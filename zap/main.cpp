@@ -1314,8 +1314,6 @@ int main(int argc, char **argv)
 #ifndef ZAP_DEDICATED
       createClientGame(settings);                  // Instantiate gClientGame
 
-      FXManager::init();                           // Get ready for sparks!!  C'mon baby!!
-
       resetInputCodeStates();                      // Reset keyboard state mapping to show no keys depressed
 
       Joystick::loadJoystickPresets();             // Load joystick presets from INI first

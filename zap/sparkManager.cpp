@@ -41,39 +41,25 @@ namespace Zap
 {
 
 
-namespace FXManager
-{
-
-struct Spark
-{
-   Point pos;
-   Color color;
-   F32 alpha;
-   F32 ttl;
-   Point vel;
-};
 
 
-const U32 MAX_SPARKS = 8192;    // Make this an even number
 
 
-U32 firstFreeIndex[SparkTypeCount];            // Tracks next available slot when we have fewer than MAX_SPARKS 
-U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we last overwrote
-
-Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
 
 
-void init()
+
+FXManager::FXManager()
 {
    for(U32 i = 0; i < SparkTypeCount; i++)
    {
       firstFreeIndex[i] = 0;
       lastOverwrittenIndex[i] = 500;
    }
+   teleporterEffects = NULL;
 }
 
 // Create a new spark.   ttl = Time to Live (secs)
-void emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
+void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
 {
    Spark *s;
    Spark *s2;
@@ -120,7 +106,7 @@ void emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
    }
 }
 
-struct TeleporterEffect
+struct FXManager::TeleporterEffect
 {
    Point pos;
    S32 time;
@@ -128,9 +114,7 @@ struct TeleporterEffect
    TeleporterEffect *nextEffect;
 };
 
-TeleporterEffect *teleporterEffects = NULL;
-
-void emitTeleportInEffect(Point pos, U32 type)
+void FXManager::emitTeleportInEffect(Point pos, U32 type)
 {
    TeleporterEffect *e = new TeleporterEffect;
    e->pos = pos;
@@ -140,7 +124,7 @@ void emitTeleportInEffect(Point pos, U32 type)
    teleporterEffects = e;
 }
 
-void tick( F32 dT )
+void FXManager::tick( F32 dT )
 {
    for(U32 j = 0; j < SparkTypeCount; j++)
       for(U32 i = 0; i < firstFreeIndex[j]; )
@@ -189,7 +173,7 @@ void tick( F32 dT )
 }
 
 
-void render(S32 renderPass)
+void FXManager::render(S32 renderPass)
 {
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
@@ -231,7 +215,7 @@ void render(S32 renderPass)
 #define dr(x) (float) x * Float2Pi / 360     // degreesToRadians()
 
 // Create a circular pattern of long sparks, a-la bomb in Gridwars
-void emitBlast(Point pos, U32 size)
+void FXManager::emitBlast(Point pos, U32 size)
 {
    const F32 speed = 800.0f;
    for(U32 i = 0; i < 360; i+=1)
@@ -244,7 +228,7 @@ void emitBlast(Point pos, U32 size)
 }
 
 
-void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors)
+void FXManager::emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors)
 {
    for(U32 i = 0; i < (250.0 * size); i++)
    {
@@ -257,12 +241,12 @@ void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors)
 }
 
 
-void emitBurst(Point pos, Point scale, Color color1, Color color2)
+void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2)
 {
    emitBurst(pos, scale, color1, color2, 250);
 }
 
-void emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
+void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
 {
    F32 size = 1;
 
@@ -285,8 +269,6 @@ void emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
       );
    }
 }
-
-};
 
 //-----------------------------------------------------------------------------
 

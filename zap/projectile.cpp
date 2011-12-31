@@ -459,7 +459,8 @@ void Projectile::explode(GameObject *hitObject, Point pos)
    // Do some particle spew...
    if(isGhost())
    {
-      FXManager::emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
+      TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+      ((ClientGame *)getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
 
       Ship *s = dynamic_cast<Ship *>(hitObject);
 
@@ -694,8 +695,9 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       // Make us go boom!
       Color b(1,1,1);
 
-      //FXManager::emitExplosion(getRenderPos(), 0.5, GameWeapon::projectileInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
-      FXManager::emitBlast(pos, OuterBlastRadius);          // New, manly explosion
+      TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+      //((ClientGame *)getGame())->emitExplosion(getRenderPos(), 0.5, GameWeapon::projectileInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
+      ((ClientGame *)getGame())->emitBlast(pos, OuterBlastRadius);          // New, manly explosion
 
       SoundSystem::playSoundEffect(SFXMineExplode, getActualPos(), Point());
    }

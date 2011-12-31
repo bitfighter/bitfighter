@@ -26,14 +26,14 @@
 #ifndef _FXMANAGER_H_
 #define _FXMANAGER_H_
 
-#include "gameObject.h"     
 #include "Point.h"
 #include "Color.h"
+#include "tnlVector.h"
 
 namespace Zap
 {
 
-namespace FXManager
+class FXManager
 {
    enum SparkType
    {
@@ -42,7 +42,27 @@ namespace FXManager
       SparkTypeCount
    };
 
-   void init();
+   struct Spark
+   {
+      Point pos;
+      Color color;
+      F32 alpha;
+      F32 ttl;
+      Point vel;
+   };
+
+   struct TeleporterEffect;
+   TeleporterEffect *teleporterEffects;
+
+   static const U32 MAX_SPARKS = 8192;    // Make this an even number
+
+   U32 firstFreeIndex[SparkTypeCount];            // Tracks next available slot when we have fewer than MAX_SPARKS 
+   U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we last overwrote
+
+   Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
+
+public:
+   FXManager();
    void emitSpark(Point pos, Point vel, Color color, F32 ttl = 0, SparkType=SparkTypePoint);
    void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors);
    void emitBurst(Point pos, Point scale, Color color1, Color color2);

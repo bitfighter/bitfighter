@@ -39,13 +39,15 @@
 #include <windows.h>             // For screensaver... windows only feature, I'm afraid!
 #endif
 
+#include "sparkManager.h"
+
 using namespace std;
 
 namespace Zap
 {
 
 
-class ClientGame : public Game
+class ClientGame : public Game, public FXManager
 {
    typedef Game Parent;
 

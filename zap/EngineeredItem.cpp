@@ -38,6 +38,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
+#  include "ClientGame.h"          // for accessing client's spark manager
 #endif
 
 
@@ -697,9 +698,11 @@ void EngineeredItem::explode()
    F32 c = TNL::Random::readF() * 0.15f + 0.125f;
    F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
-   FXManager::emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
-   FXManager::emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1,1,0.25), Colors::red);
-   FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+
+   ((ClientGame *)getGame())->emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
+   ((ClientGame *)getGame())->emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1,1,0.25), Colors::red);
+   ((ClientGame *)getGame())->emitBurst(getActualPos(), Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
 
    disableCollision();
 #endif
