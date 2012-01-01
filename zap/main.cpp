@@ -1153,7 +1153,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    //{
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
       gINI.addSection("EditorPlugins");
-      gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+; draw_arcs.lua Make curves!");
+      gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+;|draw_arcs.lua|Make curves!");
    //}
 }
 

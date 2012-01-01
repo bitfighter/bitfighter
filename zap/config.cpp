@@ -474,7 +474,7 @@ static void loadPluginBindings(CIniFile *ini, IniSettings *iniSettings)
    // Parse the retrieved strings.  They'll be in the form "Key Script Help"
    for(S32 i = 0; i < values.size(); i++)
    {
-      words = parseString(trim(values[i]));
+      parseString(trim(values[i]), words, '|');
 
       if(words.size() < 3)
       {
