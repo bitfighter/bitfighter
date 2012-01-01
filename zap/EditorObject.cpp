@@ -198,13 +198,9 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
    Point pos, dest;
    F32 alpha = getRenderingAlpha(isScriptItem);
 
-   bool hideit = !(showingReferenceShip && !mDockItem);
-
    Color drawColor;
 
-   if(hideit)
-      glColor(Colors::gray50, alpha);
-   else if(mSelected)
+   if(mSelected)
       glColor(SELECT_COLOR, alpha);       // yellow
    else if(mLitUp)
       glColor(HIGHLIGHT_COLOR, alpha);    // white

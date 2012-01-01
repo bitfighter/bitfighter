@@ -1897,7 +1897,7 @@ void EditorUserInterface::render()
          // TODO: Merge this with the other place this calculation is made
          delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
     
-
+      
       // == Render walls and polyWalls ==
       getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                      delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
