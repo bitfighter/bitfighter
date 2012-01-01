@@ -247,7 +247,7 @@ static void writePluginBindings(CIniFile *ini)
       addComment("----------------");
       addComment(" Editor plugins are lua scripts that can add extra functionality to the editor.  You can specify");
       addComment(" here using the following format:");
-      addComment(" Plugin1=Key1 ScriptName.lua Script help string");
+      addComment(" Plugin1=Key1|ScriptName.lua|Script help string");
       addComment(" ... etc ...");
       addComment(" The names of the presets are not important, and can be changed. Key combos follow the general form of");
       addComment(" Ctrl+Alt+Shift+Meta+Super+key (omit unneeded modifiers, you can get correct Input Strings from the ");
