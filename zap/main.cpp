@@ -1149,7 +1149,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
 
-   //if(settings->getIniSettings()->version < 3007)
+   //if(settings->getIniSettings()->version < 3007)  <<=== after 016 release, replace this number with 016 release number, and uncomment
    //{
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
       gINI.addSection("EditorPlugins");
