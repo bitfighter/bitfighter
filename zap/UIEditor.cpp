@@ -1928,7 +1928,7 @@ void EditorUserInterface::render()
 
          if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
             if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
+               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);  // <== wall centerlines rendered in here
       }
 
       // == Selected items ==

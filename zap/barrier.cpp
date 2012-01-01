@@ -525,7 +525,7 @@ bool WallItem::canBeNeutral()
 }
 
 
-const Color *WallItem::getEditorRenderColor() const
+const Color *WallItem::getEditorRenderColor()
 {
    return &Colors::gray50;
 }
@@ -1043,7 +1043,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
 }
 
 
-// Only called from the editor -- renders both walls and polywalls
+// Only called from the editor -- renders both walls and polywalls.  Does not render centerlines
 void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, const Point &selectedItemOffset, 
                                      bool previewMode, bool showSnapVertices, F32 alpha)
 {

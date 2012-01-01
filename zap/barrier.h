@@ -145,7 +145,7 @@ public:
    bool canBeNeutral();
    F32 getEditorRadius(F32 currentScale);  // Basically, the size of our hit target for vertices
 
-   const Color *getEditorRenderColor() const;      // Unselected wall spine color
+   const Color *getEditorRenderColor();    // Unselected wall spine color
 
    void scale(const Point &center, F32 scale);
 
