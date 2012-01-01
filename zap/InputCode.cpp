@@ -85,14 +85,14 @@ InputCode keyMISSION = KEY_F2;           // Show current mission info
 // Initialize state of keys... assume none are depressed
 void resetInputCodeStates()
 {
-   for (int i = 0; i < MAX_INPUT_CODES; i++)
+   for(int i = 0; i < MAX_INPUT_CODES; i++)
       inputCodeIsDown[i] = false;
 }
 
 // Prints list of any input codes that are down, for debugging purposes
 void dumpInputCodeStates()
 {
-  for (int i = 0; i < MAX_INPUT_CODES; i++)
+  for(S32 i = 0; i < MAX_INPUT_CODES; i++)
      if(inputCodeIsDown[i])
         logprintf("Key %s down", inputCodeToString((InputCode) i));
 }
@@ -101,7 +101,7 @@ void dumpInputCodeStates()
 // Set state of a input code as Up (false) or Down (true)
 void setInputCodeState(InputCode inputCode, bool state)
 {
-   inputCodeIsDown[(int) inputCode] = state;
+   inputCodeIsDown[(S32)inputCode] = state;
 }
 
 
@@ -109,7 +109,7 @@ void setInputCodeState(InputCode inputCode, bool state)
 bool getInputCodeState(InputCode inputCode)
 {
 //   logprintf("State: key %d is %s", inputCode, keyIsDown[(int) inputCode] ? "down" : "up");
-      return inputCodeIsDown[(int) inputCode];
+      return inputCodeIsDown[(S32)inputCode];
 }
 
 
@@ -1283,521 +1283,180 @@ bool isControllerButton(InputCode inputCode)
       return false;
 }
 
+
+// Array tying InputCodes to string representations; used for translating one to the other 
+static const char *keyNames[KEY_COUNT];
+
+void initializeKeyNames()
+{
+   // Fill name list with default value
+   for(S32 i = 0; i < KEY_COUNT; i++)
+      keyNames[i] = "Unknown Key";
+
+   // Now keys we know with our locally defined names
+   keyNames[S32(KEY_BACKSPACE)] = "Backspace";
+   keyNames[S32(KEY_DELETE)] = "Del";
+   keyNames[S32(KEY_TAB)] = "Tab";
+   keyNames[S32(KEY_ENTER)] = "Enter";
+   keyNames[S32(KEY_ESCAPE)] = "Esc";
+   keyNames[S32(KEY_SPACE)] = "Space";
+   keyNames[S32(KEY_0)] = "0";
+   keyNames[S32(KEY_1)] = "1";
+   keyNames[S32(KEY_2)] = "2";
+   keyNames[S32(KEY_3)] = "3";
+   keyNames[S32(KEY_4)] = "4";
+   keyNames[S32(KEY_5)] = "5";
+   keyNames[S32(KEY_6)] = "6";
+   keyNames[S32(KEY_7)] = "7";
+   keyNames[S32(KEY_8)] = "8";
+   keyNames[S32(KEY_9)] = "9";
+   keyNames[S32(KEY_A)] = "A";
+   keyNames[S32(KEY_B)] = "B";
+   keyNames[S32(KEY_C)] = "C";
+   keyNames[S32(KEY_D)] = "D";
+   keyNames[S32(KEY_E)] = "E";
+   keyNames[S32(KEY_F)] = "F";
+   keyNames[S32(KEY_G)] = "G";
+   keyNames[S32(KEY_H)] = "H";
+   keyNames[S32(KEY_I)] = "I";
+   keyNames[S32(KEY_J)] = "J";
+   keyNames[S32(KEY_K)] = "K";
+   keyNames[S32(KEY_L)] = "L";
+   keyNames[S32(KEY_M)] = "M";
+   keyNames[S32(KEY_N)] = "N";
+   keyNames[S32(KEY_O)] = "O";
+   keyNames[S32(KEY_P)] = "P";
+   keyNames[S32(KEY_Q)] = "Q";
+   keyNames[S32(KEY_R)] = "R";
+   keyNames[S32(KEY_S)] = "S";
+   keyNames[S32(KEY_T)] = "T";
+   keyNames[S32(KEY_U)] = "U";
+   keyNames[S32(KEY_V)] = "V";
+   keyNames[S32(KEY_W)] = "W";
+   keyNames[S32(KEY_X)] = "X";
+   keyNames[S32(KEY_Y)] = "Y";
+   keyNames[S32(KEY_Z)] = "Z";
+   keyNames[S32(KEY_TILDE)] = "~";
+   keyNames[S32(KEY_MINUS)] = "-";
+   keyNames[S32(KEY_EQUALS)] = "=";
+   keyNames[S32(KEY_OPENBRACKET)] = "[";
+   keyNames[S32(KEY_CLOSEBRACKET)] = "]";
+   keyNames[S32(KEY_BACKSLASH)] = "\\";
+   keyNames[S32(KEY_SEMICOLON)] = ";";
+   keyNames[S32(KEY_QUOTE)] = "'";
+   keyNames[S32(KEY_COMMA)] = ",";
+   keyNames[S32(KEY_PERIOD)] = ".";
+   keyNames[S32(KEY_SLASH)] = "/";
+   keyNames[S32(KEY_PAGEUP)] = "Page Up";
+   keyNames[S32(KEY_PAGEDOWN)] = "Page Down";
+   keyNames[S32(KEY_END)] = "End";
+   keyNames[S32(KEY_HOME)] = "Home";
+   keyNames[S32(KEY_LEFT)] = "Left Arrow";
+   keyNames[S32(KEY_UP)] = "Up Arrow";
+   keyNames[S32(KEY_RIGHT)] = "Right Arrow";
+   keyNames[S32(KEY_DOWN)] = "Down Arrow";
+   keyNames[S32(KEY_INSERT)] = "Insert";
+   keyNames[S32(KEY_F1)] = "F1";
+   keyNames[S32(KEY_F2)] = "F2";
+   keyNames[S32(KEY_F3)] = "F3";
+   keyNames[S32(KEY_F4)] = "F4";
+   keyNames[S32(KEY_F5)] = "F5";
+   keyNames[S32(KEY_F6)] = "F6";
+   keyNames[S32(KEY_F7)] = "F7";
+   keyNames[S32(KEY_F8)] = "F8";
+   keyNames[S32(KEY_F9)] = "F9";
+   keyNames[S32(KEY_F10)] = "F10";
+   keyNames[S32(KEY_F11)] = "F11";
+   keyNames[S32(KEY_F12)] = "F12";
+   keyNames[S32(KEY_SHIFT)] = "Shift";
+   keyNames[S32(KEY_ALT)] = "Alt";
+   keyNames[S32(KEY_CTRL)] = "Ctrl";
+   keyNames[S32(KEY_META)] = "Meta";
+   keyNames[S32(KEY_SUPER)] = "Super";
+   keyNames[S32(MOUSE_LEFT)] = "Left-mouse";
+   keyNames[S32(MOUSE_MIDDLE)] = "Middle-mouse";
+   keyNames[S32(MOUSE_RIGHT)] = "Right-mouse";
+   keyNames[S32(MOUSE_WHEEL_UP)] = "Mouse wheel up";
+   keyNames[S32(MOUSE_WHEEL_DOWN)] = "Mouse wheel down";
+   keyNames[S32(BUTTON_1)] = "Button 1";
+   keyNames[S32(BUTTON_2)] = "Button 2";
+   keyNames[S32(BUTTON_3)] = "Button 3";
+   keyNames[S32(BUTTON_4)] = "Button 4";
+   keyNames[S32(BUTTON_5)] = "Button 5";
+   keyNames[S32(BUTTON_6)] = "Button 6";
+   keyNames[S32(BUTTON_7)] = "Button 7";
+   keyNames[S32(BUTTON_8)] = "Button 8";
+   keyNames[S32(BUTTON_9)] = "Button 9";
+   keyNames[S32(BUTTON_10)] = "Button 10";
+   keyNames[S32(BUTTON_11)] = "Button 11";
+   keyNames[S32(BUTTON_12)] = "Button 12";
+   keyNames[S32(BUTTON_BACK)] = "Back";
+   keyNames[S32(BUTTON_START)] = "Start";
+   keyNames[S32(BUTTON_DPAD_UP)] = "DPad Up";
+   keyNames[S32(BUTTON_DPAD_DOWN)] = "DPad Down";
+   keyNames[S32(BUTTON_DPAD_LEFT)] = "DPad Left";
+   keyNames[S32(BUTTON_DPAD_RIGHT)] = "DPad Right";
+   keyNames[S32(STICK_1_LEFT)] = "Stick 1 Left";
+   keyNames[S32(STICK_1_RIGHT)] = "Stick 1 Right";
+   keyNames[S32(STICK_1_UP)] = "Stick 1 Up";
+   keyNames[S32(STICK_1_DOWN)] = "Stick 1 Down";
+   keyNames[S32(STICK_2_LEFT)] = "Stick 2 Left";
+   keyNames[S32(STICK_2_RIGHT)] = "Stick 2 Right";
+   keyNames[S32(STICK_2_UP)] = "Stick 2 Up";
+   keyNames[S32(STICK_2_DOWN)] = "Stick 2 Down";
+   keyNames[S32(MOUSE)] = "Mouse";
+   keyNames[S32(LEFT_JOYSTICK)] = "Left joystick";
+   keyNames[S32(RIGHT_JOYSTICK)] = "Right joystick";
+   keyNames[S32(KEY_CTRL_M)] = "Ctrl-M";
+   keyNames[S32(KEY_CTRL_Q)] = "Ctrl-Q";
+   keyNames[S32(KEY_CTRL_S)] = "Ctrl-S";
+   keyNames[S32(KEY_BACKQUOTE)] = "`";
+   keyNames[S32(KEY_MENU)] = "Menu";
+   keyNames[S32(KEY_KEYPAD_DIVIDE)] = "Keypad /";
+   keyNames[S32(KEY_KEYPAD_MULTIPLY)] = "Keypad *";
+   keyNames[S32(KEY_KEYPAD_MINUS)] = "Keypad -";
+   keyNames[S32(KEY_KEYPAD_PLUS)] = "Keypad +";
+   keyNames[S32(KEY_PRINT)] = "PrntScrn";
+   keyNames[S32(KEY_PAUSE)] = "Pause";
+   keyNames[S32(KEY_SCROLLOCK)] = "ScrollLock";
+   keyNames[S32(KEY_KEYPAD1)] = "Keypad 1";
+   keyNames[S32(KEY_KEYPAD2)] = "Keypad 2";
+   keyNames[S32(KEY_KEYPAD3)] = "Keypad 3";
+   keyNames[S32(KEY_KEYPAD4)] = "Keypad 4";
+   keyNames[S32(KEY_KEYPAD5)] = "Keypad 5";
+   keyNames[S32(KEY_KEYPAD6)] = "Keypad 6";
+   keyNames[S32(KEY_KEYPAD7)] = "Keypad 7";
+   keyNames[S32(KEY_KEYPAD8)] = "Keypad 8";
+   keyNames[S32(KEY_KEYPAD9)] = "Keypad 9";
+   keyNames[S32(KEY_KEYPAD0)] = "Keypad 0";
+   keyNames[S32(KEY_KEYPAD_PERIOD)] = "Keypad .";
+   keyNames[S32(KEY_KEYPAD_ENTER)] = "Keypad Enter";
+   keyNames[S32(KEY_LESS)] = "Less";
+}
+
+
 // Translate an InputCode into a string name, primarily used
 // for displaying keys in help and during rebind mode, and
 // also when storing key bindings in INI files
 const char *inputCodeToString(InputCode inputCode)
 {
-   switch(inputCode)
-   {
-   case KEY_BACKSPACE:
-         return "Backspace";
-   case KEY_DELETE:
-         return "Del";
-   case KEY_TAB:
-         return "Tab";
-   case KEY_ENTER:
-         return "Enter";
-   case KEY_ESCAPE:
-         return "Esc";
-   case KEY_SPACE:
-         return "Space";
-   case KEY_0:
-         return "0";
-   case KEY_1:
-         return "1";
-   case KEY_2:
-         return "2";
-   case KEY_3:
-         return "3";
-   case KEY_4:
-         return "4";
-   case KEY_5:
-         return "5";
-   case KEY_6:
-         return "6";
-   case KEY_7:
-         return "7";
-   case KEY_8:
-         return "8";
-   case KEY_9:
-         return "9";
-   case KEY_A:
-         return "A";
-   case KEY_B:
-         return "B";
-   case KEY_C:
-         return "C";
-   case KEY_D:
-         return "D";
-   case KEY_E:
-         return "E";
-   case KEY_F:
-         return "F";
-   case KEY_G:
-         return "G";
-   case KEY_H:
-         return "H";
-   case KEY_I:
-         return "I";
-   case KEY_J:
-         return "J";
-   case KEY_K:
-         return "K";
-   case KEY_L:
-         return "L";
-   case KEY_M:
-         return "M";
-   case KEY_N:
-         return "N";
-   case KEY_O:
-         return "O";
-   case KEY_P:
-         return "P";
-   case KEY_Q:
-         return "Q";
-   case KEY_R:
-         return "R";
-   case KEY_S:
-         return "S";
-   case KEY_T:
-         return "T";
-   case KEY_U:
-         return "U";
-   case KEY_V:
-         return "V";
-   case KEY_W:
-         return "W";
-   case KEY_X:
-         return "X";
-   case KEY_Y:
-         return "Y";
-   case KEY_Z:
-         return "Z";
-   case KEY_TILDE:
-         return "~";
-   case KEY_MINUS:
-         return "-";
-   case KEY_EQUALS:
-         return "=";
-   case KEY_OPENBRACKET:
-         return "[";
-   case KEY_CLOSEBRACKET:
-         return "]";
-   case KEY_BACKSLASH:
-         return "\\";
-   case KEY_SEMICOLON:
-         return ";";
-   case KEY_QUOTE:
-         return "'";
-   case KEY_COMMA:
-         return ",";
-   case KEY_PERIOD:
-         return ".";
-   case KEY_SLASH:
-         return "/";
-   case KEY_PAGEUP:
-         return "Page Up";
-   case KEY_PAGEDOWN:
-         return "Page Down";
-   case KEY_END:
-         return "End";
-   case KEY_HOME:
-         return "Home";
-   case KEY_LEFT:
-         return "Left Arrow";
-   case KEY_UP:
-         return "Up Arrow";
-   case KEY_RIGHT:
-         return "Right Arrow";
-   case KEY_DOWN:
-         return "Down Arrow";
-   case KEY_INSERT:
-         return "Insert";
-   case KEY_F1:
-         return "F1";
-   case KEY_F2:
-         return "F2";
-   case KEY_F3:
-         return "F3";
-   case KEY_F4:
-         return "F4";
-   case KEY_F5:
-         return "F5";
-   case KEY_F6:
-         return "F6";
-   case KEY_F7:
-         return "F7";
-   case KEY_F8:
-         return "F8";
-   case KEY_F9:
-         return "F9";
-   case KEY_F10:
-         return "F10";
-   case KEY_F11:
-         return "F11";
-   case KEY_F12:
-         return "F12";
-   case KEY_SHIFT:
-         return "Shift";
-   case KEY_ALT:
-         return "Alt";
-   case KEY_CTRL:
-         return "Ctrl";
-   case KEY_META:
-         return "Meta";
-   case KEY_SUPER:
-         return "Super";
-   case MOUSE_LEFT:
-      return "Left-mouse";
-   case MOUSE_MIDDLE:
-      return "Middle-mouse";
-   case MOUSE_RIGHT:
-      return "Right-mouse";
-   case MOUSE_WHEEL_UP:
-      return "Mouse wheel up";
-   case MOUSE_WHEEL_DOWN:
-      return "Mouse wheel down";
-   case BUTTON_1:
-      return "Button 1";
-   case BUTTON_2:
-      return "Button 2";
-   case BUTTON_3:
-      return "Button 3";
-   case BUTTON_4:
-      return "Button 4";
-   case BUTTON_5:
-      return "Button 5";
-   case BUTTON_6:
-      return "Button 6";
-   case BUTTON_7:
-      return "Button 7";
-   case BUTTON_8:
-      return "Button 8";
-   case BUTTON_9:
-      return "Button 9";
-   case BUTTON_10:
-      return "Button 10";
-   case BUTTON_11:
-      return "Button 11";
-   case BUTTON_12:
-      return "Button 12";
-   case BUTTON_BACK:
-      return "Back";
-   case BUTTON_START:
-      return "Start";
-   case BUTTON_DPAD_UP:
-      return "DPad Up";
-   case BUTTON_DPAD_DOWN:
-      return "DPad Down";
-   case BUTTON_DPAD_LEFT:
-      return "DPad Left";
-   case BUTTON_DPAD_RIGHT:
-      return "DPad Right";
-   case STICK_1_LEFT:
-      return "Stick 1 Left";
-   case STICK_1_RIGHT:
-      return "Stick 1 Right";
-   case STICK_1_UP:
-      return "Stick 1 Up";
-   case STICK_1_DOWN:
-      return "Stick 1 Down";
-   case STICK_2_LEFT:
-      return "Stick 2 Left";
-   case STICK_2_RIGHT:
-      return "Stick 2 Right";
-   case STICK_2_UP:
-      return "Stick 2 Up";
-   case STICK_2_DOWN:
-      return "Stick 2 Down";
-   case MOUSE:
-      return "Mouse";
-   case LEFT_JOYSTICK:
-      return "Left joystick";
-   case RIGHT_JOYSTICK:
-      return "Right joystick";
-   case KEY_CTRL_M:
-      return "Ctrl-M";
-   case KEY_CTRL_Q:
-      return "Ctrl-Q";
-   case KEY_CTRL_S:
-      return "Ctrl-S";
-   case KEY_BACKQUOTE:
-      return "`";
-   case KEY_MENU:
-      return "Menu";
-   case KEY_KEYPAD_DIVIDE:
-      return "Keypad /";
-   case KEY_KEYPAD_MULTIPLY:
-      return "Keypad *";
-   case KEY_KEYPAD_MINUS:
-      return "Keypad -";
-   case KEY_KEYPAD_PLUS:
-      return "Keypad +";
-   case KEY_PRINT:
-      return "PrntScrn";
-   case KEY_PAUSE:
-      return "Pause";
-   case KEY_SCROLLOCK:
-      return "ScrollLock";
-   case KEY_KEYPAD1:
-      return "Keypad 1";
-   case KEY_KEYPAD2:
-      return "Keypad 2";
-   case KEY_KEYPAD3:
-      return "Keypad 3";
-   case KEY_KEYPAD4:
-      return "Keypad 4";
-   case KEY_KEYPAD5:
-      return "Keypad 5";
-   case KEY_KEYPAD6:
-      return "Keypad 6";
-   case KEY_KEYPAD7:
-      return "Keypad 7";
-   case KEY_KEYPAD8:
-      return "Keypad 8";
-   case KEY_KEYPAD9:
-      return "Keypad 9";
-   case KEY_KEYPAD0:
-      return "Keypad 0";
-   case KEY_KEYPAD_PERIOD:
-      return "Keypad .";
-   case KEY_KEYPAD_ENTER:
-      return "Keypad Enter";
-   case KEY_LESS:
-      return "Less";
-
-   default:
-//      logprintf("undefined inputCode number: %d", inputCode);
-      return "Undefined input";
-   }
+   return keyNames[S32(inputCode)];
 }
+
 
 // Translate from a string key name into a InputCode
 // (primarily for loading key bindings from INI files)
 InputCode stringToInputCode(const char *inputName)
 {
-   if (stricmp(inputName, "Backspace") == 0)
-      return KEY_BACKSPACE;
-   else if (stricmp(inputName, "Del") == 0)
-      return KEY_DELETE;
-   else if (stricmp(inputName, "Tab") == 0)
-      return KEY_TAB;
-   else if (stricmp(inputName, "Enter") == 0)
-      return KEY_ENTER;
-   else if (stricmp(inputName, "Esc") == 0)
-      return KEY_ESCAPE;
-   else if (stricmp(inputName, "Space") == 0)
-      return KEY_SPACE;
-   else if (stricmp(inputName, "0") == 0)
-      return KEY_0;
-   else if (stricmp(inputName, "1") == 0)
-      return KEY_1;
-   else if (stricmp(inputName, "2") == 0)
-      return KEY_2;
-   else if (stricmp(inputName, "3") == 0)
-      return KEY_3;
-   else if (stricmp(inputName, "4") == 0)
-      return KEY_4;
-   else if (stricmp(inputName, "5") == 0)
-      return KEY_5;
-   else if (stricmp(inputName, "6") == 0)
-      return KEY_6;
-   else if (stricmp(inputName, "7") == 0)
-      return KEY_7;
-   else if (stricmp(inputName, "8") == 0)
-      return KEY_8;
-   else if (stricmp(inputName, "9") == 0)
-      return KEY_9;
-   else if (stricmp(inputName, "A") == 0)
-      return KEY_A;
-   else if (stricmp(inputName, "B") == 0)
-      return KEY_B;
-   else if (stricmp(inputName, "C") == 0)
-      return KEY_C;
-   else if (stricmp(inputName, "D") == 0)
-      return KEY_D;
-   else if (stricmp(inputName, "E") == 0)
-      return KEY_E;
-   else if (stricmp(inputName, "F") == 0)
-      return KEY_F;
-   else if (stricmp(inputName, "G") == 0)
-      return KEY_G;
-   else if (stricmp(inputName, "H") == 0)
-      return KEY_H;
-   else if (stricmp(inputName, "I") == 0)
-      return KEY_I;
-   else if (stricmp(inputName, "J") == 0)
-      return KEY_J;
-   else if (stricmp(inputName, "K") == 0)
-      return KEY_K;
-   else if (stricmp(inputName, "L") == 0)
-      return KEY_L;
-   else if (stricmp(inputName, "M") == 0)
-      return KEY_M;
-   else if (stricmp(inputName, "N") == 0)
-      return KEY_N;
-   else if (stricmp(inputName, "O") == 0)
-      return KEY_O;
-   else if (stricmp(inputName, "P") == 0)
-      return KEY_P;
-   else if (stricmp(inputName, "Q") == 0)
-      return KEY_Q;
-   else if (stricmp(inputName, "R") == 0)
-      return KEY_R;
-   else if (stricmp(inputName, "S") == 0)
-      return KEY_S;
-   else if (stricmp(inputName, "T") == 0)
-      return KEY_T;
-   else if (stricmp(inputName, "U") == 0)
-      return KEY_U;
-   else if (stricmp(inputName, "V") == 0)
-      return KEY_V;
-   else if (stricmp(inputName, "W") == 0)
-      return KEY_W;
-   else if (stricmp(inputName, "X") == 0)
-      return KEY_X;
-   else if (stricmp(inputName, "Y") == 0)
-      return KEY_Y;
-   else if (stricmp(inputName, "Z") == 0)
-      return KEY_Z;
-   else if (stricmp(inputName, "~") == 0)
-      return KEY_TILDE;
-   else if (stricmp(inputName, "-") == 0)
-      return KEY_MINUS;
-   else if (stricmp(inputName, "=") == 0)
-      return KEY_EQUALS;
-   else if (stricmp(inputName, "[") == 0)
-      return KEY_OPENBRACKET;
-   else if (stricmp(inputName, "]") == 0)
-      return KEY_CLOSEBRACKET;
-   else if (stricmp(inputName, "\\") == 0)
-      return KEY_BACKSLASH;
-   else if (stricmp(inputName, ";") == 0)
-      return KEY_SEMICOLON;
-   else if (stricmp(inputName, "'") == 0)
-      return KEY_QUOTE;
-   else if (stricmp(inputName, ",") == 0)
-      return KEY_COMMA;
-   else if (stricmp(inputName, ".") == 0)
-      return KEY_PERIOD;
-   else if (stricmp(inputName, "/") == 0)
-      return KEY_SLASH;
-   else if (stricmp(inputName, "Page Up") == 0)
-      return KEY_PAGEUP;
-   else if (stricmp(inputName, "Page Down") == 0)
-      return KEY_PAGEDOWN;
-   else if (stricmp(inputName, "End") == 0)
-      return KEY_END;
-   else if (stricmp(inputName, "Home") == 0)
-      return KEY_HOME;
-   else if (stricmp(inputName, "Left Arrow") == 0)
-      return KEY_LEFT;
-   else if (stricmp(inputName, "Up Arrow") == 0)
-      return KEY_UP;
-   else if (stricmp(inputName, "Right Arrow") == 0)
-      return KEY_RIGHT;
-   else if (stricmp(inputName, "Down Arrow") == 0)
-      return KEY_DOWN;
-   else if (stricmp(inputName, "Insert") == 0)
-      return KEY_INSERT;
-   else if (stricmp(inputName, "F1") == 0)
-      return KEY_F1;
-   else if (stricmp(inputName, "F2") == 0)
-      return KEY_F2;
-   else if (stricmp(inputName, "F3") == 0)
-      return KEY_F3;
-   else if (stricmp(inputName, "F4") == 0)
-      return KEY_F4;
-   else if (stricmp(inputName, "F5") == 0)
-      return KEY_F5;
-   else if (stricmp(inputName, "F6") == 0)
-      return KEY_F6;
-   else if (stricmp(inputName, "F7") == 0)
-      return KEY_F7;
-   else if (stricmp(inputName, "F8") == 0)
-      return KEY_F8;
-   else if (stricmp(inputName, "F9") == 0)
-      return KEY_F9;
-   else if (stricmp(inputName, "F10") == 0)
-      return KEY_F10;
-   else if (stricmp(inputName, "F11") == 0)
-      return KEY_F11;
-   else if (stricmp(inputName, "F12") == 0)
-      return KEY_F12;
-   else if (stricmp(inputName, "Shift") == 0)
-      return KEY_SHIFT;
-   else if (stricmp(inputName, "Alt") == 0)
-      return KEY_ALT;
-   else if (stricmp(inputName, "Ctrl") == 0)
-      return KEY_CTRL;
-   else if (stricmp(inputName, "Left-mouse") == 0)
-      return MOUSE_LEFT;
-   else if (stricmp(inputName, "Middle-mouse") == 0)
-      return MOUSE_MIDDLE;
-   else if (stricmp(inputName, "Right-mouse") == 0)
-      return MOUSE_RIGHT;
-   else if (stricmp(inputName, "Button 1") == 0)
-      return BUTTON_1;
-   else if (stricmp(inputName, "Button 2") == 0)
-      return BUTTON_2;
-   else if (stricmp(inputName, "Button 3") == 0)
-      return BUTTON_3;
-   else if (stricmp(inputName, "Button 4") == 0)
-      return BUTTON_4;
-   else if (stricmp(inputName, "Button 5") == 0)
-      return BUTTON_5;
-   else if (stricmp(inputName, "Button 6") == 0)
-      return BUTTON_6;
-   else if (stricmp(inputName, "Button 7") == 0)
-      return BUTTON_7;
-   else if (stricmp(inputName, "Button 8") == 0)
-      return BUTTON_8;
-   else if (stricmp(inputName, "Button 9") == 0)
-      return BUTTON_9;
-   else if (stricmp(inputName, "Button 10") == 0)
-      return BUTTON_10;
-   else if (stricmp(inputName, "Button 11") == 0)
-      return BUTTON_11;
-   else if (stricmp(inputName, "Button 12") == 0)
-      return BUTTON_12;
-   else if (stricmp(inputName, "Back") == 0)
-      return BUTTON_BACK;
-   else if (stricmp(inputName, "Start") == 0)
-      return BUTTON_START;
-   else if (stricmp(inputName, "DPad Up") == 0)
-      return BUTTON_DPAD_UP;
-   else if (stricmp(inputName, "DPad Down") == 0)
-      return BUTTON_DPAD_DOWN;
-   else if (stricmp(inputName, "DPad Left") == 0)
-      return BUTTON_DPAD_LEFT;
-   else if (stricmp(inputName, "DPad Right") == 0)
-      return BUTTON_DPAD_RIGHT;
-   else if (stricmp(inputName, "Stick 1 Left") == 0)
-      return STICK_1_LEFT;
-   else if (stricmp(inputName, "Stick 1 Right") == 0)
-      return STICK_1_RIGHT;
-   else if (stricmp(inputName, "Stick 1 Up") == 0)
-      return STICK_1_UP;
-   else if (stricmp(inputName, "Stick 1 Down") == 0)
-      return STICK_1_DOWN;
-   else if (stricmp(inputName, "Stick 2 Left") == 0)
-      return STICK_2_LEFT;
-   else if (stricmp(inputName, "Stick 2 Right") == 0)
-      return STICK_2_RIGHT;
-   else if (stricmp(inputName, "Stick 2 Up") == 0)
-      return STICK_2_UP;
-   else if (stricmp(inputName, "Stick 2 Down") == 0)
-      return STICK_2_DOWN;
-   else if (stricmp(inputName, "Mouse") == 0)
-      return MOUSE;
-   else if(stricmp(inputName, "Less") == 0)     // Appears on some European keyboards
-      return KEY_LESS;
-   else
-      return KEY_UNKNOWN;
+   for(S32 i = 0; i < KEY_COUNT; i++)
+      if(stricmp(inputName, keyNames[i]) == 0)
+         return InputCode(i);
+
+   return KEY_UNKNOWN;
 }
 
-}
+};
+
 
 #ifdef __cplusplus
 extern "C" {

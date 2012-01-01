@@ -595,7 +595,8 @@ void loadUpdaterSettings(CIniFile *ini, IniSettings *iniSettings)
 
 static InputCode getInputCode(CIniFile *ini, const string &section, const string &key, InputCode defaultValue)
 {
-   return stringToInputCode(ini->GetValue(section, key, inputCodeToString(defaultValue)).c_str());
+   const char *code = inputCodeToString(defaultValue);
+   return stringToInputCode(ini->GetValue(section, key, code).c_str());
 }
 
 

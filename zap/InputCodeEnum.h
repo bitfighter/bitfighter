@@ -119,6 +119,7 @@ enum InputCode {
    MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
    KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy InputCode item in the instructions
    KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
+   KEY_COUNT,
    KEY_UNKNOWN, KEY_NONE,
    BUTTON_UNKNOWN
 };

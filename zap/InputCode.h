@@ -43,10 +43,11 @@ enum JoystickJoysticks {
 const char *inputCodeToString(InputCode inputCode);
 InputCode stringToInputCode(const char *inputName);
 
-void setInputCodeState(InputCode inputCode, bool state);  // Set key state (t=down, f=up)
-bool getInputCodeState(InputCode inputCode);              // Return current key state (t=down, f=up)
-void resetInputCodeStates();                          // Initialize key states
-void dumpInputCodeStates();                           // Log key states for testing
+void setInputCodeState(InputCode inputCode, bool state);    // Set key state (t=down, f=up)
+bool getInputCodeState(InputCode inputCode);                // Return current key state (t=down, f=up)
+void resetInputCodeStates();                                // Initialize key states
+void dumpInputCodeStates();                                 // Log key states for testing
+void initializeKeyNames();
 
 // Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
 std::string makeInputString(InputCode inputCode);
@@ -55,13 +56,12 @@ bool checkModifier(InputCode mod1, InputCode mod2);
 bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
 
 #ifndef ZAP_DEDICATED
-InputCode sdlKeyToInputCode(int key);       // Convert SDL keys to InputCode
-
-int inputCodeToSDLKey(InputCode inputCode);           // Take a InputCode and return the SDL equivalent
+   InputCode sdlKeyToInputCode(int key);              // Convert SDL keys to InputCode
+   int inputCodeToSDLKey(InputCode inputCode);        // Take a InputCode and return the SDL equivalent
 #endif
 
-char keyToAscii(int unicode, InputCode inputCode);  // Return a printable ascii char, if possible
-bool isControllerButton(InputCode inputCode);       // Does inputCode represent a controller button?
+char keyToAscii(int unicode, InputCode inputCode);    // Return a printable ascii char, if possible
+bool isControllerButton(InputCode inputCode);         // Does inputCode represent a controller button?
 
 extern InputCode inputSELWEAP1[2];
 extern InputCode inputSELWEAP2[2];

@@ -1252,6 +1252,7 @@ void exceptionHandler(int sig) {
 
 using namespace Zap;
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 // main()
@@ -1293,6 +1294,8 @@ int main(int argc, char **argv)
 
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
+
+   initializeKeyNames();                        // Used by loadSettingsFromINI()
 
    loadSettingsFromINI(&gINI, settings);        // Read INI
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
