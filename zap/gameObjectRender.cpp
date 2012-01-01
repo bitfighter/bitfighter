@@ -1487,8 +1487,6 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
 
 void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 {
-   //renderEnergySymbol(Point(UserInterface::horizMargin / 2, UserInterface::canvasHeight - UserInterface::vertMargin - 10), .45);
-
    const S32 GAUGE_WIDTH = 200;
    const S32 GUAGE_HEIGHT = 20;
 
