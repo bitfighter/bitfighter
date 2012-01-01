@@ -1288,7 +1288,7 @@ bool isControllerButton(InputCode inputCode)
 // also when storing key bindings in INI files
 const char *inputCodeToString(InputCode inputCode)
 {
-   switch (inputCode)
+   switch(inputCode)
    {
    case KEY_BACKSPACE:
          return "Backspace";
@@ -1564,6 +1564,10 @@ const char *inputCodeToString(InputCode inputCode)
       return "Keypad .";
    case KEY_KEYPAD_ENTER:
       return "Keypad Enter";
+   case KEY_LESS:
+      return "Less";
+   case KEY_NUMLOCK:
+      return "NumLock";
 
    default:
 //      logprintf("undefined inputCode number: %d", inputCode);
@@ -1789,6 +1793,10 @@ InputCode stringToInputCode(const char *inputName)
       return STICK_2_DOWN;
    else if (stricmp(inputName, "Mouse") == 0)
       return MOUSE;
+   else if(stricmp(inputName, "Less") == 0)     // Appears on some European keyboards
+      return KEY_LESS;
+   else if(stricmp(inputName, "NumLock") == 0)
+      return KEY_NUMLOCK;
    else
       return KEY_UNKNOWN;
 }
