@@ -1822,7 +1822,7 @@ void EditorUserInterface::render()
 
       if(fillVector.size() != 0)
       {
-         // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team.
+         // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
          fillVector.sort(sortByTeam);
          glClear(GL_DEPTH_BUFFER_BIT);
          glEnable(GL_DEPTH_TEST);

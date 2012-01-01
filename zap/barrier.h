@@ -156,7 +156,6 @@ public:
 
    void setSelected(bool selected);
 
-
    static const S32 VERTEX_SIZE = 5;
 };
 
