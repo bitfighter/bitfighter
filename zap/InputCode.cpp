@@ -1566,8 +1566,6 @@ const char *inputCodeToString(InputCode inputCode)
       return "Keypad Enter";
    case KEY_LESS:
       return "Less";
-   case KEY_NUMLOCK:
-      return "NumLock";
 
    default:
 //      logprintf("undefined inputCode number: %d", inputCode);
@@ -1795,8 +1793,6 @@ InputCode stringToInputCode(const char *inputName)
       return MOUSE;
    else if(stricmp(inputName, "Less") == 0)     // Appears on some European keyboards
       return KEY_LESS;
-   else if(stricmp(inputName, "NumLock") == 0)
-      return KEY_NUMLOCK;
    else
       return KEY_UNKNOWN;
 }
