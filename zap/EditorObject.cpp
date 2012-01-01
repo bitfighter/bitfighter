@@ -144,7 +144,7 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
    for(S32 i = 0; i < getVertCount(); i++)
       if(vertSelected(i) || isVertexLitUp(i) || ((mSelected || mLitUp)  && getVertCount() == 1))
       {
-         glColor((vertSelected(i) || mSelected) ? SELECT_COLOR : HIGHLIGHT_COLOR);
+         glColor((vertSelected(i) || (mSelected && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 

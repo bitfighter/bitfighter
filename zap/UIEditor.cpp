@@ -2003,9 +2003,13 @@ void EditorUserInterface::render()
                obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
          }
 
-      // Render our snap vertex as a hollow magenta box -- but not on point objects
-      if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE && mSnapObject->getGeomType() != geomPoint)      
+      // Render our snap vertex as a hollow magenta box...
+      if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE && 
+         mSnapObject->getGeomType() != geomPoint &&                                                      // ...but not on point objects...
+         !mSnapObject->isVertexLitUp(mSnapVertexIndex) && !mSnapObject->vertSelected(mSnapVertexIndex))  // ...or selected vertices
+      {
          renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);  
+      }
 
     glPopMatrix(); 
 
