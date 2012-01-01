@@ -134,16 +134,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
-//#ifndef ZAP_DEDICATED
-//static void labelVertex(Point pos, F32 radius, const char *itemLabelTop, const char *itemLabelBottom, F32 scale)
-//{
-//   F32 labelSize = DOCK_LABEL_SIZE / scale;
-//
-//   UserInterface::drawStringc(pos.x, pos.y - radius - (5 / scale), labelSize, itemLabelTop);     // Above the vertex
-//   UserInterface::drawStringc(pos.x, pos.y + radius + labelSize + (2 / scale), labelSize, itemLabelBottom);              // Below the vertex
-//}
-//#endif
-
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
 {
@@ -159,7 +149,6 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
          drawSquare(center, radius / currentScale);
-         //labelVertex(center, radius / currentScale, getOnScreenName(), getVertLabel(i), currentScale);
       }
 #endif
 }
@@ -226,14 +215,7 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
       else
       {
          renderEditor(currentScale);
-
-         // Label item with instruction message describing what happens if user presses enter
-         //if(isSelected() && !isBeingEdited())
-         //   renderItemText(getInstructionMsg(), 0, currentScale);
-
          renderAndLabelHighlightedVertices(currentScale);
-         /*if(isSelected() && !isBeingEdited() && showAttribsWhenSelected())
-            renderAttributeString(currentScale);*/
       }
    }
 #endif
