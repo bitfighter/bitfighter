@@ -57,6 +57,8 @@ bool Move::isEqualMove(Move *prev)
             modsUnchanged;
 }
 
+const U8 BIGMOVETIMEBITS = 16;
+
 void Move::pack(BitStream *stream, Move *prev, bool packTime)
 {
    if(!stream->writeFlag(prev && isEqualMove(prev)))
@@ -81,7 +83,15 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       }
    }
    if(packTime)
-      stream->writeRangedU32(time, 0, MaxMoveTime);
+   {
+      if(time >= MaxMoveTime)
+      {
+         stream->writeRangedU32(127, 0, MaxMoveTime);
+         stream->writeInt(time - MaxMoveTime, BIGMOVETIMEBITS);   // more bits, but is probably sent less frequently.
+      }
+      else
+         stream->writeRangedU32(time, 0, MaxMoveTime);
+   }
 }
 
 void Move::unpack(BitStream *stream, bool unpackTime)
@@ -103,7 +113,11 @@ void Move::unpack(BitStream *stream, bool unpackTime)
    }
 
    if(unpackTime)
+   {
       time = stream->readRangedU32(0, MaxMoveTime);
+      if(time >= MaxMoveTime)
+         time = stream->readInt(BIGMOVETIMEBITS) + MaxMoveTime;
+   }
 }
 
 void Move::prepare()    // Packs and unpacks move to ensure effects of rounding are same on client and server

@@ -417,10 +417,6 @@ void ClientGame::idle(U32 timeDelta)
 
    computeWorldObjectExtents();
 
-   // Only update at most MaxMoveTime milliseconds
-   if(timeDelta > Move::MaxMoveTime)
-      timeDelta = Move::MaxMoveTime;
-
    if(!mInCommanderMap && mCommanderZoomDelta != 0)                        // Zooming into normal view
    {
       if(timeDelta > mCommanderZoomDelta)
@@ -452,8 +448,6 @@ void ClientGame::idle(U32 timeDelta)
 
 
    theMove->time = timeDelta + prevTimeDelta;
-   if(theMove->time > Move::MaxMoveTime) 
-      theMove->time = Move::MaxMoveTime;
 
    if(mConnectionToServer.isValid())
    {

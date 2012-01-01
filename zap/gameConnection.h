@@ -332,7 +332,7 @@ public:
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
 #ifndef ZAP_DEDICATED
-   void setConnectionSpeed();
+   void setConnectionSpeed(S32 speed);
 #endif
 
    void onConnectionEstablished();
@@ -340,6 +340,9 @@ public:
    void onConnectTerminated(TerminationReason r, const char *notUsed);
 
    void onConnectionTerminated(TerminationReason r, const char *string);
+
+
+   void readPacket(BitStream *bstream);
 
    TNL_DECLARE_NETCONNECTION(GameConnection);
 };

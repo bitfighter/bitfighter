@@ -1609,14 +1609,13 @@ string GameConnection::makeUnique(string name)
 
 #ifndef ZAP_DEDICATED
 
-void GameConnection::setConnectionSpeed()
+void GameConnection::setConnectionSpeed(S32 speed)
 {
    U32 minPacketSendPeriod;
    U32 minPacketRecvPeriod;
    U32 maxSendBandwidth;
    U32 maxRecvBandwidth;
-   const U32 speed = mClientGame->getSettings()->getIniSettings()->connectionSpeed;
-   if(speed == -2)
+   if(speed <= -2)
    {
       minPacketSendPeriod = 80;
       minPacketRecvPeriod = 80;
@@ -1630,24 +1629,31 @@ void GameConnection::setConnectionSpeed()
       maxSendBandwidth = 2000;
       maxRecvBandwidth = 2000;
    }
-   else if(speed == 1)
+   else if(speed == 0)
    {
-      minPacketSendPeriod = 40;
-      minPacketRecvPeriod = 40;
-      maxSendBandwidth = 20000;
-      maxRecvBandwidth = 20000;
+      minPacketSendPeriod = 45;
+      minPacketRecvPeriod = 45;
+      maxSendBandwidth = 8000;
+      maxRecvBandwidth = 8000;
    }
-   else if(speed == 2)
+   else if(speed == 1)
    {
       minPacketSendPeriod = 30;
       minPacketRecvPeriod = 30;
+      maxSendBandwidth = 20000;
+      maxRecvBandwidth = 20000;
+   }
+   else if(speed >= 2)
+   {
+      minPacketSendPeriod = 20;
+      minPacketRecvPeriod = 20;
       maxSendBandwidth = 65535;
       maxRecvBandwidth = 65535;
    }
    else
    {
-      minPacketSendPeriod = 50;
-      minPacketRecvPeriod = 50;
+      minPacketSendPeriod = 45;
+      minPacketRecvPeriod = 45;
       maxSendBandwidth = 8000;
       maxRecvBandwidth = 8000;
    }
@@ -1672,7 +1678,7 @@ void GameConnection::onConnectionEstablished()
    if(isInitiator())    // Runs on client
    {
 #ifndef ZAP_DEDICATED
-      setConnectionSpeed();
+      setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
       mClientGame->setInCommanderMap(false);       // Start game in regular mode
       mClientGame->clearZoomDelta();               // No in zoom effect
       setGhostFrom(false);
@@ -1709,6 +1715,7 @@ void GameConnection::onConnectionEstablished()
    }
    else                 // Runs on server
    {
+      setConnectionSpeed(2);  // high speed, most servers often have a lot of bandwidth available.
       gServerGame->addClient(mClientInfo);
       setGhostFrom(true);
       setGhostTo(false);
@@ -1898,6 +1905,15 @@ bool GameConnection::gotPermissionsReply()
 bool GameConnection::isInCommanderMap()
 {
    return mInCommanderMap;
+}
+
+void GameConnection::readPacket(BitStream *bstream)
+{
+   Parent::readPacket(bstream);
+	if(mClientGame)
+      printf("      %i\n", bstream->getBitPosition());
+   else
+      printf("%i\n", bstream->getBitPosition());
 }
 
 
