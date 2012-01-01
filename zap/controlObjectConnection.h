@@ -58,8 +58,8 @@ private:
    Point mServerPosition;
    bool mCompressPointsRelative;
 
-   U32 firstMoveIndex;
-   U32 highSendIndex[3];
+   S8 firstMoveIndex;
+   S8 highSendIndex[3];
    U32 mMoveTimeCredit;
 
 public:
@@ -73,7 +73,7 @@ public:
 
    struct GamePacketNotify : public GhostConnection::GhostPacketNotify
    {
-      U32 firstUnsentMoveIndex;
+      S8 firstUnsentMoveIndex;
       Point lastControlObjectPosition;
       GamePacketNotify();
    };

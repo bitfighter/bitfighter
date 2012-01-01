@@ -57,8 +57,11 @@ void ControlObjectConnection::setControlObject(GameObject *theObject)
 
 void ControlObjectConnection::packetReceived(PacketNotify *notify)
 {
-   for(/* empty */; firstMoveIndex < ((GamePacketNotify *) notify)->firstUnsentMoveIndex; firstMoveIndex++)
-      pendingMoves.erase(U32(0));
+   if(isConnectionToServer())  // only client needs to handle this
+   {
+      for(/* empty */; S8(firstMoveIndex - ((Zap::ControlObjectConnection::GamePacketNotify *) notify)->firstUnsentMoveIndex) < 0; firstMoveIndex++)
+         pendingMoves.erase(U32(0));
+   }
    mServerPosition = ((GamePacketNotify *) notify)->lastControlObjectPosition;
    Parent::packetReceived(notify);
 }
@@ -98,19 +101,20 @@ ControlObjectConnection::PacketNotify *ControlObjectConnection::allocNotify()
    return new GamePacketNotify;
 }
 
+static U8 CLIENTCONTROLBITS = 16;
 
 void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *notify)
 {
    if(isConnectionToServer())
    {
-      U32 firstSendIndex = highSendIndex[0];
-      if(firstSendIndex < firstMoveIndex)
+      S8 firstSendIndex = highSendIndex[0];
+      if(S8(firstSendIndex - firstMoveIndex) < 0)   // S8(...) appears to be needed here, even though they are both already S8, somehow the compiler converts them to 32 bit, screwing up the S8 overflow.
          firstSendIndex = firstMoveIndex;
 
-      bstream->write(getControlCRC());
+      bstream->writeInt(getControlCRC(), CLIENTCONTROLBITS);
 
       bstream->write(firstSendIndex);
-      U32 skipCount = firstSendIndex - firstMoveIndex;
+      U32 skipCount = (U32) S8(firstSendIndex - firstMoveIndex);
       U32 moveCount = pendingMoves.size() - skipCount;
 
       bstream->writeRangedU32(moveCount, 0, MaxPendingMoves);
@@ -126,7 +130,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
          pendingMoves[i].pack(bstream, lastMove, true);
          lastMove = &pendingMoves[i];
       }
-      ((GamePacketNotify *) notify)->firstUnsentMoveIndex = firstMoveIndex + pendingMoves.size();
+      ((GamePacketNotify *) notify)->firstUnsentMoveIndex = firstMoveIndex + S8(pendingMoves.size());
       if(controlObject.isValid())
          ((GamePacketNotify *) notify)->lastControlObjectPosition = controlObject->getActualPos();
 
@@ -147,7 +151,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
       // remote side has a copy of the control object already
       mCompressPointsRelative = bstream->writeFlag(ghostIndex != -1);
 
-      if(bstream->writeFlag(getControlCRC() != mLastClientControlCRC))
+      if(bstream->writeFlag(getControlCRC() & (0xFFFFFFFF >> CLIENTCONTROLBITS) != mLastClientControlCRC))
       {
          if(ghostIndex != -1)
          {
@@ -172,14 +176,15 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
 
    if(isConnectionToClient())
    {
-      bstream->read(&mLastClientControlCRC);
+      mLastClientControlCRC = bstream->readInt(CLIENTCONTROLBITS);
 
-      U32 firstMove;
+      S8 firstMove;
       bstream->read(&firstMove);
       U32 count = bstream->readRangedU32(0, MaxPendingMoves);
 
       Move theMove;
-      for(/* empty */; firstMove < firstMoveIndex && count > 0; firstMove++)
+
+      for(/* empty */; S8(firstMove - firstMoveIndex) < 0 && count > 0; firstMove++)
       {
          count--;
          theMove.unpack(bstream, true);
