@@ -387,7 +387,7 @@ EditorAttributeMenuUI *EngineeredItem::getAttributeMenu()
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
    {
-      ClientGame *clientGame = (ClientGame *)getGame();
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
@@ -700,9 +700,11 @@ void EngineeredItem::explode()
 
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
-   ((ClientGame *)getGame())->emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
-   ((ClientGame *)getGame())->emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1,1,0.25), Colors::red);
-   ((ClientGame *)getGame())->emitBurst(getActualPos(), Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   game->emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
+   game->emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1, 1, 0.25), Colors::red);
+   game->emitBurst(getActualPos(), Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
 
    disableCollision();
 #endif

@@ -478,11 +478,16 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
             chaos *= scale + 1;
 
             TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-            if(TNL::Random::readF() > 0.5)
-               ((ClientGame *)getGame())->emitSpark(collisionPoint, normal * chaos.len() + Point(normal.y, -normal.x)*scale*5  + chaos + mMoveState[stateIndex].vel*0.05f, bumpC);
 
             if(TNL::Random::readF() > 0.5)
-               ((ClientGame *)getGame())->emitSpark(collisionPoint, normal * chaos.len() + Point(normal.y, -normal.x)*scale*-5 + chaos + mMoveState[stateIndex].vel*0.05f, bumpC);
+               static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
+                                                               normal * chaos.len() + Point(normal.y, -normal.x) * scale * 5  + chaos + 
+                                                                         mMoveState[stateIndex].vel*0.05f, bumpC);
+
+            if(TNL::Random::readF() > 0.5)
+               static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
+                                                               normal * chaos.len() + Point(normal.y, -normal.x) * scale * -5 + chaos + 
+                                                                         mMoveState[stateIndex].vel*0.05f, bumpC);
          }
       }
    }
@@ -1315,7 +1320,7 @@ EditorAttributeMenuUI *Asteroid::getAttributeMenu()
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
    {
-      ClientGame *clientGame = (ClientGame *)getGame();
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 

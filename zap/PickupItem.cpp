@@ -197,7 +197,14 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
    {
+      // Should be:
+      // ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+      // but...
+      // error C2440: 'static_cast' : cannot convert from 'Zap::Game *' to 'Zap::ClientGame *'
+      // Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast  
+      // so...
       ClientGame *clientGame = (ClientGame *)getGame();
+
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called

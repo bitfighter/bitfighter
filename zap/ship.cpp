@@ -1387,7 +1387,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny
 
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      ((ClientGame *)getGame())->emitTeleportInEffect(mMoveState[ActualState].pos, 1);
+
+      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mMoveState[ActualState].pos, 1);
 
       SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos, Point());
    }
@@ -1771,10 +1772,12 @@ void Ship::emitShipExplosion(Point pos)
    F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   
+   ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   ((ClientGame *)getGame())->emitExplosion(mMoveState[ActualState].pos, 0.9f, ShipExplosionColors, NumShipExplosionColors);
-   ((ClientGame *)getGame())->emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
-   ((ClientGame *)getGame())->emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
+   game->emitExplosion(mMoveState[ActualState].pos, 0.9f, ShipExplosionColors, NumShipExplosionColors);
+   game->emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
+   game->emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
 #endif
 }
 
@@ -1919,7 +1922,7 @@ void Ship::emitMovementSparks()
 
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
-                ((ClientGame *)getGame())->emitSpark(mMoveState[RenderState].pos - shipDirs[i] * 13,
+                static_cast<ClientGame *>(getGame())->emitSpark(mMoveState[RenderState].pos - shipDirs[i] * 13,
                      -shipDirs[i] * 100 + chaos, thrust, 1.5f * TNL::Random::readF());
              }
           }

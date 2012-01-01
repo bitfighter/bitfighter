@@ -230,7 +230,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      ((ClientGame *)getGame())->emitTeleportInEffect(mDests[dest], 0);
+      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
 
       SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest], Point());
 

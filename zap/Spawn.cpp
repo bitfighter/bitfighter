@@ -140,7 +140,7 @@ EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()
 
    if(!mAttributeMenuUI)
    {
-      ClientGame *clientGame = (ClientGame *)getGame();
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
