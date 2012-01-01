@@ -1492,6 +1492,10 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
    const S32 GAUGE_WIDTH = 200;
    const S32 GUAGE_HEIGHT = 20;
 
+   // For readability
+   const S32 hMargin = UserInterface::horizMargin;
+   const S32 vMargin = UserInterface::vertMargin;
+
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    F32 full = F32(energy) / F32(maxEnergy) * GAUGE_WIDTH;
@@ -1499,29 +1503,24 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
    // Guage fill
    glBegin(GL_POLYGON);
       glColor(Colors::blue);
-      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
+      glVertex2i(hMargin, canvasHeight - vMargin - GUAGE_HEIGHT);
+      glVertex2i(hMargin, canvasHeight - vMargin);
 
       glColor(Colors::cyan);
-      glVertex2f(UserInterface::horizMargin + full, (F32)canvasHeight - UserInterface::vertMargin);
-      glVertex2f(UserInterface::horizMargin + full, (F32)canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(hMargin + full, (F32)canvasHeight - vMargin);
+      glVertex2f(hMargin + full, (F32)canvasHeight - vMargin - GUAGE_HEIGHT);
    glEnd();
 
    // Guage outline
-   glBegin(GL_LINES);
-      glColor(Colors::white);
-      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2i(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
-      glVertex2i(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2i(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin);
+   glColor(Colors::white);
+   drawVertLine(hMargin, canvasHeight - vMargin - GUAGE_HEIGHT, canvasHeight - vMargin);
+   drawVertLine(hMargin + GAUGE_WIDTH, canvasHeight - vMargin - GUAGE_HEIGHT, canvasHeight - vMargin);
 
-      // Show safety line
-      S32 cutoffx = cooldownThreshold * GAUGE_WIDTH / maxEnergy;
+   // Show safety line
+   S32 cutoffx = cooldownThreshold * GAUGE_WIDTH / maxEnergy;
 
-      glColor(Colors::yellow);
-      glVertex2i(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin - 23);
-      glVertex2i(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin + 4);
-   glEnd();
+   glColor(Colors::yellow);
+   drawVertLine(hMargin + cutoffx, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
 }
 
 
