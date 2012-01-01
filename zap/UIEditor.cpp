@@ -1811,9 +1811,11 @@ static void drawFourArrows(Point pos)
 
 void EditorUserInterface::render()
 {
-   mouseIgnore = false; // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
+   mouseIgnore = false;    // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
 
-   if(mPreviewMode)
+   if(!mPreviewMode)
+      renderGrid();        // Render grid first, so it's at the bottom
+   else
    {
       fillVector.clear();
       
@@ -1876,9 +1878,7 @@ void EditorUserInterface::render()
          }
       }
    }
-   else
-      renderGrid();           // Render grid first, so it's at the bottom
-
+ 
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
