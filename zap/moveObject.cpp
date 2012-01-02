@@ -1654,46 +1654,115 @@ TNL_IMPLEMENT_NETOBJECT(Worm);
 
 static const F32 WORM_ITEM_MASS = 1;
 
-Worm::Worm() : MoveItem(Point(0,0), true, (F32)WORM_RADIUS, WORM_ITEM_MASS)
+Worm::Worm()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = WormTypeNumber;
    hasExploded = false;
 
-   // Give the worm some intial motion in a random direction
-   F32 ang = TNL::Random::readF() * Float2Pi;
-   mNextAng = TNL::Random::readF() * Float2Pi;
-   F32 vel = asteroidVel;
-
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].vel.x = vel * cos(ang);
-      mMoveState[i].vel.y = vel * sin(ang);
-   }
-
-   mDirTimer.reset(1000);
+   mDirTimer.reset(100);
 
    mKillString = "killed by a worm";
+
+   mHeadIndex = 0;
+   mTailLength = 0;
 }
 
-void Worm::renderItem(const Point &pos)
+bool Worm::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 2)
+      return false;
+
+   Point pos;
+   pos.read(argv);
+   pos *= game->getGridSize();
+
+   // TODO: We need to reconcile these two ways of storing an item's location
+   setActualPos(pos);      // Needed by game
+   setVert(pos, 0);        // Needed by editor
+
+   mHeadIndex = 0;
+   mTailLength = 0;
+
+   setExtent(Rect(pos, 1));
+
+   return true;
+}
+
+const char *Worm::getOnScreenName()
+{
+   return "Worm";
+}
+
+string Worm::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+void Worm::render()
 {
    if(!hasExploded)
-      renderWorm(pos);
+   {
+      if(mTailLength <= 1)
+      {
+         renderWorm(mPoints[mHeadIndex]);
+         return;
+      }
+      Vector<Point> p;
+      S32 i = mHeadIndex;
+      for(S32 count = 0; count <= mTailLength; count++)
+      {
+         p.push_back(mPoints[i]);
+         i--;
+         if(i < 0)
+            i = maxTailLength - 1;
+      }
+      glColor(1,1,1);
+      renderPointVector(&p, GL_LINE_STRIP);
+   }
 }
 
+Worm *Worm::clone() const
+{
+   return new Worm(*this);
+}
+
+void Worm::renderEditor(F32 currentScale)
+{
+   render();
+}
+
+void Worm::renderDock()
+{
+   render();
+}
 
 bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-   center = mMoveState[state].pos;
-   radius = F32(WORM_RADIUS);
-   return true;
+   //center = mMoveState[state].pos;
+   //radius = F32(WORM_RADIUS);
+   return false;
 }
 
 
 bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   return false;
+   S32 i = mHeadIndex;
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      polyPoints.push_back(mPoints[i]);
+      i--;
+      if(i < 0)
+         i = maxTailLength - 1;
+   }
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      polyPoints.push_back(mPoints[i]);
+      i++;
+      if(i >= maxTailLength)
+         i = 0;
+   }
+   return true;
 }
 
 bool Worm::collide(GameObject *otherObject)
@@ -1706,19 +1775,25 @@ bool Worm::collide(GameObject *otherObject)
 static const S32 wormVel = 250;
 void Worm::setPosAng(Point pos, F32 ang)
 {
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = ang;
-      mMoveState[i].vel.x = wormVel * cos(ang);
-      mMoveState[i].vel.y = wormVel * sin(ang);
-   }
+   if(mTailLength < maxTailLength - 1)
+      mTailLength++;
+
+   mHeadIndex++;
+   if(mHeadIndex >= maxTailLength)
+      mHeadIndex = 0;
+
+   mPoints[mHeadIndex] = pos;
+   setMaskBits(TailPointParts << mHeadIndex);
+
+   Vector<Point> p;
+   getCollisionPoly(p);
+   setExtent(p);
 }
 
 
 void Worm::setNextAng(F32 nextAng)
 {
-   mNextAng = nextAng;
+   //mNextAng = nextAng;
 }
 
 
@@ -1734,13 +1809,18 @@ void Worm::idle(GameObject::IdleCallPath path)
    if(!isInDatabase())
       return;
 
-   if(mDirTimer.update(mCurrentMove.time))
+   if(path == GameObject::IdleCallPath::ServerIdleMainLoop && mDirTimer.update(mCurrentMove.time))
    {
-      //mMoveState[ActualState].angle = TNL::Random::readF() * Float2Pi;
-      F32 ang = mMoveState[ActualState].vel.ATAN2();
-      setPosAng(mMoveState[ActualState].pos, ang + (TNL::Random::readI(0,2) - 1) * FloatPi / 4);
-      mDirTimer.reset(1000);
-      setMaskBits(InitialMask);     // WRONG!!
+      Point p;
+      mAngle = (mAngle + (TNL::Random::readF() - 0.5f) * 173); // * FloatPi * 4.f;
+      if(mAngle < -FloatPi * 4.f)
+         mAngle += FloatPi * 8.f;
+      if(mAngle > FloatPi * 4.f)
+         mAngle -= FloatPi * 8.f;
+
+      p.setPolar(20, mAngle);
+      setPosAng(mPoints[mHeadIndex] + p, mAngle);      // TODO:  don't go through walls
+      mDirTimer.reset(200);
    }
 
    Parent::idle(path);
@@ -1751,6 +1831,17 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
+   for(S32 i=0; i < maxTailLength; i++)
+   {
+      if(stream->writeFlag(TailPointParts << i))
+      {
+         mPoints[i].write(stream);
+      }
+   }
+
+   stream->writeInt(mHeadIndex, 5);
+   stream->writeInt(mTailLength, 5);
+
    stream->writeFlag(hasExploded);
 
    return retMask;
@@ -1760,6 +1851,22 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
+
+   for(S32 i=0; i < maxTailLength; i++)
+   {
+      if(stream->readFlag())
+      {
+         mPoints[i].read(stream);
+      }
+   }
+
+   mHeadIndex = stream->readInt(5);
+   mTailLength = stream->readInt(5);
+
+   Vector<Point> p;
+   getCollisionPoly(p);
+   setExtent(p);
+
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
 
