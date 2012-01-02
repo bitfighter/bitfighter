@@ -486,8 +486,8 @@ void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
       updateJoyAxesDirections(ShootAxisUpDownMask, value);
 }
 
-extern InputCode joystickButtonToInputCode(Joystick::Button button);
 
+extern InputCode joystickButtonToInputCode(Joystick::Button button);
 
 void Event::onJoyButtonDown(U8 which, U8 button)
 {
