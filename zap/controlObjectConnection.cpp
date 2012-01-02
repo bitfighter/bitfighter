@@ -151,7 +151,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
       // remote side has a copy of the control object already
       mCompressPointsRelative = bstream->writeFlag(ghostIndex != -1);
 
-      if(bstream->writeFlag(getControlCRC() & (0xFFFFFFFF >> CLIENTCONTROLBITS) != mLastClientControlCRC))
+      if(bstream->writeFlag( (getControlCRC() & (0xFFFFFFFF >> CLIENTCONTROLBITS)) != mLastClientControlCRC ))
       {
          if(ghostIndex != -1)
          {
