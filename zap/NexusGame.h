@@ -55,6 +55,9 @@ private:
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
    Vector<SafePtr<NexusObject> > mNexus;
 
+   void idle_client(U32 deltaT);     // Idle for clients
+   void idle_server(U32 deltaT);     // Idle for server
+
 public:
    NexusGameType();      // Constructor
    bool processArguments(S32 argc, const char **argv, Game *game);

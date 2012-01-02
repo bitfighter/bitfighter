@@ -70,7 +70,9 @@ static const char *eventNames[] = {
    "ShipKilled",
    "PlayerJoined",
    "PlayerLeft",
-   "MsgReceived"
+   "MsgReceived",
+   "NexusOpened",
+   "NexusClosed"
 };
 
 static const char *eventFunctions[] = {
@@ -79,7 +81,9 @@ static const char *eventFunctions[] = {
    "onShipKilled",
    "onPlayerJoined",
    "onPlayerLeft",
-   "onMsgReceived"
+   "onMsgReceived",
+   "onNexusOpened",
+   "onNexusClosed"
 };
 
 
@@ -293,6 +297,8 @@ void LuaRobot::setEnums(lua_State *L)
    setEventEnum(MsgReceivedEvent);
    setEventEnum(PlayerJoinedEvent);
    setEventEnum(PlayerLeftEvent);
+   setEventEnum(NexusOpenedEvent);
+   setEventEnum(NexusClosedEvent);
 
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);
@@ -1259,6 +1265,7 @@ void EventManager::update()
 }
 
 
+// onNexusOpened, onNexusClosed
 void EventManager::fireEvent(EventType eventType)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)

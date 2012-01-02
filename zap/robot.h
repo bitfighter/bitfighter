@@ -48,6 +48,8 @@ public:
       PlayerJoinedEvent,      // (playerInfo) --> Player joined game
       PlayerLeftEvent,        // (playerInfo) --> Player left game
       MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
+      NexusOpenedEvent,       // () --> Nexus opened (nexus games only)
+      NexusClosedEvent,       // () --> Nexus closed (nexus games only)
       EventTypes
    };
 

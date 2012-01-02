@@ -24,26 +24,26 @@
 //------------------------------------------------------------------------------------
 
 #include "NexusGame.h"
-#include "flagItem.h"
-#include "SoundSystem.h"
-#include "gameNetInterface.h"
-#include "ship.h"
-#include "GeomUtils.h"        // For centroid calculation for labeling
-#include "stringUtils.h"      // For itos
-#include "game.h"
-#include "gameConnection.h"
+//#include "flagItem.h"
+//#include "SoundSystem.h"
+//#include "gameNetInterface.h"
+//#include "ship.h"
+//#include "GeomUtils.h"        // For centroid calculation for labeling
+//#include "stringUtils.h"      // For itos
+//#include "game.h"
+//#include "gameConnection.h"
+#include "robot.h"            // For EventManager
 
 // Things I think should not be on server side
-#include "Colors.h"
+//#include "Colors.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
 
-
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIGame.h"
-#include "UIMenuItems.h"
-#include "SDL/SDL_opengl.h"
+#   include "ClientGame.h"
+#   include "UIGame.h"
+#   include "UIMenuItems.h"
+#   include "SDL/SDL_opengl.h"
 #endif
 
 
@@ -53,7 +53,6 @@ namespace Zap
 {
 
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
-
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
@@ -69,6 +68,7 @@ GAMETYPE_RPC_S2C(NexusGameType, s2cAddYardSaleWaypoint, (F32 x, F32 y), (x, y))
    w.pos.set(x,y);
    mYardSaleWaypoints.push_back(w);
 }
+
 
 TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score), (msgIndex, clientName, flagCount, score),
@@ -87,10 +87,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    }
    else if(msgIndex == NexusMsgYardSale)
    {
-      SoundSystem::playSoundEffect(SFXFlagSnatch);
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
                   "%s is having a YARD SALE!",
                   clientName.getString());
+      SoundSystem::playSoundEffect(SFXFlagSnatch);
    }
    else if(msgIndex == NexusMsgGameOverWin)
    {
@@ -352,20 +352,28 @@ void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
 
-   if(isGhost())     // i.e. on client
-   {
-      mNexusTimer.update(deltaT);
-      for(S32 i = 0; i < mYardSaleWaypoints.size();)
-      {
-         if(mYardSaleWaypoints[i].timeLeft.update(deltaT))
-            mYardSaleWaypoints.erase_fast(i);
-         else
-            i++;
-      }
-      return;
-   }
+   if(isGhost()) 
+      idle_client(deltaT);
+   else
+      idle_server(deltaT);
+}
 
-   // The following only runs on the server
+
+void NexusGameType::idle_client(U32 deltaT)
+ {
+   mNexusTimer.update(deltaT);
+   for(S32 i = 0; i < mYardSaleWaypoints.size();)
+   {
+      if(mYardSaleWaypoints[i].timeLeft.update(deltaT))
+         mYardSaleWaypoints.erase_fast(i);
+      else
+         i++;
+   }
+}
+
+
+void NexusGameType::idle_server(U32 deltaT)
+{
    if(!mNexusIsOpen && mNexusTimer.update(deltaT))         // Nexus has just opened
    {
       mNexusTimer.reset(mNexusOpenTime * 1000);
@@ -389,6 +397,9 @@ void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
          if(nexus)
             shipTouchNexus(client_ship, nexus);
       }
+
+      // Fire an event
+      Robot::getEventManager().fireEvent(EventManager::NexusOpenedEvent);
    }
    else if(mNexusIsOpen && mNexusTimer.update(deltaT))       // Nexus has just closed
    {
@@ -398,6 +409,9 @@ void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
       static StringTableEntry msg("The Nexus is now CLOSED.");
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
+
+      // Fire an event
+      Robot::getEventManager().fireEvent(EventManager::NexusClosedEvent);
    }
 
    // Advance all flagSpawn timers and see if it's time for a new flag
@@ -412,6 +426,7 @@ void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       }
    }
 }
+
 
 // What does a particular scoring event score?
 S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
