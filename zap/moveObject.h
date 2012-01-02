@@ -338,22 +338,43 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Worm : public MoveItem      // But not an editor object!!  -- should be a Projectile?
+class Worm : public GameObject, public EditorPointObject
 {
-typedef MoveItem Parent;
+typedef GameObject Parent;
 
 public:
    static const S32 WORM_RADIUS = 5;
 
 private:
    bool hasExploded;
-   F32 mNextAng;
+   F32 mAngle;
    Timer mDirTimer;
+
+   static const S32 maxTailLength = 28;
+
+protected:
+   enum MaskBits {
+      InitialMask = Parent::FirstFreeMask << 0,
+      ExplosionMask = Parent::FirstFreeMask << 1,
+      TailPointParts = Parent::FirstFreeMask << 2,  // there are multiple tail parts
+      FirstFreeMask = TailPointParts << maxTailLength,
+   };
+
+   Point mPoints[maxTailLength];
+   S32 mHeadIndex;
+   S32 mTailLength;
+
 
 public:
    Worm();     // Constructor  
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
+   const char *getOnScreenName();
+   Worm *clone() const;
 
-   void renderItem(const Point &pos);
+   void render();
+   void renderEditor(F32 currentScale);
+   void renderDock();
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);

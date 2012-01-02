@@ -3097,53 +3097,38 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       }
    }
 
-   //else if(mGame->getTeamCount() > 0 && !isTeamGame())   // Render leaderboard for non-team games
-   //{
-   //   S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
+   // Render leaderboard for single team games like rabbit and bitmatch
+   else if(teamCount > 0 && !gameType->isTeamGame())
+   {
+      S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
 
-   //   // Build a list of teams, so we can sort by score
-   //   Vector<RefPtr<ClientRef> > leaderboardList;
+      const S32 textsize = 20;
 
-   //   // Add you to the leaderboard
-   //   if(getGame()->getConnectionToServer())
-   //   {
-   //      leaderboardList.push_back(getGame()->getConnectionToServer());
-   //      logprintf("Score = %d", getGame()->getConnectionToServer()->getScore());
-   //   }
+      // Render player score
+      const char* name = getGame()->getClientInfo()->getName().getString();
+      S32 score = getGame()->getClientInfo()->getScore();
 
-   //   // Get leading player
-   //   ClientRef *winningClient = mClientList[0];
-   //   for(S32 i = 1; i < mClientList.size(); i++)
-   //   {
-   //      if(mClientList[i]->getScore() > winningClient->getScore())
-   //      {
-   //         winningClient = mClientList[i];
-   //      }
-   //   }
+      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
+            UserInterface::getStringWidthf(textsize, "%s %s %d", "", name, score);
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 0 * 24;
 
-   //   // Add leader to the leaderboard
-   //   leaderboardList.push_back(winningClient);
+      glColor(Colors::white);
+      UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", "", name, score);
 
-   //   const S32 textsize = 20;
+      // Render leader score
+      if(gameType->getLeadingPlayer() >= 0)
+      {
+         name = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
+         score = gameType->getLeadingPlayerScore();
 
-   //   for(S32 i = 0; i < leaderboardList.size(); i++)
-   //   {
-   //      const char* prefix = "";
-   //      if(i == leaderboardList.size() - 1)
-   //      {
-   //         prefix = "Leader:";
-   //      }
-   //      const char* name = leaderboardList[i]->name.getString();
-   //      S32 score = leaderboardList[i]->getScore();
+         xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
+               UserInterface::getStringWidthf(textsize, "%s %s %d", "1st:", name, score);
+         ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 1 * 24;
 
-   //      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 
-   //                 UserInterface::getStringWidthf(textsize, "%s %s %d", prefix, name, score);
-   //      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 24;
-
-   //      glColor3f(1, 1, 1);
-   //      UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", prefix, name, score);
-   //   }
-   //}
+         glColor(Colors::yellow);
+         UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", "1st:", name, score);
+      }
+   }
 
    renderTimeLeft();
    renderTalkingClients();

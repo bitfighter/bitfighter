@@ -342,7 +342,6 @@ public:
    void onConnectionTerminated(TerminationReason r, const char *string);
 
 
-   void readPacket(BitStream *bstream);
 
    TNL_DECLARE_NETCONNECTION(GameConnection);
 };

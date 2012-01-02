@@ -112,6 +112,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mWinningScore = winningScore;
    mLeadingTeam = -1;
    mLeadingTeamScore = 0;
+   mLeadingPlayer = -1;
+   mLeadingPlayerScore = 0;
    mDigitsNeededToDisplayScore = 1;
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
@@ -1698,13 +1700,18 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          player->addScore(points);
          newScore = player->getScore();
 
-         // (No need to broadcast score because individual scores are only displayed when Tab is held,
-         // in which case scores, along with data like ping time, are streamed in)
-
          // Accumulate every client's total score counter, which tracks total number of points scored by anyone
          if(points > 0)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
+            {
                mGame->getClientInfo(i)->addToTotalScore(points);
+
+               // Broadcast player scores for rendering on the client
+               if(!isTeamGame())
+                  s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
+            }
+
+         updateLeadingPlayerAndScore();
       }
    }
 
@@ -1760,6 +1767,23 @@ void GameType::updateLeadingTeamAndScore()
       {
          mLeadingTeamScore = ((Team *)(mGame->getTeam(i)))->getScore();
          mLeadingTeam = i;
+      }
+   }
+}
+
+
+// Sets mLeadingTeamScore and mLeadingTeam; runs on client and server
+void GameType::updateLeadingPlayerAndScore()
+{
+   // Find the leading player
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      S32 score = mGame->getClientInfo(i)->getScore();
+
+      if(score > mLeadingPlayerScore)
+      {
+         mLeadingPlayerScore = score;
+         mLeadingPlayer = i;
       }
    }
 }
@@ -2180,6 +2204,16 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::MAX_TEAMS> t
    
    ((Team *)mGame->getTeam(teamIndex))->setScore(score);
    updateLeadingTeamAndScore();    
+}
+
+GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, score))
+{
+   TNLAssert(index < U32(mGame->getClientCount()), "player index out of range");
+
+   if(index < U32(mGame->getClientCount()))
+      mGame->getClientInfo(index)->setScore(score);
+
+   updateLeadingPlayerAndScore();
 }
 
 
@@ -3441,6 +3475,18 @@ S32 GameType::getLeadingScore() const
 S32 GameType::getLeadingTeam() const
 {
    return mLeadingTeam;
+}
+
+
+S32 GameType::getLeadingPlayerScore() const
+{
+   return mLeadingPlayerScore;
+}
+
+
+S32 GameType::getLeadingPlayer() const
+{
+   return mLeadingPlayer;
 }
 
 
