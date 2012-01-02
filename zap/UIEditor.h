@@ -342,7 +342,6 @@ public:
    void zoom(F32 zoomAmount);
 
    void onKeyUp(InputCode inputCode);
-   void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
    void onMouseDragged();
    void startDraggingDockItem();

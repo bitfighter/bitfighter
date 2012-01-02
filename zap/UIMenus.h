@@ -106,7 +106,6 @@ public:
    void render();                                        // Draw the basic menu
    void onKeyDown(InputCode inputCode, char ascii);
    void onKeyUp(InputCode inputCode);
-   void onMouseMoved(S32 x, S32 y);                      // Redirect to argless version
    void onMouseMoved();
    void processMouse();
 

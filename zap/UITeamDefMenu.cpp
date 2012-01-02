@@ -360,7 +360,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
 }
 
 
-void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
+void TeamDefUserInterface::onMouseMoved()
 {
    SDL_SetCursor(Cursor::getDefault());
 

@@ -389,7 +389,7 @@ void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
 
 // Handle mouse input, figure out which menu item we're over, and highlight it
-void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
+void KeyDefMenuUserInterface::onMouseMoved()
 {
    SDL_SetCursor(Cursor::getDefault());  // Show cursor when user moves mouse
 

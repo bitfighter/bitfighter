@@ -895,13 +895,7 @@ bool GameUserInterface::isCmdChat()
 }
 
 
-void GameUserInterface::onMouseDragged(S32 x, S32 y)
-{
-   onMouseMoved();
-}
-
-
-void GameUserInterface::onMouseMoved(S32 x, S32 y)
+void GameUserInterface::onMouseDragged()
 {
    onMouseMoved();
 }
@@ -909,6 +903,8 @@ void GameUserInterface::onMouseMoved(S32 x, S32 y)
 
 void GameUserInterface::onMouseMoved()
 {
+   Parent::onMouseMoved();
+
    mMousePoint.set(gScreenInfo.getMousePos()->x - gScreenInfo.getGameCanvasWidth()  / 2,
                    gScreenInfo.getMousePos()->y - gScreenInfo.getGameCanvasHeight() / 2);
 

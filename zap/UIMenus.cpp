@@ -388,12 +388,6 @@ void MenuUserInterface::getMenuResponses(Vector<string> &responses)
 }
 
 
-void MenuUserInterface::onMouseMoved(S32 x, S32 y)
-{
-   onMouseMoved(); // Redirect to argless version
-}
-
-
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved()
 {

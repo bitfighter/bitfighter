@@ -385,7 +385,7 @@ void SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
    if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)
    {
       const Point *mousePos = gScreenInfo.getWindowMousePos();
-      current->onMouseMoved((S32)mousePos->x, (S32)mousePos->y);
+      current->onMouseMoved();
    }
 }
 

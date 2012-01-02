@@ -2707,13 +2707,6 @@ void EditorUserInterface::findHitItemOnDock()
 }
 
 
-// Incoming calls from SDL come here (because that's where they went when GLUT was in charge)...
-void EditorUserInterface::onMouseMoved(S32 x, S32 y)
-{
-   onMouseMoved();      //... and go here
-}
-
-
 void EditorUserInterface::onMouseMoved()
 {
    if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between

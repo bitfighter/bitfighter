@@ -946,8 +946,8 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
 // These will be overridden in child classes if needed
 void UserInterface::render()                               { /* Do nothing */ }
 void UserInterface::idle(U32 timeDelta)                    { /* Do nothing */ }
-void UserInterface::onMouseMoved(S32 x, S32 y)             { /* Do nothing */ }
-void UserInterface::onMouseDragged(S32 x, S32 y)           { /* Do nothing */ }
+void UserInterface::onMouseMoved()                         { /* Do nothing */ }
+void UserInterface::onMouseDragged()                       { /* Do nothing */ }
 void UserInterface::onKeyDown(InputCode inputCode, char ascii) { /* Do nothing */ }
 void UserInterface::onKeyUp(InputCode inputCode)               { /* Do nothing */ }
 

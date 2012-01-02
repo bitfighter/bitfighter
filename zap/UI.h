@@ -132,8 +132,8 @@ public:
    // Input event handlers
    virtual void onKeyDown(InputCode inputCode, char ascii);
    virtual void onKeyUp(InputCode inputCode);
-   virtual void onMouseMoved(S32 x, S32 y);
-   virtual void onMouseDragged(S32 x, S32 y);
+   virtual void onMouseMoved();
+   virtual void onMouseDragged();
 
    void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
    static void drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled = false);

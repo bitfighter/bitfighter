@@ -184,9 +184,9 @@ public:
 
    // Functions for handling user input
    void onKeyDown(InputCode inputCode, char ascii);
-   void onMouseMoved(S32 x, S32 y);
+   void onMouseMoved();
    void onKeyUp(InputCode inputCode);
-   void onMouseDragged(S32 x, S32 y);
+   void onMouseDragged();
 
    S32 getDividerPos();
    S32 getServersPerPage();

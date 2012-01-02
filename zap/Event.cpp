@@ -426,7 +426,7 @@ void Event::onMouseMoved(S32 x, S32 y, DisplayMode mode)
    setMousePos(x, y, mode);
 
    if(UserInterface::current)
-      UserInterface::current->onMouseMoved(x, y);
+      UserInterface::current->onMouseMoved();
 }
 
 

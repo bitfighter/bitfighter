@@ -1124,7 +1124,7 @@ void QueryServersUserInterface::onKeyUp(InputCode inputCode)
 }
 
 
-void QueryServersUserInterface::onMouseDragged(S32 x, S32 y) 
+void QueryServersUserInterface::onMouseDragged() 
 {
    const Point *mousePos = gScreenInfo.getMousePos();    // (used in some of the macro expansions)
 
@@ -1177,11 +1177,11 @@ void QueryServersUserInterface::sortSelected()
 
 
 // Handle mouse input, figure out which menu item we're over, and highlight it
-void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
+void QueryServersUserInterface::onMouseMoved()
 {
    if(getInputCodeState(MOUSE_LEFT))
    {
-      onMouseDragged(x, y);
+      onMouseDragged();
       return;
    }
 
