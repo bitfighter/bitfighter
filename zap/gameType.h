@@ -91,6 +91,8 @@ private:
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
    S32 mLeadingTeamScore;           // Score of mLeadingTeam
+   S32 mLeadingPlayer;              // Player index of mClientInfos with highest score
+   S32 mLeadingPlayerScore;         // Score of mLeadingPlayer
    S32 mDigitsNeededToDisplayScore; // Digits needed to display scores
 
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
@@ -181,6 +183,8 @@ public:
 
    S32 getLeadingScore() const;
    S32 getLeadingTeam() const;
+   S32 getLeadingPlayerScore() const;
+   S32 getLeadingPlayer() const;
 
    void catalogSpybugs();           // Build a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
@@ -423,6 +427,7 @@ public:
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
+   void updateLeadingPlayerAndScore(); // Sets mLeadingTeamScore and mLeadingTeam
    void updateRatings();               // Update everyone's game-normalized ratings at the end of the game
 
 
