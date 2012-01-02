@@ -319,6 +319,7 @@ public:
 
    void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
 
+   void clearSelected();
    void setSelected(S32 owner, bool selected);
    void rebuildSelectedOutline();
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem

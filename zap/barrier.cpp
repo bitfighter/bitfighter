@@ -1007,6 +1007,13 @@ void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDa
 }
 
 
+void WallSegmentManager::clearSelected()
+{
+   for(S32 i = 0; i < mWallSegments.size(); i++)
+      mWallSegments[i]->setSelected(false);
+}
+
+
 void WallSegmentManager::setSelected(S32 owner, bool selected)
 {
    for(S32 i = 0; i < mWallSegments.size(); i++)

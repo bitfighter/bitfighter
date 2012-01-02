@@ -382,6 +382,26 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    rebuildEverything();    // Well, rebuild segments from walls at least
 
+   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+
+   // Update wall segment manager with what's currently selected
+   fillVector.clear();
+   getGame()->getEditorDatabase()->findObjects((TestFunc)isWallType, fillVector);
+
+   wallSegmentManager->clearSelected();
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      TNLAssert(dynamic_cast<EditorObject *>(fillVector[i]), "Bad cast!");
+      EditorObject *editorObject = dynamic_cast<EditorObject *>(fillVector[i]);
+
+      if(editorObject->isSelected())
+         wallSegmentManager->setSelected(editorObject->getSerialNumber(), true);
+   }
+
+   wallSegmentManager->rebuildSelectedOutline();
+
+
    //getGame()->getEditorDatabase()->dumpObjects();
 
    // Why is this block needed??  Makes larger levels palpably slow...
