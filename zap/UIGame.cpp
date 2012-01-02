@@ -3107,9 +3107,9 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    // Render leaderboard for single team games like rabbit and bitmatch
    else if(teamCount > 0 && !gameType->isTeamGame())
    {
-      S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
+      S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom() - 22;
 
-      const S32 textsize = 20;
+      const S32 textsize = 12;
 
       /// Render player score
       const char* name = getGame()->getClientInfo()->getName().getString();
@@ -3119,9 +3119,9 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
 
       S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
             UserInterface::getStringWidthf(textsize, "%s %s %d", "", name, score);
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 0 * 24;
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 0 * 16;
 
-      glColor(Colors::white, 0.5f);
+      glColor(Colors::red, 0.6f);
       UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", "", name, score);
 
       /// Render leader score
@@ -3130,31 +3130,15 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
          name = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
          score = gameType->getLeadingPlayerScore();
 
-         ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 1 * 24;
+         ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 1 * 16;
 
          // Draw leader name + score
          xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
                UserInterface::getStringWidthf(textsize, "%s %d", name, score);
 
-         glColor(Colors::white, 0.8f);
+         glColor(Colors::red);
          UserInterface::drawStringf(xpos, ypos, textsize, "%s %d", name, score);
-
-         // Draw leader indicator
-//         xpos -= UserInterface::getStringWidth(textsize, "1st: ");
-//
-//         glColor(Colors::yellow);
-//         UserInterface::drawString(xpos, ypos, textsize, "1st: ");
       }
-
-      /// Render score-to-win
-      score = gameType->getWinningScore();
-
-      xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
-            UserInterface::getStringWidthf(textsize, "%s %d", "Goal:", score);
-      ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 2 * 24;
-
-      glColor(Colors::yellow);
-      UserInterface::drawStringf(xpos, ypos, textsize, "%s %d", "Goal:", score);
    }
 
    renderTimeLeft();
