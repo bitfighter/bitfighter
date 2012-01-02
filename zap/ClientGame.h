@@ -77,6 +77,7 @@ private:
 
    string mLoginPassword;
    boost::shared_ptr<ClientInfo> mClientInfo;         // ClientInfo object for local client
+   ClientInfo *mLocalRemoteClientInfo;                // ClientInfo pointer to the remote ClientInfo received from the server
 
    S32 findClientIndex(const StringTableEntry &name);
 
@@ -99,6 +100,8 @@ public:
 
    ClientInfo *getClientInfo();
    boost::shared_ptr<ClientInfo> getClientInfo_shared_ptr(); // Ugly on purpose... should rarely be used!
+
+   ClientInfo *getLocalRemoteClientInfo();
 
    string getLoginPassword() const;
    void setLoginPassword(const string &loginPassword);

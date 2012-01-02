@@ -108,7 +108,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mUIManager = new UIManager(this);         // Gets deleted in destructor
 
-   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, false));   
+   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, false));
+   mLocalRemoteClientInfo = NULL;
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -273,6 +274,12 @@ ClientInfo *ClientGame::getClientInfo()
 boost::shared_ptr<ClientInfo> ClientGame::getClientInfo_shared_ptr()
 {
    return mClientInfo;
+}
+
+
+ClientInfo *ClientGame::getLocalRemoteClientInfo()
+{
+   return mLocalRemoteClientInfo;
 }
 
 
@@ -552,6 +559,9 @@ void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 void ClientGame::onPlayerJoined(const boost::shared_ptr<ClientInfo> &clientInfo, bool isLocalClient, bool playAlert)
 {
    addToClientList(clientInfo);
+
+   // Find which client is us
+   mLocalRemoteClientInfo = findClientInfo(mClientInfo->getName());
 
    if(isLocalClient)    // i.e. if this is us
    {
