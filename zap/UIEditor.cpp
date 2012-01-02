@@ -399,7 +399,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
          wallSegmentManager->setSelected(editorObject->getSerialNumber(), true);
    }
 
-   wallSegmentManager->rebuildSelectedOutline();
+   onSelectionChanged();
 
 
    //getGame()->getEditorDatabase()->dumpObjects();
