@@ -24,18 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "NexusGame.h"
-//#include "flagItem.h"
-//#include "SoundSystem.h"
-//#include "gameNetInterface.h"
-//#include "ship.h"
-//#include "GeomUtils.h"        // For centroid calculation for labeling
-//#include "stringUtils.h"      // For itos
-//#include "game.h"
-//#include "gameConnection.h"
 #include "robot.h"            // For EventManager
 
 // Things I think should not be on server side
-//#include "Colors.h"
 #include "ScreenInfo.h"
 #include "gameObjectRender.h"
 
