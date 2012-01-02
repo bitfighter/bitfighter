@@ -26,11 +26,11 @@
 #include "NexusGame.h"
 #include "robot.h"            // For EventManager
 
-// Things I think should not be on server side
-#include "ScreenInfo.h"
-#include "gameObjectRender.h"
+#include "stringUtils.h"      // For ftos et al
 
 #ifndef ZAP_DEDICATED
+#   include "gameObjectRender.h"
+#   include "ScreenInfo.h"
 #   include "ClientGame.h"
 #   include "UIGame.h"
 #   include "UIMenuItems.h"
@@ -879,16 +879,20 @@ void NexusObject::idle(GameObject::IdleCallPath path)
 
 void NexusObject::render()
 {
+#ifndef ZAP_DEDICATED
    GameType *gt = getGame()->getGameType();
    NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gt);
    renderNexus(getOutline(), getFill(), getCentroid(), getLabelAngle(), 
               (theGameType && theGameType->mNexusIsOpen), gt ? gt->mZoneGlowTimer.getFraction() : 0);
+#endif
 }
 
 
 void NexusObject::renderDock()
 {
+#ifndef ZAP_DEDICATED
   renderNexus(getOutline(), getFill(), false, 0);
+#endif
 }
 
 
