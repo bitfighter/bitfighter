@@ -1313,7 +1313,7 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
                // otherwise progress to previous history item
                if(userConsole->historyScrollIndex != userConsole->historyQueueIndex)
                {
-                   userConsole->historyScrollIndex = wrap(userConsole, userConsole->historyScrollIndex - 1);
+                   userConsole->historyScrollIndex = userConsole->historyScrollIndex - 1 < 0 ? 0 : userConsole->historyScrollIndex - 1;
                    putCursorAtEndOfLine(userConsole);
                }
             }
