@@ -1809,7 +1809,7 @@ void Worm::idle(GameObject::IdleCallPath path)
    if(!isInDatabase())
       return;
 
-   if(path == GameObject::IdleCallPath::ServerIdleMainLoop && mDirTimer.update(mCurrentMove.time))
+   if(path == ServerIdleMainLoop && mDirTimer.update(mCurrentMove.time))
    {
       Point p;
       mAngle = (mAngle + (TNL::Random::readF() - 0.5f) * 173); // * FloatPi * 4.f;
