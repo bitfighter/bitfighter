@@ -732,7 +732,7 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
 // This method is called after a music track finishes playing
 void SoundSystem::music_end_callback(void* userdata, ALuint source)
 {
-   logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
+//   logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
 
    // Set the state to stopped
    musicState = MusicStopped;
