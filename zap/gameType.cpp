@@ -1704,7 +1704,11 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          // Accumulate every client's total score counter, which tracks total number of points scored by anyone
          if(points > 0)
             for(S32 i = 0; i < mGame->getClientCount(); i++)
+            {
                mGame->getClientInfo(i)->addToTotalScore(points);
+               if(!isTeamGame())
+                  s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
+            }
       }
    }
 
@@ -2179,6 +2183,16 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::MAX_TEAMS> t
       return;
    
    ((Team *)mGame->getTeam(teamIndex))->setScore(score);
+   updateLeadingTeamAndScore();    
+}
+
+GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, score))
+{
+   TNLAssert(index < U32(mGame->getClientCount()), "teamIndex out of range");
+
+   if(index < U32(mGame->getClientCount()))
+      mGame->getClientInfo(index)->setScore(score);
+
    updateLeadingTeamAndScore();    
 }
 
