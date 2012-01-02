@@ -1907,16 +1907,6 @@ bool GameConnection::isInCommanderMap()
    return mInCommanderMap;
 }
 
-void GameConnection::readPacket(BitStream *bstream)
-{
-   Parent::readPacket(bstream);
-	if(mClientGame)
-      printf("      %i\n", bstream->getBitPosition());
-   else
-      printf("%i\n", bstream->getBitPosition());
-}
-
-
 const Vector<U32> &GameConnection::getLoadout()
 {
    return mLoadout;
