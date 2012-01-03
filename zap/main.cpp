@@ -62,7 +62,8 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>Lua added copyMoveFromObject, Lua getCurrLoadout and getReqLoadout can now be used for ships
 <li>Removed deprecated getMove() method -- if your bot still relies on this, it will no longer work
-<li>Migrated onTick() to a standard event -- this will let bots unsubscribe to onTick events if they like (bot start out subscribed to onTick by default)
+<li>Migrated onTick() to a standard event -- this will let bots unsubscribe to onTick events if they like (bot start out subscribed to onTick by default).  See wiki for how to use this to make the bot sleep for a time.
+<li>Created nexusOpened and nexusClosed events.  See wiki for details.
 </ul>
 
 <h2>Bug Fixes</h2>
