@@ -1775,6 +1775,9 @@ void GameType::updateLeadingTeamAndScore()
 // Sets mLeadingTeamScore and mLeadingTeam; runs on client and server
 void GameType::updateLeadingPlayerAndScore()
 {
+   mLeadingPlayerScore = 0;
+   mLeadingPlayer = -1;
+
    // Find the leading player
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
@@ -2135,6 +2138,7 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
    getGame()->removeFromClientList(clientInfo);   
 
+   updateLeadingPlayerAndScore();
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 }
 
@@ -2173,6 +2177,8 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
       return;
 
    clientGame->onPlayerQuit(name);
+
+   updateLeadingPlayerAndScore();
 #endif
 }
 
