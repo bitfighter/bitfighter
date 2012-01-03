@@ -85,13 +85,14 @@ void ErrorMessageUserInterface::quit()
 
 void ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
    quit();     // Quit the interface when any key is pressed...  any key at all.
 }
 
 
-void ErrorMessageUserInterface::idle(U32 t)
+void ErrorMessageUserInterface::idle(U32 timeDelta)
 {
-   // Do nothing
+   Parent::idle(timeDelta);
 }
 
 

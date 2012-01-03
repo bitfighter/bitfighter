@@ -400,7 +400,7 @@ ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParen
 
 void ChatUserInterface::idle(U32 timeDelta)
 {
-   // Do nothing
+   Parent::idle(timeDelta);
 }
 
 
@@ -495,6 +495,8 @@ void ChatUserInterface::renderHeader()
 
 void ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == keyOUTGAMECHAT)
       onOutGameChat();
    else if(inputCode == keyDIAG)            // Turn on diagnostic overlay

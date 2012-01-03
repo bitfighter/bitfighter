@@ -2709,6 +2709,8 @@ void EditorUserInterface::findHitItemOnDock()
 
 void EditorUserInterface::onMouseMoved()
 {
+   Parent::onMouseMoved();
+
    if(mouseIgnore)  // Needed to avoid freezing effect from too many mouseMoved events without a render in between
       return;
 
@@ -3447,6 +3449,8 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 // Handle key presses
 void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode, ascii))      // Pass the key on to the console for processing
       return;
 
@@ -4168,6 +4172,8 @@ bool EditorUserInterface::anythingSelected()
 
 void EditorUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    F32 pixelsToScroll = timeDelta * (getInputCodeState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
 
    if(mLeft && !mRight)

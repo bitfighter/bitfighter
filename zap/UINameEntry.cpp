@@ -96,7 +96,7 @@ void TextEntryUserInterface::render()
 
 void TextEntryUserInterface::idle(U32 timeDelta)
 {
-   // Do nothing
+   Parent::idle(timeDelta);
 }
 
 
@@ -120,6 +120,8 @@ string TextEntryUserInterface::getSaltedHashText()
 
 void TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    switch (inputCode)
    {
       case KEY_ENTER:
@@ -212,6 +214,8 @@ bool LevelNameEntryUserInterface::setLevelIndex()
 
 void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
    {
       if(mLevels.size() == 0)
@@ -250,10 +254,7 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
       completePartial();
 
    else                                // Normal typed key
-   {
-      Parent::onKeyDown(inputCode, ascii);
       mFoundLevel = setLevelIndex();   // Update levelIndex to reflect current level
-   }
 }
 
 

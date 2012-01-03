@@ -87,6 +87,8 @@ private:
 
    ClientGame *mClientGame;
 
+   U32 mTimeSinceLastInput;
+
 protected:
    static bool mDisableShipKeyboardInput;  // Disable ship movement while user is in menus
 

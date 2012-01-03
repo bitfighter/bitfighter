@@ -162,6 +162,8 @@ MenuItem *MenuUserInterface::getMenuItem(S32 index)
 
 void MenuUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    // Controls rate of scrolling long menus with mouse
    mScrollTimer.update(timeDelta);
 
@@ -391,6 +393,8 @@ void MenuUserInterface::getMenuResponses(Vector<string> &responses)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved()
 {
+   Parent::onMouseMoved();
+
    // Really only matters when starting to host game... don't want to be able to change menu items while the levels are loading.
    // This is purely an aesthetic issue, a minor irritant.
    if(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels)
@@ -452,6 +456,8 @@ void MenuUserInterface::processMouse()
 
 void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == KEY_UNKNOWN)
       return;
 
@@ -785,6 +791,8 @@ void MainMenuUserInterface::render()
 
 void MainMenuUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    mFadeInTimer.update(timeDelta);
    if(mColorTimer.update(timeDelta))
    {
@@ -1409,6 +1417,8 @@ GameMenuUserInterface::GameMenuUserInterface(ClientGame *game) : MenuUserInterfa
 
 void GameMenuUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    GameConnection *gc = getGame()->getConnectionToServer();
 
    if(gc && gc->waitingForPermissionsReply() && gc->gotPermissionsReply())      // We're waiting for a reply, and it has arrived

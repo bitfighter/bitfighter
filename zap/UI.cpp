@@ -86,6 +86,7 @@ bool UserInterface::mDisableShipKeyboardInput = true;
 UserInterface::UserInterface(ClientGame *clientGame)
 {
    mClientGame = clientGame;
+   mTimeSinceLastInput = 0;
 }
 
 
@@ -944,12 +945,32 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
 
 
 // These will be overridden in child classes if needed
-void UserInterface::render()                               { /* Do nothing */ }
-void UserInterface::idle(U32 timeDelta)                    { /* Do nothing */ }
-void UserInterface::onMouseMoved()                         { /* Do nothing */ }
-void UserInterface::onMouseDragged()                       { /* Do nothing */ }
-void UserInterface::onKeyDown(InputCode inputCode, char ascii) { /* Do nothing */ }
-void UserInterface::onKeyUp(InputCode inputCode)               { /* Do nothing */ }
+void UserInterface::render()  { /* Do nothing */ }
+
+
+void UserInterface::idle(U32 timeDelta)
+{ 
+   mTimeSinceLastInput += timeDelta;
+   logprintf("Time %d", mTimeSinceLastInput/1000);
+}
+
+
+void UserInterface::onMouseMoved()                         
+{ 
+   mTimeSinceLastInput = 0;
+}
+
+
+void UserInterface::onMouseDragged()  { /* Do nothing */ }
+
+
+void UserInterface::onKeyDown(InputCode inputCode, char ascii) 
+{ 
+   mTimeSinceLastInput = 0;
+}
+
+
+void UserInterface::onKeyUp(InputCode inputCode)  { /* Do nothing */ }
 
 
 UserInterfaceData::UserInterfaceData() 

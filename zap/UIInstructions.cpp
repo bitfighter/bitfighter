@@ -756,6 +756,8 @@ void InstructionsUserInterface::exitInstructions()
 
 void InstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
       playBoop();

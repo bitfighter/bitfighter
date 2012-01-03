@@ -479,6 +479,8 @@ void EditorInstructionsUserInterface::prevPage()
 
 void EditorInstructionsUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    if(mAnimTimer.update(timeDelta))
    {
       mAnimTimer.reset(1000);
@@ -498,6 +500,8 @@ void EditorInstructionsUserInterface::exitInstructions()
 
 void EditorInstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
       playBoop();

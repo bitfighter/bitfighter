@@ -143,6 +143,8 @@ void CreditsUserInterface::addFX(CreditsFX *fx)
 
 void CreditsUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    for(S32 i = 0; i < fxList.size(); i++)
       if(fxList[i]->isActive())
          fxList[i]->updateFX(timeDelta);
@@ -167,6 +169,8 @@ void CreditsUserInterface::quit()
 
 void CreditsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    quit();     // Quit the interface when any key is pressed...  any key at all.
 }
 
@@ -309,6 +313,8 @@ void SplashUserInterface::onActivate()
 
 void SplashUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    if(mSplashTimer.update(timeDelta))
    {
       mPhase++;
@@ -374,6 +380,8 @@ void SplashUserInterface::quit()
 
 void SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    quitting = true;
    quit();                              // Quit the interface when any key is pressed...  any key at all.
 

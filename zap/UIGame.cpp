@@ -384,6 +384,8 @@ void GameUserInterface::displayChatMessage(const Color &msgColor, const char *fo
 
 void GameUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    // Update some timers
    mShutdownTimer.update(timeDelta);
    mInputModeChangeAlertDisplayTimer.update(timeDelta);
@@ -897,6 +899,7 @@ bool GameUserInterface::isCmdChat()
 
 void GameUserInterface::onMouseDragged()
 {
+   TNLAssert(false, "Is this ever called?");
    onMouseMoved();
 }
 
@@ -1033,6 +1036,8 @@ void GameUserInterface::selectWeapon(U32 indx)
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode, ascii))   // Pass the key on to the console for processing
    {
       // Do nothing... key processed

@@ -66,6 +66,8 @@ void YesNoUserInterface::reset()
 
 void YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == KEY_Y)
    {
       if(mYesFunction)

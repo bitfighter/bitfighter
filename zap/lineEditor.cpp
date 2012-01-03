@@ -263,7 +263,7 @@ void LineEditor::addChar(const char c)
                                               (c >= 'a' && c <= 'z') )  )
       return;
    
-   if(length() < mMaxLen) mLine.append(string(1,c)); 
+   if(length() < mMaxLen) mLine.append(string(1, c)); 
    mMatchIndex = -1;
 }
 

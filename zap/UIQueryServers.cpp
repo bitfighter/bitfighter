@@ -418,6 +418,8 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
 
 void QueryServersUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    U32 elapsedTime = Platform::getRealMilliseconds() - time;
    time = Platform::getRealMilliseconds();
    mouseScrollTimer.update(timeDelta);
@@ -953,6 +955,8 @@ void QueryServersUserInterface::recalcCurrentIndex()
 // All key handling now under one roof!
 void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    inputCode = convertJoystickToKeyboard(inputCode);
    mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
@@ -1179,6 +1183,8 @@ void QueryServersUserInterface::sortSelected()
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void QueryServersUserInterface::onMouseMoved()
 {
+   Parent::onMouseMoved();
+
    if(getInputCodeState(MOUSE_LEFT))
    {
       onMouseDragged();

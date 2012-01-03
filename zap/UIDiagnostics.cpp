@@ -70,9 +70,9 @@ void DiagnosticUserInterface::onActivate()
 }
 
 
-void DiagnosticUserInterface::idle(U32 t)
+void DiagnosticUserInterface::idle(U32 timeDelta)
 {
-   // Do nothing
+   Parent::idle(timeDelta);
 }
 
 
@@ -91,8 +91,11 @@ void DiagnosticUserInterface::quit()
 
 void DiagnosticUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(inputCode == KEY_ESCAPE)
       quit();                          // Quit the interface
+
    else if(inputCode == keyDIAG)
    {
       mCurPage++;

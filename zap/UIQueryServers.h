@@ -67,6 +67,7 @@ public:
 
 class QueryServersUserInterface : public UserInterface, public AbstractChat
 {
+   typedef UserInterface Parent;
    typedef AbstractChat ChatParent;
 
 private:

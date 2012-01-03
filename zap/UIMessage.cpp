@@ -111,6 +111,8 @@ void MessageUserInterface::quit()
 
 void MessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    if(!mFadeTime)  // If message isn't the fading sort, then...
       quit();      // ...quit the interface when any key is pressed...  any key at all.
 }
@@ -118,6 +120,8 @@ void MessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
 void MessageUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    if(mFadeTime && mFadeTimer.update(timeDelta))
       quit();
 }

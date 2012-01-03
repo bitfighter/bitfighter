@@ -120,6 +120,8 @@ void TeamDefUserInterface::onActivate()
 
 void TeamDefUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    if(errorMsgTimer.update(timeDelta))
       errorMsg = "";
 }
@@ -232,6 +234,8 @@ extern bool isPrintable(char c);
 
 void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
    if(inputCode == KEY_ENTER)
@@ -362,6 +366,8 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
 void TeamDefUserInterface::onMouseMoved()
 {
+   Parent::onMouseMoved();
+
    SDL_SetCursor(Cursor::getDefault());
 
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();

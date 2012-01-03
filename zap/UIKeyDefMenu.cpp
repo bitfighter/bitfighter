@@ -161,6 +161,7 @@ void KeyDefMenuUserInterface::onActivate()
 
 void KeyDefMenuUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
    errorMsgTimer.update(timeDelta);
 }
 
@@ -285,6 +286,8 @@ void KeyDefMenuUserInterface::render()
 
 void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
+   Parent::onKeyDown(inputCode, ascii);
+
    // InputCode entry
    if(changingItem > -1)
    {
@@ -391,6 +394,8 @@ void KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void KeyDefMenuUserInterface::onMouseMoved()
 {
+   Parent::onMouseMoved();
+
    SDL_SetCursor(Cursor::getDefault());  // Show cursor when user moves mouse
 
    const Point *mousePos = gScreenInfo.getMousePos();
