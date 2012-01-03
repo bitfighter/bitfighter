@@ -353,7 +353,7 @@ S32 AsteroidSpawn::getDefaultRespawnTime()
 
 void AsteroidSpawn::spawn(Game *game, const Point &pos)
 {
-   Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+   Asteroid *asteroid = new Asteroid();   // Create a new asteroid
 
    F32 ang = TNL::Random::readF() * Float2Pi;
 

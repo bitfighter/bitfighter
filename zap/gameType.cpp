@@ -593,7 +593,7 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
    //if(mTestTimer.update(deltaT))
    //{
-   //   Worm *worm = dynamic_cast<Worm *>(TNL::Object::create("Worm"));
+   //   Worm *worm = new Worm();
    //   F32 ang = TNL::Random::readF() * Float2Pi;
    //   worm->setPosAng(Point(0,0), ang);
    //   worm->addToGame(gServerGame);
