@@ -33,14 +33,7 @@
 #include <mpg123.h>
 
 
-#ifdef _WIN32
-#define MPG123_LIB "libmpg123.dll"
-#elif defined(__APPLE__)
-#define MPG123_LIB "libmpg123.0.dylib"
-#else
-#define MPG123_LIB "libmpg123.so.0"
-#endif
-
+#ifdef DYNLOAD
 static void *mp123_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(mpg123_read);
@@ -56,6 +49,21 @@ MAKE_FUNC(mpg123_decode);
 MAKE_FUNC(mpg123_format);
 #undef MAKE_FUNC
 
+#define mpg123_read pmpg123_read
+#define mpg123_init pmpg123_init
+#define mpg123_open_feed pmpg123_open_feed
+#define mpg123_new pmpg123_new
+#define mpg123_delete pmpg123_delete
+#define mpg123_feed pmpg123_feed
+#define mpg123_exit pmpg123_exit
+#define mpg123_getformat pmpg123_getformat
+#define mpg123_format_none pmpg123_format_none
+#define mpg123_decode pmpg123_decode
+#define mpg123_format pmpg123_format
+#else
+#define mp123_handle 1
+#endif
+
 
 struct mp3Stream : public alureStream {
 private:
@@ -67,8 +75,16 @@ private:
     std::ios::pos_type dataEnd;
 
 public:
+#ifdef DYNLOAD
     static void Init()
     {
+#ifdef _WIN32
+#define MPG123_LIB "libmpg123.dll"
+#elif defined(__APPLE__)
+#define MPG123_LIB "libmpg123.0.dylib"
+#else
+#define MPG123_LIB "libmpg123.so.0"
+#endif
         mp123_handle = OpenLib(MPG123_LIB);
         if(!mp123_handle) return;
 
@@ -94,6 +110,10 @@ public:
         }
         mp123_handle = NULL;
     }
+#else
+    static void Init() { }
+    static void Deinit() { }
+#endif
 
     virtual bool IsValid()
     { return mp3File != NULL; }
@@ -115,7 +135,7 @@ public:
         while(bytes > 0)
         {
             size_t got = 0;
-            int ret = pmpg123_read(mp3File, data, bytes, &got);
+            int ret = mpg123_read(mp3File, data, bytes, &got);
 
             bytes -= got;
             data += got;
@@ -123,7 +143,7 @@ public:
 
             if(ret == MPG123_NEW_FORMAT)
             {
-                pmpg123_delete(mp3File);
+                mpg123_delete(mp3File);
                 mp3File = NULL;
                 break;
             }
@@ -137,7 +157,7 @@ public:
                     fstream->read((char*)data, insize);
                     insize = fstream->gcount();
                 }
-                if(insize > 0 && pmpg123_feed(mp3File, data, insize) == MPG123_OK)
+                if(insize > 0 && mpg123_feed(mp3File, data, insize) == MPG123_OK)
                     continue;
             }
             if(got == 0)
@@ -152,8 +172,8 @@ public:
         std::ios::pos_type oldpos = fstream->tellg();
         fstream->seekg(dataStart);
 
-        mpg123_handle *newFile = pmpg123_new(NULL, NULL);
-        if(pmpg123_open_feed(newFile) == MPG123_OK)
+        mpg123_handle *newFile = mpg123_new(NULL, NULL);
+        if(mpg123_open_feed(newFile) == MPG123_OK)
         {
             unsigned char data[4096];
             long newrate;
@@ -169,23 +189,23 @@ public:
                 amt = fstream->gcount();
                 if(amt == 0)  break;
                 total += amt;
-                ret = pmpg123_decode(newFile, data, amt, NULL, 0, NULL);
+                ret = mpg123_decode(newFile, data, amt, NULL, 0, NULL);
             } while(ret == MPG123_NEED_MORE && total < 64*1024);
 
             if(ret == MPG123_NEW_FORMAT &&
-               pmpg123_getformat(newFile, &newrate, &newchans, &enc) == MPG123_OK)
+               mpg123_getformat(newFile, &newrate, &newchans, &enc) == MPG123_OK)
             {
-                if(pmpg123_format_none(newFile) == MPG123_OK &&
-                   pmpg123_format(newFile, samplerate, channels, MPG123_ENC_SIGNED_16) == MPG123_OK)
+                if(mpg123_format_none(newFile) == MPG123_OK &&
+                   mpg123_format(newFile, samplerate, channels, MPG123_ENC_SIGNED_16) == MPG123_OK)
                 {
                     // All OK
                     if(mp3File)
-                        pmpg123_delete(mp3File);
+                        mpg123_delete(mp3File);
                     mp3File = newFile;
                     return true;
                 }
             }
-            pmpg123_delete(newFile);
+            mpg123_delete(newFile);
         }
 
         fstream->seekg(oldpos);
@@ -202,8 +222,8 @@ public:
         if(!FindDataChunk())
             return;
 
-        mp3File = pmpg123_new(NULL, NULL);
-        if(pmpg123_open_feed(mp3File) == MPG123_OK)
+        mp3File = mpg123_new(NULL, NULL);
+        if(mpg123_open_feed(mp3File) == MPG123_OK)
         {
             unsigned char data[4096];
             int enc;
@@ -217,29 +237,29 @@ public:
                 amt = fstream->gcount();
                 if(amt == 0)  break;
                 total += amt;
-                ret = pmpg123_decode(mp3File, data, amt, NULL, 0, NULL);
+                ret = mpg123_decode(mp3File, data, amt, NULL, 0, NULL);
             } while(ret == MPG123_NEED_MORE && total < 64*1024);
 
             if(ret == MPG123_NEW_FORMAT &&
-               pmpg123_getformat(mp3File, &samplerate, &channels, &enc) == MPG123_OK)
+               mpg123_getformat(mp3File, &samplerate, &channels, &enc) == MPG123_OK)
             {
                 format = GetSampleFormat(channels, 16, false);
-                if(pmpg123_format_none(mp3File) == MPG123_OK &&
-                   pmpg123_format(mp3File, samplerate, channels, MPG123_ENC_SIGNED_16) == MPG123_OK)
+                if(mpg123_format_none(mp3File) == MPG123_OK &&
+                   mpg123_format(mp3File, samplerate, channels, MPG123_ENC_SIGNED_16) == MPG123_OK)
                 {
                     // All OK
                     return;
                 }
             }
         }
-        pmpg123_delete(mp3File);
+        mpg123_delete(mp3File);
         mp3File = NULL;
     }
 
     virtual ~mp3Stream()
     {
         if(mp3File)
-            pmpg123_delete(mp3File);
+            mpg123_delete(mp3File);
         mp3File = NULL;
     }
 

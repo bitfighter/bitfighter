@@ -38,43 +38,10 @@
 #include <errno.h>
 
 typedef pthread_mutex_t CRITICAL_SECTION;
-static inline void EnterCriticalSection(CRITICAL_SECTION *cs)
-{
-    int ret;
-    ret = pthread_mutex_lock(cs);
-    assert(ret == 0);
-}
-static inline void LeaveCriticalSection(CRITICAL_SECTION *cs)
-{
-    int ret;
-    ret = pthread_mutex_unlock(cs);
-    assert(ret == 0);
-}
-static inline void InitializeCriticalSection(CRITICAL_SECTION *cs)
-{
-    pthread_mutexattr_t attrib;
-    int ret;
-
-    ret = pthread_mutexattr_init(&attrib);
-    assert(ret == 0);
-
-    ret = pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
-#ifdef HAVE_PTHREAD_NP_H
-    if(ret != 0)
-        ret = pthread_mutexattr_setkind_np(&attrib, PTHREAD_MUTEX_RECURSIVE);
-#endif
-    assert(ret == 0);
-    ret = pthread_mutex_init(cs, &attrib);
-    assert(ret == 0);
-
-    pthread_mutexattr_destroy(&attrib);
-}
-static inline void DeleteCriticalSection(CRITICAL_SECTION *cs)
-{
-    int ret;
-    ret = pthread_mutex_destroy(cs);
-    assert(ret == 0);
-}
+void EnterCriticalSection(CRITICAL_SECTION *cs);
+void LeaveCriticalSection(CRITICAL_SECTION *cs);
+void InitializeCriticalSection(CRITICAL_SECTION *cs);
+void DeleteCriticalSection(CRITICAL_SECTION *cs);
 
 #endif
 
@@ -94,11 +61,9 @@ static const bool LittleEndian = (endian_test.b[0] != 0);
 static const bool BigEndian = !LittleEndian;
 
 
+#ifdef DYNLOAD
 void *OpenLib(const char *libname);
 void CloseLib(void *handle);
-#ifndef DYNLOAD
-#define LOAD_FUNC(h, x) p##x = x
-#else
 void *GetLibProc(void *handle, const char *funcname);
 
 template<typename T>
@@ -115,8 +80,10 @@ if(!(p##x))                                                                  \
 #endif
 
 
-extern PFNALCSETTHREADCONTEXTPROC alcSetThreadContext;
-extern PFNALCGETTHREADCONTEXTPROC alcGetThreadContext;
+extern PFNALCSETTHREADCONTEXTPROC palcSetThreadContext;
+extern PFNALCGETTHREADCONTEXTPROC palcGetThreadContext;
+#define alcSetThreadContext palcSetThreadContext
+#define alcGetThreadContext palcGetThreadContext
 
 void SetError(const char *err);
 ALuint DetectBlockAlignment(ALenum format);
@@ -157,6 +124,8 @@ struct alureStream {
     }
     virtual bool SetPatchset(const char*)
     { return true; }
+    virtual alureInt64 GetLength()
+    { return 0; }
 
     alureStream(std::istream *_stream)
       : data(NULL), fstream(_stream)
@@ -228,6 +197,7 @@ struct UserFuncs {
     alureInt64 (*seek)(void *f, alureInt64 offset, int whence);
 };
 extern UserFuncs Funcs;
+extern bool UsingSTDIO;
 
 class FileStreamBuf : public std::streambuf {
     void *usrFile;

@@ -36,14 +36,7 @@
 #include <fluidsynth.h>
 
 
-#ifdef _WIN32
-#define FLUIDSYNTH_LIB "libfluidsynth.dll"
-#elif defined(__APPLE__)
-#define FLUIDSYNTH_LIB "libfluidsynth.1.dylib"
-#else
-#define FLUIDSYNTH_LIB "libfluidsynth.so.1"
-#endif
-
+#ifdef DYNLOAD
 static void *fsynth_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(fluid_settings_setstr);
@@ -66,6 +59,29 @@ MAKE_FUNC(fluid_synth_noteoff);
 MAKE_FUNC(fluid_synth_sfunload);
 MAKE_FUNC(fluid_synth_noteon);
 #undef MAKE_FUNC
+
+#define fluid_settings_setstr pfluid_settings_setstr
+#define fluid_synth_program_change pfluid_synth_program_change
+#define fluid_synth_sfload pfluid_synth_sfload
+#define fluid_settings_setnum pfluid_settings_setnum
+#define fluid_synth_sysex pfluid_synth_sysex
+#define fluid_synth_cc pfluid_synth_cc
+#define fluid_synth_pitch_bend pfluid_synth_pitch_bend
+#define fluid_synth_channel_pressure pfluid_synth_channel_pressure
+#define fluid_synth_write_float pfluid_synth_write_float
+#define new_fluid_synth pnew_fluid_synth
+#define delete_fluid_settings pdelete_fluid_settings
+#define delete_fluid_synth pdelete_fluid_synth
+#define fluid_synth_program_reset pfluid_synth_program_reset
+#define fluid_settings_setint pfluid_settings_setint
+#define new_fluid_settings pnew_fluid_settings
+#define fluid_synth_write_s16 pfluid_synth_write_s16
+#define fluid_synth_noteoff pfluid_synth_noteoff
+#define fluid_synth_sfunload pfluid_synth_sfunload
+#define fluid_synth_noteon pfluid_synth_noteon
+#else
+#define fsynth_handle 1
+#endif
 
 
 struct fluidStream : public alureStream {
@@ -151,8 +167,16 @@ private:
     bool doFontLoad;
 
 public:
+#ifdef DYNLOAD
     static void Init()
     {
+#ifdef _WIN32
+#define FLUIDSYNTH_LIB "libfluidsynth.dll"
+#elif defined(__APPLE__)
+#define FLUIDSYNTH_LIB "libfluidsynth.1.dylib"
+#else
+#define FLUIDSYNTH_LIB "libfluidsynth.so.1"
+#endif
         fsynth_handle = OpenLib(FLUIDSYNTH_LIB);
         if(!fsynth_handle) return;
 
@@ -182,6 +206,10 @@ public:
             CloseLib(fsynth_handle);
         fsynth_handle = NULL;
     }
+#else
+    static void Init() { }
+    static void Deinit() { }
+#endif
 
     virtual bool IsValid()
     { return fluidSynth != NULL; }
@@ -210,7 +238,7 @@ public:
             doFontLoad = false;
             const char *soundfont = getenv("FLUID_SOUNDFONT");
             if(soundfont && soundfont[0])
-                fontID = pfluid_synth_sfload(fluidSynth, soundfont, true);
+                fontID = fluid_synth_sfload(fluidSynth, soundfont, true);
         }
 
         if(format == AL_FORMAT_STEREO16)
@@ -237,13 +265,29 @@ public:
             unsigned long val = i->ReadVarLen();
             i->SamplesLeft += val * samplesPerTick;
         }
-        pfluid_synth_program_reset(fluidSynth);
+        fluid_synth_program_reset(fluidSynth);
         UpdateTempo(500000);
         return true;
     }
 
     virtual bool SetPatchset(const char *sfont)
     {
+        if(UsingSTDIO)
+        {
+            int newid = fluid_synth_sfload(fluidSynth, sfont, true);
+            if(newid == FLUID_FAILED)
+            {
+                SetError("Failed to load soundfont");
+                return false;
+            }
+
+            if(fontID != FLUID_FAILED)
+                fluid_synth_sfunload(fluidSynth, fontID, true);
+            fontID = newid;
+            doFontLoad = false;
+            return true;
+        }
+
         /* FluidSynth has no way to load a soundfont using IO callbacks. So we
          * have to copy the specified file using the callbacks to a regular
          * file that FluidSynth can open. */
@@ -308,7 +352,7 @@ public:
         if(copyok)
         {
             fflush(file);
-            newid = pfluid_synth_sfload(fluidSynth, &tmpfname[0], true);
+            newid = fluid_synth_sfload(fluidSynth, &tmpfname[0], true);
         }
 
         fclose(file);
@@ -327,7 +371,7 @@ public:
         }
 
         if(fontID != FLUID_FAILED)
-            pfluid_synth_sfunload(fluidSynth, fontID, true);
+            fluid_synth_sfunload(fluidSynth, fontID, true);
         fontID = newid;
         doFontLoad = false;
 
@@ -343,8 +387,7 @@ public:
         if(!fsynth_handle) return;
 
         ALCdevice *device = alcGetContextsDevice(alcGetCurrentContext());
-        if(device)
-            alcGetIntegerv(device, ALC_FREQUENCY, 1, &sampleRate);
+        if(device) alcGetIntegerv(device, ALC_FREQUENCY, 1, &sampleRate);
 
         char hdr[4];
         if(!fstream->read(hdr, 4))
@@ -387,15 +430,15 @@ public:
     virtual ~fluidStream()
     {
         if(fontID != FLUID_FAILED)
-            pfluid_synth_sfunload(fluidSynth, fontID, true);
+            fluid_synth_sfunload(fluidSynth, fontID, true);
         fontID = FLUID_FAILED;
 
         if(fluidSynth != NULL)
-            pdelete_fluid_synth(fluidSynth);
+            delete_fluid_synth(fluidSynth);
         fluidSynth = NULL;
 
         if(fluidSettings != NULL)
-            pdelete_fluid_settings(fluidSettings);
+            delete_fluid_settings(fluidSettings);
         fluidSettings = NULL;
     }
 
@@ -444,9 +487,9 @@ private:
     }
 
     void WriteSamples(ALuint count, short *buffer)
-    { pfluid_synth_write_s16(fluidSynth, count, buffer, 0, 2, buffer, 1, 2); }
+    { fluid_synth_write_s16(fluidSynth, count, buffer, 0, 2, buffer, 1, 2); }
     void WriteSamples(ALuint count, float *buffer)
-    { pfluid_synth_write_float(fluidSynth, count, buffer, 0, 2, buffer, 1, 2); }
+    { fluid_synth_write_float(fluidSynth, count, buffer, 0, 2, buffer, 1, 2); }
 
     void ProcessMidi()
     {
@@ -485,11 +528,11 @@ private:
             switch(event&MIDI_EVENT_MASK)
             {
                 case MIDI_NOTEOFF:
-                    pfluid_synth_noteoff(fluidSynth, channel, parm1);
+                    fluid_synth_noteoff(fluidSynth, channel, parm1);
                     i->Offset += 2;
                     break;
                 case MIDI_NOTEON:
-                    pfluid_synth_noteon(fluidSynth, channel, parm1, parm2);
+                    fluid_synth_noteon(fluidSynth, channel, parm1, parm2);
                     i->Offset += 2;
                     break;
                 case MIDI_POLYPRESS:
@@ -497,21 +540,21 @@ private:
                     break;
 
                 case MIDI_CTRLCHANGE:
-                    pfluid_synth_cc(fluidSynth, channel, parm1, parm2);
+                    fluid_synth_cc(fluidSynth, channel, parm1, parm2);
                     i->Offset += 2;
                     break;
                 case MIDI_PRGMCHANGE:
-                    pfluid_synth_program_change(fluidSynth, channel, parm1);
+                    fluid_synth_program_change(fluidSynth, channel, parm1);
                     i->Offset += 1;
                     break;
 
                 case MIDI_CHANPRESS:
-                    pfluid_synth_channel_pressure(fluidSynth, channel, parm1);
+                    fluid_synth_channel_pressure(fluidSynth, channel, parm1);
                     i->Offset += 1;
                     break;
 
                 case MIDI_PITCHBEND:
-                    pfluid_synth_pitch_bend(fluidSynth, channel, (parm1&0x7F) | ((parm2&0x7F)<<7));
+                    fluid_synth_pitch_bend(fluidSynth, channel, (parm1&0x7F) | ((parm2&0x7F)<<7));
                     i->Offset += 2;
                     break;
 
@@ -530,7 +573,7 @@ private:
                             if(i->data[i->Offset+len-1] == MIDI_SYSEXEND)
                             {
                                 char *data = reinterpret_cast<char*>(&i->data[i->Offset]);
-                                pfluid_synth_sysex(fluidSynth, data, len-1, NULL, NULL, NULL, false);
+                                fluid_synth_sysex(fluidSynth, data, len-1, NULL, NULL, NULL, false);
                             }
                             i->Offset += len;
                             break;
@@ -618,16 +661,16 @@ private:
 
     void SetupSynth()
     {
-        fluidSettings = pnew_fluid_settings();
+        fluidSettings = new_fluid_settings();
         if(fluidSettings)
         {
-            pfluid_settings_setnum(fluidSettings, "synth.gain", 0.5);
-            pfluid_settings_setstr(fluidSettings, "synth.reverb.active", "yes");
-            pfluid_settings_setstr(fluidSettings, "synth.chorus.active", "yes");
-            pfluid_settings_setint(fluidSettings, "synth.polyphony", 256);
-            pfluid_settings_setnum(fluidSettings, "synth.sample-rate", (double)sampleRate);
+            fluid_settings_setnum(fluidSettings, "synth.gain", 0.5);
+            fluid_settings_setstr(fluidSettings, "synth.reverb.active", "yes");
+            fluid_settings_setstr(fluidSettings, "synth.chorus.active", "yes");
+            fluid_settings_setint(fluidSettings, "synth.polyphony", 256);
+            fluid_settings_setnum(fluidSettings, "synth.sample-rate", (double)sampleRate);
 
-            fluidSynth = pnew_fluid_synth(fluidSettings);
+            fluidSynth = new_fluid_synth(fluidSettings);
         }
     }
 };

@@ -37,6 +37,7 @@ private:
     int samplerate;
     int blockAlign;
     int sampleSize;
+    int channels;
     long dataStart;
     long dataLen;
     size_t remLen;
@@ -98,6 +99,12 @@ public:
         return false;
     }
 
+    virtual alureInt64 GetLength()
+    {
+        alureInt64 ret = dataLen;
+        return ret / channels * 8 / sampleSize;
+    }
+
     aiffStream(std::istream *_fstream)
       : alureStream(_fstream), format(0), dataStart(0)
     {
@@ -120,7 +127,7 @@ public:
             if(memcmp(tag, "COMM", 4) == 0 && length >= 18)
             {
                 /* mono or stereo data */
-                int channels = read_be16(fstream);
+                channels = read_be16(fstream);
 
                 /* number of sample frames */
                 fstream->ignore(4);

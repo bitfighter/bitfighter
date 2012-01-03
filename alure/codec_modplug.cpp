@@ -30,17 +30,10 @@
 
 #include <istream>
 
-#include <modplug.h>
+#include <libmodplug/modplug.h>
 
 
-#ifdef _WIN32
-#define MODPLUG_LIB "libmodplug.dll"
-#elif defined(__APPLE__)
-#define MODPLUG_LIB "libmodplug.1.dylib"
-#else
-#define MODPLUG_LIB "libmodplug.so.1"
-#endif
-
+#ifdef DYNLOAD
 static void *mod_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(ModPlug_Load);
@@ -49,6 +42,14 @@ MAKE_FUNC(ModPlug_Read);
 MAKE_FUNC(ModPlug_SeekOrder);
 #undef MAKE_FUNC
 
+#define ModPlug_Load pModPlug_Load
+#define ModPlug_Unload pModPlug_Unload
+#define ModPlug_Read pModPlug_Read
+#define ModPlug_SeekOrder pModPlug_SeekOrder
+#else
+#define mod_handle 1
+#endif
+
 
 struct modStream : public alureStream {
 private:
@@ -56,8 +57,16 @@ private:
     int lastOrder;
 
 public:
+#ifdef DYNLOAD
     static void Init()
     {
+#ifdef _WIN32
+#define MODPLUG_LIB "libmodplug.dll"
+#elif defined(__APPLE__)
+#define MODPLUG_LIB "libmodplug.1.dylib"
+#else
+#define MODPLUG_LIB "libmodplug.so.1"
+#endif
         mod_handle = OpenLib(MODPLUG_LIB);
         if(!mod_handle) return;
 
@@ -72,6 +81,10 @@ public:
             CloseLib(mod_handle);
         mod_handle = NULL;
     }
+#else
+    static void Init() { }
+    static void Deinit() { }
+#endif
 
     virtual bool IsValid()
     { return modFile != NULL; }
@@ -86,7 +99,7 @@ public:
 
     virtual ALuint GetData(ALubyte *data, ALuint bytes)
     {
-        int ret = pModPlug_Read(modFile, data, bytes);
+        int ret = ModPlug_Read(modFile, data, bytes);
         if(ret < 0) return 0;
         return ret;
     }
@@ -107,17 +120,17 @@ public:
         }
         data.resize(total);
 
-        ModPlugFile *newMod = pModPlug_Load(&data[0], data.size());
+        ModPlugFile *newMod = ModPlug_Load(&data[0], data.size());
         if(!newMod)
         {
             SetError("Could not reload data");
             return false;
         }
-        pModPlug_Unload(modFile);
+        ModPlug_Unload(modFile);
         modFile = newMod;
 
         // There seems to be no way to tell if the seek succeeds
-        pModPlug_SeekOrder(modFile, order);
+        ModPlug_SeekOrder(modFile, order);
         lastOrder = order;
 
         return true;
@@ -148,14 +161,14 @@ public:
             }
             data.resize(total);
 
-            modFile = pModPlug_Load(&data[0], data.size());
+            modFile = ModPlug_Load(&data[0], data.size());
         }
     }
 
     virtual ~modStream()
     {
         if(modFile)
-            pModPlug_Unload(modFile);
+            ModPlug_Unload(modFile);
         modFile = NULL;
     }
 };

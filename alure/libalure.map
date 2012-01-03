@@ -39,3 +39,7 @@ LIBALURE_1.1 {
     alureSetIOCallbacks;
     alureGetProcAddress;
 } LIBALURE_1.0;
+LIBALURE_1.2 {
+  global:
+    alureGetStreamLength;
+} LIBALURE_1.1;

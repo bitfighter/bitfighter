@@ -33,14 +33,7 @@
 #include <sndfile.h>
 
 
-#ifdef _WIN32
-#define SNDFILE_LIB "libsndfile-1.dll"
-#elif defined(__APPLE__)
-#define SNDFILE_LIB "libsndfile.1.dylib"
-#else
-#define SNDFILE_LIB "libsndfile.so.1"
-#endif
-
+#ifdef DYNLOAD
 static void *sndfile_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(sf_close);
@@ -48,6 +41,14 @@ MAKE_FUNC(sf_open_virtual);
 MAKE_FUNC(sf_readf_short);
 MAKE_FUNC(sf_seek);
 #undef MAKE_FUNC
+
+#define sf_close psf_close
+#define sf_open_virtual psf_open_virtual
+#define sf_readf_short psf_readf_short
+#define sf_seek psf_seek
+#else
+#define sndfile_handle 1
+#endif
 
 
 struct sndStream : public alureStream {
@@ -57,8 +58,16 @@ private:
     ALenum format;
 
 public:
+#ifdef DYNLOAD
     static void Init()
     {
+#ifdef _WIN32
+#define SNDFILE_LIB "libsndfile-1.dll"
+#elif defined(__APPLE__)
+#define SNDFILE_LIB "libsndfile.1.dylib"
+#else
+#define SNDFILE_LIB "libsndfile.so.1"
+#endif
         sndfile_handle = OpenLib(SNDFILE_LIB);
         if(!sndfile_handle) return;
 
@@ -73,6 +82,10 @@ public:
             CloseLib(sndfile_handle);
         sndfile_handle = NULL;
     }
+#else
+    static void Init() { }
+    static void Deinit() { }
+#endif
 
     virtual bool IsValid()
     { return sndFile != NULL; }
@@ -90,16 +103,23 @@ public:
     virtual ALuint GetData(ALubyte *data, ALuint bytes)
     {
         const ALuint frameSize = 2*sndInfo.channels;
-        return psf_readf_short(sndFile, (short*)data, bytes/frameSize) * frameSize;
+        return sf_readf_short(sndFile, (short*)data, bytes/frameSize) * frameSize;
     }
 
     virtual bool Rewind()
     {
-        if(psf_seek(sndFile, 0, SEEK_SET) != -1)
+        if(sf_seek(sndFile, 0, SEEK_SET) != -1)
             return true;
 
         SetError("Seek failed");
         return false;
+    }
+
+    virtual alureInt64 GetLength()
+    {
+        if(sndInfo.frames == -1)
+            return 0;
+        return sndInfo.frames;
     }
 
     sndStream(std::istream *_fstream)
@@ -113,13 +133,13 @@ public:
             get_filelen, seek,
             read, write, tell
         };
-        sndFile = psf_open_virtual(&streamIO, SFM_READ, &sndInfo, this);
+        sndFile = sf_open_virtual(&streamIO, SFM_READ, &sndInfo, this);
     }
 
     virtual ~sndStream()
     {
         if(sndFile)
-            psf_close(sndFile);
+            sf_close(sndFile);
         sndFile = NULL;
     }
 
