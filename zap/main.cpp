@@ -160,6 +160,7 @@ using namespace TNL;
 #include "game.h"
 #include "SoundSystem.h"
 #include "ship.h"
+#include "InputCode.h" // initializeKeyNames()
 
 #include <math.h>
 

@@ -1701,6 +1701,7 @@ string Worm::toString(F32 gridSize) const
 
 void Worm::render()
 {
+#ifndef ZAP_DEDICATED
    if(!hasExploded)
    {
       if(mTailLength <= 1)
@@ -1720,6 +1721,7 @@ void Worm::render()
       glColor(1,1,1);
       renderPointVector(&p, GL_LINE_STRIP);
    }
+#endif
 }
 
 Worm *Worm::clone() const

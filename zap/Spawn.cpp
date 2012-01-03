@@ -457,7 +457,7 @@ void CircleSpawn::spawn(Game *game, const Point &pos)
 {
    for(S32 i = 0; i < 10; i++)
    {
-      Circle *circle = dynamic_cast<Circle *>(TNL::Object::create("Circle"));   // Create a new Circle
+      Circle *circle = new Circle();   // Create a new Circle
       F32 ang = TNL::Random::readF() * Float2Pi;
 
       circle->setPosAng(pos, ang);

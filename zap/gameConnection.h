@@ -331,9 +331,7 @@ public:
    void writeConnectRequest(BitStream *stream);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
-#ifndef ZAP_DEDICATED
    void setConnectionSpeed(S32 speed);
-#endif
 
    void onConnectionEstablished();
 

@@ -1607,7 +1607,6 @@ string GameConnection::makeUnique(string name)
    return proposedName;
 }
 
-#ifndef ZAP_DEDICATED
 
 void GameConnection::setConnectionSpeed(S32 speed)
 {
@@ -1650,13 +1649,6 @@ void GameConnection::setConnectionSpeed(S32 speed)
       maxSendBandwidth = 65535;
       maxRecvBandwidth = 65535;
    }
-   else
-   {
-      minPacketSendPeriod = 45;
-      minPacketRecvPeriod = 45;
-      maxSendBandwidth = 8000;
-      maxRecvBandwidth = 8000;
-   }
 
    //if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth
    //{
@@ -1668,7 +1660,6 @@ void GameConnection::setConnectionSpeed(S32 speed)
 
    setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);
 }
-#endif
 
 // Runs on client and server?
 void GameConnection::onConnectionEstablished()
