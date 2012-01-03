@@ -1903,6 +1903,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
          
          conn->resetLoadout();
          conn->switchedTeamCount = 0;
+
+         getClientInfo(i)->setScore(0); // Reset player scores, for non team game types
       }
    }
 
