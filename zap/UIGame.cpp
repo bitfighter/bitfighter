@@ -3112,32 +3112,57 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       const S32 textsize = 12;
 
       /// Render player score
-      const char* name = getGame()->getClientInfo()->getName().getString();
+      bool hasLeader = gameType->getLeadingPlayer() >= 0;
+      bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
 
-      // Get score from server
-      S32 score = getGame()->getLocalRemoteClientInfo()->getScore();
+      const char *clientName = getGame()->getClientInfo()->getName().getString();
 
-      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
-            UserInterface::getStringWidthf(textsize, "%s %s %d", "", name, score);
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 0 * 16;
+      // The player is the leader if a leader is detected and it matches his name
+      bool clientIsLeader = hasLeader &&
+            !strcmp(clientName, game->getClientInfo(gameType->getLeadingPlayer())->getName().getString());
 
-      glColor(Colors::red, 0.6f);
-      UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", "", name, score);
+      // The top rendered name is the leading player or none if no leading player
+      // (no scoring even has occured yet)
+      const char *nameTop =
+            hasLeader ? game->getClientInfo(gameType->getLeadingPlayer())->getName().getString() : "";
+      S32 scoreTop =
+            hasLeader ? gameType->getLeadingPlayerScore() : S32_MIN;
 
-      /// Render leader score
-      if(gameType->getLeadingPlayer() >= 0)
+      // The bottom rendered name is either second leader or the current player
+      const char *nameBottom =
+            clientIsLeader && hasSecondLeader ?
+                  game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
+                  clientName;
+      S32 scoreBottom =
+            clientIsLeader && hasSecondLeader ?
+                  gameType->getSecondLeadingPlayerScore() :
+                  getGame()->getLocalRemoteClientInfo()->getScore();
+
+
+      S32 xpos, ypos;
+
+      // Render bottom score if player isn't the leader or we have a second leader
+      if(!clientIsLeader || hasSecondLeader)
       {
-         name = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
-         score = gameType->getLeadingPlayerScore();
+         xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
+               UserInterface::getStringWidthf(textsize, "%s %s %d", "", nameBottom, scoreBottom);
+         ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 0 * 16;
 
+         glColor(Colors::red, 0.6f);
+         UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", "", nameBottom, scoreBottom);
+      }
+
+      // Render top score only if we have a leader
+      if(hasLeader)
+      {
          ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 1 * 16;
 
          // Draw leader name + score
          xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
-               UserInterface::getStringWidthf(textsize, "%s %d", name, score);
+               UserInterface::getStringWidthf(textsize, "%s %d", nameTop, scoreTop);
 
          glColor(Colors::red);
-         UserInterface::drawStringf(xpos, ypos, textsize, "%s %d", name, score);
+         UserInterface::drawStringf(xpos, ypos, textsize, "%s %d", nameTop, scoreTop);
       }
    }
 

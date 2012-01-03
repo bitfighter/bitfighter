@@ -93,6 +93,8 @@ private:
    S32 mLeadingTeamScore;           // Score of mLeadingTeam
    S32 mLeadingPlayer;              // Player index of mClientInfos with highest score
    S32 mLeadingPlayerScore;         // Score of mLeadingPlayer
+   S32 mSecondLeadingPlayer;        // Player index of mClientInfos with highest score
+   S32 mSecondLeadingPlayerScore;   // Score of mLeadingPlayer
    S32 mDigitsNeededToDisplayScore; // Digits needed to display scores
 
    bool mCanSwitchTeams;            // Player can switch teams when this is true, not when it is false
@@ -185,6 +187,8 @@ public:
    S32 getLeadingTeam() const;
    S32 getLeadingPlayerScore() const;
    S32 getLeadingPlayer() const;
+   S32 getSecondLeadingPlayerScore() const;
+   S32 getSecondLeadingPlayer() const;
 
    void catalogSpybugs();           // Build a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);

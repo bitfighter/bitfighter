@@ -114,6 +114,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mLeadingTeamScore = 0;
    mLeadingPlayer = -1;
    mLeadingPlayerScore = 0;
+   mSecondLeadingPlayer = -1;
+   mSecondLeadingPlayerScore = 0;
    mDigitsNeededToDisplayScore = 1;
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
@@ -1777,6 +1779,8 @@ void GameType::updateLeadingPlayerAndScore()
 {
    mLeadingPlayerScore = 0;
    mLeadingPlayer = -1;
+   mSecondLeadingPlayerScore = 0;
+   mSecondLeadingPlayer = -1;
 
    // Find the leading player
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -1787,6 +1791,13 @@ void GameType::updateLeadingPlayerAndScore()
       {
          mLeadingPlayerScore = score;
          mLeadingPlayer = i;
+         continue;
+      }
+
+      if(score > mSecondLeadingPlayerScore)
+      {
+         mSecondLeadingPlayerScore = score;
+         mSecondLeadingPlayer = i;
       }
    }
 }
@@ -3493,6 +3504,18 @@ S32 GameType::getLeadingPlayerScore() const
 S32 GameType::getLeadingPlayer() const
 {
    return mLeadingPlayer;
+}
+
+
+S32 GameType::getSecondLeadingPlayerScore() const
+{
+   return mSecondLeadingPlayerScore;
+}
+
+
+S32 GameType::getSecondLeadingPlayer() const
+{
+   return mSecondLeadingPlayer;
 }
 
 
