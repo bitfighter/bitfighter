@@ -951,7 +951,6 @@ void UserInterface::render()  { /* Do nothing */ }
 void UserInterface::idle(U32 timeDelta)
 { 
    mTimeSinceLastInput += timeDelta;
-   logprintf("Time %d", mTimeSinceLastInput/1000);
 }
 
 
