@@ -114,6 +114,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mLeadingTeamScore = 0;
    mLeadingPlayer = -1;
    mLeadingPlayerScore = 0;
+   mSecondLeadingPlayer = -1;
+   mSecondLeadingPlayerScore = 0;
    mDigitsNeededToDisplayScore = 1;
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
@@ -591,7 +593,7 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
    //if(mTestTimer.update(deltaT))
    //{
-   //   Worm *worm = dynamic_cast<Worm *>(TNL::Object::create("Worm"));
+   //   Worm *worm = new Worm();
    //   F32 ang = TNL::Random::readF() * Float2Pi;
    //   worm->setPosAng(Point(0,0), ang);
    //   worm->addToGame(gServerGame);
@@ -1700,16 +1702,16 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          player->addScore(points);
          newScore = player->getScore();
 
-         // Accumulate every client's total score counter, which tracks total number of points scored by anyone
-         if(points > 0)
-            for(S32 i = 0; i < mGame->getClientCount(); i++)
-            {
+         for(S32 i = 0; i < mGame->getClientCount(); i++)
+         {
+            // Accumulate every client's total score counter, which tracks total number of points scored by anyone
+            if(points > 0)
                mGame->getClientInfo(i)->addToTotalScore(points);
 
-               // Broadcast player scores for rendering on the client
-               if(!isTeamGame())
-                  s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
-            }
+            // Broadcast player scores for rendering on the client
+            if(!isTeamGame())
+               s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
+         }
 
          updateLeadingPlayerAndScore();
       }
@@ -1777,6 +1779,8 @@ void GameType::updateLeadingPlayerAndScore()
 {
    mLeadingPlayerScore = 0;
    mLeadingPlayer = -1;
+   mSecondLeadingPlayerScore = 0;
+   mSecondLeadingPlayer = -1;
 
    // Find the leading player
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -1787,6 +1791,13 @@ void GameType::updateLeadingPlayerAndScore()
       {
          mLeadingPlayerScore = score;
          mLeadingPlayer = i;
+         continue;
+      }
+
+      if(score > mSecondLeadingPlayerScore)
+      {
+         mSecondLeadingPlayerScore = score;
+         mSecondLeadingPlayer = i;
       }
    }
 }
@@ -3486,6 +3497,8 @@ S32 GameType::getLeadingTeam() const
 
 S32 GameType::getLeadingPlayerScore() const
 {
+   TNLAssert(mLeadingPlayerScore < mGame->getClientCount(), "mLeadingPlayerScore out of range");
+   TNLAssert(mLeadingPlayerScore >= -1, "mLeadingPlayerScore negative number other then -1");
    return mLeadingPlayerScore;
 }
 
@@ -3493,6 +3506,18 @@ S32 GameType::getLeadingPlayerScore() const
 S32 GameType::getLeadingPlayer() const
 {
    return mLeadingPlayer;
+}
+
+
+S32 GameType::getSecondLeadingPlayerScore() const
+{
+   return mSecondLeadingPlayerScore;
+}
+
+
+S32 GameType::getSecondLeadingPlayer() const
+{
+   return mSecondLeadingPlayer;
 }
 
 

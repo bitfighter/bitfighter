@@ -1345,7 +1345,7 @@ void HostMenuUserInterface::saveSettings()
    settings->setLevelChangePassword(getMenuItem(OPT_LVL_PASS)->getValue(), true);
    settings->setServerPassword(getMenuItem(OPT_PASS)->getValue(), true);
 
-   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getValue() == "yes");
+   settings->getIniSettings()->allowGetMap = (getMenuItem(OPT_GETMAP)->getIntValue() != 0);
    //settings->getIniSettings()->maxplayers = getMenuItem(OPT_MAX_PLAYERS)->getIntValue();
 
    saveSettingsToINI(&gINI, getGame()->getSettings());
