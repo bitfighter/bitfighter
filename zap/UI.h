@@ -112,6 +112,8 @@ public:
    static S32 messageMargin;
    static S32 chatMessageMargin;
 
+   U32 getTimeSinceLastInput();
+
    void renderCurrent();
 
    virtual void render();

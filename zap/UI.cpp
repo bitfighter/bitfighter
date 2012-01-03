@@ -231,6 +231,12 @@ InputCode UserInterface::convertJoystickToKeyboard(InputCode inputCode)
 }
 
 
+U32 UserInterface::getTimeSinceLastInput()
+{
+   return mTimeSinceLastInput;
+}
+
+
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
 
