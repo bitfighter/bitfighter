@@ -1702,16 +1702,16 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          player->addScore(points);
          newScore = player->getScore();
 
-         // Accumulate every client's total score counter, which tracks total number of points scored by anyone
-         if(points > 0)
-            for(S32 i = 0; i < mGame->getClientCount(); i++)
-            {
+         for(S32 i = 0; i < mGame->getClientCount(); i++)
+         {
+            // Accumulate every client's total score counter, which tracks total number of points scored by anyone
+            if(points > 0)
                mGame->getClientInfo(i)->addToTotalScore(points);
 
-               // Broadcast player scores for rendering on the client
-               if(!isTeamGame())
-                  s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
-            }
+            // Broadcast player scores for rendering on the client
+            if(!isTeamGame())
+               s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
+         }
 
          updateLeadingPlayerAndScore();
       }
