@@ -1744,7 +1744,7 @@ void GameUserInterface::setTimeHandler(ClientGame *game, const Vector<string> &w
 
       S32 timeMillis = S32(60 * 1000 * atof(words[1].c_str()));
 
-      if((timeMillis < 0 || timeMillis == 0) && (stricmp(words[0].c_str(), "0") && stricmp(words[0].c_str(), "unlim")))  // 0 --> unlimited
+      if(timeMillis < 0 || (timeMillis == 0 && stricmp(words[1].c_str(), "0") && stricmp(words[1].c_str(), "unlim")) )  // 0 --> unlimited
       {
          game->displayErrorMessage("!!! Invalid time... game time not changed");
          return;
