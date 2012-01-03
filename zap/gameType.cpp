@@ -1120,7 +1120,7 @@ void GameType::onAddedToGame(Game *game)
 }
 
 
-// Server only!
+// Server only! (overridden in NexusGame)
 void GameType::spawnShip(ClientInfo *clientInfo)
 {
    GameConnection *conn = clientInfo->getConnection();
@@ -1129,7 +1129,7 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
-   conn->respawnTimer.clear(); // prevent spawning a second copy of the same player ship
+   conn->respawnTimer.clear(); // Prevent spawning a second copy of the same player ship
 
    if(clientInfo->isRobot())
    {
