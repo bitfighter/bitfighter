@@ -343,31 +343,12 @@
 		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
 		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
-		73A2B20013DE57C40002EF92 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1FF13DE57C40002EF92 /* libz.dylib */; };
-		73A2B23613DE58630002EF92 /* png.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22313DE58630002EF92 /* png.c */; };
-		73A2B23713DE58630002EF92 /* png.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A2B22413DE58630002EF92 /* png.h */; };
-		73A2B23813DE58630002EF92 /* pngconf.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A2B22513DE58630002EF92 /* pngconf.h */; };
-		73A2B23913DE58630002EF92 /* pngerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22613DE58630002EF92 /* pngerror.c */; };
-		73A2B23A13DE58630002EF92 /* pngget.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22713DE58630002EF92 /* pngget.c */; };
-		73A2B23B13DE58630002EF92 /* pngmem.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22813DE58630002EF92 /* pngmem.c */; };
-		73A2B23C13DE58630002EF92 /* pngpread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22913DE58630002EF92 /* pngpread.c */; };
-		73A2B23D13DE58630002EF92 /* pngpriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A2B22A13DE58630002EF92 /* pngpriv.h */; };
-		73A2B23E13DE58630002EF92 /* pngread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22B13DE58630002EF92 /* pngread.c */; };
-		73A2B23F13DE58630002EF92 /* pngrio.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22C13DE58630002EF92 /* pngrio.c */; };
-		73A2B24013DE58630002EF92 /* pngrtran.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22D13DE58630002EF92 /* pngrtran.c */; };
-		73A2B24113DE58630002EF92 /* pngrutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22E13DE58630002EF92 /* pngrutil.c */; };
-		73A2B24213DE58630002EF92 /* pngset.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B22F13DE58630002EF92 /* pngset.c */; };
-		73A2B24313DE58630002EF92 /* pngtest.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B23013DE58630002EF92 /* pngtest.c */; };
-		73A2B24413DE58630002EF92 /* pngtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B23113DE58630002EF92 /* pngtrans.c */; };
-		73A2B24513DE58630002EF92 /* pngwio.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B23213DE58630002EF92 /* pngwio.c */; };
-		73A2B24613DE58630002EF92 /* pngwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B23313DE58630002EF92 /* pngwrite.c */; };
-		73A2B24713DE58630002EF92 /* pngwtran.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B23413DE58630002EF92 /* pngwtran.c */; };
-		73A2B24813DE58630002EF92 /* pngwutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B23513DE58630002EF92 /* pngwutil.c */; };
+		739746A014B373980053CCF4 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
+		739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739746EF14B374E30053CCF4 /* WeaponInfo.cpp */; };
+		7397470A14B3766B0053CCF4 /* libpng.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
 		73A2B27113DE59030002EF92 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1FF13DE57C40002EF92 /* libz.dylib */; };
-		73A2B27A13DE59090002EF92 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1EA13DE57BD0002EF92 /* libpng.framework */; };
 		73A2B2A713DE59740002EF92 /* ScreenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A313DE59740002EF92 /* ScreenShooter.cpp */; };
 		73A2B2A813DE59740002EF92 /* UIManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A513DE59740002EF92 /* UIManager.cpp */; };
-		73A2B2D613DE5B660002EF92 /* libpng.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73A2B1EA13DE57BD0002EF92 /* libpng.framework */; };
 		73B0FB601370AA260019AE4E /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379553C136E1CCE003A660B /* AudioUnit.framework */; };
 		73B0FB611370AA260019AE4E /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
 		73B0FBBF1370AAD10019AE4E /* ALc.c in Sources */ = {isa = PBXBuildFile; fileRef = 73B0FB771370AAD10019AE4E /* ALc.c */; };
@@ -835,13 +816,6 @@
 			remoteGlobalIDString = 7388F059139D5A28003C6BB0;
 			remoteInfo = Vorbis;
 		};
-		73A2B28113DE59110002EF92 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 73A2B1E913DE57BD0002EF92;
-			remoteInfo = libpng;
-		};
 		73B0FC151370ABA90019AE4E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -910,7 +884,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				73A2B2D613DE5B660002EF92 /* libpng.framework in CopyFiles */,
+				7397470A14B3766B0053CCF4 /* libpng.framework in CopyFiles */,
 				73851F3D13ABF1C900D88D2A /* SDL.framework in CopyFiles */,
 				7388F2FD139D6DD8003C6BB0 /* Ogg.framework in CopyFiles */,
 				7388F2FE139D6DD8003C6BB0 /* Speex.framework in CopyFiles */,
@@ -1253,28 +1227,15 @@
 		738B576E1446185700F25FDF /* InputCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCode.h; path = ../../../zap/InputCode.h; sourceTree = SOURCE_ROOT; };
 		738B576F1446185700F25FDF /* InputCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCodeEnum.h; path = ../../../zap/InputCodeEnum.h; sourceTree = SOURCE_ROOT; };
 		738B57701446185700F25FDF /* shipItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shipItems.cpp; path = ../../../zap/shipItems.cpp; sourceTree = SOURCE_ROOT; };
-		73A2B1EA13DE57BD0002EF92 /* libpng.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libpng.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7397469F14B373980053CCF4 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = ../../../lib/libpng.framework; sourceTree = SOURCE_ROOT; };
+		739746EE14B374E30053CCF4 /* GameTypesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameTypesEnum.h; path = ../../../zap/GameTypesEnum.h; sourceTree = SOURCE_ROOT; };
+		739746EF14B374E30053CCF4 /* WeaponInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WeaponInfo.cpp; path = ../../../zap/WeaponInfo.cpp; sourceTree = SOURCE_ROOT; };
+		739746F014B374E30053CCF4 /* WeaponInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WeaponInfo.h; path = ../../../zap/WeaponInfo.h; sourceTree = SOURCE_ROOT; };
 		73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libpng-Info.plist"; sourceTree = "<group>"; };
 		73A2B1FF13DE57C40002EF92 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		73A2B22313DE58630002EF92 /* png.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = png.c; sourceTree = "<group>"; };
 		73A2B22413DE58630002EF92 /* png.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = png.h; sourceTree = "<group>"; };
 		73A2B22513DE58630002EF92 /* pngconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pngconf.h; sourceTree = "<group>"; };
-		73A2B22613DE58630002EF92 /* pngerror.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngerror.c; sourceTree = "<group>"; };
-		73A2B22713DE58630002EF92 /* pngget.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngget.c; sourceTree = "<group>"; };
-		73A2B22813DE58630002EF92 /* pngmem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngmem.c; sourceTree = "<group>"; };
-		73A2B22913DE58630002EF92 /* pngpread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngpread.c; sourceTree = "<group>"; };
 		73A2B22A13DE58630002EF92 /* pngpriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pngpriv.h; sourceTree = "<group>"; };
-		73A2B22B13DE58630002EF92 /* pngread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngread.c; sourceTree = "<group>"; };
-		73A2B22C13DE58630002EF92 /* pngrio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngrio.c; sourceTree = "<group>"; };
-		73A2B22D13DE58630002EF92 /* pngrtran.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngrtran.c; sourceTree = "<group>"; };
-		73A2B22E13DE58630002EF92 /* pngrutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngrutil.c; sourceTree = "<group>"; };
-		73A2B22F13DE58630002EF92 /* pngset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngset.c; sourceTree = "<group>"; };
-		73A2B23013DE58630002EF92 /* pngtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngtest.c; sourceTree = "<group>"; };
-		73A2B23113DE58630002EF92 /* pngtrans.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngtrans.c; sourceTree = "<group>"; };
-		73A2B23213DE58630002EF92 /* pngwio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngwio.c; sourceTree = "<group>"; };
-		73A2B23313DE58630002EF92 /* pngwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngwrite.c; sourceTree = "<group>"; };
-		73A2B23413DE58630002EF92 /* pngwtran.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngwtran.c; sourceTree = "<group>"; };
-		73A2B23513DE58630002EF92 /* pngwutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pngwutil.c; sourceTree = "<group>"; };
 		73A2B2A113DE59740002EF92 /* HTFGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HTFGame.h; path = ../../../zap/HTFGame.h; sourceTree = SOURCE_ROOT; };
 		73A2B2A213DE59740002EF92 /* retrieveGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = retrieveGame.h; path = ../../../zap/retrieveGame.h; sourceTree = SOURCE_ROOT; };
 		73A2B2A313DE59740002EF92 /* ScreenShooter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScreenShooter.cpp; path = ../../../zap/ScreenShooter.cpp; sourceTree = SOURCE_ROOT; };
@@ -1764,14 +1725,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		73A2B1E813DE57BD0002EF92 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				73A2B20013DE57C40002EF92 /* libz.dylib in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		73B0FB5A1370A9F80019AE4E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1801,7 +1754,7 @@
 				73B0FC1D1370ABB70019AE4E /* OpenAL-Soft.framework in Frameworks */,
 				73851F4E13ABF20200D88D2A /* SDL.framework in Frameworks */,
 				73A2B27113DE59030002EF92 /* libz.dylib in Frameworks */,
-				73A2B27A13DE59090002EF92 /* libpng.framework in Frameworks */,
+				739746A014B373980053CCF4 /* libpng.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1821,6 +1774,7 @@
 		036FF04E12D1D79500C14EE2 /* Pre Compiled */ = {
 			isa = PBXGroup;
 			children = (
+				7397469F14B373980053CCF4 /* libpng.framework */,
 				73A2B1FF13DE57C40002EF92 /* libz.dylib */,
 				73851E9313ABF09E00D88D2A /* SDL.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
@@ -1843,7 +1797,6 @@
 		036FF0B612D1D7EF00C14EE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				73A2B1EA13DE57BD0002EF92 /* libpng.framework */,
 				7388F036139D59E4003C6BB0 /* Ogg.framework */,
 				7388F047139D5A05003C6BB0 /* Speex.framework */,
 				7388F05A139D5A28003C6BB0 /* Vorbis.framework */,
@@ -2386,25 +2339,9 @@
 		73A2B22213DE58630002EF92 /* libpng */ = {
 			isa = PBXGroup;
 			children = (
-				73A2B22313DE58630002EF92 /* png.c */,
 				73A2B22413DE58630002EF92 /* png.h */,
 				73A2B22513DE58630002EF92 /* pngconf.h */,
-				73A2B22613DE58630002EF92 /* pngerror.c */,
-				73A2B22713DE58630002EF92 /* pngget.c */,
-				73A2B22813DE58630002EF92 /* pngmem.c */,
-				73A2B22913DE58630002EF92 /* pngpread.c */,
 				73A2B22A13DE58630002EF92 /* pngpriv.h */,
-				73A2B22B13DE58630002EF92 /* pngread.c */,
-				73A2B22C13DE58630002EF92 /* pngrio.c */,
-				73A2B22D13DE58630002EF92 /* pngrtran.c */,
-				73A2B22E13DE58630002EF92 /* pngrutil.c */,
-				73A2B22F13DE58630002EF92 /* pngset.c */,
-				73A2B23013DE58630002EF92 /* pngtest.c */,
-				73A2B23113DE58630002EF92 /* pngtrans.c */,
-				73A2B23213DE58630002EF92 /* pngwio.c */,
-				73A2B23313DE58630002EF92 /* pngwrite.c */,
-				73A2B23413DE58630002EF92 /* pngwtran.c */,
-				73A2B23513DE58630002EF92 /* pngwutil.c */,
 			);
 			name = libpng;
 			path = ../../../libpng;
@@ -2516,6 +2453,9 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				739746EE14B374E30053CCF4 /* GameTypesEnum.h */,
+				739746EF14B374E30053CCF4 /* WeaponInfo.cpp */,
+				739746F014B374E30053CCF4 /* WeaponInfo.h */,
 				738222581479FE5900930942 /* Cursor.cpp */,
 				738222591479FE5900930942 /* Cursor.h */,
 				7382225A1479FE5900930942 /* TeamShuffleHelper.cpp */,
@@ -3164,16 +3104,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		73A2B1E513DE57BD0002EF92 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				73A2B23713DE58630002EF92 /* png.h in Headers */,
-				73A2B23813DE58630002EF92 /* pngconf.h in Headers */,
-				73A2B23D13DE58630002EF92 /* pngpriv.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		73B0FB571370A9F80019AE4E /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -3357,24 +3287,6 @@
 			productReference = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		73A2B1E913DE57BD0002EF92 /* libpng */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 73A2B1FE13DE57BE0002EF92 /* Build configuration list for PBXNativeTarget "libpng" */;
-			buildPhases = (
-				73A2B1E513DE57BD0002EF92 /* Headers */,
-				73A2B1E613DE57BD0002EF92 /* Resources */,
-				73A2B1E713DE57BD0002EF92 /* Sources */,
-				73A2B1E813DE57BD0002EF92 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = libpng;
-			productName = libpng;
-			productReference = 73A2B1EA13DE57BD0002EF92 /* libpng.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 		73B0FB5B1370A9F80019AE4E /* OpenAL-Soft */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73B0FB5F1370AA170019AE4E /* Build configuration list for PBXNativeTarget "OpenAL-Soft" */;
@@ -3414,7 +3326,6 @@
 				7388F02A139D59C2003C6BB0 /* PBXTargetDependency */,
 				737BEFAA139D97DC0066B0CB /* PBXTargetDependency */,
 				737BEFAC139D97DC0066B0CB /* PBXTargetDependency */,
-				73A2B28213DE59110002EF92 /* PBXTargetDependency */,
 			);
 			name = Bitfighter;
 			productInstallPath = "$(HOME)/Applications";
@@ -3444,7 +3355,6 @@
 				73B0FB5B1370A9F80019AE4E /* OpenAL-Soft */,
 				7386B9F6136FE3000094A660 /* ALURE */,
 				7375E28D13690E1900F71273 /* luavec */,
-				73A2B1E913DE57BD0002EF92 /* libpng */,
 				737CE46B12904E9E00D732B7 /* libtomcrypt */,
 				737CE61C1290553D00D732B7 /* tnl */,
 				7388F01E139D5992003C6BB0 /* Ogg */,
@@ -3519,13 +3429,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		7388F056139D5A28003C6BB0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		73A2B1E613DE57BD0002EF92 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3923,29 +3826,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		73A2B1E713DE57BD0002EF92 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				73A2B23613DE58630002EF92 /* png.c in Sources */,
-				73A2B23913DE58630002EF92 /* pngerror.c in Sources */,
-				73A2B23A13DE58630002EF92 /* pngget.c in Sources */,
-				73A2B23B13DE58630002EF92 /* pngmem.c in Sources */,
-				73A2B23C13DE58630002EF92 /* pngpread.c in Sources */,
-				73A2B23E13DE58630002EF92 /* pngread.c in Sources */,
-				73A2B23F13DE58630002EF92 /* pngrio.c in Sources */,
-				73A2B24013DE58630002EF92 /* pngrtran.c in Sources */,
-				73A2B24113DE58630002EF92 /* pngrutil.c in Sources */,
-				73A2B24213DE58630002EF92 /* pngset.c in Sources */,
-				73A2B24313DE58630002EF92 /* pngtest.c in Sources */,
-				73A2B24413DE58630002EF92 /* pngtrans.c in Sources */,
-				73A2B24513DE58630002EF92 /* pngwio.c in Sources */,
-				73A2B24613DE58630002EF92 /* pngwrite.c in Sources */,
-				73A2B24713DE58630002EF92 /* pngwtran.c in Sources */,
-				73A2B24813DE58630002EF92 /* pngwutil.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		73B0FB591370A9F80019AE4E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -4100,6 +3980,7 @@
 				738B57741446185700F25FDF /* shipItems.cpp in Sources */,
 				7382225C1479FE5900930942 /* Cursor.cpp in Sources */,
 				7382225D1479FE5900930942 /* TeamShuffleHelper.cpp in Sources */,
+				739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4185,11 +4066,6 @@
 			isa = PBXTargetDependency;
 			target = 7388F059139D5A28003C6BB0 /* Vorbis */;
 			targetProxy = 7388F308139D6E53003C6BB0 /* PBXContainerItemProxy */;
-		};
-		73A2B28213DE59110002EF92 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 73A2B1E913DE57BD0002EF92 /* libpng */;
-			targetProxy = 73A2B28113DE59110002EF92 /* PBXContainerItemProxy */;
 		};
 		73B0FC161370ABA90019AE4E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5308,80 +5184,6 @@
 			};
 			name = Release;
 		};
-		73A2B1FA13DE57BE0002EF92 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "libpng-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = libpng;
-			};
-			name = Debug;
-		};
-		73A2B1FB13DE57BE0002EF92 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "libpng-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = libpng;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		73A2B1FC13DE57BE0002EF92 /* debug x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "libpng-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = libpng;
-			};
-			name = "debug x86_64";
-		};
-		73A2B1FD13DE57BE0002EF92 /* release x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "libpng-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = libpng;
-			};
-			name = "release x86_64";
-		};
 		73B0FB5D1370A9F90019AE4E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5668,17 +5470,6 @@
 				7388F05D139D5A29003C6BB0 /* Release */,
 				73852FC713D51A7500FA74BB /* debug x86_64 */,
 				730F1B6513D52189004EE354 /* release x86_64 */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		73A2B1FE13DE57BE0002EF92 /* Build configuration list for PBXNativeTarget "libpng" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				73A2B1FA13DE57BE0002EF92 /* Debug */,
-				73A2B1FB13DE57BE0002EF92 /* Release */,
-				73A2B1FC13DE57BE0002EF92 /* debug x86_64 */,
-				73A2B1FD13DE57BE0002EF92 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
