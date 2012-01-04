@@ -415,6 +415,7 @@ public:
    TNL_DECLARE_RPC(s2cClientBecameLevelChanger, (StringTableEntry clientName));
 
    TNL_DECLARE_RPC(s2cPlayerSpawnDelayed, ());
+   TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
 
    TNL_DECLARE_RPC(s2cSyncMessagesComplete, (U32 sequence));
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));

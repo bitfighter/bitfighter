@@ -375,6 +375,9 @@ public:
    static void renamePlayerHandler(ClientGame *game, const Vector<string> &words);
    static void globalMuteHandler(ClientGame *game, const Vector<string> &words);
    static void shuffleTeams(ClientGame *game, const Vector<string> &words);
+
+   bool isHelperActive();
+   bool isChatting();
 };
 
 

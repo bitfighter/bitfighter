@@ -190,7 +190,6 @@ public:
 
    void reactivatePrevUI();
    void reactivateMenu(const UserInterface *target);
-   UserInterface *getPrevUI();
    bool hasPrevUI();
    void clearPrevUIs();
    void renderPrevUI();
@@ -198,6 +197,8 @@ public:
    void saveUI(UserInterface *ui);
 
    void renderCurrent();
+   UserInterface *getCurrentUI();
+   UserInterface *getPrevUI();
 };
 
 };

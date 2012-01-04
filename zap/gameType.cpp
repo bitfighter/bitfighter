@@ -24,32 +24,30 @@
 //------------------------------------------------------------------------------------
 
 #include "gameType.h"
-#include "game.h"
-#include "gameNetInterface.h"
-#include "flagItem.h"
+//#include "game.h"
+//#include "gameNetInterface.h"
+//#include "flagItem.h"
 #include "EngineeredItem.h"
 #include "gameObjectRender.h"
 #include "SoundEffect.h"
 #include "config.h"
-#include "projectile.h"     // For s2cClientJoinedTeam()
-#include "playerInfo.h"     // For LuaPlayerInfo constructor  
-#include "stringUtils.h"    // For itos
-//#include "BotNavMeshZone.h" // For gBotNavMeshZones
-#include "gameStats.h"      // For VersionedGameStats def
+#include "projectile.h"       // For s2cClientJoinedTeam()
+#include "playerInfo.h"       // For LuaPlayerInfo constructor  
+#include "stringUtils.h"      // For itos
+#include "gameStats.h"        // For VersionedGameStats def
 #include "version.h"
-#include "Colors.h"
+//#include "Colors.h"
 #include "BanList.h"
-#include "IniFile.h"        // For CIniFile
+#include "IniFile.h"          // For CIniFile
 
 
 #ifndef ZAP_DEDICATED
-
-#include "ClientGame.h"
-#include "loadoutHelper.h"
-#include "UIGame.h"
-#include "UIMenus.h"
-#include "SDL/SDL_opengl.h"
-
+#   include "ClientGame.h"
+#   include "loadoutHelper.h"
+#   include "UIGame.h"
+#   include "UIMenus.h"
+#   include "UIErrorMessage.h"   
+#   include "SDL/SDL_opengl.h"
 #endif
 
 
@@ -532,15 +530,18 @@ void GameType::idle_server(U32 deltaT)
 {
    queryItemsOfInterest();
 
-   if(mScoreboardUpdateTimer.update(deltaT))
-   {
+   bool needsScoreboardUpdate = mScoreboardUpdateTimer.update(deltaT);
+
+   if(needsScoreboardUpdate)
       mScoreboardUpdateTimer.reset();
 
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
-      {
-         ClientInfo *clientInfo = mGame->getClientInfo(i);
-         GameConnection *conn = clientInfo->getConnection();
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
 
+      if(needsScoreboardUpdate)
+      {
          if(conn->isEstablished())    // robots don't have connection
          {
             clientInfo->setPing((U32) conn->getRoundTripTime());
@@ -552,20 +553,22 @@ void GameType::idle_server(U32 deltaT)
          // Send scores/pings to client if game is over, or client has requested them
          if(mGameOver || conn->wantsScoreboardUpdates())
             updateClientScoreboard(clientInfo);
-
-         if(conn->respawnTimer.update(deltaT))           // Need to respawn?
-            spawnShip(clientInfo);                       
-                                                         
-         if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
-            if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
-            {                                            
-               NetObject::setRPCDestConnection(conn);    // Limit who gets this message
-               s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
-               NetObject::setRPCDestConnection(NULL);
-            }
-
-         conn->addTimeSinceLastMove(deltaT);             // Increment timer       
       }
+
+
+      // Respawn dead players
+      if(conn->respawnTimer.update(deltaT))           // Need to respawn?
+         spawnShip(clientInfo);                       
+                                                         
+      if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
+         if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
+         {                                            
+            NetObject::setRPCDestConnection(conn);    // Limit who gets this message
+            s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
+            NetObject::setRPCDestConnection(NULL);
+         }
+
+      conn->addTimeSinceLastMove(deltaT);             // Increment timer       
    }
 
 
@@ -577,7 +580,7 @@ void GameType::idle_server(U32 deltaT)
    }
 
 
-   // Spawn things
+   // Spawn items (that are not ships)
    for(S32 i = 0; i < mItemSpawnPoints.size(); i++)
       if(mItemSpawnPoints[i]->updateTimer(deltaT))
       {
@@ -1127,9 +1130,9 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 {
    GameConnection *conn = clientInfo->getConnection();
 
-   static const U32 INACTIVITY_THRESHOLD = 1000000000;    // in ms
+   static const U32 INACTIVITY_THRESHOLD = 20000;    // 20 secs, in ms
 
-   // Check if player is "on hold" due to inactivity; if so, delay spawn
+   // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client
    if(conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD)
    {
       s2cPlayerSpawnDelayed();
@@ -2112,6 +2115,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 
 
 // A player (either us or a remote player) has joined the game.  This will be called for all players (including us) when changing levels.
+// This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
                 (StringTableEntry name, bool isLocalClient, bool isAdmin, bool isRobot, bool playAlert), 
                 (name, isLocalClient, isAdmin, isRobot, playAlert))
@@ -2137,15 +2141,40 @@ GAMETYPE_RPC_S2C(GameType, s2cPlayerSpawnDelayed, (), ())
 {
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-
    TNLAssert(clientGame, "Invalid client game!");
+
    if(!clientGame) 
       return;
 
    clientGame->setSpawnDelayed(true);
 
+   // If the player is busy in some other UI, there is nothing to do here -- spawn will be undelayed when
+   // they return to the game.  If the player is in game, however, we'll show them a message.
+   // Spawn will be automatically undelayed when user reactivates gameUI by pressing any key.
+   UIManager *uiManager = clientGame->getUIManager();
+
+   // Check if we're in the gameUI, and make sure a helper menu isn't open and we're not chatting
+   if(uiManager->getCurrentUI()->getMenuID() == GameUI && !uiManager->getGameUserInterface()->isHelperActive() && 
+                                                          !uiManager->getGameUserInterface()->isChatting())
+   {
+      ErrorMessageUserInterface *errUI = uiManager->getErrorMsgUserInterface();
+
+      errUI->reset();
+      errUI->setTitle("PRESS ANY KEY TO SPAWN");
+      errUI->setMessage(2, "You were killed; press any key to continue playing.");
+      errUI->activate();
+   }
 #endif
 }
+
+
+GAMETYPE_RPC_C2S(GameType, c2sPlayerSpawnUndelayed, (), ())
+{
+   GameConnection *conn = (GameConnection *) getRPCSourceConnection();
+   conn->resetTimeSinceLastMove();
+   spawnShip(conn->getClientInfo());
+}
+
 
 // Remove a client from the game
 // Server only
@@ -2709,6 +2738,8 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
       return;  // Error message handled client-side
 
    GameConnection *conn = clientInfo->getConnection();
+   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
+
    if(Robot::robots.size() == 0)
    {
       conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
@@ -2735,6 +2766,8 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
       return;  // Error message handled client-side
 
    GameConnection *conn = clientInfo->getConnection();
+   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
+
    if(Robot::robots.size() == 0)
    {
       conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
@@ -2762,6 +2795,7 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
    mShowAllBots = !mShowAllBots;  // Toggle
 
    GameConnection *conn = clientInfo->getConnection();
+   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
    if(Robot::robots.size() == 0)
       conn->s2cDisplayErrorMessage("!!! There are no robots to show");
@@ -2792,6 +2826,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
    settings->getIniSettings()->maxBots = count;
 
    GameConnection *conn = clientInfo->getConnection();
+   TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
+
    Vector<StringTableEntry> e;
    e.push_back(itos(count));
    conn->s2cDisplayMessageE(GameConnection::ColorRed, SFXNone, "Maximum bots was changed to %e0", e);
@@ -2808,20 +2844,20 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    if(!clientInfo->isAdmin())
       return;  // Error message handled client-side
 
-   ClientInfo *banedClientInfo = mGame->findClientInfo(playerName);
+   ClientInfo *bannedClientInfo = mGame->findClientInfo(playerName);
 
    // Player not found
-   if(!banedClientInfo)
+   if(!bannedClientInfo)
       return;  // Error message handled client-side
 
-   if(banedClientInfo->isAdmin())
+   if(bannedClientInfo->isAdmin())
       return;  // Error message handled client-side
 
    // Cannot ban robot
-   if(!banedClientInfo->getConnection()->isEstablished())
+   if(!bannedClientInfo->getConnection()->isEstablished())
       return;  // Error message handled client-side
 
-   Address ipAddress = banedClientInfo->getConnection()->getNetAddressString();
+   Address ipAddress = bannedClientInfo->getConnection()->getNetAddressString();
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
@@ -2838,7 +2874,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    GameConnection *conn = clientInfo->getConnection();
 
    // Disconnect player
-   banedClientInfo->getConnection()->disconnect(NetConnection::ReasonBanned, "");
+   bannedClientInfo->getConnection()->disconnect(NetConnection::ReasonBanned, "");
    conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Player was banned");
 }
 

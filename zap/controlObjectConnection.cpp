@@ -272,6 +272,12 @@ void ControlObjectConnection::addTimeSinceLastMove(U32 time)
 }
 
 
+void ControlObjectConnection::resetTimeSinceLastMove()
+{
+   mTimeSinceLastMove = 0;
+}
+
+
 void ControlObjectConnection::writeCompressedPoint(const Point &p, BitStream *stream)
 {
    if(!mCompressPointsRelative)

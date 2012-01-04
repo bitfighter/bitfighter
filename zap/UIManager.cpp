@@ -457,6 +457,12 @@ UserInterface *UIManager::getPrevUI()
 }
 
 
+UserInterface *UIManager::getCurrentUI()
+{
+   return UserInterface::current;
+}
+
+
 bool UIManager::hasPrevUI()
 {
    return mPrevUIs.size() > 0;

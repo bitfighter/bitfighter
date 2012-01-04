@@ -270,30 +270,21 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
       for(S32 i = 0; i < ShipWeaponCount; i++)
          loadout.push_back(gLoadoutWeapons[mWeapon[i]].index);
 
-      exitHelper();                     // Exit loadout menu and resume play, however we leave this routine
+      
 
       GameConnection *conn = getGame()->getConnectionToServer();
-      if(!conn)
-         return true;
 
-      if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
-         getGame()->displayShipDesignChangedMessage(loadout, "Modifications canceled -- new ship design same as the current");     
+      if(conn)
+      {
+         if(getGame()->getSettings()->getIniSettings()->verboseHelpMessages)
+            getGame()->displayShipDesignChangedMessage(loadout, "Modifications canceled -- new ship design same as the current");     
 
-      // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
-      // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
-      // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
-      conn->c2sRequestLoadout(loadout);     
-
-      /*gc->mOldLoadout = loadout;*/
-
-              // what does this block do?
-
-               //theSame = true;
-               //for(S32 i = 0; i < ShipModuleCount; i++)
-               //   theSame = theSame && (gLoadoutModules[mModule[i]].index == (U32)ship->getModule(i));
-
-               //for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-               //   theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == (U32)ship->getWeapon(i - ShipModuleCount));
+         // Request loadout even if it was the same -- if I have loadout A, with on-deck loadout B, and I enter a new loadout
+         // that matches A, it would be better to have loadout remain unchanged if I entered a loadout zone.
+         // Tell server loadout has changed.  Server will activate it when we enter a loadout zone.
+         conn->c2sRequestLoadout(loadout);     
+      }
+      exitHelper();     
    }
 
    return true;

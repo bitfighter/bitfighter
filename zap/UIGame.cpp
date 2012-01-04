@@ -263,6 +263,8 @@ void GameUserInterface::onReactivate()
    if(getGame()->isSuspended())
       unsuspendGame();
 
+   getGame()->undelaySpawn();
+
    mDisableShipKeyboardInput = false;
    SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
    enterMode(PlayMode);
@@ -957,18 +959,32 @@ void GameUserInterface::enterMode(UIMode mode)
       mHelper = getEngineerHelper(getGame());
    else if(mode == TeamShuffleMode)
       mHelper = getTeamShuffleHelper(getGame());
-   else 
+   else if(mode == ChatMode)
+      mHelper = NULL;
+   else if(mode == PlayMode)
    {
-      if(mode == PlayMode)
-         setBusyChatting(false);
-
+      cancelChat();
       mHelper = NULL;
    }
+   else
+      TNLAssert(false, "Invalid mode!");
 
    mCurrentUIMode = mode;
 
    if(mHelper)
       mHelper->onMenuShow();
+}
+
+
+bool GameUserInterface::isHelperActive()
+{
+   return mHelper != NULL;
+}
+
+
+bool GameUserInterface::isChatting()
+{
+   return mCurrentChatType != NoChat;
 }
 
 
@@ -2635,7 +2651,7 @@ void GameUserInterface::cancelChat()
    mCurrentChatType = NoChat;
    setBusyChatting(false);
 
-   //enterMode(PlayMode);
+   getGame()->undelaySpawn();
 }
 
 

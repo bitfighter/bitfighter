@@ -300,6 +300,16 @@ bool ClientGame::isSpawnDelayed()
 }
 
 
+void ClientGame::undelaySpawn()
+{
+   if(isSpawnDelayed())
+   {
+      getGameType()->c2sPlayerSpawnUndelayed();
+      setSpawnDelayed(false);
+   }
+}
+
+
 string ClientGame::getLoginPassword() const
 {
    return mLoginPassword;
