@@ -40,7 +40,7 @@ namespace Zap
 
 class GameObject;
 
-class ControlObjectConnection: public GhostConnection
+class ControlObjectConnection: public GhostConnection    // only child class is GameConnection...
 {
 private:
    typedef GhostConnection Parent;
@@ -61,6 +61,11 @@ private:
    S8 firstMoveIndex;
    S8 highSendIndex[3];
    U32 mMoveTimeCredit;
+
+   U32 mTimeSinceLastMove; 
+   F32 mPrevAngle;
+
+   void onGotNewMove(const Move &move);
 
 public:
    ControlObjectConnection();
@@ -90,6 +95,10 @@ public:
 
    void writeCompressedPoint(const Point &p, BitStream *stream);
    void readCompressedPoint(Point &p, BitStream *stream);
+
+   void addTimeSinceLastMove(U32 time);
+   U32 getTimeSinceLastMove();
+
 };
 
 

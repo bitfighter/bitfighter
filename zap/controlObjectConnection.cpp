@@ -40,6 +40,9 @@ ControlObjectConnection::ControlObjectConnection()
    mLastClientControlCRC = 0;
    firstMoveIndex = 1;
    mMoveTimeCredit = 0;
+
+   mTimeSinceLastMove = 0;
+   mPrevAngle = 0;
 }
 
 
@@ -138,7 +141,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
       highSendIndex[1] = highSendIndex[2];
       highSendIndex[2] = ((GamePacketNotify *) notify)->firstUnsentMoveIndex;
    }
-   else
+   else     // We're on the server, sending packet to client.  I think...
    {
       S32 ghostIndex = -1;
       if(controlObject.isValid())
@@ -174,7 +177,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
 
    bool replayControlObjectMoves = false;
 
-   if(isConnectionToClient())
+   if(isConnectionToClient())    // Is server ??
    {
       mLastClientControlCRC = bstream->readInt(CLIENTCONTROLBITS);
 
@@ -186,6 +189,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
 
       for(/* empty */; S8(firstMove - firstMoveIndex) < 0 && count > 0; firstMove++)
       {
+         // Looks like we'll be ignoring these moves
          count--;
          theMove.unpack(bstream, true);
       }
@@ -200,17 +204,20 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             mMoveTimeCredit -= theMove.time;
             controlObject->setCurrentMove(theMove);
             controlObject->idle(GameObject::ServerIdleControlFromClient);
+            onGotNewMove(theMove);
          }
          firstMoveIndex++;
       }
    }
-   else     // Is connection to server
+   else     // Is connection to server (i.e. we're on the client, I think)
    {
-      bool controlObjectValid = bstream->readFlag();
+      bool controlObjectValid = bstream->readFlag();     
 
       mCompressPointsRelative = controlObjectValid;
-
       //mGameUserInterface.receivedControlUpdate(false);
+
+      //onGotNewMove();
+
       // CRC mismatch...
       if(bstream->readFlag())
       {
@@ -240,6 +247,30 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
       controlObject->controlMoveReplayComplete();
    }
 }
+
+
+// A new move has arrived
+void ControlObjectConnection::onGotNewMove(const Move &move)
+{
+   // See if the player actually moved, or if this is just an empty "do nothing" move
+   if(move.x != 0 || move.y != 0 || move.fire || move.isAnyModActive() || move.angle != mPrevAngle)
+      mTimeSinceLastMove = 0;
+
+   mPrevAngle = move.angle;
+}
+
+
+U32 ControlObjectConnection::getTimeSinceLastMove()
+{
+   return mTimeSinceLastMove;
+}
+
+
+void ControlObjectConnection::addTimeSinceLastMove(U32 time)
+{
+   mTimeSinceLastMove += time;
+}
+
 
 void ControlObjectConnection::writeCompressedPoint(const Point &p, BitStream *stream)
 {
