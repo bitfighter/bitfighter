@@ -1132,8 +1132,8 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never display bots.
    if((conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD) && !clientInfo->isRobot())
    {
-      return;
       s2cPlayerSpawnDelayed();
+      return;
    }
 
 
