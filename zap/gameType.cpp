@@ -3488,8 +3488,7 @@ S32 GameType::getLeadingTeam() const
 
 S32 GameType::getLeadingPlayerScore() const
 {
-   TNLAssert(mLeadingPlayerScore < mGame->getClientCount(), "mLeadingPlayerScore out of range");
-   TNLAssert(mLeadingPlayerScore >= -1, "mLeadingPlayerScore negative number other then -1");
+   TNLAssert(mLeadingPlayer < mGame->getClientCount(), "mLeadingPlayer out of range");
    return mLeadingPlayerScore;
 }
 
