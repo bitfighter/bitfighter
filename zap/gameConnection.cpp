@@ -1879,16 +1879,16 @@ S32 GameConnection::getSuicides()
 // Better: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
 F32 GameConnection::getCalculatedRating()
 {
-   // Total kills = mKills + mFratricides
+   // Total kills = mKills + mFratricides (but we won't count mFratricides)
    // Counted deaths = mDeaths - mSuicides (mSuicides are included in mDeaths and we want to ignore them)
 
-   S32 totalKillsAndDeaths = (mKills + mFratricides) + (mDeaths - mSuicides);
+   S32 totalKillsAndDeaths = mKills + (mDeaths - mSuicides);
 
    // Initial case: you haven't killed or died -- go out and prove yourself, lad!
    if(totalKillsAndDeaths == 0)
       return 0;
 
-   // Standard case (fratricides will reduce your ratio)
+   // Standard case
    else   
       return F32(mKills - (mDeaths - mSuicides)) / F32(totalKillsAndDeaths);
 }
