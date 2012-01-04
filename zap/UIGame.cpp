@@ -2979,9 +2979,9 @@ void GameUserInterface::renderScoreboard()
          static char buff[255] = "";
 
          if(isTeamGame)
-            dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->getRating());
+            dSprintf(buff, sizeof(buff), "%2.2f", playerScores[j]->getRating());
          else
-            dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
+            dSprintf(buff, sizeof(buff), "%2.2f  %d", playerScores[j]->getRating(), playerScores[j]->getScore());
 
          drawString(xr - (85 + S32(getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
          drawStringf(xr - 60, curRowY, fontSize, "%d", playerScores[j]->getPing());
