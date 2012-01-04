@@ -564,7 +564,8 @@ void GameType::idle_server(U32 deltaT)
             NetObject::setRPCDestConnection(NULL);
          }
 
-      conn->addTimeSinceLastMove(deltaT);             // Increment timer       
+      if(!clientInfo->isRobot())
+         conn->addTimeSinceLastMove(deltaT);             // Increment timer       
    }
 
 
