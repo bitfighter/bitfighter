@@ -111,6 +111,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, false));
    mLocalRemoteClientInfo = NULL;
 
+   mSpawnDelayed = false;
+
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
    {
@@ -154,9 +156,12 @@ ClientGame::~ClientGame()
 
 
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
+// Also get here when hosting a game
 void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
    setActiveTeamManager(mTeamManager);
+
+   mSpawnDelayed = false;
 
    MasterServerConnection *connToMaster = getConnectionToMaster();
    
@@ -280,6 +285,18 @@ boost::shared_ptr<ClientInfo> ClientGame::getClientInfo_shared_ptr()
 ClientInfo *ClientGame::getLocalRemoteClientInfo()
 {
    return mLocalRemoteClientInfo;
+}
+
+
+void ClientGame::setSpawnDelayed(bool spawnDelayed)
+{
+   mSpawnDelayed = spawnDelayed;
+}
+
+
+bool ClientGame::isSpawnDelayed()
+{
+   return mSpawnDelayed;
 }
 
 

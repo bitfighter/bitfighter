@@ -83,6 +83,8 @@ private:
 
    AbstractTeam *getNewTeam();
 
+   bool mSpawnDelayed;
+
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
@@ -148,6 +150,9 @@ public:
 
    void onPlayerJoined(const boost::shared_ptr<ClientInfo> &clientInfo, bool isLocalClient, bool playAlert);
    void onPlayerQuit(const StringTableEntry &name);
+
+   void setSpawnDelayed(bool spawnDelayed);
+   bool isSpawnDelayed();
 
    // Check for permissions
    bool hasAdmin(const char *failureMessage);

@@ -521,16 +521,15 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 {
    mTotalGamePlay += deltaT;
 
-   if(path != GameObject::ServerIdleMainLoop)     // i.e. client only
-   {
-      mGameTimer.update(deltaT);
-      mZoneGlowTimer.update(deltaT);
-
-      return;  // We're out of here!
-   }
+   if(path != GameObject::ServerIdleMainLoop)    
+      idle_client(deltaT);
+   else
+      idle_server(deltaT);
+}
 
 
-   // From here on, server only
+void GameType::idle_server(U32 deltaT)
+{
    queryItemsOfInterest();
 
    if(mScoreboardUpdateTimer.update(deltaT))
@@ -539,24 +538,36 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
       for(S32 i = 0; i < mGame->getClientCount(); i++)
       {
-         ClientInfo *client = mGame->getClientInfo(i);
+         ClientInfo *clientInfo = mGame->getClientInfo(i);
+         GameConnection *conn = clientInfo->getConnection();
 
-         if(client->getConnection()->isEstablished())  // robots don't have connection
+         if(conn->isEstablished())    // robots don't have connection
          {
-            GameConnection *conn = client->getConnection();
+            clientInfo->setPing((U32) conn->getRoundTripTime());
 
-            client->setPing((U32) conn->getRoundTripTime());
-
-            if(client->getPing() > MaxPing || conn->lostContact())
-               client->setPing(MaxPing);
+            if(clientInfo->getPing() > MaxPing || conn->lostContact())
+               clientInfo->setPing(MaxPing);
          }
-      }
 
-      // Send scores/pings to client if game is over, or client has requested them
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
-         if(mGameOver || mGame->getClientInfo(i)->getConnection()->wantsScoreboardUpdates())
-            updateClientScoreboard(mGame->getClientInfo(i));
+         // Send scores/pings to client if game is over, or client has requested them
+         if(mGameOver || conn->wantsScoreboardUpdates())
+            updateClientScoreboard(clientInfo);
+
+         if(conn->respawnTimer.update(deltaT))           // Need to respawn?
+            spawnShip(clientInfo);                       
+                                                         
+         if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
+            if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
+            {                                            
+               NetObject::setRPCDestConnection(conn);    // Limit who gets this message
+               s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
+               NetObject::setRPCDestConnection(NULL);
+            }
+
+         conn->addTimeSinceLastMove(deltaT);             // Increment timer       
+      }
    }
+
 
    // Periodically send time-remaining updates to the clients unless the game timer is at zero
    if(mGameTimeUpdateTimer.update(deltaT) && mGameTimer.getCurrent() != 0)
@@ -565,23 +576,6 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       s2cSetTimeRemaining(mGameTimer.getCurrent());
    }
 
-   // Cycle through all clients
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = mGame->getClientInfo(i);
-      GameConnection *conn = clientInfo->getConnection();
-
-      if(conn->respawnTimer.update(deltaT))          // Need to respawn?
-         spawnShip(clientInfo);
-
-      if(conn->mSwitchTimer.getCurrent())            // Are we still counting down until the player can switch?
-         if(conn->mSwitchTimer.update(deltaT))       // Has the time run out?
-         {
-            NetObject::setRPCDestConnection(conn);   // Limit who gets this message
-            s2cCanSwitchTeams(true);                 // If so, let the client know they can switch again
-            NetObject::setRPCDestConnection(NULL);
-         }
-   }
 
    // Spawn things
    for(S32 i = 0; i < mItemSpawnPoints.size(); i++)
@@ -625,6 +619,12 @@ void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
       gameOverManGameOver();
 }
 
+
+void GameType::idle_client(U32 deltaT)
+{
+   mGameTimer.update(deltaT);
+   mZoneGlowTimer.update(deltaT);
+}
 
 
 //// Sorts teams by player counts, high to low
@@ -1126,6 +1126,16 @@ void GameType::onAddedToGame(Game *game)
 void GameType::spawnShip(ClientInfo *clientInfo)
 {
    GameConnection *conn = clientInfo->getConnection();
+
+   static const U32 INACTIVITY_THRESHOLD = 1000000000;    // in ms
+
+   // Check if player is "on hold" due to inactivity; if so, delay spawn
+   if(conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD)
+   {
+      s2cPlayerSpawnDelayed();
+      return;
+   }
+
 
    U32 teamIndex = clientInfo->getTeamIndex();
 
@@ -1700,6 +1710,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       if(points != 0)
       {
          player->addScore(points);
+         player->addToTotalScore(points);
          newScore = player->getScore();
 
          for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -2116,7 +2127,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
 
-   TNLAssert(clientGame, "No client game in s2cAddClient!");
+   TNLAssert(clientGame, "Invalid client game!");
    if(!clientGame) 
       return;
       
@@ -2127,6 +2138,21 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 #endif
 }
 
+
+// Player appears to be away, spawn is on hold until he returns
+GAMETYPE_RPC_S2C(GameType, s2cPlayerSpawnDelayed, (), ())
+{
+#ifndef ZAP_DEDICATED
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+
+   TNLAssert(clientGame, "Invalid client game!");
+   if(!clientGame) 
+      return;
+
+   clientGame->setSpawnDelayed(true);
+
+#endif
+}
 
 // Remove a client from the game
 // Server only
