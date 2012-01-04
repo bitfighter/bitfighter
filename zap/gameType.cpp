@@ -1130,10 +1130,10 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    static const U32 INACTIVITY_THRESHOLD = 20000;    // 20 secs, in ms
 
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never display bots.
-   if(!conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD && clientInfo->isRobot())
+   if((conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD) && !clientInfo->isRobot())
    {
-      s2cPlayerSpawnDelayed();
       return;
+      s2cPlayerSpawnDelayed();
    }
 
 
@@ -2157,6 +2157,7 @@ GAMETYPE_RPC_S2C(GameType, s2cPlayerSpawnDelayed, (), ())
       ErrorMessageUserInterface *errUI = uiManager->getErrorMsgUserInterface();
 
       errUI->reset();
+      errUI->setPresentation(1);
       errUI->setTitle("PRESS ANY KEY TO SPAWN");
       errUI->setMessage(2, "You were killed; press any key to continue playing.");
       errUI->activate();
