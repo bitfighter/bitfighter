@@ -1710,7 +1710,6 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       if(points != 0)
       {
          player->addScore(points);
-         player->addToTotalScore(points);
          newScore = player->getScore();
 
          // Broadcast player scores for rendering on the client
