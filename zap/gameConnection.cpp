@@ -104,8 +104,10 @@ void GameConnection::initialize()
    mSwitchTimer.reset(0);
 
    mGamesPlayed = 0;                      // Overall
-   mCumulativeScore = 0;                  // Total points scored my this connection
-   mTotalCumulativeScore = 0;             // Total points scored by anyone while this connection is alive
+   mKills = 0;
+   mFratricides = 0;
+   mDeaths = 0;
+   mSuicides = 0;
 
    mAcheivedConnection = false;
    mLastEnteredLevelChangePassword = "";
@@ -1820,33 +1822,81 @@ void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 }
 
 
-void GameConnection::addToTotalCumulativeScore(S32 score)
+void GameConnection::addKill()
 {
-   mTotalCumulativeScore += score;
+   mKills++;
+   mStatistics.addKill();
 }
 
 
-// Return a measure of a player's strength.  Right now this is rather bogus -- any improvements welcomed!!!
-// Should return a number between -1 and 1
-// Better: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
-F32 GameConnection::getCumulativeRating()
+void GameConnection::addFratricide()
 {
-   // Initial case: no one has scored
-   if(mTotalCumulativeScore == 0)      
-      return .5;
+   mFratricides++;
+   mStatistics.addFratricide();
+}
 
-   // Standard case: 
+
+void GameConnection::addDeath()
+{
+   mDeaths++;
+   mStatistics.addDeath();
+}
+
+
+void GameConnection::addSuicide()
+{
+   mSuicides++;
+   mStatistics.addSuicide();
+}
+
+
+S32 GameConnection::getKills()
+{
+   return mKills;
+}
+
+
+S32 GameConnection::getFratricides()
+{
+   return mFratricides;
+}
+
+
+S32 GameConnection::getDeaths()
+{
+   return mDeaths;
+}
+
+
+S32 GameConnection::getSuicides()
+{
+   return mSuicides;
+}
+
+
+// Return a measure of a player's strength.
+// Right now this is roughly a kill - death / kill + death ratio
+// Better: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
+F32 GameConnection::getCalculatedRating()
+{
+   // Total kills = mKills + mFratricides
+   // Counted deaths = mDeaths - mSuicides (mSuicides are included in mDeaths and we want to ignore them)
+
+   S32 totalKillsAndDeaths = (mKills + mFratricides) + (mDeaths - mSuicides);
+
+   // Initial case: you haven't killed or died -- go out and prove yourself, lad!
+   if(totalKillsAndDeaths == 0)
+      return 0;
+
+   // Standard case (fratricides will reduce your ratio)
    else   
-      return F32(mCumulativeScore) / F32(mTotalCumulativeScore);
+      return F32(mKills - (mDeaths - mSuicides)) / F32(totalKillsAndDeaths);
 }
 
 
 void GameConnection::endOfGameScoringHandler()
 {
    mGamesPlayed++;
-   //mScore = 0; 
-   //mRating = 0; 
-   //mTotalScore = 0;
    mStatistics.resetStatistics();
 }
 

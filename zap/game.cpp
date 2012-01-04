@@ -255,13 +255,6 @@ F32 LocalClientInfo::getRating()
 }
 
 
-void LocalClientInfo::addToTotalScore(S32 score) 
-{ 
-   mTotalScore += score; 
-   mClientConnection->addToTotalCumulativeScore(score); 
-}
-
-
 GameConnection *LocalClientInfo::getConnection()
 {
    return mClientConnection;
@@ -343,12 +336,6 @@ F32 RemoteClientInfo::getRating()
 void RemoteClientInfo::setRating(F32 rating)
 {
    mRating = rating;
-}
-
-
-void RemoteClientInfo::addToTotalScore(S32 score)
-{
-   TNLAssert(false, "We don't track total score in these parts...");
 }
 
 
@@ -749,7 +736,7 @@ void Game::countTeamPlayers()
             GameConnection *conn = clientInfo->getConnection();
 
             if(conn)
-               team->addRating(max(conn->getCumulativeRating(), BASE_RATING));    
+               team->addRating(max(conn->getCalculatedRating(), BASE_RATING));    
          }
       }
    }
@@ -1875,7 +1862,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 // Highest ratings first -- runs on server only
 static S32 QSORT_CALLBACK RatingSort(boost::shared_ptr<ClientInfo> *a, boost::shared_ptr<ClientInfo> *b)
 {
-   F32 diff = (*a)->getConnection()->getCumulativeRating() - (*b)->getConnection()->getCumulativeRating();
+   F32 diff = (*a)->getConnection()->getCalculatedRating() - (*b)->getConnection()->getCalculatedRating();
 
    if(diff == 0) 
       return 0;

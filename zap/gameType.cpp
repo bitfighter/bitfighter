@@ -1621,7 +1621,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
 {
    ClientInfo *killer = killerObject && killerObject->getOwner() ? killerObject->getOwner()->getClientInfo() : NULL;
 
-   victim->getConnection()->mStatistics.addDeath();
+   victim->getConnection()->addDeath();
 
    StringTableEntry killerDescr = killerObject->getKillString();
 
@@ -1629,20 +1629,20 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
    {
       if(killer == victim)    // We killed ourselves -- should have gone easy with the bouncers!
       {
-         killer->getConnection()->mStatistics.addSuicide();
+         killer->getConnection()->addSuicide();
          updateScore(killer, KillSelf);
       }
 
       // Should do nothing with friendly fire disabled
       else if(isTeamGame() && killer->getTeamIndex() == victim->getTeamIndex())   // Same team in a team game
       {
-         killer->getConnection()->mStatistics.addFratricide();
+         killer->getConnection()->addFratricide();
          updateScore(killer, KillTeammate);
       }
 
       else                                                                        // Different team, or not a team game
       {
-         killer->getConnection()->mStatistics.addKill();
+         killer->getConnection()->addKill();
          updateScore(killer, KillEnemy);
       }
 
@@ -1702,16 +1702,10 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          player->addScore(points);
          newScore = player->getScore();
 
+         // Broadcast player scores for rendering on the client
          for(S32 i = 0; i < mGame->getClientCount(); i++)
-         {
-            // Accumulate every client's total score counter, which tracks total number of points scored by anyone
-            if(points > 0)
-               mGame->getClientInfo(i)->addToTotalScore(points);
-
-            // Broadcast player scores for rendering on the client
             if(!isTeamGame())
                s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
-         }
 
          updateLeadingPlayerAndScore();
       }
@@ -3233,12 +3227,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 }
 
 
-const U32 minRating = 0;
-const U32 maxRating = 200;
-
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
 Vector<SignedInt<24> > GameType::mScores;
-Vector<RangedU32<minRating,maxRating> > GameType::mRatings;
+Vector<SignedFloat<8> > GameType::mRatings;  // 8 bits for 255 gradations between -1 and 1 ~ about 1 value per .01
 
 
 void GameType::updateClientScoreboard(ClientInfo *requestor)
@@ -3260,7 +3251,7 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
       mScores.push_back(info->getScore());
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back(min(U32(info->getConnection()->getCumulativeRating() * 100.0) + 100, maxRating));
+      mRatings.push_back(info->getConnection()->getCalculatedRating());
    }
 
    // Next come the robots ... Robots is part of mClientList
@@ -3278,7 +3269,7 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
 
 
 GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
-                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<minRating,maxRating> > ratings),
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<SignedFloat<8> > ratings),
                  (pingTimes, scores, ratings))
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -3290,7 +3281,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
       client->setPing(pingTimes[i]);
       client->setScore(scores[i]);
-      client->setRating(((F32)ratings[i] - 100.f) / 100.f);
+      client->setRating(ratings[i]);
    }
 }
 

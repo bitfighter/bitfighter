@@ -133,8 +133,6 @@ public:
    void setScore(S32 score);
    void addScore(S32 score);
 
-   virtual void addToTotalScore(S32 score) = 0;
-
    virtual void setRating(F32 rating) = 0;
    virtual F32 getRating() = 0;
 
@@ -188,8 +186,6 @@ public:
    void setRating(F32 rating);
    F32 getRating();
 
-   void addToTotalScore(S32 score);
-
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
 };
@@ -220,8 +216,6 @@ public:
 
    F32 getRating();
    void setRating(F32 rating);
-
-   void addToTotalScore(S32 score);
 
    void initialize();
 

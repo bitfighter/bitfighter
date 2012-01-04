@@ -294,7 +294,7 @@ public:
    // Static vectors used for constructing update RPCs
    static Vector<RangedU32<0, MaxPing> > mPingTimes;
    static Vector<SignedInt<24> > mScores;
-   static Vector<RangedU32<0, 200> > mRatings;
+   static Vector<SignedFloat<8> > mRatings;
 
    GameType(S32 winningScore = DefaultWinningScore);    // Constructor
    virtual ~GameType();                                 // Destructor
@@ -439,7 +439,7 @@ public:
    TNL_DECLARE_RPC(s2cSetPlayerScore, (U16 index, S32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<SignedFloat<8> > ratings));
 
    void updateClientScoreboard(ClientInfo *clientInfo);
 
