@@ -76,7 +76,6 @@ private:
    boost::shared_ptr<ClientInfo> mClientInfo;         
    LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
 
-
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // Sometimes this is NULL
 #endif
