@@ -3139,21 +3139,24 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
 
       // The top rendered name is the leading player or none if no leading player
       // (no scoring even has occured yet)
-      const char *nameTop =
-            hasLeader ? game->getClientInfo(gameType->getLeadingPlayer())->getName().getString() : "";
-      S32 scoreTop =
-            hasLeader ? gameType->getLeadingPlayerScore() : S32_MIN;
+      const char *nameTop = hasLeader ? game->getClientInfo(gameType->getLeadingPlayer())->getName().getString() : "";
+      S32 scoreTop = hasLeader ? gameType->getLeadingPlayerScore() : S32_MIN;
 
       // The bottom rendered name is either second leader or the current player
-      const char *nameBottom =
-            clientIsLeader && hasSecondLeader ?
-                  game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
-                  clientName;
-      S32 scoreBottom =
-            clientIsLeader && hasSecondLeader ?
-                  gameType->getSecondLeadingPlayerScore() :
-                  getGame()->getLocalRemoteClientInfo()->getScore();
+      const char *nameBottom = clientIsLeader && hasSecondLeader ?
+                                    game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
+                                    clientName;
 
+      TNLAssert(getGame()->getLocalRemoteClientInfo(), "How did this get to be NULL?");
+
+      S32 scoreBottom;
+      if(getGame()->getLocalRemoteClientInfo())
+         scoreBottom = clientIsLeader && hasSecondLeader ?
+                              gameType->getSecondLeadingPlayerScore() :
+                              getGame()->getLocalRemoteClientInfo()->getScore();
+      else
+         scoreBottom = 0;
+                     
 
       S32 xpos, ypos;
 
