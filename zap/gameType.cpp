@@ -24,9 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "gameType.h"
-//#include "game.h"
-//#include "gameNetInterface.h"
-//#include "flagItem.h"
 #include "EngineeredItem.h"
 #include "gameObjectRender.h"
 #include "SoundEffect.h"
@@ -36,7 +33,6 @@
 #include "stringUtils.h"      // For itos
 #include "gameStats.h"        // For VersionedGameStats def
 #include "version.h"
-//#include "Colors.h"
 #include "BanList.h"
 #include "IniFile.h"          // For CIniFile
 
