@@ -19,18 +19,6 @@
 			name = "Create Bitfighter Dedicated Server Release";
 			productName = "Create Bitfighter Dedicated Server Release";
 		};
-		033F6AF912D191B40023D4C6 /* Compile Frameworks Only */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 033F6B0512D192160023D4C6 /* Build configuration list for PBXAggregateTarget "Compile Frameworks Only" */;
-			buildPhases = (
-			);
-			dependencies = (
-				033F6AFF12D191C70023D4C6 /* PBXTargetDependency */,
-				033F6AFD12D191C20023D4C6 /* PBXTargetDependency */,
-			);
-			name = "Compile Frameworks Only";
-			productName = "Compile Frameworks";
-		};
 		03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 03AD17D912CE2BC700274A25 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Game Release" */;
@@ -192,153 +180,7 @@
 		7385CBB114147824008470C8 /* PickupItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA414147824008470C8 /* PickupItem.cpp */; };
 		7385CBB214147824008470C8 /* Spawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA614147824008470C8 /* Spawn.cpp */; };
 		7385CBB314147824008470C8 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA814147824008470C8 /* Timer.cpp */; };
-		7388F04E139D5A0E003C6BB0 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F036139D59E4003C6BB0 /* Ogg.framework */; };
-		7388F061139D5A32003C6BB0 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F036139D59E4003C6BB0 /* Ogg.framework */; };
 		7388F06C139D5B46003C6BB0 /* music in Resources */ = {isa = PBXBuildFile; fileRef = 7388F069139D5B46003C6BB0 /* music */; };
-		7388F08F139D5BB0003C6BB0 /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F089139D5BB0003C6BB0 /* bitwise.c */; };
-		7388F090139D5BB0003C6BB0 /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F08A139D5BB0003C6BB0 /* framing.c */; };
-		7388F091139D5BB0003C6BB0 /* config_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F08C139D5BB0003C6BB0 /* config_types.h */; };
-		7388F092139D5BB0003C6BB0 /* ogg.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F08D139D5BB0003C6BB0 /* ogg.h */; };
-		7388F093139D5BB0003C6BB0 /* os_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F08E139D5BB0003C6BB0 /* os_types.h */; };
-		7388F0B0139D6343003C6BB0 /* Ogg_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 7388F0AF139D6343003C6BB0 /* Ogg_Prefix.pch */; };
-		7388F15D139D6588003C6BB0 /* bits.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0F1139D6588003C6BB0 /* bits.c */; };
-		7388F15E139D6588003C6BB0 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0F2139D6588003C6BB0 /* buffer.c */; };
-		7388F15F139D6588003C6BB0 /* cb_search.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0F3139D6588003C6BB0 /* cb_search.c */; };
-		7388F165139D6588003C6BB0 /* exc_10_16_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0F9139D6588003C6BB0 /* exc_10_16_table.c */; };
-		7388F166139D6588003C6BB0 /* exc_10_32_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0FA139D6588003C6BB0 /* exc_10_32_table.c */; };
-		7388F167139D6588003C6BB0 /* exc_20_32_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0FB139D6588003C6BB0 /* exc_20_32_table.c */; };
-		7388F168139D6588003C6BB0 /* exc_5_256_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0FC139D6588003C6BB0 /* exc_5_256_table.c */; };
-		7388F169139D6588003C6BB0 /* exc_5_64_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0FD139D6588003C6BB0 /* exc_5_64_table.c */; };
-		7388F16A139D6588003C6BB0 /* exc_8_128_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0FE139D6588003C6BB0 /* exc_8_128_table.c */; };
-		7388F16B139D6588003C6BB0 /* fftwrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F0FF139D6588003C6BB0 /* fftwrap.c */; };
-		7388F16C139D6588003C6BB0 /* fftwrap.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F100139D6588003C6BB0 /* fftwrap.h */; };
-		7388F16D139D6588003C6BB0 /* filterbank.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F101139D6588003C6BB0 /* filterbank.c */; };
-		7388F16F139D6588003C6BB0 /* filters.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F103139D6588003C6BB0 /* filters.c */; };
-		7388F179139D6588003C6BB0 /* gain_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F10D139D6588003C6BB0 /* gain_table.c */; };
-		7388F17A139D6588003C6BB0 /* gain_table_lbr.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F10E139D6588003C6BB0 /* gain_table_lbr.c */; };
-		7388F17B139D6588003C6BB0 /* hexc_10_32_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F10F139D6588003C6BB0 /* hexc_10_32_table.c */; };
-		7388F17C139D6588003C6BB0 /* hexc_table.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F110139D6588003C6BB0 /* hexc_table.c */; };
-		7388F17D139D6588003C6BB0 /* high_lsp_tables.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F111139D6588003C6BB0 /* high_lsp_tables.c */; };
-		7388F17E139D6588003C6BB0 /* jitter.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F112139D6588003C6BB0 /* jitter.c */; };
-		7388F17F139D6588003C6BB0 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F113139D6588003C6BB0 /* kiss_fft.c */; };
-		7388F180139D6588003C6BB0 /* kiss_fft.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F114139D6588003C6BB0 /* kiss_fft.h */; };
-		7388F181139D6588003C6BB0 /* kiss_fftr.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F115139D6588003C6BB0 /* kiss_fftr.c */; };
-		7388F182139D6588003C6BB0 /* kiss_fftr.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F116139D6588003C6BB0 /* kiss_fftr.h */; };
-		7388F183139D6588003C6BB0 /* lpc.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F117139D6588003C6BB0 /* lpc.c */; };
-		7388F186139D6588003C6BB0 /* lsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F11A139D6588003C6BB0 /* lsp.c */; };
-		7388F188139D6588003C6BB0 /* lsp_bfin.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F11C139D6588003C6BB0 /* lsp_bfin.h */; };
-		7388F189139D6588003C6BB0 /* lsp_tables_nb.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F11D139D6588003C6BB0 /* lsp_tables_nb.c */; };
-		7388F18A139D6588003C6BB0 /* ltp.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F11E139D6588003C6BB0 /* ltp.c */; };
-		7388F192139D6588003C6BB0 /* mdf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F126139D6588003C6BB0 /* mdf.c */; };
-		7388F194139D6588003C6BB0 /* modes.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F128139D6588003C6BB0 /* modes.c */; };
-		7388F196139D6588003C6BB0 /* modes_wb.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F12A139D6588003C6BB0 /* modes_wb.c */; };
-		7388F197139D6588003C6BB0 /* nb_celp.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F12B139D6588003C6BB0 /* nb_celp.c */; };
-		7388F199139D6588003C6BB0 /* os_support.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F12D139D6588003C6BB0 /* os_support.h */; };
-		7388F19A139D6588003C6BB0 /* preprocess.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F12E139D6588003C6BB0 /* preprocess.c */; };
-		7388F19B139D6588003C6BB0 /* pseudofloat.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F12F139D6588003C6BB0 /* pseudofloat.h */; };
-		7388F19C139D6588003C6BB0 /* quant_lsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F130139D6588003C6BB0 /* quant_lsp.c */; };
-		7388F19E139D6588003C6BB0 /* quant_lsp_bfin.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F132139D6588003C6BB0 /* quant_lsp_bfin.h */; };
-		7388F19F139D6588003C6BB0 /* resample.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F133139D6588003C6BB0 /* resample.c */; };
-		7388F1A0139D6588003C6BB0 /* resample_sse.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F134139D6588003C6BB0 /* resample_sse.h */; };
-		7388F1A1139D6588003C6BB0 /* sb_celp.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F135139D6588003C6BB0 /* sb_celp.c */; };
-		7388F1A4139D6588003C6BB0 /* smallft.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F138139D6588003C6BB0 /* smallft.c */; };
-		7388F1A6139D6588003C6BB0 /* speex.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F13B139D6588003C6BB0 /* speex.h */; };
-		7388F1A7139D6588003C6BB0 /* speex_bits.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F13C139D6588003C6BB0 /* speex_bits.h */; };
-		7388F1A8139D6588003C6BB0 /* speex_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F13D139D6588003C6BB0 /* speex_buffer.h */; };
-		7388F1A9139D6588003C6BB0 /* speex_callbacks.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F13E139D6588003C6BB0 /* speex_callbacks.h */; };
-		7388F1AA139D6588003C6BB0 /* speex_config_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F13F139D6588003C6BB0 /* speex_config_types.h */; };
-		7388F1AB139D6588003C6BB0 /* speex_echo.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F140139D6588003C6BB0 /* speex_echo.h */; };
-		7388F1AC139D6588003C6BB0 /* speex_header.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F141139D6588003C6BB0 /* speex_header.h */; };
-		7388F1AD139D6588003C6BB0 /* speex_jitter.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F142139D6588003C6BB0 /* speex_jitter.h */; };
-		7388F1AE139D6588003C6BB0 /* speex_preprocess.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F143139D6588003C6BB0 /* speex_preprocess.h */; };
-		7388F1AF139D6588003C6BB0 /* speex_resampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F144139D6588003C6BB0 /* speex_resampler.h */; };
-		7388F1B0139D6588003C6BB0 /* speex_stereo.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F145139D6588003C6BB0 /* speex_stereo.h */; };
-		7388F1B1139D6588003C6BB0 /* speex_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F146139D6588003C6BB0 /* speex_types.h */; };
-		7388F1B2139D6588003C6BB0 /* speex.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F147139D6588003C6BB0 /* speex.c */; };
-		7388F1B3139D6588003C6BB0 /* speex_callbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F148139D6588003C6BB0 /* speex_callbacks.c */; };
-		7388F1B4139D6588003C6BB0 /* speex_header.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F149139D6588003C6BB0 /* speex_header.c */; };
-		7388F1B6139D6588003C6BB0 /* stereo.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F14B139D6588003C6BB0 /* stereo.c */; };
-		7388F1BD139D6588003C6BB0 /* vbr.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F152139D6588003C6BB0 /* vbr.c */; };
-		7388F1BF139D6588003C6BB0 /* vorbis_psy.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F154139D6588003C6BB0 /* vorbis_psy.h */; };
-		7388F1C0139D6588003C6BB0 /* vq.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F155139D6588003C6BB0 /* vq.c */; };
-		7388F1C1139D6588003C6BB0 /* vq.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F156139D6588003C6BB0 /* vq.h */; };
-		7388F1C5139D6588003C6BB0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F15A139D6588003C6BB0 /* window.c */; };
-		7388F1F3139D6967003C6BB0 /* _kiss_fft_guts.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F0EF139D6588003C6BB0 /* _kiss_fft_guts.h */; };
-		7388F1F4139D698C003C6BB0 /* filterbank.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F102139D6588003C6BB0 /* filterbank.h */; };
-		7388F26D139D6B5F003C6BB0 /* analysis.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F214139D6B5F003C6BB0 /* analysis.c */; };
-		7388F26E139D6B5F003C6BB0 /* backends.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F215139D6B5F003C6BB0 /* backends.h */; };
-		7388F270139D6B5F003C6BB0 /* bitrate.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F217139D6B5F003C6BB0 /* bitrate.c */; };
-		7388F271139D6B5F003C6BB0 /* bitrate.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F218139D6B5F003C6BB0 /* bitrate.h */; };
-		7388F272139D6B5F003C6BB0 /* block.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F219139D6B5F003C6BB0 /* block.c */; };
-		7388F275139D6B5F003C6BB0 /* res_books_51.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F21E139D6B5F003C6BB0 /* res_books_51.h */; };
-		7388F276139D6B5F003C6BB0 /* res_books_stereo.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F21F139D6B5F003C6BB0 /* res_books_stereo.h */; };
-		7388F277139D6B5F003C6BB0 /* floor_books.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F221139D6B5F003C6BB0 /* floor_books.h */; };
-		7388F27E139D6B5F003C6BB0 /* res_books_uncoupled.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F229139D6B5F003C6BB0 /* res_books_uncoupled.h */; };
-		7388F27F139D6B5F003C6BB0 /* codebook.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F22A139D6B5F003C6BB0 /* codebook.c */; };
-		7388F280139D6B5F003C6BB0 /* codebook.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F22B139D6B5F003C6BB0 /* codebook.h */; };
-		7388F281139D6B5F003C6BB0 /* codec_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F22C139D6B5F003C6BB0 /* codec_internal.h */; };
-		7388F282139D6B5F003C6BB0 /* envelope.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F22D139D6B5F003C6BB0 /* envelope.c */; };
-		7388F283139D6B5F003C6BB0 /* envelope.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F22E139D6B5F003C6BB0 /* envelope.h */; };
-		7388F284139D6B5F003C6BB0 /* floor0.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F22F139D6B5F003C6BB0 /* floor0.c */; };
-		7388F285139D6B5F003C6BB0 /* floor1.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F230139D6B5F003C6BB0 /* floor1.c */; };
-		7388F286139D6B5F003C6BB0 /* highlevel.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F231139D6B5F003C6BB0 /* highlevel.h */; };
-		7388F287139D6B5F003C6BB0 /* info.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F232139D6B5F003C6BB0 /* info.c */; };
-		7388F288139D6B5F003C6BB0 /* lookup.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F233139D6B5F003C6BB0 /* lookup.c */; };
-		7388F289139D6B5F003C6BB0 /* lookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F234139D6B5F003C6BB0 /* lookup.h */; };
-		7388F28A139D6B5F003C6BB0 /* lookup_data.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F235139D6B5F003C6BB0 /* lookup_data.h */; };
-		7388F28C139D6B5F003C6BB0 /* lpc.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F237139D6B5F003C6BB0 /* lpc.c */; };
-		7388F28D139D6B5F003C6BB0 /* lpc.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F238139D6B5F003C6BB0 /* lpc.h */; };
-		7388F28E139D6B5F003C6BB0 /* lsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F239139D6B5F003C6BB0 /* lsp.c */; };
-		7388F28F139D6B5F003C6BB0 /* lsp.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F23A139D6B5F003C6BB0 /* lsp.h */; };
-		7388F292139D6B5F003C6BB0 /* mapping0.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F23D139D6B5F003C6BB0 /* mapping0.c */; };
-		7388F293139D6B5F003C6BB0 /* masking.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F23E139D6B5F003C6BB0 /* masking.h */; };
-		7388F294139D6B5F003C6BB0 /* mdct.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F23F139D6B5F003C6BB0 /* mdct.c */; };
-		7388F295139D6B5F003C6BB0 /* mdct.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F240139D6B5F003C6BB0 /* mdct.h */; };
-		7388F296139D6B5F003C6BB0 /* misc.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F241139D6B5F003C6BB0 /* misc.h */; };
-		7388F297139D6B5F003C6BB0 /* floor_all.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F243139D6B5F003C6BB0 /* floor_all.h */; };
-		7388F29A139D6B5F003C6BB0 /* psych_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F246139D6B5F003C6BB0 /* psych_11.h */; };
-		7388F29B139D6B5F003C6BB0 /* psych_16.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F247139D6B5F003C6BB0 /* psych_16.h */; };
-		7388F29C139D6B5F003C6BB0 /* psych_44.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F248139D6B5F003C6BB0 /* psych_44.h */; };
-		7388F29D139D6B5F003C6BB0 /* psych_8.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F249139D6B5F003C6BB0 /* psych_8.h */; };
-		7388F29E139D6B5F003C6BB0 /* residue_16.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F24A139D6B5F003C6BB0 /* residue_16.h */; };
-		7388F29F139D6B5F003C6BB0 /* residue_44.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F24B139D6B5F003C6BB0 /* residue_44.h */; };
-		7388F2A0139D6B5F003C6BB0 /* residue_44p51.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F24C139D6B5F003C6BB0 /* residue_44p51.h */; };
-		7388F2A1139D6B5F003C6BB0 /* residue_44u.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F24D139D6B5F003C6BB0 /* residue_44u.h */; };
-		7388F2A2139D6B5F003C6BB0 /* residue_8.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F24E139D6B5F003C6BB0 /* residue_8.h */; };
-		7388F2A3139D6B5F003C6BB0 /* setup_11.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F24F139D6B5F003C6BB0 /* setup_11.h */; };
-		7388F2A4139D6B5F003C6BB0 /* setup_16.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F250139D6B5F003C6BB0 /* setup_16.h */; };
-		7388F2A5139D6B5F003C6BB0 /* setup_22.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F251139D6B5F003C6BB0 /* setup_22.h */; };
-		7388F2A6139D6B5F003C6BB0 /* setup_32.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F252139D6B5F003C6BB0 /* setup_32.h */; };
-		7388F2A7139D6B5F003C6BB0 /* setup_44.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F253139D6B5F003C6BB0 /* setup_44.h */; };
-		7388F2A8139D6B5F003C6BB0 /* setup_44p51.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F254139D6B5F003C6BB0 /* setup_44p51.h */; };
-		7388F2A9139D6B5F003C6BB0 /* setup_44u.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F255139D6B5F003C6BB0 /* setup_44u.h */; };
-		7388F2AA139D6B5F003C6BB0 /* setup_8.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F256139D6B5F003C6BB0 /* setup_8.h */; };
-		7388F2AB139D6B5F003C6BB0 /* setup_X.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F257139D6B5F003C6BB0 /* setup_X.h */; };
-		7388F2AC139D6B5F003C6BB0 /* os.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F258139D6B5F003C6BB0 /* os.h */; };
-		7388F2AD139D6B5F003C6BB0 /* psy.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F259139D6B5F003C6BB0 /* psy.c */; };
-		7388F2AE139D6B5F003C6BB0 /* psy.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F25A139D6B5F003C6BB0 /* psy.h */; };
-		7388F2B0139D6B5F003C6BB0 /* registry.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F25C139D6B5F003C6BB0 /* registry.c */; };
-		7388F2B1139D6B5F003C6BB0 /* registry.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F25D139D6B5F003C6BB0 /* registry.h */; };
-		7388F2B2139D6B5F003C6BB0 /* res0.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F25E139D6B5F003C6BB0 /* res0.c */; };
-		7388F2B3139D6B5F003C6BB0 /* scales.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F25F139D6B5F003C6BB0 /* scales.h */; };
-		7388F2B4139D6B5F003C6BB0 /* sharedbook.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F260139D6B5F003C6BB0 /* sharedbook.c */; };
-		7388F2B5139D6B5F003C6BB0 /* smallft.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F261139D6B5F003C6BB0 /* smallft.c */; };
-		7388F2B6139D6B5F003C6BB0 /* smallft.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F262139D6B5F003C6BB0 /* smallft.h */; };
-		7388F2B7139D6B5F003C6BB0 /* synthesis.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F263139D6B5F003C6BB0 /* synthesis.c */; };
-		7388F2B9139D6B5F003C6BB0 /* codec.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F266139D6B5F003C6BB0 /* codec.h */; };
-		7388F2BA139D6B5F003C6BB0 /* vorbisenc.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F267139D6B5F003C6BB0 /* vorbisenc.h */; };
-		7388F2BB139D6B5F003C6BB0 /* vorbisfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F268139D6B5F003C6BB0 /* vorbisfile.h */; };
-		7388F2BC139D6B5F003C6BB0 /* vorbisenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F269139D6B5F003C6BB0 /* vorbisenc.c */; };
-		7388F2BD139D6B5F003C6BB0 /* vorbisfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F26A139D6B5F003C6BB0 /* vorbisfile.c */; };
-		7388F2BE139D6B5F003C6BB0 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = 7388F26B139D6B5F003C6BB0 /* window.c */; };
-		7388F2BF139D6B5F003C6BB0 /* window.h in Headers */ = {isa = PBXBuildFile; fileRef = 7388F26C139D6B5F003C6BB0 /* window.h */; };
-		7388F2F4139D6DBF003C6BB0 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F036139D59E4003C6BB0 /* Ogg.framework */; };
-		7388F2F5139D6DBF003C6BB0 /* Speex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F047139D5A05003C6BB0 /* Speex.framework */; };
-		7388F2F6139D6DBF003C6BB0 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */; };
-		7388F2FD139D6DD8003C6BB0 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7388F036139D59E4003C6BB0 /* Ogg.framework */; };
-		7388F2FE139D6DD8003C6BB0 /* Speex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7388F047139D5A05003C6BB0 /* Speex.framework */; };
-		7388F2FF139D6DD8003C6BB0 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */; };
-		7388F30A139D6E58003C6BB0 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */; };
 		738B57711446185700F25FDF /* BanList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57681446185700F25FDF /* BanList.cpp */; };
 		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
@@ -346,6 +188,14 @@
 		739746A014B373980053CCF4 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
 		739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739746EF14B374E30053CCF4 /* WeaponInfo.cpp */; };
 		7397470A14B3766B0053CCF4 /* libpng.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
+		7397499C14B4EDC60053CCF4 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499B14B4EDC60053CCF4 /* Ogg.framework */; };
+		7397499E14B4EDC60053CCF4 /* Speex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499D14B4EDC60053CCF4 /* Speex.framework */; };
+		739749A014B4EDC60053CCF4 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499F14B4EDC60053CCF4 /* Vorbis.framework */; };
+		73974A5514B4EE0B0053CCF4 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397499B14B4EDC60053CCF4 /* Ogg.framework */; };
+		73974A5614B4EE0B0053CCF4 /* Speex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397499D14B4EDC60053CCF4 /* Speex.framework */; };
+		73974A5714B4EE0B0053CCF4 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397499F14B4EDC60053CCF4 /* Vorbis.framework */; };
+		73974A6414B4EE780053CCF4 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499B14B4EDC60053CCF4 /* Ogg.framework */; };
+		73974A6514B4EE790053CCF4 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499F14B4EDC60053CCF4 /* Vorbis.framework */; };
 		73A2B27113DE59030002EF92 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1FF13DE57C40002EF92 /* libz.dylib */; };
 		73A2B2A713DE59740002EF92 /* ScreenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A313DE59740002EF92 /* ScreenShooter.cpp */; };
 		73A2B2A813DE59740002EF92 /* UIManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A513DE59740002EF92 /* UIManager.cpp */; };
@@ -684,7 +534,6 @@
 		73D2F56712E2DA1700EA5EBE /* yarrow.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F52212E2DA1700EA5EBE /* yarrow.c */; };
 		73D2F5DF12E2DDD200EA5EBE /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		73D6B5061370C32B002ABC48 /* OpenAL-Soft_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 73D6B5051370C32B002ABC48 /* OpenAL-Soft_Prefix.pch */; };
-		73D6B5091370C349002ABC48 /* ALURE_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 73D6B5081370C349002ABC48 /* ALURE_Prefix.pch */; };
 		73EE612013BA398D009931CD /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EE611F13BA398D009931CD /* AudioToolbox.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		94010E8511D7CF0200E2DBB2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94010E8411D7CF0200E2DBB2 /* OpenGL.framework */; };
@@ -710,20 +559,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 7378261712960DDF007333BE;
 			remoteInfo = Bitfighterd;
-		};
-		033F6AFC12D191C20023D4C6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
-			remoteInfo = libtomcrypt;
-		};
-		033F6AFE12D191C70023D4C6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 737CE61C1290553D00D732B7;
-			remoteInfo = tnl;
 		};
 		03AD188E12CE2BED00274A25 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -760,20 +595,6 @@
 			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
 			remoteInfo = libtomcrypt;
 		};
-		737BEFA9139D97DC0066B0CB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7388F046139D5A05003C6BB0;
-			remoteInfo = Speex;
-		};
-		737BEFAB139D97DC0066B0CB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7388F059139D5A28003C6BB0;
-			remoteInfo = Vorbis;
-		};
 		737CE630129055A600D732B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -787,34 +608,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
 			remoteInfo = libtomcrypt;
-		};
-		7388F029139D59C2003C6BB0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7388F01E139D5992003C6BB0;
-			remoteInfo = Ogg;
-		};
-		7388F04C139D5A0A003C6BB0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7388F01E139D5992003C6BB0;
-			remoteInfo = Ogg;
-		};
-		7388F05F139D5A2D003C6BB0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7388F01E139D5992003C6BB0;
-			remoteInfo = Ogg;
-		};
-		7388F308139D6E53003C6BB0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7388F059139D5A28003C6BB0;
-			remoteInfo = Vorbis;
 		};
 		73B0FC151370ABA90019AE4E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -884,11 +677,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				73974A5514B4EE0B0053CCF4 /* Ogg.framework in CopyFiles */,
+				73974A5614B4EE0B0053CCF4 /* Speex.framework in CopyFiles */,
+				73974A5714B4EE0B0053CCF4 /* Vorbis.framework in CopyFiles */,
 				7397470A14B3766B0053CCF4 /* libpng.framework in CopyFiles */,
 				73851F3D13ABF1C900D88D2A /* SDL.framework in CopyFiles */,
-				7388F2FD139D6DD8003C6BB0 /* Ogg.framework in CopyFiles */,
-				7388F2FE139D6DD8003C6BB0 /* Speex.framework in CopyFiles */,
-				7388F2FF139D6DD8003C6BB0 /* Vorbis.framework in CopyFiles */,
 				73B0FC341370ABE80019AE4E /* ALURE.framework in CopyFiles */,
 				73B0FC351370ABE80019AE4E /* OpenAL-Soft.framework in CopyFiles */,
 				7375E3AA1369176300F71273 /* luavec.framework in CopyFiles */,
@@ -1038,10 +831,7 @@
 		7385CBA914147824008470C8 /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Timer.h; path = ../../../zap/Timer.h; sourceTree = SOURCE_ROOT; };
 		7386B9F7136FE3000094A660 /* ALURE.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ALURE.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7388F020139D5992003C6BB0 /* Ogg-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Ogg-Info.plist"; sourceTree = "<group>"; };
-		7388F036139D59E4003C6BB0 /* Ogg.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Ogg.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		7388F047139D5A05003C6BB0 /* Speex.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Speex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7388F048139D5A05003C6BB0 /* Speex-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Speex-Info.plist"; sourceTree = "<group>"; };
-		7388F05A139D5A28003C6BB0 /* Vorbis.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Vorbis.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7388F05B139D5A28003C6BB0 /* Vorbis-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Vorbis-Info.plist"; sourceTree = "<group>"; };
 		7388F069139D5B46003C6BB0 /* music */ = {isa = PBXFileReference; lastKnownFileType = folder; name = music; path = ../../../resource/music; sourceTree = SOURCE_ROOT; };
 		7388F089139D5BB0003C6BB0 /* bitwise.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bitwise.c; sourceTree = "<group>"; };
@@ -1231,6 +1021,9 @@
 		739746EE14B374E30053CCF4 /* GameTypesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameTypesEnum.h; path = ../../../zap/GameTypesEnum.h; sourceTree = SOURCE_ROOT; };
 		739746EF14B374E30053CCF4 /* WeaponInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WeaponInfo.cpp; path = ../../../zap/WeaponInfo.cpp; sourceTree = SOURCE_ROOT; };
 		739746F014B374E30053CCF4 /* WeaponInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WeaponInfo.h; path = ../../../zap/WeaponInfo.h; sourceTree = SOURCE_ROOT; };
+		7397499B14B4EDC60053CCF4 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Ogg.framework; sourceTree = "<absolute>"; };
+		7397499D14B4EDC60053CCF4 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Speex.framework; sourceTree = "<absolute>"; };
+		7397499F14B4EDC60053CCF4 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Vorbis.framework; sourceTree = "<absolute>"; };
 		73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libpng-Info.plist"; sourceTree = "<group>"; };
 		73A2B1FF13DE57C40002EF92 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		73A2B22413DE58630002EF92 /* png.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = png.h; sourceTree = "<group>"; };
@@ -1698,30 +1491,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				73B0FC171370ABAC0019AE4E /* OpenAL-Soft.framework in Frameworks */,
-				7388F30A139D6E58003C6BB0 /* Vorbis.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F01D139D5992003C6BB0 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F045139D5A05003C6BB0 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F04E139D5A0E003C6BB0 /* Ogg.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F058139D5A28003C6BB0 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F061139D5A32003C6BB0 /* Ogg.framework in Frameworks */,
+				73974A6414B4EE780053CCF4 /* Ogg.framework in Frameworks */,
+				73974A6514B4EE790053CCF4 /* Vorbis.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1740,9 +1511,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7388F2F4139D6DBF003C6BB0 /* Ogg.framework in Frameworks */,
-				7388F2F5139D6DBF003C6BB0 /* Speex.framework in Frameworks */,
-				7388F2F6139D6DBF003C6BB0 /* Vorbis.framework in Frameworks */,
 				7375E2A113690EE100F71273 /* luavec.framework in Frameworks */,
 				737CE637129055BF00D732B7 /* tnl.framework in Frameworks */,
 				737CE5CB129051DC00D732B7 /* libtomcrypt.framework in Frameworks */,
@@ -1755,6 +1523,9 @@
 				73851F4E13ABF20200D88D2A /* SDL.framework in Frameworks */,
 				73A2B27113DE59030002EF92 /* libz.dylib in Frameworks */,
 				739746A014B373980053CCF4 /* libpng.framework in Frameworks */,
+				7397499C14B4EDC60053CCF4 /* Ogg.framework in Frameworks */,
+				7397499E14B4EDC60053CCF4 /* Speex.framework in Frameworks */,
+				739749A014B4EDC60053CCF4 /* Vorbis.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1781,6 +1552,9 @@
 				94010E8411D7CF0200E2DBB2 /* OpenGL.framework */,
 				9462C40211D7D82700791A0B /* IOKit.framework */,
 				9462C41611D7D95600791A0B /* Carbon.framework */,
+				7397499B14B4EDC60053CCF4 /* Ogg.framework */,
+				7397499D14B4EDC60053CCF4 /* Speex.framework */,
+				7397499F14B4EDC60053CCF4 /* Vorbis.framework */,
 			);
 			name = "Pre Compiled";
 			sourceTree = "<group>";
@@ -1797,9 +1571,6 @@
 		036FF0B612D1D7EF00C14EE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7388F036139D59E4003C6BB0 /* Ogg.framework */,
-				7388F047139D5A05003C6BB0 /* Speex.framework */,
-				7388F05A139D5A28003C6BB0 /* Vorbis.framework */,
 				73B0FB5C1370A9F80019AE4E /* OpenAL-Soft.framework */,
 				7386B9F7136FE3000094A660 /* ALURE.framework */,
 				7375E28E13690E1900F71273 /* luavec.framework */,
@@ -3002,105 +2773,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				73D6B5091370C349002ABC48 /* ALURE_Prefix.pch in Headers */,
 				7317B9DB1370CAC30025A41E /* alure.h in Headers */,
 				7317B9DC1370CAC30025A41E /* alext.h in Headers */,
 				7317B9E11370CAC30025A41E /* config.h in Headers */,
 				7317B9E31370CAC30025A41E /* main.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F01A139D5992003C6BB0 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F091139D5BB0003C6BB0 /* config_types.h in Headers */,
-				7388F092139D5BB0003C6BB0 /* ogg.h in Headers */,
-				7388F093139D5BB0003C6BB0 /* os_types.h in Headers */,
-				7388F0B0139D6343003C6BB0 /* Ogg_Prefix.pch in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F042139D5A05003C6BB0 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F16C139D6588003C6BB0 /* fftwrap.h in Headers */,
-				7388F180139D6588003C6BB0 /* kiss_fft.h in Headers */,
-				7388F182139D6588003C6BB0 /* kiss_fftr.h in Headers */,
-				7388F188139D6588003C6BB0 /* lsp_bfin.h in Headers */,
-				7388F199139D6588003C6BB0 /* os_support.h in Headers */,
-				7388F19B139D6588003C6BB0 /* pseudofloat.h in Headers */,
-				7388F19E139D6588003C6BB0 /* quant_lsp_bfin.h in Headers */,
-				7388F1A0139D6588003C6BB0 /* resample_sse.h in Headers */,
-				7388F1A6139D6588003C6BB0 /* speex.h in Headers */,
-				7388F1A7139D6588003C6BB0 /* speex_bits.h in Headers */,
-				7388F1A8139D6588003C6BB0 /* speex_buffer.h in Headers */,
-				7388F1A9139D6588003C6BB0 /* speex_callbacks.h in Headers */,
-				7388F1AA139D6588003C6BB0 /* speex_config_types.h in Headers */,
-				7388F1AB139D6588003C6BB0 /* speex_echo.h in Headers */,
-				7388F1AC139D6588003C6BB0 /* speex_header.h in Headers */,
-				7388F1AD139D6588003C6BB0 /* speex_jitter.h in Headers */,
-				7388F1AE139D6588003C6BB0 /* speex_preprocess.h in Headers */,
-				7388F1AF139D6588003C6BB0 /* speex_resampler.h in Headers */,
-				7388F1B0139D6588003C6BB0 /* speex_stereo.h in Headers */,
-				7388F1B1139D6588003C6BB0 /* speex_types.h in Headers */,
-				7388F1BF139D6588003C6BB0 /* vorbis_psy.h in Headers */,
-				7388F1C1139D6588003C6BB0 /* vq.h in Headers */,
-				7388F1F3139D6967003C6BB0 /* _kiss_fft_guts.h in Headers */,
-				7388F1F4139D698C003C6BB0 /* filterbank.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F055139D5A28003C6BB0 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F26E139D6B5F003C6BB0 /* backends.h in Headers */,
-				7388F271139D6B5F003C6BB0 /* bitrate.h in Headers */,
-				7388F275139D6B5F003C6BB0 /* res_books_51.h in Headers */,
-				7388F276139D6B5F003C6BB0 /* res_books_stereo.h in Headers */,
-				7388F277139D6B5F003C6BB0 /* floor_books.h in Headers */,
-				7388F27E139D6B5F003C6BB0 /* res_books_uncoupled.h in Headers */,
-				7388F280139D6B5F003C6BB0 /* codebook.h in Headers */,
-				7388F281139D6B5F003C6BB0 /* codec_internal.h in Headers */,
-				7388F283139D6B5F003C6BB0 /* envelope.h in Headers */,
-				7388F286139D6B5F003C6BB0 /* highlevel.h in Headers */,
-				7388F289139D6B5F003C6BB0 /* lookup.h in Headers */,
-				7388F28A139D6B5F003C6BB0 /* lookup_data.h in Headers */,
-				7388F28D139D6B5F003C6BB0 /* lpc.h in Headers */,
-				7388F28F139D6B5F003C6BB0 /* lsp.h in Headers */,
-				7388F293139D6B5F003C6BB0 /* masking.h in Headers */,
-				7388F295139D6B5F003C6BB0 /* mdct.h in Headers */,
-				7388F296139D6B5F003C6BB0 /* misc.h in Headers */,
-				7388F297139D6B5F003C6BB0 /* floor_all.h in Headers */,
-				7388F29A139D6B5F003C6BB0 /* psych_11.h in Headers */,
-				7388F29B139D6B5F003C6BB0 /* psych_16.h in Headers */,
-				7388F29C139D6B5F003C6BB0 /* psych_44.h in Headers */,
-				7388F29D139D6B5F003C6BB0 /* psych_8.h in Headers */,
-				7388F29E139D6B5F003C6BB0 /* residue_16.h in Headers */,
-				7388F29F139D6B5F003C6BB0 /* residue_44.h in Headers */,
-				7388F2A0139D6B5F003C6BB0 /* residue_44p51.h in Headers */,
-				7388F2A1139D6B5F003C6BB0 /* residue_44u.h in Headers */,
-				7388F2A2139D6B5F003C6BB0 /* residue_8.h in Headers */,
-				7388F2A3139D6B5F003C6BB0 /* setup_11.h in Headers */,
-				7388F2A4139D6B5F003C6BB0 /* setup_16.h in Headers */,
-				7388F2A5139D6B5F003C6BB0 /* setup_22.h in Headers */,
-				7388F2A6139D6B5F003C6BB0 /* setup_32.h in Headers */,
-				7388F2A7139D6B5F003C6BB0 /* setup_44.h in Headers */,
-				7388F2A8139D6B5F003C6BB0 /* setup_44p51.h in Headers */,
-				7388F2A9139D6B5F003C6BB0 /* setup_44u.h in Headers */,
-				7388F2AA139D6B5F003C6BB0 /* setup_8.h in Headers */,
-				7388F2AB139D6B5F003C6BB0 /* setup_X.h in Headers */,
-				7388F2AC139D6B5F003C6BB0 /* os.h in Headers */,
-				7388F2AE139D6B5F003C6BB0 /* psy.h in Headers */,
-				7388F2B1139D6B5F003C6BB0 /* registry.h in Headers */,
-				7388F2B3139D6B5F003C6BB0 /* scales.h in Headers */,
-				7388F2B6139D6B5F003C6BB0 /* smallft.h in Headers */,
-				7388F2B9139D6B5F003C6BB0 /* codec.h in Headers */,
-				7388F2BA139D6B5F003C6BB0 /* vorbisenc.h in Headers */,
-				7388F2BB139D6B5F003C6BB0 /* vorbisfile.h in Headers */,
-				7388F2BF139D6B5F003C6BB0 /* window.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3224,67 +2900,10 @@
 			);
 			dependencies = (
 				73B0FC161370ABA90019AE4E /* PBXTargetDependency */,
-				7388F309139D6E53003C6BB0 /* PBXTargetDependency */,
 			);
 			name = ALURE;
 			productName = ALURE;
 			productReference = 7386B9F7136FE3000094A660 /* ALURE.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		7388F01E139D5992003C6BB0 /* Ogg */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7388F023139D5993003C6BB0 /* Build configuration list for PBXNativeTarget "Ogg" */;
-			buildPhases = (
-				7388F01A139D5992003C6BB0 /* Headers */,
-				7388F01B139D5992003C6BB0 /* Resources */,
-				7388F01C139D5992003C6BB0 /* Sources */,
-				7388F01D139D5992003C6BB0 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = Ogg;
-			productName = Ogg;
-			productReference = 7388F036139D59E4003C6BB0 /* Ogg.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		7388F046139D5A05003C6BB0 /* Speex */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7388F04B139D5A06003C6BB0 /* Build configuration list for PBXNativeTarget "Speex" */;
-			buildPhases = (
-				7388F042139D5A05003C6BB0 /* Headers */,
-				7388F043139D5A05003C6BB0 /* Resources */,
-				7388F044139D5A05003C6BB0 /* Sources */,
-				7388F045139D5A05003C6BB0 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7388F04D139D5A0A003C6BB0 /* PBXTargetDependency */,
-			);
-			name = Speex;
-			productName = Speex;
-			productReference = 7388F047139D5A05003C6BB0 /* Speex.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		7388F059139D5A28003C6BB0 /* Vorbis */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7388F05E139D5A29003C6BB0 /* Build configuration list for PBXNativeTarget "Vorbis" */;
-			buildPhases = (
-				7388F055139D5A28003C6BB0 /* Headers */,
-				7388F056139D5A28003C6BB0 /* Resources */,
-				7388F057139D5A28003C6BB0 /* Sources */,
-				7388F058139D5A28003C6BB0 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7388F060139D5A2D003C6BB0 /* PBXTargetDependency */,
-			);
-			name = Vorbis;
-			productName = Vorbis;
-			productReference = 7388F05A139D5A28003C6BB0 /* Vorbis.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		73B0FB5B1370A9F80019AE4E /* OpenAL-Soft */ = {
@@ -3323,9 +2942,6 @@
 				7375E2A013690EDD00F71273 /* PBXTargetDependency */,
 				73B0FC211370ABBA0019AE4E /* PBXTargetDependency */,
 				73B0FC231370ABBA0019AE4E /* PBXTargetDependency */,
-				7388F02A139D59C2003C6BB0 /* PBXTargetDependency */,
-				737BEFAA139D97DC0066B0CB /* PBXTargetDependency */,
-				737BEFAC139D97DC0066B0CB /* PBXTargetDependency */,
 			);
 			name = Bitfighter;
 			productInstallPath = "$(HOME)/Applications";
@@ -3357,13 +2973,9 @@
 				7375E28D13690E1900F71273 /* luavec */,
 				737CE46B12904E9E00D732B7 /* libtomcrypt */,
 				737CE61C1290553D00D732B7 /* tnl */,
-				7388F01E139D5992003C6BB0 /* Ogg */,
-				7388F046139D5A05003C6BB0 /* Speex */,
-				7388F059139D5A28003C6BB0 /* Vorbis */,
 				7378261712960DDF007333BE /* Bitfighterd */,
 				03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */,
 				033F6AE312D190F20023D4C6 /* Create Bitfighter Dedicated Server Release */,
-				033F6AF912D191B40023D4C6 /* Compile Frameworks Only */,
 			);
 		};
 /* End PBXProject section */
@@ -3408,27 +3020,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		7386B9F3136FE3000094A660 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F01B139D5992003C6BB0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F043139D5A05003C6BB0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F056139D5A28003C6BB0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3741,91 +3332,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7388F01C139D5992003C6BB0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F08F139D5BB0003C6BB0 /* bitwise.c in Sources */,
-				7388F090139D5BB0003C6BB0 /* framing.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F044139D5A05003C6BB0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F15D139D6588003C6BB0 /* bits.c in Sources */,
-				7388F15E139D6588003C6BB0 /* buffer.c in Sources */,
-				7388F15F139D6588003C6BB0 /* cb_search.c in Sources */,
-				7388F165139D6588003C6BB0 /* exc_10_16_table.c in Sources */,
-				7388F166139D6588003C6BB0 /* exc_10_32_table.c in Sources */,
-				7388F167139D6588003C6BB0 /* exc_20_32_table.c in Sources */,
-				7388F168139D6588003C6BB0 /* exc_5_256_table.c in Sources */,
-				7388F169139D6588003C6BB0 /* exc_5_64_table.c in Sources */,
-				7388F16A139D6588003C6BB0 /* exc_8_128_table.c in Sources */,
-				7388F16B139D6588003C6BB0 /* fftwrap.c in Sources */,
-				7388F16D139D6588003C6BB0 /* filterbank.c in Sources */,
-				7388F16F139D6588003C6BB0 /* filters.c in Sources */,
-				7388F179139D6588003C6BB0 /* gain_table.c in Sources */,
-				7388F17A139D6588003C6BB0 /* gain_table_lbr.c in Sources */,
-				7388F17B139D6588003C6BB0 /* hexc_10_32_table.c in Sources */,
-				7388F17C139D6588003C6BB0 /* hexc_table.c in Sources */,
-				7388F17D139D6588003C6BB0 /* high_lsp_tables.c in Sources */,
-				7388F17E139D6588003C6BB0 /* jitter.c in Sources */,
-				7388F17F139D6588003C6BB0 /* kiss_fft.c in Sources */,
-				7388F181139D6588003C6BB0 /* kiss_fftr.c in Sources */,
-				7388F183139D6588003C6BB0 /* lpc.c in Sources */,
-				7388F186139D6588003C6BB0 /* lsp.c in Sources */,
-				7388F189139D6588003C6BB0 /* lsp_tables_nb.c in Sources */,
-				7388F18A139D6588003C6BB0 /* ltp.c in Sources */,
-				7388F192139D6588003C6BB0 /* mdf.c in Sources */,
-				7388F194139D6588003C6BB0 /* modes.c in Sources */,
-				7388F196139D6588003C6BB0 /* modes_wb.c in Sources */,
-				7388F197139D6588003C6BB0 /* nb_celp.c in Sources */,
-				7388F19A139D6588003C6BB0 /* preprocess.c in Sources */,
-				7388F19C139D6588003C6BB0 /* quant_lsp.c in Sources */,
-				7388F19F139D6588003C6BB0 /* resample.c in Sources */,
-				7388F1A1139D6588003C6BB0 /* sb_celp.c in Sources */,
-				7388F1A4139D6588003C6BB0 /* smallft.c in Sources */,
-				7388F1B2139D6588003C6BB0 /* speex.c in Sources */,
-				7388F1B3139D6588003C6BB0 /* speex_callbacks.c in Sources */,
-				7388F1B4139D6588003C6BB0 /* speex_header.c in Sources */,
-				7388F1B6139D6588003C6BB0 /* stereo.c in Sources */,
-				7388F1BD139D6588003C6BB0 /* vbr.c in Sources */,
-				7388F1C0139D6588003C6BB0 /* vq.c in Sources */,
-				7388F1C5139D6588003C6BB0 /* window.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7388F057139D5A28003C6BB0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7388F26D139D6B5F003C6BB0 /* analysis.c in Sources */,
-				7388F270139D6B5F003C6BB0 /* bitrate.c in Sources */,
-				7388F272139D6B5F003C6BB0 /* block.c in Sources */,
-				7388F27F139D6B5F003C6BB0 /* codebook.c in Sources */,
-				7388F282139D6B5F003C6BB0 /* envelope.c in Sources */,
-				7388F284139D6B5F003C6BB0 /* floor0.c in Sources */,
-				7388F285139D6B5F003C6BB0 /* floor1.c in Sources */,
-				7388F287139D6B5F003C6BB0 /* info.c in Sources */,
-				7388F288139D6B5F003C6BB0 /* lookup.c in Sources */,
-				7388F28C139D6B5F003C6BB0 /* lpc.c in Sources */,
-				7388F28E139D6B5F003C6BB0 /* lsp.c in Sources */,
-				7388F292139D6B5F003C6BB0 /* mapping0.c in Sources */,
-				7388F294139D6B5F003C6BB0 /* mdct.c in Sources */,
-				7388F2AD139D6B5F003C6BB0 /* psy.c in Sources */,
-				7388F2B0139D6B5F003C6BB0 /* registry.c in Sources */,
-				7388F2B2139D6B5F003C6BB0 /* res0.c in Sources */,
-				7388F2B4139D6B5F003C6BB0 /* sharedbook.c in Sources */,
-				7388F2B5139D6B5F003C6BB0 /* smallft.c in Sources */,
-				7388F2B7139D6B5F003C6BB0 /* synthesis.c in Sources */,
-				7388F2BC139D6B5F003C6BB0 /* vorbisenc.c in Sources */,
-				7388F2BD139D6B5F003C6BB0 /* vorbisfile.c in Sources */,
-				7388F2BE139D6B5F003C6BB0 /* window.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		73B0FB591370A9F80019AE4E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -3992,16 +3498,6 @@
 			target = 7378261712960DDF007333BE /* Bitfighterd */;
 			targetProxy = 033F6AE812D1910A0023D4C6 /* PBXContainerItemProxy */;
 		};
-		033F6AFD12D191C20023D4C6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
-			targetProxy = 033F6AFC12D191C20023D4C6 /* PBXContainerItemProxy */;
-		};
-		033F6AFF12D191C70023D4C6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 737CE61C1290553D00D732B7 /* tnl */;
-			targetProxy = 033F6AFE12D191C70023D4C6 /* PBXContainerItemProxy */;
-		};
 		03AD188F12CE2BED00274A25 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* Bitfighter */;
@@ -4027,16 +3523,6 @@
 			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
 			targetProxy = 7378261B12960DDF007333BE /* PBXContainerItemProxy */;
 		};
-		737BEFAA139D97DC0066B0CB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7388F046139D5A05003C6BB0 /* Speex */;
-			targetProxy = 737BEFA9139D97DC0066B0CB /* PBXContainerItemProxy */;
-		};
-		737BEFAC139D97DC0066B0CB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7388F059139D5A28003C6BB0 /* Vorbis */;
-			targetProxy = 737BEFAB139D97DC0066B0CB /* PBXContainerItemProxy */;
-		};
 		737CE631129055A600D732B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 737CE61C1290553D00D732B7 /* tnl */;
@@ -4046,26 +3532,6 @@
 			isa = PBXTargetDependency;
 			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
 			targetProxy = 737CE7361290582200D732B7 /* PBXContainerItemProxy */;
-		};
-		7388F02A139D59C2003C6BB0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7388F01E139D5992003C6BB0 /* Ogg */;
-			targetProxy = 7388F029139D59C2003C6BB0 /* PBXContainerItemProxy */;
-		};
-		7388F04D139D5A0A003C6BB0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7388F01E139D5992003C6BB0 /* Ogg */;
-			targetProxy = 7388F04C139D5A0A003C6BB0 /* PBXContainerItemProxy */;
-		};
-		7388F060139D5A2D003C6BB0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7388F01E139D5992003C6BB0 /* Ogg */;
-			targetProxy = 7388F05F139D5A2D003C6BB0 /* PBXContainerItemProxy */;
-		};
-		7388F309139D6E53003C6BB0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7388F059139D5A28003C6BB0 /* Vorbis */;
-			targetProxy = 7388F308139D6E53003C6BB0 /* PBXContainerItemProxy */;
 		};
 		73B0FC161370ABA90019AE4E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4107,31 +3573,6 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = "Create Bitfighter Dedicated Server Release";
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		033F6AFA12D191B40023D4C6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Compile Frameworks";
-			};
-			name = Debug;
-		};
-		033F6AFB12D191B40023D4C6 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				OTHER_CFLAGS = (
-					"-DTNL_ENABLE_LOGGING",
-					"-TNL_ENABLE_LOGGING",
-				);
-				PRODUCT_NAME = "Compile Frameworks";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -4257,6 +3698,10 @@
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib\"",
+				);
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -4349,77 +3794,6 @@
 			};
 			name = "release x86_64";
 		};
-		730F1B6313D52189004EE354 /* release x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "Ogg-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Ogg;
-			};
-			name = "release x86_64";
-		};
-		730F1B6413D52189004EE354 /* release x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					__MACOSX__,
-					FLOATING_POINT,
-					"EXPORT=__attribute__((visibility(\\\"default\\\")))",
-				);
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "Speex-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Speex;
-			};
-			name = "release x86_64";
-		};
-		730F1B6513D52189004EE354 /* release x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				HEADER_SEARCH_PATHS = (
-					../../../libogg,
-					../../../libvorbis,
-				);
-				INFOPLIST_FILE = "Vorbis-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Vorbis;
-			};
-			name = "release x86_64";
-		};
 		730F1B6613D52189004EE354 /* release x86_64 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4467,16 +3841,6 @@
 			};
 			name = "release x86_64";
 		};
-		730F1B6913D52189004EE354 /* release x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Compile Frameworks";
-			};
-			name = "release x86_64";
-		};
 		7375E29113690E1A00F71273 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4503,20 +3867,29 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "luavec-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
+				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -4601,6 +3974,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -4608,15 +3982,23 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = ../libtomcrypt;
 				INFOPLIST_FILE = "libtomcrypt-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
+				SDKROOT = "";
+				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "";
 				ZERO_LINK = NO;
 			};
@@ -4650,6 +4032,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -4657,14 +4040,23 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "tnl-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
+				SDKROOT = "";
+				SEPARATE_STRIP = YES;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -4766,6 +4158,10 @@
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib\"",
+				);
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -4858,77 +4254,6 @@
 			};
 			name = "debug x86_64";
 		};
-		73852FC513D51A7500FA74BB /* debug x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "Ogg-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Ogg;
-			};
-			name = "debug x86_64";
-		};
-		73852FC613D51A7500FA74BB /* debug x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					__MACOSX__,
-					FLOATING_POINT,
-					"EXPORT=__attribute__((visibility(\\\"default\\\")))",
-				);
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "Speex-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Speex;
-			};
-			name = "debug x86_64";
-		};
-		73852FC713D51A7500FA74BB /* debug x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				HEADER_SEARCH_PATHS = (
-					../../../libogg,
-					../../../libvorbis,
-				);
-				INFOPLIST_FILE = "Vorbis-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Vorbis;
-			};
-			name = "debug x86_64";
-		};
 		73852FC813D51A7500FA74BB /* debug x86_64 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4976,16 +4301,6 @@
 			};
 			name = "debug x86_64";
 		};
-		73852FCB13D51A7500FA74BB /* debug x86_64 */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Compile Frameworks";
-			};
-			name = "debug x86_64";
-		};
 		7386B9FD136FE3010094A660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4993,6 +4308,10 @@
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib\"",
+				);
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -5018,14 +4337,23 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../lib\"",
+				);
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = (
 					../../../lib,
 					../../../libogg,
@@ -5034,152 +4362,15 @@
 				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = ALURE;
+				SDKROOT = "";
+				SEPARATE_STRIP = YES;
 				USE_HEADERMAP = NO;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		7388F021139D5993003C6BB0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "Ogg-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Ogg;
-			};
-			name = Debug;
-		};
-		7388F022139D5993003C6BB0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "Ogg-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Ogg;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		7388F049139D5A06003C6BB0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					__MACOSX__,
-					FLOATING_POINT,
-					"EXPORT=__attribute__((visibility(\\\"default\\\")))",
-				);
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "Speex-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Speex;
-			};
-			name = Debug;
-		};
-		7388F04A139D5A06003C6BB0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					__MACOSX__,
-					FLOATING_POINT,
-					"EXPORT=__attribute__((visibility(\\\"default\\\")))",
-				);
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "Speex-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Speex;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		7388F05C139D5A29003C6BB0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				HEADER_SEARCH_PATHS = (
-					../../../libogg,
-					../../../libvorbis,
-				);
-				INFOPLIST_FILE = "Vorbis-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Vorbis;
-			};
-			name = Debug;
-		};
-		7388F05D139D5A29003C6BB0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				HEADER_SEARCH_PATHS = (
-					../../../libogg,
-					../../../libvorbis,
-				);
-				INFOPLIST_FILE = "Vorbis-Info.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PREBINDING = NO;
-				PRODUCT_NAME = Vorbis;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -5215,14 +4406,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = (
 					"../../../openal/openal-soft",
 					"../../../openal/openal-soft/include",
@@ -5230,9 +4426,14 @@
 				);
 				INFOPLIST_FILE = "OpenAL-Soft-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
 				PREBINDING = NO;
 				PRODUCT_NAME = "OpenAL-Soft";
+				SDKROOT = "";
+				SEPARATE_STRIP = YES;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
 			};
@@ -5279,6 +4480,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -5287,9 +4489,12 @@
 					"\"$(SRCROOT)/build/Release\"",
 					"\"$(SRCROOT)/build/Debug\"",
 				);
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
 					../../../libpng,
@@ -5304,8 +4509,13 @@
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
+				SDKROOT = "";
+				SEPARATE_STRIP = YES;
 				SYMROOT = build/;
 			};
 			name = Release;
@@ -5360,17 +4570,6 @@
 				033F6AE512D190F30023D4C6 /* Release */,
 				73852FCA13D51A7500FA74BB /* debug x86_64 */,
 				730F1B6813D52189004EE354 /* release x86_64 */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		033F6B0512D192160023D4C6 /* Build configuration list for PBXAggregateTarget "Compile Frameworks Only" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				033F6AFA12D191B40023D4C6 /* Debug */,
-				033F6AFB12D191B40023D4C6 /* Release */,
-				73852FCB13D51A7500FA74BB /* debug x86_64 */,
-				730F1B6913D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -5437,39 +4636,6 @@
 				7386B9FE136FE3010094A660 /* Release */,
 				73852FC113D51A7500FA74BB /* debug x86_64 */,
 				730F1B5F13D52189004EE354 /* release x86_64 */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		7388F023139D5993003C6BB0 /* Build configuration list for PBXNativeTarget "Ogg" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7388F021139D5993003C6BB0 /* Debug */,
-				7388F022139D5993003C6BB0 /* Release */,
-				73852FC513D51A7500FA74BB /* debug x86_64 */,
-				730F1B6313D52189004EE354 /* release x86_64 */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		7388F04B139D5A06003C6BB0 /* Build configuration list for PBXNativeTarget "Speex" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7388F049139D5A06003C6BB0 /* Debug */,
-				7388F04A139D5A06003C6BB0 /* Release */,
-				73852FC613D51A7500FA74BB /* debug x86_64 */,
-				730F1B6413D52189004EE354 /* release x86_64 */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		7388F05E139D5A29003C6BB0 /* Build configuration list for PBXNativeTarget "Vorbis" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7388F05C139D5A29003C6BB0 /* Debug */,
-				7388F05D139D5A29003C6BB0 /* Release */,
-				73852FC713D51A7500FA74BB /* debug x86_64 */,
-				730F1B6513D52189004EE354 /* release x86_64 */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
