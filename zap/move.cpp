@@ -40,6 +40,17 @@ Move::Move()
    }
 }
 
+
+bool Move::isAnyModActive() const
+{
+   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+      if(modulePrimary[i] || moduleSecondary[i])
+         return true;
+
+   return false;
+}
+
+
 bool Move::isEqualMove(Move *prev)
 {
    bool modsUnchanged = true;

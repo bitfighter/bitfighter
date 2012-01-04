@@ -55,6 +55,8 @@ inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
 class Move : public Point
 {
 public:
+   Move();                          // Constructor
+
    F32 angle;
    bool fire;
    bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
@@ -65,7 +67,7 @@ public:
       MaxMoveTime = 127,
    };
 
-   Move();                          // Constructor
+   bool isAnyModActive() const;
    bool isEqualMove(Move *prev);    // Compares this move to the previous one -- are they the same?
    void pack(BitStream *stream, Move *prev, bool packTime);
    void unpack(BitStream *stream, bool unpackTime);
