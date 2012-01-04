@@ -43,8 +43,8 @@ std::map<ALint,UserCallbacks> InstalledCallbacks;
 CRITICAL_SECTION cs_StreamPlay;
 alureStream::ListType alureStream::StreamList;
 
-PFNALCSETTHREADCONTEXTPROC alcSetThreadContext;
-PFNALCGETTHREADCONTEXTPROC alcGetThreadContext;
+PFNALCSETTHREADCONTEXTPROC palcSetThreadContext;
+PFNALCGETTHREADCONTEXTPROC palcGetThreadContext;
 
 
 template<typename T>
@@ -129,16 +129,16 @@ static void init_alure(void)
 
     if(alcIsExtensionPresent(NULL, "ALC_EXT_thread_local_context"))
     {
-        LoadALCProc(NULL, "alcSetThreadContext", &alcSetThreadContext);
-        LoadALCProc(NULL, "alcGetThreadContext", &alcGetThreadContext);
-        if(!alcSetThreadContext || !alcGetThreadContext)
+        LoadALCProc(NULL, "alcSetThreadContext", &palcSetThreadContext);
+        LoadALCProc(NULL, "alcGetThreadContext", &palcGetThreadContext);
+        if(!palcSetThreadContext || !palcGetThreadContext)
         {
             fprintf(stderr, "Alure lib: ALC_EXT_thread_local_context advertised, but missing function:\n"
                             "    alcSetThreadContext=%p\n"
                             "    alcGetThreadContext=%p\n",
-                            alcSetThreadContext, alcGetThreadContext);
-            alcSetThreadContext = NULL;
-            alcGetThreadContext = NULL;
+                            palcSetThreadContext, palcGetThreadContext);
+            palcSetThreadContext = NULL;
+            palcGetThreadContext = NULL;
         }
     }
 }
@@ -150,23 +150,57 @@ static void deinit_alure(void)
 }
 
 
-#ifndef DYNLOAD
-void *OpenLib(const char*)
-{ return (void*)0xDEADBEEF; }
-void CloseLib(void*)
-{ }
+#ifndef HAVE_WINDOWS_H
 
-#elif defined(_WIN32)
+void EnterCriticalSection(CRITICAL_SECTION *cs)
+{
+    int ret;
+    ret = pthread_mutex_lock(cs);
+    assert(ret == 0);
+}
+void LeaveCriticalSection(CRITICAL_SECTION *cs)
+{
+    int ret;
+    ret = pthread_mutex_unlock(cs);
+    assert(ret == 0);
+}
+void InitializeCriticalSection(CRITICAL_SECTION *cs)
+{
+    pthread_mutexattr_t attrib;
+    int ret;
 
+    ret = pthread_mutexattr_init(&attrib);
+    assert(ret == 0);
+
+    ret = pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
+#ifdef HAVE_PTHREAD_NP_H
+    if(ret != 0)
+        ret = pthread_mutexattr_setkind_np(&attrib, PTHREAD_MUTEX_RECURSIVE);
+#endif
+    assert(ret == 0);
+    ret = pthread_mutex_init(cs, &attrib);
+    assert(ret == 0);
+
+    pthread_mutexattr_destroy(&attrib);
+}
+void DeleteCriticalSection(CRITICAL_SECTION *cs)
+{
+    int ret;
+    ret = pthread_mutex_destroy(cs);
+    assert(ret == 0);
+}
+
+#endif
+
+#ifdef DYNLOAD
+#ifdef _WIN32
 void *OpenLib(const char *libname)
 { return LoadLibraryA(libname); }
 void CloseLib(void *hdl)
 { FreeLibrary((HINSTANCE)hdl); }
 void *GetLibProc(void *hdl, const char *funcname)
 { return (void*)GetProcAddress((HINSTANCE)hdl, funcname); }
-
 #else
-
 void *OpenLib(const char *libname)
 {
     const char *err = dlerror();
@@ -191,6 +225,7 @@ void *GetLibProc(void *hdl, const char *funcname)
 }
 void CloseLib(void *hdl)
 { dlclose(hdl); }
+#endif
 #endif
 
 
@@ -735,6 +770,7 @@ ALURE_API void* ALURE_APIENTRY alureGetProcAddress(const ALchar *funcname)
         ADD_FUNCTION(alureCreateStreamFromMemory)
         ADD_FUNCTION(alureCreateStreamFromStaticMemory)
         ADD_FUNCTION(alureCreateStreamFromCallback)
+        ADD_FUNCTION(alureGetStreamLength)
         ADD_FUNCTION(alureRewindStream)
         ADD_FUNCTION(alureDestroyStream)
         ADD_FUNCTION(alureSetStreamOrder)

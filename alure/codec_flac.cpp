@@ -33,14 +33,7 @@
 #include <FLAC/all.h>
 
 
-#ifdef _WIN32
-#define FLAC_LIB "libFLAC.dll"
-#elif defined(__APPLE__)
-#define FLAC_LIB "libFLAC.8.dylib"
-#else
-#define FLAC_LIB "libFLAC.so.8"
-#endif
-
+#ifdef DYNLOAD
 static void *flac_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(FLAC__stream_decoder_get_state);
@@ -48,9 +41,22 @@ MAKE_FUNC(FLAC__stream_decoder_finish);
 MAKE_FUNC(FLAC__stream_decoder_new);
 MAKE_FUNC(FLAC__stream_decoder_seek_absolute);
 MAKE_FUNC(FLAC__stream_decoder_delete);
+MAKE_FUNC(FLAC__stream_decoder_get_total_samples);
 MAKE_FUNC(FLAC__stream_decoder_process_single);
 MAKE_FUNC(FLAC__stream_decoder_init_stream);
 #undef MAKE_FUNC
+
+#define FLAC__stream_decoder_get_state pFLAC__stream_decoder_get_state
+#define FLAC__stream_decoder_finish pFLAC__stream_decoder_finish
+#define FLAC__stream_decoder_new pFLAC__stream_decoder_new
+#define FLAC__stream_decoder_seek_absolute pFLAC__stream_decoder_seek_absolute
+#define FLAC__stream_decoder_delete pFLAC__stream_decoder_delete
+#define FLAC__stream_decoder_get_total_samples pFLAC__stream_decoder_get_total_samples
+#define FLAC__stream_decoder_process_single pFLAC__stream_decoder_process_single
+#define FLAC__stream_decoder_init_stream pFLAC__stream_decoder_init_stream
+#else
+#define flac_handle 1
+#endif
 
 
 struct flacStream : public alureStream {
@@ -68,8 +74,17 @@ private:
     ALuint outLen;
 
 public:
+#ifdef DYNLOAD
     static void Init()
     {
+#ifdef _WIN32
+#define FLAC_LIB "libFLAC.dll"
+#elif defined(__APPLE__)
+#define FLAC_LIB "libFLAC.8.dylib"
+#else
+#define FLAC_LIB "libFLAC.so.8"
+#endif
+
         flac_handle = OpenLib(FLAC_LIB);
         if(!flac_handle) return;
 
@@ -78,6 +93,7 @@ public:
         LOAD_FUNC(flac_handle, FLAC__stream_decoder_new);
         LOAD_FUNC(flac_handle, FLAC__stream_decoder_seek_absolute);
         LOAD_FUNC(flac_handle, FLAC__stream_decoder_delete);
+        LOAD_FUNC(flac_handle, FLAC__stream_decoder_get_total_samples);
         LOAD_FUNC(flac_handle, FLAC__stream_decoder_process_single);
         LOAD_FUNC(flac_handle, FLAC__stream_decoder_init_stream);
     }
@@ -87,6 +103,10 @@ public:
             CloseLib(flac_handle);
         flac_handle = NULL;
     }
+#else
+    static void Init() { }
+    static void Deinit() { }
+#endif
 
     virtual bool IsValid()
     { return flacFile != NULL; }
@@ -115,8 +135,8 @@ public:
 
         while(outLen < outMax)
         {
-            if(pFLAC__stream_decoder_process_single(flacFile) == false ||
-               pFLAC__stream_decoder_get_state(flacFile) == FLAC__STREAM_DECODER_END_OF_STREAM)
+            if(FLAC__stream_decoder_process_single(flacFile) == false ||
+               FLAC__stream_decoder_get_state(flacFile) == FLAC__STREAM_DECODER_END_OF_STREAM)
                 break;
         }
 
@@ -125,7 +145,7 @@ public:
 
     virtual bool Rewind()
     {
-        if(pFLAC__stream_decoder_seek_absolute(flacFile, 0) != false)
+        if(FLAC__stream_decoder_seek_absolute(flacFile, 0) != false)
         {
             initialData.clear();
             return true;
@@ -135,16 +155,21 @@ public:
         return false;
     }
 
+    virtual alureInt64 GetLength()
+    {
+        return FLAC__stream_decoder_get_total_samples(flacFile);
+    }
+
     flacStream(std::istream *_fstream)
       : alureStream(_fstream), flacFile(NULL), format(AL_NONE), samplerate(0),
         blockAlign(0), useFloat(AL_FALSE)
     {
         if(!flac_handle) return;
 
-        flacFile = pFLAC__stream_decoder_new();
+        flacFile = FLAC__stream_decoder_new();
         if(flacFile)
         {
-            if(pFLAC__stream_decoder_init_stream(flacFile, ReadCallback, SeekCallback, TellCallback, LengthCallback, EofCallback, WriteCallback, MetadataCallback, ErrorCallback, this) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
+            if(FLAC__stream_decoder_init_stream(flacFile, ReadCallback, SeekCallback, TellCallback, LengthCallback, EofCallback, WriteCallback, MetadataCallback, ErrorCallback, this) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
             {
                 if(InitFlac())
                 {
@@ -152,9 +177,9 @@ public:
                     return;
                 }
 
-                pFLAC__stream_decoder_finish(flacFile);
+                FLAC__stream_decoder_finish(flacFile);
             }
-            pFLAC__stream_decoder_delete(flacFile);
+            FLAC__stream_decoder_delete(flacFile);
             flacFile = NULL;
         }
     }
@@ -163,8 +188,8 @@ public:
     {
         if(flacFile)
         {
-            pFLAC__stream_decoder_finish(flacFile);
-            pFLAC__stream_decoder_delete(flacFile);
+            FLAC__stream_decoder_finish(flacFile);
+            FLAC__stream_decoder_delete(flacFile);
             flacFile = NULL;
         }
     }
@@ -181,8 +206,8 @@ private:
         outLen = 0;
         while(initialData.size() == 0)
         {
-            if(pFLAC__stream_decoder_process_single(flacFile) == false ||
-               pFLAC__stream_decoder_get_state(flacFile) == FLAC__STREAM_DECODER_END_OF_STREAM)
+            if(FLAC__stream_decoder_process_single(flacFile) == false ||
+               FLAC__stream_decoder_get_state(flacFile) == FLAC__STREAM_DECODER_END_OF_STREAM)
                 break;
         }
 

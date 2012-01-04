@@ -109,8 +109,10 @@ private:
    //S32 mTotalScore;              // Total number of points scored by anyone this game
 
    // Long term score tracking
-   S32 mCumulativeScore;         // Total points scored my this connection over it's entire lifetime
-   S32 mTotalCumulativeScore;    // Total points scored by anyone while this connection is alive
+   S32 mKills;                   // Total kills over the lifetime of this connection
+   S32 mFratricides;             // Total kills of teammates over the lifetime of this connection
+   S32 mDeaths;                  // Total deaths over the lifetime of this connection
+   S32 mSuicides;                // Total suicides over the lifetime of this connection
    U32 mGamesPlayed;             // Number of games played, obviously
 
 public:
@@ -222,18 +224,17 @@ public:
    bool wantsScoreboardUpdates();
    void setWantsScoreboardUpdates(bool wantsUpdates);
 
-   //S32 getScore() { return mScore; }
-   //void setScore(S32 score) { mScore = score; }    // Called from ServerClientInfo
+   void addKill();
+   void addFratricide();
+   void addDeath();
+   void addSuicide();
+   S32 getKills();
+   S32 getFratricides();
+   S32 getDeaths();
+   S32 getSuicides();
 
-   //void addScore(S32 score) { mScore += score; }
-   //void addToTotalScore(S32 score) { mTotalScore += score; mTotalCumulativeScore += score; }
+   F32 getCalculatedRating();
 
-   void addToTotalCumulativeScore(S32 score);
-
-   F32 getCumulativeRating();
-   //F32 getRating();
-
-   //void setRating(F32 rating) { mRating = rating; }
 
    void endOfGameScoringHandler();
 

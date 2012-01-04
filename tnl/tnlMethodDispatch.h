@@ -66,7 +66,6 @@ namespace Types
    {
       s.readStringTableEntry(val);
    }
-
    /// Writes a StringTableEntry into a BitStream.
    inline void write(TNL::BitStream &s, TNL::StringTableEntry &val)
    {
@@ -93,6 +92,39 @@ namespace Types
    template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::SignedInt<BitCount> &val)
    {
       s.writeSignedInt(val.value, BitCount);
+   }
+
+   /// Reads a bit-compressed integer from a BitStream
+   template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::Int<BitCount> *val)
+   {
+      val->value = s.readInt(BitCount);
+   }
+   /// Writes a bit-compressed integer into a BitStream
+   template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::Int<BitCount> &val)
+   {
+      s.writeInt(val.value, BitCount);
+   }
+
+   /// Reads a bit-compressed Float (0 to 1) from a BitStream.
+   template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::Float<BitCount> *val)
+   {
+      val->value = s.readFloat(BitCount);
+   }
+   /// Writes a bit-compressed Float (0 to 1) into a BitStream.
+   template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::Float<BitCount> &val)
+   {
+      s.writeFloat(val.value, BitCount);
+   }
+
+   /// Reads a bit-compressed SignedFloat (-1 to 1) from a BitStream.
+   template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::SignedFloat<BitCount> *val)
+   {
+      val->value = s.readSignedFloat(BitCount);
+   }
+   /// Writes a bit-compressed SignedFloat (-1 to 1) into a BitStream.
+   template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::SignedFloat<BitCount> &val)
+   {
+      s.writeSignedFloat(val.value, BitCount);
    }
 
 
@@ -232,42 +264,6 @@ namespace Types
 
       for(TNL::S32 i = 0; i < val.size(); i++)
          write(s, val[i], arg1);
-   }
-
-
-   /// Reads a bit-compressed integer from a BitStream
-   template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::Int<BitCount> *val)
-   {
-      val->value = s.readInt(BitCount);
-   }
-
-
-   /// Writes a bit-compressed integer into a BitStream
-   template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::Int<BitCount> &val)
-   {
-      s.writeInt(val.value, BitCount);
-   }
-
-
-   /// Reads a bit-compressed SignedFloat (-1 to 1) from a BitStream.
-   template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::Float<BitCount> *val)
-   {
-      val->value = s.readFloat(BitCount);
-   }
-   /// Writes a bit-compressed SignedFloat (-1 to 1) into a BitStream.
-   template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::Float<BitCount> &val)
-   {
-      s.writeFloat(val.value, BitCount);
-   }
-   /// Reads a bit-compressed Float (0 to 1) from a BitStream.
-   template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::SignedFloat<BitCount> *val)
-   {
-      val->value = s.readSignedFloat(BitCount);
-   }
-   /// Writes a bit-compressed Float (0 to 1) into a BitStream.
-   template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::SignedFloat<BitCount> &val)
-   {
-      s.writeSignedFloat(val.value, BitCount);
    }
 };
 

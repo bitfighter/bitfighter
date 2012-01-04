@@ -533,6 +533,28 @@ ALURE_API ALboolean ALURE_APIENTRY alureSetStreamPatchset(alureStream *stream, c
     return stream->SetPatchset(patchset);
 }
 
+/* Function: alureGetStreamLength
+ *
+ * Retrieves an approximate number of samples for the stream. Not all streams
+ * or decoders can return such info, and may return 0 if the stream length is
+ * unknown.
+ *
+ * Returns:
+ * -1 on error.
+ *
+ * *Version Added*: 1.2
+ */
+ALURE_API alureInt64 ALURE_APIENTRY alureGetStreamLength(alureStream *stream)
+{
+    if(!alureStream::Verify(stream))
+    {
+        SetError("Invalid stream pointer");
+        return -1;
+    }
+
+    return stream->GetLength();
+}
+
 /* Function: alureDestroyStream
  *
  * Closes an opened stream. For convenience, it will also delete the given

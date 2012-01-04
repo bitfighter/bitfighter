@@ -33,14 +33,7 @@
 #include <dumb.h>
 
 
-#ifdef _WIN32
-#define DUMB_LIB "libdumb.dll"
-#elif defined(__APPLE__)
-#define DUMB_LIB "libdumb.dylib"
-#else
-#define DUMB_LIB "libdumb.so"
-#endif
-
+#ifdef DYNLOAD
 static void *dumb_handle;
 #define MAKE_FUNC(x) static typeof(x)* p##x
 MAKE_FUNC(dumbfile_open_ex);
@@ -60,6 +53,25 @@ MAKE_FUNC(dumb_it_sr_get_speed);
 MAKE_FUNC(dumb_it_sr_set_speed);
 #undef MAKE_FUNC
 
+#define dumbfile_open_ex pdumbfile_open_ex
+#define dumbfile_close pdumbfile_close
+#define dumb_read_mod pdumb_read_mod
+#define dumb_read_s3m pdumb_read_s3m
+#define dumb_read_xm pdumb_read_xm
+#define dumb_read_it pdumb_read_it
+#define dumb_silence pdumb_silence
+#define duh_sigrenderer_generate_samples pduh_sigrenderer_generate_samples
+#define duh_get_it_sigrenderer pduh_get_it_sigrenderer
+#define duh_end_sigrenderer pduh_end_sigrenderer
+#define unload_duh punload_duh
+#define dumb_it_start_at_order pdumb_it_start_at_order
+#define dumb_it_set_loop_callback pdumb_it_set_loop_callback
+#define dumb_it_sr_get_speed pdumb_it_sr_get_speed
+#define dumb_it_sr_set_speed pdumb_it_sr_set_speed
+#else
+#define dumb_handle 1
+#endif
+
 
 struct dumbStream : public alureStream {
 private:
@@ -73,8 +85,17 @@ private:
     ALCint samplerate;
 
 public:
+#ifdef DYNLOAD
     static void Init()
     {
+#ifdef _WIN32
+#define DUMB_LIB "libdumb.dll"
+#elif defined(__APPLE__)
+#define DUMB_LIB "libdumb.dylib"
+#else
+#define DUMB_LIB "libdumb.so"
+#endif
+
         dumb_handle = OpenLib(DUMB_LIB);
         if(!dumb_handle) return;
 
@@ -100,6 +121,10 @@ public:
             CloseLib(dumb_handle);
         dumb_handle = NULL;
     }
+#else
+    static void Init() { }
+    static void Deinit() { }
+#endif
 
     virtual bool IsValid()
     { return renderer != NULL; }
@@ -123,7 +148,7 @@ public:
     {
         ALuint ret = 0;
 
-        if(pdumb_it_sr_get_speed(pduh_get_it_sigrenderer(renderer)) == 0)
+        if(dumb_it_sr_get_speed(duh_get_it_sigrenderer(renderer)) == 0)
             return 0;
 
         ALuint sample_count = bytes / ((format==AL_FORMAT_STEREO16) ?
@@ -134,8 +159,8 @@ public:
             &sampleBuf[0]
         };
 
-        pdumb_silence(samples[0], sample_count);
-        ret = pduh_sigrenderer_generate_samples(renderer, 1.0f, 65536.0f/samplerate, sample_count/2, samples);
+        dumb_silence(samples[0], sample_count);
+        ret = duh_sigrenderer_generate_samples(renderer, 1.0f, 65536.0f/samplerate, sample_count/2, samples);
         ret *= 2;
         if(format == AL_FORMAT_STEREO16)
         {
@@ -154,26 +179,26 @@ public:
 
     virtual bool Rewind()
     {
-        DUH_SIGRENDERER *newrenderer = pdumb_it_start_at_order(duh, 2, lastOrder);
+        DUH_SIGRENDERER *newrenderer = dumb_it_start_at_order(duh, 2, lastOrder);
         if(!newrenderer)
         {
             SetError("Could not start renderer");
             return false;
         }
-        pduh_end_sigrenderer(renderer);
+        duh_end_sigrenderer(renderer);
         renderer = newrenderer;
         return true;
     }
 
     virtual bool SetOrder(ALuint order)
     {
-        DUH_SIGRENDERER *newrenderer = pdumb_it_start_at_order(duh, 2, order);
+        DUH_SIGRENDERER *newrenderer = dumb_it_start_at_order(duh, 2, order);
         if(!newrenderer)
         {
             SetError("Could not set order");
             return false;
         }
-        pduh_end_sigrenderer(renderer);
+        duh_end_sigrenderer(renderer);
         renderer = newrenderer;
 
         lastOrder = order;
@@ -187,14 +212,13 @@ public:
         if(!dumb_handle) return;
 
         ALCdevice *device = alcGetContextsDevice(alcGetCurrentContext());
-        if(device)
-            alcGetIntegerv(device, ALC_FREQUENCY, 1, &samplerate);
+        if(device) alcGetIntegerv(device, ALC_FREQUENCY, 1, &samplerate);
 
         DUH* (*funcs[])(DUMBFILE*) = {
-            pdumb_read_it,
-            pdumb_read_xm,
-            pdumb_read_s3m,
-            //pdumb_read_mod,
+            dumb_read_it,
+            dumb_read_xm,
+            dumb_read_s3m,
+            //dumb_read_mod,
             NULL
         };
 
@@ -206,24 +230,24 @@ public:
 
         for(size_t i = 0;funcs[i];i++)
         {
-            dumbFile = pdumbfile_open_ex(this, &vfs);
+            dumbFile = dumbfile_open_ex(this, &vfs);
             if(dumbFile)
             {
                 duh = funcs[i](dumbFile);
                 if(duh)
                 {
-                    renderer = pdumb_it_start_at_order(duh, 2, lastOrder);
+                    renderer = dumb_it_start_at_order(duh, 2, lastOrder);
                     if(renderer)
                     {
-                        pdumb_it_set_loop_callback(pduh_get_it_sigrenderer(renderer), loop_cb, this);
+                        dumb_it_set_loop_callback(duh_get_it_sigrenderer(renderer), loop_cb, this);
                         break;
                     }
 
-                    punload_duh(duh);
+                    unload_duh(duh);
                     duh = NULL;
                 }
 
-                pdumbfile_close(dumbFile);
+                dumbfile_close(dumbFile);
                 dumbFile = NULL;
             }
             fstream->clear();
@@ -234,15 +258,15 @@ public:
     virtual ~dumbStream()
     {
         if(renderer)
-            pduh_end_sigrenderer(renderer);
+            duh_end_sigrenderer(renderer);
         renderer = NULL;
 
         if(duh)
-            punload_duh(duh);
+            unload_duh(duh);
         duh = NULL;
 
         if(dumbFile)
-            pdumbfile_close(dumbFile);
+            dumbfile_close(dumbFile);
         dumbFile = NULL;
     }
 
@@ -282,7 +306,7 @@ private:
     static int loop_cb(void *user_data)
     {
         dumbStream *self = static_cast<dumbStream*>(user_data);
-        pdumb_it_sr_set_speed(pduh_get_it_sigrenderer(self->renderer), 0);
+        dumb_it_sr_set_speed(duh_get_it_sigrenderer(self->renderer), 0);
         return 0;
     }
 };

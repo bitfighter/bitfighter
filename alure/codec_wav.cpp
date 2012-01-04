@@ -37,6 +37,7 @@ private:
     int samplerate;
     int blockAlign;
     int sampleSize;
+    int channels;
     long dataStart;
     long dataLen;
     size_t remLen;
@@ -105,6 +106,12 @@ public:
         return false;
     }
 
+    virtual alureInt64 GetLength()
+    {
+        alureInt64 ret = dataLen;
+        return ret / channels * 8 / sampleSize;
+    }
+
     wavStream(std::istream *_fstream)
       : alureStream(_fstream), format(0), dataStart(0)
     {
@@ -134,7 +141,7 @@ public:
                     break;
 
                 /* mono or stereo data */
-                int channels = read_le16(fstream);
+                channels = read_le16(fstream);
 
                 /* sample frequency */
                 samplerate = read_le32(fstream);
