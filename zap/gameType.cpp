@@ -1129,8 +1129,8 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 
    static const U32 INACTIVITY_THRESHOLD = 20000;    // 20 secs, in ms
 
-   // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client
-   if(conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD)
+   // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never display bots.
+   if(!conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD && clientInfo->isRobot())
    {
       s2cPlayerSpawnDelayed();
       return;
