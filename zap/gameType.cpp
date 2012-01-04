@@ -2136,7 +2136,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 // Player appears to be away, spawn is on hold until he returns
 GAMETYPE_RPC_S2C(GameType, s2cPlayerSpawnDelayed, (), ())
 {
-#ifndef ZAP_DEDICATED
+#ifndef ZAP_DEDICATED  
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
    TNLAssert(clientGame, "Invalid client game!");
 
@@ -2158,8 +2158,12 @@ GAMETYPE_RPC_S2C(GameType, s2cPlayerSpawnDelayed, (), ())
 
       errUI->reset();
       errUI->setPresentation(1);
-      errUI->setTitle("PRESS ANY KEY TO SPAWN");
-      errUI->setMessage(2, "You were killed; press any key to continue playing.");
+      errUI->setTitle("");
+      errUI->setMessage(1, "PRESS ANY");
+      errUI->setMessage(2, "KEY TO");
+      errUI->setMessage(3, "RESPAWN");
+      errUI->setInstr("");
+
       errUI->activate();
    }
 #endif

@@ -759,17 +759,24 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 inset = 100;              // Inset for left and right edges of box
-   const S32 titleSize = 30;     // Size of title
-   const S32 titleGap = 10;      // Spacing between title and first line of text
-   const S32 textSize = 18;      // Size of text and instructions
-   const S32 textGap = 6;        // Spacing between text lines
-   const S32 instrGap = 15;      // Gap between last line of text and instruction line
+   S32 inset = 100;                    // Inset for left and right edges of box
+   const S32 titleSize = 30;           // Size of title
+   const S32 titleGap = 10;            // Spacing between title and first line of text
+   const S32 textSize = 18;            // Size of text and instructions
+   const S32 textGap = textSize / 3;   // Spacing between text lines
+   const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
-   S32 boxHeight = titleSize + titleGap + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
+   S32 titleSpace = titleSize + titleGap;
+   S32 boxHeight = titleSpace + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
 
-   if(!strcmp(instr, ""))
+   if(strcmp(instr, "") == 0)
       boxHeight -= (instrGap + textSize);
+
+   if(strcmp(title, "") == 0)
+   {
+      boxHeight -= titleSpace;
+      titleSpace = 0;
+   }
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
@@ -798,10 +805,67 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    glColor(Colors::white);
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
+
    for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + vertMargin + titleSize + titleGap + i * (textSize + textGap), textSize, message[i]);
+      drawCenteredString(boxTop + vertMargin + titleSpace + i * (textSize + textGap), textSize, message[i]);
 
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
+}
+
+
+void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
+{
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   S32 inset = 100;              // Inset for left and right edges of box
+   const S32 titleSize = 30;     // Size of title
+   const S32 titleGap = 10;      // Spacing between title and first line of text
+   const S32 textSize = 36;      // Size of text and instructions
+   const S32 textGap = textSize / 3;        // Spacing between text lines
+   const S32 instrGap = 15;      // Gap between last line of text and instruction line
+
+   S32 actualLines = 0;
+   for(S32 i = 0; i < msgLines; i++)
+      if(strcmp(message[i], "") != 0)
+         actualLines = i + 1;
+
+   S32 titleSpace = titleSize + titleGap;
+   S32 boxHeight = titleSpace + actualLines * (textSize + textGap) + instrGap;
+
+   if(strcmp(instr, "") == 0)
+      boxHeight -= instrGap;
+
+   if(strcmp(title, "") == 0)
+   {
+      boxHeight -= titleSpace;
+      titleSpace = 0;
+   }
+
+   S32 boxTop = (canvasHeight - boxHeight) / 2;
+
+   S32 maxLen = 0;
+   for(S32 i = 0; i < msgLines; i++)
+   {
+      S32 len = getStringWidth(textSize, message[i]) + 20;     // 20 gives a little breathing room on the edges
+      if(len > maxLen)
+         maxLen = len;
+   }
+
+   if(canvasWidth - 2 * inset < maxLen)
+      inset = (canvasWidth - maxLen) / 2;
+
+   // Draw title, message, and footer
+   glColor(Colors::blue);
+   drawCenteredString(boxTop + vertMargin, titleSize, title);
+
+   S32 boxWidth = 300;
+   drawHollowRect(boxWidth / 2, boxTop - vertMargin, canvasWidth - (boxWidth / 2), boxTop + boxHeight + vertMargin, Colors::blue);
+
+   for(S32 i = 0; i < msgLines; i++)
+      drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i]);
+
+   drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
 }
 
 

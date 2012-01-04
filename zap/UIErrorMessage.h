@@ -36,6 +36,9 @@ class ErrorMessageUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
+private:
+   S32 mPresentationId;
+
 public:
    ErrorMessageUserInterface(ClientGame *game);      // Constructor
    const static S32 MAX_LINES = 9;
@@ -45,6 +48,7 @@ public:
    void onActivate();
    void setMessage (S32 id, const char *message);
    void setTitle(const char *message);
+   void setPresentation(S32 presentationId);
    void reset();
    void setInstr(const char *message);
    void idle(U32 t);

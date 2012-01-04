@@ -50,8 +50,10 @@ void ErrorMessageUserInterface::onActivate()
 
 void ErrorMessageUserInterface::reset()
 {
-   mTitle = "WE HAVE A PROBLEM";    // Default title
+   mTitle = "WE HAVE A PROBLEM";          // Default title
    mInstr = "Hit any key to continue";
+   mPresentationId = 0;
+
    for(S32 i = 0; i < MAX_LINES; i++)
       mMessage[i] = "";
 }
@@ -68,6 +70,12 @@ void ErrorMessageUserInterface::setMessage(S32 id, const char *message)
 void ErrorMessageUserInterface::setTitle(const char *message)
 {
    mTitle = message;
+}
+
+
+void ErrorMessageUserInterface::setPresentation(S32 presentationId)
+{
+   mPresentationId = presentationId;
 }
 
 
@@ -100,7 +108,12 @@ void ErrorMessageUserInterface::render()
 {
    getUIManager()->renderPrevUI();
    
-   renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
+   if(mPresentationId == 0)      // Standard presentation
+      renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
+   else if(mPresentationId == 1)
+       renderUnboxedMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
+   else
+      TNLAssert(false, "Unknown value of mPresentationId!");
 }
 
 

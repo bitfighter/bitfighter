@@ -140,6 +140,8 @@ public:
    virtual void onMouseDragged();
 
    void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
+   void renderUnboxedMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
+
    static void drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled = false);
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor);
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
