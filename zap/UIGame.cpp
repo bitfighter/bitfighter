@@ -728,21 +728,17 @@ static const S32 gapSize = 3;       // Gap between text and box
 S32 gLoadoutIndicatorHeight = fontSize + gapSize * 2;
 
 
-S32 renderIndicator(S32 xPos, const char *name)
+static S32 renderIndicator(S32 xPos, const char *name)
 {
    S32 width = UserInterface::getStringWidth(fontSize, name);
 
-   glBegin(GL_LINE_LOOP);
-      glVertex2i(xPos, UserInterface::vertMargin);
-      glVertex2i(xPos + width + 2 * gapSize, UserInterface::vertMargin);
-      glVertex2i(xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
-      glVertex2i(xPos, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
-   glEnd();
+   UserInterface::drawHollowRect(xPos, UserInterface::vertMargin, 
+                                 xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
 
-   // Add the weapon name
+   // Add the weapon or module name
    UserInterface::drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, name);
 
-   return width;
+   return width + 2 * gapSize;
 }
 
 
@@ -759,11 +755,11 @@ void GameUserInterface::renderLoadoutIndicators()
    if(!localShip)
       return;
 
-   const Color INDICATOR_INACTIVE_COLOR(0, .8, 0);          // greenish
-   const Color INDICATOR_ACTIVE_COLOR  (.8, 0, 0);          // redish
-   const Color INDICATOR_PASSIVE_COLOR = Colors::yellow;
+   static const Color *INDICATOR_INACTIVE_COLOR = &Colors::green80;      
+   static const Color *INDICATOR_ACTIVE_COLOR = &Colors::red80;        
+   static const Color *INDICATOR_PASSIVE_COLOR = &Colors::yellow;
 
-   U32 xPos = UserInterface::horizMargin;
+   U32 xPos = horizMargin;
 
    // First, the weapons
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
@@ -772,7 +768,7 @@ void GameUserInterface::renderLoadoutIndicators()
 
       S32 width = renderIndicator(xPos, GameWeapon::weaponInfo[localShip->getWeapon(i)].name.getString());
 
-      xPos += UserInterface::vertMargin + width - 2 * gapSize;
+      xPos += width + gapSize;
    }
 
    xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
@@ -794,7 +790,7 @@ void GameUserInterface::renderLoadoutIndicators()
 
       S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 
-      xPos += UserInterface::vertMargin + width - 2 * gapSize;
+      xPos += width + gapSize;
    }
 }
 
@@ -804,7 +800,7 @@ void GameUserInterface::renderMessageDisplay()
 {
    glColor(Colors::white);
 
-   S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? UserInterface::messageMargin : UserInterface::vertMargin;
+   S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin;
    S32 msgCount;
 
    msgCount = MessageDisplayCount;  // Short form
@@ -819,7 +815,7 @@ void GameUserInterface::renderMessageDisplay()
          //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
          //y += FONTSIZE + FONT_GAP;
          y += (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP)
-            * UserInterface::drawWrapText(mDisplayMessage[i], UserInterface::horizMargin, y,
+            * drawWrapText(mDisplayMessage[i], horizMargin, y,
                750, // wrap width
                y_end, // ypos_end
                SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP, // line height
@@ -835,7 +831,7 @@ void GameUserInterface::renderChatMessageDisplay()
 {
    glColor(Colors::white);
 
-   S32 y = UserInterface::chatMessageMargin;
+   S32 y = chatMessageMargin;
    S32 msgCount;
 
    if(mMessageDisplayMode == LongFixed)
@@ -858,9 +854,8 @@ void GameUserInterface::renderChatMessageDisplay()
             else
                glColor(mDisplayChatMessageColor[i]);
 
-            //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP)
-               * UserInterface::drawWrapText(mDisplayChatMessage[i], UserInterface::horizMargin, y,
+            //drawString(horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mDisplayChatMessage[i], horizMargin, y,
                   700, // wrap width
                   y_end, // ypos_end
                   CHAT_FONT_SIZE + CHAT_FONT_GAP, // line height
@@ -879,9 +874,8 @@ void GameUserInterface::renderChatMessageDisplay()
             else
                glColor(mStoreChatMessageColor[i]);
 
-            //drawString(UserInterface::horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP)
-               * UserInterface::drawWrapText(mStoreChatMessage[i], UserInterface::horizMargin, y,
+            //drawString(horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,
                   700, // wrap width
                   y_end, // ypos_end
                   CHAT_FONT_SIZE + CHAT_FONT_GAP, // line height
@@ -2870,22 +2864,6 @@ void GameUserInterface::renderScoreboard()
    if(!gameType)
       return;
 
-   if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
-   {
-      // Display alert about input mode changing
-      F32 alpha = 1;
-      if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
-         alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      glColor(Colors::paleRed, alpha);
-      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
-   }
-
-   U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
-
    bool isTeamGame = gameType->isTeamGame();
 
 #ifdef USE_DUMMY_PLAYER_SCORES
@@ -2913,14 +2891,15 @@ void GameUserInterface::renderScoreboard()
    if(maxTeamPlayers == 0)
       return;
 
-   U32 columnCount = min(teams, 2);
 
-   U32 teamWidth = totalWidth / columnCount;
-   U32 teamAreaHeight = isTeamGame ? 40 : 0;
+   const U32 drawableWidth = gScreenInfo.getGameCanvasWidth() - horizMargin * 2;
+   const U32 columnCount = min(teams, 2);
+   const U32 teamWidth = drawableWidth / columnCount;
+   const U32 teamAreaHeight = isTeamGame ? 40 : 0;
 
    U32 numTeamRows = (teams + 1) >> 1;
 
-   U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
+   U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
    U32 maxHeight = MIN(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
 
    U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
@@ -2964,7 +2943,7 @@ void GameUserInterface::renderScoreboard()
 #endif
 
       S32 curRowY = yt + teamAreaHeight + 1;
-      S32 fontSize = U32(maxHeight * 0.8f);
+      S32 fontSize = U32(maxHeight * 0.85f);
       const char *botSymbol = "B ";
       const char *levelChangerSymbol = "+ ";
       const char *adminSymbol = "@ ";
@@ -3020,179 +2999,192 @@ S32 QSORT_CALLBACK teamScoreSort(Team **a, Team **b)
 
 void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
 {
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
    if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
-   {
-      // Fade message out
-      F32 alpha = 1;
-      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
-         alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      glColor(Colors::white, alpha);
-      drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", gameType->getLevelName()->getString());
-
-      // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-      const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameType() != SoccerGame && 
-                              getGame()->getTeamCount() > 1) ? "Team " : "";
-
-      drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());
-
-      glColor(Colors::cyan, alpha);
-      drawCenteredString(canvasHeight / 2 - 100, 20, gameType->getInstructionString());
-
-      glColor(Colors::magenta, alpha);
-      drawCenteredString(canvasHeight / 2 - 75, 20, gameType->getLevelDescription()->getString());
-
-      glColor(Colors::menuHelpColor, alpha);
-      drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", inputCodeToString(keyMISSION));
-
-      if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
-      {
-         glColor(Colors::red, alpha);
-         drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", gameType->getLevelCredits()->getString());
-      }
-
-      glColor(Colors::yellow, alpha);
-      drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", gameType->getWinningScore());
-
-      mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
-   }
+      renderMissionOverlay(gameType);
 
    if(mInputModeChangeAlertDisplayTimer.getCurrent() != 0)
-   {
-      // Display alert about input mode changing
-      F32 alpha = 1;
-      if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
-         alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
+      renderInputModeChangeAlert();
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      glColor(Colors::paleRed, alpha);
-      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
-                                         getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
-   }
-
-   Game *game = gameType->getGame();
+   Game *game = getGame();
    S32 teamCount = game->getTeamCount();
 
-   // Render scoreboard
+   U32 rightAlignCoord = gScreenInfo.getGameCanvasWidth() - horizMargin;
+
    if((gameType->isGameOver() || scoreboardVisible) && teamCount > 0)
       renderScoreboard();
+   
+   else if(teamCount > 1 && gameType->isTeamGame())      // Render team scores in lower-right corner when scoreboard is off
+      renderTeamScores(gameType, rightAlignCoord);
+   
+   else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
+     renderLeadingPlayerScores(gameType, rightAlignCoord);
 
-   // Render team scores in lower-right corner when scoreboard is off
-   else if(teamCount > 1 && gameType->isTeamGame())
-   {
-      S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
-
-      // Build a list of teams, so we can sort by score
-      Vector<Team *> teams;
-      teams.reserve(teamCount);
-
-      for(S32 i = 0; i < teamCount; i++)
-      {
-         teams.push_back((Team *)gameType->getGame()->getTeam(i));
-         teams[i]->mId = i;
-      }
-
-      teams.sort(teamScoreSort);    
-
-      const S32 textsize = 32;
-      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - gameType->getDigitsNeededToDisplayScore() * 
-                                                                                 UserInterface::getStringWidth(textsize, "0");
-
-      for(S32 i = 0; i < teams.size(); i++)
-      {
-         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - (teams.size() - i - 1) * 38;
-
-         Team *team = (Team *)game->getTeam(i);
-
-         glColor(Colors::magenta);
-         if( gameType->teamHasFlag(team->getId()) )
-            UserInterface::drawString(xpos - 50, ypos + 3, 18, "*");
-
-         renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
-
-         glColor(Colors::white);
-         UserInterface::drawStringf(xpos, ypos, textsize, "%d", team->getScore());
-      }
-   }
-
-   // Render leaderboard for single team games like rabbit and bitmatch
-   else if(teamCount > 0 && !gameType->isTeamGame())
-   {
-      S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom() - 22;
-
-      const S32 textsize = 12;
-
-      /// Render player score
-      bool hasLeader = gameType->getLeadingPlayer() >= 0;
-      bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
-
-      const char *clientName = getGame()->getClientInfo()->getName().getString();
-
-      // The player is the leader if a leader is detected and it matches his name
-      bool clientIsLeader = hasLeader &&
-            !strcmp(clientName, game->getClientInfo(gameType->getLeadingPlayer())->getName().getString());
-
-      // The top rendered name is the leading player or none if no leading player
-      // (no scoring even has occured yet)
-      const char *nameTop = hasLeader ? game->getClientInfo(gameType->getLeadingPlayer())->getName().getString() : "";
-      S32 scoreTop = hasLeader ? gameType->getLeadingPlayerScore() : S32_MIN;
-
-      // The bottom rendered name is either second leader or the current player
-      const char *nameBottom = clientIsLeader && hasSecondLeader ?
-                                    game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
-                                    clientName;
-
-      TNLAssert(getGame()->getLocalRemoteClientInfo(), "How did this get to be NULL?");
-
-      S32 scoreBottom;
-      if(getGame()->getLocalRemoteClientInfo())
-         scoreBottom = clientIsLeader && hasSecondLeader ?
-                              gameType->getSecondLeadingPlayerScore() :
-                              getGame()->getLocalRemoteClientInfo()->getScore();
-      else
-         scoreBottom = 0;
-                     
-
-      S32 xpos, ypos;
-
-      // Render bottom score if player isn't the leader or we have a second leader
-      if(!clientIsLeader || hasSecondLeader)
-      {
-         xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
-               UserInterface::getStringWidthf(textsize, "%s %s %d", "", nameBottom, scoreBottom);
-         ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 0 * 16;
-
-         glColor(Colors::red, 0.6f);
-         UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", "", nameBottom, scoreBottom);
-      }
-
-      // Render top score only if we have a leader
-      if(hasLeader)
-      {
-         ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - 1 * 16;
-
-         // Draw leader name + score
-         xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin -
-               UserInterface::getStringWidthf(textsize, "%s %d", nameTop, scoreTop);
-
-         glColor(Colors::red);
-         UserInterface::drawStringf(xpos, ypos, textsize, "%s %d", nameTop, scoreTop);
-      }
-   }
-
-   renderTimeLeft();
+   renderTimeLeft(rightAlignCoord);
    renderTalkingClients();
    renderDebugStatus();
 }
 
 
+// Display alert about input mode changing
+void GameUserInterface::renderInputModeChangeAlert()
+{
+   F32 alpha = 1;
 
-void GameUserInterface::renderTimeLeft()
+   if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
+      alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
+
+   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
+
+   glColor(Colors::paleRed, alpha);
+   drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
+                                      getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
+}
+
+
+void GameUserInterface::renderMissionOverlay(const GameType *gameType)
+{
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   S32 yCenter = canvasHeight / 2;
+
+   // Fade message out
+   F32 alpha = 1;
+   if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !mMissionOverlayActive)
+      alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
+
+   glColor(Colors::white, alpha);
+   drawCenteredStringf(yCenter - 180, 30, "Level: %s", gameType->getLevelName()->getString());
+
+   // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
+   const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameType() != SoccerGame && 
+                           getGame()->getTeamCount() > 1) ? "Team " : "";
+
+   drawCenteredStringf(yCenter - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());
+
+   glColor(Colors::cyan, alpha);
+   drawCenteredString(yCenter - 100, 20, gameType->getInstructionString());
+
+   glColor(Colors::magenta, alpha);
+   drawCenteredString(yCenter - 75, 20, gameType->getLevelDescription()->getString());
+
+   glColor(Colors::menuHelpColor, alpha);
+   drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", inputCodeToString(keyMISSION));
+
+   if(gameType->getLevelCredits()->isNotNull())    // Only render credits string if it's is not empty
+   {
+      glColor(Colors::red, alpha);
+      drawCenteredStringf(yCenter + 50, 20, "%s", gameType->getLevelCredits()->getString());
+   }
+
+   glColor(Colors::yellow, alpha);
+   drawCenteredStringf(yCenter - 50, 20, "Score to Win: %d", gameType->getWinningScore());
+
+   mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
+}
+
+
+void GameUserInterface::renderTeamScores(const GameType *gameType, U32 rightAlignCoord)
+{
+   S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
+
+   // Build a list of teams, so we can sort by score
+   Game *game = getGame();
+   S32 teamCount = game->getTeamCount();
+
+   static Vector<Team *> teams;
+   teams.resize(teamCount);
+
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      teams[i] = (Team *)game->getTeam(i);
+      teams[i]->mId = i;
+   }
+
+   teams.sort(teamScoreSort);    
+
+   const S32 textsize = 32;
+   S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textsize, "0");
+
+   for(S32 i = 0; i < teams.size(); i++)
+   {
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teams.size() - i - 1) * 38;
+
+      Team *team = (Team *)game->getTeam(i);
+
+      glColor(Colors::magenta);
+      if( gameType->teamHasFlag(team->getId()) )
+         drawString(xpos - 50, ypos + 3, 18, "*");
+
+      renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
+
+      glColor(Colors::white);
+      drawStringf(xpos, ypos, textsize, "%d", team->getScore());
+   }
+}
+
+
+void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord)
+{
+   Game *game = gameType->getGame();
+
+   S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom() - 22;
+
+   const S32 textsize = 12;
+
+   /// Render player score
+   bool hasLeader = gameType->getLeadingPlayer() >= 0;
+   bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
+
+   const char *clientName = getGame()->getClientInfo()->getName().getString();
+
+   // The player is the leader if a leader is detected and it matches his name
+   bool clientIsLeader = hasLeader &&
+         !strcmp(clientName, game->getClientInfo(gameType->getLeadingPlayer())->getName().getString());
+
+   // The top rendered name is the leading player or none if no leading player
+   // (no scoring even has occured yet)
+   const char *nameTop = hasLeader ? game->getClientInfo(gameType->getLeadingPlayer())->getName().getString() : "";
+   S32 scoreTop = hasLeader ? gameType->getLeadingPlayerScore() : S32_MIN;
+
+   // The bottom rendered name is either second leader or the current player
+   const char *nameBottom = clientIsLeader && hasSecondLeader ?
+                                 game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
+                                 clientName;
+
+   TNLAssert(getGame()->getLocalRemoteClientInfo(), "How did this get to be NULL?");
+
+   S32 scoreBottom;
+   if(getGame()->getLocalRemoteClientInfo())
+      scoreBottom = clientIsLeader && hasSecondLeader ?
+                           gameType->getSecondLeadingPlayerScore() :
+                           getGame()->getLocalRemoteClientInfo()->getScore();
+   else
+      scoreBottom = 0;
+                     
+
+   S32 ypos;
+
+   // Render bottom score if player isn't the leader or we have a second leader
+   if(!clientIsLeader || hasSecondLeader)
+   {
+      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - 0 * 16;
+
+      glColor(Colors::red, 0.6f);
+      drawStringfr(rightAlignCoord, ypos + textsize, textsize, "%s %d", nameBottom, scoreBottom);
+   }
+
+   // Render top score only if we have a leader
+   if(hasLeader)
+   {
+      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - 1 * 16;
+
+      // Draw leader name + score
+      glColor(Colors::red);
+      drawStringfr(rightAlignCoord, ypos + textsize, textsize, "%s %d", nameTop, scoreTop);
+   }
+}
+
+
+void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
 {
    const S32 size = 20;       // Size of time
    const S32 gtsize = 12;     // Size of game type/score indicator
@@ -3201,20 +3193,25 @@ void GameUserInterface::renderTimeLeft()
 
    string txt = string("[") + gameType->getShortName() + "/" + itos(gameType->getWinningScore()) + "]";
 
-   S32 len = UserInterface::getStringWidthf(gtsize, txt.c_str());
-   S32 x = gScreenInfo.getGameCanvasWidth() - horizMargin - 65;
+   static const U32 w00 = getStringWidth(size, "00:00");
+   static const U32 wUnlim = getStringWidth(size, "Unlim.");
+
+   bool useUnlim = gameType->getTotalGameTime() == 0 && !gameType->isGameOver();    // Time remaining in game
+   U32 w = useUnlim ? wUnlim : w00;
+
+   S32 x = rightAlignCoord - w;
    S32 y = gScreenInfo.getGameCanvasHeight() - vertMargin - 20;
 
    glColor(Colors::cyan);
-   drawStringf(x - len - 5, y + ((size - gtsize) / 2) + 2, gtsize, txt.c_str());
-
+   drawStringfr(x - 5, y + ((size - gtsize) / 2) + gtsize + 2, gtsize, txt.c_str());
+   
    glColor(Colors::white);
 
-   if(gameType->getTotalGameTime() == 0)
+   if(useUnlim)  // Don't render "Unlim" when time is 0 because it has expired
       drawString(x, y, size, "Unlim.");
    else
    {
-      U32 timeLeft = gameType->getRemainingGameTime();      // Time remaining in game
+      U32 timeLeft = gameType->getRemainingGameTime();               
       U32 minsRemaining = timeLeft / 60;
       U32 secsRemaining = timeLeft - (minsRemaining * 60);
 
@@ -3236,7 +3233,7 @@ void GameUserInterface::renderTalkingClients()
          const S32 TEXT_HEIGHT = 20;
 
          glColor( getGame()->getTeamColor(client->getTeamIndex()) );
-         UserInterface::drawString(10, y, TEXT_HEIGHT, client->getName().getString());
+         drawString(10, y, TEXT_HEIGHT, client->getName().getString());
          y += TEXT_HEIGHT + 5;
       }
    }
@@ -3262,15 +3259,15 @@ void GameUserInterface::renderDebugStatus()
       S32 x, y;
 
       // Draw box
-      x = UserInterface::vertMargin + BOX_THICKNESS / 2 - 3;
-      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin;
+      x = vertMargin + BOX_THICKNESS / 2 - 3;
+      y = gScreenInfo.getGameCanvasHeight() - vertMargin;
 
       drawFilledRect(x, y, x + BOX_WIDTH, y - BOX_HEIGHT, Colors::black, Colors::white);
 
 
       // Draw Pause symbol
-      x = UserInterface::vertMargin + BOX_THICKNESS + BOX_INSET;
-      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - BOX_THICKNESS - BOX_INSET;
+      x = vertMargin + BOX_THICKNESS + BOX_INSET;
+      y = gScreenInfo.getGameCanvasHeight() - vertMargin - BOX_THICKNESS - BOX_INSET;
 
       glBegin(GL_POLYGON);    // Filled rectangle
          glVertex2i(x,               y);
@@ -3283,7 +3280,7 @@ void GameUserInterface::renderDebugStatus()
 
       x += BOX_INSET;
       y -= (TEXT_SIZE + BOX_INSET + BOX_THICKNESS + 3);
-      UserInterface::drawString(x, y, TEXT_SIZE, "STEP: Alt-], Ctrl-]");
+      drawString(x, y, TEXT_SIZE, "STEP: Alt-], Ctrl-]");
    }
 }
 

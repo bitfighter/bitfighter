@@ -860,7 +860,7 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
    S32 boxWidth = 300;
-   drawHollowRect(boxWidth / 2, boxTop - vertMargin, canvasWidth - (boxWidth / 2), boxTop + boxHeight + vertMargin, Colors::blue);
+   drawHollowRect(boxWidth / 2, boxTop - vertMargin, canvasWidth - (boxWidth / 2), boxTop + boxHeight + vertMargin);
 
    for(S32 i = 0; i < msgLines; i++)
       drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i]);
@@ -887,6 +887,8 @@ void UserInterface::drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
       glVertex2i(x1, y2);
    glEnd();
 }
+
+
 // Some functions (renderSpyBugVisibleRange) use this F32 version, this function have better accuracy
 void UserInterface::drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
 {
@@ -918,6 +920,12 @@ void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &
 void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor)
 {
    glColor(outlineColor);
+   drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
+}
+
+
+void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2)
+{
    drawRect(x1, y1, x2, y2, GL_LINE_LOOP);
 }
 

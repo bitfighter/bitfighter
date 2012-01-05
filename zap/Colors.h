@@ -54,6 +54,10 @@ namespace Colors
    const Color paleGreen(.50f, 1, .50f);  // A washed out green
    const Color richGreen(0, .35f, 0);
 
+   const Color red80  (.80f, 0, 0);
+   const Color green80(0, .80f, 0);
+   const Color blue80 (0, 0, .80f);
+
 
    // Some special colors
    const Color menuHelpColor(green);

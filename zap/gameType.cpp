@@ -2273,6 +2273,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::MAX_TEAMS> t
    updateLeadingTeamAndScore();    
 }
 
+
 GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, score))
 {
    TNLAssert(index < U32(mGame->getClientCount()), "player index out of range");
@@ -2343,10 +2344,9 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       GrenadeProjectile *gp = dynamic_cast<GrenadeProjectile *>(fillVector[i]);
+
       if(gp->mSetBy == name)
-      {
          gp->mSetBy = "";                                    // No longer set-by-self
-      }
    }
 #endif
 }

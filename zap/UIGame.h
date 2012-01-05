@@ -163,9 +163,13 @@ private:
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
    Timer mLevelInfoDisplayTimer;
 
-   void renderTimeLeft();
-   void renderTalkingClients();     // Render things related to voice chat
-   void renderDebugStatus();        // Render things related to debugging
+   void renderInputModeChangeAlert();
+   void renderMissionOverlay(const GameType *gameType);
+   void renderTeamScores(const GameType *gameType, U32 rightAlignCoord);
+   void renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord);
+   void renderTimeLeft(U32 rightAlignCoord);
+   void renderTalkingClients();              // Render things related to voice chat
+   void renderDebugStatus();                 // Render things related to debugging
 
 
    F32 mFPSAvg;
