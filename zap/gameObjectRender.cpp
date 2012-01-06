@@ -165,7 +165,7 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 
 void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle)
 {
-   F32 interimAngle = 6.283f/dashCount;  // tau is so much easier
+   F32 interimAngle = FloatTau / dashCount;  
 
    for (S32 i = 0; i < dashCount; i++ )
       drawArc(center, radius, interimAngle * i, (interimAngle * (i + 1)) - spaceAngle);
