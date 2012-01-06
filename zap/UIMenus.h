@@ -336,7 +336,6 @@ public:
 
 class PlayerMenuUserInterface : public MenuUserInterface
 {
-#ifndef ZAP_DEDICATED
    typedef MenuUserInterface Parent;
 
 public:
@@ -371,7 +370,6 @@ public:
 
 };
 
-#endif      // #ifndef ZAP_DEDICATED
 
 #endif      // #ifndef _UIMENUS_H_
 
