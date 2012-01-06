@@ -528,19 +528,14 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
    U32 minsRemaining = timeLeft / (60 * 1000);
    U32 secsRemaining = (timeLeft - (minsRemaining * 60 * 1000)) / 1000;
 
-   const S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 45;
+   const S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin;
+   const S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 25;
    const S32 size = 20;
 
    if(mNexusTimer.getPeriod() == 0)
-   {
-      S32 x =  gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - UserInterface::getStringWidth(size, NEXUS_NEVER_STR);
-      UserInterface::drawStringf(x, y, size, NEXUS_NEVER_STR);
-   }
+      UserInterface::drawStringfr(x, y, size, NEXUS_NEVER_STR);
    else
-   {
-      S32 x =  gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - UserInterface::getStringWidth(size, NEXUS_STR);
-      UserInterface::drawStringf(x, y, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
-   }
+      UserInterface::drawStringfr(x, y, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);

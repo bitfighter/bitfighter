@@ -1440,6 +1440,10 @@ void initializeKeyNames()
 // also when storing key bindings in INI files
 const char *inputCodeToString(InputCode inputCode)
 {
+   //TNLAssert(U32(inputCode) < U32(KEY_COUNT), "inputCode out of range");
+   if(U32(inputCode) >= U32(KEY_COUNT))
+      return "";
+
    return keyNames[S32(inputCode)];
 }
 

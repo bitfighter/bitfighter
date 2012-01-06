@@ -230,7 +230,7 @@ stateLineParseDone:
       }
       catch(LevelLoadException &e)
       {
-         logprintf("Level Error: Can't parse %s: %s", line, e.what());
+         logprintf("Level Error: Can't parse %s: %s", line, e.what());  // TODO: fix "line" variable having hundreds of level lines
       }
    }
    argc = 0;
