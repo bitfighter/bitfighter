@@ -1955,11 +1955,11 @@ void Ship::render(S32 layerIndex)
    // by the ship's angle, - 90 degrees
 
    GameConnection *conn = clientGame->getConnectionToServer();
-   bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
+   bool localShip = !(conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
 
 
-   // now adjust if using cloak module
+   // Now adjust if using cloak module
    F32 alpha = isModulePrimaryActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
 
    glPushMatrix();
@@ -1973,7 +1973,7 @@ void Ship::render(S32 layerIndex)
       if(isBusy)
          str = "<<" + str + ">>";
 
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
+      TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
 
       F32 textAlpha = 0.5f * alpha;
       S32 textSize = 14;
