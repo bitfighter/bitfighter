@@ -140,6 +140,7 @@ XXX need to document timers, new luavec stuff XXX
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
+#include "UIGame.h"
 #include "UINameEntry.h"
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
@@ -150,9 +151,6 @@ using namespace TNL;
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 #include "SDL/SDL_syswm.h"
-
-
-#include "UIGame.h"
 #endif
 
 #include "version.h"       // For BUILD_VERSION def
