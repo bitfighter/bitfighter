@@ -3017,7 +3017,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       renderTeamScores(gameType, rightAlignCoord);
    
    else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
-     renderLeadingPlayerScores(gameType, rightAlignCoord);
+      renderLeadingPlayerScores(gameType, rightAlignCoord);
 
    renderTimeLeft(rightAlignCoord);
    renderTalkingClients();
