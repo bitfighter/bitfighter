@@ -2024,9 +2024,10 @@ void Ship::render(S32 layerIndex)
    // LayerIndex == 1
 
    GameType *gameType = clientGame->getGameType();
+   TNLAssert(gameType, "gameType should always be valid here");
 
    if(!gameType)
-      return;     // This will likely never happen
+      return;     
 
    F32 thrusts[4];
    calcThrustComponents(thrusts);      // Calculate the various thrust components for rendering purposes
@@ -2048,14 +2049,12 @@ void Ship::render(S32 layerIndex)
    renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
               isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), hasModule(ModuleArmor));
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
       renderAimVector();
 
    glPopMatrix();
 
-   if(mSpawnShield.getCurrent() != 0)  // Add invulnerability effect
+   if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
    {
       glColor(Colors::green, 0.5f);
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, 6.283f/24);
