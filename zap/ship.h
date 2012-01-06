@@ -136,7 +136,8 @@ protected:
 public:
    static const S32 CollisionRadius = 24;
    static const S32 RepairRadius = 65;
-   static const U32 SpawnShieldTime = 5000;
+   static const U32 SpawnShieldTime = 5000;        // Time spawn shields are active
+   static const U32 SpawnShieldFlashTime = 1500;   // Time at which shields start to flash
 
    enum {
       MaxVelocity = 450,        // points per second
