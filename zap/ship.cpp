@@ -1939,8 +1939,11 @@ void Ship::render(S32 layerIndex)
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
 
-   if(layerIndex == 0) return;   // Only render on layers -1 and 1
-   if(hasExploded) return;       // Don't render an exploded ship!
+   if(layerIndex == 0)  // Only render on layers -1 and 1
+      return;
+
+   if(hasExploded)      // Don't render an exploded ship!
+      return;
 
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
    F32 rotAmount = 0;      // We use rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
