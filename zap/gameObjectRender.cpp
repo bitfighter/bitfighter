@@ -97,7 +97,7 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 }
 
 
-// Use slower method here because we need to visit each point
+// Use slower method here because we need to visit each point to add offset
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
    glBegin(geomType);
@@ -187,7 +187,7 @@ void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, 
 {
    F32 interimAngle = 6.283f/rayCount;
 
-   for (S32 i = 0; i < rayCount; i++ )
+   for(S32 i = 0; i < rayCount; i++)
       drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + startAngle);
 }
 
@@ -334,7 +334,6 @@ void drawEllipse(const Point &pos, S32 width, S32 height, F32 angle)
 }
 
 
-
 // Well...  draws a filled ellipse, much as you'd expect
 void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 {
@@ -357,10 +356,8 @@ void drawFilledCircle(const Point &pos, F32 radius)
 void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 {
    glBegin(GL_POLYGON);
-
-   for(F32 theta = start; theta < end; theta += 0.2f)
-      glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
-
+      for(F32 theta = start; theta < end; theta += 0.2f)
+         glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
    glEnd();
 }
 
@@ -441,28 +438,25 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    }
    if(thrusts[2] > 0)
    {
-      glColor4f(1, 0, 0, alpha);
-      glBegin(GL_LINES);
+      glColor(Colors::red, alpha);
+      glBegin(GL_LINE_STRIP);
          glVertex2f(xThrust, 10);
          glVertex2f(xThrust + thrusts[2] * xThrust * 1.5f, 5);
          glVertex2f(xThrust, 0);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5f, 5);
       glEnd();
 
-      glColor4f(1,0.5,0, alpha);
-      glBegin(GL_LINES);
+      glColor(Colors::orange50, alpha);
+      glBegin(GL_LINE_STRIP);
          glVertex2f(xThrust, 8);
          glVertex2f(xThrust + thrusts[2] * xThrust, 5);
          glVertex2f(xThrust, 2);
-         glVertex2f(xThrust + thrusts[2] * xThrust, 5);
       glEnd();
 
-      glColor4f(1,1,0, alpha);
-      glBegin(GL_LINES);
+      glColor(Colors::yellow, alpha);
+      glBegin(GL_LINE_STRIP);
          glVertex2f(xThrust, 6);
          glVertex2f(xThrust + thrusts[2] * xThrust * 0.5f, 5);
          glVertex2f(xThrust, 4);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5f, 5);
       glEnd();
    }
 
@@ -505,7 +499,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    if(hasArmor)
    {
       glLineWidth(gLineWidth3);
-      glColor4f(1,1,0,alpha);    // Yellow
+      glColor(Colors::yellow ,alpha);   
 
       drawPolygon(Point(0,0), 5, 30, FloatHalfPi);
 
@@ -526,7 +520,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       
    if(sensorActive)
    {
-      glColor4f(1,1,1,alpha);
+      glColor(Colors::white, alpha);
       F32 radius = (sensorTime & 0x1FF) * 0.002f;
       drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
    }
@@ -635,7 +629,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       const F32 alpha = showDestOverride ? 1.f : zoomFraction;
 
       // Show teleport destinations on commander's map only
-      glColor4f(1, 1, 1, .25f * alpha );
+      glColor(Colors::white, .25f * alpha );
 
       glEnable(GL_POLYGON_SMOOTH);
       setDefaultBlendFunction();
@@ -655,7 +649,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          F32 midy = pos.y + .75f * sina * dist;
 
          glBegin(GL_POLYGON);
-            glColor4f(1, 1, 1, .25f * alpha);
+            glColor(Colors::white, .25f * alpha);
             glVertex2f(pos.x + asina * wid, pos.y + acosa * wid);
             glVertex2f(midx + asina * wid, midy + acosa * wid);
             glVertex2f(midx - asina * wid, midy - acosa * wid);
@@ -664,10 +658,10 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 
          glBegin(GL_POLYGON);
             glVertex2f(midx + asina * wid, midy + acosa * wid);
-            glColor4f(1, 1, 1, 0);
+            glColor(Colors::white, 0);
             glVertex2f(dests[i].x + asina * wid, dests[i].y + acosa * wid);
             glVertex2f(dests[i].x - asina * wid, dests[i].y - acosa * wid);
-            glColor4f(1, 1, 1, .25f * alpha);
+            glColor(Colors::white, .25f * alpha);
             glVertex2f(midx - asina * wid, midy - acosa * wid);
          glEnd();
       }
@@ -790,9 +784,9 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
    glLineWidth(gDefaultLineWidth);
 
    if(enabled)
-      glColor3f(1,1,1);
+      glColor(Colors::white);
    else
-      glColor3f(0.6f, 0.6f, 0.6f);
+      glColor(0.6f);
 
    glBegin(GL_LINE_LOOP);
       glVertex(anchor + cross * 18);
@@ -838,10 +832,7 @@ static void drawFlag(const Color *flagColor, const Color *mastColor, F32 alpha)
    // Now the flag's mast
    glColor(mastColor != NULL ? *mastColor : Colors::white, alpha);
 
-   glBegin(GL_LINES);
-      glVertex2f(-15, -15);
-      glVertex2f(-15, 15);
-   glEnd();
+   drawVertLine(-15, -15, 15);
 }
 
 
