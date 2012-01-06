@@ -674,8 +674,8 @@ void Ship::idle(GameObject::IdleCallPath path)
          mCloakTimer.update(mCurrentMove.time);
 
          // Update spawn shield unless we move the ship - then it turns off .. server only
-         if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
-         {
+         //if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
+         //{
             if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
                mSpawnShield.update(mCurrentMove.time);
             else
@@ -683,7 +683,7 @@ void Ship::idle(GameObject::IdleCallPath path)
 
             if(mSpawnShield.getCurrent() == 0)
                setMaskBits(SpawnShieldMask);
-         }
+        /* }*/
       }
    }
 
@@ -1311,9 +1311,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(hasExploded)
             enableCollision();
          hasExploded = false;
-         playSpawnEffect = stream->readFlag();    // prevent spawn effect every time the robot goes into scope.
+         playSpawnEffect = stream->readFlag();    // Prevent spawn effect every time the robot goes into scope
          shipwarped = true;
-         mSpawnShield.reset(stream->readFlag() ? 1 : 0);
+         mSpawnShield.reset(stream->readFlag() ? SpawnShieldTime : 0);
       }
       if(stream->readFlag())        // Health
          mHealth = stream->readFloat(6);
@@ -2058,7 +2058,7 @@ void Ship::render(S32 layerIndex)
 
    if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
    {
-      glColor(Colors::green, 0.5f);
+      glColor(Colors::green, F32(mSpawnShield.getCurrent()) / 5000.0f);
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau/24);
    }
 
