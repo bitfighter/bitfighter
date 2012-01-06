@@ -526,8 +526,8 @@ void Ship::processWeaponFire()
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
       {
-         mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;              // Drain energy
-         mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);    // Uncloak ship
+         mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
+         mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
 
          if(getControllingClient().isValid())
             getControllingClient()->mStatistics.countShot(curWeapon);
@@ -537,7 +537,8 @@ void Ship::processWeaponFire()
             Point dir = getAimVector();
 
             // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
-            GameWeapon::createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+            GameWeapon::createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, 
+                                                mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
          }
 
          mFireTimer += S32(GameWeapon::weaponInfo[curWeapon].fireDelay);
@@ -675,10 +676,11 @@ void Ship::idle(GameObject::IdleCallPath path)
          // Update spawn shield unless we move the ship - then it turns off .. server only
          if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
          {
-            if (mCurrentMove.x == 0 && mCurrentMove.y == 0)
+            if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
                mSpawnShield.update(mCurrentMove.time);
             else
                mSpawnShield.clear();
+
             if(mSpawnShield.getCurrent() == 0)
                setMaskBits(SpawnShieldMask);
          }
@@ -2057,7 +2059,7 @@ void Ship::render(S32 layerIndex)
    if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
    {
       glColor(Colors::green, 0.5f);
-      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, 6.283f/24);
+      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau/24);
    }
 
    if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
