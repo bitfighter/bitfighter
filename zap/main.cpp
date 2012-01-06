@@ -150,6 +150,9 @@ using namespace TNL;
 #include "SDL/SDL.h"
 #include "SDL/SDL_opengl.h"
 #include "SDL/SDL_syswm.h"
+
+
+#include "UIGame.h"
 #endif
 
 #include "version.h"       // For BUILD_VERSION def
@@ -553,11 +556,17 @@ S32 getWindowPositionY()
 #endif
 
 
+
 void gameIdle(U32 integerTime)
 {
 #ifndef ZAP_DEDICATED
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
+
+   // If the main game interface is in the stack, idle that too to keep things current, update timers, etc.
+   UIManager *uiManager = gClientGame->getUIManager();
+   if(uiManager->cameFrom(GameUI))
+      uiManager->getGameUserInterface()->idle(integerTime);
 #endif
 
    if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load

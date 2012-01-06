@@ -1132,7 +1132,7 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never display bots.
    if((conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD) && !clientInfo->isRobot())
    {
-      s2cPlayerSpawnDelayed();
+      conn->s2cPlayerSpawnDelayed();
       return;
    }
 
@@ -2130,51 +2130,6 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
 
 #endif
-}
-
-
-// Player appears to be away, spawn is on hold until he returns
-GAMETYPE_RPC_S2C(GameType, s2cPlayerSpawnDelayed, (), ())
-{
-#ifndef ZAP_DEDICATED  
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "Invalid client game!");
-
-   if(!clientGame) 
-      return;
-
-   clientGame->setSpawnDelayed(true);
-
-   // If the player is busy in some other UI, there is nothing to do here -- spawn will be undelayed when
-   // they return to the game.  If the player is in game, however, we'll show them a message.
-   // Spawn will be automatically undelayed when user reactivates gameUI by pressing any key.
-   UIManager *uiManager = clientGame->getUIManager();
-
-   // Check if we're in the gameUI, and make sure a helper menu isn't open and we're not chatting
-   if(uiManager->getCurrentUI()->getMenuID() == GameUI && !uiManager->getGameUserInterface()->isHelperActive() && 
-                                                          !uiManager->getGameUserInterface()->isChatting())
-   {
-      ErrorMessageUserInterface *errUI = uiManager->getErrorMsgUserInterface();
-
-      errUI->reset();
-      errUI->setPresentation(1);
-      errUI->setTitle("");
-      errUI->setMessage(1, "PRESS ANY");
-      errUI->setMessage(2, "KEY TO");
-      errUI->setMessage(3, "RESPAWN");
-      errUI->setInstr("");
-
-      errUI->activate();
-   }
-#endif
-}
-
-
-GAMETYPE_RPC_C2S(GameType, c2sPlayerSpawnUndelayed, (), ())
-{
-   GameConnection *conn = (GameConnection *) getRPCSourceConnection();
-   conn->resetTimeSinceLastMove();
-   spawnShip(conn->getClientInfo());
 }
 
 

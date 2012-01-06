@@ -316,11 +316,7 @@ void MenuUserInterface::render()
       if(getUIManager()->getGameUserInterface())
          getUIManager()->getGameUserInterface()->render();
 
-      glColor(Colors::black, 0.6f);
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      drawRect(0, 0, canvasWidth, canvasHeight, GL_POLYGON);
+      dimUnderlyingUI();
    }
 
    glColor(Colors::white);    
@@ -1191,7 +1187,9 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    clientGame->resetMasterConnectTimer();
    
    clientGame->updatePlayerNameAndPassword(ui->getMenuItem(1)->getValueForWritingToLevelFile(), 
-                                           ui->getMenuItem(2)->getValueForWritingToLevelFile());
+                                           ui->getMenuItem(3)->getIntValue() == 0 ? string("") : ui->getMenuItem(2)->getValueForWritingToLevelFile());
+
+   clientGame->setLoginPassword(ui->getMenuItem(2)->getValueForWritingToLevelFile());
 
    clientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(clientGame->getClientInfo()->getName().getString());
@@ -1208,7 +1206,8 @@ void NameEntryUserInterface::setupMenu()
    addMenuItem(new MenuItem("OK", nameAndPasswordAcceptCallback, ""));
    addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
-   addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getLoginPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
+   addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
+   addMenuItem(new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", ""));
    
    getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    getMenuItem(2)->setSecret(true);

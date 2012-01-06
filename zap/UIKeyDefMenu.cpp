@@ -188,16 +188,7 @@ void KeyDefMenuUserInterface::render()
    if(getGame()->getConnectionToServer())
    {
       getUIManager()->getGameUserInterface()->render();
-      glColor(Colors::black, 0.6f);
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      glBegin(GL_POLYGON);
-         glVertex2i(0, 0);
-         glVertex2i(canvasWidth, 0);
-         glVertex2i(canvasWidth, gScreenInfo.getGameCanvasHeight());
-         glVertex2i(0, canvasHeight);
-      glEnd();
+      dimUnderlyingUI();
    }
 
    glColor(Colors::white);

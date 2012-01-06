@@ -657,7 +657,9 @@ void GameUserInterface::renderProgressBar()
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
 {
-   if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard)
+   bool shouldRender = getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard &&     // Reticle in keyboard mode only
+                       current->getMenuID() == GameUI;                                                   // And not when menu is active
+   if(shouldRender)
    {
 #if 0 // TNL_OS_WIN32
       Point realMousePoint = mMousePoint;
@@ -672,8 +674,6 @@ void GameUserInterface::renderReticle()
       }
 #endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(Colors::green, 0.7f);
       glBegin(GL_LINES);
@@ -3017,7 +3017,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
       renderTeamScores(gameType, rightAlignCoord);
    
    else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
-     renderLeadingPlayerScores(gameType, rightAlignCoord);
+      renderLeadingPlayerScores(gameType, rightAlignCoord);
 
    renderTimeLeft(rightAlignCoord);
    renderTalkingClients();

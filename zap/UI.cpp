@@ -155,7 +155,7 @@ UIID UserInterface::getMenuID() const
 }
 
 
-// Retrieve previous interface's name
+// Retrieve previous interface's id
 UIID UserInterface::getPrevMenuID() const
 {
    if(getUIManager()->hasPrevUI())
@@ -509,12 +509,14 @@ S32 UserInterface::drawCenteredString(S32 x, S32 y, S32 size, const char *string
    drawString(xpos, y, size, string);
    return xpos;
 }
+
+
 F32 UserInterface::drawCenteredString(F32 x, F32 y, S32 size, const char *string)
 {
-   F32 xpos = x - getStringWidth(F32(size), string) / 2;
-   drawString(xpos, y, size, string);
-   return xpos;
+   return drawCenteredString(x, y, F32(size), string);
 }
+
+
 F32 UserInterface::drawCenteredString(F32 x, F32 y, F32 size, const char *string)
 {
    F32 xpos = x - getStringWidth(size, string) / 2;
@@ -533,7 +535,6 @@ S32 UserInterface::drawCenteredStringf(S32 y, S32 size, const char *format, ...)
 S32 UserInterface::drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-
    return drawCenteredString(x, y, size, buffer);
 }
 
@@ -652,9 +653,10 @@ S32 UserInterface::drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, co
    S32 width = offset + getStringWidth(size, buffer);
    S32 x = get2ColStartingPos(leftCol) - width / 2;         // x must be S32 in case it leaks off left side of screen
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    drawString(x, y, size, left);
-   glColor3f(0,1,1);
+
+   glColor(Colors::cyan);
    drawString(x + offset, y, size, buffer);
 
    return x;
@@ -761,7 +763,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
 
    S32 inset = 100;                    // Inset for left and right edges of box
    const S32 titleSize = 30;           // Size of title
-   const S32 titleGap = 10;            // Spacing between title and first line of text
+   const S32 titleGap = titleSize / 3; // Spacing between title and first line of text
    const S32 textSize = 18;            // Size of text and instructions
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
@@ -805,7 +807,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    glColor(Colors::white);
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
-
    for(S32 i = 0; i < msgLines; i++)
       drawCenteredString(boxTop + vertMargin + titleSpace + i * (textSize + textGap), textSize, message[i]);
 
@@ -813,17 +814,19 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
 }
 
 
+// This function could use some further cleaning; currently only used for the delayed spawn notification
 void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
 {
+   dimUnderlyingUI();
+
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 inset = 100;              // Inset for left and right edges of box
-   const S32 titleSize = 30;     // Size of title
-   const S32 titleGap = 10;      // Spacing between title and first line of text
-   const S32 textSize = 36;      // Size of text and instructions
-   const S32 textGap = textSize / 3;        // Spacing between text lines
-   const S32 instrGap = 15;      // Gap between last line of text and instruction line
+   const S32 titleSize = 30;              // Size of title
+   const S32 titleGap = titleSize / 3;    // Spacing between title and first line of text
+   const S32 textSize = 36;               // Size of text and instructions
+   const S32 textGap = textSize / 3;      // Spacing between text lines
+   const S32 instrGap = 15;               // Gap between last line of text and instruction line
 
    S32 actualLines = 0;
    for(S32 i = 0; i < msgLines; i++)
@@ -844,28 +847,27 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 
    S32 boxTop = (canvasHeight - boxHeight) / 2;
 
-   S32 maxLen = 0;
-   for(S32 i = 0; i < msgLines; i++)
-   {
-      S32 len = getStringWidth(textSize, message[i]) + 20;     // 20 gives a little breathing room on the edges
-      if(len > maxLen)
-         maxLen = len;
-   }
-
-   if(canvasWidth - 2 * inset < maxLen)
-      inset = (canvasWidth - maxLen) / 2;
-
    // Draw title, message, and footer
    glColor(Colors::blue);
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
-   S32 boxWidth = 300;
-   drawHollowRect(boxWidth / 2, boxTop - vertMargin, canvasWidth - (boxWidth / 2), boxTop + boxHeight + vertMargin);
+   S32 boxWidth = 500;
+   drawHollowRect((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin);
 
    for(S32 i = 0; i < msgLines; i++)
       drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i]);
 
    drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
+}
+
+
+void UserInterface::dimUnderlyingUI()
+{
+   glColor(Colors::black, 0.75); 
+
+   TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
+
+   drawFilledRect (0, 0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
 }
 
 
@@ -898,6 +900,12 @@ void UserInterface::drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
       glVertex2f(x2, y2);
       glVertex2f(x1, y2);
    glEnd();
+}
+
+
+void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2)
+{
+   drawRect(x1, y1, x2, y2, GL_QUADS);
 }
 
 

@@ -266,7 +266,6 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 
    mConnectionToServer = theConnection;
    theConnection->setClientGame(this);
-
 }
 
 
@@ -290,7 +289,35 @@ ClientInfo *ClientGame::getLocalRemoteClientInfo()
 
 void ClientGame::setSpawnDelayed(bool spawnDelayed)
 {
+   if(mSpawnDelayed && spawnDelayed)    // Yes, yes, we heard you the first time!
+      return;
+
    mSpawnDelayed = spawnDelayed;
+
+   if(mSpawnDelayed)
+   {
+      // If the player is busy in some other UI, there is nothing to do here -- spawn will be undelayed when
+      // they return to the game.  If the player is in game, however, we'll show them a message.
+      // Spawn will be automatically undelayed when user reactivates gameUI by pressing any key.
+      UIManager *uiManager = getUIManager();
+
+      // Check if we're in the gameUI, and make sure a helper menu isn't open and we're not chatting
+      if(uiManager->getCurrentUI()->getMenuID() == GameUI && !uiManager->getGameUserInterface()->isHelperActive() && 
+                                                             !uiManager->getGameUserInterface()->isChatting())
+      {
+         ErrorMessageUserInterface *errUI = uiManager->getErrorMsgUserInterface();
+
+         errUI->reset();
+         errUI->setPresentation(1);
+         errUI->setTitle("");
+         errUI->setMessage(1, "PRESS ANY");
+         errUI->setMessage(2, "KEY TO");
+         errUI->setMessage(3, "RESPAWN");
+         errUI->setInstr("");
+
+         errUI->activate();
+      }
+   }
 }
 
 
@@ -304,7 +331,7 @@ void ClientGame::undelaySpawn()
 {
    if(isSpawnDelayed())
    {
-      getGameType()->c2sPlayerSpawnUndelayed();
+      getConnectionToServer()->c2sPlayerSpawnUndelayed();
       setSpawnDelayed(false);
    }
 }

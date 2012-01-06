@@ -420,16 +420,7 @@ void ChatUserInterface::render()
    if(mRenderUnderlyingUI && getUIManager()->hasPrevUI())           // If there is an underlying menu...
    {
       getUIManager()->renderPrevUI();  // ...render it...
-      glColor(Colors::black, 0.75);        // ... and dim it out a bit, nay, a lot
-
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-      glBegin(GL_POLYGON);
-         glVertex2i(0, 0);
-         glVertex2i(gScreenInfo.getGameCanvasWidth(), 0);
-         glVertex2i(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
-         glVertex2i(0, gScreenInfo.getGameCanvasHeight());
-      glEnd();
+      dimUnderlyingUI();
    }
 
    // Render header

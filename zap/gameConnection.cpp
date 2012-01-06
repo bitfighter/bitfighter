@@ -34,7 +34,7 @@
 #include "BanList.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
+#   include "ClientGame.h"
 #endif
 
 #include "md5wrapper.h"
@@ -258,6 +258,22 @@ const char *GameConnection::getConnectionStateString(S32 i)
 //   }
 //}
 
+
+
+// Player appears to be away, spawn is on hold until he returns
+TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED  
+   gClientGame->setSpawnDelayed(true);
+#endif
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+{
+   resetTimeSinceLastMove();
+   gServerGame->getGameType()->spawnShip(getClientInfo());
+}
 
 
 // Old server side /getmap command, now unused, may be removed
