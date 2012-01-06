@@ -776,9 +776,10 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    else if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int specifiying how many pixels in a grid cell)
    {                                           
       if(argc < 2)
-         throw LevelLoadException("Improperly formed GridSize parameter");
+         logprintf(LogConsumer::LogLevelError, "Improperly formed GridSize parameter");
+      else
+         setGridSize((F32)atof(argv[1]));
 
-      setGridSize((F32)atof(argv[1]));
       return;
    }
 
@@ -786,15 +787,24 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
    {
       // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));      
+      TNL::Object *theObject;
+      if(!strcmp(argv[0], "HuntersGameType"))
+         theObject = new NexusGameType();
+      else
+         theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
+
       GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
 
-      bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
+      if(gt)
+      {
+         bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
+         if(!validArgs)
+            logprintf(LogConsumer::LogLevelError, "GameType have incorrect parameters");
 
-      gt->addToGame(this, database);    
-
-      if(!validArgs || strcmp(gt->getClassName(), argv[0]))
-         throw LevelLoadException("Improperly formed GameType parameter");
+         gt->addToGame(this, database);    
+      }
+      else
+         logprintf(LogConsumer::LogLevelError, "Could not create a GameType");
       
       return;
    }
@@ -817,8 +827,6 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          strcpy(obj, "FlagItem");
 
       // Convert legacy Hunters* objects
-      else if(!stricmp(argv[0], "HuntersGameType"))
-         strcpy(obj, "NexusGameType");
       else if(!stricmp(argv[0], "HuntersNexusObject"))
          strcpy(obj, "NexusObject");
 
