@@ -2059,7 +2059,7 @@ void Ship::render(S32 layerIndex)
    if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
    {
       glColor(Colors::green, F32(mSpawnShield.getCurrent()) / F32(SpawnShieldTime) * .75);
-      F32 offset = F32(Platform::getRealMilliseconds()) / 2500.0f;
+      F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24, offset);
    }
 
