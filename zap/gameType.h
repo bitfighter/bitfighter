@@ -47,6 +47,7 @@ namespace Zap
 
 // Some forward declarations
 class GoalZone;
+class CoreItem;
 class MenuItem;
 class MoveItem;
 class ClientGame;
@@ -400,6 +401,8 @@ public:
 
    virtual void addZone(GoalZone *zone);
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
+
+   virtual void addCore(CoreItem *core);
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);

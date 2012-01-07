@@ -27,6 +27,7 @@
 #define COREGAME_H_
 
 #include "gameType.h"
+#include "item.h"
 
 
 namespace Zap {
@@ -40,16 +41,31 @@ class CoreGameType : public GameType
 
 private:
    Vector<CoreItem*> mCores;
+   U32 mCoreItemHitPoints;
 
 public:
    CoreGameType();
    virtual ~CoreGameType();
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString() const;
+
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
 
+   void addCore(CoreItem *core);
+
+   U32 getCoreItemHitPoints();
+   void setCoreItemHitPoints(U32 hitPoints);
+
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+
+#ifndef ZAP_DEDICATED
+   const char **getGameParameterMenuKeys();
+   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
+   bool saveMenuItem(const MenuItem *menuItem, const char *key);
+#endif
 
    GameTypes getGameType() const;
    const char *getShortName() const;
@@ -60,6 +76,78 @@ public:
 
    TNL_DECLARE_CLASS(CoreGameType);
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class CoreItem : public Item
+{
+
+typedef Item Parent;
+
+private:
+   static const U32 CoreStartWidth = 400;
+   static const U32 CoreMinWidth = 80;
+
+   bool hasExploded;
+   U32 mStartingHitPoints;
+   U32 mHitPoints;
+
+public:
+   static const U32 CoreDefaultHitPoints = 20;
+
+   CoreItem();     // Constructor
+   CoreItem *clone() const;
+
+   void renderItem(const Point &pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool collide(GameObject *otherObject);
+
+   F32 calcCoreWidth() const;
+
+   U32 getStartingHitPoints();
+   void setStartingHitPoints(U32 hitPoints);
+
+   void onAddedToGame(Game *theGame);
+
+   void damageObject(DamageInfo *theInfo);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void onItemExploded(Point pos);
+
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
+
+   void setRadius(F32 radius);
+
+   TNL_DECLARE_CLASS(CoreItem);
+
+   ///// Editor methods
+   const char *getEditorHelpString();
+   const char *getPrettyNamePlural();
+   const char *getOnDockName();
+   const char *getOnScreenName();
+
+   F32 getEditorRadius(F32 currentScale);
+   void renderDock();
+
+   ///// Lua interface
+public:
+   CoreItem(lua_State *L);    // Constructor
+
+   static const char className[];
+
+   static Lunar<CoreItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L);
+
+   S32 getHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   void push(lua_State *L);
+};
+
+
 
 } /* namespace Zap */
 #endif /* COREGAME_H_ */

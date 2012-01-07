@@ -3784,6 +3784,12 @@ void GameType::shipTouchZone(Ship *ship, GoalZone *zone)
 }
 
 
+void GameType::addCore(CoreItem *core)
+{
+   /* Do nothing */
+}
+
+
 void GameType::majorScoringEventOcurred(S32 team)
 {
    /* empty */
