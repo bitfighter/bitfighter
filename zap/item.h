@@ -92,7 +92,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Core : public Item
+class CoreItem : public Item
 {
 
 typedef Item Parent;
@@ -106,8 +106,8 @@ private:
    U32 mHitPoints;
 
 public:
-   Core();     // Constructor  
-   Core *clone() const;
+   CoreItem();     // Constructor  
+   CoreItem *clone() const;
 
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
@@ -121,9 +121,12 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
+
    void setRadius(F32 radius);
 
-   TNL_DECLARE_CLASS(Core);
+   TNL_DECLARE_CLASS(CoreItem);
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -136,11 +139,11 @@ public:
 
    ///// Lua interface
 public:
-   Core(lua_State *L);    // Constructor
+   CoreItem(lua_State *L);    // Constructor
 
    static const char className[];
 
-   static Lunar<Core>::RegType methods[];
+   static Lunar<CoreItem>::RegType methods[];
 
    S32 getClassID(lua_State *L);
 

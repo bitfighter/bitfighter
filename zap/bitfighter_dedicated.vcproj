@@ -577,6 +577,14 @@
 				RelativePath=".\CTFGame.h"
 				>
 			</File>
+         <File
+            RelativePath=".\CoreGame.cpp"
+            >
+         </File>
+         <File
+            RelativePath=".\CoreGame.h"
+            >
+         </File>
 			<File
 				RelativePath=".\gameType.cpp"
 				>

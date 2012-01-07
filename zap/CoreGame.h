@@ -23,26 +23,43 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _GAMETYPESENUM_H_
-#define _GAMETYPESENUM_H_
+#ifndef COREGAME_H_
+#define COREGAME_H_
 
-namespace Zap
+#include "gameType.h"
+
+
+namespace Zap {
+
+// Forward Declarations
+class CoreItem;
+
+class CoreGameType : public GameType
 {
-   enum GameTypes
-   {
-      BitmatchGame,
-      CTFGame,
-      HTFGame,
-      NexusGame,
-      RabbitGame,
-      RetrieveGame,
-      SoccerGame,
-      ZoneControlGame,
-      CoreGame,
-      NoGameType,
-      GameTypesCount
-   };
+   typedef GameType Parent;
+
+private:
+   Vector<CoreItem*> mCores;
+
+public:
+   CoreGameType();
+   virtual ~CoreGameType();
+
+   // Runs on client
+   void renderInterfaceOverlay(bool scoreboardVisible);
+
+   // What does a particular scoring event score?
+   S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+
+   GameTypes getGameType() const;
+   const char *getShortName() const;
+   const char *getInstructionString();
+   bool canBeTeamGame() const;
+   bool canBeIndividualGame() const;
+
+
+   TNL_DECLARE_CLASS(CoreGameType);
 };
 
-
-#endif
+} /* namespace Zap */
+#endif /* COREGAME_H_ */

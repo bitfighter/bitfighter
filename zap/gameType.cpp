@@ -77,6 +77,7 @@ const S32 GameType::MAX_TEAMS;
 const char *gGameTypeNames[] = {
    "GameType",                // Generic game type --> Bitmatch
    "CTFGameType",
+   "CoreGameType",
    "HTFGameType",
    "NexusGameType",
    "RabbitGameType",
@@ -3401,6 +3402,8 @@ StringTableEntry GameType::getGameTypeName(GameTypes gameType)
          return "Soccer";
       case ZoneControlGame:
          return "Zone Control";
+      case CoreGame:
+         return "Core";
       default:
          TNLAssert(false, "Bad GameType value");
          return "";

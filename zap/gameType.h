@@ -155,6 +155,7 @@ public:
       ScoreGoalEnemyTeam,     // soccer
       ScoreGoalHostileTeam,   // soccer
       ScoreGoalOwnTeam,       // soccer -> score on self
+      CoreDestroyed,          // core -> core is destroyed
       ScoringEventsCount
    };
 

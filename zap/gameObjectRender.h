@@ -212,7 +212,7 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
-void renderCore(const Point &pos, F32 size);
+void renderCore(const Point &pos, F32 size, const Color *coreColor);
 
 void renderSoccerBall(const Point &pos, F32 size);
 void renderSoccerBall(const Point &pos);

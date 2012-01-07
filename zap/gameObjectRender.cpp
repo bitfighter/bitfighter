@@ -1693,10 +1693,12 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size)
+void renderCore(const Point &pos, F32 size, const Color *coreColor)
 {
-   glColor(Colors::red);
+   glColor(Colors::white);
    drawSquare(pos, size);
+   glColor(coreColor);
+   drawSquare(pos, size/2);
 }
 
 
