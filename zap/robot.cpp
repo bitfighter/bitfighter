@@ -265,6 +265,7 @@ void LuaRobot::setEnums(lua_State *L)
    setEnum(RetrieveGame);
    setEnum(SoccerGame);
    setEnum(ZoneControlGame);
+   setEnum(CoreGame);
 
    // Scoring Events
    setGTEnum(KillEnemy);

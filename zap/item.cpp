@@ -226,77 +226,77 @@ GameObject *Item::getGameObject()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(Core);
+TNL_IMPLEMENT_NETOBJECT(CoreItem);
 class LuaCore;
 
 // Constructor
-Core::Core() : Parent(Point(0,0), F32(CoreStartWidth))
+CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
    mHitPoints = CoreStartingHitPoints;     // Hits to kill
    hasExploded = false;
 
-   mKillString = "crashed into an reactor";     // TODO: Really needed?
+   mKillString = "crashed into a core";    // TODO: Really needed?
 }
 
 
-Core *Core::clone() const
+CoreItem *CoreItem::clone() const
 {
-   return new Core(*this);
+   return new CoreItem(*this);
 }
 
 
-void Core::renderItem(const Point &pos)
+void CoreItem::renderItem(const Point &pos)
 {
    if(!hasExploded)
-      renderCore(pos, calcCoreWidth() / 2);
+      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam));
 }
 
 
-void Core::renderDock()
+void CoreItem::renderDock()
 {
-   renderCore(getVert(0), 5);
+   renderCore(getVert(0), 5, &Colors::white);
 }
 
 
-const char *Core::getEditorHelpString()
+const char *CoreItem::getEditorHelpString()
 {
    return "Core.  Destroy to score.";
 }
 
 
-const char *Core::getPrettyNamePlural()
+const char *CoreItem::getPrettyNamePlural()
 {
    return "Cores";
 }
 
 
-const char *Core::getOnDockName()
+const char *CoreItem::getOnDockName()
 {
    return "Core";
 }
 
 
-const char *Core::getOnScreenName()
+const char *CoreItem::getOnScreenName()
 {
    return "Core";
 }
 
 
-F32 Core::getEditorRadius(F32 currentScale)
+F32 CoreItem::getEditorRadius(F32 currentScale)
 {
    return getRadius() * currentScale;
 }
 
 
-bool Core::getCollisionCircle(U32 state, Point &center, F32 &radius) const
+bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
    return false;
 }
 
 
-bool Core::getCollisionPoly(Vector<Point> &polyPoints) const
+bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    Rect rect = Rect(getActualPos(), calcCoreWidth());
    rect.toPoly(polyPoints);
@@ -304,7 +304,7 @@ bool Core::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-void Core::damageObject(DamageInfo *theInfo)
+void CoreItem::damageObject(DamageInfo *theInfo)
 {
    if(hasExploded)  
       return; 
@@ -323,13 +323,13 @@ void Core::damageObject(DamageInfo *theInfo)
 }
 
 
-void Core::setRadius(F32 radius) 
+void CoreItem::setRadius(F32 radius) 
 { 
    Parent::setRadius(radius * getGame()->getGridSize());
 }
 
 
-U32 Core::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
@@ -338,11 +338,14 @@ U32 Core::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    stream->writeFlag(hasExploded);
 
+   if(stream->writeFlag(updateMask & InitialMask))
+      writeThisTeam(stream);
+
    return retMask;
 }
 
 
-void Core::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
@@ -350,9 +353,6 @@ void Core::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       mHitPoints = stream->readInt(8);
       setRadius(calcCoreWidth());
-
-      //if(!mInitial)
-      //   SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -363,71 +363,94 @@ void Core::unpackUpdate(GhostConnection *connection, BitStream *stream)
       disableCollision();
       onItemExploded(getActualPos());
    }
+
+   if(stream->readFlag())
+      readThisTeam(stream);
 }
 
 
-F32 Core::calcCoreWidth() const
+bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 3)         // CoreItem <team> <x> <y>
+      return false;
+
+   mTeam = atoi(argv[0]);
+
+   if(!Parent::processArguments(argc-1, argv+1, game))
+      return false;
+
+   return true;
+}
+
+
+string CoreItem::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+}
+
+
+F32 CoreItem::calcCoreWidth() const
 {
    return
          F32(CoreStartWidth - CoreMinWidth) * F32(mHitPoints) / F32(CoreStartingHitPoints) + CoreMinWidth;
 }
 
 
-bool Core::collide(GameObject *otherObject)
+bool CoreItem::collide(GameObject *otherObject)
 {
    return true;
 }
 
 
 // Client only
-void Core::onItemExploded(Point pos)
+void CoreItem::onItemExploded(Point pos)
 {
    SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
 
-const char Core::className[] = "Core";      // Class name as it appears to Lua scripts
+const char CoreItem::className[] = "CoreItem";      // Class name as it appears to Lua scripts
 
 // Lua constructor
-Core::Core(lua_State *L)
+CoreItem::CoreItem(lua_State *L)
 {
    // Do we want to construct these from Lua?  If so, do that here!
 }
 
 
 // Define the methods we will expose to Lua
-Lunar<Core>::RegType Core::methods[] =
+Lunar<CoreItem>::RegType CoreItem::methods[] =
 {
    // Standard gameItem methods
-   method(Core, getClassID),
-   method(Core, getLoc),
-   method(Core, getRad),
-   method(Core, getVel),
-   method(Core, getTeamIndx),
+   method(CoreItem, getClassID),
+   method(CoreItem, getLoc),
+   method(CoreItem, getRad),
+   method(CoreItem, getVel),
+   method(CoreItem, getTeamIndx),
 
    // Class specific methods
-   method(Core, getHitPoints),
+   method(CoreItem, getHitPoints),
 
    {0,0}    // End method list
 };
 
 
-S32 Core::getClassID(lua_State *L)
+S32 CoreItem::getClassID(lua_State *L)
 {
    return returnInt(L, CoreTypeNumber);
 }
 
 
-S32 Core::getHitPoints(lua_State *L)
+S32 CoreItem::getHitPoints(lua_State *L)
 {
    return returnInt(L, mHitPoints);
 }
 
 
-void Core::push(lua_State *L)
+void CoreItem::push(lua_State *L)
 {
-   Lunar<Core>::push(L, this);
+   Lunar<CoreItem>::push(L, this);
 }
 
 

@@ -206,6 +206,8 @@ void EditorUserInterface::populateDock()
 
    if(getGame()->getGameType()->getGameType() == SoccerGame)
       addDockObject(new SoccerBallItem(), xPos, yPos);
+   else if(getGame()->getGameType()->getGameType() == CoreGame)
+      addDockObject(new CoreItem(), xPos, yPos);
    else
       addDockObject(new FlagItem(), xPos, yPos);
    yPos += spacer;
@@ -223,8 +225,8 @@ void EditorUserInterface::populateDock()
    yPos += spacer;
 
    //addDockObject(new CircleSpawn(), xPos - 10, yPos);
-   addDockObject(new Core(), xPos /*+ 10*/, yPos);
-   yPos += spacer;
+//   addDockObject(new Core(), xPos /*+ 10*/, yPos);
+//   yPos += spacer;
 
 
    // These two will share a line

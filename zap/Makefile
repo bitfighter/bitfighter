@@ -47,6 +47,7 @@ OBJECTS_SHARED=\
    Color.o\
    config.o\
    controlObjectConnection.o\
+   CoreGame.o\
    CTFGame.o\
    dataConnection.o\
    EditorObject.o\
