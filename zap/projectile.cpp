@@ -650,7 +650,7 @@ U32 GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, B
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
    stream->writeFlag(exploded);
-   stream->writeFlag(updateMask & InitialMask);
+   stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
    return ret;
 }
 
@@ -943,7 +943,7 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
-   if(stream->writeFlag(updateMask & InitialMask))
+   if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
       stream->writeStringTableEntry(getOwner() ? getOwner()->getClientInfo()->getName() : "");
@@ -960,7 +960,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool initial = false;
    Parent::unpackUpdate(connection, stream);
 
-   if(stream->readFlag())     // Initial data
+   if(mInitial)     // Initial data
    {
       initial = true;
       readThisTeam(stream);

@@ -131,7 +131,6 @@ protected:
 
    bool mIsMounted;
    bool mIsCollideable;
-   bool mInitial;       // True on initial unpack, false thereafter
 
    U16 mItemId;         // Item ID, shared between client and server
 

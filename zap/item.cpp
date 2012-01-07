@@ -43,7 +43,7 @@
 namespace Zap
 {
 
-   
+bool Item::mInitial;
 static U32 sItemId = 1;
 
 // Constructor
@@ -101,7 +101,7 @@ string Item::toString(F32 gridSize) const
 
 U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+   //U32 retMask = Parent::packUpdate(connection, updateMask, stream);  // Goes to empty function NetObject::packUpdate
 
    if(stream->writeFlag(updateMask & InitialMask))
    {
@@ -110,15 +110,16 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
    }
 
-   return retMask;
+   return 0; //retMask;
 }
 
 
 void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);
+   //Parent::unpackUpdate(connection, stream);  // Goes to empty function NetObject::unpackUpdate
 
-   if(stream->readFlag())     // InitialMask
+   mInitial = stream->readFlag();
+   if(mInitial)     // InitialMask
    {
       mItemId = stream->readRangedU32(0, U16_MAX);
 
@@ -338,7 +339,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
    stream->writeFlag(hasExploded);
 
-   if(stream->writeFlag(updateMask & InitialMask))
+   if(updateMask & InitialMask)
       writeThisTeam(stream);
 
    return retMask;
@@ -364,7 +365,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       onItemExploded(getActualPos());
    }
 
-   if(stream->readFlag())
+   if(mInitial)
       readThisTeam(stream);
 }
 

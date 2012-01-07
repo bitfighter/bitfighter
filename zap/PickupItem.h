@@ -38,7 +38,6 @@ class PickupItem : public Item
 
 private:
    bool mIsVisible;
-   bool mIsMomentarilyVisible; // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
    Timer mRepopTimer;
    S32 mRepopDelay;            // Period of mRepopTimer, in seconds
 
@@ -50,7 +49,8 @@ private:
 protected:
    enum MaskBits {
       PickupMask    = Parent::FirstFreeMask << 0,
-      FirstFreeMask = Parent::FirstFreeMask << 1
+      PickupSoundMask    = Parent::FirstFreeMask << 1,
+      FirstFreeMask = Parent::FirstFreeMask << 2
    };
 
 public:

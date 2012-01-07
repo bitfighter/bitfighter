@@ -54,7 +54,6 @@ PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius
 {
    mRepopDelay = repopDelay;
    mIsVisible = true;
-   mIsMomentarilyVisible = false;
 
    mNetFlags.set(Ghostable);
 }
@@ -83,7 +82,6 @@ void PickupItem::idle(GameObject::IdleCallPath path)
             if(ship && ship->isOnObject(this))
             {
                collide(ship);
-               mIsMomentarilyVisible = true;
             }
          }
       }
@@ -147,14 +145,8 @@ U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);       // Writes id and pos
 
-   stream->writeFlag(updateMask & InitialMask);
-   stream->writeFlag(mIsVisible || mIsMomentarilyVisible);
-
-   if(mIsMomentarilyVisible)
-   {
-      mIsMomentarilyVisible = false;
-      setMaskBits(PickupMask);
-   }
+   stream->writeFlag(mIsVisible);
+   stream->writeFlag((updateMask & PickupSoundMask) && (updateMask != 0xFFFFFFFF));
 
    return retMask;
 }
@@ -164,13 +156,10 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);    // Get id and pos
 
-   bool isInitial = stream->readFlag();
-   bool visible = stream->readFlag();
+   mIsVisible = stream->readFlag();
 
-   if(!isInitial && !visible && mIsVisible)
+   if(stream->readFlag())
       onClientPickup();
-
-   mIsVisible = visible;
 }
 
 
@@ -181,7 +170,7 @@ bool PickupItem::collide(GameObject *otherObject)
    {
       if(pickup(dynamic_cast<Ship *>(otherObject)))
       {
-         setMaskBits(PickupMask);
+         setMaskBits(PickupSoundMask);
          mRepopTimer.reset(mRepopDelay * 1000);
          mIsVisible = false;
       }

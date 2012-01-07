@@ -52,6 +52,8 @@ protected:
       FirstFreeMask   = Parent::FirstFreeMask << 3
    };
 
+   static bool mInitial;       // True on initial unpack, false thereafter
+
 public:
    Item(const Point &pos = Point(0,0), F32 radius = 1);      // Constructor
 
