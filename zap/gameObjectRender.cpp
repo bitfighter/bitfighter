@@ -195,7 +195,7 @@ void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, 
 {
    // Draw the dashed arcs
    drawDashedArc(center, innerRadius, dashCount, spaceAngle, offset);
-   drawDashedArc(center, outerRadius, dashCount, spaceAngle, offset);
+   drawDashedArc(center, outerRadius, dashCount, spaceAngle, -offset);
 
    // Now connect them
    //drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0, offset);
