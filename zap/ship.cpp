@@ -2056,13 +2056,18 @@ void Ship::render(S32 layerIndex)
 
    glPopMatrix();
 
-   if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
-   {
-      glColor(Colors::green, /*F32(mSpawnShield.getCurrent()) / F32(SpawnShieldTime) * .75*/0.65f);
+   // Add post-spawn invulnerability effect
 
-      if(mSpawnShield.getCurrent() > 1500 || mSpawnShield.getCurrent() % 300 > 150)
+   static const S32 BLINK_THRESHOLD = 1500;  // Blink for last n ms
+   static const S32 BLINK_RATE = 300;        // Higher numbers = slower bink rate
+
+   if(mSpawnShield.getCurrent() != 0)  
+   {
+      if(mSpawnShield.getCurrent() > BLINK_THRESHOLD || mSpawnShield.getCurrent() % BLINK_RATE < BLINK_RATE / 2)  
       {
-         F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
+         glColor(Colors::orange50, .65f);    // Decrease this value for fainter shield
+
+         F32 offset = F32(Platform::getRealMilliseconds()) / 4000.0f;   // Increasing this number slows the rotation
          drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24, offset);
       }
    }
