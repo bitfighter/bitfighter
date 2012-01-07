@@ -165,7 +165,8 @@ private:
 
    void renderInputModeChangeAlert();
    void renderMissionOverlay(const GameType *gameType);
-   void renderTeamScores(const GameType *gameType, U32 rightAlignCoord);
+   void renderTeamFlagScores(const GameType *gameType, U32 rightAlignCoord);
+   void renderCoreScores(const GameType *gameType, U32 rightAlignCoord);
    void renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord);
    void renderTimeLeft(U32 rightAlignCoord);
    void renderTalkingClients();              // Render things related to voice chat

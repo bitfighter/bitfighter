@@ -3013,9 +3013,17 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    if((gameType->isGameOver() || scoreboardVisible) && teamCount > 0)
       renderScoreboard();
    
-   else if(teamCount > 1 && gameType->isTeamGame())      // Render team scores in lower-right corner when scoreboard is off
-      renderTeamScores(gameType, rightAlignCoord);
-   
+   // Render team scores in lower-right corner when scoreboard is off
+   else if(teamCount > 1 && gameType->isTeamGame())
+   {
+      // Render Core scores
+      if(gameType->getGameType() == CoreGame)
+         renderCoreScores(gameType, rightAlignCoord);
+
+      // Render scores for the rest of the team game types, which use flags
+      else
+         renderTeamFlagScores(gameType, rightAlignCoord);
+   }
    else if(teamCount > 0 && !gameType->isTeamGame())     // For single team games like rabbit and bitmatch
       renderLeadingPlayerScores(gameType, rightAlignCoord);
 
@@ -3082,7 +3090,7 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
 }
 
 
-void GameUserInterface::renderTeamScores(const GameType *gameType, U32 rightAlignCoord)
+void GameUserInterface::renderTeamFlagScores(const GameType *gameType, U32 rightAlignCoord)
 {
    S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
 
@@ -3115,6 +3123,43 @@ void GameUserInterface::renderTeamScores(const GameType *gameType, U32 rightAlig
          drawString(xpos - 50, ypos + 3, 18, "*");
 
       renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
+
+      glColor(Colors::white);
+      drawStringf(xpos, ypos, textsize, "%d", team->getScore());
+   }
+}
+
+
+void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlignCoord)
+{
+   S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
+
+   // Build a list of teams, so we can sort by score
+   Game *game = getGame();
+   S32 teamCount = game->getTeamCount();
+
+   static Vector<Team *> teams;
+   teams.resize(teamCount);
+
+   for(S32 i = 0; i < teamCount; i++)
+   {
+      teams[i] = (Team *)game->getTeam(i);
+      teams[i]->mId = i;
+   }
+
+   teams.sort(teamScoreSort);
+
+   const S32 textsize = 32;
+   S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textsize, "0");
+
+   for(S32 i = 0; i < teams.size(); i++)
+   {
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teams.size() - i - 1) * 38;
+
+      Team *team = (Team *)game->getTeam(i);
+      Point center(xpos - 20, ypos + 19);
+
+      renderCore(center, 10, team->getColor());
 
       glColor(Colors::white);
       drawStringf(xpos, ypos, textsize, "%d", team->getScore());

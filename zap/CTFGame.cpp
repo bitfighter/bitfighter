@@ -186,7 +186,7 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    Parent::renderInterfaceOverlay(scoreboardVisible);
 
    // Add some objective arrows...
-   // ...but endering objective arrows makes no sense if there is no ship at the moment
+   // ...but rendering objective arrows makes no sense if there is no ship at the moment
    Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
    if(!ship)
       return;
