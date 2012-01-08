@@ -707,11 +707,8 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(ServerGame *game)
    // Figure out which zones are adjacent to which, and find the "gateway" between them
    for(S32 i = 0; i < zones.size(); i++)
    {
-      for(S32 j = i; j < zones.size(); j++)
+      for(S32 j = i + 1; j < zones.size(); j++)
       {
-         if(i == j)
-            continue;      // Don't check self...
-
          // Do zones i and j touch?  First a quick and dirty bounds check:
          if(!zones[i]->getExtent().intersectsOrBorders(zones[j]->getExtent()))
             continue;
