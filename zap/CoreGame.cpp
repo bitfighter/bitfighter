@@ -131,16 +131,54 @@ bool CoreGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 #endif
 
 
-void CoreGameType::addCore(CoreItem *core)
+void CoreGameType::addCore(CoreItem *core, S32 team)
 {
    mCores.push_back(core);
+
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+   {
+      // Make every team that doesn't own this core require another point to win
+      if(i != team)
+      {
+         Team *team = (Team *)getGame()->getTeam(i);
+         team->addScore(-DestroyedCoreScore);
+      }
+   }
 }
 
 
 S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
-   // TODO Auto-generated destructor stub
-   return 0;
+   if(scoreGroup == TeamScore)
+   {
+      switch(scoreEvent)
+      {
+         case OwnCoreDestroyed:
+            return -data;
+         case EnemyCoreDestroyed:
+            return data;
+         default:
+            return naScore;
+      }
+   }
+   else  // scoreGroup == IndividualScore
+   {
+      switch(scoreEvent)
+      {
+         default:
+            return naScore;
+      }
+   }
+}
+
+
+void CoreGameType::score(Ship *destroyer, S32 team, S32 score)
+{
+   // If someone destroyed enemy core
+   if(destroyer && destroyer->getTeam() != team)
+      updateScore(NULL, team, EnemyCoreDestroyed, score);
+   else
+      updateScore(NULL, team, OwnCoreDestroyed, score);
 }
 
 
@@ -279,9 +317,20 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    mHitPoints--;
    if(mHitPoints == 0)    // Kill small items
    {
+      // We've scored!
+      GameType *gameType = getGame()->getGameType();
+      if(gameType)
+      {
+         Ship *destroyer = dynamic_cast<Ship *>(theInfo->damagingObject);
+         CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
+         if(coreGameType)
+            coreGameType->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
+      }
+
       hasExploded = true;
       deleteObject(500);
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
+
       return;
    }
 
@@ -325,10 +374,12 @@ void CoreItem::onAddedToGame(Game *theGame)
    // Adjust hit points to match that set in CoreGameType
    CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
    if(coreGameType)
+   {
       setStartingHitPoints(coreGameType->getCoreItemHitPoints());
 
-   // Now add to game
-   gameType->addCore(this);
+      // Now add to game
+      coreGameType->addCore(this, getTeam());
+   }
 }
 
 

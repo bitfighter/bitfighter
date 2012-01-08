@@ -156,7 +156,8 @@ public:
       ScoreGoalEnemyTeam,     // soccer
       ScoreGoalHostileTeam,   // soccer
       ScoreGoalOwnTeam,       // soccer -> score on self
-      CoreDestroyed,          // core -> core is destroyed
+      EnemyCoreDestroyed,     // core -> enemy core is destroyed
+      OwnCoreDestroyed,       // core -> own core is destroyed
       ScoringEventsCount
    };
 
@@ -401,8 +402,6 @@ public:
 
    virtual void addZone(GoalZone *zone);
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
-
-   virtual void addCore(CoreItem *core);
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);

@@ -668,23 +668,23 @@ void Ship::idle(GameObject::IdleCallPath path)
          updateInterpolation();
       }
 
-      if(path != GameObject::ClientIdleControlReplay)
-      {
+      //if(path != GameObject::ClientIdleControlReplay)
+      //{
          mSensorZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
 
-         // Update spawn shield unless we move the ship - then it turns off .. server only
-         //if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
-         //{
             if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
                mSpawnShield.update(mCurrentMove.time);
             else
                mSpawnShield.clear();
 
+         // Update spawn shield unless we move the ship - then it turns off .. server only
+         if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
+         {
             if(mSpawnShield.getCurrent() == 0)
                setMaskBits(SpawnShieldMask);
-        /* }*/
-      }
+         }
+      //}
    }
 
    // Update the object in the game's extents database

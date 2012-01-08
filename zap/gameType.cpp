@@ -493,6 +493,12 @@ string GameType::getScoringEventDescr(ScoringEvent event)
       case ScoreGoalOwnTeam:
          return "Score a goal against own team";
 
+      // Core specifig:
+      case EnemyCoreDestroyed:
+         return "Destroyed a Core on enemy team";
+      case OwnCoreDestroyed:
+         return "Destroyed a Core on own team";
+
       // Other:
       default:
          return "Unknown event!";
@@ -1737,7 +1743,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
 
       // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
       // deducted, then the same amount is added to every team.  Assumes that points < 0.
-      if(scoringEvent == ScoreGoalOwnTeam)
+      if(scoringEvent == ScoreGoalOwnTeam || scoringEvent == OwnCoreDestroyed)
       {
          for(S32 i = 0; i < mGame->getTeamCount(); i++)
          {
@@ -3779,12 +3785,6 @@ void GameType::addZone(GoalZone *zone)
 
 
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone)
-{
-   /* Do nothing */
-}
-
-
-void GameType::addCore(CoreItem *core)
 {
    /* Do nothing */
 }
