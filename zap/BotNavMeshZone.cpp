@@ -705,7 +705,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections(ServerGame *game)
    NeighboringZone neighbor;
 
    // Figure out which zones are adjacent to which, and find the "gateway" between them
-   for(S32 i = 0; i < zones.size(); i++)
+   for(S32 i = 0; i < zones.size() - 1; i++)
    {
       for(S32 j = i + 1; j < zones.size(); j++)
       {
