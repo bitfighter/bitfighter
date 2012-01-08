@@ -143,8 +143,8 @@
     <ClCompile Include="..\zap\config.cpp" />
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
-    <ClCompile Include="..\zap\CoreGame.cpp" />
     <ClCompile Include="BanList.cpp" />
+    <ClCompile Include="CoreGame.cpp" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="EngineeredItem.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
@@ -260,9 +260,9 @@
     <ClInclude Include="..\zap\ConfigEnum.h" />
     <ClInclude Include="..\zap\controlObjectConnection.h" />
     <ClInclude Include="..\zap\CTFGame.h" />
-    <ClInclude Include="..\zap\CoreGame.h" />
     <ClInclude Include="..\zap\Directory.h" />
     <ClInclude Include="..\zap\dirent.h" />
+    <ClInclude Include="CoreGame.h" />
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="EngineeredItem.h" />
     <ClInclude Include="..\zap\flagItem.h" />
@@ -376,6 +376,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\zap\ZAP.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bitfighter_dedicated.vcproj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
