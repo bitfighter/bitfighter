@@ -1944,7 +1944,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #ifdef ZAP_DEDICATED
    mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
 #else
-   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame);
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame != NULL);
 #endif
    //}
 
