@@ -34,6 +34,7 @@ namespace Zap {
 
 // Forward Declarations
 class CoreItem;
+class Ship;
 
 class CoreGameType : public GameType
 {
@@ -44,6 +45,8 @@ private:
    U32 mCoreItemHitPoints;
 
 public:
+   static const S32 DestroyedCoreScore = 1;
+
    CoreGameType();
    virtual ~CoreGameType();
 
@@ -53,13 +56,14 @@ public:
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
 
-   void addCore(CoreItem *core);
+   void addCore(CoreItem *core, S32 team);
 
    U32 getCoreItemHitPoints();
    void setCoreItemHitPoints(U32 hitPoints);
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+   void score(Ship *destroyer, S32 team, S32 score);
 
 #ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
