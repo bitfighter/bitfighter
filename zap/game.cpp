@@ -1937,7 +1937,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
    //else
    //{
 
-   mDatabaseForBotZones.removeEverythingFromDatabase();    // Not sure if this is needed, but might be as long as we are still loading zones from level files
+   // Not sure if this is needed, but might be as long as we are still loading zones from level files... but I think we aren't anymore
+   mDatabaseForBotZones.removeEverythingFromDatabase();    
 
    // Try and load Bot Zones for this level, set flag if failed
    // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
