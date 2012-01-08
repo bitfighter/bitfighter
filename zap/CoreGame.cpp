@@ -163,11 +163,11 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
    }
    else  // scoreGroup == IndividualScore
    {
-      switch(scoreEvent)
-      {
-         default:
+      //switch(scoreEvent)
+      //{
+      //   default:
             return naScore;
-      }
+      //}
    }
 }
 
