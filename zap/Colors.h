@@ -58,6 +58,8 @@ namespace Colors
    const Color green80(0, .80f, 0);
    const Color blue80 (0, 0, .80f);
 
+   const Color red40(.40f, 0, 0);
+
 
    // Some special colors
    const Color menuHelpColor(green);
