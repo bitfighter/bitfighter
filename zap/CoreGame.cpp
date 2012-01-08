@@ -77,8 +77,12 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
       return;
 
    for(S32 i = 0; i < mCores.size(); i++)
-      if(mCores[i]->getTeam() != ship->getTeam())
-         renderObjectiveArrow(mCores[i], getTeamColor(mCores[i]->getTeam()));
+   {
+      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
+      if(coreItem)
+         if(coreItem->getTeam() != ship->getTeam())
+            renderObjectiveArrow(coreItem, getTeamColor(coreItem->getTeam()));
+   }
 #endif
 }
 
@@ -278,15 +282,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       hasExploded = true;
       deleteObject(500);
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
-
-      // Clean up from our Cores list  // TODO how to do this?
-//      GameType *gameType = getGame()->getGameType();
-//      if(gameType)
-//      {
-//         CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
-//         if(coreGameType)
-//            coreGameType->removeCore(this);
-//      }
       return;
    }
 

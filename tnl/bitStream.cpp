@@ -323,18 +323,16 @@ F32 BitStream::readSignedFloat(U8 bitCount)
 
 void BitStream::writeSignedInt(S32 value, U8 bitCount)
 {
-   if(writeFlag(value < 0))
-      writeInt(-value, bitCount - 1);
-   else
-      writeInt(value, bitCount - 1);
+   writeInt(value, bitCount);
 }
+
+#if ((-1) >> 1 != -1)
+#error "Signed right shift error, your compiler doesn't support signed right shift?"
+#endif
 
 S32 BitStream::readSignedInt(U8 bitCount)
 {
-   if(readFlag())
-      return -(S32)readInt(bitCount - 1);
-   else
-      return (S32)readInt(bitCount - 1);
+   return S32(readInt(bitCount)) << (32 - bitCount) >> (32 - bitCount);
 }
 
 void BitStream::writeNormalVector(const Point3F& vec, U8 bitCount)

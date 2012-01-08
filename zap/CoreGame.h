@@ -40,7 +40,7 @@ class CoreGameType : public GameType
    typedef GameType Parent;
 
 private:
-   Vector<CoreItem*> mCores;
+   Vector<SafePtr<CoreItem> > mCores;
    U32 mCoreItemHitPoints;
 
 public:
