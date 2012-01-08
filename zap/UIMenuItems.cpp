@@ -87,6 +87,7 @@ void MenuItem::initialize()
    mCallback = NULL;
    mHelp = "";
    mIndex = -1;
+   mMenuItemSize = MENU_ITEM_SIZE_NORMAL;
 
    mEnterAdvancesItem = false;
    mSelectedColor = Colors::yellow;
@@ -113,6 +114,18 @@ bool MenuItem::shouldLuaGarbageCollectThisObject()
 MenuItemTypes MenuItem::getItemType()
 {
    return MenuItemType;
+}
+
+
+void MenuItem::setSize(MenuItemSize size)
+{
+   mMenuItemSize = size;
+}
+
+
+MenuItemSize MenuItem::getSize()
+{
+   return mMenuItemSize;
 }
 
 

@@ -271,13 +271,13 @@ bool GameParamUserInterface::anythingChanged()
 }
 
 
-S32 GameParamUserInterface::getTextSize()
+S32 GameParamUserInterface::getTextSize(MenuItemSize size)
 {
    return 18;
 }
 
 
-S32 GameParamUserInterface::getGap()
+S32 GameParamUserInterface::getGap(MenuItemSize size)
 {
    return 12;
 }

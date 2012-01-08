@@ -59,13 +59,13 @@ string QuickMenuUI::getTitle()
 }
 
 
-S32 QuickMenuUI::getTextSize()
+S32 QuickMenuUI::getTextSize(MenuItemSize size)
 {
-   return 20;
+   return size == MENU_ITEM_SIZE_NORMAL ? 20 : 12;
 }
 
 
-S32 QuickMenuUI::getGap()
+S32 QuickMenuUI::getGap(MenuItemSize size)
 {
    return 6;
 }
@@ -80,12 +80,20 @@ void QuickMenuUI::render()
 
    // mMenuLocation.x = 1000; mMenuLocation.y = -1000;      // <== For testing menu positioning code
 
-   const S32 INSTRUCTION_SIZE = getTextSize() * 6 / 10;     // Size of smaller bottom menu item, "Save and quit"
+   //TODO: Get rid of the following
+   const S32 INSTRUCTION_SIZE = getTextSize(MENU_ITEM_SIZE_SMALL);     // Size of smaller bottom menu item, "Save and quit"
 
    string title = getTitle();
 
-   S32 count = getMenuItemCount() - 1;      // We won't count our last item, save-n-quit, because it's rendered separately
-   S32 yStart = S32(mMenuLocation.y) - count * (getTextSize() + getGap()) - 10 - (getGap() + INSTRUCTION_SIZE);
+   //S32 count = getMenuItemCount() - 1;      // We won't count our last item, save-n-quit, because it's rendered separately
+   // was S32 yStart = S32(mMenuLocation.y) - count * (getTextSize() + getGap()) - 10 - (getGap() + INSTRUCTION_SIZE);
+
+   S32 yStart = S32(mMenuLocation.y);
+
+   S32 menuHeight = getTotalMenuItemHeight() +                                         // Height of all menu items
+                    getTextSize(MENU_ITEM_SIZE_SMALL) + getGap(MENU_ITEM_SIZE_NORMAL); // Height of title and title gam
+
+   yStart = S32(mMenuLocation.y) - menuHeight;
 
    S32 width = max(getMenuWidth(), getStringWidth(INSTRUCTION_SIZE, title.c_str()));
 
@@ -96,7 +104,8 @@ void QuickMenuUI::render()
    S32 naturalRight = S32(mMenuLocation.x) + width / 2 + hpad;
 
    S32 naturalTop =  yStart - vpad;
-   S32 naturalBottom = yStart + count * (getTextSize() + getGap()) + 2 * (getGap() + INSTRUCTION_SIZE) + vpad * 2 + 2;
+   S32 naturalBottom = yStart + menuHeight + vpad * 2 + 2;
+
 
    // Keep the menu on screen, no matter where the item being edited is located
    S32 keepingItOnScreenAdjFactorX = 0;
@@ -130,33 +139,47 @@ void QuickMenuUI::render()
 
    // First draw the menu title
    glColor(Colors::red);
-   drawCenteredString(cenX, yStart, INSTRUCTION_SIZE, title.c_str());
+   drawCenteredString(cenX, yStart, getTextSize(MENU_ITEM_SIZE_SMALL), title.c_str());
 
    // Then the menu items
-   yStart += INSTRUCTION_SIZE + getGap() + 2;
+   yStart += getGap(MENU_ITEM_SIZE_NORMAL) + getTextSize(MENU_ITEM_SIZE_SMALL) + 2;
    mTopOfFirstMenuItem = yStart;    // Save this -- it will be handy elsewhere!
 
-   for(S32 i = 0; i < count; i++)
+   S32 y = yStart;
+
+   for(S32 i = 0; i < getMenuItemCount(); i++)
    {
-      S32 y = yStart + i * (getTextSize() + getGap());
+      MenuItemSize size = getMenuItem(i)->getSize();
+      S32 itemTextSize = getTextSize(size);
+      S32 itemGap = getGap(size);
+
+      S32 specialCaseFix = 0;
+      // Special case: increase gap beween main menu and "Save and Quit"
+      if(i == getMenuItemCount() - 1)
+      {
+         specialCaseFix = 2;
+         y += 5;
+      }
 
       // Draw background highlight if this item's selected
       if(selectedIndex == i)
-         drawMenuItemHighlight(left,  y, right, y + getTextSize() + 5);
+         drawMenuItemHighlight(left,  y - specialCaseFix, right, y + itemTextSize + 5);
 
-      getMenuItem(i)->render(cenX, y, getTextSize(), selectedIndex == i);
+      getMenuItem(i)->render(cenX, y, itemTextSize, selectedIndex == i);
+
+      y += itemTextSize + itemGap;
    }
 
    /////
    // The last menu item is our save and exit item, which we want to draw smaller to balance out the menu title visually.
    // We'll blindly assume it's there, and also that it's last.
-   S32 y = (yStart + count * (getTextSize() + getGap()) + getGap());
+   //y += getGap(MENU_ITEM_SIZE_NORMAL);
 
-   // Draw background highlight if this item's selected
-   if(selectedIndex == getMenuItemCount() - 1)
-      drawMenuItemHighlight(left,  y - 1, right, y + INSTRUCTION_SIZE + 3);
+   //// Draw background highlight if this item's selected
+   //if(selectedIndex == getMenuItemCount() - 1)
+   //   drawMenuItemHighlight(left,  y - 1, right, y + INSTRUCTION_SIZE + 3);
 
-   getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == (getMenuItemCount() - 1));
+   //getLastMenuItem()->render(cenX, y, INSTRUCTION_SIZE, selectedIndex == (getMenuItemCount() - 1));
 
    /////
    // Render instructions just below the menu
@@ -169,34 +192,34 @@ void QuickMenuUI::render()
    // Make sure help fits on the screen left-right-wise; note that this probably breaks down if text is longer than the screen is wide
    instrXPos = cenX;
 
-   S32 xoff = (getStringWidth(getTextSize(), getMenuItem(selectedIndex)->getHelp()) - width) / 2;  // Amount help "sticks out" beyond menu box
+   S32 HELP_TEXT_SIZE = getTextSize(MENU_ITEM_SIZE_NORMAL);
+
+   S32 xoff = (getStringWidth(HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp()) - width) / 2;  // Amount help "sticks out" beyond menu box
    if(xoff > 0)
       instrXPos += max(xoff - left, min(gScreenInfo.getGameCanvasWidth() - xoff - right, 0));
 
    // Now consider vertical position
-   if(naturalBottom + vpad + getTextSize() < gScreenInfo.getGameCanvasHeight())
+   if(naturalBottom + vpad + HELP_TEXT_SIZE < gScreenInfo.getGameCanvasHeight())
       instrYPos = naturalBottom + keepingItOnScreenAdjFactorY + vpad;                           // Help goes below, in normal location
    else
-      instrYPos = naturalTop + keepingItOnScreenAdjFactorY - getTextSize() - getGap() - vpad;   // No room below, help goes above
+      instrYPos = naturalTop + keepingItOnScreenAdjFactorY - HELP_TEXT_SIZE - getGap(MENU_ITEM_SIZE_NORMAL) - vpad;   // No room below, help goes above
 
-   drawCenteredString(instrXPos, instrYPos, getTextSize(), getMenuItem(selectedIndex)->getHelp());
+   drawCenteredString(instrXPos, instrYPos, HELP_TEXT_SIZE, getMenuItem(selectedIndex)->getHelp());
+}
+
+
+S32 QuickMenuUI::getYStart()
+{
+   return mTopOfFirstMenuItem;
 }
 
 
 S32 QuickMenuUI::getSelectedMenuItem()
 {
-   if(mTopOfFirstMenuItem < 0)      // Haven't run render yet, still have no idea where the menu is!
+   if(getYStart() < 0)      // Haven't run render yet, still have no idea where the menu is!
       return 0;
 
-   S32 y = (S32)gScreenInfo.getMousePos()->y;
-
-   if(y <= mTopOfFirstMenuItem)
-      return 0;
-
-   if(y >= mTopOfFirstMenuItem + (getMenuItemCount() - 1) * (getTextSize() + getGap()))
-      return getMenuItemCount() - 1;
-
-   return (y - mTopOfFirstMenuItem) / (getTextSize() + getGap());
+   return Parent::getSelectedMenuItem();
 }
 
 
@@ -224,7 +247,7 @@ S32 QuickMenuUI::getMenuWidth()
 
    for(S32 i = 0; i < getMenuItemCount(); i++)
    {
-      S32 itemWidth = getMenuItem(i)->getWidth(getTextSize());
+      S32 itemWidth = getMenuItem(i)->getWidth(getTextSize(getMenuItem(i)->getSize()));
 
       if(itemWidth > width)
          width = itemWidth;
@@ -266,7 +289,10 @@ void QuickMenuUI::addSaveAndQuitMenuItem()
 
 void QuickMenuUI::addSaveAndQuitMenuItem(const char *menuText, const char *helpText)
 {
-   addMenuItem(new MenuItem(menuText, saveAndQuit, helpText));
+   MenuItem *menuItem = new MenuItem(menuText, saveAndQuit, helpText);
+   menuItem->setSize(MENU_ITEM_SIZE_SMALL);
+
+   addMenuItem(menuItem);
 }
 
 

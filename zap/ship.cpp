@@ -2058,7 +2058,8 @@ void Ship::render(S32 layerIndex)
 
    if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
    {
-      glColor(Colors::green, /*F32(mSpawnShield.getCurrent()) / F32(SpawnShieldTime) * .75*/0.65f);
+      //glColor(Colors::green, /*F32(mSpawnShield.getCurrent()) / F32(SpawnShieldTime) * .75*/0.65f);
+      glColor(Colors::orange50, .65f);    // Decrease this value for fainter shield
 
       if(mSpawnShield.getCurrent() > 1500 || mSpawnShield.getCurrent() % 300 > 150)
       {

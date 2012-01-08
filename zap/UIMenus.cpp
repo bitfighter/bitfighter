@@ -69,8 +69,8 @@ extern void shutdownBitfighter();
 ////////////////////////////////////
 ////////////////////////////////////
 
-// Max number of menu items we show on screen before we go into scrolling mode
-#define MAX_MENU_SIZE S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize() + getGap()))   
+// Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
+#define MAX_MENU_SIZE S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)))   
 
 // Constructor
 MenuUserInterface::MenuUserInterface(ClientGame *game) : UserInterface(game)
@@ -210,7 +210,8 @@ S32 MenuUserInterface::getYStart()
    if(getMenuID() == GameParamsUI)  // If we're on the GameParams menu, start at a constant position
       return 70;
    else                             // Otherwise, attpempt to center the menu vertically
-      return (gScreenInfo.getGameCanvasHeight() - min(mMenuItems.size(), MAX_MENU_SIZE) * (getTextSize() + getGap())) / 2 + vertOff;
+      return (gScreenInfo.getGameCanvasHeight() - min(mMenuItems.size(), MAX_MENU_SIZE) * 
+             (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL))) / 2 + vertOff;
 }
 
 
@@ -319,12 +320,15 @@ void MenuUserInterface::render()
       dimUnderlyingUI();
    }
 
+   // Title 
    glColor(Colors::white);    
    drawCenteredString(vertMargin, 30, mMenuTitle.c_str());
-
+   
+   // Subtitle
    glColor(mMenuSubTitleColor);
    drawCenteredString(vertMargin + 35, 18, mMenuSubTitle.c_str());
 
+   // Instructions
    if(mRenderInstructions)
       renderMenuInstructions(getGame()->getSettings());
 
@@ -336,19 +340,25 @@ void MenuUserInterface::render()
    S32 yStart = getYStart();
    S32 offset = getOffset();
 
-   // Just because it looks good (was 2, which looks crappy on gameParams menu.  0 seems to look ok everywhere.
-   S32 adjfact = 0;    
    S32 shrinkfact = 1;
+
+   S32 y = yStart;
 
    for(S32 i = 0; i < count; i++)
    {
-      S32 y = yStart + i * (getTextSize() + getGap());
+      MenuItemSize size = getMenuItem(i)->getSize();
+      S32 textsize = getTextSize(size);
+      S32 gap = getGap(size);
+      
+      // Highlight selected item
+      if(selectedIndex == i + offset)  
+         drawMenuItemHighlight(0,           y - gap / 2 + shrinkfact, 
+                               canvasWidth, y + textsize + gap / 2 - shrinkfact);
 
-      if(selectedIndex == i + offset)  // Highlight selected item
-         drawMenuItemHighlight(0,           y - getGap() / 2 + adjfact + shrinkfact, 
-                               canvasWidth, y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
+      S32 indx = i + offset;
+      mMenuItems[indx]->render(y, textsize, selectedIndex == indx);
 
-      mMenuItems[i+offset]->render(y, getTextSize(), selectedIndex == i+offset);
+      y += textsize + gap;
    }
 
    // Render an indicator that there are scrollable items above and/or below
@@ -360,7 +370,7 @@ void MenuUserInterface::render()
          renderArrowAbove(yStart, ARROW_HEIGHT);
 
       if(offset < mMenuItems.size() - MAX_MENU_SIZE)     // There are items below
-         renderArrowBelow(yStart + (getTextSize() + getGap()) * MAX_MENU_SIZE, ARROW_HEIGHT);
+         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * MAX_MENU_SIZE, ARROW_HEIGHT);
    }
 
    // Render a help string at the bottom of the menu
@@ -407,8 +417,32 @@ void MenuUserInterface::onMouseMoved()
 
 S32 MenuUserInterface::getSelectedMenuItem()
 {
-   return S32( floor(( gScreenInfo.getMousePos()->y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + mFirstVisibleItem;
+   S32 mouseY = (S32)gScreenInfo.getMousePos()->y;   
+
+   S32 cumHeight = getYStart();
+
+   // Mouse is above the top of the menu
+   if(mouseY <= cumHeight)
+      return 0;
+
+   // Mouse is on the menu
+   for(S32 i = 0; i < getMenuItemCount() - 1; i++)
+   {
+      MenuItemSize size = getMenuItem(i)->getSize();
+      S32 height = getTextSize(size) + .5 * getGap(size);
+
+      cumHeight += height;
+
+      if(mouseY < cumHeight)
+         return i;     
+
+      cumHeight += .5 * getGap(size);
+   }
+
+   // Mouse is below bottom of menu
+   return getMenuItemCount() - 1;
 }
+
 
 
 void MenuUserInterface::processMouse()
@@ -518,6 +552,19 @@ bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
 }
 
 
+S32 MenuUserInterface::getTotalMenuItemHeight()
+{
+   S32 height = 0;
+   for(S32 i = 0; i < mMenuItems.size(); i++)
+   {
+      MenuItemSize size = mMenuItems[i]->getSize();
+      height += getTextSize(size) + getGap(size);
+   }
+
+   return height;
+}
+
+
 // Process the keys that work on all menus
 bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 {
@@ -541,7 +588,9 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
          S32 yStart = getYStart();
          const Point *mousePos = gScreenInfo.getMousePos();
 
-         if(mousePos->y < yStart || mousePos->y > yStart + (mMenuItems.size() + 1) * (getTextSize() + getGap()))
+         getSelectedMenuItem();
+
+         if(mousePos->y < getYStart() || yStart + getTotalMenuItemHeight())
             return true;
       }
 
@@ -592,13 +641,13 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 }
 
 
-S32 MenuUserInterface::getTextSize()
+S32 MenuUserInterface::getTextSize(MenuItemSize size)
 {
-   return 23;
+   return size == MENU_ITEM_SIZE_NORMAL ? 23 : 15;
 }
 
 
-S32 MenuUserInterface::getGap()
+S32 MenuUserInterface::getGap(MenuItemSize size)
 {
    return 18;
 }
@@ -1207,9 +1256,12 @@ void NameEntryUserInterface::setupMenu()
    addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
    addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
-   addMenuItem(new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", ""));
+
+   MenuItem *menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
+   menuItem->setSize(MENU_ITEM_SIZE_SMALL);
+   addMenuItem(menuItem);
    
-   getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
+   getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // Quotes are incompatible with PHPBB3 logins
    getMenuItem(2)->setSecret(true);
 }
 
@@ -1223,7 +1275,7 @@ void NameEntryUserInterface::renderExtras()
    const S32 rows = 3;
    S32 row = 0;
 
-   glColor3f(0,1,0);
+   glColor(Colors::menuHelpColor);
 
    drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
             "You can skip this screen by editing the [Settings] section of Bitfighter.ini");
@@ -1390,7 +1442,7 @@ void HostMenuUserInterface::renderProgressListItems()
 {
    if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
    {
-      TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
+      TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
 
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {

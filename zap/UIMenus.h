@@ -46,7 +46,7 @@ class MenuUserInterface : public UserInterface
 private:
    Vector<boost::shared_ptr<MenuItem> > mMenuItems;
 
-   S32 getYStart();     // Get vert pos of first menu item
+   virtual S32 getYStart();     // Get vert pos of first menu item
    S32 getOffset(); 
    Timer mScrollTimer;
 
@@ -54,14 +54,13 @@ private:
    bool mRepeatMode;
    bool mKeyDown;
 
-   virtual S32 getTextSize();        // Let menus set their own text size
-   virtual S32 getGap();             // Gap is the space between items
+   virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
+   virtual S32 getGap(MenuItemSize size);       // Gap is the space between items
 
-   virtual void renderExtras();      // For drawing something extra on a menu
-   void advanceItem();               // What happens when we move on to the next menu item?
+   virtual void renderExtras();     // For drawing something extra on a menu
+   void advanceItem();              // What happens when we move on to the next menu item?
 
    virtual void initialize();
-   virtual S32 getSelectedMenuItem();
 
 protected:
    
@@ -72,6 +71,10 @@ protected:
    // Handle keyboard input while a menu is displayed
    virtual bool processMenuSpecificKeys(InputCode inputCode, char ascii);
    virtual bool processKeys(InputCode inputCode, char ascii);
+   virtual S32 getSelectedMenuItem();
+
+   S32 getTotalMenuItemHeight();    // Add up height of all menu items
+
 
    void sortMenuItems();
    MenuItem *getLastMenuItem();

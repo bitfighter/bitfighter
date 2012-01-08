@@ -56,6 +56,11 @@ enum PlayerType {
    PlayerTypeIrrelevant
 };
 
+enum MenuItemSize {
+   MENU_ITEM_SIZE_SMALL,
+   MENU_ITEM_SIZE_NORMAL
+};
+
 class ClientGame;
 class MenuUserInterface;
 
@@ -66,6 +71,7 @@ class MenuItem : public LuaObject
 {
 private:
    S32 mIndex;
+   MenuItemSize mMenuItemSize;
    MenuUserInterface *mMenu;
    virtual void initialize();
 
@@ -118,6 +124,9 @@ public:
 
    // When enter is pressed, should selection advance to the next item?
    virtual void setEnterAdvancesItem(bool enterAdvancesItem);
+
+   MenuItemSize getSize();
+   void setSize(MenuItemSize size);
    
    virtual const char *getSpecialEditingInstructions();
    virtual string getValueForDisplayingInMenu();
