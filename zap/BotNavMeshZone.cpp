@@ -524,7 +524,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    Rect bounds = game->getWorldExtents();
    bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
-   // Make sure level isn't too big for zone generation, which uses U16s
+   // Make sure level isn't too big for zone generation, which uses 16 bit ints
    if(bounds.getHeight() >= (F32)U16_MAX || bounds.getWidth() >= (F32)U16_MAX)
    {
       logprintf(LogConsumer::LogLevelError, "Level too big for zone generation! (max size in either dimension is %d)", U16_MAX);
