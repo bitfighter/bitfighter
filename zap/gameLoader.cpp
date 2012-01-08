@@ -280,7 +280,9 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
 
          if(cur == 0)
          {
-            logprintf(LogConsumer::LogWarning, "Load level ==> Some lines too long in file %s (max len = %d)", filename.c_str(), sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
+            logprintf(LogConsumer::LogLevelError, "Load level ==> Some lines too long in file %s (max len = %d)", 
+                      filename.c_str(), sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
+
             cur = lastByteRead - 1; // Did not find \n, go back to end of chunk. Without this line, it will freeze in endless loop.
          }
                      // small cur number (cur > 0) is OK, as cur will then have to be a big number on next pass.
@@ -292,8 +294,9 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
       char c = levelChunk[cur];     // Read a char, hold onto it for a second
       levelChunk[cur] = 0;          // Replace it with null
 
-      parseLevelLine(levelChunk, database, inEditor, filename); // ParseLevelLine will read from the beginning of the chunk until it hits the null we just inserted
-      levelChunk[cur] = c;                            // Replace the null with our saved char
+      // ParseLevelLine will read from the beginning of the chunk until it hits the null we just inserted
+      parseLevelLine(levelChunk, database, inEditor, filename); 
+      levelChunk[cur] = c;          // Replace the null with our saved char
 
       // Now get rid of that line we just processed with parseLevelLine, by copying the data starting at cur back to the beginning of our chunk
       S32 cur2 = 0;
@@ -314,7 +317,8 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
 #undef MaxArgc
 #undef MaxArgLen
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 #  ifdef TNL_OS_WIN32
 #     include "dirent.h"        // Need local copy for Windows builds
