@@ -291,7 +291,7 @@ const char *CoreItem::getOnScreenName()
 
 F32 CoreItem::getEditorRadius(F32 currentScale)
 {
-   return getRadius() * currentScale;
+   return (calcCoreWidth() / 2) * currentScale + 5;
 }
 
 
