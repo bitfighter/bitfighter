@@ -344,8 +344,7 @@ public:
    static void restartLevelHandler(ClientGame *game, const Vector<string> &words);
    static void shutdownServerHandler(ClientGame *game, const Vector<string> &words);
    static void kickPlayerHandler(ClientGame *game, const Vector<string> &words);
-   static void adminPassHandler(ClientGame *game, const Vector<string> &words);
-   static void levelPassHandler(ClientGame *game, const Vector<string> &words);
+   static void submitPassHandler(ClientGame *game, const Vector<string> &words);
    static void showCoordsHandler(ClientGame *game, const Vector<string> &words);
    static void showZonesHandler(ClientGame *game, const Vector<string> &words);
    static void showPathsHandler(ClientGame *game, const Vector<string> &words);

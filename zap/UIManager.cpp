@@ -65,8 +65,7 @@ UIManager::UIManager(ClientGame *clientGame)
    mMessageUserInterface = NULL;
    mLevelMenuUserInterface = NULL;
    mLevelMenuSelectUserInterface = NULL;
-   mAdminPasswordEntryUserInterface = NULL;
-   mLevelChangePasswordEntryUserInterface = NULL;
+   mLevelChangeOrAdminPasswordEntryUserInterface = NULL;
    mHostMenuUserInterface = NULL;
    mGameMenuUserInterface = NULL;
    mErrorMsgUserInterface = NULL;
@@ -101,8 +100,7 @@ UIManager::~UIManager()
    delete mMessageUserInterface;
    delete mLevelMenuUserInterface;
    delete mLevelMenuSelectUserInterface;
-   delete mAdminPasswordEntryUserInterface;
-   delete mLevelChangePasswordEntryUserInterface;
+   delete mLevelChangeOrAdminPasswordEntryUserInterface;
    delete mHostMenuUserInterface;
    delete mGameMenuUserInterface;
    delete mErrorMsgUserInterface;
@@ -252,23 +250,13 @@ LevelMenuSelectUserInterface *UIManager::getLevelMenuSelectUserInterface()
 }
 
 
-AdminPasswordEntryUserInterface *UIManager::getAdminPasswordEntryUserInterface()
+LevelChangeOrAdminPasswordEntryUserInterface *UIManager::getLevelChangeOrAdminPasswordEntryUserInterface()
 {
    // Lazily initialize
-   if(!mAdminPasswordEntryUserInterface)
-      mAdminPasswordEntryUserInterface = new AdminPasswordEntryUserInterface(mGame);
+   if(!mLevelChangeOrAdminPasswordEntryUserInterface)
+      mLevelChangeOrAdminPasswordEntryUserInterface = new LevelChangeOrAdminPasswordEntryUserInterface(mGame);
 
-   return mAdminPasswordEntryUserInterface;
-}
-
-
-LevelChangePasswordEntryUserInterface *UIManager::getLevelChangePasswordEntryUserInterface()
-{
-   // Lazily initialize
-   if(!mLevelChangePasswordEntryUserInterface)
-      mLevelChangePasswordEntryUserInterface = new LevelChangePasswordEntryUserInterface(mGame);
-
-   return mLevelChangePasswordEntryUserInterface;
+   return mLevelChangeOrAdminPasswordEntryUserInterface;
 }
 
 

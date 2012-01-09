@@ -1530,15 +1530,9 @@ static void restartGameCallback(ClientGame *game, U32 unused)
 }
 
 
-static void levelChangePWCallback(ClientGame *game, U32 unused)
+static void levelChangeOrAdminPWCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getLevelChangePasswordEntryUserInterface()->activate();
-}
-
-
-static void adminPWCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->getAdminPasswordEntryUserInterface()->activate();
+   game->getUIManager()->getLevelChangeOrAdminPasswordEntryUserInterface()->activate();
 }
 
 
@@ -1579,8 +1573,6 @@ void GameMenuUserInterface::buildMenu()
          addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
          addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    "", KEY_R));
       }
-      else        // Not level changer
-         addMenuItem(new MenuItem("ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P));
 
       if(gc->getClientInfo()->isAdmin())
       {
@@ -1594,7 +1586,7 @@ void GameMenuUserInterface::buildMenu()
          addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
       }
       else     // Not admin
-         addMenuItem(new MenuItem("ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E));
+         addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
    }
 
    if(getUIManager()->cameFrom(EditorUI))    // Came from editor
