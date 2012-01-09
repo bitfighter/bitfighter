@@ -42,7 +42,6 @@ class CoreGameType : public GameType
 
 private:
    Vector<SafePtr<CoreItem> > mCores;
-   U32 mCoreItemHitPoints;
 
 public:
    static const S32 DestroyedCoreScore = 1;
@@ -57,9 +56,6 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
 
    void addCore(CoreItem *core, S32 team);
-
-   U32 getCoreItemHitPoints();
-   void setCoreItemHitPoints(U32 hitPoints);
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
@@ -85,6 +81,8 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class EditorAttributeMenuUI;
+
 class CoreItem : public Item
 {
 
@@ -97,6 +95,11 @@ private:
    bool hasExploded;
    U32 mStartingHitPoints;
    U32 mHitPoints;
+
+#ifndef ZAP_DEDICATED
+   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
+#endif
+
 
 public:
    static const U32 CoreDefaultHitPoints = 20;
@@ -128,6 +131,14 @@ public:
 
    TNL_DECLARE_CLASS(CoreItem);
 
+#ifndef ZAP_DEDICATED
+   // These four methods are all that's needed to add an editable attribute to a class...
+   EditorAttributeMenuUI *getAttributeMenu();
+   void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we start editing to get menus populated
+   void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
+   string getAttributeString();
+#endif
+
    ///// Editor methods
    const char *getEditorHelpString();
    const char *getPrettyNamePlural();
@@ -136,6 +147,7 @@ public:
 
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
+
 
    ///// Lua interface
 public:

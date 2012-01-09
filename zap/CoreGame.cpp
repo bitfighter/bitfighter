@@ -28,7 +28,8 @@
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#include "UIMenuItems.h"
+#include "UIEditorMenus.h"
+#include "UI.h"
 #include "gameObjectRender.h"
 #endif
 
@@ -50,11 +51,7 @@ CoreGameType::~CoreGameType()
 bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
-   {
       setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
-      if(argc > 1)
-         mCoreItemHitPoints = U32(atoi(argv[1]));  // Hit points of Cores in game
-   }
 
    return true;
 }
@@ -62,7 +59,7 @@ bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreGameType::toString() const
 {
-   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + itos(mCoreItemHitPoints);
+   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3);
 }
 
 
@@ -96,7 +93,6 @@ const char **CoreGameType::getGameParameterMenuKeys()
       "Level Credits",
       "Levelgen Script",
       "Game Time",
-      "Core Hit Points",      // <=== defined here
 //      "Score to Win",       // There is no score to win in this game mode - it is hardcoded as 0
       "Grid Size",
       "Min Players",
@@ -111,22 +107,13 @@ const char **CoreGameType::getGameParameterMenuKeys()
 
 boost::shared_ptr<MenuItem> CoreGameType::getMenuItem(const char *key)
 {
-   if(!strcmp(key, "Core Hit Points"))
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Core Hit Points:", mCoreItemHitPoints, 1, 1, 1000, "", "",
-                                                                        "Hit points that each Core has in-game"));
-   else return Parent::getMenuItem(key);
-
+   return Parent::getMenuItem(key);
 }
 
 
 bool CoreGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 {
-   if(!strcmp(key, "Core Hit Points"))
-      mCoreItemHitPoints = menuItem->getIntValue();
-   else
-      return Parent::saveMenuItem(menuItem, key);
-
-   return true;
+   return Parent::saveMenuItem(menuItem, key);
 }
 #endif
 
@@ -182,18 +169,6 @@ void CoreGameType::score(Ship *destroyer, S32 team, S32 score)
 }
 
 
-U32 CoreGameType::getCoreItemHitPoints()
-{
-   return mCoreItemHitPoints;
-}
-
-
-void CoreGameType::setCoreItemHitPoints(U32 hitPoints)
-{
-   mCoreItemHitPoints = hitPoints;
-}
-
-
 GameTypes CoreGameType::getGameType() const
 {
    return CoreGame;
@@ -233,6 +208,11 @@ TNL_IMPLEMENT_NETOBJECT(CoreGameType);
 TNL_IMPLEMENT_NETOBJECT(CoreItem);
 class LuaCore;
 
+// Statics:
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
+#endif
+
 // Constructor
 CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
@@ -263,6 +243,50 @@ void CoreItem::renderDock()
 {
    renderCore(getVert(0), 5, &Colors::white);
 }
+
+
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *CoreItem::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultHitPoints, 1, 1, S32_MAX, "", "", ""));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(mHitPoints);
+}
+
+
+// Retrieve the values we need from the menu
+void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   mHitPoints = attributeMenu->getMenuItem(0)->getIntValue();
+}
+
+
+// Render some attributes when item is selected but not being edited
+string CoreItem::getAttributeString()
+{
+   return "Hit points: " + itos(mHitPoints);
+}
+
+#endif
 
 
 const char *CoreItem::getEditorHelpString()
@@ -372,16 +396,10 @@ void CoreItem::onAddedToGame(Game *theGame)
    if(!gameType)                 // Sam has observed this under extreme network packet loss
       return;
 
-   // Adjust hit points to match that set in CoreGameType
+   // Now add to game
    CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
    if(coreGameType)
-   {
-      if(!isGhost())
-         setStartingHitPoints(coreGameType->getCoreItemHitPoints());
-
-      // Now add to game
       coreGameType->addCore(this, getTeam());
-   }
 }
 
 
@@ -433,12 +451,13 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 3)         // CoreItem <team> <x> <y>
+   if(argc < 4)         // CoreItem <team> <hit points> <x> <y>
       return false;
 
    mTeam = atoi(argv[0]);
+   mHitPoints = atoi(argv[1]);
 
-   if(!Parent::processArguments(argc-1, argv+1, game))
+   if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
 
    return true;
@@ -447,7 +466,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(mHitPoints) + " " + geomToString(gridSize);
 }
 
 
