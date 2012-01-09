@@ -246,8 +246,7 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   mStartingHitPoints = CoreDefaultHitPoints;      // Hits to kill
-   mHitPoints = mStartingHitPoints;
+   setStartingHitPoints(CoreDefaultStartingHitPoints);      // Hits to kill
    hasExploded = false;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
@@ -284,7 +283,7 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultHitPoints, 5, 1, S32_MAX, "", "", ""));
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHitPoints, 5, 1, S32_MAX, "", "", ""));
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -297,21 +296,21 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
 // Get the menu looking like what we want
 void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->getMenuItem(0)->setIntValue(mHitPoints);
+   attributeMenu->getMenuItem(0)->setIntValue(mStartingHitPoints);
 }
 
 
 // Retrieve the values we need from the menu
 void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   mHitPoints = attributeMenu->getMenuItem(0)->getIntValue();
+   setStartingHitPoints(attributeMenu->getMenuItem(0)->getIntValue());
 }
 
 
 // Render some attributes when item is selected but not being edited
 string CoreItem::getAttributeString()
 {
-   return "Hit points: " + itos(mHitPoints);
+   return "Hit points: " + itos(mStartingHitPoints);
 }
 
 #endif
@@ -472,7 +471,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(mInitial)
    {
       readThisTeam(stream);
-      mStartingHitPoints = stream->readInt(8);
+      setStartingHitPoints(stream->readInt(8));
    }
 }
 
@@ -483,7 +482,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    mTeam = atoi(argv[0]);
-   mHitPoints = atoi(argv[1]);
+   setStartingHitPoints(atoi(argv[1]));
 
    if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
@@ -494,15 +493,16 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + itos(mHitPoints) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(mStartingHitPoints) + " " + geomToString(gridSize);
 }
 
 
 F32 CoreItem::calcCoreWidth() const
 {
    F32 ratio = F32(mHitPoints) / F32(mStartingHitPoints);
+//   logprintf("ratio: %f", ratio);
 
-   return F32(CoreStartWidth - CoreMinWidth) * ratio / F32(CoreDefaultHitPoints) + CoreMinWidth;
+   return (F32(CoreStartWidth - CoreMinWidth) * ratio) + CoreMinWidth;
 }
 
 

@@ -89,8 +89,8 @@ class CoreItem : public Item
 typedef Item Parent;
 
 private:
-   static const U32 CoreStartWidth = 400;
-   static const U32 CoreMinWidth = 80;
+   static const U32 CoreStartWidth = 200;
+   static const U32 CoreMinWidth = 20;
 
    bool hasExploded;
    U32 mStartingHitPoints;
@@ -102,7 +102,7 @@ private:
 
 
 public:
-   static const U32 CoreDefaultHitPoints = 50;
+   static const U32 CoreDefaultStartingHitPoints = 50;
 
    CoreItem();     // Constructor
    CoreItem *clone() const;
