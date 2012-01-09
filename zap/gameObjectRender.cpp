@@ -1697,7 +1697,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor)
    glColor(Colors::gray80);
    drawSquare(pos, size);
    glColor(coreColor);
-   drawSquare(pos, size/2);
+   drawSquare(pos, size / 2);
 }
 
 
