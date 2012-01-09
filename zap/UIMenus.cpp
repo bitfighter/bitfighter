@@ -1238,7 +1238,8 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    clientGame->resetMasterConnectTimer();
    
    clientGame->updatePlayerNameAndPassword(ui->getMenuItem(1)->getValueForWritingToLevelFile(), 
-                                           ui->getMenuItem(3)->getIntValue() == 0 ? string("") : ui->getMenuItem(2)->getValueForWritingToLevelFile());
+                                           ui->getMenuItem(3)->getIntValue() == 0 ? string("") : 
+                                                                                    ui->getMenuItem(2)->getValueForWritingToLevelFile());
 
    clientGame->setLoginPassword(ui->getMenuItem(2)->getValueForWritingToLevelFile());
 
