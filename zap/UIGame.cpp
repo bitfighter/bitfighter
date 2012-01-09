@@ -1505,31 +1505,12 @@ void GameUserInterface::kickPlayerHandler(ClientGame *game, const Vector<string>
 }
 
 
-void GameUserInterface::adminPassHandler(ClientGame *game, const Vector<string> &words)
+void GameUserInterface::submitPassHandler(ClientGame *game, const Vector<string> &words)
 {
    GameConnection *conn = game->getConnectionToServer();
 
-   if(conn->getClientInfo()->isAdmin())
-      game->displayErrorMessage("!!! You are already an admin");
-   else if(words.size() < 2 || words[1] == "")
-      game->displayErrorMessage("!!! Need to supply a password");
-   else
-      conn->submitAdminPassword(words[1].c_str());
+   conn->submitPassword(words[1].c_str());
 }
-
-
-void GameUserInterface::levelPassHandler(ClientGame *game, const Vector<string> &words)
-{
-   GameConnection *gc = game->getConnectionToServer();
-
-   if(gc->getClientInfo()->isLevelChanger())
-      game->displayErrorMessage("!!! You can already change levels");
-   else if(words.size() < 2 || words[1] == "")
-      game->displayErrorMessage("!!! Need to supply a password");
-   else
-      gc->submitLevelChangePassword(words[1].c_str());
-}
-
 
 void GameUserInterface::showCoordsHandler(ClientGame *game, const Vector<string> &words)
 {
@@ -2058,8 +2039,7 @@ void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<stri
 
 CommandInfo chatCmds[] = {   
    //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory  helpGroup lines,  helpArgString            helpTextSstring
-   { "admin",   GameUserInterface::adminPassHandler, { STR },      1,       ADV_COMMANDS,    0,     1,     {"<password>"},         "Request admin permissions"  },
-   { "levpass", GameUserInterface::levelPassHandler, { STR },      1,       ADV_COMMANDS,    0,     1,     {"<password>"},         "Request level change permissions"  },
+   { "password",GameUserInterface::submitPassHandler,{ STR },      1,       ADV_COMMANDS,    0,     1,     {"<password>"},         "Request admin or level change permissions"  },
    { "servvol", GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,     1,     {"<0-10>"},             "Set volume of server"  },
    { "getmap",  GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,     1,     {"[file]"},             "Save currently playing level in [file], if allowed" },
    { "suspend", GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,     1,     {  },                   "Place game on hold while waiting for players" },

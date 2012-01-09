@@ -69,8 +69,7 @@ private:
    bool mAcheivedConnection;
 
    // For saving passwords
-   string mLastEnteredLevelChangePassword;
-   string mLastEnteredAdminPassword;
+   string mLastEnteredPassword;
 
    // These are only used on the server -- will be NULL on client
    boost::shared_ptr<ClientInfo> mClientInfo;         
@@ -207,8 +206,7 @@ public:
 
    void reset();        // Clears/initializes some things between levels
 
-   void submitAdminPassword(const char *password);
-   void submitLevelChangePassword(string password);
+   void submitPassword(const char *password);
 
    void suspendGame();
    void unsuspendGame();
@@ -267,8 +265,7 @@ public:
    // Chage passwords on the server
    void changeParam(const char *param, ParamType type);
 
-   TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));
-   TNL_DECLARE_RPC(c2sLevelChangePassword, (StringPtr pass));
+   TNL_DECLARE_RPC(c2sSubmitPassword, (StringPtr pass));
 
    TNL_DECLARE_RPC(c2sSetAuthenticated, ());      // Tell server that the client is (or claims to be) authenticated
 
@@ -277,6 +274,7 @@ public:
 
    TNL_DECLARE_RPC(s2cSetIsAdmin, (bool granted));
    TNL_DECLARE_RPC(s2cSetIsLevelChanger, (bool granted, bool notify));
+   TNL_DECLARE_RPC(s2cWrongPassword, ());
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
 

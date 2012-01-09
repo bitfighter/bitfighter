@@ -375,16 +375,19 @@ void MenuUserInterface::render()
    }
 
    // Render a help string at the bottom of the menu
-   const S32 helpFontSize = 15;
-   glColor(Colors::menuHelpColor);
-   S32 ypos = canvasHeight - vertMargin - 50;
+   if(U32(selectedIndex) < U32(mMenuItems.size()))
+   {
+      const S32 helpFontSize = 15;
+      glColor(Colors::menuHelpColor);
+      S32 ypos = canvasHeight - vertMargin - 50;
 
-   // Render a special instruction line
-   if(mRenderSpecialInstructions)
-      drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
+      // Render a special instruction line
+      if(mRenderSpecialInstructions)
+         drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
 
-   ypos -= helpFontSize + 5;
-   drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
+      ypos -= helpFontSize + 5;
+      drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
+   }
 
    renderExtras();  // Draw something unique on a menu
 }
@@ -519,7 +522,7 @@ void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
    if(!ui->mFirstTime)
       ui->showAnimation = false;    // Stop animations if a key is pressed
 
-   mMenuItems[selectedIndex]->handleKey(inputCode, ascii) || processMenuSpecificKeys(inputCode, ascii) || processKeys(inputCode, ascii);
+   (U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->handleKey(inputCode, ascii)) || processMenuSpecificKeys(inputCode, ascii) || processKeys(inputCode, ascii);
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
    if(inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT && inputCode != KEY_ESCAPE)
@@ -1535,15 +1538,9 @@ static void restartGameCallback(ClientGame *game, U32 unused)
 }
 
 
-static void levelChangePWCallback(ClientGame *game, U32 unused)
+static void levelChangeOrAdminPWCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getLevelChangePasswordEntryUserInterface()->activate();
-}
-
-
-static void adminPWCallback(ClientGame *game, U32 unused)
-{
-   game->getUIManager()->getAdminPasswordEntryUserInterface()->activate();
+   game->getUIManager()->getLevelChangeOrAdminPasswordEntryUserInterface()->activate();
 }
 
 
@@ -1584,8 +1581,6 @@ void GameMenuUserInterface::buildMenu()
          addMenuItem(new MenuItem("ADD TIME (2 MINS)",    addTwoMinsCallback,     "", KEY_T, KEY_2));
          addMenuItem(new MenuItem("RESTART LEVEL",        restartGameCallback,    "", KEY_R));
       }
-      else        // Not level changer
-         addMenuItem(new MenuItem("ENTER LEVEL CHANGE PASSWORD", levelChangePWCallback, "", KEY_L, KEY_P));
 
       if(gc->getClientInfo()->isAdmin())
       {
@@ -1599,7 +1594,7 @@ void GameMenuUserInterface::buildMenu()
          addMenuItem(new MenuItem("KICK A PLAYER", kickPlayerCallback, "", KEY_K));
       }
       else     // Not admin
-         addMenuItem(new MenuItem("ENTER ADMIN PASSWORD", adminPWCallback, "", KEY_A, KEY_E));
+         addMenuItem(new MenuItem("ENTER PASSWORD", levelChangeOrAdminPWCallback, "", KEY_A, KEY_E));
    }
 
    if(getUIManager()->cameFrom(EditorUI))    // Came from editor

@@ -401,44 +401,22 @@ void InGamePasswordEntryUserInterface::onEscape()
 ////////////////////////////////////////
 
 // Constructor
-AdminPasswordEntryUserInterface::AdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
-{
-   setMenuID(AdminPasswordEntryUI);
-   title = "ENTER ADMIN PASSWORD:";
-   instr1 = "";
-   instr2 = "Enter the admin password to perform admin tasks and change levels on this server";
-}
-
-AdminPasswordEntryUserInterface::~AdminPasswordEntryUserInterface()
-{
-}
-
-void AdminPasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
-{
-   gameConnection->submitAdminPassword(text);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor
-LevelChangePasswordEntryUserInterface::LevelChangePasswordEntryUserInterface(ClientGame *game) : Parent(game)     
+LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game) : Parent(game)     
 {
    setMenuID(LevelChangePasswordEntryUI);
-   title = "ENTER LEVEL CHANGE PASSWORD:";
+   title = "ENTER PASSWORD:";
    instr1 = "";
-   instr2 = "Enter the level change password to change levels on this server";
+   instr2 = "Enter the level change or admin password to change levels on this server";
 }
 
-LevelChangePasswordEntryUserInterface::~LevelChangePasswordEntryUserInterface()
+LevelChangeOrAdminPasswordEntryUserInterface::~LevelChangeOrAdminPasswordEntryUserInterface()
 {
 }
 
 
-void LevelChangePasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
+void LevelChangeOrAdminPasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
 {
-   gameConnection->submitLevelChangePassword(text);
+   gameConnection->submitPassword(text);
 }
 
 

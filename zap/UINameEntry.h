@@ -176,28 +176,13 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class AdminPasswordEntryUserInterface : public InGamePasswordEntryUserInterface
+class LevelChangeOrAdminPasswordEntryUserInterface : public InGamePasswordEntryUserInterface
 {
    typedef InGamePasswordEntryUserInterface Parent;
 
 public:
-   AdminPasswordEntryUserInterface(ClientGame *game);           // Constructor
-   virtual ~AdminPasswordEntryUserInterface();
-
-   void submitPassword(GameConnection *gameConnection, const char *text);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LevelChangePasswordEntryUserInterface : public InGamePasswordEntryUserInterface
-{
-   typedef InGamePasswordEntryUserInterface Parent;
-
-public:
-   LevelChangePasswordEntryUserInterface(ClientGame *game);     // Constructor
-   virtual ~LevelChangePasswordEntryUserInterface();
+   LevelChangeOrAdminPasswordEntryUserInterface(ClientGame *game);     // Constructor
+   virtual ~LevelChangeOrAdminPasswordEntryUserInterface();
 
    void submitPassword(GameConnection *gameConnection, const char *text);
 };

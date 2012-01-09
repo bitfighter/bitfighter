@@ -28,7 +28,8 @@
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#include "UIMenuItems.h"
+#include "UIEditorMenus.h"
+#include "UI.h"
 #include "gameObjectRender.h"
 #endif
 
@@ -36,9 +37,9 @@
 namespace Zap {
 
 
-CoreGameType::CoreGameType()
+CoreGameType::CoreGameType() : GameType(0)  // Winning score hard-coded to 0
 {
-   setWinningScore(0);   // Winning score hard-coded to 0
+   // Do nothing
 }
 
 CoreGameType::~CoreGameType()
@@ -50,11 +51,7 @@ CoreGameType::~CoreGameType()
 bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc > 0)
-   {
       setGameTime(F32(atof(argv[0]) * 60.0));      // Game time, stored in minutes in level file
-      if(argc > 1)
-         mCoreItemHitPoints = U32(atoi(argv[1]));  // Hit points of Cores in game
-   }
 
    return true;
 }
@@ -62,7 +59,7 @@ bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreGameType::toString() const
 {
-   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + itos(mCoreItemHitPoints);
+   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3);
 }
 
 
@@ -96,7 +93,6 @@ const char **CoreGameType::getGameParameterMenuKeys()
       "Level Credits",
       "Levelgen Script",
       "Game Time",
-      "Core Hit Points",      // <=== defined here
 //      "Score to Win",       // There is no score to win in this game mode - it is hardcoded as 0
       "Grid Size",
       "Min Players",
@@ -111,22 +107,13 @@ const char **CoreGameType::getGameParameterMenuKeys()
 
 boost::shared_ptr<MenuItem> CoreGameType::getMenuItem(const char *key)
 {
-   if(!strcmp(key, "Core Hit Points"))
-      return boost::shared_ptr<MenuItem>(new CounterMenuItem("Core Hit Points:", mCoreItemHitPoints, 1, 1, 1000, "", "",
-                                                                        "Hit points that each Core has in-game"));
-   else return Parent::getMenuItem(key);
-
+   return Parent::getMenuItem(key);
 }
 
 
 bool CoreGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
 {
-   if(!strcmp(key, "Core Hit Points"))
-      mCoreItemHitPoints = menuItem->getIntValue();
-   else
-      return Parent::saveMenuItem(menuItem, key);
-
-   return true;
+   return Parent::saveMenuItem(menuItem, key);
 }
 #endif
 
@@ -153,6 +140,18 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
    {
       switch(scoreEvent)
       {
+         case KillEnemy:
+            return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
+         case KillSelf:
+            return 0;
+         case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
          case OwnCoreDestroyed:
             return -data;
          case EnemyCoreDestroyed:
@@ -163,11 +162,27 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
    }
    else  // scoreGroup == IndividualScore
    {
-      //switch(scoreEvent)
-      //{
-      //   default:
+      switch(scoreEvent)
+      {
+         case KillEnemy:
+            return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
+         case KillSelf:
+            return -1;
+         case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 1;
+         case KillOwnTurret:
+            return -1;
+         case OwnCoreDestroyed:
+            return -5 * data;
+         case EnemyCoreDestroyed:
+            return 5 * data;
+         default:
             return naScore;
-      //}
+      }
    }
 }
 
@@ -179,18 +194,6 @@ void CoreGameType::score(Ship *destroyer, S32 team, S32 score)
       updateScore(NULL, team, EnemyCoreDestroyed, score);
    else
       updateScore(NULL, team, OwnCoreDestroyed, score);
-}
-
-
-U32 CoreGameType::getCoreItemHitPoints()
-{
-   return mCoreItemHitPoints;
-}
-
-
-void CoreGameType::setCoreItemHitPoints(U32 hitPoints)
-{
-   mCoreItemHitPoints = hitPoints;
 }
 
 
@@ -233,13 +236,17 @@ TNL_IMPLEMENT_NETOBJECT(CoreGameType);
 TNL_IMPLEMENT_NETOBJECT(CoreItem);
 class LuaCore;
 
+// Statics:
+#ifndef ZAP_DEDICATED
+   EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
+#endif
+
 // Constructor
 CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   mStartingHitPoints = CoreDefaultHitPoints;      // Hits to kill
-   mHitPoints = mStartingHitPoints;
+   setStartingHitPoints(CoreDefaultStartingHitPoints);      // Hits to kill
    hasExploded = false;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
@@ -263,6 +270,50 @@ void CoreItem::renderDock()
 {
    renderCore(getVert(0), 5, &Colors::white);
 }
+
+
+#ifndef ZAP_DEDICATED
+
+EditorAttributeMenuUI *CoreItem::getAttributeMenu()
+{
+   // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
+   if(!mAttributeMenuUI)
+   {
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+
+      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHitPoints, 5, 1, S32_MAX, "", "", ""));
+
+      // Add our standard save and exit option to the menu
+      mAttributeMenuUI->addSaveAndQuitMenuItem();
+   }
+
+   return mAttributeMenuUI;
+}
+
+
+// Get the menu looking like what we want
+void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   attributeMenu->getMenuItem(0)->setIntValue(mStartingHitPoints);
+}
+
+
+// Retrieve the values we need from the menu
+void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
+{
+   setStartingHitPoints(attributeMenu->getMenuItem(0)->getIntValue());
+}
+
+
+// Render some attributes when item is selected but not being edited
+string CoreItem::getAttributeString()
+{
+   return "Hit points: " + itos(mStartingHitPoints);
+}
+
+#endif
 
 
 const char *CoreItem::getEditorHelpString()
@@ -330,6 +381,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       hasExploded = true;
       deleteObject(500);
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
+      disableCollision();
 
       return;
    }
@@ -371,16 +423,10 @@ void CoreItem::onAddedToGame(Game *theGame)
    if(!gameType)                 // Sam has observed this under extreme network packet loss
       return;
 
-   // Adjust hit points to match that set in CoreGameType
+   // Now add to game
    CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
    if(coreGameType)
-   {
-      if(!isGhost())
-         setStartingHitPoints(coreGameType->getCoreItemHitPoints());
-
-      // Now add to game
       coreGameType->addCore(this, getTeam());
-   }
 }
 
 
@@ -394,7 +440,10 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    stream->writeFlag(hasExploded);
 
    if(updateMask & InitialMask)
+   {
       writeThisTeam(stream);
+      stream->writeInt(mStartingHitPoints, 8);
+   }
 
    return retMask;
 }
@@ -420,18 +469,22 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    if(mInitial)
+   {
       readThisTeam(stream);
+      setStartingHitPoints(stream->readInt(8));
+   }
 }
 
 
 bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 3)         // CoreItem <team> <x> <y>
+   if(argc < 4)         // CoreItem <team> <hit points> <x> <y>
       return false;
 
    mTeam = atoi(argv[0]);
+   setStartingHitPoints(atoi(argv[1]));
 
-   if(!Parent::processArguments(argc-1, argv+1, game))
+   if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
 
    return true;
@@ -440,15 +493,16 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(mStartingHitPoints) + " " + geomToString(gridSize);
 }
 
 
 F32 CoreItem::calcCoreWidth() const
 {
    F32 ratio = F32(mHitPoints) / F32(mStartingHitPoints);
+//   logprintf("ratio: %f", ratio);
 
-   return F32(CoreStartWidth - CoreMinWidth) * ratio / F32(CoreDefaultHitPoints) + CoreMinWidth;
+   return (F32(CoreStartWidth - CoreMinWidth) * ratio) + CoreMinWidth;
 }
 
 
