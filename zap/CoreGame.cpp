@@ -330,6 +330,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       hasExploded = true;
       deleteObject(500);
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
+      disableCollision();
 
       return;
    }
@@ -394,7 +395,10 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    stream->writeFlag(hasExploded);
 
    if(updateMask & InitialMask)
+   {
       writeThisTeam(stream);
+      stream->writeInt(mStartingHitPoints, 8);
+   }
 
    return retMask;
 }
@@ -420,7 +424,10 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    if(mInitial)
+   {
       readThisTeam(stream);
+      mStartingHitPoints = stream->readInt(8);
+   }
 }
 
 
