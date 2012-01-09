@@ -182,6 +182,7 @@ public:
    // Alert users when they get a reply to their request for elevated permissions
    void gotAdminPermissionsReply(bool granted);
    void gotLevelChangePermissionsReply(bool granted);
+   void gotWrongPassword();
 
    void gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken);
    void gotQueryResponse(const Address &address, const Nonce &nonce, const char *serverName, const char *serverDescr, 

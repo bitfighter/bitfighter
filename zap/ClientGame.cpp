@@ -204,7 +204,11 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          }
       }
       else        // Connect to a remote server, but not via the master server
+      {
+         mClientInfo->setIsAdmin(false);
+         mClientInfo->setIsLevelChanger(false);
          gameConnection->connect(getNetInterface(), remoteAddress);  
+      }
 
       getUIManager()->getGameUserInterface()->activate();
    }
@@ -725,6 +729,16 @@ void ClientGame::gotLevelChangePermissionsReply(bool granted)
       displayMessage(gCmdChatColor, granted ? levelPassSuccessMsg : levelPassFailureMsg);
 }
 
+void ClientGame::gotWrongPassword()
+{
+   static const char *levelPassFailureMsg = "Incorrect password";
+
+   // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+   if(UserInterface::current->getMenuID() == GameMenuUI)
+      getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
+   else
+      displayMessage(gCmdChatColor, levelPassFailureMsg);
+}
 
 void ClientGame::gotPingResponse(const Address &address, const Nonce &nonce, U32 clientIdentityToken)
 {

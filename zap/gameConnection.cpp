@@ -509,7 +509,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    string levChangePW = mSettings->getLevelChangePassword();
 
    // If admin password is blank, no one can get admin permissions except the local host, if there is one...
-   if(adminPW != "" && strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
+   if(!mClientInfo->isAdmin() && adminPW != "" && !strcmp(md5.getSaltedHashFromString(adminPW).c_str(), pass))
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -532,7 +532,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       if(gameType)
          gameType->s2cClientBecameAdmin(mClientInfo->getName());  // Announce change to world
    }
-   else if(!strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass)) // If level change password is blank, it should already been granted to all clients
+   else if(!mClientInfo->isLevelChanger() && !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass)) // If level change password is blank, it should already been granted to all clients
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -547,36 +547,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
    }
    else
    {
-      s2cSetIsAdmin(false);      // Tell client they have NOT been granted access
+      s2cWrongPassword();      // Tell client they have NOT been granted access
 
-      if(adminPW != "")
-         logprintf(LogConsumer::LogConnection, "%s - client \"%s\" provided incorrect password.", 
+      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" provided incorrect password.", 
                                                getNetAddressString(), mClientInfo->getName().getString());
-
       mWrongPasswordCount++;
       if(mWrongPasswordCount > MAX_WRONG_PASSWORD)
          disconnect(NetConnection::ReasonError, "Too many wrong password");
-      return;
    }
-   mWrongPasswordCount = 0;
-
-   mClientInfo->setIsAdmin(true);               // Enter admin PW and...
-
-   if(!mClientInfo->isLevelChanger())
-   {
-      mClientInfo->setIsLevelChanger(true);     // ...get these permissions too!
-      sendLevelList();
-   }
-      
-   s2cSetIsAdmin(true);                         // Tell client they have been granted access
-
-   if(mSettings->getIniSettings()->allowAdminMapUpload)
-      s2rSendableFlags(1);                      // Enable level uploads
-
-   GameType *gameType = gServerGame->getGameType();
-
-   if(gameType)
-      gameType->s2cClientBecameAdmin(mClientInfo->getName());  // Announce change to world
 }
 
 
@@ -914,7 +892,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cWrongPassword, (), (), NetClassGroupGameMas
 {
 #ifndef ZAP_DEDICATED
    if(waitingForPermissionsReply())
-      mClientGame->gotLevelChangePermissionsReply(false);
+      mClientGame->gotWrongPassword();
 #endif
 }
 
