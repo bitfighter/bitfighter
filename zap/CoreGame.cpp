@@ -447,8 +447,7 @@ F32 CoreItem::calcCoreWidth() const
 {
    F32 ratio = F32(mHitPoints) / F32(mStartingHitPoints);
 
-   return
-         F32(CoreStartWidth - CoreMinWidth) * ratio / F32(CoreDefaultHitPoints) + CoreMinWidth;
+   return F32(CoreStartWidth - CoreMinWidth) * ratio / F32(CoreDefaultHitPoints) + CoreMinWidth;
 }
 
 
