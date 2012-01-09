@@ -97,6 +97,7 @@ void MenuUserInterface::initialize()
    itemSelectedWithMouse = false;
    mFirstVisibleItem = 0;
    mRenderInstructions = true;
+   mRenderSpecialInstructions = true;
 }
 
 
@@ -380,8 +381,9 @@ void MenuUserInterface::render()
       glColor(Colors::menuHelpColor);
       S32 ypos = canvasHeight - vertMargin - 50;
 
-      // Render a special instruction line (should this be a method of CounterMenuItemType?
-      UserInterface::drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions() );
+      // Render a special instruction line
+      if(mRenderSpecialInstructions)
+         drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
 
       ypos -= helpFontSize + 5;
       drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
@@ -1239,7 +1241,8 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    clientGame->resetMasterConnectTimer();
    
    clientGame->updatePlayerNameAndPassword(ui->getMenuItem(1)->getValueForWritingToLevelFile(), 
-                                           ui->getMenuItem(3)->getIntValue() == 0 ? string("") : ui->getMenuItem(2)->getValueForWritingToLevelFile());
+                                           ui->getMenuItem(3)->getIntValue() == 0 ? string("") : 
+                                                                                    ui->getMenuItem(2)->getValueForWritingToLevelFile());
 
    clientGame->setLoginPassword(ui->getMenuItem(2)->getValueForWritingToLevelFile());
 
@@ -1254,12 +1257,14 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 void NameEntryUserInterface::setupMenu()
 {
    clearMenuItems();
+   mRenderSpecialInstructions = false;
 
    addMenuItem(new MenuItem("OK", nameAndPasswordAcceptCallback, ""));
    addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
    addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
 
+   // If we have already saved a PW, this defaults to yes; to no otherwise
    MenuItem *menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
    menuItem->setSize(MENU_ITEM_SIZE_SMALL);
    addMenuItem(menuItem);

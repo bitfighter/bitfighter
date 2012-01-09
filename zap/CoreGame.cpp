@@ -163,11 +163,11 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
    }
    else  // scoreGroup == IndividualScore
    {
-      switch(scoreEvent)
-      {
-         default:
+      //switch(scoreEvent)
+      //{
+      //   default:
             return naScore;
-      }
+      //}
    }
 }
 
@@ -291,7 +291,7 @@ const char *CoreItem::getOnScreenName()
 
 F32 CoreItem::getEditorRadius(F32 currentScale)
 {
-   return getRadius() * currentScale;
+   return (calcCoreWidth() / 2) * currentScale + 5;
 }
 
 
@@ -375,7 +375,8 @@ void CoreItem::onAddedToGame(Game *theGame)
    CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
    if(coreGameType)
    {
-      setStartingHitPoints(coreGameType->getCoreItemHitPoints());
+      if(!isGhost())
+         setStartingHitPoints(coreGameType->getCoreItemHitPoints());
 
       // Now add to game
       coreGameType->addCore(this, getTeam());
@@ -447,8 +448,7 @@ F32 CoreItem::calcCoreWidth() const
 {
    F32 ratio = F32(mHitPoints) / F32(mStartingHitPoints);
 
-   return
-         F32(CoreStartWidth - CoreMinWidth) * ratio / F32(CoreDefaultHitPoints) + CoreMinWidth;
+   return F32(CoreStartWidth - CoreMinWidth) * ratio / F32(CoreDefaultHitPoints) + CoreMinWidth;
 }
 
 

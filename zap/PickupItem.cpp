@@ -324,7 +324,7 @@ void RepairItem::renderDock()
 
 F32 RepairItem::getEditorRadius(F32 currentScale)
 {
-   return 22 * currentScale;
+   return 18 * currentScale + 5;
 }
 
 

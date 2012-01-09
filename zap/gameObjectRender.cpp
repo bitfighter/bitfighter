@@ -1697,7 +1697,21 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor)
    glColor(Colors::gray80);
    drawSquare(pos, size);
    glColor(coreColor);
-   drawSquare(pos, size/2);
+   drawSquare(pos, size / 2);
+
+   for(S32 i = 0; i < 30; i++)
+   {
+      F32 R = 24;
+      F32 r = -14;
+      F32 t = (F32)Platform::getRealMilliseconds() / 100.0f + 3 * i;
+      F32 p = -9;    // -19 12
+
+      F32 x = (R+r)*cos(t) + p*cos((R+r)*t/r); 
+      F32 y = (R+r)*sin(t) + p*sin((R+r)*t/r);
+      glBegin(GL_POINTS);
+         glVertex2f(pos.x + x, pos.y + y);
+      glEnd();
+   }
 }
 
 

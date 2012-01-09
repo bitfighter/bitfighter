@@ -63,10 +63,10 @@ private:
    virtual void initialize();
 
 protected:
-   
    S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
 
    bool mRenderInstructions;
+   bool mRenderSpecialInstructions;
 
    // Handle keyboard input while a menu is displayed
    virtual bool processMenuSpecificKeys(InputCode inputCode, char ascii);
@@ -74,7 +74,6 @@ protected:
    virtual S32 getSelectedMenuItem();
 
    S32 getTotalMenuItemHeight();    // Add up height of all menu items
-
 
    void sortMenuItems();
    MenuItem *getLastMenuItem();
