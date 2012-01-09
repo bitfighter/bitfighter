@@ -1260,6 +1260,7 @@ void NameEntryUserInterface::setupMenu()
                                     getGame()->getSettings()->getDefaultName(), "", MAX_PLAYER_NAME_LENGTH));
    addMenuItem(new TextEntryMenuItem("PASSWORD:", getGame()->getSettings()->getPlayerPassword(), "", "", MAX_PLAYER_PASSWORD_LENGTH));
 
+   // If we have already saved a PW, this defaults to yes; to no otherwise
    MenuItem *menuItem = new YesNoMenuItem("SAVE PASSWORD:", getGame()->getSettings()->getPlayerPassword() != "", "");
    menuItem->setSize(MENU_ITEM_SIZE_SMALL);
    addMenuItem(menuItem);
