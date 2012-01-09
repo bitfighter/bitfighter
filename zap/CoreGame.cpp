@@ -36,9 +36,9 @@
 namespace Zap {
 
 
-CoreGameType::CoreGameType()
+CoreGameType::CoreGameType() : GameType(0)  // Winning score hard-coded to 0
 {
-   setWinningScore(0);   // Winning score hard-coded to 0
+   // Do nothing
 }
 
 CoreGameType::~CoreGameType()
