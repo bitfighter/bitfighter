@@ -97,6 +97,7 @@ void MenuUserInterface::initialize()
    itemSelectedWithMouse = false;
    mFirstVisibleItem = 0;
    mRenderInstructions = true;
+   mRenderSpecialInstructions = true;
 }
 
 
@@ -378,8 +379,9 @@ void MenuUserInterface::render()
    glColor(Colors::menuHelpColor);
    S32 ypos = canvasHeight - vertMargin - 50;
 
-   // Render a special instruction line (should this be a method of CounterMenuItemType?
-   UserInterface::drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions() );
+   // Render a special instruction line
+   if(mRenderSpecialInstructions)
+      drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
 
    ypos -= helpFontSize + 5;
    drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
@@ -1251,6 +1253,7 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
 void NameEntryUserInterface::setupMenu()
 {
    clearMenuItems();
+   mRenderSpecialInstructions = false;
 
    addMenuItem(new MenuItem("OK", nameAndPasswordAcceptCallback, ""));
    addMenuItem(new TextEntryMenuItem("NICKNAME:", getGame()->getSettings()->getIniSettings()->lastName, 
