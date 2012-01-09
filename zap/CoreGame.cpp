@@ -140,6 +140,18 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
    {
       switch(scoreEvent)
       {
+         case KillEnemy:
+            return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
+         case KillSelf:
+            return 0;
+         case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
          case OwnCoreDestroyed:
             return -data;
          case EnemyCoreDestroyed:
@@ -150,11 +162,27 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
    }
    else  // scoreGroup == IndividualScore
    {
-      //switch(scoreEvent)
-      //{
-      //   default:
+      switch(scoreEvent)
+      {
+         case KillEnemy:
+            return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
+         case KillSelf:
+            return -1;
+         case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 1;
+         case KillOwnTurret:
+            return -1;
+         case OwnCoreDestroyed:
+            return -5 * data;
+         case EnemyCoreDestroyed:
+            return 5 * data;
+         default:
             return naScore;
-      //}
+      }
    }
 }
 
