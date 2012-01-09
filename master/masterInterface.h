@@ -140,7 +140,7 @@ public:
    TNL_DECLARE_RPC(m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString));
 
    // If the user has a verified name, send this message back so they know the "correct spelling" of the name
-   TNL_DECLARE_RPC(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName));
+   TNL_DECLARE_RPC(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, StringPtr correctedName));
 
 
    // c2mSendChat sends an out-of-game chat message from the client to the master server

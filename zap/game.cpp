@@ -100,6 +100,12 @@ void ClientInfo::setAuthenticated(bool isAuthenticated)
 }
 
 
+void ClientInfo::setBadges(Int<BADGE_COUNT> badges)
+{
+   mBadges = badges;
+}
+
+
 void ClientInfo::initialize()
 {
    mScore = 0;
@@ -110,6 +116,7 @@ void ClientInfo::initialize()
    mIsLevelChanger = false;
    mIsRobot = false;
    mIsAuthenticated = false;
+   mBadges = NO_BADGES;
 }
 
 

@@ -134,8 +134,9 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameS
 // Authentication RPCs
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, 
+                                                               Int<BADGE_COUNT> badges,
                                                                StringPtr correctedName), 
-                                                               (authStatus, correctedName),
+                                                               (authStatus, badges, correctedName),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name), (id, name),

@@ -77,7 +77,8 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, 
                (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
-   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, 
+                                                  Int<BADGE_COUNT> badges, StringPtr correctedName));
 
    TNL_DECLARE_RPC_OVERRIDE(m2cSetMOTD, (StringPtr masterName, StringPtr motdString));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));

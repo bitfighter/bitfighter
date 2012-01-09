@@ -52,6 +52,15 @@ enum AuthenticationStatus {
    AuthenticationStatusCount
 };
 
+
+enum MeritBadges {
+   NO_BADGES = 0,
+   KilledFirstPlayer = BIT(0),
+   FirstVictory = BIT(1),
+   //...
+   BADGE_COUNT = 32    // Changing this value will require updating master server and protocol.
+};
+
 enum ServerInfoFlags {
    TestModeFlag = BIT(0),
 };

@@ -34,6 +34,7 @@
 #include "shipItems.h"           // For moduleInfos
 #include "EditorObject.h"        // For NO_TEAM
 #include "dataConnection.h"      // For DataSender
+#include "SharedConstants.h"     // For badges enum
 
 #include "GameTypesEnum.h"
 
@@ -116,6 +117,7 @@ protected:
    bool mIsAdmin;
    bool mIsRobot;
    bool mIsAuthenticated;
+   Int<BADGE_COUNT> mBadges;
 
    virtual void initialize();
 
@@ -144,6 +146,8 @@ public:
 
    bool isAuthenticated();
    virtual void setAuthenticated(bool isAuthenticated);
+
+   void setBadges(Int<BADGE_COUNT> badges);
 
    bool isLevelChanger();
    void setIsLevelChanger(bool isLevelChanger);

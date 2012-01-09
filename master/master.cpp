@@ -843,6 +843,7 @@ static const char *sanitizeForJson(const char *value)
             // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
             string name = mPlayerOrServerName.getString();
             PHPBB3AuthenticationStatus stat = verifyCredentials(name, password);
+            Int<BADGE_COUNT> badges = 0;     //<=== here we can read badges from the database
 
             mPlayerOrServerName.set(name.c_str());
 
@@ -867,14 +868,14 @@ static const char *sanitizeForJson(const char *value)
                logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
                mAuthenticated = true;
 
-               m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, name.c_str());
+               m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, badges, name.c_str());
             }
 
             else if(stat == UnknownUser || stat == Unsupported)
-               m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, "");
+               m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
 
             else  // stat == CantConnect || stat == UnknownStatus
-               m2cSetAuthenticated(AuthenticationStatusFailed, "");
+               m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
          }
       }
 
