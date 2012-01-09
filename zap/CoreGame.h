@@ -102,7 +102,7 @@ private:
 
 
 public:
-   static const U32 CoreDefaultHitPoints = 20;
+   static const U32 CoreDefaultHitPoints = 50;
 
    CoreItem();     // Constructor
    CoreItem *clone() const;
