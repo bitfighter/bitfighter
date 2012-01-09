@@ -375,7 +375,8 @@ void CoreItem::onAddedToGame(Game *theGame)
    CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
    if(coreGameType)
    {
-      setStartingHitPoints(coreGameType->getCoreItemHitPoints());
+      if(!isGhost())
+         setStartingHitPoints(coreGameType->getCoreItemHitPoints());
 
       // Now add to game
       coreGameType->addCore(this, getTeam());
