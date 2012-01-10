@@ -1704,7 +1704,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
 
    // Draw rotating rays
    glColor(coreColor);
-   drawAngledRayCircle(pos, atomSize + 2, size - 1, 2, coreRotateTime, 0);
+   drawAngledRayCircle(pos, atomSize + 4, size - 2, 2, coreRotateTime, 0);
 
    // Draw atomic like graphic
    F32 t = F32(time & 1023) / 1024.f * FloatTau;
