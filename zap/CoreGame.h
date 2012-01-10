@@ -91,7 +91,7 @@ typedef Item Parent;
 private:
    static const U32 CoreStartWidth = 200;
    static const U32 CoreMinWidth = 20;
-   static const U32 CoreDefaultStartingHitPoints = 10;  // 1 health is the equivalent damage a normal ship can take
+   static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
 
    static const F32 DamageReductionRatio;
 

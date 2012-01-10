@@ -251,7 +251,7 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   setStartingHealth(F32(CoreDefaultStartingHitPoints) / DamageReductionRatio);      // Hits to kill
+   setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
    hasExploded = false;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
@@ -288,7 +288,7 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHitPoints,
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHealth,
             10, 1, S32(DamageReductionRatio), "", "", ""));
 
       // Add our standard save and exit option to the menu
