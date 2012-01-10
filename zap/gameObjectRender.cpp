@@ -1692,10 +1692,8 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size, const Color *coreColor)
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
 {
-   U32 time = Platform::getRealMilliseconds();
-
    F32 atomSize = size * 0.40;
    F32 coreRotateTime = F32(time & 16383) / 16384.f * FloatTau;
 

@@ -33,6 +33,7 @@
 #include "gameObjectRender.h"
 #endif
 
+#include <cmath>
 
 namespace Zap {
 
@@ -282,13 +283,13 @@ CoreItem *CoreItem::clone() const
 void CoreItem::renderItem(const Point &pos)
 {
    if(!hasExploded)
-      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam));
+      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getCurrentTime());
 }
 
 
 void CoreItem::renderDock()
 {
-   renderCore(getVert(0), 5, &Colors::white);
+   renderCore(getVert(0), 5, &Colors::white, getGame()->getCurrentTime());
 }
 
 
@@ -369,15 +370,26 @@ F32 CoreItem::getEditorRadius(F32 currentScale)
 
 bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-   center = getActualPos();
-   radius = calcCoreWidth() / 2;
-   return true;
+//   center = getActualPos();
+//   radius = calcCoreWidth() / 2;
+   return false;
 }
 
 
 bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   return false;
+   // This poly rotates with time to match what is rendered
+   F32 coreRotateTime = F32(getGame()->getCurrentTime() & 16383) / 16384.f * FloatTau;
+   Point pos = getActualPos();
+   F32 radius = calcCoreWidth() / 2;
+
+   for(F32 theta = 0; theta < FloatTau; theta += FloatTau / 10)  // 10 sides
+   {
+      Point p = Point(pos.x + cos(theta + coreRotateTime) * radius, pos.y + sin(theta + coreRotateTime) * radius);
+      polyPoints.push_back(p);
+   }
+
+   return true;
 }
 
 

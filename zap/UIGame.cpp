@@ -3143,7 +3143,7 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       Team *team = (Team *)game->getTeam(i);
       Point center(xpos - 20, ypos + 19);
 
-      renderCore(center, 10, team->getColor());
+      renderCore(center, 10, team->getColor(), getGame()->getCurrentTime());
 
       glColor(Colors::white);
       drawStringf(xpos, ypos, textSize, "%d", cgt->getTeamCoreCount(i));
