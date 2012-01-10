@@ -241,24 +241,6 @@ const char *GameConnection::getConnectionStateString(S32 i)
 }
 
 
-// Definitive, final declaration of whether this player is (or is not) verified on this server
-// Runs on both client (tracking other players) and server (tracking all players)
-//void GameConnection::setAuthenticated(bool isAuthenticated)
-//{ 
-//   mIsVerified = isAuthenticated; 
-//   mClientNeedsToBeVerified = false; 
-//
-//   if(isConnectionToClient())    // Only run this bit if we are a server
-//   {
-//      // If we are verified, we need to alert any connected clients, so they can render ships properly.  This is done via the ship object.
-//      Ship *ship = dynamic_cast<Ship *>(getControlObject());
-//      if(ship)
-//         ship->setIsAuthenticated(isAuthenticated, mClientInfo->getName());
-//   }
-//}
-
-
-
 // Player appears to be away, spawn is on hold until he returns
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
