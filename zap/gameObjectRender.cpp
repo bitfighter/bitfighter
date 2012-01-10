@@ -37,6 +37,7 @@
 #include "config.h"     // Only for testing burst graphics below
 #include "ScreenInfo.h"
 #include "game.h"
+#include "ClientGame.h"
 
 #include "UIEditor.h"         // For RenderingStyles enum
 
@@ -1694,16 +1695,34 @@ void renderSoccerBall(const Point &pos, F32 size)
 
 void renderCore(const Point &pos, F32 size, const Color *coreColor)
 {
+   TNLAssert(gClientGame, "gClientGame is NULL, where should we get MilliSeconds from?");  // probably is never NULL, and server never render
+   U32 time = gClientGame ? gClientGame->getCurrentTime() : 0;
    glColor(Colors::gray80);
    drawSquare(pos, size);
-   glColor(coreColor);
-   drawSquare(pos, size / 2);
+   //glColor(coreColor);
+   //drawSquare(pos, size / 2);
 
-   for(S32 i = 0; i < 30; i++)
+
+   F32 t = F32(time & 1023) / 1024.f * Float2Pi;
+   for(F32 rotate = 0; rotate < Float2Pi; rotate += Float2Pi / 5 + 0.001f)
+   {
+      glBegin(GL_LINE_LOOP);
+      for(F32 theta = 0; theta < Float2Pi; theta += 0.2f)
+      {
+         F32 x = cos(theta + rotate * 2 + t) * size * 0.5f;
+         F32 y = sin(theta + rotate * 2 + t) * size;
+         glColor(coreColor, theta / Float2Pi);
+         glVertex2f(pos.x + cos(rotate) * x + sin(rotate) * y, pos.y + sin(rotate) * x - cos(rotate) * y);
+      }
+      glEnd();
+   }
+
+
+   /*for(S32 i = 0; i < 30; i++)
    {
       F32 R = 24;
       F32 r = -14;
-      F32 t = (F32)Platform::getRealMilliseconds() / 100.0f + 3 * i;
+      F32 t = (F32)time / 100.0f + 3 * i;
       F32 p = -9;    // -19 12
 
       F32 x = (R+r)*cos(t) + p*cos((R+r)*t/r); 
@@ -1711,9 +1730,8 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor)
       glBegin(GL_POINTS);
          glVertex2f(pos.x + x, pos.y + y);
       glEnd();
-   }
+   }*/
 }
-
 
 void renderSoccerBall(const Point &pos)
 {
