@@ -128,6 +128,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mHitItem = NULL;
+   mHitVertex = NONE;
    mDockItemHit = NULL;
    mEdgeHit = NONE;
 
@@ -3040,6 +3041,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       autoSave();
 
       mHitItem = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
+      mHitVertex = NONE;
 
       doneDeleteing();
    }
@@ -3659,9 +3661,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
                mHitItem->setSelected(true);
                onSelectionChanged();
             }
-            else if(mHitVertex != NONE && (!mHitItem || !mHitItem->isSelected()))      // Hit a vertex of an unselected item
+            else if(mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
             {        // (braces required)
-               if(!mHitItem->vertSelected(mHitVertex))
+               if(!(mHitItem->vertSelected(mHitVertex)))
                {
                   clearSelection();
                   mHitItem->selectVert(mHitVertex);
