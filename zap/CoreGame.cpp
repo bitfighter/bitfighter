@@ -354,15 +354,15 @@ F32 CoreItem::getEditorRadius(F32 currentScale)
 
 bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-   return false;
+   center = getActualPos();
+   radius = calcCoreWidth() / 2;
+   return true;
 }
 
 
 bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   Rect rect = Rect(getActualPos(), calcCoreWidth());
-   rect.toPoly(polyPoints);
-   return true;
+   return false;
 }
 
 
