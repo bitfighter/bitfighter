@@ -2059,13 +2059,32 @@ void Ship::render(S32 layerIndex)
    if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
    {
       //glColor(Colors::green, /*F32(mSpawnShield.getCurrent()) / F32(SpawnShieldTime) * .75*/0.65f);
-      glColor(Colors::green, .65f);    // Decrease this value for fainter shield
+      
 
       if(mSpawnShield.getCurrent() > 1500 || mSpawnShield.getCurrent() % 300 > 150)
-      {
-         F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
-         drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24, offset);
-      }
+         glColor(Colors::green, .65f);    // Decrease this value for fainter shield
+      else
+         glColor(Colors::green, .15f);    // Decrease this value for fainter shield
+
+      F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
+      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24, offset);
+
+      // bink fading code... don't like it
+      //      S32 aaa = 300;  // blink rate
+      //S32 t = mSpawnShield.getCurrent() % aaa;     // t < 150, shield is off, t > 150, shield is on
+      //S32 x = 100;  // duration of fade
+      //if(mSpawnShield.getCurrent() > 1500 || t < x || t > aaa/2 + x)
+      //{
+      //   F32 tfact = 1;
+      //   if(mSpawnShield.getCurrent() < 1500)
+      //   {
+      //      if(t > aaa/2 && t < aaa/2 + x)  // 130  // getting brighter
+      //         tfact = (F32)(t - aaa/2 ) /  (F32)x;
+      //      else if(t < x)  // dimming down
+      //         tfact = (F32)(x-t) / (F32)x;
+      //   logprintf("%f",tfact);
+      //   }
+
    }
 
    if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
