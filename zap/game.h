@@ -226,7 +226,6 @@ public:
    // Voice chat stuff -- these will be invalid on the server side
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
-
 };
 #endif
 
