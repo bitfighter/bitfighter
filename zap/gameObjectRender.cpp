@@ -1700,11 +1700,11 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
    // Draw outer polygon and inner circle
    glColor(Colors::gray80);
    drawPolygon(pos, 10, size, coreRotateTime);
-   drawCircle(pos, atomSize);
+   drawCircle(pos, atomSize + 2);
 
    // Draw rotating rays
    glColor(coreColor);
-   drawAngledRayCircle(pos, atomSize, size - 1, 2, coreRotateTime, 0);
+   drawAngledRayCircle(pos, atomSize + 2, size - 1, 2, coreRotateTime, 0);
 
    // Draw atomic like graphic
    F32 t = F32(time & 1023) / 1024.f * FloatTau;
@@ -1716,7 +1716,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
          F32 x = cos(theta + rotate * 2 + t) * atomSize * 0.5f;
          F32 y = sin(theta + rotate * 2 + t) * atomSize;
          glColor(coreColor, theta / FloatTau);
-         glVertex2f(pos.x + cos(rotate) * x + sin(rotate) * y, pos.y + sin(rotate) * x - cos(rotate) * y);
+         glVertex2f(pos.x + cos(rotate + coreRotateTime) * x + sin(rotate + coreRotateTime) * y, pos.y + sin(rotate + coreRotateTime) * x - cos(rotate + coreRotateTime) * y);
       }
       glEnd();
    }
