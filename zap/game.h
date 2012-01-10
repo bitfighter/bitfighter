@@ -211,8 +211,8 @@ private:
    VoiceDecoder *mDecoder;
 
 public:
-   RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin);      // Constructor
-   virtual ~RemoteClientInfo();                                                     // Destructor
+   RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, bool isRobot, bool isAdmin);  // Constructor
+   virtual ~RemoteClientInfo();                                                                       // Destructor
 
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);

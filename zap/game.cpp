@@ -301,11 +301,12 @@ VoiceDecoder *LocalClientInfo::getVoiceDecoder()
 
 #ifndef ZAP_DEDICATED
 // Constructor
-RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isRobot, bool isAdmin)
+RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, bool isRobot, bool isAdmin)
 {
    initialize();
 
    mName = name;
+   mIsAuthenticated = isAuthenticated;
    mIsRobot = isRobot;
    mIsAdmin = isAdmin;
    mTeamIndex = NO_TEAM;

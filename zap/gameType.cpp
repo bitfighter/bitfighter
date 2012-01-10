@@ -1584,7 +1584,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    clientInfo->setTeamIndex(minTeamIndex);     // Add new player to that team
 
    // Tell other clients about the new guy, who is never us...
-   s2cAddClient(clientInfo->getName(), false, clientInfo->isAdmin(), clientInfo->isRobot(), true);    
+   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), false, clientInfo->isAdmin(), clientInfo->isRobot(), true);    
 
    if(clientInfo->getTeamIndex() >= 0) 
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex());
@@ -2120,9 +2120,10 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 
 // A player (either us or a remote player) has joined the game.  This will be called for all players (including us) when changing levels.
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
+// ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
-                (StringTableEntry name, bool isLocalClient, bool isAdmin, bool isRobot, bool playAlert), 
-                (name, isLocalClient, isAdmin, isRobot, playAlert))
+                (StringTableEntry name, bool isAuthenticated, bool isLocalClient, bool isAdmin, bool isRobot, bool playAlert), 
+                (name, isAuthenticated, isLocalClient, isAdmin, isRobot, playAlert))
 {
 #ifndef ZAP_DEDICATED
 
@@ -2132,7 +2133,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    if(!clientGame) 
       return;
       
-   boost::shared_ptr<ClientInfo> clientInfo = boost::shared_ptr<ClientInfo>(new RemoteClientInfo(name, isRobot, isAdmin));  
+   boost::shared_ptr<ClientInfo> clientInfo = boost::shared_ptr<ClientInfo>(new RemoteClientInfo(name, isAuthenticated, isRobot, isAdmin));  
 
    clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
 
@@ -2393,7 +2394,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       bool isLocalClient = (conn == theConnection);
 
-      s2cAddClient(clientInfo->getName(), isLocalClient, clientInfo->isAdmin(), clientInfo->isRobot(), false);
+      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), isLocalClient, clientInfo->isAdmin(), clientInfo->isRobot(), false);
 
       S32 team = clientInfo->getTeamIndex();
 

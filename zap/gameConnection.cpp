@@ -1218,6 +1218,7 @@ void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
 
    Ship *ship = dynamic_cast<Ship *>(clientInfo->getConnection()->getControlObject());
 
+
    if(ship)
    {
       ship->setName(newName);
