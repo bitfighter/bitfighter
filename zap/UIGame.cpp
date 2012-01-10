@@ -60,6 +60,7 @@
 #include "ClientGame.h"
 #include "Colors.h"
 #include "Cursor.h"
+#include "CoreGame.h"
 
 #include "../tnl/tnlEndian.h"
 
@@ -3112,6 +3113,8 @@ void GameUserInterface::renderTeamFlagScores(const GameType *gameType, U32 right
 
 void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlignCoord)
 {
+   CoreGameType *cgt = static_cast<CoreGameType*>(const_cast<GameType*>(gameType));
+
    S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
 
    // Build a list of teams, so we can sort by score
@@ -3129,9 +3132,10 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
 
    teams.sort(teamScoreSort);
 
-   const S32 textsize = 32;
-   S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textsize, "0");
+   const S32 textSize = 32;
+   S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textSize, "0");
 
+   // Here we show the number of Cores remaining INSTEAD OF the score, which is negative
    for(S32 i = 0; i < teams.size(); i++)
    {
       S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teams.size() - i - 1) * 38;
@@ -3142,7 +3146,7 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       renderCore(center, 10, team->getColor());
 
       glColor(Colors::white);
-      drawStringf(xpos, ypos, textsize, "%d", team->getScore());
+      drawStringf(xpos, ypos, textSize, "%d", cgt->getTeamCoreCount(i));
    }
 }
 

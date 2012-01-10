@@ -84,6 +84,21 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
+S32 CoreGameType::getTeamCoreCount(S32 teamIndex)
+{
+   S32 count = 0;
+
+   for(S32 i = 0; i < mCores.size(); i++)
+   {
+      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
+      if(coreItem && coreItem->getTeam() == teamIndex)
+         count++;
+   }
+
+   return count;
+}
+
+
 #ifndef ZAP_DEDICATED
 const char **CoreGameType::getGameParameterMenuKeys()
 {

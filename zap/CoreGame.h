@@ -52,6 +52,8 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
+   S32 getTeamCoreCount(S32 teamIndex);
+
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
 

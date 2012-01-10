@@ -111,7 +111,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mLeadingPlayerScore = 0;
    mSecondLeadingPlayer = -1;
    mSecondLeadingPlayerScore = 0;
-   mDigitsNeededToDisplayScore = mWinningScore < 1 ? 2 : 1;  // 2 digits if winning score is 0 or below
+   mDigitsNeededToDisplayScore = 1;
    mCanSwitchTeams = true;       // Players can switch right away
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;        // By default, all zones glow
