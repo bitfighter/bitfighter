@@ -742,7 +742,9 @@ static const char *sanitizeForJson(const char *value)
             else
                status = AuthenticationStatusUnauthenticatedName;
 
-            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status);
+            Int<BADGE_COUNT> badges = NO_BADGES;   // <=== Look up some badge info in the player DB here!
+
+            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, badges);
             break;
          }
    }

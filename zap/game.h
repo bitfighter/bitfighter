@@ -144,10 +144,9 @@ public:
    S32 getTeamIndex();
    void setTeamIndex(S32 teamIndex);
 
+   virtual void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
    bool isAuthenticated();
-   virtual void setAuthenticated(bool isAuthenticated);
-
-   void setBadges(Int<BADGE_COUNT> badges);
+   Int<BADGE_COUNT> getBadges();
 
    bool isLevelChanger();
    void setIsLevelChanger(bool isLevelChanger);
@@ -185,7 +184,7 @@ public:
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);
 
-   void setAuthenticated(bool isAuthenticated);
+   void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
 
    void setRating(F32 rating);
    F32 getRating();

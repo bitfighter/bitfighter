@@ -200,7 +200,8 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->s2cSetIsLevelChanger(true, false);                         // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getSettings()->getHostName());  // Server name is whatever we've set locally
 
-            gc->getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated());      // Tell local host if we're authenticated... no need to verify
+            // Tell local host if we're authenticated... no need to verify
+            gc->getClientInfo()->setAuthenticated(getClientInfo()->isAuthenticated(), getClientInfo()->getBadges());  
          }
       }
       else        // Connect to a remote server, but not via the master server

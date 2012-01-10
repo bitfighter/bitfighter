@@ -1237,9 +1237,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    mClientInfo->setName(oldName);         // Restore name to properly get it updated to clients
    setClientNameNonUnique(newName);       // For correct authentication
    
-   mIsVerified = false;                   // Renamed names are never verified
-   mClientInfo->setAuthenticated(false);  // Prevents name from being underlined
-   mClientNeedsToBeVerified = false;      // Prevent attempts to authenticate the new name
+   mIsVerified = false;                               // Renamed names are never verified
+   mClientInfo->setAuthenticated(false, NO_BADGES);   // Prevents name from being underlined
+   mClientNeedsToBeVerified = false;                  // Prevent attempts to authenticate the new name
    mClientClaimsToBeVerified = false;
 
    if(oldName != uniqueName)              // Did the name actually change?

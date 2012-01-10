@@ -167,7 +167,8 @@ public:
 
 
    TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
-   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
+   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, 
+                                         RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges));
 
    TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
 

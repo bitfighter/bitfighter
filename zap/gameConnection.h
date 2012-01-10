@@ -321,10 +321,9 @@ public:
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);
 
-   //void setAuthenticated(bool isVerified);    // Client & Server... Runs on server after getting message from master, or on local connection
    void resetAuthenticationTimer();
    S32 getAuthenticationCounter();
-   //bool isAuthenticated() { return mIsVerified; }
+
    void requestAuthenticationVerificationFromMaster();
    void updateAuthenticationTimer(U32 timeDelta);
 

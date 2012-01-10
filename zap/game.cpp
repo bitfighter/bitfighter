@@ -94,15 +94,16 @@ ClientInfo::~ClientInfo()
 }
 
 
-void ClientInfo::setAuthenticated(bool isAuthenticated)
+void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
    mIsAuthenticated = isAuthenticated; 
+   mBadges = badges;
 }
 
 
-void ClientInfo::setBadges(Int<BADGE_COUNT> badges)
+Int<BADGE_COUNT> ClientInfo::getBadges()
 {
-   mBadges = badges;
+   return mBadges;
 }
 
 
@@ -236,9 +237,9 @@ LocalClientInfo::~LocalClientInfo()
 }
 
 
-void LocalClientInfo::setAuthenticated(bool isAuthenticated)
+void LocalClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
-   Parent::setAuthenticated(isAuthenticated);
+   Parent::setAuthenticated(isAuthenticated, badges);
 
    if(mClientConnection && mClientConnection->isConnectionToClient())    // Only run this bit if we are a server
    {

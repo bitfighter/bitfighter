@@ -143,7 +143,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, (Vector<U8> i
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
-                              RangedU32<0,AuthenticationStatusCount> status ), (id, name, status ),
+                              RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges), (id, name, status, badges),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 0) {}
 
 

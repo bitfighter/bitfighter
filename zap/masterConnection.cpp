@@ -245,21 +245,21 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       clientGame->correctPlayerName(correctedName.getString());
-      clientGame->getClientInfo()->setAuthenticated(true);
+      clientGame->getClientInfo()->setAuthenticated(true, badges);
 
       GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
       if(gc)
-         gc->c2sSetAuthenticated();
+         gc->c2sSetAuthenticated();    // Tell server that the client is (or claims to be) authenticated
    }
    else 
-      clientGame->getClientInfo()->setAuthenticated(false);
+      clientGame->getClientInfo()->setAuthenticated(false, NO_BADGES);
 }
 #endif
 
 
 // Now we know that player with specified id has an approved name
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
-         RangedU32<0,AuthenticationStatusCount> status))
+         RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges))
 {
    if(!mGame->isServer())
       return;
@@ -274,7 +274,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
-            clientInfo->setAuthenticated(true);
+            clientInfo->setAuthenticated(true, badges);
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
             for(S32 j = 0; j < mGame->getClientCount(); j++)
@@ -299,7 +299,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  
             if(clientInfo->getConnection()->getAuthenticationCounter() > 1)  // Client gets two bites at the apple, to cover rare race condition
-               clientInfo->setAuthenticated(false);
+               clientInfo->setAuthenticated(false, NO_BADGES);
             else
                clientInfo->getConnection()->resetAuthenticationTimer();
          }
