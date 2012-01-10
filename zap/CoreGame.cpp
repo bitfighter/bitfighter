@@ -435,14 +435,14 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
    if(stream->writeFlag(updateMask & ItemChangedMask))
-      stream->writeInt(mHitPoints, 8);
+      stream->write(mHitPoints);
 
    stream->writeFlag(hasExploded);
 
    if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
-      stream->writeInt(mStartingHitPoints, 8);
+      stream->write(mStartingHitPoints);
    }
 
    return retMask;
@@ -455,7 +455,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
    {
-      mHitPoints = stream->readInt(8);
+      stream->read(&mHitPoints);
       setRadius(calcCoreWidth());
    }
 
@@ -471,7 +471,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(mInitial)
    {
       readThisTeam(stream);
-      setStartingHitPoints(stream->readInt(8));
+      stream->read(&mStartingHitPoints);
    }
 }
 
