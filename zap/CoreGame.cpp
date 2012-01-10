@@ -238,15 +238,20 @@ class LuaCore;
 
 // Statics:
 #ifndef ZAP_DEDICATED
-   EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
+EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 #endif
+
+// Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
+// for easier bit transmission
+const F32 CoreItem::DamageReductionRatio = 10000.0f;
+
 
 // Constructor
 CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   setStartingHitPoints(CoreDefaultStartingHitPoints);      // Hits to kill
+   setStartingHealth(F32(CoreDefaultStartingHitPoints) / DamageReductionRatio);      // Hits to kill
    hasExploded = false;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
@@ -283,7 +288,8 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
 
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
-      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHitPoints, 5, 1, S32_MAX, "", "", ""));
+      mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHitPoints,
+            10, 1, S32(DamageReductionRatio), "", "", ""));
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -296,21 +302,21 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
 // Get the menu looking like what we want
 void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->getMenuItem(0)->setIntValue(mStartingHitPoints);
+   attributeMenu->getMenuItem(0)->setIntValue(S32(mStartingHealth * DamageReductionRatio));
 }
 
 
 // Retrieve the values we need from the menu
 void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   setStartingHitPoints(attributeMenu->getMenuItem(0)->getIntValue());
+   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()) / F32(DamageReductionRatio));
 }
 
 
 // Render some attributes when item is selected but not being edited
 string CoreItem::getAttributeString()
 {
-   return "Hit points: " + itos(mStartingHitPoints);
+   return "Health: " + itos(S32(mStartingHealth * DamageReductionRatio));
 }
 
 #endif
@@ -365,8 +371,12 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(hasExploded)
       return;
 
-   mHitPoints--;
-   if(mHitPoints == 0)    // Kill small items
+   mHealth -= theInfo->damageAmount / DamageReductionRatio;
+
+   if(mHealth < 0)
+      mHealth = 0;
+
+   if(mHealth == 0)
    {
       // We've scored!
       GameType *gameType = getGame()->getGameType();
@@ -397,16 +407,10 @@ void CoreItem::setRadius(F32 radius)
 }
 
 
-U32 CoreItem::getStartingHitPoints()
+void CoreItem::setStartingHealth(F32 health)
 {
-   return mStartingHitPoints;
-}
-
-
-void CoreItem::setStartingHitPoints(U32 hitPoints)
-{
-   mStartingHitPoints = hitPoints;
-   mHitPoints = hitPoints;
+   mStartingHealth = health;
+   mHealth = health;
 }
 
 
@@ -435,14 +439,14 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
    if(stream->writeFlag(updateMask & ItemChangedMask))
-      stream->write(mHitPoints);
+      stream->writeFloat(mHealth, 16);  // 16 bits -> 1/65536 increments
 
    stream->writeFlag(hasExploded);
 
    if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
-      stream->write(mStartingHitPoints);
+      stream->writeFloat(mStartingHealth, 16);
    }
 
    return retMask;
@@ -455,7 +459,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
    {
-      stream->read(&mHitPoints);
+      mHealth = stream->readFloat(16);
       setRadius(calcCoreWidth());
    }
 
@@ -471,18 +475,18 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(mInitial)
    {
       readThisTeam(stream);
-      stream->read(&mStartingHitPoints);
+      mStartingHealth = stream->readFloat(16);
    }
 }
 
 
 bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 4)         // CoreItem <team> <hit points> <x> <y>
+   if(argc < 4)         // CoreItem <team> <health> <x> <y>
       return false;
 
    mTeam = atoi(argv[0]);
-   setStartingHitPoints(atoi(argv[1]));
+   setStartingHealth(F32(atoi(argv[1])) / DamageReductionRatio);
 
    if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
@@ -493,14 +497,13 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + itos(mStartingHitPoints) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(mTeam) + " " + itos(S32(mStartingHealth * DamageReductionRatio)) + " " + geomToString(gridSize);
 }
 
 
 F32 CoreItem::calcCoreWidth() const
 {
-   F32 ratio = F32(mHitPoints) / F32(mStartingHitPoints);
-//   logprintf("ratio: %f", ratio);
+   F32 ratio = mHealth / mStartingHealth;
 
    return (F32(CoreStartWidth - CoreMinWidth) * ratio) + CoreMinWidth;
 }
@@ -540,7 +543,7 @@ Lunar<CoreItem>::RegType CoreItem::methods[] =
    method(CoreItem, getTeamIndx),
 
    // Class specific methods
-   method(CoreItem, getHitPoints),
+   method(CoreItem, getCurrentHitPoints),
 
    {0,0}    // End method list
 };
@@ -552,9 +555,9 @@ S32 CoreItem::getClassID(lua_State *L)
 }
 
 
-S32 CoreItem::getHitPoints(lua_State *L)
+S32 CoreItem::getCurrentHitPoints(lua_State *L)
 {
-   return returnInt(L, mHitPoints);
+   return returnFloat(L, mHealth);
 }
 
 
