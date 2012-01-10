@@ -52,6 +52,8 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
+   S32 getTeamCoreCount(S32 teamIndex);
+
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
 
@@ -91,10 +93,13 @@ typedef Item Parent;
 private:
    static const U32 CoreStartWidth = 200;
    static const U32 CoreMinWidth = 20;
+   static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
+
+   static const F32 DamageReductionRatio;
 
    bool hasExploded;
-   U32 mStartingHitPoints;
-   U32 mHitPoints;
+   F32 mStartingHealth;
+   F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
@@ -102,7 +107,6 @@ private:
 
 
 public:
-   static const U32 CoreDefaultStartingHitPoints = 50;
 
    CoreItem();     // Constructor
    CoreItem *clone() const;
@@ -114,8 +118,7 @@ public:
 
    F32 calcCoreWidth() const;
 
-   U32 getStartingHitPoints();
-   void setStartingHitPoints(U32 hitPoints);
+   void setStartingHealth(F32 health);
 
    void onAddedToGame(Game *theGame);
 
@@ -159,7 +162,7 @@ public:
 
    S32 getClassID(lua_State *L);
 
-   S32 getHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getCurrentHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    void push(lua_State *L);
 };
 

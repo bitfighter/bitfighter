@@ -562,8 +562,8 @@ void gameIdle(U32 integerTime)
       UserInterface::current->idle(integerTime);
 
    // If the main game interface is in the stack, idle that too to keep things current, update timers, etc.
-   UIManager *uiManager = gClientGame->getUIManager();
-   if(uiManager->cameFrom(GameUI))
+   UIManager *uiManager = gClientGame ? gClientGame->getUIManager() : NULL;
+   if(uiManager && uiManager->cameFrom(GameUI))
       uiManager->getGameUserInterface()->idle(integerTime);
 #endif
 

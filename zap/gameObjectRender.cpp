@@ -294,7 +294,7 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
    F32 cosbeta = cos(angle);
 
    glBegin(glStyle);
-      for(F32 theta = 0; theta < Float2Pi; theta += 0.2f)
+      for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
       {
          F32 sinalpha = sin(theta);
          F32 cosalpha = cos(theta);
@@ -313,7 +313,7 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
    glBegin(GL_LINE_LOOP);
-      for(F32 theta = 0; theta < Float2Pi; theta += Float2Pi / sides)
+      for(F32 theta = 0; theta < FloatTau; theta += FloatTau / sides)
          glVertex2f(pos.x + cos(theta + angle) * radius, pos.y + sin(theta + angle) * radius);
    glEnd();
 }
@@ -348,7 +348,7 @@ void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle)
 
 void drawFilledCircle(const Point &pos, F32 radius)
 {
-   drawFilledSector(pos, radius, 0, Float2Pi);
+   drawFilledSector(pos, radius, 0, FloatTau);
 }
 
 
@@ -512,7 +512,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
 
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINE_LOOP);
-         for(F32 theta = 0; theta <= Float2Pi; theta += 0.3f)
+         for(F32 theta = 0; theta <= FloatTau; theta += 0.3f)
             glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
       glEnd();
    }
@@ -610,7 +610,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       {
          Tracker &t = particles[i];
 
-         t.thetaI = TNL::Random::readF() * Float2Pi;
+         t.thetaI = TNL::Random::readF() * FloatTau;
          t.thetaP = TNL::Random::readF() * 2 + 0.5f;
          t.dP = TNL::Random::readF() * 5 + 2.5f;
          t.dI = TNL::Random::readF() * t.dP;
@@ -693,7 +693,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       if(d > 0.9)
          alphaMod = (1 - d) * 10;
 
-      F32 theta = fmod(t.thetaI + F32(time) * 0.001f * t.thetaP, Float2Pi);
+      F32 theta = fmod(t.thetaI + F32(time) * 0.001f * t.thetaP, FloatTau);
       F32 startRadius = radiusFraction * radius * d;
 
       Point start(cos(theta), sin(theta));
@@ -928,7 +928,7 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
    glPushMatrix();
       glScale(scaleFact);
       glTranslate(centroid);
-      glRotatef(angle * 360 / Float2Pi, 0, 0, 1);
+      glRotatef(angle * 360 / FloatTau, 0, 0, 1);
       renderCenteredString(Point(0,0), size,  text);
    glPopMatrix();
 }
@@ -1223,7 +1223,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
       const int outerR = 3;
       const int dist = 10;
 
-#define dr(x) (float) x * Float2Pi / 360     // degreesToRadians()
+#define dr(x) (float) x * FloatTau / 360     // degreesToRadians()
 
       glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
       glColor(pi->projColors[1]);
@@ -1692,28 +1692,35 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size, const Color *coreColor)
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
 {
+   F32 atomSize = size * 0.40;
+   F32 coreRotateTime = F32(time & 16383) / 16384.f * FloatTau;
+
+   // Draw outer polygon and inner circle
    glColor(Colors::gray80);
-   drawSquare(pos, size);
+   drawPolygon(pos, 10, size, coreRotateTime);
+   drawCircle(pos, atomSize);
+
+   // Draw rotating rays
    glColor(coreColor);
-   drawSquare(pos, size / 2);
+   drawAngledRayCircle(pos, atomSize, size - 1, 2, coreRotateTime, 0);
 
-   for(S32 i = 0; i < 30; i++)
+   // Draw atomic like graphic
+   F32 t = F32(time & 1023) / 1024.f * FloatTau;
+   for(F32 rotate = 0; rotate < FloatTau; rotate += FloatTau / 5 + 0.001f)
    {
-      F32 R = 24;
-      F32 r = -14;
-      F32 t = (F32)Platform::getRealMilliseconds() / 100.0f + 3 * i;
-      F32 p = -9;    // -19 12
-
-      F32 x = (R+r)*cos(t) + p*cos((R+r)*t/r); 
-      F32 y = (R+r)*sin(t) + p*sin((R+r)*t/r);
-      glBegin(GL_POINTS);
-         glVertex2f(pos.x + x, pos.y + y);
+      glBegin(GL_LINE_LOOP);
+      for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+      {
+         F32 x = cos(theta + rotate * 2 + t) * atomSize * 0.5f;
+         F32 y = sin(theta + rotate * 2 + t) * atomSize;
+         glColor(coreColor, theta / FloatTau);
+         glVertex2f(pos.x + cos(rotate) * x + sin(rotate) * y, pos.y + sin(rotate) * x - cos(rotate) * y);
+      }
       glEnd();
    }
 }
-
 
 void renderSoccerBall(const Point &pos)
 {
@@ -2083,7 +2090,7 @@ void drawCircle(F32 x, F32 y, F32 radius)
 {
     glBegin(GL_LINE_LOOP);
     
-    for(F32 theta = 0; theta < Float2Pi; theta += 0.2f)
+    for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
         glVertex2f(x + cos(theta) * radius, y + sin(theta) * radius);
     
     glEnd();
