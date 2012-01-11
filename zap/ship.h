@@ -192,6 +192,7 @@ public:
    Point mImpulseVector;
    F32 getSlipzoneSpeedMoficationFactor();
 
+   StringTableEntry getName();
    //void setName(StringTableEntry name);
    void setIsAuthenticated(bool isAuthenticated, StringTableEntry name);
 
