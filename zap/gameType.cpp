@@ -1738,12 +1738,9 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       if(points == 0)
          return;
 
-      Team *team = (Team *)mGame->getTeam(teamIndex);
-      team->addScore(points);
-
       // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
       // deducted, then the same amount is added to every team.  Assumes that points < 0.
-      if(scoringEvent == ScoreGoalOwnTeam || scoringEvent == OwnCoreDestroyed)
+      if(scoringEvent == ScoreGoalOwnTeam)
       {
          for(S32 i = 0; i < mGame->getTeamCount(); i++)
          {
@@ -1751,8 +1748,29 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
             s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());     // Broadcast result
          }
       }
-      else  // All other scoring events
+
+      // Now add the score
+      //
+      // Exception for Core gametype - all teams get a point except the one that had a Core destroyed
+      if(scoringEvent == OwnCoreDestroyed || scoringEvent == EnemyCoreDestroyed)
+      {
+         for(S32 i = 0; i < mGame->getTeamCount(); i++)
+         {
+            // Skip the
+            if(i == teamIndex)
+               continue;
+
+            ((Team *)mGame->getTeam(i))->addScore(points);            // Add magnitiude of negative score to all teams
+            s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());     // Broadcast result
+         }
+      }
+      // All other scoring events
+      else
+      {
+         Team *team = (Team *)mGame->getTeam(teamIndex);
+         team->addScore(points);
          s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
+      }
 
       updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;

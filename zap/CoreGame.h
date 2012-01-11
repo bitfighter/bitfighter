@@ -61,7 +61,7 @@ public:
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-   void score(Ship *destroyer, S32 team, S32 score);
+   void score(Ship *destroyer, S32 coreOwningTeam, S32 score);
 
 #ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
