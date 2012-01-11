@@ -259,7 +259,7 @@ EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 
 // Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
 // for easier bit transmission
-const F32 CoreItem::DamageReductionRatio = 10000.0f;
+const F32 CoreItem::DamageReductionRatio = 1000.0f;
 
 
 // Constructor
@@ -572,7 +572,7 @@ void CoreItem::onItemExploded(Point pos)
    game->emitBlast(pos, 500);
    game->emitBlast(pos, 600);
    game->emitBlast(pos, 700);
-   logprintf("%f %f", pos.x, pos.y);
+//   logprintf("%f %f", pos.x, pos.y);
 }
 
 
