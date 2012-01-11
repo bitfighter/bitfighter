@@ -335,7 +335,7 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHealth,
-            10, 1, S32(DamageReductionRatio), "", "", ""));
+            1, 1, S32(DamageReductionRatio), "", "", ""));
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
