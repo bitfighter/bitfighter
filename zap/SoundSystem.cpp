@@ -99,6 +99,7 @@ static SFXProfile sfxProfilesModern[] = {
  // Other
  {  "core_heartbeat.wav",  false, 1.0f,  false, 150, 1000 },
  {  "core_explode.wav",    false, 1.0f,  false, 300, 1000 },
+ {  "core_explode_secondary.wav",    false, 1.0f,  false, 300, 1000 },
 
  {  NULL, false, 0, false, 0, 0 },
 };
@@ -177,6 +178,7 @@ static SFXProfile sfxProfilesClassic[] = {
  // Other
  {  "core_heartbeat.wav",  false, 1.0f,  false, 150, 1000 },
  {  "core_explode.wav",    false, 1.0f,  false, 300, 1000 },
+ {  "core_explode_secondary.wav",    false, 1.0f,  false, 300, 1000 },
 
  {  NULL, false, 0, false, 0, 0 },
 };

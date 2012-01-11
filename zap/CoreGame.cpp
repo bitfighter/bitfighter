@@ -284,7 +284,7 @@ class LuaCore;
 EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 #endif
 
-U32 CoreItem::mCurrentExplosionNumber = 0;
+U32 CoreItem::mCurrentExplosionNumber = 0;  // zero indexed
 
 // Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
 // for easier bit transmission
@@ -479,6 +479,8 @@ void CoreItem::doExplosion(const Point &pos)
       teamColor,
    };
 
+   bool isStart = mCurrentExplosionNumber == 0;
+
    S32 xNeg = TNL::Random::readB() ? 1 : -1;
    S32 yNeg = TNL::Random::readB() ? 1 : -1;
 
@@ -486,12 +488,16 @@ void CoreItem::doExplosion(const Point &pos)
    F32 y = TNL::Random::readF() * yNeg * .71  * F32(CoreStartWidth) / 2;
 
    // First explosion is at the center
-   Point blastPoint = mCurrentExplosionNumber == 1 ? pos : pos + Point(x, y);
+   Point blastPoint = isStart ? pos : pos + Point(x, y);
 
-   SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point());
+   // Also add in secondary sound at start
+   if(isStart)
+      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
 
-   game->emitBlast(blastPoint, 1200);
-   game->emitExplosion(blastPoint, 4.f, CoreExplosionColors, 12);
+   SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1.0 - 0.25 * F32(mCurrentExplosionNumber));
+
+   game->emitBlast(blastPoint, 1200 - 300 * F32(mCurrentExplosionNumber));
+   game->emitExplosion(blastPoint, 4.f - 1 * F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
 
    mCurrentExplosionNumber++;
 }
@@ -516,7 +522,7 @@ void CoreItem::idle(GameObject::IdleCallPath path)
       if(mExplosionTimer.getCurrent() != 0)
          mExplosionTimer.update(mCurrentMove.time);
       else
-         if(mCurrentExplosionNumber <= mExplosionCount)
+         if(mCurrentExplosionNumber < mExplosionCount)
          {
             doExplosion(getActualPos());
             mExplosionTimer.reset(mExplosionInterval);
@@ -642,7 +648,7 @@ bool CoreItem::collide(GameObject *otherObject)
 // Client only
 void CoreItem::onItemExploded(Point pos)
 {
-   mCurrentExplosionNumber = 1;
+   mCurrentExplosionNumber = 0;
    mExplosionTimer.reset(mExplosionInterval);
 
    // Start with an explosion at the center.  See idle() for other called explosions
