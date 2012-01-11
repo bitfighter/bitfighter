@@ -454,11 +454,6 @@ void Ship::selectWeapon()
 }
 
 
-StringTableEntry Ship::getName()
-{
-   return getControllingClient() ? getControllingClient()->getClientInfo()->getName() : "";
-}
-
 
 //void Ship::setName(StringTableEntry name)
 //{
@@ -1968,7 +1963,7 @@ void Ship::render(S32 layerIndex)
    {
       //string str = mPlayerName.getString();
       //TNLAssert(getControllingClient(), "Ship has no client!");
-      string str = getName().getString();    // <=== broken
+      string str = getControllingClient() ? getControllingClient()->getClientInfo()->getName().getString() : "";    // <=== broken
 
       // Modify name if owner is "busy"
       if(isBusy)
