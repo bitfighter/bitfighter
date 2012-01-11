@@ -298,6 +298,8 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
    hasExploded = false;
 
+   mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
+
    mKillString = "crashed into a core";    // TODO: Really needed?
 }
 
@@ -446,7 +448,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       }
 
       hasExploded = true;
-      deleteObject(mExplosionCount * mExplosionInterval);   // Must wait for triggered explosions
+      deleteObject(ExplosionCount * ExplosionInterval);   // Must wait for triggered explosions
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
       disableCollision();
 
@@ -509,24 +511,29 @@ void CoreItem::idle(GameObject::IdleCallPath path)
    if(path != GameObject::ClientIdleMainRemote)
       return;
 
-   F32 ratio = mHealth / mStartingHealth;
-   U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
-
-   // Use a fudge-factor of 1 frame
-   if(getGame()->getCurrentTime() % soundInterval < S32(1000 / getGame()->getSettings()->getIniSettings()->maxFPS))
-      SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
-
    // Update Explosion Timer
    if(hasExploded)
    {
       if(mExplosionTimer.getCurrent() != 0)
          mExplosionTimer.update(mCurrentMove.time);
       else
-         if(mCurrentExplosionNumber < mExplosionCount)
+         if(mCurrentExplosionNumber < ExplosionCount)
          {
             doExplosion(getActualPos());
-            mExplosionTimer.reset(mExplosionInterval);
+            mExplosionTimer.reset(ExplosionInterval);
          }
+   }
+
+   if(mHeartbeatTimer.getCurrent() != 0)
+      mHeartbeatTimer.update(mCurrentMove.time);
+   else
+   {
+      F32 ratio = mHealth / mStartingHealth;
+      U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
+
+      SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
+
+      mHeartbeatTimer.reset(soundInterval);
    }
 }
 
@@ -649,7 +656,7 @@ bool CoreItem::collide(GameObject *otherObject)
 void CoreItem::onItemExploded(Point pos)
 {
    mCurrentExplosionNumber = 0;
-   mExplosionTimer.reset(mExplosionInterval);
+   mExplosionTimer.reset(ExplosionInterval);
 
    // Start with an explosion at the center.  See idle() for other called explosions
    doExplosion(pos);

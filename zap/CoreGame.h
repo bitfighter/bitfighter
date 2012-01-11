@@ -96,6 +96,10 @@ private:
    static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
    static const U32 CoreHeartbeatStartInterval = 2000;  // Milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
+   static const U32 ExplosionInterval = 600;
+   static const U32 ExplosionCount = 3;
+
+   static U32 mCurrentExplosionNumber;
 
    static const F32 DamageReductionRatio;
 
@@ -103,10 +107,8 @@ private:
    F32 mStartingHealth;
    F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
 
+   Timer mHeartbeatTimer;
    Timer mExplosionTimer;
-   static const U32 mExplosionInterval = 600;
-   static const U32 mExplosionCount = 3;
-   static U32 mCurrentExplosionNumber;
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
