@@ -96,6 +96,9 @@ static SFXProfile sfxProfilesModern[] = {
  {  "comm_down.wav",       true,  0.4f,  false, 150, 600 },
  {  "boop.wav",            true,  0.25f, false, 150, 600 },
 
+ // Other
+ {  "core_heartbeat.wav",  false, 1.0f,  false, 150, 1000 },
+
  {  NULL, false, 0, false, 0, 0 },
 };
 
@@ -169,6 +172,9 @@ static SFXProfile sfxProfilesClassic[] = {
  {  "comm_up.wav",         true,  0.4f,  false, 150, 600 },
  {  "comm_down.wav",       true,  0.4f,  false, 150, 600 },
  {  "boop.wav",            true,  0.25f, false, 150, 600 },
+
+ // Other
+ {  "core_heartbeat.wav",  false, 1.0f,  false, 150, 1000 },
 
  {  NULL, false, 0, false, 0, 0 },
 };

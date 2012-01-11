@@ -61,7 +61,7 @@ public:
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-   void score(Ship *destroyer, S32 team, S32 score);
+   void score(Ship *destroyer, S32 coreOwningTeam, S32 score);
 
 #ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
@@ -94,6 +94,8 @@ private:
    static const U32 CoreStartWidth = 200;
    static const U32 CoreMinWidth = 20;
    static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
+   static const U32 CoreHeartbeatStartInterval = 2000;  // Milliseconds
+   static const U32 CoreHeartbeatMinInterval = 500;
 
    static const F32 DamageReductionRatio;
 
@@ -126,6 +128,8 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
+
+   void idle(GameObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;

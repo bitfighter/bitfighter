@@ -25,6 +25,7 @@
 
 #include "CoreGame.h"
 #include "item.h"
+#include "projectile.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -168,8 +169,7 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
             return 0;
          case KillOwnTurret:
             return 0;
-         case OwnCoreDestroyed:
-            return -data;
+         case OwnCoreDestroyed:   // Scores are adjusted the same for all Core-destroyed events
          case EnemyCoreDestroyed:
             return data;
          default:
@@ -203,13 +203,40 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
 }
 
 
-void CoreGameType::score(Ship *destroyer, S32 team, S32 score)
+void CoreGameType::score(Ship *destroyer, S32 coreOwningTeam, S32 score)
 {
-   // If someone destroyed enemy core
-   if(destroyer && destroyer->getTeam() != team)
-      updateScore(NULL, team, EnemyCoreDestroyed, score);
+   Vector<StringTableEntry> e;
+
+   if(destroyer)
+   {
+      e.push_back(destroyer->getName());
+      e.push_back(getGame()->getTeamName(coreOwningTeam));
+
+      // If someone destroyed enemy core
+      if(destroyer->getTeam() != coreOwningTeam)
+      {
+         static StringTableEntry capString("%e0 destroyed a %e1 Core!");
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
+         updateScore(NULL, coreOwningTeam, EnemyCoreDestroyed, score);
+      }
+      else
+      {
+         static StringTableEntry capString("%e0 destroyed own %e1 Core!");
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
+         updateScore(NULL, coreOwningTeam, OwnCoreDestroyed, score);
+      }
+   }
    else
-      updateScore(NULL, team, OwnCoreDestroyed, score);
+   {
+      e.push_back(getGame()->getTeamName(coreOwningTeam));
+
+      static StringTableEntry capString("Something destroyed a %e0 Core!");
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
+      updateScore(NULL, coreOwningTeam, EnemyCoreDestroyed, score);
+   }
 }
 
 
@@ -259,7 +286,7 @@ EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 
 // Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
 // for easier bit transmission
-const F32 CoreItem::DamageReductionRatio = 10000.0f;
+const F32 CoreItem::DamageReductionRatio = 1000.0f;
 
 
 // Constructor
@@ -409,7 +436,9 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       GameType *gameType = getGame()->getGameType();
       if(gameType)
       {
-         Ship *destroyer = dynamic_cast<Ship *>(theInfo->damagingObject);
+         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
+         Ship *destroyer = dynamic_cast<Ship *>(p->mShooter.getPointer());
+
          CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
          if(coreGameType)
             coreGameType->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
@@ -425,6 +454,21 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(calcCoreWidth());
+}
+
+
+void CoreItem::idle(GameObject::IdleCallPath path)
+{
+   if(path != GameObject::ClientIdleMainRemote)
+      return;
+
+   F32 ratio = mHealth / mStartingHealth;
+
+   U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
+
+   // Use a fudge-factor of 1 frame
+   if(getGame()->getCurrentTime() % soundInterval < S32(1000 / getGame()->getSettings()->getIniSettings()->maxFPS))
+      SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
 }
 
 
@@ -545,8 +589,30 @@ bool CoreItem::collide(GameObject *otherObject)
 // Client only
 void CoreItem::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
-   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
+   SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
+
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   Color teamColor = getTeamColor(mTeam);
+
+   Color CoreExplosionColors[12] = {
+      Colors::red,
+      teamColor,
+      Colors::white,
+      teamColor,
+      Colors::blue,
+      teamColor,
+      Colors::white,
+      teamColor,
+      Colors::yellow,
+      teamColor,
+      Colors::white,
+      teamColor,
+   };
+
+   game->emitBlast(pos, 1200);
+   game->emitExplosion(pos, 4.f, CoreExplosionColors, 12);
 }
 
 
