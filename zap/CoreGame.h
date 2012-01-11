@@ -103,6 +103,11 @@ private:
    F32 mStartingHealth;
    F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
 
+   Timer mExplosionTimer;
+   static const U32 mExplosionInterval = 600;
+   static const U32 mExplosionCount = 3;
+   static U32 mCurrentExplosionNumber;
+
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
 #endif
@@ -128,6 +133,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
+   void doExplosion(const Point &pos);
 
    void idle(GameObject::IdleCallPath path);
 

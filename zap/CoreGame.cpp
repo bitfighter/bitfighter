@@ -284,10 +284,11 @@ class LuaCore;
 EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 #endif
 
+U32 CoreItem::mCurrentExplosionNumber = 0;
+
 // Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
 // for easier bit transmission
 const F32 CoreItem::DamageReductionRatio = 1000.0f;
-
 
 // Constructor
 CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
@@ -445,7 +446,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       }
 
       hasExploded = true;
-      deleteObject(500);
+      deleteObject(mExplosionCount * mExplosionInterval);   // Must wait for triggered explosions
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
       disableCollision();
 
@@ -457,18 +458,70 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 }
 
 
+void CoreItem::doExplosion(const Point &pos)
+{
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   Color teamColor = getTeamColor(mTeam);
+   Color CoreExplosionColors[12] = {
+      Colors::red,
+      teamColor,
+      Colors::white,
+      teamColor,
+      Colors::blue,
+      teamColor,
+      Colors::white,
+      teamColor,
+      Colors::yellow,
+      teamColor,
+      Colors::white,
+      teamColor,
+   };
+
+   S32 xNeg = TNL::Random::readB() ? 1 : -1;
+   S32 yNeg = TNL::Random::readB() ? 1 : -1;
+
+   F32 x = TNL::Random::readF() * xNeg * .71  * F32(CoreStartWidth) / 2;  // rougly sin(45)
+   F32 y = TNL::Random::readF() * yNeg * .71  * F32(CoreStartWidth) / 2;
+
+   // First explosion is at the center
+   Point blastPoint = mCurrentExplosionNumber == 1 ? pos : pos + Point(x, y);
+
+   SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point());
+
+   game->emitBlast(blastPoint, 1200);
+   game->emitExplosion(blastPoint, 4.f, CoreExplosionColors, 12);
+
+   mCurrentExplosionNumber++;
+}
+
+
 void CoreItem::idle(GameObject::IdleCallPath path)
 {
+   // Only run the following on the client
    if(path != GameObject::ClientIdleMainRemote)
       return;
 
    F32 ratio = mHealth / mStartingHealth;
-
    U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
 
    // Use a fudge-factor of 1 frame
    if(getGame()->getCurrentTime() % soundInterval < S32(1000 / getGame()->getSettings()->getIniSettings()->maxFPS))
       SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
+
+   // Update Explosion Timer
+   if(hasExploded)
+   {
+      if(mExplosionTimer.getCurrent() != 0)
+         mExplosionTimer.update(mCurrentMove.time);
+      else
+         if(mCurrentExplosionNumber <= mExplosionCount)
+         {
+            doExplosion(getActualPos());
+            mExplosionTimer.reset(mExplosionInterval);
+         }
+   }
 }
 
 
@@ -589,30 +642,11 @@ bool CoreItem::collide(GameObject *otherObject)
 // Client only
 void CoreItem::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
+   mCurrentExplosionNumber = 1;
+   mExplosionTimer.reset(mExplosionInterval);
 
-   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-   ClientGame *game = static_cast<ClientGame *>(getGame());
-
-   Color teamColor = getTeamColor(mTeam);
-
-   Color CoreExplosionColors[12] = {
-      Colors::red,
-      teamColor,
-      Colors::white,
-      teamColor,
-      Colors::blue,
-      teamColor,
-      Colors::white,
-      teamColor,
-      Colors::yellow,
-      teamColor,
-      Colors::white,
-      teamColor,
-   };
-
-   game->emitBlast(pos, 1200);
-   game->emitExplosion(pos, 4.f, CoreExplosionColors, 12);
+   // Start with an explosion at the center.  See idle() for other called explosions
+   doExplosion(pos);
 }
 
 
