@@ -25,6 +25,7 @@
 
 #include "CoreGame.h"
 #include "item.h"
+#include "projectile.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -205,11 +206,38 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
 
 void CoreGameType::score(Ship *destroyer, S32 team, S32 score)
 {
-   // If someone destroyed enemy core
-   if(destroyer && destroyer->getTeam() != team)
-      updateScore(NULL, team, EnemyCoreDestroyed, score);
+   Vector<StringTableEntry> e;
+
+   if(destroyer)
+   {
+      e.push_back(destroyer->getName());
+      e.push_back(getGame()->getTeamName(team));
+
+      // If someone destroyed enemy core
+      if(destroyer->getTeam() != team)
+      {
+         static StringTableEntry capString("%e0 destroyed a %e1 Core!");
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
+         updateScore(NULL, team, EnemyCoreDestroyed, score);
+      }
+      else
+      {
+         static StringTableEntry capString("%e0 destroyed own %e1 Core!");
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
+         updateScore(NULL, team, OwnCoreDestroyed, score);
+      }
+   }
    else
-      updateScore(NULL, team, OwnCoreDestroyed, score);
+   {
+      e.push_back(getGame()->getTeamName(team));
+
+      static StringTableEntry capString("Something destroyed a %e0 Core!");
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+
+      updateScore(NULL, team, EnemyCoreDestroyed, score);
+   }
 }
 
 
@@ -409,7 +437,10 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       GameType *gameType = getGame()->getGameType();
       if(gameType)
       {
-         Ship *destroyer = dynamic_cast<Ship *>(theInfo->damagingObject);
+         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
+         Ship *destroyer = dynamic_cast<Ship *>(p->mShooter.getPointer());
+
+//         Ship *destroyer = dynamic_cast<Ship *>(theInfo->damagingObject->mShooter.getPointer());
          CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
          if(coreGameType)
             coreGameType->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
