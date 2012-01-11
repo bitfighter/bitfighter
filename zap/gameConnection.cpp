@@ -1221,7 +1221,7 @@ void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
 
    if(ship)
    {
-      ship->setName(newName);
+      //ship->setName(newName);
       ship->setMaskBits(Ship::AuthenticationMask);    // Will trigger sending new ship name on next update
    }
 }

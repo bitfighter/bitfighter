@@ -1563,9 +1563,8 @@ bool Robot::startLua()
    if(!LuaScriptRunner::startLua(ROBOT) || !loadScript())
       return false;
 
-   string name = runGetName();                              // Run bot's getName function
-
-   mPlayerName = GameConnection::makeUnique(name).c_str();  // Make sure name is unique
+   string name = runGetName();                                          // Run bot's getName function
+   getClientInfo()->setName(GameConnection::makeUnique(name).c_str());  // Make sure name is unique
 
    return true;
 }
@@ -1932,8 +1931,8 @@ void Robot::setConnection()
    GameConnection *gc = new GameConnection();
    gc->setClientInfo(mClientInfo);  // Fixes Robots scoring problems. Do not want a GameConnection to hold a different ClientInfo
 
-   if(getName() == "")                          // Make sure bots have a name
-      setName(GameConnection::makeUnique("Robot").c_str());
+   if(mClientInfo->getName() == "")                          // Make sure bots have a name
+      mClientInfo->setName(GameConnection::makeUnique("Robot").c_str());
 
    gc->setControlObject(this);
    

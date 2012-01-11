@@ -103,7 +103,6 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
    mass = m;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
-   mPlayerName = playerName;  
    mIsAuthenticated = isAuthenticated;
 
    mIsRobot = isRobot;
@@ -457,20 +456,20 @@ void Ship::selectWeapon()
 
 StringTableEntry Ship::getName()
 {
-   return mPlayerName;
+   return getControllingClient() ? getControllingClient()->getClientInfo()->getName() : "";
 }
 
 
-void Ship::setName(StringTableEntry name)
-{
-   mPlayerName = name;
-}
+//void Ship::setName(StringTableEntry name)
+//{
+// //  mPlayerName = name;
+//}
 
 
+// Only run on server
 void Ship::setIsAuthenticated(bool isAuthenticated, StringTableEntry name)
 {
    mIsAuthenticated = isAuthenticated;
-   mPlayerName = name;
 
    setMaskBits(AuthenticationMask);
 }
@@ -1161,7 +1160,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       writeThisTeam(stream);
       if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
       {
-         stream->writeStringTableEntry(mPlayerName);
          stream->writeFlag(mIsAuthenticated);
       }
    }
@@ -1260,7 +1258,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       readThisTeam(stream);
       if(stream->readFlag())     // Player authentication status changed
       {
-         stream->readStringTableEntry(&mPlayerName);
          mIsAuthenticated = stream->readFlag();
       }
    }
@@ -1969,7 +1966,9 @@ void Ship::render(S32 layerIndex)
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
-      string str = mPlayerName.getString();
+      //string str = mPlayerName.getString();
+      //TNLAssert(getControllingClient(), "Ship has no client!");
+      string str = getName().getString();    // <=== broken
 
       // Modify name if owner is "busy"
       if(isBusy)
