@@ -428,6 +428,21 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 }
 
 
+void CoreItem::idle(GameObject::IdleCallPath path)
+{
+   if(path != GameObject::ClientIdleMainRemote)
+      return;
+
+   F32 ratio = mHealth / mStartingHealth;
+
+   U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
+
+   // Use a fudge-factor of 1 frame
+   if(getGame()->getCurrentTime() % soundInterval < S32(1000 / getGame()->getSettings()->getIniSettings()->maxFPS))
+      SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
+}
+
+
 void CoreItem::setRadius(F32 radius)
 {
    Parent::setRadius(radius * getGame()->getGridSize());

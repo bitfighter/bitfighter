@@ -101,6 +101,9 @@ enum SFXProfiles
    SFXUICommDown,
    SFXIncomingMessage,
 
+   // Other
+   SFXCoreHeartbeat,
+
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
 
