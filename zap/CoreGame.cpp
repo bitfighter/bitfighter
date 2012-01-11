@@ -541,12 +541,38 @@ bool CoreItem::collide(GameObject *otherObject)
    return true;
 }
 
+Color CoreExplosionColors[12] = {
+   Colors::red,
+   Colors::white,
+   Colors::white,
+   Colors::yellow,
+   Colors::red,
+   Colors::white,
+   Colors::green,
+   Colors::white,
+   Colors::red,
+   Colors::white,
+   Colors::blue,
+   Colors::yellow,
+};
 
 // Client only
 void CoreItem::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
-   // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
+   SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
+
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   game->emitExplosion(pos, 1.f, CoreExplosionColors, 12);
+   game->emitExplosion(pos, 2.f, CoreExplosionColors, 12);
+   game->emitExplosion(pos, 3.f, CoreExplosionColors, 12);
+   game->emitBlast(pos, 300);
+   game->emitBlast(pos, 400);
+   game->emitBlast(pos, 500);
+   game->emitBlast(pos, 600);
+   game->emitBlast(pos, 700);
+   logprintf("%f %f", pos.x, pos.y);
 }
 
 
