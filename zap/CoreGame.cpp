@@ -493,12 +493,12 @@ void CoreItem::doExplosion(const Point &pos)
    Point blastPoint = isStart ? pos : pos + Point(x, y);
 
    // Also add in secondary sound at start
-   if(isStart)
-      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
+//   if(isStart)
+//      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
 
    SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1.0 - 0.25 * F32(mCurrentExplosionNumber));
 
-   game->emitBlast(blastPoint, 1200 - 300 * F32(mCurrentExplosionNumber));
+   game->emitBlast(blastPoint, 600 - 100 * F32(mCurrentExplosionNumber));
    game->emitExplosion(blastPoint, 4.f - 1 * F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
 
    mCurrentExplosionNumber++;
