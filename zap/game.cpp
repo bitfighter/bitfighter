@@ -2357,58 +2357,61 @@ void ServerGame::idle(U32 timeDelta)
             mVoteTimer = 0;
             switch(mVoteType)
             {
-            case 0:
-               mNextLevel = mVoteNumber;
-               if(mGameType)
-                  mGameType->gameOverManGameOver();
-               break;
-            case 1:
-               if(mGameType)
-               {
-                  mGameType->extendGameTime(mVoteNumber);                                  // Increase "official time"
-                  mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());   // Broadcast time to clients
-               }
-               break;   
-            case 2:
-               if(mGameType)
-               {
-                  mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
-                  mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());    // Broadcast time to clients
-               }
-               break;
-            case 3:
-               if(mGameType)
-               {
-                  mGameType->setWinningScore(mVoteNumber);
-                  mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);    // Broadcast score to clients
-               }
-               break;
-            case 4:
-               if(mGameType)
-               {
-                  for(S32 i = 0; i < getClientCount(); i++)
+               case 0:
+                  mNextLevel = mVoteNumber;
+                  if(mGameType)
+                     mGameType->gameOverManGameOver();
+                  break;
+               case 1:
+                  if(mGameType)
                   {
-                     ClientInfo *clientInfo = getClientInfo(i);
-
-                     if(clientInfo->getName() == mVoteClientName)
-                        mGameType->changeClientTeam(clientInfo, mVoteNumber);
+                     mGameType->extendGameTime(mVoteNumber);                                  // Increase "official time"
+                     mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());   // Broadcast time to clients
                   }
-               }
-               break;
-            case 5:
-               if(mGameType)
-               {
-                  for(S32 i = 0; i < getClientCount(); i++)
+                  break;   
+               case 2:
+                  if(mGameType)
                   {
-                     ClientInfo *clientInfo = getClientInfo(i);
-
-                     if(clientInfo->getName() == mVoteClientName)
-                        mGameType->changeClientTeam(clientInfo, mVoteNumber);
+                     mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
+                     mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());    // Broadcast time to clients
                   }
-               }
-               break;
-            }
-         }
+                  break;
+               case 3:
+                  if(mGameType)
+                  {
+                     mGameType->setWinningScore(mVoteNumber);
+                     mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);    // Broadcast score to clients
+                  }
+                  break;
+               case 4:
+                  if(mGameType)
+                  {
+                     for(S32 i = 0; i < getClientCount(); i++)
+                     {
+                        ClientInfo *clientInfo = getClientInfo(i);
+
+                        if(clientInfo->getName() == mVoteClientName)
+                           mGameType->changeClientTeam(clientInfo, mVoteNumber);
+                     }
+                  }
+                  break;
+               case 5:
+                  if(mGameType)
+                  {
+                     for(S32 i = 0; i < getClientCount(); i++)
+                     {
+                        ClientInfo *clientInfo = getClientInfo(i);
+
+                        if(clientInfo->getName() == mVoteClientName)
+                           mGameType->changeClientTeam(clientInfo, mVoteNumber);
+                     }
+                  }
+                  break;
+               default:
+                  TNLAssert(false, "Invalid option in switch statement!");
+            } // switch
+         } // if
+
 
          Vector<StringTableEntry> e;
          Vector<StringPtr> s;
