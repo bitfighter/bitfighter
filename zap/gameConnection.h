@@ -195,7 +195,6 @@ public:
    ClientInfo *getClientInfo();
    void setClientInfo(boost::shared_ptr<ClientInfo> clientInfo);
 
-
    bool lostContact();
 
    string getServerName();
