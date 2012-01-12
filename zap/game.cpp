@@ -1952,15 +1952,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
-   //if(mDatabaseForBotZones.getObjectCount() != 0)     // There are some zones loaded in the level...
-   //{
-   //   mGameType->mBotZoneCreationFailed = false;
-   //   BotNavMeshZone::IDBotMeshZones(this);
-   //   BotNavMeshZone::buildBotNavMeshZoneConnections(this);
-   //}
-   //else
-   //{
-
    // Not sure if this is needed, but might be as long as we are still loading zones from level files... but I think we aren't anymore
    mDatabaseForBotZones.removeEverythingFromDatabase();    
 
