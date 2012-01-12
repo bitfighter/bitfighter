@@ -2416,6 +2416,7 @@ void ServerGame::idle(U32 timeDelta)
          Vector<StringTableEntry> e;
          Vector<StringPtr> s;
          Vector<S32> i;
+
          i.push_back(voteYes);
          i.push_back(voteNo);
          i.push_back(voteNothing);
@@ -2465,14 +2466,16 @@ void ServerGame::idle(U32 timeDelta)
       if(masterConn && masterConn->isEstablished())
       {
          // Only update if something is different
-         if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || prevRobotCount != getRobotCount() || prevPlayerCount != getPlayerCount())
+         if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || 
+            prevRobotCount != getRobotCount()             || prevPlayerCount != getPlayerCount())
          {
             prevCurrentLevelName = getCurrentLevelName();
             prevCurrentLevelType = getCurrentLevelType();
             prevRobotCount = getRobotCount();
             prevPlayerCount = getPlayerCount();
 
-            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelTypeName(), getRobotCount(), getPlayerCount(), mSettings->getMaxPlayers(), mInfoFlags);
+            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelTypeName(), getRobotCount(), 
+                                           getPlayerCount(), mSettings->getMaxPlayers(), mInfoFlags);
             mMasterUpdateTimer.reset(UpdateServerStatusTime);
          }
          else
@@ -2498,10 +2501,11 @@ void ServerGame::idle(U32 timeDelta)
    for(S32 i = 0; i < getClientCount(); i++)
    {
       ClientInfo *clientInfo = getClientInfo(i);
-      GameConnection *conn = clientInfo->getConnection();
 
       if(!clientInfo->isRobot())
       {
+         GameConnection *conn = clientInfo->getConnection();
+
          if(conn->mChatTimer > timeDelta)
             conn->mChatTimer -= timeDelta;
          else
