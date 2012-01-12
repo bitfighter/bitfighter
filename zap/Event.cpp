@@ -575,6 +575,9 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    OGLCONSOLE_Reshape();
 
    gINI.SetValueF("Settings", "WindowScalingFactor", game->getSettings()->getIniSettings()->winSizeFact, true);
+
+   glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+
 }
 
 

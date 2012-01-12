@@ -1107,7 +1107,16 @@ void actualizeScreenMode(bool changingInterfaces)
       glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
    }
    else
-      glDisable(GL_SCISSOR_TEST);
+   {
+      // Enabling scissor appears to fix crashing problem switching screen mode
+      // in linux and "Mobile 945GME Express Integrated Graphics Controller",
+      // probably due to lines and points was not being clipped,
+      // causing some lines to wrap around the screen, or by writing other
+      // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
+      // This is probably a BUG in linux intel graphics driver.
+      glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+      glEnable(GL_SCISSOR_TEST);
+   }
 
 
    setDefaultBlendFunction();

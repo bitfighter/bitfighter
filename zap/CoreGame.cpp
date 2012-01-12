@@ -335,7 +335,7 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
       mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
 
       mAttributeMenuUI->addMenuItem(new CounterMenuItem("Hit points:", CoreDefaultStartingHealth,
-            10, 1, S32(DamageReductionRatio), "", "", ""));
+            1, 1, S32(DamageReductionRatio), "", "", ""));
 
       // Add our standard save and exit option to the menu
       mAttributeMenuUI->addSaveAndQuitMenuItem();
@@ -493,12 +493,12 @@ void CoreItem::doExplosion(const Point &pos)
    Point blastPoint = isStart ? pos : pos + Point(x, y);
 
    // Also add in secondary sound at start
-   if(isStart)
-      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
+//   if(isStart)
+//      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
 
    SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1.0 - 0.25 * F32(mCurrentExplosionNumber));
 
-   game->emitBlast(blastPoint, 1200 - 300 * F32(mCurrentExplosionNumber));
+   game->emitBlast(blastPoint, 600 - 100 * F32(mCurrentExplosionNumber));
    game->emitExplosion(blastPoint, 4.f - 1 * F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
 
    mCurrentExplosionNumber++;
@@ -528,10 +528,13 @@ void CoreItem::idle(GameObject::IdleCallPath path)
       mHeartbeatTimer.update(mCurrentMove.time);
    else
    {
-      F32 ratio = mHealth / mStartingHealth;
-      U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
-
+      // Thump thump
       SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
+
+      // Now reset the timer as a function of health
+      // Exponential
+      F32 ratio = mHealth / mStartingHealth;
+      U32 soundInterval = CoreHeartbeatMinInterval + F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * pow(ratio, 2.f);
 
       mHeartbeatTimer.reset(soundInterval);
    }
