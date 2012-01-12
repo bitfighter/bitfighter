@@ -1103,8 +1103,6 @@ void actualizeScreenMode(bool changingInterfaces)
                 gScreenInfo.getVertPhysicalMargin(),     // y
                 gScreenInfo.getDrawAreaWidth(),          // width
                 gScreenInfo.getDrawAreaHeight());        // height
-
-      glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
    }
    else
    {
@@ -1115,9 +1113,9 @@ void actualizeScreenMode(bool changingInterfaces)
       // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
       // This is probably a BUG in linux intel graphics driver.
       glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-      glEnable(GL_SCISSOR_TEST);
    }
 
+   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
 
    setDefaultBlendFunction();
    glLineWidth(gDefaultLineWidth);
