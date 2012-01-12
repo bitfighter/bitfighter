@@ -76,6 +76,7 @@ string LuaLevelGenerator::getScriptName()
 
 
 #ifndef ZAP_DEDICATED
+/* This function not used anywhere?
       static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
       {
          LuaUtil::dumpStack(L);
@@ -91,6 +92,7 @@ string LuaLevelGenerator::getScriptName()
 
         return pushedMenuItem;
       }
+*/
 #endif
 
 
