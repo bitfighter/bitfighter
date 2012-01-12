@@ -487,6 +487,7 @@ void Ship::selectWeapon(U32 weaponIdx)
       {
          Vector<StringTableEntry> e;
          e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
+
          static StringTableEntry msg("%e0 selected.");
          cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
       }

@@ -256,6 +256,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
    if(!isGhost())    // If we're on the server, that is
    {
       DamageInfo theInfo;
+
       theInfo.collisionPoint = collisionPoint;
       theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
       theInfo.damageType = DamageTypePoint;
