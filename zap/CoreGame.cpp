@@ -528,10 +528,24 @@ void CoreItem::idle(GameObject::IdleCallPath path)
       mHeartbeatTimer.update(mCurrentMove.time);
    else
    {
-      F32 ratio = mHealth / mStartingHealth;
-      U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
-
+      // Thump thump
       SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
+
+      // Now reset the timer as a function of health
+
+      // Linear decay
+//      F32 ratio = mHealth / mStartingHealth;
+//      U32 soundInterval = F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio + CoreHeartbeatMinInterval;
+
+      // Use logarithmic decay
+      // This equation was graphed here:
+      // http://www.quickmath.com/webMathematica3/quickmath/graphs/equations/basic.jsp#v1=y%3D500%2B1500%2F%284^%284x%29%29&v2=0&v3=1&v4=0&v5=2000
+      // y = 500 + 1500 / (4^(4x))
+      F32 ratio = 1 - (mHealth / mStartingHealth);
+      U32 soundInterval = CoreHeartbeatMinInterval +
+            ( F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) / pow(4.f, 4.f * ratio) );
+
+//      logprintf("sound interval: %d", soundInterval);
 
       mHeartbeatTimer.reset(soundInterval);
    }
