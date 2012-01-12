@@ -73,7 +73,6 @@ private:
 
    // These are only used on the server -- will be NULL on client
    boost::shared_ptr<ClientInfo> mClientInfo;         
-   LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
 
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // Sometimes this is NULL
@@ -196,8 +195,6 @@ public:
    ClientInfo *getClientInfo();
    void setClientInfo(boost::shared_ptr<ClientInfo> clientInfo);
 
-
-   LuaPlayerInfo *getPlayerInfo();
 
    bool lostContact();
 

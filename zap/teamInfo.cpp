@@ -381,11 +381,10 @@ S32 LuaTeamInfo::getPlayers(lua_State *L)
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = gServerGame->getClientInfo(i);
-      GameConnection *conn = clientInfo->getConnection();
 
       if(clientInfo->getTeamIndex() == mTeamIndex)
       {
-         conn->getPlayerInfo()->push(L);
+         clientInfo->getPlayerInfo()->push(L);
          pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
          lua_rawseti(L, 1, pushed);
       }

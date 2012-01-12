@@ -3113,7 +3113,7 @@ void GameType::sendChatDisplayEvent(ClientInfo *sender, bool global, const char 
    }
 
    // And fire an event handler...
-   Robot::getEventManager().fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getConnection()->getPlayerInfo(), global);
+   Robot::getEventManager().fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getPlayerInfo(), global);
 }
 
 

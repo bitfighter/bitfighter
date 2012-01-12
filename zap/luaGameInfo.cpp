@@ -131,12 +131,11 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = gServerGame->getClientInfo(i);
-      GameConnection *conn = clientInfo->getConnection();
 
-      if(conn->getPlayerInfo()->isDefunct() || clientInfo->isRobot())     // Skip defunct players and bots
+      if(clientInfo->getPlayerInfo()->isDefunct() || clientInfo->isRobot())     // Skip defunct players and bots
          continue;
       
-      conn->getPlayerInfo()->push(L);
+      clientInfo->getPlayerInfo()->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }

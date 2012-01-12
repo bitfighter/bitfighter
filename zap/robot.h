@@ -117,7 +117,7 @@ private:
 
    static const S32 RobotRespawnDelay = 1500;
 
-   boost::shared_ptr<ClientInfo> mClientInfo;         // Reusable ClientInfo for robot, will have NULL connection, used when spawning
+   boost::shared_ptr<ClientInfo> mClientInfo;         
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
    bool mHasSpawned;

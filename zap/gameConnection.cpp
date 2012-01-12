@@ -68,7 +68,6 @@ GameConnection::GameConnection()
 #endif
 
    initialize();
-   mPlayerInfo = new PlayerInfo(mClientInfo.get());   // Deleted in destructor
 }
 
 
@@ -87,9 +86,6 @@ GameConnection::GameConnection(ClientGame *clientGame)
 
 
    setSimulatedNetParams(mSettings->getSimulatedLoss(), mSettings->getSimulatedLag());
-
-   // These are not used on client
-   mPlayerInfo = NULL;     
 }
 #endif
 
@@ -157,7 +153,6 @@ GameConnection::~GameConnection()
    }
 
    delete mDataBuffer;
-   delete mPlayerInfo;
 }
 
 
@@ -1509,12 +1504,6 @@ void GameConnection::setClientInfo(boost::shared_ptr<ClientInfo> clientInfo)
 }
 
 
-LuaPlayerInfo *GameConnection::getPlayerInfo()
-{
-   return mPlayerInfo;
-}
-
-
 bool GameConnection::lostContact()
 {
    return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0;   // No contact in 2000ms?  That's bad!
@@ -1696,7 +1685,7 @@ void GameConnection::onConnectionEstablished()
       mAcheivedConnection = true;
       
       // Notify the bots that a new player has joined
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getPlayerInfo());
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
 
       if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
@@ -1731,8 +1720,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    }
    else     // Server
    {
-      getPlayerInfo()->setDefunct();
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getPlayerInfo());
+      LuaPlayerInfo *playerInfo = getClientInfo()->getPlayerInfo();
+      playerInfo->setDefunct();
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, playerInfo);
 
       gServerGame->removeClient(mClientInfo.get());
    }

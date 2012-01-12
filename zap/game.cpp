@@ -46,6 +46,7 @@
 #include "stringUtils.h"
 #include "NexusGame.h"           // For creating new NexusFlagItem
 #include "teamInfo.h"            // For TeamManager def
+#include "playerInfo.h"
 
 #include "IniFile.h"             // For CIniFile def
 #include "BanList.h"             // For banList kick duration
@@ -84,13 +85,14 @@ namespace Zap
 // Constructor
 ClientInfo::ClientInfo()
 {
-   // Do nothing
+   mPlayerInfo = NULL;
 }
+
 
 // Destructor
 ClientInfo::~ClientInfo()
 {
-   // Do nothing
+   delete mPlayerInfo;
 }
 
 
@@ -118,6 +120,9 @@ void ClientInfo::initialize()
    mIsRobot = false;
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
+
+   TNLAssert(!mPlayerInfo, "mPlayerInfo should be NULL -- set to that in constructor.");
+   mPlayerInfo = NULL;     // Perhaps redundant...
 }
 
 
@@ -208,6 +213,16 @@ void ClientInfo::setIsAdmin(bool isAdmin)
 bool ClientInfo::isRobot()
 {
    return mIsRobot;
+}
+
+
+LuaPlayerInfo *ClientInfo::getPlayerInfo()
+{
+   // Lazily initialize
+   if(!mPlayerInfo)
+      mPlayerInfo = new PlayerInfo(this);   // Deleted in destructor
+
+   return mPlayerInfo;
 }
 
 

@@ -1928,7 +1928,7 @@ void Robot::setConnection()
 {
    // Cannot be in onAddedToGame, as it will error while trying to add robots while level map is not ready
 
-   GameConnection *gc = new GameConnection();
+   GameConnection *gc = new GameConnection();      // Is this ever deleted??
    gc->setClientInfo(mClientInfo);  // Fixes Robots scoring problems. Do not want a GameConnection to hold a different ClientInfo
 
    if(mClientInfo->getName() == "")                          // Make sure bots have a name
