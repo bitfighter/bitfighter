@@ -47,12 +47,13 @@ private:
 
    LevelLoader *mCaller;
    F32 mGridSize;
+   bool mInEditor;
 
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);
 
 public:
    LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
-                     LevelLoader *caller);   // C++ constructor
+                     LevelLoader *caller, bool inEditor = false);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
@@ -86,7 +87,7 @@ public:
    S32 getPlayerCount(lua_State *L);
 
    // Implement LevelLoader abstract method
-   void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName);
+   void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);
 };
 
 
