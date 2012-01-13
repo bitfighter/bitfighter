@@ -808,7 +808,6 @@ VersionedGameStats GameType::getGameStats()
       for(S32 j = 0; j < mGame->getClientCount(); j++)
       {
          ClientInfo *clientInfo = mGame->getClientInfo(j);
-         GameConnection *conn = clientInfo->getConnection();
 
          // Only looking for players on the current team
          if(clientInfo->getTeamIndex() != i)  // this is not sorted... 
@@ -829,11 +828,23 @@ VersionedGameStats GameType::getGameStats()
          playerStats->suicides       = statistics->getSuicides();
          playerStats->fratricides    = statistics->getFratricides();
 
-         playerStats->switchedTeamCount = conn->switchedTeamCount;
+         // Bots have no conn, so we'll just set these stats manually.  We could streamline this bit here
+         // by moving these settings over to the clientInfo.
+         if(clientInfo->isRobot())
+         {
+            playerStats->isHosting         = false;      // bots never host
+            playerStats->switchedTeamCount = 0;          // bots never switch teams
+         }
+         else
+         {
+            GameConnection *conn = clientInfo->getConnection();
+            playerStats->isHosting         = conn->isLocalConnection();
+            playerStats->switchedTeamCount = conn->switchedTeamCount;
+         }
+
          playerStats->isAdmin           = clientInfo->isAdmin();
          playerStats->isLevelChanger    = clientInfo->isLevelChanger();
          playerStats->isAuthenticated   = clientInfo->isAuthenticated();
-         playerStats->isHosting         = conn->isLocalConnection();
 
          playerStats->flagPickup          = statistics->mFlagPickup;
          playerStats->flagDrop            = statistics->mFlagDrop;
@@ -856,6 +867,7 @@ VersionedGameStats GameType::getGameStats()
             weaponStats.shots = shots[k];
             weaponStats.hits = hits[k];
             weaponStats.hitBy = statistics->getHitBy(WeaponType(k));
+
             if(weaponStats.shots != 0 || weaponStats.hits != 0 || weaponStats.hitBy != 0)
                playerStats->weaponStats.push_back(weaponStats);
          }
