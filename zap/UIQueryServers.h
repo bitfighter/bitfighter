@@ -71,6 +71,8 @@ class QueryServersUserInterface : public UserInterface, public AbstractChat
    typedef AbstractChat ChatParent;
 
 private:
+   static const S32 MIN_PAD = 3;
+
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
    bool mMouseAtBottomFixFactor;    // UGLY
 
