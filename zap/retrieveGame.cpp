@@ -110,11 +110,11 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       r = stealString;
       team = theFlag->getZone()->getTeam();
       updateScore(team, LostFlag);
-      if(theShip->getOwner())
-         theShip->getOwner()->mStatistics.mFlagReturn++;  // used as flag steal
+
+      theShip->getClientInfo()->getStatistics()->mFlagReturn++;  // used as flag steal
    }
-   if(theShip->getOwner())
-      theShip->getOwner()->mStatistics.mFlagPickup++;
+
+   theShip->getClientInfo()->getStatistics()->mFlagPickup++;
 
    Vector<StringTableEntry> e;
    e.push_back(theShip->getName());
@@ -187,8 +187,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       // Score the flag...
       updateScore(s, ReturnFlagToZone);
 
-      if(s->getOwner())
-         s->getOwner()->mStatistics.mFlagScore++;
+      s->getClientInfo()->getStatistics()->mFlagScore++;
 
       // See if all the flags are owned by one team...
       for(S32 i = 0; i < mFlags.size(); i++)

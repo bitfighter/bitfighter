@@ -376,8 +376,6 @@ void ClientGame::displayShipDesignChangedMessage(const Vector<U32> &loadout, con
       return;
 
    Ship *ship = dynamic_cast<Ship *>(getConnectionToServer()->getControlObject());
-   if(!ship)
-      return;
 
    // If we're in a loadout zone, don't show any message -- new loadout will become active immediately, 
    // and we'll get a different msg from the server.  Avoids unnecessary messages.
@@ -386,7 +384,7 @@ void ClientGame::displayShipDesignChangedMessage(const Vector<U32> &loadout, con
 
    if(getSettings()->getIniSettings()->verboseHelpMessages)
    {
-      if(((Ship *)getConnectionToServer()->getControlObject())->isLoadoutSameAsCurrent(loadout))
+      if(ship->isLoadoutSameAsCurrent(loadout))
          displayErrorMessage(msgToShowIfLoadoutsAreTheSame);
       else
       {

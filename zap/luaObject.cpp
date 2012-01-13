@@ -114,7 +114,7 @@ S32 LuaObject::returnShip(lua_State *L, Ship *ship)
 
 S32 LuaObject::returnPlayerInfo(lua_State *L, Ship *ship)
 {
-   return returnPlayerInfo(L, ship->getControllingClient()->getClientInfo()->getPlayerInfo());
+   return returnPlayerInfo(L, ship->getClientInfo()->getPlayerInfo());
 }
 
 

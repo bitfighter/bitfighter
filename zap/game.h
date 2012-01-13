@@ -35,6 +35,7 @@
 #include "EditorObject.h"        // For NO_TEAM
 #include "dataConnection.h"      // For DataSender
 #include "SharedConstants.h"     // For badges enum
+#include "statistics.h"          // For Statistics def
 
 #include "GameTypesEnum.h"
 
@@ -101,6 +102,7 @@ class GameConnection;
 class SoundEffect;
 class VoiceDecoder;
 class LuaPlayerInfo;
+class Ship;
 
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
@@ -108,7 +110,10 @@ class LuaPlayerInfo;
 class ClientInfo
 {
 private:
-   LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
+   LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
+   Statistics mStatistics;       // Statistics tracker
+   Ship *mShip;
+   Vector<U32> mLoadout;
 
 protected:
    StringTableEntry mName;
@@ -123,8 +128,6 @@ protected:
    bool mIsAuthenticated;
    Int<BADGE_COUNT> mBadges;
 
-   virtual void initialize();
-
 public:
    ClientInfo();           // Constructor
    virtual ~ClientInfo();  // Destructor
@@ -138,6 +141,11 @@ public:
    S32 getScore();
    void setScore(S32 score);
    void addScore(S32 score);
+
+   const Vector<U32> &getLoadout();
+
+   Ship *getShip();
+   void setShip(Ship *ship);
 
    virtual void setRating(F32 rating) = 0;
    virtual F32 getRating() = 0;
@@ -159,6 +167,8 @@ public:
    void setIsAdmin(bool isAdmin);
 
    bool isRobot();
+
+   Statistics *getStatistics();      // Return pointer to statistics tracker 
 
    LuaPlayerInfo *getPlayerInfo();
 

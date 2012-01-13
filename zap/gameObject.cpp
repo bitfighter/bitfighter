@@ -366,6 +366,8 @@ GameObject::GameObject() : BfObject()
    /*mLastQueryId = 0;*/
    mDisableCollisionCount = 0;
    mCreationTime = 0;
+
+   mOwner = NULL;
 }
 
 
@@ -392,6 +394,7 @@ void GameObject::setControllingClient(GameConnection *c)         // This only ge
 {
    mControllingClient = c;
 }
+
 
 void GameObject::setOwner(GameConnection *connection)
 {

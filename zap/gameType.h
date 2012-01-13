@@ -361,7 +361,8 @@ public:
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 
-   void serverAddClient(ClientInfo *clientInfo);
+   void serverAddClient(ClientInfo *clientInfo);         
+
    void serverRemoveClient(ClientInfo *clientInfo);    // Remove a client from the game
 
    virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);

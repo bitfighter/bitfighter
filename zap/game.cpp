@@ -86,6 +86,16 @@ namespace Zap
 ClientInfo::ClientInfo()
 {
    mPlayerInfo = NULL;
+
+   mScore = 0;
+   mTotalScore = 0;
+   mTeamIndex = (NO_TEAM + 0);
+   mPing = 0;
+   mIsAdmin = false;
+   mIsLevelChanger = false;
+   mIsRobot = false;
+   mIsAuthenticated = false;
+   mBadges = NO_BADGES;
 }
 
 
@@ -106,23 +116,6 @@ void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 Int<BADGE_COUNT> ClientInfo::getBadges()
 {
    return mBadges;
-}
-
-
-void ClientInfo::initialize()
-{
-   mScore = 0;
-   mTotalScore = 0;
-   mTeamIndex = (NO_TEAM + 0);
-   mPing = 0;
-   mIsAdmin = false;
-   mIsLevelChanger = false;
-   mIsRobot = false;
-   mIsAuthenticated = false;
-   mBadges = NO_BADGES;
-
-   TNLAssert(!mPlayerInfo, "mPlayerInfo should be NULL -- set to that in constructor.");
-   mPlayerInfo = NULL;     // Perhaps redundant...
 }
 
 
@@ -153,6 +146,24 @@ void ClientInfo::setScore(S32 score)
 void ClientInfo::addScore(S32 score)
 {
    mScore += score;
+}
+
+
+void ClientInfo::setShip(Ship *ship)
+{
+   mShip = ship;
+}
+
+
+Ship *ClientInfo::getShip()
+{
+   return mShip;
+}
+
+
+const Vector<U32> &ClientInfo::getLoadout()
+{
+   return mLoadout;
 }
 
 
@@ -226,6 +237,13 @@ LuaPlayerInfo *ClientInfo::getPlayerInfo()
 }
 
 
+// Return pointer to statistics tracker 
+Statistics *ClientInfo::getStatistics()
+{
+   return &mStatistics;
+}
+
+
 Nonce *ClientInfo::getId()
 {
    return &mId;
@@ -236,10 +254,8 @@ Nonce *ClientInfo::getId()
 ////////////////////////////////////////
 
 // Constructor
-LocalClientInfo::LocalClientInfo(GameConnection *gameConnection, bool isRobot)
+LocalClientInfo::LocalClientInfo(GameConnection *gameConnection, bool isRobot) : ClientInfo()
 {
-   initialize();
-
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
 }
@@ -316,15 +332,14 @@ VoiceDecoder *LocalClientInfo::getVoiceDecoder()
 
 #ifndef ZAP_DEDICATED
 // Constructor
-RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, bool isRobot, bool isAdmin)
+RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, bool isRobot, bool isAdmin) : ClientInfo()
 {
-   initialize();
-
    mName = name;
    mIsAuthenticated = isAuthenticated;
    mIsRobot = isRobot;
    mIsAdmin = isAdmin;
    mTeamIndex = NO_TEAM;
+   mRating = 0;
 
    // Initialize speech stuff, will be deleted in destructor
    mDecoder = new SpeexVoiceDecoder();
@@ -362,12 +377,6 @@ void RemoteClientInfo::setRating(F32 rating)
    mRating = rating;
 }
 
-
-void RemoteClientInfo::initialize()
-{
-   Parent::initialize();
-   mRating = 0;
-}
 
 // Voice chat stuff -- these will be invalid on the server side
 SoundEffect *RemoteClientInfo::getVoiceSFX()

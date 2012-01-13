@@ -28,8 +28,8 @@
 
 
 #include "ship.h"          // Parent class
-#include "game.h"          // For ClientInfo def
 #include "luaObject.h"
+#include "game.h"          // For ClientInfo def
 
 namespace Zap
 {
@@ -95,7 +95,7 @@ public:
 class MoveItem;
 class LuaRobot;
 class ServerGame;
-class ClientInfo;
+//class ClientInfo;
 
 /**
  * This is the wrapper around the C++ object found in object.cc
@@ -110,7 +110,7 @@ class Robot : public Ship, public LuaScriptRunner
    typedef Ship Parent;
 
 private:
-   U16 mCurrentZone;            // Zone robot is currently in
+   U16 mCurrentZone;             // Zone robot is currently in
 
    S32 mScore;
    S32 mTotalScore;
@@ -131,7 +131,6 @@ public:
    Robot();      // Constructor
    ~Robot();                                                                                    // Destructor
 
-   void setConnection();                    
    bool initialize(Point &pos);
 
    void kill();
@@ -160,8 +159,6 @@ public:
    // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
-   boost::shared_ptr<ClientInfo> getClientInfo();
-
    bool isRobot();
    //static S32 getRobotCount() { return robots.size(); }
 
@@ -180,6 +177,9 @@ public:
    void setPointerToThis();
    void registerClasses();
    string runGetName();                   // Run bot's getName() function
+
+   ClientInfo *getClientInfo();
+
 
    S32 getScore();    // Return robot's score
    F32 getRating();   // Return robot's rating
@@ -264,7 +264,7 @@ public:
    S32 fire(lua_State *L);
    S32 setWeapon(lua_State *L);
    S32 setWeaponIndex(lua_State *L);
-   S32 hasWeapon(lua_State *L);
+   S32 hasWeapon(lua_State *L);  
 
    S32 globalMsg(lua_State *L);
    S32 teamMsg(lua_State *L);

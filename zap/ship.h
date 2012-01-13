@@ -105,6 +105,8 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class Statistics;
+class ClientInfo;
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -265,6 +267,7 @@ public:
    bool isLoadoutSameAsCurrent(const Vector<U32> &loadout);
    void setDefaultLoadout();           // Set the ship's loadout to the default values
 
+   virtual ClientInfo *getClientInfo();
    static string loadoutToString(const Vector<U32> &loadout);
    static bool stringToLoadout(string loadoutStr, Vector<U32> &loadout);
 

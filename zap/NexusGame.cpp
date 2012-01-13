@@ -378,7 +378,7 @@ void NexusGameType::idle_server(U32 deltaT)
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getGame()->getClientCount(); i++)
       {
-         Ship *client_ship = dynamic_cast<Ship *>(getGame()->getClientInfo(i)->getConnection()->getControlObject());
+         Ship *client_ship = getGame()->getClientInfo(i)->getShip();
 
          if(!client_ship)
             continue;
@@ -606,11 +606,11 @@ void NexusGameType::spawnShip(ClientInfo *clientInfo)
 {
    Parent::spawnShip(clientInfo);
 
-   GameConnection *conn = clientInfo->getConnection();
+   Ship *ship = clientInfo->getShip();
 
-   NexusFlagItem *newFlag = new NexusFlagItem(conn->getControlObject()->getActualPos());
+   NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
    newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
-   newFlag->mountToShip(dynamic_cast<Ship *>(conn->getControlObject()));    // mountToShip() can handle NULL
+   newFlag->mountToShip(ship);    // mountToShip() can handle NULL
    newFlag->changeFlagCount(0);
 }
 
@@ -679,8 +679,7 @@ void NexusFlagItem::dropFlags(U32 flags)
 
 void NexusFlagItem::onMountDestroyed()
 {
-   if(mMount->getOwner())
-      mMount->getOwner()->mStatistics.mFlagDrop += mFlagCount + 1;
+   mMount->getClientInfo()->getStatistics()->mFlagDrop += mFlagCount + 1;
 
    dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
 

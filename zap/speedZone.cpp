@@ -477,8 +477,9 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
    if(!s->isGhost() && stateIndex == MoveObject::ActualState)  // Only server needs to send information
    {
       setMaskBits(HitMask);
-      if(s->getControllingClient().isValid())
-         // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
+
+      // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
+      if(s->getControllingClient() && s->getControllingClient().isValid())
          s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
    }
 

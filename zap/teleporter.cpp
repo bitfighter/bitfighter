@@ -293,8 +293,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
          ship->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
 
-         if(ship->getOwner())
-            ship->getOwner()->mStatistics.mTeleport++;
+         ship->getClientInfo()->getStatistics()->mTeleport++;
 
          // See if we've teleported onto a loadout zone
          GameObject *obj = ship->isInZone(LoadoutZoneTypeNumber);

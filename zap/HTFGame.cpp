@@ -111,11 +111,11 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       r = stealString;
       teamIndex = theFlag->getZone()->getTeam();
-      if(theShip->getOwner())
-         theShip->getOwner()->mStatistics.mFlagReturn++;  // used as flag steal
+
+      theShip->getClientInfo()->getStatistics()->mFlagReturn++;  // used as flag steal
    }
-   if(theShip->getOwner())
-      theShip->getOwner()->mStatistics.mFlagPickup++;
+
+   theShip->getClientInfo()->getStatistics()->mFlagPickup++;
 
    Vector<StringTableEntry> e;
    e.push_back(theShip->getName());
@@ -203,9 +203,7 @@ void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
       mountedFlag->setActualPos(z->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
       updateScore(s, ReturnFlagToZone);
-      if(s->getOwner())
-         s->getOwner()->mStatistics.mFlagScore++;
-
+      s->getClientInfo()->getStatistics()->mFlagScore++;
    }
 }
 

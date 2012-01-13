@@ -81,8 +81,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          updateScore(theShip, ReturnTeamFlag);
 
-         if(theShip->getOwner())
-            theShip->getOwner()->mStatistics.mFlagReturn++;
+         theShip->getClientInfo()->getStatistics()->mFlagReturn++;
       }
       else     // Flag is at home
       {
@@ -93,21 +92,19 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
             if(mountedFlag)
             {
                static StringTableEntry capString("%e0 captured the %e1 flag!");
+
                Vector<StringTableEntry> e;
                e.push_back(theShip->getName());
                e.push_back(getGame()->getTeamName(mountedFlag->getTeam()));
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-
                mountedFlag->dismount();
                mountedFlag->sendHome();
 
                updateScore(theShip, CaptureFlag);
 
-               if(theShip->getOwner())
-                  theShip->getOwner()->mStatistics.mFlagScore++;
-
+               theShip->getClientInfo()->getStatistics()->mFlagScore++;
             }
          }
       }
@@ -128,8 +125,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          theFlag->mountToShip(theShip);
 
-         if(theShip->getOwner())
-            theShip->getOwner()->mStatistics.mFlagPickup++;
+         theShip->getClientInfo()->getStatistics()->mFlagPickup++;
       }
    }
 }

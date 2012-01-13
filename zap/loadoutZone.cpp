@@ -176,7 +176,7 @@ bool LoadoutZone::collide(GameObject *hitObject)
    // Anyone can use neutral loadout zones
    if(!isGhost() &&                                                           // On the server
          (hitObject->getTeam() == getTeam() || getTeam() == TEAM_NEUTRAL) &&  // The zone is on the same team as hitObject, or it's neutral
-         isShipType(hitObject->getObjectTypeNumber()) )                       // The thing that hit the zone is a ship
+         isShipType(hitObject->getObjectTypeNumber()))                        // The thing that hit the zone is a ship
       getGame()->getGameType()->SRV_updateShipLoadout(hitObject);      
 
    return false;

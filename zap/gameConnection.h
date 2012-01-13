@@ -72,7 +72,7 @@ private:
    string mLastEnteredPassword;
 
    // These are only used on the server -- will be NULL on client
-   boost::shared_ptr<ClientInfo> mClientInfo;         
+   boost::shared_ptr<ClientInfo> mClientInfo;       
 
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // Sometimes this is NULL
@@ -81,12 +81,11 @@ private:
    bool mInCommanderMap;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
-   bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
+   bool mIsBusy;                    // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
-   bool mWantsScoreboardUpdates;          // Indicates if client has requested scoreboard streaming (e.g. pressing Tab key)
+   bool mWantsScoreboardUpdates;    // Indicates if client has requested scoreboard streaming (e.g. pressing Tab key)
    bool mReadyForRegularGhosts;
 
-   //StringTableEntry mClientName;
    StringTableEntry mClientNameNonUnique; // For authentication, not unique name
    //Nonce mClientId;
    bool mClientClaimsToBeVerified;
@@ -101,11 +100,6 @@ private:
    Vector<U32> mLoadout;
    GameSettings *mSettings;
 
-   // Score for current game
-   //S32 mScore;                   // Score this game
-   //F32 mRating;                  // Rating for this game
-   //S32 mTotalScore;              // Total number of points scored by anyone this game
-
    // Long term score tracking
    S32 mKills;                   // Total kills over the lifetime of this connection
    S32 mFratricides;             // Total kills of teammates over the lifetime of this connection
@@ -119,7 +113,7 @@ public:
 
    void resetLoadout();
 
-   U8 mVote;  // 0 = not voted,  1 = vote yes,  2 = vote no
+   U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
    U32 mVoteTime;
    bool mChatMute;
 
@@ -185,8 +179,6 @@ public:
    void setClientGame(ClientGame *game);
 #endif
 
-   Statistics mStatistics;       // Player statistics tracker
-
    Timer mSwitchTimer;           // Timer controlling when player can switch teams after an initial switch
 
    void setClientNameNonUnique(StringTableEntry name);
@@ -218,17 +210,7 @@ public:
    bool wantsScoreboardUpdates();
    void setWantsScoreboardUpdates(bool wantsUpdates);
 
-   void addKill();
-   void addFratricide();
-   void addDeath();
-   void addSuicide();
-   S32 getKills();
-   S32 getFratricides();
-   S32 getDeaths();
-   S32 getSuicides();
-
    F32 getCalculatedRating();
-
 
    void endOfGameScoringHandler();
 

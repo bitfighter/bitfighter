@@ -49,13 +49,11 @@ namespace Zap
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
-GameConnection::GameConnection()
+GameConnection::GameConnection() : mClientInfo(boost::shared_ptr<ClientInfo>(new LocalClientInfo(this, false)))
 {
    TNLAssert(gServerGame, "Client should not be using this constructor!");
 
    mSettings = gServerGame->getSettings();      // HACK!!  Should not refer to gServerGame!!
-
-   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(this, false));
 
    mVote = 0;
    mVoteTime = 0;
@@ -207,9 +205,6 @@ void GameConnection::setClientGame(ClientGame *game)
 // Clears/initializes some things between levels
 void GameConnection::reset()
 {  
-   //mScore = 0;
-   //mRating = 0;
-
    mReadyForRegularGhosts = false;
    mWantsScoreboardUpdates = false;
 }
@@ -1211,14 +1206,10 @@ void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
 
    clientInfo->setName(newName);
 
-   Ship *ship = dynamic_cast<Ship *>(clientInfo->getConnection()->getControlObject());
-
+   Ship *ship = clientInfo->getShip();
 
    if(ship)
-   {
-      //ship->setName(newName);
       ship->setMaskBits(Ship::AuthenticationMask);    // Will trigger sending new ship name on next update
-   }
 }
 
 
@@ -1786,56 +1777,56 @@ void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 }
 
 
-void GameConnection::addKill()
-{
-   mKills++;
-   mStatistics.addKill();
-}
-
-
-void GameConnection::addFratricide()
-{
-   mFratricides++;
-   mStatistics.addFratricide();
-}
-
-
-void GameConnection::addDeath()
-{
-   mDeaths++;
-   mStatistics.addDeath();
-}
-
-
-void GameConnection::addSuicide()
-{
-   mSuicides++;
-   mStatistics.addSuicide();
-}
-
-
-S32 GameConnection::getKills()
-{
-   return mKills;
-}
-
-
-S32 GameConnection::getFratricides()
-{
-   return mFratricides;
-}
-
-
-S32 GameConnection::getDeaths()
-{
-   return mDeaths;
-}
-
-
-S32 GameConnection::getSuicides()
-{
-   return mSuicides;
-}
+//void GameConnection::addKill()
+//{
+//   mKills++;
+//   mStatistics.addKill();
+//}
+//
+//
+//void GameConnection::addFratricide()
+//{
+//   mFratricides++;
+//   mStatistics.addFratricide();
+//}
+//
+//
+//void GameConnection::addDeath()
+//{
+//   mDeaths++;
+//   mStatistics.addDeath();
+//}
+//
+//
+//void GameConnection::addSuicide()
+//{
+//   mSuicides++;
+//   mStatistics.addSuicide();
+//}
+//
+//
+//S32 GameConnection::getKills()
+//{
+//   return mKills;
+//}
+//
+//
+//S32 GameConnection::getFratricides()
+//{
+//   return mFratricides;
+//}
+//
+//
+//S32 GameConnection::getDeaths()
+//{
+//   return mDeaths;
+//}
+//
+//
+//S32 GameConnection::getSuicides()
+//{
+//   return mSuicides;
+//}
 
 
 // Return a measure of a player's strength.
@@ -1861,7 +1852,7 @@ F32 GameConnection::getCalculatedRating()
 void GameConnection::endOfGameScoringHandler()
 {
    mGamesPlayed++;
-   mStatistics.resetStatistics();
+   getClientInfo()->getStatistics()->resetStatistics();
 }
 
 
@@ -1911,6 +1902,7 @@ bool GameConnection::isInCommanderMap()
 {
    return mInCommanderMap;
 }
+
 
 const Vector<U32> &GameConnection::getLoadout()
 {

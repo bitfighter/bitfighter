@@ -99,8 +99,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
    theFlag->mountToShip(theShip);
 
-   if(theShip->getOwner())
-      theShip->getOwner()->mStatistics.mFlagPickup++;
+   theShip->getClientInfo()->getStatistics()->mFlagPickup++;
 
    mFlagTeam = theShip->getTeam();
    s2cSetFlagTeam(mFlagTeam);
@@ -142,7 +141,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    S32 oldTeam = z->getTeam();
    if(oldTeam >= 0)    // Zone is being captured from another team
    {
-      if(mZones.size() <= 50)  // Don't display message when too many zones will be annoying with messages.
+      if(mZones.size() <= 50)  // Don't display message when too many zones -- the flood of messages will get annoying!
       {
          static StringTableEntry takeString("%e0 captured a zone from team %e1!");
          Vector<StringTableEntry> e;
@@ -153,23 +152,22 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       }
       updateScore(z->getTeam(), UncaptureZone);      // Inherently team-only event, no?
    }
-   else                 // Zone is neutral
-      if(mZones.size() <= 50)
+   else                 // Zone is neutral (i.e. NOT captured from another team)
    {
-      static StringTableEntry takeString("%e0 captured an unclaimed zone!");
-      Vector<StringTableEntry> e;
-      e.push_back(s->getName());
+      if(mZones.size() <= 50)
+      {
+         static StringTableEntry takeString("%e0 captured an unclaimed zone!");
+         Vector<StringTableEntry> e;
+         e.push_back(s->getName());
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+      }
    }
 
    updateScore(s, CaptureZone);
 
-
-   z->setTeam(s->getTeam());                       // Assign zone to capturing team
-
-   if(s->getOwner())
-      s->getOwner()->mStatistics.mFlagScore++;
+   z->setTeam(s->getTeam());                             // Assign zone to capturing team
+   s->getClientInfo()->getStatistics()->mFlagScore++;    // Record the capture
 
 
    // Check to see if team now controls all zones...

@@ -183,6 +183,19 @@ void Ship::setDefaultLoadout()
 }
 
 
+ClientInfo *Ship::getClientInfo()
+{
+   if(getControllingClient())
+      return getControllingClient()->getClientInfo();
+   else
+   {
+      TNLAssert(false, "No controlling client --> is this legit?");
+      return NULL;
+   }
+}
+
+
+
 // Push a LuaShip proxy onto the stack
 void Ship::push(lua_State *L)
 {
@@ -456,7 +469,7 @@ void Ship::selectWeapon()
 
 StringTableEntry Ship::getName()
 {
-   return getControllingClient() ? getControllingClient()->getClientInfo()->getName() : "";
+   return getClientInfo()->getName();
 }
 
 
@@ -475,14 +488,16 @@ void Ship::setIsAuthenticated(bool isAuthenticated, StringTableEntry name)
 }
 
 
+// I *think* this runs only on the server
 void Ship::selectWeapon(U32 weaponIdx)
 {
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
-   // Display a message confirming new weapon choice if we're not showing the indicators
+   // Display a message confirming new weapon choice if we're not showing the indicators   <=== SHOULDN'T THIS DECISION BE MADE ON THE CLIENT???
    if(!mGame->getSettings()->getIniSettings()->showWeaponIndicators)
    {
-      GameConnection *cc = getControllingClient();
+      GameConnection *cc = getControllingClient();       // Will be NULL for robots and inert ships
+
       if(cc)
       {
          Vector<StringTableEntry> e;
@@ -529,8 +544,7 @@ void Ship::processWeaponFire()
          mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
 
-         if(getControllingClient().isValid())
-            getControllingClient()->mStatistics.countShot(curWeapon);
+         getClientInfo()->getStatistics()->countShot(curWeapon);
 
          if(!isGhost())    // i.e. server only
          {
@@ -581,6 +595,7 @@ void Ship::controlMoveReplayComplete()
       mInterpolating = true;
 }
 
+
 void Ship::idle(GameObject::IdleCallPath path)
 {
    // Don't process exploded ships
@@ -588,8 +603,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       return;
 
    if(path == GameObject::ServerIdleControlFromClient)
-      if(getOwner())
-         getOwner()->mStatistics.mPlayTime += mCurrentMove.time;
+      getClientInfo()->getStatistics()->mPlayTime += mCurrentMove.time;
 
    Parent::idle(path);
 
@@ -621,7 +635,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       processMove(ActualState);
 
       // When not moving, Detect if on a GoFast - seems better to always detect...
-      //if(mMoveState[ActualState].vel == Point(0,0))
+      //if(mMoveState[ActualState].vel =f= Point(0,0))
       {
          SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
          if(speedZone && speedZone->collide(this))
@@ -877,10 +891,9 @@ void Ship::processModules()
       {
          S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * scaleFactor);
          mEnergy -= EnergyUsed;
-         anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge.
-         GameConnection *gc = getOwner();
-         if(gc)
-            gc->mStatistics.addModuleUsed(ShipModule(i), mCurrentMove.time);
+         anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge
+
+         getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
       }
 
       // Fire the module secondary component if it is active and the cooldown timer has run out
@@ -1026,14 +1039,12 @@ void Ship::damageObject(DamageInfo *theInfo)
       mHealth = 1;
 
    Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
-   if(victimOwner && projectile)
-   {
-      victimOwner->mStatistics.countHitBy(projectile->mWeaponType);
-   }
+
+   if(projectile)
+      getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
+
    else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
-   {
-      victimOwner->mStatistics.mCrashedIntoAsteroid++;
-   }
+      getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
 }
 
 
@@ -1258,9 +1269,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       readThisTeam(stream);
       if(stream->readFlag())     // Player authentication status changed
-      {
          mIsAuthenticated = stream->readFlag();
-      }
    }
 
 
@@ -1400,10 +1409,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
    F32 value = Parent::getUpdatePriority(scopeObject, updateMask, updateSkips);
+
    if(getControllingClient())
       value += 2.3f;
    else
       value -= 2.3f;
+
    return value;
 }
 
@@ -1549,8 +1560,7 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
    if(isLoadoutSameAsCurrent(loadout))      // Don't bother if ship config hasn't changed
       return;
 
-   if(getOwner())
-      getOwner()->mStatistics.mChangedLoadout++;
+   getClientInfo()->getStatistics()->mChangedLoadout++;
 
    WeaponType currentWeapon = mWeapon[mActiveWeaponIndx];
 
@@ -1588,6 +1598,7 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
    GameConnection *cc = getControllingClient();
 
 #ifndef ZAP_DEDICATED
+   // Safe to delete this block?  Ever triggered?  Anyone?  (-CE Jan 2012)
    if(!cc)
    {
       ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
@@ -1711,13 +1722,9 @@ void Ship::kill(DamageInfo *theInfo)
    if(isGhost())     // Server only, please...
       return;
 
-   GameConnection *controllingClient = getControllingClient();
-   if(controllingClient)
-   {
-      GameType *gt = getGame()->getGameType();
-      if(gt)
-         gt->controlObjectForClientKilled(controllingClient->getClientInfo(), this, theInfo->damagingObject);
-   }
+   GameType *gt = getGame()->getGameType();
+   if(gt)
+      gt->controlObjectForClientKilled(getClientInfo(), this, theInfo->damagingObject);
 
    kill();
 }
@@ -2322,13 +2329,16 @@ S32 LuaShip::getCurrLoadout(lua_State *L)
    return 1;
 }
 
+
 // Return requested loadout
 S32 LuaShip::getReqLoadout(lua_State *L)
 {
    U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
    GameConnection *gc = thisShip->getOwner();
+
    const Vector<U32> requestedLoadout = gc ? gc->getLoadout() : Vector<U32>();
-   if(!gc || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout.
+
+   if(!gc || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout
       return getCurrLoadout(L);
 
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
@@ -2339,6 +2349,7 @@ S32 LuaShip::getReqLoadout(lua_State *L)
 
    return 1;
 }
+
 
 GameObject *LuaShip::getGameObject()
 {

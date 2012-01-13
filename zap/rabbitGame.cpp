@@ -355,9 +355,7 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 
    flag->mountToShip(ship);
 
-   if(ship->getOwner())
-      ship->getOwner()->mStatistics.mFlagPickup++;
-
+   ship->getClientInfo()->getStatistics()->mFlagPickup++;
 }
 
 

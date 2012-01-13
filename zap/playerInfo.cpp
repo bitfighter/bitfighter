@@ -182,7 +182,7 @@ S32 PlayerInfo::isRobot(lua_State *L)
 
 S32 PlayerInfo::getShip(lua_State *L)
 {
-	return isDefunct() ? returnNil(L) : returnShip(L, dynamic_cast<Ship *>(mClientInfo->getConnection()->getControlObject()));
+	return isDefunct() ? returnNil(L) : returnShip(L, mClientInfo->getShip());
 }
 
 

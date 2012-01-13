@@ -266,8 +266,10 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 
       hitObject->damageObject(&theInfo);
 
-      if(hitShip && mShooter.isValid() && mShooter->getControllingClient().isValid())
-         mShooter->getControllingClient()->mStatistics.countHit(mWeaponType);
+      Ship *shooter = dynamic_cast<Ship *>(mShooter.getPointer());
+
+      if(hitShip && shooter)
+         shooter->getClientInfo()->getStatistics()->countHit(mWeaponType);
    }
 
    mTimeRemaining = 0;
@@ -722,7 +724,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 
       if(getOwner())
          for(S32 i = 0; i < hits; i++)
-            getOwner()->mStatistics.countHit(mWeaponType);
+            getOwner()->getClientInfo()->getStatistics()->countHit(mWeaponType);
    }
    exploded = true;
 }

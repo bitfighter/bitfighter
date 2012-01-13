@@ -1411,7 +1411,9 @@ Vector<Robot *> Robot::robots;
 
 
 // Constructor, runs on client and server
-Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), LuaScriptRunner()
+Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), 
+                 LuaScriptRunner(), 
+                 mClientInfo(boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, true)))
 {
    mHasSpawned = false;
    mObjectTypeNumber = RobotShipTypeNumber;
@@ -1419,7 +1421,7 @@ Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), LuaScript
    mCurrentZone = U16_MAX;
    flightPlanTo = U16_MAX;
 
-   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, true));
+   mClientInfo->setShip(this);
 
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
@@ -1529,7 +1531,11 @@ bool Robot::start()
    if(!startLua())
       return false;
 
-   setConnection();
+   if(mClientInfo->getName() == "")                          // Make sure bots have a name
+      mClientInfo->setName(GameConnection::makeUnique("Robot").c_str());
+
+   mHasSpawned = true;
+
    mGame->addToClientList(mClientInfo);
 
    return true;
@@ -1557,7 +1563,7 @@ void Robot::setPointerToThis()
 }
 
 
-// Loads script, runs getName
+// Loads script, runs getName, stores result in bot's clientInfo
 bool Robot::startLua()
 {
    if(!LuaScriptRunner::startLua(ROBOT) || !loadScript())
@@ -1599,7 +1605,7 @@ string Robot::runGetName()
       return "";
    }
 
-   return "";
+   return "";     // Will never get here
 }
 
 
@@ -1924,33 +1930,6 @@ void Robot::tickTimer(U32 deltaT)
 }
 
 
-void Robot::setConnection()
-{
-   // Cannot be in onAddedToGame, as it will error while trying to add robots while level map is not ready
-
-   GameConnection *gc = new GameConnection();      // Is this ever deleted??
-   gc->setClientInfo(mClientInfo);  // Fixes Robots scoring problems. Do not want a GameConnection to hold a different ClientInfo
-
-   if(mClientInfo->getName() == "")                          // Make sure bots have a name
-      mClientInfo->setName(GameConnection::makeUnique("Robot").c_str());
-
-   gc->setControlObject(this);
-   
-   setOwner(gc);
-
-   mClientInfo->setName(getName());
-   mClientInfo->setConnection(gc);
-   
-   mHasSpawned = true;
-}
-
-
-boost::shared_ptr<ClientInfo> Robot::getClientInfo()
-{
-   return mClientInfo;
-}
-
-
 bool Robot::isRobot()
 {
    return true;
@@ -2003,6 +1982,13 @@ void Robot::addSteps(S32 steps)
 {
    mStepCount = steps * robots.size();
 }
+
+
+ClientInfo *Robot::getClientInfo()
+{
+   return mClientInfo.get();
+}
+
 
 
 };

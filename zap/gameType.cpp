@@ -658,6 +658,7 @@ void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F3
 
    if(gc)
       ship = gc->getControlObject();
+
    if(!ship)
       return;
 
@@ -684,8 +685,10 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    GameConnection *gc = game->getConnectionToServer();
 
    GameObject *co = NULL;
+
    if(gc)
       co = gc->getControlObject();
+
    if(!co)
       return;
 
@@ -813,7 +816,7 @@ VersionedGameStats GameType::getGameStats()
          teamStats->playerStats.push_back(PlayerStats());
          PlayerStats *playerStats = &teamStats->playerStats.last();
 
-         Statistics *statistics = &conn->mStatistics;
+         Statistics *statistics = clientInfo->getStatistics();
             
          playerStats->name           = clientInfo->getName().getString();    // TODO: What if this is a bot??  What should go here??
          playerStats->nonce          = *clientInfo->getId();
@@ -1132,15 +1135,18 @@ void GameType::onAddedToGame(Game *game)
 // Server only! (overridden in NexusGame)
 void GameType::spawnShip(ClientInfo *clientInfo)
 {
-   GameConnection *conn = clientInfo->getConnection();
+      GameConnection *conn = clientInfo->getConnection();      // Will be NULL for robots
 
-   static const U32 INACTIVITY_THRESHOLD = 20000;    // 20 secs, in ms
-
-   // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never display bots.
-   if((conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD) && !clientInfo->isRobot())
+   // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delay bots.
+   if(!clientInfo->isRobot())
    {
-      conn->s2cPlayerSpawnDelayed();
-      return;
+      static const U32 INACTIVITY_THRESHOLD = 20000;           // 20 secs
+
+      if(conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD)
+      {
+         conn->s2cPlayerSpawnDelayed();
+         return;
+      }
    }
 
 
@@ -1148,29 +1154,33 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
-   conn->respawnTimer.clear(); // Prevent spawning a second copy of the same player ship
 
    if(clientInfo->isRobot())
    {
-      Robot *robot = (Robot *) conn->getControlObject();
-      robot->setOwner(conn);
+      Robot *robot = (Robot *) clientInfo->getShip();
+      //robot->setOwner(conn);
       robot->setTeam(teamIndex);
       spawnRobot(robot);
    }
    else
    {
+      conn->respawnTimer.clear();   // Prevent spawning a second copy of the same player ship
+
       // Player's name, team, and spawn location
       Ship *newShip = new Ship(clientInfo->getName(), clientInfo->isAuthenticated(), teamIndex, spawnPoint);
       clientInfo->getConnection()->setControlObject(newShip);
+      clientInfo->setShip(newShip);
+
       newShip->setOwner(clientInfo->getConnection());
       newShip->addToGame(mGame, mGame->getGameObjDatabase());
-   }
+  
 
-   if(!levelHasLoadoutZone())
-      setClientShipLoadout(conn, conn->getLoadout());          // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
-   else
-      setClientShipLoadout(conn, conn->mOldLoadout, true);     // Still using old loadout because we haven't entered a loadout zone yet...
-   conn->mOldLoadout.clear();
+      if(!levelHasLoadoutZone())
+         setClientShipLoadout(conn, conn->getLoadout());      // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+      else
+         setClientShipLoadout(conn, conn->mOldLoadout, true); // Still using old loadout because we haven't entered a loadout zone yet...
+      conn->mOldLoadout.clear();
+   }
 }
 
 
@@ -1280,7 +1290,7 @@ void GameType::SRV_clientRequestLoadout(GameConnection *conn, const Vector<U32> 
 }
 
 
-// Called from above
+// Called from above and elsewhere
 // Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
 void GameType::setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent)
 {
@@ -1528,19 +1538,24 @@ const Color *GameType::getShipColor(Ship *s)
 }
 
 
-// Runs on the server.
+// These run on the server.
 // Adds a new client to the game when a player joins, or when a level cycles.
 // Note that when a new game starts, players will be added in order from
 // strongest to weakest.  Bots will be added to their predefined teams, or if that is invalid, to the lowest ranked team.
 void GameType::serverAddClient(ClientInfo *clientInfo)
 {
-   GameConnection *conn = clientInfo->getConnection();
-   TNLAssert(conn, "Attempting to add a client with a NULL connection!");
-
-   conn->setScopeObject(this);
-   conn->reset();
-
    getGame()->countTeamPlayers();     // Also calcs team ratings
+
+   if(!clientInfo->isRobot())
+   {
+      GameConnection *conn = clientInfo->getConnection();
+
+      if(conn)
+      {
+         conn->setScopeObject(this);
+         conn->reset();
+      }
+   }
 
    // Figure out how many players the team with the fewest players has
    Team *team = (Team *)mGame->getTeam(0);
@@ -1568,20 +1583,18 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       }
    }
 
-   if(clientInfo->isRobot())                              // Robots use their own team number, if it is valid
+   // Robots use their own team number, so if we have a valid one, override that assigned above
+   if(clientInfo->isRobot())                              
    {
-      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
+      Ship *robot = clientInfo->getShip();
 
-      if(ship)
-      {
-         if(ship->getTeam() >= 0 && ship->getTeam() < mGame->getTeamCount())        // No neutral or hostile bots -- why not?
-            minTeamIndex = ship->getTeam();
+      if(clientInfo->getShip()->getTeam() >= 0 && robot->getTeam() < mGame->getTeamCount())   // No neutral or hostile bots -- why not?
+         minTeamIndex = robot->getTeam();
 
-         ship->setMaskBits(Ship::ChangeTeamMask);        // This is needed to avoid gray robot ships when using /addbot
-      }
+      robot->setMaskBits(Ship::ChangeTeamMask);                               // Needed to avoid gray robot ships when using /addbot
    }
    
-   clientInfo->setTeamIndex(minTeamIndex);     // Add new player to that team
+   clientInfo->setTeamIndex(minTeamIndex);     // Add new player to their assigned team
 
    // Tell other clients about the new guy, who is never us...
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), false, clientInfo->isAdmin(), clientInfo->isRobot(), true);    
@@ -1598,9 +1611,6 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 {
    if(!damager)            // Anonomyous projectiles are deadly to all!
       return true;
-
-   //if(!strcmp(damager->getClassName(), "Mine"))        // Mines can damage anyone!  (there's got to be a better way to tell if damager is a mine... but getObjectMask doesn't seem to do the trick...)
-   //   return true;
 
    GameConnection *damagerOwner = damager->getOwner();
    GameConnection *victimOwner = victim->getOwner();
@@ -1638,7 +1648,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
 {
    ClientInfo *killer = killerObject && killerObject->getOwner() ? killerObject->getOwner()->getClientInfo() : NULL;
 
-   victim->getConnection()->addDeath();
+   victim->getStatistics()->addDeath();
 
    StringTableEntry killerDescr = killerObject->getKillString();
 
@@ -1646,20 +1656,20 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
    {
       if(killer == victim)    // We killed ourselves -- should have gone easy with the bouncers!
       {
-         killer->getConnection()->addSuicide();
+         killer->getStatistics()->addSuicide();
          updateScore(killer, KillSelf);
       }
 
       // Should do nothing with friendly fire disabled
       else if(isTeamGame() && killer->getTeamIndex() == victim->getTeamIndex())   // Same team in a team game
       {
-         killer->getConnection()->addFratricide();
+         killer->getStatistics()->addFratricide();
          updateScore(killer, KillTeammate);
       }
 
       else                                                                        // Different team, or not a team game
       {
-         killer->getConnection()->addKill();
+         killer->getStatistics()->addKill();
          updateScore(killer, KillEnemy);
       }
 
@@ -1689,14 +1699,8 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
 // Runs on server only?
 void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 {
-   TNLAssert(ship, "Ship is null in updateScore!!");
-
-   ClientInfo *clientInfo = NULL;
-
-   if(ship->getControllingClient())
-      clientInfo = ship->getControllingClient()->getClientInfo();  // Get client reference for ships...
-
-   updateScore(clientInfo, ship->getTeam(), scoringEvent, data);
+   TNLAssert(ship, "Ship should never be NULL here!!");
+   updateScore(ship->getClientInfo(), ship->getTeam(), scoringEvent, data);
 }
 
 
@@ -2115,12 +2119,12 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
             obj->setOwner(NULL);
       }
 
-      if(ship->isRobot())              // Players get a new ship object, robots reuse the same ship object
+      if(ship->isRobot())     // Players get a new ship, robots reuse the same object
          ship->setMaskBits(Ship::ChangeTeamMask);
+      else
+         client->getConnection()->respawnTimer.clear();    // If we've just died, this will keep a second copy of ourselves from appearing
 
-      ship->kill();                    // Destroy the old ship
-
-      client->getConnection()->respawnTimer.clear();    // If we've just died, this will keep a second copy of ourselves from appearing
+      ship->kill();           // Destroy the old ship
    }
 
    if(team < 0)                                                                     // If no team provided...
@@ -2132,7 +2136,9 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       s2cClientJoinedTeam(client->getName(), client->getTeamIndex());               // ...announce the change
 
    spawnShip(client);                                                               // Create a new ship
-   client->getConnection()->switchedTeamCount++;                                    // Track number of times the player switched teams
+
+   if(!client->isRobot())
+      client->getConnection()->switchedTeamCount++;                                 // Track number of times the player switched teams
 }
 
 
@@ -2522,12 +2528,13 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 
 void GameType::addBot(Vector<StringTableEntry> args)
 {
-   // TODO
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
    GameSettings *settings = gServerGame->getSettings();
 
    GameConnection *conn = clientInfo->getConnection();
+
+   static const S32 ABSOLUTE_MAX_BOTS = 256;
 
    if(mBotZoneCreationFailed)
       conn->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
@@ -2544,7 +2551,7 @@ void GameType::addBot(Vector<StringTableEntry> args)
       return;  // Error message handled client-side
 
    else if((Robot::robots.size() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
-         Robot::robots.size() >= 256)
+         Robot::robots.size() >= ABSOLUTE_MAX_BOTS)
       conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
 
    else if(args.size() >= 2 && !safeFilename(args[1].getString()))
@@ -2580,7 +2587,7 @@ void GameType::addBot(Vector<StringTableEntry> args)
          return;
       }
 
-      serverAddClient(robot->getClientInfo().get());
+      serverAddClient(robot->getClientInfo());
 
       StringTableEntry msg = StringTableEntry("Robot added by %e0");
       Vector<StringTableEntry> e;
@@ -3198,6 +3205,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+
    if(ship)
       ship->selectWeapon();
 }
@@ -3266,6 +3274,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+
    if(ship)
       ship->selectWeapon(indx);
 }
