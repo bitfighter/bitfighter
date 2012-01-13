@@ -40,7 +40,7 @@ namespace Zap
 
 // C++ Constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     GridDatabase *gridDatabase, LevelLoader *caller)
+                                     GridDatabase *gridDatabase, LevelLoader *caller, bool inEditor)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
@@ -52,6 +52,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 
    mGridSize = gridSize;
    mCaller = caller;
+   mInEditor = inEditor;
 }
 
 
@@ -277,16 +278,16 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
    for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
       argv[i] = getString(L, i + 1, methodName);
 
-   processLevelLoadLine(argc, 0, argv, mGridDatabase, false, "Levelgen script: " + mScriptName);      // For now, all ids are 0!
+   processLevelLoadLine(argc, 0, argv, mGridDatabase, "Levelgen script: " + mScriptName);      // For now, all ids are 0!
 
    return 0;
 }
 
 
 // Let someone else do the work!
-void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName)
+void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
-   mCaller->processLevelLoadLine(argc, id, argv, database, false, levelFileName);
+   mCaller->processLevelLoadLine(argc, id, argv, database, mInEditor, levelFileName);
 }
 
 
@@ -298,7 +299,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, mGridDatabase, false, "Levelgen script: " + mScriptName);
+   mCaller->parseLevelLine(line, mGridDatabase, mInEditor, "Levelgen script: " + mScriptName);
 
    return 0;
 }

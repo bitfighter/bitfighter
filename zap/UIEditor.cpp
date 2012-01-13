@@ -639,7 +639,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame());
+   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), true);
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
