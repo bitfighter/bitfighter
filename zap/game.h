@@ -155,6 +155,8 @@ public:
    virtual void setRating(F32 rating) = 0;
    virtual F32 getRating() = 0;
    F32 getCalculatedRating();
+   void endOfGameScoringHandler();     // Resets stats and the like
+
 
    S32 getPing();
    void setPing(S32 ping);

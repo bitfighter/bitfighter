@@ -242,6 +242,14 @@ F32 ClientInfo::getCalculatedRating()
 }
 
 
+// Resets stats and the like
+void ClientInfo::endOfGameScoringHandler()
+{
+   mStatistics.addGamePlayed();
+   mStatistics.resetStatistics();
+}
+
+
 LuaPlayerInfo *ClientInfo::getPlayerInfo()
 {
    // Lazily initialize

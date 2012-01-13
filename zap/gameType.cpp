@@ -1868,10 +1868,7 @@ void GameType::updateScore(S32 team, ScoringEvent event, S32 data)
 void GameType::updateRatings()
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      GameConnection *conn = mGame->getClientInfo(i)->getConnection();
-      conn->endOfGameScoringHandler();
-   }
+      mGame->getClientInfo(i)->endOfGameScoringHandler();
 }
 
 

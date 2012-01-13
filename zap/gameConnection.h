@@ -100,13 +100,6 @@ private:
    Vector<U32> mLoadout;
    GameSettings *mSettings;
 
-   // Long term score tracking
-   S32 mKills;                   // Total kills over the lifetime of this connection
-   S32 mFratricides;             // Total kills of teammates over the lifetime of this connection
-   S32 mDeaths;                  // Total deaths over the lifetime of this connection
-   S32 mSuicides;                // Total suicides over the lifetime of this connection
-   U32 mGamesPlayed;             // Number of games played, obviously
-
 public:
    U16 switchedTeamCount;
 
@@ -206,8 +199,6 @@ public:
 
    bool wantsScoreboardUpdates();
    void setWantsScoreboardUpdates(bool wantsUpdates);
-
-   void endOfGameScoringHandler();
 
    virtual void onEndGhosting();    // Gets run when game is over
 

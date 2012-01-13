@@ -32,6 +32,12 @@ namespace Zap
 // Constructor
 Statistics::Statistics()
 {
+   mTotalKills = 0;      
+   mTotalFratricides = 0;
+   mTotalDeaths = 0;     
+   mTotalSuicides = 0; 
+   mGamesPlayed = 0;
+
    resetStatistics();
 }
 
@@ -132,6 +138,8 @@ void Statistics::addModuleUsed(ShipModule module, U32 milliseconds)
    TNLAssert(U32(module) < U32(ModuleCount), "ShipModule out of range");
    mModuleUsedTime[(S32)module] += milliseconds;
 }
+
+
 U32 Statistics::getModuleUsed(ShipModule module)
 {
    TNLAssert(U32(module) < U32(ModuleCount), "ShipModule out of range");
@@ -139,11 +147,19 @@ U32 Statistics::getModuleUsed(ShipModule module)
 }
 
 
+void Statistics::addGamePlayed()
+{
+   mGamesPlayed++;
+}
+
+
 // Player killed another player
 void Statistics::addKill()
 {
    mKills++;
+   mTotalKills++;
 }
+
 
 // Report cumulated kills
 U32 Statistics::getKills()
@@ -156,6 +172,7 @@ U32 Statistics::getKills()
 void Statistics::addDeath()
 {
    mDeaths++;
+   mTotalDeaths++;
 }
 
 // Report cumulated deaths
@@ -169,6 +186,7 @@ U32 Statistics::getDeaths()
 void Statistics::addSuicide()
 {
    mSuicides++;
+   mTotalSuicides++;
 }
 
 // Report cumulated suicides
@@ -182,6 +200,7 @@ U32 Statistics::getSuicides()
 void Statistics::addFratricide()
 {
    mFratricides++;
+   mTotalFratricides++;
 }
 
 
@@ -199,19 +218,21 @@ F32 Statistics::getCalculatedRating()
 {
    // Total kills = mKills + mFratricides (but we won't count mFratricides)
    // Counted deaths = mDeaths - mSuicides (mSuicides are included in mDeaths and we want to ignore them)
-   // Use F32 here so we don't underflow with U32 math
-   F32 totalKillsAndDeaths = F32(mKills) + (F32(mDeaths) - F32(mSuicides));
+   // Use F32 here so we don't underflow with U32 math; probably not necessary
+   F32 deathsDueToEnemyAction   = F32(mTotalDeaths) - F32(mTotalSuicides);
+   F32 totalTotalKillsAndDeaths = F32(mTotalKills) + deathsDueToEnemyAction;
 
    // Initial case: you haven't killed or died -- go out and prove yourself, lad!
-   if(totalKillsAndDeaths == 0)
+   if(totalTotalKillsAndDeaths == 0)
       return 0;
 
    // Standard case
    else   
-      return ((F32)mKills - ((F32)mDeaths - (F32)mSuicides)) / totalKillsAndDeaths;
+      return ((F32)mTotalKills - deathsDueToEnemyAction) / totalTotalKillsAndDeaths;
 }
 
 
+// Gets called at beginning of each game -- stats listed here do not persist
 void Statistics::resetStatistics()
 {
    mKills = 0;

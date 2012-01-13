@@ -47,10 +47,17 @@ private:
    U32 mHitBy[WeaponCount];
    U32 mModuleUsedTime[ModuleCount];
 
-   U32 mKills;          // Enemy kills
-   U32 mDeaths;         // Times died
-   U32 mSuicides;       // Self kills
-   U32 mFratricides;    // Tammate kills
+   U32 mKills;             // Enemy kills
+   U32 mDeaths;            // Times died
+   U32 mSuicides;          // Self kills
+   U32 mFratricides;       // Teammate kills
+
+   // Long term score tracking
+   U32 mTotalKills;        // Total kills over the lifetime of this connection
+   U32 mTotalFratricides;  // Total kills of teammates over the lifetime of this connection
+   U32 mTotalDeaths;       // Total deaths over the lifetime of this connection
+   U32 mTotalSuicides;     // Total suicides over the lifetime of this connection
+   U32 mGamesPlayed;       // Number of games played, obviously
 
 public:
    U32 mFlagPickup;
@@ -81,6 +88,8 @@ public:
 
    void addModuleUsed(ShipModule, U32 milliseconds);
    U32 getModuleUsed(ShipModule);
+
+   void addGamePlayed();
 
    void addKill();      // Player killed another player
    U32 getKills();      // Report cumulated kills

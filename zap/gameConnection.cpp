@@ -101,12 +101,6 @@ void GameConnection::initialize()
    mWaitingForPermissionsReply = false;
    mSwitchTimer.reset(0);
 
-   mGamesPlayed = 0;                      // Overall
-   mKills = 0;
-   mFratricides = 0;
-   mDeaths = 0;
-   mSuicides = 0;
-
    mAcheivedConnection = false;
    mLastEnteredPassword = "";
 
@@ -1722,13 +1716,6 @@ bool GameConnection::wantsScoreboardUpdates()
 void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 {
    mWantsScoreboardUpdates = wantsUpdates;
-}
-
-
-void GameConnection::endOfGameScoringHandler()
-{
-   mGamesPlayed++;
-   getClientInfo()->getStatistics()->resetStatistics();
 }
 
 
