@@ -108,10 +108,7 @@ private:
    U32 mGamesPlayed;             // Number of games played, obviously
 
 public:
-   Vector<U32> mOldLoadout;      // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    U16 switchedTeamCount;
-
-   void resetLoadout();
 
    U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
    U32 mVoteTime;
@@ -210,10 +207,7 @@ public:
    bool wantsScoreboardUpdates();
    void setWantsScoreboardUpdates(bool wantsUpdates);
 
-   F32 getCalculatedRating();
-
    void endOfGameScoringHandler();
-
 
    virtual void onEndGhosting();    // Gets run when game is over
 
@@ -236,7 +230,6 @@ public:
 
 
    TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type));      // Player using engineer module
-   bool sEngineerDeployObject(U32 type);      // Player using engineer module, robots use this, bypassing the net interface. True if successful.
 
    // Chage passwords on the server
    void changeParam(const char *param, ParamType type);
@@ -260,7 +253,6 @@ public:
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
 
    TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U32> loadout));     // Client has changed his loadout configuration
-   void sRequestLoadout(Vector<U32> &loadout);                    // Robot has changed his loadout configuration
 
    TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));

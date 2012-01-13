@@ -161,6 +161,15 @@ Ship *ClientInfo::getShip()
 }
 
 
+void ClientInfo::resetLoadout()
+{
+   mLoadout.clear();
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      mLoadout.push_back(DefaultLoadout[i]);
+}
+
+
 const Vector<U32> &ClientInfo::getLoadout()
 {
    return mLoadout;
@@ -227,6 +236,12 @@ bool ClientInfo::isRobot()
 }
 
 
+F32 ClientInfo::getCalculatedRating()
+{
+   return mStatistics.getCalculatedRating();
+}
+
+
 LuaPlayerInfo *ClientInfo::getPlayerInfo()
 {
    // Lazily initialize
@@ -235,6 +250,59 @@ LuaPlayerInfo *ClientInfo::getPlayerInfo()
 
    return mPlayerInfo;
 }
+
+// Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed. // TODO: Move this elsewhere
+bool ClientInfo::sEngineerDeployObject(U32 type)
+{
+   Ship *ship = dynamic_cast<Ship *>(getShip());
+   if(!ship)                                          // Not a good sign...
+      return false;                                   // ...bail
+
+   GameType *gameType = ship->getGame()->getGameType();
+
+   if(!gameType->isEngineerEnabled())          // Something fishy going on here...
+      return false;                                   // ...bail
+
+   EngineerModuleDeployer deployer;
+
+   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, type)) 
+      if(!isRobot())
+         getConnection()->s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
+
+   else if(deployer.deployEngineeredItem(ship->getClientInfo(), type))
+   {
+      // Announce the build
+      StringTableEntry msg( "%e0 has engineered a %e1." );
+
+      Vector<StringTableEntry> e;
+      e.push_back(getName());
+      e.push_back(type == EngineeredTurret ? "turret" : "force field");
+   
+
+      gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
+
+      return true;
+   }
+
+   // else... fail silently?
+   return false;
+}
+
+
+void ClientInfo::sRequestLoadout(Vector<U32> &loadout)
+{
+   mLoadout = loadout;
+   GameType *gt = gServerGame->getGameType();
+   if(gt)
+      gt->SRV_clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
+
+   // Check if ship is in a loadout zone, in which case we'll make the loadout take effect immediately
+   //Ship *ship = dynamic_cast<Ship *>(this->getControlObject());
+
+   //if(ship && ship->isInZone(LoadoutZoneType))
+      //ship->setLoadout(loadout);
+}
+
 
 
 // Return pointer to statistics tracker 
@@ -376,6 +444,7 @@ void RemoteClientInfo::setRating(F32 rating)
 {
    mRating = rating;
 }
+
 
 
 // Voice chat stuff -- these will be invalid on the server side
@@ -765,11 +834,7 @@ void Game::countTeamPlayers()
          if(isServer())
          {
             const F32 BASE_RATING = .1f;
-
-            GameConnection *conn = clientInfo->getConnection();
-
-            if(conn)
-               team->addRating(max(conn->getCalculatedRating(), BASE_RATING));    
+            team->addRating(max(clientInfo->getCalculatedRating(), BASE_RATING));    
          }
       }
    }
@@ -1903,7 +1968,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 // Highest ratings first -- runs on server only
 static S32 QSORT_CALLBACK RatingSort(boost::shared_ptr<ClientInfo> *a, boost::shared_ptr<ClientInfo> *b)
 {
-   F32 diff = (*a)->getConnection()->getCalculatedRating() - (*b)->getConnection()->getCalculatedRating();
+   F32 diff = (*a)->getCalculatedRating() - (*b)->getCalculatedRating();
 
    if(diff == 0) 
       return 0;
@@ -1924,15 +1989,16 @@ void ServerGame::cycleLevel(S32 nextLevel)
    {
       for(S32 i = 0; i < getClientCount(); i++)
       {
-         GameConnection *conn = getClientInfo(i)->getConnection();
+         ClientInfo *clientInfo = getClientInfo(i);
+         GameConnection *conn = clientInfo->getConnection();
 
          conn->resetGhosting();
-         conn->mOldLoadout.clear();
+         clientInfo->mOldLoadout.clear();
          
-         conn->resetLoadout();
+         clientInfo->resetLoadout();
          conn->switchedTeamCount = 0;
 
-         getClientInfo(i)->setScore(0); // Reset player scores, for non team game types
+         clientInfo->setScore(0); // Reset player scores, for non team game types
       }
    }
 

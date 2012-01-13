@@ -52,7 +52,6 @@ private:
    U32 mSuicides;       // Self kills
    U32 mFratricides;    // Tammate kills
 
-
 public:
    U32 mFlagPickup;
    U32 mFlagDrop;
@@ -95,6 +94,8 @@ public:
    void addFratricide();   // Player killed teammate
    U32 getFratricides();   // Report cumulated fratricides
 
+
+   F32 getCalculatedRating();
 
    Vector<U32> getShotsVector();
    Vector<U32> getHitsVector();

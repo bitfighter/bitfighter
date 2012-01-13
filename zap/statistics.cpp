@@ -178,18 +178,39 @@ U32 Statistics::getSuicides()
 }
 
 
-
 // Player killed teammate
 void Statistics::addFratricide()
 {
    mFratricides++;
 }
 
+
 // Report cumulated fratricides
 U32 Statistics::getFratricides()
 {
    return mFratricides;
 }
+
+
+// Return a measure of a player's strength.
+// Right now this is roughly a kill - death / kill + death ratio
+// Better might be: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
+F32 Statistics::getCalculatedRating()
+{
+   // Total kills = mKills + mFratricides (but we won't count mFratricides)
+   // Counted deaths = mDeaths - mSuicides (mSuicides are included in mDeaths and we want to ignore them)
+   // Use F32 here so we don't underflow with U32 math
+   F32 totalKillsAndDeaths = F32(mKills) + (F32(mDeaths) - F32(mSuicides));
+
+   // Initial case: you haven't killed or died -- go out and prove yourself, lad!
+   if(totalKillsAndDeaths == 0)
+      return 0;
+
+   // Standard case
+   else   
+      return F32(mKills) - (F32(mDeaths) - F32(mSuicides)) / totalKillsAndDeaths;
+}
+
 
 void Statistics::resetStatistics()
 {

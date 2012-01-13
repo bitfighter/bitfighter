@@ -396,13 +396,13 @@ void GameObject::setControllingClient(GameConnection *c)         // This only ge
 }
 
 
-void GameObject::setOwner(GameConnection *connection)
+void GameObject::setOwner(ClientInfo *clientInfo)
 {
-   mOwner = connection;
+   mOwner = clientInfo;
 }
 
 
-GameConnection *GameObject::getOwner()
+ClientInfo *GameObject::getOwner()
 {
    return mOwner;
 }
@@ -582,12 +582,11 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc obj
       localInfo.damageAmount   *= t;
 
       // Adjust for self-damage
-      GameConnection *damagerOwner = info.damagingObject->getOwner();
-      GameConnection *victimOwner = foundObject->getOwner();
+      ClientInfo *damagerOwner = info.damagingObject->getOwner();
+      ClientInfo *victimOwner = foundObject->getOwner();
 
       if(victimOwner && damagerOwner == victimOwner)
          localInfo.damageAmount *= localInfo.damageSelfMultiplier;
-
 
       if(isShipType(foundObject->getObjectTypeNumber()))
          shipsHit++;

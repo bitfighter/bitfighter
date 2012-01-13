@@ -161,15 +161,21 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shoote
    hasBounced = false;
    mShooter = shooter;
 
+   setOwner(NULL);
+
    // Copy some attributes from the shooter
    if(shooter)
    {
-      setOwner(shooter->getOwner());
+      if(isShipType(shooter->getObjectTypeNumber()))
+      {
+         Ship *ship = static_cast<Ship *>(shooter);
+         setOwner(ship->getClientInfo());
+      }
+
       mTeam = shooter->getTeam();
       mKillString = shooter->getKillString();
    }
-   else
-      setOwner(NULL);
+      
 
    mType = GameWeapon::weaponInfo[type].projectileType;
    mWeaponType = type;
@@ -724,7 +730,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 
       if(getOwner())
          for(S32 i = 0; i < hits; i++)
-            getOwner()->getClientInfo()->getStatistics()->countHit(mWeaponType);
+            getOwner()->getStatistics()->countHit(mWeaponType);
    }
    exploded = true;
 }
@@ -949,7 +955,7 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
-      stream->writeStringTableEntry(getOwner() ? getOwner()->getClientInfo()->getName() : "");
+      stream->writeStringTableEntry(getOwner() ? getOwner()->getName() : "");
    }
 
    stream->writeFlag(mArmed);
@@ -1251,12 +1257,8 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    if(stream->writeFlag(updateMask & InitialMask))
    {
       writeThisTeam(stream);
-      //RDW I want to kill the compiler that allows binding NULL to a reference.
-      //stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : NULL);
-      // Just don't kill the coder who keeps doing it! -CE
-      // And remember, pack and unpack must match, so if'ing this out won't work unless we do the same on unpack.
-      StringTableEntryRef noOwner = StringTableEntryRef("");
-      stream->writeStringTableEntry(getOwner() ? getOwner()->getClientInfo()->getName() : noOwner);
+      static StringTableEntryRef NO_OWNER = StringTableEntryRef("");
+      stream->writeStringTableEntry(getOwner() ? getOwner()->getName() : NO_OWNER);
    }
    return ret;
 }

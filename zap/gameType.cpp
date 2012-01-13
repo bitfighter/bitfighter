@@ -1136,7 +1136,7 @@ void GameType::onAddedToGame(Game *game)
 // Server only! (overridden in NexusGame)
 void GameType::spawnShip(ClientInfo *clientInfo)
 {
-      GameConnection *conn = clientInfo->getConnection();      // Will be NULL for robots
+   GameConnection *conn = clientInfo->getConnection();      // Will be NULL for robots
 
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delay bots.
    if(!clientInfo->isRobot())
@@ -1160,7 +1160,7 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isRobot())
    {
       Robot *robot = (Robot *) clientInfo->getShip();
-      //robot->setOwner(conn);
+      robot->setOwner(NULL);           // Probably not needed
       robot->setTeam(teamIndex);
       spawnRobot(robot);
    }
@@ -1171,15 +1171,15 @@ void GameType::spawnShip(ClientInfo *clientInfo)
       clientInfo->getConnection()->setControlObject(newShip);
       clientInfo->setShip(newShip);
 
-      newShip->setOwner(clientInfo->getConnection());
+      newShip->setOwner(clientInfo);
       newShip->addToGame(mGame, mGame->getGameObjDatabase());
   
 
       if(!levelHasLoadoutZone())
-         setClientShipLoadout(conn, conn->getLoadout());      // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+         setClientShipLoadout(clientInfo, clientInfo->getLoadout());      // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
       else
-         setClientShipLoadout(conn, conn->mOldLoadout, true); // Still using old loadout because we haven't entered a loadout zone yet...
-      conn->mOldLoadout.clear();
+         setClientShipLoadout(clientInfo, clientInfo->mOldLoadout, true); // Still using old loadout because we haven't entered a loadout zone yet...
+      clientInfo->mOldLoadout.clear();
    }
 }
 
@@ -1224,10 +1224,10 @@ Point GameType::getSpawnPoint(S32 teamIndex)
 // This gets run when the ship hits a loadout zone -- server only
 void GameType::SRV_updateShipLoadout(GameObject *shipObject)
 {
-   GameConnection *gc = shipObject->getControllingClient();
+   ClientInfo *clientInfo = shipObject->getOwner();
 
-   if(gc)
-      setClientShipLoadout(gc, gc->getLoadout());
+   if(clientInfo)
+      setClientShipLoadout(clientInfo, clientInfo->getLoadout());
 }
 
 
@@ -1275,9 +1275,9 @@ string GameType::validateLoadout(const Vector<U32> &loadout)
 
 // Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
 // Server only, called in direct response to request from client via c2sRequestLoadout()
-void GameType::SRV_clientRequestLoadout(GameConnection *conn, const Vector<U32> &loadout)
+void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout)
 {
-   Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
+   Ship *ship = clientInfo->getShip();
 
    if(ship)
    {
@@ -1285,22 +1285,22 @@ void GameType::SRV_clientRequestLoadout(GameConnection *conn, const Vector<U32> 
 
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
-            setClientShipLoadout(conn, loadout, false);
+            setClientShipLoadout(clientInfo, loadout, false);
    }
 }
 
 
 // Called from above and elsewhere
 // Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
-void GameType::setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent)
+void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout, bool silent)
 {
    if(validateLoadout(loadout) != "")
       return;
 
-   Ship *theShip = dynamic_cast<Ship *>(conn->getControlObject());
+   Ship *ship = clientInfo->getShip();
 
-   if(theShip)
-      theShip->setLoadout(loadout, silent);
+   if(ship)
+      ship->setLoadout(loadout, silent);
 }
 
 
@@ -1612,8 +1612,8 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
    if(!damager)            // Anonomyous projectiles are deadly to all!
       return true;
 
-   GameConnection *damagerOwner = damager->getOwner();
-   GameConnection *victimOwner = victim->getOwner();
+   ClientInfo *damagerOwner = damager->getOwner();
+   ClientInfo *victimOwner = victim->getOwner();
 
    if(!victimOwner)     // Perhaps the victim is dead?!?
       return true;
@@ -1646,7 +1646,7 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 // Handle scoring when ship is killed
 void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clientObject, GameObject *killerObject)
 {
-   ClientInfo *killer = killerObject && killerObject->getOwner() ? killerObject->getOwner()->getClientInfo() : NULL;
+   ClientInfo *killer = killerObject ? killerObject->getOwner() : NULL;
 
    victim->getStatistics()->addDeath();
 
@@ -3304,7 +3304,7 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
       mScores.push_back(info->getScore());
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back(info->getConnection()->getCalculatedRating());
+      mRatings.push_back(info->getCalculatedRating());
    }
 
    // Next come the robots ... Robots is part of mClientList

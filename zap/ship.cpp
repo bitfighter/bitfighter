@@ -1023,8 +1023,8 @@ void Ship::damageObject(DamageInfo *theInfo)
       }
    }
 
-   GameConnection *damagerOwner = theInfo->damagingObject->getOwner();
-   GameConnection *victimOwner = this->getOwner();
+   ClientInfo *damagerOwner = theInfo->damagingObject->getOwner();
+   ClientInfo *victimOwner = this->getOwner();
 
    // Healing things do negative damage, thus adding to health
    mHealth -= damageAmount * ((victimOwner && damagerOwner == victimOwner) ? theInfo->damageSelfMultiplier : 1);
@@ -2334,11 +2334,11 @@ S32 LuaShip::getCurrLoadout(lua_State *L)
 S32 LuaShip::getReqLoadout(lua_State *L)
 {
    U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
-   GameConnection *gc = thisShip->getOwner();
+   ClientInfo *clientInfo = thisShip->getOwner();
 
-   const Vector<U32> requestedLoadout = gc ? gc->getLoadout() : Vector<U32>();
+   const Vector<U32> requestedLoadout = clientInfo ? clientInfo->getLoadout() : Vector<U32>();
 
-   if(!gc || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout
+   if(!clientInfo || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout
       return getCurrLoadout(L);
 
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)

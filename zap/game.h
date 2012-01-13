@@ -112,7 +112,7 @@ class ClientInfo
 private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
    Statistics mStatistics;       // Statistics tracker
-   Ship *mShip;
+   SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
    Vector<U32> mLoadout;
 
 protected:
@@ -145,12 +145,16 @@ public:
    const Vector<U32> &getLoadout();
    Timer respawnTimer;
 
+   void resetLoadout();
+   Vector<U32> mOldLoadout;      // Server: to respawn with old loadout  Client: to check if using same loadout configuration
+   void sRequestLoadout(Vector<U32> &loadout);
 
    Ship *getShip();
    void setShip(Ship *ship);
 
    virtual void setRating(F32 rating) = 0;
    virtual F32 getRating() = 0;
+   F32 getCalculatedRating();
 
    S32 getPing();
    void setPing(S32 ping);
@@ -173,6 +177,9 @@ public:
    Statistics *getStatistics();      // Return pointer to statistics tracker 
 
    LuaPlayerInfo *getPlayerInfo();
+
+   bool sEngineerDeployObject(U32 type);      // Player using engineer module, robots use this, bypassing the net interface. True if successful.
+
 
    Nonce *getId();
 

@@ -46,6 +46,7 @@ namespace Zap
 
 class GridDatabase;
 class Game;
+class ClientInfo;
 
 
 // START GAME OBJECT TYPES
@@ -199,13 +200,15 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class ClientInfo;
+
 class GameObject : public virtual BfObject, public NetObject
 {
    typedef NetObject Parent;
 
 private:
    SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
-   SafePtr<GameConnection> mOwner;
+   ClientInfo *mOwner;
    U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
 
    U32 mCreationTime;
@@ -252,8 +255,8 @@ public:
    SafePtr<GameConnection> getControllingClient();
    void setControllingClient(GameConnection *c);         // This only gets run on the server
 
-   void setOwner(GameConnection *c);
-   GameConnection *getOwner();
+   void setOwner(ClientInfo *clientInfo);
+   ClientInfo *getOwner();
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 

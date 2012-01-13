@@ -381,10 +381,11 @@ public:
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
-   void SRV_clientRequestLoadout(GameConnection *conn, const Vector<U32> &loadout);
+   void SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout);
    void SRV_updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
    string validateLoadout(const Vector<U32> &loadout);
-   void setClientShipLoadout(GameConnection *conn, const Vector<U32> &loadout, bool silent = false);
+   void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout, bool silent = false);
+
 
    bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
@@ -432,9 +433,9 @@ public:
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
    // Not all of these actually used?
-   void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);               // used
+   void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);              
+   void updateScore(ClientInfo *clientInfo, ScoringEvent scoringEvent, S32 data = 0); 
    void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0);
-   void updateScore(ClientInfo *player, ScoringEvent event, S32 data = 0);        // used
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam

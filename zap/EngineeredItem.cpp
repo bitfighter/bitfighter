@@ -230,10 +230,10 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
 
 // Runs on server
 // Only run after canCreateObjectAtLocation, which checks for errors and sets mDeployPosition
-bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U32 objectType)
+bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 objectType)
 {
    // Do some basic crash-proofing sanity checks first
-   Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());
+   Ship *ship = dynamic_cast<Ship *>(clientInfo->getShip());
    if(!ship)
       return false;
 
@@ -244,19 +244,21 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
       case EngineeredTurret:
          deployedObject = new Turret(ship->getTeam(), mDeployPosition, mDeployNormal);    // Deploy pos/norm calc'ed in canCreateObjectAtLocation()
          break;
+
       case EngineeredForceField:
          deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
          break;
+
       default:
          return false;
    }
 
-   deployedObject->setOwner(connection);
+   deployedObject->setOwner(clientInfo);
    deployedObject->computeExtent();
 
    if(!deployedObject)              // Something went wrong
    {
-      connection->s2cDisplayErrorMessage("Error deploying object.");
+      clientInfo->getConnection()->s2cDisplayErrorMessage("Error deploying object.");
       delete deployedObject;
       return false;
    }
@@ -580,18 +582,15 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDisabled();
 
       // Handle scoring
-      if( isTurret() && di->damagingObject && di->damagingObject->getOwner() && di->damagingObject->getOwner()->getControlObject() )
+      if(isTurret() && di->damagingObject && di->damagingObject->getOwner())
       {
-         Ship *s = dynamic_cast<Ship *>(di->damagingObject->getOwner()->getControlObject());
-         if(s)
-         {
-            GameType *gt = getGame()->getGameType();
+         ClientInfo *player = di->damagingObject->getOwner();
+         GameType *gt = getGame()->getGameType();
 
-            if(gt->isTeamGame() && s->getTeam() == getTeam())
-               gt->updateScore(s, GameType::KillOwnTurret);
-            else
-               gt->updateScore(s, GameType::KillEnemyTurret);
-         }
+         if(gt->isTeamGame() && player->getTeamIndex() == getTeam())
+            gt->updateScore(player, GameType::KillOwnTurret);
+         else
+            gt->updateScore(player, GameType::KillEnemyTurret);
       }
    }
    else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed

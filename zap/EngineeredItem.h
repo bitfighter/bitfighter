@@ -374,7 +374,7 @@ private:
 
 public:
    bool canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType);    // Check potential deployment position
-   bool deployEngineeredItem(GameConnection *connection, U32 objectType);  // Deploy!
+   bool deployEngineeredItem(ClientInfo *clientInfo, U32 objectType);  // Deploy!
    string getErrorMessage();
 
    static bool findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal);

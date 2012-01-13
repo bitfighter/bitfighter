@@ -49,7 +49,7 @@ namespace Zap
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
-GameConnection::GameConnection() : mClientInfo(boost::shared_ptr<ClientInfo>(new LocalClientInfo(this, false)))
+GameConnection::GameConnection()
 {
    TNLAssert(gServerGame, "Client should not be using this constructor!");
 
@@ -60,6 +60,10 @@ GameConnection::GameConnection() : mClientInfo(boost::shared_ptr<ClientInfo>(new
    mChatMute = false;
    mChatTimer = 0;
    mChatTimerBlocked = false;
+
+   // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
+   // in the arguments makes VC++ nervous, which in turn makes me nervous.
+   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(this, false));
 
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
@@ -151,15 +155,6 @@ GameConnection::~GameConnection()
    }
 
    delete mDataBuffer;
-}
-
-
-void GameConnection::resetLoadout()
-{
-   mLoadout.clear();
-
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      mLoadout.push_back(DefaultLoadout[i]);
 }
 
 
@@ -421,44 +416,7 @@ void GameConnection::changeParam(const char *param, ParamType type)
 TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type), (type), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   sEngineerDeployObject(type);
-}
-
-
-// Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed.  Why is this in gameConnection???
-bool GameConnection::sEngineerDeployObject(U32 type)
-{
-   Ship *ship = dynamic_cast<Ship *>(getControlObject());
-   if(!ship)                                          // Not a good sign...
-      return false;                                   // ...bail
-
-   GameType *gameType = ship->getGame()->getGameType();
-
-   if(!gameType->isEngineerEnabled())          // Something fishy going on here...
-      return false;                                   // ...bail
-
-   EngineerModuleDeployer deployer;
-
-   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, type))     
-      s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
-
-   else if(deployer.deployEngineeredItem(this, type))
-   {
-      // Announce the build
-      StringTableEntry msg( "%e0 has engineered a %e1." );
-
-      Vector<StringTableEntry> e;
-      e.push_back(mClientInfo->getName());
-      e.push_back(type == EngineeredTurret ? "turret" : "force field");
-   
-
-      gameType->broadcastMessage(ColorAqua, SFXNone, msg, e);
-
-      return true;
-   }
-
-   // else... fail silently?
-   return false;
+   getClientInfo()->sEngineerDeployObject(type);
 }
 
 
@@ -875,30 +833,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCommanderMap, (), (),
    mInCommanderMap = true;
 }
 
+
 TNL_IMPLEMENT_RPC(GameConnection, c2sReleaseCommanderMap, (), (),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    mInCommanderMap = false;
 }
 
+
 // Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U32> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   sRequestLoadout(loadout);
+   getClientInfo()->sRequestLoadout(loadout);
 }
-void GameConnection::sRequestLoadout(Vector<U32> &loadout)
-{
-   mLoadout = loadout;
-   GameType *gt = gServerGame->getGameType();
-   if(gt)
-      gt->SRV_clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
 
-   // Check if ship is in a loadout zone, in which case we'll make the loadout take effect immediately
-   //Ship *ship = dynamic_cast<Ship *>(this->getControlObject());
-
-   //if(ship && ship->isInZone(LoadoutZoneType))
-      //ship->setLoadout(loadout);
-}
 
 Color colors[] =
 {
@@ -1774,78 +1722,6 @@ bool GameConnection::wantsScoreboardUpdates()
 void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 {
    mWantsScoreboardUpdates = wantsUpdates;
-}
-
-
-//void GameConnection::addKill()
-//{
-//   mKills++;
-//   mStatistics.addKill();
-//}
-//
-//
-//void GameConnection::addFratricide()
-//{
-//   mFratricides++;
-//   mStatistics.addFratricide();
-//}
-//
-//
-//void GameConnection::addDeath()
-//{
-//   mDeaths++;
-//   mStatistics.addDeath();
-//}
-//
-//
-//void GameConnection::addSuicide()
-//{
-//   mSuicides++;
-//   mStatistics.addSuicide();
-//}
-//
-//
-//S32 GameConnection::getKills()
-//{
-//   return mKills;
-//}
-//
-//
-//S32 GameConnection::getFratricides()
-//{
-//   return mFratricides;
-//}
-//
-//
-//S32 GameConnection::getDeaths()
-//{
-//   return mDeaths;
-//}
-//
-//
-//S32 GameConnection::getSuicides()
-//{
-//   return mSuicides;
-//}
-
-
-// Return a measure of a player's strength.
-// Right now this is roughly a kill - death / kill + death ratio
-// Better: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system
-F32 GameConnection::getCalculatedRating()
-{
-   // Total kills = mKills + mFratricides (but we won't count mFratricides)
-   // Counted deaths = mDeaths - mSuicides (mSuicides are included in mDeaths and we want to ignore them)
-
-   S32 totalKillsAndDeaths = mKills + (mDeaths - mSuicides);
-
-   // Initial case: you haven't killed or died -- go out and prove yourself, lad!
-   if(totalKillsAndDeaths == 0)
-      return 0;
-
-   // Standard case
-   else   
-      return F32(mKills - (mDeaths - mSuicides)) / F32(totalKillsAndDeaths);
 }
 
 

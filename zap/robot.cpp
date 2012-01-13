@@ -1062,16 +1062,16 @@ S32 LuaRobot::unsubscribe(lua_State *L)
    return 0;
 }
 
+
 S32 LuaRobot::engineerDeployObject(lua_State *L)
 {
    static const char *methodName = "Robot:engineerDeployObject()";
    checkArgCount(L, 1, methodName);
    S32 type = (S32)getInt(L, 0, methodName);
 
-   if(! thisRobot->getOwner())
-      return returnBool(L, false);
    return returnBool(L, thisRobot->getOwner()->sEngineerDeployObject(type));
 }
+
 
 S32 LuaRobot::dropItem(lua_State *L)
 {
@@ -1083,6 +1083,7 @@ S32 LuaRobot::dropItem(lua_State *L)
 
    return 0;
 }
+
 
 S32 LuaRobot::copyMoveFromObject(lua_State *L)
 {

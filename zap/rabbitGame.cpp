@@ -212,14 +212,14 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
    if(!damager)
       return true;
 
-   GameConnection *damagerOwner = damager->getOwner();
-   GameConnection *victimOwner = victim->getOwner();
+   ClientInfo *damagerOwner = damager->getOwner();
+   ClientInfo *victimOwner = victim->getOwner();
 
    if( (!damagerOwner || !victimOwner) || (damagerOwner == victimOwner))      // Can damage self
       return true;
 
-   Ship *attackShip = dynamic_cast<Ship *>(damagerOwner->getControlObject());
-   Ship *victimShip = dynamic_cast<Ship *>(victimOwner->getControlObject());
+   Ship *attackShip = damagerOwner->getShip();
+   Ship *victimShip = victimOwner->getShip();
 
    if(!attackShip || !victimShip)
       return true;
@@ -314,20 +314,22 @@ void RabbitGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
    }
 }
 
+
 void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
    Ship *killerShip = NULL;
-   GameConnection *ko = killerObject->getOwner();
+   ClientInfo *ko = killerObject->getOwner();
+
    if(ko)
-      killerShip = dynamic_cast<Ship *>(ko->getControlObject());
+      killerShip = ko->getShip();
 
    Ship *victimShip = dynamic_cast<Ship *>(clientObject);
 
    if(killerShip)
    {
-      if (shipHasFlag(killerShip))
+      if(shipHasFlag(killerShip))
       {
          // Rabbit killed another person
          onFlaggerKill(killerShip);
