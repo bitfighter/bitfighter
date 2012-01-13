@@ -541,38 +541,41 @@ void GameType::idle_server(U32 deltaT)
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
-      GameConnection *conn = clientInfo->getConnection();
-
-      if(needsScoreboardUpdate)
-      {
-         if(conn->isEstablished())    // robots don't have connection
-         {
-            clientInfo->setPing((U32) conn->getRoundTripTime());
-
-            if(clientInfo->getPing() > MaxPing || conn->lostContact())
-               clientInfo->setPing(MaxPing);
-         }
-
-         // Send scores/pings to client if game is over, or client has requested them
-         if(mGameOver || conn->wantsScoreboardUpdates())
-            updateClientScoreboard(clientInfo);
-      }
-
-
-      // Respawn dead players
-      if(conn->respawnTimer.update(deltaT))           // Need to respawn?
-         spawnShip(clientInfo);                       
-                                                         
-      if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
-         if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
-         {                                            
-            NetObject::setRPCDestConnection(conn);    // Limit who gets this message
-            s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
-            NetObject::setRPCDestConnection(NULL);
-         }
 
       if(!clientInfo->isRobot())
+      {
+         GameConnection *conn = clientInfo->getConnection();
+
+         if(needsScoreboardUpdate)
+         {
+            if(conn->isEstablished())    // robots don't have connection
+            {
+               clientInfo->setPing((U32) conn->getRoundTripTime());
+
+               if(clientInfo->getPing() > MaxPing || conn->lostContact())
+                  clientInfo->setPing(MaxPing);
+            }
+
+            // Send scores/pings to client if game is over, or client has requested them
+            if(mGameOver || conn->wantsScoreboardUpdates())
+               updateClientScoreboard(clientInfo);
+         }
+
+    
+         // Respawn dead players
+         if(conn->respawnTimer.update(deltaT))           // Need to respawn?
+            spawnShip(clientInfo);                       
+                                                         
+         if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
+            if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
+            {                                            
+               NetObject::setRPCDestConnection(conn);    // Limit who gets this message
+               s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
+               NetObject::setRPCDestConnection(NULL);
+            }
+
          conn->addTimeSinceLastMove(deltaT);             // Increment timer       
+      }
    }
 
 
