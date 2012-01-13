@@ -372,7 +372,7 @@ S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount()
 // Return a table listing all players on this team
 S32 LuaTeamInfo::getPlayers(lua_State *L)
 {
-   TNLAssert(gServerGame->getPlayerCount() == (U32)gServerGame->getClientCount(), "Mismatched player counts!");
+   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getClientCount(), "Mismatched player counts!");
 
    S32 pushed = 0;
 

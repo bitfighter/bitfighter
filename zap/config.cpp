@@ -113,7 +113,7 @@ IniSettings::IniSettings()
    levelChangePassword = "";
    levelDir = "";
 
-   U32 connectionSpeed = 0;
+   connectionSpeed = 0;
 
    defaultRobotScript = "s_bot.bot";            
    globalLevelScript = "";

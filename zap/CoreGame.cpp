@@ -348,7 +348,7 @@ EditorAttributeMenuUI *CoreItem::getAttributeMenu()
 // Get the menu looking like what we want
 void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   attributeMenu->getMenuItem(0)->setIntValue(S32(mStartingHealth * DamageReductionRatio));
+   attributeMenu->getMenuItem(0)->setIntValue(S32(mStartingHealth * DamageReductionRatio + 0.5));
 }
 
 
@@ -362,7 +362,7 @@ void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Render some attributes when item is selected but not being edited
 string CoreItem::getAttributeString()
 {
-   return "Health: " + itos(S32(mStartingHealth * DamageReductionRatio));
+   return "Health: " + itos(S32(mStartingHealth * DamageReductionRatio + 0.5));
 }
 
 #endif
@@ -626,7 +626,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    mTeam = atoi(argv[0]);
-   setStartingHealth(F32(atoi(argv[1])) / DamageReductionRatio);
+   setStartingHealth(atof(argv[1]) / DamageReductionRatio);
 
    if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
@@ -637,7 +637,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + itos(S32(mStartingHealth * DamageReductionRatio)) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(mTeam) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
 }
 
 
