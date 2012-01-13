@@ -250,7 +250,7 @@ GameTypes CoreGameType::getGameType() const
 
 const char *CoreGameType::getShortName() const
 {
-   return "C";
+   return "Core";
 }
 
 
