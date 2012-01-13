@@ -1862,7 +1862,7 @@ void EditorUserInterface::render()
 
          TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-         S32 prevTeam;
+         S32 prevTeam = -10;
 
          // Draw spybug visibility ranges first, underneath everything else
          for(S32 i = 0; i < fillVector.size(); i++)

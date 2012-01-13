@@ -124,8 +124,6 @@ QueryServersUserInterface::QueryServersUserInterface(ClientGame *game) : UserInt
 
    mServersPerPage = 8;    // To start with, anyway...
 
-   static const S32 MIN_PAD = 3;
-
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
    columns.push_back(ColumnInfo("STAT", 400));
