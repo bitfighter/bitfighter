@@ -45,7 +45,7 @@ Timer::~Timer()
 
 bool Timer::update(U32 timeDelta)
 {
-   if (mCurrentCounter == 0)
+   if(mCurrentCounter == 0)
       return false;
 
    if (timeDelta >= mCurrentCounter)
