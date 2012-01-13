@@ -214,8 +214,6 @@ public:
 
    void endOfGameScoringHandler();
 
-   Timer respawnTimer;
-
 
    virtual void onEndGhosting();    // Gets run when game is over
 

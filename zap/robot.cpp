@@ -1481,7 +1481,6 @@ bool Robot::initialize(Point &pos)
 {
    try
    {
-      //respawnTimer.clear();
       flightPlan.clear();
 
       mCurrentZone = U16_MAX;   // Correct value will be calculated upon first request

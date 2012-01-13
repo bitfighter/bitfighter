@@ -143,6 +143,8 @@ public:
    void addScore(S32 score);
 
    const Vector<U32> &getLoadout();
+   Timer respawnTimer;
+
 
    Ship *getShip();
    void setShip(Ship *ship);

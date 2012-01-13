@@ -541,6 +541,9 @@ void GameType::idle_server(U32 deltaT)
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
+      // Respawn dead players
+      if(clientInfo->respawnTimer.update(deltaT))           // Need to respawn?
+         spawnShip(clientInfo);                       
 
       if(!clientInfo->isRobot())
       {
@@ -561,11 +564,6 @@ void GameType::idle_server(U32 deltaT)
                updateClientScoreboard(clientInfo);
          }
 
-    
-         // Respawn dead players
-         if(conn->respawnTimer.update(deltaT))           // Need to respawn?
-            spawnShip(clientInfo);                       
-                                                         
          if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
             if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
             {                                            
@@ -1157,6 +1155,7 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
+   clientInfo->respawnTimer.clear();   // Prevent spawning a second copy of the same player ship
 
    if(clientInfo->isRobot())
    {
@@ -1167,8 +1166,6 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    }
    else
    {
-      conn->respawnTimer.clear();   // Prevent spawning a second copy of the same player ship
-
       // Player's name, team, and spawn location
       Ship *newShip = new Ship(clientInfo->getName(), clientInfo->isAuthenticated(), teamIndex, spawnPoint);
       clientInfo->getConnection()->setControlObject(newShip);
@@ -1694,7 +1691,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
       s2cKillMessage(victim->getName(), NULL, killerDescr);
    }
 
-   victim->getConnection()->respawnTimer.reset(RespawnDelay);
+   victim->respawnTimer.reset(RespawnDelay);
 }
 
 
@@ -2125,7 +2122,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       if(ship->isRobot())     // Players get a new ship, robots reuse the same object
          ship->setMaskBits(Ship::ChangeTeamMask);
       else
-         client->getConnection()->respawnTimer.clear();    // If we've just died, this will keep a second copy of ourselves from appearing
+         client->respawnTimer.clear();    // If we've just died, this will keep a second copy of ourselves from appearing
 
       ship->kill();           // Destroy the old ship
    }
