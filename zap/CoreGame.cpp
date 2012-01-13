@@ -26,6 +26,8 @@
 #include "CoreGame.h"
 #include "item.h"
 #include "projectile.h"
+#include "game.h"
+#include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -248,7 +250,7 @@ GameTypes CoreGameType::getGameType() const
 
 const char *CoreGameType::getShortName() const
 {
-   return "C";
+   return "Core";
 }
 
 
@@ -312,14 +314,18 @@ CoreItem *CoreItem::clone() const
 
 void CoreItem::renderItem(const Point &pos)
 {
+#ifndef ZAP_DEDICATED
    if(!hasExploded)
       renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getCurrentTime());
+#endif
 }
 
 
 void CoreItem::renderDock()
 {
+#ifndef ZAP_DEDICATED
    renderCore(getVert(0), 5, &Colors::white, getGame()->getCurrentTime());
+#endif
 }
 
 
@@ -462,6 +468,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
 void CoreItem::doExplosion(const Point &pos)
 {
+#ifndef ZAP_DEDICATED
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
@@ -501,6 +508,7 @@ void CoreItem::doExplosion(const Point &pos)
    game->emitBlast(blastPoint, 600 - 100 * F32(mCurrentExplosionNumber));
    game->emitExplosion(blastPoint, 4.f - 1 * F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
 
+#endif
    mCurrentExplosionNumber++;
 }
 

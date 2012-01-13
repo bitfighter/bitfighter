@@ -770,7 +770,7 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 // 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
 void shutdownBitfighter()
 {
-   GameSettings *settings;
+   GameSettings *settings = NULL;
 
    // Avoid this function being called twice when we exit via methods 1-4 above
 #ifndef ZAP_DEDICATED

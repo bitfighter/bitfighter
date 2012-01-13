@@ -596,11 +596,6 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
       // Visualize rcPolyMesh
       for(S32 i = 0; i < mesh.npolys; i++)
       {
-         S32 firstx = S32_MAX;
-         S32 firsty = S32_MAX;
-         S32 lastx = S32_MAX;
-         S32 lasty = S32_MAX;
-
          S32 j = 0;
          botzone = NULL;
 

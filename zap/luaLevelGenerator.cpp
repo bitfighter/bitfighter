@@ -99,6 +99,9 @@ string LuaLevelGenerator::getScriptName()
 // Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
 bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error)
 {
+#ifdef ZAP_DEDICATED
+   return false;
+#else
    error = false;
    try
    {   
@@ -132,6 +135,7 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
       error = true;
       return true;
    }
+#endif
 }
 
 

@@ -361,7 +361,7 @@ void LuaObject::getStringVectorFromTable(lua_State *L, S32 index, const char *me
    lua_pop(L, 1);
 }
 
-
+/* // not used?
 static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
 {
   ToggleMenuItem *pushedMenuItem;
@@ -377,11 +377,14 @@ static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
 
   return pushedMenuItem;
 }
-
+*/
 
 // Pulls values out of the table at specified, verifies that they are MenuItems, and adds them to the menuItems vector
 bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems)
 {
+#ifdef ZAP_DEDICATED
+      throw LuaException("Dedicated server should not use MenuItem");
+#else
    if(!lua_istable(L, index))
    {
       char msg[256];
@@ -443,6 +446,7 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
    // We've got all the elements in the table, so clear it off the stack
    lua_pop(L, 1);
 
+#endif
    return true;
 }
 
