@@ -2265,13 +2265,12 @@ void EditorUserInterface::pasteSelection()
 
       EditorObject *newObject = mClipboard[i]->newCopy();
 
+      // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
+      newObject->addToGame(getGame(), getGame()->getEditorDatabase());
+
       newObject->setSelected(true);
       newObject->moveTo(pos - offset);
-
-      // onGeomChanged calls updateExtentInDatabase, which only sets the object's extent, but does not do anything with the database
-      // since object won't be in the database until addToGame is called, which will insert object with extent calculated in onGeomChanged
       newObject->onGeomChanged();                                          
-      newObject->addToGame(getGame(), getGame()->getEditorDatabase()); 
    }
 
    onSelectionChanged();
