@@ -208,7 +208,7 @@ F32 Statistics::getCalculatedRating()
 
    // Standard case
    else   
-      return F32(mKills) - (F32(mDeaths) - F32(mSuicides)) / totalKillsAndDeaths;
+      return ((F32)mKills - ((F32)mDeaths - (F32)mSuicides)) / totalKillsAndDeaths;
 }
 
 
