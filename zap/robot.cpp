@@ -1412,9 +1412,8 @@ Vector<Robot *> Robot::robots;
 
 
 // Constructor, runs on client and server
-Robot::Robot() : Ship("Robot", false, TEAM_NEUTRAL, Point(), 1, true), 
-                 LuaScriptRunner(), 
-                 mClientInfo(boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, true)))
+Robot::Robot() : Ship(new LocalClientInfo(NULL, true), TEAM_NEUTRAL, Point(), 1, true),   // LocalClientInfo deleted in destructor
+                 LuaScriptRunner() 
 {
    mHasSpawned = false;
    mObjectTypeNumber = RobotShipTypeNumber;
@@ -1448,9 +1447,8 @@ Robot::~Robot()
    }
 
    // Server only from here on down
-
    if(getGame() && getGame()->getGameType())
-      getGame()->getGameType()->serverRemoveClient(mClientInfo.get());
+      getGame()->getGameType()->serverRemoveClient(mClientInfo);
 
 
    // Remove this robot from the list of all robots
@@ -1465,6 +1463,7 @@ Robot::~Robot()
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
 
    delete mPlayerInfo;
+   delete mClientInfo;
 
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mScriptName.c_str(), robots.size());
 }
@@ -1982,13 +1981,6 @@ void Robot::addSteps(S32 steps)
 {
    mStepCount = steps * robots.size();
 }
-
-
-ClientInfo *Robot::getClientInfo()
-{
-   return mClientInfo.get();
-}
-
 
 
 };

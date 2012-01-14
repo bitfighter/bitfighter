@@ -638,17 +638,18 @@ S32 Game::getRobotCount() const
 
 ClientInfo *Game::getClientInfo(S32 index) 
 { 
-   return mClientInfos[index].get(); 
+   return mClientInfos[index]; 
 }
 
 
-const Vector<boost::shared_ptr<ClientInfo> > *Game::getClientInfos()
+const Vector<ClientInfo *> *Game::getClientInfos()
 {
    return &mClientInfos;
 }
 
 
-void Game::addToClientList(const boost::shared_ptr<ClientInfo> &clientInfo) 
+// ClientInfo will be a RemoteClientInfo in ClientGame and a LocalClientInfo in ServerGame
+void Game::addToClientList(ClientInfo *clientInfo) 
 { 
    mClientInfos.push_back(clientInfo);
 
@@ -672,7 +673,6 @@ S32 Game::findClientIndex(const StringTableEntry &name)
 
 void Game::removeFromClientList(const StringTableEntry &name)
 {
-   //logprintf("Removing client %s...", name.getString());
    S32 index = findClientIndex(name);
 
    if(index >= 0)
@@ -690,7 +690,7 @@ void Game::removeFromClientList(const StringTableEntry &name)
 void Game::removeFromClientList(ClientInfo *clientInfo)
 {
    for(S32 i = 0; i < mClientInfos.size(); i++)
-      if(mClientInfos[i].get() == clientInfo)
+      if(mClientInfos[i] == clientInfo)
       {
          if(mClientInfos[i]->isRobot())
             mRobotCount--;
@@ -717,7 +717,7 @@ ClientInfo *Game::findClientInfo(const StringTableEntry &name)
 {
    S32 index = findClientIndex(name);
 
-   return index >= 0 ? mClientInfos[index].get() : NULL;
+   return index >= 0 ? mClientInfos[index] : NULL;
 }
 
 
@@ -1973,8 +1973,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
-// Highest ratings first -- runs on server only
-static S32 QSORT_CALLBACK RatingSort(boost::shared_ptr<ClientInfo> *a, boost::shared_ptr<ClientInfo> *b)
+// Highest ratings first -- runs on server only, so these should be LocalClientInfos
+static S32 QSORT_CALLBACK RatingSort(ClientInfo **a, ClientInfo **b)
 {
    F32 diff = (*a)->getCalculatedRating() - (*b)->getCalculatedRating();
 
@@ -2050,7 +2050,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Clear team info for all clients
    resetAllClientTeams();
 
-   // Now add players to the gameType, from highest rating to lowest --> will attempt to create ratings-based teams
+   // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
    mClientInfos.sort(RatingSort);
 
    if(mGameType.isValid())
@@ -2248,8 +2248,10 @@ bool ServerGame::loadLevel(const string &levelFileName)
 }
 
 
-void ServerGame::addClient(boost::shared_ptr<ClientInfo> clientInfo)
+void ServerGame::addClient(ClientInfo *clientInfo)
 {
+   TNLAssert(!clientInfo->isRobot(), "This only gets called for players");
+
    GameConnection *conn = clientInfo->getConnection();
 
    // If client has level change or admin permissions, send a list of levels and their types to the connecting client
@@ -2263,7 +2265,7 @@ void ServerGame::addClient(boost::shared_ptr<ClientInfo> clientInfo)
 
    if(mGameType.isValid())
    {
-      mGameType->serverAddClient(clientInfo.get());
+      mGameType->serverAddClient(clientInfo);
       addToClientList(clientInfo);
    }
 

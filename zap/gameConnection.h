@@ -71,8 +71,8 @@ private:
    // For saving passwords
    string mLastEnteredPassword;
 
-   // These are only used on the server -- will be NULL on client
-   boost::shared_ptr<ClientInfo> mClientInfo;       
+   ClientInfo *mClientInfo;               // This could be either a LocalClientInfo or a RemoteClientInfo
+   bool mClientInfoWasCreatedLocally;     // Track whether we are responsible for deleting the clientInfo in the destructor
 
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // Sometimes this is NULL
@@ -87,7 +87,7 @@ private:
    bool mReadyForRegularGhosts;
 
    StringTableEntry mClientNameNonUnique; // For authentication, not unique name
-   //Nonce mClientId;
+
    bool mClientClaimsToBeVerified;
    bool mClientNeedsToBeVerified;
    bool mIsVerified;                      // True if the connection has a verified account confirmed by the master
@@ -175,7 +175,7 @@ public:
    void setServerName(StringTableEntry name);
 
    ClientInfo *getClientInfo();
-   void setClientInfo(boost::shared_ptr<ClientInfo> clientInfo);
+   void setClientInfo(ClientInfo *clientInfo);
 
    bool lostContact();
 

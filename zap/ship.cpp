@@ -81,9 +81,10 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 #endif
 
 // Constructor
-// Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
+// Note that on client, we use all default values set in declaration; on the server, these values will be provided
+// Most of these values are set in the initial packet set from the server (see packUpdate() below)
 // Also, the following is also run by robot's constructor
-Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, (F32)CollisionRadius), mSpawnPoint(p)
+Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, (F32)CollisionRadius), mSpawnPoint(p)
 {
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
@@ -99,11 +100,13 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
 #endif
 
+   mClientInfo = clientInfo;
+
    mTeam = team;
    mass = m;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
-   mIsAuthenticated = isAuthenticated;
+   mIsAuthenticated = false;//clientInfo->isAuthenticated();
 
    mIsRobot = isRobot;
 
@@ -185,13 +188,14 @@ void Ship::setDefaultLoadout()
 
 ClientInfo *Ship::getClientInfo()
 {
-   if(getControllingClient())
-      return getControllingClient()->getClientInfo();
-   else
-   {
-      TNLAssert(false, "No controlling client --> is this legit?");
-      return NULL;
-   }
+   return mClientInfo;
+   //if(getControllingClient())
+      //return getControllingClient()->getClientInfo();
+   //else
+   //{
+   //   TNLAssert(false, "No controlling client --> is this legit?");
+   //   return NULL;
+   //}
 }
 
 
@@ -469,6 +473,7 @@ void Ship::selectWeapon()
 
 StringTableEntry Ship::getName()
 {
+   logprintf("%p", getClientInfo());
    return getClientInfo()->getName();
 }
 
@@ -1151,6 +1156,9 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
+      // We'll need the name (or some other identifier) to match the ship to its clientInfo on the client side
+      stream->writeStringTableEntry(getClientInfo()->getName());
+
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
       {
@@ -1175,7 +1183,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          stream->writeFlag(mIsAuthenticated);
       }
    }
-
 
 
    if(stream->writeFlag(updateMask & LoadoutMask))    // Module configuration
@@ -1253,6 +1260,15 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(isInitialUpdate())
    {
       wasInitialUpdate = true;
+
+      // Read the name and use it to find the clientInfo that should be waiting for us... hopefully
+      StringTableEntry playerName;
+      stream->readStringTableEntry(&playerName);
+
+      ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
+      TNLAssert(clientInfo, "We need a clientInfo for this ship!");
+
+      mClientInfo = clientInfo;
 
       // Read mounted items:
       while(stream->readFlag())
@@ -1964,7 +1980,6 @@ void Ship::render(S32 layerIndex)
    GameConnection *conn = clientGame->getConnectionToServer();
    bool localShip = !(conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
-
 
    // Now adjust if using cloak module
    F32 alpha = isModulePrimaryActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();

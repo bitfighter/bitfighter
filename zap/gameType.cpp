@@ -1179,7 +1179,7 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    else
    {
       // Player's name, team, and spawn location
-      Ship *newShip = new Ship(clientInfo->getName(), clientInfo->isAuthenticated(), teamIndex, spawnPoint);
+      Ship *newShip = new Ship(clientInfo, teamIndex, spawnPoint);
       clientInfo->getConnection()->setControlObject(newShip);
       clientInfo->setShip(newShip);
 
@@ -2166,7 +2166,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    if(!clientGame) 
       return;
       
-   boost::shared_ptr<ClientInfo> clientInfo = boost::shared_ptr<ClientInfo>(new RemoteClientInfo(name, isAuthenticated, isRobot, isAdmin));  
+   ClientInfo *clientInfo = new RemoteClientInfo(name, isAuthenticated, isRobot, isAdmin);   // Deleted in s2cRemoveClient()
 
    clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
 
@@ -2233,9 +2233,13 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    if(!clientGame) 
       return;
 
+   ClientInfo *clientInfo = clientGame->findClientInfo(name);
+
    clientGame->onPlayerQuit(name);
 
    updateLeadingPlayerAndScore();
+
+   delete clientInfo;
 #endif
 }
 

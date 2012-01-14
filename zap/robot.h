@@ -117,7 +117,6 @@ private:
 
    static const S32 RobotRespawnDelay = 1500;
 
-   boost::shared_ptr<ClientInfo> mClientInfo;         
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
    bool mHasSpawned;
@@ -177,9 +176,6 @@ public:
    void setPointerToThis();
    void registerClasses();
    string runGetName();                   // Run bot's getName() function
-
-   ClientInfo *getClientInfo();
-
 
    S32 getScore();    // Return robot's score
    F32 getRating();   // Return robot's rating

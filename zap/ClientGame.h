@@ -76,8 +76,13 @@ private:
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
 
    string mLoginPassword;
-   boost::shared_ptr<ClientInfo> mClientInfo;         // ClientInfo object for local client
-   ClientInfo *mLocalRemoteClientInfo;                // ClientInfo pointer to the remote ClientInfo received from the server
+
+   // ClientGame has two ClientInfos for the local player; mClientInfo is a LocalClientInfo, which contains a rich array of information
+   // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
+   // set of info about the player, which is stored in a RemoteClientInfo.  So when a player connects, they get several RemoteClientInfos,
+   // one of which describes themselves.  It is occasionally useful to have a handle on that, which is what mLocalRemoteClientInfo provides.
+   ClientInfo *mClientInfo;               // ClientInfo object for local client
+   ClientInfo *mLocalRemoteClientInfo;    // ClientInfo pointer to the remote ClientInfo received from the server
 
    S32 findClientIndex(const StringTableEntry &name);
 
@@ -101,7 +106,6 @@ public:
    void setConnectionToServer(GameConnection *connection);
 
    ClientInfo *getClientInfo();
-   boost::shared_ptr<ClientInfo> getClientInfo_shared_ptr(); // Ugly on purpose... should rarely be used!
 
    ClientInfo *getLocalRemoteClientInfo();
 
@@ -148,7 +152,7 @@ public:
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
-   void onPlayerJoined(const boost::shared_ptr<ClientInfo> &clientInfo, bool isLocalClient, bool playAlert);
+   void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert);
    void onPlayerQuit(const StringTableEntry &name);
 
    void setSpawnDelayed(bool spawnDelayed);

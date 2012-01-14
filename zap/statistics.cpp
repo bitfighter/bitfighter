@@ -246,6 +246,7 @@ void Statistics::resetStatistics()
       mHits[i] = 0;
       mHitBy[i] = 0;
    }
+
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleUsedTime[i] = 0;
 

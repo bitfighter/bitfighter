@@ -63,7 +63,8 @@ GameConnection::GameConnection()
 
    // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
    // in the arguments makes VC++ nervous, which in turn makes me nervous.
-   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(this, false));
+   mClientInfo = new LocalClientInfo(this, false);    // Deleted in destructor
+   mClientInfoWasCreatedLocally = true;
 
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
@@ -80,7 +81,8 @@ GameConnection::GameConnection(ClientGame *clientGame)
    initialize();
 
    mSettings = clientGame->getSettings();
-   mClientInfo = clientGame->getClientInfo_shared_ptr();
+   mClientInfo = clientGame->getClientInfo();      // Now have a LocalClientInfo representing the local player
+   mClientInfoWasCreatedLocally = false;
 
    TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
    if(mClientInfo->getName() == "")
@@ -149,6 +151,9 @@ GameConnection::~GameConnection()
    }
 
    delete mDataBuffer;
+
+   if(mClientInfoWasCreatedLocally)
+      delete mClientInfo;
 }
 
 
@@ -1042,7 +1047,7 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 
    // Use voting when there is no level change password and there is more then 1 player (unless changer is an admin)
    if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
-         gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(mClientInfo.get(), 0, newLevelIndex))
+         gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(mClientInfo, 0, newLevelIndex))
       return;
 
    bool restart = false;
@@ -1172,7 +1177,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    mClientClaimsToBeVerified = false;
 
    if(oldName != uniqueName)              // Did the name actually change?
-      updateClientChangedName(mClientInfo.get(), uniqueName);
+      updateClientChangedName(mClientInfo, uniqueName);
 }
 
 
@@ -1427,11 +1432,11 @@ void GameConnection::setServerName(StringTableEntry name)
 
 ClientInfo *GameConnection::getClientInfo()
 {
-   return mClientInfo.get();
+   return mClientInfo;
 }
 
 
-void GameConnection::setClientInfo(boost::shared_ptr<ClientInfo> clientInfo)
+void GameConnection::setClientInfo(ClientInfo *clientInfo)
 {
    mClientInfo = clientInfo;
 }
@@ -1657,7 +1662,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
       playerInfo->setDefunct();
       Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, playerInfo);
 
-      gServerGame->removeClient(mClientInfo.get());
+      gServerGame->removeClient(mClientInfo);
    }
 }
 

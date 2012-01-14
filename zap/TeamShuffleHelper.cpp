@@ -56,7 +56,7 @@ void TeamShuffleHelper::shuffle()
    for(S32 i = 0; i < teamCount; i++)
       mTeams[i].clear();
 
-   const Vector<boost::shared_ptr<ClientInfo> > *clientInfos = getGame()->getClientInfos();
+   const Vector<ClientInfo *> *clientInfos = getGame()->getClientInfos();
 
    playersPerTeam = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
 
@@ -67,7 +67,7 @@ void TeamShuffleHelper::shuffle()
          S32 index = TNL::Random::readI(0, mTeams.size() - 1);
          if(mTeams[index].size() < playersPerTeam)
          {
-            mTeams[index].push_back(clientInfos->get(i).get());
+            mTeams[index].push_back(clientInfos->get(i));
             break;
          }
       }

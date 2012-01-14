@@ -123,6 +123,7 @@ private:
    void findObjectsUnderShip(U8 typeNumber);
 
 protected:
+   ClientInfo *mClientInfo;
    bool mIsAuthenticated;
 
    bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
@@ -230,7 +231,7 @@ public:
    void calcThrustComponents(F32 *thrust);
 
    // Constructor
-   Ship(StringTableEntry playerName="", bool isAuthenticated = false, S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      
+   Ship(ClientInfo *clientInfo = NULL, S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      
    
    ~Ship();           // Destructor
 
@@ -267,7 +268,7 @@ public:
    bool isLoadoutSameAsCurrent(const Vector<U32> &loadout);
    void setDefaultLoadout();           // Set the ship's loadout to the default values
 
-   virtual ClientInfo *getClientInfo();
+   ClientInfo *getClientInfo();
    static string loadoutToString(const Vector<U32> &loadout);
    static bool stringToLoadout(string loadoutStr, Vector<U32> &loadout);
 

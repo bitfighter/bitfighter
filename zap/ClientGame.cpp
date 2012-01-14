@@ -108,7 +108,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mUIManager = new UIManager(this);         // Gets deleted in destructor
 
-   mClientInfo = boost::shared_ptr<ClientInfo>(new LocalClientInfo(NULL, false));
+   mClientInfo = new LocalClientInfo(NULL, false);    // Will be deleted in destructor
    mLocalRemoteClientInfo = NULL;
 
    mSpawnDelayed = false;
@@ -152,6 +152,7 @@ ClientGame::~ClientGame()
    delete mUserInterfaceData;
    delete mUIManager;   
    delete mConnectionToServer.getPointer();
+   delete mClientInfo;
 }
 
 
@@ -275,12 +276,6 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 
 
 ClientInfo *ClientGame::getClientInfo()
-{
-   return mClientInfo.get();
-}
-
-
-boost::shared_ptr<ClientInfo> ClientGame::getClientInfo_shared_ptr()
 {
    return mClientInfo;
 }
@@ -613,7 +608,8 @@ void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 
 
 // A new player has just joined the game; if isLocalClient is true, that new player is us!
-void ClientGame::onPlayerJoined(const boost::shared_ptr<ClientInfo> &clientInfo, bool isLocalClient, bool playAlert)
+// ClientInfo will be a RemoteClientInfo
+void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert)
 {
    addToClientList(clientInfo);
 
