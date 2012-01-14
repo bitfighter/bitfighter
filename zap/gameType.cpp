@@ -3132,7 +3132,10 @@ void GameType::sendChatDisplayEvent(ClientInfo *sender, bool global, const char 
       S32 senderTeamIndex = sender->getTeamIndex();
 
       if(global || clientInfo->getTeamIndex() == senderTeamIndex)
-         clientInfo->getConnection()->postNetEvent(theEvent);
+      {
+         if(clientInfo->getConnection())
+            clientInfo->getConnection()->postNetEvent(theEvent);
+      }
    }
 
    // And fire an event handler...
