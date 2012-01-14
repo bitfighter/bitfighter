@@ -68,6 +68,7 @@ public:
    };
 
    LineEditor(U32 maxLength = 256, string value = "");   // Constructor
+   virtual ~LineEditor();
 
    U32 length();                                // Returns line length in chars
    void addChar(char c);
