@@ -146,8 +146,9 @@ void CoreGameType::addCore(CoreItem *core, S32 team)
       // Make every team that doesn't own this core require another point to win
       if(i != team)
       {
-         Team *team = (Team *)getGame()->getTeam(i);
-         team->addScore(-DestroyedCoreScore);
+         Team *team = dynamic_cast<Team *>(getGame()->getTeam(i));
+         if(team)
+            team->addScore(-DestroyedCoreScore);
       }
    }
 }
