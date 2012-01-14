@@ -204,7 +204,7 @@ RobotPlayerInfo::~RobotPlayerInfo()
 
 S32 RobotPlayerInfo::getName(lua_State *L)
 {
-   return returnString(L, mRobot->getName().getString());
+   return returnString(L, mRobot->getClientInfo()->getName().getString());
 }
 
 

@@ -249,13 +249,13 @@ bool SoccerGameType::okToUseModules(Ship *ship)
 // Runs on server only, and only when player deliberately drops ball
 void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   //logprintf("%s SoccerGameType->itemDropped", isGhost()? "Client:" : "Server:");
    TNLAssert(!isGhost(), "Should run on server only!");
+   TNLAssert(false, "Shound never run at all!!!");
 
    static StringTableEntry dropString("%e0 dropped the ball!");
 
    Vector<StringTableEntry> e;
-   e.push_back(ship->getName());
+   e.push_back(ship->getClientInfo()->getName());
 
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
@@ -551,7 +551,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
       {
          mLastPlayerTouch = dynamic_cast<Ship *>(theInfo->damagingObject);
          mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();
-         mLastPlayerTouchName = mLastPlayerTouch->getName();
+         mLastPlayerTouchName = mLastPlayerTouch->getClientInfo()->getName();
       }
 
       else if(isProjectileType(theInfo->damagingObject->getObjectTypeNumber()))
@@ -560,7 +560,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
          mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
          mLastPlayerTouchTeam = p->getTeam(); // Projectile always have a team from what fired it, can be used to credit a team.
-         mLastPlayerTouchName = ship ? ship->getName() : StringTableEntry(NULL);
+         mLastPlayerTouchName = ship ? ship->getClientInfo()->getName() : StringTableEntry(NULL);
       }
       else
          mLastPlayerTouch = NULL;
@@ -599,8 +599,8 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       {
          Ship *ship = dynamic_cast<Ship *>(hitObject);
          mLastPlayerTouch = ship;
-         mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
-         mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
+         mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();                  // Used to credit team if ship quits game before goal is scored
+         mLastPlayerTouchName = mLastPlayerTouch->getClientInfo()->getName(); // Used for making nicer looking messages in same situation
       }
    }
    else if(hitObject->getObjectTypeNumber() == GoalZoneTypeNumber)      // SCORE!!!!

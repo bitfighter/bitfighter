@@ -203,7 +203,6 @@ static NexusFlagItem *findFirstNexusFlag(Ship *ship)
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items
 void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   //NexusFlagItem *flag = findFirstNexusFlag(ship);  //  This line causes multiple "Drop Flag" messages when ship carry multiple items.
    NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
    if(!flag)
       return;
@@ -215,7 +214,7 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 
    Vector<StringTableEntry> e;
 
-   e.push_back(ship->getName());
+   e.push_back(ship->getClientInfo()->getName());
    if(flagCount > 1)
       e.push_back(itos(flagCount).c_str());
 
@@ -306,7 +305,8 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
 
    if(theFlag->getFlagCount() > 0)
    {
-      s2cNexusMessage(NexusMsgScore, theShip->getName().getString(), theFlag->getFlagCount(), getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
+      s2cNexusMessage(NexusMsgScore, theShip->getClientInfo()->getName().getString(), theFlag->getFlagCount(), 
+                      getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
    }
    theFlag->changeFlagCount(0);
@@ -572,7 +572,7 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObje
          {
             Point pos = flag->getActualPos();
             s2cAddYardSaleWaypoint(pos.x, pos.y);
-            s2cNexusMessage(NexusMsgYardSale, theShip->getName().getString(), 0, 0);
+            s2cNexusMessage(NexusMsgYardSale, theShip->getClientInfo()->getName().getString(), 0, 0);
          }
 
          return;

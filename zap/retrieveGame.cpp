@@ -102,6 +102,8 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    if(mFlags.size() == 1)
       r = oneFlagTakeString;
 
+   ClientInfo *clientInfo = theShip->getClientInfo();
+
    S32 team;
    if(theFlag->getZone() == NULL)      // Picked up flag just sitting around
       team = theShip->getTeam();
@@ -111,13 +113,13 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       team = theFlag->getZone()->getTeam();
       updateScore(team, LostFlag);
 
-      theShip->getClientInfo()->getStatistics()->mFlagReturn++;  // used as flag steal
+      clientInfo->getStatistics()->mFlagReturn++;  // used as flag steal
    }
 
-   theShip->getClientInfo()->getStatistics()->mFlagPickup++;
+   clientInfo->getStatistics()->mFlagPickup++;
 
    Vector<StringTableEntry> e;
-   e.push_back(theShip->getName());
+   e.push_back(clientInfo->getName());
    e.push_back(getGame()->getTeamName(team));
 
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
@@ -136,7 +138,8 @@ void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
    {
       static StringTableEntry dropString("%e0 dropped a flag!");
       Vector<StringTableEntry> e;
-      e.push_back(ship->getName());
+
+      e.push_back(ship->getClientInfo()->getName());
 
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
@@ -164,13 +167,14 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
    // Ok, the ship has a flag and it's on the ship and we're in an empty zone
    MoveItem *item = s->mMountedItems[flagIndex];
    FlagItem *mountedFlag = dynamic_cast<FlagItem *>(item);
+
    if(mountedFlag)
    {
       static StringTableEntry capString("%e0 retrieved a flag!");
       static StringTableEntry oneFlagCapString("%e0 retrieved the flag!");
 
       Vector<StringTableEntry> e;
-      e.push_back(s->getName());
+      e.push_back(s->getClientInfo()->getName());
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone

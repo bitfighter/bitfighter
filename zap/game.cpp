@@ -346,15 +346,12 @@ LocalClientInfo::~LocalClientInfo()
 
 void LocalClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
+   TNLAssert(isAuthenticated || badges == NO_BADGES, "Unauthenticated players should never have badges!");
    Parent::setAuthenticated(isAuthenticated, badges);
 
-   if(mClientConnection && mClientConnection->isConnectionToClient())    // Only run this bit if we are a server
-   {
-      // If we are verified, we need to alert any connected clients, so they can render ships properly.  This is done via the ship object.
-      Ship *ship = dynamic_cast<Ship *>(getConnection()->getControlObject());
-      if(ship)
-         ship->setIsAuthenticated(isAuthenticated, mName);
-   }
+   // If we're a server and are connected to a client, notify them of the change!
+   if(mClientConnection && mClientConnection->isConnectionToClient())
+      mClientConnection->s2cSetAuthenticated(badges);
 }
 
 

@@ -92,7 +92,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       return;
 
    Vector<StringTableEntry> e;
-   e.push_back(theShip->getName());
+   e.push_back(theShip->getClientInfo()->getName());
    e.push_back(getGame()->getTeamName(theShip->getTeam()));
 
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
@@ -120,7 +120,7 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
       static StringTableEntry dropString("%e0 dropped the flag!");
 
       Vector<StringTableEntry> e;
-      e.push_back(ship->getName());
+      e.push_back(ship->getClientInfo()->getName());
 
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
@@ -145,7 +145,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       {
          static StringTableEntry takeString("%e0 captured a zone from team %e1!");
          Vector<StringTableEntry> e;
-         e.push_back(s->getName());
+         e.push_back(s->getClientInfo()->getName());
          e.push_back(getGame()->getTeamName(oldTeam));
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
@@ -158,7 +158,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       {
          static StringTableEntry takeString("%e0 captured an unclaimed zone!");
          Vector<StringTableEntry> e;
-         e.push_back(s->getName());
+         e.push_back(s->getClientInfo()->getName());
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
       }

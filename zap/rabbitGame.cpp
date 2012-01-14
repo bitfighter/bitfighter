@@ -352,7 +352,7 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
    if(flag->getTeam() != ship->getTeam() && flag->getTeam() != -1)
       return;
 
-   s2cRabbitMessage(RabbitMsgGrab, ship->getName());
+   s2cRabbitMessage(RabbitMsgGrab, ship->getClientInfo()->getName());
    flag->mTimer.reset(mFlagScoreTimer);
 
    flag->mountToShip(ship);
@@ -378,7 +378,7 @@ void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
    if(flag)
    {
       flag->mTimer.reset(mFlagReturnTimer);
-      s2cRabbitMessage(RabbitMsgDrop, ship->getName());
+      s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
 
       Point vel = ship->getActualVel();
 
@@ -410,14 +410,14 @@ void RabbitGameType::addFlag(FlagItem *flag)
 // Rabbit killed another ship
 void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 {
-   s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getName());
+   s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getClientInfo()->getName());
    updateScore(rabbitShip, RabbitKills);  
 }
 
 
 void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
-   s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getName());
+   s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getClientInfo()->getName());
    updateScore(killerShip, RabbitKilled); 
 }
 

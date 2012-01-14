@@ -1976,7 +1976,7 @@ void TeamMenuUserInterface::render()
    {
       Ship *ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
       if(ship)
-         name = ship->getName().getString();
+         name = ship->getClientInfo()->getName().getString();
    }
 
    if(name != nameToChange)    // i.e. names differ, this isn't the local player

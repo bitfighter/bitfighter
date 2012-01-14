@@ -431,6 +431,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (Int<BADGE_COUNT> badges), (badges), 
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   getClientInfo()->setAuthenticated(true, badges);
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
@@ -1153,10 +1160,6 @@ void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
 
    clientInfo->setName(newName);
 
-   Ship *ship = clientInfo->getShip();
-
-   if(ship)
-      ship->setMaskBits(Ship::AuthenticationMask);    // Will trigger sending new ship name on next update
 }
 
 
@@ -1489,7 +1492,7 @@ string GameConnection::makeUnique(string name)
 
       for(S32 i = 0; i < Robot::robots.size(); i++)
       {
-         if(proposedName == Robot::robots[i]->getName().getString())
+         if(proposedName == Robot::robots[i]->getClientInfo()->getName().getString())
          {
             unique = false;
 

@@ -2210,19 +2210,18 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
-      if(mGame->getClientInfo(i)->getName() == oldName)
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+      if(clientInfo->getName() == oldName)
       {
-         mGame->getClientInfo(i)->setName(newName);
+         clientInfo->setName(newName);
+         clientInfo->setAuthenticated(false, NO_BADGES);
          break;
       }
    }
 
+   // Notifiy the player
    ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
-
-   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+   clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "Your name was changed to %s", newName.getString());
 #endif
 }
 
@@ -3040,9 +3039,9 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry playerName), (player
       playerClientInfo->getConnection()->disconnect(NetConnection::ReasonKickedByAdmin, "");
    }
 
-   // Get rid of robots tied to the player
+   // Get rid of robots that have the to-be-kicked name
    for(S32 i = 0; i < Robot::robots.size(); i++)
-      if(Robot::robots[i]->getName() == playerName)
+      if(Robot::robots[i]->getClientInfo()->getName() == playerName)
          delete Robot::robots[i];
 
    Vector<StringTableEntry> e;

@@ -30,7 +30,8 @@
 #include "controlObjectConnection.h"
 #include "dataConnection.h"            // For DataSendable interface
 #include "statistics.h"
-#include "SoundSystem.h"               // for NumSFXBuffers
+#include "SoundSystem.h"               // For NumSFXBuffers
+#include "SharedConstants.h"           // For BADGE_COUNT constant
 
 #include "tnlNetConnection.h"
 #include "Timer.h"
@@ -227,7 +228,8 @@ public:
 
    TNL_DECLARE_RPC(c2sSubmitPassword, (StringPtr pass));
 
-   TNL_DECLARE_RPC(c2sSetAuthenticated, ());      // Tell server that the client is (or claims to be) authenticated
+   TNL_DECLARE_RPC(c2sSetAuthenticated, ());                   // Tell server that the client is (or claims to be) authenticated
+   TNL_DECLARE_RPC(s2cSetAuthenticated, (Int<BADGE_COUNT>));   // Tell clients a player is authenticated, pass on some badge info
 
    TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> type));
 

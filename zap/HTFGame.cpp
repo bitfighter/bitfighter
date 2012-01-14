@@ -100,25 +100,31 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    if(theFlag->getZone() != NULL && theFlag->getZone()->getTeam() == theShip->getTeam())
       return;
 
+   ClientInfo *clientInfo = theShip->getClientInfo();
+
    static StringTableEntry stealString("%e0 stole %e2 flag from team %e1!");
    static StringTableEntry takeString("%e0 of team %e1 took %e2 flag!");
-   StringTableEntry r = takeString;
+
+   StringTableEntry *r;
    U32 teamIndex;
 
    if(theFlag->getZone() == NULL)
+   {
+      r = &takeString;
       teamIndex = theShip->getTeam();
+   }
    else
    {
-      r = stealString;
+      r = &stealString;
       teamIndex = theFlag->getZone()->getTeam();
 
-      theShip->getClientInfo()->getStatistics()->mFlagReturn++;  // used as flag steal
+      clientInfo->getStatistics()->mFlagReturn++;  // used as flag steal
    }
 
-   theShip->getClientInfo()->getStatistics()->mFlagPickup++;
+   clientInfo->getStatistics()->mFlagPickup++;
 
    Vector<StringTableEntry> e;
-   e.push_back(theShip->getName());
+   e.push_back(clientInfo->getName());
    e.push_back(getGame()->getTeamName(teamIndex));
 
    if(mFlags.size() == 1)
@@ -126,7 +132,7 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    else
       e.push_back(aString);
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, *r, e);
 
    theFlag->mountToShip(theShip);
    theFlag->setZone(NULL);
@@ -145,7 +151,7 @@ void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
       static StringTableEntry dropString("%e0 dropped %e1 flag!");
 
       Vector<StringTableEntry> e;
-      e.push_back(ship->getName());
+      e.push_back(ship->getClientInfo()->getName());
 
       if(mFlags.size() == 1)
          e.push_back(theString);
@@ -176,12 +182,14 @@ void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
    // Ok, the ship has a flag and it's on the ship...
    MoveItem *item = s->mMountedItems[flagIndex];
    FlagItem *mountedFlag = dynamic_cast<FlagItem *>(item);
+
    if(mountedFlag)
    {
       static StringTableEntry capString("%e0 retrieved %e1 flag.  Team %e2 holds %e1 flag!");
 
       Vector<StringTableEntry> e;
-      e.push_back(s->getName());
+      e.push_back(s->getClientInfo()->getName());
+
       if(mFlags.size() == 1)
          e.push_back(theString);
       else

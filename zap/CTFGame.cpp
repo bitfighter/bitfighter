@@ -65,6 +65,8 @@ void CTFGameType::addFlag(FlagItem *flag)
 
 void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
+   ClientInfo *clientInfo = theShip->getClientInfo();
+
    if(theShip->getTeam() == theFlag->getTeam())      // Touch own flag
    {
       if(!theFlag->isAtHome())
@@ -72,7 +74,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          static StringTableEntry returnString("%e0 returned the %e1 flag.");
 
          Vector<StringTableEntry> e;
-         e.push_back(theShip->getName());
+         e.push_back(clientInfo->getName());
          e.push_back(getGame()->getTeamName(theFlag->getTeam()));
          
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
@@ -81,7 +83,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          updateScore(theShip, ReturnTeamFlag);
 
-         theShip->getClientInfo()->getStatistics()->mFlagReturn++;
+         clientInfo->getStatistics()->mFlagReturn++;
       }
       else     // Flag is at home
       {
@@ -94,7 +96,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
                static StringTableEntry capString("%e0 captured the %e1 flag!");
 
                Vector<StringTableEntry> e;
-               e.push_back(theShip->getName());
+               e.push_back(theShip->getClientInfo()->getName());
                e.push_back(getGame()->getTeamName(mountedFlag->getTeam()));
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
@@ -104,7 +106,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
                updateScore(theShip, CaptureFlag);
 
-               theShip->getClientInfo()->getStatistics()->mFlagScore++;
+               clientInfo->getStatistics()->mFlagScore++;
             }
          }
       }
@@ -118,14 +120,14 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          // Alert the clients
          static StringTableEntry takeString("%e0 took the %e1 flag!");
          Vector<StringTableEntry> e;
-         e.push_back(theShip->getName());
+         e.push_back(clientInfo->getName());
          e.push_back(getGame()->getTeamName(theFlag->getTeam()));
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
 
          theFlag->mountToShip(theShip);
 
-         theShip->getClientInfo()->getStatistics()->mFlagPickup++;
+         clientInfo->getStatistics()->mFlagPickup++;
       }
    }
 }
@@ -142,7 +144,7 @@ void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
       static StringTableEntry dropString("%e0 dropped the %e1 flag!");
 
       Vector<StringTableEntry> e;
-      e.push_back(ship->getName());
+      e.push_back(ship->getClientInfo()->getName());
       e.push_back(getGame()->getTeamName(flag->getTeam()));
 
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);

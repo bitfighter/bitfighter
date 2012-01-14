@@ -124,7 +124,6 @@ private:
 
 protected:
    ClientInfo *mClientInfo;
-   bool mIsAuthenticated;
 
    bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
    bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
@@ -181,9 +180,8 @@ public:
       LoadoutMask = BIT(8),
       RespawnMask = BIT(9),         // For when robots respawn
       TeleportMask = BIT(10),        // Ship has just teleported
-      AuthenticationMask = BIT(11), // Player authentication status changed
-      ChangeTeamMask = BIT(12),     // Used for when robots change teams
-      SpawnShieldMask = BIT(13),    // Used for when robots change teams
+      ChangeTeamMask = BIT(11),     // Used for when robots change teams
+      SpawnShieldMask = BIT(12),    // Used for when robots change teams
    };
 
    S32 mFireTimer;
@@ -194,10 +192,6 @@ public:
    U32 mSensorStartTime;
    Point mImpulseVector;
    F32 getSlipzoneSpeedMoficationFactor();
-
-   StringTableEntry getName();
-   //void setName(StringTableEntry name);
-   void setIsAuthenticated(bool isAuthenticated, StringTableEntry name);
 
    SFXHandle mModuleSound[ModuleCount];
 

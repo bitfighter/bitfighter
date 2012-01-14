@@ -106,7 +106,6 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    mass = m;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
-   mIsAuthenticated = false;//clientInfo->isAuthenticated();
 
    mIsRobot = isRobot;
 
@@ -468,28 +467,6 @@ Point Ship::getAimVector()
 void Ship::selectWeapon()
 {
    selectWeapon(mActiveWeaponIndx + 1);
-}
-
-
-StringTableEntry Ship::getName()
-{
-   logprintf("%p", getClientInfo());
-   return getClientInfo()->getName();
-}
-
-
-//void Ship::setName(StringTableEntry name)
-//{
-// //  mPlayerName = name;
-//}
-
-
-// Only run on server
-void Ship::setIsAuthenticated(bool isAuthenticated, StringTableEntry name)
-{
-   mIsAuthenticated = isAuthenticated;
-
-   setMaskBits(AuthenticationMask);
 }
 
 
@@ -1175,17 +1152,11 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       stream->writeFlag(false);
    }  // End initial update
 
-   if(stream->writeFlag(updateMask & (ChangeTeamMask | AuthenticationMask)))   // A player with admin can change robots teams.
-   {
+   if(stream->writeFlag(updateMask & ChangeTeamMask))    // A player with admin can change robots teams
       writeThisTeam(stream);
-      if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
-      {
-         stream->writeFlag(mIsAuthenticated);
-      }
-   }
 
 
-   if(stream->writeFlag(updateMask & LoadoutMask))    // Module configuration
+   if(stream->writeFlag(updateMask & LoadoutMask))       // Module configuration
    {
       for(S32 i = 0; i < ShipModuleCount; i++)
          stream->writeEnum(mModule[i], ModuleCount);
@@ -1280,19 +1251,14 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    }  // initial update
 
-
-   if(stream->readFlag())     // Team or Player authentication status changed
-   {
+   if(stream->readFlag())        // Team changed (ChangeTeamMask)
       readThisTeam(stream);
-      if(stream->readFlag())     // Player authentication status changed
-         mIsAuthenticated = stream->readFlag();
-   }
-
 
    if(stream->readFlag())        // New module configuration
    {
       bool hadSensorThen = false;
       bool hasSensorNow = false;
+
       for(S32 i = 0; i < ShipModuleCount; i++)
       {
          // Check old loadout for sensor
@@ -1759,6 +1725,7 @@ void Ship::kill()
    hasExploded = true;
    setMaskBits(ExplosionMask);
    disableCollision();
+
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       mMountedItems[i]->onMountDestroyed();
 }
@@ -1989,9 +1956,7 @@ void Ship::render(S32 layerIndex)
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
-      //string str = mPlayerName.getString();
-      //TNLAssert(getControllingClient(), "Ship has no client!");
-      string str = getName().getString();    // <=== broken
+      string str = getClientInfo()->getName().getString();
 
       // Modify name if owner is "busy"
       if(isBusy)
@@ -2008,7 +1973,7 @@ void Ship::render(S32 layerIndex)
       UserInterface::drawStringc(0, 30 + textSize, textSize, str.c_str());
 
       // Underline name if player is authenticated
-      if(mIsAuthenticated)
+      if(getClientInfo()->isAuthenticated())
       {
          S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
          drawHorizLine(-xoff, xoff, 33 + textSize);

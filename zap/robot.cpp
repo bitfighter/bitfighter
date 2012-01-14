@@ -722,7 +722,7 @@ S32 LuaRobot::globalMsg(lua_State *L)
    GameType *gt = gServerGame->getGameType();
    if(gt)
    {
-      gt->s2cDisplayChatMessage(true, thisRobot->getName(), message);
+      gt->s2cDisplayChatMessage(true, thisRobot->getClientInfo()->getName(), message);
 
       // Fire our event handler
       Robot::getEventManager().fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
@@ -743,7 +743,7 @@ S32 LuaRobot::teamMsg(lua_State *L)
    GameType *gt = gServerGame->getGameType();
    if(gt)
    {
-      gt->s2cDisplayChatMessage(true, thisRobot->getName(), message);
+      gt->s2cDisplayChatMessage(true, thisRobot->getClientInfo()->getName(), message);
 
       // Fire our event handler
       Robot::getEventManager().fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);

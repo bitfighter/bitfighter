@@ -211,7 +211,7 @@ void CoreGameType::score(Ship *destroyer, S32 coreOwningTeam, S32 score)
 
    if(destroyer)
    {
-      e.push_back(destroyer->getName());
+      e.push_back(destroyer->getClientInfo()->getName());
       e.push_back(getGame()->getTeamName(coreOwningTeam));
 
       // If someone destroyed enemy core
