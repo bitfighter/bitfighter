@@ -949,6 +949,10 @@ public:
 // Only runs on server
 void GameType::saveGameStats()
 {
+   // Do not send statistics for games being tested in the editor
+   if(mGame->isTestServer())
+      return;
+
    MasterServerConnection *masterConn = mGame->getConnectionToMaster();
 
    VersionedGameStats stats = getGameStats();

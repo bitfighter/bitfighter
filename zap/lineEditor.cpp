@@ -44,6 +44,10 @@ LineEditor::LineEditor(U32 maxLength, string value)
    mMatchIndex = -1;
 }
 
+LineEditor::~LineEditor()
+{
+   ;
+}
 
 U32 LineEditor::length()
 {
