@@ -55,10 +55,10 @@ enum AuthenticationStatus {
 
 enum MeritBadges {
    NO_BADGES = 0,
-   KilledFirstPlayer = BIT(0),
-   FirstVictory = BIT(1),
+   DEVELOPER_BADGE = BIT(0),
+   FIRST_VICTORY = BIT(1),
    //...
-   BADGE_COUNT = 32    // Changing this value will require updating master server and protocol.
+   BADGE_COUNT = 32              // Changing this value will require updating master server and protocol version
 };
 
 enum ServerInfoFlags {

@@ -2954,6 +2954,11 @@ void GameUserInterface::renderScoreboard()
 
          static char buff[255] = "";
 
+         if(playerScores[j]->getBadges() & DEVELOPER_BADGE)
+            glColor(Colors::yellow);
+         else
+            glColor(Colors::white);
+
          if(isTeamGame)
             dSprintf(buff, sizeof(buff), "%2.2f", playerScores[j]->getRating());
          else

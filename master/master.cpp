@@ -744,6 +744,14 @@ static const char *sanitizeForJson(const char *value)
 
             Int<BADGE_COUNT> badges = NO_BADGES;   // <=== Look up some badge info in the player DB here!
 
+            // This is, obviously, temporary; can be removed when we have a real master-side badge system in place
+            if(stricmp(name.getString(), "watusimoto") == 0 || stricmp(name.getString(), "raptor") == 0 ||
+               stricmp(name.getString(), "sam686") == 0 ))
+            {
+               badges &= DEVELOPER_BADGE;
+            }
+
+
             m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, badges);
             break;
          }
