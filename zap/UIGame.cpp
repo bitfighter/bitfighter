@@ -2937,6 +2937,12 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
          S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
 
+         if(playerScores[j]->getBadges() & DEVELOPER_BADGE)
+            glColor(Colors::yellow);
+         else
+            glColor(Colors::white);
+
+
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
             drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, botSymbol);
@@ -2952,11 +2958,6 @@ void GameUserInterface::renderScoreboard()
          drawString(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
 
          static char buff[255] = "";
-
-         if(playerScores[j]->getBadges() & DEVELOPER_BADGE)
-            glColor(Colors::yellow);
-         else
-            glColor(Colors::white);
 
          if(isTeamGame)
             dSprintf(buff, sizeof(buff), "%2.2f", playerScores[j]->getRating());
