@@ -559,7 +559,10 @@ public:
    NetConnectionState getConnectionState() { return mConnectionState; }
 
    /// Returns true if the connection handshaking has completed successfully.
-   bool isEstablished() { return mConnectionState == Connected; }
+   bool isEstablished() 
+   { 
+      return mConnectionState == Connected; 
+   }
 
    /// @name Adaptive Protocol
    ///

@@ -1226,6 +1226,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
             {
                if(mNameToAddressThread->mAddress.isValid())
                {
+                  TNLAssert(!mConnectionToMaster, "Already have connection to master!");
                   mConnectionToMaster = new MasterServerConnection(this);
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }

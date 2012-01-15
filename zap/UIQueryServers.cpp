@@ -660,12 +660,13 @@ void QueryServersUserInterface::render()
    for(S32 i = 0; i < buttons.size(); i++)
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
 
-   bool connectedToMaster = getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->isEstablished();
+   MasterServerConnection *conn = getGame()->getConnectionToMaster();
+   bool connectedToMaster = conn && conn->isEstablished();
 
    if(connectedToMaster)
    {
       glColor(gMasterServerBlue);
-      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", getGame()->getConnectionToMaster()->getMasterName().c_str() );
+      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", conn->getMasterName().c_str() );
    }
    else
    {

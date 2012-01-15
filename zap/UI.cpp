@@ -727,11 +727,12 @@ void UserInterface::playBoop()
 // Render master connection state if we're not connected
 void UserInterface::renderMasterStatus()
 {
-   if(mClientGame->getConnectionToMaster() && mClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
+   MasterServerConnection *conn = mClientGame->getConnectionToMaster();
+
+   if(conn && conn->getConnectionState() != NetConnection::Connected)
    {
       glColor(Colors::white);
-      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", 
-                   GameConnection::getConnectionStateString(gClientGame->getConnectionToMaster()->getConnectionState()));
+      UserInterface::drawStringf(10, 550, 15, "Master Server - %s", GameConnection::getConnectionStateString(conn->getConnectionState()));
    }
 }
 
