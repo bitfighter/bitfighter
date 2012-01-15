@@ -272,8 +272,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 
       if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)    // Robots don't have valid clientId, so this will never match a bot
       {
-         clientInfo->getConnection()->mClientClaimsToBeVerified = false;         // Once we get a reply, don't need to check again
-
          if(status == AuthenticationStatusAuthenticatedName)
          {
             clientInfo->setAuthenticated(true, badges);

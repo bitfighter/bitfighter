@@ -1416,8 +1416,9 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
-   // Ask master if client name/id match and the client is authenticated
-   if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
+   // Ask master if client name/id match and the client is authenticated; don't bother if they're already authenticated, or
+   // if they don't claim they are
+   if(!mClientInfo->isAuthenticated() && masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
       masterConn->requestAuthentication(mClientNameNonUnique, *mClientInfo->getId());   
 }
 
