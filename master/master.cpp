@@ -775,15 +775,8 @@ static const char *sanitizeForJson(const char *value)
       if(!Parent::readConnectRequest(bstream, reason))
          return false;
 
-      // We first read a string in -- in protocol version 0, the version was sent as a string.  In susbsequent
-      // protocols, a "+" char is sent for the version, followed by an int version number.  This should provide
-      // more flexibility to alter the cm communication protocol in the future while retaining backwards compatibility
-      // At some point, when no more version 0 clients exist in the wild, the version 0 stuff can be removed.  However,
-      // we will still need to keep the dummy string because there is no way to remove it without breaking some
-      // version of the protocol or another.
-      // Also note that if player is hosting a game interactively (i.e. with host option on main menu), they
+      // Note that if player is hosting a game interactively (i.e. with host option on main menu), they
       // will create two connections here, one for the host, and one for the client instance.
-
       char readstr[256]; // to hold the string being read
 
       bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
