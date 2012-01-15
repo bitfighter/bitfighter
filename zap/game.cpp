@@ -451,7 +451,6 @@ void RemoteClientInfo::setRating(F32 rating)
 }
 
 
-
 // Voice chat stuff -- these will be invalid on the server side
 SoundEffect *RemoteClientInfo::getVoiceSFX()
 {
