@@ -150,8 +150,8 @@ public:
    Vector<U32> mOldLoadout;      // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    void sRequestLoadout(Vector<U32> &loadout);
 
-   void setClientClaimsToBeVerified(bool claimsToBeVerified);
-   bool isClientClaimsToBeVerified();
+   void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
+   bool getNeedToCheckAuthenticationWithMaster();
 
    Ship *getShip();
    void setShip(Ship *ship);

@@ -163,13 +163,13 @@ Ship *ClientInfo::getShip()
 }
 
 
-void ClientInfo::setClientClaimsToBeVerified(bool claimsToBeVerified)
+void ClientInfo::setNeedToCheckAuthenticationWithMaster(bool needToCheck)
 {
-   mNeedToCheckAuthenticationWithMaster = claimsToBeVerified;
+   mNeedToCheckAuthenticationWithMaster = needToCheck;
 }
 
 
-bool ClientInfo::isClientClaimsToBeVerified()
+bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 {
    return mNeedToCheckAuthenticationWithMaster;
 }
