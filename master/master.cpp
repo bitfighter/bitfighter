@@ -291,8 +291,7 @@ static const char *sanitizeForJson(const char *value)
    // that match the client's particular filter criteria and
    // sends it to the client, followed by a QueryServersDone RPC.
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers,
-                (U32 queryId, U32 regionMask, U32 minPlayers, U32 maxPlayers,
-                 U32 infoFlags, U32 maxBots, U32 minCPUSpeed,
+                (U32 queryId, U32 minPlayers, U32 maxPlayers, U32 infoFlags, U32 maxBots, 
                  StringTableEntry gameType, StringTableEntry missionType)
    )
    {
@@ -306,15 +305,11 @@ static const char *sanitizeForJson(const char *value)
             continue;
 
          // Ok, so the protocol version is correct, however...
-         if(!(walk->mRegionCode & regionMask))       // ...wrong region
-            continue;
          if(walk->mPlayerCount > maxPlayers || walk->mPlayerCount < minPlayers)   // ...too few or too many players
             continue;
          if(infoFlags & ~walk->mInfoFlags)           // ...wrong info flags
             continue;
          if(maxBots < walk->mNumBots)                // ...too many bots
-            continue;
-         if(minCPUSpeed > walk->mCPUSpeed)           // ...CPU speed insufficient
             continue;
          if(gameType.isNotNull() && (gameType != walk->mLevelName))          // ...wrong level name
             continue;
@@ -790,8 +785,6 @@ static const char *sanitizeForJson(const char *value)
       // If it's a game server, read status info...
       if(mIsGameServer)
       {
-         bstream->read(&mCPUSpeed);
-         bstream->read(&mRegionCode);
          bstream->read(&mNumBots);
          bstream->read(&mPlayerCount);
          bstream->read(&mMaxPlayers);

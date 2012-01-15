@@ -102,10 +102,6 @@ protected:
    U32              mMaxPlayers;        ///< Maximum number of players on this server.
    U32              mNumBots;           ///< Current number of bots on this server.
 
-   // The following are mostly dummy values at the moment... we may use them later.
-   U32              mRegionCode;        ///< The region code in which this server operates.
-   U32              mCPUSpeed;          ///< The CPU speed of this server.
-
    StringTableEntry mLevelName;
    StringTableEntry mLevelType;
    StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
@@ -154,8 +150,7 @@ public:
    // that match the client's particular filter criteria and
    // sends it to the client, followed by a QueryServersDone RPC.
    TNL_DECLARE_RPC_OVERRIDE(c2mQueryServers,
-                (U32 queryId, U32 regionMask, U32 minPlayers, U32 maxPlayers,
-                 U32 infoFlags, U32 maxBots, U32 minCPUSpeed,
+                (U32 queryId, U32 minPlayers, U32 maxPlayers, U32 infoFlags, U32 maxBots, 
                  StringTableEntry gameType, StringTableEntry missionType)
    );
 
@@ -203,47 +198,6 @@ public:
    // Updates the master with the current status of a game server.
    TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
-
-
-   // Send player statistics to the master server     ==> deprecated
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, 
-                                                      U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits));
-
-   // Send player statistics to the master server     ==> deprecated as of 015
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, 
-                                                        U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits));
-
-
-   //// Send player statistics to the master server
-   //TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, 
-   //                                                     StringTableEntry teamName, S32 score,
-   //                                                     U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits));
-
-   // Send game statistics to the master server  ==> Deprecated
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
-                                                    RangedU32<0,128> players, S16 timeInSecs));
-
-
-   // Send game statistics to the master server   ==> Deprecated starting in 015
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, 
-                                                      Vector<StringTableEntry> teams, Vector<S32> teamScores,
-                                                      Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
-                                                      RangedU32<0,128> players, S16 timeInSecs));
-
-   /////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-   // Send game statistics to the master server   ==> Current as of 015
-   // Note that teams are sent in descending order, most players to fewest  
- //  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
- //                                                     Vector<StringTableEntry> teams, Vector<S32> teamScores,
- //                                                     Vector<RangedU32<0,0xFFFFFF> > color, 
- //                                                     U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIds,
- //                                                     Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
- //                                                     Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
- //                                                     Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits));
 
    void processIsAuthenticated(Zap::GameStats *gameStats);
    void SaveStatistics(Zap::VersionedGameStats &stats);
