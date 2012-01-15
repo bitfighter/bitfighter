@@ -607,11 +607,13 @@ void NexusGameType::spawnShip(ClientInfo *clientInfo)
    Parent::spawnShip(clientInfo);
 
    Ship *ship = clientInfo->getShip();
-
-   NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
-   newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
-   newFlag->mountToShip(ship);    // mountToShip() can handle NULL
-   newFlag->changeFlagCount(0);
+   if(ship)
+   {
+      NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
+      newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
+      newFlag->mountToShip(ship);    // mountToShip() can handle NULL
+      newFlag->changeFlagCount(0);
+   }
 }
 
 ////////////////////////////////////////
