@@ -800,11 +800,7 @@ static const char *sanitizeForJson(const char *value)
          mPlayerOrServerName = cleanName(readstr).c_str();
 
          bstream->readString(readstr);
-
-         //if(mCMProtocolVersion >= 2)
-            mServerDescr = readstr;
-         //else
-         //   mServerDescr = "";
+         mServerDescr = readstr;
 
          linkToServerList();
       }
@@ -816,88 +812,78 @@ static const char *sanitizeForJson(const char *value)
          bstream->readString(readstr);
          mPlayerOrServerName = cleanName(readstr).c_str();
 
-         //if(mCMProtocolVersion <= 2)
-         //   linkToClientList();
-
-         //else     // Level 3 or above: Read a password & id and check them out
-         {
-            bstream->readString(readstr);
-            string password = readstr;
+         bstream->readString(readstr);
+         string password = readstr;
             
-            mPlayerId.read(bstream);
+         mPlayerId.read(bstream);
 
-            // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
-            // possibilities, it most likely will be.
-            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-               if(walk != this && walk->mCMProtocolVersion >= 3 && walk->mPlayerId == mPlayerId)
-               {
-                  logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
-                                                                                               walk->mPlayerOrServerName.getString());
-                  disconnect(ReasonDuplicateId, "");
-                  reason = ReasonDuplicateId;
-                  return false;
-               }
-
-            // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
-            string name = mPlayerOrServerName.getString();
-            PHPBB3AuthenticationStatus stat = verifyCredentials(name, password);
-            Int<BADGE_COUNT> badges = 0;     //<=== here we can read badges from the database
-
-            mPlayerOrServerName.set(name.c_str());
-
-            if(stat == WrongPassword)
+         // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
+         // possibilities, it most likely will be.
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+            if(walk != this && walk->mCMProtocolVersion >= 3 && walk->mPlayerId == mPlayerId)
             {
-               logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
-               disconnect(ReasonBadLogin, "");
-               reason = ReasonBadLogin;
+               logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
+                                                                                             walk->mPlayerOrServerName.getString());
+               disconnect(ReasonDuplicateId, "");
+               reason = ReasonDuplicateId;
                return false;
             }
-            else if(stat == InvalidUsername)
-            {
-               logprintf(LogConsumer::LogConnection, "User name %s contains illegal characters", mPlayerOrServerName.getString());
-               // Send message back to client to request new username/password
-               disconnect(ReasonInvalidUsername, "");
-               reason = ReasonInvalidUsername;
-               return false;
-            }
-            linkToClientList();
-            if(stat == Authenticated)
-            {
-               logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
-               mAuthenticated = true;
 
-               m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, getBadges(mPlayerOrServerName), name.c_str());
-            }
+         // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
+         string name = mPlayerOrServerName.getString();
+         PHPBB3AuthenticationStatus stat = verifyCredentials(name, password);
+         Int<BADGE_COUNT> badges = 0;     //<=== here we can read badges from the database
 
-            else if(stat == UnknownUser || stat == Unsupported)
-               m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
+         mPlayerOrServerName.set(name.c_str());
 
-            else  // stat == CantConnect || stat == UnknownStatus
-               m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
+         if(stat == WrongPassword)
+         {
+            logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
+            disconnect(ReasonBadLogin, "");
+            reason = ReasonBadLogin;
+            return false;
          }
+         else if(stat == InvalidUsername)
+         {
+            logprintf(LogConsumer::LogConnection, "User name %s contains illegal characters", mPlayerOrServerName.getString());
+            // Send message back to client to request new username/password
+            disconnect(ReasonInvalidUsername, "");
+            reason = ReasonInvalidUsername;
+            return false;
+         }
+         linkToClientList();
+         if(stat == Authenticated)
+         {
+            logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
+            mAuthenticated = true;
+
+            m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, getBadges(mPlayerOrServerName), name.c_str());
+         }
+
+         else if(stat == UnknownUser || stat == Unsupported)
+            m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
+
+         else  // stat == CantConnect || stat == UnknownStatus
+            m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
       }
 
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
       string motdString = "Welcome to Bitfighter!";  // Default msg
 
-      //if(mCMProtocolVersion >= 1)    // Don't even bother with level 0 clients -- none of these clients are out there anymore!
-      {
-         for(S32 i = 0; i < MOTDVersionVec.size(); i++)
-            if(mClientBuild == MOTDVersionVec[i])
-            {
-               motdString = MOTDStringVec[i];
-               break;
-            }
+      for(S32 i = 0; i < MOTDVersionVec.size(); i++)
+         if(mClientBuild == MOTDVersionVec[i])
+         {
+            motdString = MOTDStringVec[i];
+            break;
+         }
 
-         m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this
+      m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this
 
-         // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
-         logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
-                                                    mIsGameServer ? "SERVER_INFO" : "CLIENT_INFO", getTimeStamp().c_str(),
-                                                    mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
-                                                    strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
-      }
-
+      // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
+      logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
+                                                   mIsGameServer ? "SERVER_INFO" : "CLIENT_INFO", getTimeStamp().c_str(),
+                                                   mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
+                                                   strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
       if(!mIsGameServer)  // seems to be just a waste of bandwidth when sending this to servers
          m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
 
