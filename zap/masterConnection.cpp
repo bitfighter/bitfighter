@@ -78,8 +78,7 @@ void MasterServerConnection::startServerQuery()
 
    // And automatically do a server query as well - you may not want to do things
    // in this order in your own clients.
-   c2mQueryServers(mCurrentQueryId, 0, 128, 0, 128, "", "");
-   //             (queryId, minPlayers, maxPlayers, infoFlags, maxBots, gameType, missionType);
+   c2mQueryServers(mCurrentQueryId);
 
 }
 
