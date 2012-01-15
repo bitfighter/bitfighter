@@ -433,8 +433,16 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
 void MasterServerConnection::onConnectionEstablished()
 {
-   if(mGame->isServer())        // Might want ServerFilter ?
+   if(mGame->isServer())        
+   {
       logprintf(LogConsumer::MsgType(LogConsumer::LogConnection | LogConsumer::ServerFilter), "Server established connection with Master Server");
+
+      // Check if we have any clients that need to have their authentication status checked; might happen if we've lost touch with master 
+      // and clients have connected in the meantime.  In some rare circumstances, could lead to double-verification, but I don't think this
+      // would be a real problem
+      for(S32 i = 0; i < mGame->getClientCount(); i++)
+         mGame->getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
+   }
    else
    {
       logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
