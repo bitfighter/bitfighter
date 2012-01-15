@@ -66,7 +66,7 @@ MasterServerConnection::MasterServerConnection(Game *game)
 
 MasterServerConnection::MasterServerConnection()
 {
-   TNLAssert(false, "This costructor is never run!"); 
+   TNLAssert(false, "We need a default constructor, but we never actually use it!"); 
 }
 
 
