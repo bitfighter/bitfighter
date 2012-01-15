@@ -114,6 +114,7 @@ private:
    Statistics mStatistics;       // Statistics tracker
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
    Vector<U32> mLoadout;
+   bool mNeedToCheckAuthenticationWithMaster;
 
 protected:
    StringTableEntry mName;
@@ -148,6 +149,9 @@ public:
    void resetLoadout();
    Vector<U32> mOldLoadout;      // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    void sRequestLoadout(Vector<U32> &loadout);
+
+   void setClientClaimsToBeVerified(bool claimsToBeVerified);
+   bool isClientClaimsToBeVerified();
 
    Ship *getShip();
    void setShip(Ship *ship);

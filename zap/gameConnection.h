@@ -89,7 +89,6 @@ private:
 
    StringTableEntry mClientNameNonUnique; // For authentication, not unique name
 
-   bool mClientClaimsToBeVerified;
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 

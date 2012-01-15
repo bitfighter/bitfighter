@@ -107,7 +107,6 @@ void GameConnection::initialize()
    mLastEnteredPassword = "";
 
    // Things related to verification
-   mClientClaimsToBeVerified = false;     // Does client report that they are verified
    mAuthenticationCounter = 0;            // Counts number of retries
 
    switchedTeamCount = 0;
@@ -421,7 +420,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
-   mClientClaimsToBeVerified = true;
+   mClientInfo->setClientClaimsToBeVerified(true);
 
    requestAuthenticationVerificationFromMaster();
 }
@@ -1178,7 +1177,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    setClientNameNonUnique(newName);       // For correct authentication
    
    mClientInfo->setAuthenticated(false, NO_BADGES);   // Prevents name from being underlined
-   mClientClaimsToBeVerified = false;
+   mClientInfo->setClientClaimsToBeVerified(false);   // Do not inquire with master
 
    if(oldName != uniqueName)              // Did the name actually change?
       updateClientChangedName(mClientInfo, uniqueName);
@@ -1383,10 +1382,9 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    mClientNameNonUnique = name;              // For authentication non-unique name
 
    mClientInfo->getId()->read(stream);
-   mClientClaimsToBeVerified = stream->readFlag();
+   mClientInfo->setClientClaimsToBeVerified(stream->readFlag());
 
-   if(mClientClaimsToBeVerified)
-      requestAuthenticationVerificationFromMaster();
+   requestAuthenticationVerificationFromMaster();    
 
    return true;
 }
@@ -1418,7 +1416,7 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
 
    // Ask master if client name/id match and the client is authenticated; don't bother if they're already authenticated, or
    // if they don't claim they are
-   if(!mClientInfo->isAuthenticated() && masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
+   if(!mClientInfo->isAuthenticated() && masterConn && masterConn->isEstablished() && mClientInfo->isClientClaimsToBeVerified())
       masterConn->requestAuthentication(mClientNameNonUnique, *mClientInfo->getId());   
 }
 

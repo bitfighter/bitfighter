@@ -96,7 +96,7 @@ ClientInfo::ClientInfo()
    mIsRobot = false;
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
-   mClientClaimsToBeVerified = false;     // Does client report that they are verified
+   mNeedToCheckAuthenticationWithMaster = false;     // Does client report that they are verified
 }
 
 
@@ -109,7 +109,7 @@ ClientInfo::~ClientInfo()
 
 void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
-   mClientClaimsToBeVerified = false;     // Once we get here, we'll treat the ruling as definitive
+   mNeedToCheckAuthenticationWithMaster = false;     // Once we get here, we'll treat the ruling as definitive
    mIsAuthenticated = isAuthenticated; 
    mBadges = badges;
 }
@@ -165,13 +165,13 @@ Ship *ClientInfo::getShip()
 
 void ClientInfo::setClientClaimsToBeVerified(bool claimsToBeVerified)
 {
-   mClientClaimsToBeVerified = claimsToBeVerified;
+   mNeedToCheckAuthenticationWithMaster = claimsToBeVerified;
 }
 
 
 bool ClientInfo::isClientClaimsToBeVerified()
 {
-   return mClientClaimsToBeVerified;
+   return mNeedToCheckAuthenticationWithMaster;
 }
 
 
