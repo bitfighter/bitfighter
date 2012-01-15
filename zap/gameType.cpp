@@ -1155,17 +1155,11 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    GameConnection *conn = clientInfo->getConnection();      // Will be NULL for robots
 
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delay bots.
-   if(!clientInfo->isRobot())
+   if(clientInfo->isSpawnDelayed())
    {
-      static const U32 INACTIVITY_THRESHOLD = 20000;           // 20 secs
-
-      if(conn->getTimeSinceLastMove() > INACTIVITY_THRESHOLD)
-      {
-         conn->s2cPlayerSpawnDelayed();
-         return;
-      }
+      conn->s2cPlayerSpawnDelayed();
+      return;
    }
-
 
    U32 teamIndex = clientInfo->getTeamIndex();
 
@@ -1192,9 +1186,16 @@ void GameType::spawnShip(ClientInfo *clientInfo)
   
 
       if(!levelHasLoadoutZone())
-         setClientShipLoadout(clientInfo, clientInfo->getLoadout());      // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+      {
+         // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+         setClientShipLoadout(clientInfo, clientInfo->getLoadout());      
+      }
       else
-         setClientShipLoadout(clientInfo, clientInfo->mOldLoadout, true); // Still using old loadout because we haven't entered a loadout zone yet...
+      {
+         // Still using old loadout because we haven't entered a loadout zone yet...
+         setClientShipLoadout(clientInfo, clientInfo->mOldLoadout, true); 
+      }
+
       clientInfo->mOldLoadout.clear();
    }
 }
@@ -1619,7 +1620,11 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    if(clientInfo->getTeamIndex() >= 0) 
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex());
 
-   spawnShip(clientInfo);
+   if(!clientInfo->isSpawnDelayed())
+   {
+      TNLAssert(clientInfo->getShip(), "Expecting to have a ship to spawn with!");
+      spawnShip(clientInfo);
+   }
 }
 
 

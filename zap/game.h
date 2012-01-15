@@ -153,6 +153,8 @@ public:
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();
 
+   bool isSpawnDelayed();
+
    Ship *getShip();
    void setShip(Ship *ship);
 
