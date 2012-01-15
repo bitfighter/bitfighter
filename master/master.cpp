@@ -596,7 +596,6 @@ static const char *sanitizeForJson(const char *value)
 
 
 
-
    // s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
    // request specified by the requestId.  The rejectData will be passed along to the requesting client.
    // Called to indicate a connect request is being rejected.
@@ -647,9 +646,8 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-
-
-   /////////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////
+   ////////////////////////////////////////
 
    Int<BADGE_COUNT> getBadges(StringTableEntry name)
    {
@@ -761,7 +759,7 @@ static const char *sanitizeForJson(const char *value)
       return name;
    }
 
-
+   // Must match MasterServerConnection::writeConnectRequest()!!
    bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
       if(!Parent::readConnectRequest(bstream, reason))

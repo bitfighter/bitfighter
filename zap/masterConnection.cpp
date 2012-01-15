@@ -382,6 +382,7 @@ string MasterServerConnection::getMasterName()
 
 // Send a connection request to the master server.  Also, tell them a little about ourselves.
 // Note that most of these parameters are completely bogus...  but even if they're not currently used, we gotta send something.
+// Must match MasterServerConnection::readConnectRequest()!!
 void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 {
    Parent::writeConnectRequest(bstream);
@@ -390,15 +391,11 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
-
-
    if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
    {
       ServerGame *serverGame = (ServerGame *)mGame;
       const char *gameTypeName = GameType::getGameTypeName(serverGame->getCurrentLevelType()).getString();
 
-      bstream->write((U32) 1000);                             // CPU speed  (dummy)
-      bstream->write((U32) 0xFFFFFFFF);                       // region code (dummy) --> want to use this?
       bstream->write((U32) serverGame->getRobotCount());      // number of bots
       bstream->write((U32) serverGame->getPlayerCount());     // num players       --> will always be 0 or 1?
       bstream->write((U32) serverGame->getMaxPlayers());      // max players
