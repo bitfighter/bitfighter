@@ -1613,7 +1613,8 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    clientInfo->setTeamIndex(minTeamIndex);     // Add new player to their assigned team
 
    // Tell other clients about the new guy, who is never us...
-   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), false, clientInfo->isAdmin(), clientInfo->isRobot(), true);    
+   s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
+                clientInfo->isRobot(), true);    
 
    if(clientInfo->getTeamIndex() >= 0) 
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex());
@@ -2159,8 +2160,9 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
-                (StringTableEntry name, bool isAuthenticated, bool isLocalClient, bool isAdmin, bool isRobot, bool playAlert), 
-                (name, isAuthenticated, isLocalClient, isAdmin, isRobot, playAlert))
+                (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isLocalClient, 
+                 bool isAdmin, bool isRobot, bool playAlert), 
+                (name, isAuthenticated, badges, isLocalClient, isAdmin, isRobot, playAlert))
 {
 #ifndef ZAP_DEDICATED
 
@@ -2170,7 +2172,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    if(!clientGame) 
       return;
       
-   ClientInfo *clientInfo = new RemoteClientInfo(name, isAuthenticated, isRobot, isAdmin);   // Deleted in s2cRemoveClient()
+   ClientInfo *clientInfo = new RemoteClientInfo(name, isAuthenticated, badges, isRobot, isAdmin);   // Deleted in s2cRemoveClient()
 
    clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
 
@@ -2434,7 +2436,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       bool isLocalClient = (conn == theConnection);
 
-      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), isLocalClient, clientInfo->isAdmin(), clientInfo->isRobot(), false);
+      s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), isLocalClient, clientInfo->isAdmin(), clientInfo->isRobot(), false);
 
       S32 team = clientInfo->getTeamIndex();
 

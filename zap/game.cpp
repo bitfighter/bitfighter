@@ -405,7 +405,8 @@ VoiceDecoder *LocalClientInfo::getVoiceDecoder()
 
 #ifndef ZAP_DEDICATED
 // Constructor
-RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, bool isRobot, bool isAdmin) : ClientInfo()
+RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
+                                   bool isRobot, bool isAdmin) : ClientInfo()
 {
    mName = name;
    mIsAuthenticated = isAuthenticated;
@@ -413,6 +414,7 @@ RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenti
    mIsAdmin = isAdmin;
    mTeamIndex = NO_TEAM;
    mRating = 0;
+   mBadges = badges;
 
    // Initialize speech stuff, will be deleted in destructor
    mDecoder = new SpeexVoiceDecoder();

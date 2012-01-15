@@ -659,7 +659,19 @@ static const char *sanitizeForJson(const char *value)
 
    /////////////////////////////////////////////////////////////////////////////////////
 
+   Int<BADGE_COUNT> getBadges(StringTableEntry name)
+   {
+      Int<BADGE_COUNT> badges = NO_BADGES;   // <=== Look up some badge info in the player DB here!
 
+      // This is, obviously, temporary; can be removed when we have a real master-side badge system in place
+      if(stricmp(name.getString(), "watusimoto") == 0 || stricmp(name.getString(), "raptor") == 0 ||
+         stricmp(name.getString(), "sam686") == 0 )
+      {
+         badges.value &= DEVELOPER_BADGE;
+      }
+
+      return badges;
+   }
 
 
    void MasterServerConnection::processIsAuthenticated(GameStats *gameStats)
@@ -742,17 +754,7 @@ static const char *sanitizeForJson(const char *value)
             else
                status = AuthenticationStatusUnauthenticatedName;
 
-            Int<BADGE_COUNT> badges = NO_BADGES;   // <=== Look up some badge info in the player DB here!
-
-            // This is, obviously, temporary; can be removed when we have a real master-side badge system in place
-            if(stricmp(name.getString(), "watusimoto") == 0 || stricmp(name.getString(), "raptor") == 0 ||
-               stricmp(name.getString(), "sam686") == 0 )
-            {
-               badges.value &= DEVELOPER_BADGE;
-            }
-
-
-            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, badges);
+            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, getBadges(name));
             break;
          }
    }
@@ -878,7 +880,7 @@ static const char *sanitizeForJson(const char *value)
                logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
                mAuthenticated = true;
 
-               m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, badges, name.c_str());
+               m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, getBadges(mPlayerOrServerName), name.c_str());
             }
 
             else if(stat == UnknownUser || stat == Unsupported)
