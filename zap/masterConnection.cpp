@@ -272,6 +272,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
 
       if(clientInfo->getId()->isValid() && *clientInfo->getId() == clientId)    // Robots don't have valid clientId, so this will never match a bot
       {
+         clientInfo->getConnection()->mClientClaimsToBeVerified = false;         // Once we get a reply, don't need to check again
+
          if(status == AuthenticationStatusAuthenticatedName)
          {
             clientInfo->setAuthenticated(true, badges);
@@ -279,12 +281,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
             for(S32 j = 0; j < mGame->getClientCount(); j++)
             {
-               ClientInfo *conn2 = mGame->getClientInfo(j);
+               ClientInfo *c = mGame->getClientInfo(j);
 
-               if(conn2->getName() == name && !conn2->isAuthenticated())
+               if(c->getName() == name && !c->isAuthenticated())
                {
                   //makeUnique will think the name is in use by self, and rename it.
-                  updateClientChangedName(conn2, GameConnection::makeUnique(conn2->getName().getString()).c_str());
+                  updateClientChangedName(c, GameConnection::makeUnique(c->getName().getString()).c_str());
                }
             }
 
