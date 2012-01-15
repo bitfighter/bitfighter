@@ -2907,7 +2907,6 @@ void GameUserInterface::renderScoreboard()
          renderFlag(F32(xl + 20), F32(yt + 18), teamColor);
          renderFlag(F32(xr - 20), F32(yt + 18), teamColor);
 
-         glColor(Colors::white);
          drawHorizLine(xl, xr, yt + S32(teamAreaHeight));
 
          drawString(xl + 40, yt + 2, 30, getGame()->getTeamName(i).getString());
