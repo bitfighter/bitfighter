@@ -351,7 +351,7 @@ void LocalClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> ba
 
    // If we're a server and are connected to a client, notify them of the change!
    if(mClientConnection && mClientConnection->isConnectionToClient())
-      mClientConnection->s2cSetAuthenticated(badges);
+      mClientConnection->s2cSetAuthenticated(isAuthenticated, badges);
 }
 
 
