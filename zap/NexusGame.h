@@ -93,7 +93,7 @@ public:
 #endif
 
    void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
-   void spawnShip(ClientInfo *clientInfo);
+   bool spawnShip(ClientInfo *clientInfo);
    GameTypes getGameType() const;
    const char *getShortName() const;
    const char *getInstructionString();

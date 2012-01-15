@@ -1150,7 +1150,7 @@ void GameType::onAddedToGame(Game *game)
 
 
 // Server only! (overridden in NexusGame)
-void GameType::spawnShip(ClientInfo *clientInfo)
+bool GameType::spawnShip(ClientInfo *clientInfo)
 {
    GameConnection *conn = clientInfo->getConnection();      // Will be NULL for robots
 
@@ -1158,7 +1158,7 @@ void GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isSpawnDelayed())
    {
       conn->s2cPlayerSpawnDelayed();
-      return;
+      return false;
    }
 
    U32 teamIndex = clientInfo->getTeamIndex();
@@ -1198,6 +1198,8 @@ void GameType::spawnShip(ClientInfo *clientInfo)
 
       clientInfo->mOldLoadout.clear();
    }
+
+   return true;
 }
 
 
@@ -1620,11 +1622,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    if(clientInfo->getTeamIndex() >= 0) 
       s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex());
 
-   if(!clientInfo->isSpawnDelayed())
-   {
-      TNLAssert(clientInfo->getShip(), "Expecting to have a ship to spawn with!");
-      spawnShip(clientInfo);
-   }
+   spawnShip(clientInfo);
 }
 
 

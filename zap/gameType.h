@@ -368,7 +368,7 @@ public:
    virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    virtual void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
 
-   virtual void spawnShip(ClientInfo *clientInfo);
+   virtual bool spawnShip(ClientInfo *clientInfo);
    virtual void spawnRobot(Robot *robot);
 
    virtual void changeClientTeam(ClientInfo *client, S32 team);     // Change player to team indicated, -1 = cycle teams

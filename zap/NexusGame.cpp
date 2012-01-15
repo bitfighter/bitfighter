@@ -602,18 +602,19 @@ void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 
 // Special spawn function for Nexus games (runs only on server)
-void NexusGameType::spawnShip(ClientInfo *clientInfo)
+bool NexusGameType::spawnShip(ClientInfo *clientInfo)
 {
-   Parent::spawnShip(clientInfo);
+   if(!Parent::spawnShip(clientInfo))
+      return false;
 
    Ship *ship = clientInfo->getShip();
-   if(ship)
-   {
-      NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
-      newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
-      newFlag->mountToShip(ship);    // mountToShip() can handle NULL
-      newFlag->changeFlagCount(0);
-   }
+
+   NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
+   newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
+   newFlag->mountToShip(ship);    // mountToShip() can handle NULL
+   newFlag->changeFlagCount(0);
+
+   return true;
 }
 
 ////////////////////////////////////////
