@@ -467,6 +467,8 @@ public:
    virtual void addAdminGameMenuOptions(MenuUserInterface *menu);
 #endif
 
+   void sendChatFromRobot(bool global, StringPtr message, ClientInfo *botClientInfo);
+
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
 

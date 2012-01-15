@@ -3109,6 +3109,13 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
 }
 
 
+void GameType::sendChatFromRobot(bool global, StringPtr message, ClientInfo *botClientInfo)
+{
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, botClientInfo->getName(), StringPtr(message)));
+   sendChatDisplayEvent(botClientInfo, global, message, theEvent);
+}
+
+
 // Sends a quick-chat message (which, due to its repeated nature can be encapsulated in a StringTableEntry item)
 GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry message), (global, message))
 {
@@ -3141,7 +3148,9 @@ void GameType::sendChatDisplayEvent(ClientInfo *sender, bool global, const char 
    }
 
    // And fire an event handler...
-   Robot::getEventManager().fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getPlayerInfo(), global);
+   // But don't add event if called by robot - it is already called in LuaRobot::globalMsg/teamMsg
+   if(!sender->isRobot())
+      Robot::getEventManager().fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getPlayerInfo(), global);
 }
 
 
