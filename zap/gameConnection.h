@@ -56,7 +56,7 @@ struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;
 class ClientInfo;
-class LocalClientInfo;
+class FullClientInfo;
 
 
 class GameConnection: public ControlObjectConnection, public DataSendable
@@ -72,7 +72,7 @@ private:
    // For saving passwords
    string mLastEnteredPassword;
 
-   ClientInfo *mClientInfo;               // This could be either a LocalClientInfo or a RemoteClientInfo
+   ClientInfo *mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
    bool mClientInfoWasCreatedLocally;     // Track whether we are responsible for deleting the clientInfo in the destructor
 
 #ifndef ZAP_DEDICATED

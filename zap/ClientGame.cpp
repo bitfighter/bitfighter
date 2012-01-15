@@ -108,7 +108,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mUIManager = new UIManager(this);         // Gets deleted in destructor
 
-   mClientInfo = new LocalClientInfo(NULL, false);    // Will be deleted in destructor
+   mClientInfo = new FullClientInfo(NULL, false);    // Will be deleted in destructor
    mLocalRemoteClientInfo = NULL;
 
    mSpawnDelayed = false;

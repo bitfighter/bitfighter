@@ -77,7 +77,7 @@ private:
 
    string mLoginPassword;
 
-   // ClientGame has two ClientInfos for the local player; mClientInfo is a LocalClientInfo, which contains a rich array of information
+   // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
    // set of info about the player, which is stored in a RemoteClientInfo.  So when a player connects, they get several RemoteClientInfos,
    // one of which describes themselves.  It is occasionally useful to have a handle on that, which is what mLocalRemoteClientInfo provides.

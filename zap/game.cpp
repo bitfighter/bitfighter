@@ -331,7 +331,7 @@ Nonce *ClientInfo::getId()
 ////////////////////////////////////////
 
 // Constructor
-LocalClientInfo::LocalClientInfo(GameConnection *gameConnection, bool isRobot) : ClientInfo()
+FullClientInfo::FullClientInfo(GameConnection *gameConnection, bool isRobot) : ClientInfo()
 {
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
@@ -339,19 +339,19 @@ LocalClientInfo::LocalClientInfo(GameConnection *gameConnection, bool isRobot) :
 
 
 // Destructor
-LocalClientInfo::~LocalClientInfo()
+FullClientInfo::~FullClientInfo()
 {
    // Do nothing
 }
 
 
-void LocalClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
+void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
    TNLAssert(isAuthenticated || badges == NO_BADGES, "Unauthenticated players should never have badges!");
    Parent::setAuthenticated(isAuthenticated, badges);
 
    // Broadcast new connection status to all clients.  It does seem a little roundabout to use the game server to communicate
-   // between the LocalClientInfo and the RemoteClientInfo on each client; we could contact the RemoteClientInfo directly and
+   // between the FullClientInfo and the RemoteClientInfo on each client; we could contact the RemoteClientInfo directly and
    // then not send a message to the client being authenticated below.  But I think this is cleaner architecturally, and this
    // message is not sent often.
    if(mClientConnection && mClientConnection->isConnectionToClient())      
@@ -360,7 +360,7 @@ void LocalClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> ba
 }
 
 
-F32 LocalClientInfo::getRating()
+F32 FullClientInfo::getRating()
 {
    // Initial case: no one has scored
    if(mTotalScore == 0)      
@@ -372,32 +372,32 @@ F32 LocalClientInfo::getRating()
 }
 
 
-GameConnection *LocalClientInfo::getConnection()
+GameConnection *FullClientInfo::getConnection()
 {
    return mClientConnection;
 }
 
 
-void LocalClientInfo::setConnection(GameConnection *conn)
+void FullClientInfo::setConnection(GameConnection *conn)
 {
    mClientConnection = conn;
 }
 
 
-void LocalClientInfo::setRating(F32 rating)
+void FullClientInfo::setRating(F32 rating)
 {
    TNLAssert(false, "Ratings can't be set for this class!");
 }
 
 
-SoundEffect *LocalClientInfo::getVoiceSFX()
+SoundEffect *FullClientInfo::getVoiceSFX()
 {
    TNLAssert(false, "Can't access VoiceSFX from this class!");
    return NULL;
 }
 
 
-VoiceDecoder *LocalClientInfo::getVoiceDecoder()
+VoiceDecoder *FullClientInfo::getVoiceDecoder()
 {
    TNLAssert(false, "Can't access VoiceDecoder from this class!");
    return NULL;
@@ -651,7 +651,7 @@ const Vector<ClientInfo *> *Game::getClientInfos()
 }
 
 
-// ClientInfo will be a RemoteClientInfo in ClientGame and a LocalClientInfo in ServerGame
+// ClientInfo will be a RemoteClientInfo in ClientGame and a FullClientInfo in ServerGame
 void Game::addToClientList(ClientInfo *clientInfo) 
 { 
    mClientInfos.push_back(clientInfo);
@@ -1976,7 +1976,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
-// Highest ratings first -- runs on server only, so these should be LocalClientInfos
+// Highest ratings first -- runs on server only, so these should be FullClientInfos
 static S32 QSORT_CALLBACK RatingSort(ClientInfo **a, ClientInfo **b)
 {
    F32 diff = (*a)->getCalculatedRating() - (*b)->getCalculatedRating();

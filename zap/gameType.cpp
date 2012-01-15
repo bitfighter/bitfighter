@@ -3166,18 +3166,18 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
    if(!clientGame) 
       return;
 
-   ClientInfo *localClientInfo = clientGame->getClientInfo();
+   ClientInfo *fullClientInfo = clientGame->getClientInfo();
    GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
 
    Color theColor = Colors::yellow;
 
-   if(localClientInfo->getName() == toName && toName == fromName)      // Message sent to self
+   if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
       gameUI->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
 
-   else if(localClientInfo->getName() == toName)                       // To this player
+   else if(fullClientInfo->getName() == toName)                       // To this player
       gameUI->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
 
-   else if(localClientInfo->getName() == fromName)                     // From this player
+   else if(fullClientInfo->getName() == fromName)                     // From this player
       gameUI->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else  

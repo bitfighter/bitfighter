@@ -194,7 +194,7 @@ public:
 
 class GameConnection;
 
-class LocalClientInfo : public ClientInfo
+class FullClientInfo : public ClientInfo
 {
    typedef ClientInfo Parent;
 
@@ -202,8 +202,8 @@ private:
    GameConnection *mClientConnection;
    
 public:
-   LocalClientInfo(GameConnection *clientConnection, bool isRobot);     // Constructor
-   virtual ~LocalClientInfo();                                          // Destructor
+   FullClientInfo(GameConnection *clientConnection, bool isRobot);     // Constructor
+   virtual ~FullClientInfo();                                          // Destructor
 
 
    // WARNING!! mClientConnection can be NULL on client!!! (though should never be NULL on server)
