@@ -66,7 +66,7 @@ MasterServerConnection::MasterServerConnection(Game *game)
 
 MasterServerConnection::MasterServerConnection()
 {
-   TNLAssert(false, "LLL");  // XXX What the crazy is LLL?
+   TNLAssert(false, "This costructor is never run!"); 
 }
 
 
