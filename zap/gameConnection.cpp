@@ -434,7 +434,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (bool isAuthenticated, Int<BADGE_COUNT> badges), (isAuthenticated, badges), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
-   getClientInfo()->setAuthenticated(true, badges);
+   getClientInfo()->setAuthenticated(isAuthenticated, badges);
 }
 
 
