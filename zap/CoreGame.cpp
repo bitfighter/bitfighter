@@ -446,8 +446,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       GameType *gameType = getGame()->getGameType();
       if(gameType)
       {
-         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
-         Ship *destroyer = dynamic_cast<Ship *>(p->mShooter.getPointer());
+         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);  // What about GrenadeProjectile and Mines?
+         Ship *destroyer = p ? dynamic_cast<Ship *>(p->mShooter.getPointer()) : NULL;
 
          CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
          if(coreGameType)
