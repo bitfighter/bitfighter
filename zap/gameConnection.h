@@ -91,7 +91,6 @@ private:
 
    bool mClientClaimsToBeVerified;
    bool mClientNeedsToBeVerified;
-   bool mIsVerified;                      // True if the connection has a verified account confirmed by the master
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 

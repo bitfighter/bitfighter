@@ -109,7 +109,6 @@ void GameConnection::initialize()
    // Things related to verification
    mClientClaimsToBeVerified = false;     // Does client report that they are verified
    mClientNeedsToBeVerified = false;      // If so, do we still need to verify that claim?
-   mIsVerified = false;                   // Final conclusion... client is or is not verified
    mAuthenticationCounter = 0;            // Counts number of retries
 
    switchedTeamCount = 0;
@@ -423,7 +422,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
-   mIsVerified = false; 
    mClientNeedsToBeVerified = true; 
    mClientClaimsToBeVerified = true;
 
@@ -1181,7 +1179,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    mClientInfo->setName(oldName);         // Restore name to properly get it updated to clients
    setClientNameNonUnique(newName);       // For correct authentication
    
-   mIsVerified = false;                               // Renamed names are never verified
    mClientInfo->setAuthenticated(false, NO_BADGES);   // Prevents name from being underlined
    mClientNeedsToBeVerified = false;                  // Prevent attempts to authenticate the new name
    mClientClaimsToBeVerified = false;
@@ -1389,7 +1386,6 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    mClientNameNonUnique = name;              // For authentication non-unique name
 
    mClientInfo->getId()->read(stream);
-   mIsVerified = false;
    mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
 
    if(mClientClaimsToBeVerified)
