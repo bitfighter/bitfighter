@@ -464,6 +464,7 @@ void TeamManager::addTeam(AbstractTeam *team, S32 index)
 
 void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
 {
+   delete mTeams[index];  // delete old team that is no longer used
    mTeams[index] = team;
 }
 

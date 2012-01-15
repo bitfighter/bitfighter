@@ -420,9 +420,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
+#ifndef ZAP_DEDICATED
    mClientInfo->setNeedToCheckAuthenticationWithMaster(true);
 
    requestAuthenticationVerificationFromMaster();
+#endif
 }
 
 
@@ -431,12 +433,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
                                                        (name, isAuthenticated, badges), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = gClientGame->findClientInfo(name);
 
    if(clientInfo)
       clientInfo->setAuthenticated(isAuthenticated, badges);
    //else
       // This can happen if we're hosting locally when we first join the game.  Not sure why, but it seems harmless...
+#endif
 }
 
 
