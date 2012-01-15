@@ -381,7 +381,6 @@ string MasterServerConnection::getMasterName()
 
 
 // Send a connection request to the master server.  Also, tell them a little about ourselves.
-// Note that most of these parameters are completely bogus...  but even if they're not currently used, we gotta send something.
 // Must match MasterServerConnection::readConnectRequest()!!
 void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 {
