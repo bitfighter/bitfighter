@@ -464,6 +464,7 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
 }
 
 
+// When we fire this off, we'll be expecting a return message in m2sSetAuthenticated()
 void MasterServerConnection::requestAuthentication(StringTableEntry clientName, Nonce clientId)
 {
    s2mRequestAuthentication(clientId.toVector(), clientName);

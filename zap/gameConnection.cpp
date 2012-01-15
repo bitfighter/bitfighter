@@ -431,10 +431,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (),
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (bool isAuthenticated, Int<BADGE_COUNT> badges), (isAuthenticated, badges), 
-                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+// A client has changed it's authentication status -- Only fired when game::setAuthenticated() is run on the server
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges), 
+                                                       (name, isAuthenticated, badges), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
-   getClientInfo()->setAuthenticated(isAuthenticated, badges);
+   ClientInfo *clientInfo = gClientGame->findClientInfo(name);
+
+   if(clientInfo)
+      clientInfo->setAuthenticated(isAuthenticated, badges);
+   //else
+      // This can happen if we're hosting locally when we first join the game.  Not sure why, but it seems harmless...
 }
 
 
@@ -1305,7 +1312,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
     mClientInfo->getId()->write(stream);
 
-   stream->writeFlag(mIsVerified);    // Tell server whether we (the client) claim to be authenticated
+    stream->writeFlag(mClientInfo->isAuthenticated());    // Tell server whether we (the client) claim to be authenticated
 #endif
 }
 
@@ -1385,7 +1392,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    mIsVerified = false;
    mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
 
-   requestAuthenticationVerificationFromMaster();
+   if(mClientClaimsToBeVerified)
+      requestAuthenticationVerificationFromMaster();
 
    return true;
 }

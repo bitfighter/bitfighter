@@ -350,9 +350,13 @@ void LocalClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> ba
    TNLAssert(isAuthenticated || badges == NO_BADGES, "Unauthenticated players should never have badges!");
    Parent::setAuthenticated(isAuthenticated, badges);
 
-   // If we're a server and are connected to a client, notify them of the change!
-   if(mClientConnection && mClientConnection->isConnectionToClient())
-      mClientConnection->s2cSetAuthenticated(isAuthenticated, badges);
+   // Broadcast new connection status to all clients.  It does seem a little roundabout to use the game server to communicate
+   // between the LocalClientInfo and the RemoteClientInfo on each client; we could contact the RemoteClientInfo directly and
+   // then not send a message to the client being authenticated below.  But I think this is cleaner architecturally, and this
+   // message is not sent often.
+   if(mClientConnection && mClientConnection->isConnectionToClient())      
+      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         gServerGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
 }
 
 
