@@ -149,10 +149,7 @@ public:
    // The query server method builds a piecewise list of servers
    // that match the client's particular filter criteria and
    // sends it to the client, followed by a QueryServersDone RPC.
-   TNL_DECLARE_RPC_OVERRIDE(c2mQueryServers,
-                (U32 queryId, U32 minPlayers, U32 maxPlayers, U32 infoFlags, U32 maxBots, 
-                 StringTableEntry gameType, StringTableEntry missionType)
-   );
+   TNL_DECLARE_RPC_OVERRIDE(c2mQueryServers, (U32 queryId) );
 
    /// checkActivityTime validates that this particular connection is
    /// not issuing too many requests at once in an attempt to DOS

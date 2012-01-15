@@ -40,9 +40,7 @@
 //
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryServers,
-   (U32 queryId, U32 minPlayers, U32 maxPlayers, U32 infoFlags,
-   U32 maxBots, StringTableEntry gameType, StringTableEntry missionType),
-   (queryId, minPlayers, maxPlayers, infoFlags, maxBots, gameType, missionType),
+   (U32 queryId), (queryId),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cQueryServersResponse,

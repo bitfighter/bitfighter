@@ -290,10 +290,7 @@ static const char *sanitizeForJson(const char *value)
    // The query server method builds a piecewise list of servers
    // that match the client's particular filter criteria and
    // sends it to the client, followed by a QueryServersDone RPC.
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers,
-                (U32 queryId, U32 minPlayers, U32 maxPlayers, U32 infoFlags, U32 maxBots, 
-                 StringTableEntry gameType, StringTableEntry missionType)
-   )
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mQueryServers, (U32 queryId))
    {
       Vector<IPAddress> theVector(IP_MESSAGE_ADDRESS_COUNT);
       theVector.reserve(IP_MESSAGE_ADDRESS_COUNT);
@@ -304,17 +301,17 @@ static const char *sanitizeForJson(const char *value)
          if(walk->mCSProtocolVersion != mCSProtocolVersion)     // Incomptible protocols
             continue;
 
-         // Ok, so the protocol version is correct, however...
-         if(walk->mPlayerCount > maxPlayers || walk->mPlayerCount < minPlayers)   // ...too few or too many players
-            continue;
-         if(infoFlags & ~walk->mInfoFlags)           // ...wrong info flags
-            continue;
-         if(maxBots < walk->mNumBots)                // ...too many bots
-            continue;
-         if(gameType.isNotNull() && (gameType != walk->mLevelName))          // ...wrong level name
-            continue;
-         if(missionType.isNotNull() && (missionType != walk->mLevelType))    // ...wrong level type
-            continue;
+         //// Ok, so the protocol version is correct, however...
+         //if(walk->mPlayerCount > maxPlayers || walk->mPlayerCount < minPlayers)   // ...too few or too many players
+         //   continue;
+         //if(infoFlags & ~walk->mInfoFlags)           // ...wrong info flags
+         //   continue;
+         //if(maxBots < walk->mNumBots)                // ...too many bots
+         //   continue;
+         //if(gameType.isNotNull() && (gameType != walk->mLevelName))          // ...wrong level name
+         //   continue;
+         //if(missionType.isNotNull() && (missionType != walk->mLevelType))    // ...wrong level type
+         //   continue;
 
          // Somehow, despite it all, we matched.  Add us to the results list.
          theVector.push_back(walk->getNetAddress().toIPAddress());

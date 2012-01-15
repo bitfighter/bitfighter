@@ -80,11 +80,10 @@ public:
    // Version 0 RPCs
 
    /// c2mQueryServers is sent by the client to the master server to request a list of
-   /// servers that match the specified filter criteria.  A c2mQueryServers request will
+   /// servers that match the specified filter criteria (most of which were removed for 016).  A c2mQueryServers request will
    /// result in one or more m2cQueryServersResponse RPCs, with the final call having an empty
    /// Vector of servers.
-   TNL_DECLARE_RPC(c2mQueryServers, (U32 queryId, U32 minPlayers, U32 maxPlayers, U32 infoFlags,
-      U32 maxBots, StringTableEntry gameType, StringTableEntry missionType));
+   TNL_DECLARE_RPC(c2mQueryServers, (U32 queryId));
 
    /// m2cQueryServersResponse is sent by the master server in response to a c2mQueryServers RPC, to
    /// return a partial list of the servers that matched the specified filter criteria.  Because packets
