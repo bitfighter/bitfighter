@@ -96,6 +96,7 @@ ClientInfo::ClientInfo()
    mIsRobot = false;
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
+   mClientClaimsToBeVerified = false;     // Does client report that they are verified
 }
 
 
@@ -108,6 +109,7 @@ ClientInfo::~ClientInfo()
 
 void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
 {
+   mClientClaimsToBeVerified = false;     // Once we get here, we'll treat the ruling as definitive
    mIsAuthenticated = isAuthenticated; 
    mBadges = badges;
 }
@@ -158,6 +160,18 @@ void ClientInfo::setShip(Ship *ship)
 Ship *ClientInfo::getShip()
 {
    return mShip;
+}
+
+
+void ClientInfo::setClientClaimsToBeVerified(bool claimsToBeVerified)
+{
+   mClientClaimsToBeVerified = claimsToBeVerified;
+}
+
+
+bool ClientInfo::isClientClaimsToBeVerified()
+{
+   return mClientClaimsToBeVerified;
 }
 
 
