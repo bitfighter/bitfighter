@@ -225,8 +225,6 @@ class EditorPointObject : public EditorObject, public PointGeometry
    typedef EditorObject Parent;
 
 public:
-   //EditorPointObject();       // Constructor
-
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void prepareForDock(Game *game, const Point &point);
 };
@@ -237,13 +235,9 @@ public:
 
 class EditorItem : public EditorPointObject
 {
-   //typedef MoveItem Parent;   
-   //typedef EditorObject EditorParent;
    typedef EditorPointObject Parent;
 
 public:
-   //EditorItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-
    virtual void renderEditor(F32 currentScale) = 0;
    virtual F32 getEditorRadius(F32 currentScale) = 0;
    virtual string toString(F32 gridSize) const = 0;
