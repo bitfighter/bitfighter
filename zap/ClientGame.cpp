@@ -1813,17 +1813,17 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       if(argc >= 2)
       {
-         WallItem *wallObject = new WallItem();  
-         wallObject->initializeEditor();        // Only runs unselectVerts
+         WallItem *wallItem = new WallItem();  
+         wallItem->initializeEditor();        // Only runs unselectVerts
         
-         wallObject->processArguments(argc, argv, this);
+         wallItem->processArguments(argc, argv, this);
          
-         if(wallObject->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
-            delete wallObject;
+         if(wallItem->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
+            delete wallItem;
          else
          {
-            wallObject->addToGame(this, database);
-            wallObject->processEndPoints();
+            wallItem->addToGame(this, database);
+            wallItem->processEndPoints();
          }
       }
    }
