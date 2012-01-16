@@ -2509,21 +2509,14 @@ extern void writeServerBanList(CIniFile *ini, BanList *banList);
 // When adding new commands, please update the giant CommandInfo chatCmds[] array in UIGame.cpp)
 void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args)
 {
-   ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
-   if(!mGame)
-      return;
-
-   GameConnection *conn = clientInfo->getConnection();
+   ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    if(!stricmp(cmd, "yes"))
       serverGame->voteClient(clientInfo, true);
    else if(!stricmp(cmd, "no"))
       serverGame->voteClient(clientInfo, false);
    else
-   {
-      // Command not found, tell the client
-      conn->s2cDisplayErrorMessage("!!! Invalid Command");
-   }
+      clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Invalid Command");
 }
 
 
@@ -2675,7 +2668,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
    if(score <= 0)    // i.e. score is invalid
       return;  // Error message handled client-side
 
-   ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
+   ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    // Use voting when there is no level change password, and there is more then 1 player
    if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && serverGame->getPlayerCount() > 1)
@@ -2696,7 +2689,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   ServerGame *serverGame = dynamic_cast<ServerGame *>(mGame);
+   ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    // Reset player scores
    for(S32 i = 0; i < serverGame->getClientCount(); i++)
@@ -3144,10 +3137,8 @@ extern Color gTeamChatColor;
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    ClientInfo *fullClientInfo = clientGame->getClientInfo();
    GameUserInterface *gameUI = clientGame->getUIManager()->getGameUserInterface();
@@ -3172,14 +3163,13 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message), (global, clientName, message))
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   if(!clientGame || clientGame->isOnMuteList(clientName.getString()))
+   if(clientGame->isOnMuteList(clientName.getString()))
       return;
 
-   Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
+   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(*color, "%s: %s", clientName.getString(), message.getString());
 #endif
 }
 
@@ -3188,14 +3178,10 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
 {
 #ifndef ZAP_DEDICATED
-   Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
 
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
-
-   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(*color, "%s: %s", clientName.getString(), message.getString());
 #endif
 }
 
