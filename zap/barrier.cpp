@@ -527,7 +527,7 @@ bool WallItem::canBeNeutral()
 
 const Color *WallItem::getEditorRenderColor()
 {
-   return &Colors::gray50;
+   return &Colors::gray50;    // Color of wall spine in editor
 }
 
 
@@ -634,7 +634,7 @@ string PolyWall::toString(F32 gridSize) const
 
 const char *PolyWall::getEditorHelpString()
 {
-   return "Polygonal wall item let you be creative with your wall design.";
+   return "Polygonal wall item lets you be creative with your wall design.";
 }
 
 
