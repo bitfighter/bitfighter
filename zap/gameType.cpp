@@ -1415,7 +1415,9 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
          if(clientInfo->getTeamIndex() != teamId)      // Wrong team
             continue;
 
-         Ship *ship = dynamic_cast<Ship *>(clientInfo->getConnection()->getControlObject());
+         TNLAssert(clientInfo->getConnection()->getControlObject() == clientInfo->getShip(), "Not equal?!?");
+
+         Ship *ship = clientInfo->getShip();
          if(!ship)       // Can happen!
             continue;
 
@@ -1504,7 +1506,8 @@ void GameType::queryItemsOfInterest()
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
 
-         if( (theShip->hasModule(ModuleSensor) && delta.x < Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL) ||
+         if( (theShip->hasModule(ModuleSensor) && delta.x < Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL && 
+                                                  delta.y < Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL) ||
                (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL) )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
@@ -2120,7 +2123,8 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    if(client->getTeamIndex() == team)     // Don't explode if not switching team
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(client->getConnection()->getControlObject());    // Get the ship that's switching
+   TNLAssert(client->getConnection()->getControlObject() == client->getShip(), "Not equal?!?");
+   Ship *ship = client->getShip();    // Get the ship that's switching
 
    if(ship)
    {
@@ -2190,14 +2194,11 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
    if(clientInfo->getConnection())
    {
       // Blow up the ship...
-      GameObject *theControlObject = clientInfo->getConnection()->getControlObject();
+      TNLAssert(clientInfo->getConnection()->getControlObject() == clientInfo->getShip(), "Not equal?!?");
 
-      if(theControlObject)
-      {
-         Ship *ship = dynamic_cast<Ship *>(theControlObject);
-         if(ship)
-            ship->kill();
-      }
+      Ship *ship = clientInfo->getShip();
+      if(ship)
+         ship->kill();
    }
 
    s2cRemoveClient(clientInfo->getName());            // Tell other clients that this one has departed
