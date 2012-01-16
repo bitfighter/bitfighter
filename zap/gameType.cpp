@@ -645,7 +645,7 @@ void GameType::idle_client(U32 deltaT)
 #ifndef ZAP_DEDICATED
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
-   dynamic_cast<ClientGame *>(mGame)->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
+   static_cast<ClientGame *>(mGame)->getUIManager()->getGameUserInterface()->renderBasicInterfaceOverlay(this, scoreboardVisible);
 }
 
 
@@ -681,7 +681,7 @@ void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F3
 
 void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outlineColor, F32 alphaMod) const
 {
-   ClientGame *game = dynamic_cast<ClientGame *>(mGame);
+   ClientGame *game = static_cast<ClientGame *>(mGame);
 
    GameConnection *gc = game->getConnectionToServer();
 
@@ -1997,7 +1997,7 @@ static void switchPlayersTeamCallback(ClientGame *game, U32 unused)
 // Add any additional game-specific admin menu items, processed below
 void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 {
-   ClientGame *game = dynamic_cast<ClientGame *>(mGame);
+   ClientGame *game = static_cast<ClientGame *>(mGame);
 
    if(isTeamGame() && game->getTeamCount() > 1)
       menu->addMenuItem(new MenuItem("CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
@@ -2016,11 +2016,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
                                                 levelHasLoadoutZone, engineerEnabled))
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    mLevelName = levelName;
    mLevelDescription = levelDesc;
@@ -2173,11 +2170,8 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 {
 #ifndef ZAP_DEDICATED
 
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-
-   TNLAssert(clientGame, "Invalid client game!");
-   if(!clientGame) 
-      return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
       
    ClientInfo *clientInfo = new RemoteClientInfo(name, isAuthenticated, badges, isRobot, isAdmin);   // Deleted in s2cRemoveClient()
 
@@ -2226,7 +2220,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
    }
 
    // Notifiy the player
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "Your name was changed to %s", newName.getString());
 #endif
 }
@@ -2236,11 +2230,8 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
 GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    ClientInfo *clientInfo = clientGame->findClientInfo(name);
 
@@ -2307,9 +2298,8 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 #ifndef ZAP_DEDICATED
    mWinningScore = winningScore;
 
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    clientGame->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
@@ -2323,23 +2313,18 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
                 (name, teamIndex))
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = mGame->findClientInfo(name);      // Will be us, if we changed teams
-   if(!clientInfo)
+   ClientInfo *remoteClientInfo = mGame->findClientInfo(name);      // Get RemoteClientInfo for player changing teams
+   if(!remoteClientInfo)
       return;
 
-   clientInfo->setTeamIndex((S32) teamIndex);
+   remoteClientInfo->setTeamIndex((S32) teamIndex);
 
    // The following works as long as everyone runs with a unique name.  Fails if two players have names that collide and have
    // been corrected by the server.
-   // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   ClientInfo *localClientInfo = clientGame->getClientInfo();
 
-   GameConnection *localClient = clientGame->getConnectionToServer();
-
-   if(localClient && localClient->getClientInfo()->getName() == name)      
+   if(localClientInfo->getName() == name)      
       clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", mGame->getTeamName(teamIndex).getString());
    else
       clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mGame->getTeamName(teamIndex).getString());
@@ -2375,10 +2360,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
 
    // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
    // saw a different message.
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
       clientGame->displayMessage(Colors::cyan, "%s has been granted administrator access.", name.getString());
@@ -2401,11 +2384,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 
    // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
    // saw a different message.
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
       clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
@@ -2476,10 +2456,9 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);     // Tells server we're ready to go!
 
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) 
-      return;
+   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
 
    clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
    Barrier::prepareRenderingGeometry(clientGame);    // Get walls ready to render
