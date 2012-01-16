@@ -236,7 +236,8 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 #ifndef ZAP_DEDICATED
 
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
+
+   Ship *ship = dynamic_cast<Ship *>(static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
    if(!ship)
       return;
 

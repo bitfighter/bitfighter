@@ -3341,10 +3341,8 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
-
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   
    if(killer)  // Known killer, was self, robot, or another player
    {
       if(killer == victim)

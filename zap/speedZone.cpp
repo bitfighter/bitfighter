@@ -399,15 +399,12 @@ bool SpeedZone::collide(GameObject *hitObject)
          return false;
 
 #ifndef ZAP_DEDICATED
-      if(isGhost()) // on client, don't process speedZone on all moveObjects except the controlling one.
+      if(isGhost()) // On client, don't process speedZone on all moveObjects except the controlling one
       {
-         ClientGame *client = dynamic_cast<ClientGame *>(getGame());
-         if(client)
-         {
-            GameConnection *gc = client->getConnectionToServer();
-            if(gc && gc->getControlObject() != hitObject) 
-               return false;
-         }
+         ClientGame *client = static_cast<ClientGame *>(getGame());
+         GameConnection *gc = client->getConnectionToServer();
+         if(gc && gc->getControlObject() != hitObject) 
+            return false;
       }
 #endif
       return true;

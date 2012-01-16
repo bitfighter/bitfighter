@@ -67,27 +67,26 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 {
 #ifndef ZAP_DEDICATED
 
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
    if(msgIndex == NexusMsgScore)
    {
       SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", 
+                                 clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
    }
    else if(msgIndex == NexusMsgYardSale)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
-                  "%s is having a YARD SALE!",
-                  clientName.getString());
+                                 "%s is having a YARD SALE!",
+                                 clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagSnatch);
    }
    else if(msgIndex == NexusMsgGameOverWin)
    {
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
-                     "Player %s wins the game!",
-                     clientName.getString());
+                                 "Player %s wins the game!",
+                                 clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == NexusMsgGameOverTie)

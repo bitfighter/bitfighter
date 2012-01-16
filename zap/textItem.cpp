@@ -117,10 +117,10 @@ void TextItem::newObjectFromDock(F32 gridSize)
 void TextItem::render()
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *game = dynamic_cast<ClientGame *>(getGame());
+   ClientGame *game = static_cast<ClientGame *>(getGame());
    
    // Don't render opposing team's text items
-   if(!game || !game->getConnectionToServer() || !game->getGameType())
+   if(!game->getConnectionToServer() || !game->getGameType())
       return;
 
    Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
@@ -514,7 +514,7 @@ LineItem *LineItem::clone() const
 void LineItem::render()
 {
 #ifndef ZAP_DEDICATED
-   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+   GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
 
    // Don't render opposing team's text items... gc will only exist in game.  This block will be skipped when rendering preview in the editor.
    if(gc)      

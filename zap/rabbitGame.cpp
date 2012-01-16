@@ -47,50 +47,45 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
    switch (msgIndex)
    {
-   case RabbitMsgGrab:
-      SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->displayMessage(Color(1.0f, 0.0f, 0.0f),
-                  "%s GRABBED the Carrot!",
-                  clientName.getString());
-      break;
-   case RabbitMsgRabbitKill:
-      SoundSystem::playSoundEffect(SFXShipHeal);
-      clientGame->displayMessage(Color(1.0f, 0.0f, 0.0f),
-                  "%s is a rabbid rabbit!",
-                  clientName.getString());
-      break;
-   case RabbitMsgDrop:
-      SoundSystem::playSoundEffect(SFXFlagDrop);
-      clientGame->displayMessage(Color(0.0f, 1.0f, 0.0f),
-                  "%s DROPPED the Carrot!",
-                  clientName.getString());
-      break;
-   case RabbitMsgRabbitDead:
-      SoundSystem::playSoundEffect(SFXShipExplode);
-      clientGame->displayMessage(Color(1.0f, 0.0f, 0.0f),
-                  "%s killed the rabbit!",
-                  clientName.getString());
-      break;
-   case RabbitMsgReturn:
-      SoundSystem::playSoundEffect(SFXFlagReturn);
-      clientGame->displayMessage(Color(1.0f, 0.0f, 1.0f),
-                  "The Carrot has been returned!");
-      break;
-   case RabbitMsgGameOverWin:
-      clientGame->displayMessage(Color(1.0f, 1.0f, 0.0f),
-                  "%s is the top rabbit!",
-                  clientName.getString());
-      break;
-   case RabbitMsgGameOverTie:
-      clientGame->displayMessage(Color(1.0f, 1.0f, 0.0f),
-                  "No top rabbit - Carrot wins by default!");
-      break;
+      case RabbitMsgGrab:
+         SoundSystem::playSoundEffect(SFXFlagCapture);
+         clientGame->displayMessage(Colors::red, "%s GRABBED the Carrot!", clientName.getString());
+         break;
+
+      case RabbitMsgRabbitKill:
+         SoundSystem::playSoundEffect(SFXShipHeal);
+         clientGame->displayMessage(Colors::red, "%s is a rabbid rabbit!", clientName.getString());
+         break;
+
+      case RabbitMsgDrop:
+         SoundSystem::playSoundEffect(SFXFlagDrop);
+         clientGame->displayMessage(Colors::green, "%s DROPPED the Carrot!", clientName.getString());
+         break;
+
+      case RabbitMsgRabbitDead:
+         SoundSystem::playSoundEffect(SFXShipExplode);
+         clientGame->displayMessage(Colors::red, "%s killed the rabbit!", clientName.getString());
+         break;
+
+      case RabbitMsgReturn:
+         SoundSystem::playSoundEffect(SFXFlagReturn);
+         clientGame->displayMessage(Colors::magenta, "The Carrot has been returned!");
+         break;
+
+      case RabbitMsgGameOverWin:
+         clientGame->displayMessage(Colors::yellow, "%s is the top rabbit!", clientName.getString());
+         break;
+
+      case RabbitMsgGameOverTie:
+         clientGame->displayMessage(Colors::yellow, "No top rabbit - Carrot wins by default!");
+         break;
+
+      default:
+         TNLAssert(false, "Invalid option");
    }
 #endif
 }
@@ -240,7 +235,7 @@ const Color *RabbitGameType::getShipColor(Ship *ship)
    if(getGame()->getTeamCount() != 1)
       return Parent::getShipColor(ship);
 
-   GameConnection *gc = dynamic_cast<ClientGame *>(getGame())->getConnectionToServer();
+   GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
 
    if(!gc)
       return &Colors::white;     // Something's gone wrong!

@@ -615,7 +615,7 @@ void GrenadeProjectile::idle(IdleCallPath path)
    {
       U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
-      ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
       gc = clientGame->getConnectionToServer();
 
       collisionDisabled = aliveTime < 250 && gc && gc->getControlObject();
@@ -994,7 +994,7 @@ void Mine::renderItem(const Point &pos)
    bool visible, armed;
 
    Game *game = getGame();
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
+   ClientGame *clientGame = static_cast<ClientGame *>(game);
 
    if(clientGame && clientGame->getConnectionToServer())
    {
@@ -1288,9 +1288,9 @@ void SpyBug::renderItem(const Point &pos)
    bool visible;
 
    Game *game = getGame();
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(game);
+   ClientGame *clientGame = static_cast<ClientGame *>(game);
 
-   if(clientGame && clientGame->getConnectionToServer())
+   if(clientGame->getConnectionToServer())
    {
       GameConnection *conn = clientGame->getConnectionToServer();   
       Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());

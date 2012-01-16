@@ -101,9 +101,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    }
 
 
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-   TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
    // Print the message
    clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
@@ -167,7 +165,7 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 #ifndef ZAP_DEDICATED
 
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    Ship *ship = dynamic_cast<Ship *>(clientGame && clientGame->getConnectionToServer() ? clientGame->getConnectionToServer()->getControlObject() : NULL);
 
    if(!ship)

@@ -2662,9 +2662,7 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    if(mGameType)
-   {
       mGameType->idle(GameObject::ServerIdleMainLoop, timeDelta);
-   }
 
    processDeleteList(timeDelta);
 

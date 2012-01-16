@@ -264,9 +264,11 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
 #ifndef ZAP_DEDICATED
 
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
+
+   Ship *ship = dynamic_cast<Ship *>(static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
    if(!ship)
       return;
+
    bool uFlag = false;
    S32 team = ship->getTeam();
 
@@ -303,6 +305,7 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
       if(!mFlags[i]->isMounted() && !uFlag)
       {
          GoalZone *gz = mFlags[i]->getZone();
+
          if(gz && gz->getTeam() != team)
             renderObjectiveArrow(mFlags[i], getTeamColor(gz->getTeam()));
          else if(!gz)
@@ -311,6 +314,7 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
       else
       {
          Ship *mount = mFlags[i]->getMount();
+
          if(mount && mount != ship)
             renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
       }

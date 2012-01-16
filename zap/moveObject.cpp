@@ -72,7 +72,7 @@ void MoveObject::onAddedToGame(Game *game)
 
 #ifndef ZAP_DEDICATED
    if(isGhost())     // Client only
-      this->setControllingClient(dynamic_cast<ClientGame *>(game)->getConnectionToServer());
+      this->setControllingClient(static_cast<ClientGame *>(game)->getConnectionToServer());
 #endif
 }
 
@@ -472,7 +472,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 
          Color bumpC(scale/3, scale/3, scale);
 
-         for(S32 i=0; i<4*pow((F32)scale, 0.5f); i++)
+         for(S32 i = 0; i < 4 * pow((F32)scale, 0.5f); i++)
          {
             Point chaos(TNL::Random::readF(), TNL::Random::readF());
             chaos *= scale + 1;

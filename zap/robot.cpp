@@ -1914,7 +1914,7 @@ void Robot::tickTimer(U32 deltaT)
 
       lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
 
-      if (lua_pcall(L, 2, 0, 0) != 0)
+      if(lua_pcall(L, 2, 0, 0) != 0)
          throw LuaException(lua_tostring(L, -1));
    }
    catch(LuaException &e)

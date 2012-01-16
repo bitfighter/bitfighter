@@ -1583,13 +1583,11 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
    // Safe to delete this block?  Ever triggered?  Anyone?  (-CE Jan 2012)
    if(!cc)
    {
-      ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+      TNLAssert(false, "If this ever gets triggered, please remove the comment above, and add a note about how we get here...");
+      TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
-      if(clientGame)
-      {
-         TNLAssert(false, "Please document code path/circumstances this is triggered!");
-         cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
-      }
+      cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
       TNLAssert(cc, "Problem!");
    }
 #endif
@@ -1762,7 +1760,6 @@ void Ship::emitShipExplosion(Point pos)
    F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-   
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
    game->emitExplosion(mMoveState[ActualState].pos, 0.9f, ShipExplosionColors, NumShipExplosionColors);
@@ -1780,12 +1777,6 @@ void Ship::emitMovementSparks()
    if(hasExploded || mMoveState[ActualState].vel.len() < 0.1)
       return;
 
-/*  Provisionally delete this...
-   mSparkElapsed += deltaT;
-
-   if(mSparkElapsed <= 32)  // What is the purpose of this?  To prevent sparks for the first 32ms of ship's life?!?
-      return;
-*/
    bool boostActive = isModulePrimaryActive(ModuleBoost);
    bool cloakActive = isModulePrimaryActive(ModuleCloak);
 
@@ -1802,7 +1793,7 @@ void Ship::emitMovementSparks()
    F32 cosTh = cos(th);
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
-   for(S32 i=0; i<3; i++)
+   for(S32 i = 0; i < 3; i++)
    {
       shipDirs[i].x = corners[i].x * cosTh + corners[i].y * sinTh;
       shipDirs[i].y = corners[i].y * cosTh - corners[i].x * sinTh;
@@ -1903,7 +1894,7 @@ void Ship::emitMovementSparks()
                 chaos *= 5;
 
                 // interp give us some nice enginey colors...
-                Color dim(1, 0, 0);
+                Color dim(Colors::red);
                 Color light(1, 1, boostActive ? 1.f : 0.f);
                 Color thrust;
 
@@ -1913,7 +1904,7 @@ void Ship::emitMovementSparks()
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
                 static_cast<ClientGame *>(getGame())->emitSpark(mMoveState[RenderState].pos - shipDirs[i] * 13,
-                     -shipDirs[i] * 100 + chaos, thrust, 1.5f * TNL::Random::readF());
+                                          -shipDirs[i] * 100 + chaos, thrust, 1.5f * TNL::Random::readF());
              }
           }
       }
@@ -1927,8 +1918,6 @@ extern bool gShowAimVector;
 void Ship::render(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
-
    if(layerIndex == 0)  // Only render on layers -1 and 1
       return;
 
@@ -1943,8 +1932,9 @@ void Ship::render(S32 layerIndex)
    // An angle of 0 means the ship is heading down the +X axis
    // since we draw the ship pointing up the Y axis, we should rotate
    // by the ship's angle, - 90 degrees
-
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    GameConnection *conn = clientGame->getConnectionToServer();
+
    bool localShip = !(conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
 

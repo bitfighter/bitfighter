@@ -85,6 +85,9 @@ void MasterServerConnection::startServerQuery()
 #ifndef ZAP_DEDICATED
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList))
 {
+   if(mGame->isServer())
+      return;
+
    // Only process results from current query, ignoring anything older...
    if(queryId != mCurrentQueryId || mGame->isServer())
       return;
@@ -102,7 +105,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    }
    else  // Empty list recieved, transmission complete, send whole list on to the UI
    {
-      dynamic_cast<ClientGame *>(mGame)->gotServerListFromMaster(mServerList);
+      static_cast<ClientGame *>(mGame)->gotServerListFromMaster(mServerList);
 
       mServerList.clear();
    }
@@ -199,7 +202,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       Nonce serverNonce(connectionData->getBuffer() + Nonce::NonceSize);
 
       // Client is creating new connection to game server
-      ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
       GameConnection *gameConnection = new GameConnection(clientGame);
       clientGame->setConnectionToServer(gameConnection);
 
@@ -209,7 +212,10 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData))
 {
-   if(!mGame->isServer() && requestId == mCurrentQueryId)
+   if(mGame->isServer())
+      return;
+
+   if(requestId == mCurrentQueryId)
    {
       rejectData->takeOwnership();
       rejectData->resize(rejectData->getBufferSize() + 1);
@@ -217,7 +223,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
       rejectString[rejectData->getBufferSize() - 1] = 0;
 
       logprintf(LogConsumer::LogConnection, "Arranged connection rejected: %s", rejectString);
-      dynamic_cast<ClientGame *>(mGame)->connectionToServerRejected(rejectString);
+      static_cast<ClientGame *>(mGame)->connectionToServerRejected(rejectString);
    }
 }
 
@@ -228,7 +234,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
       return;
 
    setMasterName(masterName.getString());
-   dynamic_cast<ClientGame *>(mGame)->setMOTD(motdString.getString());
+   static_cast<ClientGame *>(mGame)->setMOTD(motdString.getString());
 }
 
 
@@ -239,14 +245,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    if(mGame->isServer())
       return;
 
-   ClientGame *clientGame = (ClientGame *)mGame;
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
       clientGame->correctPlayerName(correctedName.getString());
       clientGame->getClientInfo()->setAuthenticated(true, badges);
 
-      GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
+      GameConnection *gc = clientGame->getConnectionToServer();
       if(gc)
          gc->c2sSetAuthenticated();    // Tell server that the client is (or claims to be) authenticated
    }
@@ -318,7 +324,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool 
    if(mGame->isServer())
       return;
 
-   dynamic_cast<ClientGame *>(mGame)->setNeedToUpgrade(needToUpgrade);
+   static_cast<ClientGame *>(mGame)->setNeedToUpgrade(needToUpgrade);
 }
 
 
@@ -329,7 +335,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntr
    if(mGame->isServer())
       return;
 
-   dynamic_cast<ClientGame *>(mGame)->gotChatMessage(playerNick.getString(), message.getString(), isPrivate, false);
+   static_cast<ClientGame *>(mGame)->gotChatMessage(playerNick.getString(), message.getString(), isPrivate, false);
 }
 
 
@@ -340,7 +346,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vect
    if(mGame->isServer())
       return;
 
-   dynamic_cast<ClientGame *>(mGame)->setPlayersInGlobalChat(playerNicks);
+   static_cast<ClientGame *>(mGame)->setPlayersInGlobalChat(playerNicks);
 }
 
 
@@ -362,7 +368,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
    if(mGame->isServer())
       return;
 
-   dynamic_cast<ClientGame *>(mGame)->playerLeftGlobalChat(playerNick);
+   static_cast<ClientGame *>(mGame)->playerLeftGlobalChat(playerNick);
 }
 #endif
 
