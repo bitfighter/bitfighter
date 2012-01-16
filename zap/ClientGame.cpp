@@ -1842,7 +1842,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          S32 skipArgs = 0;
          if(!stricmp(argv[0], "BarrierMakerS"))
          {
-            logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+            logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
 
             skipArgs = 1;
          }
