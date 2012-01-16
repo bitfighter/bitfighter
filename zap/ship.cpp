@@ -1134,7 +1134,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       // We'll need the name (or some other identifier) to match the ship to its clientInfo on the client side
-      stream->writeStringTableEntry(getClientInfo()->getName());
+      stream->writeStringTableEntry(getClientInfo() ? getClientInfo()->getName() : StringTableEntry());
 
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
@@ -1237,7 +1237,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->readStringTableEntry(&playerName);
 
       ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
-      TNLAssert(clientInfo, "We need a clientInfo for this ship!");
+      TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");  // there may be "Ship" with empty name in a few level
 
       mClientInfo = clientInfo;
 
@@ -1946,7 +1946,7 @@ void Ship::render(S32 layerIndex)
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
-      string str = getClientInfo()->getName().getString();
+      string str = getClientInfo() ? getClientInfo()->getName().getString() : string();
 
       // Modify name if owner is "busy"
       if(isBusy)
@@ -1963,7 +1963,7 @@ void Ship::render(S32 layerIndex)
       UserInterface::drawStringc(0, 30 + textSize, textSize, str.c_str());
 
       // Underline name if player is authenticated
-      if(getClientInfo()->isAuthenticated())
+      if(getClientInfo() && getClientInfo()->isAuthenticated())
       {
          S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
          drawHorizLine(-xoff, xoff, 33 + textSize);

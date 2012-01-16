@@ -78,7 +78,8 @@ bool isWithHealthType(U8 x)
 {
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
+         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == CoreTypeNumber;
 }
 
 bool isForceFieldDeactivatingType(U8 x)
