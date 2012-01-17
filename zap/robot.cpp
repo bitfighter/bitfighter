@@ -1303,11 +1303,11 @@ void EventManager::fireEvent(EventType eventType)
 // onTick
 void EventManager::fireEvent(EventType eventType, U32 deltaT)
 {
-   if(eventType == TickEvent)
-      mStepCount--;   
-
    if(suppressEvents())   
       return;
+
+   if(eventType == TickEvent)
+      mStepCount--;   
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -1950,13 +1950,6 @@ void Robot::clearMove()
       mCurrentMove.modulePrimary[i] = false;
       mCurrentMove.moduleSecondary[i] = false;
    }
-}
-
-
-// Static method, called from ServerGame::idle()
-void Robot::idleAllBots(U32 timePassed)      
-{
-   EventManager::get()->fireEvent(EventManager::TickEvent, timePassed);
 }
 
 

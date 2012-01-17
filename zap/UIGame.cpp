@@ -3275,40 +3275,30 @@ void GameUserInterface::renderDebugStatus()
    {
       glColor(Colors::white);
 
-      const S32 PAUSE_HEIGHT = 40;
-      const S32 PAUSE_WIDTH = 15;
-      const S32 PAUSE_GAP = 8;
+      const S32 PAUSE_HEIGHT = 30;
+      const S32 PAUSE_WIDTH = 10;
+      const S32 PAUSE_GAP = 6;
       const S32 BOX_INSET = 5;
-      const S32 BOX_THICKNESS = 4;
-      const S32 BOX_HEIGHT = PAUSE_HEIGHT + 2 * PAUSE_GAP + BOX_THICKNESS;
-      const S32 BOX_WIDTH = 280;
-      const S32 TEXT_SIZE = 20;
+
+      const S32 TEXT_SIZE = 15;
+      const char *TEXT = "STEP: Alt-], Ctrl-]";
 
       S32 x, y;
 
       // Draw box
-      x = vertMargin + BOX_THICKNESS / 2 - 3;
-      y = gScreenInfo.getGameCanvasHeight() - vertMargin;
-
-      drawFilledRect(x, y, x + BOX_WIDTH, y - BOX_HEIGHT, Colors::black, Colors::white);
-
+      x = gScreenInfo.getGameCanvasWidth() - horizMargin - 2 * (PAUSE_WIDTH + PAUSE_GAP) - BOX_INSET - getStringWidth(TEXT_SIZE, TEXT);
+      y = vertMargin + PAUSE_HEIGHT;
 
       // Draw Pause symbol
-      x = vertMargin + BOX_THICKNESS + BOX_INSET;
-      y = gScreenInfo.getGameCanvasHeight() - vertMargin - BOX_THICKNESS - BOX_INSET;
-
-      glBegin(GL_POLYGON);    // Filled rectangle
-         glVertex2i(x,               y);
-         glVertex2i(x + PAUSE_WIDTH, y);
-         glVertex2i(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
-         glVertex2i(x,               y - PAUSE_HEIGHT);
-      glEnd();
+      drawFilledRect(x, y, x + PAUSE_WIDTH, y - PAUSE_HEIGHT, Colors::black, Colors::white);
 
       x += PAUSE_WIDTH + PAUSE_GAP;
+      drawFilledRect(x, y, x + PAUSE_WIDTH, y - PAUSE_HEIGHT, Colors::black, Colors::white);
 
-      x += BOX_INSET;
-      y -= (TEXT_SIZE + BOX_INSET + BOX_THICKNESS + 3);
-      drawString(x, y, TEXT_SIZE, "STEP: Alt-], Ctrl-]");
+      x += PAUSE_WIDTH + PAUSE_GAP + BOX_INSET;
+
+      y -= TEXT_SIZE + (PAUSE_HEIGHT - TEXT_SIZE) / 2 + 1;
+      drawString(x, y, TEXT_SIZE, TEXT);
    }
 }
 
