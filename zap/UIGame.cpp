@@ -1100,7 +1100,7 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else 
    {
       // If we're in play mode, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
-      if(!mHelper)
+      if(!mHelper && mCurrentChatType == NoChat)
       {
          Ship *ship = NULL;
          if(getGame()->getConnectionToServer())   // Prevents errors, getConnectionToServer() might be NULL, and getControlObject may crash if NULL
