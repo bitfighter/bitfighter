@@ -828,7 +828,6 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
       stream->read(&mAnchorNormal.x);
       stream->read(&mAnchorNormal.y);
       setVert(pos, 0);
-      computeExtent();
    }
 
 
@@ -976,6 +975,7 @@ ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anch
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
+   onGeomChanged(); // can't be placed on parent, as parent construtor must initalized first
 }
 
 
