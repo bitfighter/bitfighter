@@ -72,7 +72,8 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
 #ifndef ZAP_DEDICATED
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   Ship *ship = clientGame && clientGame->getConnectionToServer() ? dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject()) : NULL;
 
    if(!ship)
       return;
