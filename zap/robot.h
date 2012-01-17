@@ -181,6 +181,7 @@ public:
    F32 getRating();   // Return robot's rating
    const char *getScriptName();
 
+   static void idleAllBots(U32 timePassed);
    static void setPaused(bool isPaused);
    static void togglePauseStatus();
    static bool isPaused();

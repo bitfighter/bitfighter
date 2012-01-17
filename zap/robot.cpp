@@ -1860,6 +1860,19 @@ void Robot::render(S32 layerIndex)
 #endif
 }
 
+static void clearMove(Move &mCurrentMove){
+   // Clear out current move.  It will get set just below with the lua call, but if that function
+   // doesn't set the various move components, we want to make sure that they default to 0.
+   mCurrentMove.fire = false;
+   mCurrentMove.x = 0;
+   mCurrentMove.y = 0;
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      mCurrentMove.modulePrimary[i] = false;
+      mCurrentMove.moduleSecondary[i] = false;
+   }
+}
 
 void Robot::idle(GameObject::IdleCallPath path)
 {
@@ -1874,35 +1887,26 @@ void Robot::idle(GameObject::IdleCallPath path)
 
       TNLAssert(deltaT != 0, "Robot::idle deltaT is zero")     // Time should never be zero anymore
 
-      // Clear out current move.  It will get set just below with the lua call, but if that function
-      // doesn't set the various move components, we want to make sure that they default to 0.
-      mCurrentMove.fire = false;
-      mCurrentMove.x = 0;
-      mCurrentMove.y = 0;
-
-      for(S32 i = 0; i < ShipModuleCount; i++)
-      {
-         mCurrentMove.modulePrimary[i] = false;
-         mCurrentMove.moduleSecondary[i] = false;
-      }
-
       tickTimer(deltaT);
 
-      if(!mIsPaused || mStepCount > 0)
-      {
-         if(mStepCount > 0)
-            mStepCount--;
-         
-         Robot::getEventManager().fireEvent(EventManager::TickEvent, deltaT);
-      }
-
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
-      return;
-   }
 
-   Parent::idle(path);     // All client paths can use this idle
+      clearMove(mCurrentMove); // clear current move after Parent::idle, to be ready for event manager's "TickEvent"
+   }
+   else
+      Parent::idle(path);     // All client paths can use this idle
 }
 
+void Robot::idleAllBots(U32 timePassed)
+{
+   if(!mIsPaused || mStepCount > 0)
+   {
+      if(mStepCount > 0)
+         mStepCount--;
+
+      getEventManager().fireEvent(EventManager::TickEvent, timePassed);
+   }
+}
 
 // Advance timers by deltaT
 void Robot::tickTimer(U32 deltaT)

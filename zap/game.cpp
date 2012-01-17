@@ -2639,6 +2639,9 @@ void ServerGame::idle(U32 timeDelta)
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
 
+   // for robots
+   Robot::idleAllBots(timeDelta);
+
    fillVector2.clear();  // need to have our own local fillVector
    mGameObjDatabase->findObjects(fillVector2);
 
