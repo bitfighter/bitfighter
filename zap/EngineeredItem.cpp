@@ -1073,6 +1073,7 @@ void ForceFieldProjector::onEnabled()
 
 bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
 {
+   TNLAssert(mCollisionPolyPoints.size() != 0, "mCollisionPolyPoints.size() shouldn't be zero");
    polyPoints = mCollisionPolyPoints;
    return true;
 }
