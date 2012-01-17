@@ -245,18 +245,17 @@ bool SoccerGameType::okToUseModules(Ship *ship)
 }
 
 
-// Runs on server only, and only when player deliberately drops ball
+// Runs on server only, and only when player deliberately drops ball... gets run when dropping resurce item
 void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    TNLAssert(!isGhost(), "Should run on server only!");
-   TNLAssert(false, "Shound never run at all!!!");
 
-   static StringTableEntry dropString("%e0 dropped the ball!");
+   //static StringTableEntry dropString("%e0 dropped the ball!");
 
-   Vector<StringTableEntry> e;
-   e.push_back(ship->getClientInfo()->getName());
+   //Vector<StringTableEntry> e;
+   //e.push_back(ship->getClientInfo()->getName());
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   //broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
 
 
