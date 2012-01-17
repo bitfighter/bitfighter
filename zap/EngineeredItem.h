@@ -54,6 +54,7 @@ protected:
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;
+   bool mEngineered;
 
    bool mSnapped;             // Item is snapped to a wall
 
@@ -101,6 +102,9 @@ public:
 
    void explode();
    bool isDestroyed();
+   void setEngineered(bool isEngineered);
+   bool isEngineered(); // Was this engineered py a player?
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 

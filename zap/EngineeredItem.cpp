@@ -147,6 +147,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
    // Forcefields only from here on down; we've got miles to go before we sleep
 
+   /// Part ONE
    // We need to ensure forcefield doesn't cross another; doing so can create an impossible situation
    // Forcefield starts at the end of the projector.  Need to know where that is.
    Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal, 0);
@@ -224,6 +225,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    }
 
 
+   /// Part TWO
    // Check to make sure that forcefield doesn't come within a ship's width of a wall
    // This is to prevent such rampant forecfield abuse
    bool wallTooClose = false;
@@ -276,6 +278,40 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
       return false;
    }
 
+
+   /// Part THREE
+   // Now we should check for any turrets that may be in the way using the same geometry as in
+   // part two.  We can excluded engineered turrets because they can be destroyed
+   bool turretInTheWay = false;
+   gameObjectDatabase->findObjects(TurretTypeNumber, fillVector, queryRect);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      Turret *turret = dynamic_cast<Turret *>(fillVector[i]);
+
+      if(!turret)
+         continue;
+
+      // We don't care about engineered turrets because they can be destroyed
+      if(turret->isEngineered())
+         continue;
+
+      currentPoly.clear();
+      turret->getCollisionPoly(currentPoly);
+
+      if(polygonsIntersect(currentPoly, collisionPoly))
+      {
+         turretInTheWay = true;
+         break;
+      }
+   }
+
+   if(turretInTheWay)
+   {
+      mErrorMessage = "!!! Cannot deploy forcefield over a non-destructible turret";
+      return false;
+   }
+
    return true;     // We've run the gammut -- this location is OK
 }
 
@@ -323,6 +359,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
    deployedObject->setResource(resource);
+   deployedObject->setEngineered(true);
 
    return true;
 }
@@ -349,6 +386,7 @@ EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) 
    mHealRate = 0;
    mMountSeg = NULL;
    mSnapped = false;
+   mEngineered = false;
 
    mRadius = 7;
 }
@@ -768,6 +806,19 @@ bool EngineeredItem::isDestroyed()
 }
 
 
+void EngineeredItem::setEngineered(bool isEngineered)
+{
+   mEngineered = isEngineered;
+}
+
+
+bool EngineeredItem::isEngineered()
+{
+   // If the engineered item has a resource attached, then it was engineered by a player
+   return mEngineered;
+}
+
+
 // Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
 // a wall or another engineered item
 // static method
@@ -797,6 +848,7 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
       stream->write(getVert(0).y);
       stream->write(mAnchorNormal.x);
       stream->write(mAnchorNormal.y);
+      stream->writeFlag(mEngineered);
    }
 
    if(stream->writeFlag(updateMask & TeamMask))
@@ -827,6 +879,7 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
       stream->read(&pos.y);
       stream->read(&mAnchorNormal.x);
       stream->read(&mAnchorNormal.y);
+      mEngineered = stream->readFlag();
       setVert(pos, 0);
    }
 
