@@ -1630,7 +1630,7 @@ void GameConnection::onConnectionEstablished()
       mAcheivedConnection = true;
       
       // Notify the bots that a new player has joined
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
+      EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
 
       if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
@@ -1667,7 +1667,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    {
       LuaPlayerInfo *playerInfo = getClientInfo()->getPlayerInfo();
       playerInfo->setDefunct();
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, playerInfo);
+      EventManager::get()->fireEvent(NULL, EventManager::PlayerLeftEvent, playerInfo);
 
       gServerGame->removeClient(mClientInfo);
    }

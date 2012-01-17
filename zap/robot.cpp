@@ -56,10 +56,6 @@ namespace Zap
 
 const bool QUIT_ON_SCRIPT_ERROR = true;
 
-
-bool Robot::mIsPaused = false;
-S32 Robot::mStepCount = -1;
-
 extern ServerGame *gServerGame;
 
 
@@ -86,8 +82,6 @@ static const char *eventFunctions[] = {
    "onNexusClosed"
 };
 
-
-static EventManager eventManager;                // Singleton event manager, one copy is used by all bots
 
 
 // Constructor
@@ -116,7 +110,7 @@ LuaRobot::~LuaRobot()
    // send an event to a dead bot, after all...
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       if(subscriptions[i])
-         eventManager.unsubscribeImmediate(thisRobot->getL(), (EventManager::EventType)i);
+         EventManager::get()->unsubscribeImmediate(thisRobot->getL(), (EventManager::EventType)i);
 
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted Lua Robot Object (%p)\n", this);
 }
@@ -725,7 +719,7 @@ S32 LuaRobot::globalMsg(lua_State *L)
       gt->sendChatFromRobot(true, message, thisRobot->getClientInfo());
 
       // Fire our event handler
-      Robot::getEventManager().fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
+      EventManager::get()->fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
    }
 
    return 0;
@@ -746,7 +740,7 @@ S32 LuaRobot::teamMsg(lua_State *L)
       gt->sendChatFromRobot(false, message, thisRobot->getClientInfo());
 
       // Fire our event handler
-      Robot::getEventManager().fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);
+      EventManager::get()->fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);
    }
 
    return 0;
@@ -1042,7 +1036,7 @@ S32 LuaRobot::subscribe(lua_State *L)
 
 void LuaRobot::doSubscribe(lua_State *L, EventManager::EventType eventType)
 {
-   eventManager.subscribe(L, eventType);
+   EventManager::get()->subscribe(L, eventType);
    subscriptions[eventType] = true;
 }
 
@@ -1057,7 +1051,7 @@ S32 LuaRobot::unsubscribe(lua_State *L)
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
-   eventManager.unsubscribe(L, (EventManager::EventType) eventType);
+   EventManager::get()->unsubscribe(L, (EventManager::EventType) eventType);
    subscriptions[eventType] = false;
    return 0;
 }
@@ -1119,12 +1113,19 @@ bool EventManager::anyPending = false;
 Vector<lua_State *> EventManager::subscriptions[EventTypes];
 Vector<lua_State *> EventManager::pendingSubscriptions[EventTypes];
 Vector<lua_State *> EventManager::pendingUnsubscriptions[EventTypes];
+bool EventManager::mConstructed = false;  // Prevent duplicate instantiation
+
+static EventManager eventManager;         // Singleton event manager, one copy is used by all bots
 
 
 // C++ constructor
 EventManager::EventManager()
 {
-   // Do nothing
+   TNLAssert(!mConstructed, "There is only one EventManager to rule them all!");
+
+   mIsPaused = false;
+   mStepCount = -1;
+   mConstructed = true;
 }
 
 
@@ -1132,6 +1133,13 @@ EventManager::EventManager()
 EventManager::EventManager(lua_State *L)
 {
    // Do nothing
+}
+
+
+// Provide access to the single EventManager instance
+EventManager *EventManager::get()
+{
+   return &eventManager;
 }
 
 
@@ -1270,6 +1278,9 @@ void EventManager::update()
 // onNexusOpened, onNexusClosed
 void EventManager::fireEvent(EventType eventType)
 {
+   if(suppressEvents())   
+      return;
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
@@ -1292,6 +1303,12 @@ void EventManager::fireEvent(EventType eventType)
 // onTick
 void EventManager::fireEvent(EventType eventType, U32 deltaT)
 {
+   if(eventType == TickEvent)
+      mStepCount--;   
+
+   if(suppressEvents())   
+      return;
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
@@ -1315,6 +1332,9 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
 
 void EventManager::fireEvent(EventType eventType, Ship *ship)
 {
+   if(suppressEvents())   
+      return;
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
@@ -1337,6 +1357,9 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
 void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
 {
+   if(suppressEvents())   
+      return;
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
@@ -1366,6 +1389,9 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
 // onPlayerJoined, onPlayerLeft
 void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayerInfo *player)
 {
+   if(suppressEvents())   
+      return;
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
@@ -1399,6 +1425,39 @@ void EventManager::handleEventFiringError(lua_State *L, EventType eventType, con
       robot->logError( "Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
 
    delete robot;
+}
+
+
+// If true, events will not fire!
+bool EventManager::suppressEvents()
+{
+   return mIsPaused && mStepCount <= 0;    // Paused bots should still respond to events as long as stepCount > 0
+}
+
+
+void EventManager::setPaused(bool isPaused)
+{
+   mIsPaused = isPaused;
+}
+
+
+void EventManager::togglePauseStatus()
+{
+   mIsPaused = !mIsPaused;
+}
+
+
+bool EventManager::isPaused()
+{
+   return mIsPaused;
+}
+
+
+// Each firing of TickEvent is considered a step
+void EventManager::addSteps(S32 steps)
+{
+   if(mIsPaused)           // Don't add steps if not paused to avoid hitting pause and having bot still run a few steps
+      mStepCount = steps;     
 }
 
 
@@ -1649,12 +1708,6 @@ void Robot::registerClasses()
 }
 
 
-EventManager Robot::getEventManager()
-{
-   return eventManager;
-}
-
-
 // This only runs the very first time the robot is added to the level
 // Note that level may not yet be ready, so the bot can't spawn yet
 // Runs on client and server 
@@ -1868,39 +1921,42 @@ void Robot::idle(GameObject::IdleCallPath path)
    if(hasExploded)
       return;
 
-   if(path == GameObject::ServerIdleMainLoop)                  // Running on server
+   if(path != GameObject::ServerIdleMainLoop)   
+      Parent::idle(path);                       
+   else                         
    {
       U32 deltaT = mCurrentMove.time;
 
-      TNLAssert(deltaT != 0, "Robot::idle deltaT is zero")     // Time should never be zero anymore
-
-      // Clear out current move.  It will get set just below with the lua call, but if that function
-      // doesn't set the various move components, we want to make sure that they default to 0.
-      mCurrentMove.fire = false;
-      mCurrentMove.x = 0;
-      mCurrentMove.y = 0;
-
-      for(S32 i = 0; i < ShipModuleCount; i++)
-      {
-         mCurrentMove.modulePrimary[i] = false;
-         mCurrentMove.moduleSecondary[i] = false;
-      }
+      TNLAssert(deltaT != 0, "Time should never be zero!")     
 
       tickTimer(deltaT);
 
-      if(!mIsPaused || mStepCount > 0)
-      {
-         if(mStepCount > 0)
-            mStepCount--;
-         
-         Robot::getEventManager().fireEvent(EventManager::TickEvent, deltaT);
-      }
-
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
-      return;
-   }
 
-   Parent::idle(path);     // All client paths can use this idle
+      clearMove();            // Clear current move after Parent::idle; provide a clean slate for "TickEvent"
+   }
+}
+
+
+// Clear out current move so that if none of the event handlers set the various move components, the bot will do nothing
+void Robot::clearMove()
+{
+   mCurrentMove.fire = false;
+   mCurrentMove.x = 0;
+   mCurrentMove.y = 0;
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      mCurrentMove.modulePrimary[i] = false;
+      mCurrentMove.moduleSecondary[i] = false;
+   }
+}
+
+
+// Static method, called from ServerGame::idle()
+void Robot::idleAllBots(U32 timePassed)      
+{
+   EventManager::get()->fireEvent(EventManager::TickEvent, timePassed);
 }
 
 
@@ -1957,31 +2013,6 @@ const char *Robot::getScriptName()
 {
    return mScriptName.c_str();
 }
-
-
-void Robot::setPaused(bool isPaused)
-{
-   mIsPaused = isPaused;
-}
-
-
-void Robot::togglePauseStatus()
-{
-   mIsPaused = !mIsPaused;
-}
-
-
-bool Robot::isPaused()
-{
-   return mIsPaused;
-}
-
-
-void Robot::addSteps(S32 steps)
-{
-   mStepCount = steps * robots.size();
-}
-
 
 };
 

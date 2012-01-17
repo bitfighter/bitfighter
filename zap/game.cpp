@@ -1444,7 +1444,7 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    mShuttingDown = false;
 
-   Robot::setPaused(false);
+   EventManager::get()->setPaused(false);
 
    hostingModePhase = ServerGame::NotHosting;
 
@@ -2638,6 +2638,9 @@ void ServerGame::idle(U32 timeDelta)
    // In practice, we could probably just set it and forget it when we load a level.
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
+
+   // For robots
+   Robot::idleAllBots(timeDelta);
 
    fillVector2.clear();  // need to have our own local fillVector
    mGameObjDatabase->findObjects(fillVector2);

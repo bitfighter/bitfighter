@@ -389,7 +389,7 @@ void NexusGameType::idle_server(U32 deltaT)
       }
 
       // Fire an event
-      Robot::getEventManager().fireEvent(EventManager::NexusOpenedEvent);
+      EventManager::get()->fireEvent(EventManager::NexusOpenedEvent);
    }
    else if(mNexusIsOpen && mNexusTimer.update(deltaT))       // Nexus has just closed
    {
@@ -401,7 +401,7 @@ void NexusGameType::idle_server(U32 deltaT)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
 
       // Fire an event
-      Robot::getEventManager().fireEvent(EventManager::NexusClosedEvent);
+      EventManager::get()->fireEvent(EventManager::NexusClosedEvent);
    }
 
    // Advance all flagSpawn timers and see if it's time for a new flag

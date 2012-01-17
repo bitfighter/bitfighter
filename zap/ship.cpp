@@ -664,23 +664,23 @@ void Ship::idle(GameObject::IdleCallPath path)
          updateInterpolation();
       }
 
-      //if(path != GameObject::ClientIdleControlReplay)
-      //{
+      if(path != GameObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
+      {
          mSensorZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
 
-            if(mCurrentMove.x == 0 && mCurrentMove.y == 0)
-               mSpawnShield.update(mCurrentMove.time);
-            else
-               mSpawnShield.clear();
-
          // Update spawn shield unless we move the ship - then it turns off .. server only
-         if(path == ServerIdleControlFromClient && mSpawnShield.getCurrent())
+         if(mSpawnShield.getCurrent() != 0)
          {
-            if(mSpawnShield.getCurrent() == 0)
-               setMaskBits(SpawnShieldMask);
+            if(path == ServerIdleControlFromClient && (mCurrentMove.x != 0 || mCurrentMove.y != 0))
+            {
+               mSpawnShield.clear();
+               setMaskBits(SpawnShieldMask);  // tell clients spawn shield did turn off due to moving
+            }
+            else
+               mSpawnShield.update(mCurrentMove.time);
          }
-      //}
+      }
    }
 
    // Update the object in the game's extents database
@@ -1040,7 +1040,7 @@ void Ship::onAddedToGame(Game *game)
    if(!isGhost())
    {
       mRespawnTime = getGame()->getCurrentTime();
-      Robot::getEventManager().fireEvent(EventManager::ShipSpawnedEvent, this);
+      EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, this);
    }
 }
 
@@ -1714,7 +1714,8 @@ void Ship::kill()
 {
    if(!isGhost())
    {
-      Robot::getEventManager().fireEvent(EventManager::ShipKilledEvent, this);
+      EventManager::get()->fireEvent(EventManager::ShipKilledEvent, this);
+
       if(getOwner())
          getLoadout(getOwner()->mOldLoadout);
    }

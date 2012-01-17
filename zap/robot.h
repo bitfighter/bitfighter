@@ -65,9 +65,16 @@ private:
 
    void handleEventFiringError(lua_State *L, EventType eventType, const char *errorMsg);
 
+   bool mIsPaused;
+   S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
+   static bool mConstructed;
+
 public:
    EventManager();                  // C++ constructor
    EventManager(lua_State *L);      // Lua Constructor
+
+   static EventManager *get();      // Provide access to the single EventManager instance
+   bool suppressEvents();
 
    static Vector<lua_State *> subscriptions[EventTypes];
    static Vector<lua_State *> pendingSubscriptions[EventTypes];
@@ -85,6 +92,12 @@ public:
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
    void fireEvent(lua_State *L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
    void fireEvent(lua_State *L, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
+
+   // Allow the pausing of event firing for debugging purposes
+   void setPaused(bool isPaused);
+   void togglePauseStatus();
+   bool isPaused();
+   void addSteps(S32 steps);     // Each robot will cause the step counter to decrement
 };
 
 
@@ -121,9 +134,6 @@ private:
 
    bool mHasSpawned;
 
-   static bool mIsPaused;
-   static S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
-
    void tickTimer(U32 deltaT);      // Move bot's timer forward
 
 public:
@@ -141,6 +151,7 @@ public:
    public:
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
+   void clearMove();
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *);
@@ -162,7 +173,6 @@ public:
    //static S32 getRobotCount() { return robots.size(); }
 
    LuaRobot *mLuaRobot;                   // Could make private and make a public setter method...
-   static EventManager getEventManager();
 
    LuaPlayerInfo *getPlayerInfo();
 
@@ -181,10 +191,7 @@ public:
    F32 getRating();   // Return robot's rating
    const char *getScriptName();
 
-   static void setPaused(bool isPaused);
-   static void togglePauseStatus();
-   static bool isPaused();
-   static void addSteps(S32 steps);     // Each robot will cause the step counter to decrement
+   static void idleAllBots(U32 timePassed);
 
 private:
    int attribute;

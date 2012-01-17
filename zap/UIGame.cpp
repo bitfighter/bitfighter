@@ -1198,15 +1198,9 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
    // menu above
 
    if(inputCode == KEY_CLOSEBRACKET && checkModifier(KEY_ALT))           // Alt-] advances bots by one step if frozen
-   {
-      if(Robot::isPaused())
-         Robot::addSteps(1);
-   }
+      EventManager::get()->addSteps(1);
    else if(inputCode == KEY_CLOSEBRACKET && checkModifier(KEY_CTRL))     // Ctrl-] advances bots by 10 steps if frozen
-   {
-      if(Robot::isPaused())
-         Robot::addSteps(10);
-   }
+      EventManager::get()->addSteps(10);
    else if(inputCode == KEY_1 && checkModifier(KEY_CTRL))              // Ctrl-1 saves loadout preset in slot 1 (with index 0, of course!)
       saveLoadoutPreset(getGame(), 0);
    else if(inputCode == KEY_1 && checkModifier(KEY_ALT))               // Alt-1 loads preset from slot 1 (with index 0, of course!)
@@ -1544,7 +1538,7 @@ void GameUserInterface::pauseBotsHandler(ClientGame *game, const Vector<string> 
    if(!(gServerGame && gServerGame->isTestServer())) 
       game->displayErrorMessage("!!! Robots can only be frozen on a test server");
    else
-      Robot::togglePauseStatus();
+      EventManager::get()->togglePauseStatus();
 }
 
 
@@ -1555,7 +1549,7 @@ void GameUserInterface::stepBotsHandler(ClientGame *game, const Vector<string> &
    else
    {
       S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
-      Robot::addSteps(steps);
+      EventManager::get()->addSteps(steps);
    }
 }
 
@@ -3277,7 +3271,7 @@ void GameUserInterface::renderTalkingClients()
 void GameUserInterface::renderDebugStatus()
 {
    // When bots are frozen, render large pause icon in lower left
-   if(Robot::isPaused())
+   if(EventManager::get()->isPaused())
    {
       glColor(Colors::white);
 

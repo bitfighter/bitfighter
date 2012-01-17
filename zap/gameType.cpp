@@ -620,7 +620,7 @@ void GameType::idle_server(U32 deltaT)
   
 
    // Process any pending Robot events
-   Robot::getEventManager().update();
+   EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over
    if(mGameTimer.update(deltaT))
@@ -3126,7 +3126,7 @@ void GameType::sendChatDisplayEvent(ClientInfo *sender, bool global, const char 
    // And fire an event handler...
    // But don't add event if called by robot - it is already called in LuaRobot::globalMsg/teamMsg
    if(!sender->isRobot())
-      Robot::getEventManager().fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getPlayerInfo(), global);
+      EventManager::get()->fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getPlayerInfo(), global);
 }
 
 
