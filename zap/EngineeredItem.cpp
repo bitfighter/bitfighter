@@ -104,7 +104,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectDatabase, GridDatabase *wallSegmentDatabase, Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -134,7 +134,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
          return false;
    }
 
-   if(!EngineeredItem::checkDeploymentPosition(bounds, database))
+   if(!EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase))
    {
       mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
@@ -153,8 +153,8 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
-   DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(database, forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
+   DatabaseObject *collObj;  // Dummy obj
+   ForceField::findForceFieldEnd(gameObjectDatabase, forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
 
    bool collision = false;
 
@@ -166,7 +166,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
    ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
 
    fillVector.clear();
-   database->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+   gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
    Vector<Point> ffpGeom;     // Geom of any projectors we find
 
@@ -192,7 +192,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
-      database->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+      gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
@@ -217,10 +217,62 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
       }
    }
 
-
    if(collision)
    {
       mErrorMessage = "!!! Cannot deply forcefield where it could cross another.";
+      return false;
+   }
+
+
+   // Check to make sure that forcefield doesn't come within a ship's width of a wall
+   // This is to prevent such rampant forecfield abuse
+   bool wallTooClose = false;
+   fillVector.clear();
+
+   // Build collision poly from forcefield and ship's width
+   // Similar to expanding a barrier spine
+   Vector<Point> collisionPoly;
+   Point dir = forceFieldEnd - forceFieldStart;
+
+   Point crossVec(dir.y, -dir.x);
+   crossVec.normalize(2 * Ship::CollisionRadius);
+
+   collisionPoly.push_back(forceFieldStart + crossVec);
+   collisionPoly.push_back(forceFieldEnd + crossVec);
+   collisionPoly.push_back(forceFieldEnd - crossVec);
+   collisionPoly.push_back(forceFieldStart - crossVec);
+
+   // Reset query rect
+   queryRect = Rect(collisionPoly);
+
+   // Find the terminating wall segment, but don't adjust the end point
+   Point dummyEndNotUsed;
+   DatabaseObject *terminatingWallSegment;
+   ForceField::findForceFieldEnd(wallSegmentDatabase, forceFieldStart, mDeployNormal, dummyEndNotUsed, &terminatingWallSegment);
+
+   // Search for wall segments within query
+   wallSegmentDatabase->findObjects(isWallType, fillVector, queryRect);
+
+   Vector<Point> currentPoly;
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Exclude the end segment from our search
+      if(terminatingWallSegment && terminatingWallSegment == fillVector[i])
+         continue;
+
+      currentPoly.clear();
+      fillVector[i]->getCollisionPoly(currentPoly);
+
+      if(polygonsIntersect(currentPoly, collisionPoly))
+      {
+         wallTooClose = true;
+         break;
+      }
+   }
+
+   if(wallTooClose)
+   {
+      mErrorMessage = "!!! Cannot deploy forcefield where it will pass too close to a wall";
       return false;
    }
 

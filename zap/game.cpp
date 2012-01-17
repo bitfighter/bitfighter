@@ -294,7 +294,8 @@ bool ClientInfo::sEngineerDeployObject(U32 type)
 
    EngineerModuleDeployer deployer;
 
-   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, type)) 
+   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(),
+         ship->getGame()->getWallSegmentManager()->getWallSegmentDatabase(), ship, type))
    {
       if(!isRobot())
          getConnection()->s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
