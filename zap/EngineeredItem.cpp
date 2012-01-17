@@ -1110,12 +1110,12 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 // Runs on both client and server
 void ForceFieldProjector::onEnabled()
 {
-   if(!isGhost())
+   if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
       Point end;
       DatabaseObject *collObj;
-   
+	
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
       mField = new ForceField(mTeam, start, end);
