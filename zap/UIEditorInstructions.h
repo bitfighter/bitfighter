@@ -27,6 +27,7 @@
 #define _UIEDITORINSTRUCTIONS_H_
 
 #include "UIAbstractInstructions.h"
+#include "WallSegmentManager.h"
 #include "Timer.h"
 
 namespace Zap

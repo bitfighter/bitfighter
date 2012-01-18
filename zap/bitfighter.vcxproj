@@ -244,6 +244,7 @@
     <ClCompile Include="UIEditorMenus.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
+    <ClCompile Include="WallSegmentManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\clipper\clipper.h" />
@@ -372,6 +373,7 @@
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIMenuItems.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="WallSegmentManager.h" />
     <ClInclude Include="zoneControlGame.h" />
   </ItemGroup>
   <ItemGroup>

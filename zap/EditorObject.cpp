@@ -24,7 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "EditorObject.h"
-#include "EngineeredItem.h"   // For Turret properties
+#include "WallSegmentManager.h"
+#include "EngineeredItem.h"      // For Turret properties
 #include "soccerGame.h"          // For soccer ball radius
 
 #include "textItem.h"            // For copy constructor
@@ -41,9 +42,9 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"          // For ClientGame and getUIManager()
-#include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
-#include "SDL/SDL_opengl.h"
+#   include "ClientGame.h"       // For ClientGame and getUIManager()
+#   include "UIEditorMenus.h"    // For EditorAttributeMenuUI def
+#   include "SDL/SDL_opengl.h"
 #endif
 
 using namespace boost;

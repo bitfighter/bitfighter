@@ -34,6 +34,7 @@
 #include "BotNavMeshZone.h"
 #include "game.h"
 #include "gameConnection.h"
+#include "WallSegmentManager.h"
 
 
 #ifndef ZAP_DEDICATED

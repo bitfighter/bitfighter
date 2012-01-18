@@ -53,6 +53,8 @@
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 
+#include "WallSegmentManager.h"
+
 #ifndef ZAP_DEDICATED
 #include "voiceCodec.h"
 #endif
