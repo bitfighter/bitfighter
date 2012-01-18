@@ -1824,11 +1824,11 @@ static void drawFourArrows(Point pos)
    };
 
    glPushMatrix();
-   glTranslate(pos);
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, GL_FLOAT, sizeof(pointList[0]) * 2, pointList);    
-   glDrawArrays(GL_LINES, 0, sizeof(pointList) / (sizeof(pointList[0]) * 2));
-   glDisableClientState(GL_VERTEX_ARRAY);
+      glTranslate(pos);
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glVertexPointer(2, GL_FLOAT, sizeof(pointList[0]) * 2, pointList);    
+      glDrawArrays(GL_LINES, 0, sizeof(pointList) / (sizeof(pointList[0]) * 2));
+      glDisableClientState(GL_VERTEX_ARRAY);
    glPopMatrix();
 
 }
