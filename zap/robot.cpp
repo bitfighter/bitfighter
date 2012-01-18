@@ -171,6 +171,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, activateModule),
    method(LuaRobot, activateModuleIndex),
    method(LuaRobot, setReqLoadout),
+   method(LuaRobot, setCurrLoadout),
 
    method(LuaRobot, subscribe),
    method(LuaRobot, unsubscribe),
@@ -698,8 +699,24 @@ S32 LuaRobot::setReqLoadout(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       vec.push_back(loadout->getLoadoutItem(i));
 
-   //thisRobot->setLoadout(vec); Robots cheat with this line, skipping loadout zone.
    thisRobot->getOwner()->sRequestLoadout(vec);
+
+   return 0;
+}
+
+// Sets loadout to specified --> takes 2 modules, 3 weapons
+S32 LuaRobot::setCurrLoadout(lua_State *L)
+{
+   checkArgCount(L, 1, "Robot:setCurrLoadout()");
+
+   LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
+   Vector<U32> vec;
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(loadout->getLoadoutItem(i));
+
+   if(thisRobot->getGame()->getGameType()->validateLoadout(vec) == "")
+      thisRobot->setLoadout(vec);
 
    return 0;
 }

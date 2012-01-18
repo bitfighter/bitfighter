@@ -274,6 +274,7 @@ public:
    S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
    S32 setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
+   S32 setCurrLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
 
    S32 subscribe(lua_State *L);
    S32 unsubscribe(lua_State *L);
