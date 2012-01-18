@@ -305,8 +305,6 @@ public:
    WallSegmentManager();   // Constructor
    ~WallSegmentManager();  // Destructor
 
-   GridDatabase *getGridDatabase();
-
    GridDatabase *getWallSegmentDatabase();
    GridDatabase *getWallEdgeDatabase();
 

@@ -769,7 +769,8 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 // Constructor
 WallSegmentManager::WallSegmentManager()
 {
-   mWallSegmentDatabase = new GridDatabase();
+   // These deleted in the destructor
+   mWallSegmentDatabase = new GridDatabase();      
    mWallEdgeDatabase = new GridDatabase();
 }
 
@@ -781,12 +782,6 @@ WallSegmentManager::~WallSegmentManager()
 
    delete mWallSegmentDatabase;
    delete mWallEdgeDatabase;
-}
-
-
-GridDatabase *WallSegmentManager::getGridDatabase()
-{
-   return mWallSegmentDatabase;
 }
 
 

@@ -394,7 +394,8 @@ void EditorInstructionsUserInterface::renderPageWalls()
       for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
       {
          // Create a new segment, and add it to the list
-         WallSegment *newSegment = new WallSegment(mWallSegmentManager.getGridDatabase(), extendedEndPoints[i], extendedEndPoints[i+1], width);    
+         WallSegment *newSegment = new WallSegment(mWallSegmentManager.getWallSegmentDatabase(), 
+                                                   extendedEndPoints[i], extendedEndPoints[i+1], width);    
          wallSegments.push_back(newSegment);            
       }
 
