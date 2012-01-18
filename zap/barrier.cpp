@@ -57,6 +57,7 @@ bool loadBarrierPoints(const WallRec *barrier, Vector<Point> &points)
    return (points.size() >= 2);
 }
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -95,8 +96,6 @@ void WallRec::constructWalls(Game *theGame)
       }
    }
 }
-
-
 
 
 ////////////////////////////////////////
