@@ -806,7 +806,6 @@ GridDatabase *WallSegmentManager::getWallEdgeDatabase()
 void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjectDatabase, S32 changedWallSerialNumber)
 {
    rebuildEdges();         // Rebuild all edges for all walls
-   //updateAllMountedItems(editorDatabase);
 
    // This block is a modified version of updateAllMountedItems that homes in on a particular segment
    // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
