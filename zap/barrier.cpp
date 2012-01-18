@@ -971,42 +971,6 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
 
 
 // Called by WallItems and PolyWalls when their geom changes
-void WallSegmentManager::updateMountedItems(EditorObjectDatabase *database, EditorObject *wall)
-{
-   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
-   // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
-
-   // CE 12/21/2011 -> Replaced following with call to updateAllMountedItems(); other stuff was commented out, and it looks like the partial
-   // engineer updates were disabled for some reason.   Perhaps by me!
-   //////////////fillVector.clear();
-   //////////////database->findObjects((TestFunc)isEngineeredType, fillVector);
-
-   //////////////for(S32 i = 0; i < fillVector.size(); i++)
-   //////////////{
-   //////////////   EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
-   //////////////   //if(engrItem->getMountSegment()->getOwner() == wall->getSerialNumber())      <=== updating all engr items in game!
-   //////////////      engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
-   //////////////}
-
-   //// Second, find any forcefields that might intersect our new wall segment and recalc their endpoints.  There are cases where the ff
-   //// is mounted to one segment, and terminates on a second, but might be affected by a third segment being placed it its path.
-   //Rect aoi = wall->getExtent();
-
-   // // A FF could extend into our area of interest from quite a distance, so expand search region accordingly
-   //aoi.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));  
-
-   //fillVector.clear();
-   //database->findObjects(ForceFieldProjectorTypeNumber, fillVector);
-
-   //for(S32 i = 0; i < fillVector.size(); i++)
-   //{
-   //   ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-   //   ffp->findForceFieldEnd();
-   //}
-}
-
-
-// Called by WallItems and PolyWalls when their geom changes
 void WallSegmentManager::updateAllMountedItems(EditorObjectDatabase *database)
 {
    // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 

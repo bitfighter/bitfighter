@@ -323,7 +323,6 @@ public:
    void rebuildSelectedOutline();
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
-   void updateMountedItems(EditorObjectDatabase *database, EditorObject *wall);
    void updateAllMountedItems(EditorObjectDatabase *database);
 
 
