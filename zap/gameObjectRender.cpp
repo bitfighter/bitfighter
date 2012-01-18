@@ -375,7 +375,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    // First render the thrusters
    if(thrusts[0] > 0) // forward thrust
    {
-      glColor4f(1, 0, 0, alpha);
+      glColor(Colors::white, alpha);
       glBegin(GL_LINES);
          glVertex2f(-8, -15);
          glVertex2f(0, -15 - 20 * thrusts[0]);
@@ -383,7 +383,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
          glVertex2f(8, -15);
       glEnd();
 
-      glColor4f(1, 0.5, 0, alpha);
+      glColor(Colors::orange50, alpha);
       glBegin(GL_LINES);
          glVertex2f(-6, -15);
          glVertex2f(0, -15 - 15 * thrusts[0]);
@@ -391,7 +391,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
          glVertex2f(6, -15);
       glEnd();
 
-      glColor4f(1, 1, 0, alpha);
+      glColor(Colors::yellow, alpha);
       glBegin(GL_LINES);
          glVertex2f(-4, -15);
          glVertex2f(0, -15 - 8 * thrusts[0]);
@@ -404,7 +404,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       // two jets:
       // left and right side:
       // from 7.5, 10 -> 12.5, 10 and from -7.5, 10 to -12.5, 10
-      glColor4f(1, 0.5, 0, alpha);
+      glColor(Colors::orange50, alpha);
       glBegin(GL_LINES);
          glVertex2f(7.5, 10);
          glVertex2f(10, 10 + thrusts[1] * 15);
@@ -416,7 +416,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
          glVertex2f(-10, 10 + thrusts[1] * 15);
       glEnd();
 
-      glColor4f(1,1,0, alpha);
+      glColor(Colors::yellow, alpha);
       glBegin(GL_LINES);
          glVertex2f(9, 10);
          glVertex2f(10, 10 + thrusts[1] * 10);

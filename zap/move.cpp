@@ -73,15 +73,15 @@ const U8 BIGMOVETIMEBITS = 16;
 void Move::pack(BitStream *stream, Move *prev, bool packTime)
 {
    if(!stream->writeFlag(prev && isEqualMove(prev)))
-      {
+   {
       stream->writeFloat(fabs(x), 5);
       stream->writeFlag(x < 0);
       stream->writeFloat(fabs(y), 5);
       stream->writeFlag(y < 0);
 
-      //RDW This needs to be signed.
-      //Otherwise, the ship can't face up!
+      // This needs to be signed, otherwise, the ship can't face up!
       S32 writeAngle = S32(radiansToUnit(angle) * 0x1000);
+
       //RDW Should this be writeSignedInt?
       //The BitStream header leads me to believe it should.
       stream->writeInt(writeAngle, 12);
@@ -98,7 +98,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       if(time >= MaxMoveTime)
       {
          stream->writeRangedU32(127, 0, MaxMoveTime);
-         stream->writeInt(time - MaxMoveTime, BIGMOVETIMEBITS);   // more bits, but is probably sent less frequently.
+         stream->writeInt(time - MaxMoveTime, BIGMOVETIMEBITS);   // More bits, but sent less frequently
       }
       else
          stream->writeRangedU32(time, 0, MaxMoveTime);
@@ -110,12 +110,16 @@ void Move::unpack(BitStream *stream, bool unpackTime)
    if(!stream->readFlag())
    {
       x = stream->readFloat(5);
-      if(stream->readFlag()) x = -x;
+      if(stream->readFlag()) 
+         x = -x;
+
       y = stream->readFloat(5);
-      if(stream->readFlag()) y = -y;
+      if(stream->readFlag()) 
+         y = -y;
 
       angle = unitToRadians(stream->readInt(12) / F32(0x1000));
       fire = stream->readFlag();
+
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       {
          modulePrimary[i] = stream->readFlag();

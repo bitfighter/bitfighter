@@ -1135,7 +1135,7 @@ void GameType::onLevelLoaded()
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
-   Robot::startBots();           // Cycle through all our bots and start them up
+   Robot::startAllBots();           // Cycle through all our bots and start them up
 }
 
 
@@ -1415,8 +1415,6 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
          if(clientInfo->getTeamIndex() != teamId)      // Wrong team
             continue;
 
-         TNLAssert(clientInfo->getConnection()->getControlObject() == clientInfo->getShip(), "Not equal?!?");
-
          Ship *ship = clientInfo->getShip();
          if(!ship)       // Can happen!
             continue;
@@ -1453,8 +1451,8 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
    
    if(mShowAllBots && connection->isInCommanderMap())
    {
-      for(S32 i = 0; i < Robot::robots.size(); i++)
-         connection->objectInScope(Robot::robots[i]);
+      for(S32 i = 0; i < Robot::getBotCount(); i++)
+         connection->objectInScope(Robot::getBot(i));  
    }
 }
 
@@ -2120,7 +2118,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
    if(client->getTeamIndex() == team)     // Don't explode if not switching team
       return;
 
-   TNLAssert(client->getConnection()->getControlObject() == client->getShip(), "Not equal?!?");
+   TNLAssert(client->isRobot() || client->getConnection()->getControlObject() == client->getShip(), "Not equal?!?");
    Ship *ship = client->getShip();    // Get the ship that's switching
 
    if(ship)
@@ -2428,7 +2426,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
          s2cClientJoinedTeam(clientInfo->getName(), team);
    }
 
-   //for(S32 i = 0; i < Robot::robots.size(); i++)  //Robot is part of mClientList
+   //for(S32 i = 0; i < Robot::getBotCount(); i++)  //Robot is part of mClientList
    //{
    //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
@@ -2544,8 +2542,8 @@ void GameType::addBot(Vector<StringTableEntry> args)
    else if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   else if((Robot::robots.size() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
-         Robot::robots.size() >= ABSOLUTE_MAX_BOTS)
+   else if((Robot::getBotCount() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
+         Robot::getBotCount() >= ABSOLUTE_MAX_BOTS)
       conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
 
    else if(args.size() >= 2 && !safeFilename(args[1].getString()))
@@ -2616,10 +2614,10 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
 
    S32 prevRobotSize = -1;
 
-   while(count > 0 && prevRobotSize != Robot::robots.size()) // loop may end when cannot add anymore bots
+   while(count > 0 && prevRobotSize != Robot::getBotCount()) // loop may end when cannot add anymore bots
    {
       count--;
-      prevRobotSize = Robot::robots.size();
+      prevRobotSize = Robot::getBotCount();
       addBot(args);
    }
 }
@@ -2724,14 +2722,14 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   if(Robot::robots.size() == 0)
+   if(Robot::getBotCount() == 0)
    {
       conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
    // Only delete one robot - the most recently added
-   delete Robot::robots[Robot::robots.size() - 1];
+   Robot::deleteBot(Robot::getBotCount() - 1);
 
    StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
    Vector<StringTableEntry> e;
@@ -2752,15 +2750,14 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   if(Robot::robots.size() == 0)
+   if(Robot::getBotCount() == 0)
    {
       conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
    // Delete all bots
-   for(S32 i = Robot::robots.size() - 1; i >= 0; i--)
-      delete Robot::robots[i];
+   Robot::deleteAllBots();
 
    StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
    Vector<StringTableEntry> e;
@@ -2781,7 +2778,7 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   if(Robot::robots.size() == 0)
+   if(Robot::getBotCount() == 0)
       conn->s2cDisplayErrorMessage("!!! There are no robots to show");
    else
    {
@@ -2982,12 +2979,13 @@ GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S
 
    changeClientTeam(playerClientInfo, teamIndex);
 
-   playerClientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "An admin has shuffled you to a different team");
+   if(!playerClientInfo->isRobot())
+      playerClientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "An admin has shuffled you to a different team");
 }
 
 
 
-GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry playerName), (playerName))
+GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickeeName))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
@@ -2995,36 +2993,39 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry playerName), (player
    if(!sourceClientInfo->isAdmin())
       return;
 
-   ClientInfo *playerClientInfo = mGame->findClientInfo(playerName);
+   ClientInfo *kickee = mGame->findClientInfo(kickeeName);    
 
-   if(!playerClientInfo)    // Hmmm... couldn't find the dude.  Maybe he disconnected?
+   if(!kickee)    // Hmmm... couldn't find the dude.  Maybe he disconnected?
       return;
 
-   if(playerClientInfo->isAdmin())
+   if(!kickee->isRobot())
    {
-      source->s2cDisplayErrorMessage("Can't kick an administrator!");
-      return;
+      if(kickee->isAdmin())
+      {
+         source->s2cDisplayErrorMessage("Can't kick an administrator!");
+         return;
+      }
+
+      if(kickee->getConnection()->isEstablished())
+      {
+         GameConnection *kickeeConnection = kickee->getConnection();
+         ConnectionParameters &p = kickeeConnection->getConnectionParameters();
+         BanList *banList = gServerGame->getSettings()->getBanList();
+
+         if(p.mIsArranged)
+            banList->kickHost(p.mPossibleAddresses[0]);           // Banned for 30 seconds
+
+         banList->kickHost(kickeeConnection->getNetAddress());    // Banned for 30 seconds
+         kickeeConnection->disconnect(NetConnection::ReasonKickedByAdmin, "");
+      }
    }
-
-   if(playerClientInfo->getConnection()->isEstablished())     // Robots don't have established connections
-   {
-      ConnectionParameters &p = playerClientInfo->getConnection()->getConnectionParameters();
-
-      if(p.mIsArranged)
-         gServerGame->getSettings()->getBanList()->kickHost(p.mPossibleAddresses[0]);      // Banned for 30 seconds
-
-      gServerGame->getSettings()->getBanList()->kickHost(playerClientInfo->getConnection()->getNetAddress());      // Banned for 30 seconds
-      playerClientInfo->getConnection()->disconnect(NetConnection::ReasonKickedByAdmin, "");
-   }
-
+   
    // Get rid of robots that have the to-be-kicked name
-   for(S32 i = 0; i < Robot::robots.size(); i++)
-      if(Robot::robots[i]->getClientInfo()->getName() == playerName)
-         delete Robot::robots[i];
+   Robot::deleteBot(kickeeName);
 
    Vector<StringTableEntry> e;
-   e.push_back(playerName);  // --> Name of player being administered
-   e.push_back(sourceClientInfo->getName());  // --> Name of player doing the administering
+   e.push_back(kickeeName);                     
+   e.push_back(sourceClientInfo->getName());    // --> Name of player doing the administering
 
    broadcastMessage(GameConnection::ColorAqua, SFXIncomingMessage, "%e0 was kicked from the game by %e1.", e);
 }
@@ -3307,7 +3308,7 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
    }
 
    // Next come the robots ... Robots is part of mClientList
-   //for(S32 i = 0; i < Robot::robots.size(); i++)
+   //for(S32 i = 0; i < Robot::getBotCount(); i++)
    //{
    //   mPingTimes.push_back(0);
    //   mScores.push_back(Robot::robots[i]->getScore());
@@ -3665,11 +3666,12 @@ S32 GameType::getDigitsNeededToDisplayScore() const
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &message)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
-      mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
+      if(!mGame->getClientInfo(i)->isRobot())
+         mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
 }
 
 
-// Send a message to all clients
+// Send a message to all clients (except robots, of course!)
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
                                 const StringTableEntry &formatString, const Vector<StringTableEntry> &e)
 {

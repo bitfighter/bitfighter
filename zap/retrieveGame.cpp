@@ -208,7 +208,8 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
          e[0] = getGame()->getTeamName(s->getTeam());
 
          for(S32 i = 0; i < getGame()->getClientCount(); i++)
-            getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
+            if(!getGame()->getClientInfo(i)->isRobot())
+               getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
       }
 
       // Return all the flags to their starting locations if need be

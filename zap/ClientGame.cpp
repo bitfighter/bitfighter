@@ -1509,8 +1509,8 @@ void ClientGame::renderCommander()
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
-      for(S32 i = 0; i < Robot::robots.size(); i++)
-         renderObjects.push_back(Robot::robots[i]);
+      for(S32 i = 0; i < Robot::getBotCount(); i++)
+         renderObjects.push_back(Robot::getBot(i));
 
    if(ship)
    {
@@ -1731,8 +1731,8 @@ void ClientGame::renderNormal()
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
-      for(S32 i = 0; i < Robot::robots.size(); i++)
-         renderObjects.push_back(Robot::robots[i]);
+      for(S32 i = 0; i < Robot::getBotCount(); i++)
+         renderObjects.push_back(Robot::getBot(i));
 
 
    renderObjects.sort(renderSortCompare);

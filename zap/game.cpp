@@ -294,8 +294,7 @@ bool ClientInfo::sEngineerDeployObject(U32 type)
 
    EngineerModuleDeployer deployer;
 
-   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(),
-         ship->getGame()->getWallSegmentManager()->getWallSegmentDatabase(), ship, type))
+   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, type))
    {
       if(!isRobot())
          getConnection()->s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
@@ -372,13 +371,15 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
    TNLAssert(isAuthenticated || badges == NO_BADGES, "Unauthenticated players should never have badges!");
    Parent::setAuthenticated(isAuthenticated, badges);
 
-   // Broadcast new connection status to all clients.  It does seem a little roundabout to use the game server to communicate
+   // Broadcast new connection status to all clients, except the client that is authenticated.  Presumably they already know.  
+   //  ===> This may now be wrong <=== It does seem a little roundabout to use the game server to communicate
    // between the FullClientInfo and the RemoteClientInfo on each client; we could contact the RemoteClientInfo directly and
    // then not send a message to the client being authenticated below.  But I think this is cleaner architecturally, and this
    // message is not sent often.
    if(mClientConnection && mClientConnection->isConnectionToClient())      
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         gServerGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
+         if(gServerGame->getClientInfo(i)->getName() != mName)
+            gServerGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
 }
 
 
@@ -2554,22 +2555,22 @@ void ServerGame::idle(U32 timeDelta)
    else if(mGameSuspended && ( (getPlayerCount() > 0 && !mSuspendor) || getPlayerCount() > 1 ))
       unsuspendGame(false);
 
-   if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen.
+   if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen
       timeDelta = 100;
 
    mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
-   checkConnectionToMaster(timeDelta);    // Connect to master server if not connected
+   checkConnectionToMaster(timeDelta);                   // Connect to master server if not connected
 
    
-   mSettings->getBanList()->updateKickList(timeDelta);    // Unban players who's bans have expired
+   mSettings->getBanList()->updateKickList(timeDelta);   // Unban players who's bans have expired
 
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
    {
       MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
-      static StringTableEntry prevCurrentLevelName;   // Using static, so it holds the value when it comes back here.
+      static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here.
       static GameTypes prevCurrentLevelType;
       static S32 prevRobotCount;
       static S32 prevPlayerCount;
@@ -2639,6 +2640,9 @@ void ServerGame::idle(U32 timeDelta)
    // In practice, we could probably just set it and forget it when we load a level.
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
+
+   // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
+   Robot::clearBotMoves();           
 
    // Fire TickEvent, in case anyone is listening
    EventManager::get()->fireEvent(EventManager::TickEvent, timeDelta);

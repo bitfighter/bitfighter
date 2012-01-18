@@ -123,12 +123,13 @@ class Robot : public Ship, public LuaScriptRunner
    typedef Ship Parent;
 
 private:
-   U16 mCurrentZone;             // Zone robot is currently in
+   static const S32 RobotRespawnDelay = 1500;
+
+   U16 mCurrentZone;                // Zone robot is currently in
 
    S32 mScore;
    S32 mTotalScore;
 
-   static const S32 RobotRespawnDelay = 1500;
 
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
@@ -136,9 +137,13 @@ private:
 
    void tickTimer(U32 deltaT);      // Move bot's timer forward
 
+   static Vector<Robot *> robots;   // Grand master list of all robots in the current game
+
+   void clearMove();                // Reset bot's move to do nothing
+
 public:
-   Robot();      // Constructor
-   ~Robot();                                                                                    // Destructor
+   Robot();       // Constructor
+   ~Robot();      // Destructor
 
    bool initialize(Point &pos);
 
@@ -148,10 +153,8 @@ public:
 
    void logError(const char *format, ...);   // In case of error...
 
-   public:
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
-   void clearMove();
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *);
@@ -175,10 +178,18 @@ public:
    LuaRobot *mLuaRobot;                   // Could make private and make a public setter method...
 
    LuaPlayerInfo *getPlayerInfo();
-
-   static Vector<Robot *> robots;         // Grand master list of all robots in the current game
-   static void startBots();               // Loop through all our bots and run thier main() functions
    bool start();
+
+
+
+   // Future kernel of a BotManager class
+   static void startAllBots();               // Loop through all our bots and run thier main() functions
+   static Robot *getBot(S32 index);
+   static void clearBotMoves();
+   static S32 getBotCount();
+   static void deleteBot(S32 i);                         // Delete bot by index
+   static void deleteBot(const StringTableEntry &name);  // Delete bot by name
+   static void deleteAllBots();
 
    static Robot *findBot(lua_State *L);   // Find the bot that owns this L
 
@@ -274,6 +285,7 @@ public:
    S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
    S32 setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
+   S32 setCurrLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
 
    S32 subscribe(lua_State *L);
    S32 unsubscribe(lua_State *L);

@@ -171,6 +171,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, activateModule),
    method(LuaRobot, activateModuleIndex),
    method(LuaRobot, setReqLoadout),
+   method(LuaRobot, setCurrLoadout),
 
    method(LuaRobot, subscribe),
    method(LuaRobot, unsubscribe),
@@ -698,8 +699,24 @@ S32 LuaRobot::setReqLoadout(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       vec.push_back(loadout->getLoadoutItem(i));
 
-   //thisRobot->setLoadout(vec); Robots cheat with this line, skipping loadout zone.
    thisRobot->getOwner()->sRequestLoadout(vec);
+
+   return 0;
+}
+
+// Sets loadout to specified --> takes 2 modules, 3 weapons
+S32 LuaRobot::setCurrLoadout(lua_State *L)
+{
+   checkArgCount(L, 1, "Robot:setCurrLoadout()");
+
+   LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
+   Vector<U32> vec;
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(loadout->getLoadoutItem(i));
+
+   if(thisRobot->getGame()->getGameType()->validateLoadout(vec) == "")
+      thisRobot->setLoadout(vec);
 
    return 0;
 }
@@ -1571,8 +1588,51 @@ bool Robot::initialize(Point &pos)
 } 
 
 
-// Loop through all our bots and start their interpreters -- called from onLevelLoaded, also from 
-void Robot::startBots()
+Robot *Robot::getBot(S32 index)
+{
+   return robots[index];
+}
+
+
+// static
+void Robot::clearBotMoves()
+{
+   for(S32 i = 0; i < robots.size(); i++)
+      robots[i]->clearMove();
+}
+
+
+S32 Robot::getBotCount()
+{
+   return robots.size();
+}
+
+
+void Robot::deleteBot(S32 i)
+{
+   delete robots[i];
+}
+
+
+// Delete bot by name
+void Robot::deleteBot(const StringTableEntry &name)
+{
+   for(S32 i = 0; i < robots.size(); i++)
+      if(robots[i]->getClientInfo()->getName() == name)
+         deleteBot(i);
+}
+
+
+void Robot::deleteAllBots()
+{
+   for(S32 i = robots.size() - 1; i >= 0; i--)
+      deleteBot(i);
+}
+
+
+// Loop through all our bots and start their interpreters, delete those that sqawk
+// static, only called from GameType::onLevelLoaded()
+void Robot::startAllBots()
 {   
    for(S32 i = 0; i < robots.size(); i++)
       if(!robots[i]->start())
@@ -1897,12 +1957,12 @@ bool Robot::canSeePoint(Point point)
 void Robot::render(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
-   if(isGhost())                                      // Client rendering client's objects
+   if(isGhost())                                         // Client rendering client's objects
       Parent::render(layerIndex);
 
-   else if(layerIndex == 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
+   else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
    {
-      glColor3f(1,1,0);       // yellow
+      glColor(Colors::yellow);      
       glBegin(GL_LINE_STRIP);
          glVertex(getActualPos());
          for(S32 i = flightPlan.size() - 1; i >= 0; i--)
@@ -1932,8 +1992,6 @@ void Robot::idle(GameObject::IdleCallPath path)
       tickTimer(deltaT);
 
       Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
-
-      clearMove();            // Clear current move after Parent::idle; provide a clean slate for "TickEvent"
    }
 }
 

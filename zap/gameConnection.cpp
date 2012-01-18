@@ -1494,9 +1494,9 @@ string GameConnection::makeUnique(string name)
          }
       }
 
-      for(S32 i = 0; i < Robot::robots.size(); i++)
+      for(S32 i = 0; i < Robot::getBotCount(); i++)
       {
-         if(proposedName == Robot::robots[i]->getClientInfo()->getName().getString())
+         if(proposedName == Robot::getBot(i)->getClientInfo()->getName().getString())
          {
             unique = false;
 

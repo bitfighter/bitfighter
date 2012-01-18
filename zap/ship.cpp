@@ -1185,9 +1185,10 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
+
    if(!shouldWritePosition)
    {
-      // The number of bits here *must* match the same number in the else statement
+      // The number of writeFlags here *must* match the same number in the else statement
       stream->writeFlag(false);
       stream->writeFlag(false);
       stream->writeFlag(false);
@@ -1195,23 +1196,23 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    }
    else     // Write mCurrentMove data...
    {
-      if(stream->writeFlag(updateMask & PositionMask))
+      if(stream->writeFlag(updateMask & PositionMask))         // <=== ONE
       {
          // Send position and speed
          gameConnection->writeCompressedPoint(mMoveState[RenderState].pos, stream);
          writeCompressedVelocity(mMoveState[RenderState].vel, BoostMaxVelocity + 1, stream);
       }
-      if(stream->writeFlag(updateMask & MoveMask))
-         mCurrentMove.pack(stream, NULL, false);      // Send current move
+      if(stream->writeFlag(updateMask & MoveMask))             // <=== TWO
+         mCurrentMove.pack(stream, NULL, false);               // Send current move
 
       // If a module primary component is detected as on, pack it
-      if(stream->writeFlag(updateMask & ModulePrimaryMask))
-         for(S32 i = 0; i < ModuleCount; i++)         // Send info about which modules are active
+      if(stream->writeFlag(updateMask & ModulePrimaryMask))    // <=== THREE
+         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active
             stream->writeFlag(mModulePrimaryActive[i]);
 
       // If a module secondary component is detected as on, pack it
-      if(stream->writeFlag(updateMask & ModuleSecondaryMask))
-         for(S32 i = 0; i < ModuleCount; i++)         // Send info about which modules are active
+      if(stream->writeFlag(updateMask & ModuleSecondaryMask))  // <=== FOUR
+         for(S32 i = 0; i < ModuleCount; i++)                  // Send info about which modules are active
             stream->writeFlag(mModuleSecondaryActive[i]);
    }
    return 0;
@@ -1237,6 +1238,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->readStringTableEntry(&playerName);
 
       ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
+
+
       TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");  // there may be "Ship" with empty name in a few level
 
       mClientInfo = clientInfo;
@@ -1342,6 +1345,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
          if(i == ModuleSensor && wasPrimaryActive[i] != mModulePrimaryActive[i])
             mSensorStartTime = getGame()->getCurrentTime();
+
          if(i == ModuleCloak && wasPrimaryActive[i] != mModulePrimaryActive[i])
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
       }
@@ -1936,7 +1940,7 @@ void Ship::render(S32 layerIndex)
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    GameConnection *conn = clientGame->getConnectionToServer();
 
-   bool localShip = !(conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
+   bool localShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
 
    // Now adjust if using cloak module

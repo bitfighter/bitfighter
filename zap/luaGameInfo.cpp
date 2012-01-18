@@ -142,7 +142,7 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
 
    for(S32 i = 0; i < gServerGame->getRobotCount(); i ++)
    {
-      Robot::robots[i]->getPlayerInfo()->push(L);
+      Robot::getBot(i)->getPlayerInfo()->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
