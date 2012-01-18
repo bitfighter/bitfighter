@@ -208,7 +208,7 @@ class GameObject : public virtual BfObject, public NetObject
 
 private:
    SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
-   ClientInfo *mOwner;
+   SafePtr<ClientInfo> mOwner;
    U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
 
    U32 mCreationTime;
