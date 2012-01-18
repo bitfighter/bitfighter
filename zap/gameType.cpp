@@ -1815,7 +1815,7 @@ void GameType::updateLeadingTeamAndScore()
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
       S32 score = ((Team *)(mGame->getTeam(i)))->getScore();
-      S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + (score < 0 ? 2 : 1));
+      S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + ((score < 0 && getGameType() != CoreGame) ? 2 : 1));
 
       mDigitsNeededToDisplayScore = max(digits, mDigitsNeededToDisplayScore);
 
