@@ -475,7 +475,10 @@ void EditorObject::beginBatchGeomUpdate()
 void EditorObject::endBatchGeomUpdate(ClientGame *game, bool modifiedWalls)
 {
    if(modifiedWalls)
-      game->getWallSegmentManager()->finishedChangingWalls(game->getEditorDatabase());
+   {
+      EditorObjectDatabase *database = game->getEditorDatabase();
+      database->getWallSegmentManager()->finishedChangingWalls(database);
+   }
 
    mBatchUpdatingGeom = false;
 }

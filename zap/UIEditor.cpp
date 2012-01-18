@@ -383,14 +383,15 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mLastUndoIndex--;
 
    getGame()->setEditorDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
+   EditorObjectDatabase *database = getGame()->getEditorDatabase();
 
    rebuildEverything();    // Well, rebuild segments from walls at least
 
-   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    // Update wall segment manager with what's currently selected
    fillVector.clear();
-   getGame()->getEditorDatabase()->findObjects((TestFunc)isWallType, fillVector);
+   database->findObjects((TestFunc)isWallType, fillVector);
 
    wallSegmentManager->clearSelected();
 
@@ -435,9 +436,9 @@ EditorObject *EditorUserInterface::getSnapItem()
 
 void EditorUserInterface::rebuildEverything()
 {
-   Game *game = getGame();
+   EditorObjectDatabase *database = getGame()->getEditorDatabase();
 
-   game->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
+   database->getWallSegmentManager()->recomputeAllWallGeometry(database);
    resnapAllEngineeredItems();
 
    setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
@@ -449,9 +450,10 @@ void EditorUserInterface::resnapAllEngineeredItems()
 {
    fillVector.clear();
 
-   getGame()->getEditorDatabase()->findObjects((TestFunc)isEngineeredType, fillVector);
+   EditorObjectDatabase *database = getGame()->getEditorDatabase();
+   database->findObjects((TestFunc)isEngineeredType, fillVector);
 
-   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -551,7 +553,7 @@ void EditorUserInterface::loadLevel()
    populateDock();                     // Add game-specific items to the dock
 
    // Bulk-process new items, walls first
-   game->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
+   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
    
    // Snap all engineered items to the closest wall, if one is found
    resnapAllEngineeredItems();
@@ -999,7 +1001,8 @@ string EditorUserInterface::getLevelFileName()
 
 void EditorUserInterface::onSelectionChanged()
 {
-   getGame()->getWallSegmentManager()->rebuildSelectedOutline();
+   EditorObjectDatabase *database = getGame()->getEditorDatabase();
+   database->getWallSegmentManager()->rebuildSelectedOutline();
 }
 
 
@@ -1287,7 +1290,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
    Point snapPoint(p);
 
-   WallSegmentManager *wallSegmentManager = getGame()->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = getGame()->getEditorDatabase()->getWallSegmentManager();
 
    if(mDraggingObjects)
    {
@@ -1827,6 +1830,8 @@ static void drawFourArrows(Point pos)
 
 void EditorUserInterface::render()
 {
+   EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
+
    mouseIgnore = false;    // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
 
    if(!mPreviewMode)
@@ -1835,7 +1840,6 @@ void EditorUserInterface::render()
    {
       fillVector.clear();
       
-      EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
       editorDb->findObjects(SpyBugTypeNumber, fillVector);
 
       if(fillVector.size() != 0)
@@ -1915,7 +1919,7 @@ void EditorUserInterface::render()
     
       
       // == Render walls and polyWalls ==
-      getGame()->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
+     editorDb->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                      delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
     
 
@@ -2524,7 +2528,7 @@ void EditorUserInterface::findHitItemAndEdge()
       }
 
    // We've already checked for wall vertices; now we'll check for hits in the interior of walls
-   GridDatabase *wallDb = getGame()->getWallSegmentManager()->getWallSegmentDatabase();
+   GridDatabase *wallDb = editorDb->getWallSegmentManager()->getWallSegmentDatabase();
    fillVector2.clear();
 
    wallDb->findObjects((TestFunc)isAnyObjectType, fillVector2, cursorRect);
@@ -3236,22 +3240,22 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
    const Vector<EditorObject *> *objList = getObjectList();
    EditorObject *obj = objList->get(itemIndex);
-
    Game *game = getGame();
-   WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
+   EditorObjectDatabase *database = game->getEditorDatabase();
+
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    if(isWallType(obj->getObjectTypeNumber()))
    {
       // Need to recompute boundaries of any intersecting walls
-      wallSegmentManager->deleteSegments(obj->getItemId());                      // Delete the segments associated with the wall
-      game->getEditorDatabase()->removeFromDatabase(obj, obj->getExtent());
+      wallSegmentManager->deleteSegments(obj->getItemId());          // Delete the segments associated with the wall
+      database->removeFromDatabase(obj, obj->getExtent());
 
       if(!batchMode)
          doneDeleteingWalls();
    }
    else
-      game->getEditorDatabase()->removeFromDatabase(obj, obj->getExtent());
-
+      database->removeFromDatabase(obj, obj->getExtent());
 
    if(!batchMode)
       doneDeleteing();
@@ -3261,10 +3265,11 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 // After deleting a bunch of items, clean up
 void EditorUserInterface::doneDeleteingWalls()
 {
-   Game *game = getGame();
-   WallSegmentManager *wallSegmentManager = game->getWallSegmentManager();
+   EditorObjectDatabase *database = getGame()->getEditorDatabase();
 
-   wallSegmentManager->recomputeAllWallGeometry(game->getEditorDatabase());   // Recompute wall edges
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+
+   wallSegmentManager->recomputeAllWallGeometry(database);   // Recompute wall edges
    resnapAllEngineeredItems();         
 }
 

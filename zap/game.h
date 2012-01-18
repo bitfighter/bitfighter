@@ -334,7 +334,6 @@ private:
    U32 mTimeUnconnectedToMaster;                         // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
 
-   WallSegmentManager *mWallSegmentManager;    
    TeamManager *mActiveTeamManager;
 
    // Functions for handling individual level parameters read in processLevelParam; some may be game-specific
@@ -437,8 +436,6 @@ public:
 
    static const ModuleInfo *getModuleInfo(ShipModule module);
    
-   WallSegmentManager *getWallSegmentManager() const;                   // TODO: Move back to ClientGame()
-
    void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 

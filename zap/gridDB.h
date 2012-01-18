@@ -90,8 +90,11 @@ public:
    virtual bool isDatabasable();    // Can this item actually be inserted into a database?
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+class WallSegmentManager;
 
 class GridDatabase
 {
@@ -101,6 +104,8 @@ private:
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
    static U32 mQueryId;
    static U32 mCountGridDatabase;
+
+   WallSegmentManager *mWallSegmentManager;    
 
 protected:
    Vector<DatabaseObject *> mAllObjects;
@@ -117,12 +122,12 @@ public:
       BucketEntry *nextInBucket;
    };
 
-   static ClassChunker<BucketEntry> *mChunker;  // if not a pointer, then somehow static get destroyed first then non-static when game is quitting, crashing it.
+   static ClassChunker<BucketEntry> *mChunker;
 
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
 
-   GridDatabase();                              // Constructor
-   virtual ~GridDatabase();                     // Destructor
+   GridDatabase(bool createWallSegmentManager = true);   // Constructor
+   virtual ~GridDatabase();                              // Destructor
 
    static const S32 BucketWidthBitShift = 8;    // Width/height of each bucket in pixels, in a form of 2 ^ n, 8 is 256 pixels
 
@@ -144,6 +149,8 @@ public:
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
 
    void dumpObjects();     // For debugging purposes
+
+   WallSegmentManager *getWallSegmentManager() const;                   // TODO: Move back to ClientGame()
 
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);

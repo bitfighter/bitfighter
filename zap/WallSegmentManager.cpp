@@ -44,8 +44,8 @@ namespace Zap
 WallSegmentManager::WallSegmentManager()
 {
    // These deleted in the destructor
-   mWallSegmentDatabase = new GridDatabase();      
-   mWallEdgeDatabase = new GridDatabase();
+   mWallSegmentDatabase = new GridDatabase(false);      
+   mWallEdgeDatabase = new GridDatabase(false);
 }
 
 

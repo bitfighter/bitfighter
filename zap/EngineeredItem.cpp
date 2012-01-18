@@ -1215,16 +1215,19 @@ void ForceFieldProjector::onItemDragging()
 void ForceFieldProjector::findForceFieldEnd()
 {
    // Load the corner points of a maximum-length forcefield into geom
+      DatabaseObject *collObj;
    
-   DatabaseObject *collObj;
 
    F32 scale = 1;
    
    Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
 
-   // Pass in database containing WallSegments
-   if(ForceField::findForceFieldEnd(getGame()->getWallSegmentManager()->getWallEdgeDatabase(), start, mAnchorNormal, forceFieldEnd, &collObj))
+   // Pass in database containing WallSegments, returns object in collObj
+   if(ForceField::findForceFieldEnd(getGame()->getEditorDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
+                                    start, mAnchorNormal, forceFieldEnd, &collObj))
+   {
       setEndSegment(dynamic_cast<WallSegment *>(collObj));
+   }
    else
       setEndSegment(NULL);
 

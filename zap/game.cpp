@@ -560,8 +560,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
 
-   mWallSegmentManager = new WallSegmentManager();    // gets deleted in destructor
-
    mNameToAddressThread = NULL;
 
    mTeamManager = new TeamManager;                    // gets deleted in destructor 
@@ -572,7 +570,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 // Destructor
 Game::~Game()
 {
-   delete mWallSegmentManager;
    delete mTeamManager;
 
    if(mNameToAddressThread)
@@ -1317,12 +1314,6 @@ const ModuleInfo *Game::getModuleInfo(ShipModule module)
 {
    TNLAssert(U32(module) < U32(ModuleCount), "out of range module");
    return &gModuleInfo[(U32) module];
-}
-
-
-WallSegmentManager *Game::getWallSegmentManager() const
-{
-   return mWallSegmentManager;
 }
 
 
