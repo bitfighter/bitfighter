@@ -310,6 +310,7 @@ public:
    GridDatabase *getWallSegmentDatabase();
    GridDatabase *getWallEdgeDatabase();
 
+   void finishedChangingWalls(EditorObjectDatabase *editorDatabase,  S32 changedWallSerialNumber);
    void finishedChangingWalls(EditorObjectDatabase *editorDatabase);
 
    Vector<WallSegment *> mWallSegments;      

@@ -442,7 +442,7 @@ void WallItem::onGeomChanged()
    wallSegmentManager->setSelected(mSerialNumber, mSelected);     // Make sure newly generated segments retain selection state of parent wall
 
    if(!isBatchUpdatingGeom())
-      wallSegmentManager->finishedChangingWalls(editorDatabase);
+      wallSegmentManager->finishedChangingWalls(editorDatabase, mSerialNumber);
 
    Parent::onGeomChanged();
 }
@@ -672,7 +672,7 @@ void PolyWall::onGeomChanged()
    wallSegmentManager->computeWallSegmentIntersections(getGame()->getEditorDatabase(), this);
 
    if(!isBatchUpdatingGeom())
-      wallSegmentManager->finishedChangingWalls(getGame()->getEditorDatabase());
+      wallSegmentManager->finishedChangingWalls(getGame()->getEditorDatabase(), mSerialNumber);
 
    Parent::onGeomChanged();
 }
@@ -799,6 +799,38 @@ GridDatabase *WallSegmentManager::getWallSegmentDatabase()
 GridDatabase *WallSegmentManager::getWallEdgeDatabase()
 {
    return mWallEdgeDatabase;
+}
+
+
+// Temporary function to work out how to fix the spazzy ffs
+void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjectDatabase, S32 changedWallSerialNumber)
+{
+   rebuildEdges();         // Rebuild all edges for all walls
+   //updateAllMountedItems(editorDatabase);
+
+   // This block is a modified version of updateAllMountedItems that homes in on a particular segment
+   // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
+   // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.
+   fillVector.clear();
+   editorObjectDatabase->findObjects((TestFunc)isEngineeredType, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
+
+      // Remount any engr items that were attached to any segments on the modified wall
+      if(engrItem->getMountSegment()->getOwner() == changedWallSerialNumber)
+         engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
+
+      // Calculate where all ffs land -- no telling if the segment we moved is or was interfering in its path
+      if(!engrItem->isTurret())
+      {
+         ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(engrItem);
+         ffp->findForceFieldEnd();
+      }
+   }
+
+   rebuildSelectedOutline();
 }
 
 
@@ -1173,6 +1205,7 @@ WallSegment::~WallSegment()
 }
 
 
+// Returns serial number of owner
 S32 WallSegment::getOwner()
 {
    return mOwner;
