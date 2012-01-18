@@ -378,7 +378,7 @@ private:
 
 public:
    // Check potential deployment position
-   bool canCreateObjectAtLocation(GridDatabase *database, GridDatabase *wallSegmentDatabase, Ship *ship, U32 objectType);
+   bool canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType);
 
    bool deployEngineeredItem(ClientInfo *clientInfo, U32 objectType);  // Deploy!
    string getErrorMessage();

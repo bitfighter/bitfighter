@@ -182,7 +182,9 @@ using namespace TNL;
 #endif
 
 #ifdef TNL_OS_LINUX
+#ifndef ZAP_DEDICATED
 #include <X11/Xlib.h>
+#endif
 #endif
 
 // Maybe don't enable by default?
