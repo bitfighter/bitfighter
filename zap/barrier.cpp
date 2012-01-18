@@ -802,7 +802,7 @@ GridDatabase *WallSegmentManager::getWallEdgeDatabase()
 }
 
 
-// Temporary function to work out how to fix the spazzy ffs
+// This variant only resnaps engineered items that were attached to a segment that moved
 void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjectDatabase, S32 changedWallSerialNumber)
 {
    rebuildEdges();         // Rebuild all edges for all walls
