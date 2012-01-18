@@ -405,14 +405,6 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    onSelectionChanged();
 
-
-   //getGame()->getEditorDatabase()->dumpObjects();
-
-   // Why is this block needed??  Makes larger levels palpably slow...
-   //const Vector<EditorObject *> *objects = getGame()->getEditorDatabase()->getObjectList();
-   //for(S32 i = 0; i < objects->size(); i++)
-   //   objects->get(i)->updateExtentInDatabase();
-
    mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
 }
