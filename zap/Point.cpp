@@ -106,6 +106,15 @@ void Point::normalize(float newLen)
    }
 }
 
+
+void Point::interp(float t, const Point &p1, const Point &p2)
+{
+   float oneMinusT = 1.0f - t;
+   x = p1.x * t + p2.x * oneMinusT;
+   y = p1.y * t + p2.y * oneMinusT;
+}
+
+
 F32 Point::ATAN2() const
 {
    return atan2(y, x);

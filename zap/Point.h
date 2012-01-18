@@ -66,6 +66,8 @@ public:
    F32 lenSquared() const;
    void normalize();
    void normalize(float newLen);
+   void interp(float t, const Point &p1, const Point &p2);
+
    F32 ATAN2() const;
    F32 distanceTo(const Point &pt) const;
    F32 distSquared(const Point &pt) const;
