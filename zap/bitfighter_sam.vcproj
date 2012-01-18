@@ -714,6 +714,14 @@
 			Name="GameTypes"
 			>
 			<File
+				RelativePath=".\CoreGame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CoreGame.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CTFGame.cpp"
 				>
 			</File>
@@ -721,14 +729,6 @@
 				RelativePath=".\CTFGame.h"
 				>
 			</File>
-         <File
-            RelativePath=".\CoreGame.cpp"
-            >
-         </File>
-         <File
-            RelativePath=".\CoreGame.h"
-            >
-         </File>
 			<File
 				RelativePath=".\gameType.cpp"
 				>
@@ -1172,6 +1172,10 @@
 		</File>
 		<File
 			RelativePath=".\UIMessage.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\WallSegmentManager.cpp"
 			>
 		</File>
 		<File
