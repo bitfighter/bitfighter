@@ -1081,9 +1081,6 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
                                      bool previewMode, bool showSnapVertices, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
-   fillVector.clear();
-   mWallSegmentDatabase->findObjects((TestFunc)isWallType, fillVector);
-
    // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
    bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && previewMode;
    Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
