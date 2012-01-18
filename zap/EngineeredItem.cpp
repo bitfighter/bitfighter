@@ -104,7 +104,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectDatabase, GridDatabase *wallSegmentDatabase, Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -134,7 +134,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
          return false;
    }
 
-   if(!EngineeredItem::checkDeploymentPosition(bounds, database))
+   if(!EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase))
    {
       mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
@@ -147,14 +147,15 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
 
    // Forcefields only from here on down; we've got miles to go before we sleep
 
+   /// Part ONE
    // We need to ensure forcefield doesn't cross another; doing so can create an impossible situation
    // Forcefield starts at the end of the projector.  Need to know where that is.
    Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal, 0);
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
-   DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(database, forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
+   DatabaseObject *collObj;  // Dummy obj
+   ForceField::findForceFieldEnd(gameObjectDatabase, forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
 
    bool collision = false;
 
@@ -166,7 +167,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
    ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
 
    fillVector.clear();
-   database->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+   gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
    Vector<Point> ffpGeom;     // Geom of any projectors we find
 
@@ -192,7 +193,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
       // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
-      database->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
+      gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
@@ -217,10 +218,97 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *database, S
       }
    }
 
-
    if(collision)
    {
       mErrorMessage = "!!! Cannot deply forcefield where it could cross another.";
+      return false;
+   }
+
+
+   /// Part TWO
+   // Check to make sure that forcefield doesn't come within a ship's width of a wall
+   // This is to prevent such rampant forecfield abuse
+   bool wallTooClose = false;
+   fillVector.clear();
+
+   // Build collision poly from forcefield and ship's width
+   // Similar to expanding a barrier spine
+   Vector<Point> collisionPoly;
+   Point dir = forceFieldEnd - forceFieldStart;
+
+   Point crossVec(dir.y, -dir.x);
+   crossVec.normalize(2 * Ship::CollisionRadius);
+
+   collisionPoly.push_back(forceFieldStart + crossVec);
+   collisionPoly.push_back(forceFieldEnd + crossVec);
+   collisionPoly.push_back(forceFieldEnd - crossVec);
+   collisionPoly.push_back(forceFieldStart - crossVec);
+
+   // Reset query rect
+   queryRect = Rect(collisionPoly);
+
+   // Find the terminating wall segment, but don't adjust the end point
+   Point dummyEndNotUsed;
+   DatabaseObject *terminatingWallSegment;
+   ForceField::findForceFieldEnd(wallSegmentDatabase, forceFieldStart, mDeployNormal, dummyEndNotUsed, &terminatingWallSegment);
+
+   // Search for wall segments within query
+   wallSegmentDatabase->findObjects(isWallType, fillVector, queryRect);
+
+   Vector<Point> currentPoly;
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Exclude the end segment from our search
+      if(terminatingWallSegment && terminatingWallSegment == fillVector[i])
+         continue;
+
+      currentPoly.clear();
+      fillVector[i]->getCollisionPoly(currentPoly);
+
+      if(polygonsIntersect(currentPoly, collisionPoly))
+      {
+         wallTooClose = true;
+         break;
+      }
+   }
+
+   if(wallTooClose)
+   {
+      mErrorMessage = "!!! Cannot deploy forcefield where it will pass too close to a wall";
+      return false;
+   }
+
+
+   /// Part THREE
+   // Now we should check for any turrets that may be in the way using the same geometry as in
+   // part two.  We can excluded engineered turrets because they can be destroyed
+   bool turretInTheWay = false;
+   gameObjectDatabase->findObjects(TurretTypeNumber, fillVector, queryRect);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      Turret *turret = dynamic_cast<Turret *>(fillVector[i]);
+
+      if(!turret)
+         continue;
+
+      // We don't care about engineered turrets because they can be destroyed
+      if(turret->isEngineered())
+         continue;
+
+      currentPoly.clear();
+      turret->getCollisionPoly(currentPoly);
+
+      if(polygonsIntersect(currentPoly, collisionPoly))
+      {
+         turretInTheWay = true;
+         break;
+      }
+   }
+
+   if(turretInTheWay)
+   {
+      mErrorMessage = "!!! Cannot deploy forcefield over a non-destructible turret";
       return false;
    }
 
@@ -271,6 +359,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
    deployedObject->setResource(resource);
+   deployedObject->setEngineered(true);
 
    return true;
 }
@@ -297,6 +386,7 @@ EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) 
    mHealRate = 0;
    mMountSeg = NULL;
    mSnapped = false;
+   mEngineered = false;
 
    mRadius = 7;
 }
@@ -715,6 +805,19 @@ bool EngineeredItem::isDestroyed()
 }
 
 
+void EngineeredItem::setEngineered(bool isEngineered)
+{
+   mEngineered = isEngineered;
+}
+
+
+bool EngineeredItem::isEngineered()
+{
+   // If the engineered item has a resource attached, then it was engineered by a player
+   return mEngineered;
+}
+
+
 // Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
 // a wall or another engineered item
 // static method
@@ -744,6 +847,7 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
       stream->write(getVert(0).y);
       stream->write(mAnchorNormal.x);
       stream->write(mAnchorNormal.y);
+      stream->writeFlag(mEngineered);
    }
 
    if(stream->writeFlag(updateMask & TeamMask))
@@ -774,8 +878,8 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
       stream->read(&pos.y);
       stream->read(&mAnchorNormal.x);
       stream->read(&mAnchorNormal.y);
+      mEngineered = stream->readFlag();
       setVert(pos, 0);
-      computeExtent();
    }
 
 
@@ -926,6 +1030,7 @@ ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anch
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
+   onGeomChanged(); // can't be placed on parent, as parent construtor must initalized first
 }
 
 
@@ -1007,12 +1112,12 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 // Runs on both client and server
 void ForceFieldProjector::onEnabled()
 {
-   if(!isGhost())
+   if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
       Point end;
       DatabaseObject *collObj;
-   
+	
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
       mField = new ForceField(mTeam, start, end);
@@ -1023,6 +1128,7 @@ void ForceFieldProjector::onEnabled()
 
 bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
 {
+   TNLAssert(mCollisionPolyPoints.size() != 0, "mCollisionPolyPoints.size() shouldn't be zero");
    polyPoints = mCollisionPolyPoints;
    return true;
 }

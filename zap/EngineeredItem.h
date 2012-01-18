@@ -54,6 +54,7 @@ protected:
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;
+   bool mEngineered;
 
    bool mSnapped;             // Item is snapped to a wall
 
@@ -101,6 +102,9 @@ public:
 
    void explode();
    bool isDestroyed();
+   void setEngineered(bool isEngineered);
+   bool isEngineered(); // Was this engineered py a player?
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
@@ -373,7 +377,9 @@ private:
    string mErrorMessage;
 
 public:
-   bool canCreateObjectAtLocation(GridDatabase *database, Ship *ship, U32 objectType);    // Check potential deployment position
+   // Check potential deployment position
+   bool canCreateObjectAtLocation(GridDatabase *database, GridDatabase *wallSegmentDatabase, Ship *ship, U32 objectType);
+
    bool deployEngineeredItem(ClientInfo *clientInfo, U32 objectType);  // Deploy!
    string getErrorMessage();
 

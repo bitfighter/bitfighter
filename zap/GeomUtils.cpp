@@ -1383,6 +1383,29 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
        return false;
 }
 
+
+Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthReduction)
+{
+   // Determine the directional vector
+   Point dir = endPoint - startPoint;
+
+   // Save current length
+   F32 length = dir.len();
+
+   // Normalize into a unit vector of sorts
+   dir.normalize();
+
+   // Multiply by the new length
+   // Careful!  If lengthReduction is greater than the segment length, you'll get an
+   // end point on the opposite vector!!
+   dir *= (length - lengthReduction);
+
+   // Return the new end-point
+   return startPoint + dir;
+}
+
+
+
 Triangulate::TriangleData::TriangleData()
 {
    pointList = NULL;

@@ -106,6 +106,9 @@ bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &cl
 bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 &collisionTime);
 bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
 
+// This will return a new end point of a segment that you wish to shorten
+Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthReduction);
+
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
 // TODO: Should we create a MathUtils class for this and other useful purely mathematic functions?
