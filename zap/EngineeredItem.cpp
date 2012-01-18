@@ -104,7 +104,7 @@ string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
 
 // Returns "" if location is OK, otherwise returns an error message
 // Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectDatabase, GridDatabase *wallSegmentDatabase, Ship *ship, U32 objectType)
+bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectDatabase, Ship *ship, U32 objectType)
 {
    string msg;
 
@@ -154,8 +154,8 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
    // Now we can find the point where the forcefield would end if this were a valid position
    Point forceFieldEnd;
-   DatabaseObject *collObj;  // Dummy obj
-   ForceField::findForceFieldEnd(gameObjectDatabase, forceFieldStart, mDeployNormal, forceFieldEnd, &collObj);
+   DatabaseObject *terminatingWallObject;
+   ForceField::findForceFieldEnd(gameObjectDatabase, forceFieldStart, mDeployNormal, forceFieldEnd, &terminatingWallObject);
 
    bool collision = false;
 
@@ -247,19 +247,14 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    // Reset query rect
    queryRect = Rect(collisionPoly);
 
-   // Find the terminating wall segment, but don't adjust the end point
-   Point dummyEndNotUsed;
-   DatabaseObject *terminatingWallSegment;
-   ForceField::findForceFieldEnd(wallSegmentDatabase, forceFieldStart, mDeployNormal, dummyEndNotUsed, &terminatingWallSegment);
-
    // Search for wall segments within query
-   wallSegmentDatabase->findObjects(isWallType, fillVector, queryRect);
+   gameObjectDatabase->findObjects(isWallType, fillVector, queryRect);
 
    Vector<Point> currentPoly;
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       // Exclude the end segment from our search
-      if(terminatingWallSegment && terminatingWallSegment == fillVector[i])
+      if(terminatingWallObject && terminatingWallObject == fillVector[i])
          continue;
 
       currentPoly.clear();
