@@ -375,7 +375,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    // First render the thrusters
    if(thrusts[0] > 0) // forward thrust
    {
-      glColor(Colors::white, alpha);
+      glColor(Colors::red, alpha);
       glBegin(GL_LINES);
          glVertex2f(-8, -15);
          glVertex2f(0, -15 - 20 * thrusts[0]);
