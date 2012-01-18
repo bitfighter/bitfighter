@@ -1180,22 +1180,6 @@ WallSegment::~WallSegment()
 { 
    // Make sure object is out of the database
    getDatabase()->removeFromDatabase(this, getExtent()); 
-
-   // Find any forcefields that were using this as an end point and let them know the segment is gone.  Since 
-   // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.
-   // This is a last-ditch effort to ensure that the pointers point at something real.
-
-   //fillVector.clear();
-   //mGame->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector);
-
-   //for(S32 i = 0; i < fillVector.size(); i++)
-   //{
-   //   ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-   //   TNLAssert(proj, "bad cast!");
-
-   //   if(proj->forceFieldEndSegment == this || proj->getMountSegment() == this) 
-   //      proj->onGeomChanged();            // Will force recalculation of mount and endpoint
-   //}
 }
 
 
