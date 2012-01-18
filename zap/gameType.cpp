@@ -1415,8 +1415,6 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
          if(clientInfo->getTeamIndex() != teamId)      // Wrong team
             continue;
 
-         TNLAssert(clientInfo->getConnection()->getControlObject() == clientInfo->getShip(), "Not equal?!?");
-
          Ship *ship = clientInfo->getShip();
          if(!ship)       // Can happen!
             continue;
