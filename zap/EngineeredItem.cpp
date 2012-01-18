@@ -471,20 +471,19 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    F32 t;
 
    // Start with a sweep of the area
-   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125f)    // Reducing to 0.0125 seems to have no effect
+   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125f)   // Reducing to 0.0125 seems to have no effect
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
-      Point mountPos = pos - dir * 0.001f;                           // Offsetting slightly prevents spazzy behavior in editor
       
       // Look for walls
-      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
+      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, MoveObject::ActualState, format, pos, pos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {
          if(t < minDist)
          {
-            anchor.set(mountPos + dir * t);
+            anchor.set(pos + dir * t);
             normal.set(n);
             minDist = t;
             closestWall = wall;
@@ -854,7 +853,10 @@ Point EngineeredItem::mountToWall(const Point &pos, GridDatabase *wallEdgeDataba
 
    if(mountEdge)
    {
-      mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, anchor,     // <== passing in anchor here (found above), not pos
+      Point p;
+      p.interp(.1, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
+
+      mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, p,   
                         (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
    }
 
