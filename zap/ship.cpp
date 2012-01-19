@@ -1045,13 +1045,17 @@ void Ship::damageObject(DamageInfo *theInfo)
    else if(mHealth > 1)
       mHealth = 1;
 
-   Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
 
-   if(projectile)
-      getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
+   if(getClientInfo()) // could be NULL
+   {
+      Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
 
-   else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
-      getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
+      if(projectile)
+         getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
+ 
+      else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
+         getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
+   }
 }
 
 
