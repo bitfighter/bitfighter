@@ -54,8 +54,6 @@ enum GeomType {
 
 class Geometry
 {
-protected:
-   bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
 
 public:
    Geometry();           // Constructor
@@ -96,8 +94,6 @@ public:
    virtual Rect calcExtents();
 
    virtual void onPointsChanged();
-
-   void disableTriangluation();
 
    // These functions are declered in Geometry.cpp
    void rotateAboutPoint(const Point &center, F32 angle);
