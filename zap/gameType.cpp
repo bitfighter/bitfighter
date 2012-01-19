@@ -1170,7 +1170,6 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isRobot())
    {
       Robot *robot = (Robot *) clientInfo->getShip();
-      robot->setOwner(NULL);           // Probably not needed
       robot->setTeam(teamIndex);
       spawnRobot(robot);
    }

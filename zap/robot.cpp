@@ -1498,6 +1498,7 @@ Robot::Robot() : Ship(new FullClientInfo(NULL, true), TEAM_NEUTRAL, Point(), 1, 
    flightPlanTo = U16_MAX;
 
    mClientInfo->setShip(this);
+   this->setOwner(mClientInfo);  // To make Rabbit game work without bots shooting each other...
 
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
