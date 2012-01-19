@@ -296,7 +296,7 @@ void Ship::activateModulePrimary(U32 index)
 
 void Ship::activateModuleSecondary(U32 index)
 {
-   mCurrentMove.modulePrimary[index] = true;
+   mCurrentMove.moduleSecondary[index] = true;
 }
 
 
