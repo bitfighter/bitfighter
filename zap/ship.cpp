@@ -93,6 +93,8 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleSecondaryCooldownTimer[i].setPeriod(gModuleInfo[i].getSecondaryCooldown());
 
+   mSensorZoomTimer.setPeriod(SensorZoomTime);
+
    mNetFlags.set(Ghostable);
 
 #ifndef ZAP_DEDICATED
@@ -295,6 +297,18 @@ void Ship::activateModulePrimary(U32 index)
 void Ship::activateModuleSecondary(U32 index)
 {
    mCurrentMove.modulePrimary[index] = true;
+}
+
+
+Ship::SensorStatus Ship::getSensorStatus()
+{
+   return mSensorStatus;
+}
+
+
+Ship::SensorStatus Ship::getPreviousSensorStatus()
+{
+   return mPrevSensorStatus;
 }
 
 
@@ -938,9 +952,20 @@ void Ship::processModules()
       {
          if(i == ModuleSensor)
          {
+            mSensorZoomTimer.reset();
             mSensorStartTime = getGame()->getCurrentTime();
             if(mModulePrimaryActive[i])
+            {
                mEnergy -= SensorInitialEnergyUsage; // inital energy use, prevents tapping to see cloaked
+               updateSensorStatus(SensorStatusActive, SensorStatusPassive);
+            }
+            else
+            {
+               if(hasModule(ModuleSensor))
+                  updateSensorStatus(SensorStatusPassive, SensorStatusActive);
+               else
+                  updateSensorStatus(SensorStatusOff, SensorStatusActive);
+            }
          }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
@@ -1278,7 +1303,18 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       // Set sensor zoom timer if sensor carrying status has switched
       if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
-         mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
+      {
+         mSensorZoomTimer.reset();
+         if(hasSensorNow)
+            updateSensorStatus(SensorStatusPassive, SensorStatusOff);
+         else
+         {
+            if(mModulePrimaryActive[ModuleSensor])
+               updateSensorStatus(SensorStatusOff, SensorStatusActive);
+            else
+               updateSensorStatus(SensorStatusOff, SensorStatusPassive);
+         }
+      }
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
@@ -1343,11 +1379,16 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          wasPrimaryActive[i] = mModulePrimaryActive[i];
          mModulePrimaryActive[i] = stream->readFlag();
 
-         if(i == ModuleSensor && wasPrimaryActive[i] != mModulePrimaryActive[i])
-            mSensorStartTime = getGame()->getCurrentTime();
-
-         if(i == ModuleCloak && wasPrimaryActive[i] != mModulePrimaryActive[i])
-            mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
+         // Module activity toggled
+         if(wasPrimaryActive[i] != mModulePrimaryActive[i])
+         {
+            if(i == ModuleSensor)
+            {
+               mSensorStartTime = getGame()->getCurrentTime();
+            }
+            else if(i == ModuleCloak)
+               mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
+         }
       }
    }
 
@@ -1424,6 +1465,13 @@ bool Ship::hasModule(ShipModule mod)
       if(mModule[i] == mod)
          return true;
    return false;
+}
+
+
+void Ship::updateSensorStatus(SensorStatus sensorStatus, SensorStatus prevSensorStatus)
+{
+   mSensorStatus = sensorStatus;
+   mPrevSensorStatus = prevSensorStatus;
 }
 
 

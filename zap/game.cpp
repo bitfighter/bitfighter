@@ -634,15 +634,23 @@ void Game::setReadyToConnectToMaster(bool ready)
 }
 
 
-Point Game::getScopeRange(bool sensorIsActive)
+Point Game::getScopeRange(S32 sensorStatus)
 {
-   return
-         sensorIsActive ?
-               Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL
-                     + PLAYER_SCOPE_MARGIN, PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL
-                     + PLAYER_SCOPE_MARGIN) :
-               Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN, PLAYER_VISUAL_DISTANCE_VERTICAL
-                     + PLAYER_SCOPE_MARGIN);
+   switch(sensorStatus)
+   {
+      case Ship::SensorStatusPassive:
+         return Point(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+               PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+
+      case Ship::SensorStatusActive:
+         return Point(PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+               PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+
+      case Ship::SensorStatusOff:
+      default:
+         return Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+               PLAYER_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   }
 }
 
 
@@ -1385,15 +1393,47 @@ Rect Game::computeBarrierExtents()
 
 Point Game::computePlayerVisArea(Ship *ship) const
 {
-   F32 fraction = ship->getSensorZoomFraction();
-
    Point regVis(PLAYER_VISUAL_DISTANCE_HORIZONTAL, PLAYER_VISUAL_DISTANCE_VERTICAL);
-   Point sensVis(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL);
+   Point sensPassiveVis(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
+   Point sensActiveVis(PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL);
 
-   if(ship->hasModule(ModuleSensor))
-      return regVis + (sensVis - regVis) * fraction;
-   else
-      return sensVis + (regVis - sensVis) * fraction;
+   Point *comingFrom;
+   Point *goingTo;
+
+   switch(ship->getSensorStatus())
+   {
+      case Ship::SensorStatusPassive:
+         goingTo = &sensPassiveVis;
+         break;
+
+      case Ship::SensorStatusActive:
+         goingTo = &sensActiveVis;
+         break;
+
+      case Ship::SensorStatusOff:
+      default:
+         goingTo = &regVis;
+         break;
+   }
+
+   switch(ship->getPreviousSensorStatus())
+   {
+      case Ship::SensorStatusPassive:
+         comingFrom = &sensPassiveVis;
+         break;
+
+      case Ship::SensorStatusActive:
+         comingFrom = &sensActiveVis;
+         break;
+
+      case Ship::SensorStatusOff:
+      default:
+         comingFrom = &regVis;
+         break;
+   }
+
+   // Ugly
+   return *comingFrom + (*goingTo - *comingFrom) * ship->getSensorZoomFraction();
 }
 
 

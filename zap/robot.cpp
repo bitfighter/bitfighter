@@ -775,7 +775,7 @@ S32 LuaRobot::findItems(lua_State *L)
 {
    Point pos = thisRobot->getActualPos();
    Rect queryRect(pos, pos);
-   queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));
+   queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
 
    return doFindItems(L, &queryRect);
 }

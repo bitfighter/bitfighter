@@ -184,6 +184,12 @@ public:
       SpawnShieldMask = BIT(12),    // Used for when robots change teams
    };
 
+   enum SensorStatus {
+      SensorStatusPassive,
+      SensorStatusActive,
+      SensorStatusOff
+   };
+
    S32 mFireTimer;
    Timer mWarpInTimer;
    F32 mHealth;
@@ -191,7 +197,12 @@ public:
    bool mCooldownNeeded;
    U32 mSensorStartTime;
    Point mImpulseVector;
+
+   SensorStatus mSensorStatus;
+   SensorStatus mPrevSensorStatus;
+
    F32 getSlipzoneSpeedMoficationFactor();
+   void updateSensorStatus(SensorStatus sensorStatus, SensorStatus prevSensorStatus);
 
    SFXHandle mModuleSound[ModuleCount];
 
@@ -290,6 +301,8 @@ public:
    void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
    void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
 
+   SensorStatus getSensorStatus();
+   SensorStatus getPreviousSensorStatus();
 
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();
