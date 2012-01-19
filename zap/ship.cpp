@@ -93,7 +93,8 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleSecondaryCooldownTimer[i].setPeriod(gModuleInfo[i].getSecondaryCooldown());
 
-   mSensorZoomTimer.setPeriod(SensorZoomTime);
+   mSensorActiveZoomTimer.setPeriod(SensorZoomTime);
+   mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
 
    mNetFlags.set(Ghostable);
 
@@ -465,9 +466,15 @@ bool Ship::isOnObject(GameObject *object)
 }
 
 
-F32 Ship::getSensorZoomFraction()
+F32 Ship::getSensorActiveZoomFraction()
 {
-   return 1 - mSensorZoomTimer.getFraction();
+   return 1 - mSensorActiveZoomTimer.getFraction();
+}
+
+
+F32 Ship::getSensorEquipZoomFraction()
+{
+   return 1 - mSensorEquipZoomTimer.getFraction();
 }
 
 
@@ -680,7 +687,8 @@ void Ship::idle(GameObject::IdleCallPath path)
 
       if(path != GameObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
       {
-         mSensorZoomTimer.update(mCurrentMove.time);
+         mSensorActiveZoomTimer.update(mCurrentMove.time);
+         mSensorEquipZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
 
          // Update spawn shield unless we move the ship - then it turns off .. server only
@@ -952,7 +960,7 @@ void Ship::processModules()
       {
          if(i == ModuleSensor)
          {
-            mSensorZoomTimer.reset();
+            mSensorActiveZoomTimer.reset();
             mSensorStartTime = getGame()->getCurrentTime();
             if(mModulePrimaryActive[i])
                mEnergy -= SensorInitialEnergyUsage; // inital energy use, prevents tapping to see cloaked
@@ -1296,8 +1304,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
 
       // Set sensor zoom timer if sensor carrying status has switched
-//      if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
-//         mSensorZoomTimer.reset();
+      if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
+         mSensorEquipZoomTimer.reset();
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);

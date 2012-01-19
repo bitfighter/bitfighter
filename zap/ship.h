@@ -210,7 +210,8 @@ public:
    ShipModule getModule(U32 indx);        // Returns module in slot indx
 
 
-   Timer mSensorZoomTimer;
+   Timer mSensorEquipZoomTimer;
+   Timer mSensorActiveZoomTimer;
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
@@ -261,7 +262,8 @@ public:
    bool isCarryingItem(U8 objectType);
    MoveItem *unmountItem(U8 objectType);
 
-   F32 getSensorZoomFraction();
+   F32 getSensorActiveZoomFraction();
+   F32 getSensorEquipZoomFraction();
    Point getAimVector();
 
    void getLoadout(Vector<U32> &loadout);

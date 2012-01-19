@@ -1393,6 +1393,11 @@ Rect Game::computeBarrierExtents()
 
 Point Game::computePlayerVisArea(Ship *ship) const
 {
+   F32 activeFraction = ship->getSensorActiveZoomFraction();
+   F32 equipFraction = ship->getSensorEquipZoomFraction();
+
+   F32 fraction = 0;
+
    Point regVis(PLAYER_VISUAL_DISTANCE_HORIZONTAL, PLAYER_VISUAL_DISTANCE_VERTICAL);
    Point sensPassiveVis(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
    Point sensActiveVis(PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL);
@@ -1400,27 +1405,51 @@ Point Game::computePlayerVisArea(Ship *ship) const
    Point *comingFrom;
    Point *goingTo;
 
+   // This trainwreck is how to determine our visibility based on the tri-state sensor module
+   // It depends on the last sensor status, which is determined if one of the two timers is still
+   // running
    switch(ship->getSensorStatus())
    {
       case Ship::SensorStatusPassive:
-         goingTo = &sensPassiveVis;
-         comingFrom = &sensActiveVis;
+         if (equipFraction < 1)
+         {
+            comingFrom = &regVis;
+            goingTo = &sensPassiveVis;
+            fraction = equipFraction;
+         }
+         else if(activeFraction < 1)
+         {
+            goingTo = &sensPassiveVis;
+            comingFrom = &sensActiveVis;
+            fraction = activeFraction;
+         }
+         else
+         {
+            goingTo = &sensPassiveVis;
+            comingFrom = &sensPassiveVis;
+            fraction = 1;
+         }
          break;
 
       case Ship::SensorStatusActive:
          goingTo = &sensActiveVis;
          comingFrom = &sensPassiveVis;
+         fraction = activeFraction;
          break;
 
       case Ship::SensorStatusOff:
       default:
-         comingFrom = &regVis;
+         if (activeFraction < 1)
+            comingFrom = &sensActiveVis;
+         else
+            comingFrom = &sensPassiveVis;
          goingTo = &regVis;
+         fraction = equipFraction;
          break;
    }
 
    // Ugly
-   return *comingFrom + (*goingTo - *comingFrom) * ship->getSensorZoomFraction();
+   return *comingFrom + (*goingTo - *comingFrom) * fraction;
 }
 
 
