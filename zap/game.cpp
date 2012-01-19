@@ -2093,8 +2093,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
          clientInfo->setScore(0); // Reset player scores, for non team game types
       }
+      delete mGameType;  // need to delete old GameType..
    }
-
+	
    setCurrentLevelIndex(nextLevel, getPlayerCount());
    
    string levelFile = getLevelFileNameFromIndex(mCurrentLevelIndex);
