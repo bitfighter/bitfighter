@@ -230,6 +230,8 @@ const F32 velocityEpsilon = 0.00001f;
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
 void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
+   TNLAssert(this, "'THIS' is NULL");
+
    U32 tryCount = 0;
    Vector<SafePtr<GameObject> > disabledList;
 
@@ -295,7 +297,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             if(mHitLimit > 0) 
             {
                // Move the displaced object a tiny bit, true -> isBeingDisplaced
-               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, false, displacerList); 
+               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
                mHitLimit--;
             }
          }

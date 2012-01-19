@@ -1670,6 +1670,9 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clie
 {
    ClientInfo *killer = killerObject ? killerObject->getOwner() : NULL;
 
+   if(!victim)
+      return;   // do nothing, it is probably a "Ship 0 0 0" in a level, where that Ship don't have a ClientInfo
+
    victim->getStatistics()->addDeath();
 
    StringTableEntry killerDescr = killerObject->getKillString();

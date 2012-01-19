@@ -325,6 +325,8 @@ public:
 
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item
 
+   virtual Ship *clone() const;
+
    TNL_DECLARE_CLASS(Ship);
 };
 

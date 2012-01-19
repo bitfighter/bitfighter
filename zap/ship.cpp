@@ -2380,5 +2380,13 @@ Ship *LuaShip::getObj()
 }
 
 
+Ship *Ship::clone() const
+{
+   return new Ship(*this);
+}
+
+
+
+
 };
 

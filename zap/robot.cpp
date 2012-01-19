@@ -2066,5 +2066,11 @@ const char *Robot::getScriptName()
    return mScriptName.c_str();
 }
 
+Robot *Robot::clone() const
+{
+   return new Robot(*this);
+}
+
+
 };
 
