@@ -198,11 +198,7 @@ public:
    U32 mSensorStartTime;
    Point mImpulseVector;
 
-   SensorStatus mSensorStatus;
-   SensorStatus mPrevSensorStatus;
-
    F32 getSlipzoneSpeedMoficationFactor();
-   void updateSensorStatus(SensorStatus sensorStatus, SensorStatus prevSensorStatus);
 
    SFXHandle mModuleSound[ModuleCount];
 
@@ -302,7 +298,6 @@ public:
    void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
 
    SensorStatus getSensorStatus();
-   SensorStatus getPreviousSensorStatus();
 
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();

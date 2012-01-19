@@ -302,13 +302,13 @@ void Ship::activateModuleSecondary(U32 index)
 
 Ship::SensorStatus Ship::getSensorStatus()
 {
-   return mSensorStatus;
-}
+   if(!hasModule(ModuleSensor))
+      return SensorStatusOff;
 
-
-Ship::SensorStatus Ship::getPreviousSensorStatus()
-{
-   return mPrevSensorStatus;
+   if(mModulePrimaryActive[ModuleSensor])
+      return SensorStatusActive;
+   else
+      return SensorStatusPassive;
 }
 
 
@@ -955,17 +955,7 @@ void Ship::processModules()
             mSensorZoomTimer.reset();
             mSensorStartTime = getGame()->getCurrentTime();
             if(mModulePrimaryActive[i])
-            {
                mEnergy -= SensorInitialEnergyUsage; // inital energy use, prevents tapping to see cloaked
-               updateSensorStatus(SensorStatusActive, SensorStatusPassive);
-            }
-            else
-            {
-               if(hasModule(ModuleSensor))
-                  updateSensorStatus(SensorStatusPassive, SensorStatusActive);
-               else
-                  updateSensorStatus(SensorStatusOff, SensorStatusActive);
-            }
          }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
@@ -1306,19 +1296,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
 
       // Set sensor zoom timer if sensor carrying status has switched
-      if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
-      {
-         mSensorZoomTimer.reset();
-         if(hasSensorNow)
-            updateSensorStatus(SensorStatusPassive, SensorStatusOff);
-         else
-         {
-            if(mModulePrimaryActive[ModuleSensor])
-               updateSensorStatus(SensorStatusOff, SensorStatusActive);
-            else
-               updateSensorStatus(SensorStatusOff, SensorStatusPassive);
-         }
-      }
+//      if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
+//         mSensorZoomTimer.reset();
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
@@ -1469,13 +1448,6 @@ bool Ship::hasModule(ShipModule mod)
       if(mModule[i] == mod)
          return true;
    return false;
-}
-
-
-void Ship::updateSensorStatus(SensorStatus sensorStatus, SensorStatus prevSensorStatus)
-{
-   mSensorStatus = sensorStatus;
-   mPrevSensorStatus = prevSensorStatus;
 }
 
 

@@ -1404,31 +1404,18 @@ Point Game::computePlayerVisArea(Ship *ship) const
    {
       case Ship::SensorStatusPassive:
          goingTo = &sensPassiveVis;
+         comingFrom = &sensActiveVis;
          break;
 
       case Ship::SensorStatusActive:
          goingTo = &sensActiveVis;
-         break;
-
-      case Ship::SensorStatusOff:
-      default:
-         goingTo = &regVis;
-         break;
-   }
-
-   switch(ship->getPreviousSensorStatus())
-   {
-      case Ship::SensorStatusPassive:
          comingFrom = &sensPassiveVis;
-         break;
-
-      case Ship::SensorStatusActive:
-         comingFrom = &sensActiveVis;
          break;
 
       case Ship::SensorStatusOff:
       default:
          comingFrom = &regVis;
+         goingTo = &regVis;
          break;
    }
 
