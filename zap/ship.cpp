@@ -93,6 +93,9 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleSecondaryCooldownTimer[i].setPeriod(gModuleInfo[i].getSecondaryCooldown());
 
+   mSensorActiveZoomTimer.setPeriod(SensorZoomTime);
+   mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
+
    mNetFlags.set(Ghostable);
 
 #ifndef ZAP_DEDICATED
@@ -294,7 +297,19 @@ void Ship::activateModulePrimary(U32 index)
 
 void Ship::activateModuleSecondary(U32 index)
 {
-   mCurrentMove.modulePrimary[index] = true;
+   mCurrentMove.moduleSecondary[index] = true;
+}
+
+
+Ship::SensorStatus Ship::getSensorStatus()
+{
+   if(!hasModule(ModuleSensor))
+      return SensorStatusOff;
+
+   if(mModulePrimaryActive[ModuleSensor])
+      return SensorStatusActive;
+   else
+      return SensorStatusPassive;
 }
 
 
@@ -451,9 +466,15 @@ bool Ship::isOnObject(GameObject *object)
 }
 
 
-F32 Ship::getSensorZoomFraction()
+F32 Ship::getSensorActiveZoomFraction()
 {
-   return 1 - mSensorZoomTimer.getFraction();
+   return 1 - mSensorActiveZoomTimer.getFraction();
+}
+
+
+F32 Ship::getSensorEquipZoomFraction()
+{
+   return 1 - mSensorEquipZoomTimer.getFraction();
 }
 
 
@@ -666,7 +687,8 @@ void Ship::idle(GameObject::IdleCallPath path)
 
       if(path != GameObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
       {
-         mSensorZoomTimer.update(mCurrentMove.time);
+         mSensorActiveZoomTimer.update(mCurrentMove.time);
+         mSensorEquipZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
 
          // Update spawn shield unless we move the ship - then it turns off .. server only
@@ -938,6 +960,7 @@ void Ship::processModules()
       {
          if(i == ModuleSensor)
          {
+            mSensorActiveZoomTimer.reset();
             mSensorStartTime = getGame()->getCurrentTime();
             if(mModulePrimaryActive[i])
                mEnergy -= SensorInitialEnergyUsage; // inital energy use, prevents tapping to see cloaked
@@ -1020,13 +1043,17 @@ void Ship::damageObject(DamageInfo *theInfo)
    else if(mHealth > 1)
       mHealth = 1;
 
-   Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
 
-   if(projectile)
-      getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
+   if(getClientInfo()) // could be NULL
+   {
+      Projectile *projectile = dynamic_cast<Projectile *>(theInfo->damagingObject);
 
-   else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
-      getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
+      if(projectile)
+         getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
+ 
+      else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
+         getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
+   }
 }
 
 
@@ -1278,7 +1305,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       // Set sensor zoom timer if sensor carrying status has switched
       if(hadSensorThen != hasSensorNow && !isInitialUpdate())  // ! isInitialUpdate(), don't do zoom out effect of ship spawn
-         mSensorZoomTimer.reset(SensorZoomTime - mSensorZoomTimer.getCurrent(), SensorZoomTime);
+         mSensorEquipZoomTimer.reset();
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
@@ -1343,11 +1370,16 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          wasPrimaryActive[i] = mModulePrimaryActive[i];
          mModulePrimaryActive[i] = stream->readFlag();
 
-         if(i == ModuleSensor && wasPrimaryActive[i] != mModulePrimaryActive[i])
-            mSensorStartTime = getGame()->getCurrentTime();
-
-         if(i == ModuleCloak && wasPrimaryActive[i] != mModulePrimaryActive[i])
-            mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
+         // Module activity toggled
+         if(wasPrimaryActive[i] != mModulePrimaryActive[i])
+         {
+            if(i == ModuleSensor)
+            {
+               mSensorStartTime = getGame()->getCurrentTime();
+            }
+            else if(i == ModuleCloak)
+               mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
+         }
       }
    }
 
@@ -2354,6 +2386,14 @@ Ship *LuaShip::getObj()
 {
    return thisShip;
 }
+
+
+Ship *Ship::clone() const
+{
+   return new Ship(*this);
+}
+
+
 
 
 };

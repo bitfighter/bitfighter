@@ -42,7 +42,6 @@ namespace Zap
 // Constructor
 Geometry::Geometry()
 {
-   mTriangluationDisabled = false;
 }
 
 
@@ -215,12 +214,6 @@ Rect Geometry::calcExtents()
 void Geometry::onPointsChanged()
 {
    TNLAssert(false, "Not implemented");
-}
-
-
-void Geometry::disableTriangluation()
-{
-   mTriangluationDisabled = true;
 }
 
 
@@ -830,8 +823,8 @@ const Vector<Point> *PolylineGeometry::getFill() const
 
 Point PolylineGeometry::getCentroid()
 {
-   TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
-   return mCentroid;
+   TNLAssert(false, "Polylines don't have Centroid");
+   return Point();
 }
 
 
@@ -936,6 +929,7 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 PolygonGeometry::PolygonGeometry() : PolylineGeometry()
 {
    mLabelAngle = 0;
+   mTriangluationDisabled = false;
 }
 
 
@@ -951,6 +945,11 @@ const Vector<Point> *PolygonGeometry::getFill() const
    return &mPolyFill;
 }
 
+Point PolygonGeometry::getCentroid()
+{
+   TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
+   return mCentroid;
+}
 
 F32 PolygonGeometry::getLabelAngle()
 {
@@ -979,6 +978,10 @@ void PolygonGeometry::onPointsChanged()
    Parent::onPointsChanged();
 }
 
+void PolygonGeometry::disableTriangluation()
+{
+   mTriangluationDisabled = true;
+}
 
 //boost::shared_ptr<Geometry> PolygonGeometry::copyGeometry() const
 //{

@@ -184,6 +184,12 @@ public:
       SpawnShieldMask = BIT(12),    // Used for when robots change teams
    };
 
+   enum SensorStatus {
+      SensorStatusPassive,
+      SensorStatusActive,
+      SensorStatusOff
+   };
+
    S32 mFireTimer;
    Timer mWarpInTimer;
    F32 mHealth;
@@ -191,6 +197,7 @@ public:
    bool mCooldownNeeded;
    U32 mSensorStartTime;
    Point mImpulseVector;
+
    F32 getSlipzoneSpeedMoficationFactor();
 
    SFXHandle mModuleSound[ModuleCount];
@@ -203,7 +210,8 @@ public:
    ShipModule getModule(U32 indx);        // Returns module in slot indx
 
 
-   Timer mSensorZoomTimer;
+   Timer mSensorEquipZoomTimer;
+   Timer mSensorActiveZoomTimer;
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
@@ -254,7 +262,8 @@ public:
    bool isCarryingItem(U8 objectType);
    MoveItem *unmountItem(U8 objectType);
 
-   F32 getSensorZoomFraction();
+   F32 getSensorActiveZoomFraction();
+   F32 getSensorEquipZoomFraction();
    Point getAimVector();
 
    void getLoadout(Vector<U32> &loadout);
@@ -290,6 +299,7 @@ public:
    void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
    void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
 
+   SensorStatus getSensorStatus();
 
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();
@@ -316,6 +326,8 @@ public:
    DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
 
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item
+
+   virtual Ship *clone() const;
 
    TNL_DECLARE_CLASS(Ship);
 };

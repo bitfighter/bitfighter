@@ -778,7 +778,13 @@ void GameUserInterface::renderLoadoutIndicators()
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() != ModulePrimaryUseActive)
-         glColor(INDICATOR_PASSIVE_COLOR);
+      {
+         if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() == ModulePrimaryUseHybrid &&
+               localShip->isModulePrimaryActive(localShip->getModule(i)))
+            glColor(INDICATOR_ACTIVE_COLOR);
+         else
+            glColor(INDICATOR_PASSIVE_COLOR);
+      }
       else if(localShip->isModulePrimaryActive(localShip->getModule(i)))
          glColor(INDICATOR_ACTIVE_COLOR);
       else 

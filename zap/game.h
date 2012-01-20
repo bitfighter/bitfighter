@@ -107,7 +107,7 @@ class Ship;
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
 // But the general scope of what we track should be limited; other items should be stored directly on the GameConnection object itself.
-class ClientInfo
+class ClientInfo : public Object  // using "Object" will be needed for GameObject's "SafePtr"
 {
 private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
@@ -405,9 +405,11 @@ public:
 
    static const S32 PLAYER_SCOPE_MARGIN = 150;
 
-   static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL = 1060;   // How far player can see with sensor activated horizontally...
-   static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL = 795;      // ...and vertically
+   static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
+   static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
 
+   static const S32 PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL = 1060;   // How far player can see with sensor activated horizontally...
+   static const S32 PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL = 795;      // ...and vertically
 
    Game(const Address &theBindAddress, GameSettings *settings);         // Constructor
    virtual ~Game();                                                     // Destructor
@@ -513,7 +515,7 @@ public:
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  
 
-   Point getScopeRange(bool sensorIsActive);
+   Point getScopeRange(S32 sensorStatus);
 };
 
 

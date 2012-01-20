@@ -202,6 +202,8 @@ public:
    F32 getRating();   // Return robot's rating
    const char *getScriptName();
 
+   Robot *clone() const;
+
 private:
    int attribute;
    string message;

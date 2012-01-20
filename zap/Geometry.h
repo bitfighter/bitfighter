@@ -152,7 +152,6 @@ class PolylineGeometry : virtual public BfObject
 {
 protected:
    Vector<Point> mPolyBounds;
-   Point mCentroid;
       
    bool mAnyVertsSelected;
    vector<bool> mVertSelected; 
@@ -185,7 +184,7 @@ public:
 
    const Vector<Point> *getOutline() const;
    virtual const Vector<Point> *getFill() const;
-   Point getCentroid();
+   virtual Point getCentroid();
    virtual F32 getLabelAngle();
 
    void packGeom(GhostConnection *connection, BitStream *stream);
@@ -210,6 +209,8 @@ class PolygonGeometry : public PolylineGeometry
 private:
    Vector<Point> mPolyFill;
    F32 mLabelAngle;
+   Point mCentroid;
+   bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
 
 public:
    PolygonGeometry();      // Constructor
@@ -217,11 +218,14 @@ public:
    GeomType getGeomType();
 
    const Vector<Point> *getFill() const;
+   Point getCentroid();
    F32 getLabelAngle();
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual void onPointsChanged();
+
+   void disableTriangluation();
 };
 
 

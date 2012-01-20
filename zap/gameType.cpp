@@ -1170,7 +1170,6 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isRobot())
    {
       Robot *robot = (Robot *) clientInfo->getShip();
-      robot->setOwner(NULL);           // Probably not needed
       robot->setTeam(teamIndex);
       spawnRobot(robot);
    }
@@ -1420,7 +1419,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
             continue;
 
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
-         queryRect.expand(mGame->getScopeRange(ship->hasModule(ModuleSensor)));
+         queryRect.expand(mGame->getScopeRange(ship->getSensorStatus()));
 
          if (scopeObject == ship)
             mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1439,7 +1438,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
       TNLAssert(co, "Null control object!");
 
       Rect queryRect(pos, pos);
-      queryRect.expand( mGame->getScopeRange(co->hasModule(ModuleSensor)) );
+      queryRect.expand( mGame->getScopeRange(co->getSensorStatus()) );
 
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1490,7 +1489,7 @@ void GameType::queryItemsOfInterest()
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
       
       Point pos = ioi.theItem->getActualPos();
-      Point scopeRange(Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL);
+      Point scopeRange(Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL);
       Rect queryRect(pos, pos);
 
       queryRect.expand(scopeRange);
@@ -1504,9 +1503,11 @@ void GameType::queryItemsOfInterest()
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
 
-         if( (theShip->hasModule(ModuleSensor) && delta.x < Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL && 
-                                                  delta.y < Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL) ||
-               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL) )
+         if(
+               (theShip->getSensorStatus() == Ship::SensorStatusActive && delta.x < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL) ||
+               (theShip->getSensorStatus() == Ship::SensorStatusPassive && delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
+               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL)
+            )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
    }
@@ -1668,6 +1669,9 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clientObject, GameObject *killerObject)
 {
    ClientInfo *killer = killerObject ? killerObject->getOwner() : NULL;
+
+   if(!victim)
+      return;   // do nothing, it is probably a "Ship 0 0 0" in a level, where that Ship don't have a ClientInfo
 
    victim->getStatistics()->addDeath();
 

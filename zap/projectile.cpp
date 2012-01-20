@@ -1257,7 +1257,7 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    if(stream->writeFlag(updateMask & InitialMask))
    {
       writeThisTeam(stream);
-      static StringTableEntryRef NO_OWNER = StringTableEntryRef("");
+      static StringTableEntry NO_OWNER = StringTableEntry();
 
       if(getOwner() != NULL)
          stream->writeStringTableEntry(getOwner()->getName());

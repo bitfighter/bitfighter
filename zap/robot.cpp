@@ -775,7 +775,7 @@ S32 LuaRobot::findItems(lua_State *L)
 {
    Point pos = thisRobot->getActualPos();
    Rect queryRect(pos, pos);
-   queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));
+   queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
 
    return doFindItems(L, &queryRect);
 }
@@ -1498,6 +1498,7 @@ Robot::Robot() : Ship(new FullClientInfo(NULL, true), TEAM_NEUTRAL, Point(), 1, 
    flightPlanTo = U16_MAX;
 
    mClientInfo->setShip(this);
+   this->setOwner(mClientInfo);  // To make Rabbit game work without bots shooting each other...
 
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
@@ -2064,6 +2065,12 @@ const char *Robot::getScriptName()
 {
    return mScriptName.c_str();
 }
+
+Robot *Robot::clone() const
+{
+   return new Robot(*this);
+}
+
 
 };
 

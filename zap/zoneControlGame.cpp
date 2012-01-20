@@ -181,7 +181,11 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
-      getGame()->getClientInfo(i)->getConnection()->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+   {
+      GameConnection *gc = getGame()->getClientInfo(i)->getConnection();
+      if(gc)
+         gc->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+   }
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
