@@ -296,6 +296,7 @@ WallSegmentManager *GridDatabase::getWallSegmentManager() const
    return mWallSegmentManager;
 }
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
