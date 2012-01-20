@@ -1448,12 +1448,7 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
    glTranslate(pos);
 
    glColor(overrideColor == NULL ? Colors::white : *overrideColor, alpha);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(-size , -size );
-      glVertex2f(size , -size );
-      glVertex2f(size , size );
-      glVertex2f(-size , size );
-   glEnd();
+   drawSquare(Point(0,0), size, false);
 
    glColor(overrideColor == NULL ? Colors::red : *overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
@@ -1516,15 +1511,10 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 void renderEnergySymbol(const Color *overrideColor, F32 alpha)
 {
    // Yellow lightning bolt
-   glColor(overrideColor == NULL ? Colors::yellow : *overrideColor, alpha);
+   glColor(overrideColor == NULL ? Colors::orange67 : *overrideColor, alpha);
 
    static S16 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
    renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GL_LINE_LOOP);
-
-   // Orangey circle
-   glLineWidth(gLineWidth3);
-   glColor(overrideColor == 0 ? Colors::orange67 : *overrideColor, alpha);
-   glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -1544,12 +1534,19 @@ void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideCol
 
    glPushMatrix();
       glTranslate(pos);
-      glScale(scaleFactor);
 
+      // Scale down the symbol a little so it fits in the box
+      glScale(scaleFactor * .7);
       renderEnergySymbol(overrideColor, alpha);
 
-      drawCircle(Point(0,0), 16);
+      // Scale back up to where we were
+      glScale(1/.7);
+
+      S32 size = 18;
+      glColor(Colors::white);
+      drawSquare(Point(0,0), size, false);
       glLineWidth(gDefaultLineWidth);
+
    glPopMatrix();
 }
 
