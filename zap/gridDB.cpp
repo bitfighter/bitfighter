@@ -331,7 +331,6 @@ void DatabaseObject::initialize()
 }
 
 
-
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
