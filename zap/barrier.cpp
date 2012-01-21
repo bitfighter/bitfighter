@@ -561,7 +561,7 @@ void WallItem::setSelected(bool selected)
    Parent::setSelected(selected);
    
    // Find the associated segment(s) and mark them as selected (or not)
-   getDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
+   getGame()->getEditorDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
 }
 
 
