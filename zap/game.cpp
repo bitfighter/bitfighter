@@ -778,8 +778,8 @@ EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
 
 void Game::setEditorDatabase(boost::shared_ptr<GridDatabase> database)
 {
-   mEditorDatabase =
-         boost::dynamic_pointer_cast<EditorObjectDatabase>(database);
+   TNLAssert(database.get(), "Database should not be NULL!");
+   mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database);
 }
 
 
