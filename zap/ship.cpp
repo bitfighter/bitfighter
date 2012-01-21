@@ -2078,7 +2078,7 @@ void Ship::render(S32 layerIndex)
       if(mSpawnShield.getCurrent() > 1500 || mSpawnShield.getCurrent() % 300 > 150)
          glColor(Colors::green, .65f);    // Decrease this value for fainter shield
       else
-         glColor(Colors::green, .15f);    // Decrease this value for fainter shield
+         glColor(Colors::yellow, .4f);    // Decrease this value for fainter shield
 
       F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24, offset);
