@@ -56,6 +56,15 @@ Item::Item(const Point &pos, F32 radius)
    sItemId++;
 }
 
+// Copy Constructor
+Item::Item(const Item &t)
+{
+   mRadius = t.mRadius;
+
+   mItemId = sItemId;
+   sItemId++;
+}
+
 
 Point Item::getActualPos() const
 {
@@ -85,9 +94,9 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
    pos.read(argv);
    pos *= game->getGridSize();
 
-   // TODO: We need to reconcile these two ways of storing an item's location
+   // TODO? We need to reconcile these two ways of storing an item's location
    setActualPos(pos);      // Needed by game
-   setVert(pos, 0);        // Needed by editor
+   //setVert(pos, 0);        // Needed by editor... But setActualPos(pos) already does setVert(pos, 0)
 
    return true;
 }
@@ -169,6 +178,10 @@ F32 Item::getEditorRadius(F32 currentScale)
    return (getRadius() + 2) * currentScale;
 }
 
+Rect Item::calcExtents()
+{
+   return Rect(getVert(0), mRadius);
+}
 
 // LuaItem interface
 S32 Item::getLoc(lua_State *L)

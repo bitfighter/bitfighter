@@ -299,6 +299,7 @@ DatabaseObject::DatabaseObject(const DatabaseObject &t)
 {  
    initialize();
    mObjectTypeNumber = t.mObjectTypeNumber; 
+   mExtent = t.mExtent;
 }
 
 

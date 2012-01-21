@@ -56,6 +56,7 @@ protected:
 
 public:
    Item(const Point &pos = Point(0,0), F32 radius = 1);      // Constructor
+   Item(const Item &t);                                      // Copy Constructor
 
    virtual Point getActualPos() const;
    virtual void setActualPos(const Point &p);
@@ -77,6 +78,8 @@ public:
    virtual void renderEditor(F32 currentScale);
    virtual F32 getEditorRadius(F32 currentScale);
    virtual string toString(F32 gridSize) const;
+
+   virtual Rect calcExtents(); // part of Geometry
 
    // LuaItem interface
    virtual S32 getLoc(lua_State *L);
