@@ -393,9 +393,6 @@ public:
 
    bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
 
-   static void renderSnapTarget(const Point &target);
-
-
    S32 getItemSelectedCount();      // How many are objects are selcted?
 
 

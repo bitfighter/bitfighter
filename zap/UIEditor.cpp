@@ -2164,17 +2164,6 @@ const Color *EditorUserInterface::getTeamColor(S32 team)
 }
 
 
-void EditorUserInterface::renderSnapTarget(const Point &target)
-{
-   //glLineWidth(gLineWidth1);
-
-   //glColor(Colors::magenta);
-   //drawFilledSquare(target, 2);
-
-   //glLineWidth(gDefaultLineWidth);
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 /*
