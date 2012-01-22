@@ -202,7 +202,7 @@ void LuaRobot::setEnums(lua_State *L)
    setEnumName(BarrierTypeNumber, "BarrierType");
    setEnumName(PlayerShipTypeNumber, "ShipType");
    setEnumName(LineTypeNumber, "LineType");
-   setEnumName(ResourceItemTypeNumber, "ResourceItem");
+   setEnumName(ResourceItemTypeNumber, "ResourceItemType");
    setEnumName(TextItemTypeNumber, "TextItemType");
    setEnumName(LoadoutZoneTypeNumber, "LoadoutZoneType");
    setEnumName(TestItemTypeNumber, "TestItem");

@@ -1617,15 +1617,15 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 
 #ifndef ZAP_DEDICATED
    // Safe to delete this block?  Ever triggered?  Anyone?  (-CE Jan 2012)
-   if(!cc)
-   {
-      TNLAssert(false, "If this ever gets triggered, please remove the comment above, and add a note about how we get here...");
-      TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+   //if(!cc)
+   //{
+   //   TNLAssert(false, "If this ever gets triggered, please remove the comment above, and add a note about how we get here...");
+   //   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   //   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
-      cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
-      TNLAssert(cc, "Problem!");
-   }
+   //   cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
+   //   TNLAssert(cc, "Problem!");
+   //}
 #endif
 
    if(cc)
