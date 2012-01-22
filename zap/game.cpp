@@ -380,7 +380,7 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
    // message is not sent often.
    if(mClientConnection && mClientConnection->isConnectionToClient())      
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         if(gServerGame->getClientInfo(i)->getName() != mName)
+         if(gServerGame->getClientInfo(i)->getName() != mName && gServerGame->getClientInfo(i)->getConnection())
             gServerGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
 }
 
