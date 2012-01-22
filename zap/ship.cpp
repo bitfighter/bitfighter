@@ -495,17 +495,6 @@ void Ship::selectWeapon()
 void Ship::selectWeapon(U32 weaponIdx)
 {
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
-
-   GameConnection *cc = getControllingClient();       // Will be NULL for robots and inert ships
-
-   if(cc)
-   {
-      Vector<StringTableEntry> e;
-      e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
-
-      static StringTableEntry msg("%e0 selected.");
-      cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
-   }
 }
 
 
@@ -1145,7 +1134,14 @@ void Ship::readControlState(BitStream *stream)
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
    if(mFireTimer > S32(MaxFireDelay))
       mFireTimer =  S32(MaxFireDelay) - mFireTimer;
+
+   U32 previousWeaponIndex = mActiveWeaponIndx;
    mActiveWeaponIndx = stream->readRangedU32(0, WeaponCount);
+
+#ifndef ZAP_DEDICATED
+   if(previousWeaponIndex != mActiveWeaponIndx && !getGame()->getSettings()->getIniSettings()->showWeaponIndicators)
+      static_cast<ClientGame *>(getGame())->displayMessage(Colors::cyan, "%s selected.", GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name.getString());
+#endif
 }
 
 
