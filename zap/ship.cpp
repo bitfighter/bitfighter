@@ -496,19 +496,15 @@ void Ship::selectWeapon(U32 weaponIdx)
 {
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
-   // Display a message confirming new weapon choice if we're not showing the indicators   <=== SHOULDN'T THIS DECISION BE MADE ON THE CLIENT???
-   if(!mGame->getSettings()->getIniSettings()->showWeaponIndicators)
+   GameConnection *cc = getControllingClient();       // Will be NULL for robots and inert ships
+
+   if(cc)
    {
-      GameConnection *cc = getControllingClient();       // Will be NULL for robots and inert ships
+      Vector<StringTableEntry> e;
+      e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
 
-      if(cc)
-      {
-         Vector<StringTableEntry> e;
-         e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
-
-         static StringTableEntry msg("%e0 selected.");
-         cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
-      }
+      static StringTableEntry msg("%e0 selected.");
+      cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
    }
 }
 
