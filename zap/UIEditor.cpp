@@ -318,12 +318,16 @@ void EditorUserInterface::saveUndoState()
    //copyItems(getObjectList(), mUndoItems[mLastUndoIndex % UNDO_STATES]);
 
    EditorObjectDatabase *eod = getGame()->getEditorDatabase();
-   TNLAssert(eod, "bad!");
+   TNLAssert(eod, "I expected to have a valid EditorObjectDatabase here!");
 
+   logprintf("Saving Undo State -------------------------------");   //{P{P
    EditorObjectDatabase *newDB = eod;
-   eod->dumpObjects();
+   eod->dumpObjects();     //{P{P
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
+
+   logprintf("-------------------------------");      // {P{P
+   mUndoItems[mLastUndoIndex % UNDO_STATES]->dumpObjects();//{P{P
 
    mLastUndoIndex++;
    //mLastRedoIndex++; 
