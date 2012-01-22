@@ -543,7 +543,8 @@ void Ship::processWeaponFire()
          mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
 
-         getClientInfo()->getStatistics()->countShot(curWeapon);
+         if(getClientInfo())
+            getClientInfo()->getStatistics()->countShot(curWeapon);
 
          if(!isGhost())    // i.e. server only
          {
