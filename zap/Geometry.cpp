@@ -42,6 +42,7 @@ namespace Zap
 // Constructor
 Geometry::Geometry()
 {
+   // Do nothing
 }
 
 
