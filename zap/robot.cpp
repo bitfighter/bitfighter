@@ -1831,8 +1831,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 
    if(mScriptName == "")     // Bot script could not be located
    {
-      logprintf("Could not find bot file %s", scriptName.c_str());     // TODO: Better handling here
-      OGLCONSOLE_Print("Could not find bot file %s", scriptName.c_str());
+      logprintf(LogConsumer::LuaBotMessage, "Could not find bot file %s", scriptName.c_str());  
       return false;
    }
 
