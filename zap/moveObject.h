@@ -82,6 +82,8 @@ public:
    virtual void setActualPos(const Point &pos);
    virtual void setActualVel(const Point &vel);
 
+   void setVert(const Point &pos, S32 index);
+
    F32 getMass();
    void setMass(F32 mass);
 

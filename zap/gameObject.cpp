@@ -312,6 +312,35 @@ bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
    return true;
 }
 
+Point BfObject::getRenderPos() const
+{
+   return getExtent().getCenter();
+}
+
+
+Point BfObject::getActualPos() const
+{
+   return getExtent().getCenter();
+}
+
+
+Point BfObject::getRenderVel() const
+{
+   return Point();
+}
+
+
+Point BfObject::getActualVel() const
+{
+   return Point();
+}
+
+
+void BfObject::setActualPos(Point p)
+{
+    setExtent(Rect(p, 10));
+}
+
 
 void BfObject::render()
 {
@@ -420,39 +449,9 @@ void GameObject::deleteObject(U32 deleteTimeInterval)
 }
 
 
-Point GameObject::getRenderPos() const
-{
-   return getExtent().getCenter();
-}
-
-
-Point GameObject::getActualPos() const
-{
-   return getExtent().getCenter();
-}
-
-
-Point GameObject::getRenderVel() const
-{
-   return Point();
-}
-
-
-Point GameObject::getActualVel() const
-{
-   return Point();
-}
-
-
 void GameObject::setScopeAlways()
 {
    getGame()->setScopeAlwaysObject(this);
-}
-
-
-void GameObject::setActualPos(Point p)
-{
-    setExtent(Rect(p, 10));
 }
 
 
