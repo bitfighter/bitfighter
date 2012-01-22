@@ -96,7 +96,7 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 
    // TODO? We need to reconcile these two ways of storing an item's location
    setActualPos(pos);      // Needed by game
-   //setVert(pos, 0);        // Needed by editor... But setActualPos(pos) already does setVert(pos, 0)
+   setVert(pos, 0);        // Needed by editor... But setActualPos(pos) already does setVert(pos, 0)
 
    return true;
 }
