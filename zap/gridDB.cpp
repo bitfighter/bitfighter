@@ -766,6 +766,7 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
             DatabaseObject *theObject = walk->theObject;
 
             DatabaseObject *object = getObject(dbObjectMap, theObject);    // Returns a pointer to a new or existing copy of theObject
+            object->setDatabase(this);
             be->theObject = object;
 
             be->nextInBucket = mBuckets[x][y];
