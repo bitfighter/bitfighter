@@ -56,15 +56,6 @@ Item::Item(const Point &pos, F32 radius)
    sItemId++;
 }
 
-// Copy Constructor
-Item::Item(const Item &t)
-{
-   mRadius = t.mRadius;
-
-   mItemId = sItemId;
-   sItemId++;
-}
-
 
 Point Item::getActualPos() const
 {

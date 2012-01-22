@@ -56,7 +56,6 @@ protected:
 
 public:
    Item(const Point &pos = Point(0,0), F32 radius = 1);      // Constructor
-   Item(const Item &t);                                      // Copy Constructor
 
    virtual Point getActualPos() const;
    virtual void setActualPos(const Point &p);
