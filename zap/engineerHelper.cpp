@@ -208,7 +208,13 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
 {
    if(mSelectedItem != -1 && EngineerModuleDeployer::findDeployPoint(ship, deployPosition, deployNormal))
    {
-      glColor3f(1,0,0);  // red
+      // Check deployment, so square will be green if allowed, red if not allowed, helps engineering
+      EngineerModuleDeployer deployer;
+      if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
+         glColor(Colors::green);
+      else
+         glColor(Colors::red);
+
       drawSquare(deployPosition, 5);
    }
 }
