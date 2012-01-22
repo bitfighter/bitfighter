@@ -2070,12 +2070,7 @@ void EditorUserInterface::renderDragSelectBox()
    
    glColor(Colors::white);
    Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(downPos.x,   downPos.y);
-      glVertex2f(mMousePos.x, downPos.y);
-      glVertex2f(mMousePos.x, mMousePos.y);
-      glVertex2f(downPos.x,   mMousePos.y);
-   glEnd();
+   drawHollowRect(downPos.x, downPos.y, mMousePos.x, mMousePos.y);
 }
 
 
