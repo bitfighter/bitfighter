@@ -2579,10 +2579,11 @@ void GameType::addBot(Vector<StringTableEntry> args)
          args_count++;
       }
 
-      if(!robot->processArguments(args_count, args_char, mGame))
+      string errorMessage;
+      if(!robot->processArguments(args_count, args_char, mGame, errorMessage))
       {
          delete robot;
-         conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
+         conn->s2cDisplayErrorMessage("!!! " + errorMessage);
          return;
       }
 

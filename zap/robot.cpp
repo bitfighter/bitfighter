@@ -1809,7 +1809,7 @@ void Robot::kill()
 }
 
 
-bool Robot::processArguments(S32 argc, const char **argv, Game *game)
+bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
    if(argc >= 1)
       mTeam = atoi(argv[0]);
@@ -1831,8 +1831,9 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 
    if(mScriptName == "")     // Bot script could not be located
    {
-      logprintf("Could not find bot file %s", scriptName.c_str());     // TODO: Better handling here
-      OGLCONSOLE_Print("Could not find bot file %s", scriptName.c_str());
+      errorMessage = "Could not find bot file " + scriptName;
+      logprintf(errorMessage.c_str());     // TODO: Better handling here
+      OGLCONSOLE_Print(errorMessage.c_str());
       return false;
    }
 
