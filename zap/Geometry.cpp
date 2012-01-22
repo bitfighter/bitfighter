@@ -283,7 +283,7 @@ GeomType PointGeometry::getGeomType()
 
 Point PointGeometry::getVert(S32 index) const
 {
-   return mPos;
+   return getActualPos();
 }
 
 
@@ -375,7 +375,7 @@ const Vector<Point> *PointGeometry::getFill() const
 
 Point PointGeometry::getCentroid()
 {
-   return mPos;
+   return getActualPos();
 }
 
 
@@ -393,33 +393,32 @@ void PointGeometry::onPointsChanged()
 
 void PointGeometry::setVert(const Point &pos, S32 index)
 {
-   mPos = pos;
-   //GameObject *obj = dynamic_cast<GameObject *>(this);
-   //if(obj)
-   //   obj->setActualPos(pos);
+	setActualPos(pos);
 }
 
 void PointGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
-   mPos.write(stream);
+   getActualPos().write(stream);
 }
 
 
 void PointGeometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 {
-   mPos.read(stream);
+   Point p;
+   p.read(stream);
+   setActualPos(p);
 }
 
 
 Rect PointGeometry::calcExtents()
 {
-   return Rect(mPos, 1);
+   return Rect(getActualPos(), 1);
 }
 
 
 string PointGeometry::geomToString(F32 gridSize) const
 {
-   Point pos = mPos; 
+   Point pos = getActualPos(); 
    return (pos / gridSize).toString();
 }
 

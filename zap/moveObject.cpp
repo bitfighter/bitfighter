@@ -129,6 +129,14 @@ void MoveObject::setActualVel(const Point &vel)
    mMoveState[ActualState].vel = vel;
 }
 
+// for Geometry, should set both actual and render position
+void MoveObject::setVert(const Point &pos, S32 index)
+{
+   mMoveState[ActualState].pos = pos;
+   mMoveState[RenderState].pos = pos;
+   updateExtentInDatabase();
+}
+
 
 F32 MoveObject::getMass()
 {
@@ -1679,9 +1687,7 @@ bool Worm::processArguments(S32 argc, const char **argv, Game *game)
    pos.read(argv);
    pos *= game->getGridSize();
 
-   // TODO: We need to reconcile these two ways of storing an item's location
-   setActualPos(pos);      // Needed by game
-   setVert(pos, 0);        // Needed by editor
+   setActualPos(pos);
 
    mHeadIndex = 0;
    mTailLength = 0;

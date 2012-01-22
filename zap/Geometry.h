@@ -54,7 +54,6 @@ namespace Zap
 class PointGeometry : virtual public BfObject
 {
 private:
-   Point mPos;
    bool mPosIsSelected;
 
 public:
@@ -63,7 +62,7 @@ public:
 
    GeomType getGeomType();
    virtual Point getVert(S32 index) const;
-   void setVert(const Point &pos, S32 index);
+   virtual void setVert(const Point &pos, S32 index);
 
    S32 getVertCount();
 

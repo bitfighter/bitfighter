@@ -496,19 +496,15 @@ void Ship::selectWeapon(U32 weaponIdx)
 {
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
-   // Display a message confirming new weapon choice if we're not showing the indicators   <=== SHOULDN'T THIS DECISION BE MADE ON THE CLIENT???
-   if(!mGame->getSettings()->getIniSettings()->showWeaponIndicators)
+   GameConnection *cc = getControllingClient();       // Will be NULL for robots and inert ships
+
+   if(cc)
    {
-      GameConnection *cc = getControllingClient();       // Will be NULL for robots and inert ships
+      Vector<StringTableEntry> e;
+      e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
 
-      if(cc)
-      {
-         Vector<StringTableEntry> e;
-         e.push_back(GameWeapon::weaponInfo[mWeapon[mActiveWeaponIndx]].name);
-
-         static StringTableEntry msg("%e0 selected.");
-         cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
-      }
+      static StringTableEntry msg("%e0 selected.");
+      cc->s2cDisplayMessageE(GameConnection::ColorAqua, SFXUIBoop, msg, e);
    }
 }
 
@@ -547,7 +543,8 @@ void Ship::processWeaponFire()
          mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
 
-         getClientInfo()->getStatistics()->countShot(curWeapon);
+         if(getClientInfo())
+            getClientInfo()->getStatistics()->countShot(curWeapon);
 
          if(!isGhost())    // i.e. server only
          {
@@ -1617,15 +1614,15 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 
 #ifndef ZAP_DEDICATED
    // Safe to delete this block?  Ever triggered?  Anyone?  (-CE Jan 2012)
-   if(!cc)
-   {
-      TNLAssert(false, "If this ever gets triggered, please remove the comment above, and add a note about how we get here...");
-      TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-      ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+   //if(!cc)
+   //{
+   //   TNLAssert(false, "If this ever gets triggered, please remove the comment above, and add a note about how we get here...");
+   //   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+   //   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
 
-      cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
-      TNLAssert(cc, "Problem!");
-   }
+   //   cc = clientGame->getConnectionToServer();      // Second try  ==> under what circumstances can this happen?
+   //   TNLAssert(cc, "Problem!");
+   //}
 #endif
 
    if(cc)

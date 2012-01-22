@@ -182,6 +182,13 @@ public:
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
 
+   virtual Point getActualPos() const;
+   virtual Point getRenderPos() const;
+   virtual Point getRenderVel() const;
+   virtual Point getActualVel() const;
+
+   virtual void setActualPos(Point p);
+
    // Render is called twice for every object that is in the
    // render list.  By default GameObject will call the render()
    // method one time (when layerIndex == 0).
@@ -288,13 +295,6 @@ public:
 
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
-
-   virtual Point getActualPos() const;
-   virtual Point getRenderPos() const;
-   virtual Point getRenderVel() const;
-   virtual Point getActualVel() const;
-
-   virtual void setActualPos(Point p);
 
    virtual bool collide(GameObject *hitObject);
 

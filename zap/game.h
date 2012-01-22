@@ -475,7 +475,7 @@ public:
 
    EditorObjectDatabase *getEditorDatabase(); // TODO: Only for clientGame
 
-   void setEditorDatabase(boost::shared_ptr<GridDatabase> database);
+   void setEditorDatabase(boost::shared_ptr<EditorObjectDatabase> database);
 
    bool runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                           GridDatabase *targetDatabase);

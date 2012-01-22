@@ -36,6 +36,8 @@
 #   include "SDL/SDL_opengl.h"
 #endif
 
+#include <cmath>
+
 
 using namespace TNL;
 

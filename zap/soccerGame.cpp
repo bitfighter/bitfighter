@@ -351,8 +351,6 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 
    GameType *gameType = game->getGameType();
 
-   TNLAssert(dynamic_cast<SoccerGameType *>(gameType), "Blech! sgt is NULL, not SoccerGameType");
-
    for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char firstChar = argv2[i][0];    // First character of arg

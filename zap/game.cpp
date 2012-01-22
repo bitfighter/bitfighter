@@ -380,7 +380,7 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
    // message is not sent often.
    if(mClientConnection && mClientConnection->isConnectionToClient())      
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         if(gServerGame->getClientInfo(i)->getName() != mName)
+         if(gServerGame->getClientInfo(i)->getName() != mName && gServerGame->getClientInfo(i)->getConnection())
             gServerGame->getClientInfo(i)->getConnection()->s2cSetAuthenticated(mName, isAuthenticated, badges);
 }
 
@@ -776,7 +776,7 @@ EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
 }  
 
 
-void Game::setEditorDatabase(boost::shared_ptr<GridDatabase> database)
+void Game::setEditorDatabase(boost::shared_ptr<EditorObjectDatabase> database)
 {
    TNLAssert(database.get(), "Database should not be NULL!");
    mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database);
@@ -1608,7 +1608,8 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, S32 type, S32 number)
    mVoteClientName = clientInfo->getName();
 
    for(S32 i = 0; i < getClientCount(); i++)
-      getClientInfo(i)->getConnection()->mVote = 0;
+      if(getClientInfo(i)->getConnection())  // robots don't have GameConnection
+         getClientInfo(i)->getConnection()->mVote = 0;
 
    conn->mVote = 1;
    conn->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
@@ -2086,7 +2087,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       }
       delete mGameType.getPointer();  // need to delete old GameType..
    }
-	
+   
    setCurrentLevelIndex(nextLevel, getPlayerCount());
    
    string levelFile = getLevelFileNameFromIndex(mCurrentLevelIndex);
@@ -2479,7 +2480,7 @@ void ServerGame::idle(U32 timeDelta)
                ClientInfo *clientInfo = getClientInfo(i);
                GameConnection *conn = clientInfo->getConnection();
 
-               if(conn->mVote == 0 && !clientInfo->isRobot())
+               if(conn && conn->mVote == 0 && !clientInfo->isRobot())
                {
                   WaitingToVote = true;
                   conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, msg, e, s, i);
@@ -2503,11 +2504,11 @@ void ServerGame::idle(U32 timeDelta)
             ClientInfo *clientInfo = getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
 
-            if(conn->mVote == 1)
+            if(conn && conn->mVote == 1)
                voteYes++;
-            else if(conn->mVote == 2)
+            else if(conn && conn->mVote == 2)
                voteNo++;
-            else if(!clientInfo->isRobot())
+            else if(conn && !clientInfo->isRobot())
                voteNothing++;
          }
 
@@ -2589,10 +2590,13 @@ void ServerGame::idle(U32 timeDelta)
             ClientInfo *clientInfo = getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
 
-            conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 did not vote", e, s, i);
+            if(conn)
+            {
+               conn->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 did not vote", e, s, i);
 
-            if(!votePass && clientInfo->getName() == mVoteClientName)
-               conn->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
+               if(!votePass && clientInfo->getName() == mVoteClientName)
+                  conn->mVoteTime = mSettings->getIniSettings()->voteRetryLength * 1000;
+            }
          }
       }
    }

@@ -386,7 +386,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mLastUndoIndex--;
 
-   getGame()->setEditorDatabase(boost::dynamic_pointer_cast<GridDatabase>(mUndoItems[mLastUndoIndex % UNDO_STATES]));
+   getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
    EditorObjectDatabase *database = getGame()->getEditorDatabase();
 
    rebuildEverything();    // Well, rebuild segments from walls at least

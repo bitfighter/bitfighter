@@ -1686,7 +1686,7 @@ void LevelMenuUserInterface::onActivate()
          string name = GameType::getGameTypeName(gc->mLevelInfos[i].levelType).getString();
          c[0] = name[0];
          c[1] = '\0';
-         logprintf("LEVEL - %s", name.c_str());
+//         logprintf("LEVEL - %s", name.c_str());
          addMenuItem(new MenuItem(i + 1, name.c_str(), selectLevelTypeCallback, "", stringToInputCode(c)));
       }
    }
