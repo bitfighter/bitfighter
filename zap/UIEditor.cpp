@@ -1827,6 +1827,7 @@ static void drawFourArrows(Point pos)
 
 }
 
+
 void EditorUserInterface::render()
 {
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
