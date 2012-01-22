@@ -226,9 +226,14 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    }
 
 
-   /// Part TWO
-   // Check to make sure that forcefield doesn't come within a ship's width of a wall
-   // This is to prevent such rampant forecfield abuse
+   /// Part TWO - preventative abuse measures
+
+   // First thing first, is abusive engineer allowed?  If so, let's get out of here
+   if(ship->getGame()->getGameType()->isEngineerUnrestrictedEnabled())
+      return true;
+
+   // Continuing on..  let's check to make sure that forcefield doesn't come within a ship's
+   // width of a wall; this should really squelch the forcefield abuse
    bool wallTooClose = false;
    fillVector.clear();
 
