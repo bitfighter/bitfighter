@@ -324,10 +324,9 @@ void EditorUserInterface::saveUndoState()
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
 
-   //mUndoItems[mLastUndoIndex % UNDO_STATES]->dumpObjects();//{P{
+   //mUndoItems[mLastUndoIndex % UNDO_STATES]->dumpObjects();
 
    mLastUndoIndex++;
-   //mLastRedoIndex++; 
    mLastRedoIndex = mLastUndoIndex;
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
@@ -346,7 +345,6 @@ void EditorUserInterface::saveUndoState()
 void EditorUserInterface::removeUndoState()
 {
    mLastUndoIndex--;
-   //mLastRedoIndex++; 
    mLastRedoIndex = mLastUndoIndex;
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
