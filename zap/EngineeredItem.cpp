@@ -755,6 +755,25 @@ void EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal,
 }
 
 
+Point EngineeredItem::getActualPos() const
+{
+   return mPos;
+}
+
+
+Point EngineeredItem::getRenderPos() const
+{
+   return mPos;
+}
+
+
+void EngineeredItem::setActualPos(Point p)
+{
+   mPos = p;
+   computeExtent();
+}
+
+
 void EngineeredItem::explode()
 {
 #ifndef ZAP_DEDICATED

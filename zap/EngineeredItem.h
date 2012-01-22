@@ -51,6 +51,7 @@ private:
 protected:
    F32 mHealth;
    SafePtr<MoveItem> mResource;
+   Point mPos;
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;
@@ -93,6 +94,11 @@ public:
    virtual bool isTurret();
 
    virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
+
+   Point getActualPos() const;
+   Point getRenderPos() const;
+   void setActualPos(Point p);
+
 
 #ifndef ZAP_DEDICATED
    Point getEditorSelectionOffset(F32 currentScale);
