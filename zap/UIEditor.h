@@ -258,7 +258,7 @@ private:
    void onFinishedDragging();    // Called when we're done dragging an object
    void onSelectionChanged();    // Called when current selection has changed
 
-   void resnapAllEngineeredItems();
+   void resnapAllEngineeredItems(EditorObjectDatabase *database);
 
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
@@ -308,6 +308,7 @@ public:
    void onAfterRunScriptFromConsole();
 
    void render();
+   void renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase);
    void renderPolyline(const Vector<Point> *verts);
 
    void setLevelToCanvasCoordConversion();

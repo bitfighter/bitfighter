@@ -68,9 +68,14 @@ public:
 
    void buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase);
 
+   void clear();                                // Delete everything from everywhere!
+
    void clearSelected();
    void setSelected(S32 owner, bool selected);
    void rebuildSelectedOutline();
+
+   void deleteEdges();
+   void deleteSegments();                       // Delete all segments regardless of owner
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void updateAllMountedItems(EditorObjectDatabase *database);

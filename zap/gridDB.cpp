@@ -826,6 +826,10 @@ void EditorObjectDatabase::removeEverythingFromDatabase()
 
    for(S32 i = 0; i < tempVector.size(); i++)
       removeFromDatabase(tempVector[i], tempVector[i]->getExtent());
+
+   WallSegmentManager *wallSegmentManager = getWallSegmentManager();
+   if(wallSegmentManager)
+      wallSegmentManager->clear();
 }
 
 

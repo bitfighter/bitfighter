@@ -435,29 +435,28 @@ EditorObject *EditorUserInterface::getSnapItem()
 
 void EditorUserInterface::rebuildEverything()
 {
-   EditorObjectDatabase *database = getGame()->getEditorDatabase();
+   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
+   resnapAllEngineeredItems(mLoadTarget);
 
-   database->getWallSegmentManager()->recomputeAllWallGeometry(database);
-   resnapAllEngineeredItems();
-
-   setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
-   autoSave();
+   // If the load target isn't or standard database, no need to save anything!
+   if(mLoadTarget ==  getGame()->getEditorDatabase())
+   {
+      setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
+      autoSave();
+   }
 }
 
 
-void EditorUserInterface::resnapAllEngineeredItems()
+// Resnaps all engineered items in database
+void EditorUserInterface::resnapAllEngineeredItems(EditorObjectDatabase *database)
 {
    fillVector.clear();
-
-   EditorObjectDatabase *database = getGame()->getEditorDatabase();
    database->findObjects((TestFunc)isEngineeredType, fillVector);
-
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
-      engrObj->mountToWall(engrObj->getVert(0), wallSegmentManager->getWallEdgeDatabase(), wallSegmentManager->getWallSegmentDatabase());
+      engrObj->mountToWall(engrObj->getVert(0), database->getWallSegmentManager());
    }
 }
 
@@ -512,27 +511,27 @@ void EditorUserInterface::loadLevel()
    ClientGame *game = getGame();
 
    // Initialize
-   clearDatabase(game->getEditorDatabase());
+   mLoadTarget = game->getEditorDatabase();
+   clearDatabase(mLoadTarget);
    game->clearTeams();
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
    mAddingVertex = false;
    clearLevelGenItems();
-   mLoadTarget = game->getEditorDatabase();
    mGameTypeArgs.clear();
    robots.clear();
 
    game->resetLevelInfo();
 
    GameType *gameType = new GameType;
-   gameType->addToGame(game, game->getEditorDatabase());
+   gameType->addToGame(game, mLoadTarget);
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
    string fileName = joindir(folderManager->levelDir, mEditFileName).c_str();
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   if(game->loadLevelFromFile(fileName, true, game->getEditorDatabase()))   
+   if(game->loadLevelFromFile(fileName, true, mLoadTarget))   
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -552,14 +551,12 @@ void EditorUserInterface::loadLevel()
    populateDock();                     // Add game-specific items to the dock
 
    // Bulk-process new items, walls first
-   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(game->getEditorDatabase());
+   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
    
    // Snap all engineered items to the closest wall, if one is found
-   resnapAllEngineeredItems();
+   resnapAllEngineeredItems(mLoadTarget);
 }
 
-
-extern OGLCONSOLE_Console gConsole;
 
 void EditorUserInterface::clearLevelGenItems()
 {
@@ -595,6 +592,9 @@ void EditorUserInterface::copyScriptItemsToEditor()
 }
 
 
+extern OGLCONSOLE_Console gConsole;
+
+// User has pressed Ctrl+R -- run the levelgen script and insert any resulting items into the editor, in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
    string scriptName = getGame()->getGameType()->getScriptName();
@@ -646,12 +646,14 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    {
       EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
 
-      if(obj->getVertCount() < 2)      // Invalid item; delete
+      if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
          mLoadTarget->removeFromDatabase(obj, obj->getExtent());
 
       if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          dynamic_cast<WallItem *>(obj)->processEndPoints();
    }
+
+   rebuildEverything();
 
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
    // June of what year?  -bbr
@@ -1289,7 +1291,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
    Point snapPoint(p);
 
-   WallSegmentManager *wallSegmentManager = getGame()->getEditorDatabase()->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
 
    if(mDraggingObjects)
    {
@@ -1302,8 +1304,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
          EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject);
-         return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager->getWallEdgeDatabase(), 
-                                                              wallSegmentManager->getWallSegmentDatabase());
+         return engrObj->mountToWall(snapPointToLevelGrid(p), mLoadTarget->getWallSegmentManager());
       }
    }
 
@@ -1777,12 +1778,7 @@ void EditorUserInterface::renderReferenceShip()
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor4f(.5, .5, 1, .35f);
-      glBegin(GL_POLYGON);
-         glVertex2f(-horizDist, -vertDist);
-         glVertex2f(horizDist, -vertDist);
-         glVertex2f(horizDist, vertDist);
-         glVertex2f(-horizDist, vertDist);
-      glEnd();
+      drawFilledRect(-horizDist, -vertDist, horizDist, vertDist);
 
    glPopMatrix();
 }
@@ -1909,7 +1905,6 @@ void EditorUserInterface::render()
       for(S32 i = 0; i < levelGenObjList->size(); i++)
          levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode);
    
-      const Vector<EditorObject *> *objList = getObjectList();
 
       Point delta;      // Defaults to (0,0)
 
@@ -1919,29 +1914,14 @@ void EditorUserInterface::render()
     
       
       // == Render walls and polyWalls ==
-     editorDb->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
-                     delta, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(false/*isScriptItem*/));
-    
-
-#ifdef SHOW_EXTENT_BOXES
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         EditorObject *obj = objList->get(i);
-         {
-            glColor(Colors::red);
-            glBegin(GL_LINE_LOOP);
-               glVertex2f(obj->getExtent().min.x, obj->getExtent().min.y);
-               glVertex2f(obj->getExtent().min.x, obj->getExtent().max.y);
-               glVertex2f(obj->getExtent().max.x, obj->getExtent().max.y);
-               glVertex2f(obj->getExtent().max.x, obj->getExtent().min.y);
-            glEnd();
-         }
-      }
-#endif
+      renderWalls(editorDb, delta, false);
+      renderWalls(&mLevelGenDatabase, delta, true );
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
       // Don't render polywalls, as they get rendered along with walls elsewhere
+      const Vector<EditorObject *> *objList = getObjectList();
+
       for(S32 i = 0; i < objList->size(); i++)
       {
          EditorObject *obj = objList->get(i);
@@ -1950,6 +1930,19 @@ void EditorUserInterface::render()
             if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
                obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);  // <== wall centerlines rendered in here
       }
+
+      
+            const Vector<EditorObject *> *objList2 = mLevelGenDatabase.getObjectList();
+
+            for(S32 i = 0; i < objList2->size(); i++)
+            {
+               EditorObject *obj = objList2->get(i);
+
+               if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
+                  if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
+                     obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);  // <== wall centerlines rendered in here
+            }
+
 
       // == Selected items ==
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
@@ -2060,6 +2053,14 @@ void EditorUserInterface::render()
 
    renderConsole();        // Rendered last, so it's always on top
 }
+
+
+void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase)
+{
+     database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
+                     offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+}
+
 
 
 // Draw box for selecting items
@@ -3249,12 +3250,10 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 // After deleting a bunch of items, clean up
 void EditorUserInterface::doneDeleteingWalls()
 {
-   EditorObjectDatabase *database = getGame()->getEditorDatabase();
+   WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
 
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
-
-   wallSegmentManager->recomputeAllWallGeometry(database);   // Recompute wall edges
-   resnapAllEngineeredItems();         
+   wallSegmentManager->recomputeAllWallGeometry(mLoadTarget);   // Recompute wall edges
+   resnapAllEngineeredItems(mLoadTarget);         
 }
 
 

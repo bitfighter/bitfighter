@@ -956,10 +956,9 @@ const Vector<Point> *EngineeredItem::getBufferForBotZone()
 
 
 // Find mount point or turret or forcefield closest to pos
-Point EngineeredItem::mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase)
+Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager)
 {  
    Point anchor, nrml;
-
    DatabaseObject *mountEdge = NULL, *mountSeg = NULL;
 
    // First we snap to a wall edge -- this will ensure we don't end up attaching to an interior wall segment in the case of a wall intersection.
@@ -967,7 +966,7 @@ Point EngineeredItem::mountToWall(const Point &pos, GridDatabase *wallEdgeDataba
    // we could update or item accordingly.  Unfortunately, there is no direct way to associate a WallEdge with a WallSegment, but we can do
    // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
    // ensure the segment we find is associated with the edge found in the first pass.
-   mountEdge = findAnchorPointAndNormal(wallEdgeDatabase, pos, 
+   mountEdge = findAnchorPointAndNormal(wallSegmentManager->getWallEdgeDatabase(), pos, 
                                (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    if(mountEdge)
@@ -975,7 +974,7 @@ Point EngineeredItem::mountToWall(const Point &pos, GridDatabase *wallEdgeDataba
       Point p;
       p.interp(.1, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
 
-      mountSeg = findAnchorPointAndNormal(wallSegmentDatabase, p,   
+      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), p,   
                         (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
    }
 

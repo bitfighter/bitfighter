@@ -118,7 +118,7 @@ public:
    bool collide(GameObject *hitObject);
    F32 getHealth();
    void healObject(S32 time);
-   Point mountToWall(const Point &pos, GridDatabase *wallEdgeDatabase, GridDatabase *wallSegmentDatabase);
+   Point mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager);
 
    void onGeomChanged();
 

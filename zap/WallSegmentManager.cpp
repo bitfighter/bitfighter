@@ -52,10 +52,7 @@ WallSegmentManager::WallSegmentManager()
 // Destructor
 WallSegmentManager::~WallSegmentManager()
 {
-   mWallEdges.deleteAndClear();
-
-   delete mWallSegmentDatabase;
-   delete mWallEdgeDatabase;
+   clear();
 }
 
 
@@ -88,7 +85,7 @@ void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjec
 
       // Remount any engr items that were attached to any segments on the modified wall
       if(engrItem->getMountSegment()->getOwner() == changedWallSerialNumber)
-         engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
+         engrItem->mountToWall(engrItem->getVert(0), editorObjectDatabase->getWallSegmentManager());
 
       // Calculate where all ffs land -- no telling if the segment we moved is or was interfering in its path
       if(!engrItem->isTurret())
@@ -129,7 +126,7 @@ void WallSegmentManager::rebuildEdges()
    // Run clipper
    clipAllWallEdges(mWallSegments, mWallEdgePoints);    
 
-   mWallEdges.deleteAndClear();
+   deleteEdges();
    mWallEdges.resize(mWallEdgePoints.size() / 2);
 
    // Add clipped wallEdges to the spatial database
@@ -142,25 +139,25 @@ void WallSegmentManager::rebuildEdges()
 
 
 // Delete all segments, then find all walls and build a new set of segments
-void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *gameDatabase)
+void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *database)
 {
-   mWallSegments.deleteAndClear();
+   deleteSegments();
 
    fillVector.clear();
-   gameDatabase->findObjects((TestFunc)isWallType, fillVector);
+   database->findObjects((TestFunc)isWallType, fillVector);
 
    Vector<DatabaseObject *> engrObjects;
-   gameDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
+   database->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    // Iterate over all our wall objects
    for(S32 i = 0; i < fillVector.size(); i++)
-      buildWallSegmentEdgesAndPoints(gameDatabase, fillVector[i], engrObjects);
+      buildWallSegmentEdgesAndPoints(database, fillVector[i], engrObjects);
 }
 
 
 // Given a wall, build all the segments and related geometry; also manage any affected mounted items
 // Operates only on passed wall segment -- does not alter others
-void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *wallDbObject, 
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, DatabaseObject *wallDbObject, 
                                                         const Vector<DatabaseObject *> &engrObjects)
 {
 #ifndef ZAP_DEDICATED
@@ -223,7 +220,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *gameDataba
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < toBeRemounted.size(); j++)  
-      toBeRemounted[j]->mountToWall(toBeRemounted[j]->getVert(0), mWallEdgeDatabase, mWallSegmentDatabase);
+      toBeRemounted[j]->mountToWall(toBeRemounted[j]->getVert(0), database->getWallSegmentManager());
 
 #endif
 }
@@ -255,7 +252,7 @@ void WallSegmentManager::updateAllMountedItems(EditorObjectDatabase *database)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
-      engrItem->mountToWall(engrItem->getVert(0), getWallEdgeDatabase(), getWallSegmentDatabase());
+      engrItem->mountToWall(engrItem->getVert(0), database->getWallSegmentManager());
    }
 }
 
@@ -268,6 +265,17 @@ void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDa
    gameObjDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
 
    buildWallSegmentEdgesAndPoints(gameObjDatabase, item, engrObjects);
+}
+
+
+void WallSegmentManager::clear()
+{
+   mWallEdgeDatabase->removeEverythingFromDatabase();
+   mWallSegmentDatabase->removeEverythingFromDatabase();
+   deleteSegments();
+   deleteEdges();
+
+   mWallEdgePoints.clear();
 }
 
 
@@ -295,6 +303,18 @@ void WallSegmentManager::rebuildSelectedOutline()
          selectedSegments.push_back(mWallSegments[i]);
 
    clipAllWallEdges(selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
+}
+
+
+void WallSegmentManager::deleteSegments()
+{
+   mWallSegments.deleteAndClear();
+}
+
+
+void WallSegmentManager::deleteEdges()
+{
+   mWallEdges.deleteAndClear();
 }
 
 
