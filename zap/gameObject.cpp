@@ -78,18 +78,18 @@ bool isWithHealthType(U8 x)
 {
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
          x == CoreTypeNumber;
 }
 
 bool isForceFieldDeactivatingType(U8 x)
 {
    return
-         x == MineTypeNumber || x == SpyBugTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
+         x == MineTypeNumber         || x == SpyBugTypeNumber ||
+         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber ||
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
+         x == EnergyItemTypeNumber   || x == RepairItemTypeNumber ||
+         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber;
 }
 
 bool isDamageableType(U8 x)
