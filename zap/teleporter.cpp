@@ -159,12 +159,13 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       mDests.push_back(dest);
       setExtent(Rect(pos, (F32)TELEPORTER_RADIUS)); // for ServerGame extent
    }
+#ifndef ZAP_DEDICATED
    else
    {
       mDests.push_back(dest);
       setExtent(calcExtents()); // for editor
    }
-
+#endif
 
    return true;
 }
