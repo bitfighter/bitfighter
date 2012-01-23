@@ -97,7 +97,7 @@ private:
    static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
    static const U32 CoreHeartbeatStartInterval = 2000;  // Milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
-   static const U32 CoreAttackedWarningDuration = 300;
+   static const U32 CoreAttackedWarningDuration = 600;
    static const U32 ExplosionInterval = 600;
    static const U32 ExplosionCount = 3;
 
