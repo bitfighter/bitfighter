@@ -2544,7 +2544,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\npkgdmg=\"${BUILT_PRODUCTS_DIR}/../../../tools/pkg-dmg\"\n\ndsstore=bitfighter.dsstore\nbackground=bf_dmg_background.png\n\n## Get the Bitfighter version to put into the package name\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\n## Remove old DMG if found\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\n## Copy application to temporary folder\nrsync -av \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}/\"\n\n## Strip unnecessary architectures from libraries before packaging\n# First find if we are doing x86_64\ntemp_test=`file ${BUILT_PRODUCTS_DIR}/${app_name}.app/Contents/MacOS/${app_name} | grep -o x86_64`\nlipo_flag=\"-remove\"\n\nif [ ! -z \"$temp_test\" ]; then\n  lipo_flag=\"-extract\"\n  echo \"stripping all but x86_64\"\nfi\n\n# Go to the frameworks directory\npushd \"${to_package_dir}/${app_name}.app/Contents/Frameworks/\"\n\n# Do the strip!\nfor fw_dir in `ls -d *.framework`\ndo\n  # echo \"$fw_dir\"\n  fw_name=\"${fw_dir%\\.framework}\"\n  # echo \"$fw_name\"\n  pushd \"$fw_dir/Versions/A\"\n  mv \"$fw_name\" \"$fw_name\".orig\n  lipo \"$fw_name\".orig \"$lipo_flag\" x86_64 -output \"$fw_name\"\n  rm \"$fw_name\".orig\n  popd\ndone\n\npopd\n\n## Finally package application in a DMG\n\"$pkgdmg\" --target \"${final_dmg}\" --source \"${to_package_dir}\" --volname ${app_name} --copy ${dsstore}:/.DS_Store --mkdir /.background --copy ${background}:/.background --symlink /Applications:/Applications\n\n## Clean-up\n#rm -r \"${to_package_dir}\"";
+			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\npkgdmg=\"${BUILT_PRODUCTS_DIR}/../../../tools/pkg-dmg\"\n\ndsstore=bitfighter.dsstore\nbackground=bf_dmg_background.png\n\n## Get the Bitfighter version to put into the package name\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}-MacOSX-32bit-Universal\"\n\n## Remove old DMG if found\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\n## Copy application to temporary folder\nrsync -av \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}/\"\n\n## Strip unnecessary architectures from libraries before packaging\n# First find if we are doing x86_64\ntemp_test=`file ${BUILT_PRODUCTS_DIR}/${app_name}.app/Contents/MacOS/${app_name} | grep -o x86_64`\nlipo_flag=\"-remove\"\n\nif [ ! -z \"$temp_test\" ]; then\n  lipo_flag=\"-extract\"\n  final_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}-MacOSX-64bit-Intel\"\n  echo \"stripping all but x86_64\"\nfi\n\n# Go to the frameworks directory\npushd \"${to_package_dir}/${app_name}.app/Contents/Frameworks/\"\n\n# Do the strip!\nfor fw_dir in `ls -d *.framework`\ndo\n  # echo \"$fw_dir\"\n  fw_name=\"${fw_dir%\\.framework}\"\n  # echo \"$fw_name\"\n  pushd \"$fw_dir/Versions/A\"\n  cp \"$fw_name\" \"$fw_name\".orig\n  lipo \"$fw_name\".orig \"$lipo_flag\" x86_64 -output \"$fw_name\"\n  rm \"$fw_name\".orig\n  popd\ndone\n\npopd\n\n## Finally package application in a DMG\n\"$pkgdmg\" --target \"${final_dmg}\" --source \"${to_package_dir}\" --volname ${app_name} --copy ${dsstore}:/.DS_Store --mkdir /.background --copy ${background}:/.background --symlink /Applications:/Applications\n\n## Clean-up\n#rm -r \"${to_package_dir}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2926,7 +2926,7 @@
 			};
 			name = Release;
 		};
-		730F1B5C13D52189004EE354 /* release x86_64 */ = {
+		730F1B5C13D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -2947,9 +2947,9 @@
 				SDKROOT = macosx10.6;
 				VALID_ARCHS = x86_64;
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B5D13D52189004EE354 /* release x86_64 */ = {
+		730F1B5D13D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2991,9 +2991,9 @@
 				SDKROOT = macosx10.6;
 				VALID_ARCHS = x86_64;
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B5E13D52189004EE354 /* release x86_64 */ = {
+		730F1B5E13D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3003,8 +3003,8 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				HEADER_SEARCH_PATHS = (
 					"../../../openal/openal-soft",
@@ -3018,9 +3018,9 @@
 				PRODUCT_NAME = "OpenAL-Soft";
 				USE_HEADERMAP = NO;
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B5F13D52189004EE354 /* release x86_64 */ = {
+		730F1B5F13D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3034,8 +3034,8 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GENERATE_MASTER_OBJECT_FILE = NO;
 				HEADER_SEARCH_PATHS = (
@@ -3050,9 +3050,9 @@
 				PRODUCT_NAME = ALURE;
 				USE_HEADERMAP = NO;
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B6013D52189004EE354 /* release x86_64 */ = {
+		730F1B6013D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3062,8 +3062,8 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = "";
@@ -3072,9 +3072,9 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B6113D52189004EE354 /* release x86_64 */ = {
+		730F1B6113D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3084,22 +3084,26 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_BUILTIN_FUNCTIONS = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_USE_INDIRECT_FUNCTION_CALLS = NO;
 				HEADER_SEARCH_PATHS = ../libtomcrypt;
 				INFOPLIST_FILE = "libtomcrypt-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
+				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B6213D52189004EE354 /* release x86_64 */ = {
+		730F1B6213D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3110,8 +3114,8 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_MODEL_TUNING = "";
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = "";
@@ -3121,9 +3125,9 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
-		730F1B6713D52189004EE354 /* release x86_64 */ = {
+		730F1B6713D52189004EE354 /* x86_64-Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -3131,7 +3135,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Create Bitfighter Game Release";
 			};
-			name = "release x86_64";
+			name = "x86_64-Release";
 		};
 		7375E29113690E1A00F71273 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -3159,7 +3163,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -3172,16 +3176,14 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "luavec-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
-				SDKROOT = "";
+				SDKROOT = macosx10.4;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -3215,7 +3217,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -3228,17 +3230,15 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = ../libtomcrypt;
 				INFOPLIST_FILE = "libtomcrypt-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
-				SDKROOT = "";
+				SDKROOT = macosx10.4;
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "";
 				ZERO_LINK = NO;
@@ -3273,7 +3273,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -3287,22 +3287,20 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "tnl-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
-				SDKROOT = "";
+				SDKROOT = macosx10.4;
 				SEPARATE_STRIP = YES;
 				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
-		73852FBE13D51A7500FA74BB /* debug x86_64 */ = {
+		73852FBE13D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -3321,9 +3319,9 @@
 				PREBINDING = NO;
 				SDKROOT = macosx10.4;
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FBF13D51A7500FA74BB /* debug x86_64 */ = {
+		73852FBF13D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3343,7 +3341,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
 				GCC_VERSION = "";
-				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
 					../../../libpng,
@@ -3359,27 +3356,28 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
-				SDKROOT = "";
+				SDKROOT = macosx10.6;
 				VALID_ARCHS = x86_64;
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FC013D51A7500FA74BB /* debug x86_64 */ = {
+		73852FC013D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = (
 					"../../../openal/openal-soft",
 					"../../../openal/openal-soft/include",
@@ -3390,14 +3388,16 @@
 				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
 				PREBINDING = NO;
 				PRODUCT_NAME = "OpenAL-Soft";
+				SDKROOT = macosx10.6;
 				USE_HEADERMAP = NO;
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FC113D51A7500FA74BB /* debug x86_64 */ = {
+		73852FC113D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -3408,9 +3408,10 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION = "";
 				GENERATE_MASTER_OBJECT_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					../../../lib,
@@ -3422,36 +3423,41 @@
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				PREBINDING = NO;
 				PRODUCT_NAME = ALURE;
+				SDKROOT = macosx10.6;
 				USE_HEADERMAP = NO;
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FC213D51A7500FA74BB /* debug x86_64 */ = {
+		73852FC213D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "luavec-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
+				SDKROOT = macosx10.6;
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FC313D51A7500FA74BB /* debug x86_64 */ = {
+		73852FC313D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -3459,10 +3465,11 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = ../libtomcrypt;
 				INFOPLIST_FILE = "libtomcrypt-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
@@ -3471,12 +3478,13 @@
 				PRODUCT_NAME = libtomcrypt;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FC413D51A7500FA74BB /* debug x86_64 */ = {
+		73852FC413D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -3484,20 +3492,22 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "tnl-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
+				SDKROOT = macosx10.6;
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
-		73852FC913D51A7500FA74BB /* debug x86_64 */ = {
+		73852FC913D51A7500FA74BB /* x86_64-Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -3505,7 +3515,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Create Bitfighter Game Release";
 			};
-			name = "debug x86_64";
+			name = "x86_64-Debug";
 		};
 		7386B9FD136FE3010094A660 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -3543,7 +3553,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -3560,7 +3570,6 @@
 				GCC_VERSION = "";
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = (
 					../../../lib,
 					../../../libogg,
@@ -3571,11 +3580,10 @@
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = ALURE;
-				SDKROOT = "";
+				SDKROOT = macosx10.4;
 				SEPARATE_STRIP = YES;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
@@ -3613,7 +3621,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -3639,7 +3647,7 @@
 				OTHER_CFLAGS = "-DAL_ALEXT_PROTOTYPES";
 				PREBINDING = NO;
 				PRODUCT_NAME = "OpenAL-Soft";
-				SDKROOT = "";
+				SDKROOT = macosx10.4;
 				SEPARATE_STRIP = YES;
 				USE_HEADERMAP = NO;
 				ZERO_LINK = NO;
@@ -3687,7 +3695,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3697,11 +3705,11 @@
 					"\"$(SRCROOT)/build/Debug\"",
 				);
 				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
 					../../../libpng,
@@ -3718,12 +3726,12 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
-				SDKROOT = "";
+				SDKROOT = macosx10.4;
 				SEPARATE_STRIP = YES;
 				SYMROOT = build/;
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
 			};
 			name = Release;
 		};
@@ -3775,8 +3783,8 @@
 			buildConfigurations = (
 				03AD17D012CE2BBF00274A25 /* Debug */,
 				03AD17D112CE2BBF00274A25 /* Release */,
-				73852FC913D51A7500FA74BB /* debug x86_64 */,
-				730F1B6713D52189004EE354 /* release x86_64 */,
+				73852FC913D51A7500FA74BB /* x86_64-Debug */,
+				730F1B6713D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3786,8 +3794,8 @@
 			buildConfigurations = (
 				7375E29113690E1A00F71273 /* Debug */,
 				7375E29213690E1A00F71273 /* Release */,
-				73852FC213D51A7500FA74BB /* debug x86_64 */,
-				730F1B6013D52189004EE354 /* release x86_64 */,
+				73852FC213D51A7500FA74BB /* x86_64-Debug */,
+				730F1B6013D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3797,8 +3805,8 @@
 			buildConfigurations = (
 				737CE46D12904E9E00D732B7 /* Debug */,
 				737CE46E12904E9E00D732B7 /* Release */,
-				73852FC313D51A7500FA74BB /* debug x86_64 */,
-				730F1B6113D52189004EE354 /* release x86_64 */,
+				73852FC313D51A7500FA74BB /* x86_64-Debug */,
+				730F1B6113D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3808,8 +3816,8 @@
 			buildConfigurations = (
 				737CE61F1290553D00D732B7 /* Debug */,
 				737CE6201290553D00D732B7 /* Release */,
-				73852FC413D51A7500FA74BB /* debug x86_64 */,
-				730F1B6213D52189004EE354 /* release x86_64 */,
+				73852FC413D51A7500FA74BB /* x86_64-Debug */,
+				730F1B6213D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3819,8 +3827,8 @@
 			buildConfigurations = (
 				7386B9FD136FE3010094A660 /* Debug */,
 				7386B9FE136FE3010094A660 /* Release */,
-				73852FC113D51A7500FA74BB /* debug x86_64 */,
-				730F1B5F13D52189004EE354 /* release x86_64 */,
+				73852FC113D51A7500FA74BB /* x86_64-Debug */,
+				730F1B5F13D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3830,8 +3838,8 @@
 			buildConfigurations = (
 				73B0FB5D1370A9F90019AE4E /* Debug */,
 				73B0FB5E1370A9F90019AE4E /* Release */,
-				73852FC013D51A7500FA74BB /* debug x86_64 */,
-				730F1B5E13D52189004EE354 /* release x86_64 */,
+				73852FC013D51A7500FA74BB /* x86_64-Debug */,
+				730F1B5E13D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3841,8 +3849,8 @@
 			buildConfigurations = (
 				C01FCF4B08A954540054247B /* Debug */,
 				C01FCF4C08A954540054247B /* Release */,
-				73852FBF13D51A7500FA74BB /* debug x86_64 */,
-				730F1B5D13D52189004EE354 /* release x86_64 */,
+				73852FBF13D51A7500FA74BB /* x86_64-Debug */,
+				730F1B5D13D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -3852,8 +3860,8 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
-				73852FBE13D51A7500FA74BB /* debug x86_64 */,
-				730F1B5C13D52189004EE354 /* release x86_64 */,
+				73852FBE13D51A7500FA74BB /* x86_64-Debug */,
+				730F1B5C13D52189004EE354 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
