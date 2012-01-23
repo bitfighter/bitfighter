@@ -124,6 +124,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mMaxRecPlayers = 0;
 
    mEngineerEnabled = false;
+   mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
 
 #ifndef ZAP_DEDICATED
@@ -308,6 +309,11 @@ bool GameType::processSpecialsParam(const char *param)
 {
    if(!stricmp(param, "Engineer"))
       setEngineerEnabled(true);
+   else if(!stricmp(param, "EngineerUnrestricted"))
+   {
+      setEngineerEnabled(true);
+      setEngineerUnrestrictedEnabled(true);
+   }
    else if(!stricmp(param, "NoBots"))
       setBotsAllowed(false);
    else
@@ -322,7 +328,12 @@ string GameType::getSpecialsLine()
    string specialsLine = "Specials";
 
    if(isEngineerEnabled())
-      specialsLine += " Engineer";
+   {
+      if(isEngineerUnrestrictedEnabled())
+         specialsLine += " EngineerUnrestricted";
+      else
+         specialsLine += " Engineer";
+   }
 
    if(!areBotsAllowed())
       specialsLine += " NoBots";
@@ -2012,10 +2023,10 @@ void GameType::addAdminGameMenuOptions(MenuUserInterface *menu)
 // Also serves to tell the client we're on a new level.
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
                                                 StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, 
-                                                bool levelHasLoadoutZone, bool engineerEnabled),
+                                                bool levelHasLoadoutZone, bool engineerEnabled, bool engineerAbuseEnabled),
                                             (levelName, levelDesc, teamScoreLimit, 
                                                 levelCreds, objectCount, lx, ly, ux, uy, 
-                                                levelHasLoadoutZone, engineerEnabled))
+                                                levelHasLoadoutZone, engineerEnabled, engineerAbuseEnabled))
 {
 #ifndef ZAP_DEDICATED
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
@@ -2029,6 +2040,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mObjectsExpected = objectCount;
 
    mEngineerEnabled = engineerEnabled;
+   mEngineerUnrestrictedEnabled = engineerAbuseEnabled;
 
    mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
 
@@ -2404,7 +2416,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, mGame->mObjectsLoaded, 
                    barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
-                   mLevelHasLoadoutZone, isEngineerEnabled());
+                   mLevelHasLoadoutZone, mEngineerEnabled, mEngineerUnrestrictedEnabled);
 
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
@@ -2567,10 +2579,11 @@ void GameType::addBot(Vector<StringTableEntry> args)
          args_count++;
       }
 
-      if(!robot->processArguments(args_count, args_char, mGame))
+      string errorMessage;
+      if(!robot->processArguments(args_count, args_char, mGame, errorMessage))
       {
          delete robot;
-         conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
+         conn->s2cDisplayErrorMessage("!!! " + errorMessage);
          return;
       }
 
@@ -3759,6 +3772,18 @@ bool GameType::isEngineerEnabled()
 void GameType::setEngineerEnabled(bool enabled)
 {
    mEngineerEnabled = enabled;
+}
+
+
+bool GameType::isEngineerUnrestrictedEnabled()
+{
+   return mEngineerUnrestrictedEnabled;
+}
+
+
+void GameType::setEngineerUnrestrictedEnabled(bool enabled)
+{
+   mEngineerUnrestrictedEnabled = enabled;
 }
 
 

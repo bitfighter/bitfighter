@@ -185,7 +185,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;
-         
+
          if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
          {
             if(gc)

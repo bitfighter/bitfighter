@@ -1167,8 +1167,6 @@ void Game::setGameTime(F32 time)
 }
 
 
-extern OGLCONSOLE_Console gConsole;
-
 bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                                    GridDatabase *targetDatabase)
 {
@@ -2572,6 +2570,7 @@ void ServerGame::idle(U32 timeDelta)
                   break;
                default:
                   TNLAssert(false, "Invalid option in switch statement!");
+                  break;
             } // switch
          } // if
 

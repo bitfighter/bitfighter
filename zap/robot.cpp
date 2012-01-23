@@ -1809,7 +1809,7 @@ void Robot::kill()
 }
 
 
-bool Robot::processArguments(S32 argc, const char **argv, Game *game)
+bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
    if(argc >= 1)
       mTeam = atoi(argv[0]);
@@ -1831,6 +1831,7 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 
    if(mScriptName == "")     // Bot script could not be located
    {
+      errorMessage = "Could not find bot file " + scriptName;
       logprintf(LogConsumer::LuaBotMessage, "Could not find bot file %s", scriptName.c_str());
       return false;
    }
