@@ -386,17 +386,20 @@ void Barrier::prepareRenderingGeometry(Game *game)
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
 
-
+#ifndef ZAP_DEDICATED
 extern void glColor(const Color *c, float alpha = 1.0);
+#endif
 
 // Render wall fill only for this wall; all edges rendered in a single pass later
 void Barrier::render(S32 layerIndex)
 {
+#ifndef ZAP_DEDICATED
    if(layerIndex == 0)           // First pass: draw the fill
    {
       glColor(getGame()->getSettings()->getWallFillColor());
       renderWallFill(&mRenderFillGeometry, mSolid);
    }
+#endif
 }
 
 
