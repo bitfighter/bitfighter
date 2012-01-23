@@ -128,6 +128,7 @@ public:
    F32 calcCoreWidth() const;
 
    void setStartingHealth(F32 health);
+   F32 getHealth();
 
    void onAddedToGame(Game *theGame);
 
@@ -174,7 +175,7 @@ public:
 
    S32 getClassID(lua_State *L);
 
-   S32 getCurrentHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getHealth(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    void push(lua_State *L);
 };
 

@@ -564,6 +564,13 @@ void CoreItem::setStartingHealth(F32 health)
 }
 
 
+F32 CoreItem::getHealth()
+{
+   // health is from 0 to 1.0
+   return mHealth / mStartingHealth;
+}
+
+
 void CoreItem::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
@@ -696,7 +703,7 @@ Lunar<CoreItem>::RegType CoreItem::methods[] =
    method(CoreItem, getTeamIndx),
 
    // Class specific methods
-   method(CoreItem, getCurrentHitPoints),
+   method(CoreItem, getHealth),
 
    {0,0}    // End method list
 };
@@ -708,7 +715,7 @@ S32 CoreItem::getClassID(lua_State *L)
 }
 
 
-S32 CoreItem::getCurrentHitPoints(lua_State *L)
+S32 CoreItem::getHealth(lua_State *L)
 {
    return returnFloat(L, mHealth);
 }
