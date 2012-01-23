@@ -478,7 +478,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    }
 
    // Reset the attacked warning timer
-   mAttackedWarningTimer.reset(CoreAttackedWarngingInterval);
+   mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(calcCoreWidth());
@@ -664,7 +664,6 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    mBeingAttacked = stream->readFlag();
-   logprintf("client attacked: %d", mBeingAttacked);
 }
 
 
