@@ -3150,6 +3150,21 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
 
       renderCore(center, 10, team->getColor(), getGame()->getCurrentTime());
 
+      // Render something if a Core is being attacked
+      if(cgt->isTeamCoreBeingAttacked(i))
+      {
+         if(getGame()->getCurrentTime() % 300 > 150)
+         {
+            glColor(Colors::red80);
+            drawCircle(center, 15);
+         }
+         else
+         {
+            glColor(Colors::yellow, 0.6);
+            drawCircle(center, 15);
+         }
+      }
+
       glColor(Colors::white);
       drawStringf(xpos, ypos, textSize, "%d", cgt->getTeamCoreCount(i));
    }

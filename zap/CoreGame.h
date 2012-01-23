@@ -53,6 +53,7 @@ public:
    string toString() const;
 
    S32 getTeamCoreCount(S32 teamIndex);
+   bool isTeamCoreBeingAttacked(S32 teamIndex);
 
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
@@ -96,6 +97,7 @@ private:
    static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
    static const U32 CoreHeartbeatStartInterval = 2000;  // Milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
+   static const U32 CoreAttackedWarngingInterval = 2000;
    static const U32 ExplosionInterval = 600;
    static const U32 ExplosionCount = 3;
 
@@ -103,12 +105,14 @@ private:
 
    static const F32 DamageReductionRatio;
 
-   bool hasExploded;
+   bool mHasExploded;
+   bool mBeingAttacked;
    F32 mStartingHealth;
    F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
 
-   Timer mHeartbeatTimer;
-   Timer mExplosionTimer;
+   Timer mHeartbeatTimer;        // Client-side timer
+   Timer mExplosionTimer;        // Client-side timer
+   Timer mAttackedWarningTimer;  // Server-side timer
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
@@ -126,6 +130,7 @@ public:
    bool collide(GameObject *otherObject);
 
    F32 calcCoreWidth() const;
+   bool isBeingAttacked();
 
    void setStartingHealth(F32 health);
    F32 getHealth();

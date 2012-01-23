@@ -104,6 +104,20 @@ S32 CoreGameType::getTeamCoreCount(S32 teamIndex)
 }
 
 
+bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex)
+{
+   for(S32 i = 0; i < mCores.size(); i++)
+   {
+      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
+      if(coreItem && coreItem->getTeam() == teamIndex)
+         if(coreItem->isBeingAttacked())
+            return true;
+   }
+
+   return false;
+}
+
+
 #ifndef ZAP_DEDICATED
 const char **CoreGameType::getGameParameterMenuKeys()
 {
@@ -300,7 +314,7 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
    setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
-   hasExploded = false;
+   mHasExploded = false;
 
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
 
@@ -317,7 +331,7 @@ CoreItem *CoreItem::clone() const
 void CoreItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(!hasExploded)
+   if(!mHasExploded)
       renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getCurrentTime());
 #endif
 }
@@ -433,7 +447,7 @@ bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 
 void CoreItem::damageObject(DamageInfo *theInfo)
 {
-   if(hasExploded)
+   if(mHasExploded)
       return;
 
    mHealth -= theInfo->damageAmount / DamageReductionRatio;
@@ -455,13 +469,16 @@ void CoreItem::damageObject(DamageInfo *theInfo)
             coreGameType->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
       }
 
-      hasExploded = true;
+      mHasExploded = true;
       deleteObject(ExplosionCount * ExplosionInterval);   // Must wait for triggered explosions
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
       disableCollision();
 
       return;
    }
+
+   // Reset the attacked warning timer
+   mAttackedWarningTimer.reset(CoreAttackedWarngingInterval);
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(calcCoreWidth());
@@ -517,12 +534,21 @@ void CoreItem::doExplosion(const Point &pos)
 
 void CoreItem::idle(GameObject::IdleCallPath path)
 {
+   // Update attack timer on the server
+   if(path == GameObject::ServerIdleMainLoop)
+   {
+      // If timer runs out, then set this Core as having a changed state so the client
+      // knows it isn't being attacked anymore
+      if(mAttackedWarningTimer.update(mCurrentMove.time))
+         setMaskBits(ItemChangedMask);
+   }
+
    // Only run the following on the client
    if(path != GameObject::ClientIdleMainRemote)
       return;
 
    // Update Explosion Timer
-   if(hasExploded)
+   if(mHasExploded)
    {
       if(mExplosionTimer.getCurrent() != 0)
          mExplosionTimer.update(mCurrentMove.time);
@@ -598,13 +624,15 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
       stream->writeFloat(mHealth, 16);  // 16 bits -> 1/65536 increments
 
-   stream->writeFlag(hasExploded);
+   stream->writeFlag(mHasExploded);
 
    if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
       stream->writeFloat(mStartingHealth, 16);
    }
+
+   stream->writeFlag(mAttackedWarningTimer.getCurrent());
 
    return retMask;
 }
@@ -622,9 +650,9 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
 
-   if(explode && !hasExploded)
+   if(explode && !mHasExploded)
    {
-      hasExploded = true;
+      mHasExploded = true;
       disableCollision();
       onItemExploded(getActualPos());
    }
@@ -634,6 +662,9 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       readThisTeam(stream);
       mStartingHealth = stream->readFloat(16);
    }
+
+   mBeingAttacked = stream->readFlag();
+   logprintf("client attacked: %d", mBeingAttacked);
 }
 
 
@@ -655,6 +686,12 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 string CoreItem::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + itos(mTeam) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
+}
+
+
+bool CoreItem::isBeingAttacked()
+{
+   return mBeingAttacked;
 }
 
 
