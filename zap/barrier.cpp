@@ -387,11 +387,16 @@ void Barrier::prepareRenderingGeometry(Game *game)
 }
 
 
+extern void glColor(const Color *c, float alpha = 1.0);
+
 // Render wall fill only for this wall; all edges rendered in a single pass later
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
-      renderWallFill(&mRenderFillGeometry, mSolid, getGame()->getSettings()->getWallFillColor());
+   {
+      glColor(getGame()->getSettings()->getWallFillColor());
+      renderWallFill(&mRenderFillGeometry, mSolid);
+   }
 }
 
 
@@ -837,20 +842,18 @@ void WallSegment::resetEdges()
 }
 
 
-void WallSegment::renderFill(const Color &fillColor, const Point &offset)
+void WallSegment::renderFill(const Point &offset)
 {
 #ifndef ZAP_DEDICATED
 
-   Color color = fillColor;
-   
-   glDisable(GL_BLEND);
+   //glDisable(GL_BLEND);
    
    if(mSelected)
-      renderWallFill(&mTriangulatedFillPoints, offset, true, color);       // Use true because all segment fills are triangulated
+      renderWallFill(&mTriangulatedFillPoints, offset, true);       // Use true because all segment fills are triangulated
    else
-      renderWallFill(&mTriangulatedFillPoints, true, color);
+      renderWallFill(&mTriangulatedFillPoints, true);
 
-   glEnable(GL_BLEND);
+   //glEnable(GL_BLEND);
 #endif
 }
 

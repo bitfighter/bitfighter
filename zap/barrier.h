@@ -242,7 +242,7 @@ public:
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderFill(const Color &fillColor, const Point &offset);
+   void renderFill(const Point &offset);
 
    const Vector<Point> *getCorners();
    const Vector<Point> *getEdges();

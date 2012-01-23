@@ -1558,17 +1558,15 @@ void renderEnergyItem(const Point &pos)
 
 
 // Use faster method with no offset
-void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fillColor)
+void renderWallFill(const Vector<Point> *points, bool polyWall)
 {
-   glColor(fillColor);
    renderPointVector(points, polyWall ? GL_TRIANGLES : GL_POLYGON);
 }
 
 
 // Use slower method if each point needs to be offset
-void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall, const Color &fillColor)
+void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall)
 {
-   glColor(fillColor);
    renderPointVector(points, offset, polyWall ? GL_TRIANGLES : GL_POLYGON);
 }
 

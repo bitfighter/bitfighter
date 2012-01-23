@@ -348,24 +348,28 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
 
    // Render walls that have been moved first (i.e. render their shadows)
+   glColor(.1);
    if(moved)
       for(S32 i = 0; i < mWallSegments.size(); i++)
-         if(mWallSegments[i]->isSelected())         
-            mWallSegments[i]->renderFill(Color(.1), Point(0,0));
+         if(mWallSegments[i]->isSelected())     
+            mWallSegments[i]->renderFill(Point(0,0));
+
 
    // Then normal, unselected walls
+   glColor(fillColor);
    for(S32 i = 0; i < mWallSegments.size(); i++)
       if(!moved || !mWallSegments[i]->isSelected())         
-         mWallSegments[i]->renderFill(fillColor, selectedItemOffset);      // renderFill ignores offset for unselected walls
+         mWallSegments[i]->renderFill(selectedItemOffset);      // renderFill ignores offset for unselected walls
 
    renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());     // Render wall outlines
 
    // Render selected/moving walls last so they appear on top
+   glColor(fillColor);
    if(moved)
    {
       for(S32 i = 0; i < mWallSegments.size(); i++)
          if(mWallSegments[i]->isSelected())  
-            mWallSegments[i]->renderFill(fillColor, selectedItemOffset);
+            mWallSegments[i]->renderFill(selectedItemOffset);
 
       // Render wall outlines for selected walls only
       renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, settings->getWallOutlineColor());      

@@ -187,8 +187,8 @@ extern void renderRepairItem(const Point &pos, bool forEditor, const Color *over
 
 extern void renderEnergyItem(const Point &pos); 
 
-extern void renderWallFill(const Vector<Point> *points, bool polyWall, const Color &fillColor);
-extern void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall, const Color &fillColor);
+extern void renderWallFill(const Vector<Point> *points, bool polyWall);
+extern void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall);
 
 extern void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // Render lightning bolt symbol
