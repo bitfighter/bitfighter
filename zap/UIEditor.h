@@ -64,45 +64,6 @@ enum VertexRenderStyles
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-//class SelectionItem
-//{
-//private:
-//   bool mSelected;
-//   Vector<bool> mVertSelected;
-//
-//public:
-//   SelectionItem() { /* Do nothing */ }      // Generic constructor
-//   SelectionItem(EditorObject *item);        // Primary constructor
-//
-//   void restore(EditorObject *item);
-//};
-//
-//
-//////////////////////////////////////////
-//////////////////////////////////////////
-//
-//class EditorObject;
-//
-//class Selection
-//{
-//public:
-//   Selection() { /* Do nothing */ }            // Generic constructor
-//   Selection(Vector<EditorObject *> &items);   // Primary constructor
-//
-//private:
-//   Vector<SelectionItem> mSelection;
-//
-//public:
-//   void restore(Vector<EditorObject *> &items);
-//};
-//
-//
-////////////////////////////////////////
-////////////////////////////////////////
-
 class EditorAttributeMenuUI;
 class PluginMenuUI;
 
@@ -188,7 +149,11 @@ private:
    bool mAutoScrollWithMouseReady;
    Point mScrollWithMouseLocation;
    bool showMinorGridLines();
-   void renderGrid();               // Draw background snap grid
+
+   // Helper drawing methods
+   void renderGrid();                                             // Draw background snap grid
+   void renderTurretRanges(EditorObjectDatabase *editorDb);       // Draw translucent turret ranges
+   void renderObjectsUnderConstruction();                         // Render partially constructed walls and other items that aren't yet in a db
    void renderDock();
    void renderInfoPanel();
    void renderPanelInfoLine(S32 line, const char *format, ...);
@@ -302,12 +267,13 @@ public:
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
    EditorObject *getSnapItem();
-   void rebuildEverything();                  // Does lots of things in undo, redo, and add items from script
+   void rebuildEverything(EditorObjectDatabase *database);   // Does lots of things in undo, redo, and add items from script
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
    void render();
+   void renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay);
    void renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase);
    void renderPolyline(const Vector<Point> *verts);
 
@@ -408,8 +374,10 @@ public:
    void doneDeleteingWalls(); 
    void doneDeleteing();
 
-   void runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
+   // Run a script, and put resulting objects in database
+   void runScript(EditorObjectDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
+
    string getPluginKey();                 // Try to create some sort of uniqeish signature for the plugin
    void onPluginMenuClosed(const Vector<string> &args);
    void runLevelGenScript();              // Run associated levelgen script

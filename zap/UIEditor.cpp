@@ -384,7 +384,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
    EditorObjectDatabase *database = getGame()->getEditorDatabase();
 
-   rebuildEverything();    // Well, rebuild segments from walls at least
+   rebuildEverything(database);    // Well, rebuild segments from walls at least
 
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
@@ -418,10 +418,13 @@ void EditorUserInterface::redo()
       mSnapVertexIndex = NONE;
 
       mLastUndoIndex++;
+
       getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
+      EditorObjectDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
+
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
-      rebuildEverything();
+      rebuildEverything(database);     // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
       validateLevel();
    }
 }
@@ -433,13 +436,13 @@ EditorObject *EditorUserInterface::getSnapItem()
 }
 
 
-void EditorUserInterface::rebuildEverything()
+void EditorUserInterface::rebuildEverything(EditorObjectDatabase *database)
 {
-   mLoadTarget->getWallSegmentManager()->recomputeAllWallGeometry(mLoadTarget);
-   resnapAllEngineeredItems(mLoadTarget);
+   database->getWallSegmentManager()->recomputeAllWallGeometry(database);
+   resnapAllEngineeredItems(database);
 
-   // If the load target isn't or standard database, no need to save anything!
-   if(mLoadTarget ==  getGame()->getEditorDatabase())
+   // If we're rebuilding items in our levelgen database, no need to save anything!
+   if(database != &mLevelGenDatabase)
    {
       setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
       autoSave();
@@ -586,7 +589,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
       
    mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
 
-   rebuildEverything();
+   rebuildEverything(getGame()->getEditorDatabase());
 
    mLastUndoStateWasBarrierWidthChange = false;
 }
@@ -594,7 +597,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 extern OGLCONSOLE_Console gConsole;
 
-// User has pressed Ctrl+R -- run the levelgen script and insert any resulting items into the editor, in a separate database
+// User has pressed Ctrl+R -- run the levelgen script and insert any resulting items into the editor in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
    string scriptName = getGame()->getGameType()->getScriptName();
@@ -608,19 +611,13 @@ void EditorUserInterface::runLevelGenScript()
 
    clearLevelGenItems();      // Clear out any items from the last run
 
-   // Set the load target to the levelgen db, as that's where we want our items stored
-   mLoadTarget = &mLevelGenDatabase;
-
    FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
-   runScript(folderManager, scriptName, *scriptArgs);
-
-   // Reset the target
-   mLoadTarget = getGame()->getEditorDatabase();
+   runScript(&mLevelGenDatabase, folderManager, scriptName, *scriptArgs);
 }
 
 
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
-void EditorUserInterface::runScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
+void EditorUserInterface::runScript(EditorObjectDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args)
 {
    string name = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
 
@@ -632,7 +629,7 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), mLoadTarget, getGame(), true);
+   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), database, getGame(), true);
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
@@ -640,20 +637,20 @@ void EditorUserInterface::runScript(const FolderManager *folderManager, const st
    // Process new items that need it
    // Walls need processing so that they can render properly
    fillVector.clear();
-   mLoadTarget->findObjects((TestFunc)isWallType, fillVector);
+   database->findObjects((TestFunc)isWallType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EditorObject *obj = dynamic_cast<EditorObject *>(fillVector[i]);
 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
-         mLoadTarget->removeFromDatabase(obj, obj->getExtent());
+         database->removeFromDatabase(obj, obj->getExtent());
 
       if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          dynamic_cast<WallItem *>(obj)->processEndPoints();
    }
 
-   rebuildEverything();
+   rebuildEverything(database);
 
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
    // June of what year?  -bbr
@@ -766,7 +763,7 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
    mPluginMenuValues[key] = args;
 
    mPluginRunner->runMain(args);
-   rebuildEverything();
+   rebuildEverything(getGame()->getEditorDatabase());
 }
 
 
@@ -1037,7 +1034,7 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
          words.erase(0);
 
          ui->onBeforeRunScriptFromConsole();
-         ui->runScript(gClientGame->getSettings()->getFolderManager(), name, words);
+         ui->runScript(gClientGame->getEditorDatabase(), gClientGame->getSettings()->getFolderManager(), name, words);
          ui->onAfterRunScriptFromConsole();
       }
    }   
@@ -1069,7 +1066,7 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
    for(S32 i = 0; i < objList->size(); i++)
       objList->get(i)->setSelected(!objList->get(i)->isSelected());
 
-   rebuildEverything();
+   rebuildEverything(getGame()->getEditorDatabase());
    onSelectionChanged();
 }
 
@@ -1448,8 +1445,6 @@ S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vect
 
 extern Color gErrorMessageTextColor;
 
-static bool fillRendered = false;
-
 
 bool EditorUserInterface::showMinorGridLines()
 {
@@ -1460,9 +1455,6 @@ bool EditorUserInterface::showMinorGridLines()
 // Render background snap grid
 void EditorUserInterface::renderGrid()
 {
-   if(mPreviewMode)     // No grid in preview mode
-      return;   
-
    F32 colorFact = (mSnapContext == FULL_SNAPPING) ? 1 : 0.5f;
 
    // Minor grid lines
@@ -1508,6 +1500,76 @@ void EditorUserInterface::renderGrid()
    glEnd();
 
    glLineWidth(gDefaultLineWidth);
+}
+
+
+static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
+{
+   TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
+   TNLAssert(dynamic_cast<BfObject *>(*b), "Not a BfObject");
+   return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
+}
+
+
+void EditorUserInterface::renderTurretRanges(EditorObjectDatabase *editorDb)
+{
+   fillVector.clear();
+      
+   editorDb->findObjects(SpyBugTypeNumber, fillVector);
+
+   if(fillVector.size() != 0)
+   {
+      // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
+      fillVector.sort(sortByTeam);
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_DEPTH_WRITEMASK);
+      glDepthFunc(GL_LESS);
+      glPushMatrix();
+      glTranslatef(0, 0, -0.95f);
+
+      // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
+      glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
+
+      S32 prevTeam = -10;
+
+      // Draw spybug visibility ranges first, underneath everything else
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
+
+         if(i != 0 && editorObj->getTeam() != prevTeam)
+            glTranslatef(0, 0, 0.05f);
+         prevTeam = editorObj->getTeam();
+
+         Point pos = editorObj->getVert(0);
+         pos *= mCurrentScale;
+         pos += mCurrentOffset;
+         renderSpyBugVisibleRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
+      }
+
+      setDefaultBlendFunction();
+
+      glPopMatrix();
+      glDisable(GL_DEPTH_WRITEMASK);
+      glDisable(GL_DEPTH_TEST);
+   }
+
+   // Next draw turret firing ranges for selected or highlighted turrets only
+   fillVector.clear();
+      
+   editorDb->findObjects(TurretTypeNumber, fillVector);
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
+      if(editorObj->isSelected() || editorObj->isLitUp())
+      {
+         Point pos = editorObj->getVert(0);
+         pos *= mCurrentScale;
+         pos += mCurrentOffset;
+         renderTurretFiringRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
+      }
+   }
 }
 
 
@@ -1790,14 +1852,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
-{
-   TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
-   TNLAssert(dynamic_cast<BfObject *>(*b), "Not a BfObject");
-   return ((BfObject *)(*b))->getTeam() - ((BfObject *)(*a))->getTeam();
-}
-
-
 static void drawFourArrows(Point pos)
 {
    const F32 pointList[] = {
@@ -1828,83 +1882,23 @@ void EditorUserInterface::render()
 {
    EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
 
-   mouseIgnore = false;    // Needed to avoid freezing effect from too many mouseMoved events without a render in between (sam)
+   mouseIgnore = false;                // Avoid freezing effect from too many mouseMoved events without a render in between (sam)
 
-   if(!mPreviewMode)
-      renderGrid();        // Render grid first, so it's at the bottom
+   TNLAssert(glIsEnabled(GL_BLEND), "Blending should be on here!");
+
+   // Render bottom-most layer of our display
+   if(mPreviewMode)
+      renderTurretRanges(editorDb);    // Render range of all turrets in editorDb
    else
-   {
-      fillVector.clear();
-      
-      editorDb->findObjects(SpyBugTypeNumber, fillVector);
+      renderGrid();                    
 
-      if(fillVector.size() != 0)
-      {
-         // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
-         fillVector.sort(sortByTeam);
-         glClear(GL_DEPTH_BUFFER_BIT);
-         glEnable(GL_DEPTH_TEST);
-         glEnable(GL_DEPTH_WRITEMASK);
-         glDepthFunc(GL_LESS);
-         glPushMatrix();
-         glTranslatef(0, 0, -0.95f);
-
-         // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
-         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
-
-         TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-         S32 prevTeam = -10;
-
-         // Draw spybug visibility ranges first, underneath everything else
-         for(S32 i = 0; i < fillVector.size(); i++)
-         {
-            EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
-
-            if(i != 0 && editorObj->getTeam() != prevTeam)
-               glTranslatef(0, 0, 0.05f);
-            prevTeam = editorObj->getTeam();
-
-            Point pos = editorObj->getVert(0);
-            pos *= mCurrentScale;
-            pos += mCurrentOffset;
-            renderSpyBugVisibleRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
-         }
-
-         setDefaultBlendFunction();
-
-         glPopMatrix();
-         glDisable(GL_DEPTH_WRITEMASK);
-         glDisable(GL_DEPTH_TEST);
-      }
-
-      // Next draw turret firing ranges for selected or highlighted turrets only
-      fillVector.clear();
-      
-      editorDb->findObjects(TurretTypeNumber, fillVector);
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
-         if(editorObj->isSelected() || editorObj->isLitUp())
-         {
-            Point pos = editorObj->getVert(0);
-            pos *= mCurrentScale;
-            pos += mCurrentOffset;
-            renderTurretFiringRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
-         }
-      }
-   }
- 
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    glPushMatrix();
       setLevelToCanvasCoordConversion();
 
-      const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
-      for(S32 i = 0; i < levelGenObjList->size(); i++)
-         levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode);
-   
+      //const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
+      //for(S32 i = 0; i < levelGenObjList->size(); i++)
+      //   levelGenObjList->get(i)->renderInEditor(mCurrentScale, mSnapVertexIndex, true, mPreviewMode);
 
       Point delta;      // Defaults to (0,0)
 
@@ -1912,7 +1906,6 @@ void EditorUserInterface::render()
          // TODO: Merge this with the other place this calculation is made
          delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
     
-      
       // == Render walls and polyWalls ==
       renderWalls(editorDb, delta, false);
       renderWalls(&mLevelGenDatabase, delta, true );
@@ -1920,75 +1913,18 @@ void EditorUserInterface::render()
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
       // Don't render polywalls, as they get rendered along with walls elsewhere
-      const Vector<EditorObject *> *objList = getObjectList();
-
-      for(S32 i = 0; i < objList->size(); i++)
-      {
-         EditorObject *obj = objList->get(i);
-
-         if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
-            if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);  // <== wall centerlines rendered in here
-      }
-
-      
-            const Vector<EditorObject *> *objList2 = mLevelGenDatabase.getObjectList();
-
-            for(S32 i = 0; i < objList2->size(); i++)
-            {
-               EditorObject *obj = objList2->get(i);
-
-               if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
-                  if(!(mDraggingObjects && obj->isSelected()) || mPreviewMode)
-                     obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);  // <== wall centerlines rendered in here
-            }
-
+      renderObjects(editorDb, false, false);                         // Render our normal objects
+      renderObjects(&mLevelGenDatabase, false, true);                // Render any levelgen objects being overlaid
 
       // == Selected items ==
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
       // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
       // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
-      if(!mPreviewMode)
-      {
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            EditorObject *obj = objList->get(i);
-
-            if(obj->isSelected() || obj->isLitUp())
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
-         }
-      }
-
-      fillRendered = false;
+      renderObjects(getGame()->getEditorDatabase(), true, false);    // Render selected objects     
 
       // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
-      {
-         // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
-         mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-         glLineWidth(gLineWidth3);
-
-         if(mCreatingPoly) // Wall
-            glColor(*SELECT_COLOR);
-         else              // LineItem
-            glColor(getTeamColor(mNewItem->getTeam()));
-
-         renderPolyline(mNewItem->getOutline());
-
-         glLineWidth(gDefaultLineWidth);
-
-         for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
-         {
-            Point v = mNewItem->getVert(j);
-            
-            // Draw vertices
-            if(j == mNewItem->getVertCount() - 1)                    // This is our most current vertex
-               renderVertex(HighlightedVertex, v, NO_NUMBER, mCurrentScale);
-            else
-               renderVertex(SelectedItemVertex, v, j, mCurrentScale);
-         }
-         mNewItem->deleteVert(mNewItem->getVertCount() - 1); 
-      }
+         renderObjectsUnderConstruction();
 
       // Since we're not constructing a barrier, if there are any barriers or lineItems selected, 
       // get the width for display at bottom of dock
@@ -2008,17 +1944,17 @@ void EditorUserInterface::render()
 
       // Draw map items (teleporters, etc.) that are being dragged  (above the dock).  But don't draw walls here, or
       // we'll lose our wall centernlines.
-      if(mDraggingObjects)
-         for(S32 i = 0; i < objList->size(); i++)
-         {
-            EditorObject *obj = objList->get(i);
-            if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
-               obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
-         }
+      //if(mDraggingObjects)
+      //   for(S32 i = 0; i < objList->size(); i++)
+      //   {
+      //      EditorObject *obj = objList->get(i);
+      //      if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
+      //         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
+      //   }
 
       // Render our snap vertex as a hollow magenta box...
-      if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE && 
-         mSnapObject->getGeomType() != geomPoint &&                                                      // ...but not on point objects...
+      if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&        // ...but not in preview mode...
+         mSnapObject->getGeomType() != geomPoint &&                                                      // ...and not on point objects...
          !mSnapObject->isVertexLitUp(mSnapVertexIndex) && !mSnapObject->vertSelected(mSnapVertexIndex))  // ...or selected vertices
       {
          renderVertex(SnappingVertex, mSnapObject->getVert(mSnapVertexIndex), NO_NUMBER, mCurrentScale/*, alpha*/);  
@@ -2031,6 +1967,7 @@ void EditorUserInterface::render()
       renderReferenceShip();
    else
    {
+      // The following items are hidden in preview mode:
       renderDock();
       renderDockItems();
       renderInfoPanel();
@@ -2055,12 +1992,55 @@ void EditorUserInterface::render()
 }
 
 
-void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase)
+void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay)
 {
-     database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
-                     offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+   const Vector<EditorObject *> *objList = database->getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      EditorObject *obj = objList->get(i);
+
+      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)                                // Skip polywalls because... ???
+         if( renderSelectedObjects == (obj->isSelected() || obj->isLitUp()) )             // Only render selected items when renderSelectedObjects is true
+            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);    // <== wall centerlines rendered in here
+   }
 }
 
+
+void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase)
+{
+   database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
+                                                  offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+}
+
+
+void EditorUserInterface::renderObjectsUnderConstruction()
+{
+   // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
+   mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   glLineWidth(gLineWidth3);
+
+   if(mCreatingPoly) // Wall
+      glColor(*SELECT_COLOR);
+   else              // LineItem
+      glColor(getTeamColor(mNewItem->getTeam()));
+
+   renderPolyline(mNewItem->getOutline());
+
+   glLineWidth(gDefaultLineWidth);
+
+   for(S32 j = mNewItem->getVertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
+   {
+      Point v = mNewItem->getVert(j);
+            
+      // Draw vertices
+      if(j == mNewItem->getVertCount() - 1)                    // This is our most current vertex
+         renderVertex(HighlightedVertex, v, NO_NUMBER, mCurrentScale);
+      else
+         renderVertex(SelectedItemVertex, v, j, mCurrentScale);
+   }
+   mNewItem->deleteVert(mNewItem->getVertCount() - 1); 
+}
 
 
 // Draw box for selecting items

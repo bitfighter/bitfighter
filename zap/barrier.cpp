@@ -571,7 +571,8 @@ void WallItem::setSelected(bool selected)
    Parent::setSelected(selected);
    
    // Find the associated segment(s) and mark them as selected (or not)
-   getGame()->getEditorDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
+   if(getDatabase())
+      getDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
 }
 
 
@@ -661,12 +662,14 @@ const char *PolyWall::getOnScreenName()
 }
 
 
+// Should be the same as WallItem::setSelected()
 void PolyWall::setSelected(bool selected)
 {
    Parent::setSelected(selected);
    
    // Find the associated segment(s) and mark them as selected (or not)
-   getDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
+   if(getDatabase())
+      getDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
 }
 
 
