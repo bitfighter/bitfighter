@@ -580,12 +580,6 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 }
 
 
-void CoreItem::setRadius(F32 radius)
-{
-   Parent::setRadius(radius * getGame()->getGridSize());
-}
-
-
 void CoreItem::setStartingHealth(F32 health)
 {
    mStartingHealth = health;

@@ -148,8 +148,6 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
-   void setRadius(F32 radius);
-
    TNL_DECLARE_CLASS(CoreItem);
 
 #ifndef ZAP_DEDICATED
