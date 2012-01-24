@@ -34,7 +34,7 @@ namespace Zap {
 
 // Forward Declarations
 class CoreItem;
-class Ship;
+class ClientInfo;
 
 class CoreGameType : public GameType
 {
@@ -62,7 +62,7 @@ public:
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-   void score(Ship *destroyer, S32 coreOwningTeam, S32 score);
+   void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
 
 #ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();

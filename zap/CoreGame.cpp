@@ -221,17 +221,17 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
 }
 
 
-void CoreGameType::score(Ship *destroyer, S32 coreOwningTeam, S32 score)
+void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
 {
    Vector<StringTableEntry> e;
 
    if(destroyer)
    {
-      e.push_back(destroyer->getClientInfo()->getName());
+      e.push_back(destroyer->getName());
       e.push_back(getGame()->getTeamName(coreOwningTeam));
 
       // If someone destroyed enemy core
-      if(destroyer->getTeam() != coreOwningTeam)
+      if(destroyer->getTeamIndex() != coreOwningTeam)
       {
          static StringTableEntry capString("%e0 destroyed a %e1 Core!");
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
@@ -450,6 +450,9 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(mHasExploded)
       return;
 
+   if(theInfo->damageAmount == 0)
+      return;
+
    mHealth -= theInfo->damageAmount / DamageReductionRatio;
 
    if(mHealth < 0)
@@ -461,8 +464,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       GameType *gameType = getGame()->getGameType();
       if(gameType)
       {
-         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);  // What about GrenadeProjectile and Mines?
-         Ship *destroyer = p ? dynamic_cast<Ship *>(p->mShooter.getPointer()) : NULL;
+         ClientInfo *destroyer = theInfo->damagingObject->getOwner();
 
          CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
          if(coreGameType)
@@ -478,7 +480,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    }
 
    // Reset the attacked warning timer if we're not healing
-   if(theInfo->damageAmount >= 0)
+   if(theInfo->damageAmount > 0)
       mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
