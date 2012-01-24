@@ -2000,9 +2000,8 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool ren
    {
       EditorObject *obj = objList->get(i);
 
-      if(obj->getObjectTypeNumber() != PolyWallTypeNumber)                             // Skip polywalls because... ???
-         if( renderSelectedObjects == (obj->isSelected() || obj->isLitUp()) )          // Only draw sel'ed items when renderSelectedObjects is true
-            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
+      if( renderSelectedObjects == (obj->isSelected() || obj->isLitUp()) )          // Only draw sel'ed items when renderSelectedObjects is true
+         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
    }
 }
 
