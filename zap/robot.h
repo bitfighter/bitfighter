@@ -161,7 +161,7 @@ public:
 
    S32 getCurrentZone(ServerGame *game);
    void setCurrentZone(S32 zone);
-   bool canSeePoint(Point point);         // Is point within robot's LOS?
+   bool canSeePoint(Point point, bool wallOnly = false);         // Is point within robot's LOS?
 
    Vector<Point> flightPlan;              // List of points to get from one point to another
    U16 flightPlanTo;                      // Zone our flightplan was calculated to

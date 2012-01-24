@@ -433,6 +433,9 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
                   collisionTime = 0;
                   collisionObject = foundObject;
                   delta.set(0,0);
+
+                  p.normalize(myRadius);  // we need this calculation, just to properly show bounce sparks at right position
+                  collisionPoint = myPos - p;
                }
                else
                {
@@ -451,6 +454,9 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
                      collisionTime = t;
                      collisionObject = foundObject;
                      delta = mMoveState[stateIndex].vel * collisionTime;
+
+                     p.normalize(otherRadius);  // we need this calculation, just to properly show bounce sparks at right position
+                     collisionPoint = shipPos + p;
                   }
                }
             }

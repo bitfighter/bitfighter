@@ -854,7 +854,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    Point target = getPointOrXY(L, 1, methodName);
 
    // If we can see the target, go there directly
-   if(thisRobot->canSeePoint(target))
+   if(thisRobot->canSeePoint(target, true))
    {
       thisRobot->flightPlan.clear();
       return returnPoint(L, target);
@@ -897,7 +897,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
          // removed if(first) ... Problems with Robot get stuck after pushed from burst or mines.
          // To save calculations, might want to avoid (thisRobot->canSeePoint(last))
-         if(thisRobot->canSeePoint(last))
+         if(thisRobot->canSeePoint(last, true))
          {
             dest = last;
             found = true;
@@ -933,7 +933,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
       Point p;
       thisRobot->flightPlan.push_back(target);
 
-      if(!thisRobot->canSeePoint(target))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
+      if(!thisRobot->canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
          BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(targetZone));
 
@@ -1920,7 +1920,7 @@ bool Robot::findNearestShip(Point &loc)
 }
 
 
-bool Robot::canSeePoint(Point point)
+bool Robot::canSeePoint(Point point, bool wallOnly)
 {
    Point difference = point - getActualPos();
 
@@ -1945,7 +1945,7 @@ bool Robot::canSeePoint(Point point)
    Rect queryRect(thisPoints);
 
    fillVector.clear();
-   findObjects((TestFunc)isCollideableType, fillVector, queryRect);
+   findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
       if(fillVector[i]->getCollisionPoly(otherPoints) && polygonsIntersect(thisPoints, otherPoints))

@@ -2951,7 +2951,7 @@ void GameUserInterface::renderScoreboard()
          if(playerScores[j]->isLevelChanger() && !playerScores[j]->isAdmin())
             drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, levelChangerSymbol);
 
-         // Add level changer mark
+         // Add admin mark
          if(playerScores[j]->isAdmin())
             drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
@@ -2962,7 +2962,12 @@ void GameUserInterface::renderScoreboard()
          if(isTeamGame)
             dSprintf(buff, sizeof(buff), "%2.2f", playerScores[j]->getRating());
          else
-            dSprintf(buff, sizeof(buff), "%2.2f  %d", playerScores[j]->getRating(), playerScores[j]->getScore());
+         {
+            if(playerScores[j]->getRating() < 0)
+               dSprintf(buff, sizeof(buff), "%d %2.2f", playerScores[j]->getScore(), playerScores[j]->getRating());
+            else
+               dSprintf(buff, sizeof(buff), "%d  %2.2f", playerScores[j]->getScore(), playerScores[j]->getRating());
+         }
 
          drawString(xr - (85 + S32(getStringWidth(F32(fontSize), buff))), curRowY, fontSize, buff);
          drawStringf(xr - 60, curRowY, fontSize, "%d", playerScores[j]->getPing());
@@ -3149,6 +3154,21 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       Point center(xpos - 20, ypos + 19);
 
       renderCore(center, 10, team->getColor(), getGame()->getCurrentTime());
+
+      // Render something if a Core is being attacked
+      if(cgt->isTeamCoreBeingAttacked(i))
+      {
+         if(getGame()->getCurrentTime() % 300 > 150)
+         {
+            glColor(Colors::red80);
+            drawCircle(center, 15);
+         }
+         else
+         {
+            glColor(Colors::yellow, 0.6);
+            drawCircle(center, 15);
+         }
+      }
 
       glColor(Colors::white);
       drawStringf(xpos, ypos, textSize, "%d", cgt->getTeamCoreCount(i));

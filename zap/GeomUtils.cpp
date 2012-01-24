@@ -377,7 +377,6 @@ bool polygonIntersectsSegmentDetailed(Point *poly, U32 vertexCount, bool format,
    return false;
 }
 
-
 bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime)
 {
    // if the point is in the circle, it's a collision at the start
@@ -397,7 +396,7 @@ bool circleIntersectsSegment(Point center, float radius, Point start, Point end,
    float b = -2 * d.dot(v);
    float c = d.dot(d) - radius * radius;
 
-   return FindLowestRootInInterval(a, b, c, 100, collisionTime);
+   return FindLowestRootInInterval(a, b, c, 1, collisionTime);
 }
 
 

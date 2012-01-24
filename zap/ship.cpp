@@ -757,14 +757,25 @@ bool Ship::findRepairTargets()
    mRepairTargets.clear();
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      GameObject *s = dynamic_cast<GameObject *>(foundObjects[i]);
-      if(s->isDestroyed() || s->getHealth() >= 1)                             // Don't repair dead or fully healed objects...
+      Item *item = dynamic_cast<Item*>(foundObjects[i]);
+
+      // Have to have an item to get a radius
+      if(!item)
          continue;
-      if((s->getRenderPos() - pos).len() > (RepairRadius + CollisionRadius))  // ...or ones too far away...
+
+      // Don't repair dead or fully healed objects...
+      if(item->isDestroyed() || item->getHealth() >= 1)
          continue;
-      if(s->getTeam() != -1 && s->getTeam() != getTeam())                     // ...or ones not on our team or neutral
+
+      // ...or ones too far away...
+      if((item->getRenderPos() - pos).len() > (RepairRadius + CollisionRadius + item->getRadius()))
          continue;
-      mRepairTargets.push_back(s);
+
+      // ...or ones not on our team or neutral
+      if(item->getTeam() != -1 && item->getTeam() != getTeam())
+         continue;
+
+      mRepairTargets.push_back(item);
    }
    return mRepairTargets.size() != 0;
 }
@@ -1258,7 +1269,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->readStringTableEntry(&playerName);
 
       ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
-
 
       TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");  // there may be "Ship" with empty name in a few level
 

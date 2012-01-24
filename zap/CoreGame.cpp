@@ -104,6 +104,20 @@ S32 CoreGameType::getTeamCoreCount(S32 teamIndex)
 }
 
 
+bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex)
+{
+   for(S32 i = 0; i < mCores.size(); i++)
+   {
+      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
+      if(coreItem && coreItem->getTeam() == teamIndex)
+         if(coreItem->isBeingAttacked())
+            return true;
+   }
+
+   return false;
+}
+
+
 #ifndef ZAP_DEDICATED
 const char **CoreGameType::getGameParameterMenuKeys()
 {
@@ -207,17 +221,17 @@ S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent
 }
 
 
-void CoreGameType::score(Ship *destroyer, S32 coreOwningTeam, S32 score)
+void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
 {
    Vector<StringTableEntry> e;
 
    if(destroyer)
    {
-      e.push_back(destroyer->getClientInfo()->getName());
+      e.push_back(destroyer->getName());
       e.push_back(getGame()->getTeamName(coreOwningTeam));
 
       // If someone destroyed enemy core
-      if(destroyer->getTeam() != coreOwningTeam)
+      if(destroyer->getTeamIndex() != coreOwningTeam)
       {
          static StringTableEntry capString("%e0 destroyed a %e1 Core!");
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
@@ -300,7 +314,7 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
    setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
-   hasExploded = false;
+   mHasExploded = false;
 
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
 
@@ -317,7 +331,7 @@ CoreItem *CoreItem::clone() const
 void CoreItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(!hasExploded)
+   if(!mHasExploded)
       renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getCurrentTime());
 #endif
 }
@@ -408,32 +422,36 @@ F32 CoreItem::getEditorRadius(F32 currentScale)
 
 bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-//   center = getActualPos();
-//   radius = calcCoreWidth() / 2;
-   return false;
+   center = getActualPos();
+   radius = calcCoreWidth() / 2;
+   return true;
 }
 
 
 bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    // This poly rotates with time to match what is rendered
-   F32 coreRotateTime = F32(getGame()->getCurrentTime() & 16383) / 16384.f * FloatTau;
-   Point pos = getActualPos();
-   F32 radius = calcCoreWidth() / 2;
+   // problem with shooting through moving polygon, and client and server may have different getCurrentTime()
+   //F32 coreRotateTime = F32(getGame()->getCurrentTime() & 16383) / 16384.f * FloatTau;
+   //Point pos = getActualPos();
+   //F32 radius = calcCoreWidth() / 2;
 
-   for(F32 theta = 0; theta < FloatTau; theta += FloatTau / 10)  // 10 sides
-   {
-      Point p = Point(pos.x + cos(theta + coreRotateTime) * radius, pos.y + sin(theta + coreRotateTime) * radius);
-      polyPoints.push_back(p);
-   }
+   //for(F32 theta = 0; theta < FloatTau; theta += FloatTau / 10)  // 10 sides
+   //{
+   //   Point p = Point(pos.x + cos(theta + coreRotateTime) * radius, pos.y + sin(theta + coreRotateTime) * radius);
+   //   polyPoints.push_back(p);
+   //}
 
-   return true;
+   return false;
 }
 
 
 void CoreItem::damageObject(DamageInfo *theInfo)
 {
-   if(hasExploded)
+   if(mHasExploded)
+      return;
+
+   if(theInfo->damageAmount == 0)
       return;
 
    mHealth -= theInfo->damageAmount / DamageReductionRatio;
@@ -447,21 +465,24 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       GameType *gameType = getGame()->getGameType();
       if(gameType)
       {
-         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);  // What about GrenadeProjectile and Mines?
-         Ship *destroyer = p ? dynamic_cast<Ship *>(p->mShooter.getPointer()) : NULL;
+         ClientInfo *destroyer = theInfo->damagingObject->getOwner();
 
          CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
          if(coreGameType)
             coreGameType->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
       }
 
-      hasExploded = true;
+      mHasExploded = true;
       deleteObject(ExplosionCount * ExplosionInterval);   // Must wait for triggered explosions
       setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
       disableCollision();
 
       return;
    }
+
+   // Reset the attacked warning timer if we're not healing
+   if(theInfo->damageAmount > 0)
+      mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(calcCoreWidth());
@@ -517,12 +538,21 @@ void CoreItem::doExplosion(const Point &pos)
 
 void CoreItem::idle(GameObject::IdleCallPath path)
 {
+   // Update attack timer on the server
+   if(path == GameObject::ServerIdleMainLoop)
+   {
+      // If timer runs out, then set this Core as having a changed state so the client
+      // knows it isn't being attacked anymore
+      if(mAttackedWarningTimer.update(mCurrentMove.time))
+         setMaskBits(ItemChangedMask);
+   }
+
    // Only run the following on the client
    if(path != GameObject::ClientIdleMainRemote)
       return;
 
    // Update Explosion Timer
-   if(hasExploded)
+   if(mHasExploded)
    {
       if(mExplosionTimer.getCurrent() != 0)
          mExplosionTimer.update(mCurrentMove.time);
@@ -551,16 +581,17 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 }
 
 
-void CoreItem::setRadius(F32 radius)
-{
-   Parent::setRadius(radius * getGame()->getGridSize());
-}
-
-
 void CoreItem::setStartingHealth(F32 health)
 {
    mStartingHealth = health;
    mHealth = health;
+}
+
+
+F32 CoreItem::getHealth()
+{
+   // health is from 0 to 1.0
+   return mHealth / mStartingHealth;
 }
 
 
@@ -591,13 +622,15 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
       stream->writeFloat(mHealth, 16);  // 16 bits -> 1/65536 increments
 
-   stream->writeFlag(hasExploded);
+   stream->writeFlag(mHasExploded);
 
    if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
       stream->writeFloat(mStartingHealth, 16);
    }
+
+   stream->writeFlag(mAttackedWarningTimer.getCurrent());
 
    return retMask;
 }
@@ -615,9 +648,9 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
 
-   if(explode && !hasExploded)
+   if(explode && !mHasExploded)
    {
-      hasExploded = true;
+      mHasExploded = true;
       disableCollision();
       onItemExploded(getActualPos());
    }
@@ -627,6 +660,8 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       readThisTeam(stream);
       mStartingHealth = stream->readFloat(16);
    }
+
+   mBeingAttacked = stream->readFlag();
 }
 
 
@@ -648,6 +683,12 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 string CoreItem::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + itos(mTeam) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
+}
+
+
+bool CoreItem::isBeingAttacked()
+{
+   return mBeingAttacked;
 }
 
 
@@ -696,7 +737,7 @@ Lunar<CoreItem>::RegType CoreItem::methods[] =
    method(CoreItem, getTeamIndx),
 
    // Class specific methods
-   method(CoreItem, getCurrentHitPoints),
+   method(CoreItem, getHealth),
 
    {0,0}    // End method list
 };
@@ -708,7 +749,7 @@ S32 CoreItem::getClassID(lua_State *L)
 }
 
 
-S32 CoreItem::getCurrentHitPoints(lua_State *L)
+S32 CoreItem::getHealth(lua_State *L)
 {
    return returnFloat(L, mHealth);
 }

@@ -136,7 +136,6 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    setVert(dest, 1);
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
-   bool found = false;
 
 #ifndef ZAP_DEDICATED
    if(!dynamic_cast<ClientGame *>(game))              // Editor handles multi-dest teleporters as separate single dest items
@@ -151,19 +150,22 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
          if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
          {
             tel->mDests.push_back(dest);
-            found = true;
-            break;      // There will only be one!
+            destroySelf();    // Since this is really part of a different teleporter, delete this one
+            return true;      // There will only be one!
          }
       }
-   }
 
-   if(!found)           // New teleporter origin
+      // New teleporter origin
+      mDests.push_back(dest);
+      setExtent(Rect(pos, (F32)TELEPORTER_RADIUS)); // for ServerGame extent
+   }
+#ifndef ZAP_DEDICATED
+   else
    {
       mDests.push_back(dest);
-      setExtent(Rect(pos, (F32)TELEPORTER_RADIUS));
+      setExtent(calcExtents()); // for editor
    }
-   else  
-      destroySelf();    // Since this is really part of a different teleporter, delete this one
+#endif
 
    return true;
 }

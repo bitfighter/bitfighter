@@ -34,7 +34,7 @@ namespace Zap {
 
 // Forward Declarations
 class CoreItem;
-class Ship;
+class ClientInfo;
 
 class CoreGameType : public GameType
 {
@@ -53,6 +53,7 @@ public:
    string toString() const;
 
    S32 getTeamCoreCount(S32 teamIndex);
+   bool isTeamCoreBeingAttacked(S32 teamIndex);
 
    // Runs on client
    void renderInterfaceOverlay(bool scoreboardVisible);
@@ -61,7 +62,7 @@ public:
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-   void score(Ship *destroyer, S32 coreOwningTeam, S32 score);
+   void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
 
 #ifndef ZAP_DEDICATED
    const char **getGameParameterMenuKeys();
@@ -96,6 +97,7 @@ private:
    static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
    static const U32 CoreHeartbeatStartInterval = 2000;  // Milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
+   static const U32 CoreAttackedWarningDuration = 600;
    static const U32 ExplosionInterval = 600;
    static const U32 ExplosionCount = 3;
 
@@ -103,12 +105,14 @@ private:
 
    static const F32 DamageReductionRatio;
 
-   bool hasExploded;
+   bool mHasExploded;
+   bool mBeingAttacked;
    F32 mStartingHealth;
    F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
 
-   Timer mHeartbeatTimer;
-   Timer mExplosionTimer;
+   Timer mHeartbeatTimer;        // Client-side timer
+   Timer mExplosionTimer;        // Client-side timer
+   Timer mAttackedWarningTimer;  // Server-side timer
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
@@ -126,8 +130,10 @@ public:
    bool collide(GameObject *otherObject);
 
    F32 calcCoreWidth() const;
+   bool isBeingAttacked();
 
    void setStartingHealth(F32 health);
+   F32 getHealth();
 
    void onAddedToGame(Game *theGame);
 
@@ -141,8 +147,6 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
-
-   void setRadius(F32 radius);
 
    TNL_DECLARE_CLASS(CoreItem);
 
@@ -174,7 +178,7 @@ public:
 
    S32 getClassID(lua_State *L);
 
-   S32 getCurrentHitPoints(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getHealth(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    void push(lua_State *L);
 };
 

@@ -52,7 +52,11 @@ WallSegmentManager::WallSegmentManager()
 // Destructor
 WallSegmentManager::~WallSegmentManager()
 {
-   clear();
+   delete mWallEdgeDatabase;
+   delete mWallSegmentDatabase;
+
+   deleteSegments();
+   deleteEdges();
 }
 
 
