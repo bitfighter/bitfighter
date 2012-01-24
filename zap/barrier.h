@@ -185,8 +185,6 @@ public:
    virtual void onGeomChanged();
    virtual void onItemDragging();
 
-   //bool getCollisionPoly(Vector<Point> &polyPoints);
-
    /////
    // Editor methods
    const char *getEditorHelpString();

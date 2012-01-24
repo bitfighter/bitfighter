@@ -111,6 +111,8 @@ void EditorObject::addToEditor(Game *game)
    // constists of:
    //    mGame = game;
    //    addToDatabase();
+
+   onGeomChanged();     // Added primarily as a generic way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 

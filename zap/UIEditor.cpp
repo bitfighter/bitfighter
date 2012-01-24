@@ -2825,8 +2825,8 @@ void EditorUserInterface::startDraggingDockItem()
    Point pos = convertCanvasToLevelCoord(mMousePos) - item->getInitialPlacementOffset(getGame()->getGridSize());
    item->moveTo(pos);
       
-   item->addToEditor(getGame());          
-
+   item->addToEditor(getGame()); 
+   
    clearSelection();            // No items are selected...
    item->setSelected(true);     // ...except for the new one
    onSelectionChanged();
