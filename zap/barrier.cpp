@@ -434,21 +434,34 @@ WallItem *WallItem::clone() const
 }
 
 
-// Only called from editor... use of getEditorDatabase() below is a bit hacky...
+// These methods are a clue that there should be a closer relationship between WallItem and PolyWall
+static void onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber, bool isBatchUpdating)
+{
+   WallSegmentManager *wallSegmentManager = editorDatabase->getWallSegmentManager();
+
+   wallSegmentManager->computeWallSegmentIntersections(editorDatabase, wall);
+   wallSegmentManager->setSelected(serialNumber, selected);     // Make sure newly generated segments retain selection state of parent wall
+
+   if(!isBatchUpdating)
+      wallSegmentManager->finishedChangingWalls(editorDatabase, serialNumber);
+}
+
+
+static void setWallSelected(GridDatabase *database, S32 serialNumber, bool selected)
+{
+   // Find the associated segment(s) and mark them as selected (or not)
+   if(database)
+      database->getWallSegmentManager()->setSelected(serialNumber, selected);
+}
+
+
+// Only called from editor... use of getEditorDatabase() below is a bit hacky... what if wall is in a different database?
 void WallItem::onGeomChanged()
 {
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
    processEndPoints();
 
-   EditorObjectDatabase *editorDatabase = getGame()->getEditorDatabase();
-   WallSegmentManager *wallSegmentManager = editorDatabase->getWallSegmentManager();
-
-   wallSegmentManager->computeWallSegmentIntersections(editorDatabase, this);    
-   
-   wallSegmentManager->setSelected(mSerialNumber, mSelected);     // Make sure newly generated segments retain selection state of parent wall
-
-   if(!isBatchUpdatingGeom())
-      wallSegmentManager->finishedChangingWalls(editorDatabase, mSerialNumber);
+   onWallGeomChanged(getGame()->getEditorDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
 
    Parent::onGeomChanged();
 }
@@ -571,8 +584,7 @@ void WallItem::setSelected(bool selected)
    Parent::setSelected(selected);
    
    // Find the associated segment(s) and mark them as selected (or not)
-   if(getDatabase())
-      getDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
+   setWallSelected(getDatabase(), mSerialNumber, selected);
 }
 
 
@@ -662,28 +674,18 @@ const char *PolyWall::getOnScreenName()
 }
 
 
-// Should be the same as WallItem::setSelected()
 void PolyWall::setSelected(bool selected)
 {
    Parent::setSelected(selected);
-   
-   // Find the associated segment(s) and mark them as selected (or not)
-   if(getDatabase())
-      getDatabase()->getWallSegmentManager()->setSelected(mSerialNumber, selected);
+
+   setWallSelected(getDatabase(), mSerialNumber, selected);
 }
 
 
 // Only called from editor
 void PolyWall::onGeomChanged()
 {
-   EditorObjectDatabase *database = getGame()->getEditorDatabase();
-   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
-
-   wallSegmentManager->computeWallSegmentIntersections(database, this);
-
-   if(!isBatchUpdatingGeom())
-      wallSegmentManager->finishedChangingWalls(database, mSerialNumber);
-
+   onWallGeomChanged(getGame()->getEditorDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
    Parent::onGeomChanged();
 }
 
