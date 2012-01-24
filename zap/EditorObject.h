@@ -113,6 +113,8 @@ public:
    void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);    // Render some text, with specified vertical offset
    virtual void renderEditor(F32 currentScale);
+   virtual void renderEditorPreview(F32 currentScale);         // Render objects when tab is pressed
+
 
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
 #ifndef ZAP_DEDICATED

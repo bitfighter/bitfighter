@@ -295,22 +295,11 @@ void BfObject::clearGame()
 }
 
 
-bool BfObject::getCollisionPoly(Vector<Point> &polyPoints) const
-{
-   return false;
-}
-
-
-bool BfObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
-{
-   return false;
-}
-
-
 bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 {
    return true;
 }
+
 
 Point BfObject::getRenderPos() const
 {
@@ -342,52 +331,15 @@ void BfObject::setActualPos(Point p)
 }
 
 
-void BfObject::render()
-{
-   // Do nothing
-}
-
-
-void BfObject::render(S32 layerIndex)
-{
-   if(layerIndex == 1)
-      render();
-}
-
-
-// By default, we'll just render this as we do in game.  Occasionally (like with textItems, we may need to do something special).
-void BfObject::renderEditorPreview(F32 currentScale)
-{
-   render();
-}
-
-
-void BfObject::setExtent(const Rect &extent)
-{
-   DatabaseObject::setExtent(extent); // Passthrough
-}
-
-
 void BfObject::updateExtentInDatabase()
 {
    setExtent(calcExtents());    // Make sure the database extents are in sync with where the object actually is
 }
 
 
-void BfObject::readThisTeam(BitStream *stream)
-{
-   mTeam = stream->readInt(4) - 2;
-}
-
-
-void BfObject::writeThisTeam(BitStream *stream)
-{
-   stream->writeInt(mTeam + 2, 4);
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
+
 // Constructor
 GameObject::GameObject() : BfObject()
 {
@@ -503,7 +455,7 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 
 void GameObject::damageObject(DamageInfo *theInfo)
 {
-
+   // Do nothing
 }
 
 
@@ -759,6 +711,19 @@ void GameObject::setLastMove(const Move &theMove)
 }
 
 
+void GameObject::render()
+{
+   // Do nothing
+}
+
+
+void GameObject::render(S32 layerIndex)
+{
+   if(layerIndex == 1)
+      render();
+}
+
+
 void GameObject::disableCollision()
 {
    TNLAssert(mDisableCollisionCount < 10, "Too many disabled collisions");
@@ -965,6 +930,19 @@ void GameObject::push(lua_State *L)       // Lua-aware classes will implement th
 {
    TNLAssert(false, "Unimplemented push function!");
 }
+
+
+void GameObject::readThisTeam(BitStream *stream)
+{
+   mTeam = stream->readInt(4) - 2;
+}
+
+
+void GameObject::writeThisTeam(BitStream *stream)
+{
+   stream->writeInt(mTeam + 2, 4);
+}
+
 
 };
 

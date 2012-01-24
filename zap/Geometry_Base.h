@@ -63,6 +63,7 @@ public:
    virtual Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
    virtual S32 getVertCount();
+   virtual S32 getMinVertCount();      // Minimum number of vertices geometry needs to be viable
    virtual void clearVerts();
    virtual bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
    virtual bool addVertFront(Point vert);

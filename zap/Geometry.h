@@ -65,6 +65,7 @@ public:
    virtual void setVert(const Point &pos, S32 index);
 
    S32 getVertCount();
+   S32 getMinVertCount();
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
@@ -113,6 +114,7 @@ public:
    void setVert(const Point &pos, S32 index);
 
    S32 getVertCount();
+   S32 getMinVertCount();
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
@@ -167,6 +169,7 @@ public:
    virtual void setVert(const Point &pos, S32 index);
 
    S32 getVertCount();
+   S32 getMinVertCount();
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
@@ -225,6 +228,8 @@ public:
    virtual void onPointsChanged();
 
    void disableTriangluation();
+
+   S32 getMinVertCount();
 };
 
 

@@ -80,6 +80,13 @@ S32 Geometry::getVertCount()
 }
 
 
+S32 Geometry::getMinVertCount()
+{
+   TNLAssert(false, "Not implemented");
+   return 0;
+}
+
+
 void Geometry::clearVerts()
 {
    TNLAssert(false, "Not implemented");
@@ -293,6 +300,12 @@ S32 PointGeometry::getVertCount()
 }
 
 
+S32 PointGeometry::getMinVertCount()
+{
+   return 1;
+}
+
+
 void PointGeometry::clearVerts()
 {
    // Do nothing
@@ -396,6 +409,7 @@ void PointGeometry::setVert(const Point &pos, S32 index)
 	setActualPos(pos);
 }
 
+
 void PointGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
    getActualPos().write(stream);
@@ -427,12 +441,6 @@ void PointGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gr
 {
    TNLAssert(false, "Haven't figured this one out yet!");
 }
-
-
-//boost::shared_ptr<Geometry> PointGeometry::copyGeometry() const
-//{
-//    return boost::shared_ptr<Geometry>(new PointGeometry(*this));
-//}
 
 
 ////////////////////////////////////////
@@ -477,6 +485,12 @@ void SimpleLineGeometry::setVert(const Point &pos, S32 index)
 
 
 S32 SimpleLineGeometry::getVertCount()
+{
+   return 2;
+}
+
+
+S32 SimpleLineGeometry::getMinVertCount()
 {
    return 2;
 }
@@ -629,12 +643,6 @@ void SimpleLineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F
 }
 
 
-//boost::shared_ptr<Geometry> SimpleLineGeometry::copyGeometry() const
-//{
-//    return boost::shared_ptr<Geometry>(new SimpleLineGeometry(*this));
-//}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -675,6 +683,12 @@ void PolylineGeometry::setVert(const Point &point, S32 index)
 S32 PolylineGeometry::getVertCount() 
 { 
    return mPolyBounds.size(); 
+}
+
+
+S32 PolylineGeometry::getMinVertCount()
+{
+   return 2;
 }
 
 
@@ -889,11 +903,6 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 
    for(S32 i = firstCoord; i < argc; i += 2)
    {
-      // Put a cap on the number of vertices in a polygon... or do we really need this?  Maybe we don't want to limit the vertices in an 
-      // object when we're reading it... maybe only limit what we can do in the editor.
-      //if(bounds.size() >= gMaxPolygonPoints)
-      //   break;
-
       p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
 
       if(i == firstCoord || p != lastP)
@@ -914,12 +923,6 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
     mVertSelected.resize(mPolyBounds.size());
     onPointsChanged();
 }
-
-
-//boost::shared_ptr<Geometry> PolylineGeometry::copyGeometry() const
-//{
-//    return boost::shared_ptr<Geometry>(new PolylineGeometry(*this));
-//}
 
 
 ////////////////////////////////////////
@@ -983,12 +986,10 @@ void PolygonGeometry::disableTriangluation()
    mTriangluationDisabled = true;
 }
 
-//boost::shared_ptr<Geometry> PolygonGeometry::copyGeometry() const
-//{
-//   PolygonGeometry *newGeom = new PolygonGeometry(*this);
-//   return boost::shared_ptr<Geometry>(newGeom);
-//}
 
-
+S32 PolygonGeometry::getMinVertCount()
+{
+   return 3;
+}
 
 };

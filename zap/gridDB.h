@@ -74,8 +74,8 @@ public:
    Rect getExtent() const;
    void setExtent(const Rect &extentRect);
 
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const = 0;
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const = 0;
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 
    virtual bool isCollisionEnabled();
 

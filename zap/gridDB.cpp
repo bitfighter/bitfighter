@@ -278,7 +278,6 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
    findObjects(testFunc, fillVector, &extents, minx, miny, maxx, maxy);
 }
 
-
 void GridDatabase::dumpObjects()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
@@ -564,6 +563,18 @@ bool DatabaseObject::isDatabasable()
 }
 
 
+bool DatabaseObject::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   return false;
+}
+
+
+bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
+{
+   return false;
+}
+
+
 bool DatabaseObject::isCollisionEnabled()
 {
    return true;
@@ -710,6 +721,7 @@ EditorObjectDatabase::EditorObjectDatabase() : Parent()
 {
    // Do nothing, just here to call Parent's constructor
 }
+
 
 // Copy constructor
 EditorObjectDatabase::EditorObjectDatabase(const EditorObjectDatabase &database)

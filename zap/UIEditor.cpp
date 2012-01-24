@@ -2994,10 +2994,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
             }
          }
 
-         // Deleted last vertex, or item can't lose a vertex... it must go!
-         if(obj->getVertCount() == 0 || (obj->getGeomType() == geomSimpleLine && obj->getVertCount() < 2)
-                                     || (obj->getGeomType() == geomPolyLine   && obj->getVertCount() < 2)
-                                     || (obj->getGeomType() == geomPolygon    && obj->getVertCount() < 2))
+         // Check if item has too few vertices left to be viable
+         if(obj->getVertCount() < obj->getMinVertCount())
          {
             if(isWallType(obj->getObjectTypeNumber()))
                deletedWall = true;

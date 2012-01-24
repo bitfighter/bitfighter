@@ -87,6 +87,7 @@ public:
    void resetTimer();
    U32 getPeriod();     // temp debugging
 
+   virtual void renderEditorPreview(F32 currentScale);
    virtual void renderEditor(F32 currentScale) = 0;
    virtual void renderDock() = 0;
 };

@@ -152,6 +152,7 @@ struct DamageInfo
    DamageInfo();  // Constructor
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -175,11 +176,6 @@ public:
    virtual void removeFromGame();
    void clearGame();
 
-   // DatabaseObject methods -- provide default implementations
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
-
-
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
 
    virtual Point getActualPos() const;
@@ -189,18 +185,7 @@ public:
 
    virtual void setActualPos(Point p);
 
-   // Render is called twice for every object that is in the
-   // render list.  By default GameObject will call the render()
-   // method one time (when layerIndex == 0).
-   virtual void render(S32 layerIndex);
-   virtual void render();
-   virtual void renderEditorPreview(F32 currentScale);
-
-   virtual void setExtent(const Rect &extent);
    void updateExtentInDatabase();
-
-   void readThisTeam(BitStream *stream);
-   void writeThisTeam(BitStream *stream);
 };
 
 
@@ -251,9 +236,6 @@ public:
       FirstFreeMask = BIT(0)
    };
 
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
-   void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
-
    GameObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
    GameObject *findObjectLOS(TestFunc, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
 
@@ -267,6 +249,9 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+
    virtual S32 getRenderSortValue();
 
    Rect getBounds(U32 stateIndex) const;
@@ -275,6 +260,12 @@ public:
    const Move &getLastMove();
    void setCurrentMove(const Move &theMove);
    void setLastMove(const Move &theMove);
+
+   // Render is called twice for every object that is in the
+   // render list.  By default GameObject will call the render()
+   // method one time (when layerIndex == 0).
+   virtual void render(S32 layerIndex);
+   virtual void render();
 
    enum IdleCallPath {
       ServerIdleMainLoop,              // Idle called from top-level idle loop on server
@@ -315,6 +306,9 @@ public:
 
    S32 getTeamIndx(lua_State *L);      // Return item team to Lua
    virtual void push(lua_State *L);    // Lua-aware classes will implement this
+   
+   void readThisTeam(BitStream *stream);
+   void writeThisTeam(BitStream *stream);
 };
 
 

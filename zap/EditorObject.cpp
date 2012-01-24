@@ -369,6 +369,17 @@ const Color *EditorObject::getTeamColor(S32 teamId)
 }
 
 
+// By default, we'll just render this as we do in game.  Occasionally (like with textItems), we may need to do something special.
+void EditorObject::renderEditorPreview(F32 currentScale)
+{
+   GameObject *gameObject = dynamic_cast<GameObject *>(this);
+   TNLAssert(gameObject, "This object cannot be cast to a GameObject, therefore I can't render it in preview mode!");
+
+   if(gameObject)
+      gameObject->render();
+}
+
+
 // Draw the vertices for a polygon or line item (i.e. walls)
 void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
 {

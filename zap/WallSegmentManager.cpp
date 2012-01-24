@@ -83,8 +83,8 @@ void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjec
    {
       EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
 
-      // Remount any engr items that were attached to any segments on the modified wall
-      if(engrItem->getMountSegment()->getOwner() == changedWallSerialNumber)
+      // Remount any engr items that were either not attached to any wall, or were attached to any segments on the modified wall
+      if(engrItem->getMountSegment() == NULL || engrItem->getMountSegment()->getOwner() == changedWallSerialNumber)
          engrItem->mountToWall(engrItem->getVert(0), editorObjectDatabase->getWallSegmentManager());
 
       // Calculate where all ffs land -- no telling if the segment we moved is or was interfering in its path
