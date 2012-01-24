@@ -273,7 +273,7 @@ public:
    void onAfterRunScriptFromConsole();
 
    void render();
-   void renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay);
+   void renderObjects(const Vector<EditorObject *> *objList, bool renderSelectedObjects, bool isLevelgenOverlay);
    void renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase);
    void renderPolyline(const Vector<Point> *verts);
 
