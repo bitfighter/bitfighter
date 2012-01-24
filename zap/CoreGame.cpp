@@ -477,8 +477,9 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       return;
    }
 
-   // Reset the attacked warning timer
-   mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
+   // Reset the attacked warning timer if we're not healing
+   if(theInfo->damageAmount >= 0)
+      mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(calcCoreWidth());
