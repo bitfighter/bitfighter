@@ -455,6 +455,12 @@ static void setWallSelected(GridDatabase *database, S32 serialNumber, bool selec
 }
 
 
+static F32 getWallEditorRadius(F32 currentScale)
+{
+   return (F32)WallItem::VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+}
+
+
 // Only called from editor... use of getEditorDatabase() below is a bit hacky... what if wall is in a different database?
 void WallItem::onGeomChanged()
 {
@@ -553,7 +559,7 @@ const Color *WallItem::getEditorRenderColor()
 // Size of object in editor 
 F32 WallItem::getEditorRadius(F32 currentScale)
 {
-   return (F32)VERTEX_SIZE;   // Keep vertex hit targets the same regardless of scale
+   return getWallEditorRadius(currentScale);
 }
 
 
@@ -647,6 +653,13 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 string PolyWall::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+
+// Size of object in editor 
+F32 PolyWall::getEditorRadius(F32 currentScale)
+{
+   return getWallEditorRadius(currentScale);
 }
 
 

@@ -193,6 +193,8 @@ public:
    const char *getOnScreenName();
    string toString(F32 gridSize) const;
 
+   F32 getEditorRadius(F32 currentScale);
+
    /////
    // Lua interface  ==>  don't need these!!
 
