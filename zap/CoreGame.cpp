@@ -422,26 +422,27 @@ F32 CoreItem::getEditorRadius(F32 currentScale)
 
 bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-//   center = getActualPos();
-//   radius = calcCoreWidth() / 2;
-   return false;
+   center = getActualPos();
+   radius = calcCoreWidth() / 2;
+   return true;
 }
 
 
 bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    // This poly rotates with time to match what is rendered
-   F32 coreRotateTime = F32(getGame()->getCurrentTime() & 16383) / 16384.f * FloatTau;
-   Point pos = getActualPos();
-   F32 radius = calcCoreWidth() / 2;
+   // problem with shooting through moving polygon, and client and server may have different getCurrentTime()
+   //F32 coreRotateTime = F32(getGame()->getCurrentTime() & 16383) / 16384.f * FloatTau;
+   //Point pos = getActualPos();
+   //F32 radius = calcCoreWidth() / 2;
 
-   for(F32 theta = 0; theta < FloatTau; theta += FloatTau / 10)  // 10 sides
-   {
-      Point p = Point(pos.x + cos(theta + coreRotateTime) * radius, pos.y + sin(theta + coreRotateTime) * radius);
-      polyPoints.push_back(p);
-   }
+   //for(F32 theta = 0; theta < FloatTau; theta += FloatTau / 10)  // 10 sides
+   //{
+   //   Point p = Point(pos.x + cos(theta + coreRotateTime) * radius, pos.y + sin(theta + coreRotateTime) * radius);
+   //   polyPoints.push_back(p);
+   //}
 
-   return true;
+   return false;
 }
 
 

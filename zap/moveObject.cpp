@@ -432,6 +432,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
                   collisionTime = 0;
                   collisionObject = foundObject;
+                  collisionPoint = shipPos;
                   delta.set(0,0);
                }
                else
@@ -450,6 +451,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
                      collisionTime = t;
                      collisionObject = foundObject;
+                     collisionPoint = shipPos;
                      delta = mMoveState[stateIndex].vel * collisionTime;
                   }
                }
