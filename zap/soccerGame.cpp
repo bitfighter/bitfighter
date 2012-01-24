@@ -332,7 +332,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallIte
    mLastPlayerTouch = NULL;
    mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
-   mDragFactor = 1.0;     // 1.0 for no drag
+   mDragFactor = 0.0;     // 0.0 for no drag
 }
 
 
