@@ -355,7 +355,7 @@ public:
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:
-   Point snapPoint(Point const &p, bool snapWhileOnDock = false);
+   Point snapPoint(EditorObjectDatabase *database, Point const &p, bool snapWhileOnDock = false);
    Point snapPointToLevelGrid(Point const &p);
 
    bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets

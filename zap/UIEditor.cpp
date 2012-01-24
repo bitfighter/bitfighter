@@ -1279,7 +1279,7 @@ Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
 }
 
 
-Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
+Point EditorUserInterface::snapPoint(EditorObjectDatabase *database, Point const &p, bool snapWhileOnDock)
 {
    if(mouseOnDock() && !snapWhileOnDock) 
       return p;      // No snapping!
@@ -1288,7 +1288,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
 
    Point snapPoint(p);
 
-   WallSegmentManager *wallSegmentManager = mLoadTarget->getWallSegmentManager();
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    if(mDraggingObjects)
    {
@@ -1301,7 +1301,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
          EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject);
-         return engrObj->mountToWall(snapPointToLevelGrid(p), mLoadTarget->getWallSegmentManager());
+         return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager);
       }
    }
 
@@ -1617,7 +1617,7 @@ void EditorUserInterface::renderInfoPanel()
    if(mSnapObject)
       pos = mSnapObject->getVert(mSnapVertexIndex);
    else
-      pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
+      pos = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos));
 
 
    glColor(Colors::white);
@@ -1904,7 +1904,7 @@ void EditorUserInterface::render()
 
       if(mDraggingObjects)
          // TODO: Merge this with the other place this calculation is made
-         delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+         delta = snapPoint(editorDb, convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
     
       // == Render walls and polyWalls ==
       renderWalls(editorDb, delta, false);
@@ -2016,7 +2016,7 @@ void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Poin
 void EditorUserInterface::renderObjectsUnderConstruction()
 {
    // Add a vert (and deleted it later) to help show what this item would look like if the user placed the vert in the current location
-   mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   mNewItem->addVert(snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)));
    glLineWidth(gLineWidth3);
 
    if(mCreatingPoly) // Wall
@@ -2214,7 +2214,7 @@ void EditorUserInterface::pasteSelection()
 
    clearSelection();       // Only the pasted items should be selected
 
-   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
+   Point pos = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos));
 
    Point firstPoint = mClipboard[0]->getVert(0);
    Point offset;
@@ -2770,9 +2770,9 @@ void EditorUserInterface::onMouseDragged()
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
-      delta = snapPoint(convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
+      delta = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
    else
-      delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
+      delta = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
 
    // Update coordinates of dragged item
@@ -3265,7 +3265,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
       }
    TNLAssert(newObject, "Couldn't create object in insertNewItem()");
 
-   newObject->moveTo(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+   newObject->moveTo(snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)));
    newObject->addToEditor(getGame());    
    newObject->onGeomChanged();
 
@@ -3492,7 +3492,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          if(mNewItem->getVertCount() < gMaxPolygonPoints)            // Limit number of points in a polygon/polyline
          {
-            mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+            mNewItem->addVert(snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)));
             mNewItem->onGeomChanging();
          }
          
@@ -3509,7 +3509,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          if(mHitItem->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
 
-         Point newVertex = snapPoint(convertCanvasToLevelCoord(mMousePos));      // adding vertex w/ right-mouse
+         Point newVertex = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
 
          mAddingVertex = true;
 
@@ -3538,7 +3538,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
          mNewItem->initializeEditor();
          mNewItem->setTeam(mCurrentTeam);
-         mNewItem->addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
+         mNewItem->addVert(snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)));
       }
    }
    else if(inputCode == MOUSE_LEFT)
