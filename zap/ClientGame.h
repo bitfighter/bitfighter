@@ -90,8 +90,6 @@ private:
 
    bool mSpawnDelayed;
 
-   RefPtr<EditorObjectDatabase> mEditorDatabase;
-
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
@@ -218,10 +216,6 @@ public:
    void unsuspendGame();
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);        // For loading levels in editor
-
-   EditorObjectDatabase *getEditorDatabase();
-   void setEditorDatabase(EditorObjectDatabase *database);
-
 };
 
 ////////////////////////////////////////

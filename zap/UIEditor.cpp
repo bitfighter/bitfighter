@@ -84,7 +84,7 @@ const F32 MIN_SCALE = .05f;         // Most zoomed-in scale
 const F32 MAX_SCALE = 2.5;          // Most zoomed-out scale
 const F32 STARTING_SCALE = 0.5;
 
-static RefPtr<EditorObjectDatabase> mLoadTarget;
+static EditorObjectDatabase *mLoadTarget;
 
 // statics
 Vector<string> EditorUserInterface::robots;        // List of robot lines in the level file
@@ -322,7 +322,7 @@ void EditorUserInterface::saveUndoState()
    EditorObjectDatabase *newDB = eod;
    //eod->dumpObjects();     
 
-   mUndoItems[mLastUndoIndex % UNDO_STATES] = new EditorObjectDatabase(*newDB);  // Make a copy
+   mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase(*newDB));  // Make a copy
 
    //mUndoItems[mLastUndoIndex % UNDO_STATES]->dumpObjects();
 
@@ -420,7 +420,7 @@ void EditorUserInterface::redo()
       mLastUndoIndex++;
 
       getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
-      EditorObjectDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES];
+      EditorObjectDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
 
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 

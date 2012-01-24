@@ -767,15 +767,19 @@ GridDatabase *Game::getGameObjDatabase()
 
 
 EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
-{
-   TNLAssert(false, "Only used for ClientGame?");
-   return NULL;
-}
+{ 
+   // Lazy init
+   if(!mEditorDatabase.get())
+      mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
+         
+   return mEditorDatabase.get(); 
+}  
 
 
-void Game::setEditorDatabase(EditorObjectDatabase *database)
+void Game::setEditorDatabase(boost::shared_ptr<EditorObjectDatabase> database)
 {
-   TNLAssert(false, "Only used for ClientGame?");
+   TNLAssert(database.get(), "Database should not be NULL!");
+   mEditorDatabase = boost::dynamic_pointer_cast<EditorObjectDatabase>(database);
 }
 
 

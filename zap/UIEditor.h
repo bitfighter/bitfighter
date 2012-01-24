@@ -111,7 +111,7 @@ private:
 
    const Vector<EditorObject *> *getObjectList();     // Convenience method
 
-   Vector<RefPtr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
+   Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Vector<Point> mOriginalVertLocations;
 
