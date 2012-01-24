@@ -1888,5 +1888,23 @@ AbstractTeam *ClientGame::getNewTeam()
    return new EditorTeam;
 }
 
+EditorObjectDatabase *ClientGame::getEditorDatabase()
+{ 
+   // Lazy init
+   if(!mEditorDatabase.getPointer())
+      mEditorDatabase = new EditorObjectDatabase();
+
+   return mEditorDatabase.getPointer(); 
+}  
+
+
+void ClientGame::setEditorDatabase(EditorObjectDatabase *database)
+{
+   TNLAssert(database, "Database should not be NULL!");
+   database->pointCanSeePoint(Point(0,1), Point(0,2));  // dummy check if valid database
+   mEditorDatabase = database;
+}
+
+
 };
 

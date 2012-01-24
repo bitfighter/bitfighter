@@ -30,6 +30,7 @@
 #include "tnlTypes.h"
 #include "tnlDataChunker.h"
 #include "tnlVector.h"
+#include "tnlNetBase.h"
 
 #include "Rect.h"
 #include "GeomUtils.h"
@@ -167,7 +168,7 @@ public:
 
 class EditorObject;
 
-class EditorObjectDatabase : public GridDatabase
+class EditorObjectDatabase : public GridDatabase, public Object // Object, to make SafePtr and RefPtr work
 {
    typedef GridDatabase Parent;
 
