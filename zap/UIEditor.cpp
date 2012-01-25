@@ -1989,7 +1989,7 @@ void EditorUserInterface::render()
 }
 
 
-// Render everything but walls, which are rendered elsewhere
+// Render everything but walls, which are rendered in renderWalls() below
 void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay)
 {
    const Vector<EditorObject *> *objList = database->getObjectList();
@@ -2019,7 +2019,7 @@ void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Poin
       EditorObject *obj = objList->get(i);
 
       if(obj->getObjectTypeNumber() == WallItemTypeNumber)
-         if( selected == (obj->isSelected()/* || obj->isLitUp()*/) )    // Only draw sel'ed items when renderSelectedObjects is true
+         if( selected == (obj->isSelected() || obj->anyVertsSelected()) )    // Only draw sel'ed items when renderSelectedObjects is true
             obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
    }
 }
