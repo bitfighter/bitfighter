@@ -1338,7 +1338,7 @@ Point EditorUserInterface::snapPoint(EditorObjectDatabase *database, Point const
       }
 
       // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
-      if(snapToWallCorners)
+      if(snapToWallCorners)   
          checkCornersForSnap(p, wallSegmentManager->mWallEdges, minDist, snapPoint);
    }
 
@@ -1896,12 +1896,11 @@ void EditorUserInterface::render()
    glPushMatrix();
       setLevelToCanvasCoordConversion();
 
-      Point delta;      // Defaults to (0,0)
+      // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
+      // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rahter obvoius fact
+      // that walls that are not being dragged should be rendered in place.
+      static Point delta = mDraggingObjects ? mSnapDelta : Point(0,0);
 
-      if(mDraggingObjects)
-         // TODO: Merge this with the other place this calculation is made
-         delta = snapPoint(editorDb, convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
-    
       // == Render walls and polyWalls ==
       renderWalls(editorDb, delta, false, false);
       renderWalls(&mLevelGenDatabase, delta, false, true );
@@ -2732,7 +2731,7 @@ void EditorUserInterface::onMouseDragged()
        needToSaveUndoState = false;
    }
 
-   findSnapVertex();
+   findSnapVertex();    // Sets mSnapObject and mSnapVertexIndex
 
    if(!mSnapObject || mSnapVertexIndex == NONE)
       return;
@@ -2763,16 +2762,13 @@ void EditorUserInterface::onMouseDragged()
    SDL_SetCursor(Cursor::getSpray());
 
 
-   Point delta;
-
    // The thinking here is that for large items -- walls, polygons, etc., we may grab an item far from its snap vertex, and we
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    if(mSnapObject->getGeomType() == geomPoint || (mHitItem && mHitItem->anyVertsSelected()))
-      delta = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
-   else
-      delta = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
-
+      mSnapDelta = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos)) - mMoveOrigin;
+   else  // larger items
+      mSnapDelta = snapPoint(getGame()->getEditorDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
    // Update coordinates of dragged item
    const Vector<EditorObject *> *objList = getObjectList();
@@ -2788,7 +2784,7 @@ void EditorUserInterface::onMouseDragged()
          for(S32 j = 0; j < obj->getVertCount(); j++)
             if(obj->isSelected() || obj->vertSelected(j))
             {
-               obj->setVert(mOriginalVertLocations[count] + delta, j);
+               obj->setVert(mOriginalVertLocations[count] + mSnapDelta, j);
                count++;
             }
 

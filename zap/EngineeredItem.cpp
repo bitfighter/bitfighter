@@ -984,6 +984,8 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
                         (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
    }
 
+   // Can find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location while the
+   // segment is some distance away
    if(mountSeg)   // Found a segment we can mount to
    {
       setVert(anchor, 0);

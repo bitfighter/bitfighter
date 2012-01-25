@@ -113,6 +113,7 @@ private:
 
    Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
+   Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
    Vector<Point> mOriginalVertLocations;
 
    Vector<boost::shared_ptr<EditorObject> > mDockItems;    // Items sitting in the dock
