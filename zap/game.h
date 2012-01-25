@@ -473,7 +473,7 @@ public:
    GameNetInterface *getNetInterface();
    virtual GridDatabase *getGameObjDatabase();
 
-   EditorObjectDatabase *getEditorDatabase(); 
+   virtual EditorObjectDatabase *getEditorDatabase(); 
 
    void setEditorDatabase(boost::shared_ptr<EditorObjectDatabase> database);
 
