@@ -111,6 +111,7 @@ bool isTurretTargetType(U8 x);
 bool isCollideableType(U8 x);                  // Move objects bounce off of these
 bool isForceFieldCollideableType(U8 x);
 bool isWallType(U8 x);
+bool isWallItemType(U8 x);
 bool isLineItemType(U8 x);
 bool isWeaponCollideableType(U8 x);
 bool isAsteroidCollideableType(U8 x);

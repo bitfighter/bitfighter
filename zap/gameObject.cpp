@@ -146,6 +146,12 @@ bool isWallType(U8 x)
 }
 
 
+bool isWallItemType(U8 x)
+{
+   return x == WallItemTypeNumber;
+}
+
+
 bool isLineItemType(U8 x)
 {
    return
