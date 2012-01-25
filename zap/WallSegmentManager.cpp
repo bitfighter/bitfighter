@@ -373,7 +373,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    else  // Render selected/moving walls last so they appear on top; this is pass 2, 
    {
       glColor(fillColor);
-      if(moved)
+     /* if(moved)*/
       {
          for(S32 i = 0; i < mWallSegments.size(); i++)
             if(mWallSegments[i]->isSelected())  

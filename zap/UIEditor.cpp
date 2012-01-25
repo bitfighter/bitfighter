@@ -1917,7 +1917,7 @@ void EditorUserInterface::render()
       // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
       renderObjects(editorDb, true, false);               // Render selected objects 
 
-      renderWalls(editorDb, delta, true, false);    //{P{P
+      renderWalls(editorDb, delta, true, false);   
 
       // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
@@ -1989,6 +1989,7 @@ void EditorUserInterface::render()
 }
 
 
+// Render everything but walls, which are rendered elsewhere
 void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay)
 {
    const Vector<EditorObject *> *objList = database->getObjectList();
@@ -1996,9 +1997,9 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool ren
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
-
-      if( renderSelectedObjects == (obj->isSelected() || obj->isLitUp()) )          // Only draw sel'ed items when renderSelectedObjects is true
-         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
+      if(obj->getObjectTypeNumber() != WallItemTypeNumber)
+         if( renderSelectedObjects == (obj->isSelected() || obj->isLitUp()) )          // Only draw sel'ed items when renderSelectedObjects is true
+            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
    }
 }
 
@@ -2009,6 +2010,18 @@ void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Poin
    // Render wall outlines and fill
    database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, selected,
                                                   offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+
+   // Render walls as normal objects to get their centerlines
+   const Vector<EditorObject *> *objList = database->getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+   {
+      EditorObject *obj = objList->get(i);
+
+      if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+         if( selected == (obj->isSelected()/* || obj->isLitUp()*/) )    // Only draw sel'ed items when renderSelectedObjects is true
+            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
+   }
 }
 
 
