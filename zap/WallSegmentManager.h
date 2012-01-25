@@ -94,7 +94,7 @@ public:
  
    ////////////////
    // Render functions
-   void renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, const Point &selectedItemOffset,
+   void renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, bool drawSelected, const Point &selectedItemOffset,
                     bool previewMode, bool showSnapVertices, F32 alpha);
 };
 
