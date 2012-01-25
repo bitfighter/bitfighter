@@ -1903,21 +1903,21 @@ void EditorUserInterface::render()
          delta = snapPoint(editorDb, convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
     
       // == Render walls and polyWalls ==
-      renderWalls(editorDb, delta, false);
-      renderWalls(&mLevelGenDatabase, delta, true );
+      renderWalls(editorDb, delta, false, false);
+      renderWalls(&mLevelGenDatabase, delta, false, true );
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
       renderObjects(editorDb, false, false);              // Render our normal objects
       renderObjects(&mLevelGenDatabase, false, true);     // Render any levelgen objects being overlaid
 
-      
-
       // == Selected items ==
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
       // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
       // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
-      renderObjects(editorDb, true, false);               // Render selected objects     
+      renderObjects(editorDb, true, false);               // Render selected objects 
+
+      //renderWalls(editorDb, delta, true, false);    {P{P
 
       // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
@@ -2004,12 +2004,11 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool ren
 
 
 // Render walls and centerlines
-void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase)
+void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase)
 {
    // Render wall outlines and fill
    database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                                                   offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
-   // Render centerlines {P{P
 }
 
 

@@ -274,7 +274,7 @@ public:
 
    void render();
    void renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay);
-   void renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase);
+   void renderWalls(EditorObjectDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
    void renderPolyline(const Vector<Point> *verts);
 
    void setLevelToCanvasCoordConversion();
