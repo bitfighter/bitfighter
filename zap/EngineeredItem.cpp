@@ -566,15 +566,16 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
+      Point mountPos = pos - dir * 0.001f;  // Offsetting slightly prevents spazzy behavior in editor
       
       // Look for walls
-      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, MoveObject::ActualState, format, pos, pos + dir, t, n);
+      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {
          if(t < minDist)
          {
-            anchor.set(pos + dir * t);
+            anchor.set(mountPos + dir * t);
             normal.set(n);
             minDist = t;
             closestWall = wall;
