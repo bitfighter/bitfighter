@@ -98,11 +98,12 @@ public:
    EditorObject *copy();            // Makes a duplicate of the item (see method for explanation)
    EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
 
+#ifndef ZAP_DEDICATED
    virtual void prepareForDock(ClientGame *game, const Point &point);
    void addToEditor(ClientGame *game);
+#endif
 
    void assignNewSerialNumber();
-   void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
 
    // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
    virtual Point getInitialPlacementOffset(F32 gridSize);
@@ -110,7 +111,10 @@ public:
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 
+#ifndef ZAP_DEDICATED
    void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
+   void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
+#endif
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);    // Render some text, with specified vertical offset
    virtual void renderEditor(F32 currentScale);
    virtual void renderEditorPreview(F32 currentScale);         // Render objects when tab is pressed

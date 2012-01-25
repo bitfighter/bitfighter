@@ -94,7 +94,7 @@ EditorObject *EditorObject::clone() const
 //   mSerialNumber = mNextSerialNumber++;
 //}
 
-
+#ifndef ZAP_DEDICATED
 void EditorObject::prepareForDock(ClientGame *game, const Point &point)
 {
    mGame = game;
@@ -103,7 +103,6 @@ void EditorObject::prepareForDock(ClientGame *game, const Point &point)
    
    unselectVerts();
 }
-
 
 void EditorObject::addToEditor(ClientGame *game)
 {
@@ -114,6 +113,7 @@ void EditorObject::addToEditor(ClientGame *game)
 
    onGeomChanged();     // Added primarily as a generic way to get PolyWalls to build themselves after being dragged from the dock
 }
+#endif
 
 
 void EditorObject::assignNewSerialNumber()
@@ -137,10 +137,10 @@ static F32 getRenderingAlpha(bool isScriptItem)
 
 static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
 
+#ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
 {
-#ifndef ZAP_DEDICATED
    F32 radius = getEditorRadius(currentScale);
 
    // Label and highlight any selected or lit up vertices.  This will also highlight point items.
@@ -153,24 +153,24 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
 
          drawSquare(center, radius / currentScale);
       }
-#endif
 }
 
 
 void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 yOffset)
 {
-#ifndef ZAP_DEDICATED
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
    glColor(Colors::white);
    UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
-#endif
 }
+#endif
 
 
 void EditorObject::labelDockItem()
 {
+#ifndef ZAP_DEDICATED
    renderDockItemLabel(getVert(0), getOnDockName(), 11);
+#endif
 }
 
 
@@ -635,8 +635,10 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
 
 void EditorPointObject::prepareForDock(ClientGame *game, const Point &point)
 {
+#ifndef ZAP_DEDICATED
    setVert(point, 0);
    Parent::prepareForDock(game, point);
+#endif
 }
 
 

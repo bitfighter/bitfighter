@@ -769,6 +769,7 @@ GridDatabase *Game::getGameObjDatabase()
 EditorObjectDatabase *Game::getEditorDatabase()
 { 
    TNLAssert(false, "Not implemented!");
+   return NULL;
 }  
 
 
