@@ -766,13 +766,9 @@ GridDatabase *Game::getGameObjDatabase()
 }
 
 
-EditorObjectDatabase *Game::getEditorDatabase()  // TODO: Only for clientGame
+EditorObjectDatabase *Game::getEditorDatabase()
 { 
-   // Lazy init
-   if(!mEditorDatabase.get())
-      mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
-         
-   return mEditorDatabase.get(); 
+   TNLAssert(false, "Not implemented!");
 }  
 
 

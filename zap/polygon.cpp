@@ -112,7 +112,7 @@ void EditorPolygon::labelDockItem()
 }
 
 
-void EditorPolygon::prepareForDock(Game *game, const Point &point)
+void EditorPolygon::prepareForDock(ClientGame *game, const Point &point)
 {
 #ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height

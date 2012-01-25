@@ -1908,9 +1908,10 @@ void EditorUserInterface::render()
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
-      // Don't render polywalls, as they get rendered along with walls elsewhere
       renderObjects(editorDb->getObjectList(), false, false);              // Render our normal objects
       renderObjects(mLevelGenDatabase.getObjectList(), false, true);       // Render any levelgen objects being overlaid
+
+      
 
       // == Selected items ==
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
@@ -2000,10 +2001,13 @@ void EditorUserInterface::renderObjects(const Vector<EditorObject *> *objList, b
 }
 
 
+// Render walls and centerlines
 void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Point &offset, bool isLevelGenDatabase)
 {
+   // Render wall outlines and fill
    database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, 
                                                   offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
+   // Render centerlines {P{P
 }
 
 
@@ -3196,8 +3200,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
 {
    const Vector<EditorObject *> *objList = getObjectList();
    EditorObject *obj = objList->get(itemIndex);
-   Game *game = getGame();
-   EditorObjectDatabase *database = game->getEditorDatabase();
+   EditorObjectDatabase *database = getGame()->getEditorDatabase();
 
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
@@ -3967,8 +3970,6 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
             fillVector.clear();
 
             getGame()->getEditorDatabase()->findObjects(fillVector);
-            /*   EditorObjectDatabase *editorDb = getGame()->getEditorDatabase();
-               editorDb->findObjects((TestFunc)isAnyObjectType, fillVector, cursorRect);*/
 
 
             for(S32 i = 0; i < fillVector.size(); i++)

@@ -95,7 +95,7 @@ EditorObject *EditorObject::clone() const
 //}
 
 
-void EditorObject::prepareForDock(Game *game, const Point &point)
+void EditorObject::prepareForDock(ClientGame *game, const Point &point)
 {
    mGame = game;
 
@@ -105,7 +105,7 @@ void EditorObject::prepareForDock(Game *game, const Point &point)
 }
 
 
-void EditorObject::addToEditor(Game *game)
+void EditorObject::addToEditor(ClientGame *game)
 {
    BfObject::addToGame(game, game->getEditorDatabase());
    // constists of:
@@ -633,7 +633,7 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
 }
 
 
-void EditorPointObject::prepareForDock(Game *game, const Point &point)
+void EditorPointObject::prepareForDock(ClientGame *game, const Point &point)
 {
    setVert(point, 0);
    Parent::prepareForDock(game, point);

@@ -98,8 +98,8 @@ public:
    EditorObject *copy();            // Makes a duplicate of the item (see method for explanation)
    EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
 
-   virtual void prepareForDock(Game *game, const Point &point);
-   void addToEditor(Game *game);
+   virtual void prepareForDock(ClientGame *game, const Point &point);
+   void addToEditor(ClientGame *game);
 
    void assignNewSerialNumber();
    void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
@@ -228,7 +228,7 @@ class EditorPointObject : public EditorObject, public PointGeometry
 
 public:
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
-   void prepareForDock(Game *game, const Point &point);
+   void prepareForDock(ClientGame *game, const Point &point);
 };
 
 
