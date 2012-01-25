@@ -1908,8 +1908,8 @@ void EditorUserInterface::render()
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
-      renderObjects(editorDb->getObjectList(), false, false);              // Render our normal objects
-      renderObjects(mLevelGenDatabase.getObjectList(), false, true);       // Render any levelgen objects being overlaid
+      renderObjects(editorDb, false, false);              // Render our normal objects
+      renderObjects(&mLevelGenDatabase, false, true);     // Render any levelgen objects being overlaid
 
       
 
@@ -1917,7 +1917,7 @@ void EditorUserInterface::render()
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
       // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
       // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
-      renderObjects(editorDb->getObjectList(), true, false);               // Render selected objects     
+      renderObjects(editorDb, true, false);               // Render selected objects     
 
       // == Draw geomPolyLine features under construction ==
       if(mCreatingPoly || mCreatingPolyline)    
@@ -1989,8 +1989,10 @@ void EditorUserInterface::render()
 }
 
 
-void EditorUserInterface::renderObjects(const Vector<EditorObject *> *objList, bool renderSelectedObjects, bool isLevelgenOverlay)
+void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay)
 {
+   const Vector<EditorObject *> *objList = database->getObjectList();
+
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
