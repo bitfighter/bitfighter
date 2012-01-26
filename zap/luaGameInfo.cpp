@@ -81,11 +81,11 @@ extern const char *gGameTypeNames[];
 S32 LuaGameInfo::getGameType(lua_State *L)
 {
    TNLAssert(gServerGame->getGameType(), "Need Gametype check in getGameType");
-   return returnInt(L, gServerGame->getGameType()->getGameType());
+   return returnInt(L, gServerGame->getGameType()->getGameTypeId());
 }
 
 
-S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gGameTypeNames[gServerGame->getGameType()->getGameType()]); }
+S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gGameTypeNames[gServerGame->getGameType()->getGameTypeId()]); }
 S32 LuaGameInfo::getFlagCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->getFlagCount()); }
 S32 LuaGameInfo::getWinningScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getWinningScore()); }
 S32 LuaGameInfo::getGameTimeTotal(lua_State *L)     { return returnInt(L, gServerGame->getGameType()->getTotalGameTime()); }

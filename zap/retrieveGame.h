@@ -78,7 +78,7 @@ public:
 
    bool isTeamFlagGame();
 
-   GameTypes getGameType() const;
+   GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString();
    bool isTeamGame();

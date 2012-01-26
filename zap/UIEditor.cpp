@@ -206,9 +206,9 @@ void EditorUserInterface::populateDock()
    addDockObject(new TextItem(), xPos, yPos);
    yPos += spacer;
 
-   if(getGame()->getGameType()->getGameType() == SoccerGame)
+   if(getGame()->getGameType()->getGameTypeId() == SoccerGame)
       addDockObject(new SoccerBallItem(), xPos, yPos);
-   else if(getGame()->getGameType()->getGameType() == CoreGame)
+   else if(getGame()->getGameType()->getGameTypeId() == CoreGame)
       addDockObject(new CoreItem(), xPos, yPos);
    else
       addDockObject(new FlagItem(), xPos, yPos);
@@ -240,7 +240,7 @@ void EditorUserInterface::populateDock()
    addDockObject(new LoadoutZone(), xPos, yPos);
    yPos += 25;
 
-   if(getGame()->getGameType()->getGameType() == NexusGame)
+   if(getGame()->getGameType()->getGameTypeId() == NexusGame)
    {
       addDockObject(new NexusObject(), xPos, yPos);
       yPos += 25;
@@ -865,15 +865,15 @@ void EditorUserInterface::validateLevel()
    GameType *gameType = getGame()->getGameType();
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
-   if(foundSoccerBall && gameType->getGameType() != SoccerGame)
+   if(foundSoccerBall && gameType->getGameTypeId() != SoccerGame)
       mLevelWarnings.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
-   if(foundNexus && gameType->getGameType() != NexusGame)
+   if(foundNexus && gameType->getGameTypeId() != NexusGame)
       mLevelWarnings.push_back("WARNING: Nexus object can only be used in Nexus game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
-   if(!foundNexus && gameType->getGameType() == NexusGame)
+   if(!foundNexus && gameType->getGameTypeId() == NexusGame)
       mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
    if(foundFlags && !gameType->isFlagGame())

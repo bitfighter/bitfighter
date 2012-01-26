@@ -64,7 +64,7 @@ public:
       SoccerMsgGameOverTie,
    };
 
-   GameTypes getGameType() const;
+   GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    virtual const char *getInstructionString();
    //bool isTeamGame();

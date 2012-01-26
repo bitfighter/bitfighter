@@ -1830,7 +1830,7 @@ void GameType::updateLeadingTeamAndScore()
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
       S32 score = ((Team *)(mGame->getTeam(i)))->getScore();
-      S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + ((score < 0 && getGameType() != CoreGame) ? 2 : 1));
+      S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + ((score < 0 && getGameTypeId() != CoreGame) ? 2 : 1));
 
       mDigitsNeededToDisplayScore = max(digits, mDigitsNeededToDisplayScore);
 
@@ -2686,7 +2686,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    // No changing score in Core
-   if(serverGame->getGameType()->getGameType() == CoreGame)
+   if(serverGame->getGameType()->getGameTypeId() == CoreGame)
       return;
 
    // Use voting when there is no level change password, and there is more then 1 player
@@ -2711,7 +2711,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    // No changing score in Core
-   if(serverGame->getGameType()->getGameType() == CoreGame)
+   if(serverGame->getGameType()->getGameTypeId() == CoreGame)
       return;
 
    // Reset player scores
@@ -3439,7 +3439,7 @@ Game *GameType::getGame() const
 
 
 // static
-StringTableEntry GameType::getGameTypeName(GameTypes gameType)
+StringTableEntry GameType::getGameTypeName(GameTypeId gameType)
 {
    switch(gameType)
    {
@@ -3468,7 +3468,7 @@ StringTableEntry GameType::getGameTypeName(GameTypes gameType)
 }
 
 
-GameTypes GameType::getGameType() const
+GameTypeId GameType::getGameTypeId() const
 {
    return BitmatchGame;
 }
@@ -3476,7 +3476,7 @@ GameTypes GameType::getGameType() const
 
 const char *GameType::getGameTypeString() const
 {
-   return getGameTypeName(getGameType()).getString();
+   return getGameTypeName(getGameTypeId()).getString();
 }
 
 

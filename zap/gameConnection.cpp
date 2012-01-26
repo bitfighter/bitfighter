@@ -1030,7 +1030,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, RangedU32
    if(type == NoGameType)
       mLevelInfos.clear();
    else
-      mLevelInfos.push_back(LevelInfo(name, (GameTypes)type.value));
+      mLevelInfos.push_back(LevelInfo(name, (GameTypeId)type.value));
 }
 
 

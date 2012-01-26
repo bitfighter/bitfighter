@@ -1450,7 +1450,7 @@ LevelInfo::LevelInfo()
 
 
 // Constructor, only used on client
-LevelInfo::LevelInfo(const StringTableEntry &name, GameTypes type)
+LevelInfo::LevelInfo(const StringTableEntry &name, GameTypeId type)
 {
    initialize();
 
@@ -1784,7 +1784,7 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
                GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
                if(gt)
                {
-                  levelInfo.levelType = gt->getGameType();
+                  levelInfo.levelType = gt->getGameTypeId();
                   delete gt;
                   foundGameType = true;
                }
@@ -1919,7 +1919,7 @@ StringTableEntry ServerGame::getCurrentLevelName()
 
 
 // Return type of level currently in play
-GameTypes ServerGame::getCurrentLevelType()
+GameTypeId ServerGame::getCurrentLevelType()
 {
    return mLevelInfos[mCurrentLevelIndex].levelType;
 }
@@ -2621,7 +2621,7 @@ void ServerGame::idle(U32 timeDelta)
       MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
       static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here.
-      static GameTypes prevCurrentLevelType;
+      static GameTypeId prevCurrentLevelType;
       static S32 prevRobotCount;
       static S32 prevPlayerCount;
 

@@ -90,7 +90,7 @@ public:
    void setFlagScore(S32 pointsPerMinute);
    S32 getFlagScore() const;
 
-   GameTypes getGameType() const;
+   GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString();
    //bool isTeamGame();

@@ -258,7 +258,7 @@ void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
 }
 
 
-GameTypes CoreGameType::getGameType() const
+GameTypeId CoreGameType::getGameTypeId() const
 {
    return CoreGame;
 }
