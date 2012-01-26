@@ -119,6 +119,8 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
 {
    buildAllWallSegmentEdgesAndPoints(gameDatabase);
    rebuildEdges();
+
+   rebuildSelectedOutline();
 }
 
 
@@ -309,7 +311,10 @@ void WallSegmentManager::rebuildSelectedOutline()
       if(mWallSegments[i]->isSelected())
          selectedSegments.push_back(mWallSegments[i]);
 
-   clipAllWallEdges(selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
+   if(selectedSegments.size() == 0)
+      mSelectedWallEdgePoints.clear();
+   else
+      clipAllWallEdges(selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }
 
 
