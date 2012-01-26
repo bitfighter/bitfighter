@@ -290,8 +290,14 @@ public:
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 
    const Vector<U32> &getLoadout();
+
+   static const U8 CONNECT_VERSION;  // may be useful in future version (such as 016a)
+   U8 mConnectionVersion;  // the CONNECT_VERSION of the other side of this connection
+
    void writeConnectRequest(BitStream *stream);
    bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
+   void writeConnectAccept(BitStream *stream);
+   bool readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason);
 
    void setConnectionSpeed(S32 speed);
 

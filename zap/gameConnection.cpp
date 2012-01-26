@@ -48,6 +48,8 @@ namespace Zap
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
+const U8 GameConnection::CONNECT_VERSION = 0;  // GameConnection's version, for possible future use with changes on compatible versions
+
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
 {
@@ -1280,6 +1282,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 }
 
 
+
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
 {
@@ -1287,6 +1290,8 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    Parent::writeConnectRequest(stream);
 
    bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
+
+   stream->write(CONNECT_VERSION);
 
    string serverPW;
    string lastServerName = mClientGame->getRequestedServerName();
@@ -1324,6 +1329,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       return false;
 
    char buf[256];
+
+   stream->read(&mConnectionVersion);
 
    stream->readString(buf);
    string serverPassword = gServerGame->getSettings()->getServerPassword();
@@ -1391,6 +1398,22 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    requestAuthenticationVerificationFromMaster();    
 
    return true;
+}
+
+// Server side writes ConnectAccept
+void GameConnection::writeConnectAccept(BitStream *stream)
+{
+   Parent::writeConnectAccept(stream);
+   stream->write(CONNECT_VERSION);
+}
+
+// Client side reads ConnectAccept
+bool GameConnection::readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason)
+{
+   if(!Parent::readConnectAccept(stream, reason))
+      return false;
+
+   stream->read(&mConnectionVersion);
 }
 
 

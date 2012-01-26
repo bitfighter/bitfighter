@@ -182,8 +182,6 @@ string Teleporter::toString(F32 gridSize) const
 
 U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   bool isInitial = (updateMask & BIT(3));
-
    if(stream->writeFlag(updateMask & InitMask))
    {
       getVert(0).write(stream);
@@ -193,11 +191,13 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       for(S32 i = 0; i < mDests.size(); i++)
          mDests[i].write(stream);
 
-      if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))
+      if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))  // most teleporter will be at a default timing
          stream->writeInt(mTeleporterDelay, 32);
-   }
 
-   if(stream->writeFlag((updateMask & TeleportMask) && !isInitial))    // Basically, this gets triggered if a ship passes through
+      if(mTeleporterDelay != 0 && stream->writeFlag(timeout != 0))
+         stream->writeInt(timeout, 32);  // a player might join while this teleporter is in the middle of delay.
+   }
+   else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
       stream->write(mLastDest);     // Where ship is going
 
    return 0;
@@ -223,9 +223,11 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       if(stream->readFlag())
          mTeleporterDelay = stream->readInt(32);
-   }
 
-   if(stream->readFlag() && isGhost())
+      if(mTeleporterDelay != 0 && stream->readFlag())
+         timeout = stream->readInt(32);
+   }
+   else if(stream->readFlag() && isGhost())
    {
       S32 dest;
       stream->read(&dest);
@@ -323,8 +325,12 @@ void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
    F32 r;
-   if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
+   if(timeout == 0)
+      r = 1;
+   else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
       r = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
+   else if(mTeleporterDelay < TeleporterExpandTime)
+      r = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
    else if(timeout < TeleporterExpandTime)
       r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
    else
