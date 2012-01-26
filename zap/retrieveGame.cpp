@@ -388,7 +388,7 @@ bool RetrieveGameType::isTeamFlagGame()
 }
 
 
-GameTypes RetrieveGameType::getGameType() const
+GameTypeId RetrieveGameType::getGameTypeId() const
 {
    return RetrieveGame;
 }

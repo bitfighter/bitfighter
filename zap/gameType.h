@@ -170,9 +170,9 @@ public:
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
-   static StringTableEntry getGameTypeName(GameTypes gameType);
+   static StringTableEntry getGameTypeName(GameTypeId gameType);
 
-   virtual GameTypes getGameType() const;
+   virtual GameTypeId getGameTypeId() const;
    const char *getGameTypeString() const;       
    virtual const char *getShortName() const;            // Will be overridden by other games
    virtual const char *getInstructionString() const;    //          -- ditto --

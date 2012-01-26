@@ -184,7 +184,7 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-GameTypes SoccerGameType::getGameType() const
+GameTypeId SoccerGameType::getGameTypeId() const
 {
    return SoccerGame;
 }

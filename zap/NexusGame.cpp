@@ -472,7 +472,7 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
 }
 
 
-GameTypes NexusGameType::getGameType() const
+GameTypeId NexusGameType::getGameTypeId() const
 {
    return NexusGame;
 }

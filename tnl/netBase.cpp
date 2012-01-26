@@ -169,31 +169,10 @@ void NetClassRep::logBitUsage()
 }
 
 
-Object::Object()
+
+
+SafePtrData::~SafePtrData()
 {
-   initialize();
-}
-
-
-Object::Object(const Object &copy) 
-{ 
-   initialize();
-}
-
-
-void Object::initialize()
-{
-   mFirstObjectRef = NULL; 
-   mRefCount = 0; 
-}
-
-
-Object::~Object()
-{
-   TNLAssert(mRefCount == 0, "Error! Object deleted with non-zero reference count!");
-   // loop through the linked list of object references and NULL
-   // out all pointers to this object.
-
    SafeObjectRef *walk = mFirstObjectRef;
    while(walk)
    {
@@ -203,6 +182,16 @@ Object::~Object()
       walk->mNextObjectRef = NULL;
       walk = next;
    }
+}
+
+void RefPtrData::destroySelf()
+{
+   delete this;
+}
+
+RefPtrData::~RefPtrData()
+{
+   TNLAssert(mRefCount == 0, "Error! Object deleted with non-zero reference count!");
 }
 
 //--------------------------------------

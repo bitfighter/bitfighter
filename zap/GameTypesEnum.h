@@ -28,7 +28,7 @@
 
 namespace Zap
 {
-   enum GameTypes
+   enum GameTypeId
    {
       BitmatchGame,
       CTFGame,

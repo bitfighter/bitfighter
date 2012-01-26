@@ -107,7 +107,7 @@ class Ship;
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
 // But the general scope of what we track should be limited; other items should be stored directly on the GameConnection object itself.
-class ClientInfo : public Object  // using "Object" will be needed for GameObject's "SafePtr"
+class ClientInfo : public SafePtrData
 {
 private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
@@ -527,14 +527,14 @@ struct LevelInfo
 public:
    StringTableEntry levelFileName;  // File level is stored in
    StringTableEntry levelName;      // Level "in-game" names
-   GameTypes levelType;      
+   GameTypeId levelType;      
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
 
    LevelInfo();      // Default constructor used on server side
 
    // Constructor, used on client side where we don't care about min/max players
-   LevelInfo(const StringTableEntry &name, GameTypes type);
+   LevelInfo(const StringTableEntry &name, GameTypeId type);
 
    // Constructor, used on server side, augmented with setInfo method below
    LevelInfo(const string &levelFile);
@@ -658,7 +658,7 @@ public:
 
    StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
-   GameTypes getCurrentLevelType();             // Return type of level currently in play
+   GameTypeId getCurrentLevelType();             // Return type of level currently in play
    StringTableEntry getCurrentLevelTypeName();  // Return name of type of level currently in play
 
    bool isServer();

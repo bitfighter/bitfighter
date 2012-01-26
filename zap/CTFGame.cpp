@@ -271,7 +271,7 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
-GameTypes CTFGameType::getGameType() const
+GameTypeId CTFGameType::getGameTypeId() const
 {
    return CTFGame;
 }

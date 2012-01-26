@@ -351,7 +351,49 @@ public:
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
+class RefPtrData
+{
+   U32 mRefCount;                  ///< Reference counter for RefPtr objects.
+   friend class RefObjectRef;
+
+public:
+   RefPtrData() {mRefCount = 0;}
+   RefPtrData(const RefPtrData &copy) {mRefCount = 0;}
+   virtual ~RefPtrData();
+
+   /// Object destroy self call (from RefPtr).
+   ///
+   /// @note Override if this class has specially allocated memory.
+   virtual void destroySelf();
+
+   void incRef()
+   {
+      mRefCount++;
+   }
+
+   void decRef()
+   {
+      mRefCount--;
+      if(!mRefCount)
+         destroySelf();
+   }
+};
+
+
 class SafeObjectRef;
+
+class SafePtrData
+{
+   SafeObjectRef *mFirstObjectRef; ///< The head of the linked list of safe object references.
+   friend class SafeObjectRef;
+public:
+   SafePtrData() {mFirstObjectRef = NULL;}
+   SafePtrData(const SafePtrData &copy) {mFirstObjectRef = NULL;}
+   virtual ~SafePtrData();
+};
+
+
+//------------------------------------------------------------------------------
 
 /// Base class for all NetObject, NetEvent, NetConnection and NetInterface instances.
 ///
@@ -394,29 +436,12 @@ class SafeObjectRef;
 /// @see NetClassRepInstance for gory implementation details.
 /// @nosubgrouping
 
-class Object
+class Object : public RefPtrData, public SafePtrData
 {
-   SafeObjectRef *mFirstObjectRef; ///< The head of the linked list of safe object references.
-   U32 mRefCount;                  ///< Reference counter for RefPtr objects.
-
-   friend class SafeObjectRef;
    friend class RefObjectRef;
 public:
    /// Returns the NetClassRep associated with this object.
    virtual NetClassRep* getClassRep() const;
-
-   Object();
-   virtual ~Object();
-
-   Object(const Object &copy);
-
-
-   void initialize();      // Code common to the constructor and the copy constructor
-
-   /// Object destroy self call (from RefPtr).
-   ///
-   /// @note Override if this class has specially allocated memory.
-   virtual void destroySelf() { delete this; }
 
    /// Get our class ID within the specified NetClassGroup.
    U32 getClassId(NetClassGroup classGroup) const;
@@ -442,17 +467,6 @@ public:
       return NetClassRep::create(groupId, typeId, classId);
    }
 
-   void incRef()
-   {
-      mRefCount++;
-   }
-
-   void decRef()
-   {
-      mRefCount--;
-      if(!mRefCount)
-         destroySelf();
-   }
    /// @}
 };
 
@@ -474,44 +488,33 @@ inline const char * Object::getClassName() const
 class RefObjectRef
 {
 protected:
-   Object *mObject; ///< The object this RefObjectRef references.
+   RefPtrData *mObject; ///< The object this RefObjectRef references.
 
-   /// Increments the reference count on the referenced object.
-   void incRef()
-   {
-      if(mObject)
-         mObject->incRef();
-   }
-
-   /// Decrements the reference count on the referenced object.
-   void decRef()
-   {
-      if(mObject)
-      {
-         mObject->decRef();
-      }
-   }
 public:
 
    /// Constructor, assigns from the object and increments its reference count if it's not NULL.
-   RefObjectRef(Object *object = NULL)
+   RefObjectRef(RefPtrData *object = NULL)
    {
       mObject = object;
-      incRef();
+      if(object)
+         object->incRef();
    }
 
    /// Destructor, dereferences the object, if there is one.
    ~RefObjectRef()
    {
-      decRef();
+      if(mObject)
+         mObject->decRef();
    }
 
    /// Assigns this reference object from an existing Object instance.
-   void set(Object *object)
+   void set(RefPtrData *object)
    {
-      decRef();
+      if(object)
+         object->incRef(); // increment first to avoid delete problem when (object == mObject)
+      if(mObject)
+         mObject->decRef();
       mObject = object;
-      incRef();
    }
 };
 
@@ -526,7 +529,7 @@ template <class T> class RefPtr : public RefObjectRef
 public:
    RefPtr() : RefObjectRef() {}
    RefPtr(T *ptr) : RefObjectRef(ptr) {}
-   RefPtr(const RefPtr<T>& ref) : RefObjectRef((Object *) ref.mObject) {}
+   RefPtr(const RefPtr<T>& ref) : RefObjectRef((RefPtrData *) ref.mObject) {}
 
    RefPtr<T>& operator=(const RefPtr<T>& ref)
    {
@@ -550,15 +553,15 @@ public:
 /// Base class for Object safe pointers.
 class SafeObjectRef
 {
-   friend class Object;
+friend class SafePtrData;
 protected:
-   Object *mObject;               ///< The object this is a safe pointer to, or NULL if the object has been deleted.
+   SafePtrData *mObject;          ///< The object this is a safe pointer to, or NULL if the object has been deleted.
    SafeObjectRef *mPrevObjectRef; ///< The previous SafeObjectRef for mObject.
    SafeObjectRef *mNextObjectRef; ///< The next SafeObjectRef for mObject.
 public:
-   SafeObjectRef(Object *object);
+   SafeObjectRef(SafePtrData *object);
    SafeObjectRef();
-   void set(Object *object);
+   void set(SafePtrData *object);
    ~SafeObjectRef();
 
    void registerReference();   ///< Links this SafeObjectRef into the doubly linked list of SafeObjectRef instances for mObject.
@@ -590,7 +593,7 @@ inline void SafeObjectRef::registerReference()
    }
 }
 
-inline void SafeObjectRef::set(Object *object)
+inline void SafeObjectRef::set(SafePtrData *object)
 {
    unregisterReference();
    mObject = object;
@@ -602,7 +605,7 @@ inline SafeObjectRef::~SafeObjectRef()
    unregisterReference();
 }
 
-inline SafeObjectRef::SafeObjectRef(Object *object)
+inline SafeObjectRef::SafeObjectRef(SafePtrData *object)
 {
    mObject = object;
    registerReference();
@@ -625,7 +628,7 @@ template <class T> class SafePtr : public SafeObjectRef
 public:
    SafePtr() : SafeObjectRef() {}
    SafePtr(T *ptr) : SafeObjectRef(ptr) {}
-   SafePtr(const SafePtr<T>& ref) : SafeObjectRef((Object *) ref.mObject) {}
+   SafePtr(const SafePtr<T>& ref) : SafeObjectRef((SafePtrData *) ref.mObject) {}
 
    SafePtr<T>& operator=(const SafePtr<T>& ref)
    {

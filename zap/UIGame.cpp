@@ -1767,7 +1767,12 @@ void GameUserInterface::setWinningScoreHandler(ClientGame *game, const Vector<st
       }
 
       if(game->getGameType())
-         game->getGameType()->c2sSetWinningScore(score);
+      {
+         if(game->getGameType()->getGameTypeId() == CoreGame)
+            game->displayErrorMessage("!!! Cannot change score in Core game type");
+         else
+            game->getGameType()->c2sSetWinningScore(score);
+      }
    }
 }
 
@@ -1777,7 +1782,12 @@ void GameUserInterface::resetScoreHandler(ClientGame *game, const Vector<string>
    if(game->hasLevelChange("!!! Need level change permission"))
    {
       if(game->getGameType())
-         game->getGameType()->c2sResetScore();
+      {
+         if(game->getGameType()->getGameTypeId() == CoreGame)
+            game->displayErrorMessage("!!! Cannot change score in Core game type");
+         else
+            game->getGameType()->c2sResetScore();
+      }
    }
 }
 
@@ -3008,7 +3018,7 @@ void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bo
    else if(teamCount > 1 && gameType->isTeamGame())
    {
       // Render Core scores
-      if(gameType->getGameType() == CoreGame)
+      if(gameType->getGameTypeId() == CoreGame)
          renderCoreScores(gameType, rightAlignCoord);
 
       // Render scores for the rest of the team game types, which use flags
@@ -3054,7 +3064,7 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
    drawCenteredStringf(yCenter - 180, 30, "Level: %s", gameType->getLevelName()->getString());
 
    // Prefix game type with "Team" if they are typically individual games, but are being played in team mode
-   const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameType() != SoccerGame && 
+   const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && 
                            getGame()->getTeamCount() > 1) ? "Team " : "";
 
    drawCenteredStringf(yCenter - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());

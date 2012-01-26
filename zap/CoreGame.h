@@ -70,7 +70,7 @@ public:
    bool saveMenuItem(const MenuItem *menuItem, const char *key);
 #endif
 
-   GameTypes getGameType() const;
+   GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString();
    bool canBeTeamGame() const;

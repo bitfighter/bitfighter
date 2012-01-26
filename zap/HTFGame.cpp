@@ -377,7 +377,7 @@ S32 HTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
-GameTypes HTFGameType::getGameType() const
+GameTypeId HTFGameType::getGameTypeId() const
 {
    return HTFGame;
 }

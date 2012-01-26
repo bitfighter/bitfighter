@@ -446,7 +446,7 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 }
 
 
-GameTypes RabbitGameType::getGameType() const
+GameTypeId RabbitGameType::getGameTypeId() const
 {
    return RabbitGame;
 }

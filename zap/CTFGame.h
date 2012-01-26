@@ -47,7 +47,7 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamId) const;
 
-   GameTypes getGameType() const;
+   GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString();
    

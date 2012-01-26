@@ -206,9 +206,9 @@ void EditorUserInterface::populateDock()
    addDockObject(new TextItem(), xPos, yPos);
    yPos += spacer;
 
-   if(getGame()->getGameType()->getGameType() == SoccerGame)
+   if(getGame()->getGameType()->getGameTypeId() == SoccerGame)
       addDockObject(new SoccerBallItem(), xPos, yPos);
-   else if(getGame()->getGameType()->getGameType() == CoreGame)
+   else if(getGame()->getGameType()->getGameTypeId() == CoreGame)
       addDockObject(new CoreItem(), xPos, yPos);
    else
       addDockObject(new FlagItem(), xPos, yPos);
@@ -240,7 +240,7 @@ void EditorUserInterface::populateDock()
    addDockObject(new LoadoutZone(), xPos, yPos);
    yPos += 25;
 
-   if(getGame()->getGameType()->getGameType() == NexusGame)
+   if(getGame()->getGameType()->getGameTypeId() == NexusGame)
    {
       addDockObject(new NexusObject(), xPos, yPos);
       yPos += 25;
@@ -383,6 +383,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
    EditorObjectDatabase *database = getGame()->getEditorDatabase();
+   mLoadTarget = database;
 
    rebuildEverything(database);    // Well, rebuild segments from walls at least
 
@@ -421,6 +422,7 @@ void EditorUserInterface::redo()
 
       getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       EditorObjectDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
+      mLoadTarget = database;
 
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
@@ -863,15 +865,15 @@ void EditorUserInterface::validateLevel()
    GameType *gameType = getGame()->getGameType();
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
-   if(foundSoccerBall && gameType->getGameType() != SoccerGame)
+   if(foundSoccerBall && gameType->getGameTypeId() != SoccerGame)
       mLevelWarnings.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
-   if(foundNexus && gameType->getGameType() != NexusGame)
+   if(foundNexus && gameType->getGameTypeId() != NexusGame)
       mLevelWarnings.push_back("WARNING: Nexus object can only be used in Nexus game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
-   if(!foundNexus && gameType->getGameType() == NexusGame)
+   if(!foundNexus && gameType->getGameTypeId() == NexusGame)
       mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
    if(foundFlags && !gameType->isFlagGame())
@@ -3431,7 +3433,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    if(entryMode != EntryNone)
       textEntryKeyHandler(inputCode, ascii);
 
-   else if(inputCode == KEY_ENTER)       // Enter - Edit props
+   else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
    // Mouse wheel zooms in and out
@@ -3681,7 +3683,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       pasteSelection();
    else if(inputString == "V")            // Flip vertical
       flipSelectionVertical();
-   else if(inputString == "/")
+   else if(inputString == "/" || inputString == "Keypad /")
       OGLCONSOLE_ShowConsole();
 
    else if(inputString == "Ctrl+Shift+L") // Reload level
@@ -3738,13 +3740,13 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mDown = true;
    else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
-   else if(inputString == "Shift+=")      // Shifted - Increase barrier width by 1
+   else if(inputString == "Shift+=" || inputString == "Shift+Keypad +")      // Shifted - Increase barrier width by 1
       changeBarrierWidth(1);
-   else if(inputString == "=")            // Unshifted + --> by 5                      
+   else if(inputString == "=" || inputString == "Keypad +")            // Unshifted + --> by 5
       changeBarrierWidth(5);
-   else if(inputString == "Shift+-")      // Shifted - Decrease barrier width by 1
+   else if(inputString == "Shift+-" || inputString == "Shift+Keypad -")      // Shifted - Decrease barrier width by 1
       changeBarrierWidth(-1);
-   else if(inputString == "-")            // Unshifted --> by 5
+   else if(inputString == "-" || inputString == "Keypad -")            // Unshifted --> by 5
       changeBarrierWidth(-5);
    else if(inputString == "E")            // Zoom In
       mIn = true;
@@ -3844,7 +3846,7 @@ bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 // Handle keyboard activity when we're editing an item's attributes
 void EditorUserInterface::textEntryKeyHandler(InputCode inputCode, char ascii)
 {
-   if(inputCode == KEY_ENTER)
+   if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
    {
       if(entryMode == EntryID)
       {
