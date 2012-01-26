@@ -383,6 +383,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
    EditorObjectDatabase *database = getGame()->getEditorDatabase();
+   mLoadTarget = database;
 
    rebuildEverything(database);    // Well, rebuild segments from walls at least
 
@@ -421,6 +422,7 @@ void EditorUserInterface::redo()
 
       getGame()->setEditorDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       EditorObjectDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
+      mLoadTarget = database;
 
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
