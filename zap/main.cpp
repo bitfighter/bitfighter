@@ -49,13 +49,32 @@ XXX need to document timers, new luavec stuff XXX
 /* Fixes after 015a
 <h2>New features</h2>
 <ul>
+<li>New game type:  Core
+<li>Migrated from GLUT to the SDL framework.  This brings several improvements like faster rendering on Mac and nicer Input programming.
 <li>Added /leveldir admin command to change folder where levels are read.  Change affects current session only, and will not be saved in the INI.
-<li>Can now specify whether soccer game permits picking up the ball or not
 <li>-help cmd line option now displays meaningful help
 <li>Loadout presets: define them with Ctrl-1/2/3, retrieve them with Alt-1/2/3.  They persist in the INI between sessions.  You can see your current preset definitions with the /showpresets command.
 <li>Mouse wheel zooms in and out in the editor
 <li>Implemented 2-tier snapping in editor -- hold space to disable grid snap, but still snap to wall corners and other items; hold shift-space to completely disable snapping
 <li>Plugin system for the editor -- users can write scripts to generate items in the editor and bind them to hot keys.  Inlcudes simple curve generation tool as a sample.
+<li>Music sub-system added.  Plays Ogg Vorbis music files
+<li>Screenshots work now and are saved in PNG format
+<li>64-bit Intel Mac build available now
+<li>Sensor module is now gives increased sight passively
+<li>Sensor module now deploys Spy-bug with a double-click; this means Spy-bug is now part of the Sensor module and not separately equipped
+<li>Spawn shield
+<li>Voice chat works on all three platforms and uses the SPEEX codec for better audio
+<li>Bouncers do more damage to the Armor module (3/4 damage instead of 1/2)
+<li>Energy recharge changes:  recharge slightly faster if your ship isn't moving; double recharge if not moving in a loadout zone; hostile loadout zones reduce energy.
+<li>Servers have a persistent ban list now that is saved in the INI.  See admin commands /ban and /banip
+<li>Allow /mute in server lobby
+<li>Added /resetscore command
+<li>Additional scoreboard marks for admins (@) and level changers (+)
+<li>Editor option to disallow robots
+<li>Add inertia-like behavior to objects.  This means larger items like TestItems take more shots to move
+<li>Soccer changes:  pick-up has been removed for good and the Soccerball has more inertia
+<li>Add /shuffle command for admins
+<li>Joystick profiles are now kept in a separate INI, joystick_presets.ini, that can be adjusted and added to for your joystick
 </ul>
 
 <h2>Bot scripting</h2>
@@ -72,11 +91,19 @@ XXX need to document timers, new luavec stuff XXX
 <li>Teleporter, added Delay option in levels for teleporters      <<=== what is this??
 <li>Teleporting onto a loadout zone triggers loadout change, just like flying onto one
 <li>Console command history now working in a sane manner
+<li>Messages render with disabled loadout indicators
+<li>Indent multi-line chat to fix clever impersonations
+<li>Only spawn a robot if a valid script was detected
+<li>Prevent impersonations with spaces in a username
+<li>Fix rare crash with bot zone generation
+<li>Fix some game lobby bugs with leaving/joining being out of sync
+<li>Reduce the leave/join spamming in chat
+<li>Don't send game statistics to master server when testing a level from the editor
+<li>Robot team messages now only go to the team
+<li>Forcefield abuse has been greatly reduced.  Note:  you can return to the original forcefield behavior by specifying the level Special of 'EngineerUnrestricted' instead of 'Engineer'
 </ul>
 
 <h2>Other changes</h2>
-<li>Deprecated SoccerPickup parameter -- now stored as an option on the Specials line.  Will be completely removed in 017.  Easiest fix is to load
-    an affected level into the editor and save; parameter will be properly rewritten
 <li>Reduced CPU usage for overlapping asteroids
 <li>Removed -jsave and -jplay cmd line options.  It's been ages since they worked, and it's unlikely they ever will
 <li>Removed optional hostAddr cmd line parameter for -dedicated <hostAddr>.  Specify host address (only rarely needed) with the existing -hostAddr option
@@ -88,6 +115,17 @@ XXX need to document timers, new luavec stuff XXX
 <li>Removed dedicated wall-editing mode (Ctrl-A)
 <li>Loadouts no longer carry over from level to level -- now you start a new level with the default loadout
 <li>When requesting admin or level change permissions, incorrect passwords are now logged in server log
+<li>LUA scripts print to the OGLconsole
+<li>Diagnostics work a little better and will not show joystick info if none is attached
+<li>Reduced network load by convert objects from a 32-bit mask to an 8-bit type number
+<li>Robots are smarter with forcefields
+<li>Add engineer to help screen
+<li>Add Bitfighter icon to the taskbar
+<li>Line smoothing is now officially part of the game
+<li>CTRL + A mode has been removed from the editor
+<li>Top scores are rendered in single-team games like Rabbit and Bitmatch in lower right corner
+<li>Player ratings are determined by kill/death ratio.  If you die more, your rating is negative
+<li>Reduce CPU usage on diagnostics screen
 </ul>
 */
 
