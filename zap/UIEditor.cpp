@@ -2964,7 +2964,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          deleteItem(i, true);
          deleted = true;
       }
-      else if(!objectsOnly)      // Deleted any selected vertices
+      else if(!objectsOnly)      // Deleted only selected vertices
       {
          bool geomChanged = false;
 

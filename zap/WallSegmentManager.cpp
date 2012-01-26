@@ -343,7 +343,8 @@ void WallSegmentManager::deleteSegments(S32 owner)
 
 extern Color EDITOR_WALL_FILL_COLOR;
 
-// Only called from the editor -- renders both walls and polywalls.  Does not render centerlines
+// Only called from the editor -- renders both walls and polywalls.  
+// Does not render centerlines -- those are drawn by calling wall's render fn.
 void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, bool dragMode, bool drawSelected,
                                      const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
 {
@@ -373,15 +374,12 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    else  // Render selected/moving walls last so they appear on top; this is pass 2, 
    {
       glColor(fillColor);
-     /* if(moved)*/
-      {
-         for(S32 i = 0; i < mWallSegments.size(); i++)
-            if(mWallSegments[i]->isSelected())  
-               mWallSegments[i]->renderFill(selectedItemOffset);
+      for(S32 i = 0; i < mWallSegments.size(); i++)
+         if(mWallSegments[i]->isSelected())  
+            mWallSegments[i]->renderFill(selectedItemOffset);
 
-         // Render wall outlines for selected walls only
-         renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, settings->getWallOutlineColor());      
-      }
+      // Render wall outlines for selected walls only
+      renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, settings->getWallOutlineColor());      
    }
 
    if(showSnapVertices)
