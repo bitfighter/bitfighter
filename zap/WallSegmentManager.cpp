@@ -311,8 +311,9 @@ void WallSegmentManager::rebuildSelectedOutline()
       if(mWallSegments[i]->isSelected())
          selectedSegments.push_back(mWallSegments[i]);
 
-   if(selectedSegments.size() == 0)
-      mSelectedWallEdgePoints.clear();
+   // If no walls are selected we can skip a lot of work, butx removing this check will not change the result
+   if(selectedSegments.size() == 0)          
+      mSelectedWallEdgePoints.clear();    
    else
       clipAllWallEdges(selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }
