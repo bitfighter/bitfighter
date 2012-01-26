@@ -3431,7 +3431,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    if(entryMode != EntryNone)
       textEntryKeyHandler(inputCode, ascii);
 
-   else if(inputCode == KEY_ENTER)       // Enter - Edit props
+   else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
 
    // Mouse wheel zooms in and out
@@ -3681,7 +3681,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       pasteSelection();
    else if(inputString == "V")            // Flip vertical
       flipSelectionVertical();
-   else if(inputString == "/")
+   else if(inputString == "/" || inputString == "Keypad /")
       OGLCONSOLE_ShowConsole();
 
    else if(inputString == "Ctrl+Shift+L") // Reload level
@@ -3738,13 +3738,13 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mDown = true;
    else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
-   else if(inputString == "Shift+=")      // Shifted - Increase barrier width by 1
+   else if(inputString == "Shift+=" || inputString == "Shift+Keypad +")      // Shifted - Increase barrier width by 1
       changeBarrierWidth(1);
-   else if(inputString == "=")            // Unshifted + --> by 5                      
+   else if(inputString == "=" || inputString == "Keypad +")            // Unshifted + --> by 5
       changeBarrierWidth(5);
-   else if(inputString == "Shift+-")      // Shifted - Decrease barrier width by 1
+   else if(inputString == "Shift+-" || inputString == "Shift+Keypad -")      // Shifted - Decrease barrier width by 1
       changeBarrierWidth(-1);
-   else if(inputString == "-")            // Unshifted --> by 5
+   else if(inputString == "-" || inputString == "Keypad -")            // Unshifted --> by 5
       changeBarrierWidth(-5);
    else if(inputString == "E")            // Zoom In
       mIn = true;
@@ -3844,7 +3844,7 @@ bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 // Handle keyboard activity when we're editing an item's attributes
 void EditorUserInterface::textEntryKeyHandler(InputCode inputCode, char ascii)
 {
-   if(inputCode == KEY_ENTER)
+   if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
    {
       if(entryMode == EntryID)
       {
