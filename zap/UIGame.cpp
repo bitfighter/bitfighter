@@ -1767,7 +1767,12 @@ void GameUserInterface::setWinningScoreHandler(ClientGame *game, const Vector<st
       }
 
       if(game->getGameType())
-         game->getGameType()->c2sSetWinningScore(score);
+      {
+         if(game->getGameType()->getGameType() == CoreGame)
+            game->displayErrorMessage("!!! Cannot change score in Core game type");
+         else
+            game->getGameType()->c2sSetWinningScore(score);
+      }
    }
 }
 
@@ -1777,7 +1782,12 @@ void GameUserInterface::resetScoreHandler(ClientGame *game, const Vector<string>
    if(game->hasLevelChange("!!! Need level change permission"))
    {
       if(game->getGameType())
-         game->getGameType()->c2sResetScore();
+      {
+         if(game->getGameType()->getGameType() == CoreGame)
+            game->displayErrorMessage("!!! Cannot change score in Core game type");
+         else
+            game->getGameType()->c2sResetScore();
+      }
    }
 }
 
