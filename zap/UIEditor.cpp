@@ -4059,7 +4059,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
             onSelectionChanged();
          }
 
-         else if(mDraggingObjects)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
+         else if(mDraggingObjects || mAddingVertex)     // We were dragging and dropping.  Could have been a move or a delete (by dragging to dock).
          {
             if(mAddingVertex)
             {
@@ -4127,7 +4127,7 @@ void EditorUserInterface::onFinishedDragging()
    if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
    {
       // If our snap vertex has moved then all selected items have moved
-      bool itemsMoved = mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
+      bool itemsMoved = mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
 
       if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
       {
