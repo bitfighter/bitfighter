@@ -516,8 +516,8 @@ void CoreItem::doExplosion(const Point &pos)
    S32 xNeg = TNL::Random::readB() ? 1 : -1;
    S32 yNeg = TNL::Random::readB() ? 1 : -1;
 
-   F32 x = TNL::Random::readF() * xNeg * .71  * F32(CoreStartWidth) / 2;  // rougly sin(45)
-   F32 y = TNL::Random::readF() * yNeg * .71  * F32(CoreStartWidth) / 2;
+   F32 x = TNL::Random::readF() * xNeg * .71f  * F32(CoreStartWidth) / 2;  // rougly sin(45)
+   F32 y = TNL::Random::readF() * yNeg * .71f  * F32(CoreStartWidth) / 2;
 
    // First explosion is at the center
    Point blastPoint = isStart ? pos : pos + Point(x, y);
@@ -526,10 +526,10 @@ void CoreItem::doExplosion(const Point &pos)
 //   if(isStart)
 //      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
 
-   SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1.0 - 0.25 * F32(mCurrentExplosionNumber));
+   SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1 - 0.25f * F32(mCurrentExplosionNumber));
 
-   game->emitBlast(blastPoint, 600 - 100 * F32(mCurrentExplosionNumber));
-   game->emitExplosion(blastPoint, 4.f - 1 * F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
+   game->emitBlast(blastPoint, 600 - 100 * mCurrentExplosionNumber);
+   game->emitExplosion(blastPoint, 4.f - F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
 
 #endif
    mCurrentExplosionNumber++;
@@ -574,7 +574,7 @@ void CoreItem::idle(GameObject::IdleCallPath path)
       // Now reset the timer as a function of health
       // Exponential
       F32 ratio = mHealth / mStartingHealth;
-      U32 soundInterval = CoreHeartbeatMinInterval + F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * pow(ratio, 2.f);
+      U32 soundInterval = CoreHeartbeatMinInterval + U32(F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio * ratio);
 
       mHeartbeatTimer.reset(soundInterval);
    }

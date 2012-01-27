@@ -1414,6 +1414,7 @@ bool GameConnection::readConnectAccept(BitStream *stream, NetConnection::Termina
       return false;
 
    stream->read(&mConnectionVersion);
+   return true;
 }
 
 

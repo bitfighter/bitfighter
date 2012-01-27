@@ -1836,8 +1836,8 @@ void EditorUserInterface::renderReferenceShip()
       glRotatef(-90, 0, 0, 1);
 
       // And show how far it can see
-      F32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
-      F32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
+      const S32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
+      const S32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 

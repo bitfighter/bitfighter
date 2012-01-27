@@ -978,7 +978,7 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    if(mountEdge)
    {
       Point p;
-      p.interp(.1, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
+      p.interp(.1f, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
 
       mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), p,   
                         (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);

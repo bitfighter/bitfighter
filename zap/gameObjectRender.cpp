@@ -1536,11 +1536,11 @@ void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideCol
       glTranslate(pos);
 
       // Scale down the symbol a little so it fits in the box
-      glScale(scaleFactor * .7);
+      glScale(scaleFactor * .7f);
       renderEnergySymbol(overrideColor, alpha);
 
       // Scale back up to where we were
-      glScale(1/.7);
+      glScale(1 / .7f);
 
       S32 size = 18;
       glColor(Colors::white);
@@ -1689,7 +1689,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 
 void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
 {
-   F32 atomSize = size * 0.40;
+   F32 atomSize = size * 0.40f;
    F32 coreRotateTime = F32(time & 16383) / 16384.f * FloatTau;
 
    // Draw outer polygon and inner circle
@@ -1703,7 +1703,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
 
    // Draw atomic like graphic
    F32 t = F32(time & 1023) / 1024.f * FloatTau;
-   for(F32 rotate = 0; rotate < FloatTau; rotate += FloatTau / 5 + 0.001f)
+   for(F32 rotate = 0; rotate < FloatTau - 0.01f; rotate += FloatTau / 5)  //  0.01f part avoids rounding error
    {
       glBegin(GL_LINE_LOOP);
       for(F32 theta = 0; theta < FloatTau; theta += 0.2f)

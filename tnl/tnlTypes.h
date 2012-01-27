@@ -163,7 +163,9 @@ typedef unsigned _int64 U64;
 #  define TNL_COMPILER_STRING "VisualC++"
 #endif
 
+#if _MSC_VER < 1200
 #define for if(false) {} else for   ///< Hack to work around Microsoft VC's non-C++ compliance on variable scoping
+#endif                              // appears to be fixed on recent version of compiler
 
 #ifdef _MSC_VER
 // disable warning caused by memory layer
