@@ -150,7 +150,10 @@ public:
 
    void dumpObjects();     // For debugging purposes
 
-   WallSegmentManager *getWallSegmentManager() const;                   // TODO: Move back to ClientGame()
+   
+   Rect getExtents();      // Get the combined extents of every object in the database
+
+   WallSegmentManager *getWallSegmentManager() const;      
 
    
    virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);

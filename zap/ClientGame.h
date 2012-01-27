@@ -94,8 +94,6 @@ public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
    virtual ~ClientGame();
 
-   EditorObjectDatabase *getEditorDatabase();
-
    void joinGame(Address remoteAddress, bool isFromMaster, bool local);
    void closeConnectionToGameServer();
 

@@ -183,7 +183,6 @@ public:
    void setSelected(bool selected);
 
    virtual void onGeomChanged();
-   virtual void onItemDragging();
 
    /////
    // Editor methods

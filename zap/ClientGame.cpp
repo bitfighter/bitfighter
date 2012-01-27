@@ -156,16 +156,6 @@ ClientGame::~ClientGame()
 }
 
 
-EditorObjectDatabase *ClientGame::getEditorDatabase()  
-{ 
-   // Lazy init
-   if(!mEditorDatabase.get())
-      mEditorDatabase = boost::shared_ptr<EditorObjectDatabase>(new EditorObjectDatabase());
-         
-   return mEditorDatabase.get(); 
-}  
-
-
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
 // Also get here when hosting a game
 void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)

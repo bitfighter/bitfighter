@@ -100,7 +100,7 @@ public:
 
 #ifndef ZAP_DEDICATED
    virtual void prepareForDock(ClientGame *game, const Point &point);
-   void addToEditor(ClientGame *game);
+   void addToEditor(ClientGame *game, GridDatabase *database);
 #endif
 
    void assignNewSerialNumber();
@@ -122,8 +122,10 @@ public:
 
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
 #ifndef ZAP_DEDICATED
-   static void endBatchGeomUpdate(ClientGame *game, bool modifiedWalls);   // this method is called
+   static void endBatchGeomUpdate(EditorObjectDatabase *database, bool modifiedWalls);   // this method is called
 #endif
+
+   EditorObjectDatabase *getEditorObjectDatabase();
 
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected();

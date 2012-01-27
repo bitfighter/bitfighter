@@ -278,6 +278,7 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
    findObjects(testFunc, fillVector, &extents, minx, miny, maxx, maxy);
 }
 
+
 void GridDatabase::dumpObjects()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
@@ -288,6 +289,52 @@ void GridDatabase::dumpObjects()
             logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
             logprintf("Obj coords: %s", dynamic_cast<EditorObject *>(theObject)->getVert(0).toString().c_str());
          }
+}
+
+
+// Get the extents of every object in the database
+Rect GridDatabase::getExtents()
+{
+   if(mAllObjects.size() == 0)     // No objects ==> no extents!
+      return Rect();
+
+   Rect rect;
+
+   // Think we can delete from HERE...   inserted this comment 27-Jan-2012  #########################################
+
+   // All this rigamarole is to make world extent correct for levels that do not overlap (0,0)
+   // The problem is that the GameType is treated as an object, and has the extent (0,0), and
+   // a mask of UnknownType.  Fortunately, the GameType tends to be first, so what we do is skip
+   // all objects until we find an UnknownType object, then start creating our extent from there.
+   // We have to assign theRect to an extent object initially to avoid getting the default coords
+   // of (0,0) that are assigned by the constructor.
+
+
+   S32 first = -1;
+
+   // Look for first non-UnknownType object
+   for(S32 i = 0; i < mAllObjects.size() && first == -1; i++)
+      if(mAllObjects[i]->getObjectTypeNumber() != UnknownTypeNumber)
+      {
+         rect = mAllObjects[i]->getExtent();
+         first = i;
+      }
+
+   TNLAssert(first == 0, "I think this should never happen -- how would an object with UnknownTypeNumber get in the database?? \
+                          if it does, please document it and remove this assert, along withthe rect = line below -Wat");
+
+   if(first == -1)      // No suitable objects found, return empty extents
+      return Rect();
+
+   // ...to HERE
+
+   rect = mAllObjects[0]->getExtent();
+
+   // Now start unioning the extents of remaining objects.  Should be all of them.
+   for(S32 i = /*first + */1; i < mAllObjects.size(); i++)
+      rect.unionRect(mAllObjects[i]->getExtent());
+
+   return rect;
 }
 
 

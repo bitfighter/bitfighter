@@ -72,8 +72,6 @@ class EditorUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 public:
-   EditorUserInterface(ClientGame *game);  // Constructor
-
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
    {                       // we can edit in the editor
       Text = 0,
@@ -116,12 +114,15 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   const Vector<EditorObject *> *getObjectList();     // Convenience method
-
    Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
    Vector<Point> mOriginalVertLocations;
+
+
+   boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;
+
+   void setDatabase(boost::shared_ptr<EditorObjectDatabase> database);
 
    Vector<boost::shared_ptr<EditorObject> > mDockItems;    // Items sitting in the dock
 
@@ -190,7 +191,7 @@ private:
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
-   void clearSelection();        // Mark all objects and vertices as unselected
+   void clearSelection(EditorObjectDatabase *database);     // Mark all objects and vertices in specified db as unselected
 
    void centerView();            // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
@@ -198,7 +199,7 @@ private:
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    //S32 countSelectedVerts();
-   bool anyItemsSelected();      // Are any items selected?
+   bool anyItemsSelected(EditorObjectDatabase *database);      // Are any items selected?
    bool anythingSelected();      // Are any items/vertices selected?
 
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
@@ -219,11 +220,11 @@ private:
    EditorObject *mHitItem;
    EditorObject *mDockItemHit;
 
-   void computeSelectionMinMax(Point &min, Point &max);
+   void computeSelectionMinMax(EditorObjectDatabase *database, Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
-   void insertNewItem(U8 itemTypeNumber);                      // Insert a new object into the game
+   void insertNewItem(U8 itemTypeNumber);    // Insert a new object into the specified database
 
    bool mWasTesting;
    GameType *mEditorGameType;    // Used to store our GameType while we're testing
@@ -254,7 +255,10 @@ protected:
    bool usesEditorScreenMode();
 
 public:
-   virtual ~EditorUserInterface();       // Destructor
+   EditorUserInterface(ClientGame *game);    // Constructor
+   virtual ~EditorUserInterface();           // Destructor
+
+   EditorObjectDatabase *getDatabase();      // Need external access to this in one static function
 
    void clearDatabase(GridDatabase *database);
 

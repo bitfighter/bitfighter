@@ -978,7 +978,7 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    if(mountEdge)
    {
       Point p;
-      p.interp(.1, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
+      p.interp(.1f, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
 
       mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), p,   
                         (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
@@ -1249,7 +1249,7 @@ void ForceFieldProjector::findForceFieldEnd()
    Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
-   if(ForceField::findForceFieldEnd(getGame()->getEditorDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
+   if(ForceField::findForceFieldEnd(getEditorObjectDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
                                     start, mAnchorNormal, forceFieldEnd, &collObj))
    {
       setEndSegment(dynamic_cast<WallSegment *>(collObj));

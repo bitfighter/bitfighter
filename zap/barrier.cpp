@@ -461,13 +461,13 @@ static F32 getWallEditorRadius(F32 currentScale)
 }
 
 
-// Only called from editor... use of getEditorDatabase() below is a bit hacky... what if wall is in a different database?
+// Only called from editor
 void WallItem::onGeomChanged()
 {
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
    processEndPoints();
 
-   onWallGeomChanged(getGame()->getEditorDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
+   onWallGeomChanged(getEditorObjectDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
 
    Parent::onGeomChanged();
 }
@@ -698,14 +698,9 @@ void PolyWall::setSelected(bool selected)
 // Only called from editor
 void PolyWall::onGeomChanged()
 {
-   onWallGeomChanged(getGame()->getEditorDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
+   onWallGeomChanged(getEditorObjectDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
+
    Parent::onGeomChanged();
-}
-
-
-void PolyWall::onItemDragging()
-{
-   // Do nothing
 }
 
 

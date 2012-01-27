@@ -104,9 +104,9 @@ void EditorObject::prepareForDock(ClientGame *game, const Point &point)
    unselectVerts();
 }
 
-void EditorObject::addToEditor(ClientGame *game)
+void EditorObject::addToEditor(ClientGame *game, GridDatabase *database)
 {
-   BfObject::addToGame(game, game->getEditorDatabase());
+   BfObject::addToGame(game, database);
    // constists of:
    //    mGame = game;
    //    addToDatabase();
@@ -484,14 +484,18 @@ void EditorObject::beginBatchGeomUpdate()
 }
 
 
+EditorObjectDatabase *EditorObject::getEditorObjectDatabase()
+{
+   TNLAssert(dynamic_cast<EditorObjectDatabase *>(getDatabase()), "This should be a EditorObjectDatabase!");
+   return static_cast<EditorObjectDatabase *>(getDatabase());
+}
+
+
 #ifndef ZAP_DEDICATED
-void EditorObject::endBatchGeomUpdate(ClientGame *game, bool modifiedWalls)
+void EditorObject::endBatchGeomUpdate(EditorObjectDatabase *database, bool modifiedWalls)      // static method
 {
    if(modifiedWalls)
-   {
-      EditorObjectDatabase *database = game->getEditorDatabase();
       database->getWallSegmentManager()->finishedChangingWalls(database);
-   }
 
    mBatchUpdatingGeom = false;
 }

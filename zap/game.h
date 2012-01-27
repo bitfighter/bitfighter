@@ -351,8 +351,6 @@ private:
    NameToAddressThread *mNameToAddressThread;
 
 protected:
-   boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;    // TODO: Move to clientGame
-
    virtual void cleanUp();
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
@@ -472,10 +470,6 @@ public:
 
    GameNetInterface *getNetInterface();
    virtual GridDatabase *getGameObjDatabase();
-
-   virtual EditorObjectDatabase *getEditorDatabase(); 
-
-   void setEditorDatabase(boost::shared_ptr<EditorObjectDatabase> database);
 
    bool runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                           GridDatabase *targetDatabase);
