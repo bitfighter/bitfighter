@@ -372,7 +372,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 
       // hack for now
       if(alpha < 1)
-         glColor(.2, .5, .2);
+         glColor(.67f, .67f, .67f);
       else
          glColor(fillColor * alpha);
 
