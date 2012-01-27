@@ -433,7 +433,7 @@ WallItem *WallItem::clone() const
    return new WallItem(*this);
 }
 
-
+ 
 // These methods are a clue that there should be a closer relationship between WallItem and PolyWall
 static void onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber, bool isBatchUpdating)
 {
