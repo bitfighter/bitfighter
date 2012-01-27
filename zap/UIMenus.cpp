@@ -434,14 +434,14 @@ S32 MenuUserInterface::getSelectedMenuItem()
    for(S32 i = 0; i < getMenuItemCount() - 1; i++)
    {
       MenuItemSize size = getMenuItem(i)->getSize();
-      S32 height = getTextSize(size) + .5 * getGap(size);
+      S32 height = getGap(size) / 2 + getTextSize(size);
 
       cumHeight += height;
 
       if(mouseY < cumHeight)
          return i;     
 
-      cumHeight += .5 * getGap(size);
+      cumHeight += getGap(size) / 2;
    }
 
    // Mouse is below bottom of menu
