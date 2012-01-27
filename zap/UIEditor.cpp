@@ -2019,20 +2019,8 @@ void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Poin
    database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, selected,
                                                   offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
+   // Render walls as ordinary objects; this will draw wall centerlines
    renderObjects(database, selected ? RENDER_SELECTED_WALLS : RENDER_UNSELECTED_WALLS, false);  
-
-
-   //// Render walls as normal objects to get their centerlines
-   //const Vector<EditorObject *> *objList = database->getObjectList();
-
-   //for(S32 i = 0; i < objList->size(); i++)
-   //{
-   //   EditorObject *obj = objList->get(i);
-
-   //   if(isWallType(obj->getObjectTypeNumber()))
-   //      if( selected == (obj->isSelected() || obj->anyVertsSelected()) )    // Only draw sel'ed items when renderSelectedObjects is true
-   //         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
-   //}
 }
 
 
