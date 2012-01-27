@@ -1905,8 +1905,8 @@ void EditorUserInterface::render()
       delta = mDraggingObjects ? mSnapDelta : Point(0,0);
 
       // == Render walls and polyWalls ==
-      renderWalls(editorDb, delta, false, false);
       renderWalls(&mLevelGenDatabase, delta, false, true );
+      renderWalls(editorDb, delta, false, false);
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
