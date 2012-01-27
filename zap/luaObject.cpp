@@ -41,6 +41,7 @@
 #include "playerInfo.h"       // For playerInfo def
 #include "UIMenuItems.h"      // For MenuItem def
 #include "config.h"
+#include "CoreGame.h"         // For getItem()
 
 #include "stringUtils.h"      // For joindir  
 #include "lua.h"
@@ -776,6 +777,8 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
          return Lunar<Turret>::check(L, index);
       case ForceFieldProjectorTypeNumber:
          return Lunar<ForceFieldProjector>::check(L, index);
+      case CoreTypeNumber:
+         return Lunar<CoreItem>::check(L, index);
 
 
       default:

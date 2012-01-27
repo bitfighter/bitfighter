@@ -1,5 +1,5 @@
 --- from quickBot v2, modified by sam686
---- works on all game modes
+--- works on all game modes, except this bot don't work on non-pickup soccer
 
 game = nil
 difficulty = nil
@@ -81,7 +81,7 @@ function angleDifference(angleA,angleB)
 end
 
 function fireAtObjects()
-	local enemies = bot:findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType)
+	local enemies = bot:findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
 	for index,enemy in ipairs(enemies) do
 		if(fireAtObject(enemy, WeaponPhaser)) then
 			break
@@ -104,12 +104,17 @@ function fireAtObject(obj, weapon)
 	if(obj:getClassID() == ShipType or
 		obj:getClassID() == RobotType or
 		obj:getClassID() == TurretType or
-		obj:getClassID() == ForceFieldProjectorType) then
+		obj:getClassID() == ForceFieldProjectorType or
+		obj:getClassID() == CoreType) then
 			if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == NeutralTeamIndx then
 				--logprint("It's an ally.")
 				return(false)
 			end
+		if(obj:getClassID() == CoreType) then
+			logprint(" " .. " " .. obj:getTeamIndx())
+		end
 	end
+
 	
 	local angle = getFiringSolution(obj)
 	if angle ~= nil and bot:hasWeapon(weapon) then
@@ -273,6 +278,7 @@ function getObjective(objType, team, onTeam)
 	local currentIndex = 1
 	for ind, it in ipairs(items) do
 		local itTeamIndex = it:getTeamIndx()
+
 		if objType == FlagType and gameType == NexusGame then
 			if not it:isOnShip() then
 				itemsOnMyTeam[currentIndex] = it
@@ -291,14 +297,14 @@ function getObjective(objType, team, onTeam)
 					currentIndex = currentIndex + 1
  				end
 			end
-		elseif(objType == ShipType or objType == RobotType or objType == TurretType or objType == ForceFieldProjectorType or objType == FlagType or objType == GoalZoneType or objType == NexusType or objType == SpyBugType) then
+		else
+			if itTeamIndex == NeutralTeamIndx then  -- anything Neutral is on our team
+				itTeamIndex = team
+			end
 			if (itTeamIndex == team and onTeam) or (itTeamIndex ~= team and not onTeam) then
 				itemsOnMyTeam[currentIndex] = it
 				currentIndex = currentIndex + 1
 			end
-		else
-			itemsOnMyTeam[currentIndex] = it
-			currentIndex = currentIndex + 1
 		end
 	end
 	local listMax = 0
@@ -352,7 +358,7 @@ function doObjective()
 	elseif(gameType == RabbitGame) then
 		--Grab a flag, or go after the flag.			
 		if not bot:hasFlag() then
-			local otherFlag = getObjective(FlagType,-100,false)
+			local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
 			gotoPosition(otherFlag:getLoc())
 		end
 	elseif(gameType == HTFGame or gameType == RetrieveGame) then
@@ -362,7 +368,7 @@ function doObjective()
 			local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),true)
 			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
 		else
-			local otherFlag = getObjective(FlagType,-100,false)
+			local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
 			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
 		end
 	elseif(gameType == CTFGame) then
@@ -401,7 +407,7 @@ function doObjective()
 		end
 	elseif(gameType == SoccerGame) then
 		--grab soccer and put into enemy goal
-		-- How do we know if we are holding soccer ?
+		-- How do we know if we are holding soccer ? (not supported when cannot pickup soccer (016)
 		if bot:getMountedItems(SoccerBallItemType)[1] ~= nil then
 			local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),false)
 			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end			
@@ -412,7 +418,7 @@ function doObjective()
 	elseif(gameType == ZoneControlGame) then
 		-- Grab flag, then go after zones that is not ours.
 		if not bot:hasFlag() then
-			local otherFlag = getObjective(FlagType,-100,false)
+			local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
 			if otherFlag ~= nil then
 				if otherFlag:isOnShip() then
 					gotoAndOrbitPosition(otherFlag:getLoc())
@@ -423,6 +429,12 @@ function doObjective()
 		else
 			local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),false)
 			gotoPosition(otherFlag:getLoc())
+		end
+
+	elseif(gameType == CoreGame) then
+		local obj = getObjective(CoreType,bot:getTeamIndx(),false)
+		if obj ~= nil then
+			gotoAndOrbitPosition(obj:getLoc())
 		end
 
 	end

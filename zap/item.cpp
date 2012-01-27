@@ -192,7 +192,7 @@ S32 Item::getVel(lua_State *L)
 
 S32 Item::getTeamIndx(lua_State *L)
 {
-   return TEAM_NEUTRAL + 1;
+   return returnInt(L, getTeam() + 1);
 }
 
 
