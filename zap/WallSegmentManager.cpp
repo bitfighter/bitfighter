@@ -370,7 +370,12 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
             if(mWallSegments[i]->isSelected())     
                mWallSegments[i]->renderFill(Point(0,0));
 
-      glColor(fillColor * alpha);
+      // hack for now
+      if(alpha < 1)
+         glColor(.2, .5, .2);
+      else
+         glColor(fillColor * alpha);
+
       for(S32 i = 0; i < mWallSegments.size(); i++)
          if(!moved || !mWallSegments[i]->isSelected())         
             mWallSegments[i]->renderFill(selectedItemOffset);              // renderFill ignores offset for unselected walls
