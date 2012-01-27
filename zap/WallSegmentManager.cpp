@@ -370,7 +370,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
             if(mWallSegments[i]->isSelected())     
                mWallSegments[i]->renderFill(Point(0,0));
 
-      glColor(fillColor);
+      glColor(fillColor * alpha);
       for(S32 i = 0; i < mWallSegments.size(); i++)
          if(!moved || !mWallSegments[i]->isSelected())         
             mWallSegments[i]->renderFill(selectedItemOffset);              // renderFill ignores offset for unselected walls
@@ -379,7 +379,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    }
    else  // Render selected/moving walls last so they appear on top; this is pass 2, 
    {
-      glColor(fillColor);
+      glColor(fillColor * alpha);
       for(S32 i = 0; i < mWallSegments.size(); i++)
          if(mWallSegments[i]->isSelected())  
             mWallSegments[i]->renderFill(selectedItemOffset);

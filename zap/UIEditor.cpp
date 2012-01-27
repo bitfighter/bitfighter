@@ -1850,7 +1850,7 @@ void EditorUserInterface::renderReferenceShip()
 
 static F32 getRenderingAlpha(bool isScriptItem)
 {
-   return isScriptItem ? .6f : 1;     // Script items will appear somewhat translucent
+   return isScriptItem ? .4f : 1;     // Script items will appear somewhat translucent
 }
 
 
@@ -2007,7 +2007,7 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderMo
       bool wantWalls = ( renderMode == RENDER_UNSELECTED_WALLS || renderMode == RENDER_SELECTED_WALLS);
 
       if(isSelected == wantSelected && isWall == wantWalls)     
-         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
+         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, isLevelgenOverlay, mPreviewMode); // <== wall centerlines rendered in here
    }
 }
 
@@ -2020,7 +2020,8 @@ void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Poin
                                                   offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
    // Render walls as ordinary objects; this will draw wall centerlines
-   renderObjects(database, selected ? RENDER_SELECTED_WALLS : RENDER_UNSELECTED_WALLS, false);  
+   if(!isLevelGenDatabase)
+      renderObjects(database, selected ? RENDER_SELECTED_WALLS : RENDER_UNSELECTED_WALLS, false);  
 }
 
 
