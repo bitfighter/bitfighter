@@ -704,6 +704,12 @@ void PolyWall::onGeomChanged()
 }
 
 
+void PolyWall::onItemDragging()
+{
+   // Do nothing -- this is here to override EditorPolygon::onItemDragging(), onGeomChanged() should only be called after move is complete
+}
+
+
 /////
 // Lua interface  ==>  don't need these!!
 

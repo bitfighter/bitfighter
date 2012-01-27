@@ -2818,6 +2818,7 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
+
    // Update coordinates of dragged item
    const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
 
