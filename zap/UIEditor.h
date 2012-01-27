@@ -99,6 +99,13 @@ private:
       NO_SNAPPING
    };
 
+   enum RenderModes {
+      RENDER_UNSELECTED_NONWALLS,
+      RENDER_SELECTED_NONWALLS,
+      RENDER_UNSELECTED_WALLS,
+      RENDER_SELECTED_WALLS
+   };
+
    SnapContext mSnapContext;
 
    enum {
@@ -233,6 +240,11 @@ private:
 
    EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
 
+   void render();
+   void renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
+   void renderWalls(EditorObjectDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
+   void renderPolyline(const Vector<Point> *verts);
+
 protected:
    void onActivate();
    void onReactivate();
@@ -269,14 +281,6 @@ public:
 
    EditorObject *getSnapItem();
    void rebuildEverything(EditorObjectDatabase *database);   // Does lots of things in undo, redo, and add items from script
-
-   void onBeforeRunScriptFromConsole();
-   void onAfterRunScriptFromConsole();
-
-   void render();
-   void renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay);
-   void renderWalls(EditorObjectDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
-   void renderPolyline(const Vector<Point> *verts);
 
    void setLevelToCanvasCoordConversion();
 
@@ -363,6 +367,8 @@ public:
 
    S32 getItemSelectedCount();      // How many are objects are selcted?
 
+   void onBeforeRunScriptFromConsole();
+   void onAfterRunScriptFromConsole();
 
    static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &points, bool abcFormat, F32 &minDist, Point &snapPoint);
    static S32 checkEdgesForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, bool abcFormat, F32 &minDist, Point &snapPoint);

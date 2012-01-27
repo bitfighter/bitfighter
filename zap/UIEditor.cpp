@@ -1910,14 +1910,14 @@ void EditorUserInterface::render()
 
       // == Normal, unselected items ==
       // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
-      renderObjects(editorDb, false, false);              // Render our normal objects
-      renderObjects(&mLevelGenDatabase, false, true);     // Render any levelgen objects being overlaid
+      renderObjects(editorDb, RENDER_UNSELECTED_NONWALLS, false);             // Render our normal objects
+      renderObjects(&mLevelGenDatabase, RENDER_UNSELECTED_NONWALLS, true);    // Render any levelgen objects being overlaid
 
       // == Selected items ==
       // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
       // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
       // We do render polywalls here because this is what draws the highlighted outline when the polywall is selected.
-      renderObjects(editorDb, true, false);               // Render selected objects 
+      renderObjects(editorDb, RENDER_SELECTED_NONWALLS, false);               // Render selected objects 
 
       renderWalls(editorDb, delta, true, false);   
 
@@ -1992,16 +1992,22 @@ void EditorUserInterface::render()
 
 
 // Render everything but walls, which are rendered in renderWalls() below
-void EditorUserInterface::renderObjects(EditorObjectDatabase *database, bool renderSelectedObjects, bool isLevelgenOverlay)
+void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay)
 {
    const Vector<EditorObject *> *objList = database->getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
-      if(obj->getObjectTypeNumber() != WallItemTypeNumber)
-         if( renderSelectedObjects == (obj->isSelected() || obj->isLitUp()) )          // Only draw sel'ed items when renderSelectedObjects is true
-            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
+
+      bool isSelected = obj->isSelected() || obj->isLitUp();
+      bool isWall = isWallType(obj->getObjectTypeNumber());
+
+      bool wantSelected = (renderMode == RENDER_SELECTED_NONWALLS || renderMode == RENDER_SELECTED_WALLS);
+      bool wantWalls = ( renderMode == RENDER_UNSELECTED_WALLS || renderMode == RENDER_SELECTED_WALLS);
+
+      if(isSelected == wantSelected && isWall == wantWalls)     
+         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
    }
 }
 
@@ -2013,17 +2019,20 @@ void EditorUserInterface::renderWalls(EditorObjectDatabase *database, const Poin
    database->getWallSegmentManager()->renderWalls(getGame()->getSettings(), mCurrentScale, mDraggingObjects, selected,
                                                   offset, mPreviewMode, getSnapToWallCorners(), getRenderingAlpha(isLevelGenDatabase));
 
-   // Render walls as normal objects to get their centerlines
-   const Vector<EditorObject *> *objList = database->getObjectList();
+   renderObjects(database, selected ? RENDER_SELECTED_WALLS : RENDER_UNSELECTED_WALLS, false);  
 
-   for(S32 i = 0; i < objList->size(); i++)
-   {
-      EditorObject *obj = objList->get(i);
 
-      if(isWallType(obj->getObjectTypeNumber()))
-         if( selected == (obj->isSelected() || obj->anyVertsSelected()) )    // Only draw sel'ed items when renderSelectedObjects is true
-            obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
-   }
+   //// Render walls as normal objects to get their centerlines
+   //const Vector<EditorObject *> *objList = database->getObjectList();
+
+   //for(S32 i = 0; i < objList->size(); i++)
+   //{
+   //   EditorObject *obj = objList->get(i);
+
+   //   if(isWallType(obj->getObjectTypeNumber()))
+   //      if( selected == (obj->isSelected() || obj->anyVertsSelected()) )    // Only draw sel'ed items when renderSelectedObjects is true
+   //         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode); // <== wall centerlines rendered in here
+   //}
 }
 
 
