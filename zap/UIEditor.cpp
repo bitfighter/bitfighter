@@ -1991,7 +1991,7 @@ void EditorUserInterface::render()
 }
 
 
-// Render everything but walls, which are rendered in renderWalls() below
+// Render objects in the specified database
 void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay)
 {
    const Vector<EditorObject *> *objList = database->getObjectList();
