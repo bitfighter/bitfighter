@@ -617,8 +617,7 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
    }
    catch(...)
    {
-      logError("Function main() could not be found!  Aborting script.");
-      return false;
+      logError("Function main() could not be found! Script will run, but please edit your script to have a main() function.");
    }
 
    try
