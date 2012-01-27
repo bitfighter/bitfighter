@@ -573,7 +573,7 @@ S32 QueryServersUserInterface::getSelectedIndex()
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
       S32 indx = S32(floor((gScreenInfo.getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
-                     getFirstServerIndexOnCurrentPage() - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0) );
+                     getFirstServerIndexOnCurrentPage() ); // fixes mouse offset problem by removing this part: - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0) 
 
       // Bounds checking and such
       if(indx < 0)
@@ -1338,7 +1338,9 @@ void QueryServersUserInterface::issueChat()
    Vector<string> words;
    parseString(mLineEditor.getString(), words, ' ');
 
-   if(words[0] == "/connect")
+   if(words.size() == 0)  // might be caused by mLineEditor == " "
+      ;
+   else if(words[0] == "/connect")
    {
       Address address(&mLineEditor.c_str()[9]);
       if(address.isValid())
