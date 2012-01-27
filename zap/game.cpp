@@ -2470,9 +2470,9 @@ void ServerGame::idle(U32 timeDelta)
             
             bool WaitingToVote = false;
 
-            for(S32 i = 0; i < getClientCount(); i++)
+            for(S32 i2 = 0; i2 < getClientCount(); i2++)
             {
-               ClientInfo *clientInfo = getClientInfo(i);
+               ClientInfo *clientInfo = getClientInfo(i2);
                GameConnection *conn = clientInfo->getConnection();
 
                if(conn && conn->mVote == 0 && !clientInfo->isRobot())
@@ -2581,9 +2581,9 @@ void ServerGame::idle(U32 timeDelta)
          i.push_back(voteNothing);
          e.push_back(votePass ? "Pass" : "Fail");
 
-         for(S32 i = 0; i < getClientCount(); i++)
+         for(S32 i2 = 0; i2 < getClientCount(); i2++)
          {
-            ClientInfo *clientInfo = getClientInfo(i);
+            ClientInfo *clientInfo = getClientInfo(i2);
             GameConnection *conn = clientInfo->getConnection();
 
             if(conn)
