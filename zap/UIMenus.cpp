@@ -1005,9 +1005,13 @@ static void addStickOptions(Vector<string> *opts)
 
 static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 
+// Must be static; keeps track of the number of sticks the user had last time the setInputModeCallback was run.
+// That lets the function know if it needs to rebuild the menu because of new stick values available.
+static S32 sticks = 0;    
+
 static void setInputModeCallback(ClientGame *game, U32 val)
 {
-   S32 sticks = Joystick::DetectedJoystickNameList.size();
+   Joystick::initJoystick();      // Refills Joystick::DetectedJoystickNameList to allow people to plug in joystick while in this menu...
 
    if(sticks != Joystick::DetectedJoystickNameList.size())
    {
@@ -1026,13 +1030,13 @@ static void setInputModeCallback(ClientGame *game, U32 val)
       // Special case handler for common situation
       if(sticks == 0 && Joystick::DetectedJoystickNameList.size() == 1)      // User just plugged a stick in
          menuItem->setValueIndex(1);
+
+      sticks = Joystick::DetectedJoystickNameList.size();
    }
 
    game->getSettings()->getIniSettings()->inputMode = (val == 0) ? InputModeKeyboard : InputModeJoystick;
    if(val >= 1) 
       Joystick::UseJoystickNumber = val - 1;
-
-   Joystick::initJoystick();      // Will allow people to plug in joystick while in this menu...
 }
 
 
