@@ -86,6 +86,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
 
       default:
          TNLAssert(false, "Invalid option");
+         break;
    }
 #endif
 }
@@ -420,28 +421,57 @@ void RabbitGameType::onFlaggerDead(Ship *killerShip)
 // What does a particular scoring event score?
 S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
-   switch(scoreEvent)
+   if(scoreGroup == TeamScore)
    {
-   case KillEnemy:
-      return 0;
-   case KilledByAsteroid:  // Fall through OK
-   case KilledByTurret:    // Fall through OK
-   case KillSelf:
-      return -5;
-   case KillTeammate:
-      return 0;
-   case KillEnemyTurret:
-      return 0;
-   case KillOwnTurret:
-      return 0;
-   case RabbitKilled:
-      return 5;
-   case RabbitKills:
-      return 5;
-   case RabbitHoldsFlag:      // Points per second
-   return 1;
-   default:
-      return naScore;
+      switch(scoreEvent)
+      {
+         case KillEnemy:
+            return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
+         case KillSelf:
+            return 0;
+         case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
+         case RabbitKilled:
+            return 5;
+         case RabbitKills:
+            return 5;
+         case RabbitHoldsFlag:      // Points per second
+            return 1;
+         default:
+            return naScore;
+      }
+   }
+   else  // scoreGroup == IndividualScore
+   {
+      switch(scoreEvent)
+      {
+         case KillEnemy:
+            return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
+         case KillSelf:
+            return -5;
+         case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
+         case RabbitKilled:
+            return 5;
+         case RabbitKills:
+            return 5;
+         case RabbitHoldsFlag:      // Points per second
+            return 1;
+         default:
+            return naScore;
+      }
    }
 }
 
