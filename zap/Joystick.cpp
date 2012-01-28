@@ -404,8 +404,6 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
    joystickInfo.buttonMappings[ButtonBack].label = "9";
    joystickInfo.buttonMappings[ButtonStart].label = "10";
    
-      
-
    return joystickInfo;
 }
 
