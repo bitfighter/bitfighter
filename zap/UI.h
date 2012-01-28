@@ -215,6 +215,11 @@ public:
    static S32 drawCenteredString2Col(S32 y, S32 size, bool leftCol, const char *str);
    static S32 drawCenteredString2Colf(S32 y, S32 size, bool leftCol, const char *format, ...);
    static S32 drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const char *left, const char *right, ...);
+   static S32 drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const Color &leftColor, const Color &rightColor,
+         const char *left, const char *right, ...);
+
+   static S32 drawCenteredStringPair2Col(S32 y, S32 size, bool leftCol, const Color &leftColor, const Color &rightColor,
+         const char *left, const char *right);
 
    // Get info about where text will be draw
    static S32 get2ColStartingPos(bool leftCol);

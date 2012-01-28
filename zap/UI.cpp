@@ -640,24 +640,33 @@ S32 UserInterface::getStringPairWidth(S32 size, const char *leftStr, const char 
 //}
 
 
-// Draws a string centered in the left or right half of the screen, with different parts colored differently
-S32 UserInterface::drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const char *left, const char *right, ...)
+S32 UserInterface::drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const char *left, const char *format, ...)
 {
-   va_list args;
-   va_start(args, right);
-   char buffer[2048];
-   vsnprintf(buffer, sizeof(buffer), right, args);
-   va_end(args);
+   makeBuffer;
+   return drawCenteredStringPair2Col(y, size, leftCol, Colors::white, Colors::cyan, left, buffer);
+}
 
+
+S32 UserInterface::drawCenteredStringPair2Colf(S32 y, S32 size, bool leftCol, const Color &leftColor, const Color &rightColor,
+      const char *left, const char *format, ...)
+{
+   makeBuffer;
+   return drawCenteredStringPair2Col(y, size, leftCol, leftColor, rightColor, left, buffer);
+}
+
+// Draws a string centered in the left or right half of the screen, with different parts colored differently
+S32 UserInterface::drawCenteredStringPair2Col(S32 y, S32 size, bool leftCol, const Color &leftColor, const Color &rightColor,
+      const char *left, const char *right)
+{
    S32 offset = getStringWidth(size, left) + getStringWidth(size, " ");
-   S32 width = offset + getStringWidth(size, buffer);
+   S32 width = offset + getStringWidth(size, right);
    S32 x = get2ColStartingPos(leftCol) - width / 2;         // x must be S32 in case it leaks off left side of screen
 
-   glColor(Colors::white);
+   glColor(leftColor);
    drawString(x, y, size, left);
 
-   glColor(Colors::cyan);
-   drawString(x + offset, y, size, buffer);
+   glColor(rightColor);
+   drawString(x + offset, y, size, right);
 
    return x;
 }
