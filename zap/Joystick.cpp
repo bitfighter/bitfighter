@@ -369,7 +369,7 @@ Joystick::JoystickInfo *Joystick::getJoystickInfo(const string &joystickType)
       if(joystickType == JoystickPresetList[i].identifier)
          return &JoystickPresetList[i];
 
-   // We should never get here
+   TNLAssert(false, "We should never get here!");
    return NULL;
 }
 
@@ -387,7 +387,7 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
    joystickInfo.shootAxesSdlIndex[0] = 2;
    joystickInfo.shootAxesSdlIndex[1] = 3;
 
-   // make the button graphics all the same
+   // Make the button graphics all the same
    for(S32 i = 0; i < MaxJoystickButtons; i++)
    {
       joystickInfo.buttonMappings[i].button = (Joystick::Button)i;  // 'i' should be in line with Joystick::Button
@@ -407,8 +407,8 @@ U32 Joystick::getJoystickIndex(const string &joystickType)
       if(joystickType == JoystickPresetList[i].identifier)
          return (U32)i;
 
-   // Shouldn't ever reach here, but if we do, return the generic joystick
-   return JoystickPresetList.size() - 1;
+   TNLAssert(false, "We should never get here!");
+   return JoystickPresetList.size() - 1;              // Return the generic joystick
 }
 
 
