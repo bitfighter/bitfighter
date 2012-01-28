@@ -391,7 +391,7 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
    for(S32 i = 0; i < MaxJoystickButtons; i++)
    {
       joystickInfo.buttonMappings[i].button = (Joystick::Button)i;  // 'i' should be in line with Joystick::Button
-      joystickInfo.buttonMappings[i].label = "";
+      joystickInfo.buttonMappings[i].label = itos(i);
       joystickInfo.buttonMappings[i].color = Colors::white;
       joystickInfo.buttonMappings[i].buttonShape = ButtonShapeRound;
       joystickInfo.buttonMappings[i].buttonSymbol = ButtonSymbolNone;
