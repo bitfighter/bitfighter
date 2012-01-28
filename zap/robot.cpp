@@ -32,6 +32,7 @@
 #include "EngineeredItem.h"      // For lua object defs
 #include "PickupItem.h"          // For lua object defs
 #include "teleporter.h"          // For lua object defs
+#include "CoreGame.h"            // For lua object defs
 #include "GameTypesEnum.h"
 
 #include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
@@ -232,6 +233,7 @@ void LuaRobot::setEnums(lua_State *L)
    setEnumName(WallSegmentTypeNumber, "WallSegmentType");
    setEnumName(SlipZoneTypeNumber, "SlipZoneType");
    setEnumName(SpyBugTypeNumber, "SpyBugType");
+   setEnumName(CoreTypeNumber, "CoreType");
 
    // Modules
    setEnum(ModuleShield);
@@ -1766,6 +1768,7 @@ void Robot::registerClasses()
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
    Lunar<NexusObject>::Register(L);
+   Lunar<CoreItem>::Register(L);
 }
 
 
