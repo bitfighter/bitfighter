@@ -58,7 +58,7 @@ public:
    virtual ~JoystickRender();
 
 
-   static void renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated, S32 offset = 0);
+   static void renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated);
    static S32 getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode);
 
    static void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
