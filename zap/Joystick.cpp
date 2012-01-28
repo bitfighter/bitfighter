@@ -391,11 +391,20 @@ Joystick::JoystickInfo Joystick::getGenericJoystickInfo()
    for(S32 i = 0; i < MaxJoystickButtons; i++)
    {
       joystickInfo.buttonMappings[i].button = (Joystick::Button)i;  // 'i' should be in line with Joystick::Button
-      joystickInfo.buttonMappings[i].label = itos(i);
+      joystickInfo.buttonMappings[i].label = "";
       joystickInfo.buttonMappings[i].color = Colors::white;
       joystickInfo.buttonMappings[i].buttonShape = ButtonShapeRound;
       joystickInfo.buttonMappings[i].buttonSymbol = ButtonSymbolNone;
    }
+
+   // Add some labels
+   for(S32 i = 0; i < 8; i++)
+      joystickInfo.buttonMappings[i].label = itos(i);
+
+   joystickInfo.buttonMappings[ButtonBack].label = "9";
+   joystickInfo.buttonMappings[ButtonStart].label = "10";
+   
+      
 
    return joystickInfo;
 }
