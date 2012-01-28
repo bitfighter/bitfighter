@@ -175,7 +175,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    // Render keyboard keys, just in case
    if(!isControllerButton(inputCode))
    {
-      UserInterface::drawStringf(x, y, 15, "[%s]", inputCodeToString(inputCode));
+      UserInterface::drawStringf(x, y + 2, 15, "[%s]", inputCodeToString(inputCode));     // + 2 vertically aligns things better
       return;
    }
 
