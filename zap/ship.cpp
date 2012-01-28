@@ -905,7 +905,7 @@ void Ship::processModules()
          if(mEnergy >= energyCost)
          {
             // Do the module secondary component action
-            if (i == ModuleSensor)
+            if (i == ModuleSensor && !isGhost())
             {
                Point direction = getAimVector();
                GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
