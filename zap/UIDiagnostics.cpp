@@ -289,6 +289,8 @@ static S32 showMasterBlock(ClientGame *game, S32 textsize, S32 ypos, S32 gap, bo
 }
 
 
+extern void drawHorizLine(S32 x1, S32 x2, S32 y);
+
 void DiagnosticUserInterface::render()
 {
    // Draw title, subtitle, and footer
@@ -383,24 +385,31 @@ void DiagnosticUserInterface::render()
 
       if(joystickDetected)
       {
-         const S32 rawAxisPosX = 500;
-         const S32 rawAxisPosY = 330;
-         glColor3f(1, 0, 1);
-         drawString(rawAxisPosX, rawAxisPosY-40, textsize - 2, "Raw Analog Axis:");
-         glBegin(GL_LINES);
-         for(S32 i = 0; i < Joystick::rawAxisCount; i++) // shows RAW axis inputs
+         F32 x = 500;
+         F32 y = 290;
+
+         glColor(Colors::white);
+         drawString(x, y, textsize - 2, "Raw Analog Axis Values:");
+
+         y += 25;
+
+         for(S32 i = 0; i < Joystick::rawAxisCount; i++)
          {
-            glColor3f(0.5,0,0);
-            glVertex2i(i*8+rawAxisPosX, rawAxisPosY - 20);
-            glVertex2i(i*8+rawAxisPosX, rawAxisPosY + 20);
-            glColor(Colors::yellow);
-            glVertex2i(i*8+rawAxisPosX, rawAxisPosY);
-            F32 a = Joystick::rawAxis[i];
-            if(a < -1) a = -1;
-            if(a > 1) a = 1;
-            glVertex2f(F32(i*8+rawAxisPosX), rawAxisPosY + a * 20);
+            F32 a = Joystick::rawAxis[i];    // Range: -1 to 1
+            if(fabs(a) > .1f)
+            {
+               glColor(Colors::cyan);
+               S32 len = drawStringAndGetWidthf(x, y, textsize - 2, "Axis %d", i);
+
+               glColor(Colors::red);
+               drawHorizLine(x, x + len, y + textsize + 3);
+
+               glColor(Colors::yellow);
+               drawHorizLine(x + len / 2, x + len / 2 + a * len / 2, y + textsize + 3);
+
+               x += len + 8;
+            }
          }
-         glEnd();
       }
 
       // Key states
