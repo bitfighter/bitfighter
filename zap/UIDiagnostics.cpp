@@ -42,6 +42,7 @@
 #include "SDL/SDL_opengl.h"
 
 #include <stdio.h>
+#include <cmath>
 
 namespace Zap
 {
