@@ -192,6 +192,7 @@ public:
    static const S32 FieldDownTime = 250;
    static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
+   static const F32 ForceFieldHalfWidth;
 
    ForceField(S32 team = -1, Point start = Point(), Point end = Point());
    bool collide(GameObject *hitObject);

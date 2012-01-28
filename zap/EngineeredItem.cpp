@@ -243,7 +243,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    Point dir = forceFieldEnd - forceFieldStart;
 
    Point crossVec(dir.y, -dir.x);
-   crossVec.normalize(2 * Ship::CollisionRadius);
+   crossVec.normalize(2 * Ship::CollisionRadius + ForceField::ForceFieldHalfWidth);
 
    collisionPoly.push_back(forceFieldStart + crossVec);
    collisionPoly.push_back(forceFieldEnd + crossVec);
@@ -1440,13 +1440,14 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+const F32 ForceField::ForceFieldHalfWidth = 2.5;
+
 // static
 void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &geom, F32 scaleFact)
 {
-   static const F32 FORCEFIELD_HALF_WIDTH = 2.5;
 
    Point normal(end.y - start.y, start.x - end.x);
-   normal.normalize(FORCEFIELD_HALF_WIDTH * scaleFact);    
+   normal.normalize(ForceFieldHalfWidth * scaleFact);
 
    geom.push_back(start + normal);
    geom.push_back(end + normal);
