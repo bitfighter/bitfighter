@@ -1096,7 +1096,7 @@ void OptionsMenuUserInterface::setupMenus()
    INPUT_MODE_MENU_ITEM_INDEX = getMenuItemCount() - 1;
 
    opts.clear();
-   // Add the joystick names
+   // Add the joystick names to opts
    Joystick::getAllJoystickPrettyNames(opts);
 
    U32 selectedOption = Joystick::SelectedPresetIndex;
@@ -1128,15 +1128,17 @@ void OptionsMenuUserInterface::setupMenus()
    opts.push_back("ENABLED");
    addMenuItem(new ToggleMenuItem("VOICE ECHO:", opts, settings->getIniSettings()->echoVoice ? 1 : 0, true, 
                                   setVoiceEchoCallback, "Toggle whether you hear your voice on voice chat",  KEY_E));
-
+#ifdef INCLUDE_CONN_SPEED_ITEM
    opts.clear();
    opts.push_back("VERY LOW");
    opts.push_back("LOW");
    opts.push_back("MEDIUM");  // there is 5 options, -2 (very low) to 2 (very high)
    opts.push_back("HIGH");
    opts.push_back("VERY HIGH");
+
    addMenuItem(new ToggleMenuItem("CONNECTION SPEED:", opts, settings->getIniSettings()->connectionSpeed + 2, true, 
                                   setConnectionSpeedCallback, "Speed of your connection, if your ping goes too high, try slower speed.",  KEY_E));
+#endif
 }
 
 
