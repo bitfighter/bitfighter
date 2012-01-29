@@ -1697,6 +1697,20 @@ bool Robot::startLua()
 }
 
 
+static string getNextName()
+{
+   static const string botNames[] = {
+      "Addison", "Alexis", "Amelia", "Audrey", "Chloe", "Claire", "Elizabeth", "Ella", 
+      "Emily", "Emma", "Evelyn" "Gabriella", "Hailey", "Hannah", "Isabella", "Layla", 
+      "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe" 
+   };
+
+   static S32 nameIndex = -1;
+   nameIndex++;
+
+   return botNames[nameIndex % ARRAYSIZE(botNames)];
+}
+
 
 // Run bot's getName function, return default name if fn isn't defined
 string Robot::runGetName()
@@ -1709,7 +1723,7 @@ string Robot::runGetName()
       if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
       {
          // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
-         string name = "Nancy";
+         string name = getNextName();
          logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
          return name;
       }
@@ -1717,7 +1731,7 @@ string Robot::runGetName()
       {
          if(!lua_isstring(L, -1))
          {
-            string name = "Nancy";
+            string name = getNextName();
             logError("Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
             return name;
          }

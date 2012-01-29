@@ -41,10 +41,10 @@ bot = LuaRobot(Robot)
 
 
 --
--- Default robot name, can and should be overridden by user robots, but we need to have something...
+-- Returning nil will grab the next bot name; however, this is a fallback and should be overridden by robots...
 --
 function getName()
-    return("FancyNancy")
+    return nil
 end
 
 --
