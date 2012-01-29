@@ -27,9 +27,14 @@ if [ ! -f "$userdatadir/robots/s_bot.bot" ]; then
 fi
 
 # 016
-if [ ! -d "$userdatadir/editor_plugins" ]; then
+if [ ! -d "$userdatadir/scripts" ]; then
   cp -r "$datadir/scripts" "$userdatadir/"
+fi
+if [ ! -d "$userdatadir/editor_plugins" ]; then
   cp -r "$datadir/editor_plugins" "$userdatadir/"
+fi
+if [ ! -f "$userdatadir/joystick_presets.ini" ]; then
+  cp "$datadir/joystick_presets.ini" "$userdatadir/"
 fi
 
 # Full path is need on some Mac systems for sfx - not sure why yet

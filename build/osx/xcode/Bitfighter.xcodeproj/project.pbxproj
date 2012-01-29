@@ -139,6 +139,7 @@
 		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
 		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
+		73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */ = {isa = PBXBuildFile; fileRef = 73946E6014D50F0F00B95333 /* joystick_presets.ini */; };
 		739746A014B373980053CCF4 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
 		739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739746EF14B374E30053CCF4 /* WeaponInfo.cpp */; };
 		7397470A14B3766B0053CCF4 /* libpng.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
@@ -699,6 +700,7 @@
 		738B576E1446185700F25FDF /* InputCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCode.h; path = ../../../zap/InputCode.h; sourceTree = SOURCE_ROOT; };
 		738B576F1446185700F25FDF /* InputCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCodeEnum.h; path = ../../../zap/InputCodeEnum.h; sourceTree = SOURCE_ROOT; };
 		738B57701446185700F25FDF /* shipItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shipItems.cpp; path = ../../../zap/shipItems.cpp; sourceTree = SOURCE_ROOT; };
+		73946E6014D50F0F00B95333 /* joystick_presets.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = joystick_presets.ini; path = ../../../exe/joystick_presets.ini; sourceTree = SOURCE_ROOT; };
 		7397469F14B373980053CCF4 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = ../../../lib/libpng.framework; sourceTree = SOURCE_ROOT; };
 		739746EE14B374E30053CCF4 /* GameTypesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameTypesEnum.h; path = ../../../zap/GameTypesEnum.h; sourceTree = SOURCE_ROOT; };
 		739746EF14B374E30053CCF4 /* WeaponInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WeaponInfo.cpp; path = ../../../zap/WeaponInfo.cpp; sourceTree = SOURCE_ROOT; };
@@ -1329,6 +1331,7 @@
 				737CE3F412904D5300D732B7 /* robots */,
 				737CE3FC12904D5300D732B7 /* scripts */,
 				94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */,
+				73946E6014D50F0F00B95333 /* joystick_presets.ini */,
 				8D1107310486CEB800E47090 /* Bitfighter-Info.plist */,
 			);
 			name = Resources;
@@ -2527,6 +2530,7 @@
 				73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */,
 				D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */,
 				7388F06C139D5B46003C6BB0 /* music in Resources */,
+				73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
