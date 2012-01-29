@@ -241,9 +241,11 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
    TNLAssert(this, "'THIS' is NULL");
 
    U32 tryCount = 0;
+   const U32 TRY_COUNT_MAX = 8;
    Vector<SafePtr<GameObject> > disabledList;
+   F32 moveTimeStart = moveTime;
 
-   while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time
+   while(moveTime > moveTimeEpsilon && tryCount < TRY_COUNT_MAX)     // moveTimeEpsilon is a very short, but non-zero, bit of time
    {
       tryCount++;
 
@@ -313,7 +315,6 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       else if(isCollideableType(objectHit->getObjectTypeNumber()))
       {
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
-         //moveTime = 0;
       }
       else if(objectHit->getObjectTypeNumber() == SpeedZoneTypeNumber)
       {
@@ -330,7 +331,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       if(disabledList[i].isValid())
          disabledList[i]->enableCollision();
 
-   if(tryCount == 8)
+   if(tryCount == TRY_COUNT_MAX && moveTime > moveTimeStart * 0.98f)
       mMoveState[stateIndex].vel.set(0,0); // prevents some overload by not trying to move anymore
 }
 
