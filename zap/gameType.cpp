@@ -1761,7 +1761,9 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
 
          // Broadcast player scores for rendering on the client
          if(!isTeamGame())
-            s2cSetPlayerScore(player->getId(), player->getScore());
+            for(S32 i = 0; i < mGame->getClientCount(); i++)  // TODO: try to get rid of this for loop
+               if(getGame()->getClientInfo(i) == player)      // and this pointer checks (we need to get the index, for veriable "i")
+                  s2cSetPlayerScore(i, player->getScore());
 
          updateLeadingPlayerAndScore();
       }
