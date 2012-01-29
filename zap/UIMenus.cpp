@@ -1009,7 +1009,7 @@ static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 
 // Must be static; keeps track of the number of sticks the user had last time the setInputModeCallback was run.
 // That lets the function know if it needs to rebuild the menu because of new stick values available.
-static S32 sticks = 0;    
+static S32 sticks = -1;    
 
 static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 {
