@@ -421,10 +421,18 @@ U32 Joystick::getJoystickIndex(const string &joystickType)
 
 void Joystick::loadJoystickPresets()
 {
-   FolderManager *folderManager = gClientGame->getSettings()->getFolderManager();
 
-   // Load up the joystick presets INI
-   joystickPresetsINI.SetPath(joindir(folderManager->iniDir, "joystick_presets.ini"));
+// Load up the joystick presets INI
+string dir;
+
+#ifdef TNL_OS_MAC_OSX
+   FolderManager *folderManager = gClientGame->getSettings()->getFolderManager();
+   dir = folderManager->iniDir;
+#else
+   dir = ".";
+#endif
+
+   joystickPresetsINI.SetPath(joindir(dir, "joystick_presets.ini"));
    joystickPresetsINI.ReadFile();
 
    // Loop through each section (joystick) and parse
