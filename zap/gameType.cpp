@@ -1760,9 +1760,8 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          newScore = player->getScore();
 
          // Broadcast player scores for rendering on the client
-         for(S32 i = 0; i < mGame->getClientCount(); i++)
-            if(!isTeamGame())
-               s2cSetPlayerScore(i, mGame->getClientInfo(i)->getScore());
+         if(!isTeamGame())
+            s2cSetPlayerScore(player->getId(), player->getScore());
 
          updateLeadingPlayerAndScore();
       }

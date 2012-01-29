@@ -2003,7 +2003,7 @@ void Ship::render(S32 layerIndex)
    glPushMatrix();
    glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
 
-   if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
+   if(!localShip && layerIndex == 1 && getClientInfo())      // Need to draw this before the glRotatef below, but only on layer 1...
    {
       string str = getClientInfo() ? getClientInfo()->getName().getString() : string();
 
