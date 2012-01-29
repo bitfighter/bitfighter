@@ -381,10 +381,10 @@ void DiagnosticUserInterface::render()
       else
       {
          // Draw which preset we're using
-         drawCenteredStringPair2Colf(ypos, textsize, true, "Preset Name:", "%s", Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].name.c_str());
+         drawCenteredStringPair2Colf(ypos, textsize, true, "Stick Profile:", "%s", Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].name.c_str());
 
          // Draw the raw SDL detection string
-         drawCenteredStringPair2Colf(ypos + textsize + gap, textsize, true, Colors::magenta, Colors::cyan, "Raw SDL Name:", "%s",
+         drawCenteredStringPair2Colf(ypos + textsize + gap, textsize, true, Colors::magenta, Colors::cyan, "Autodetect String:", "%s",
                (U32(index) >= U32(Joystick::DetectedJoystickNameList.size()) || Joystick::DetectedJoystickNameList[index] == "") ? "<None>" : Joystick::DetectedJoystickNameList[index].c_str());
       }
 

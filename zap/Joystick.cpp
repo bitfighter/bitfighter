@@ -146,7 +146,7 @@ bool Joystick::initJoystick()
    for (S32 i = 0; i < joystickCount; i++)
    {
       const char *joystickName = SDL_JoystickName(i);
-      logprintf("%d.) Search string = \"%s\"", i + 1, joystickName);
+      logprintf("%d.) Autodetect string = \"%s\"", i + 1, joystickName);
       DetectedJoystickNameList.push_back(joystickName);
    }
 
