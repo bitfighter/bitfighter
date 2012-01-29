@@ -1011,21 +1011,25 @@ static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
 // That lets the function know if it needs to rebuild the menu because of new stick values available.
 static S32 sticks = 0;    
 
-static void setInputModeCallback(ClientGame *game, U32 val)
+static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 {
-   Joystick::initJoystick();      // Refills Joystick::DetectedJoystickNameList to allow people to plug in joystick while in this menu...
+   // Refills Joystick::DetectedJoystickNameList to allow people to plug in joystick while in this menu...
+   Joystick::initJoystick();
 
+   // If there is a different number of sticks than previously detected
    if(sticks != Joystick::DetectedJoystickNameList.size())
    {
       ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(game->getUIManager()->getOptionsMenuUserInterface()->
                                                                 getMenuItem(INPUT_MODE_MENU_ITEM_INDEX));
 
+      // Rebuild this menu with the new number of sticks
       if(menuItem)
          addStickOptions(&menuItem->mOptions);
 
-      if(val > (U32)Joystick::DetectedJoystickNameList.size())
+      // Loop back to the first index if we hit the end of the list
+      if(inputModeIndex > (U32)Joystick::DetectedJoystickNameList.size())
       {
-         val = 0;
+         inputModeIndex = 0;
          menuItem->setValueIndex(0);
       }
 
@@ -1033,12 +1037,13 @@ static void setInputModeCallback(ClientGame *game, U32 val)
       if(sticks == 0 && Joystick::DetectedJoystickNameList.size() == 1)      // User just plugged a stick in
          menuItem->setValueIndex(1);
 
+      // Save the current number of sticks
       sticks = Joystick::DetectedJoystickNameList.size();
    }
 
-   game->getSettings()->getIniSettings()->inputMode = (val == 0) ? InputModeKeyboard : InputModeJoystick;
-   if(val >= 1) 
-      Joystick::UseJoystickNumber = val - 1;
+   game->getSettings()->getIniSettings()->inputMode = (inputModeIndex == 0) ? InputModeKeyboard : InputModeJoystick;
+   if(inputModeIndex >= 1)
+      Joystick::UseJoystickNumber = inputModeIndex - 1;
 }
 
 
