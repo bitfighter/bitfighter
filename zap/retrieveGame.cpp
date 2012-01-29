@@ -348,7 +348,7 @@ S32 RetrieveGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreE
          case RemoveFlagFromEnemyZone:
             return 0;
          case LostFlag:    // Not really an individual scoring event!
-         return -1;
+            return -1;
          default:
             return naScore;
       }
@@ -358,23 +358,23 @@ S32 RetrieveGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreE
       switch(scoreEvent)
       {
          case KillEnemy:
-            return 1;
+            return 0;
          case KilledByAsteroid:  // Fall through OK
          case KilledByTurret:    // Fall through OK
          case KillSelf:
-            return -1;
+            return 0;
          case KillTeammate:
             return 0;
          case KillEnemyTurret:
-            return 1;
+            return 0;
          case KillOwnTurret:
-            return -1;
+            return 0;
          case ReturnFlagToZone:
-            return 2;
-         case RemoveFlagFromEnemyZone:
             return 1;
-            // case LostFlag:    // Not really an individual scoring event!
-            //    return 0;
+         case RemoveFlagFromEnemyZone:
+            return 0;
+         case LostFlag:    // Not really an individual scoring event!
+            return -1;
          default:
             return naScore;
       }
