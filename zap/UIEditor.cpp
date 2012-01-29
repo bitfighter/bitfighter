@@ -3853,7 +3853,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       insertNewItem(MineTypeNumber);
    else if(inputString == "F")                // Force Field
       insertNewItem(ForceFieldProjectorTypeNumber);
-   else if(inputString == "Backspace" || inputString == "Del")
+   else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")  // Keypad . is the keypad's del key
       deleteSelection(false);
    else if(inputCode == keyHELP)              // Turn on help screen
    {
