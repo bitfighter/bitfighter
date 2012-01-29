@@ -1715,6 +1715,13 @@ string Robot::runGetName()
       }
       else
       {
+         if(!lua_isstring(L, -1))
+         {
+            string name = "Nancy";
+            logError("Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
+            return name;
+         }
+
          string name = lua_tostring(L, -1);
          lua_pop(L, 1);
          return name;
