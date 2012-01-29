@@ -380,8 +380,8 @@ void DiagnosticUserInterface::render()
          drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
       else
       {
-         // Draw which preset we're using
-         drawCenteredStringPair2Colf(ypos, textsize, true, "Stick Profile:", "%s", Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].name.c_str());
+         // Draw which profile we're using
+         drawCenteredStringPair2Colf(ypos, textsize, true, "Current Profile:", "%s", Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].name.c_str());
 
          // Draw the raw SDL detection string
          drawCenteredStringPair2Colf(ypos + textsize + gap, textsize, true, Colors::magenta, Colors::cyan, "Autodetect String:", "%s",

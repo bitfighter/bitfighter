@@ -2103,7 +2103,7 @@ string IniSettings::getInputMode()
 {
 #ifndef ZAP_DEDICATED
    if(inputMode == InputModeJoystick)
-      return "Joystick " + itos(Joystick::UseJoystickNumber);
+      return "Joystick " + itos(Joystick::UseJoystickNumber + 1);    // Humans use 1-based indices!
    else
 #endif
       return "Keyboard";
