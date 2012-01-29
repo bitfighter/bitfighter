@@ -156,7 +156,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
          return smallRectButtonWidth;
          break;
       case Joystick::ButtonShapeHorizEllipse:
-         return horizEllipseButtonRadiusX;
+         return horizEllipseButtonRadiusX * 2;
          break;
       case Joystick::ButtonShapeRightTriangle:
          return rectButtonWidth;
@@ -170,12 +170,14 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 
 
 // Renders something resembling a controller button or keyboard key
-void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated, S32 offset)
+// Note:  buttons are with the given x coordinate as their center
+void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated)
 {
    // Render keyboard keys, just in case
    if(!isControllerButton(inputCode))
    {
-      UserInterface::drawStringf(x, y + 2, 15, "[%s]", inputCodeToString(inputCode));     // + 2 vertically aligns things better
+      // Offset a bit in the x direction.
+      UserInterface::drawStringf(x - 10, y, 15, "[%s]", inputCodeToString(inputCode));
       return;
    }
 
@@ -192,6 +194,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    Color *buttonColor = &Joystick::JoystickPresetList[joystickIndex].buttonMappings[button].color;
 
 
+   // Note:  the x coordinate is already at the center
    Point location(x,y);
    Point center = location + Point(0, buttonHalfHeight);
 

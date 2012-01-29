@@ -172,7 +172,7 @@ void LoadoutHelper::render()
          if(showKeys)
          {
             glColor(Colors::white);     
-            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 20), (F32)yPos, joystickIndex, list->get(i).key, false);
+            JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + 30), (F32)yPos, joystickIndex, list->get(i).key, false);
          }
 
          if(selected)

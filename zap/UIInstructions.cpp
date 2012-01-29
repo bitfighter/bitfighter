@@ -302,7 +302,7 @@ void InstructionsUserInterface::renderPage1()
          }
          else
             JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), Joystick::SelectedPresetIndex,
-                                                   *controls[i].primaryControlIndex, false, 10);
+                                                   *controls[i].primaryControlIndex, false);
       }
 
       y += 26;
