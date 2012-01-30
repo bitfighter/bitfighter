@@ -1063,7 +1063,7 @@ static Color getGoalZoneOutlineColor(const Color &c, F32 glowFraction)
 
 
 // TODO: Consider replacing yellow with team color to indicate who scored!
-static Color getGoalZoneFillColor(const Color *c, bool isFlashing, F32 glowFraction)
+static Color getGoalZoneFillColor(const Color &c, bool isFlashing, F32 glowFraction)
 {
    F32 alpha = isFlashing ? 0.75f : 0.5f;
 
@@ -1072,7 +1072,7 @@ static Color getGoalZoneFillColor(const Color *c, bool isFlashing, F32 glowFract
 
 
 // No label version
-void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill)
+void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill)
 {
    Color fillColor    = getGoalZoneFillColor(c, false, 0);
    Color outlineColor = getGoalZoneOutlineColor(c, false);
@@ -1082,28 +1082,32 @@ void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<P
 
 
 // Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle, 
+void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<Point> *fill, Point centroid, F32 labelAngle,
                     bool isFlashing, F32 glowFraction, S32 score, F32 flashCounter, bool useOldStyle)
 {
    Color fillColor, outlineColor;
 
    if(useOldStyle)
    {
-      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
-      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
+//      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
+//      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
+
+      F32 alpha = isFlashing ? 0.75f : 0.5f;
+      fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
+      outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
    }
    else // Some new flashing effect (sam's idea)
    {
       F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
 
-      Color newColor = *c;
+      Color newColor = c;
       if(isFlashing)
          newColor = newColor + glowRate * (1 - glowRate);
       else
          newColor = newColor * (1 - glowRate);
 
-      fillColor    = getGoalZoneFillColor(&newColor, false, glowFraction);
-      outlineColor = getGoalZoneOutlineColor(&newColor, false);
+      fillColor    = getGoalZoneFillColor(newColor, false, glowFraction);
+      outlineColor = getGoalZoneOutlineColor(newColor, false);
    }
 
 
