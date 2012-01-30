@@ -340,7 +340,22 @@ void CoreItem::renderItem(const Point &pos)
 void CoreItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   renderCore(getVert(0), 5, &Colors::white, getGame()->getCurrentTime());
+   glColor(Colors::white);
+   drawPolygon(getVert(0), 10, 5, 0);
+   drawCircle(getVert(0), 2);
+#endif
+}
+
+
+void CoreItem::renderEditor(F32 currentScale)
+{
+#ifndef ZAP_DEDICATED
+   // Here we render a simpler, non-animated Core to reduce distraction in the editor
+   glColor(Colors::white);
+   drawPolygon(getVert(0), 10, CoreStartWidth / 2, 0);
+
+   glColor(getTeamColor(mTeam));
+   drawCircle(getVert(0), CoreStartWidth / 5);
 #endif
 }
 
