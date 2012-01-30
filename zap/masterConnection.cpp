@@ -440,7 +440,8 @@ void MasterServerConnection::onConnectionEstablished()
       // and clients have connected in the meantime.  In some rare circumstances, could lead to double-verification, but I don't think this
       // would be a real problem
       for(S32 i = 0; i < mGame->getClientCount(); i++)
-         mGame->getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
+         if(mGame->getClientInfo(i)->getConnection())             // robots don't have GameConnection
+            mGame->getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
    }
    else
    {

@@ -1832,6 +1832,13 @@ void Robot::kill()
          mMountedItems[i]->onMountDestroyed();
 }
 
+// Need this, as this may come from level or levelgen
+bool Robot::processArguments(S32 argc, const char **argv, Game *game)
+{
+   string unused_String;
+   return processArguments(argc, argv, game, unused_String); 
+}
+
 
 bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {

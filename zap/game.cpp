@@ -2079,7 +2079,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
       for(S32 i = 0; i < getClientCount(); i++)
       {
          mGameType->serverAddClient(getClientInfo(i));
-         getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
+         if(getClientInfo(i)->getConnection())                          // robots don't have GameConnection
+            getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
       }
 }
 

@@ -156,6 +156,7 @@ public:
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
    bool processArguments(S32 argc, const char **argv, Game *game, string &errorMessage);
    void onAddedToGame(Game *);
 
