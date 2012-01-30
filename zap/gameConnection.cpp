@@ -612,7 +612,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          ClientInfo *clientInfo = gServerGame->getClientInfo(i);
          GameConnection *conn = clientInfo->getConnection();
 
-         if(clientInfo->isLevelChanger())
+         if(clientInfo->isLevelChanger() && conn)
             conn->sendLevelList();
       }
 
@@ -679,8 +679,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
             if(!clientInfo->isLevelChanger())
             {
                clientInfo->setIsLevelChanger(true);
-               conn->sendLevelList();
-               conn->s2cSetIsLevelChanger(true, false);     // Silently
+               if(conn)
+               {
+                  conn->sendLevelList();
+                  conn->s2cSetIsLevelChanger(true, false);     // Silently
+               }
             }
          }
       }
@@ -694,7 +697,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
             if(clientInfo->isLevelChanger() && (!clientInfo->isAdmin()))
             {
                clientInfo->setIsLevelChanger(false);
-               conn->s2cSetIsLevelChanger(false, false);
+               if(conn)
+                  conn->s2cSetIsLevelChanger(false, false);
             }
          }
       }
@@ -709,7 +713,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
       // If we've changed the server name, notify all the clients
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         gServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
+         if(gServerGame->getClientInfo(i)->getConnection())
+            gServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
