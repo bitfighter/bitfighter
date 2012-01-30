@@ -1100,7 +1100,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
    for(S32 i = 0; i < gServerGame->getClientCount(); i++)
    {
       GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
-      conn->s2cInitiateShutdown(time, mClientInfo->getName(), reason, conn == this);
+      if(conn)
+         conn->s2cInitiateShutdown(time, mClientInfo->getName(), reason, conn == this);
    }
 }
 
