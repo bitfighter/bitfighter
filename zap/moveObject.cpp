@@ -2107,7 +2107,7 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
 
 void ResourceItem::onItemDropped()
 {
-   if(mMount.isValid())
+   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
    {
       this->setActualPos(mMount->getActualPos()); 
       this->setActualVel(mMount->getActualVel() * 1.5);
