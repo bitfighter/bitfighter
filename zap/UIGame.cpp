@@ -3203,7 +3203,7 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
          }
          else
          {
-            glColor(Colors::yellow, 0.6);
+            glColor(Colors::yellow, 0.6f);
             drawCircle(center, 15);
          }
       }

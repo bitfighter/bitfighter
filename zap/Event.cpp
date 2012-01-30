@@ -81,7 +81,9 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    // Also, normalize the input value to a floating point scale of 0 to 1
    F32 normalValue;
    S32 absValue = abs(value);
-   if(absValue < Joystick::LowerSensitivityThreshold)
+   if(axisMask && (ShootAxisUpDownMask || ShootAxisLeftRightMask))  // shooting have its own deadzone system (see ClientGame.cpp, joystickUpdateMove)
+      normalValue = F32(absValue) / 32767.f;
+   else if(absValue < Joystick::LowerSensitivityThreshold)
       normalValue = 0.0f;
    else if(absValue > Joystick::UpperSensitivityThreshold)
       normalValue = 1.0f;

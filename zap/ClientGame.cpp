@@ -431,7 +431,7 @@ static void joystickUpdateMove(GameSettings *settings, Move *theMove)
 
    F32 fact = settings->getEnableExperimentalAimMode() ? maxplen : plen;
 
-   if(fact > (settings->getEnableExperimentalAimMode() ? 0.95 : 0.50))    // It requires a large movement to actually fire...
+   if(fact > (settings->getEnableExperimentalAimMode() ? 0.95 : 0.66f))    // It requires a large movement to actually fire...
    {
       theMove->angle = atan2(p.y, p.x);
       theMove->fire = true;
