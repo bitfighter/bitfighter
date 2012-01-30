@@ -475,8 +475,10 @@ const char *gGameObjectInfo[] = {
    /* 24 */   "Test Item", "Bouncy ball",
    /* 25 */   "Resource Item", "Use with engineer module",
    /* 26 */   "Soccer Ball", "Push into enemy goal in Soccer game",
+   /* 27 */   "Core", "Kill the enemy's; defend yours OR DIE!"
 };
-static U32 GameObjectCount = 27;      // <=== If you add something above, increment this!
+
+static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;   
 
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index)
@@ -497,10 +499,10 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       objStart += Point(200, 90);
       Point start = objStart + Point(0, 55);
 
-      glColor3f(1,1,0);
+      glColor(Colors::yellow);
       renderCenteredString(start, (S32)20, text);
 
-      glColor3f(1,1,1);
+      glColor(Colors::white);
       renderCenteredString(start + Point(0, 25), (S32)17, desc);
 
       glPushMatrix();
@@ -621,6 +623,9 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 26:    // SoccerBall
             renderSoccerBall(Point(0,0));
             break;
+
+         case 27:    // Core
+            renderCore(Point(0,0), 55, &Colors::blue, Platform::getRealMilliseconds());
       }
       glPopMatrix();
       objStart.y += 75;
