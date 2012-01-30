@@ -1944,23 +1944,23 @@ void GameUserInterface::banPlayerHandler(ClientGame *game, const Vector<string> 
          return;
       }
 
-      ClientInfo *banedClientInfo = game->findClientInfo(words[1].c_str());
+      ClientInfo *bannedClientInfo = game->findClientInfo(words[1].c_str());
 
-      if(!banedClientInfo)
+      if(bannedClientInfo->isRobot())
+      {
+         game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
+         return;
+      }
+
+      if(!bannedClientInfo)
       {
          game->displayErrorMessage("!!! Player name not found");
          return;
       }
 
-      if(banedClientInfo->isAdmin())
+      if(bannedClientInfo->isAdmin())
       {
          game->displayErrorMessage("!!! Cannot ban an admin");
-         return;
-      }
-
-      if(!banedClientInfo->getConnection()->isEstablished())
-      {
-         game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
          return;
       }
 
