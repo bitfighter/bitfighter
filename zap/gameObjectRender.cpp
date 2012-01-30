@@ -1092,6 +1092,7 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
 //      fillColor    = getGoalZoneFillColor(c, isFlashing, glowFraction);
 //      outlineColor = getGoalZoneOutlineColor(c, isFlashing);
 
+      // TODO: reconcile why using the above commentted out code doesn't work
       F32 alpha = isFlashing ? 0.75f : 0.5f;
       fillColor    = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) * alpha * (1 - glowFraction * glowFraction));
       outlineColor = Color(Color(1,1,0) * (glowFraction * glowFraction) + Color(c) *         (1 - glowFraction * glowFraction));
