@@ -2861,7 +2861,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
       return;  // Error message handled client-side
 
    // Cannot ban robot
-   if(!bannedClientInfo->getConnection()->isEstablished())
+   if(!bannedClientInfo->isRobot())
       return;  // Error message handled client-side
 
    Address ipAddress = bannedClientInfo->getConnection()->getNetAddressString();
