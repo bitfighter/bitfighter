@@ -65,8 +65,8 @@ namespace Zap
 {
 
 // bitfighter.org would soon be the same as 199.192.229.168
-//const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.org:25955";
-const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";    
+const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955,bitfighter.org:25955";
+//const char *MASTER_SERVER_LIST_ADDRESS = "IP:199.192.229.168:25955, bitfighter.net:25955";
 
 // Constructor: Set default values here
 IniSettings::IniSettings()
