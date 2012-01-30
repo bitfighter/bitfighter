@@ -1289,7 +1289,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       ClientInfo *clientInfo = getGame()->findClientInfo(playerName);
 
-      TNLAssert(clientInfo, "We need a clientInfo for this ship!");
+      // A null player name is the tell-tale sign of a 'Ship' object in the level file
+//      TNLAssert(clientInfo || playerName.isNull(), "We need a clientInfo for this ship!");
 
       mClientInfo = clientInfo;
 
