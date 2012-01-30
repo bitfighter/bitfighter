@@ -86,6 +86,8 @@ string concatenate(const Vector<string> &words, S32 startingWith = 0);
 string lcase(string strToConvert);
 string ucase(string strToConvert);
 
+bool isInteger(const char *str);
+
 
 void s_fprintf(FILE *stream, const char *format, ...);      // throws SaveException
 

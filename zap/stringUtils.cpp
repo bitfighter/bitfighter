@@ -219,6 +219,19 @@ string ucase(string strToConvert)
 }
 
 
+// Return true if str looks like an int
+bool isInteger(const char *str)
+{
+   S32 i = 0;
+   while(str[i])
+   {
+      if(str[i] < '0' || str[i] > '9')
+         return false;
+      i++;
+   }
+
+   return true;
+}
 
 
 // TODO: Merge this with the one following
