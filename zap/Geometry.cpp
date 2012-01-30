@@ -805,7 +805,7 @@ bool PolylineGeometry::vertSelected(S32 vertIndex)
 
 void PolylineGeometry::onPointsChanged()
 {
-    updateExtentInDatabase();
+    // Do nothing
 }
 
 

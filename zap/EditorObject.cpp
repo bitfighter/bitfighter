@@ -298,6 +298,7 @@ void EditorObject::onGeomChanging()
 {
    if(getGeomType() == geomPolygon)
       onGeomChanged();               // Allows poly fill to get reshaped as vertices move
+
    onPointsChanged();
 }
 
