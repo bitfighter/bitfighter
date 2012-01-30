@@ -103,6 +103,12 @@ public:
       set(r);
       return *this;
    }
+
+   inline bool operator==(const Rect &r) const
+   {
+      return min == r.min && max == r.max;
+   }
+
 };
 
 };	// namespace
