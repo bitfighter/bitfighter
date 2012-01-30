@@ -658,9 +658,19 @@ Rect DatabaseObject::getExtent() const
 }
 
 
+//extern string itos(int);
+
 // Update object's extents in the database -- will not add object to database if it's not already in it
 void DatabaseObject::setExtent(const Rect &extents)
 {
+   // The following is some debugging code for seeing the ridiculous number of duplicate calls we make to this function
+   // This duplication is probably a sign that there is a problem in the model.  Deal with it another day.
+   //static string last = "", lastx = "";
+   //logprintf("Updating %p extent to %s", this, extents.toString().c_str());
+   //lastx = itos((int)(this)) + " " + extents.toString();
+   //if(lastx == last) { logprintf("SAME======================="); }
+   //last = lastx;
+
    GridDatabase *gridDB = getDatabase();
 
    if(gridDB)
