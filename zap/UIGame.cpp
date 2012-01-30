@@ -2095,8 +2095,8 @@ CommandInfo chatCmds[] = {
    { "settime",     GameUserInterface::setTimeHandler,         { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Set play time for the level" },
    { "setwinscore", GameUserInterface::setWinningScoreHandler, { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<score>"},                            "Set score to win the level" },
    { "resetscore",  GameUserInterface::resetScoreHandler,      {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Reset all scores to zero" },
-   { "addbot",      GameUserInterface::addBotHandler,          { STR, TEAM, STR },3,      LEVEL_COMMANDS,  1,  1, {"[file]", "[team]","[args]"},           "Add a bot from [file] to [team], pass [args] to bot" },
-   { "addbots",     GameUserInterface::addBotsHandler,         { INT, STR, TEAM, STR },4, LEVEL_COMMANDS,  1, 2,  {"[count]","[file]","[team]","[args]"}, "Add a [count] of bots from [file] to [team], pass [args] to bot" },
+   { "addbot",      GameUserInterface::addBotHandler,          { STR, TEAM, STR },3,      LEVEL_COMMANDS,  1,  2, {"[file]", "[team num]","[args]"},           "Add bot from [file] to [team num], pass [args] to bot" },
+   { "addbots",     GameUserInterface::addBotsHandler,         { INT, STR, TEAM, STR },4, LEVEL_COMMANDS,  1, 2,  {"[count]","[file]","[team num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     GameUserInterface::kickBotHandler,         {  },              1,      LEVEL_COMMANDS,  1, 1,  {  },                                   "Kick most recently added bot" },
    { "kickbots",    GameUserInterface::kickBotsHandler,        {  },              1,      LEVEL_COMMANDS,  1, 1,  {  },                                   "Kick all bots" },
 
