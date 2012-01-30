@@ -981,6 +981,7 @@ void PolygonGeometry::onPointsChanged()
    Parent::onPointsChanged();
 }
 
+
 void PolygonGeometry::disableTriangluation()
 {
    mTriangluationDisabled = true;
