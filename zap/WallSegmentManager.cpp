@@ -223,9 +223,9 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
          mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
+      wall->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
    }
 
-   wall->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
    for(S32 j = 0; j < toBeRemounted.size(); j++)  
