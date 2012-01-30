@@ -345,7 +345,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    deployedObject->setOwner(clientInfo);
    deployedObject->computeExtent();
 
-   if(!deployedObject)              // Something went wrong
+   if(!deployedObject && !clientInfo->isRobot())              // Something went wrong
    {
       clientInfo->getConnection()->s2cDisplayErrorMessage("Error deploying object.");
       delete deployedObject;
