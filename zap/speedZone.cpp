@@ -268,7 +268,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
             mRotateSpeed = (F32)atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"
          else if(!strnicmp(argv2[i], "Rotate=", 7))  // 016, same as 'R', better name
             mRotateSpeed = (F32)atof(&argv2[i][7]);   // "Rotate=3.4" or "Rotate=-1.7"
-         else if(!stricmp(argv2[i], "SnapEnable"))
+         else if(!stricmp(argv2[i], "SnapEnabled"))
             mSnapLocation = true;
       }
       else
@@ -318,7 +318,7 @@ string SpeedZone::toString(F32 gridSize) const
 {
    string out = string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpeed);
    if(mSnapLocation)
-      out += " SnapEnable";
+      out += " SnapEnabled";
    if(mRotateSpeed != 0)
       out += " Rotate=" + ftos(mRotateSpeed, 4);
    return out;
