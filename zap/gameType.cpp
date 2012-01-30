@@ -3077,6 +3077,10 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr me
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
 
+      // No sending to bots - they don't have a game connection
+      if(clientInfo->isRobot())
+         continue;
+
       if(clientInfo->getName() == toName)     // Do we want a case insensitive search?
       {
          if(!source->checkMessage(message.getString(), 2))
