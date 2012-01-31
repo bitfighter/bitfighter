@@ -123,7 +123,7 @@ private:
    void findObjectsUnderShip(U8 typeNumber);
 
 protected:
-   ClientInfo *mClientInfo;
+   SafePtr <ClientInfo> mClientInfo;
 
    bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
    bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
