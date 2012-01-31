@@ -591,7 +591,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    if(hasExploded)
       return;
 
-   if(path == GameObject::ServerIdleControlFromClient)
+   if(path == GameObject::ServerIdleControlFromClient && getClientInfo())
       getClientInfo()->getStatistics()->mPlayTime += mCurrentMove.time;
 
    Parent::idle(path);
@@ -894,7 +894,8 @@ void Ship::processModules()
          mEnergy -= EnergyUsed;
          anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge
 
-         getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
+         if(getClientInfo())
+            getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
       }
 
       // Fire the module secondary component if it is active and the cooldown timer has run out
@@ -1601,7 +1602,8 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
    if(isLoadoutSameAsCurrent(loadout))      // Don't bother if ship config hasn't changed
       return;
 
-   getClientInfo()->getStatistics()->mChangedLoadout++;
+   if(getClientInfo())
+      getClientInfo()->getStatistics()->mChangedLoadout++;
 
    WeaponType currentWeapon = mWeapon[mActiveWeaponIndx];
 
