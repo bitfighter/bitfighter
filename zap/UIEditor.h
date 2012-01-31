@@ -191,6 +191,7 @@ private:
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
+   void selectAll(EditorObjectDatabase *database);          // Mark all objects and vertices in specified db as selected
    void clearSelection(EditorObjectDatabase *database);     // Mark all objects and vertices in specified db as unselected
 
    void centerView();            // Center display on all objects

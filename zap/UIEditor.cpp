@@ -2195,6 +2195,18 @@ void EditorUserInterface::clearSelection(EditorObjectDatabase *database)
 
 
 // TODO: Move this method to EditorObjectDatabase!!
+// Mark everything as selected
+void EditorUserInterface::selectAll(EditorObjectDatabase *database)
+{
+   const Vector<EditorObject *> *objList = database->getObjectList();
+
+   for(S32 i = 0; i < objList->size(); i++)
+      objList->get(i)->setSelected(true);
+}
+
+
+
+// TODO: Move this method to EditorObjectDatabase!!
 bool EditorUserInterface::anyItemsSelected(EditorObjectDatabase *database)
 {
    const Vector<EditorObject *> *objList = database->getObjectList();
@@ -3810,6 +3822,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       splitBarrier();
    else if(inputString == "J")            // Join selected barrier segments
       joinBarrier();
+   else if(inputString == "Ctrl+A")       // Select everything
+      selectAll(getDatabase());
    else if(inputString == "Ctrl+Shift+X") // Resize selection
    {
       if(!anyItemsSelected(getDatabase()))
