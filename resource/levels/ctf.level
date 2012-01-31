@@ -1,0 +1,97 @@
+CTFGameType 10 8
+LevelName Capture01
+LevelDescription ""
+LevelCredits ""
+GridSize 255
+Team Blue 0 0 1
+Team Red 1 0 0
+Specials Engineer
+MinPlayers
+MaxPlayers
+BarrierMaker 50 8.5 0.5 9.5 0.5
+BarrierMaker 50 -0.5 6 0 6.5
+PolyWall 2.5 5 2.5 6 5.5 6 4.5 5
+BarrierMaker 50 12 1.5 12.5 2
+BarrierMaker 50 1.5 4.5 1.5 3.5
+BarrierMaker 50 8.5 3.5 8.5 4 7.5 5 7.5 5.5
+PolyWall -0.5 6.5 0 6.5 -0.5 6
+BarrierMaker 50 5.5 2.5 6 2.5 7 3.5 7.5 3.5
+BarrierMaker 50 2.8 0.8 3 1 3 2 2.8 2.2
+BarrierMaker 50 5.5 7.5 4.5 7.5
+PolyWall 9.5 2 6.5 2 7.5 3 9.5 3
+BarrierMaker 50 9.8 7.8 10 8 10.5 8
+BarrierMaker 50 0.6 0.9 0.5 1 0 1
+PolyWall 6.5 6 5.5 7 8 7 8 6
+BarrierMaker 50 9.8 5.2 10 5 11 5 11.2 5.2
+BarrierMaker 50 11.8 5.8 12 6 12 6.5
+BarrierMaker 50 2.2 0.2 2 0 1.5 0
+BarrierMaker 50 -0.5 6.5 0.5 6.5 0.5 7 1 7.5 1.5 7.5
+BarrierMaker 50 1.5 5.5 1.5 6 1 6.5 0 6.5
+BarrierMaker 50 0.9 0.6 1 0.5 1 0
+BarrierMaker 50 3.5 7.5 2.5 7.5
+BarrierMaker 50 0 0.5 0.5 0 2 0 2.5 -0.5 11.5 -0.5 12.5 0.5 12.5 5.5 12 6 12 7.5 11.5 8 10 8 9.5 8.5 0.5 8.5 -0.5 7.5 -0.5 2.5 0 2 0 0.5 0.5 0
+BarrierMaker 50 6.5 0.5 7.5 0.5
+BarrierMaker 50 3.5 4.5 3.5 4 4.5 3 4.5 2.5
+BarrierMaker 50 9.2 5.8 9 6 9 7 9.2 7.2
+PolyWall 12 1.5 12.5 2 12.5 1.5
+BarrierMaker 50 10.5 2.5 10.5 2 11 1.5 12 1.5
+BarrierMaker 50 12.5 1.5 11.5 1.5 11.5 1 11 0.5 10.5 0.5
+BarrierMaker 50 0.2 2.2 0 2 0 1.5
+BarrierMaker 50 11.4 7.1 11.5 7 12 7
+BarrierMaker 50 2.2 2.8 2 3 1 3 0.8 2.8
+BarrierMaker 50 10.5 3.5 10.5 4.5
+BarrierMaker 50 4.5 0.5 5.5 0.5
+BarrierMaker 50 6.5 5.5 6 5.5 5 4.5 4.5 4.5
+BarrierMaker 50 11.1 7.4 11 7.5 11 8
+BarrierMaker 50 7.5 7.5 6.5 7.5
+PolyWall 4 1 4 2 5.5 2 6.5 1
+LoadoutZone 0 3.8 1 3.8 2 4 2 4 1
+LoadoutZone 1 8 6 8 7 8.2 7 8.2 6
+LoadoutZone 1 12.1 2.5 12.1 3.5 12.3 3.5 12.3 2.5
+LoadoutZone 0 -0.3 4.5 -0.3 5.5 -0.1 5.5 -0.1 4.5
+SpeedZone 8.5 8 8.24902 8 2000 SnapEnabled
+Teleporter 0 7 8 4
+SpeedZone 3.5 0 3.75098 0 2000 SnapEnabled
+Teleporter 12 1 4 4
+ForceFieldProjector 1 11.800096 5.799905 0
+ForceFieldProjector 1 9.800085 7.799915 0
+FlagItem 1 11.5 7.5
+FlagItem 0 0.5 0.5
+ForceFieldProjector 0 0.2 2.2 0
+ForceFieldProjector 0 2.2 0.2 0
+ResourceItem 6 3.5
+ResourceItem 6 4.5
+ResourceItem 7 4.5
+ResourceItem 6.5 4
+ResourceItem 5.5 4
+Turret 0 0.319325 0.319324 0
+Turret 1 11.680676 7.680676 0
+ResourceItem 5 3.5
+Turret 0 0.5 6.402 0
+Turret 1 11.499906 1.598 0
+Spawn 0 0.5 3.5
+Spawn 0 0.5 4.5
+Spawn 0 0.5 5.5
+Spawn 0 1.5 1.5
+Spawn 0 2.5 2.5
+Spawn 0 1.5 2.5
+Spawn 0 1.5 0.5
+Spawn 0 2.5 1.5
+Spawn 0 0.5 1.5
+Spawn 1 10.5 5.5
+Spawn 1 10.5 6.5
+Spawn 1 9.5 6.5
+Spawn 1 11.5 6.5
+Spawn 1 10.5 7.5
+Spawn 1 11.5 2.5
+Spawn 1 11.5 3.5
+Spawn 1 11.5 4.5
+Spawn 1 9.5 5.5
+Spawn 0 0.5 2.5
+Spawn 0 2.5 0.5
+Spawn 1 11.5 5.5
+Spawn 1 9.5 7.5
+Turret -1 8 2 1
+Turret -1 3.999998 6 1
+ForceFieldProjector -1 1.499999 5.5 1
+ForceFieldProjector -1 10.5 2.5 1

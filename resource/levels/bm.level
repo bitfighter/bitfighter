@@ -1,0 +1,32 @@
+GameType 8 15
+LevelName "Bitmatch01"
+LevelDescription ""
+LevelCredits 
+GridSize 255
+Team Blue 0 0 1
+Specials
+MinPlayers
+MaxPlayers
+BarrierMaker 50 -3.5 0 -3 0
+BarrierMaker 50 3.5 0 3 0
+BarrierMaker 50 0 -3.5 0 -3
+BarrierMaker 50 -3 -0.5 -3 0.5
+BarrierMaker 50 3 -0.5 3 0.5
+BarrierMaker 50 -4.5 0 -4.5 -0.5 -3.5 -1.5 -3 -1.5 -1.5 -3 -1.5 -3.5 -0.5 -4.5 0.5 -4.5 1.5 -3.5 1.5 -3 3 -1.5 3.5 -1.5 4.5 -0.5 4.5 0.5 3.5 1.5 3 1.5 1.5 3 1.5 3.5 0.5 4.5 -0.5 4.5 -1.5 3.5 -1.5 3 -3 1.5 -3.5 1.5 -4.5 0.5 -4.5 -0.5
+BarrierMaker 50 -0.5 -3 0.5 -3
+BarrierMaker 50 0 3.5 0 3
+BarrierMaker 50 -0.5 3 0.5 3
+BarrierMaker 200 -1.5 -1.5 1.5 1.5
+BarrierMaker 200 1.5 -1.5 -1.5 1.5
+RepairItem 0 -4 45
+RepairItem 0 4 45
+RepairItem 4 0 45
+RepairItem -4 0 45
+Spawn 0 0 -1
+Spawn 0 1 0
+Spawn 0 0 1
+Spawn 0 -1 0
+Spawn 0 -2 -2
+Spawn 0 2 -2
+Spawn 0 2 2
+Spawn 0 -2 2

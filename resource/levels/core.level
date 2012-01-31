@@ -1,0 +1,74 @@
+CoreGameType 8
+LevelName Core03
+LevelDescription ""
+LevelCredits ""
+GridSize 255
+Team Blue 0 0 1
+Team Red 1 0 0
+Specials Engineer
+MinPlayers
+MaxPlayers
+BarrierMaker 50 13.6 2.5 13.5 3 13.6 3.5
+PolyWall 13.1 4.4 12.6 4.7 14.6 4.7 14.1 4.4
+PolyWall 12.6 1.3 13.1 1.6 14.1 1.6 14.6 1.3
+PolyWall 9.3 1.9 8.9 2 8.8 3 8.9 4 9.3 4.1 9.3 3.9 9 3.9 9 2.1 9.3 2.1
+PolyWall 5 4.5 4.5 4.5 4.5 5.5 5.5 5.5 6 3.2 5 3.2
+BarrierMaker 50 17.4 2.5 17.5 3 17.4 3.5
+PolyWall 6.4 1.3 6.9 1.6 7.9 1.6 8.4 1.3
+PolyWall 10.7 2 10.7 2.3 11.2 2.3 11.2 2.8 11.5 2.8 11.3 2.2
+BarrierMaker 50 3.6 2.5 3.5 3 3.6 3.5
+PolyWall 9.5 2.8 9.8 2.8 9.8 2.3 10.3 2.3 10.3 2 9.7 2.2
+PolyWall 15.5 0.5 15 2.8 16 2.8 16 1.5 16.5 1.5 16.5 0.5
+PolyWall 10.7 3.7 10.7 4 11.3 3.8 11.5 3.2 11.2 3.2 11.2 3.7
+BarrierMaker 50 7.4 2.5 7.5 3 7.4 3.5
+BarrierMaker 50 19 6 20 3 19 0 15 0 14.6 1 12.5 1 11.5 1.5 9.5 1.5 8.5 1 6.4 1 6 0 2 0 1 3 2 6 6 6 6.4 5 8.5 5 9.5 4.5 11.5 4.5 12.5 5 14.6 5 15 6 19 6 20 3
+PolyWall 15 3.2 15.5 5.5 16.5 5.5 16.5 4.5 16 4.5 16 3.2
+PolyWall 4.5 0.5 4.5 1.5 5 1.5 5 2.8 6 2.8 5.5 0.5
+PolyWall 9.8 3.2 9.5 3.2 9.7 3.8 10.3 4 10.3 3.7 9.8 3.7
+PolyWall 6.9 4.4 6.4 4.7 8.4 4.7 7.9 4.4
+PolyWall 11.7 1.9 11.7 2.1 12 2.1 12 3.9 11.7 3.9 11.7 4.1 12.1 4 12.2 3 12.1 2
+LoadoutZone 1 16.1 3.3 16.1 4.4 16.4 4.4 16.4 3.3
+LoadoutZone 1 16.1 1.6 16.1 2.7 16.4 2.7 16.4 1.6
+LoadoutZone 0 4.6 3.3 4.6 4.4 4.9 4.4 4.9 3.3
+LoadoutZone 0 4.6 1.6 4.6 2.7 4.9 2.7 4.9 1.6
+ResourceItem 10 2.5
+ResourceItem 10 3.5
+ResourceItem 11 3.5
+ResourceItem 11 2.5
+ResourceItem 10.3 2.5
+ResourceItem 10.7 2.5
+ResourceItem 10 3.2
+ResourceItem 10.3 3.5
+ResourceItem 10.7 3.5
+ResourceItem 11 3.2
+ResourceItem 11 2.8
+ResourceItem 10 2.8
+CoreItem 0 125 2.5 3
+CoreItem 1 125 18 4.5
+CoreItem 0 125 3 4.5
+CoreItem 1 125 18.5 3
+CoreItem 1 125 18 1.5
+TestItem 10.5 3
+CoreItem 0 125 3 1.5
+Spawn 0 4 3
+Spawn 0 4 5
+Spawn 0 4 1
+Spawn 0 2 2
+Spawn 0 2 4
+Spawn 1 17 3
+Spawn 1 17 1
+Spawn 1 19 2
+Spawn 1 19 4
+Spawn 1 17 5
+Spawn 1 14 4
+Spawn 1 14 2
+Spawn 1 13 2
+Spawn 1 13 4
+Spawn 0 7 2
+Spawn 0 7 4
+Spawn 0 8 4
+Spawn 0 8 2
+Spawn 0 6 1
+Spawn 0 6 5
+Spawn 1 15 5
+Spawn 1 15 1
