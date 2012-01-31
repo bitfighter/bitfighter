@@ -1340,7 +1340,7 @@ int main(int argc, char **argv)
       argVector.push_back(argv[i]);
 
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
-   settings->resolveDirs();                     // Figures out where all our folders are
+   settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
 

@@ -1844,13 +1844,11 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
-
    folderManager->cacheDir      = resolutionHelper(cmdLineDirs.cacheDir,      "", "cache");
    folderManager->luaDir        = resolutionHelper(cmdLineDirs.luaDir,        "", "scripts");
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
    folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
    folderManager->pluginDir     = resolutionHelper(cmdLineDirs.pluginDir,     "", "editor_plugins");
-
 
    gSqlite = folderManager->logDir + "stats";
 }
@@ -1896,18 +1894,15 @@ string FolderManager::resolveLevelDir(const string &levelDir)
       if(fileExists(levelDir))     // Check for a valid absolute path in levelDir
          return levelDir;
 
-   if(rootDataDir != "")
+   if(rootDataDir != "" && levelDir != "")
    {
-      if(levelDir != "")
-      {
-         string candidate = strictjoindir(rootDataDir, "levels", levelDir);
-         if(fileExists(candidate))
-            return candidate;
+      string candidate = strictjoindir(rootDataDir, "levels", levelDir);
+      if(fileExists(candidate))
+         return candidate;
 
-         candidate = strictjoindir(rootDataDir, levelDir);
-         if(fileExists(candidate))
-            return candidate;
-      }
+      candidate = strictjoindir(rootDataDir, levelDir);
+      if(fileExists(candidate))
+         return candidate;
    }
 
    return "";
@@ -1917,10 +1912,9 @@ string FolderManager::resolveLevelDir(const string &levelDir)
 // Figuring out where the levels are stored is so complex, it needs its own function!
 void FolderManager::resolveLevelDir(GameSettings *settings)  
 {
-   string iniLevelDir =     settings->getLevelDir(INI);
    string cmdLineLevelDir = settings->getLevelDir(CMD_LINE);
 
-   string resolved = resolveLevelDir(levelDir);
+   string resolved = resolveLevelDir(cmdLineLevelDir);
 
    if(resolved != "")
    {
@@ -1938,6 +1932,9 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
       }
    }
 
+
+   string iniLevelDir = settings->getLevelDir(INI);
+
    // rootDataDir is blank, or nothing using it worked
    if(iniLevelDir != "")
    {
@@ -1953,6 +1950,8 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
          }
       }
       
+
+      // Ok, forget about cmdLineLevelDir.  Getting desperate here.  Try just the straight folder name specified in the INI file.
       if(fileExists(iniLevelDir))
       {
          levelDir = iniLevelDir;
@@ -1960,6 +1959,7 @@ void FolderManager::resolveLevelDir(GameSettings *settings)
       }
    }
 
+   // Maybe there is just a local folder called levels?
    if(fileExists("levels"))
       levelDir = "levels";
    else
