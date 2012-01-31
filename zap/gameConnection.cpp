@@ -320,7 +320,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
    if(mClientGame)
    {
       string levelDir = mSettings->getFolderManager()->levelDir;
-      const char *outputFilename = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename()).c_str();
+      string outputFilenameString = strictjoindir(levelDir, mClientGame->getRemoteLevelDownloadFilename());
+      const char *outputFilename = outputFilenameString.c_str(); // when outputFilenameString goes out of scope or deleted, then pointer to outputFilename becomes invalid
 
       if(strcmp(outputFilename, ""))
       {
