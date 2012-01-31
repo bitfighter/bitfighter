@@ -1877,8 +1877,8 @@ void FolderManager::resolveDirs(GameSettings *settings)
 // End      ==> Don't use rootDataDir
 //      
 // If iniLevelDir is specified
-//       If levelDir is also specified try
-//            iniLevelDir/levelDir
+//     If levelDir is also specified try
+//         iniLevelDir/levelDir
 //     End   
 //     iniLevelDir
 // End    ==> Don't use iniLevelDir
