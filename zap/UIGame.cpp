@@ -2093,7 +2093,7 @@ CommandInfo chatCmds[] = {
    { "prev",        GameUserInterface::prevLevelHandler,       {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Replay previous level" },
    { "restart",     GameUserInterface::restartLevelHandler,    {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Restart current level" },
    { "settime",     GameUserInterface::setTimeHandler,         { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Set play time for the level" },
-   { "setwinscore", GameUserInterface::setWinningScoreHandler, { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<score>"},                            "Set score to win the level" },
+   { "setscore",    GameUserInterface::setWinningScoreHandler, { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<score>"},                            "Set score to win the level" },
    { "resetscore",  GameUserInterface::resetScoreHandler,      {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Reset all scores to zero" },
    { "addbot",      GameUserInterface::addBotHandler,          { STR, TEAM, STR },3,      LEVEL_COMMANDS,  1,  2, {"[file]", "[team num]","[args]"},           "Add bot from [file] to [team num], pass [args] to bot" },
    { "addbots",     GameUserInterface::addBotsHandler,         { INT, STR, TEAM, STR },4, LEVEL_COMMANDS,  1, 2,  {"[count]","[file]","[team num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
