@@ -29,7 +29,7 @@
 #define MASTER_PROTOCOL_VERSION 4  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 #define CS_PROTOCOL_VERSION 33     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 3006         // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION 3737         // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary"
 #define ZAP_GAME_NAME "Bitfighter"
 #define ZAP_GAME_RELEASE "016"    // Change this with every release -- for display purposes only, string, 
