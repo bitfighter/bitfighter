@@ -58,6 +58,7 @@ static const char *gameCredits[] = {
    "-",
    "Level contributions:",
    "Qui",
+   "Pierce Youatt (karamazovapy)"
    "-",
    "Bot development:",
    "Samuel Williams (sam686)",
