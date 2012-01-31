@@ -1057,10 +1057,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\exe\README.txt"
-			>
-		</File>
-		<File
 			RelativePath="..\recast\RecastAlloc.cpp"
 			>
 		</File>
@@ -1074,10 +1070,6 @@
 		</File>
 		<File
 			RelativePath=".\Rect.h"
-			>
-		</File>
-		<File
-			RelativePath=".\resource2.h"
 			>
 		</File>
 		<File

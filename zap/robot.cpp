@@ -1542,7 +1542,8 @@ Robot::~Robot()
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
 
    delete mPlayerInfo;
-   delete mClientInfo;
+   if(mClientInfo.isValid())
+      delete mClientInfo.getPointer();
 
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mScriptName.c_str(), robots.size());
 }
