@@ -32,10 +32,12 @@
 #include "tnlVector.h"
 #include "gameObject.h" // for BfObject
 
-namespace TNL{
+namespace TNL
+{
    class GhostConnection; // speeds up compiler, or use #include "tnlGhostConnection.h"
    class BitStream;
 }
+
 namespace boost{ template<class T> class shared_ptr; }      // or use #include "boost/smart_ptr/shared_ptr.hpp"
 
 using namespace std;
