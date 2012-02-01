@@ -341,7 +341,9 @@ void abortHosting_noLevels()
    delete gServerGame;  // need gServerGame for above message
    gServerGame = NULL;
 
+#ifndef ZAP_DEDICATED
    if(!gClientGame)
+#endif
       shutdownBitfighter();      // Quit in an orderly fashion
 }
 
