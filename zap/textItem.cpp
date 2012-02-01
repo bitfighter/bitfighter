@@ -525,7 +525,7 @@ void LineItem::render()
    }
 
    glColor(getTeamColor(mTeam));
-   renderPointVector(getOutline(), GL_LINE_STRIP);
+   renderLine(getOutline());
 #endif
 }
 
@@ -536,7 +536,7 @@ void LineItem::renderEditor(F32 currentScale)
    if(!mSelected && !mLitUp)
       glColor(getEditorRenderColor());
 
-   renderPointVector(getOutline(), GL_LINE_STRIP);
+   renderLine(getOutline());
 
    renderLinePolyVertices(currentScale);
 #endif

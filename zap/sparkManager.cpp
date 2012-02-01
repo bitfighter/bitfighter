@@ -322,7 +322,7 @@ void FXTrail::render()
 {
    glBegin(GL_LINE_STRIP);
 
-   for(S32 i=0; i<mNodes.size(); i++)
+   for(S32 i = 0; i  <mNodes.size(); i++)
    {
       F32 t = ((F32)i/(F32)mNodes.size());
 

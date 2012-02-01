@@ -2502,6 +2502,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 // Gets called multiple times as barriers are added
 GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
 {
+   // Empty wall deletes all existing walls
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else

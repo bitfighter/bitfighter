@@ -170,18 +170,10 @@ void EditorUserInterface::onQuitted()
 }
 
 
-void EditorUserInterface::addToDock(EditorObject* object)
-{
-   mDockItems.push_back(boost::shared_ptr<EditorObject>(object));
-}
-
-
 void EditorUserInterface::addDockObject(EditorObject *object, F32 xPos, F32 yPos)
 {
-   object->prepareForDock(getGame(), Point(xPos, yPos));       
-   object->setTeam(mCurrentTeam);
-
-   addToDock(object);
+   object->prepareForDock(getGame(), Point(xPos, yPos), mCurrentTeam);     // Prepare object   
+   mDockItems.push_back(boost::shared_ptr<EditorObject>(object));          // Add item to our list of dock objects
 }
 
 
@@ -265,8 +257,6 @@ void EditorUserInterface::populateDock()
 }
 
 
-//static Vector<DatabaseObject *> fillVector;     // Reusable container, now global in gridDB.h, having this here may cause linux compile errors
-
 // Destructor -- unwind things in an orderly fashion
 EditorUserInterface::~EditorUserInterface()
 {
@@ -275,36 +265,9 @@ EditorUserInterface::~EditorUserInterface()
    mDockItems.clear();
    mLevelGenDatabase.removeEverythingFromDatabase();
    mClipboard.clear();
+
    delete mNewItem;
    delete mTeamManager;
-}
-
-
-void EditorUserInterface::clearDatabase(GridDatabase *database)
-{
-   fillVector.clear();
-   database->findObjects(fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      database->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
-      //delete fillVector[i];
-   }
-}
-
-
-// Replaces the need to do a convertLevelToCanvasCoord on every point before rendering
-void EditorUserInterface::setLevelToCanvasCoordConversion()
-{
-   glTranslate(getCurrentOffset());
-   glScale(getCurrentScale());
-} 
-
-
-// Draws a line connecting points in mVerts
-void EditorUserInterface::renderPolyline(const Vector<Point> *verts)
-{
-   renderPointVector(verts, GL_LINE_STRIP);
 }
 
 
@@ -422,12 +385,6 @@ void EditorUserInterface::redo()
       onSelectionChanged();
       validateLevel();
    }
-}
-
-
-EditorObject *EditorUserInterface::getSnapItem()
-{
-   return mSnapObject;
 }
 
 
@@ -667,7 +624,7 @@ static void showPluginError(const ClientGame *game)
 
 
 // Try to create some sort of uniqeish signature for the plugin
-string EditorUserInterface::getPluginKey()
+string EditorUserInterface::getPluginSignature()
 {
    string key = mPluginRunner->getScriptName();
 
@@ -734,7 +691,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    mPluginMenu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
 
    // Restore previous values, if available
-   string key = getPluginKey();
+   string key = getPluginSignature();
 
    if(mPluginMenuValues.count(key) == 1)    // i.e. the key exists; use count to avoid creating new entry if it does not exist
       for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
@@ -753,7 +710,7 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
    // Save menu values for next time -- using a key that includes both the script name and the type of menu items
    // provides some protection against the script being changed while Bitfighter is running.  Probably not realy
    // necessary, but we can afford it here.
-   string key = getPluginKey();
+   string key = getPluginSignature();
 
    mPluginMenuValues[key] = args;
 
@@ -910,21 +867,18 @@ void EditorUserInterface::validateLevel()
 
 void EditorUserInterface::validateTeams()
 {
-   fillVector.clear();
-   getDatabase()->findObjects(fillVector);
-   
-   validateTeams(fillVector);
+   validateTeams(getDatabase()->findObjects_fast());
 }
 
 
 // Check that each item has a valid team  (fixes any problems it finds)
-void EditorUserInterface::validateTeams(const Vector<DatabaseObject *> &dbObjects)
+void EditorUserInterface::validateTeams(const Vector<DatabaseObject *> *dbObjects)
 {
    S32 teams = getTeamCount();
 
-   for(S32 i = 0; i < dbObjects.size(); i++)
+   for(S32 i = 0; i < dbObjects->size(); i++)
    {
-      EditorObject *obj = dynamic_cast<EditorObject *>(dbObjects[i]);
+      EditorObject *obj = dynamic_cast<EditorObject *>(dbObjects->get(i));
       S32 team = obj->getTeam();
 
       if(obj->hasTeam() && ((team >= 0 && team < teams) || team == TEAM_NEUTRAL || team == TEAM_HOSTILE))  
@@ -977,7 +931,7 @@ void EditorUserInterface::teamsHaveChanged()
    for(S32 i = 0; i < mDockItems.size(); i++)
       hackyjunk[i] = mDockItems[i].get();
 
-   validateTeams(hackyjunk);
+   validateTeams(&hackyjunk);
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
    setNeedToSave(true);
@@ -1366,11 +1320,11 @@ bool EditorUserInterface::getSnapToWallCorners()
 
 extern bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
 
-static Point closest;      // Reusable container
-
 static bool checkEdge(const Point &clickPoint, const Point &start, const Point &end, F32 &minDist, Point &snapPoint)
 {
-   if(findNormalPoint(clickPoint, start, end, closest))    // closest is point on line where clickPoint normal intersects
+   static Point closest;      // Reusable container
+
+   if(findNormalPoint(clickPoint, start, end, closest))    // Fills closest, the point on line where normal through clickPoint intersects
    {
       F32 dist = closest.distSquared(clickPoint);
       if(dist < minDist)
@@ -1382,41 +1336,6 @@ static bool checkEdge(const Point &clickPoint, const Point &start, const Point &
    }
 
    return false;
-}
-
-
-// Checks for snapping against a series of edges defined by verts in A-B-C-D format if abcFormat is true, or A-B B-C C-D if false
-// Sets snapPoint and minDist.  Returns index of closest segment found if closer than minDist.
-
-// Not currently used 
-
-S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat,
-                                           F32 &minDist, Point &snapPoint )
-{
-   S32 inc = abcFormat ? 1 : 2;   
-   S32 segFound = NONE;
-
-   for(S32 i = 0; i < verts.size() - 1; i += inc)
-      if(checkEdge(clickPoint, verts[i], verts[i+1], minDist, snapPoint))
-         segFound = i;
-
-   return segFound;
-}
-
-
-// Not currently used 
-
-S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<WallEdge *> &edges, bool abcFormat,
-                                           F32 &minDist, Point &snapPoint )
-{
-//   S32 inc = abcFormat ? 1 : 2;
-   S32 segFound = NONE;
-
-   for(S32 i = 0; i < edges.size(); i++)
-      if(checkEdge(clickPoint, *edges[i]->getStart(), *edges[i]->getEnd(), minDist, snapPoint))
-         segFound = i;
-
-   return segFound;
 }
 
 
@@ -1467,49 +1386,42 @@ bool EditorUserInterface::showMinorGridLines()
 // Render background snap grid
 void EditorUserInterface::renderGrid()
 {
-   F32 colorFact = (mSnapContext == FULL_SNAPPING) ? 1 : 0.5f;
+   F32 snapFadeFact = (mSnapContext == FULL_SNAPPING) ? 1 : 0.5f;
 
-   // Minor grid lines
+   // Gridlines
    for(S32 i = 1; i >= 0; i--)
    {
-      if((i && showMinorGridLines()) || !i)      // Minor then major gridlines
+      if((i && showMinorGridLines()) || !i)      // First minor then major
       {
          F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
-         F32 color = ((i ? .2f : .4f) * colorFact);
-
+         
          F32 xStart = fmod(mCurrentOffset.x, gridScale);
          F32 yStart = fmod(mCurrentOffset.y, gridScale);
 
-         glColor3f(color, color, color);
-         glBegin(GL_LINES);
-            while(yStart < gScreenInfo.getGameCanvasHeight())
-            {
-               glVertex2f(0, yStart);
-               glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), yStart);
-               yStart += gridScale;
-            }
-            while(xStart < gScreenInfo.getGameCanvasWidth())
-            {
-               glVertex2f(xStart, 0);
-               glVertex2f(xStart, (F32)gScreenInfo.getGameCanvasHeight());
-               xStart += gridScale;
-            }
-         glEnd();
+         F32 grayVal = ((i ? .2f : .4f) * snapFadeFact);
+         glColor(grayVal);
+
+         while(yStart < gScreenInfo.getGameCanvasHeight())
+         {
+            drawHorizLine(0, (F32)gScreenInfo.getGameCanvasWidth(), yStart);
+            yStart += gridScale;
+         }
+         while(xStart < gScreenInfo.getGameCanvasWidth())
+         {
+            drawVertLine(xStart, 0, (F32)gScreenInfo.getGameCanvasHeight());
+            xStart += gridScale;
+         }
       }
    }
 
    // Draw axes
-   glColor(0.7f * colorFact);
+   glColor(0.7f * snapFadeFact);
    glLineWidth(gLineWidth3);
 
    Point origin = convertLevelToCanvasCoord(Point(0,0));
 
-   glBegin(GL_LINES);
-      glVertex2f(0, origin.y);
-      glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), origin.y);
-      glVertex2f(origin.x, 0);
-      glVertex2f(origin.x, (F32)gScreenInfo.getGameCanvasHeight());
-   glEnd();
+   drawHorizLine(0, (F32)gScreenInfo.getGameCanvasWidth(), origin.y);
+   drawVertLine(origin.x, 0, (F32)gScreenInfo.getGameCanvasHeight());
 
    glLineWidth(gDefaultLineWidth);
 }
@@ -1663,18 +1575,6 @@ void EditorUserInterface::renderPanelInfoLine(S32 line, const char *format, ...)
 }
 
 
-// Local helper function
-static void renderText(S32 xpos, S32 ypos, S32 size, const Color &color, const string &text)
-{
-   // Make a thick black mask to make text easier to read
-   //glColor(Colors::black);
-   //UserInterface::drawString(xpos, ypos, size, 5, text.c_str());
-  
-   glColor(color);
-   UserInterface::drawString(xpos, ypos, size, text.c_str());
-}
-
-
 // Shows selected item attributes, or, if we're hovering over dock item, shows dock item info string
 // This method is a total mess!  TODO: Rewrite
 void EditorUserInterface::renderItemInfoPanel()
@@ -1748,8 +1648,9 @@ void EditorUserInterface::renderItemInfoPanel()
 
    if(text != "" && text != " ")
    {
-      renderText(xpos, ypos, PANEL_TEXT_SIZE, textColor, instructs);
-      renderText(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, textColor, text.c_str());
+      glColor(textColor);
+      drawString(xpos, ypos,                 PANEL_TEXT_SIZE, instructs);
+      drawString(xpos, ypos - PANEL_SPACING, PANEL_TEXT_SIZE, text.c_str());
    }
 
    ypos -= PANEL_SPACING + S32(upperLineTextSize * 1.3);
@@ -1761,12 +1662,16 @@ void EditorUserInterface::renderItemInfoPanel()
       if(hitCount > 1)
          item += " (" + itos(hitCount) + ")";
 
-      renderText(xpos, ypos, upperLineTextSize, textColor, item.c_str());
+      glColor(textColor);
+      drawString(xpos, ypos, upperLineTextSize, item.c_str());
    }
 
    ypos -= S32(upperLineTextSize * 1.3);
    if(hoverText != "" && !dockHit)
-      renderText(xpos, ypos, upperLineTextSize, Colors::white, hoverText.c_str());
+   {
+      glColor(Colors::white);
+      drawString(xpos, ypos, upperLineTextSize, hoverText.c_str());
+   }
 }
 
 
@@ -1811,23 +1716,16 @@ void EditorUserInterface::renderTextEntryOverlay()
       S32 xpos = (gScreenInfo.getGameCanvasWidth()  - boxwidth) / 2;
       S32 ypos = (gScreenInfo.getGameCanvasHeight() - boxheight) / 2;
 
-      for(S32 i = 1; i >= 0; i--)
-      {
-         glColor(Color(.3f,.6f,.3f), i ? .85f : 1);
-
-         glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2i(xpos,            ypos);
-            glVertex2i(xpos + boxwidth, ypos);
-            glVertex2i(xpos + boxwidth, ypos + boxheight);
-            glVertex2i(xpos,            ypos + boxheight);
-         glEnd();
-      }
+      Color boxColor = Color(.3f,.6f,.3f);
+      drawFilledRect(xpos, ypos, xpos + boxwidth, ypos + boxheight, boxColor, .85f, boxColor);
 
       xpos += inset;
       ypos += inset;
+
       glColor(errorFound ? errorColor : color);
       xpos += drawStringAndGetWidthf(xpos, ypos, fontsize, "%s ", mEntryBox.getPrompt().c_str());
       drawString(xpos, ypos, fontsize, mEntryBox.c_str());
+
       mEntryBox.drawCursor(xpos, ypos, fontsize);
    }
 }
@@ -1864,32 +1762,6 @@ static F32 getRenderingAlpha(bool isScriptItem)
 }
 
 
-static void drawFourArrows(Point pos)
-{
-   const F32 pointList[] = {
-        0,  15,   0, -15,
-        0,  15,   5,  10,
-        0,  15,  -5,  10,
-        0, -15,   5, -10,
-        0, -15,  -5, -10,
-       15,   0, -15,   0,
-       15,   0,  10,   5,
-       15,   0,  10,  -5,
-      -15,   0, -10,   5,
-      -15,   0, -10,  -5,
-   };
-
-   glPushMatrix();
-      glTranslate(pos);
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_FLOAT, sizeof(pointList[0]) * 2, pointList);    
-      glDrawArrays(GL_LINES, 0, sizeof(pointList) / (sizeof(pointList[0]) * 2));
-      glDisableClientState(GL_VERTEX_ARRAY);
-   glPopMatrix();
-
-}
-
-
 void EditorUserInterface::render()
 {
    EditorObjectDatabase *editorDb = getDatabase();
@@ -1906,7 +1778,8 @@ void EditorUserInterface::render()
 
 
    glPushMatrix();
-      setLevelToCanvasCoordConversion();
+      glTranslate(getCurrentOffset());
+      glScale(getCurrentScale());
 
       // mSnapDelta only gets recalculated during a dragging event -- if an item is no longer being dragged, we
       // don't want to use the now stale value in mSnapDelta, but rather (0,0) to reflect the rahter obvoius fact
@@ -2046,7 +1919,7 @@ void EditorUserInterface::renderObjectsUnderConstruction()
    else              // LineItem
       glColor(getTeamColor(mNewItem->getTeam()));
 
-   renderPolyline(mNewItem->getOutline());
+   renderLine(mNewItem->getOutline());
 
    glLineWidth(gDefaultLineWidth);
 
@@ -2245,6 +2118,17 @@ void EditorUserInterface::computeSelectionMinMax(EditorObjectDatabase *database,
          }
       }
    }
+}
+
+
+// TODO: Move to GridDatabase
+void EditorUserInterface::clearDatabase(GridDatabase *database)
+{
+   fillVector.clear();
+   database->findObjects(fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      database->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
 }
 
 
@@ -4009,13 +3893,15 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
    {
       case KEY_UP:
          mIn = false;
-         // fall-through OK  ...why?
+         mUp = false;
+         break;
       case KEY_W:
          mUp = false;
          break;
       case KEY_DOWN:
          mOut = false;
-         // fall-through OK  ...why?
+         mDown = false;
+         break;
       case KEY_S:
          mDown = false;
          break;
@@ -4085,6 +3971,7 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          }
 
          break;
+
       default:
          break;
    }     // case
@@ -4293,8 +4180,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             EditorObject *p = objList->get(i);
 
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
-            if((j == 0 && isWallType(p->getObjectTypeNumber())) ||
-               (j == 1 && ! isWallType(p->getObjectTypeNumber())) )
+            if((j == 0 && isWallType(p->getObjectTypeNumber())) || (j == 1 && ! isWallType(p->getObjectTypeNumber())) )
                p->saveItem(f, getGame()->getGridSize());
          }
       fclose(f);

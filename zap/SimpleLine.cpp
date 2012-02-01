@@ -150,11 +150,11 @@ void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
 }
 
 
-void SimpleLine::prepareForDock(ClientGame *game, const Point &point)
+void SimpleLine::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    setVert(point, 0);
-   EditorParent::prepareForDock(game, point);
+   EditorParent::prepareForDock(game, point, teamIndex);
 #endif
 }
 

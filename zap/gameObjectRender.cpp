@@ -97,6 +97,12 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 }
 
 
+void renderLine(const Vector<Point> *points)
+{
+   renderPointVector(points, GL_LINE_STRIP);
+}
+
+
 // Use slower method here because we need to visit each point to add offset
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
@@ -363,7 +369,7 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 
 void drawCentroidMark(const Point &pos, F32 radius)
 {  
-   drawPolygon(pos, 6, radius,0);
+   drawPolygon(pos, 6, radius, 0);
 }
 
 
@@ -541,6 +547,31 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glLineWidth(gDefaultLineWidth);
 }
 
+
+void drawFourArrows(const Point &pos)
+{
+   const F32 pointList[] = {
+        0,  15,   0, -15,
+        0,  15,   5,  10,
+        0,  15,  -5,  10,
+        0, -15,   5, -10,
+        0, -15,  -5, -10,
+       15,   0, -15,   0,
+       15,   0,  10,   5,
+       15,   0,  10,  -5,
+      -15,   0, -10,   5,
+      -15,   0, -10,  -5,
+   };
+
+   glPushMatrix();
+      glTranslate(pos);
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glVertexPointer(2, GL_FLOAT, sizeof(pointList[0]) * 2, pointList);    
+      glDrawArrays(GL_LINES, 0, sizeof(pointList) / (sizeof(pointList[0]) * 2));
+      glDisableClientState(GL_VERTEX_ARRAY);
+   glPopMatrix();
+
+}
 
 // This is a line extending from the ship to give joystick players some idea of where they're aiming
 void renderAimVector()

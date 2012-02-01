@@ -1287,6 +1287,7 @@ void Game::deleteObjects(U8 typeNumber)
 }
 
 
+// Not currently used
 void Game::deleteObjects(TestFunc testFunc)
 {
    fillVector.clear();

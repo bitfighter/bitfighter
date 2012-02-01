@@ -1733,8 +1733,8 @@ void Worm::render()
          if(i < 0)
             i = maxTailLength - 1;
       }
-      glColor(1,1,1);
-      renderPointVector(&p, GL_LINE_STRIP);
+      glColor(Colors::white);
+      renderLine(&p);
    }
 #endif
 }

@@ -45,7 +45,7 @@ private:
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
 
-   void prepareForDock(ClientGame *game, const Point &point);
+   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
    virtual void renderDock();
    void highlightDockItem(); 
 

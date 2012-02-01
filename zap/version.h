@@ -26,13 +26,17 @@
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
+#define ZAP_GAME_NAME "Bitfighter"
+
 #define MASTER_PROTOCOL_VERSION 4  // Change this when releasing an incompatible cm/sm protocol (must be int)
                                    // MASTER_PROTOCOL_VERSION = 4, client 015a and older (CS_PROTOCOL_VERSION <= 32) can not connect to our new master.
 #define CS_PROTOCOL_VERSION 33     // Change this when releasing an incompatible cs protocol (must be int)
+// 016 = 33 
+
 #define BUILD_VERSION 3737         // Version of the game according to hg, will be unique every release (must be int)
-                                   // Get from "hg summary"
-#define ZAP_GAME_NAME "Bitfighter"
-#define ZAP_GAME_RELEASE "016"    // Change this with every release -- for display purposes only, string, 
+// 016 = 3737                      // Get from "hg summary"
+
+#define ZAP_GAME_RELEASE "016"     // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces  
 
 #endif
