@@ -313,8 +313,6 @@ void abortHosting_noLevels()
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
    }
 
-   delete gServerGame;
-   gServerGame = NULL;
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)
@@ -338,8 +336,12 @@ void abortHosting_noLevels()
       menuUI->levelLoadDisplayDisplay = false;
       menuUI->levelLoadDisplayFadeTimer.clear();
    }
-   else
 #endif
+
+   delete gServerGame;  // need gServerGame for above message
+   gServerGame = NULL;
+
+   if(!gClientGame)
       shutdownBitfighter();      // Quit in an orderly fashion
 }
 
