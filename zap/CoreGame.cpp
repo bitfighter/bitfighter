@@ -469,6 +469,10 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(theInfo->damageAmount == 0)
       return;
 
+   // Check for friendly fire
+   if(theInfo->damagingObject->getTeam() == this->getTeam())
+      return;
+
    mHealth -= theInfo->damageAmount / DamageReductionRatio;
 
    if(mHealth < 0)
