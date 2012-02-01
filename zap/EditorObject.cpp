@@ -95,14 +95,16 @@ EditorObject *EditorObject::clone() const
 //}
 
 #ifndef ZAP_DEDICATED
-void EditorObject::prepareForDock(ClientGame *game, const Point &point)
+void EditorObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
    mGame = game;
 
    mDockItem = true;
    
    unselectVerts();
+   setTeam(teamIndex);
 }
+
 
 void EditorObject::addToEditor(ClientGame *game, GridDatabase *database)
 {
@@ -638,11 +640,11 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
 }
 
 
-void EditorPointObject::prepareForDock(ClientGame *game, const Point &point)
+void EditorPointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    setVert(point, 0);
-   Parent::prepareForDock(game, point);
+   Parent::prepareForDock(game, point, teamIndex);
 #endif
 }
 

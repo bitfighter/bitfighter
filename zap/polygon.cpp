@@ -112,7 +112,7 @@ void EditorPolygon::labelDockItem()
 }
 
 
-void EditorPolygon::prepareForDock(ClientGame *game, const Point &point)
+void EditorPolygon::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height
@@ -124,7 +124,7 @@ void EditorPolygon::prepareForDock(ClientGame *game, const Point &point)
    addVert(point + Point( w, h)); 
    addVert(point + Point(-w, h)); 
 
-   EditorObject::prepareForDock(game, point);
+   EditorObject::prepareForDock(game, point, teamIndex);
 #endif
 }
 
