@@ -1772,7 +1772,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(teamIndex < 0 || teamIndex >= mGame->getTeamCount())
+      if(teamIndex >= mGame->getTeamCount())
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
