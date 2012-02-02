@@ -3228,6 +3228,11 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
 
 void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 rightAlignCoord)
 {
+   // We can render before we get the first unpackUpdate packet that gets all the client infos.
+   // In this case just exit
+   if(getGame()->getLocalRemoteClientInfo() == NULL)
+      return;
+
    Game *game = gameType->getGame();
 
    S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom() - 22;
@@ -3253,8 +3258,6 @@ void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 
    const char *nameBottom = clientIsLeader && hasSecondLeader ?
                                  game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
                                  clientName;
-
-   TNLAssert(getGame()->getLocalRemoteClientInfo(), "How did this get to be NULL?");
 
    S32 scoreBottom;
    if(getGame()->getLocalRemoteClientInfo())
