@@ -1855,6 +1855,10 @@ void GameType::updateLeadingPlayerAndScore()
    // Find the leading player
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
+      // Check to make sure client hasn't disappeared somehow
+      if(!mGame->getClientInfo(i))
+         continue;
+
       S32 score = mGame->getClientInfo(i)->getScore();
 
       if(score > mLeadingPlayerScore)
