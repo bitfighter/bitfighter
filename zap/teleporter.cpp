@@ -38,10 +38,10 @@ using namespace TNL;
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "sparkManager.h"
-#include "SDL/SDL_opengl.h"
-#include "UI.h"
+#   include "ClientGame.h"
+#   include "sparkManager.h"
+#   include "SDL/SDL_opengl.h"
+#   include "UI.h"
 #endif
 
 #include <math.h>

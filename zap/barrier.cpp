@@ -613,6 +613,7 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 const char PolyWall::className[] = "PolyWall";      // Class name as it appears to Lua scripts
 
 
+// Constructor
 PolyWall::PolyWall()
 {
    mObjectTypeNumber = PolyWallTypeNumber;
