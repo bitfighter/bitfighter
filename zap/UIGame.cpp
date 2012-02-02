@@ -1946,15 +1946,15 @@ void GameUserInterface::banPlayerHandler(ClientGame *game, const Vector<string> 
 
       ClientInfo *bannedClientInfo = game->findClientInfo(words[1].c_str());
 
-      if(bannedClientInfo->isRobot())
-      {
-         game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
-         return;
-      }
-
       if(!bannedClientInfo)
       {
          game->displayErrorMessage("!!! Player name not found");
+         return;
+      }
+
+      if(bannedClientInfo->isRobot())
+      {
+         game->displayErrorMessage("!!! Cannot ban robots, you silly fool!");
          return;
       }
 

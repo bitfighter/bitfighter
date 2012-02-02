@@ -2869,7 +2869,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    if(bannedClientInfo->isRobot())
       return;  // Error message handled client-side
 
-   Address ipAddress = bannedClientInfo->getConnection()->getNetAddressString();
+   Address ipAddress = bannedClientInfo->getConnection()->getNetAddress();
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
@@ -2893,8 +2893,8 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
 
 GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 duration), (ipAddressString, duration))
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientInfo *clientInfo = source->getClientInfo();
+   GameConnection *conn = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = conn->getClientInfo();
    GameSettings *settings = gServerGame->getSettings();
 
    if(!clientInfo->isAdmin())
@@ -2907,6 +2907,26 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
+   // Now check to see if the client is connected and disconnect all of them if they are
+   bool playerDisconnected = false;
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
+
+      if(baneeConn && baneeConn->getNetAddress().isEqualAddress(ipAddress))
+      {
+         if(baneeConn == conn)
+         {
+            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't ban yourself");
+            return;
+         }
+
+         baneeConn->disconnect(NetConnection::ReasonBanned, "");
+         playerDisconnected = true;
+      }
+   }
+
    // banip should always add to the ban list, even if the IP isn't connected
    settings->getBanList()->addToBanList(ipAddress, banDuration);
    logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
@@ -2917,27 +2937,11 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    // Save new INI settings to disk
    gINI.WriteFile();
 
-   // Now check to see if the client is connected and disconnect them if they are
-   GameConnection *connToDisconnect = NULL;
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
-
-      if(baneeConn->getNetAddress().isEqualAddress(ipAddress))
-      {
-         connToDisconnect = baneeConn;
-         break;
-      }
-   }
-
-   GameConnection *conn = clientInfo->getConnection();
-
-   if(!connToDisconnect)
+   if(!playerDisconnected)
       conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client has been banned but is no longer connected");
    else
    {
-      connToDisconnect->disconnect(NetConnection::ReasonBanned, "");
       conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client was banned and kicked");
    }
 }
