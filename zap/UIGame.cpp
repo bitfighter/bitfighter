@@ -2646,9 +2646,14 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
       return;
 
    case VoiceVolumeType:
+   {
+      F32 oldVol = getGame()->getSettings()->getIniSettings()->voiceChatVolLevel;
       getGame()->getSettings()->getIniSettings()->voiceChatVolLevel = (F32) vol / 10.f;
       displayMessagef(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      if((oldVol == 0) != (vol == 0) && getGame()->getConnectionToServer())
+         getGame()->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
       return;
+   }
 
    case ServerAlertVolumeType:
       getGame()->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
@@ -2732,7 +2737,10 @@ void GameUserInterface::VoiceRecorder::render()
 
 void GameUserInterface::VoiceRecorder::start()
 {
-   mWantToStopRecordingAudio = 0; // linux repeadedly sends key-up / key-down when only holding key down
+   if(!(mGame->getConnectionToServer() && mGame->getConnectionToServer()->mVoiceChatEnabled))
+      mGame->displayErrorMessage("!!! Voice chat not allowed on this server");
+
+   mWantToStopRecordingAudio = 0; // linux repeadedly sends key-up / key-down when only holding key down (that was in GLUT, may )
    if(!mRecordingAudio)
    {
       mRecordingAudio = SoundSystem::startRecording();
@@ -2764,12 +2772,16 @@ void GameUserInterface::VoiceRecorder::stopNow()
 }
 void GameUserInterface::VoiceRecorder::stop()
 {
-   mWantToStopRecordingAudio = 2;
+   if(mWantToStopRecordingAudio == 0)
+      mWantToStopRecordingAudio = 2;
 }
 
 
 void GameUserInterface::VoiceRecorder::process()
 {
+   if(!(mGame->getConnectionToServer() && mGame->getConnectionToServer()->mVoiceChatEnabled))
+      stop();
+
    if(mWantToStopRecordingAudio != 0)
    {
       mWantToStopRecordingAudio--;

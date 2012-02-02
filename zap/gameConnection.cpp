@@ -120,6 +120,8 @@ void GameConnection::initialize()
 
    mWrongPasswordCount = 0;
 
+   mVoiceChatEnabled = true;
+
    reset();
 }
 
@@ -1290,6 +1292,12 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2rVoiceChatEnable, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+{
+   mVoiceChatEnabled = enable;
+}
+
+
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
 {
@@ -1643,6 +1651,9 @@ void GameConnection::onConnectionEstablished()
          if(!found) 
             mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
       }
+
+      if(mSettings->getIniSettings()->voiceChatVolLevel == 0)
+         s2rVoiceChatEnable(false);
 #endif
    }
    else                 // Runs on server

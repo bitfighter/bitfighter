@@ -3416,7 +3416,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
          ClientInfo *clientInfo = mGame->getClientInfo(i);
          GameConnection *dest = clientInfo->getConnection();
 
-         if(dest && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
+         if(dest && dest->mVoiceChatEnabled && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
             dest->postNetEvent(event);
       }
    }

@@ -281,6 +281,10 @@ public:
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);
 
+   bool mVoiceChatEnabled;  // server side: false when this client have set the voice volume to zero, which means don't send voice to this client
+                            // client side: this can allow or disallow sending voice to server
+   TNL_DECLARE_RPC(s2rVoiceChatEnable, (bool enabled));
+
    void resetAuthenticationTimer();
    S32 getAuthenticationCounter();
 
