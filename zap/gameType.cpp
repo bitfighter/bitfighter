@@ -2244,6 +2244,16 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
 #endif
 }
 
+// Tell all clients name has changed, and update server side name
+// Server only
+void GameType::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+{
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", clientInfo->getName().getString(), newName.getString());
+
+   s2cRenameClient(clientInfo->getName(), newName);
+   clientInfo->setName(newName);
+}
+
 
 // Server has notified us that a player has left the game
 GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
@@ -2966,7 +2976,7 @@ GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, String
 
    StringTableEntry oldName = renamedClientInfo->getName();
    renamedClientInfo->setName("");                          // Avoid unique self
-   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  // New name
+   StringTableEntry uniqueName = getGame()->makeUnique(newName.getString()).c_str();  // New name
    renamedClientInfo->setName(oldName);                     // Restore name to properly get it updated to clients
    renamedClientInfo->setAuthenticated(false, NO_BADGES);   // Don't underline anymore because of rename
    updateClientChangedName(renamedClientInfo, uniqueName);
@@ -3873,7 +3883,6 @@ void GameType::majorScoringEventOcurred(S32 team)
 {
    /* empty */
 }
-
 
 };
 

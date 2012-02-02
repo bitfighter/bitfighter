@@ -53,6 +53,8 @@ public:
    void sendPing(const Address &theAddress, const Nonce &clientNonce);
    void sendQuery(const Address &theAddress, const Nonce &clientNonce, U32 identityToken);
    void processPacket(const Address &sourceAddress, BitStream *pStream);
+
+   Game *getGame() { return mGame; }
 };
 
 };

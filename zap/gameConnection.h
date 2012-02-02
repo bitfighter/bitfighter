@@ -52,6 +52,7 @@ namespace Zap
 ////////////////////////////////////////
 
 class ClientGame;
+class ServerGame;
 struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;
@@ -76,8 +77,9 @@ private:
    bool mClientInfoWasCreatedLocally;     // Track whether we are responsible for deleting the clientInfo in the destructor
 
 #ifndef ZAP_DEDICATED
-   ClientGame *mClientGame;         // Sometimes this is NULL
+   ClientGame *mClientGame;         // NULL on server side, not available for dedicated build
 #endif
+   ServerGame *mServerGame;         // NULL on client side
 
    bool mInCommanderMap;
    bool mWaitingForPermissionsReply;
@@ -178,7 +180,6 @@ public:
    bool lostContact();
 
    string getServerName();
-   static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
    void reset();        // Clears/initializes some things between levels
 
@@ -315,10 +316,6 @@ public:
 
    TNL_DECLARE_NETCONNECTION(GameConnection);
 };
-
-LevelInfo getLevelInfo(char *level, S32 size);
-void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry);  
-
 
 };
 
