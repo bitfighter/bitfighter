@@ -150,6 +150,7 @@ void MoveObject::setActualVel(const Point &vel)
 
 void MoveObject::setVert(const Point &pos, S32 index)
 {
+   Parent::setVert(pos, index);
    setPos(pos);
 }
 
@@ -725,7 +726,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
 }
 
 
-// Server only
 bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
@@ -749,6 +749,7 @@ string MoveItem::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
 }
+
 
 // Client only, in-game
 void MoveItem::render()
@@ -1878,7 +1879,7 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   for(S32 i=0; i < maxTailLength; i++)
+   for(S32 i = 0; i < maxTailLength; i++)
    {
       if(stream->writeFlag(TailPointParts << i))
       {
