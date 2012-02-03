@@ -233,7 +233,7 @@ const char *GameConnection::getConnectionStateString(S32 i)
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED  
-   gClientGame->setSpawnDelayed(true);
+   mClientGame->setSpawnDelayed(true);
 #endif
 }
 
@@ -442,7 +442,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = gClientGame->findClientInfo(name);
+   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
 
    if(clientInfo)
       clientInfo->setAuthenticated(isAuthenticated, badges);
@@ -1330,9 +1330,9 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    char buf[256];
 
-   GameNetInterface *gameNetInterface = dynamic_cast<GameNetInterface *>(this->getInterface());
+   GameNetInterface *gameNetInterface = dynamic_cast<GameNetInterface *>(getInterface());
    if(!gameNetInterface)
-		return false;   // need a GameNetInterface
+      return false;   // need a GameNetInterface
 
    mServerGame = gameNetInterface->getGame()->isServer() ? (ServerGame *)gameNetInterface->getGame() : NULL;
    if(!mServerGame)

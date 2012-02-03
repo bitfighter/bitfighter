@@ -1695,7 +1695,7 @@ string ServerGame::getLastLevelLoadName()
 // Return true if the only client connected is the one we passed; don't consider bots
 bool ServerGame::onlyClientIs(GameConnection *client)
 {
-   GameType *gameType = gServerGame->getGameType();
+   GameType *gameType = getGameType();
 
    if(!gameType)
       return false;
@@ -2605,7 +2605,7 @@ void ServerGame::idle(U32 timeDelta)
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
    {
-      MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+      MasterServerConnection *masterConn = getConnectionToMaster();
 
       static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here.
       static GameTypeId prevCurrentLevelType;

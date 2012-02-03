@@ -304,7 +304,7 @@ void abortHosting_noLevels()
 {
    TNLAssert(gServerGame, "gServerGame should always exist here!");
 
-   if(gServerGame->isDedicated())
+   if(gServerGame->isDedicated())  
    {
       FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       const char *levelDir = folderManager->levelDir.c_str();

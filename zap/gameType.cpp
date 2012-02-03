@@ -171,12 +171,11 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
-
-   //TNLAssert(!mGame->isServer(), "Should only be client here!");
-   // mGame appears to return null here sometimes... why??
+   ClientGame *clientGame = ((GameConnection *) theConnection)->getClientGame();
+   TNLAssert(clientGame, "Should only be client here!");
 
 #ifndef ZAP_DEDICATED
-   addToGame(gClientGame, gClientGame->getGameObjDatabase());
+   addToGame(clientGame, clientGame->getGameObjDatabase());
 #endif
    return true;
 }
@@ -986,11 +985,11 @@ void GameType::saveGameStats()
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
 
-   if(gServerGame->getSettings()->getIniSettings()->logStats)
+   if(getGame()->getSettings()->getIniSettings()->logStats)
    {
       processStatsResults(&stats.gameStats);
 
-      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(gServerGame->getSettings(), stats);
+      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(getGame()->getSettings(), stats);
       statsthread->start();
    }
 }
@@ -2076,8 +2075,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
       return;
 
    // Use voting when no level change password and more then 1 players
-   if(!clientInfo->isAdmin() && gServerGame->getSettings()->getLevelChangePassword() == "" && 
-            gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(clientInfo, 1, time))
+   if(!clientInfo->isAdmin() && getGame()->getSettings()->getLevelChangePassword() == "" && 
+            getGame()->getPlayerCount() > 1 && ((ServerGame *)getGame())->voteStart(clientInfo, 1, time))
       return;
 
    mGameTimer.extend(time);                         // Increase "official time"
@@ -2100,16 +2099,16 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       return;                                                     // return without processing the change team request
 
    // Vote to change team might have different problems than the old way...
-   if( (!clientInfo->isLevelChanger() || gServerGame->getSettings()->getLevelChangePassword() == "") && 
-        gServerGame->getPlayerCount() > 1 )
+   if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") && 
+        getGame()->getPlayerCount() > 1 )
    {
-      if(gServerGame->voteStart(clientInfo, 4, team))
+      if(((ServerGame *)getGame())->voteStart(clientInfo, 4, team))
          return;
    }
 
    changeClientTeam(clientInfo, team);
 
-   if(!clientInfo->isAdmin() && gServerGame->getPlayerCount() > 1)
+   if(!clientInfo->isAdmin() && getGame()->getPlayerCount() > 1)
    {
       NetObject::setRPCDestConnection(NetObject::getRPCSourceConnection());   // Send c2s to the changing player only
       s2cCanSwitchTeams(false);                                               // Let the client know they can't switch until they hear back from us
@@ -2554,7 +2553,7 @@ void GameType::addBot(Vector<StringTableEntry> args)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    GameConnection *conn = clientInfo->getConnection();
 
@@ -2660,15 +2659,15 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isLevelChanger())  // Extra check in case of hacked client
       return;
 
    // Use voting when there is no level change password, and there is more then 1 player
-   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && gServerGame->getPlayerCount() > 1)
+   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && getGame()->getPlayerCount() > 1)
    {
-      if(gServerGame->voteStart(clientInfo, 2, time))
+      if(((ServerGame *) getGame())->voteStart(clientInfo, 2, time))
          return;
    }
 
@@ -2689,7 +2688,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    // Level changers and above
    if(!clientInfo->isLevelChanger())
@@ -2836,7 +2835,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isAdmin())
       return;  // Error message handled client-side
@@ -2860,7 +2859,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    // Conn is the connection of the player doing the banning
    if(!clientInfo->isAdmin())
@@ -2905,7 +2904,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
 {
    GameConnection *conn = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = conn->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isAdmin())
       return;  // Error message handled client-side
@@ -3055,7 +3054,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
       {
          GameConnection *kickeeConnection = kickee->getConnection();
          ConnectionParameters &p = kickeeConnection->getConnectionParameters();
-         BanList *banList = gServerGame->getSettings()->getBanList();
+         BanList *banList = getGame()->getSettings()->getBanList();
 
          if(p.mIsArranged)
             banList->kickHost(p.mPossibleAddresses[0]);           // Banned for 30 seconds

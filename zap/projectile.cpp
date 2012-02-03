@@ -1182,8 +1182,8 @@ SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 // Destructor
 SpyBug::~SpyBug()
 {
-   if(gServerGame && gServerGame->getGameType())
-      gServerGame->getGameType()->catalogSpybugs();
+   if(getGame() && getGame()->isServer() && getGame()->getGameType())
+      getGame()->getGameType()->catalogSpybugs();
 }
 
 

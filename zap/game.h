@@ -212,7 +212,7 @@ public:
    virtual ~FullClientInfo();                                          // Destructor
 
 
-   // WARNING!! mClientConnection can be NULL on client!!! (though should never be NULL on server)
+   // WARNING!! mClientConnection can be NULL on client and server's robots
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);
 

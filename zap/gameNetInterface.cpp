@@ -119,15 +119,15 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(U8(QueryResponse));
 
                theNonce.write(&queryResponse);
-               queryResponse.writeStringTableEntry(gServerGame->getSettings()->getHostName());
-               queryResponse.writeStringTableEntry(gServerGame->getSettings()->getHostDescr());
+               queryResponse.writeStringTableEntry(mGame->getSettings()->getHostName());
+               queryResponse.writeStringTableEntry(mGame->getSettings()->getHostDescr());
 
-               queryResponse.write(gServerGame->getPlayerCount());
-               queryResponse.write(gServerGame->getMaxPlayers());
-               queryResponse.write(gServerGame->getRobotCount());
-               queryResponse.writeFlag(gServerGame->isDedicated());
-               queryResponse.writeFlag(gServerGame->isTestServer());
-               queryResponse.writeFlag(gServerGame->getSettings()->getServerPassword() != "");
+               queryResponse.write(mGame->getPlayerCount());
+               queryResponse.write(((ServerGame *)mGame)->getMaxPlayers());
+               queryResponse.write(mGame->getRobotCount());
+               queryResponse.writeFlag(((ServerGame *)mGame)->isDedicated());
+               queryResponse.writeFlag(((ServerGame *)mGame)->isTestServer());
+               queryResponse.writeFlag(mGame->getSettings()->getServerPassword() != "");
 
                queryResponse.sendto(mSocket, remoteAddress);
             }

@@ -160,7 +160,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game, string &errorMessage);
    void onAddedToGame(Game *);
 
-   S32 getCurrentZone(ServerGame *game);
+   S32 getCurrentZone();
    void setCurrentZone(S32 zone);
    bool canSeePoint(Point point, bool wallOnly = false);         // Is point within robot's LOS?
 
@@ -239,6 +239,8 @@ public:
   // Initialize the pointer
    LuaRobot(lua_State *L);     // Lua constructor
    virtual ~LuaRobot();        // Destructor
+
+   GridDatabase *getBotZoneDatabase();
 
    static const char className[];
    static Lunar<LuaRobot>::RegType methods[];

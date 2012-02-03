@@ -3,13 +3,12 @@
 #include "dataConnection.h"
 #include "tnlEventConnection.h"
 #include "game.h"                         // For ServerGame def
+#include "gameNetInterface.h"             // for GetGame() through GameNetInterface
 
 #include "tnl.h"
 #include "tnlLog.h"
 #include "tnlVector.h"
 #include "tnlNetBase.h"
-#include "tnlNetInterface.h"
-
 #include "tnlHuffmanStringProcessor.h"    // For HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
 #include "stringUtils.h"
@@ -21,9 +20,6 @@ using namespace TNL;
 //using namespace std;
 
 namespace Zap {
-
-class ServerGame;
-extern ServerGame *gServerGame;
 
 
 FileType getResourceType(const char *fileType)
@@ -315,7 +311,11 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
                   (password, filetype, isRequest, filename), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   GameSettings *settings = gServerGame->getSettings();
+   TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
+   TNLAssert(((GameNetInterface *)getInterface())->getGame()->isServer(), "Not a ServerGame");
+
+   ServerGame *game = (ServerGame *)(((GameNetInterface *)getInterface())->getGame());
+   GameSettings *settings = game->getSettings();
 
    // Check if data connections are allowed
    if(!settings->getIniSettings()->allowDataConnections)
@@ -338,7 +338,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    if(isRequest)     // Client wants to get a file from us... they should have a file open and waiting for this data
    {
       // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-      SenderStatus stat = gServerGame->dataSender.initialize(this, settings->getFolderManager(), filename.getString(), (FileType)(U32)filetype);
+      SenderStatus stat = game->dataSender.initialize(this, settings->getFolderManager(), filename.getString(), (FileType)(U32)filetype);
 
       if(stat != STATUS_OK)
       {
@@ -433,7 +433,10 @@ void DataConnection::onConnectionEstablished()
 
       else if(mAction == REQUEST_FILE)
       {
-         FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
+         TNLAssert(dynamic_cast<GameNetInterface *>(getInterface()), "Not a GameNetInterface");
+         Game *game = static_cast<GameNetInterface *>(getInterface())->getGame();
+
+         FolderManager *folderManager = game->getSettings()->getFolderManager();
          string folder = getOutputFolder(folderManager, mFileType);
 
          if(folder == "")     // filetype was bogus; should never happen

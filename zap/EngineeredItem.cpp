@@ -354,7 +354,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    ship->engineerBuildObject();     // Deducts energy
 
-   deployedObject->addToGame(gServerGame, gServerGame->getGameObjDatabase());
+   deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
    deployedObject->onEnabled();
 
    MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);

@@ -117,7 +117,7 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
-   static U16 findZoneContaining(ServerGame *game, const Point &p);     // Returns ID of zone containing specified point
+   static U16 findZoneContaining(GridDatabase *botZoneDatabase, const Point &p);     // Returns ID of zone containing specified point
 
    static const Vector<BotNavMeshZone *> *getBotZones();                // Return cached list of all zones
 

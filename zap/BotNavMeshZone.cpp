@@ -189,10 +189,10 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 
 
 // Returns ID of zone containing specified point
-U16 BotNavMeshZone::findZoneContaining(ServerGame *game, const Point &p)
+U16 BotNavMeshZone::findZoneContaining(GridDatabase *botZoneDatabase, const Point &p)
 {
    fillVector.clear();
-   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector,
+   botZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, fillVector,
                               Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -372,11 +372,11 @@ void BotNavMeshZone::IDBotMeshZones(ServerGame *game)
 
 
 // Returns index of zone containing specified point
-static BotNavMeshZone *findZoneContainingPoint(ServerGame *game, const Point &point)
+static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, const Point &point)
 {
    Rect rect(point, 0.01f);
    zones.clear();
-   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
+   botZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
 
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
@@ -764,12 +764,12 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
       if(!teleporter)
          continue;
 
-      BotNavMeshZone *origZone = findZoneContainingPoint(game, teleporter->getActualPos());
+      BotNavMeshZone *origZone = findZoneContainingPoint(game->getBotZoneDatabase(), teleporter->getActualPos());
 
       if(origZone != NULL)
       for(S32 j = 0; j < teleporter->mDests.size(); j++)     // Review each teleporter destination
       {
-         BotNavMeshZone *destZone = findZoneContainingPoint(game, teleporter->mDests[j]);
+         BotNavMeshZone *destZone = findZoneContainingPoint(game->getBotZoneDatabase(), teleporter->mDests[j]);
 
          if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
          {
