@@ -65,7 +65,6 @@ FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : Parent(pos, true, 
 }
 
 
-
 FlagItem *FlagItem::clone() const
 {
    return new FlagItem(*this);
@@ -336,7 +335,7 @@ void FlagItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
    glPushMatrix();
-      glTranslate(getVert(0));
+      glTranslate(getActualPos());
       glScale(0.6f);
       renderFlag(0, 0, getTeamColor(mTeam));
    glPopMatrix();   

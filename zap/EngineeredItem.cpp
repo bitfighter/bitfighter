@@ -379,7 +379,7 @@ string EngineerModuleDeployer::getErrorMessage()
 // Constructor
 EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) : mAnchorNormal(anchorNormal)
 {
-   setVert(anchorPoint, 0);
+   setPos(anchorPoint);
    mHealth = 1.0f;
    mTeam = team;
    mOriginalTeam = mTeam;
@@ -419,12 +419,12 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
    // Anchor objects to the correct point
    if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, (F32)MAX_SNAP_DISTANCE, true, anchor, normal))
    {
-      setVert(pos, 0);      // Found no mount point, but for editor, needs to set the position
+      setPos(pos);               // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
    }
    else
    {
-      setVert(anchor + normal, 0);
+      setPos(anchor + normal);
       mAnchorNormal.set(normal);
    }
    
@@ -438,7 +438,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
 
 void EngineeredItem::computeObjectGeometry()
 {
-   getObjectGeometry(getVert(0), mAnchorNormal, mCollisionPolyPoints);
+   getObjectGeometry(getPos(), mAnchorNormal, mCollisionPolyPoints);
 }
 
 
@@ -512,7 +512,7 @@ void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 void EngineeredItem::onGeomChanged()
 {
-   getObjectGeometry(getVert(0), mAnchorNormal, mCollisionPolyPoints);     // Recompute collision poly
+   getObjectGeometry(getPos(), mAnchorNormal, mCollisionPolyPoints);     // Recompute collision poly
    Parent::onGeomChanged();
 }
 
@@ -703,7 +703,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       onDestroyed();
 
       mResource->addToDatabase(getGame()->getGameObjDatabase());
-      mResource->setActualPos(getVert(0) + mAnchorNormal * mResource->getRadius());
+      mResource->setPos(getPos() + mAnchorNormal * mResource->getRadius());
 
       deleteObject(500);
    }
@@ -761,22 +761,10 @@ void EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal,
 }
 
 
-Point EngineeredItem::getActualPos() const
+void EngineeredItem::setPos(Point p)
 {
-   return getVert(0);
-}
-
-
-Point EngineeredItem::getRenderPos() const
-{
-   return getVert(0);
-}
-
-
-void EngineeredItem::setActualPos(Point p)
-{
-   setVert(p, 0);
-   computeExtent();
+   Parent::setPos(p);
+   computeExtent();           // Sets extent based on actual geometry of object
 }
 
 
@@ -800,7 +788,7 @@ void EngineeredItem::explode()
       Colors::yellow,
    };
 
-   SoundSystem::playSoundEffect(SFXShipExplode, getActualPos(), Point());
+   SoundSystem::playSoundEffect(SFXShipExplode, getPos());
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
    F32 b = TNL::Random::readF() * 0.2f + 0.9f;
@@ -811,9 +799,11 @@ void EngineeredItem::explode()
 
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   game->emitExplosion(getActualPos(), 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
-   game->emitBurst(getActualPos(), Point(a,c) * 0.6f, Color(1, 1, 0.25), Colors::red);
-   game->emitBurst(getActualPos(), Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
+   Point pos = getPos();
+
+   game->emitExplosion(pos, 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
+   game->emitBurst(pos, Point(a,c) * 0.6f, Color(1, 1, 0.25), Colors::red);
+   game->emitBurst(pos, Point(b,d) * 0.6f, Colors::yellow, Colors::yellow);
 
    disableCollision();
 #endif
@@ -864,8 +854,10 @@ U32 EngineeredItem::packUpdate(GhostConnection *connection, U32 updateMask, BitS
 {
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      stream->write(getVert(0).x);
-      stream->write(getVert(0).y);
+      Point pos = getPos();
+
+      stream->write(pos.x);
+      stream->write(pos.y);
       stream->write(mAnchorNormal.x);
       stream->write(mAnchorNormal.y);
       stream->writeFlag(mEngineered);
@@ -900,7 +892,7 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
       stream->read(&mAnchorNormal.x);
       stream->read(&mAnchorNormal.y);
       mEngineered = stream->readFlag();
-      setVert(pos, 0);
+      setPos(pos);
    }
 
 
@@ -988,7 +980,7 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    // segment is some distance away
    if(mountSeg)   // Found a segment we can mount to
    {
-      setVert(anchor, 0);
+      setPos(anchor);
       setAnchorNormal(nrml);
       setMountSegment(dynamic_cast<WallSegment *>(mountSeg));
 
@@ -1111,10 +1103,12 @@ Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Po
 
 void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end)
 {
-   start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
+   Point pos = getPos();
+
+   start = getForceFieldStartPoint(pos, mAnchorNormal);
 
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(getVert(0), mAnchorNormal), mAnchorNormal, end, &collObj);
+   ForceField::findForceFieldEnd(getDatabase(), getForceFieldStartPoint(pos, mAnchorNormal), mAnchorNormal, end, &collObj);
 }
 
 
@@ -1136,7 +1130,7 @@ void ForceFieldProjector::onEnabled()
 {
    if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
    {
-      Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
+      Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
       DatabaseObject *collObj;
 	
@@ -1170,7 +1164,7 @@ void ForceFieldProjector::render()
 
 void ForceFieldProjector::renderDock()
 {
-   renderSquareItem(getVert(0), getTeamColor(mTeam), 1, &Colors::white, '>');
+   renderSquareItem(getPos(), getTeamColor(mTeam), 1, &Colors::white, '>');
 }
 
 
@@ -1182,9 +1176,10 @@ void ForceFieldProjector::renderEditor(F32 currentScale)
 
    if(mSnapped)
    {
+      Point forceFieldStart = getForceFieldStartPoint(getPos(), mAnchorNormal, scaleFact);
+
       renderForceFieldProjector(&mCollisionPolyPoints, color, true);
-      renderForceField(ForceFieldProjector::getForceFieldStartPoint(getVert(0), mAnchorNormal, scaleFact), 
-                       forceFieldEnd, color, true, scaleFact);
+      renderForceField(forceFieldStart, forceFieldEnd, color, true, scaleFact);
    }
    else
       renderDock();
@@ -1241,12 +1236,11 @@ void ForceFieldProjector::onItemDragging()
 void ForceFieldProjector::findForceFieldEnd()
 {
    // Load the corner points of a maximum-length forcefield into geom
-      DatabaseObject *collObj;
-   
+   DatabaseObject *collObj;
 
    F32 scale = 1;
    
-   Point start = getForceFieldStartPoint(getVert(0), mAnchorNormal);
+   Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
    if(ForceField::findForceFieldEnd(getEditorObjectDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
@@ -1298,7 +1292,7 @@ void ForceFieldProjector::push(lua_State *L)
 // LuaItem methods
 S32 ForceFieldProjector::getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * getRadius() );
+   return LuaObject::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
 }
 
 
@@ -1436,7 +1430,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mFieldUp = stream->readFlag();
 
    if(initial || (wasUp != mFieldUp))
-      SoundSystem::playSoundEffect(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart, Point());
+      SoundSystem::playSoundEffect(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart);
 }
 
 
@@ -1636,13 +1630,13 @@ void Turret::render()
 {
    Color c = getTeamColor(mTeam);
 
-   renderTurret(c, getVert(0), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
+   renderTurret(c, getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
 }
 
 
 void Turret::renderDock()
 {
-   renderSquareItem(getVert(0), getTeamColor(mTeam), 1, &Colors::white, 'T');
+   renderSquareItem(getPos(), getTeamColor(mTeam), 1, &Colors::white, 'T');
 }
 
 
@@ -1692,7 +1686,7 @@ void Turret::idle(IdleCallPath path)
    mFireTimer.update(mCurrentMove.time);
 
    // Choose best target:
-   Point aimPos = getVert(0) + mAnchorNormal * TURRET_OFFSET;
+   Point aimPos = getPos() + mAnchorNormal * TURRET_OFFSET;
    Point cross(mAnchorNormal.y, -mAnchorNormal.x);
 
    Rect queryRect(aimPos, aimPos);
@@ -1730,16 +1724,16 @@ void Turret::idle(IdleCallPath path)
          continue;                           // ...if so, skip it!
 
       // Calculate where we have to shoot to hit this...
-      Point Vs = potential->getActualVel();
+      Point Vs = potential->getVel();
       F32 S = (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity;
-      Point d = potential->getRenderPos() - aimPos;
+      Point d = potential->getPos() - aimPos;
 
 // This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
       if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
          continue;
 
-      Point leadPos = potential->getRenderPos() + Vs * t;
+      Point leadPos = potential->getPos() + Vs * t;
 
       // Calculate distance
       delta = (leadPos - aimPos);
@@ -1753,7 +1747,7 @@ void Turret::idle(IdleCallPath path)
 
       // See if we can see it...
       Point n;
-      if(findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
+      if(findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, aimPos, potential->getPos(), t, n))
          continue;
 
       // See if we're gonna clobber our own stuff...
@@ -1904,7 +1898,7 @@ S32 Turret::getRad(lua_State *L)
 
 S32 Turret::getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getVert(0) + mAnchorNormal * (TURRET_OFFSET));
+   return LuaObject::returnPoint(L, getPos() + mAnchorNormal * (TURRET_OFFSET));
 }
 
 

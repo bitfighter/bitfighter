@@ -99,7 +99,6 @@ public:
    void addTimeSinceLastMove(U32 time);
    U32 getTimeSinceLastMove();
    void resetTimeSinceLastMove();
-
 };
 
 

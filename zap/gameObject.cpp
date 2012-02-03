@@ -347,7 +347,7 @@ BfObject::~BfObject()
 // mGeometry will be deleted in destructor
 void BfObject::setNewGeometry(GeomType geomType)
 {
-   TNLAssert(!mGeometry.getGeometry(), "This class already has a geometry!");
+   TNLAssert(!mGeometry.getGeometry(), "This object already has a geometry!");
 
    switch(geomType)
    {
@@ -420,34 +420,16 @@ bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 }
 
 
-Point BfObject::getRenderPos() const
+Point BfObject::getPos() const
 {
    return getVert(0);
 }
 
 
-Point BfObject::getActualPos() const
+void BfObject::setPos(const Point &pos)
 {
-   return getVert(0);
-}
-
-
-Point BfObject::getRenderVel() const
-{
-   return Point(0, 0);
-}
-
-
-Point BfObject::getActualVel() const
-{
-   return Point(0, 0);
-}
-
-
-void BfObject::setActualPos(Point p)
-{
-   setVert(p, 0);
-   setExtent(Rect(p, 10));
+   setVert(pos, 0);
+   setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
 }
 
 
@@ -462,8 +444,6 @@ void BfObject::updateExtentInDatabase()
 {
    setExtent(calcExtents());    // Make sure the database extents are in sync with where the object actually is
 }
-
-
 
 
 // Basic definitions
@@ -657,7 +637,7 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 
       F32 distance = (nearest - center).len();
 
-      Point deltav = getActualVel() - so->getActualVel();
+      Point deltav = getVel() - so->getVel();
 
 
       // initial scoping factor is distance based.
@@ -709,7 +689,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc obj
       GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
       // Check the actual distance against our outer radius.  Recall that we got a list of potential
       // collision objects based on a square area, but actual collisions will be based on true distance
-      Point objPos = foundObject->getActualPos();
+      Point objPos = foundObject->getPos();
       Point delta = objPos - pos;
 
       if(delta.len() > outerRad)
@@ -846,6 +826,12 @@ void GameObject::markAsGhost()
 bool GameObject::isMoveObject()
 {
    return false;
+}
+
+
+Point GameObject::getVel()
+{
+   return Point(0,0);
 }
 
 

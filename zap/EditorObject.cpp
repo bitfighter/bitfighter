@@ -171,7 +171,7 @@ void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 
 void EditorObject::labelDockItem()
 {
 #ifndef ZAP_DEDICATED
-   renderDockItemLabel(getVert(0), getOnDockName(), 11);
+   renderDockItemLabel(getPos(), getOnDockName(), 11);
 #endif
 }
 
@@ -180,7 +180,7 @@ void EditorObject::highlightDockItem()
 {
 #ifndef ZAP_DEDICATED
    glColor(HIGHLIGHT_COLOR);
-   drawSquare(getVert(0), getDockRadius());
+   drawSquare(getPos(), getDockRadius());
 #endif
 }
 
@@ -347,9 +347,9 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 // You will have to delete this copy when you are done with it!
 EditorObject *EditorObject::copy()
 {
-   EditorObject *newObject = clone();     // TODO: Wrap in shared_ptr?
-   newObject->setExtent(getExtent());     // Why do we need to do this???
-   newObject->initializeEditor();         // Unselects all vertices
+   EditorObject *newObject = clone();     
+   //newObject->setPos(getPos());    
+   newObject->initializeEditor();         // Marks all vertices as unselected
 
    return newObject;
 }
@@ -645,7 +645,7 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
    return;
    glColor(INSTRUCTION_TEXTCOLOR);
 
-   Point pos = getVert(0);
+   Point pos = getPos();
    
    // Dividing by currentScale keeps the text a constant size in pixels
    UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
@@ -657,7 +657,7 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
 void EditorPointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
-   setVert(point, 0);
+   setPos(point);
    Parent::prepareForDock(game, point, teamIndex);
 #endif
 }
@@ -674,7 +674,7 @@ void EditorPointObject::prepareForDock(ClientGame *game, const Point &point, S32
 //
 //void EditorItem::renderEditor(F32 currentScale)
 //{
-//   renderItem(getVert(0));                    
+//   renderItem(getActualPos());                    
 //}
 //
 //

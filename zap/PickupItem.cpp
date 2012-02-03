@@ -265,7 +265,7 @@ bool RepairItem::pickup(Ship *theShip)
 // Runs on client when item's unpack method signifies the item has been picked up
 void RepairItem::onClientPickup()
 {
-   SoundSystem::playSoundEffect(SFXShipHeal, getRenderPos(), getRenderVel());
+   SoundSystem::playSoundEffect(SFXShipHeal, getPos());
 }
 
 
@@ -310,7 +310,7 @@ S32 RepairItem::getDockRadius()
 
 void RepairItem::renderDock()
 {
-   renderRepairItem(getVert(0), true, 0, 1);
+   renderRepairItem(getPos(), true, 0, 1);
 }
 
 
@@ -399,7 +399,7 @@ bool EnergyItem::pickup(Ship *theShip)
 // Runs on client when item's unpack method signifies the item has been picked up
 void EnergyItem::onClientPickup()
 {
-   SoundSystem::playSoundEffect(SFXShipHeal, getRenderPos(), getRenderVel());
+   SoundSystem::playSoundEffect(SFXShipHeal, getPos());
 }
 
 

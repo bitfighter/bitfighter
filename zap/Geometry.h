@@ -59,14 +59,14 @@ private:
    bool mPosIsSelected;
    Point mPoint;
 
+   virtual Point getVert(S32 index) const;
+   virtual void setVert(const Point &pos, S32 index);
+
 public:
    PointGeometry();     // Constructor
    ~PointGeometry();    // Destructor
 
    GeomType getGeomType();
-
-   virtual Point getVert(S32 index) const;
-   virtual void setVert(const Point &pos, S32 index);
 
    S32 getVertCount();
    S32 getMinVertCount();

@@ -768,7 +768,7 @@ bool Ship::findRepairTargets()
          continue;
 
       // ...or ones too far away...
-      if((item->getRenderPos() - pos).len() > (RepairRadius + CollisionRadius + item->getRadius()))
+      if((item->getPos() - pos).len() > (RepairRadius + CollisionRadius + item->getRadius()))
          continue;
 
       // ...or ones not on our team or neutral
@@ -1457,7 +1457,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mMoveState[ActualState].pos, 1);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos, Point());
+      SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos);
    }
 
 #endif
@@ -1829,7 +1829,7 @@ Color ShipExplosionColors[NumShipExplosionColors] = {
 void Ship::emitShipExplosion(Point pos)
 {
 #ifndef ZAP_DEDICATED
-   SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
+   SoundSystem::playSoundEffect(SFXShipExplode, pos);
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
    F32 b = TNL::Random::readF() * 0.2f + 0.9f;
@@ -2158,7 +2158,7 @@ void Ship::render(S32 layerIndex)
             glBegin(GL_LINES);
             glVertex2f(pos.x, pos.y);
 
-            Point shipPos = mRepairTargets[i]->getRenderPos();
+            Point shipPos = mRepairTargets[i]->getPos();
             glVertex2f(shipPos.x, shipPos.y);
             glEnd();
          }

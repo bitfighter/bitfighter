@@ -674,7 +674,7 @@ void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F3
       return;
 
    Rect r = target->getBounds(MoveObject::RenderState);
-   Point nearestPoint = ship->getRenderPos();
+   Point nearestPoint = ship->getPos();
 
    if(r.max.x < nearestPoint.x)
       nearestPoint.x = r.max.x;
@@ -1443,7 +1443,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
    else     // Do a simple query of the objects within scope range of the ship
    {
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
-      Point pos = scopeObject->getActualPos();
+      Point pos = scopeObject->getPos();
       Ship *co = dynamic_cast<Ship *>(scopeObject);
       TNLAssert(co, "Null control object!");
 

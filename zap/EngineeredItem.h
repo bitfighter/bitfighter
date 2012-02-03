@@ -94,9 +94,7 @@ public:
 
    virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
 
-   Point getActualPos() const;
-   Point getRenderPos() const;
-   void setActualPos(Point p);
+   void setPos(Point p);
 
 
 #ifndef ZAP_DEDICATED

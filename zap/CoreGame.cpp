@@ -340,9 +340,11 @@ void CoreItem::renderItem(const Point &pos)
 void CoreItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
+   Point pos = getPos();
+
    glColor(Colors::white);
-   drawPolygon(getVert(0), 10, 5, 0);
-   drawCircle(getVert(0), 2);
+   drawPolygon(pos, 10, 5, 0);
+   drawCircle(pos, 2);
 #endif
 }
 
@@ -350,12 +352,14 @@ void CoreItem::renderDock()
 void CoreItem::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
+   Point pos = getPos();
+
    // Here we render a simpler, non-animated Core to reduce distraction in the editor
    glColor(Colors::white);
-   drawPolygon(getVert(0), 10, CoreStartWidth / 2, 0);
+   drawPolygon(pos, 10, CoreStartWidth / 2, 0);
 
    glColor(getTeamColor(mTeam));
-   drawCircle(getVert(0), CoreStartWidth / 5);
+   drawCircle(pos, CoreStartWidth / 5);
 #endif
 }
 
@@ -437,7 +441,7 @@ F32 CoreItem::getEditorRadius(F32 currentScale)
 
 bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
-   center = getActualPos();
+   center = getPos();
    radius = calcCoreWidth() / 2;
    return true;
 }
@@ -543,7 +547,7 @@ void CoreItem::doExplosion(const Point &pos)
 
    // Also add in secondary sound at start
 //   if(isStart)
-//      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint, Point());
+//      SoundSystem::playSoundEffect(SFXCoreExplodeSecondary, blastPoint);
 
    SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1 - 0.25f * F32(mCurrentExplosionNumber));
 
@@ -578,7 +582,7 @@ void CoreItem::idle(GameObject::IdleCallPath path)
       else
          if(mCurrentExplosionNumber < ExplosionCount)
          {
-            doExplosion(getActualPos());
+            doExplosion(getPos());
             mExplosionTimer.reset(ExplosionInterval);
          }
    }
@@ -588,7 +592,7 @@ void CoreItem::idle(GameObject::IdleCallPath path)
    else
    {
       // Thump thump
-      SoundSystem::playSoundEffect(SFXCoreHeartbeat, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXCoreHeartbeat, getPos());
 
       // Now reset the timer as a function of health
       // Exponential
@@ -671,7 +675,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       mHasExploded = true;
       disableCollision();
-      onItemExploded(getActualPos());
+      onItemExploded(getPos());
    }
 
    if(mInitial)

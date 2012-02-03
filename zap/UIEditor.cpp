@@ -411,7 +411,7 @@ void EditorUserInterface::resnapAllEngineeredItems(EditorObjectDatabase *databas
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(fillVector[i]);
-      engrObj->mountToWall(engrObj->getVert(0), database->getWallSegmentManager());
+      engrObj->mountToWall(engrObj->getPos(), database->getWallSegmentManager());
    }
 }
 
@@ -1466,7 +1466,7 @@ void EditorUserInterface::renderTurretRanges(EditorObjectDatabase *editorDb)
             glTranslatef(0, 0, 0.05f);
          prevTeam = editorObj->getTeam();
 
-         Point pos = editorObj->getVert(0);
+         Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
          renderSpyBugVisibleRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
@@ -1488,7 +1488,7 @@ void EditorUserInterface::renderTurretRanges(EditorObjectDatabase *editorDb)
       EditorObject *editorObj = dynamic_cast<EditorObject *>(fillVector[i]);
       if(editorObj->isSelected() || editorObj->isLitUp())
       {
-         Point pos = editorObj->getVert(0);
+         Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
          renderTurretFiringRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
@@ -2584,7 +2584,7 @@ void EditorUserInterface::findHitItemOnDock()
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
    {
-      Point pos = mDockItems[i]->getVert(0);
+      Point pos = mDockItems[i]->getPos();
 
       if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
       {
@@ -2768,6 +2768,7 @@ void EditorUserInterface::startDraggingDockItem()
    EditorObjectDatabase *database = getDatabase();
 
    item->addToEditor(getGame(), database); 
+   database->dumpObjects();
    
    clearSelection(database);    // No items are selected...
    item->setSelected(true);     // ...except for the new one

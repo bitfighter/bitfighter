@@ -764,7 +764,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
       if(!teleporter)
          continue;
 
-      BotNavMeshZone *origZone = findZoneContainingPoint(game->getBotZoneDatabase(), teleporter->getActualPos());
+      BotNavMeshZone *origZone = findZoneContainingPoint(game->getBotZoneDatabase(), teleporter->getPos());
 
       if(origZone != NULL)
       for(S32 j = 0; j < teleporter->mDests.size(); j++)     // Review each teleporter destination
@@ -775,14 +775,14 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
          {
             // Teleporter is one way path
             neighbor.zoneID = destZone->mZoneId;
-            neighbor.borderStart.set(teleporter->getActualPos());
+            neighbor.borderStart.set(teleporter->getPos());
             neighbor.borderEnd.set(teleporter->mDests[j]);
-            neighbor.borderCenter.set(teleporter->getActualPos());
+            neighbor.borderCenter.set(teleporter->getPos());
 
             // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
             // This should be the average of the costs of traveling from each dest zone to the target zone
             neighbor.distTo = 0;                                    
-            neighbor.center.set(teleporter->getActualPos());
+            neighbor.center.set(teleporter->getPos());
 
             origZone->mNeighbors.push_back(neighbor);
          }

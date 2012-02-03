@@ -152,7 +152,7 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shoote
    setNewGeometry(geomPoint);
 
    mNetFlags.set(Ghostable);
-   setVert(pos, 0);
+   setPos(pos);
    mVelocity = vel;
 
    mTimeRemaining = GameWeapon::weaponInfo[type].projLiveTime;
@@ -186,7 +186,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    if(stream->writeFlag(updateMask & PositionMask))
    {
-      ((GameConnection *) connection)->writeCompressedPoint(getVert(0), stream);
+      ((GameConnection *) connection)->writeCompressedPoint(getPos(), stream);
       writeCompressedVelocity(mVelocity, COMPRESSED_VELOCITY_MAX, stream);
    }
 
@@ -215,9 +215,9 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool initial = false;
    if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SoundSystem::playSoundEffect
    {
-      Point p;
-      ((GameConnection *) connection)->readCompressedPoint(p, stream);
-      setVert(p, 0);
+      static Point pos;    // Reusable container
+      ((GameConnection *) connection)->readCompressedPoint(pos, stream);
+      setPos(pos);
 
       readCompressedVelocity(mVelocity, COMPRESSED_VELOCITY_MAX, stream);
    }
@@ -232,10 +232,9 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(stream->readFlag())
          mShooter = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
 
-      Rect newExtent(getVert(0), getVert(0));
-      setExtent(newExtent);
+      setExtent(Rect(getPos(), 0));
       initial = true;
-      SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getVert(0), mVelocity);
+      SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getPos(), mVelocity);
    }
    bool preCollided = collided;
    collided = stream->readFlag();
@@ -246,7 +245,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    alive = stream->readFlag();
 
    if(!preCollided && collided)     // Projectile has "become" collided
-      explode(NULL, getVert(0));
+      explode(NULL, getPos());
 
    if(!collided && initial)
    {
@@ -292,155 +291,164 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
    if(!collided && alive)
    {
-    U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
-    F32 timeLeft = (F32)deltaT;
-    S32 loopcount1 = 32;
-    while(timeLeft > 0.01f && loopcount1 != 0)    // This loop is to prevent slow bounce on low frame rate / high time left.
-    {
-      loopcount1--;
-      // Calculate where projectile will be at the end of the current interval
-      Point endPos = getVert(0) + mVelocity * timeLeft * 0.001f;
+      U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
+      F32 timeLeft = (F32)deltaT;
+      S32 loopcount1 = 32;
 
-      // Check for collision along projected route of movement
-      static Vector<GameObject *> disabledList;
+      Point startPos, collisionPoint;
 
-      Rect queryRect(getVert(0), endPos);     // Bounding box of our travels
-
-      disabledList.clear();
-
-
-      // Don't collide with shooter during first 500ms of life
-      if(mShooter.isValid() && aliveTime < 500 && !hasBounced)
+      while(timeLeft > 0.01f && loopcount1 != 0)    // This loop is to prevent slow bounce on low frame rate / high time left.
       {
-         disabledList.push_back(mShooter);
-         mShooter->disableCollision();
-      }
+         loopcount1--;
+         
+         startPos = getPos();
 
-      GameObject *hitObject;
+         // Calculate where projectile will be at the end of the current interval
+         Point endPos = startPos + mVelocity * timeLeft * 0.001f;
 
-      F32 collisionTime;
-      Point surfNormal;
+         // Check for collision along projected route of movement
+         static Vector<GameObject *> disabledList;
 
-      // Do the search
-      while(true)  
-      {
-         hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
-                                   MoveObject::RenderState, getVert(0), endPos, collisionTime, surfNormal);
+         Rect queryRect(startPos, endPos);     // Bounding box of our travels
 
-         if((!hitObject || hitObject->collide(this)))
-            break;
+         disabledList.clear();
 
-         // Disable collisions with things that don't want to be
-         // collided with (i.e. whose collide methods return false)
-         disabledList.push_back(hitObject);
-         hitObject->disableCollision();
-      }
 
-      // Re-enable collison flag for ship and items in our path that don't want to be collided with
-      // Note that if we hit an object that does want to be collided with, it won't be in disabledList
-      // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
-      // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
-
-      for(S32 i = 0; i < disabledList.size(); i++)
-         disabledList[i]->enableCollision();
-
-      if(hitObject)  // Hit something...  should we bounce?
-      {
-         bool bounce = false;
-
-         if(mType == ProjectileBounce && isWallType(hitObject->getObjectTypeNumber()))
-            bounce = true;
-         else if(isShipType(hitObject->getObjectTypeNumber()))
+         // Don't collide with shooter during first 500ms of life
+         if(mShooter.isValid() && aliveTime < 500 && !hasBounced)
          {
-            Ship *s = dynamic_cast<Ship *>(hitObject);
-            if(s->isModulePrimaryActive(ModuleShield))
-               bounce = true;
+            disabledList.push_back(mShooter);
+            mShooter->disableCollision();
          }
 
-         if(bounce)
+         GameObject *hitObject;
+
+         F32 collisionTime;
+         Point surfNormal;
+
+         // Do the search
+         while(true)  
          {
-            hasBounced = true;
-            // We hit something that we should bounce from, so bounce!
-            F32 float1 = surfNormal.dot(mVelocity) * 2;
-            mVelocity -= surfNormal * float1;
-            if(float1 > 0)
-               surfNormal = -surfNormal;      // This is to fix going through polygon barriers
+            hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
+                                       MoveObject::RenderState, startPos, endPos, collisionTime, surfNormal);
 
-            Point collisionPoint = getVert(0) + (endPos - getVert(0)) * collisionTime;
-            setVert(collisionPoint + surfNormal, 0);
-            timeLeft = timeLeft * (1 - collisionTime);
+            if((!hitObject || hitObject->collide(this)))
+               break;
 
-            MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
-            if(obj)
+            // Disable collisions with things that don't want to be
+            // collided with (i.e. whose collide methods return false)
+            disabledList.push_back(hitObject);
+            hitObject->disableCollision();
+         }
+
+         // Re-enable collison flag for ship and items in our path that don't want to be collided with
+         // Note that if we hit an object that does want to be collided with, it won't be in disabledList
+         // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
+         // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
+
+         for(S32 i = 0; i < disabledList.size(); i++)
+            disabledList[i]->enableCollision();
+
+         if(hitObject)  // Hit something...  should we bounce?
+         {
+            bool bounce = false;
+
+            if(mType == ProjectileBounce && isWallType(hitObject->getObjectTypeNumber()))
+               bounce = true;
+            else if(isShipType(hitObject->getObjectTypeNumber()))
             {
-               setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
-               float1 = getVert(0).distanceTo(obj->getRenderPos());
-               if(float1 < obj->getRadius())
-               {
-                  float1 = obj->getRadius() * 1.01f / float1;
-                  setVert(getVert(0) * float1 + obj->getRenderPos() * (1 - float1), 0);  // to fix bouncy stuck inside shielded ship
-               }
+               Ship *s = dynamic_cast<Ship *>(hitObject);
+               if(s->isModulePrimaryActive(ModuleShield))
+                  bounce = true;
             }
 
-            if(isGhost())
-               SoundSystem::playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
+            if(bounce)
+            {
+               hasBounced = true;
+               // We hit something that we should bounce from, so bounce!
+               F32 float1 = surfNormal.dot(mVelocity) * 2;
+               mVelocity -= surfNormal * float1;
+
+               if(float1 > 0)
+                  surfNormal = -surfNormal;      // This is to fix going through polygon barriers
+
+               startPos = getPos();
+               collisionPoint = startPos + (endPos - startPos) * collisionTime;
+
+               setPos(collisionPoint + surfNormal);
+               timeLeft = timeLeft * (1 - collisionTime);
+
+               MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
+               if(obj)
+               {
+                  startPos = getPos();
+
+                  setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
+                  float1 = startPos.distanceTo(obj->getRenderPos());
+                  if(float1 < obj->getRadius())
+                  {
+                     float1 = obj->getRadius() * 1.01f / float1;
+                     setVert(startPos * float1 + obj->getRenderPos() * (1 - float1), 0);  // to fix bouncy stuck inside shielded ship
+                  }
+               }
+
+               if(isGhost())
+                  SoundSystem::playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
+            }
+            else
+            {
+               // Not bouncing, so advance to location of collision
+               startPos = getPos();
+               collisionPoint = startPos + (endPos - startPos) * collisionTime;
+               handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
+               timeLeft = 0;
+            }
+
          }
-         else
+         else        // Hit nothing, advance projectile to endPos
          {
-            // Not bouncing, so advance to location of collision
-            Point collisionPoint = getVert(0) + (endPos - getVert(0)) * collisionTime;
-            handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
             timeLeft = 0;
+            //// Steer towards a nearby testitem
+            //static Vector<DatabaseObject *> targetItems;
+            //targetItems.clear();
+            //Rect searchArea(pos, 2000);
+            //S32 HeatSeekerTargetType = TestItemType | ResourceItemType;
+            //findObjects(HeatSeekerTargetType, targetItems, searchArea);
+
+            //F32 maxPull = 0;
+            //Point dist;
+            //Point maxDist;
+
+            //for(S32 i = 0; i < targetItems.size(); i++)
+            //{
+            //   GameObject *target = dynamic_cast<GameObject *>(targetItems[i]);
+            //   dist.set(pos - target->getActualPos());
+
+            //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
+            //   
+            //   pull *= (target->getObjectTypeMask() & ResourceItemType) ? .5 : 1;
+
+            //   if(pull > maxPull)
+            //   {
+            //      maxPull = pull;
+            //      maxDist.set(dist);
+            //   }
+            //   
+            //}
+
+            //if(maxPull > 0)
+            //{
+            //   F32 speed = velocity.len();
+            //   velocity += (velocity - maxDist) * maxPull;
+            //   velocity.normalize(speed);
+            //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
+            //}
+
+            setPos(endPos);
          }
-
       }
-      else        // Hit nothing, advance projectile to endPos
-      {
-         timeLeft = 0;
-         //// Steer towards a nearby testitem
-         //static Vector<DatabaseObject *> targetItems;
-         //targetItems.clear();
-         //Rect searchArea(pos, 2000);
-         //S32 HeatSeekerTargetType = TestItemType | ResourceItemType;
-         //findObjects(HeatSeekerTargetType, targetItems, searchArea);
-
-         //F32 maxPull = 0;
-         //Point dist;
-         //Point maxDist;
-
-         //for(S32 i = 0; i < targetItems.size(); i++)
-         //{
-         //   GameObject *target = dynamic_cast<GameObject *>(targetItems[i]);
-         //   dist.set(pos - target->getActualPos());
-
-         //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
-         //   
-         //   pull *= (target->getObjectTypeMask() & ResourceItemType) ? .5 : 1;
-
-         //   if(pull > maxPull)
-         //   {
-         //      maxPull = pull;
-         //      maxDist.set(dist);
-         //   }
-         //   
-         //}
-
-         //if(maxPull > 0)
-         //{
-         //   F32 speed = velocity.len();
-         //   velocity += (velocity - maxDist) * maxPull;
-         //   velocity.normalize(speed);
-         //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
-         //}
-
-         setVert(endPos, 0);
-      }
-
-      Rect newExtent(getVert(0), getVert(0));
-      setExtent(newExtent);
-    }
    }
-
+         
 
    // Kill old projectiles
    if(alive && path == GameObject::ServerIdleMainLoop)
@@ -502,22 +510,10 @@ Point Projectile::getActualVel() const
 }
 
 
-Point Projectile::getRenderPos() const
-{
-   return getVert(0);
-}
-
-
-Point Projectile::getActualPos() const
-{
-   return getVert(0);
-}
-
-
 // TODO: Get rid of this! (currently won't render without it)
 void Projectile::render()
 {
-   renderItem(getActualPos());
+   renderItem(getPos());
 }
 
 
@@ -534,7 +530,7 @@ void Projectile::renderItem(const Point &pos)
 
 S32 Projectile::getLoc(lua_State *L)
 {
-   return returnPoint(L, getActualPos());
+   return returnPoint(L, getPos());
 }
 
 
@@ -711,7 +707,7 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       //static_cast<ClientGame *>(getGame())->emitExplosion(getRenderPos(), 0.5, GameWeapon::projectileInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
       static_cast<ClientGame *>(getGame())->emitBlast(pos, OuterBlastRadius);          // New, manly explosion
 
-      SoundSystem::playSoundEffect(SFXMineExplode, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXMineExplode, getActualPos());
    }
 #endif
 
@@ -982,9 +978,9 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mArmed = stream->readFlag();
 
    if(initial && !mArmed)
-      SoundSystem::playSoundEffect(SFXMineDeploy, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXMineDeploy, getActualPos());
    else if(!initial && !wasArmed && mArmed)
-      SoundSystem::playSoundEffect(SFXMineArm, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXMineArm, getActualPos());
 }
 
 
@@ -1030,16 +1026,18 @@ void Mine::renderItem(const Point &pos)
 
 void Mine::renderEditor(F32 currentScale)
 {
-   renderMine(getVert(0), true, true);
+   renderMine(getActualPos(), true, true);
 }
 
 
 void Mine::renderDock()
 {
 #ifndef ZAP_DEDICATED
-   glColor3f(.7f, .7f, .7f);
-   drawCircle(getVert(0), 9);
-   drawLetter('M', getVert(0), Color(.7), 1);
+   Point pos = getActualPos();
+
+   glColor(.7);
+   drawCircle(pos, 9);
+   drawLetter('M', pos, Color(.7), 1);
 #endif
 }
 
@@ -1282,7 +1280,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->readStringTableEntry(&mSetBy);
    }
    if(initial)
-      SoundSystem::playSoundEffect(SFXSpyBugDeploy, getActualPos(), Point());
+      SoundSystem::playSoundEffect(SFXSpyBugDeploy, getActualPos());
 }
 
 
@@ -1322,7 +1320,7 @@ void SpyBug::renderItem(const Point &pos)
 
 void SpyBug::renderEditor(F32 currentScale)
 {
-   renderSpyBug(getVert(0), getTeamColor(getTeam()), true, true);
+   renderSpyBug(getRenderPos(), getTeamColor(getTeam()), true, true);
 }
 
 
@@ -1331,12 +1329,14 @@ void SpyBug::renderDock()
 #ifndef ZAP_DEDICATED
    const F32 radius = 9;
 
+   Point pos = getRenderPos();
+
    glColor(getTeamColor(mTeam));
-   drawFilledCircle(getVert(0), radius);
+   drawFilledCircle(pos, radius);
 
    glColor(.7f);
-   drawCircle(getVert(0), radius);
-   drawLetter('S', getVert(0), Color(mTeam < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
+   drawCircle(pos, radius);
+   drawLetter('S', pos, Color(mTeam < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif
 }
 

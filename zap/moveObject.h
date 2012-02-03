@@ -79,10 +79,17 @@ public:
    Point getRenderVel() const;
    Point getActualVel() const;
 
+   // Because MoveObjects have multiple positions (actual, render), we need to implement the following
+   // functions differently than most objects do
+   Point getVert(S32 index) const;              // Maps to getActualPos
+   Point getPos() const;                        // Maps to getActualPos
+   Point getVel();                              // Maps to getActualVel
+
    virtual void setActualPos(const Point &pos);
    virtual void setActualVel(const Point &vel);
 
-   void setVert(const Point &pos, S32 index);
+   void setVert(const Point &pos, S32 index);   // Maps to setPos
+   void setPos(const Point &pos);
 
    F32 getMass();
    void setMass(F32 mass);

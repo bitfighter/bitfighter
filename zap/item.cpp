@@ -49,30 +49,24 @@ static U32 sItemId = 1;
 // Constructor
 Item::Item(const Point &pos, F32 radius)
 {
-   setActualPos(pos);
    mRadius = radius;
+   setPos(pos);
 
    mItemId = sItemId;
    sItemId++;
 }
 
 
-Point Item::getActualPos() const
+void Item::setPos(const Point &p)
 {
-	return getVert(0);
-}
-
-
-void Item::setActualPos(const Point &p)
-{
-   setVert(p, 0);
+   Parent::setPos(p);
    setExtent(Rect(p, mRadius));
 }
 
 
 bool Item::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 {
-   point = getVert(0);
+   point = getPos();
    radius = mRadius;
    return true;
 }
@@ -88,7 +82,7 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
    pos.read(argv);
    pos *= game->getGridSize();
 
-   setActualPos(pos);      // Needed by game
+   setPos(pos);      // Needed by game
 
    return true;
 }
@@ -108,7 +102,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    {
       // Send id in inital packet
       stream->writeRangedU32(mItemId, 0, U16_MAX);
-      ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
+      ((GameConnection *) connection)->writeCompressedPoint(getPos(), stream);
    }
 
    return 0; //retMask;
@@ -127,7 +121,7 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pos;
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
 
-      setActualPos(pos);      // Also sets object extent
+      setPos(pos);      // Also sets object extent
    }
 }
 
@@ -155,13 +149,13 @@ void Item::renderItem(const Point &pos)
 
 void Item::render()
 {
-   renderItem(getActualPos());
+   renderItem(getPos());
 }
 
 
 void Item::renderEditor(F32 currentScale)
 {
-   renderItem(getVert(0));                    
+   renderItem(getPos());                    
 }
 
 
@@ -170,15 +164,17 @@ F32 Item::getEditorRadius(F32 currentScale)
    return (getRadius() + 2) * currentScale;
 }
 
+
 Rect Item::calcExtents()
 {
-   return Rect(getVert(0), mRadius);
+   return Rect(getPos(), mRadius);
 }
+
 
 // LuaItem interface
 S32 Item::getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getActualPos());
+   return LuaObject::returnPoint(L, getPos());
 }
 
 

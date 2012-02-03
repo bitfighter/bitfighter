@@ -163,9 +163,9 @@ private:
    Geometry *mGeometry;
 
 public:
-   GeometryContainer();                               // Constructor
+   GeometryContainer();                                     // Constructor
    GeometryContainer(const GeometryContainer &container);   // Copy constructor
-   ~GeometryContainer();                              // Destructor
+   ~GeometryContainer();                                    // Destructor
 
    Geometry *getGeometry();
    const Geometry *getConstGeometry() const;
@@ -208,12 +208,8 @@ public:
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
 
-   virtual Point getActualPos() const;
-   virtual Point getRenderPos() const;
-   virtual Point getRenderVel() const;
-   virtual Point getActualVel() const;
-
-   virtual void setActualPos(Point p);
+   virtual Point getPos() const;
+   virtual void setPos(const Point &pos);
 
    void onPointsChanged();
    void updateExtentInDatabase();
@@ -225,8 +221,8 @@ public:
 
    GeomType getGeomType();
 
-   Point getVert(S32 index) const;
-   void setVert(const Point &pos, S32 index);
+   virtual Point getVert(S32 index) const;               // Overridden by MoveObject
+   virtual void setVert(const Point &pos, S32 index);    // Overridden by MoveObject
 
    bool anyVertsSelected();
    void selectVert(S32 vertIndex);
@@ -261,7 +257,7 @@ public:
 
    //void newGeomCopy();
 
-   Rect calcExtents();
+   virtual Rect calcExtents();
 
    void disableTriangulation();
 };
@@ -298,6 +294,7 @@ public:
    void markAsGhost();
 
    virtual bool isMoveObject();
+   virtual Point getVel();
 
    U32 getCreationTime();
    void setCreationTime(U32 creationTime);

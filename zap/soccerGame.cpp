@@ -490,13 +490,13 @@ bool SoccerBallItem::canBeNeutral()
 
 void SoccerBallItem::renderDock()
 {
-   renderSoccerBall(getVert(0), 7);
+   renderSoccerBall(getRenderPos(), 7);
 }
 
 
 void SoccerBallItem::renderEditor(F32 currentScale)
 {
-   renderItem(getVert(0));
+   renderItem(getRenderPos());
 }
 
 

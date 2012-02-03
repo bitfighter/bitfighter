@@ -395,7 +395,7 @@ S32 LuaRobot::setThrust(lua_State *L)
 
 bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
-   Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
+   Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
    offset.normalize(aimRadius * 1.2f);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
 
@@ -412,15 +412,15 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
       return false;                                        // ...if so, skip it!
 
    // Calculate where we have to shoot to hit this...
-   Point Vs = target->getActualVel();
+   Point Vs = target->getVel();
 
-   Point d = target->getActualPos() - aimPos;
+   Point d = target->getPos() - aimPos;
 
    F32 t;      // t is set in next statement
    if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
       return false;
 
-   Point leadPos = target->getActualPos() + Vs * t;
+   Point leadPos = target->getPos() + Vs * t;
 
    // Calculate distance
    Point delta = (leadPos - aimPos);
@@ -432,7 +432,7 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
    if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
       testFunc = isFlagCollideableType;
 
-   if(target->findObjectLOS(testFunc, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
+   if(target->findObjectLOS(testFunc, MoveObject::ActualState, aimPos, target->getPos(), t, n))
       return false;
 
    // See if we're gonna clobber our own stuff...
@@ -1948,11 +1948,11 @@ bool Robot::findNearestShip(Point &loc)
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       GameObject *foundObject = dynamic_cast<GameObject *>(foundObjects[i]);
-      F32 d = foundObject->getActualPos().distanceTo(pos);
+      F32 d = foundObject->getPos().distanceTo(pos);
       if(d < dist && d > 0)      // d == 0 means we're comparing to ourselves
       {
          dist = d;
-         loc = foundObject->getActualPos();     // use set here?
+         loc = foundObject->getPos();     
          found = true;
       }
    }
