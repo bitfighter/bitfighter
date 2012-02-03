@@ -963,7 +963,10 @@ static void setMusicVolumeCallback(ClientGame *game, U32 vol)
 
 static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
 {
+   F32 oldVol = game->getSettings()->getIniSettings()->voiceChatVolLevel;
    game->getSettings()->getIniSettings()->voiceChatVolLevel = F32(vol) / 10;
+   if((oldVol == 0) != (vol == 0) && game->getConnectionToServer())
+      game->getConnectionToServer()->s2rVoiceChatEnable(vol != 0);
 }
 
 

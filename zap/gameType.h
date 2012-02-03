@@ -434,6 +434,8 @@ public:
    TNL_DECLARE_RPC(s2cCanSwitchTeams, (bool allowed));
 
    TNL_DECLARE_RPC(s2cRenameClient, (StringTableEntry oldName,StringTableEntry newName));
+   void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName);
+
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
    // Not all of these actually used?

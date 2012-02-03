@@ -43,6 +43,12 @@ GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : 
 
 void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {
+   if(! mGame->isServer())   // ignore request if we are a client, we won't let it start any connection, if some outside network thinks we are a server.
+   {
+      U8 packetType = pStream->getBuffer()[0];
+      if(packetType == ConnectChallengeRequest || packetType == ConnectRequest)
+         return;
+   }
    Parent::processPacket(sourceAddress, pStream);
 }
 

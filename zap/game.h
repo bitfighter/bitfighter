@@ -510,6 +510,8 @@ public:
    S32 mObjectsLoaded;  
 
    Point getScopeRange(S32 sensorStatus);
+
+   string makeUnique(const char *name);
 };
 
 

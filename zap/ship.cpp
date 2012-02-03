@@ -1221,7 +1221,14 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
       {
          stream->writeFlag((updateMask & RespawnMask) != 0 && getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
-         stream->writeFlag(mSpawnShield.getCurrent() != 0);
+         if(gameConnection->mConnectionVersion >= 1)
+         {
+            U32 sendNumber = (mSpawnShield.getCurrent() + (SpawnShieldTime / 16 / 2)) * 16 / SpawnShieldTime; // rounding
+            if(stream->writeFlag(sendNumber != 0))
+               stream->writeInt(sendNumber - 1, 4); 
+         }
+         else
+            stream->writeFlag(mSpawnShield.getCurrent() != 0);
       }
 
       if(stream->writeFlag(updateMask & HealthMask))     // Health
@@ -1279,6 +1286,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
+   GameConnection *gameConnection = (GameConnection *) connection;
 
    if(isInitialUpdate())
    {
@@ -1356,7 +1364,15 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          hasExploded = false;
          playSpawnEffect = stream->readFlag();    // Prevent spawn effect every time the robot goes into scope
          shipwarped = true;
-         mSpawnShield.reset(stream->readFlag() ? SpawnShieldTime : 0);
+         if(gameConnection->mConnectionVersion >= 1)
+         {
+            if(stream->readFlag())
+               mSpawnShield.reset((stream->readInt(4) + 1) * SpawnShieldTime / 16);
+            else
+               mSpawnShield.reset(0);
+         }
+         else
+            mSpawnShield.reset(stream->readFlag() ? SpawnShieldTime : 0);
       }
       if(stream->readFlag())        // Health
          mHealth = stream->readFloat(6);

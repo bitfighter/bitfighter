@@ -1772,7 +1772,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(teamIndex < 0 || teamIndex >= mGame->getTeamCount())
+      if(teamIndex >= mGame->getTeamCount())
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
@@ -1855,6 +1855,10 @@ void GameType::updateLeadingPlayerAndScore()
    // Find the leading player
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
+      // Check to make sure client hasn't disappeared somehow
+      if(!mGame->getClientInfo(i))
+         continue;
+
       S32 score = mGame->getClientInfo(i)->getScore();
 
       if(score > mLeadingPlayerScore)
@@ -2238,6 +2242,16 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "Your name was changed to %s", newName.getString());
 #endif
+}
+
+// Tell all clients name has changed, and update server side name
+// Server only
+void GameType::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+{
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", clientInfo->getName().getString(), newName.getString());
+
+   s2cRenameClient(clientInfo->getName(), newName);
+   clientInfo->setName(newName);
 }
 
 
@@ -2865,7 +2879,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    if(bannedClientInfo->isRobot())
       return;  // Error message handled client-side
 
-   Address ipAddress = bannedClientInfo->getConnection()->getNetAddressString();
+   Address ipAddress = bannedClientInfo->getConnection()->getNetAddress();
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
@@ -2889,8 +2903,8 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
 
 GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 duration), (ipAddressString, duration))
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientInfo *clientInfo = source->getClientInfo();
+   GameConnection *conn = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = conn->getClientInfo();
    GameSettings *settings = gServerGame->getSettings();
 
    if(!clientInfo->isAdmin())
@@ -2903,6 +2917,26 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
+   // Now check to see if the client is connected and disconnect all of them if they are
+   bool playerDisconnected = false;
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
+
+      if(baneeConn && baneeConn->getNetAddress().isEqualAddress(ipAddress))
+      {
+         if(baneeConn == conn)
+         {
+            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't ban yourself");
+            return;
+         }
+
+         baneeConn->disconnect(NetConnection::ReasonBanned, "");
+         playerDisconnected = true;
+      }
+   }
+
    // banip should always add to the ban list, even if the IP isn't connected
    settings->getBanList()->addToBanList(ipAddress, banDuration);
    logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
@@ -2913,27 +2947,11 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    // Save new INI settings to disk
    gINI.WriteFile();
 
-   // Now check to see if the client is connected and disconnect them if they are
-   GameConnection *connToDisconnect = NULL;
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
-
-      if(baneeConn->getNetAddress().isEqualAddress(ipAddress))
-      {
-         connToDisconnect = baneeConn;
-         break;
-      }
-   }
-
-   GameConnection *conn = clientInfo->getConnection();
-
-   if(!connToDisconnect)
+   if(!playerDisconnected)
       conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client has been banned but is no longer connected");
    else
    {
-      connToDisconnect->disconnect(NetConnection::ReasonBanned, "");
       conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client was banned and kicked");
    }
 }
@@ -2958,7 +2976,7 @@ GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, String
 
    StringTableEntry oldName = renamedClientInfo->getName();
    renamedClientInfo->setName("");                          // Avoid unique self
-   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  // New name
+   StringTableEntry uniqueName = getGame()->makeUnique(newName.getString()).c_str();  // New name
    renamedClientInfo->setName(oldName);                     // Restore name to properly get it updated to clients
    renamedClientInfo->setAuthenticated(false, NO_BADGES);   // Don't underline anymore because of rename
    updateClientChangedName(renamedClientInfo, uniqueName);
@@ -3416,7 +3434,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
          ClientInfo *clientInfo = mGame->getClientInfo(i);
          GameConnection *dest = clientInfo->getConnection();
 
-         if(dest && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
+         if(dest && dest->mVoiceChatEnabled && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
             dest->postNetEvent(event);
       }
    }
@@ -3865,7 +3883,6 @@ void GameType::majorScoringEventOcurred(S32 team)
 {
    /* empty */
 }
-
 
 };
 

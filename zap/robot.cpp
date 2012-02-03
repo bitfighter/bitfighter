@@ -1654,7 +1654,7 @@ bool Robot::start()
       return false;
 
    if(mClientInfo->getName() == "")                          // Make sure bots have a name
-      mClientInfo->setName(GameConnection::makeUnique("Robot").c_str());
+      mClientInfo->setName(getGame()->makeUnique("Robot").c_str());
 
    mHasSpawned = true;
 
@@ -1692,7 +1692,7 @@ bool Robot::startLua()
       return false;
 
    string name = runGetName();                                          // Run bot's getName function
-   getClientInfo()->setName(GameConnection::makeUnique(name).c_str());  // Make sure name is unique
+   getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
    return true;
 }
