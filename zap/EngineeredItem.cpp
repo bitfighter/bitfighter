@@ -763,19 +763,19 @@ void EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal,
 
 Point EngineeredItem::getActualPos() const
 {
-   return mPos;
+   return getVert(0);
 }
 
 
 Point EngineeredItem::getRenderPos() const
 {
-   return mPos;
+   return getVert(0);
 }
 
 
 void EngineeredItem::setActualPos(Point p)
 {
-   mPos = p;
+   setVert(p, 0);
    computeExtent();
 }
 

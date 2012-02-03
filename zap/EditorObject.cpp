@@ -623,6 +623,20 @@ static const S32 INSTRUCTION_TEXTGAP = 4;
 static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in editor
 
 
+// Constructor
+EditorPointObject::EditorPointObject()
+{
+   setNewGeometry(geomPoint);
+}
+
+
+// Destructor
+EditorPointObject::~EditorPointObject()
+{
+   // Do nothing
+}
+
+
 // Offset: negative below the item, positive above
 void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {

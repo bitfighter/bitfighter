@@ -59,13 +59,16 @@ Item::Item(const Point &pos, F32 radius)
 
 Point Item::getActualPos() const
 {
-	return Parent::getActualPos();
+	return getVert(0);
 }
+
 
 void Item::setActualPos(const Point &p)
 {
+   setVert(p, 0);
    setExtent(Rect(p, mRadius));
 }
+
 
 bool Item::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 {
@@ -73,6 +76,7 @@ bool Item::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
    radius = mRadius;
    return true;
 }
+
 
 // Server only  --> Assumes first two params are x and y location; subclasses may read additional params
 bool Item::processArguments(S32 argc, const char **argv, Game *game)

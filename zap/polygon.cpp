@@ -41,6 +41,20 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
 static const S32 INSTRUCTION_TEXTGAP = 3;
 
+// Constructor
+EditorPolygon::EditorPolygon()
+{  
+   setNewGeometry(geomPolygon);
+}
+
+
+// Destructor
+EditorPolygon::~EditorPolygon()
+{
+   // Do nothing
+}
+
+
 // Offset: negative below the item, positive above
 void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale)
 {

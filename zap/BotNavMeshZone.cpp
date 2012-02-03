@@ -70,6 +70,7 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
 {
    mGame = NULL;
    mObjectTypeNumber = BotNavMeshZoneTypeNumber;
+   setNewGeometry(geomPolygon);
 
    mZoneId = id;
 }
@@ -620,7 +621,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
                // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
                // for this object.
                if(!triangulateZones)
-                  botzone->disableTriangluation();
+                  botzone->disableTriangulation();
 
                polyToZoneMap[i] = botzone->getZoneId();
             }
@@ -665,7 +666,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
          // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
          // for this object.
          if(!triangulateZones)
-            botzone->disableTriangluation();
+            botzone->disableTriangulation();
 
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));

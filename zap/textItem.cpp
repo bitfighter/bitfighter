@@ -495,6 +495,14 @@ LineItem::LineItem()
 { 
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = LineTypeNumber;
+   setNewGeometry(geomPolyLine);
+}
+
+
+// Destructor
+LineItem::~LineItem()
+{ 
+   // Do nothing
 }
 
 
@@ -503,13 +511,6 @@ LineItem *LineItem::clone() const
    return new LineItem(*this);
 }
 
-//
-//// Copy constructor -- make sure each copy gets its own geometry object
-//LineItem::LineItem(const LineItem &li)
-//{
-//   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry(*((PolylineGeometry *)li.mGeometry.get())));  
-//}
-//
 
 void LineItem::render()
 {

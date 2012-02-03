@@ -53,16 +53,18 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PointGeometry : virtual public BfObject
+class PointGeometry : public Geometry
 {
 private:
    bool mPosIsSelected;
+   Point mPoint;
 
 public:
    PointGeometry();     // Constructor
    ~PointGeometry();    // Destructor
 
    GeomType getGeomType();
+
    virtual Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
 
@@ -94,15 +96,13 @@ public:
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual Rect calcExtents();
-
-   void onPointsChanged();
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SimpleLineGeometry : virtual public BfObject
+class SimpleLineGeometry : public Geometry
 {
 private:
    Point mFromPos, mToPos;
@@ -111,7 +111,9 @@ private:
 public:
    SimpleLineGeometry();           // Constructor
    virtual ~SimpleLineGeometry();  // Destructor
+
    GeomType getGeomType();
+
    Point getVert(S32 index) const;
    void setVert(const Point &pos, S32 index);
 
@@ -143,15 +145,13 @@ public:
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual Rect calcExtents();
-
-   void onPointsChanged();
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PolylineGeometry : virtual public BfObject
+class PolylineGeometry : public Geometry
 {
 protected:
    Vector<Point> mPolyBounds;
@@ -165,7 +165,7 @@ public:
    PolylineGeometry();    // Constructor
    ~PolylineGeometry();   // Destructor
 
-   GeomType getGeomType();
+   virtual GeomType getGeomType();
 
    Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
@@ -198,8 +198,6 @@ public:
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual Rect calcExtents();
-
-   virtual void onPointsChanged();
 };
 
 
@@ -229,7 +227,7 @@ public:
 
    virtual void onPointsChanged();
 
-   void disableTriangluation();
+   void disableTriangulation();
 
    S32 getMinVertCount();
 };

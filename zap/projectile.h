@@ -84,7 +84,6 @@ protected:
       FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
-   Point mPos;
    Point mVelocity;
 
 public:

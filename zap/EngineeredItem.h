@@ -51,7 +51,6 @@ private:
 protected:
    F32 mHealth;
    SafePtr<MoveItem> mResource;
-   Point mPos;
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;

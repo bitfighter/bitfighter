@@ -60,6 +60,18 @@ GeomType Geometry::getGeomType()
 }
 
 
+void Geometry::onPointsChanged()
+{
+   // Do nothing
+}
+
+
+void Geometry::disableTriangulation()
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
 Point Geometry::getVert(S32 index) const
 {
    TNLAssert(false, "Not implemented");
@@ -219,12 +231,6 @@ Rect Geometry::calcExtents()
 }
 
 
-void Geometry::onPointsChanged()
-{
-   TNLAssert(false, "Not implemented");
-}
-
-
 void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 {
    F32 sinTheta = sin(angle * Float2Pi / 360.0f);
@@ -267,7 +273,6 @@ void Geometry::scale(const Point &center, F32 scale)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
 // Constructor
 PointGeometry::PointGeometry()
 {
@@ -275,10 +280,18 @@ PointGeometry::PointGeometry()
 }
 
 
+//// Copy constructor
+//PointGeometry::PointGeometry(const PointGeometry &geom)
+//{
+//   mGeometry = new PointGeometry(geom);
+//}
+
+
+
 // Destructor
 PointGeometry::~PointGeometry()
 {
-   /* TNLAssert(false, "deleting!");*/
+   // Do nothing
 }
 
 
@@ -290,7 +303,7 @@ GeomType PointGeometry::getGeomType()
 
 Point PointGeometry::getVert(S32 index) const
 {
-   return getActualPos();
+   return mPoint;
 }
 
 
@@ -388,7 +401,7 @@ const Vector<Point> *PointGeometry::getFill() const
 
 Point PointGeometry::getCentroid()
 {
-   return getActualPos();
+   return mPoint;
 }
 
 
@@ -398,21 +411,15 @@ F32 PointGeometry::getLabelAngle()
 }
 
 
-void PointGeometry::onPointsChanged()
-{
-   // Do nothing
-}
-
-
 void PointGeometry::setVert(const Point &pos, S32 index)
 {
-	setActualPos(pos);
+	mPoint = pos;
 }
 
 
 void PointGeometry::packGeom(GhostConnection *connection, BitStream *stream)
 {
-   getActualPos().write(stream);
+   mPoint.write(stream);
 }
 
 
@@ -420,19 +427,19 @@ void PointGeometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 {
    Point p;
    p.read(stream);
-   setActualPos(p);
+   mPoint = p;
 }
 
 
 Rect PointGeometry::calcExtents()
 {
-   return Rect(getActualPos(), 1);
+   return Rect(mPoint, 1);
 }
 
 
 string PointGeometry::geomToString(F32 gridSize) const
 {
-   Point pos = getActualPos(); 
+   Point pos = getVert(0); 
    return (pos / gridSize).toString();
 }
 
@@ -459,7 +466,7 @@ SimpleLineGeometry::SimpleLineGeometry()
 // Destructor
 SimpleLineGeometry::~SimpleLineGeometry()
 {
-   //TNLAssert(false, "deleting!");
+   // Do nothing
 }
 
 
@@ -477,7 +484,7 @@ Point SimpleLineGeometry::getVert(S32 index) const
 
 void SimpleLineGeometry::setVert(const Point &pos, S32 index)
 {
-   if (index == 1)
+   if(index == 1)
       mToPos = pos;
    else
       mFromPos = pos;
@@ -535,7 +542,7 @@ bool SimpleLineGeometry::anyVertsSelected()
 void SimpleLineGeometry::selectVert(S32 vertIndex)
 {
    unselectVerts();
-   if (vertIndex == 1)
+   if(vertIndex == 1)
       mToSelected = true;
    else
       mFromSelected = true;
@@ -589,12 +596,6 @@ Point SimpleLineGeometry::getCentroid()
 F32 SimpleLineGeometry::getLabelAngle()
 {
    return mFromPos.angleTo(mToPos);
-}
-
-
-void SimpleLineGeometry::onPointsChanged()
-{
-   // Do nothing
 }
 
 
@@ -658,7 +659,7 @@ PolylineGeometry::PolylineGeometry()
 // Destructor
 PolylineGeometry::~PolylineGeometry()
 {
-   /*TNLAssert(false, "deleting!");*/
+   // Do nothing
 }
 
 
@@ -697,7 +698,6 @@ void PolylineGeometry::clearVerts()
    mPolyBounds.clear(); 
    mVertSelected.clear(); 
    mAnyVertsSelected = false;
-   onPointsChanged();
 }
 
 
@@ -708,7 +708,6 @@ bool PolylineGeometry::addVert(const Point &point, bool ignoreMaxPointsLimit)
 
    mPolyBounds.push_back(point); 
    mVertSelected.push_back(false); 
-   onPointsChanged();
 
    return true;
 }
@@ -721,7 +720,6 @@ bool PolylineGeometry::addVertFront(Point vert)
 
    mPolyBounds.push_front(vert); 
    mVertSelected.insert(mVertSelected.begin(), false); 
-   onPointsChanged();
 
    return true;
 }
@@ -737,7 +735,6 @@ bool PolylineGeometry::deleteVert(S32 vertIndex)
    mPolyBounds.erase(vertIndex); 
    mVertSelected.erase(mVertSelected.begin() + vertIndex); 
    checkIfAnyVertsSelected();
-   onPointsChanged();
 
    return true;
 }
@@ -752,7 +749,6 @@ bool PolylineGeometry::insertVert(Point vertex, S32 vertIndex)
    mPolyBounds[vertIndex] = vertex; 
                                                   
    mVertSelected.insert(mVertSelected.begin() + vertIndex, 1, false); 
-   onPointsChanged();
 
    return true;
 }
@@ -800,13 +796,6 @@ bool PolylineGeometry::vertSelected(S32 vertIndex)
 {
    TNLAssert(vertIndex < S32(mVertSelected.size()), "Index out of bounds!");
    return mVertSelected[vertIndex];
-}
-
-
-void PolylineGeometry::onPointsChanged()
-{
-    // Do nothing
-   updateExtentInDatabase();
 }
 
 
@@ -866,8 +855,6 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
    
    for(U32 i = 0; i < size; i++)
       mPolyBounds[i].read(stream);
-
-   onPointsChanged();
 }
 
 
@@ -922,7 +909,6 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 {
     readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds);      // Fills mPolyBounds
     mVertSelected.resize(mPolyBounds.size());
-    onPointsChanged();
 }
 
 
@@ -966,7 +952,6 @@ void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 
 {
    readPolyBounds(argc, argv, firstCoord, gridSize, false, mPolyBounds);
    mVertSelected.resize(mPolyBounds.size());
-   onPointsChanged();
 }
 
 
@@ -983,7 +968,7 @@ void PolygonGeometry::onPointsChanged()
 }
 
 
-void PolygonGeometry::disableTriangluation()
+void PolygonGeometry::disableTriangulation()
 {
    mTriangluationDisabled = true;
 }

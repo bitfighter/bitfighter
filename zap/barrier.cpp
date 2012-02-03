@@ -614,7 +614,7 @@ const char PolyWall::className[] = "PolyWall";      // Class name as it appears 
 
 
 // Constructor
-PolyWall::PolyWall()
+PolyWall::PolyWall() : Parent()
 {
    mObjectTypeNumber = PolyWallTypeNumber;
 }
@@ -622,7 +622,8 @@ PolyWall::PolyWall()
 
 PolyWall *PolyWall::clone() const
 {
-   return new PolyWall(*this);
+   PolyWall *polyWall = new PolyWall(*this);
+   return polyWall;
 }
 
 

@@ -39,9 +39,15 @@
 namespace Zap
 {
 
-
- // Constructor
+// Constructor
 SimpleLine::SimpleLine()
+{ 
+   setNewGeometry(geomSimpleLine);
+}
+
+
+// Destructor
+SimpleLine::~SimpleLine()
 { 
    // Do nothing
 }

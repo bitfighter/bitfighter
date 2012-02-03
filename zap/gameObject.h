@@ -30,7 +30,7 @@
 #include "tnlNetObject.h"
 #include "move.h"
 
-#include "Geometry_Base.h"      // For GeomType enum
+#include "Geometry_Base.h"      
 
 struct lua_State;  // or #include "lua.h"
 
@@ -157,21 +157,50 @@ struct DamageInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
-class BfObject : public DatabaseObject, public Geometry
+class GeometryContainer
 {
+private:
+   Geometry *mGeometry;
+
+public:
+   GeometryContainer();                               // Constructor
+   GeometryContainer(const GeometryContainer &container);   // Copy constructor
+   ~GeometryContainer();                              // Destructor
+
+   Geometry *getGeometry();
+   const Geometry *getConstGeometry() const;
+   void setGeometry(Geometry *geometry);
+
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getFill() const;
+   Point getVert(S32 index) const;
+   string geomToString(F32 gridSize) const; 
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
+class BfObject : public DatabaseObject
+{
+private:
+   GeometryContainer mGeometry;
+
 protected:
    Game *mGame;
    S32 mTeam;
 
 public:
-   BfObject();              // Constructor
-   virtual ~BfObject();     // Provide virtual destructor
+   BfObject();                // Constructor
+   virtual ~BfObject();       // Provide virtual destructor
 
    S32 getTeam();
    void setTeam(S32 team);
 
    Game *getGame() const;
+   void setNewGeometry(GeomType geomType);
+
 
    virtual void addToGame(Game *game, GridDatabase *database);
    virtual void removeFromGame();
@@ -186,7 +215,55 @@ public:
 
    virtual void setActualPos(Point p);
 
+   void onPointsChanged();
    void updateExtentInDatabase();
+
+   // Geometric operations
+   void unselectVerts();
+   bool vertSelected(S32 vertIndex);
+   S32 getVertCount();
+
+   GeomType getGeomType();
+
+   Point getVert(S32 index) const;
+   void setVert(const Point &pos, S32 index);
+
+   bool anyVertsSelected();
+   void selectVert(S32 vertIndex);
+   void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
+   void unselectVert(S32 vertIndex);
+
+   S32 getMinVertCount();             // Minimum number of vertices geometry needs to be viable
+   void clearVerts();
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
+   bool addVertFront(Point vert);
+
+
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getFill()    const;
+   bool deleteVert(S32 vertIndex);
+   bool insertVert(Point vertex, S32 vertIndex);
+
+   // These functions are declered in Geometry.cpp
+   void rotateAboutPoint(const Point &center, F32 angle);
+   void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
+   void scale(const Point &center, F32 scale);
+
+
+   Point getCentroid();
+   F32 getLabelAngle();
+                                                    
+   void packGeom(GhostConnection *connection, BitStream *stream);
+   void unpackGeom(GhostConnection *connection, BitStream *stream);
+
+   string geomToString(F32 gridSize) const;
+   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+
+   //void newGeomCopy();
+
+   Rect calcExtents();
+
+   void disableTriangulation();
 };
 
 

@@ -61,6 +61,7 @@ public:
    virtual ~Geometry();  // Destructor
 
    virtual GeomType getGeomType();
+
    virtual Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
    virtual S32 getVertCount();
@@ -89,6 +90,8 @@ public:
 
    virtual string geomToString(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+
+   virtual void disableTriangulation();
 
    void newGeomCopy();
 

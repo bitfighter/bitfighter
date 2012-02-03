@@ -228,11 +228,14 @@ public:
 
 // Class with editor methods related to point things
 
-class EditorPointObject : public EditorObject, public PointGeometry
+class EditorPointObject : public EditorObject
 {
    typedef EditorObject Parent;
 
 public:
+   EditorPointObject();             // Constructor
+   virtual ~EditorPointObject();    // Destructor
+
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
 };

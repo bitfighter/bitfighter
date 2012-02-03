@@ -149,9 +149,10 @@ TNL_IMPLEMENT_NETOBJECT(Projectile);
 Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shooter)
 {
    mObjectTypeNumber = BulletTypeNumber;
+   setNewGeometry(geomPoint);
 
    mNetFlags.set(Ghostable);
-   mPos = pos;
+   setVert(pos, 0);
    mVelocity = vel;
 
    mTimeRemaining = GameWeapon::weaponInfo[type].projLiveTime;
@@ -175,7 +176,6 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shoote
       mTeam = shooter->getTeam();
       mKillString = shooter->getKillString();
    }
-      
 
    mType = GameWeapon::weaponInfo[type].projectileType;
    mWeaponType = type;
@@ -186,7 +186,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    if(stream->writeFlag(updateMask & PositionMask))
    {
-      ((GameConnection *) connection)->writeCompressedPoint(mPos, stream);
+      ((GameConnection *) connection)->writeCompressedPoint(getVert(0), stream);
       writeCompressedVelocity(mVelocity, COMPRESSED_VELOCITY_MAX, stream);
    }
 
@@ -215,7 +215,10 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool initial = false;
    if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SoundSystem::playSoundEffect
    {
-      ((GameConnection *) connection)->readCompressedPoint(mPos, stream);
+      Point p;
+      ((GameConnection *) connection)->readCompressedPoint(p, stream);
+      setVert(p, 0);
+
       readCompressedVelocity(mVelocity, COMPRESSED_VELOCITY_MAX, stream);
    }
 
@@ -229,10 +232,10 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(stream->readFlag())
          mShooter = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
 
-      Rect newExtent(mPos, mPos);
+      Rect newExtent(getVert(0), getVert(0));
       setExtent(newExtent);
       initial = true;
-      SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, mPos, mVelocity);
+      SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getVert(0), mVelocity);
    }
    bool preCollided = collided;
    collided = stream->readFlag();
@@ -243,7 +246,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    alive = stream->readFlag();
 
    if(!preCollided && collided)     // Projectile has "become" collided
-      explode(NULL, mPos);
+      explode(NULL, getVert(0));
 
    if(!collided && initial)
    {
@@ -296,12 +299,12 @@ void Projectile::idle(GameObject::IdleCallPath path)
     {
       loopcount1--;
       // Calculate where projectile will be at the end of the current interval
-      Point endPos = mPos + mVelocity * timeLeft * 0.001f;
+      Point endPos = getVert(0) + mVelocity * timeLeft * 0.001f;
 
       // Check for collision along projected route of movement
       static Vector<GameObject *> disabledList;
 
-      Rect queryRect(mPos, endPos);     // Bounding box of our travels
+      Rect queryRect(getVert(0), endPos);     // Bounding box of our travels
 
       disabledList.clear();
 
@@ -322,7 +325,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
       while(true)  
       {
          hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
-                                   MoveObject::RenderState, mPos, endPos, collisionTime, surfNormal);
+                                   MoveObject::RenderState, getVert(0), endPos, collisionTime, surfNormal);
 
          if((!hitObject || hitObject->collide(this)))
             break;
@@ -363,19 +366,19 @@ void Projectile::idle(GameObject::IdleCallPath path)
             if(float1 > 0)
                surfNormal = -surfNormal;      // This is to fix going through polygon barriers
 
-            Point collisionPoint = mPos + (endPos - mPos) * collisionTime;
-            mPos = collisionPoint + surfNormal;
+            Point collisionPoint = getVert(0) + (endPos - getVert(0)) * collisionTime;
+            setVert(collisionPoint + surfNormal, 0);
             timeLeft = timeLeft * (1 - collisionTime);
 
             MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
             if(obj)
             {
                setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
-               float1 = mPos.distanceTo(obj->getRenderPos());
+               float1 = getVert(0).distanceTo(obj->getRenderPos());
                if(float1 < obj->getRadius())
                {
                   float1 = obj->getRadius() * 1.01f / float1;
-                  mPos = mPos * float1 + obj->getRenderPos() * (1 - float1);  // to fix bouncy stuck inside shielded ship
+                  setVert(getVert(0) * float1 + obj->getRenderPos() * (1 - float1), 0);  // to fix bouncy stuck inside shielded ship
                }
             }
 
@@ -385,7 +388,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          else
          {
             // Not bouncing, so advance to location of collision
-            Point collisionPoint = mPos + (endPos - mPos) * collisionTime;
+            Point collisionPoint = getVert(0) + (endPos - getVert(0)) * collisionTime;
             handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
             timeLeft = 0;
          }
@@ -430,10 +433,10 @@ void Projectile::idle(GameObject::IdleCallPath path)
          //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
          //}
 
-         mPos.set(endPos);     // Keep this line
+         setVert(endPos, 0);
       }
 
-      Rect newExtent(mPos, mPos);
+      Rect newExtent(getVert(0), getVert(0));
       setExtent(newExtent);
     }
    }
@@ -501,13 +504,13 @@ Point Projectile::getActualVel() const
 
 Point Projectile::getRenderPos() const
 {
-   return mPos;
+   return getVert(0);
 }
 
 
 Point Projectile::getActualPos() const
 {
-   return mPos;
+   return getVert(0);
 }
 
 
