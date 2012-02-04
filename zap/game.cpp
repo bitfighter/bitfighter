@@ -1223,7 +1223,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
             {
                if(mNameToAddressThread->mAddress.isValid())
                {
-                  TNLAssert(!mConnectionToMaster, "Already have connection to master!");
+                  TNLAssert(!mConnectionToMaster.isValid(), "Already have connection to master!");
                   mConnectionToMaster = new MasterServerConnection(this);
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }
@@ -2095,7 +2095,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
    // Not sure if this is needed, but might be as long as we are still loading zones from level files... but I think we aren't anymore
-   mDatabaseForBotZones.removeEverythingFromDatabase();    
+   //mDatabaseForBotZones.removeEverythingFromDatabase(); // Causes memory leak (removed from database, but not deleted), better off disabling this in BotNavMeshZone::processArguments
 
    // Try and load Bot Zones for this level, set flag if failed
    // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
