@@ -1810,7 +1810,7 @@ bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
       if(i >= maxTailLength)
          i = 0;
    }
-   return true;
+   return polyPoints.size() != 0;  // false with zero points
 }
 
 bool Worm::collide(GameObject *otherObject)

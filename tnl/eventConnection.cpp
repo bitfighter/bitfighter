@@ -270,6 +270,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          break;
       // get the first event
       EventNote *ev = mUnorderedSendEventQueueHead;
+      ConnectionStringTable::PacketEntry *strEntry = getCurrentWritePacketNotify()->stringList.stringTail;
 
       bstream->writeFlag(true);
       S32 start = bstream->getBitPosition();
@@ -290,6 +291,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       // was one:
       if(!bstream->isValid() || bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
+         mStringTable->packetRewind(&getCurrentWritePacketNotify()->stringList, strEntry);  // we never sent those stuff (TableStringEntry), so let it drop
          TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
          if(have_something_to_send)
          {
@@ -338,6 +340,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       // get the first event
       EventNote *ev = mSendEventQueueHead;
       S32 eventStart = bstream->getBitPosition();
+      ConnectionStringTable::PacketEntry *strEntry = getCurrentWritePacketNotify()->stringList.stringTail;
 
       bstream->writeFlag(true);
 
@@ -364,6 +367,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       // was one:
       if(!bstream->isValid() || bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
+         mStringTable->packetRewind(&getCurrentWritePacketNotify()->stringList, strEntry);  // we never sent those stuff (TableStringEntry), so let it drop
          if(have_something_to_send)
          {
             bstream->setBitPosition(eventStart);

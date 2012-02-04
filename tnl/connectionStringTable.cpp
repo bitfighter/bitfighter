@@ -148,5 +148,23 @@ void ConnectionStringTable::packetDropped(PacketList *note)
       walk = next;
    }
 }
-
+void ConnectionStringTable::packetRewind(PacketList *note, PacketEntry *p_entry)
+{
+   if(!p_entry)  // if we don't have a packet entry to rewind to, then lets drop everything
+   {
+      packetDropped(note);
+      note->stringHead = NULL;
+      note->stringTail = NULL;
+      return;
+   }
+   PacketEntry *walk = p_entry->nextInPacket;
+   note->stringTail = p_entry;
+   p_entry->nextInPacket = NULL;
+   while(walk)
+   {
+      PacketEntry *next = walk->nextInPacket;
+      packetEntryFreeList.free(walk);
+      walk = next;
+   }
+}
 };
