@@ -1458,7 +1458,7 @@ void ClientGame::renderCommander()
    Point worldExtents = (getUIManager()->getGameUserInterface()->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : 
                                                                                     mWorldExtents).getExtents();
 
-   worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
+   worldExtents.x *= canvasWidth  / F32(canvasWidth  - (UserInterface::horizMargin * 2));
    worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
    F32 aspectRatio = worldExtents.x / worldExtents.y;
