@@ -925,24 +925,19 @@ void Ship::processModules()
    // Recharge if we're not doing anything or if we don't have spawnshield on
    if(!anyActive && mSpawnShield.getCurrent() == 0)
    {
+      GameObject *object = isInZone(LoadoutZoneTypeNumber);
+
+
+      // If in hostile loadout zone, lose energy
+      if(object && object->getTeam() == TEAM_HOSTILE)
+         mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
+
       // If not moving or shooting, recharge or drain differently
-      if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
+      else if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
       {
-         GameObject *object = isInZone(LoadoutZoneTypeNumber);
-
-         // If in load-out zone
-         if(object)
-         {
-            // If in loadout zone of the same or neutral team, recharge quickly
-            if((object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
-               mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
-
-            // If in hostile loadout zone, lose energy
-            else if(object->getTeam() == TEAM_HOSTILE)
-               mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
-
-            // else anything in enemy loadout zone?
-         }
+         // If in loadout zone of the same or neutral team, recharge quickly
+         if(object && (object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
+            mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
 
          // Else smaller idle recharge
          else
