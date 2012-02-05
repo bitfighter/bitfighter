@@ -1277,7 +1277,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2rVoiceChatEnable, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+TNL_IMPLEMENT_RPC(GameConnection, s2rVoiceChatEnable, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
    mVoiceChatEnabled = enable;
 }
