@@ -32,6 +32,7 @@
 #include "masterConnection.h"    // For MasterServerConnection def
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "BanList.h"
+#include "gameNetInterface.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -48,14 +49,16 @@ namespace Zap
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-const U8 GameConnection::CONNECT_VERSION = 0;  // GameConnection's version, for possible future use with changes on compatible versions
+const U8 GameConnection::CONNECT_VERSION = 1;  // GameConnection's version, for possible future use with changes on compatible versions
 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
 {
-   TNLAssert(gServerGame, "Client should not be using this constructor!");
+   TNLAssert(mServerGame, "Client should not be using this constructor!");
 
-   mSettings = gServerGame->getSettings();      // HACK!!  Should not refer to gServerGame!!
+   initialize();
+
+   mSettings = NULL; // mServerGame->getSettings();      // will be set on ReadConnectRequest
 
    mVote = 0;
    mVoteTime = 0;
@@ -72,7 +75,6 @@ GameConnection::GameConnection()
    mClientGame = NULL;
 #endif
 
-   initialize();
 }
 
 
@@ -98,6 +100,7 @@ GameConnection::GameConnection(ClientGame *clientGame)
 
 void GameConnection::initialize()
 {
+   mServerGame = NULL;
    setTranslatesStrings();
    mInCommanderMap = false;
    mIsBusy = false;
@@ -120,6 +123,8 @@ void GameConnection::initialize()
 
    mWrongPasswordCount = 0;
 
+   mVoiceChatEnabled = true;
+
    reset();
 }
 
@@ -132,8 +137,8 @@ GameConnection::~GameConnection()
 
    if(isConnectionToClient())    // Only true if we're the server
    {
-      if(gServerGame->getSuspendor() == this)     
-         gServerGame->suspenderLeftGame();
+      if(mServerGame->getSuspendor() == this)     
+         mServerGame->suspenderLeftGame();
 
       if(mAcheivedConnection)         
       {
@@ -228,7 +233,7 @@ const char *GameConnection::getConnectionStateString(S32 i)
 TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED  
-   gClientGame->setSpawnDelayed(true);
+   mClientGame->setSpawnDelayed(true);
 #endif
 }
 
@@ -236,7 +241,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGa
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    resetTimeSinceLastMove();
-   gServerGame->getGameType()->spawnShip(getClientInfo());
+   mServerGame->getGameType()->spawnShip(getClientInfo());
 }
 
 
@@ -258,11 +263,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
       return;
    }
 
-   const char *filename = gServerGame->getCurrentLevelFileName().getString();
+   const char *filename = mServerGame->getCurrentLevelFileName().getString();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
    FolderManager *folderManager = mSettings->getFolderManager();
-   SenderStatus stat = gServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
+   SenderStatus stat = mServerGame->dataSender.initialize(this, folderManager, filename, LEVEL_TYPE);
 
    if(stat != STATUS_OK)
    {
@@ -389,9 +394,9 @@ void GameConnection::unsuspendGame()
 TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(suspend)
-      gServerGame->suspendGame(this);
+      mServerGame->suspendGame(this);
    else
-      gServerGame->unsuspendGame(true);
+      mServerGame->unsuspendGame(true);
 }
 
   
@@ -437,7 +442,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (StringTableEntry name, b
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = gClientGame->findClientInfo(name);
+   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
 
    if(clientInfo)
       clientInfo->setAuthenticated(isAuthenticated, badges);
@@ -472,7 +477,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       if(mSettings->getIniSettings()->allowAdminMapUpload)
          s2rSendableFlags(1);                      // Enable level uploads
 
-      GameType *gameType = gServerGame->getGameType();
+      GameType *gameType = mServerGame->getGameType();
 
       if(gameType)
          gameType->s2cClientBecameAdmin(mClientInfo->getName());  // Announce change to world
@@ -488,7 +493,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       sendLevelList();                       // Send client the level list
 
       // Announce change to world
-      gServerGame->getGameType()->s2cClientBecameLevelChanger(mClientInfo->getName());  
+      mServerGame->getGameType()->s2cClientBecameLevelChanger(mClientInfo->getName());  
    }
    else
    {
@@ -503,8 +508,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
 }
 
 
-
-extern ServerGame *gServerGame;
 
 // Allow admins to change the passwords on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
@@ -521,7 +524,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // Add a message to the server log
    if(type == (U32)DeleteLevel)
       logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientInfo->getName().getString(), 
-                                                gServerGame->getCurrentLevelFileName().getString());
+                                                mServerGame->getCurrentLevelFileName().getString());
    else
    {
       const char *types[] = { "level change password", "admin password", "server password", "server name", "server description", "leveldir param" };
@@ -542,15 +545,15 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == (U32)ServerName)
    {
       mSettings->setHostName(param.getString(), false);
-      if(gServerGame->getConnectionToMaster())
-         gServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));   
+      if(mServerGame->getConnectionToMaster())
+         mServerGame->getConnectionToMaster()->s2mChangeName(StringTableEntry(param.getString()));   
    }
    else if(type == (U32)ServerDescr)
    {
       mSettings->setHostDescr(param.getString(), false);
 
-      if(gServerGame->getConnectionToMaster())
-         gServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
+      if(mServerGame->getConnectionToMaster())
+         mServerGame->getConnectionToMaster()->s2mServerDescription(StringTableEntry(param.getString()));
    }
 
    else if(type == (U32)LevelDir)
@@ -579,7 +582,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          return;
       }
 
-      gServerGame->buildBasicLevelInfoList(newLevels);      // Populates mLevelInfos on gServerGame with nearly empty LevelInfos 
+      mServerGame->buildBasicLevelInfoList(newLevels);      // Populates mLevelInfos on mServerGame with nearly empty LevelInfos 
 
       bool anyLoaded = false;
 
@@ -588,14 +591,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
          string levelFile = folderManager->findLevelFile(candidate, newLevels[i]);
 
          LevelInfo levelInfo(newLevels[i]);
-         if(gServerGame->getLevelInfo(levelFile, levelInfo))
+         if(mServerGame->getLevelInfo(levelFile, levelInfo))
          {
             if(!anyLoaded)    // i.e. we just found the first valid level; safe to clear out old list
-               gServerGame->clearLevelInfos();
+               mServerGame->clearLevelInfos();
 
             anyLoaded = true;
 
-            gServerGame->addLevelInfo(levelInfo);
+            mServerGame->addLevelInfo(levelInfo);
          }
       }
 
@@ -608,9 +611,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       folderManager->levelDir = candidate;
 
       // Send the new list of levels to all levelchangers
-      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+      for(S32 i = 0; i < mServerGame->getClientCount(); i++)
       {
-         ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+         ClientInfo *clientInfo = mServerGame->getClientInfo(i);
          GameConnection *conn = clientInfo->getConnection();
 
          if(clientInfo->isLevelChanger() && conn)
@@ -628,7 +631,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       Vector<string> *skipList = mSettings->getLevelSkipList();
 
       for(S32 i = 0; i < skipList->size(); i++)
-         if(skipList->get(i) == gServerGame->getCurrentLevelFileName().getString())    // Already on our list!
+         if(skipList->get(i) == mServerGame->getCurrentLevelFileName().getString())    // Already on our list!
          {
             found = true;
             break;
@@ -637,7 +640,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       if(!found)
       {
          // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
-         skipList->push_back(gServerGame->getCurrentLevelFileName().getString());
+         skipList->push_back(mServerGame->getCurrentLevelFileName().getString());
          writeSkipList(&gINI, skipList);           // Write skipped levels to INI
          gINI.WriteFile();                         // Save new INI settings to disk
       }
@@ -672,9 +675,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
       if(!strcmp(param.getString(), ""))
       {
-         for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         for(S32 i = 0; i < mServerGame->getClientCount(); i++)
          {
-            ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+            ClientInfo *clientInfo = mServerGame->getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
 
             if(!clientInfo->isLevelChanger())
@@ -690,9 +693,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       }
       else  // If setting a password, remove everyone's permissions (except admins)
       { 
-         for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+         for(S32 i = 0; i < mServerGame->getClientCount(); i++)
          {
-            ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+            ClientInfo *clientInfo = mServerGame->getClientInfo(i);
             GameConnection *conn = clientInfo->getConnection();
 
             if(clientInfo->isLevelChanger() && (!clientInfo->isAdmin()))
@@ -713,9 +716,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverNameChanged;
 
       // If we've changed the server name, notify all the clients
-      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-         if(gServerGame->getClientInfo(i)->getConnection())
-            gServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
+      for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+         if(mServerGame->getClientInfo(i)->getConnection())
+            mServerGame->getClientInfo(i)->getConnection()->s2cSetServerName(mSettings->getHostName());
    }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
@@ -992,9 +995,9 @@ void GameConnection::sendLevelList()
    s2cAddLevel("", NoGameType);    
 
    // Build list remotely by sending level names one-by-one
-   for(S32 i = 0; i < gServerGame->getLevelCount(); i++)
+   for(S32 i = 0; i < mServerGame->getLevelCount(); i++)
    {
-      LevelInfo levelInfo = gServerGame->getLevelInfo(i);
+      LevelInfo levelInfo = mServerGame->getLevelInfo(i);
       s2cAddLevel(levelInfo.levelName, levelInfo.levelType);
    }
 }
@@ -1068,13 +1071,13 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
 
    // Use voting when there is no level change password and there is more then 1 player (unless changer is an admin)
    if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
-         gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(mClientInfo, 0, newLevelIndex))
+         mServerGame->getPlayerCount() > 1 && mServerGame->voteStart(mClientInfo, 0, newLevelIndex))
       return;
 
    bool restart = false;
 
    if(isRelative)
-      newLevelIndex = (gServerGame->getCurrentLevelIndex() + newLevelIndex ) % gServerGame->getLevelCount();
+      newLevelIndex = (mServerGame->getCurrentLevelIndex() + newLevelIndex ) % mServerGame->getLevelCount();
    else if(newLevelIndex == ServerGame::REPLAY_LEVEL)
       restart = true;
 
@@ -1083,11 +1086,11 @@ void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
    e.push_back(mClientInfo->getName());
    
    if(!restart)
-      e.push_back(gServerGame->getLevelNameFromIndex(newLevelIndex));
+      e.push_back(mServerGame->getLevelNameFromIndex(newLevelIndex));
 
-   gServerGame->cycleLevel(newLevelIndex);
+   mServerGame->cycleLevel(newLevelIndex);
 
-   gServerGame->getGameType()->broadcastMessage(ColorYellow, SFXNone, msg, e);
+   mServerGame->getGameType()->broadcastMessage(ColorYellow, SFXNone, msg, e);
 }
 
 
@@ -1100,12 +1103,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
    logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
                                         mClientInfo->getName().getString(), time, reason.getString());
 
-   gServerGame->setShuttingDown(true, time, this, reason.getString());
+   mServerGame->setShuttingDown(true, time, this, reason.getString());
 
    // Broadcast the message
-   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
+      GameConnection *conn = mServerGame->getClientInfo(i)->getConnection();
       if(conn)
          conn->s2cInitiateShutdown(time, mClientInfo->getName(), reason, conn == this);
    }
@@ -1129,15 +1132,15 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
    logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientInfo->getName().getString());
 
    // Broadcast the message
-   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
    {
-      GameConnection *conn = gServerGame->getClientInfo(i)->getConnection();
+      GameConnection *conn = mServerGame->getClientInfo(i)->getConnection();
 
       if(conn != this)     // Don't send message to cancellor!
          conn->s2cCancelShutdown();
    }
 
-   gServerGame->setShuttingDown(false, 0, NULL, "");
+   mServerGame->setShuttingDown(false, 0, NULL, "");
 }
 
 
@@ -1162,22 +1165,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 }
 
 
-// Tell all clients name has changed, and update server side name
-// Server only
-void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
-{
-   GameType *gameType = gServerGame->getGameType();
-
-   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", clientInfo->getName().getString(), newName.getString());
-
-   if(gameType)
-      gameType->s2cRenameClient(clientInfo->getName(), newName);
-
-   clientInfo->setName(newName);
-
-}
-
-
 // Client connects to master after joining a game, authentication fails,
 // then client has changed name to non-reserved, or entered password.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
@@ -1185,7 +1172,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    StringTableEntry oldName = mClientInfo->getName();
    mClientInfo->setName("");     
 
-   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();    // Make sure new name is unique
+   StringTableEntry uniqueName = mServerGame->makeUnique(newName.getString()).c_str();    // Make sure new name is unique
    mClientInfo->setName(oldName);         // Restore name to properly get it updated to clients
    setClientNameNonUnique(newName);       // For correct authentication
    
@@ -1193,7 +1180,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
    mClientInfo->setNeedToCheckAuthenticationWithMaster(false);    // Do not inquire with master
 
    if(oldName != uniqueName)              // Did the name actually change?
-      updateClientChangedName(mClientInfo, uniqueName);
+      mServerGame->getGameType()->updateClientChangedName(mClientInfo, uniqueName);
 }
 
 
@@ -1245,7 +1232,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          fwrite(mDataBuffer->getBuffer(), 1, mDataBuffer->getBufferSize(), f);
          fclose(f);
          logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename);
-         S32 id = gServerGame->addUploadedLevelInfo(filename, levelInfo);
+         S32 id = mServerGame->addUploadedLevelInfo(filename, levelInfo);
          c2sRequestLevelChange2(id, false);
       }
       else
@@ -1290,13 +1277,19 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
 
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2rVoiceChatEnable, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+{
+   mVoiceChatEnabled = enable;
+}
+
+
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
 {
 #ifndef ZAP_DEDICATED
    Parent::writeConnectRequest(stream);
 
-   bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
+   bool isLocal = mServerGame;      // Only way to have mServerGame defined is if we're also hosting... ergo, we must be local
 
    stream->write(CONNECT_VERSION);
 
@@ -1337,10 +1330,20 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    char buf[256];
 
+   GameNetInterface *gameNetInterface = dynamic_cast<GameNetInterface *>(getInterface());
+   if(!gameNetInterface)
+      return false;   // need a GameNetInterface
+
+   mServerGame = gameNetInterface->getGame()->isServer() ? (ServerGame *)gameNetInterface->getGame() : NULL;
+   if(!mServerGame)
+      return false;  // need a ServerGame
+
+   mSettings = mServerGame->getSettings();  // now that we got the server, set the settings.
+
    stream->read(&mConnectionVersion);
 
    stream->readString(buf);
-   string serverPassword = gServerGame->getSettings()->getServerPassword();
+   string serverPassword = mServerGame->getSettings()->getServerPassword();
 
    if(serverPassword != "" && stricmp(buf, md5.getSaltedHashFromString(serverPassword).c_str()))
    {
@@ -1375,28 +1378,28 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    name[len] = 0;    // Terminate string properly
 
    // Now that we have the name, check if the client is banned
-   if(gServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name)))
+   if(mServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name)))
    {
       reason = ReasonBanned;
       return false;
    }
 
    // Was the client kicked temporarily?
-   if(gServerGame->getSettings()->getBanList()->isAddressKicked(getNetAddress()))
+   if(mServerGame->getSettings()->getBanList()->isAddressKicked(getNetAddress()))
    {
       reason = ReasonKickedByAdmin;
       return false;
    }
 
    // Is the server Full?
-   if(gServerGame->isFull())
+   if(mServerGame->isFull())
    {
       reason = ReasonServerFull;
       return false;
    }
 
    // Change name to be unique - i.e. if we have multiples of 'ChumpChange'
-   mClientInfo->setName(makeUnique(name));   // Unique name
+   mClientInfo->setName(mServerGame->makeUnique(name));   // Unique name
    mClientNameNonUnique = name;              // For authentication non-unique name
 
    mClientInfo->getId()->read(stream);
@@ -1447,7 +1450,7 @@ void GameConnection::updateAuthenticationTimer(U32 timeDelta)
 
 void GameConnection::requestAuthenticationVerificationFromMaster()
 {
-   MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+   MasterServerConnection *masterConn = mServerGame->getConnectionToMaster();
 
    // Ask master if client name/id match and the client is authenticated; don't bother if they're already authenticated, or
    // if they don't claim they are
@@ -1489,63 +1492,6 @@ bool GameConnection::lostContact()
 string GameConnection::getServerName()
 {
    return mServerName.getString();
-}
-
-
-// Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.
-// This makes the assumption that we'll find a unique name before numstr runs out of space (allowing us to try 999,999,999 or so combinations)
-string GameConnection::makeUnique(string name)
-{
-   U32 index = 0;
-   string proposedName = name;
-
-   bool unique = false;
-
-   while(!unique)
-   {
-      unique = true;
-
-      for(S32 i = 0; i < gServerGame->getClientCount(); i++)
-      {
-         // TODO:  How to combine these blocks?
-         if(proposedName == gServerGame->getClientInfo(i)->getName().getString())     // Collision detected!
-         {
-            unique = false;
-
-            char numstr[10];
-            sprintf(numstr, ".%d", index);
-
-            // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
-            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
-            name = name.substr(0, maxNamePos);     // Make sure name won't grow too long
-            proposedName = name + numstr;
-
-            index++;
-            break;
-         }
-      }
-
-      for(S32 i = 0; i < Robot::getBotCount(); i++)
-      {
-         if(proposedName == Robot::getBot(i)->getClientInfo()->getName().getString())
-         {
-            unique = false;
-
-            char numstr[10];
-            sprintf(numstr, ".%d", index);
-
-            // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
-            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr);   
-            name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
-            proposedName = name + numstr;
-
-            index++;
-            break;
-         }
-      }
-   }
-
-   return proposedName;
 }
 
 
@@ -1620,7 +1566,7 @@ void GameConnection::onConnectionEstablished()
 
       // If we entered a password, and it worked, let's save it for next time.  If we arrive here and the saved password is empty
       // it means that the user entered a good password.  So we save.
-      bool isLocal = gServerGame;
+      bool isLocal = mServerGame;
       
       string lastServerName = mClientGame->getRequestedServerName();
 
@@ -1643,19 +1589,22 @@ void GameConnection::onConnectionEstablished()
          if(!found) 
             mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
       }
+
+      if(mSettings->getIniSettings()->voiceChatVolLevel == 0)
+         s2rVoiceChatEnable(false);
 #endif
    }
    else                 // Runs on server
    {
       setConnectionSpeed(2);  // high speed, most servers often have a lot of bandwidth available.
-      gServerGame->addClient(mClientInfo);
+      mServerGame->addClient(mClientInfo);
       setGhostFrom(true);
       setGhostTo(false);
       activateGhosting();
       //setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);  // make this client only?
 
       // Ideally, the server name would be part of the connection handshake, but this will work as well
-      s2cSetServerName(gServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here
+      s2cSetServerName(mServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here
 
       time(&joinTime);
       mAcheivedConnection = true;
@@ -1663,7 +1612,7 @@ void GameConnection::onConnectionEstablished()
       // Notify the bots that a new player has joined
       EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
 
-      if(gServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
+      if(mServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
       {
          mClientInfo->setIsLevelChanger(true);
          s2cSetIsLevelChanger(true, false);          // Tell client, but don't display notification
@@ -1676,7 +1625,7 @@ void GameConnection::onConnectionEstablished()
       logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
                                              isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
-      if(gServerGame->getSettings()->getIniSettings()->allowMapUpload)
+      if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)
          s2rSendableFlags(1);
    }
 }
@@ -1700,7 +1649,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
       playerInfo->setDefunct();
       EventManager::get()->fireEvent(NULL, EventManager::PlayerLeftEvent, playerInfo);
 
-      gServerGame->removeClient(mClientInfo);
+      mServerGame->removeClient(mClientInfo);
    }
 }
 

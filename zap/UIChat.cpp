@@ -510,7 +510,9 @@ void ChatUserInterface::onActivate()
    if(conn)
       conn->c2mJoinGlobalChat();
 
-   mPlayersInGlobalChat.clear();
+   // Only clear the chat list if the previous UI was NOT UIQueryServers
+   if(getUIManager()->getPrevUI() != getUIManager()->getQueryServersUserInterface())
+      mPlayersInGlobalChat.clear();
    mRenderUnderlyingUI = true;
    mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
@@ -518,7 +520,12 @@ void ChatUserInterface::onActivate()
 
 void ChatUserInterface::onOutGameChat()
 {
-   getUIManager()->reactivatePrevUI();
+   // Escape chat only if the previous UI isn't UIQueryServers
+   // This is to prevent spamming the chat window with joined/left messages
+   if(getUIManager()->getPrevUI() == getUIManager()->getQueryServersUserInterface())
+      getUIManager()->reactivatePrevUI();
+   else
+      onEscape();
 }
 
 

@@ -41,13 +41,6 @@ namespace Zap
 {
 
 
-
-
-
-
-
-
-
 FXManager::FXManager()
 {
    for(U32 i = 0; i < SparkTypeCount; i++)
@@ -57,6 +50,7 @@ FXManager::FXManager()
    }
    teleporterEffects = NULL;
 }
+
 
 // Create a new spark.   ttl = Time to Live (secs)
 void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
@@ -84,7 +78,7 @@ void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType 
       sparkIndex = firstFreeIndex[sparkType];
       firstFreeIndex[sparkType] += slotsNeeded;     // Point sparks take 1 slot, line sparks need 2
    }
-   
+
    s = gSparks[sparkType] + sparkIndex;   // Assign our spark to its slot
 
    s->pos = pos;
@@ -106,6 +100,7 @@ void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType 
    }
 }
 
+
 struct FXManager::TeleporterEffect
 {
    Point pos;
@@ -113,6 +108,7 @@ struct FXManager::TeleporterEffect
    U32 type;
    TeleporterEffect *nextEffect;
 };
+
 
 void FXManager::emitTeleportInEffect(Point pos, U32 type)
 {
@@ -123,6 +119,7 @@ void FXManager::emitTeleportInEffect(Point pos, U32 type)
    e->nextEffect = teleporterEffects;
    teleporterEffects = e;
 }
+
 
 void FXManager::tick( F32 dT )
 {
@@ -212,7 +209,8 @@ void FXManager::render(S32 renderPass)
    }
 }
 
-#define dr(x) (float) x * Float2Pi / 360     // degreesToRadians()
+
+#define dr(x) (float) x * FloatTau / 360     // degreesToRadians()
 
 // Create a circular pattern of long sparks, a-la bomb in Gridwars
 void FXManager::emitBlast(Point pos, U32 size)
@@ -246,6 +244,7 @@ void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2)
    emitBurst(pos, scale, color1, color2, 250);
 }
 
+
 void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
 {
    F32 size = 1;
@@ -262,13 +261,27 @@ void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2, U3
       r.interp(t, color1, color2);
 
       emitSpark(
-         pos + Point(cos(th)*scale.x, sin(th)*scale.y),
-         Point(cos(th)*scale.x*f, sin(th)*scale.y*f),
-         r,
-         TNL::Random::readF() * scale.len() * 3 + scale.len()
+            pos + Point(cos(th)*scale.x, sin(th)*scale.y),
+            Point(cos(th)*scale.x*f, sin(th)*scale.y*f),
+            r,
+            TNL::Random::readF() * scale.len() * 3 + scale.len()
       );
    }
 }
+
+
+void FXManager::clearSparks()
+{
+   // Remove all sparks
+   for(U32 j = 0; j < SparkTypeCount; j++)
+      for(U32 i = 0; i < firstFreeIndex[j]; )
+      {
+         Spark *theSpark = gSparks[j] + i;
+         firstFreeIndex[j]--;
+         *theSpark = gSparks[j][firstFreeIndex[j]];
+      }
+}
+
 
 //-----------------------------------------------------------------------------
 
@@ -279,10 +292,12 @@ FXTrail::FXTrail(U32 dropFrequency, U32 len)
    registerTrail();
 }
 
+
 FXTrail::~FXTrail()
 {
    unregisterTrail();
 }
+
 
 void FXTrail::update(Point pos, bool boosted, bool invisible)
 {
@@ -322,7 +337,7 @@ void FXTrail::render()
 {
    glBegin(GL_LINE_STRIP);
 
-   for(S32 i=0; i<mNodes.size(); i++)
+   for(S32 i = 0; i  <mNodes.size(); i++)
    {
       F32 t = ((F32)i/(F32)mNodes.size());
 
@@ -361,9 +376,9 @@ FXTrail * FXTrail::mHead = NULL;
 
 void FXTrail::registerTrail()
 {
-  FXTrail *n = mHead;
-  mHead = this;
-  mNext = n;
+   FXTrail *n = mHead;
+   mHead = this;
+   mNext = n;
 }
 
 

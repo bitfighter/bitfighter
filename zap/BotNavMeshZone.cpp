@@ -70,6 +70,7 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
 {
    mGame = NULL;
    mObjectTypeNumber = BotNavMeshZoneTypeNumber;
+   setNewGeometry(geomPolygon);
 
    mZoneId = id;
 }
@@ -136,16 +137,17 @@ GridDatabase *BotNavMeshZone::getGameObjDatabase()
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 {
    logprintf(LogConsumer::LogLevelError, "BotNavMeshZones are now created automatically -- remove them from your level files to improve performance.");
+   return false;
 
-   if(!dynamic_cast<ServerGame *>(game))
-      return false;  // can only load in server game (not editor) due to getBotZoneDatabase() being in ServerGame
+   //if(!dynamic_cast<ServerGame *>(game))
+   //   return false;  // can only load in server game (not editor) due to getBotZoneDatabase() being in ServerGame
                      // see BotNavMeshZone::getGameObjDatabase()
-   if(argc < 6)
-      return false;
+   //if(argc < 6)
+   //   return false;
 
-   readGeom(argc, argv, 0, game->getGridSize());
+   //readGeom(argc, argv, 0, game->getGridSize());
 
-   return true;
+   //return true;
 }
 
 
@@ -188,10 +190,10 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 
 
 // Returns ID of zone containing specified point
-U16 BotNavMeshZone::findZoneContaining(ServerGame *game, const Point &p)
+U16 BotNavMeshZone::findZoneContaining(GridDatabase *botZoneDatabase, const Point &p)
 {
    fillVector.clear();
-   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector,
+   botZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, fillVector,
                               Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // Slightly extend Rect, it can be on the edge of zone
 
    for(S32 i = 0; i < fillVector.size(); i++)
@@ -371,11 +373,11 @@ void BotNavMeshZone::IDBotMeshZones(ServerGame *game)
 
 
 // Returns index of zone containing specified point
-static BotNavMeshZone *findZoneContainingPoint(ServerGame *game, const Point &point)
+static BotNavMeshZone *findZoneContainingPoint(GridDatabase *botZoneDatabase, const Point &point)
 {
    Rect rect(point, 0.01f);
    zones.clear();
-   game->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
+   botZoneDatabase->findObjects(BotNavMeshZoneTypeNumber, zones, rect);
 
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
@@ -620,7 +622,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
                // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
                // for this object.
                if(!triangulateZones)
-                  botzone->disableTriangluation();
+                  botzone->disableTriangulation();
 
                polyToZoneMap[i] = botzone->getZoneId();
             }
@@ -665,7 +667,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
          // and there is really no point if they will never be viewed.  Once disabled, triangluation cannot be re-enabled
          // for this object.
          if(!triangulateZones)
-            botzone->disableTriangluation();
+            botzone->disableTriangulation();
 
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
          botzone->addVert(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
@@ -763,25 +765,25 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
       if(!teleporter)
          continue;
 
-      BotNavMeshZone *origZone = findZoneContainingPoint(game, teleporter->getActualPos());
+      BotNavMeshZone *origZone = findZoneContainingPoint(game->getBotZoneDatabase(), teleporter->getPos());
 
       if(origZone != NULL)
       for(S32 j = 0; j < teleporter->mDests.size(); j++)     // Review each teleporter destination
       {
-         BotNavMeshZone *destZone = findZoneContainingPoint(game, teleporter->mDests[j]);
+         BotNavMeshZone *destZone = findZoneContainingPoint(game->getBotZoneDatabase(), teleporter->mDests[j]);
 
          if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
          {
             // Teleporter is one way path
             neighbor.zoneID = destZone->mZoneId;
-            neighbor.borderStart.set(teleporter->getActualPos());
+            neighbor.borderStart.set(teleporter->getPos());
             neighbor.borderEnd.set(teleporter->mDests[j]);
-            neighbor.borderCenter.set(teleporter->getActualPos());
+            neighbor.borderCenter.set(teleporter->getPos());
 
             // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
             // This should be the average of the costs of traveling from each dest zone to the target zone
             neighbor.distTo = 0;                                    
-            neighbor.center.set(teleporter->getActualPos());
+            neighbor.center.set(teleporter->getPos());
 
             origZone->mNeighbors.push_back(neighbor);
          }

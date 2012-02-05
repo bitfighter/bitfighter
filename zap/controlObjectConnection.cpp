@@ -135,7 +135,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
       }
       ((GamePacketNotify *) notify)->firstUnsentMoveIndex = firstMoveIndex + S8(pendingMoves.size());
       if(controlObject.isValid())
-         ((GamePacketNotify *) notify)->lastControlObjectPosition = controlObject->getActualPos();
+         ((GamePacketNotify *) notify)->lastControlObjectPosition = controlObject->getPos();
 
       highSendIndex[0] = highSendIndex[1];
       highSendIndex[1] = highSendIndex[2];
@@ -147,7 +147,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
       if(controlObject.isValid())
       {
          ghostIndex = getGhostIndex(controlObject);
-         mServerPosition = controlObject->getActualPos();
+         mServerPosition = controlObject->getPos();
       }
 
       // We only compress points relative if we know that the
@@ -226,7 +226,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             U32 ghostIndex = bstream->readInt(GhostConnection::GhostIdBitSize);
             controlObject = (GameObject *) resolveGhost(ghostIndex);
             controlObject->readControlState(bstream);
-            mServerPosition = controlObject->getActualPos();
+            mServerPosition = controlObject->getPos();
             replayControlObjectMoves = true;
          }
          else

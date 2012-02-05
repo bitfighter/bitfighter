@@ -228,8 +228,8 @@ Section "Install"
   SetOutPath "$INSTDIR\sfx"
   File /r "..\..\..\resource\sfx\*.wav"
 
-  SetOutPath "$INSTDIR\music"
-  File /r "..\..\..\resource\music\*.ogg"
+  ;SetOutPath "$INSTDIR\music"
+  ;File /r "..\..\..\resource\music\*.ogg"
   
   SetOutPath "$INSTDIR\editor_plugins"
   File /r "..\..\..\resource\editor_plugins\*.*"

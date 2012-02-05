@@ -29,10 +29,12 @@
 
 #include "Rect.h"
 
-namespace TNL{
+namespace TNL
+{
    class GhostConnection; // speeds up compiler, or use #include "tnlGhostConnection.h"
    class BitStream;
 }
+
 namespace boost{ template<class T> class shared_ptr; }      // or use #include "boost/smart_ptr/shared_ptr.hpp"
 
 using namespace std;
@@ -43,23 +45,23 @@ namespace Zap
 {
 
 enum GeomType {           
-   geomPoint,           
-   geomSimpleLine,      
-   geomPolyLine,
-   geomPolygon,
-   geomNone,            
+   geomPoint,        // One point      
+   geomSimpleLine,   // Two points   
+   geomPolyLine,     // Many points
+   geomPolygon,      // Many points, closed loop
+   geomNone,         // Singularity   
 };
 
 
-
+// Geometry is essentially an interface class that all geometric objects implement
 class Geometry
 {
-
 public:
    Geometry();           // Constructor
    virtual ~Geometry();  // Destructor
 
    virtual GeomType getGeomType();
+
    virtual Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
    virtual S32 getVertCount();
@@ -89,7 +91,8 @@ public:
    virtual string geomToString(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
-   //virtual boost::shared_ptr<Geometry> copyGeometry() const = 0;
+   virtual void disableTriangulation();
+
    void newGeomCopy();
 
    virtual Rect calcExtents();

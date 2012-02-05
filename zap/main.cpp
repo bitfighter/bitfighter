@@ -304,7 +304,7 @@ void abortHosting_noLevels()
 {
    TNLAssert(gServerGame, "gServerGame should always exist here!");
 
-   if(gServerGame->isDedicated())
+   if(gServerGame->isDedicated())  
    {
       FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       const char *levelDir = folderManager->levelDir.c_str();
@@ -313,8 +313,6 @@ void abortHosting_noLevels()
       logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", levelDir);
    }
 
-   delete gServerGame;
-   gServerGame = NULL;
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)
@@ -338,7 +336,13 @@ void abortHosting_noLevels()
       menuUI->levelLoadDisplayDisplay = false;
       menuUI->levelLoadDisplayFadeTimer.clear();
    }
-   else
+#endif
+
+   delete gServerGame;  // need gServerGame for above message
+   gServerGame = NULL;
+
+#ifndef ZAP_DEDICATED
+   if(!gClientGame)
 #endif
       shutdownBitfighter();      // Quit in an orderly fashion
 }

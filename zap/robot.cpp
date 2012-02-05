@@ -57,7 +57,6 @@ namespace Zap
 
 const bool QUIT_ON_SCRIPT_ERROR = true;
 
-extern ServerGame *gServerGame;
 
 
 // The list of the function names to be called in the bot when a particular event is fired
@@ -83,7 +82,11 @@ static const char *eventFunctions[] = {
    "onNexusClosed"
 };
 
-
+GridDatabase *LuaRobot::getBotZoneDatabase()
+{
+   TNLAssert(dynamic_cast<ServerGame *>(thisRobot->getGame()), "Not a ServerGame");
+	return ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+}
 
 // Constructor
 LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
@@ -314,7 +317,7 @@ S32 LuaRobot::getClassID(lua_State *L)
 // Return CPU time... use for timing things
 S32 LuaRobot::getCPUTime(lua_State *L)
 {
-   return returnInt(L, gServerGame->getCurrentTime());
+   return returnInt(L, thisRobot->getGame()->getCurrentTime());
 }
 
 
@@ -392,7 +395,7 @@ S32 LuaRobot::setThrust(lua_State *L)
 
 bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
-   Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
+   Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
    offset.normalize(aimRadius * 1.2f);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
 
@@ -409,15 +412,15 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
       return false;                                        // ...if so, skip it!
 
    // Calculate where we have to shoot to hit this...
-   Point Vs = target->getActualVel();
+   Point Vs = target->getVel();
 
-   Point d = target->getActualPos() - aimPos;
+   Point d = target->getPos() - aimPos;
 
    F32 t;      // t is set in next statement
    if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
       return false;
 
-   Point leadPos = target->getActualPos() + Vs * t;
+   Point leadPos = target->getPos() + Vs * t;
 
    // Calculate distance
    Point delta = (leadPos - aimPos);
@@ -429,7 +432,7 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
    if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
       testFunc = isFlagCollideableType;
 
-   if(target->findObjectLOS(testFunc, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
+   if(target->findObjectLOS(testFunc, MoveObject::ActualState, aimPos, target->getPos(), t, n))
       return false;
 
    // See if we're gonna clobber our own stuff...
@@ -543,7 +546,7 @@ S32 LuaRobot::getZoneCenter(lua_State *L)
    S32 z = (S32)getInt(L, 1, methodName);
 
 
-   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(z));
+   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(z));
 
    if(zone)
       return returnPoint(L, zone->getCenter());
@@ -560,7 +563,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
    S32 from = (S32)getInt(L, 1, methodName);
    S32 to = (S32)getInt(L, 2, methodName);
 
-   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(from));
+   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(from));
 
    // Is requested zone a neighbor?
    if(zone)
@@ -576,7 +579,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 // Get the zone this robot is currently in.  If not in a zone, return nil
 S32 LuaRobot::getCurrentZone(lua_State *L)
 {
-   S32 zone = thisRobot->getCurrentZone(gServerGame);
+   S32 zone = thisRobot->getCurrentZone();
    return (zone == U16_MAX) ? returnNil(L) : returnInt(L, zone);
 }
 
@@ -584,7 +587,7 @@ S32 LuaRobot::getCurrentZone(lua_State *L)
 // Get a count of how many nav zones we have
 S32 LuaRobot::getZoneCount(lua_State *L)
 {
-   return returnInt(L, gServerGame->getBotZoneDatabase()->getObjectCount());
+   return returnInt(L, getBotZoneDatabase()->getObjectCount());
 }
 
 
@@ -732,7 +735,7 @@ S32 LuaRobot::globalMsg(lua_State *L)
 
    const char *message = getString(L, 1, methodName);
 
-   GameType *gt = gServerGame->getGameType();
+   GameType *gt = thisRobot->getGame()->getGameType();
    if(gt)
    {
       gt->sendChatFromRobot(true, message, thisRobot->getClientInfo());
@@ -753,7 +756,7 @@ S32 LuaRobot::teamMsg(lua_State *L)
 
    const char *message = getString(L, 1, methodName);
 
-   GameType *gt = gServerGame->getGameType();
+   GameType *gt = thisRobot->getGame()->getGameType();
    if(gt)
    {
       gt->sendChatFromRobot(false, message, thisRobot->getClientInfo());
@@ -777,7 +780,7 @@ S32 LuaRobot::findItems(lua_State *L)
 {
    Point pos = thisRobot->getActualPos();
    Rect queryRect(pos, pos);
-   queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
+   queryRect.expand(thisRobot->getGame()->computePlayerVisArea(thisRobot));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
 
    return doFindItems(L, &queryRect);
 }
@@ -804,7 +807,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
 
 
       if(number == BotNavMeshZoneTypeNumber)
-         gridDB = ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
+         gridDB = getBotZoneDatabase();
       else
          gridDB = thisRobot->getGame()->getGameObjDatabase();
 
@@ -853,6 +856,9 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 {
    static const char *methodName = "Robot:getWaypoint()";
 
+	TNLAssert(dynamic_cast<ServerGame *>(thisRobot->getGame()), "Not a ServerGame");
+   ServerGame *serverGame = (ServerGame *) thisRobot->getGame();
+
    Point target = getPointOrXY(L, 1, methodName);
 
    // If we can see the target, go there directly
@@ -864,7 +870,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   U16 targetZone = BotNavMeshZone::findZoneContaining(gServerGame, target);       // Where we're going  ===> returns zone id
+   U16 targetZone = BotNavMeshZone::findZoneContaining(serverGame->getBotZoneDatabase(), target);       // Where we're going  ===> returns zone id
 
    if(targetZone == U16_MAX)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -921,7 +927,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // We need to calculate a new flightplan
    thisRobot->flightPlan.clear();
 
-   U16 currentZone = thisRobot->getCurrentZone(gServerGame);     // Zone we're in
+   U16 currentZone = thisRobot->getCurrentZone();     // Zone we're in
 
    if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
       currentZone = findClosestZone(thisRobot->getActualPos());
@@ -937,7 +943,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
       if(!thisRobot->canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(targetZone));
+         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(targetZone));
 
          p = zone->getCenter();
          thisRobot->flightPlan.push_back(p);
@@ -957,16 +963,16 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    const Vector<BotNavMeshZone *> *zones = BotNavMeshZone::getBotZones();      // Grab our pre-cached list of nav zones
 
-   if(gServerGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == gServerGame->getGameType()->cachedBotFlightPlans.end())
+   if(serverGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == serverGame->getGameType()->cachedBotFlightPlans.end())
    {
       // Not found so calculate flight plan
       thisRobot->flightPlan = AStar::findPath(zones, currentZone, targetZone, target);
 
       // Add to cache
-      gServerGame->getGameType()->cachedBotFlightPlans[pathIndex] = thisRobot->flightPlan;
+      serverGame->getGameType()->cachedBotFlightPlans[pathIndex] = thisRobot->flightPlan;
    }
    else
-      thisRobot->flightPlan = gServerGame->getGameType()->cachedBotFlightPlans[pathIndex];
+      thisRobot->flightPlan = serverGame->getGameType()->cachedBotFlightPlans[pathIndex];
 
    if(thisRobot->flightPlan.size() > 0)
       return returnPoint(L, thisRobot->flightPlan.last());
@@ -988,14 +994,14 @@ U16 LuaRobot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
+   getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
 
-      if(gServerGame->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
+      if(thisRobot->getGame()->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
       {
          closestZone = zone->getZoneId();
          break;
@@ -1005,12 +1011,12 @@ U16 LuaRobot::findClosestZone(const Point &point)
    // Target must be outside extents of the map, find nearest zone if a straight line was drawn
    if (closestZone == U16_MAX)
    {
-      Point extentsCenter = gServerGame->getWorldExtents().getCenter();
+      Point extentsCenter = thisRobot->getGame()->getWorldExtents().getCenter();
 
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = gServerGame->getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+      DatabaseObject* object = getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
             MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
@@ -1029,7 +1035,7 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
 
    if(closest != U16_MAX)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(gServerGame->getBotZoneDatabase()->getObjectByIndex(closest));
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(closest));
       return returnPoint(L, zone->getCenter());
    }
    else
@@ -1654,7 +1660,7 @@ bool Robot::start()
       return false;
 
    if(mClientInfo->getName() == "")                          // Make sure bots have a name
-      mClientInfo->setName(GameConnection::makeUnique("Robot").c_str());
+      mClientInfo->setName(getGame()->makeUnique("Robot").c_str());
 
    mHasSpawned = true;
 
@@ -1692,7 +1698,7 @@ bool Robot::startLua()
       return false;
 
    string name = runGetName();                                          // Run bot's getName function
-   getClientInfo()->setName(GameConnection::makeUnique(name).c_str());  // Make sure name is unique
+   getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
    return true;
 }
@@ -1897,10 +1903,12 @@ void Robot::logError(const char *format, ...)
 
 
 // Returns zone ID of current zone
-S32 Robot::getCurrentZone(ServerGame *game)
+S32 Robot::getCurrentZone()
 {
+   TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
+
    // We're in uncharted territory -- try to get the current zone
-   mCurrentZone = BotNavMeshZone::findZoneContaining(game, getActualPos());
+   mCurrentZone = BotNavMeshZone::findZoneContaining(((ServerGame *)getGame())->getBotZoneDatabase(), getActualPos());
 
    return mCurrentZone;
 }
@@ -1940,11 +1948,11 @@ bool Robot::findNearestShip(Point &loc)
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       GameObject *foundObject = dynamic_cast<GameObject *>(foundObjects[i]);
-      F32 d = foundObject->getActualPos().distanceTo(pos);
+      F32 d = foundObject->getPos().distanceTo(pos);
       if(d < dist && d > 0)      // d == 0 means we're comparing to ourselves
       {
          dist = d;
-         loc = foundObject->getActualPos();     // use set here?
+         loc = foundObject->getPos();     
          found = true;
       }
    }

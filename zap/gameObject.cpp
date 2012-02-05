@@ -243,6 +243,90 @@ DamageInfo::DamageInfo()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+GeometryContainer::GeometryContainer()
+{
+   mGeometry = NULL;
+}
+
+
+// Copy constructor
+GeometryContainer::GeometryContainer(const GeometryContainer &container)
+{
+   const Geometry *old = container.mGeometry;
+
+   switch(container.mGeometry->getGeomType())
+   {
+      case geomPoint:
+         mGeometry = new PointGeometry(*static_cast<const PointGeometry *>(old));
+         break;
+      case geomSimpleLine:
+         mGeometry = new SimpleLineGeometry(*static_cast<const SimpleLineGeometry *>(old));
+         break;
+      case geomPolyLine:
+         mGeometry = new PolylineGeometry(*static_cast<const PolylineGeometry *>(old));
+         break;
+      case geomPolygon:
+         mGeometry = new PolygonGeometry(*static_cast<const PolygonGeometry *>(old));
+         break;
+      default:
+         TNLAssert(false, "Invalid value!");
+   }
+}
+
+
+// Destructor
+GeometryContainer::~GeometryContainer()
+{
+   delete mGeometry;
+}
+
+
+Geometry *GeometryContainer::getGeometry()
+{
+   return mGeometry;
+}
+
+
+const Geometry *GeometryContainer::getConstGeometry() const
+{
+   return mGeometry;
+}
+
+
+void GeometryContainer::setGeometry(Geometry *geometry)
+{
+   mGeometry = geometry;
+}
+
+
+const Vector<Point> *GeometryContainer::getOutline() const
+{
+   return mGeometry->getOutline();
+}
+
+
+const Vector<Point> *GeometryContainer::getFill() const    
+{
+   return mGeometry->getFill();
+}
+
+
+Point GeometryContainer::getVert(S32 index) const   
+{   
+   return mGeometry->getVert(index);  
+}
+
+
+string GeometryContainer::geomToString(F32 gridSize) const 
+{  
+   return mGeometry->geomToString(gridSize);  
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // BfObject - the declerations are in BfObject.h
 
 // Constructor
@@ -257,6 +341,35 @@ BfObject::BfObject()
 BfObject::~BfObject()
 {
    // Do nothing
+}
+
+
+// mGeometry will be deleted in destructor
+void BfObject::setNewGeometry(GeomType geomType)
+{
+   TNLAssert(!mGeometry.getGeometry(), "This object already has a geometry!");
+
+   switch(geomType)
+   {
+      case geomPoint:
+         mGeometry.setGeometry(new PointGeometry());
+         return;
+
+      case geomSimpleLine:
+         mGeometry.setGeometry(new SimpleLineGeometry());
+         return;
+
+      case geomPolyLine:
+         mGeometry.setGeometry(new PolylineGeometry());
+         return;
+
+      case geomPolygon:
+         mGeometry.setGeometry(new PolygonGeometry());
+         return;
+
+      default:
+         TNLAssert(false, "Unknown geometry!");
+   }
 }
 
 
@@ -307,33 +420,23 @@ bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 }
 
 
-Point BfObject::getRenderPos() const
+Point BfObject::getPos() const
 {
-   return getExtent().getCenter();
+   return getVert(0);
 }
 
 
-Point BfObject::getActualPos() const
+void BfObject::setPos(const Point &pos)
 {
-   return getExtent().getCenter();
+   setVert(pos, 0);
+   setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
 }
 
 
-Point BfObject::getRenderVel() const
-{
-   return Point();
-}
-
-
-Point BfObject::getActualVel() const
-{
-   return Point();
-}
-
-
-void BfObject::setActualPos(Point p)
-{
-    setExtent(Rect(p, 10));
+void BfObject::onPointsChanged()                        
+{   
+   mGeometry.getGeometry()->onPointsChanged();
+   updateExtentInDatabase();      
 }
 
 
@@ -341,6 +444,98 @@ void BfObject::updateExtentInDatabase()
 {
    setExtent(calcExtents());    // Make sure the database extents are in sync with where the object actually is
 }
+
+
+// Basic definitions
+GeomType BfObject::getGeomType()              {   return mGeometry.getGeometry()->getGeomType();   }
+Point    BfObject::getVert(S32 index) const   {   return mGeometry.getVert(index);  }
+
+bool BfObject::deleteVert(S32 vertIndex)               
+{   
+   if(mGeometry.getGeometry()->deleteVert(vertIndex))
+   {
+      onPointsChanged();  
+      return true;
+   }
+
+   return false;
+}
+
+
+bool  BfObject::insertVert(Point vertex, S32 vertIndex) 
+{   
+   if(mGeometry.getGeometry()->insertVert(vertex, vertIndex))
+   {
+      onPointsChanged();
+      return true;
+   }
+
+   return false;
+}
+
+
+void  BfObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
+                                                                                           
+bool BfObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
+S32  BfObject::getVertCount()              {   return mGeometry.getGeometry()->getVertCount();            }
+S32  BfObject::getMinVertCount()           {   return mGeometry.getGeometry()->getMinVertCount();         }
+
+void BfObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
+
+bool BfObject::addVertFront(Point vert)    {   return mGeometry.getGeometry()->addVertFront(vert); onPointsChanged(); }
+
+bool BfObject::addVert(const Point &point, bool ignoreMaxPointsLimit) 
+{
+   if(mGeometry.getGeometry()->addVert(point, ignoreMaxPointsLimit))
+   {
+      onPointsChanged();
+      return true;
+   }
+
+   return false;
+}
+
+
+// Vertex selection 
+void BfObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->selectVert(vertIndex);            }
+void BfObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
+void BfObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
+void BfObject::unselectVerts()             {   mGeometry.getGeometry()->unselectVerts();                  }
+
+bool BfObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
+
+
+// Geometric calculations
+Point BfObject::getCentroid()     {   return mGeometry.getGeometry()->getCentroid();     }
+F32   BfObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
+      
+
+// Geometry operations
+const Vector<Point> *BfObject::getOutline() const       {   return mGeometry.getOutline();    }
+const Vector<Point> *BfObject::getFill() const          {   return mGeometry.getFill();       }
+
+Rect BfObject::calcExtents()                            {   return mGeometry.getGeometry()->calcExtents();   }
+
+
+// Geometric manipulations
+void BfObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
+void BfObject::flip(F32 center, bool isHoriz)                    {  mGeometry.getGeometry()->flip(center, isHoriz);             }
+void BfObject::scale(const Point &center, F32 scale)             {  mGeometry.getGeometry()->scale(center, scale);              }
+
+// Geom in-out
+void BfObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
+void BfObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
+
+void BfObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
+{  
+   mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
+   onPointsChanged();
+} 
+
+string BfObject::geomToString(F32 gridSize) const {  return mGeometry.geomToString(gridSize);  }
+
+// Settings
+void BfObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
 
 
 ////////////////////////////////////////
@@ -442,7 +637,7 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 
       F32 distance = (nearest - center).len();
 
-      Point deltav = getActualVel() - so->getActualVel();
+      Point deltav = getVel() - so->getVel();
 
 
       // initial scoping factor is distance based.
@@ -494,7 +689,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc obj
       GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
       // Check the actual distance against our outer radius.  Recall that we got a list of potential
       // collision objects based on a square area, but actual collisions will be based on true distance
-      Point objPos = foundObject->getActualPos();
+      Point objPos = foundObject->getPos();
       Point delta = objPos - pos;
 
       if(delta.len() > outerRad)
@@ -631,6 +826,12 @@ void GameObject::markAsGhost()
 bool GameObject::isMoveObject()
 {
    return false;
+}
+
+
+Point GameObject::getVel()
+{
+   return Point(0,0);
 }
 
 

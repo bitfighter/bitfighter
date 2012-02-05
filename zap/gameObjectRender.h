@@ -113,6 +113,8 @@ extern void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 hea
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 
 extern void renderAimVector();
+extern void drawFourArrows(const Point &pos);
+
 extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
                              const Vector<Point> &dests, bool showDestOverride);
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
@@ -126,6 +128,8 @@ extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastCo
 
 extern void renderPointVector(const Vector<Point> *points, U32 geomType);
 extern void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance
+
+extern void renderLine(const Vector<Point> *points);
 
 extern void glScale(F32 scaleFactor);
 extern void glTranslate(const Point &pos);

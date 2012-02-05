@@ -41,6 +41,20 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;
 static const S32 INSTRUCTION_TEXTSIZE = 9;      
 static const S32 INSTRUCTION_TEXTGAP = 3;
 
+// Constructor
+EditorPolygon::EditorPolygon()
+{  
+   setNewGeometry(geomPolygon);
+}
+
+
+// Destructor
+EditorPolygon::~EditorPolygon()
+{
+   // Do nothing
+}
+
+
 // Offset: negative below the item, positive above
 void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
@@ -112,7 +126,7 @@ void EditorPolygon::labelDockItem()
 }
 
 
-void EditorPolygon::prepareForDock(ClientGame *game, const Point &point)
+void EditorPolygon::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height
@@ -124,7 +138,7 @@ void EditorPolygon::prepareForDock(ClientGame *game, const Point &point)
    addVert(point + Point( w, h)); 
    addVert(point + Point(-w, h)); 
 
-   EditorObject::prepareForDock(game, point);
+   EditorObject::prepareForDock(game, point, teamIndex);
 #endif
 }
 

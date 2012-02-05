@@ -145,6 +145,7 @@ public:
    // Sound Effect functions
    static void processSoundEffects(F32 sfxVol, F32 voiceVol);
    static SFXHandle playSoundEffect(U32 profileIndex, F32 gain = 1.0f);
+   static SFXHandle playSoundEffect(U32 profileIndex, Point position);
    static SFXHandle playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain = 1.0f);
    static void playSoundEffect(const SFXHandle &effect);
    static SFXHandle playRecordedBuffer(ByteBufferPtr p, F32 gain);

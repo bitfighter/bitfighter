@@ -57,8 +57,7 @@ protected:
 public:
    Item(const Point &pos = Point(0,0), F32 radius = 1);      // Constructor
 
-   virtual Point getActualPos() const;
-   virtual void setActualPos(const Point &p);
+   virtual void setPos(const Point &p);
 
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 
@@ -78,7 +77,7 @@ public:
    virtual F32 getEditorRadius(F32 currentScale);
    virtual string toString(F32 gridSize) const;
 
-   virtual Rect calcExtents(); // part of Geometry
+   virtual Rect calcExtents(); 
 
    // LuaItem interface
    virtual S32 getLoc(lua_State *L);

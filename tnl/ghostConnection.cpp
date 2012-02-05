@@ -334,7 +334,8 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       U32 updateStart = bstream->getBitPosition();
       U32 updateMask = walk->updateMask;
       U32 retMask = 0;
-         
+      ConnectionStringTable::PacketEntry *strEntry = getCurrentWritePacketNotify()->stringList.stringTail;;
+
       bstream->writeFlag(true);
       bstream->writeInt(walk->index, sendSize);
       if(!bstream->writeFlag(walk->flags & GhostInfo::KillGhost))
@@ -374,6 +375,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       // was one:
       if(!bstream->isValid() || bstream->getBitPosition() >= MaxPreferredPacketDataSize*8 - MinimumPaddingBits)
       {
+         mStringTable->packetRewind(&getCurrentWritePacketNotify()->stringList, strEntry);  // we never sent those stuff (TableStringEntry), so let it drop
          TNLAssert(have_something_to_send || bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits, "Packet too big to send");
          if(have_something_to_send)
          {

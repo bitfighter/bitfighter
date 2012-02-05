@@ -371,6 +371,12 @@ SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, F32 gain)
 }
 
 
+SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position)
+{
+   return playSoundEffect(profileIndex, position, Point(0,0));
+}
+
+
 SFXHandle SoundSystem::playSoundEffect(U32 profileIndex, Point position, Point velocity, F32 gain)
 {
    SFXHandle ret = new SoundEffect(profileIndex, NULL, gain, position, velocity);

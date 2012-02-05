@@ -289,17 +289,17 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
                if(c->getName() == name && !c->isAuthenticated())
                {
                   //makeUnique will think the name is in use by self, and rename it.
-                  updateClientChangedName(c, GameConnection::makeUnique(c->getName().getString()).c_str());
+                  mGame->getGameType()->updateClientChangedName(c, mGame->makeUnique(c->getName().getString()).c_str());
                }
             }
 
             StringTableEntry oldName = clientInfo->getName();
             clientInfo->setName("");                               // avoid unique self
-            StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  // The new name
+            StringTableEntry uniqueName = mGame->makeUnique(name.getString()).c_str();  // The new name
             clientInfo->setName(oldName);                          // restore name to properly get it updated to clients.
 
             if(clientInfo->getName() != uniqueName)
-               updateClientChangedName(clientInfo, uniqueName);
+               mGame->getGameType()->updateClientChangedName(clientInfo, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  
