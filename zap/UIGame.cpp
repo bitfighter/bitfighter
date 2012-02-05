@@ -1130,10 +1130,10 @@ void GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
          }
       }
 
-      if(mCurrentChatType != NoChat)
+      if(mCurrentChatType == NoChat)
+         processPlayModeKey(inputCode, ascii);   
+      else
          processChatModeKey(inputCode, ascii);
-      else   
-         processPlayModeKey(inputCode, ascii);    // A non-chat key, really
    }
 }
 
