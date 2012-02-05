@@ -72,6 +72,7 @@ public:
    void emitTeleportInEffect(Point pos, U32 type);
    void tick( F32 dT);
    void render(S32 renderPass);
+   void clearSparks();
 };
 
 class FXTrail

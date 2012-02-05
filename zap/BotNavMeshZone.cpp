@@ -137,16 +137,17 @@ GridDatabase *BotNavMeshZone::getGameObjDatabase()
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 {
    logprintf(LogConsumer::LogLevelError, "BotNavMeshZones are now created automatically -- remove them from your level files to improve performance.");
+   return false;
 
-   if(!dynamic_cast<ServerGame *>(game))
-      return false;  // can only load in server game (not editor) due to getBotZoneDatabase() being in ServerGame
+   //if(!dynamic_cast<ServerGame *>(game))
+   //   return false;  // can only load in server game (not editor) due to getBotZoneDatabase() being in ServerGame
                      // see BotNavMeshZone::getGameObjDatabase()
-   if(argc < 6)
-      return false;
+   //if(argc < 6)
+   //   return false;
 
-   readGeom(argc, argv, 0, game->getGridSize());
+   //readGeom(argc, argv, 0, game->getGridSize());
 
-   return true;
+   //return true;
 }
 
 

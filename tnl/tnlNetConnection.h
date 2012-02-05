@@ -616,7 +616,7 @@ private:
    U32 mLastAckTime;
 
    /// @}
-private:
+protected:
    ConnectionStringTable *mStringTable; ///< Helper for managing translation between global NetStringTable ids to local ids for this connection.
 public:
    /// Enables string tag translation on this connection.
