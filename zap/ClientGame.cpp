@@ -1465,6 +1465,7 @@ void ClientGame::renderCommander()
 
    F32 aspectRatio = worldExtents.x / worldExtents.y;
    F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
+
    if(aspectRatio > screenAspectRatio)
       worldExtents.y *= aspectRatio / screenAspectRatio;
    else
@@ -1488,6 +1489,7 @@ void ClientGame::renderCommander()
    Point offset = (mWorldExtents.getCenter() - position) * zoomFrac + position;
    glTranslatef(-offset.x, -offset.y, 0);
 
+   // zoomFrac == 1.0 when fully zoomed out to cmdr's map
    if(zoomFrac < 0.95)
       drawStars(1 - zoomFrac, offset, modVisSize);
  
