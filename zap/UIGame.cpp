@@ -498,17 +498,17 @@ void GameUserInterface::render()
 
    if(!getGame()->isSuspended())
    {
-      renderReticle();           // Draw crosshairs if using mouse
-      renderMessageDisplay();    // Render incoming server msgs
-      renderChatMessageDisplay();    // Render incoming chat msgs
-      renderCurrentChat();       // Render any chat msg user is composing
-      renderLoadoutIndicators(); // Draw indicators for the various loadout items
+      renderReticle();              // Draw crosshairs if using mouse
+      renderMessageDisplay();       // Render incoming server msgs
+      renderChatMessageDisplay();   // Render incoming chat msgs
+      renderCurrentChat();          // Render any chat msg user is composing
+      renderLoadoutIndicators();    // Draw indicators for the various loadout items
 
       getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
 
-      renderProgressBar();       // This is the status bar that shows progress of loading this level
+      renderProgressBar();          // This is the status bar that shows progress of loading this level
 
-      mVoiceRecorder.render();   // This is the indicator that someone is sending a voice msg
+      mVoiceRecorder.render();      // This is the indicator that someone is sending a voice msg
 
       // Display running average FPS
       if(mFPSVisible)
@@ -3203,7 +3203,7 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       Team *team = (Team *)game->getTeam(i);
       Point center(xpos - 20, ypos + 19);
 
-      F32 health[] = {1,1,1,1,1,1,1,1,1,1};
+      F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
       renderCore(center, 10, team->getColor(), getGame()->getCurrentTime(), health);
 
       // Render something if a Core is being attacked
