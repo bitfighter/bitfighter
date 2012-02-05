@@ -235,7 +235,7 @@ void KeyDefMenuUserInterface::render()
 
       if(changingItem == i)
       {
-         glColor3f(1, 0, 0);
+         glColor(Colors::red);
          drawString((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset + 1, 13, "Press Key or Button");
       }
       else
@@ -250,7 +250,7 @@ void KeyDefMenuUserInterface::render()
    
 
    // Draw some suggestions
-   glColor3f(1, 1, 0);
+   glColor(Colors::yellow);
    if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick)
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else 
@@ -258,7 +258,7 @@ void KeyDefMenuUserInterface::render()
 
 
    // Draw the help string
-   glColor3f(0, 1, 0);
+   glColor(Colors::green);
    drawCenteredString(canvasHeight - vertMargin - 110, 15, menuItems[selectedIndex].helpString.c_str());
 
    if(errorMsgTimer.getCurrent())
