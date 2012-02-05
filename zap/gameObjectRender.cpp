@@ -31,14 +31,15 @@
 #include "projectile.h"
 #include "speedZone.h"
 #include "soccerGame.h"
+#include "CoreGame.h"            // For CORE_PANELS
 #include "EngineeredItem.h"      // For TURRET_OFFSET
-#include "BotNavMeshZone.h"         // For Border def
+#include "BotNavMeshZone.h"      // For Border def
 #include "version.h"
-#include "config.h"     // Only for testing burst graphics below
+#include "config.h"              // Only for testing burst graphics below
 #include "ScreenInfo.h"
 #include "game.h"
 
-#include "UIEditor.h"         // For RenderingStyles enum
+#include "UIEditor.h"            // For RenderingStyles enum
 
 #include "SDL/SDL_opengl.h"
 
@@ -1723,19 +1724,48 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[CoreItem::CORE_PANELS])
 {
+   TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
+
    F32 atomSize = size * 0.40f;
-   F32 coreRotateTime = F32(time & 16383) / 16384.f * FloatTau;
+   F32 angle = F32(time & 16383) / 16384.f * FloatTau;
+
 
    // Draw outer polygon and inner circle
-   glColor(Colors::gray80);
-   drawPolygon(pos, 10, size, coreRotateTime);
+   Color baseColor = Colors::gray80;
+   
+   for(S32 i = 0; i < CoreItem::CORE_PANELS; i++)
+   {
+      if(panelHealth[i] > 0)
+      {
+         glColor(baseColor);
+         glLineWidth(gDefaultLineWidth * panelHealth[i]);
+      }
+      else     // Panel is dead
+      {
+         Color c = coreColor;
+         glColor(c * .2);
+         glLineWidth(gDefaultLineWidth);
+      }
+
+      static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
+      F32 theta1 = i * PANEL_ANGLE + angle;
+      F32 theta2 = (i + 1) * PANEL_ANGLE + angle;
+
+      glBegin(GL_LINES);
+         glVertex2f(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
+         glVertex2f(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+      glEnd();
+   }
+
+   glLineWidth(gDefaultLineWidth);
+   glColor(baseColor);
    drawCircle(pos, atomSize + 2);
 
    // Draw rotating rays
    glColor(coreColor);
-   drawAngledRayCircle(pos, atomSize + 4, size - 2, 2, coreRotateTime, 0);
+   drawAngledRayCircle(pos, atomSize + 4, size - 2, 2, angle, 0);
 
    // Draw atomic like graphic
    F32 t = F32(time & 1023) / 1024.f * FloatTau;
@@ -1747,7 +1777,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time)
          F32 x = cos(theta + rotate * 2 + t) * atomSize * 0.5f;
          F32 y = sin(theta + rotate * 2 + t) * atomSize;
          glColor(coreColor, theta / FloatTau);
-         glVertex2f(pos.x + cos(rotate + coreRotateTime) * x + sin(rotate + coreRotateTime) * y, pos.y + sin(rotate + coreRotateTime) * x - cos(rotate + coreRotateTime) * y);
+         glVertex2f(pos.x + cos(rotate + angle) * x + sin(rotate + angle) * y, pos.y + sin(rotate + angle) * x - cos(rotate + angle) * y);
       }
       glEnd();
    }

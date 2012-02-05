@@ -91,6 +91,9 @@ class CoreItem : public Item
 
 typedef Item Parent;
 
+public:
+   static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
+
 private:
    static const U32 CoreStartWidth = 200;
    static const U32 CoreMinWidth = 20;
@@ -107,9 +110,10 @@ private:
 
    bool mHasExploded;
    bool mBeingAttacked;
-   F32 mStartingHealth;
-   F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
+   F32 mStartingHealth;          // Health stored in the level file, will be divided amongst panels
+   //F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
 
+   F32 mPanelHealth[CORE_PANELS];
    Timer mHeartbeatTimer;        // Client-side timer
    Timer mExplosionTimer;        // Client-side timer
    Timer mAttackedWarningTimer;  // Server-side timer
@@ -117,7 +121,11 @@ private:
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
 #endif
-
+protected:
+      enum MaskBits {
+      PanelDamagedMask = Parent::FirstFreeMask << 0,
+      FirstFreeMask   = Parent::FirstFreeMask << 1
+   };
 
 public:
 
@@ -133,7 +141,8 @@ public:
    bool isBeingAttacked();
 
    void setStartingHealth(F32 health);
-   F32 getHealth();
+   F32 getTotalHealth();                  // Returns total health of all panels
+   F32 getHealth();                       // Returns overall health of item as a ratio between 0 and 1
 
    void onAddedToGame(Game *theGame);
 
@@ -168,7 +177,6 @@ public:
    void renderEditor(F32 currentScale);      // Render item in the editor
    void renderDock();
 
-
    ///// Lua interface
 public:
    CoreItem(lua_State *L);    // Constructor
@@ -179,7 +187,7 @@ public:
 
    S32 getClassID(lua_State *L);
 
-   S32 getHealth(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getHealth(lua_State *L);   
    void push(lua_State *L);
 };
 

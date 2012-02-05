@@ -625,7 +625,8 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
 
          case 27:    // Core
-            renderCore(Point(0,0), 55, &Colors::blue, Platform::getRealMilliseconds());
+            F32 health[] = {1,1,1,1,1,1,1,1,1,1};
+            renderCore(Point(0,0), 55, &Colors::blue, Platform::getRealMilliseconds(), health );
       }
       glPopMatrix();
       objStart.y += 75;

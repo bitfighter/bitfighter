@@ -3476,7 +3476,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
          mAddingVertex = true;
 
-         // Insert an extra vertex at the mouse clicked point, and then select it.
+         // Insert an extra vertex at the mouse clicked point, and then select it
          mHitItem->insertVert(newVertex, mEdgeHit + 1);
          mHitItem->selectVert(mEdgeHit + 1);
 
@@ -3484,7 +3484,6 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mHitItem->onGeomChanging();
 
          mMouseDownPos = newVertex;
-         
       }
       else     // Start creating a new poly or new polyline (tilde key + right-click ==> start polyline)
       {

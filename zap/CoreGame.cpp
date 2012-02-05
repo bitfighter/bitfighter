@@ -332,7 +332,7 @@ void CoreItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(!mHasExploded)
-      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getCurrentTime());
+      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelHealth);
 #endif
 }
 
@@ -477,12 +477,54 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(theInfo->damagingObject->getTeam() == this->getTeam())
       return;
 
-   mHealth -= theInfo->damageAmount / DamageReductionRatio;
+   //mHealth -= theInfo->damageAmount / DamageReductionRatio / 10;
 
-   if(mHealth < 0)
-      mHealth = 0;
+   //if(mHealth < 0)
+   //   mHealth = 0;
 
-   if(mHealth == 0)
+
+   // Which panel was hit?  Look at shot position, compare it to core position
+   Point p = getPos();
+   Point cp = theInfo->collisionPoint;
+
+   F32 angle = p.angleTo(cp);
+
+   F32 coreAngle = F32(getGame()->getGameType()->getRemainingGameTimeInMs() & 16383) / 16384.f * FloatTau;
+
+   F32 combinedAngle = (angle - coreAngle);
+
+   // Make sure combinedAngle is between 0 and Tau -- sometimes angleTo returns odd values
+   while(combinedAngle < 0)
+      combinedAngle += FloatTau;
+   while(combinedAngle >= FloatTau)
+      combinedAngle -= FloatTau;
+
+   static const F32 PANEL_ANGLE = FloatTau / F32(CORE_PANELS);
+   S32 hit = (S32) (combinedAngle / PANEL_ANGLE);
+
+   bool coreDestroyed = false;
+   if(mPanelHealth[hit] > 0)
+   {
+      mPanelHealth[hit] -= theInfo->damageAmount / DamageReductionRatio;
+
+      if(mPanelHealth[hit] < 0)
+         mPanelHealth[hit] = 0;
+
+      setMaskBits(PanelDamagedMask);
+   }
+
+   if(mPanelHealth[hit] == 0)
+   {
+      coreDestroyed = true;
+      for(S32 i = 0; i < CORE_PANELS; i++)
+         if(mPanelHealth[i] > 0)
+         {
+            coreDestroyed = false;
+            break;
+         }
+   }
+
+   if(coreDestroyed)
    {
       // We've scored!
       GameType *gameType = getGame()->getGameType();
@@ -496,8 +538,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       }
 
       mHasExploded = true;
-      deleteObject(ExplosionCount * ExplosionInterval);   // Must wait for triggered explosions
-      setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
+      deleteObject(ExplosionCount * ExplosionInterval);  // Must wait for triggered explosions
+      setMaskBits(ExplodedMask);                         
       disableCollision();
 
       return;
@@ -507,8 +549,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(theInfo->damageAmount > 0)
       mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
 
-   setMaskBits(ItemChangedMask);    // So our clients will get new size
-   setRadius(calcCoreWidth());
+   //setMaskBits(ItemChangedMask);    // So our clients will get new size
+   //setRadius(calcCoreWidth());
 }
 
 
@@ -596,8 +638,8 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 
       // Now reset the timer as a function of health
       // Exponential
-      F32 ratio = mHealth / mStartingHealth;
-      U32 soundInterval = CoreHeartbeatMinInterval + U32(F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * ratio * ratio);
+      F32 health = getHealth();
+      U32 soundInterval = CoreHeartbeatMinInterval + U32(F32(CoreHeartbeatStartInterval - CoreHeartbeatMinInterval) * health * health);
 
       mHeartbeatTimer.reset(soundInterval);
    }
@@ -607,14 +649,28 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 void CoreItem::setStartingHealth(F32 health)
 {
    mStartingHealth = health;
-   mHealth = health;
+   
+   // Core's total health is divided evenly amongst its panels
+   for(S32 i = 0; i < 10; i++)
+      mPanelHealth[i] = health / CORE_PANELS;
+}
+
+
+F32 CoreItem::getTotalHealth()
+{
+   F32 total = 0;
+
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      total += mPanelHealth[i];
+
+   return total;
 }
 
 
 F32 CoreItem::getHealth()
 {
    // health is from 0 to 1.0
-   return mHealth / mStartingHealth;
+   return getTotalHealth() / mStartingHealth;
 }
 
 
@@ -642,16 +698,23 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   if(stream->writeFlag(updateMask & ItemChangedMask))
-      stream->writeFloat(mHealth, 16);  // 16 bits -> 1/65536 increments
+   if(!stream->writeFlag(mHasExploded))
+   {
+      // Don't bother with health report if we've exploded
+      if(stream->writeFlag(updateMask & PanelDamagedMask))
+      {
+         F32 startingPanelHealth = mStartingHealth / CORE_PANELS;
 
-   stream->writeFlag(mHasExploded);
+         for(S32 i = 0; i < CORE_PANELS; i++)
+         {
+            F32 panelHealthRatio = mPanelHealth[i] / startingPanelHealth;
+            stream->writeFloat(panelHealthRatio, 3);     // 3 bits -> 1/8 increments, all we really need
+         }
+      }
+   }
 
    if(updateMask & InitialMask)
-   {
       writeThisTeam(stream);
-      stream->writeFloat(mStartingHealth, 16);
-   }
 
    stream->writeFlag(mAttackedWarningTimer.getCurrent());
 
@@ -659,19 +722,25 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 }
 
 
+
 void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
-   if(stream->readFlag())
+   bool exploded = (stream->readFlag());     // Exploding!  Take cover!!
+
+   if(exploded)
+      for(S32 i = 0; i < CORE_PANELS; i++)
+         mPanelHealth[i] = 0;
+
+   else                             // Haven't exploded, getting health
    {
-      mHealth = stream->readFloat(16);
-      setRadius(calcCoreWidth());
+      if(stream->readFlag())                    // Panel damaged; expect full panel health report
+         for(S32 i = 0; i < CORE_PANELS; i++)
+            mPanelHealth[i] = stream->readFloat(3);
    }
 
-   bool explode = (stream->readFlag());     // Exploding!  Take cover!!
-
-   if(explode && !mHasExploded)
+   if(exploded && !mHasExploded)    // Just exploded!
    {
       mHasExploded = true;
       disableCollision();
@@ -679,10 +748,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    if(mInitial)
-   {
       readThisTeam(stream);
-      mStartingHealth = stream->readFloat(16);
-   }
 
    mBeingAttacked = stream->readFlag();
 }
@@ -717,9 +783,9 @@ bool CoreItem::isBeingAttacked()
 
 F32 CoreItem::calcCoreWidth() const
 {
-   F32 ratio = mHealth / mStartingHealth;
+   //F32 ratio = mHealth / mStartingHealth;
 
-   return (F32(CoreStartWidth - CoreMinWidth) * ratio) + CoreMinWidth;
+   return CoreStartWidth; //(F32(CoreStartWidth - CoreMinWidth) * ratio) + CoreMinWidth;
 }
 
 
@@ -774,7 +840,7 @@ S32 CoreItem::getClassID(lua_State *L)
 
 S32 CoreItem::getHealth(lua_State *L)
 {
-   return returnFloat(L, mHealth);
+   return returnFloat(L, getTotalHealth());
 }
 
 
