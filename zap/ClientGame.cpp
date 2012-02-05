@@ -1479,7 +1479,7 @@ void ClientGame::renderCommander()
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2.f, gScreenInfo.getGameCanvasHeight() / 2.f, 0);    
+   glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5, gScreenInfo.getGameCanvasHeight() * 0.5, 0);    
 
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 
