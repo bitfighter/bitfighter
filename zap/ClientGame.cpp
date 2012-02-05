@@ -1498,7 +1498,7 @@ void ClientGame::renderCommander()
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
 
-   if(ship->isModulePrimaryActive(ModuleSensor))
+   if(ship->hasModule(ModuleSensor))
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, rawRenderObjects);
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
