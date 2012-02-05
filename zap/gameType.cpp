@@ -1431,12 +1431,12 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
          queryRect.expand(mGame->getScopeRange(ship->getSensorStatus()));
 
-         if (scopeObject == ship)
+         if(scopeObject == ship)    
             mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
          else
-            if (ship && ship->hasModule(ModuleSensor))
+            if(ship && ship->hasModule(ModuleSensor))
                mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, fillVector, queryRect);
-            else
+            else     // No sensor
                mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, fillVector, queryRect);
       }
    }
