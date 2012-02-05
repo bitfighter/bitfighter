@@ -174,7 +174,7 @@ IniSettings::IniSettings()
 
    logLevelError = true;
 
-   logStats = true;            // Log statistics into ServerFilter log files
+   logStats = false;            // Log statistics into local sqlite database
 
    version = 0;
 
