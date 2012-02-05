@@ -1199,17 +1199,16 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
 void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
 {
    InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
-   // The following keys are allowed in both play mode and in
-   // loadout or engineering menu modes if not used in the loadout
-   // menu above
 
-   if(inputCode == KEY_CLOSEBRACKET && checkModifier(KEY_ALT))           // Alt-] advances bots by one step if frozen
+   // The following keys are allowed in both play mode and in loadout or
+   // engineering menu modes if not used in the loadout menu above
+   if(inputCode == KEY_CLOSEBRACKET && checkModifier(KEY_ALT))          // Alt-] advances bots by one step if frozen
       EventManager::get()->addSteps(1);
-   else if(inputCode == KEY_CLOSEBRACKET && checkModifier(KEY_CTRL))     // Ctrl-] advances bots by 10 steps if frozen
+   else if(inputCode == KEY_CLOSEBRACKET && checkModifier(KEY_CTRL))    // Ctrl-] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
-   else if(inputCode == KEY_1 && checkModifier(KEY_CTRL))              // Ctrl-1 saves loadout preset in slot 1 (with index 0, of course!)
+   else if(inputCode == KEY_1 && checkModifier(KEY_CTRL))               // Ctrl-1 saves loadout preset in slot 1 (with index 0, of course!)
       saveLoadoutPreset(getGame(), 0);
-   else if(inputCode == KEY_1 && checkModifier(KEY_ALT))               // Alt-1 loads preset from slot 1 (with index 0, of course!)
+   else if(inputCode == KEY_1 && checkModifier(KEY_ALT))                // Alt-1 loads preset from slot 1 (with index 0, of course!)
       loadLoadoutPreset(getGame(), 0);
    else if(inputCode == KEY_2 && checkModifier(KEY_CTRL))              
       saveLoadoutPreset(getGame(), 1);
