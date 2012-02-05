@@ -1197,6 +1197,7 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
 
 bool checkInputCode(InputCode codeUserEntered, InputCode codeToActivateCommand)
 {
+   // Look for some common synonyms, like keypad_4 and 4
    return codeUserEntered == codeToActivateCommand;
 }
 
