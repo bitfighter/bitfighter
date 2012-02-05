@@ -1440,7 +1440,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
                mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, fillVector, queryRect);
       }
    }
-   else     // Do a simple query of the objects within scope range of the ship
+   else     // Not a team game OR not in commander's map -- Do a simple query of the objects within scope range of the ship
    {
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
       Point pos = scopeObject->getPos();
@@ -1458,11 +1458,10 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
    for(S32 i = 0; i < fillVector.size(); i++)
       connection->objectInScope(dynamic_cast<GameObject *>(fillVector[i]));
    
+   // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
-   {
       for(S32 i = 0; i < Robot::getBotCount(); i++)
          connection->objectInScope(Robot::getBot(i));  
-   }
 }
 
 
