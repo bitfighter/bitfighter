@@ -214,6 +214,7 @@ void Thread::start()
 
 Thread::~Thread()
 {
+   pthread_join(mThread, NULL);
 }
 
 #endif
