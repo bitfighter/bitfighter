@@ -384,6 +384,7 @@ void Ship::findObjectsUnderShip(U8 type)
 
 
 // Returns the zone in question if this ship is in a zone of type zoneType
+// Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
 GameObject *Ship::isInZone(U8 zoneTypeNumber)
 {
    findObjectsUnderShip(zoneTypeNumber);
