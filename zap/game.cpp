@@ -1534,6 +1534,9 @@ void Game::cleanUp()
    }
 
    mActiveTeamManager->clearTeams();
+
+   if(mGameType.isValid() && !mGameType->isGhost())
+      delete mGameType.getPointer();
 }
 
 
@@ -2050,23 +2053,18 @@ void ServerGame::cycleLevel(S32 nextLevel)
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
-   // mGameType will be NULL here the first time this gets run, but should never be NULL thereafter
-   if(mGameType)
+   for(S32 i = 0; i < getClientCount(); i++)
    {
-      for(S32 i = 0; i < getClientCount(); i++)
-      {
-         ClientInfo *clientInfo = getClientInfo(i);
-         GameConnection *conn = clientInfo->getConnection();
+      ClientInfo *clientInfo = getClientInfo(i);
+      GameConnection *conn = clientInfo->getConnection();
 
-         conn->resetGhosting();
-         clientInfo->mOldLoadout.clear();
-         
-         clientInfo->resetLoadout();
-         conn->switchedTeamCount = 0;
+      conn->resetGhosting();
+      clientInfo->mOldLoadout.clear();
 
-         clientInfo->setScore(0); // Reset player scores, for non team game types
-      }
-      delete mGameType.getPointer();  // need to delete old GameType..
+      clientInfo->resetLoadout();
+      conn->switchedTeamCount = 0;
+
+      clientInfo->setScore(0); // Reset player scores, for non team game types
    }
    
    setCurrentLevelIndex(nextLevel, getPlayerCount());

@@ -319,6 +319,8 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
 
    mKillString = "crashed into a core";    // TODO: Really needed?
+
+   mHealth = 1;  // for older clients
 }
 
 
@@ -510,7 +512,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       if(mPanelHealth[hit] < 0)
          mPanelHealth[hit] = 0;
 
-      setMaskBits(PanelDamagedMask);
+      setMaskBits(PanelDamagedMask << hit);
    }
 
    if(mPanelHealth[hit] == 0)
@@ -694,34 +696,60 @@ void CoreItem::onAddedToGame(Game *theGame)
 }
 
 
+// compatible with readFloat at the same number of bits
+static void writeFloatZeroOrNonZero(BitStream &s, F32 &val, U8 bitCount)
+{
+   TNLAssert(val >= 0 && val <= 1, "writeFloat Must be between 0.0 and 1.0");
+   if(val == 0)
+      s.writeInt(0, bitCount);  // always writes zero
+   else
+      s.writeInt(U32(val * ((1 << bitCount) - 2) + 0.5f) + 1, bitCount);  // never writes zero
+}
+
+
 U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
+   GameConnection *gameConnection = (GameConnection *) connection;
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   if(!stream->writeFlag(mHasExploded))
+   if(gameConnection->mConnectionVersion < 2)  // older client
+      if(stream->writeFlag(updateMask & PanelDamagedAllMask))
+      {
+         F32 health = 0;
+         for(S32 i = 0; i < CORE_PANELS; i++)
+         {
+            health += mPanelHealth[i];
+         }
+         health /= mStartingHealth;
+         stream->writeFloat(min(health, 1.0f), 16);  // 16 bits -> 1/65536 increments  ... use of min: dividing might results on 1.000001
+      }
+
+   stream->writeFlag(mHasExploded);
+
+
+   if(!mHasExploded && gameConnection->mConnectionVersion >= 2)  // newer client
    {
       // Don't bother with health report if we've exploded
-      if(stream->writeFlag(updateMask & PanelDamagedMask))
-      {
-         F32 startingPanelHealth = mStartingHealth / CORE_PANELS;
+      F32 startingPanelHealth = mStartingHealth / CORE_PANELS;
 
-         for(S32 i = 0; i < CORE_PANELS; i++)
+      for(S32 i = 0; i < CORE_PANELS; i++)
+      {
+         if(stream->writeFlag(updateMask & (PanelDamagedMask << i))) // go through each bit mask
          {
             F32 panelHealthRatio = mPanelHealth[i] / startingPanelHealth;
 
-            // TODO: We would probably be better off by transmitting just 2 bits per panel, signifying FULL_HEALTH, > 50%, < 50%, 0
-            //       Or maybe 3 bits to get a finer gradation, depending on how we want to display health on the client.  We are
-            //       using 4 for the hacky scheme below.
-
-            stream->writeFloat(panelHealthRatio, 3);     // 3 bits -> 1/8 increments, all we really need
-            // Compensate for low resolution by flagging dead panels -- costs 1 bit, but lets us send health above with lower resolution
-            stream->writeFlag(mPanelHealth[i] == 0);      
+            // writeFloatZeroOrNonZero will Compensate for low resolution by sending zero only if it is actually zero
+            writeFloatZeroOrNonZero(*stream, panelHealthRatio, 4);     // 4 bits -> 1/16 increments, all we really need
          }
       }
    }
 
    if(updateMask & InitialMask)
+   {
       writeThisTeam(stream);
+      if(gameConnection->mConnectionVersion < 2)  // older client
+         stream->writeFloat(1, 16);   // 1, so we can send range between 0.0 and 1.0
+   }
 
    stream->writeFlag(mAttackedWarningTimer.getCurrent());
 
@@ -732,30 +760,35 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
+   GameConnection *gameConnection = (GameConnection *) connection;
    Parent::unpackUpdate(connection, stream);
+
+   bool updateRadius = false;
+
+   if(gameConnection->mConnectionVersion < 2)  // older server
+      if(stream->readFlag())
+      {
+         updateRadius = true;
+         mHealth = stream->readFloat(16);
+      }
 
    bool exploded = (stream->readFlag());     // Exploding!  Take cover!!
 
-   if(exploded)
+   if(gameConnection->mConnectionVersion < 2)  // older server
+      for(S32 i = 0; i < CORE_PANELS; i++)
+         mPanelHealth[i] = 1;
+
+   else if(exploded)
       for(S32 i = 0; i < CORE_PANELS; i++)
          mPanelHealth[i] = 0;
 
    else                             // Haven't exploded, getting health
    {
-      if(stream->readFlag())                    // Panel damaged; expect full panel health report
-         for(S32 i = 0; i < CORE_PANELS; i++)
-         {
-            mPanelHealth[i] = stream->readFloat(3);
-
-            // Compensate for low resolution of panel health transmission
-            if(!stream->readFlag())
-               mPanelHealth[i] = max(mPanelHealth[i], .1f);
-            else
-            {
-               TNLAssert(mPanelHealth[i] == 0, "I think this else is unnecessary -- if this triggers, delete it make comment that it is needed.");
-               mPanelHealth[i] = 0;
-            }
-         }
+      for(S32 i = 0; i < CORE_PANELS; i++)
+      {
+         if(stream->readFlag())                    // Panel damaged
+            mPanelHealth[i] = stream->readFloat(4);
+      }
    }
 
    if(exploded && !mHasExploded)    // Just exploded!
@@ -766,7 +799,17 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    if(mInitial)
+   {
       readThisTeam(stream);
+      if(gameConnection->mConnectionVersion < 2)  // older server
+         mStartingHealth = stream->readFloat(16);
+   }
+
+   if(updateRadius)
+   {
+      mHealth = mHealth / mStartingHealth;  // convert to a range between 0.0 and 1.0
+      setRadius(calcCoreWidth());
+   }
 
    mBeingAttacked = stream->readFlag();
 }
@@ -801,9 +844,7 @@ bool CoreItem::isBeingAttacked()
 
 F32 CoreItem::calcCoreWidth() const
 {
-   //F32 ratio = mHealth / mStartingHealth;
-
-   return CoreStartWidth; //(F32(CoreStartWidth - CoreMinWidth) * ratio) + CoreMinWidth;
+   return (F32(CoreStartWidth - CoreMinWidth) * mHealth) + CoreMinWidth;
 }
 
 
