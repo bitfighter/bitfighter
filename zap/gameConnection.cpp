@@ -54,8 +54,6 @@ const U8 GameConnection::CONNECT_VERSION = 2;  // GameConnection's version, for 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
 {
-   TNLAssert(mServerGame, "Client should not be using this constructor!");
-
    initialize();
 
    mSettings = NULL; // mServerGame->getSettings();      // will be set on ReadConnectRequest
