@@ -132,7 +132,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LineItem : public GameObject, public PolylineGeometry, public EditorObject
+class LineItem : public GameObject, public EditorObject
 {
    typedef GameObject Parent;
 
@@ -142,9 +142,9 @@ private:
    S32 mWidth;    
 
 public:
-   LineItem();                      // Constructor
+   LineItem();                   // Constructor
+   virtual ~LineItem();          // Destructor
    LineItem *clone() const;
-   //LineItem(const LineItem &li);    // Copy constructor
 
    virtual void render();
    S32 getRenderSortValue();

@@ -99,7 +99,7 @@ public:
    EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
 
 #ifndef ZAP_DEDICATED
-   virtual void prepareForDock(ClientGame *game, const Point &point);
+   virtual void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
    void addToEditor(ClientGame *game, GridDatabase *database);
 #endif
 
@@ -228,13 +228,16 @@ public:
 
 // Class with editor methods related to point things
 
-class EditorPointObject : public EditorObject, public PointGeometry
+class EditorPointObject : public EditorObject
 {
    typedef EditorObject Parent;
 
 public:
+   EditorPointObject();             // Constructor
+   virtual ~EditorPointObject();    // Destructor
+
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
-   void prepareForDock(ClientGame *game, const Point &point);
+   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
 };
 
 

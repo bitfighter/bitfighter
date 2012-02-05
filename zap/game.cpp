@@ -1223,7 +1223,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
             {
                if(mNameToAddressThread->mAddress.isValid())
                {
-                  TNLAssert(!mConnectionToMaster, "Already have connection to master!");
+                  TNLAssert(!mConnectionToMaster.isValid(), "Already have connection to master!");
                   mConnectionToMaster = new MasterServerConnection(this);
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }
@@ -1287,6 +1287,7 @@ void Game::deleteObjects(U8 typeNumber)
 }
 
 
+// Not currently used
 void Game::deleteObjects(TestFunc testFunc)
 {
    fillVector.clear();
@@ -1385,6 +1386,42 @@ Point Game::computePlayerVisArea(Ship *ship) const
 
    // Ugly
    return *comingFrom + (*goingTo - *comingFrom) * fraction;
+}
+
+
+// Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.
+// This makes the assumption that we'll find a unique name before numstr runs out of space (allowing us to try 999,999,999 or so combinations)
+string Game::makeUnique(const char *name)
+{
+   U32 index = 0;
+   string proposedName = name;
+
+   bool unique = false;
+
+   while(!unique)
+   {
+      unique = true;
+
+      for(S32 i = 0; i < getClientCount(); i++)
+      {
+         if(proposedName == getClientInfo(i)->getName().getString())     // Collision detected!
+         {
+            unique = false;
+
+            char numstr[10];
+            sprintf(numstr, ".%d", index);
+
+            // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
+            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
+            proposedName = string(name).substr(0, maxNamePos) + numstr;     // Make sure name won't grow too long
+
+            index++;
+            break;
+         }
+      }
+   }
+
+   return proposedName;
 }
 
 
@@ -1658,7 +1695,7 @@ string ServerGame::getLastLevelLoadName()
 // Return true if the only client connected is the one we passed; don't consider bots
 bool ServerGame::onlyClientIs(GameConnection *client)
 {
-   GameType *gameType = gServerGame->getGameType();
+   GameType *gameType = getGameType();
 
    if(!gameType)
       return false;
@@ -2058,7 +2095,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
    // Not sure if this is needed, but might be as long as we are still loading zones from level files... but I think we aren't anymore
-   mDatabaseForBotZones.removeEverythingFromDatabase();    
+   //mDatabaseForBotZones.removeEverythingFromDatabase(); // Causes memory leak (removed from database, but not deleted), better off disabling this in BotNavMeshZone::processArguments
 
    // Try and load Bot Zones for this level, set flag if failed
    // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
@@ -2568,7 +2605,7 @@ void ServerGame::idle(U32 timeDelta)
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
    {
-      MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+      MasterServerConnection *masterConn = getConnectionToMaster();
 
       static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here.
       static GameTypeId prevCurrentLevelType;

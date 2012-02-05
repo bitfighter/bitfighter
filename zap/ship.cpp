@@ -768,7 +768,7 @@ bool Ship::findRepairTargets()
          continue;
 
       // ...or ones too far away...
-      if((item->getRenderPos() - pos).len() > (RepairRadius + CollisionRadius + item->getRadius()))
+      if((item->getPos() - pos).len() > (RepairRadius + CollisionRadius + item->getRadius()))
          continue;
 
       // ...or ones not on our team or neutral
@@ -1221,7 +1221,14 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
       {
          stream->writeFlag((updateMask & RespawnMask) != 0 && getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
-         stream->writeFlag(mSpawnShield.getCurrent() != 0);
+         if(gameConnection->mConnectionVersion >= 1)
+         {
+            U32 sendNumber = (mSpawnShield.getCurrent() + (SpawnShieldTime / 16 / 2)) * 16 / SpawnShieldTime; // rounding
+            if(stream->writeFlag(sendNumber != 0))
+               stream->writeInt(sendNumber - 1, 4); 
+         }
+         else
+            stream->writeFlag(mSpawnShield.getCurrent() != 0);
       }
 
       if(stream->writeFlag(updateMask & HealthMask))     // Health
@@ -1279,6 +1286,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
+   GameConnection *gameConnection = (GameConnection *) connection;
 
    if(isInitialUpdate())
    {
@@ -1356,7 +1364,15 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          hasExploded = false;
          playSpawnEffect = stream->readFlag();    // Prevent spawn effect every time the robot goes into scope
          shipwarped = true;
-         mSpawnShield.reset(stream->readFlag() ? SpawnShieldTime : 0);
+         if(gameConnection->mConnectionVersion >= 1)
+         {
+            if(stream->readFlag())
+               mSpawnShield.reset((stream->readInt(4) + 1) * SpawnShieldTime / 16);
+            else
+               mSpawnShield.reset(0);
+         }
+         else
+            mSpawnShield.reset(stream->readFlag() ? SpawnShieldTime : 0);
       }
       if(stream->readFlag())        // Health
          mHealth = stream->readFloat(6);
@@ -1441,7 +1457,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mMoveState[ActualState].pos, 1);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos, Point());
+      SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos);
    }
 
 #endif
@@ -1813,7 +1829,7 @@ Color ShipExplosionColors[NumShipExplosionColors] = {
 void Ship::emitShipExplosion(Point pos)
 {
 #ifndef ZAP_DEDICATED
-   SoundSystem::playSoundEffect(SFXShipExplode, pos, Point());
+   SoundSystem::playSoundEffect(SFXShipExplode, pos);
 
    F32 a = TNL::Random::readF() * 0.4f + 0.5f;
    F32 b = TNL::Random::readF() * 0.2f + 0.9f;
@@ -2142,7 +2158,7 @@ void Ship::render(S32 layerIndex)
             glBegin(GL_LINES);
             glVertex2f(pos.x, pos.y);
 
-            Point shipPos = mRepairTargets[i]->getRenderPos();
+            Point shipPos = mRepairTargets[i]->getPos();
             glVertex2f(shipPos.x, shipPos.y);
             glEnd();
          }

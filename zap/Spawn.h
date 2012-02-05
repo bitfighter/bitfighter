@@ -79,8 +79,6 @@ public:
 
    virtual string toString(F32 gridSize) const;
 
-   Point getPos() const;     // For readability
-
    F32 getEditorRadius(F32 currentScale);
 
    bool updateTimer(U32 deltaT);

@@ -48,7 +48,7 @@ namespace Zap
 
 AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
-   setVert(pos, 0);
+   setPos(pos);
    setRespawnTime(time);
 };
 
@@ -88,7 +88,7 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
    pos.read(argv);
    pos *= game->getGridSize();
 
-   setVert(pos, 0);
+   setPos(pos);
 
    S32 time = (argc > 2) ? atoi(argv[2]) : getDefaultRespawnTime();
 
@@ -104,12 +104,6 @@ string AbstractSpawn::toString(F32 gridSize) const
 {
    // <<spawn class name>> <x> <y> <spawn timer>
    return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
-}
-
-
-Point AbstractSpawn::getPos() const
-{
-   return getVert(0);
 }
 
 
@@ -272,7 +266,7 @@ S32 Spawn::getDefaultRespawnTime()
 void Spawn::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getVert(0);
+   Point pos = getPos();
 
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
@@ -390,7 +384,7 @@ static void renderAsteroidSpawn(const Point &pos)
 void AsteroidSpawn::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getVert(0);
+   Point pos = getPos();
 
    glPushMatrix();
       glTranslate(pos);
@@ -403,7 +397,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale)
 
 void AsteroidSpawn::renderDock()
 {
-   renderAsteroidSpawn(getVert(0));
+   renderAsteroidSpawn(getPos());
 }
 
 
@@ -494,7 +488,7 @@ static void renderCircleSpawn(const Point &pos)
 void CircleSpawn::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getVert(0);
+   Point pos = getPos();
 
    glPushMatrix();
       glTranslate(pos);
@@ -507,7 +501,7 @@ void CircleSpawn::renderEditor(F32 currentScale)
 
 void CircleSpawn::renderDock()
 {
-   renderCircleSpawn(getVert(0));
+   renderCircleSpawn(getPos());
 }
 
 
@@ -584,7 +578,7 @@ S32 FlagSpawn::getDefaultRespawnTime()
 void FlagSpawn::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
-   Point pos = getVert(0);
+   Point pos = getPos();
 
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);

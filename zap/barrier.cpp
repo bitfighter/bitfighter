@@ -613,7 +613,8 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 const char PolyWall::className[] = "PolyWall";      // Class name as it appears to Lua scripts
 
 
-PolyWall::PolyWall()
+// Constructor
+PolyWall::PolyWall() : Parent()
 {
    mObjectTypeNumber = PolyWallTypeNumber;
 }
@@ -621,7 +622,8 @@ PolyWall::PolyWall()
 
 PolyWall *PolyWall::clone() const
 {
-   return new PolyWall(*this);
+   PolyWall *polyWall = new PolyWall(*this);
+   return polyWall;
 }
 
 

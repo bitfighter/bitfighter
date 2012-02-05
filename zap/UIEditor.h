@@ -233,6 +233,9 @@ private:
    void onFinishedDragging();    // Called when we're done dragging an object
    void onSelectionChanged();    // Called when current selection has changed
 
+   Point convertCanvasToLevelCoord(Point p);
+   Point convertLevelToCanvasCoord(Point p, bool convert = true);
+
    void resnapAllEngineeredItems(EditorObjectDatabase *database);
 
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
@@ -245,7 +248,6 @@ private:
    void render();
    void renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
    void renderWalls(EditorObjectDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
-   void renderPolyline(const Vector<Point> *verts);
 
 protected:
    void onActivate();
@@ -284,10 +286,7 @@ public:
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
-   EditorObject *getSnapItem();
    void rebuildEverything(EditorObjectDatabase *database);   // Does lots of things in undo, redo, and add items from script
-
-   void setLevelToCanvasCoordConversion();
 
    static Vector<string> robots;
 
@@ -326,7 +325,6 @@ public:
    bool mouseIgnore;
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
-   void addToDock(EditorObject* object);
    void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
 
    string mScriptLine;                           // Script and args, if any
@@ -346,7 +344,7 @@ public:
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)
-   void validateTeams(const Vector<DatabaseObject *> &dbObjects);
+   void validateTeams(const Vector<DatabaseObject *> *dbObjects);
 
    void teamsHaveChanged();            // Another team validation routine, used when all items have valid teams, but the teams themselves change
    void makeSureThereIsAtLeastOneTeam();
@@ -358,9 +356,6 @@ public:
    void testLevelStart();
    void setSaveMessage(string msg, bool savedOK);
    void setWarnMessage(string msg1, string msg2);
-
-   Point convertCanvasToLevelCoord(Point p);
-   Point convertLevelToCanvasCoord(Point p, bool convert = true);
 
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
@@ -375,9 +370,6 @@ public:
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
-   static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &points, bool abcFormat, F32 &minDist, Point &snapPoint);
-   static S32 checkEdgesForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, bool abcFormat, F32 &minDist, Point &snapPoint);
-
    S32 checkCornersForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint);
 
    void deleteItem(S32 itemIndex, bool batchMode = false);
@@ -390,7 +382,7 @@ public:
    void runScript(EditorObjectDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
 
-   string getPluginKey();                 // Try to create some sort of uniqeish signature for the plugin
+   string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin
    void onPluginMenuClosed(const Vector<string> &args);
    void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved

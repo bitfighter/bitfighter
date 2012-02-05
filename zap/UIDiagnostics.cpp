@@ -36,6 +36,8 @@
 #include "JoystickRender.h"
 #include "ClientGame.h"
 
+#include "gameObjectRender.h"    // For drawCircle in badge rendering below
+
 
 #include "tnl.h"
 
@@ -295,18 +297,15 @@ extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 void DiagnosticUserInterface::render()
 {
    // Draw title, subtitle, and footer
-   glColor3f(1,0,0);
-   drawStringf(3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
-   drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage + 1, NUM_PAGES);
+   glColor(Colors::red);
+   drawStringf(  3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
+   drawStringf(625, 3, 25, "PAGE %d/%d",       mCurPage + 1, NUM_PAGES);
  
    drawCenteredStringf(571, 20, "%s - next page  ESC exits", inputCodeToString(keyDIAG));
-   glColor3f(0.7f, 0.7f, 0.7f);
-   glBegin(GL_LINES);
-      glVertex2f(0, 31);
-      glVertex2f(800, 31);
-      glVertex2f(0, 569);
-      glVertex2f(800, 569);
-   glEnd();
+
+   glColor(0.7f);
+   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), 31);
+   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), 569);
 
    S32 textsize = 14;
 
@@ -317,34 +316,26 @@ void DiagnosticUserInterface::render()
       glColor(Colors::red);
       drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
 
-      S32 x;
+      S32 x, y;
       x = getCenteredStringStartingPosf(textsize, "Can't control your ship? Check your input mode "
                                                   "(Options>Primary Input) [currently %s]", inputMode.c_str());
       glColor(Colors::green);
-      x += drawStringAndGetWidth(x, vertMargin + 63, textsize, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
+      y = vertMargin + 63;
+      x += drawStringAndGetWidth(x, y, textsize, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
 
       glColor(Colors::red);
-      x += drawStringAndGetWidthf(x, vertMargin + 63, textsize, "%s", inputMode.c_str());
+      x += drawStringAndGetWidth(x, y, textsize, inputMode.c_str());
 
       glColor(Colors::green);
-      drawString(x, vertMargin + 63, textsize, "]");
+      drawString(x, y, textsize, "]");
 
       // Box around something wrong? block
       glColor(Colors::cyan);
-      glBegin(GL_LINE_LOOP);
-         S32 x1 = horizMargin;
-         S32 x2 = gScreenInfo.getGameCanvasWidth() - horizMargin;
-         S32 y1 = vertMargin + 27;
-         S32 y2 = vertMargin + 90;
-
-         glVertex2i(x1, y1);     glVertex2i(x2, y1);
-         glVertex2i(x2, y2);     glVertex2i(x1, y2);
-      glEnd();
-
+      drawHollowRect(horizMargin, vertMargin + 27, gScreenInfo.getGameCanvasWidth() - horizMargin, vertMargin + 90);
 
       const S32 gap = 5;
 
-      S32 ypos = showVersionBlock(120, 14, gap);
+      S32 ypos = showVersionBlock(120, textsize, gap);
 
       glColor(Colors::white);
 
@@ -452,7 +443,7 @@ void DiagnosticUserInterface::render()
          ypos += textsize + gap;
          hpos = horizMargin;
 
-         hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", Joystick::UseJoystickNumber);
+         hpos += drawStringAndGetWidthf(hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", Joystick::UseJoystickNumber);
 
          for(U32 i = 0; i < 32; i++)  // there are 32 bit in U32
             if(Joystick::ButtonMask & BIT(i))
@@ -462,7 +453,7 @@ void DiagnosticUserInterface::render()
 
          ypos += textsize + gap + 10;
 
-         glColor3f(0, 1, 0);
+         glColor(Colors::green);
          drawCenteredString(ypos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
 
          //////////
@@ -526,7 +517,7 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       ypos += textsize + gap;
 
-      glColor3f(1,0,0);
+      glColor(Colors::red);
       drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
       ypos += textsize + gap + gap;
 
@@ -537,6 +528,7 @@ void DiagnosticUserInterface::render()
    {
       S32 gap = 5;
       S32 textsize = 16;
+      S32 smallText = 14;
 
       S32 ypos = vertMargin + 35;
 
@@ -547,12 +539,12 @@ void DiagnosticUserInterface::render()
       ypos += showNameDescrBlock(settings->getHostName(), settings->getHostDescr(), ypos, textsize, gap);
 
       drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", settings->getHostAddress().c_str());
-      drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", settings->getLevelChangePassword() == "" ?
+      drawCenteredStringPair2Colf(ypos, smallText, false, "Lvl Change PW:", "%s", settings->getLevelChangePassword() == "" ?
                                                                     "None - anyone can change" : settings->getLevelChangePassword().c_str());
       ypos += textsize + gap;
 
       
-      drawCenteredStringPair2Colf(ypos, 14, false, "Admin PW:", "%s", settings->getAdminPassword() == "" ? 
+      drawCenteredStringPair2Colf(ypos, smallText, false, "Admin PW:", "%s", settings->getAdminPassword() == "" ? 
                                                                      "None - no one can get admin" : settings->getAdminPassword().c_str());
       ypos += textsize + gap;
 
@@ -604,6 +596,34 @@ void DiagnosticUserInterface::render()
       }
 
       ypos += (textsize + gap) * (3 - j);
+
+
+      // Temporary placeholder for badge testing
+
+      S32 xpos;
+
+      xpos = horizMargin + 10;
+      ypos = 500;
+
+      S32 rad = 10;
+
+      glColor(Colors::white);
+      drawPolygon(Point(xpos,ypos), 6,rad-2, 0);
+      glColor(Colors::red);
+      drawCircle(Point(xpos, ypos), 10);
+
+      xpos += 3*rad;
+
+      glColor(Colors::yellow);
+      drawPolygon(Point(xpos,ypos), 3,rad-2, 3.14159/6);
+      glColor(Colors::red);
+      drawCircle(Point(xpos, ypos), 10);
+
+      xpos += 3*rad;
+      glColor(Colors::green);
+      drawHollowRect(xpos - rad, ypos - rad/3, xpos + rad, ypos + rad/3);
+      drawHollowRect(xpos - rad/3, ypos - rad, xpos + rad/3, ypos + rad);
+
    }
 }
 

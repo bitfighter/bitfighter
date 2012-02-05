@@ -52,6 +52,7 @@ namespace Zap
 ////////////////////////////////////////
 
 class ClientGame;
+class ServerGame;
 struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;
@@ -76,8 +77,9 @@ private:
    bool mClientInfoWasCreatedLocally;     // Track whether we are responsible for deleting the clientInfo in the destructor
 
 #ifndef ZAP_DEDICATED
-   ClientGame *mClientGame;         // Sometimes this is NULL
+   ClientGame *mClientGame;         // NULL on server side, not available for dedicated build
 #endif
+   ServerGame *mServerGame;         // NULL on client side
 
    bool mInCommanderMap;
    bool mWaitingForPermissionsReply;
@@ -178,7 +180,6 @@ public:
    bool lostContact();
 
    string getServerName();
-   static string makeUnique(string name);    // Make sure a given name is unique across all clients & bots
 
    void reset();        // Clears/initializes some things between levels
 
@@ -281,6 +282,10 @@ public:
    TNL_DECLARE_RPC(s2rSendDataParts, (U8 type, ByteBufferPtr data));
    bool s2rUploadFile(const char *filename, U8 type);
 
+   bool mVoiceChatEnabled;  // server side: false when this client have set the voice volume to zero, which means don't send voice to this client
+                            // client side: this can allow or disallow sending voice to server
+   TNL_DECLARE_RPC(s2rVoiceChatEnable, (bool enabled));
+
    void resetAuthenticationTimer();
    S32 getAuthenticationCounter();
 
@@ -311,10 +316,6 @@ public:
 
    TNL_DECLARE_NETCONNECTION(GameConnection);
 };
-
-LevelInfo getLevelInfo(char *level, S32 size);
-void updateClientChangedName(ClientInfo *clientInfo, StringTableEntry);  
-
 
 };
 

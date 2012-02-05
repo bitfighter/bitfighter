@@ -212,7 +212,7 @@ public:
    virtual ~FullClientInfo();                                          // Destructor
 
 
-   // WARNING!! mClientConnection can be NULL on client!!! (though should never be NULL on server)
+   // WARNING!! mClientConnection can be NULL on client and server's robots
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);
 
@@ -510,6 +510,8 @@ public:
    S32 mObjectsLoaded;  
 
    Point getScopeRange(S32 sensorStatus);
+
+   string makeUnique(const char *name);
 };
 
 

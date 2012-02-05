@@ -495,6 +495,14 @@ LineItem::LineItem()
 { 
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = LineTypeNumber;
+   setNewGeometry(geomPolyLine);
+}
+
+
+// Destructor
+LineItem::~LineItem()
+{ 
+   // Do nothing
 }
 
 
@@ -503,13 +511,6 @@ LineItem *LineItem::clone() const
    return new LineItem(*this);
 }
 
-//
-//// Copy constructor -- make sure each copy gets its own geometry object
-//LineItem::LineItem(const LineItem &li)
-//{
-//   mGeometry = boost::shared_ptr<Geometry>(new PolylineGeometry(*((PolylineGeometry *)li.mGeometry.get())));  
-//}
-//
 
 void LineItem::render()
 {
@@ -525,7 +526,7 @@ void LineItem::render()
    }
 
    glColor(getTeamColor(mTeam));
-   renderPointVector(getOutline(), GL_LINE_STRIP);
+   renderLine(getOutline());
 #endif
 }
 
@@ -536,7 +537,7 @@ void LineItem::renderEditor(F32 currentScale)
    if(!mSelected && !mLitUp)
       glColor(getEditorRenderColor());
 
-   renderPointVector(getOutline(), GL_LINE_STRIP);
+   renderLine(getOutline());
 
    renderLinePolyVertices(currentScale);
 #endif

@@ -100,6 +100,7 @@ public:
 
    void packetReceived(PacketList *note);
    void packetDropped(PacketList *note);
+   void packetRewind(PacketList *note, PacketEntry *p_entry);
 };
 
 };

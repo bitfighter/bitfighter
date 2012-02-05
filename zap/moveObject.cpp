@@ -94,6 +94,24 @@ bool MoveObject::isMoveObject()
 }
 
 
+Point MoveObject::getVert(S32 index) const
+{
+   return getActualPos();
+}
+
+
+Point MoveObject::getPos() const
+{
+   return getActualPos();
+}
+
+
+Point MoveObject::getVel()
+{
+   return getActualVel();
+}
+
+
 Point MoveObject::getRenderPos() const
 {
    return mMoveState[RenderState].pos;
@@ -121,16 +139,24 @@ Point MoveObject::getActualVel() const
 void MoveObject::setActualPos(const Point &pos)
 {
    mMoveState[ActualState].pos = pos;
-//   mMoveState[ActualState].vel.set(0,0);  // Why is this there?  It breaks asteroid initial movement
 }
+
 
 void MoveObject::setActualVel(const Point &vel)
 {
    mMoveState[ActualState].vel = vel;
 }
 
-// for Geometry, should set both actual and render position
+
 void MoveObject::setVert(const Point &pos, S32 index)
+{
+   Parent::setVert(pos, index);
+   setPos(pos);
+}
+
+
+// For Geometry, should set both actual and render position
+void MoveObject::setPos(const Point &pos)
 {
    mMoveState[ActualState].pos = pos;
    mMoveState[RenderState].pos = pos;
@@ -579,7 +605,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 void MoveObject::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity)
 {
    if(velocity > 0.25)    // Make sound if the objects are moving fast enough
-      SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
+      SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos);
 }
 
 
@@ -661,11 +687,12 @@ bool MoveObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) c
 void MoveObject::onGeomChanged()
 {
    // This is here, to make sure pressing TAB in editor will show correct location for MoveItems
-   mMoveState[ActualState].pos = getVert(0);
-   mMoveState[RenderState].pos = getVert(0);
+   //mMoveState[ActualState].pos = getActualPos();
+   //mMoveState[RenderState].pos = getRenderPos();
    
    Parent::onGeomChanged();
 }
+
 
 void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
 {
@@ -699,7 +726,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
 }
 
 
-// Server only
 bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
@@ -707,8 +733,10 @@ bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
    else if(!Parent::processArguments(argc, argv, game))
       return false;
 
+   Point pos = getActualPos();
+
    for(U32 i = 0; i < MoveStateCount; i++)
-      mMoveState[i].pos = getVert(0);
+      mMoveState[i].pos = pos;
 
    updateExtentInDatabase();
 
@@ -721,6 +749,7 @@ string MoveItem::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
 }
+
 
 // Client only, in-game
 void MoveItem::render()
@@ -833,11 +862,11 @@ void MoveItem::dismount()
    setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
 }
 
+
  // if wanting to use setActualPos(const Point &p), will have to change all class that have setActualPos, to allow virtual inheritance to work right.
-void MoveItem::setActualPos(const Point &p)
+void MoveItem::setActualPos(const Point &pos)
 {
-   mMoveState[ActualState].pos = p;
-//   mMoveState[ActualState].vel.set(0,0);  // Why is this there?  It breaks asteroid initial movement
+   mMoveState[ActualState].pos = pos;
    setMaskBits(WarpPositionMask | PositionMask);
 }
 
@@ -1102,7 +1131,7 @@ void Asteroid::renderItem(const Point &pos)
 
 void Asteroid::renderDock()
 {
-   renderAsteroid(getVert(0), 2, .1f);
+   renderAsteroid(getActualPos(), 2, .1f);
 }
 
 
@@ -1194,7 +1223,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    newItem->setPosAng(getActualPos(), ang2);
 
-   newItem->addToGame(gServerGame, gServerGame->getGameObjDatabase());    // And add it to the list of game objects
+   newItem->addToGame(getGame(), getGame()->getGameObjDatabase());    // And add it to the list of game objects
 }
 
 
@@ -1241,7 +1270,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mDesign = stream->readEnum(AsteroidDesigns);
 
       if(!mInitial)
-         SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
+         SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos);
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -1285,7 +1314,7 @@ TestFunc Asteroid::collideTypes()
 // Client only
 void Asteroid::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos);
    // FXManager::emitBurst(pos, Point(.1, .1), Colors::white, Colors::white, 10);
 }
 
@@ -1515,7 +1544,7 @@ void Circle::renderItem(const Point &pos)
 
 void Circle::renderDock()
 {
-   drawCircle(getVert(0), 2);
+   drawCircle(getActualPos(), 2);
 }
 
 
@@ -1611,7 +1640,7 @@ bool Circle::collide(GameObject *otherObject)
 // Client only
 void Circle::onItemExploded(Point pos)
 {
-   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos, Point());
+   SoundSystem::playSoundEffect(SFXAsteroidExplode, pos);
 }
 
 
@@ -1685,6 +1714,7 @@ Worm::Worm()
    mTailLength = 0;
 }
 
+
 bool Worm::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
@@ -1694,7 +1724,7 @@ bool Worm::processArguments(S32 argc, const char **argv, Game *game)
    pos.read(argv);
    pos *= game->getGridSize();
 
-   setActualPos(pos);
+   setPos(pos);
 
    mHeadIndex = 0;
    mTailLength = 0;
@@ -1703,6 +1733,7 @@ bool Worm::processArguments(S32 argc, const char **argv, Game *game)
 
    return true;
 }
+
 
 const char *Worm::getOnScreenName()
 {
@@ -1733,8 +1764,8 @@ void Worm::render()
          if(i < 0)
             i = maxTailLength - 1;
       }
-      glColor(1,1,1);
-      renderPointVector(&p, GL_LINE_STRIP);
+      glColor(Colors::white);
+      renderLine(&p);
    }
 #endif
 }
@@ -1779,7 +1810,7 @@ bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
       if(i >= maxTailLength)
          i = 0;
    }
-   return true;
+   return polyPoints.size() != 0;  // false with zero points
 }
 
 bool Worm::collide(GameObject *otherObject)
@@ -1848,7 +1879,7 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   for(S32 i=0; i < maxTailLength; i++)
+   for(S32 i = 0; i < maxTailLength; i++)
    {
       if(stream->writeFlag(TailPointParts << i))
       {
@@ -1925,7 +1956,7 @@ void TestItem::renderItem(const Point &pos)
 
 void TestItem::renderDock()
 {
-   renderTestItem(getVert(0), 8);
+   renderTestItem(getActualPos(), 8);
 }
 
 
@@ -2045,7 +2076,7 @@ void ResourceItem::renderItem(const Point &pos)
 
 void ResourceItem::renderDock()
 {
-   renderResourceItem(getVert(0), .4f, 0, 1);
+   renderResourceItem(getActualPos(), .4f, 0, 1);
 }
 
 

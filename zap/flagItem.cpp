@@ -65,7 +65,6 @@ FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : Parent(pos, true, 
 }
 
 
-
 FlagItem *FlagItem::clone() const
 {
    return new FlagItem(*this);
@@ -304,7 +303,7 @@ void FlagItem::sendHome()
    {
       TNLAssert(false, "No flag spawn points!");
       logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
-         gServerGame->getCurrentLevelFileName().getString(), mTeam);
+         ((ServerGame *)getGame())->getCurrentLevelFileName().getString(), mTeam);
       //mInitialPos = Point(0,0);      --> Leave mInitialPos as it was... it will probably be better than (0,0)
    }
    else
@@ -336,7 +335,7 @@ void FlagItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
    glPushMatrix();
-      glTranslate(getVert(0));
+      glTranslate(getActualPos());
       glScale(0.6f);
       renderFlag(0, 0, getTeamColor(mTeam));
    glPopMatrix();   

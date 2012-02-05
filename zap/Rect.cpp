@@ -64,6 +64,7 @@ Point Rect::getCenter() const
    return (max + min) * 0.5;
 }
 
+
 void Rect::set(const Point &p1, const Point &p2)
 {
    if(p1.x < p2.x)
@@ -76,6 +77,7 @@ void Rect::set(const Point &p1, const Point &p2)
       min.x = p2.x;
       max.x = p1.x;
    }
+
    if(p1.y < p2.y)
    {
       min.y = p1.y;
@@ -121,7 +123,7 @@ void Rect::set(const Rect &r)
 // Takes point and "radius"
 void Rect::set(const Point &p, member_type size)
 {
-   F32 sizeDiv2 = size / 2;
+   F32 sizeDiv2 = size * 0.5;
    min.x = p.x - sizeDiv2;
    max.x = p.x + sizeDiv2;
    min.y = p.y - sizeDiv2;
@@ -138,6 +140,7 @@ void Rect::unionPoint(const Point &p)
 {
    if(p.x < min.x)        min.x = p.x;
    else if(p.x > max.x)   max.x = p.x;
+
    if(p.y < min.y)        min.y = p.y;
    else if(p.y > max.y)   max.y = p.y;
 }

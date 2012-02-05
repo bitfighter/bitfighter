@@ -34,7 +34,7 @@ namespace Zap
 {
 
 
-class SimpleLine : public EditorObject, public GameObject, public SimpleLineGeometry
+class SimpleLine : public EditorObject, public GameObject
 {
    typedef GameObject Parent;
    typedef EditorObject EditorParent;
@@ -49,7 +49,8 @@ protected:
    virtual F32 getEditorRadius(F32 currentScale);     // Size of object (or in this case vertex) in editor
 
 public:
-   SimpleLine();       // Constructor
+   SimpleLine();           // Constructor
+   virtual ~SimpleLine();  // Destructor
 
    // Some properties about the item that will be needed in the editor
    virtual const char *getOnDockName() = 0;
@@ -63,7 +64,7 @@ public:
    virtual void newObjectFromDock(F32 gridSize);
    virtual Point getInitialPlacementOffset(F32 gridSize);
 
-   void prepareForDock(ClientGame *game, const Point &point);
+   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
 };
 
 

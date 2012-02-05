@@ -43,6 +43,12 @@ GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : 
 
 void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {
+   if(! mGame->isServer())   // ignore request if we are a client, we won't let it start any connection, if some outside network thinks we are a server.
+   {
+      U8 packetType = pStream->getBuffer()[0];
+      if(packetType == ConnectChallengeRequest || packetType == ConnectRequest)
+         return;
+   }
    Parent::processPacket(sourceAddress, pStream);
 }
 
@@ -113,15 +119,15 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(U8(QueryResponse));
 
                theNonce.write(&queryResponse);
-               queryResponse.writeStringTableEntry(gServerGame->getSettings()->getHostName());
-               queryResponse.writeStringTableEntry(gServerGame->getSettings()->getHostDescr());
+               queryResponse.writeStringTableEntry(mGame->getSettings()->getHostName());
+               queryResponse.writeStringTableEntry(mGame->getSettings()->getHostDescr());
 
-               queryResponse.write(gServerGame->getPlayerCount());
-               queryResponse.write(gServerGame->getMaxPlayers());
-               queryResponse.write(gServerGame->getRobotCount());
-               queryResponse.writeFlag(gServerGame->isDedicated());
-               queryResponse.writeFlag(gServerGame->isTestServer());
-               queryResponse.writeFlag(gServerGame->getSettings()->getServerPassword() != "");
+               queryResponse.write(mGame->getPlayerCount());
+               queryResponse.write(((ServerGame *)mGame)->getMaxPlayers());
+               queryResponse.write(mGame->getRobotCount());
+               queryResponse.writeFlag(((ServerGame *)mGame)->isDedicated());
+               queryResponse.writeFlag(((ServerGame *)mGame)->isTestServer());
+               queryResponse.writeFlag(mGame->getSettings()->getServerPassword() != "");
 
                queryResponse.sendto(mSocket, remoteAddress);
             }

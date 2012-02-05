@@ -171,12 +171,11 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
-
-   //TNLAssert(!mGame->isServer(), "Should only be client here!");
-   // mGame appears to return null here sometimes... why??
+   ClientGame *clientGame = ((GameConnection *) theConnection)->getClientGame();
+   TNLAssert(clientGame, "Should only be client here!");
 
 #ifndef ZAP_DEDICATED
-   addToGame(gClientGame, gClientGame->getGameObjDatabase());
+   addToGame(clientGame, clientGame->getGameObjDatabase());
 #endif
    return true;
 }
@@ -675,7 +674,7 @@ void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F3
       return;
 
    Rect r = target->getBounds(MoveObject::RenderState);
-   Point nearestPoint = ship->getRenderPos();
+   Point nearestPoint = ship->getPos();
 
    if(r.max.x < nearestPoint.x)
       nearestPoint.x = r.max.x;
@@ -986,11 +985,11 @@ void GameType::saveGameStats()
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
 
-   if(gServerGame->getSettings()->getIniSettings()->logStats)
+   if(getGame()->getSettings()->getIniSettings()->logStats)
    {
       processStatsResults(&stats.gameStats);
 
-      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(gServerGame->getSettings(), stats);
+      InsertStatsToDatabaseThread *statsthread = new InsertStatsToDatabaseThread(getGame()->getSettings(), stats);
       statsthread->start();
    }
 }
@@ -1444,7 +1443,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
    else     // Do a simple query of the objects within scope range of the ship
    {
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
-      Point pos = scopeObject->getActualPos();
+      Point pos = scopeObject->getPos();
       Ship *co = dynamic_cast<Ship *>(scopeObject);
       TNLAssert(co, "Null control object!");
 
@@ -1772,7 +1771,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(teamIndex < 0 || teamIndex >= mGame->getTeamCount())
+      if(teamIndex >= mGame->getTeamCount())
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
@@ -1855,6 +1854,10 @@ void GameType::updateLeadingPlayerAndScore()
    // Find the leading player
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
+      // Check to make sure client hasn't disappeared somehow
+      if(!mGame->getClientInfo(i))
+         continue;
+
       S32 score = mGame->getClientInfo(i)->getScore();
 
       if(score > mLeadingPlayerScore)
@@ -2033,6 +2036,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
+   clientGame->FXManager::clearSparks();
+
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
@@ -2072,8 +2077,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
       return;
 
    // Use voting when no level change password and more then 1 players
-   if(!clientInfo->isAdmin() && gServerGame->getSettings()->getLevelChangePassword() == "" && 
-            gServerGame->getPlayerCount() > 1 && gServerGame->voteStart(clientInfo, 1, time))
+   if(!clientInfo->isAdmin() && getGame()->getSettings()->getLevelChangePassword() == "" && 
+            getGame()->getPlayerCount() > 1 && ((ServerGame *)getGame())->voteStart(clientInfo, 1, time))
       return;
 
    mGameTimer.extend(time);                         // Increase "official time"
@@ -2096,16 +2101,16 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       return;                                                     // return without processing the change team request
 
    // Vote to change team might have different problems than the old way...
-   if( (!clientInfo->isLevelChanger() || gServerGame->getSettings()->getLevelChangePassword() == "") && 
-        gServerGame->getPlayerCount() > 1 )
+   if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") && 
+        getGame()->getPlayerCount() > 1 )
    {
-      if(gServerGame->voteStart(clientInfo, 4, team))
+      if(((ServerGame *)getGame())->voteStart(clientInfo, 4, team))
          return;
    }
 
    changeClientTeam(clientInfo, team);
 
-   if(!clientInfo->isAdmin() && gServerGame->getPlayerCount() > 1)
+   if(!clientInfo->isAdmin() && getGame()->getPlayerCount() > 1)
    {
       NetObject::setRPCDestConnection(NetObject::getRPCSourceConnection());   // Send c2s to the changing player only
       s2cCanSwitchTeams(false);                                               // Let the client know they can't switch until they hear back from us
@@ -2238,6 +2243,16 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "Your name was changed to %s", newName.getString());
 #endif
+}
+
+// Tell all clients name has changed, and update server side name
+// Server only
+void GameType::updateClientChangedName(ClientInfo *clientInfo, StringTableEntry newName)
+{
+   logprintf(LogConsumer::LogConnection, "Name changed from %s to %s", clientInfo->getName().getString(), newName.getString());
+
+   s2cRenameClient(clientInfo->getName(), newName);
+   clientInfo->setName(newName);
 }
 
 
@@ -2502,6 +2517,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 // Gets called multiple times as barriers are added
 GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
 {
+   // Empty wall deletes all existing walls
    if(!verts.size())
       mGame->deleteObjects((TestFunc)isWallType);
    else
@@ -2539,7 +2555,7 @@ void GameType::addBot(Vector<StringTableEntry> args)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    GameConnection *conn = clientInfo->getConnection();
 
@@ -2645,15 +2661,15 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isLevelChanger())  // Extra check in case of hacked client
       return;
 
    // Use voting when there is no level change password, and there is more then 1 player
-   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && gServerGame->getPlayerCount() > 1)
+   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && getGame()->getPlayerCount() > 1)
    {
-      if(gServerGame->voteStart(clientInfo, 2, time))
+      if(((ServerGame *) getGame())->voteStart(clientInfo, 2, time))
          return;
    }
 
@@ -2674,7 +2690,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    // Level changers and above
    if(!clientInfo->isLevelChanger())
@@ -2821,7 +2837,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetMaxBots, (S32 count), (count))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isAdmin())
       return;  // Error message handled client-side
@@ -2845,7 +2861,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameSettings *settings = getGame()->getSettings();
 
    // Conn is the connection of the player doing the banning
    if(!clientInfo->isAdmin())
@@ -2864,7 +2880,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    if(bannedClientInfo->isRobot())
       return;  // Error message handled client-side
 
-   Address ipAddress = bannedClientInfo->getConnection()->getNetAddressString();
+   Address ipAddress = bannedClientInfo->getConnection()->getNetAddress();
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
@@ -2888,9 +2904,9 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
 
 GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 duration), (ipAddressString, duration))
 {
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = gServerGame->getSettings();
+   GameConnection *conn = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = conn->getClientInfo();
+   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isAdmin())
       return;  // Error message handled client-side
@@ -2902,6 +2918,26 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
 
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
+   // Now check to see if the client is connected and disconnect all of them if they are
+   bool playerDisconnected = false;
+
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
+
+      if(baneeConn && baneeConn->getNetAddress().isEqualAddress(ipAddress))
+      {
+         if(baneeConn == conn)
+         {
+            conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't ban yourself");
+            return;
+         }
+
+         baneeConn->disconnect(NetConnection::ReasonBanned, "");
+         playerDisconnected = true;
+      }
+   }
+
    // banip should always add to the ban list, even if the IP isn't connected
    settings->getBanList()->addToBanList(ipAddress, banDuration);
    logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
@@ -2912,27 +2948,11 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    // Save new INI settings to disk
    gINI.WriteFile();
 
-   // Now check to see if the client is connected and disconnect them if they are
-   GameConnection *connToDisconnect = NULL;
 
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-   {
-      GameConnection *baneeConn = mGame->getClientInfo(i)->getConnection();
-
-      if(baneeConn->getNetAddress().isEqualAddress(ipAddress))
-      {
-         connToDisconnect = baneeConn;
-         break;
-      }
-   }
-
-   GameConnection *conn = clientInfo->getConnection();
-
-   if(!connToDisconnect)
+   if(!playerDisconnected)
       conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client has been banned but is no longer connected");
    else
    {
-      connToDisconnect->disconnect(NetConnection::ReasonBanned, "");
       conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Client was banned and kicked");
    }
 }
@@ -2957,7 +2977,7 @@ GAMETYPE_RPC_C2S(GameType, c2sRenamePlayer, (StringTableEntry playerName, String
 
    StringTableEntry oldName = renamedClientInfo->getName();
    renamedClientInfo->setName("");                          // Avoid unique self
-   StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  // New name
+   StringTableEntry uniqueName = getGame()->makeUnique(newName.getString()).c_str();  // New name
    renamedClientInfo->setName(oldName);                     // Restore name to properly get it updated to clients
    renamedClientInfo->setAuthenticated(false, NO_BADGES);   // Don't underline anymore because of rename
    updateClientChangedName(renamedClientInfo, uniqueName);
@@ -3036,7 +3056,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
       {
          GameConnection *kickeeConnection = kickee->getConnection();
          ConnectionParameters &p = kickeeConnection->getConnectionParameters();
-         BanList *banList = gServerGame->getSettings()->getBanList();
+         BanList *banList = getGame()->getSettings()->getBanList();
 
          if(p.mIsArranged)
             banList->kickHost(p.mPossibleAddresses[0]);           // Banned for 30 seconds
@@ -3415,7 +3435,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
          ClientInfo *clientInfo = mGame->getClientInfo(i);
          GameConnection *dest = clientInfo->getConnection();
 
-         if(dest && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
+         if(dest && dest->mVoiceChatEnabled && clientInfo->getTeamIndex() == sourceClientInfo->getTeamIndex() && (dest != source || echo))
             dest->postNetEvent(event);
       }
    }
@@ -3864,7 +3884,6 @@ void GameType::majorScoringEventOcurred(S32 team)
 {
    /* empty */
 }
-
 
 };
 

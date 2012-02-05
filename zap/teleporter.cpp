@@ -38,10 +38,10 @@ using namespace TNL;
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "sparkManager.h"
-#include "SDL/SDL_opengl.h"
-#include "UI.h"
+#   include "ClientGame.h"
+#   include "sparkManager.h"
+#   include "SDL/SDL_opengl.h"
+#   include "UI.h"
 #endif
 
 #include <math.h>
@@ -236,9 +236,9 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
       static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest], Point());
+      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
 
-      SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0), Point());
+      SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
       timeout = mTeleporterDelay;
    }

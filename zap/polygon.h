@@ -36,7 +36,7 @@ namespace Zap
 
 
 // Provide editor related methods to the polygon class
-class EditorPolygon : public GameObject, public EditorObject, public PolygonGeometry, public LuaItem
+class EditorPolygon : public GameObject, public EditorObject, public LuaItem
 {
    typedef GameObject Parent;
    typedef EditorObject EditorParent;
@@ -45,7 +45,7 @@ private:
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    virtual void labelDockItem();
 
-   void prepareForDock(ClientGame *game, const Point &point);
+   void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
    virtual void renderDock();
    void highlightDockItem(); 
 
@@ -54,9 +54,12 @@ private:
    Point getInitialPlacementOffset(F32 gridSize);
 
 protected:
-      void renderPolyHighlight();
+    void renderPolyHighlight();
 
 public:
+   EditorPolygon();              // Constructor
+   virtual ~EditorPolygon();     // Destructor
+
    void newObjectFromDock(F32 gridSize);
 
    // Item is being actively dragged

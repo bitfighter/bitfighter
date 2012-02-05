@@ -110,9 +110,6 @@ function fireAtObject(obj, weapon)
 				--logprint("It's an ally.")
 				return(false)
 			end
-		if(obj:getClassID() == CoreType) then
-			logprint(" " .. " " .. obj:getTeamIndx())
-		end
 	end
 
 	

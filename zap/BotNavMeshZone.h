@@ -69,7 +69,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public GameObject, public PolygonGeometry
+class BotNavMeshZone : public GameObject
 {
 private:   
    typedef GameObject Parent;
@@ -79,13 +79,14 @@ private:
    static void populateZoneList(const GridDatabase *db); // Populates mAllZones
 
 public:
+   BotNavMeshZone(S32 id = -1);    // Constructor
+   ~BotNavMeshZone();              // Destructor
+   
    bool flag;              // Flag used to mark zones during construction process, serves no purpose once zones have been generated
 
    static const S32 BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones
    static const S32 LEVEL_ZONE_BUFFER = 30;                // Extra padding around the game extents to allow outsize zones to be created
 
-   BotNavMeshZone(S32 id = -1);    // Constructor
-   ~BotNavMeshZone();              // Destructor
 
    void render(S32 layerIndex);
 
@@ -116,7 +117,7 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
-   static U16 findZoneContaining(ServerGame *game, const Point &p);     // Returns ID of zone containing specified point
+   static U16 findZoneContaining(GridDatabase *botZoneDatabase, const Point &p);     // Returns ID of zone containing specified point
 
    static const Vector<BotNavMeshZone *> *getBotZones();                // Return cached list of all zones
 

@@ -84,7 +84,6 @@ protected:
       FirstFreeMask = Parent::FirstFreeMask << 3
    };
 
-   Point mPos;
    Point mVelocity;
 
 public:
@@ -111,8 +110,6 @@ public:
 
    virtual Point getRenderVel() const;
    virtual Point getActualVel() const;
-   virtual Point getRenderPos() const;    // Unused??
-   virtual Point getActualPos() const;
 
    void render();
    void renderItem(const Point &pos);

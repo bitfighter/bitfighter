@@ -559,7 +559,7 @@ void ClientGame::idle(U32 timeDelta)
       }
 
       if(controlObject)
-         SoundSystem::setListenerParams(controlObject->getRenderPos(), controlObject->getRenderVel());
+         SoundSystem::setListenerParams(controlObject->getPos(), controlObject->getVel());
    }
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
