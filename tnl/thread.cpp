@@ -209,12 +209,12 @@ Thread::Thread()
 void Thread::start()
 {
    int val = pthread_create(&mThread, NULL, ThreadProc, this);
+   pthread_detach(mThread);  // Declare that this thread clean itself up after finishing
    mReturnValue = 0;
 }
 
 Thread::~Thread()
 {
-   pthread_join(mThread, NULL);
 }
 
 #endif
