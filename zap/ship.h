@@ -153,9 +153,20 @@ public:
       MaxControlObjectInterpDistance = 200,
       TrailCount = 2,
       EnergyMax = 100000,
-      EnergyRechargeRate = 6000,          // How much energy/second
-      EnergyRechargeRateWhenIdle = 8000, // How much energy/second if the ship isn't moving
-      EnergyRechargeRateInLoadoutZone = 12000,  // How much energy/second if the ship is in a loadout zone
+
+      // The following are all measured in units of energy/second
+      EnergyRechargeRateWhenInNoZoneWhenIdle = 8000, 
+      EnergyRechargeRateWhenInNoZoneWhenActive = 6000,         
+      EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle = 12000,
+      EnergyRechargeRateInFriendlyLoadoutZoneWhenActive = 6000,
+      EnergyRechargeRateInEnemyLoadoutZoneWhenIdle = 12000,
+      EnergyRechargeRateInEnemyLoadoutZoneWhenActive = 6000,
+      EnergyRechargeRateInNeutralLoadoutZoneWhenIdle = 12000,
+      EnergyRechargeRateInNeutralLoadoutZoneWhenActive = 6000,
+      EnergyRechargeRateInHostileLoadoutZoneWhenIdle = -12000,  
+      EnergyRechargeRateInHostileLoadoutZoneWhenActive = -12000,  
+
+
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,

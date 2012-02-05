@@ -910,7 +910,8 @@ void Ship::processModules()
             if (i == ModuleSensor && !isGhost())
             {
                Point direction = getAimVector();
-               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos, mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos,
+                                                   mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
             }
 
             // Reduce energy
@@ -923,30 +924,58 @@ void Ship::processModules()
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
       mCooldownNeeded = true;
 
-   // Recharge if we're not doing anything and we don't have spawnshield on
-   if(!anyActive && mSpawnShield.getCurrent() == 0)
+   // See if we are in a loadout zone -- special energy rules apply here.  But not if you have your spawn shield up.
+   if(mSpawnShield.getCurrent() == 0)
    {
+      bool isIdle = !anyActive && mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
+
       GameObject *object = isInZone(LoadoutZoneTypeNumber);
 
-      // If in hostile loadout zone, lose energy
-      if(object && object->getTeam() == TEAM_HOSTILE)
-         mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
-
-      // If not moving or shooting, recharge or drain differently
-      else if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire)
+      if(object)     // In zone
       {
-         // If in loadout zone of the same or neutral team, recharge quickly
-         if(object && (object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
-            mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
+         /// IN HOSTILE ZONE
+         if(object->getTeam() == TEAM_HOSTILE)
+         {
+            if(isIdle)
+               mEnergy -= S32(EnergyRechargeRateInHostileLoadoutZoneWhenIdle * scaleFactor);
+            else
+               mEnergy -= S32(EnergyRechargeRateInHostileLoadoutZoneWhenActive * scaleFactor);
+         }
 
-         // Else smaller idle recharge
+         /// IN FRIENDLY ZONE
+         else if(object->getTeam() == getTeam())
+         {
+            if(isIdle)
+               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle * scaleFactor);
+            else
+               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenActive * scaleFactor);
+         }
+         /// IN NEUTRAL ZONE
+         else if(object->getTeam() == TEAM_NEUTRAL)
+         {
+            if(isIdle)
+               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenIdle * scaleFactor);
+            else
+               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenActive * scaleFactor);
+         }
+         // In a zone that is neither hostile nor neutral nor one of your own -- must be an enemy 
+         /// IN ENEMY ZONE
          else
-            mEnergy += S32(EnergyRechargeRateWhenIdle * scaleFactor);
+         {
+            if(isIdle)
+               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenIdle * scaleFactor);
+            else
+               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenActive * scaleFactor);
+         }
       }
-
-      // Else normal rate
-      else
-         mEnergy += S32(EnergyRechargeRate * scaleFactor);
+      /// IN NO ZONE
+      else 
+      {
+         if(isIdle)
+            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenIdle * scaleFactor);
+         else
+            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenActive * scaleFactor);
+      }
    }
 
    // What to do if our most current energy reduction put us below zero
