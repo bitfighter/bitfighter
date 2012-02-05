@@ -49,7 +49,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-const U8 GameConnection::CONNECT_VERSION = 1;  // GameConnection's version, for possible future use with changes on compatible versions
+const U8 GameConnection::CONNECT_VERSION = 2;  // GameConnection's version, for possible future use with changes on compatible versions
 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()

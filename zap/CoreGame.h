@@ -111,7 +111,7 @@ private:
    bool mHasExploded;
    bool mBeingAttacked;
    F32 mStartingHealth;          // Health stored in the level file, will be divided amongst panels
-   //F32 mHealth;            // Health is stored from 0 to 1.0 for easy transmission
+   F32 mHealth;     // used if we connect to old server // Health is stored from 0 to 1.0 for easy transmission
 
    F32 mPanelHealth[CORE_PANELS];
    Timer mHeartbeatTimer;        // Client-side timer
@@ -123,8 +123,9 @@ private:
 #endif
 protected:
       enum MaskBits {
-      PanelDamagedMask = Parent::FirstFreeMask << 0,
-      FirstFreeMask   = Parent::FirstFreeMask << 1
+      PanelDamagedMask = Parent::FirstFreeMask << 0,  // each bit mask have own panel updates (PanelDamagedMask << n)
+      PanelDamagedAllMask = ((1 << CORE_PANELS) - 1) * PanelDamagedMask,  // all bits of PanelDamagedMask
+      FirstFreeMask   = Parent::FirstFreeMask << CORE_PANELS
    };
 
 public:
