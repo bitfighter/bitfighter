@@ -708,6 +708,11 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
          for(S32 i = 0; i < CORE_PANELS; i++)
          {
             F32 panelHealthRatio = mPanelHealth[i] / startingPanelHealth;
+
+            // TODO: We would probably be better off by transmitting just 2 bits per panel, signifying FULL_HEALTH, > 50%, < 50%, 0
+            //       Or maybe 3 bits to get a finer gradation, depending on how we want to display health on the client.  We are
+            //       using 4 for the hacky scheme below.
+
             stream->writeFloat(panelHealthRatio, 3);     // 3 bits -> 1/8 increments, all we really need
             // Compensate for low resolution by flagging dead panels -- costs 1 bit, but lets us send health above with lower resolution
             stream->writeFlag(mPanelHealth[i] == 0);      
