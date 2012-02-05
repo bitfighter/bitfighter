@@ -1195,6 +1195,12 @@ static void loadLoadoutPreset(ClientGame *game, S32 slot)
 }
 
 
+bool checkInputCode(InputCode codeUserEntered, InputCode codeToActivateCommand)
+{
+   return codeUserEntered == codeToActivateCommand;
+}
+
+
 // Can only get here if we're not in chat mode
 void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
 {
@@ -1219,7 +1225,7 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
    else if(inputCode == KEY_3 && checkModifier(KEY_ALT))             
       loadLoadoutPreset(getGame(), 2);
 
-   else if(inputCode == inputMOD1[inputMode])
+   else if(checkInputCode(inputCode, inputMOD1[inputMode]))
    {
       mModPrimaryActivated[0] = true;
       // If double-click timer hasn't run out, activate the secondary active component
@@ -1229,7 +1235,7 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
          mModuleOneDoubleClickTimer.clear();
       }
    }
-   else if(inputCode == inputMOD2[inputMode])
+   else if(checkInputCode(inputCode, inputMOD2[inputMode]))
    {
       mModPrimaryActivated[1] = true;
       // If double-click timer hasn't run out, activate the secondary active component
@@ -1239,19 +1245,19 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
          mModuleTwoDoubleClickTimer.clear();
       }
    }
-   else if(inputCode == inputFIRE[inputMode])
+   else if(checkInputCode(inputCode, inputFIRE[inputMode]))
       mFiring = true;
-   else if(inputCode == inputSELWEAP1[inputMode])
+   else if(checkInputCode(inputCode, inputSELWEAP1[inputMode]))
       selectWeapon(0);
-   else if(inputCode == inputSELWEAP2[inputMode])
+   else if(checkInputCode(inputCode, inputSELWEAP2[inputMode]))
       selectWeapon(1);
-   else if(inputCode == inputSELWEAP3[inputMode])
+   else if(checkInputCode(inputCode, inputSELWEAP3[inputMode]))
       selectWeapon(2);
-   else if(inputCode == keyFPS)
+   else if(checkInputCode(inputCode, keyFPS))
       mFPSVisible = !mFPSVisible;
-   else if(inputCode == inputADVWEAP[inputMode])
+   else if(checkInputCode(inputCode, inputADVWEAP[inputMode]))
       advanceWeapon();
-   else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
+   else if(checkInputCode(inputCode, KEY_ESCAPE) || checkInputCode(inputCode, BUTTON_BACK))
    {
       if(mShutdownMode == ShuttingDown)
       {
@@ -1284,10 +1290,10 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
          getUIManager()->getGameMenuUserInterface()->activate();
       }
    }     
-   else if(inputCode == inputCMDRMAP[inputMode])
+   else if(checkInputCode(inputCode, inputCMDRMAP[inputMode]))
       getGame()->zoomCommanderMap();
 
-   else if(inputCode == inputSCRBRD[inputMode])
+   else if(checkInputCode(inputCode, inputSCRBRD[inputMode]))
    {     // (braces needed)
       if(!mInScoreboardMode)    // We're activating the scoreboard
       {
@@ -1297,38 +1303,38 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
             gameType->c2sRequestScoreboardUpdates(true);
       }
    }
-   else if(inputCode == inputTOGVOICE[inputMode])
+   else if(checkInputCode(inputCode, inputTOGVOICE[inputMode]))
    {     // (braces needed)
       if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
          mVoiceRecorder.start();
    }
    else if(!mHelper)    // The following keys are only allowed in PlayMode
    {
-      if(inputCode == inputTEAMCHAT[inputMode])          // Start entering a team chat msg
+      if(checkInputCode(inputCode, inputTEAMCHAT[inputMode]))          // Start entering a team chat msg
       {
          mCurrentChatType = TeamChat;
          setBusyChatting(true);
       }
-      else if(inputCode == inputGLOBCHAT[inputMode])     // Start entering a global chat msg
+      else if(checkInputCode(inputCode, inputGLOBCHAT[inputMode]))     // Start entering a global chat msg
       {
          mCurrentChatType = GlobalChat;
          setBusyChatting(true);
       }
-      else if(inputCode == inputCMDCHAT[inputMode])      // Start entering a command
+      else if(checkInputCode(inputCode, inputCMDCHAT[inputMode]))      // Start entering a command
       {
          mCurrentChatType = CmdChat;
          setBusyChatting(true);
       }
-      else if(inputCode == inputQUICKCHAT[inputMode])
+      else if(checkInputCode(inputCode, inputQUICKCHAT[inputMode]))
          enterMode(QuickChatMode);
-      else if(inputCode == inputLOADOUT[inputMode])
+      else if(checkInputCode(inputCode, inputLOADOUT[inputMode]))
          enterMode(LoadoutMode);
-      else if(inputCode == inputDROPITEM[inputMode])
+      else if(checkInputCode(inputCode, inputDROPITEM[inputMode]))
          dropItem();
       else if(inputMode == InputModeJoystick)      // Check if the user is trying to use keyboard to move when in joystick mode
-         if(inputCode == inputUP[InputModeKeyboard]   || inputCode == inputDOWN[InputModeKeyboard] || 
-            inputCode == inputLEFT[InputModeKeyboard] || inputCode == inputRIGHT[InputModeKeyboard])
-            mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
+         if(checkInputCode(inputCode, inputUP[InputModeKeyboard])   || checkInputCode(inputCode, inputDOWN[InputModeKeyboard]) || 
+            checkInputCode(inputCode, inputLEFT[InputModeKeyboard]) || checkInputCode(inputCode, inputRIGHT[InputModeKeyboard]))
+               mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
    }
 }
 
