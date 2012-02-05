@@ -55,6 +55,7 @@ Vector<string> MOTDStringVecOld;
 Vector<U32> MOTDVersionVec;
 Vector<string> MOTDStringVec;
 U32 gLatestReleasedCSProtocol = 0; // Will be updated with value from cfg file
+U32 gLatestReleasedBuildVersion = 0;
 
 string gMasterName;                // Name of the master server
 string gJasonOutFile;              // File where JSON data gets dumped
@@ -872,7 +873,8 @@ static const char *sanitizeForJson(const char *value)
             break;
          }
 
-      m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this
+      m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion || gLatestReleasedBuildVersion > mClientBuild);
+
 
       // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
       logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
