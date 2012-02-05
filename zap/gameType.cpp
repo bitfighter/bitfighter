@@ -1514,9 +1514,14 @@ void GameType::queryItemsOfInterest()
          delta.y = fabs(delta.y);
 
          if(
-               (theShip->getSensorStatus() == Ship::SensorStatusActive && delta.x < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL) ||
-               (theShip->getSensorStatus() == Ship::SensorStatusPassive && delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
-               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL)
+               (theShip->getSensorStatus() == Ship::SensorStatusActive && 
+                     delta.x < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL && 
+                     delta.y < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL) ||
+               (theShip->getSensorStatus() == Ship::SensorStatusPassive && 
+                     delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && 
+                     delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
+               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && 
+                     delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL)
             )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
