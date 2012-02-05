@@ -45,6 +45,8 @@
 #include "shipItems.h"           // For moduleInfos
 #include "NexusGame.h"
 
+#include "UI.h"                  // For renderRect
+
 #include "stringUtils.h"
 
 #include "IniFile.h"             // For CIniFile def
@@ -1539,13 +1541,7 @@ void ClientGame::renderCommander()
                   Point visExt = computePlayerVisArea(otherShip);
 
                   glColor(teamColor * zoomFrac * 0.35f);
-
-                  glBegin(GL_POLYGON);
-                     glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                     glVertex2f(p.x + visExt.x, p.y - visExt.y);
-                     glVertex2f(p.x + visExt.x, p.y + visExt.y);
-                     glVertex2f(p.x - visExt.x, p.y + visExt.y);
-                  glEnd();
+                  UserInterface::drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y);
                }
             }
          }
