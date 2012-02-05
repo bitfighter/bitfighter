@@ -937,7 +937,7 @@ void Ship::processModules()
             if((object->getTeam() == getTeam() || object->getTeam() == TEAM_NEUTRAL))
                mEnergy += S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
 
-            // If in hostile loadout zone, loose energy
+            // If in hostile loadout zone, lose energy
             else if(object->getTeam() == TEAM_HOSTILE)
                mEnergy -= S32(EnergyRechargeRateInLoadoutZone * scaleFactor);
 
