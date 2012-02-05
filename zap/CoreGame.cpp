@@ -709,6 +709,8 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
          {
             F32 panelHealthRatio = mPanelHealth[i] / startingPanelHealth;
             stream->writeFloat(panelHealthRatio, 3);     // 3 bits -> 1/8 increments, all we really need
+            // Compensate for low resolution by flagging dead panels -- costs 1 bit, but lets us send health above with lower resolution
+            stream->writeFlag(mPanelHealth[i] == 0);      
          }
       }
    }
@@ -737,7 +739,18 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       if(stream->readFlag())                    // Panel damaged; expect full panel health report
          for(S32 i = 0; i < CORE_PANELS; i++)
+         {
             mPanelHealth[i] = stream->readFloat(3);
+
+            // Compensate for low resolution of panel health transmission
+            if(!stream->readFlag())
+               mPanelHealth[i] = max(mPanelHealth[i], .1f);
+            else
+            {
+               TNLAssert(mPanelHealth[i] == 0, "I think this else is unnecessary -- if this triggers, delete it make comment that it is needed.");
+               mPanelHealth[i] = 0;
+            }
+         }
    }
 
    if(exploded && !mHasExploded)    // Just exploded!
