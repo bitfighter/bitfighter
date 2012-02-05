@@ -923,11 +923,10 @@ void Ship::processModules()
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
       mCooldownNeeded = true;
 
-   // Recharge if we're not doing anything or if we don't have spawnshield on
+   // Recharge if we're not doing anything and we don't have spawnshield on
    if(!anyActive && mSpawnShield.getCurrent() == 0)
    {
       GameObject *object = isInZone(LoadoutZoneTypeNumber);
-
 
       // If in hostile loadout zone, lose energy
       if(object && object->getTeam() == TEAM_HOSTILE)
