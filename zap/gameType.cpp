@@ -1385,8 +1385,9 @@ void GameType::performScopeQuery(GhostConnection *connection)
 }
 
 
-
-// Here is where we determine which objects are visible from player's ships.  Only runs on server.
+// Here is where we determine which objects are visible from player's ships.  Marks items as in-scope so they 
+// will be sent to client.
+// Only runs on server. 
 void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
 {
    // If this block proves unnecessary, then we can remove the whole itemsOfInterest thing, I think...
