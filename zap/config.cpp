@@ -1796,14 +1796,13 @@ FolderManager::FolderManager()
 
 // Constructor
 FolderManager::FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir,    const string &musicDir, 
-                             const string &cacheDir, const string &iniDir,       const string &logDir,    const string &screenshotDir, 
-                             const string &luaDir,   const string &rootDataDir,  const string &pluginDir)
+                             const string &iniDir,       const string &logDir,    const string &screenshotDir, const string &luaDir,
+                             const string &rootDataDir,  const string &pluginDir)
 {
    this->levelDir      = levelDir;
    this->robotDir      = robotDir;
    this->sfxDir        = sfxDir;
    this->musicDir      = musicDir;
-   this->cacheDir      = cacheDir;
    this->iniDir        = iniDir;
    this->logDir        = logDir;
    this->screenshotDir = screenshotDir;
@@ -1846,7 +1845,6 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
-   folderManager->cacheDir      = resolutionHelper(cmdLineDirs.cacheDir,      "", "cache");
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
    folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
 

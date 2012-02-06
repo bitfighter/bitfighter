@@ -142,9 +142,6 @@ static void initFoldersBlock(FolderManager *folderManager, S32 textsize)
 
    names.push_back("");
    vals.push_back("");
-      
-   names.push_back("Cache Dir:");
-   vals.push_back(folderManager->cacheDir.c_str());
 
    names.push_back("INI Dir:");
    vals.push_back(folderManager->iniDir.c_str());
