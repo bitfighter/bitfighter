@@ -1839,16 +1839,16 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    // rootDataDir used to specify the following folders
    folderManager->robotDir      = resolutionHelper(cmdLineDirs.robotDir,      rootDataDir, "robots");
+   folderManager->pluginDir     = resolutionHelper(cmdLineDirs.pluginDir,     rootDataDir, "editor_plugins");
+   folderManager->luaDir        = resolutionHelper(cmdLineDirs.luaDir,        rootDataDir, "scripts");
    folderManager->iniDir        = resolutionHelper(cmdLineDirs.iniDir,        rootDataDir, "");
    folderManager->logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
    folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for these folders
    folderManager->cacheDir      = resolutionHelper(cmdLineDirs.cacheDir,      "", "cache");
-   folderManager->luaDir        = resolutionHelper(cmdLineDirs.luaDir,        "", "scripts");
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
    folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
-   folderManager->pluginDir     = resolutionHelper(cmdLineDirs.pluginDir,     "", "editor_plugins");
 
    gSqlite = folderManager->logDir + "stats";
 }
