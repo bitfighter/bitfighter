@@ -153,6 +153,7 @@ bool Joystick::initJoystick()
    // Enable joystick events
    SDL_JoystickEventState(SDL_ENABLE);
 
+
    // Start using joystick.
    sdlJoystick = SDL_JoystickOpen(UseJoystickNumber);
    if (sdlJoystick == NULL)
@@ -160,6 +161,8 @@ bool Joystick::initJoystick()
       logprintf("Error opening joystick %d [%s]", UseJoystickNumber, SDL_JoystickName(UseJoystickNumber));
       return false;
    }
+   logprintf("Using joystick %d - %s", UseJoystickNumber + 1, SDL_JoystickName(UseJoystickNumber));
+
 
    // Now try and autodetect the joystick and update the game settings
    string joystickType = Joystick::autodetectJoystick();
@@ -171,6 +174,14 @@ bool Joystick::initJoystick()
       gClientGame->getSettings()->getIniSettings()->joystickType = joystickType;
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
+
+   // Set primary input to joystick if any controllers were found, even a generic one
+   if(hasBeenOpenedBefore)
+      ;  // do nothing when this was opened before
+   else if(joystickType == "NoJoystick")
+      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+   else
+      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
 
    return true;
 }
