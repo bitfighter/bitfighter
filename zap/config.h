@@ -162,6 +162,7 @@ struct IniSettings      // With defaults specified
    DisplayMode oldDisplayMode;
    string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
+   bool alwaysStartInKeyboardMode;
    bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
