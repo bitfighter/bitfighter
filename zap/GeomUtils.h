@@ -58,7 +58,7 @@
 namespace TNL {
    template<class T> class Vector;
 };
-namespace clipper {
+namespace ClipperLib {
    struct IntPoint;
    typedef std::vector<IntPoint> Polygon;
    typedef std::vector<Polygon> Polygons;
@@ -67,7 +67,7 @@ struct rcPolyMesh;
 
 
 using namespace TNL;
-using namespace clipper;
+using namespace ClipperLib;
 
 namespace Zap {
 

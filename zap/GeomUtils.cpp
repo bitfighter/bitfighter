@@ -52,7 +52,7 @@
 #include "Rect.h"
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
-#include "../clipper/clipper.h"
+#include "../clipper/clipper.hpp"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -61,7 +61,7 @@ extern "C" {
 #include <math.h>
 
 using namespace TNL;
-using namespace clipper;
+using namespace ClipperLib;
 
 namespace Zap
 {
@@ -997,7 +997,7 @@ void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, co
    Polygons polygons = upscaleClipperPoints(tempInputVector);
 
    // Call Clipper to do the dirty work
-   polygons = OffsetPolygons(polygons, offset * CLIPPER_SCALE_FACT);
+   OffsetPolygons(polygons, polygons, offset * CLIPPER_SCALE_FACT);
 
    // Downscale
    Vector<Vector<Point> > tempOutputVector = downscaleClipperPoints(polygons);
