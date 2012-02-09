@@ -319,8 +319,6 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
 
    mKillString = "crashed into a core";    // TODO: Really needed?
-
-   mHealth = 1;  // for older clients
 }
 
 
@@ -709,25 +707,16 @@ static void writeFloatZeroOrNonZero(BitStream &s, F32 &val, U8 bitCount)
 
 U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   GameConnection *gameConnection = (GameConnection *) connection;
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   if(gameConnection->mConnectionVersion < 2)  // older client
-      if(stream->writeFlag(updateMask & PanelDamagedAllMask))
-      {
-         F32 health = 0;
-         for(S32 i = 0; i < CORE_PANELS; i++)
-         {
-            health += mPanelHealth[i];
-         }
-         health /= mStartingHealth;
-         stream->writeFloat(min(health, 1.0f), 16);  // 16 bits -> 1/65536 increments  ... use of min: dividing might results on 1.000001
-      }
+   if(updateMask & InitialMask)
+   {
+      writeThisTeam(stream);
+   }
 
    stream->writeFlag(mHasExploded);
 
-
-   if(!mHasExploded && gameConnection->mConnectionVersion >= 2)  // newer client
+   if(!mHasExploded)
    {
       // Don't bother with health report if we've exploded
       F32 startingPanelHealth = mStartingHealth / CORE_PANELS;
@@ -744,13 +733,6 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
       }
    }
 
-   if(updateMask & InitialMask)
-   {
-      writeThisTeam(stream);
-      if(gameConnection->mConnectionVersion < 2)  // older client
-         stream->writeFloat(1, 16);   // 1, so we can send range between 0.0 and 1.0
-   }
-
    stream->writeFlag(mAttackedWarningTimer.getCurrent());
 
    return retMask;
@@ -760,28 +742,25 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   GameConnection *gameConnection = (GameConnection *) connection;
    Parent::unpackUpdate(connection, stream);
 
-   bool updateRadius = false;
+   if(mInitial)
+   {
+      readThisTeam(stream);
+   }
 
-   if(gameConnection->mConnectionVersion < 2)  // older server
-      if(stream->readFlag())
-      {
-         updateRadius = true;
-         mHealth = stream->readFloat(16);
-      }
-
-   bool exploded = (stream->readFlag());     // Exploding!  Take cover!!
-
-   if(gameConnection->mConnectionVersion < 2)  // older server
-      for(S32 i = 0; i < CORE_PANELS; i++)
-         mPanelHealth[i] = 1;
-
-   else if(exploded)
+   if(stream->readFlag())     // Exploding!  Take cover!!
+   {
       for(S32 i = 0; i < CORE_PANELS; i++)
          mPanelHealth[i] = 0;
 
+      if(!mHasExploded)    // Just exploded!
+      {
+         mHasExploded = true;
+         disableCollision();
+         onItemExploded(getPos());
+      }
+   }
    else                             // Haven't exploded, getting health
    {
       for(S32 i = 0; i < CORE_PANELS; i++)
@@ -789,26 +768,6 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(stream->readFlag())                    // Panel damaged
             mPanelHealth[i] = stream->readFloat(4);
       }
-   }
-
-   if(exploded && !mHasExploded)    // Just exploded!
-   {
-      mHasExploded = true;
-      disableCollision();
-      onItemExploded(getPos());
-   }
-
-   if(mInitial)
-   {
-      readThisTeam(stream);
-      if(gameConnection->mConnectionVersion < 2)  // older server
-         mStartingHealth = stream->readFloat(16);
-   }
-
-   if(updateRadius)
-   {
-      mHealth = mHealth / mStartingHealth;  // convert to a range between 0.0 and 1.0
-      setRadius(calcCoreWidth());
    }
 
    mBeingAttacked = stream->readFlag();
@@ -844,7 +803,7 @@ bool CoreItem::isBeingAttacked()
 
 F32 CoreItem::calcCoreWidth() const
 {
-   return (F32(CoreStartWidth - CoreMinWidth) * mHealth) + CoreMinWidth;
+   return CoreStartWidth; //(F32(CoreStartWidth - CoreMinWidth) * mHealth) + CoreMinWidth;
 }
 
 

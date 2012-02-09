@@ -64,6 +64,7 @@ namespace Zap {
 }
 
 extern U32 gLatestReleasedCSProtocol;
+extern U32 gLatestReleasedBuildVersion;
 
 extern Vector<string> MOTDTypeVecOld;
 extern Vector<string> MOTDStringVecOld;
@@ -125,6 +126,9 @@ void processConfigLine(int argc, string argv[])
 
    else if(argv[0] == "protocol" && argc > 1)    // protocol --> latest and greatest version of c-s protocol
       gLatestReleasedCSProtocol = atoi(argv[1].c_str());
+
+   else if(argv[0] == "build_version" && argc > 1)    // build_version --> usually, latest released version of bitfighter
+      gLatestReleasedBuildVersion = atoi(argv[1].c_str());
 
    else if(argv[0] == "json_file" && argc > 1)   // json file
       gJasonOutFile = argv[1];
@@ -329,8 +333,8 @@ void readConfigFile()
 
    parseArgs(fileData);
 
-   if(gLatestReleasedCSProtocol == 0)
-      logprintf(LogConsumer::LogError, "Unable to find a valid protocol line in config file... disabling update checks!");
+   if(gLatestReleasedCSProtocol == 0 && gLatestReleasedBuildVersion == 0)
+      logprintf(LogConsumer::LogError, "Unable to find a valid protocol line or build_version in config file... disabling update checks!");
 
    fclose(f);
 }

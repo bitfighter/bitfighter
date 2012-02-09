@@ -175,9 +175,15 @@ bool Joystick::initJoystick()
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
 
+   if(gClientGame->getSettings()->getIniSettings()->alwaysStartInKeyboardMode)
+   {
+      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+      return true;
+   }
+
    // Set primary input to joystick if any controllers were found, even a generic one
    if(hasBeenOpenedBefore)
-      ;  // do nothing when this was opened before
+      return true;  // do nothing when this was opened before
    else if(joystickType == "NoJoystick")
       gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
    else

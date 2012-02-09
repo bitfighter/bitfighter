@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2012 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -86,10 +86,10 @@ static __inline__ Uint16 SDL_Swap16(Uint16 x)
 #elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
 static __inline__ Uint16 SDL_Swap16(Uint16 x)
 {
-	Uint16 result;
+	int result;
 
 	__asm__("rlwimi %0,%2,8,16,23" : "=&r" (result) : "0" (x >> 8), "r" (x));
-	return result;
+	return (Uint16)result;
 }
 #elif defined(__GNUC__) && (defined(__m68k__) && !defined(__mcoldfire__))
 static __inline__ Uint16 SDL_Swap16(Uint16 x)

@@ -62,14 +62,13 @@ struct FolderManager
    FolderManager();
 
    FolderManager(const string &levelDir, const string &robotDir,     const string &sfxDir,    const string &musicDir, 
-                 const string &cacheDir, const string &iniDir,       const string &logDir,    const string &screenshotDir, 
-                 const string &luaDir,   const string &rootDataDir,  const string &pluginDir);      
+                 const string &iniDir,       const string &logDir,    const string &screenshotDir, const string &luaDir,
+                 const string &rootDataDir,  const string &pluginDir);
 
    string levelDir;
    string robotDir;
    string sfxDir;
    string musicDir;
-   string cacheDir;
    string iniDir;
    string logDir;
    string screenshotDir;
@@ -163,6 +162,7 @@ struct IniSettings      // With defaults specified
    DisplayMode oldDisplayMode;
    string joystickType;
    bool joystickLinuxUseOldDeviceSystem;
+   bool alwaysStartInKeyboardMode;
    bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)

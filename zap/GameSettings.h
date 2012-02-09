@@ -66,7 +66,6 @@ enum ParamId {
    INI_DIR,
    LOG_DIR,
    SCRIPTS_DIR,
-   CACHE_DIR,
    ROBOT_DIR,
    SCREENSHOT_DIR,
    SFX_DIR,

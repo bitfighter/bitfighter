@@ -510,6 +510,11 @@ static SDL_SysWMinfo windowManagerInfo;
 
 void setWindowPosition(S32 left, S32 top)
 {
+#ifdef TNL_OS_MAC_OSX
+   // We cannot set window position on Mac with SDL 1.2.  Abort!
+   return;
+#endif
+
    SDL_VERSION(&windowManagerInfo.version);
 
    // No window information..  Abort!!
@@ -525,10 +530,6 @@ void setWindowPosition(S32 left, S32 top)
        XMoveWindow(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow, left, top);
        windowManagerInfo.info.x11.unlock_func();
    }
-#endif
-
-#ifdef TNL_OS_MAC_OSX
-   // I don't know if anything can be done here..
 #endif
 
 #ifdef TNL_OS_WIN32
@@ -1120,7 +1121,7 @@ void actualizeScreenMode(bool changingInterfaces)
 
    // Set the SDL screen size and change to it
    if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
-         logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
+      logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
 
    // Now save the new window dimensions in ScreenInfo
    gScreenInfo.setWindowSize(sdlWindowWidth, sdlWindowHeight);
