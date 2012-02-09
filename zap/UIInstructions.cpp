@@ -154,7 +154,7 @@ void InstructionsUserInterface::activateInCommandMode()
 struct ControlString
 {
    const char *controlString;
-   InputCode *primaryControlIndex;
+   InputCodeManager::BindingName primaryControlIndex;    // Not really a good name
 };
 
 InputCode dummyMouse = MOUSE;
