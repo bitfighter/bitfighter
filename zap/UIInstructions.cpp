@@ -59,11 +59,13 @@ void InstructionsUserInterface::onActivate()
 }
 
 
-static const U32 NUM_PAGES = 12;
+static const U32 NUM_PAGES = 13;
+static const S32 FIRST_COMMAND_PAGE = 9;
 
 static const char *pageHeaders[] = {
    "CONTROLS",
    "LOADOUT SELECTION",
+   "MODULES",
    "WEAPON PROJECTILES",
    "SPY BUGS",
    "GAME OBJECTS",
@@ -75,9 +77,6 @@ static const char *pageHeaders[] = {
    "DEBUG COMMANDS",
    "SCRIPTING CONSOLE"
 };
-
-
-static const S32 FIRST_COMMAND_PAGE = 8;
 
 
 static ControlStringsEditor consoleCommands1[] = {
@@ -107,33 +106,36 @@ void InstructionsUserInterface::render()
          renderPage2();
          break;
       case 3:
-         renderPageObjectDesc(0);
+         renderModulesPage();
          break;
       case 4:
-         renderPageObjectDesc(1);
+         renderPageObjectDesc(0);
          break;
       case 5:
-         renderPageObjectDesc(2);
+         renderPageObjectDesc(1);
          break;
       case 6:
-         renderPageObjectDesc(3);
+         renderPageObjectDesc(2);
          break;
       case 7:
-         renderPageObjectDesc(4);
+         renderPageObjectDesc(3);
          break;
       case 8:
-         renderPageCommands(0);
+         renderPageObjectDesc(4);
          break;
       case 9:
-         renderPageCommands(1, "Level change permissions are required to use these commands");     // Level control commands
+         renderPageCommands(0);
          break;
       case 10:
-         renderPageCommands(2, "Admin permissions are required to use these commands");            // Admin commands
+         renderPageCommands(1, "Level change permissions are required to use these commands");     // Level control commands
          break;
       case 11:
-         renderPageCommands(3);     // Debug commands
+         renderPageCommands(2, "Admin permissions are required to use these commands");            // Admin commands
          break;
       case 12:
+         renderPageCommands(3);     // Debug commands
+         break;
+      case 13:
          renderConsoleCommands("Open the console by pressing [Ctrl-/] in game", consoleCommands1);   // Scripting console
          break;
 
@@ -345,39 +347,112 @@ void InstructionsUserInterface::renderPage1()
 
 }
 
-static const char *loadoutInstructions[] = {
+
+static const char *loadoutInstructions1[] = {
+   "LOADOUTS",
    "Players can outfit their ships with 3 weapons and 2 modules.",      // TODO: Replace 3 & 2 w/constants
    "Pressing the ship configuration menu key brings up a menu that",
    "allows the player to choose the next loadout for his or her ship.",
-   "This loadout will not be active on the ship until the player",
-   "flies over a Loadout Zone area.  Modules include:",
+   "",
+   "This loadout will become active on the ship when the player",
+   "flies over a Loadout Zone area, or respawns on a level that",
+   "has no Loadout Zones.",
 };
 
-static const char *moduleDescriptions[] = {
-   "Boost - Boosts movement speed",
-   "Shield - Reflects incoming projectiles",
-   "Armor - Reduces damage, but makes ship harder to control",
-   "Repair - Repairs self and nearby damaged objects",
-   "Sensor - Increases visible distance and reveals hidden objects",
-   "Cloak - Turns the ship invisible",
-   "Engineer - Collect resources to build turrets and forcefields",
+static const char *loadoutInstructions2[] = {
+   "PRESETS",
+   "You can save your Loadout in a Preset for easy recall later.",
+   "To save your loadout, press [Ctrl-1], [Ctrl-2], or [Ctrl-3].",
+   "To recall the preset, press [Alt-1], [Alt-2], or [Alt-3].",
+   "",
+   "Loadout Presets will be saved when you quit the game, and",
+   "will be available the next time you play."
 };
 
 void InstructionsUserInterface::renderPage2()
 {
-   S32 y = 75;
-   glColor3f(1,1,1);
-   for(U32 i = 0; i < ARRAYSIZE(loadoutInstructions); i++)
+   S32 y = 45;
+   S32 gap = 40;
+
+   glColor(Colors::yellow);
+   for(U32 i = 0; i < ARRAYSIZE(loadoutInstructions1); i++)
    {
-      drawCenteredString(y, 20, loadoutInstructions[i]);
+      drawCenteredString(y, 20, loadoutInstructions1[i]);
+      y += gap;
+      glColor(Colors::white);
+      gap = 26;
+   }
+
+   y += 40;
+   gap = 40;
+
+   glColor(Colors::yellow);
+   for(U32 i = 0; i < ARRAYSIZE(loadoutInstructions2); i++)
+   {
+      drawCenteredString(y, 20, loadoutInstructions2[i]);
+      y += gap;
+      glColor(Colors::cyan);
+      gap = 26;
+   }
+}
+
+
+static const char *moduleInstructions[] = {
+   "Modules have up to 3 modes: Passive, Active, and Kinetic (P/A/K)",
+   "Passive mode is always active and costs no energy (e.g. Armor).",
+   "Use Active mode by pressing module's activation key (e.g. Shield).",
+   "Double-click activation key to use module's Kinetic mode.",
+};
+
+static const char *moduleDescriptions[][2] = {
+   { "Boost: ",    "Go faster! (A)" },
+   { "Shield: ",   "Reflects incoming projectiles (A)" },
+   { "Armor: ",    "Reduces damage, makes ship harder to control (P)" },
+   { "",           "Incoming bouncers do more damage" },
+   { "Repair: ",   "Repair self and nearby damaged objects (A)" },
+   { "Sensor: ",   "See further (P), Reveal hidden objects (A)," },
+   { "",           "Deploy spy bugs (K)" },
+   { "Cloak: ",    "Make ship invisible to enemies (A)" },
+   { "Engineer: ", "Collect resources to build turrets and forcefields (A)" }
+};
+
+void InstructionsUserInterface::renderModulesPage()
+{
+   S32 y = 40;
+   S32 textsize = 20;
+
+   glColor(Colors::white);
+
+   for(U32 i = 0; i < ARRAYSIZE(moduleInstructions); i++)
+   {
+      drawCenteredString(y, textsize, moduleInstructions[i]);
       y += 26;
    }
 
-   y += 30;
-   for(S32 i = 0; i < 7; i++)
+   y += 20;
+
+   glColor(Colors::cyan);
+   drawCenteredString(y, textsize, "LIST OF MODULES");
+
+   y += 35;
+
+
+   for(S32 i = 0; i < ARRAYSIZE(moduleDescriptions); i++)
    {
+      S32 x = 105;
+      glColor(Colors::yellow);
+      x += drawStringAndGetWidth(x, y, textsize, moduleDescriptions[i][0]);
+
+      // Hacky special case  TODO: find a way to generalize this
+      if(i == 3 || i == 6)
+   {
+         x += getStringWidth(textsize, moduleDescriptions[i - 1][0]);
+         y -= 20;
+      }
+
       glColor(Colors::white);
-      drawString(105, y, 20, moduleDescriptions[i]);
+      drawString(x, y, textsize, moduleDescriptions[i][1]);
+
       glPushMatrix();
       glTranslatef(60, F32(y + 10), 0);
       glScale(0.7f);
@@ -391,7 +466,7 @@ void InstructionsUserInterface::renderPage2()
          case 0:     // Boost
             renderShip(&Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
             glBegin(GL_LINES);
-               glColor3f(1,1,0);
+               glColor(Colors::yellow);
                glVertex2f(-20, -17);
                glColor(Colors::black);
                glVertex2f(-20, -50);
@@ -410,7 +485,9 @@ void InstructionsUserInterface::renderPage2()
             renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
-         case 3:     // Repair
+         // skip 3 for 2nd line of armor
+
+         case 4:     // Repair
             {
                F32 health = (getGame()->getCurrentTime() & 0x7FF) * 0.0005f;
 
@@ -422,11 +499,13 @@ void InstructionsUserInterface::renderPage2()
             }
             break;
 
-         case 4:     // Sensor
+         case 5:     // Sensor
             renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, false, true, false);
             break;
 
-         case 5:     // Cloak
+         // skip 6 for 2nd line of sensor
+
+         case 7: // Cloak
             {
                U32 time = getGame()->getCurrentTime();
                F32 frac = F32(time & 0x3FF);
@@ -439,7 +518,7 @@ void InstructionsUserInterface::renderPage2()
             }
             break;
 
-         case 6:     // Engineer
+         case 8:     // Engineer
             {
                renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false);
                renderResourceItem(Point(0,0));
@@ -447,7 +526,7 @@ void InstructionsUserInterface::renderPage2()
             break;
       }
       glPopMatrix();
-      y += 50;
+      y += 45;
    }
 }
 

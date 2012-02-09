@@ -40,15 +40,17 @@ private:
    U32 mCurPage;
    bool usingArrowKeys();
 
-public:
-   InstructionsUserInterface(ClientGame *game);      // Constructor
-   void render();
    void renderPage1();
    void renderPage2();
+   void renderModulesPage();
    void renderPageObjectDesc(U32 index);
    void renderPageCommands(U32 index, const char *msg = "");
    void nextPage();
    void prevPage();
+
+public:
+   InstructionsUserInterface(ClientGame *game);      // Constructor
+   void render();
 
    bool onKeyDown(InputCode inputCode, char ascii);
 
