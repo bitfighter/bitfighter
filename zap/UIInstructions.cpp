@@ -154,7 +154,7 @@ void InstructionsUserInterface::activateInCommandMode()
 struct ControlString
 {
    const char *controlString;
-   InputCodeManager::BindingName primaryControlIndex;    // Not really a good name
+   InputCode *primaryControlIndex;
 };
 
 InputCode dummyMouse = MOUSE;
@@ -843,7 +843,7 @@ void InstructionsUserInterface::prevPage()
 void InstructionsUserInterface::exitInstructions()
 {
    playBoop();
-    getUIManager()->reactivatePrevUI();      //mGameUserInterface
+   getUIManager()->reactivatePrevUI();      //mGameUserInterface
 }
 
 
