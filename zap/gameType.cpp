@@ -1127,7 +1127,7 @@ void GameType::addSpyBug(SpyBug *spybug)
 
 
 // Only runs on server
-void GameType::addWall(WallRec wall, Game *game)
+void GameType::addWall(const WallRec &wall, Game *game)
 {
    mWalls.push_back(wall);
    wall.constructWalls(game);
@@ -2527,11 +2527,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddWalls, (Vector<F32> verts, F32 width, bool soli
       mGame->deleteObjects((TestFunc)isWallType);
    else
    {
-      WallRec wall;
-      wall.verts = verts;
-      wall.width = width;
-      wall.solid = solid;
-
+      WallRec wall(width, solid, verts);
       wall.constructWalls(mGame);
    }
 }

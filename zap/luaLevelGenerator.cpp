@@ -229,7 +229,6 @@ Point LuaLevelGenerator::getPointFromTable(lua_State *L, int tableIndex, int key
 S32 LuaLevelGenerator::addWall(lua_State *L)
 {
    static const char *methodName = "LevelGeneratorEditor:addWall()";
-   WallRec barrier;
 
    string line = "BarrierMaker";
 
@@ -237,7 +236,6 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
    {
       F32 width = getFloat(L, 1, methodName);      // Width is first arg
       line += " " + ftos(width, 1);
-      //barrier.solid = getBool(L, 2, methodName);       // Solid param is second arg
 
       // Third arg is a table of coordinate values in "editor space" (i.e. these will be multiplied by gridsize before being used)
       S32 points = (S32)lua_objlen(L, 3);    // Get the number of points in our table of points

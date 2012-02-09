@@ -1976,55 +1976,26 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {
-      if(argc >= 2)
+      // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
+      // and geom processing in our place.
+      WallItem wallItem;
+      if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
       {
-         WallRec barrier;
-         barrier.width = F32(atof(argv[1]));
-
-         if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
-            barrier.width = Barrier::MIN_BARRIER_WIDTH;
-         else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
-            barrier.width = Barrier::MAX_BARRIER_WIDTH;
-
-   
-         for(S32 i = 2; i < argc; i++)
-            barrier.verts.push_back(F32(atof(argv[i])) * getGridSize());
-   
-         if(barrier.verts.size() > 3)
-         {
-            barrier.solid = false;
-            getGameType()->addWall(barrier, this);
+         // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+         // is convenient to transmit to the clients
+         WallRec wallRec(wallItem);
+         getGameType()->addWall(wallRec, this);
          }
       }
-   }
-   // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
-      bool width = false;
-
-      if(!stricmp(argv[0], "BarrierMakerS"))
+      PolyWall polyWall;
+      if(polyWall.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
       {
-         logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
-         width = true;
-      }
-
-      if(argc >= 2)
-      { 
-         WallRec barrier;
-         
-         if(width)      // BarrierMakerS still width, though we ignore it
-            barrier.width = F32(atof(argv[1]));
-         else           // PolyWall does not have width specified
-            barrier.width = 1;
-
-         for(S32 i = 2 - (width ? 0 : 1); i < argc; i++)
-            barrier.verts.push_back(F32(atof(argv[i])) * getGridSize());
-
-         if(barrier.verts.size() > 3)
-         {
-            barrier.solid = true;
-            getGameType()->addWall(barrier, this);
-         }
+         // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+         // is convenient to transmit to the clients
+         WallRec wallRec(polyWall);
+         getGameType()->addWall(wallRec, this);
       }
    }
    else 

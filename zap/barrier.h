@@ -215,6 +215,26 @@ private:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// This is just a small container for the bits of a wall that we transfer from the client to the server
+
+struct WallRec
+{
+   Vector<F32> verts;
+   F32 width;
+   bool solid;
+
+public:
+   WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
+   WallRec(const WallItem &wallItem);                          // Constructor
+   WallRec(const PolyWall &polyWall);                          // Constructor
+
+   void constructWalls(Game *theGame) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class WallSegment : public DatabaseObject
 {
 private:

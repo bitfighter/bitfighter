@@ -68,8 +68,8 @@ public:
 
    GeomType getGeomType();
 
-   S32 getVertCount();
-   S32 getMinVertCount();
+   S32 getVertCount() const;
+   S32 getMinVertCount() const;
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
@@ -117,8 +117,8 @@ public:
    Point getVert(S32 index) const;
    void setVert(const Point &pos, S32 index);
 
-   S32 getVertCount();
-   S32 getMinVertCount();
+   S32 getVertCount() const;
+   S32 getMinVertCount() const;
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
@@ -170,8 +170,8 @@ public:
    Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
 
-   S32 getVertCount();
-   S32 getMinVertCount();
+   S32 getVertCount() const;
+   S32 getMinVertCount() const;
 
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
@@ -229,7 +229,7 @@ public:
 
    void disableTriangulation();
 
-   S32 getMinVertCount();
+   S32 getMinVertCount() const;
 };
 
 

@@ -85,14 +85,14 @@ void Geometry::setVert(const Point &pos, S32 index)
 }
 
 
-S32 Geometry::getVertCount()
+S32 Geometry::getVertCount() const
 {
    TNLAssert(false, "Not implemented");
    return 0;
 }
 
 
-S32 Geometry::getMinVertCount()
+S32 Geometry::getMinVertCount() const
 {
    TNLAssert(false, "Not implemented");
    return 0;
@@ -307,13 +307,13 @@ Point PointGeometry::getVert(S32 index) const
 }
 
 
-S32 PointGeometry::getVertCount()
+S32 PointGeometry::getVertCount() const
 {
    return 1;
 }
 
 
-S32 PointGeometry::getMinVertCount()
+S32 PointGeometry::getMinVertCount() const
 {
    return 1;
 }
@@ -491,13 +491,13 @@ void SimpleLineGeometry::setVert(const Point &pos, S32 index)
 }
 
 
-S32 SimpleLineGeometry::getVertCount()
+S32 SimpleLineGeometry::getVertCount() const
 {
    return 2;
 }
 
 
-S32 SimpleLineGeometry::getMinVertCount()
+S32 SimpleLineGeometry::getMinVertCount() const
 {
    return 2;
 }
@@ -681,13 +681,13 @@ void PolylineGeometry::setVert(const Point &point, S32 index)
 }
 
 
-S32 PolylineGeometry::getVertCount() 
+S32 PolylineGeometry::getVertCount() const 
 { 
    return mPolyBounds.size(); 
 }
 
 
-S32 PolylineGeometry::getMinVertCount()
+S32 PolylineGeometry::getMinVertCount() const
 {
    return 2;
 }
@@ -887,13 +887,18 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 {
    Point p, lastP;
    
+   bool isTwoPointLine = (argc - firstCoord) / 2 == 2;
+   
    bounds.clear();
 
    for(S32 i = firstCoord; i < argc; i += 2)
    {
       p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
 
-      if(i == firstCoord || p != lastP)
+      // Normally, we'll want to filter out adjacent points that are identical.  But we also
+      // need to handle the situation where the user has created a 2-pt 0-length line.
+      // Because the users demand it.  We will deliver.
+      if(i == firstCoord || p != lastP || isTwoPointLine)
          bounds.push_back(p);
 
       lastP.set(p);
@@ -905,6 +910,7 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
 }
 
 
+// For walls at least, this is client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
     readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds);      // Fills mPolyBounds
@@ -974,7 +980,7 @@ void PolygonGeometry::disableTriangulation()
 }
 
 
-S32 PolygonGeometry::getMinVertCount()
+S32 PolygonGeometry::getMinVertCount() const
 {
    return 3;
 }

@@ -555,9 +555,7 @@ void ClientGame::idle(U32 timeDelta)
          }
       }
       if(mGameType)
-      {
          mGameType->idle(GameObject::ClientIdleMainRemote, timeDelta);
-      }
 
       if(controlObject)
          SoundSystem::setListenerParams(controlObject->getPos(), controlObject->getVel());
@@ -1846,7 +1844,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
          newObject->initializeEditor();     // Only runs unselectVerts
 
-         newObject->processArguments(argc - 1 - skipArgs, argv + 1 + skipArgs, this);
+         newObject->processArguments(argc - skipArgs, argv + skipArgs, this);
          
          if(newObject->getVertCount() >= 2)
          {

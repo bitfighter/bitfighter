@@ -51,26 +51,17 @@ class CoreItem;
 class MenuItem;
 class MoveItem;
 class ClientGame;
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class Robot;
 class AsteroidSpawn;
 class Team;
 class SpyBug;
 class MenuUserInterface;
 
-struct WallRec
-{
-   Vector<F32> verts;
-   F32 width;
-   bool solid;
+struct WallRec;
 
-public:
-   void constructWalls(Game *theGame);
-};
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 class GameType : public NetObject
 {
@@ -200,7 +191,7 @@ public:
    void catalogSpybugs();           // Build a list of spybugs in the game
    void addSpyBug(SpyBug *spybug);
 
-   void addWall(WallRec barrier, Game *game);
+   void addWall(const WallRec &barrier, Game *game);
 
    virtual bool isFlagGame();      // Does game use flags?
    virtual bool isTeamFlagGame();  // Does flag-team orientation matter?  Only false in HunterGame.

@@ -282,7 +282,7 @@ GeometryContainer::~GeometryContainer()
 }
 
 
-Geometry *GeometryContainer::getGeometry()
+Geometry *GeometryContainer::getGeometry() const
 {
    return mGeometry;
 }
@@ -477,8 +477,8 @@ bool  BfObject::insertVert(Point vertex, S32 vertIndex)
 void  BfObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
                                                                                            
 bool BfObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
-S32  BfObject::getVertCount()              {   return mGeometry.getGeometry()->getVertCount();            }
-S32  BfObject::getMinVertCount()           {   return mGeometry.getGeometry()->getMinVertCount();         }
+S32  BfObject::getVertCount() const        {   return mGeometry.getGeometry()->getVertCount();            }
+S32  BfObject::getMinVertCount() const     {   return mGeometry.getGeometry()->getMinVertCount();         }
 
 void BfObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
 

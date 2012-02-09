@@ -63,15 +63,57 @@ bool loadBarrierPoints(const WallRec *barrier, Vector<Point> &points)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+// Constructor
+WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
+{
+   this->width = width;
+   this->solid = solid;
+
+   this->verts.resize(verts.size());
+
+   for(S32 i = 0; i < verts.size(); i++)
+      this->verts[i] = verts[i];
+}
+
+
+// Constructor
+WallRec::WallRec(const WallItem &wallItem)
+{
+   width = wallItem.getWidth();
+   solid = false;
+
+   for(S32 i = 0; i < wallItem.getVertCount(); i++)
+   {
+      verts.push_back(wallItem.getVert(i).x);
+      verts.push_back(wallItem.getVert(i).y);
+   }
+}
+
+
+// Constructor
+WallRec::WallRec(const PolyWall &polyWall)
+{
+   width = 1;      // Doesn't really matter... will be ignored
+   solid = true;
+
+   for(S32 i = 0; i < polyWall.getVertCount(); i++)
+   {
+      verts.push_back(polyWall.getVert(i).x);
+      verts.push_back(polyWall.getVert(i).y);
+   }
+}
+
+
 // Runs on server or on client, never in editor
-void WallRec::constructWalls(Game *theGame)
+void WallRec::constructWalls(Game *theGame) const
 {
    Vector<Point> vec;
 
    if(!loadBarrierPoints(this, vec))
       return;
 
-   if(solid)   // This is a solid polygon
+   if(solid)   // This is a polywall
    {
       if(vec.first() == vec.last())      // Does our barrier form a closed loop?
          vec.erase(vec.size() - 1);      // If so, remove last vertex
@@ -594,9 +636,10 @@ void WallItem::setSelected(bool selected)
 }
 
 
+// Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 5)         // Need width, and two or more x,y pairs
+   if(argc < 6)         // Need "BarrierMaker" keyword, width, and two or more x,y pairs
       return false;
 
    return processGeometry(argc, argv, game);
@@ -642,10 +685,18 @@ void PolyWall::renderDock()
 
 bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc < 6)
+   if(argc < 7)            // Need "Polywall" keyword, and at least 3 points
       return false;
 
-   readGeom(argc, argv, 0, game->getGridSize());
+   S32 offset = 0;
+
+   if(!stricmp(argv[0], "BarrierMakerS"))
+   {
+      logprintf(LogConsumer::LogLevelError, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+      offset = 1;
+   }
+
+   readGeom(argc, argv, 1 + offset, game->getGridSize());
    //computeExtent();
 
    return true;

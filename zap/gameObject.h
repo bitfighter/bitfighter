@@ -167,7 +167,7 @@ public:
    GeometryContainer(const GeometryContainer &container);   // Copy constructor
    ~GeometryContainer();                                    // Destructor
 
-   Geometry *getGeometry();
+   Geometry *getGeometry() const;
    const Geometry *getConstGeometry() const;
    void setGeometry(Geometry *geometry);
 
@@ -217,7 +217,7 @@ public:
    // Geometric operations
    void unselectVerts();
    bool vertSelected(S32 vertIndex);
-   S32 getVertCount();
+   S32 getVertCount() const;
 
    GeomType getGeomType();
 
@@ -229,7 +229,7 @@ public:
    void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
    void unselectVert(S32 vertIndex);
 
-   S32 getMinVertCount();             // Minimum number of vertices geometry needs to be viable
+   S32 getMinVertCount() const;       // Minimum number of vertices geometry needs to be viable
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
    bool addVertFront(Point vert);
