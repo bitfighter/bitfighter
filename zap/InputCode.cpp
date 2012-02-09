@@ -49,48 +49,27 @@ namespace Zap
 
 static bool inputCodeIsDown[MAX_INPUT_CODES];
 
-// We have two sets of input codes defined -- one for when we're playing
-// with a keyboard, and one for joystick play
-InputCode inputSELWEAP1[2];       // Select weapon 1
-InputCode inputSELWEAP2[2];       // Select weapon 2
-InputCode inputSELWEAP3[2];       // Select weapon 3
-InputCode inputADVWEAP[2];        // Pick next weapon
-InputCode inputCMDRMAP[2];        // Toggle commander's map
-InputCode inputTEAMCHAT[2];       // Send team chat message
-InputCode inputGLOBCHAT[2];       // Send global chat message
-InputCode inputQUICKCHAT[2];      // Enter QuickChat mode
-InputCode inputCMDCHAT[2];        // Go directly to command mode, bypassing chat
-InputCode inputLOADOUT[2];        // Enter Loadout mode
-InputCode inputMOD1[2];           // Activate module 1
-InputCode inputMOD2[2];           // Activate module 2
-InputCode inputFIRE[2];           // Fire
-InputCode inputDROPITEM[2];       // Drop flag or other item
-InputCode inputTOGVOICE[2];       // Toggle voice chat
-InputCode inputUP[2];             // Move ship
-InputCode inputDOWN[2];
-InputCode inputLEFT[2];
-InputCode inputRIGHT[2];
-InputCode inputSCRBRD[2];         // Show scoreboard
 
-// These input codes are constant, regardless of mode, and can't be changed by the user
-// Define these here to ensure they can be used for defining menus during initialization
-// They really don't belong here, but what to do... what to do.
-InputCode keyHELP = KEY_F1;              // Display help
-InputCode keyOUTGAMECHAT = KEY_F5;       // Out of game chat
-InputCode keyFPS = KEY_F6;               // Show FPS display
-InputCode keyDIAG = KEY_F7;              // Show diagnostic overlay
-InputCode keyMISSION = KEY_F2;           // Show current mission info
+// Constructor
+InputCodeManager::InputCodeManager()
+{
+   keyHELP = KEY_F1;              // Display help
+   keyOUTGAMECHAT = KEY_F5;       // Out of game chat
+   keyFPS = KEY_F6;               // Show FPS display
+   keyDIAG = KEY_F7;              // Show diagnostic overlay
+   keyMISSION = KEY_F2;           // Show current mission info
+}
 
 
-// Initialize state of keys... assume none are depressed
-void resetInputCodeStates()
+// Initialize state of keys... assume none are depressed, or even sad
+void InputCodeManager::resetStates()
 {
    for(int i = 0; i < MAX_INPUT_CODES; i++)
       inputCodeIsDown[i] = false;
 }
 
 // Prints list of any input codes that are down, for debugging purposes
-void dumpInputCodeStates()
+void InputCodeManager::dumpInputCodeStates()
 {
   for(S32 i = 0; i < MAX_INPUT_CODES; i++)
      if(inputCodeIsDown[i])
@@ -99,34 +78,33 @@ void dumpInputCodeStates()
 
 
 // Set state of a input code as Up (false) or Down (true)
-void setInputCodeState(InputCode inputCode, bool state)
-{
+void InputCodeManager::setState(InputCode inputCode, bool state)
+{  
    inputCodeIsDown[(S32)inputCode] = state;
 }
 
 
 // Returns true of input code is down, false if it is up
-bool getInputCodeState(InputCode inputCode)
+bool InputCodeManager::getState(InputCode inputCode)
 {
 //   logprintf("State: key %d is %s", inputCode, keyIsDown[(int) inputCode] ? "down" : "up");
-      return inputCodeIsDown[(S32)inputCode];
+   return inputCodeIsDown[(S32)inputCode];
 }
 
 
-InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
+static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, KEY_SUPER };
 
-
-std::string makeInputString(InputCode inputCode)
+string InputCodeManager::makeInputString(InputCode inputCode)
 {
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
       if(inputCode == modifiers[i])
          return "";
 
-   std::string inputString = "";
-   std::string joiner = "+";
+   string inputString = "";
+   string joiner = "+";
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))
+      if(getState(modifiers[i]))
          inputString += inputCodeToString(modifiers[i]) + joiner;
    
    inputString += inputCodeToString(inputCode);
@@ -135,12 +113,12 @@ std::string makeInputString(InputCode inputCode)
 
 
 // Can pass in one of the above, or KEY_NONE to check if no modifiers are pressed
-bool checkModifier(InputCode mod1)    
+bool InputCodeManager::checkModifier(InputCode mod1)    
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))                      // Modifier is down
+      if(getState(modifiers[i]))                      // Modifier is down
       {
          if(modifiers[i] == mod1)      
             foundCount++;
@@ -153,12 +131,12 @@ bool checkModifier(InputCode mod1)
 
 
 // Check if two modifiers are both pressed (i.e. Ctrl+Alt)
-bool checkModifier(InputCode mod1, InputCode mod2)
+bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))                      // Modifier is down
+      if(getState(modifiers[i]))                      // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2)      
             foundCount++;
@@ -171,12 +149,12 @@ bool checkModifier(InputCode mod1, InputCode mod2)
 
 
 // Check to see if three modifers are all pressed (i.e. Ctrl+Alt+Shift)
-bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3)
+bool InputCodeManager::checkModifier(InputCode mod1, InputCode mod2, InputCode mod3)
 {
    S32 foundCount = 0;
 
    for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(getInputCodeState(modifiers[i]))                      // Modifier is down
+      if(getState(modifiers[i]))                      // Modifier is down
       {
          if(modifiers[i] == mod1 || modifiers[i] == mod2 || modifiers[i] == mod3)      
             foundCount++;
@@ -188,6 +166,7 @@ bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3)
 }
 
 
+// Not static -- used externally
 bool isPrintable(char c)
 {
    return c >= 32 && c <= 126;
@@ -196,7 +175,7 @@ bool isPrintable(char c)
 
 // If there is a printable ASCII code for the pressed key, return it
 // Filter out some know spurious keystrokes
-char keyToAscii(int unicode, InputCode inputCode)
+char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 {
    //if(inputCode == KEY_UP || inputCode == KEY_DOWN || inputCode == KEY_LEFT || inputCode == KEY_RIGHT)
    //   return 0;
@@ -210,9 +189,179 @@ char keyToAscii(int unicode, InputCode inputCode)
 }
 
 
+InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputMode)
+{
+   S32 mode = (S32)inputMode;
+
+   switch(bindingName)
+   {
+      case BINDING_SELWEAP1:
+	      return inputSELWEAP1[mode];
+      case BINDING_SELWEAP2:
+	      return inputSELWEAP2[mode];
+      case BINDING_SELWEAP3:
+	      return inputSELWEAP3[mode];
+      case BINDING_ADVWEAP:
+	      return inputADVWEAP[mode];
+      case BINDING_CMDRMAP:
+	      return inputCMDRMAP[mode];
+      case BINDING_TEAMCHAT:
+	      return inputTEAMCHAT[mode];
+      case BINDING_GLOBCHAT:
+	      return inputGLOBCHAT[mode];
+      case BINDING_QUICKCHAT:
+	      return inputQUICKCHAT[mode];
+      case BINDING_CMDCHAT:
+	      return inputCMDCHAT[mode];
+      case BINDING_LOADOUT:
+	      return inputLOADOUT[mode];
+      case BINDING_MOD1:
+	      return inputMOD1[mode];
+      case BINDING_MOD2:
+	      return inputMOD2[mode];
+      case BINDING_FIRE:
+	      return inputFIRE[mode];
+      case BINDING_DROPITEM:
+	      return inputDROPITEM[mode];
+      case BINDING_TOGVOICE:
+	      return inputTOGVOICE[mode];
+      case BINDING_UP:
+	      return inputUP[mode];
+      case BINDING_DOWN:
+	      return inputDOWN[mode];
+      case BINDING_LEFT:
+	      return inputLEFT[mode];
+      case BINDING_RIGHT:
+	      return inputRIGHT[mode];
+      case BINDING_SCRBRD:
+	      return inputSCRBRD[mode];
+      case BINDING_HELP:
+	      return keyHELP;
+      case BINDING_OUTGAMECHAT:
+	      return keyOUTGAMECHAT;
+      case BINDING_MISSION:
+	      return keyMISSION;
+      case BINDING_FPS:
+	      return keyFPS;
+      case BINDING_DIAG:
+	      return keyDIAG;
+      case BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
+         return MOUSE;
+      case BINDING_DUMMY_MOVE_SHIP_KEYS_UD:
+         return KEYS_UP_DOWN;
+      case BINDING_DUMMY_MOVE_SHIP_KEYS_LR:
+         return KEYS_LEFT_RIGHT;
+      case BINDING_DUMMY_STICK_LEFT:
+         return LEFT_JOYSTICK;
+      case BINDING_DUMMY_STICK_RIGHT:
+         return RIGHT_JOYSTICK;
+      case BINDING_DUMMY_MSG_MODE:
+         return KEY_CTRL_M;
+      case BINDING_DUMMY_SS_MODE:
+         return KEY_CTRL_Q;
+         
+   //         MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
+   //KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy InputCode item in the instructions
+   //KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
+         
+      default:
+         TNLAssert(false, "Invalid key binding!");
+         return KEY_NONE;
+   }
+}
+
+
+void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, InputCode key)
+{
+   S32 mode = (S32)inputMode;
+
+   switch(bindingName)
+   {
+      case BINDING_SELWEAP1:
+	      inputSELWEAP1[mode] = key;
+         break;
+      case BINDING_SELWEAP2:
+	      inputSELWEAP2[mode] = key;
+         break;
+      case BINDING_SELWEAP3:
+	      inputSELWEAP3[mode] = key;
+         break;
+      case BINDING_ADVWEAP:
+	      inputADVWEAP[mode] = key;
+         break;
+      case BINDING_CMDRMAP:
+	      inputCMDRMAP[mode] = key;
+         break;
+      case BINDING_TEAMCHAT:
+	      inputTEAMCHAT[mode] = key;
+         break;
+      case BINDING_GLOBCHAT:
+	      inputGLOBCHAT[mode] = key;
+         break;
+      case BINDING_QUICKCHAT:
+	      inputQUICKCHAT[mode] = key;
+         break;
+      case BINDING_CMDCHAT:
+	      inputCMDCHAT[mode] = key;
+         break;
+      case BINDING_LOADOUT:
+	      inputLOADOUT[mode] = key;
+         break;
+      case BINDING_MOD1:
+	      inputMOD1[mode] = key;
+         break;
+      case BINDING_MOD2:
+	      inputMOD2[mode] = key;
+         break;
+      case BINDING_FIRE:
+	      inputFIRE[mode] = key;
+         break;
+      case BINDING_DROPITEM:
+	      inputDROPITEM[mode] = key;
+         break;
+      case BINDING_TOGVOICE:
+	      inputTOGVOICE[mode] = key;
+         break;
+      case BINDING_UP:
+	      inputUP[mode] = key;
+         break;
+      case BINDING_DOWN:
+	      inputDOWN[mode] = key;
+         break;
+      case BINDING_LEFT:
+	      inputLEFT[mode] = key;
+         break;
+      case BINDING_RIGHT:
+	      inputRIGHT[mode] = key;
+         break;
+      case BINDING_SCRBRD:
+	      inputSCRBRD[mode] = key;
+         break;
+      case BINDING_HELP:
+	      keyHELP = key;
+         break;
+      case BINDING_OUTGAMECHAT:
+	      keyOUTGAMECHAT = key;
+         break;
+      case BINDING_MISSION:
+	      keyMISSION = key;
+         break;
+      case BINDING_FPS:
+	      keyFPS = key;
+         break;
+      case BINDING_DIAG:
+	      keyDIAG = key;
+         break;
+      default:
+         TNLAssert(false, "Invalid key binding!");
+   }
+}
+
+
+
 #ifndef ZAP_DEDICATED
 // Translate SDL standard keys to our InputCodes
-InputCode sdlKeyToInputCode(int key)
+InputCode InputCodeManager::sdlKeyToInputCode(int key)
 {
    switch(key)
    {
@@ -693,7 +842,7 @@ InputCode sdlKeyToInputCode(int key)
 }
 
 
-S32 inputCodeToSDLKey(InputCode inputCode)
+S32 InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 {
    switch(inputCode)
    {
@@ -1159,7 +1308,7 @@ S32 inputCodeToSDLKey(InputCode inputCode)
 }
 
 
-InputCode joystickButtonToInputCode(Joystick::Button button)
+InputCode InputCodeManager::joystickButtonToInputCode(Joystick::Button button)
 {
    switch(button)
    {
@@ -1205,7 +1354,7 @@ InputCode joystickButtonToInputCode(Joystick::Button button)
 }
 
 
-InputCode joyHatToInputCode(int hatDirectionMask)
+InputCode InputCodeManager::joyHatToInputCode(int hatDirectionMask)
 {
    switch(hatDirectionMask)
    {
@@ -1271,23 +1420,20 @@ Joystick::Button inputCodeToJoystickButton(InputCode inputCode)
 
 
 // We'll also treat controller buttons like simulated keystrokes
-bool isControllerButton(InputCode inputCode)
+bool InputCodeManager::isControllerButton(InputCode inputCode)
 {
-   if (inputCode == BUTTON_1 || inputCode == BUTTON_2 || inputCode == BUTTON_3 ||
-       inputCode == BUTTON_4 || inputCode == BUTTON_5 || inputCode == BUTTON_6 ||
-       inputCode == BUTTON_7 || inputCode == BUTTON_8 || inputCode == BUTTON_9 ||
-       inputCode == BUTTON_10 || inputCode == BUTTON_11 || inputCode == BUTTON_12 ||
-       inputCode == BUTTON_BACK || inputCode == BUTTON_START)
-      return true;
-   else
-      return false;
-}
+   return inputCode == BUTTON_1    || inputCode == BUTTON_2  || inputCode == BUTTON_3  ||
+          inputCode == BUTTON_4    || inputCode == BUTTON_5  || inputCode == BUTTON_6  ||
+          inputCode == BUTTON_7    || inputCode == BUTTON_8  || inputCode == BUTTON_9  ||
+          inputCode == BUTTON_10   || inputCode == BUTTON_11 || inputCode == BUTTON_12 ||
+          inputCode == BUTTON_BACK || inputCode == BUTTON_START;
+}       
 
 
 // Array tying InputCodes to string representations; used for translating one to the other 
 static const char *keyNames[KEY_COUNT];
 
-void initializeKeyNames()
+void InputCodeManager::initializeKeyNames()
 {
    // Fill name list with default value
    for(S32 i = 0; i < KEY_COUNT; i++)
@@ -1438,7 +1584,7 @@ void initializeKeyNames()
 // Translate an InputCode into a string name, primarily used
 // for displaying keys in help and during rebind mode, and
 // also when storing key bindings in INI files
-const char *inputCodeToString(InputCode inputCode)
+const char *InputCodeManager::inputCodeToString(InputCode inputCode)
 {
    //TNLAssert(U32(inputCode) < U32(KEY_COUNT), "inputCode out of range");
    if(U32(inputCode) >= U32(KEY_COUNT))
@@ -1450,7 +1596,7 @@ const char *inputCodeToString(InputCode inputCode)
 
 // Translate from a string key name into a InputCode
 // (primarily for loading key bindings from INI files)
-InputCode stringToInputCode(const char *inputName)
+InputCode InputCodeManager::stringToInputCode(const char *inputName)
 {
    for(S32 i = 0; i < KEY_COUNT; i++)
       if(stricmp(inputName, keyNames[i]) == 0)
@@ -1465,9 +1611,9 @@ InputCode stringToInputCode(const char *inputName)
 #ifdef __cplusplus
 extern "C" {
 #endif
-// Provide access to getInputCodeState from C code.
+// Provide access to getState from C code.
 // Has to be outside the namespace declaration because C doesn't use namespaces.
-int getInputCodeState_c(int inputCode) { return Zap::getInputCodeState((Zap::InputCode)inputCode); }
+int getState_c(int inputCode) { return Zap::InputCodeManager::getState((Zap::InputCode)inputCode); }
 #ifdef __cplusplus
 }
 #endif

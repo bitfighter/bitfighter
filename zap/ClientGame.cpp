@@ -51,7 +51,6 @@
 
 #include "IniFile.h"             // For CIniFile def
 
-
 #include "BotNavMeshZone.h"      // For zone clearing code
 #include "ScreenInfo.h"
 #include "Joystick.h"
@@ -108,9 +107,9 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mRemoteLevelDownloadFilename = "downloaded.level";
 
-   mUIManager = new UIManager(this);         // Gets deleted in destructor
+   mUIManager = new UIManager(this);               // Gets deleted in destructor
 
-   mClientInfo = new FullClientInfo(NULL, false);    // Will be deleted in destructor
+   mClientInfo = new FullClientInfo(NULL, false);  // Will be deleted in destructor
    mLocalRemoteClientInfo = NULL;
 
    mSpawnDelayed = false;
@@ -152,7 +151,7 @@ ClientGame::~ClientGame()
    cleanUp();
 
    delete mUserInterfaceData;
-   delete mUIManager;   
+   delete mUIManager; 
    delete mConnectionToServer.getPointer();
    delete mClientInfo;
 }

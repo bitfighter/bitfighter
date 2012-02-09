@@ -93,6 +93,7 @@ CreditsUserInterface::~CreditsUserInterface()
       delete fxList[i];
       fxList[i] = NULL;
    }
+
    fxList.clear();
 }
 
@@ -121,9 +122,8 @@ void CreditsUserInterface::onActivate()
    {
       U32 rand = TNL::Random::readI(0, fxList.size() - 1);
       while(fxList[rand]->isActive())
-      {
          rand = TNL::Random::readI(0, fxList.size() - 1);
-      }
+
       fxList[rand]->setActive(true);
    }
 }
@@ -168,11 +168,12 @@ void CreditsUserInterface::quit()
 }
 
 
-void CreditsUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool CreditsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(!Parent::onKeyDown(inputCode, ascii))
+      quit();     // Quit the interface when any key is pressed...  any key at all.  Except those handled by Parent.
 
-   quit();     // Quit the interface when any key is pressed...  any key at all.
+   return true;
 }
 
 //-----------------------------------------------------
@@ -379,22 +380,23 @@ void SplashUserInterface::quit()
 }
 
 
-void SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
-
-   quitting = true;
-   quit();                              // Quit the interface when any key is pressed...  any key at all.
-
-   if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)    // Unless user hit Enter or Escape, or some other thing
+   if(!Parent::onKeyDown(inputCode, ascii))
    {
-      current->onKeyDown(inputCode, ascii);                // pass keystroke on  (after reactivate in quit(), current is now the underlying UI)
+
+      quitting = true;
+      quit();                              // Quit the interface when any key is pressed...  any key at all.  Almost.
+
+      // Unless user hit Enter or Escape, or some other thing...
+      if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)    
+         current->onKeyDown(inputCode, ascii);                // ...pass keystroke on  (after reactivate in quit(), current is now the underlying
+
+      if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)
+         current->onMouseMoved();
    }
 
-   if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)
-   {
-      current->onMouseMoved();
-   }
+   return true;
 }
 
 

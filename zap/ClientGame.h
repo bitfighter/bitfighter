@@ -68,6 +68,7 @@ private:
    void supressScreensaver();
 
    UIManager *mUIManager;
+
    string mRemoteLevelDownloadFilename;
 
    bool mDebugShowShipCoords;       // Show coords on ship?

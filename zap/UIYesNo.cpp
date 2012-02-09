@@ -64,11 +64,13 @@ void YesNoUserInterface::reset()
 }
 
 
-void YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
-
-   if(inputCode == KEY_Y)
+   if(Parent::onKeyDown(inputCode, ascii)) 
+   { 
+      // Do nothing
+   }
+   else if(inputCode == KEY_Y)
    {
       if(mYesFunction)
          mYesFunction(getGame());
@@ -84,6 +86,8 @@ void YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(inputCode == KEY_ESCAPE)
       quit();
+
+   return true;
 }
 
 

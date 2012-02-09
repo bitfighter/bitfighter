@@ -38,16 +38,23 @@ namespace Zap
 
 using namespace std;
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 struct KeyDefMenuItem
 {
    const char *mText;
    U32 mIndex;
    U32 mColumn;
-   InputCode *primaryControl;
+   InputCodeManager::BindingName primaryControl;
    string helpString;
 
-   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCode *PC, string helpStr);     // Constructor
+   KeyDefMenuItem(const char *text, U32 index, U32 col, InputCodeManager::BindingName PC, string helpStr);     // Constructor
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class KeyDefMenuUserInterface : public UserInterface
 {
@@ -58,6 +65,8 @@ private:
    Timer errorMsgTimer;
    string errorMsg;
    static const S32 errorMsgDisplayTime = 6000;
+
+   bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems);
 
 public:
    KeyDefMenuUserInterface(ClientGame *game);   // Constructor
@@ -73,7 +82,7 @@ public:
 
    void render();              // Draw the menu
    void idle(U32 timeDelta);
-   void onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode, char ascii);
 
    void onMouseMoved();
 

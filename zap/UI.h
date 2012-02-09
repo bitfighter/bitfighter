@@ -133,8 +133,15 @@ public:
 
    InputCode convertJoystickToKeyboard(InputCode inputCode);
 
+   // Helpers to simplify dealing with key bindings
+   InputCode getInputCode(GameSettings *settings, InputCodeManager::BindingName binding);
+   void setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode);
+   bool checkInputCode(GameSettings *settings, InputCodeManager::BindingName, InputCode inputCode);
+   const char *getInputCodeString(GameSettings *settings, InputCodeManager::BindingName binding);
+
+
    // Input event handlers
-   virtual void onKeyDown(InputCode inputCode, char ascii);
+   virtual bool onKeyDown(InputCode inputCode, char ascii);
    virtual void onKeyUp(InputCode inputCode);
    virtual void onMouseMoved();
    virtual void onMouseDragged();

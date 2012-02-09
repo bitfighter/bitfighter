@@ -56,14 +56,14 @@ U32 Joystick::SelectedPresetIndex = 0;
 
 // Needs to be Aligned with JoystickAxesDirections
 JoystickInput Joystick::JoystickInputData[MaxAxesDirections] = {
-      {MoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT,  0.0f},
-      {MoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT, 0.0f},
-      {MoveAxesUp,     MoveAxesUpMask,     STICK_1_UP,    0.0f},
-      {MoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN,  0.0f},
-      {ShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT,  0.0f},
-      {ShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT, 0.0f},
-      {ShootAxesUp,    ShootAxesUpMask,    STICK_2_UP,    0.0f},
-      {ShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN,  0.0f},
+      { MoveAxesLeft,   MoveAxesLeftMask,   STICK_1_LEFT,  0.0f },
+      { MoveAxesRight,  MoveAxesRightMask,  STICK_1_RIGHT, 0.0f },
+      { MoveAxesUp,     MoveAxesUpMask,     STICK_1_UP,    0.0f },
+      { MoveAxesDown,   MoveAxesDownMask,   STICK_1_DOWN,  0.0f },
+      { ShootAxesLeft,  ShootAxesLeftMask,  STICK_2_LEFT,  0.0f },
+      { ShootAxesRight, ShootAxesRightMask, STICK_2_RIGHT, 0.0f },
+      { ShootAxesUp,    ShootAxesUpMask,    STICK_2_UP,    0.0f },
+      { ShootAxesDown,  ShootAxesDownMask,  STICK_2_DOWN,  0.0f },
 };
 
 

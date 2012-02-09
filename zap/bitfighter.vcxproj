@@ -285,6 +285,7 @@
     <ClInclude Include="..\zap\item.h" />
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
+    <ClInclude Include="InputCodeEnum.h" />
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="JoystickRender.h" />
     <ClInclude Include="..\zap\InputCode.h" />

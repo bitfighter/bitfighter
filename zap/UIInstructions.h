@@ -38,6 +38,7 @@ class InstructionsUserInterface : public AbstractInstructionsUserInterface
 
 private:
    U32 mCurPage;
+   bool usingArrowKeys();
 
 public:
    InstructionsUserInterface(ClientGame *game);      // Constructor
@@ -49,7 +50,7 @@ public:
    void nextPage();
    void prevPage();
 
-   void onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode, char ascii);
 
    void activateInCommandMode();
    void onActivate();

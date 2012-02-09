@@ -30,6 +30,8 @@ using namespace TNL;
 #include "move.h"
 #include "InputCode.h"
 #include "UIMenus.h"
+#include "UIDiagnostics.h"
+#include "UIChat.h"
 #include "input.h"               // For MaxJoystickButtons const
 #include "config.h"
 #include "ClientGame.h"
@@ -294,13 +296,10 @@ void UserInterface::renderCurrent()
 
      glColor(Colors::white);
 
-      // Key states
+     // Key states
      for (U32 i = 0; i < MAX_INPUT_CODES; i++)
-        if(getInputCodeState((InputCode) i))
-        {
-           drawString( hpos, vpos, 18, inputCodeToString((InputCode) i) );
-           hpos += getStringWidth(18, inputCodeToString( (InputCode) i) ) + 5;
-        }
+        if(InputCodeManager::getState((InputCode) i))
+           hpos += drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
 
       vpos += 23;
       hpos = horizMargin;
@@ -1059,9 +1058,54 @@ void UserInterface::onMouseMoved()
 void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 
-void UserInterface::onKeyDown(InputCode inputCode, char ascii) 
+InputCode UserInterface::getInputCode(GameSettings *settings, InputCodeManager::BindingName binding)
+{
+   return settings->getInputCodeManager()->getBinding(binding, settings->getIniSettings()->inputMode);
+}
+
+
+void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
+{
+   settings->getInputCodeManager()->setBinding(binding, settings->getIniSettings()->inputMode, inputCode);
+}
+
+
+bool UserInterface::checkInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
+{
+   return inputCode == getInputCode(settings, binding);
+}
+
+
+const char *UserInterface::getInputCodeString(GameSettings *settings, InputCodeManager::BindingName binding)
+{
+   return InputCodeManager::inputCodeToString(getInputCode(settings, binding));
+}
+
+ 
+bool UserInterface::onKeyDown(InputCode inputCode, char ascii) 
 { 
    mTimeSinceLastInput = 0;
+
+   bool handled = false;
+
+   GameSettings *settings = getGame()->getSettings();
+
+   if(checkInputCode(settings, InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
+   { 
+      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      playBoop();
+      
+      handled = true;
+   }
+   else if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
+   {
+      getGame()->getUIManager()->getChatUserInterface()->activate();
+      playBoop();
+
+      handled = true;
+   }
+
+   return handled;
 }
 
 

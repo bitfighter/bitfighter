@@ -954,13 +954,30 @@ void QueryServersUserInterface::recalcCurrentIndex()
 
 
 // All key handling now under one roof!
-void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
-
    inputCode = convertJoystickToKeyboard(inputCode);
    mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
+
+   if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  
+   {
+      // Toggle half-height servers, full-height servers, full chat overlay
+
+      mShowChat = !mShowChat;
+      if(mShowChat) 
+      {
+         ChatUserInterface *ui = getUIManager()->getChatUserInterface();
+         ui->activate();
+         ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
+      }
+
+      return true;
+   }
+
+   if(Parent::onKeyDown(inputCode, ascii))
+      return true;
+
    S32 currentIndex = -1;
 
    if(inputCode == KEY_ENTER || inputCode == BUTTON_START || inputCode == MOUSE_LEFT)     // Return - select highlighted server & join game
@@ -994,7 +1011,7 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
          {
             S32 currentIndex = getSelectedIndex();
             if(currentIndex == -1)
-               return;
+               return true;
 
             if(servers.size() > currentIndex)      // Index is valid
             {
@@ -1018,19 +1035,6 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
       leaveGlobalChat();
       getUIManager()->getMainMenuUserInterface()->activate();
    }
-   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
-      getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(inputCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
-   {
-      mShowChat = !mShowChat;
-      if(mShowChat) 
-      {
-         ChatUserInterface *ui = getUIManager()->getChatUserInterface();
-         ui->activate();
-         ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
-      }
-   }
-
    else if(inputCode == KEY_LEFT)
    {
       mHighlightColumn--;
@@ -1070,7 +1074,7 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
    // The following keys only make sense if there are some servers to browse through
    else if(servers.size() == 0)
-      return;
+      return true;
 
    else if(inputCode == KEY_UP)
    {
@@ -1095,6 +1099,8 @@ void QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
+
+   return true;
 }
 
 
@@ -1186,7 +1192,7 @@ void QueryServersUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
 
-   if(getInputCodeState(MOUSE_LEFT))
+   if(InputCodeManager::getState(MOUSE_LEFT))
    {
       onMouseDragged();
       return;

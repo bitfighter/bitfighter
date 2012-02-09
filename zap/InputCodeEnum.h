@@ -23,6 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef INPUT_CODE_ENUM_H_
+#define INPUT_CODE_ENUM_H_
 
 // These are used in Bitfighter, which wants these in the Zap namespace, 
 // but also in oglconsole, which is a C program and thus does not
@@ -124,3 +126,5 @@ enum InputCode {
    BUTTON_UNKNOWN
 };
 
+
+#endif 

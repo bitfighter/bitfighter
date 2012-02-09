@@ -24,6 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "loadoutHelper.h"
+
+#include "InputCode.h"     // For BindingName enum
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "gameType.h"
@@ -293,7 +295,8 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
 InputCode LoadoutHelper::getActivationKey() 
 { 
-   return inputLOADOUT[getGame()->getSettings()->getIniSettings()->inputMode]; 
+   GameSettings *settings = getGame()->getSettings();
+   return settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LOADOUT, settings->getIniSettings()->inputMode); 
 }
 
 

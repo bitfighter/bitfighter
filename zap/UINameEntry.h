@@ -62,7 +62,7 @@ public:
 
    void setSecret(bool secret);
 
-   virtual void onKeyDown(InputCode inputCode, char ascii);
+   virtual bool onKeyDown(InputCode inputCode, char ascii);
 
    const char *getText();
    string getSaltedHashText();
@@ -102,7 +102,7 @@ private:
 public:
    LevelNameEntryUserInterface(ClientGame *game);      // Constructor
 
-   virtual void onKeyDown(InputCode inputCode, char ascii);
+   virtual bool onKeyDown(InputCode inputCode, char ascii);
    virtual void onAccept(const char *text);
    virtual void onEscape();
 

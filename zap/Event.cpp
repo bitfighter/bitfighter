@@ -16,6 +16,7 @@
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "ClientGame.h"
+#include "InputCode.h"     // For InputCodeManager def
 
 #include "SDL/SDL_opengl.h"
 
@@ -76,7 +77,6 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
          oppositeAxesDirectionIndex = i;
    }
 
-
    // Update our global joystick input data, use a sensitivity threshold to take care of calibration issues
    // Also, normalize the input value to a floating point scale of 0 to 1
    F32 normalValue;
@@ -115,14 +115,14 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
    for (S32 i = 0; i < MaxAxesDirections; i++)
    {
       // If the current axes direction is set in the inputCodeDownDeltaMask, set the input code down
-      if (Joystick::JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
+      if(Joystick::JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
       {
          inputCodeDown(Joystick::JoystickInputData[i].inputCode, 0);
          continue;
       }
 
       // If the current axes direction is set in the inputCodeUpDeltaMask, set the input code up
-      if (Joystick::JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
+      if(Joystick::JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
          inputCodeUp(Joystick::JoystickInputData[i].inputCode);
    }
 
@@ -134,7 +134,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
 
 void Event::inputCodeUp(InputCode inputCode)
 {
-   setInputCodeState(inputCode, false);
+   InputCodeManager::setState(inputCode, false);
 
    if(UserInterface::current)
       UserInterface::current->onKeyUp(inputCode);
@@ -143,7 +143,7 @@ void Event::inputCodeUp(InputCode inputCode)
 
 void Event::inputCodeDown(InputCode inputCode, char ascii)
 {
-   setInputCodeState(inputCode, true);
+   InputCodeManager::setState(inputCode, true);
 
    if(UserInterface::current)
       UserInterface::current->onKeyDown(inputCode, ascii);
@@ -238,6 +238,8 @@ void pushSimulatedAltKeyPress()
 
 void Event::onEvent(ClientGame *game, SDL_Event* event)
 {
+   IniSettings *iniSettings = game->getSettings()->getIniSettings();
+
    switch (event->type)
    {
       case SDL_KEYDOWN:
@@ -249,22 +251,22 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_MOUSEMOTION:
-            onMouseMoved(event->motion.x, event->motion.y, game->getSettings()->getIniSettings()->displayMode);
+            onMouseMoved(event->motion.x, event->motion.y, iniSettings->displayMode);
          break;
 
       case SDL_MOUSEBUTTONDOWN:
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_LEFT, game->getSettings()->getIniSettings()->displayMode);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_RIGHT, game->getSettings()->getIniSettings()->displayMode);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE, game->getSettings()->getIniSettings()->displayMode);
+               onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
                break;
             case SDL_BUTTON_WHEELUP:
                onMouseWheel(true, false);
@@ -279,15 +281,15 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_LEFT, game->getSettings()->getIniSettings()->displayMode);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_RIGHT, game->getSettings()->getIniSettings()->displayMode);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_MIDDLE, game->getSettings()->getIniSettings()->displayMode);
+               onMouseButtonUp(event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
                break;
          }
          break;
@@ -374,10 +376,10 @@ void Event::onInputBlur()     // <=== what does this do??
 
 void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
 {
-   // Use getInputCodeState() instead of checking the mod flag to prevent hyper annoying case
+   // Use InputCodeManager::getState() instead of checking the mod flag to prevent hyper annoying case
    // of user pressing and holding Alt, selecting another window, releasing Alt, returning to
    // Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.
-   // GetKeyState() looks at the actual current state of the key, which is what we want.
+   // GetState() looks at the actual current state of the key, which is what we want.
 
    // ALT+ENTER --> toggles window mode/full screen
    if(key == SDLK_RETURN && (SDL_GetModState() & KMOD_ALT))
@@ -393,21 +395,21 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
    }
 
    // CTRL+Q --> screenshot!
-   else if(key == SDLK_q && getInputCodeState(KEY_CTRL))
+   else if(key == SDLK_q && InputCodeManager::getState(KEY_CTRL))
       ScreenShooter::saveScreenshot(game->getSettings()->getFolderManager()->screenshotDir);
 
    // The rest
    else
    {
-      InputCode inputCode = sdlKeyToInputCode(key);
-      inputCodeDown(inputCode, keyToAscii(unicode, inputCode));
+      InputCode inputCode = InputCodeManager::sdlKeyToInputCode(key);
+      inputCodeDown(inputCode, InputCodeManager::keyToAscii(unicode, inputCode));
    }
 }
 
 
 void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
 {
-   inputCodeUp(sdlKeyToInputCode(key));
+   inputCodeUp(InputCodeManager::sdlKeyToInputCode(key));
 }
 
 
@@ -432,19 +434,19 @@ void Event::onMouseMoved(S32 x, S32 y, DisplayMode mode)
 }
 
 
-void Event::onMouseWheel(bool Up, bool Down)
+void Event::onMouseWheel(bool up, bool down)
 {
-   if(Up)
+   if(up)
    {
       inputCodeDown(MOUSE_WHEEL_UP);
       inputCodeUp(MOUSE_WHEEL_UP);
    }
-   if(Down)
+
+   if(down)
    {
       inputCodeDown(MOUSE_WHEEL_DOWN);
       inputCodeUp(MOUSE_WHEEL_DOWN);
    }
-   // Do nothing
 }
 
 
@@ -489,12 +491,10 @@ void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 }
 
 
-extern InputCode joystickButtonToInputCode(Joystick::Button button);
-
 void Event::onJoyButtonDown(U8 which, U8 button)
 {
 //   logprintf("SDL button down number: %u", button);
-   inputCodeDown(joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)), 0);
+   inputCodeDown(InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)), 0);
    Joystick::ButtonMask |= BIT(button);
 }
 
@@ -502,12 +502,10 @@ void Event::onJoyButtonDown(U8 which, U8 button)
 void Event::onJoyButtonUp(U8 which, U8 button)
 {
 //   logprintf("SDL button up number: %u", button);
-   inputCodeUp(joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
+   inputCodeUp(InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
    Joystick::ButtonMask = Joystick::ButtonMask & ~BIT(button);
 }
 
-
-extern InputCode joyHatToInputCode(int hatDirectionMask);
 
 // See SDL_Joystick.h for the SDL_HAT_* mask definitions
 void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
@@ -518,16 +516,16 @@ void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
    U32 inputCodeDownDeltaMask = directionMask & ~Joystick::HatInputCodeMask;
    U32 inputCodeUpDeltaMask = ~directionMask & Joystick::HatInputCodeMask;
 
-   for (S32 i = 0; i < MaxHatDirections; i++)
+   for(S32 i = 0; i < MaxHatDirections; i++)
    {
-      inputCode = joyHatToInputCode(BIT(i));  // BIT(i) corresponds to a defined SDL_HAT_*  value
+      inputCode = InputCodeManager::joyHatToInputCode(BIT(i));  // BIT(i) corresponds to a defined SDL_HAT_*  value
 
       // If the current hat direction is set in the inputCodeDownDeltaMask, set the input code down
-      if (inputCodeDownDeltaMask & BIT(i))
+      if(inputCodeDownDeltaMask & BIT(i))
          inputCodeDown(inputCode, 0);
 
       // If the current hat direction is set in the inputCodeUpDeltaMask, set the input code up
-      if (inputCodeUpDeltaMask & BIT(i))
+      if(inputCodeUpDeltaMask & BIT(i))
          inputCodeUp(inputCode);
    }
 
@@ -556,17 +554,19 @@ void Event::onRestore()
 // We don't need to worry about this event in fullscreen modes because it is never fired with SDL
 void Event::onResize(ClientGame *game, S32 width, S32 height)
 {
+   IniSettings *iniSettings = game->getSettings()->getIniSettings();
+
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    // Constrain window to correct proportions...
    if((width - canvasWidth) > (height - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      game->getSettings()->getIniSettings()->winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
+      iniSettings->winSizeFact = max((F32) height / (F32)canvasHeight, gScreenInfo.getMinScalingFactor());
    else
-      game->getSettings()->getIniSettings()->winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
+      iniSettings->winSizeFact = max((F32) width / (F32)canvasWidth, gScreenInfo.getMinScalingFactor());
 
-   S32 newWidth  = (S32)floor(canvasWidth  * game->getSettings()->getIniSettings()->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
-   S32 newHeight = (S32)floor(canvasHeight * game->getSettings()->getIniSettings()->winSizeFact + 0.5f);
+   S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+   S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
 
    S32 flags = 0;
    flags = SDL_OPENGL | SDL_RESIZABLE;
@@ -576,7 +576,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
    OGLCONSOLE_Reshape();
 
-   gINI.SetValueF("Settings", "WindowScalingFactor", game->getSettings()->getIniSettings()->winSizeFact, true);
+   gINI.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 
    glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());    // See comment on identical line in main.cpp
 }

@@ -232,9 +232,10 @@ class Team;
 string origName;
 extern bool isPrintable(char c);
 
-void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii))
+      return true;
 
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 
@@ -260,9 +261,9 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
          ui->getTeam(selectedIndex)->getLineEditor()->addChar(ascii);
       }
    }
-   else if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
+   else if(ascii >= '1' && ascii <= '9')              // Keys 1-9 --> use preset
    {
-      if(checkModifier(KEY_ALT))                // Replace all teams with # of teams based on presets
+      if(InputCodeManager::checkModifier(KEY_ALT))    // Replace all teams with # of teams based on presets
       {
          U32 count = (ascii - '0');
          ui->clearTeams();
@@ -288,7 +289,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "There must be at least one team";
-         return;
+         return true;
       }
 
       ui->removeTeam(selectedIndex);
@@ -304,7 +305,7 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Too many teams for this interface";
-         return;
+         return true;
       }
 
       S32 presetIndex = teamCount % GameType::MAX_TEAMS;
@@ -321,13 +322,13 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
 
    else if(inputCode == KEY_R)
-     ui->getTeam(selectedIndex)->alterRed(checkModifier(KEY_SHIFT) ? -.01f : .01f);
+     ui->getTeam(selectedIndex)->alterRed(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
    else if(inputCode == KEY_G)
-      ui->getTeam(selectedIndex)->alterGreen(checkModifier(KEY_SHIFT) ? -.01f : .01f);
+      ui->getTeam(selectedIndex)->alterGreen(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
    else if(inputCode == KEY_B)
-      ui->getTeam(selectedIndex)->alterBlue(checkModifier(KEY_SHIFT) ? -.01f : .01f);
+      ui->getTeam(selectedIndex)->alterBlue(InputCodeManager::checkModifier(KEY_SHIFT) ? -.01f : .01f);
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)       // Quit
    {
@@ -351,16 +352,8 @@ void TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       playBoop();
       SDL_SetCursor(Cursor::getTransparent());
    }
-   else if(inputCode == keyDIAG)     // Turn on diagnostic overlay
-   {
-      getUIManager()->getDiagnosticUserInterface()->activate();
-      playBoop();
-   }
-   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-   {
-      getUIManager()->getChatUserInterface()->activate();
-      playBoop();
-   }
+
+   return true;
 }
 
 

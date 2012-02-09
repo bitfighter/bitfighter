@@ -54,7 +54,7 @@ public:
    S32 getPageCount();
  
 
-   void onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode, char ascii);
 
    void nextPage();
    void prevPage();

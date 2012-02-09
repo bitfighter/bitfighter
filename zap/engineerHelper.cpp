@@ -160,6 +160,7 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
    GameConnection *gc = getGame()->getConnectionToServer();
    InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
+   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
@@ -169,9 +170,10 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
             mSelectedItem = i;
             return true;
          }
+
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(!ship || (inputCode == inputMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
-                  (inputCode == inputMOD2[inputMode] && ship->getModule(1) == ModuleEngineer))
+      if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1, inputMode) && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2, inputMode) && ship->getModule(1) == ModuleEngineer))
       {
          exitHelper();
          return true;
@@ -180,8 +182,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    else                       // Placing item
    {
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(ship && ((inputCode == inputMOD1[inputMode] && ship->getModule(0) == ModuleEngineer) ||
-                  (inputCode == inputMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)))
+      if(ship && ((inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1, inputMode) && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2, inputMode) && ship->getModule(1) == ModuleEngineer)))
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;

@@ -246,6 +246,7 @@ static ControlStringsEditor gControls2[] = {
 void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 {
    ControlStringsEditor *controls = (page == 1) ? gControls1 : gControls2;
+   GameSettings *settings = getGame()->getSettings();
 
    S32 starty = 50;
    S32 y;
@@ -316,23 +317,23 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    glColor(txtColor);
    drawString(col1, y, 18, "Help");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", inputCodeToString(keyHELP));
+   drawStringf(col2, y, 18, "[%s]", getInputCodeString(settings, InputCodeManager::BINDING_HELP));
 
    glColor(txtColor);
    drawString(col3, y, 18, "Game Params Editor");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", inputCodeToString(KEY_F3));
+   drawStringf(col4, y, 18, "[%s]", InputCodeManager::inputCodeToString(KEY_F3));
 
    y += 26;
    glColor(txtColor);
    drawString(col1, y, 18, "Team Editor");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", inputCodeToString(KEY_F2));
+   drawStringf(col2, y, 18, "[%s]", InputCodeManager::inputCodeToString(KEY_F2));
 
    glColor(txtColor);
    drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyOUTGAMECHAT));
+   drawStringf(col4, y, 18, "[%s]", getInputCodeString(settings, InputCodeManager::BINDING_OUTGAMECHAT));
 }
 
 
@@ -500,27 +501,26 @@ void EditorInstructionsUserInterface::exitInstructions()
 }
 
 
-void EditorInstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
 
-   if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
+   else if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
       playBoop();
       prevPage();
    }
-   else if(inputCode == KEY_RIGHT || inputCode == KEY_SPACE || inputCode == BUTTON_DPAD_RIGHT ||
+   else if(inputCode == KEY_RIGHT        || inputCode == KEY_SPACE || inputCode == BUTTON_DPAD_RIGHT ||
            inputCode == BUTTON_DPAD_DOWN || inputCode == KEY_ENTER || inputCode == KEY_DOWN)
    {
       playBoop();
       nextPage();
    }
-   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      getUIManager()->getChatUserInterface()->activate();
-   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
-      getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(inputCode == keyHELP || inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
+   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode) ||
+          inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
+
+   return true;
 }
 
 };

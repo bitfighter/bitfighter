@@ -284,9 +284,11 @@ struct IniSettings      // With defaults specified
    Vector<string> alwaysPingList;
 };
 
-class CIniFile;
 
-void saveSettingsToINI(CIniFile *ini, GameSettings *settings);
+class CIniFile;
+class InputCodeManager;
+
+void saveSettingsToINI  (CIniFile *ini, GameSettings *settings);
 void loadSettingsFromINI(CIniFile *ini, GameSettings *settings);
 
 void writeSkipList(CIniFile *ini, const Vector<string> *levelSkipList);

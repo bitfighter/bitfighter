@@ -27,6 +27,8 @@
 #define _GAME_SETTINGS_H_
 
 #include "config.h"
+#include "InputCode.h"     // For InputCodeManager def
+
 #include "tnlVector.h"
 #include <string>
 
@@ -126,6 +128,7 @@ private:
 
    Vector<string> mLevelSkipList;      // Levels we'll never load, to create a pseudo delete function for remote server mgt  <=== does this ever get loaded???
    FolderManager mFolderManager;
+   InputCodeManager mInputCodeManager;
 
    BanList *mBanList;                  // Our ban list
 
@@ -173,6 +176,8 @@ public:
    void setLevelChangePassword(const string &LevelChangePassword, bool updateINI);
 
    const Vector<PluginBinding> *getPluginBindings();
+
+   InputCodeManager *getInputCodeManager(); 
 
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();

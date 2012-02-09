@@ -303,7 +303,7 @@ public:
    //ofstream mOutputFile;            // For saving downloaded levels
    //FILE *mOutputFile;               // For saving downloaded levels
 
-   void onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode, char ascii);
    void onKeyUp(InputCode inputCode);
 
    void processPlayModeKey(InputCode inputCode, char ascii);

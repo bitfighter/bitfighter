@@ -152,7 +152,7 @@ void InstructionsUserInterface::activateInCommandMode()
 struct ControlString
 {
    const char *controlString;
-   InputCode *primaryControlIndex;
+   InputCodeManager::BindingName primaryControlIndex;    // Not really a good name
 };
 
 InputCode dummyMouse = MOUSE;
@@ -163,57 +163,66 @@ InputCode dummyMoveShipKeysLR = KEYS_LEFT_RIGHT;
 InputCode dummyMsgMode = KEY_CTRL_M;
 InputCode dummySSMode = KEY_CTRL_Q;
 
-
 static ControlString controlsKeyboard[] = {
-         { "Move ship", &dummyMoveShipKeysUD},
-         { " ", &dummyMoveShipKeysLR},
-         { "Aim ship", &dummyMouse },
-         { "Fire weapon", &inputFIRE[InputModeKeyboard] },
-         { "Activate module 1", &inputMOD1[InputModeKeyboard] },
-         { "Activate module 2", &inputMOD2[InputModeKeyboard] },
-         { "-", NULL },
-         { "Open ship config menu", &inputLOADOUT[InputModeKeyboard] },
-         { "Toggle map view", &inputCMDRMAP[InputModeKeyboard] },
-         { "Drop flag", &inputDROPITEM[InputModeKeyboard] },
-         { "Show scoreboard", &inputSCRBRD[InputModeKeyboard] },
-         { NULL, NULL },      // End col 1
-         { "Cycle current weapon", &inputADVWEAP[InputModeKeyboard] },
-         { "Select weapon 1", &inputSELWEAP1[InputModeKeyboard] },
-         { "Select weapon 2", &inputSELWEAP2[InputModeKeyboard] },
-         { "Select weapon 3", &inputSELWEAP3[InputModeKeyboard] },
-         { "-", NULL },
-         { "Open QuickChat menu", &inputQUICKCHAT[InputModeKeyboard] },
-         { "Chat to team", &inputTEAMCHAT[InputModeKeyboard] },
-         { "Chat to everyone", &inputGLOBCHAT[InputModeKeyboard] },
-         { "Record voice chat", &inputTOGVOICE[InputModeKeyboard] },
-         { "Message display mode", &dummyMsgMode },
-         { "Save screenshot", &dummySSMode },
-         { NULL, NULL },   // End col 2
+         { "Move ship", InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD},
+         { " ", InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR},
+         { "Aim ship", InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE },
+         { "Fire weapon", InputCodeManager::BINDING_FIRE },
+         { "Activate module 1", InputCodeManager::BINDING_MOD1 },
+         { "Activate module 2", InputCodeManager::BINDING_MOD2 },
+         { "-", InputCodeManager::BINDING_NONE },
+         { "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
+         { "Toggle map view", InputCodeManager::BINDING_CMDRMAP },
+         { "Drop flag", InputCodeManager::BINDING_DROPITEM },
+         { "Show scoreboard", InputCodeManager::BINDING_SCRBRD },
+         { NULL, InputCodeManager::BINDING_NONE },      // End col 1
+         { "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
+         { "Select weapon 1", InputCodeManager::BINDING_SELWEAP1 },
+         { "Select weapon 2", InputCodeManager::BINDING_SELWEAP2 },
+         { "Select weapon 3", InputCodeManager::BINDING_SELWEAP3 },
+         { "-", InputCodeManager::BINDING_NONE },
+         { "Open QuickChat menu", InputCodeManager::BINDING_QUICKCHAT },
+         { "Chat to team", InputCodeManager::BINDING_TEAMCHAT },
+         { "Chat to everyone", InputCodeManager::BINDING_GLOBCHAT },
+         { "Record voice chat", InputCodeManager::BINDING_TOGVOICE },
+         { "Message display mode", InputCodeManager::BINDING_DUMMY_MSG_MODE },
+         { "Save screenshot", InputCodeManager::BINDING_DUMMY_SS_MODE },
+         { NULL, InputCodeManager::BINDING_NONE },   // End col 2
       };
 
 static ControlString controlsGamepad[] = {
-         { "Move Ship", &dummyStickLeft },
-         { "Aim Ship/Fire Weapon", &dummyStickRight },
-         { "Activate module 1", &inputMOD1[InputModeJoystick] },
-         { "Activate module 2", &inputMOD2[InputModeJoystick] },
-         { "-", NULL },
-         { "Open ship config menu", &inputLOADOUT[InputModeJoystick] },
-         { "Toggle map view", &inputCMDRMAP[InputModeJoystick] },
-         { "Drop flag", &inputDROPITEM[InputModeJoystick] },
-         { "Show scoreboard", &inputSCRBRD[InputModeJoystick] },
-         { NULL, NULL },
-         { "Cycle current weapon", &inputADVWEAP[InputModeJoystick] },
-         { "Select weapon 1", &inputSELWEAP1[InputModeJoystick] },
-         { "Select weapon 2", &inputSELWEAP2[InputModeJoystick] },
-         { "Select weapon 3", &inputSELWEAP3[InputModeJoystick] },
-         { "-", NULL },
-         { "Open QuickChat menu", &inputQUICKCHAT[InputModeJoystick] },
-         { "Chat to team", &inputTEAMCHAT[InputModeJoystick] },
-         { "Chat to everyone", &inputGLOBCHAT[InputModeJoystick] },
-         { "Record voice chat", &inputTOGVOICE[InputModeJoystick] },
-         { NULL, NULL },
+         { "Move Ship", InputCodeManager::BINDING_DUMMY_STICK_LEFT },
+         { "Aim Ship/Fire Weapon", InputCodeManager::BINDING_DUMMY_STICK_RIGHT },
+         { "Activate module 1", InputCodeManager::BINDING_MOD1 },
+         { "Activate module 2", InputCodeManager::BINDING_MOD2 },
+         { "-", InputCodeManager::BINDING_NONE },
+         { "Open ship config menu", InputCodeManager::BINDING_LOADOUT },
+         { "Toggle map view", InputCodeManager::BINDING_CMDRMAP },
+         { "Drop flag", InputCodeManager::BINDING_DROPITEM },
+         { "Show scoreboard", InputCodeManager::BINDING_SCRBRD },
+         { NULL, InputCodeManager::BINDING_NONE },
+         { "Cycle current weapon", InputCodeManager::BINDING_ADVWEAP },
+         { "Select weapon 1", InputCodeManager::BINDING_SELWEAP1 },
+         { "Select weapon 2", InputCodeManager::BINDING_SELWEAP2 },
+         { "Select weapon 3", InputCodeManager::BINDING_SELWEAP3 },
+         { "-", InputCodeManager::BINDING_NONE },
+         { "Open QuickChat menu", InputCodeManager::BINDING_QUICKCHAT },
+         { "Chat to team", InputCodeManager::BINDING_TEAMCHAT },
+         { "Chat to everyone", InputCodeManager::BINDING_GLOBCHAT },
+         { "Record voice chat", InputCodeManager::BINDING_TOGVOICE },
+         { NULL, InputCodeManager::BINDING_NONE },
       };
 
+
+bool InstructionsUserInterface::usingArrowKeys()
+{
+   GameSettings *settings = getGame()->getSettings();
+
+   return getInputCode(settings, InputCodeManager::BINDING_LEFT)  == KEY_LEFT  &&
+          getInputCode(settings, InputCodeManager::BINDING_RIGHT) == KEY_RIGHT &&
+          getInputCode(settings, InputCodeManager::BINDING_UP)    == KEY_UP    &&
+          getInputCode(settings, InputCodeManager::BINDING_DOWN)  == KEY_DOWN;
+}
 
 
 // This has become rather ugly and inelegant.  Sorry!
@@ -229,13 +238,15 @@ void InstructionsUserInterface::renderPage1()
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
 
+   GameSettings *settings = getGame()->getSettings();
+
    bool firstCol = true;
    bool done = false;
 
    drawHorizLine(col1, 750, starty + 26);
 
    static const Color txtColor = Colors::cyan;
-   static const Color keyColor = Colors::white;      // white
+   static const Color keyColor = Colors::white;     
    static const Color secColor = Colors::yellow;
 
    ControlString *controls = (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
@@ -265,7 +276,7 @@ void InstructionsUserInterface::renderPage1()
       }
       else if(!strcmp(controls[i].controlString, "-"))      // Horiz spacer
       {
-         glColor3f(0.4f, 0.4f, 0.4f);
+         glColor(0.4f);
          glBegin(GL_LINES);
             glVertex2i(actCol, y + 13);
             glVertex2i(actCol + 335, y + 13);
@@ -276,64 +287,61 @@ void InstructionsUserInterface::renderPage1()
          glColor(txtColor);
          drawString(actCol, y, 18, controls[i].controlString);      // Textual description of function (1st arg in lists above)
 
-         // Some special cases
-         //if((OptionsMenuUserInterface::joystickType == LogitechDualAction || OptionsMenuUserInterface::joystickType == PS2DualShock) && (i == 2))     // TODO: Test this...
-         //   JoystickRender::renderControllerButton(col2, y + 4, BUTTON_7, false);
-
-         //if((OptionsMenuUserInterface::joystickType == LogitechDualAction || OptionsMenuUserInterface::joystickType == PS2DualShock) && (i == 3))
-         //   JoystickRender::renderControllerButton(col2, y + 4, BUTTON_8, false);
-
          glColor(keyColor);
 
          // We'll also handle special case of arrow keys...
-         if (*controls[i].primaryControlIndex == KEYS_UP_DOWN)
+         if(controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD)
          {     // (braces needed)
-            if (inputLEFT[InputModeKeyboard] == KEY_LEFT && inputRIGHT[InputModeKeyboard] == KEY_RIGHT && inputUP[InputModeKeyboard] == KEY_UP && inputDOWN[InputModeKeyboard] == KEY_DOWN)
+            if(usingArrowKeys())
                drawString(contCol, y, 18, "Arrow Keys");
             else     // Center Up key above Down key
-               drawStringf(contCol + getStringWidthf(15, "[%s] ", inputCodeToString(inputLEFT[InputModeKeyboard])), y + 4, 15, "[%s]", inputCodeToString(inputUP[InputModeKeyboard]));
+               drawStringf(contCol + getStringWidthf(15, "[%s] ", getInputCodeString(settings, InputCodeManager::BINDING_LEFT)), y + 4, 
+                                                     15, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_UP));
          }
-         else if (*controls[i].primaryControlIndex == KEYS_LEFT_RIGHT)
+         else if (controls[i].primaryControlIndex == InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR)
          {     // (braces needed)
-            if (inputLEFT[InputModeKeyboard] == KEY_LEFT && inputRIGHT[InputModeKeyboard] == KEY_RIGHT && inputUP[InputModeKeyboard] == KEY_UP && inputDOWN[InputModeKeyboard] == KEY_DOWN)
+            if(usingArrowKeys())
                y -= 26;    // Hide this line
             else
-               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", inputCodeToString(inputLEFT[InputModeKeyboard]), inputCodeToString(inputDOWN[InputModeKeyboard]), inputCodeToString(inputRIGHT[InputModeKeyboard]));
+               drawStringf(col2, y + 4, 15, "[%s] [%s] [%s]", 
+                     getInputCodeString(settings, InputCodeManager::BINDING_LEFT),
+                     getInputCodeString(settings, InputCodeManager::BINDING_DOWN),
+                     getInputCodeString(settings, InputCodeManager::BINDING_RIGHT));
          }
          else
             JoystickRender::renderControllerButton((F32)contCol, F32(y + 4), Joystick::SelectedPresetIndex,
-                                                   *controls[i].primaryControlIndex, false);
+                                                   getInputCode(settings, controls[i].primaryControlIndex), false);
       }
 
       y += 26;
    }
 
-   y+=10;
+   y += 10;
    glColor(secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
-   y+=40;
+   y += 40;
    glColor(txtColor);
    drawString(col1, y, 18, "Help");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", inputCodeToString(keyHELP));
+   drawStringf(col2, y, 18, "[%s]", getInputCodeString(settings, InputCodeManager::BINDING_HELP));
    glColor(txtColor);
    drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyOUTGAMECHAT));
-   y+=26;
+   drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_OUTGAMECHAT));
+   y += 26;
    glColor(txtColor);
    drawString(col1, y, 18, "Mission");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", inputCodeToString(keyMISSION));
+   drawStringf(col2, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_MISSION));
    glColor(txtColor);
    drawString(col3, y, 18, "Display FPS / Lag");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyFPS));
-   y+=26;
+   drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_FPS));
+   y += 26;
    glColor(txtColor);
    drawString(col3, y, 18, "Diagnostics");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", inputCodeToString(keyDIAG));
+   drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_DIAG));
 
 }
 
@@ -649,9 +657,9 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    const S32 instrSize = 18;
 
-   glColor3f(0,1,0);
+   glColor(Colors::green);
    drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", 
-                                        inputCodeToString(inputCMDCHAT[getGame()->getSettings()->getIniSettings()->inputMode]));
+                                        getInputCodeString(getGame()->getSettings(), InputCodeManager::BINDING_CMDCHAT));
    ypos += 28;
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;
@@ -760,27 +768,26 @@ void InstructionsUserInterface::exitInstructions()
 }
 
 
-void InstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool InstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
 
-   if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
+   else if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
       playBoop();
       prevPage();
    }
-   else if(inputCode == KEY_RIGHT || inputCode == KEY_SPACE || inputCode == BUTTON_DPAD_RIGHT ||
+   else if(inputCode == KEY_RIGHT        || inputCode == KEY_SPACE || inputCode == BUTTON_DPAD_RIGHT ||
            inputCode == BUTTON_DPAD_DOWN || inputCode == KEY_ENTER || inputCode == KEY_DOWN)
    {
       playBoop();
       nextPage();
    }
-   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-      getUIManager()->getChatUserInterface()->activate();
-   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
-      getUIManager()->getDiagnosticUserInterface()->activate();
-   else if(inputCode == keyHELP || inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
+   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode) || 
+           inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
+
+   return true;
 }
 
 };

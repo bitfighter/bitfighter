@@ -120,7 +120,8 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 
    // RenderedSize will be -1 if the button is not defined
    if(settings->getIniSettings()->inputMode == InputModeKeyboard || butSize == -1)
-      UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", inputCodeToString(KEY_ESCAPE) );
+      UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSizeSm, 
+                                 "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
       S32 xPos = UserInterface::horizMargin;

@@ -32,7 +32,6 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "InputCodeEnum.h"
 #include "Color.h"
 
 #include "SDL/SDL_joystick.h"
@@ -43,6 +42,8 @@ using namespace TNL;
 using namespace std;
 
 namespace Zap {
+
+#include "InputCodeEnum.h"    // Include inside Zap namespace
 
 
 enum JoystickAxesMask {

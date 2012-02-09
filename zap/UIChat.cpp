@@ -340,9 +340,13 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
    UIID currId = UserInterface::current->getMenuID();
    if(currId != ChatUI && currId != QueryServersScreenUI )
    {
-      mGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
-         "Private message from %s: Press [%s] to enter chat mode", sender, inputCodeToString(keyOUTGAMECHAT));
-      mGame->getUIManager()->getGameUserInterface()->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
+      GameUserInterface *gameUI = mGame->getUIManager()->getGameUserInterface();
+
+      gameUI->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
+         "Private message from %s: Press [%s] to enter chat mode", 
+         sender, gameUI->getInputCodeString(mGame->getSettings(), InputCodeManager::BINDING_OUTGAMECHAT));
+
+      gameUI->displayChatMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
 
@@ -484,22 +488,20 @@ void ChatUserInterface::renderHeader()
 }
 
 
-void ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
-
-   if(inputCode == keyOUTGAMECHAT)
-      onOutGameChat();
-   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
-      getUIManager()->getDiagnosticUserInterface()->activate();
+   if(Parent::onKeyDown(inputCode, ascii)) 
+      { /* Do nothing */ }
    else if(inputCode == KEY_ESCAPE)
       onEscape();
    else if (inputCode == KEY_ENTER)                // Submits message
       issueChat();
    else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(inputCode);
-   else if(ascii)                               // Other keys - add key to message
+   else if(ascii)                                  // Other keys - add key to message
       mLineEditor.addChar(ascii);
+
+   return true;
 }
 
 

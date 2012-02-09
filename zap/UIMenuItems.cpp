@@ -702,7 +702,7 @@ bool CounterMenuItem::handleKey(InputCode inputCode, char ascii)
 {
    if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT)  
    {
-      if(checkModifier(KEY_SHIFT))
+      if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
          increment(getBigIncrement());
          snap();
@@ -714,7 +714,7 @@ bool CounterMenuItem::handleKey(InputCode inputCode, char ascii)
    }
    else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT)
    {
-      if(checkModifier(KEY_SHIFT))
+      if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
          decrement(getBigIncrement());
          snap();

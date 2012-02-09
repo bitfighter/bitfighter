@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
@@ -26,69 +26,131 @@
 #ifndef _INPUTCODE_H_
 #define _INPUTCODE_H_
 
+#include "input.h"            // For InputMode enum
+#include "tnlVector.h"
+#include "Joystick.h"
 #include <string>
+
+using namespace std;
 
 namespace Zap
 {
 
-#include "InputCodeEnum.h"
-
-enum JoystickJoysticks {
-   JOYSTICK_DPAD,
-   JOYSTICK_STICK_1,
-   JOYSTICK_STICK_2
-};
+#include "InputCodeEnum.h"    // Include inside Zap namespace
 
 
-const char *inputCodeToString(InputCode inputCode);
-InputCode stringToInputCode(const char *inputName);
+class InputCodeManager 
+{
 
-void setInputCodeState(InputCode inputCode, bool state);    // Set key state (t=down, f=up)
-bool getInputCodeState(InputCode inputCode);                // Return current key state (t=down, f=up)
-void resetInputCodeStates();                                // Initialize key states
-void dumpInputCodeStates();                                 // Log key states for testing
-void initializeKeyNames();
+public:
+   enum JoystickJoysticks {
+      JOYSTICK_DPAD,
+      JOYSTICK_STICK_1,
+      JOYSTICK_STICK_2
+   };
 
-// Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
-std::string makeInputString(InputCode inputCode);
-bool checkModifier(InputCode mod1);            
-bool checkModifier(InputCode mod1, InputCode mod2);            
-bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
+   enum BindingName {
+      BINDING_SELWEAP1,
+      BINDING_SELWEAP2,
+      BINDING_SELWEAP3,
+      BINDING_ADVWEAP,
+      BINDING_CMDRMAP,
+      BINDING_TEAMCHAT,
+      BINDING_GLOBCHAT,
+      BINDING_QUICKCHAT,
+      BINDING_CMDCHAT,
+      BINDING_LOADOUT,
+      BINDING_MOD1,
+      BINDING_MOD2,
+      BINDING_FIRE,
+      BINDING_DROPITEM,
+      BINDING_TOGVOICE,
+      BINDING_UP,
+      BINDING_DOWN,
+      BINDING_LEFT,
+      BINDING_RIGHT,
+      BINDING_SCRBRD,
+      BINDING_HELP,
+      BINDING_OUTGAMECHAT,
+      BINDING_MISSION,
+      BINDING_FPS,
+      BINDING_DIAG,
+      
+      BINDING_NONE,
+      BINDING_DUMMY_MOVE_SHIP_KEYS_UD,
+      BINDING_DUMMY_MOVE_SHIP_KEYS_LR,
+      BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE,
+      BINDING_DUMMY_STICK_LEFT,
+      BINDING_DUMMY_STICK_RIGHT,
+      BINDING_DUMMY_MSG_MODE,
+      BINDING_DUMMY_SS_MODE
+   };
+
+   InputCodeManager();     // Constructor
+
+   static const char *inputCodeToString(InputCode inputCode);
+   static InputCode stringToInputCode(const char *inputName);
+
+   static void setState(InputCode inputCode, bool state);   // Set key state (t=down, f=up)
+   static bool getState(InputCode inputCode);               // Return current key state (t=down, f=up)
+   static void resetStates();                               // Initialize key states
+   static void dumpInputCodeStates();                       // Log key states for testing
+   static void initializeKeyNames();
+
+   static InputCode joyHatToInputCode(int hatDirectionMask);
+   static InputCode joystickButtonToInputCode(Joystick::Button button);
+
+   // Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
+   static string makeInputString(InputCode inputCode);
+
+   static bool checkModifier(InputCode mod1);            
+   static bool checkModifier(InputCode mod1, InputCode mod2);            
+   static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
+
+   #ifndef ZAP_DEDICATED
+      static InputCode sdlKeyToInputCode(int key);              // Convert SDL keys to InputCode
+      static int inputCodeToSDLKey(InputCode inputCode);        // Take a InputCode and return the SDL equivalent
+   #endif
+
+   static char keyToAscii(int unicode, InputCode inputCode);    // Return a printable ascii char, if possible
+   static bool isControllerButton(InputCode inputCode);         // Does inputCode represent a controller button?
+
+   InputCode getBinding(BindingName binding, InputMode inputMode);
+   void setBinding(BindingName bindingName, InputMode inputMode, InputCode key);
+
+private:
+   InputCode inputSELWEAP1[2];
+   InputCode inputSELWEAP2[2];
+   InputCode inputSELWEAP3[2];
+   InputCode inputADVWEAP[2];
+   InputCode inputCMDRMAP[2];
+   InputCode inputTEAMCHAT[2];
+   InputCode inputGLOBCHAT[2];
+   InputCode inputQUICKCHAT[2];
+   InputCode inputCMDCHAT[2];
+   InputCode inputLOADOUT[2];
+   InputCode inputMOD1[2];
+   InputCode inputMOD2[2];
+   InputCode inputFIRE[2];
+   InputCode inputDROPITEM[2];
+   InputCode inputTOGVOICE[2];
+   InputCode inputUP[2];
+   InputCode inputDOWN[2];
+   InputCode inputLEFT[2];
+   InputCode inputRIGHT[2];
+   InputCode inputSCRBRD[2];
+   InputCode keyHELP;
+   InputCode keyOUTGAMECHAT;
+   InputCode keyMISSION;
+   InputCode keyFPS;
+   InputCode keyDIAG;
+
+   /*typedef pair<InputCode, InputCode> KeySyn;
 
 #ifndef ZAP_DEDICATED
-   InputCode sdlKeyToInputCode(int key);              // Convert SDL keys to InputCode
-   int inputCodeToSDLKey(InputCode inputCode);        // Take a InputCode and return the SDL equivalent
-#endif
-
-char keyToAscii(int unicode, InputCode inputCode);    // Return a printable ascii char, if possible
-bool isControllerButton(InputCode inputCode);         // Does inputCode represent a controller button?
-
-extern InputCode inputSELWEAP1[2];
-extern InputCode inputSELWEAP2[2];
-extern InputCode inputSELWEAP3[2];
-extern InputCode inputADVWEAP[2];
-extern InputCode inputCMDRMAP[2];
-extern InputCode inputTEAMCHAT[2];
-extern InputCode inputGLOBCHAT[2];
-extern InputCode inputQUICKCHAT[2];
-extern InputCode inputCMDCHAT[2];
-extern InputCode inputLOADOUT[2];
-extern InputCode inputMOD1[2];
-extern InputCode inputMOD2[2];
-extern InputCode inputFIRE[2];
-extern InputCode inputDROPITEM[2];
-extern InputCode inputTOGVOICE[2];
-extern InputCode inputUP[2];
-extern InputCode inputDOWN[2];
-extern InputCode inputLEFT[2];
-extern InputCode inputRIGHT[2];
-extern InputCode inputSCRBRD[2];
-extern InputCode keyHELP;
-extern InputCode keyOUTGAMECHAT;
-extern InputCode keyMISSION;
-extern InputCode keyFPS;
-extern InputCode keyDIAG;
-
+   KeySyn keySynonyms[] = { KeySyn(KEY_0, KEY_KEYPAD0), KeySyn(KEY_1, KEY_KEYPAD1) };
+#endif*/
+};
 
 };     // namespace Zap
 

@@ -491,12 +491,13 @@ void MenuUserInterface::processMouse()
 }
 
 
-void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii))
+      return true;
 
    if(inputCode == KEY_UNKNOWN)
-      return;
+      return true;
 
    // Check for in autorepeat mode
    mRepeatMode = mKeyDown;
@@ -516,7 +517,7 @@ void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
          gServerGame = NULL;
       }
 
-      return;
+      return true;
    }
 
    MainMenuUserInterface *ui = getUIManager()->getMainMenuUserInterface();
@@ -524,11 +525,15 @@ void MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
    if(!ui->mFirstTime)
       ui->showAnimation = false;    // Stop animations if a key is pressed
 
-   (U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->handleKey(inputCode, ascii)) || processMenuSpecificKeys(inputCode, ascii) || processKeys(inputCode, ascii);
+   (U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->handleKey(inputCode, ascii)) || 
+      processMenuSpecificKeys(inputCode, ascii) || 
+      processKeys(inputCode, ascii);
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
    if(inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT && inputCode != KEY_ESCAPE)
       SDL_SetCursor(Cursor::getTransparent());
+
+   return true;
 }
 
 
@@ -576,8 +581,13 @@ S32 MenuUserInterface::getTotalMenuItemHeight()
 bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 {
    inputCode = convertJoystickToKeyboard(inputCode);
+   
+   if(Parent::onKeyDown(inputCode, ascii)) 
+   { 
+      // Do nothing 
+   }
 
-   if(inputCode == KEY_LEFT || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_RIGHT)
+   else if(inputCode == KEY_LEFT || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_RIGHT)
    {
       mMenuItems[selectedIndex]->handleKey(inputCode, ascii);
       playBoop();
@@ -612,7 +622,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
       playBoop();
       onEscape();
    }
-   else if(inputCode == KEY_UP || (inputCode == KEY_TAB && checkModifier(KEY_SHIFT)))   // Prev item
+   else if(inputCode == KEY_UP || (inputCode == KEY_TAB && InputCodeManager::checkModifier(KEY_SHIFT)))   // Prev item
    {
       selectedIndex--;
       itemSelectedWithMouse = false;
@@ -632,17 +642,6 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 
    else if(inputCode == KEY_DOWN || inputCode == KEY_TAB)    // Next item
       advanceItem();
-
-   else if(inputCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-   {
-      getUIManager()->getChatUserInterface()->activate();
-      playBoop();
-   }
-   else if(inputCode == keyDIAG)            // Turn on diagnostic overlay
-   {
-      getUIManager()->getDiagnosticUserInterface()->activate();
-      playBoop();
-   }
 
    return true;      // Probably wrong, but doesn't really matter at this point
 }
@@ -753,9 +752,11 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
    mNeedToUpgrade = false;           // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;      // So we don't show the upgrade message more than once
 
+   InputCode keyHelp = getInputCode(game->getSettings(), InputCodeManager::BINDING_HELP);
+
    addMenuItem(new MenuItem("JOIN LAN/INTERNET GAME", joinSelectedCallback,    "", KEY_J));
    addMenuItem(new MenuItem("HOST GAME",              hostSelectedCallback,    "", KEY_H));
-   addMenuItem(new MenuItem("INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem("INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHelp));
    addMenuItem(new MenuItem("OPTIONS",                optionsSelectedCallback, "", KEY_O));
    addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,  "", KEY_L, KEY_E));
    addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback, "", KEY_C));
@@ -1572,11 +1573,11 @@ static void kickPlayerCallback(ClientGame *game, U32 unused)
 void GameMenuUserInterface::buildMenu()
 {
    clearMenuItems();
-
-   lastInputMode = getGame()->getSettings()->getIniSettings()->inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
+   GameSettings *settings = getGame()->getSettings();
+   lastInputMode = settings->getIniSettings()->inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
 
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
-   addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
 
    GameType *gameType = getGame()->getGameType();
 
@@ -1682,7 +1683,7 @@ void LevelMenuUserInterface::onActivate()
    clearMenuItems();
 
    char c[] = "A";   // Shortcut key
-   addMenuItem(new MenuItem(ALL_LEVELS_MENUID, ALL_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
+   addMenuItem(new MenuItem(ALL_LEVELS_MENUID, ALL_LEVELS, selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1703,14 +1704,14 @@ void LevelMenuUserInterface::onActivate()
          c[0] = name[0];
          c[1] = '\0';
 //         logprintf("LEVEL - %s", name.c_str());
-         addMenuItem(new MenuItem(i + 1, name.c_str(), selectLevelTypeCallback, "", stringToInputCode(c)));
+         addMenuItem(new MenuItem(i + 1, name.c_str(), selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
 
    sortMenuItems();
 
    if((gc->mSendableFlags & 1) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
-      addMenuItem(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", stringToInputCode(c)));
+      addMenuItem(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
 }
 
 
@@ -1785,7 +1786,7 @@ void LevelMenuSelectUserInterface::onActivate()
       for(S32 i = 0; i < mLevels.size(); i++)
       {
          c[0] = mLevels[i].c_str()[0];
-         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", stringToInputCode(c)));
+         addMenuItem(new MenuItem(i | UPLOAD_LEVELS_BIT, mLevels[i].c_str(), processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
  
@@ -1797,7 +1798,8 @@ void LevelMenuSelectUserInterface::onActivate()
          !strcmp(category.c_str(), ALL_LEVELS))
       {
          c[0] = gc->mLevelInfos[i].levelName.getString()[0];
-         addMenuItem(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), processLevelSelectionCallback, "", stringToInputCode(c)));
+         addMenuItem(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), 
+                     processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
 
@@ -1907,7 +1909,7 @@ void PlayerMenuUserInterface::render()
       PlayerType pt = clientInfo->isRobot() ? PlayerTypeRobot : (clientInfo->isAdmin() ? PlayerTypeAdmin : PlayerTypePlayer);    
 
       PlayerMenuItem *newItem = new PlayerMenuItem(i, clientInfo->getName().getString(), playerSelectedCallback, 
-                                                   stringToInputCode(c), pt);
+                                                   InputCodeManager::stringToInputCode(c), pt);
       newItem->setUnselectedColor(getGame()->getTeamColor(clientInfo->getTeamIndex()));
 
       addMenuItem(newItem);
@@ -1984,7 +1986,7 @@ void TeamMenuUserInterface::render()
 
       bool isCurrent = (i == getGame()->getTeamIndex(nameToChange.c_str()));
       
-      addMenuItem(new TeamMenuItem(i, team, processTeamSelectionCallback, stringToInputCode(c), isCurrent));
+      addMenuItem(new TeamMenuItem(i, team, processTeamSelectionCallback, InputCodeManager::stringToInputCode(c), isCurrent));
    }
 
    string name = "";

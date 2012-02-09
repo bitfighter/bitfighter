@@ -858,11 +858,11 @@ void shutdownBitfighter()
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
 
-   settings->save();        // Writes all our settings to bitfighter.ini
+   settings->save();                                  // Write settings to bitfighter.ini
 
    delete settings;
 
-   gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);     // Avoids annoying shutdown error
+   gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);  // Avoids annoying shutdown error
 
    NetClassRep::logBitUsage();
    logprintf("Bye!");
@@ -1355,7 +1355,7 @@ int main(int argc, char **argv)
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
 
-   initializeKeyNames();                        // Used by loadSettingsFromINI()
+   InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
 
    loadSettingsFromINI(&gINI, settings);        // Read INI
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
@@ -1375,12 +1375,12 @@ int main(int argc, char **argv)
    else
    {
 #ifndef ZAP_DEDICATED
-      createClientGame(settings);                  // Instantiate gClientGame
+      createClientGame(settings);         // Instantiate gClientGame
 
-      resetInputCodeStates();                      // Reset keyboard state mapping to show no keys depressed
+      InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
-      Joystick::loadJoystickPresets();             // Load joystick presets from INI first
-      Joystick::initJoystick();                    // Initialize joystick system
+      Joystick::loadJoystickPresets();    // Load joystick presets from INI first
+      Joystick::initJoystick();           // Initialize joystick system
 
 #ifdef TNL_OS_MAC_OSX
       moveToAppPath();        // On OS X, make sure we're in the right directory

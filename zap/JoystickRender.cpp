@@ -129,8 +129,8 @@ extern Joystick::Button inputCodeToJoystickButton(InputCode inputCode);
 S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode inputCode)
 {
    // Return keyboard key size, just in case
-   if(!isControllerButton(inputCode))
-      return UserInterface::getStringWidthf(15, "[%s]", inputCodeToString(inputCode));
+   if(!InputCodeManager::isControllerButton(inputCode))
+      return UserInterface::getStringWidthf(15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
 
    // Get joystick button size
    Joystick::Button button = inputCodeToJoystickButton(inputCode);
@@ -174,10 +174,10 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, InputCode inputCode, bool activated)
 {
    // Render keyboard keys, just in case
-   if(!isControllerButton(inputCode))
+   if(!InputCodeManager::isControllerButton(inputCode))
    {
       // Offset a bit in the x direction.
-      UserInterface::drawStringf(x - 10, y, 15, "[%s]", inputCodeToString(inputCode));
+      UserInterface::drawStringf(x - 10, y, 15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
       return;
    }
 

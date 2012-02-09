@@ -508,6 +508,12 @@ const Vector<PluginBinding> *GameSettings::getPluginBindings()
 }
 
 
+InputCodeManager *GameSettings::getInputCodeManager()
+{ 
+   return &mInputCodeManager;
+}
+
+
 Vector<string> *GameSettings::getSpecifiedLevels()
 {
    return &mCmdLineParams[CmdLineParams::LEVEL_LIST];

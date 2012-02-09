@@ -2624,7 +2624,7 @@ void EditorUserInterface::onMouseMoved()
    mMousePos.set(gScreenInfo.getMousePos());
 
    // Doing this with MOUSE_RIGHT allows you to drag a vertex you just placed by holding the right-mouse button
-   if(getInputCodeState(MOUSE_LEFT) || getInputCodeState(MOUSE_RIGHT) || getInputCodeState(MOUSE_MIDDLE))
+   if(InputCodeManager::getState(MOUSE_LEFT) || InputCodeManager::getState(MOUSE_RIGHT) || InputCodeManager::getState(MOUSE_MIDDLE))
    {
       onMouseDragged();
       return;
@@ -2655,7 +2655,7 @@ void EditorUserInterface::onMouseMoved()
 
 void EditorUserInterface::onMouseDragged()
 {
-   if(getInputCodeState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
+   if(InputCodeManager::getState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
    {
       mCurrentOffset += mMousePos - mScrollWithMouseLocation;
       mScrollWithMouseLocation = mMousePos;
@@ -3371,14 +3371,15 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 
 
 // Handle key presses
-void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii))
+      return true;
 
    if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode, ascii))      // Pass the key on to the console for processing
-      return;
+      return true;
 
-   string inputString = makeInputString(inputCode);
+   string inputString = InputCodeManager::makeInputString(inputCode);
 
    // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
    // This is where we handle entering things like rotation angle and other data that requires a special entry box.
@@ -3403,7 +3404,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
 
    // Regular key handling from here on down
-   else if(checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
+   else if(InputCodeManager::checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
       setCurrentTeam(-2);
 
    else if(ascii == '#' || ascii == '!')
@@ -3430,24 +3431,24 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       onSelectionChanged();
 
       if(selected == NONE)      // Nothing selected, nothing to do!
-         return;
+         return true;
 
       mEntryBox = getNewEntryBox(objList->get(selected)->getItemId() <= 0 ? "" : itos(objList->get(selected)->getItemId()), 
                                  "Item ID:", 10, LineEditor::digitsOnlyFilter);
       entryMode = EntryID;
    }
 
-   else if(ascii >= '0' && ascii <= '9' && checkModifier(KEY_NONE))  // Change team affiliation of selection with 0-9 keys
+   else if(ascii >= '0' && ascii <= '9' && InputCodeManager::checkModifier(KEY_NONE))  // Change team affiliation of selection with 0-9 keys
    {
       setCurrentTeam(ascii - '1');
-      return;
+      return true;
    }
 
    // Ctrl-left click is same as right click for Mac users
-   else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && checkModifier(KEY_CTRL)))
+   else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && InputCodeManager::checkModifier(KEY_CTRL)))
    {
-      if(getInputCodeState(MOUSE_LEFT) && !checkModifier(KEY_CTRL))  // Prevent weirdness
-         return;  
+      if(InputCodeManager::getState(MOUSE_LEFT) && !InputCodeManager::checkModifier(KEY_CTRL))  // Prevent weirdness
+         return true;  
 
       mMousePos.set(gScreenInfo.getMousePos());
 
@@ -3459,7 +3460,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
             mNewItem->onGeomChanging();
          }
          
-         return;
+         return true;
       }
 
       saveUndoState();                 // Save undo state before we clear the selection
@@ -3470,7 +3471,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(mEdgeHit != NONE && mHitItem && (mHitItem->getGeomType() == geomPolyLine || mHitItem->getGeomType() >= geomPolygon))
       {
          if(mHitItem->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
-            return;
+            return true;
 
          Point newVertex = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
 
@@ -3486,8 +3487,9 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          mMouseDownPos = newVertex;
       }
       else     // Start creating a new poly or new polyline (tilde key + right-click ==> start polyline)
-      {
-         if(getInputCodeState(KEY_BACKQUOTE))      // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
+      { 
+         // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
+         if(InputCodeManager::getState(KEY_BACKQUOTE))     
          {
             mCreatingPolyline = true;
             mNewItem = new LineItem();
@@ -3505,8 +3507,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(inputCode == MOUSE_LEFT)
    {
-      if(getInputCodeState(MOUSE_RIGHT))        // Prevent weirdness
-         return;
+      if(InputCodeManager::getState(MOUSE_RIGHT))        // Prevent weirdness
+         return true;
 
       mDraggingDockItem = NULL;
       mMousePos.set(gScreenInfo.getMousePos());
@@ -3555,7 +3557,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
          //  else
          //    toggle the selection of what was clicked
 
-         if(!checkModifier(KEY_SHIFT))    // ==> Shift key is not down
+         if(!InputCodeManager::checkModifier(KEY_SHIFT))    // ==> Shift key is not down
          {
             // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
             // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
@@ -3658,7 +3660,7 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputString == "Ctrl+Shift+R") // Rotate by arbitrary amount
    {
       if(!anyItemsSelected(getDatabase()))
-         return;
+         return true;
 
       mEntryBox = getNewEntryBox("", "Rotation angle:", 10, LineEditor::numericFilter);
       entryMode = EntryAngle;
@@ -3710,11 +3712,11 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       selectAll(getDatabase());
    else if(inputString == "Ctrl+Shift+X") // Resize selection
    {
-      if(!anyItemsSelected(getDatabase()))
-         return;
-
-      mEntryBox = getNewEntryBox("", "Resize factor:", 10, LineEditor::numericFilter);
-      entryMode = EntryScale;
+      if(anyItemsSelected(getDatabase()))
+      {
+         mEntryBox = getNewEntryBox("", "Resize factor:", 10, LineEditor::numericFilter);
+         entryMode = EntryScale;
+      }
    }
    else if(inputString == "Ctrl+X")     // Cut selection
    {
@@ -3751,17 +3753,13 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       insertNewItem(MineTypeNumber);
    else if(inputString == "F")                // Force Field
       insertNewItem(ForceFieldProjectorTypeNumber);
-   else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")  // Keypad . is the keypad's del key
+   else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")     // Keypad . is the keypad's del key
       deleteSelection(false);
-   else if(inputCode == keyHELP)              // Turn on help screen
+   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode)) // Turn on help screen
    {
       getGame()->getUIManager()->getEditorInstructionsUserInterface()->activate();
       playBoop();
    }
-   else if(inputCode == keyOUTGAMECHAT)      // Turn on Global Chat overlay
-      getGame()->getUIManager()->getChatUserInterface()->activate();
-   else if(inputCode == keyDIAG)             // Turn on diagnostic overlay
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
    else if(inputCode == KEY_ESCAPE)          // Activate the menu
    {
       playBoop();
@@ -3777,6 +3775,8 @@ void EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    {
       // Do nothing
    }
+
+   return true;
 }
 
 
@@ -4088,7 +4088,7 @@ void EditorUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
 
-   F32 pixelsToScroll = timeDelta * (getInputCodeState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
+   F32 pixelsToScroll = timeDelta * (InputCodeManager::getState(KEY_SHIFT) ? 1.0f : 0.5f);    // Double speed when shift held down
 
    if(mLeft && !mRight)
       mCurrentOffset.x += pixelsToScroll;
@@ -4370,12 +4370,13 @@ void quitEditorCallback(ClientGame *game, U32 unused)
 
 void EditorMenuUserInterface::setupMenus()
 {
+   GameSettings *settings = getGame()->getSettings();
    clearMenuItems();
    addMenuItem(new MenuItem("RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
-   addMenuItem(getWindowModeMenuItem((U32)getGame()->getSettings()->getIniSettings()->displayMode));
+   addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
    addMenuItem(new MenuItem("TEST LEVEL",       testLevelCallback,           "", KEY_T));
    addMenuItem(new MenuItem("SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
-   addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
+   addMenuItem(new MenuItem("INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
    addMenuItem(new MenuItem("LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
    addMenuItem(new MenuItem("MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
    addMenuItem(new MenuItem("QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));

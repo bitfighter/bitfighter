@@ -19,6 +19,8 @@ struct OGLCONSOLE_Console
 /* Opaque to you you lowly user */
 typedef struct _OGLCONSOLE_Console *OGLCONSOLE_Console;
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

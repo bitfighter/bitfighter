@@ -118,11 +118,11 @@ string TextEntryUserInterface::getSaltedHashText()
 }
 
 
-void TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
 
-   switch (inputCode)
+   else switch (inputCode)
    {
       case KEY_ENTER:
          onAccept(lineEditor.c_str());
@@ -140,6 +140,8 @@ void TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
          lineEditor.addChar(ascii);
          break;
    }
+
+   return true;
 }
 
 
@@ -212,14 +214,14 @@ bool LevelNameEntryUserInterface::setLevelIndex()
 }
 
 
-void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
+   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
 
-   if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
+   else if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
    {
       if(mLevels.size() == 0)
-         return;
+         return true;
 
       if(!mFoundLevel)           // If we have a partially entered name, just simulate hitting tab 
       {
@@ -238,7 +240,7 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == KEY_LEFT || inputCode == KEY_UP || inputCode == MOUSE_WHEEL_UP)
    {
       if(mLevels.size() == 0)
-         return;
+         return true;
 
       if(!mFoundLevel)
          completePartial();
@@ -255,6 +257,8 @@ void LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
    else                                // Normal typed key
       mFoundLevel = setLevelIndex();   // Update levelIndex to reflect current level
+
+   return true;
 }
 
 

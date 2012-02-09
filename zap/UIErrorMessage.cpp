@@ -91,10 +91,11 @@ void ErrorMessageUserInterface::quit()
 }
 
 
-void ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   Parent::onKeyDown(inputCode, ascii);
-   quit();     // Quit the interface when any key is pressed...  any key at all.
+   if(!Parent::onKeyDown(inputCode, ascii))
+      quit();     // Quit the interface when any key is pressed...  any key at all.  Mostly.
+   return true;
 }
 
 
