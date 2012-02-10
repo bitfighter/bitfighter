@@ -185,41 +185,44 @@ void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode)
 // This is possibly marginally less efficient, but will reduce maintenance burdens over time.
 InputCode UserInterface::convertJoystickToKeyboard(InputCode inputCode)
 {
-   if(inputCode == BUTTON_DPAD_LEFT) 
-      return KEY_LEFT;
-   if(inputCode == BUTTON_DPAD_RIGHT) 
-      return KEY_RIGHT;
-   if(inputCode == BUTTON_DPAD_UP) 
-      return KEY_UP;
-   if(inputCode == BUTTON_DPAD_DOWN) 
-      return KEY_DOWN;
+   switch((S32)inputCode)
+   {
+      case BUTTON_DPAD_LEFT:
+         return KEY_LEFT;
+      case BUTTON_DPAD_RIGHT:
+         return KEY_RIGHT;
+      case BUTTON_DPAD_UP:
+         return KEY_UP;
+      case BUTTON_DPAD_DOWN:
+         return KEY_DOWN;
 
-   if(inputCode == STICK_1_LEFT) 
-      return KEY_LEFT;
-   if(inputCode == STICK_1_RIGHT) 
-      return KEY_RIGHT;
-   if(inputCode == STICK_1_UP) 
-      return KEY_UP;
-   if(inputCode == STICK_1_DOWN) 
-      return KEY_DOWN;
+      case STICK_1_LEFT:
+         return KEY_LEFT;
+      case STICK_1_RIGHT:
+         return KEY_RIGHT;
+      case STICK_1_UP:
+         return KEY_UP;
+      case STICK_1_DOWN:
+         return KEY_DOWN;
 
-   if(inputCode == STICK_2_LEFT) 
-      return KEY_LEFT;
-   if(inputCode == STICK_2_RIGHT) 
-      return KEY_RIGHT;
-   if(inputCode == STICK_2_UP) 
-      return KEY_UP;
-   if(inputCode == STICK_2_DOWN) 
-      return KEY_DOWN;
+      case STICK_2_LEFT:
+         return KEY_LEFT;
+      case STICK_2_RIGHT:
+         return KEY_RIGHT;
+      case STICK_2_UP:
+         return KEY_UP;
+      case STICK_2_DOWN:
+         return KEY_DOWN;
 
-   if(inputCode == BUTTON_START) 
-      return KEY_ENTER;
-   if(inputCode == BUTTON_BACK) 
-      return KEY_ESCAPE;
-   if(inputCode == BUTTON_1)    // Some game pads might not have a START button
+      case BUTTON_START:
          return KEY_ENTER;
-
-   return inputCode;
+      case BUTTON_BACK:
+         return KEY_ESCAPE;
+      case BUTTON_1:	    // Some game pads might not have a START button
+         return KEY_ENTER;
+      default:
+         return inputCode;
+   }
 }
 
 
