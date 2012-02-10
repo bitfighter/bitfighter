@@ -333,14 +333,15 @@ void Ship::processMove(U32 stateIndex)
 
    mMoveState[LastProcessState] = mMoveState[stateIndex];
 
-   F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) * 
+   F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001f;
    Point requestVel(mCurrentMove.x, mCurrentMove.y);
 
+   // If going above this speed, you cannot change course
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-   if(mMoveState[stateIndex].vel.len() > MAX_CONTROLLABLE_SPEED)     
+   if(mMoveState[stateIndex].vel.lenSquared() > MAX_CONTROLLABLE_SPEED * MAX_CONTROLLABLE_SPEED)
       requestVel.set(0,0);
 
 
@@ -355,7 +356,7 @@ void Ship::processMove(U32 stateIndex)
 
 
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
-   F32 maxAccel = (isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
+   F32 maxAccel = (isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time *
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
    maxAccel *= getSlipzoneSpeedMoficationFactor();
 
@@ -842,9 +843,12 @@ void Ship::processModules()
       }
    }
 
-   // No boost if we're not moving
+   // No boost or afterburner if we're not moving
    if(mModulePrimaryActive[ModuleBoost] && mCurrentMove.x == 0 && mCurrentMove.y == 0)
+   {
       mModulePrimaryActive[ModuleBoost] = false;
+      mModuleSecondaryActive[ModuleBoost] = false;
+   }
 
    // No repair with no targets
    if(mModulePrimaryActive[ModuleRepair] && !findRepairTargets())
@@ -882,7 +886,7 @@ void Ship::processModules()
    }
 
    // This will make the module primary active component use the proper
-   // amount of enery per second since the game idle methods are run on milliseconds
+   // amount of energy per second since the game idle methods are run on milliseconds
    F32 scaleFactor = mCurrentMove.time * 0.001f;
 
    // Update things based on available energy...
@@ -906,16 +910,27 @@ void Ship::processModules()
          // If we have enough energy, fire the module
          if(mEnergy >= energyCost)
          {
-            // Do the module secondary component action
-            if (i == ModuleSensor && !isGhost())
+            // Reduce energy
+            mEnergy -= energyCost;
+
+            // Sensor module needs to play a spybug (done server-side only)
+            if(i == ModuleSensor && !isGhost())
             {
                Point direction = getAimVector();
                GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos,
                                                    mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
             }
+            // Afterburner uses up all energy and applies an impulse vector
+            else if(i == ModuleBoost)
+            {
+               // The impulse should be in the same direction you're already going
+               mImpulseVector = mMoveState[ActualState].vel;
 
-            // Reduce energy
-            mEnergy -= energyCost;
+               // Change to Afterburner speed based on current energy
+               mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (AfterburnerMaxVelocity - AfterburnerMinVelocity)) + AfterburnerMinVelocity);
+
+               mEnergy = 0;
+            }
          }
       }
    }
@@ -1020,7 +1035,8 @@ void Ship::processModules()
       {
          // If current state is active, reset the cooldown timer
          if(mModuleSecondaryActive[i])
-            mModuleSecondaryCooldownTimer[i].reset();
+            if(mModuleSecondaryCooldownTimer[i].getCurrent() == 0)
+               mModuleSecondaryCooldownTimer[i].reset();
 
          setMaskBits(ModuleSecondaryMask);
       }
@@ -1305,7 +1321,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
-   GameConnection *gameConnection = (GameConnection *) connection;
 
    if(isInitialUpdate())
    {

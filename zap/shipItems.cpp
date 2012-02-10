@@ -33,7 +33,7 @@ const ModuleInfo gModuleInfo[ModuleCount] =
 {
    // name,     drain,  cost,          type,           has2,  2cost,2cooldown,    menu name,            menu help text (renders in cyan)
 	{"Shield",   27000,     0, ModulePrimaryUseActive,  false,     0,     0,   "Shield Generator",      ""                                },
-	{"Turbo",    15000,     0, ModulePrimaryUseActive,  false,     0,     0,   "Turbo Boost",           ""                                },
+	{"Turbo",    15000,     0, ModulePrimaryUseActive,  true,      0, 10000,   "Turbo Boost",           ""                                },
 	{"Sensor",    8000,     0, ModulePrimaryUseHybrid,  true,  35000,   800,   "Enhanced Sensor",       ""                                },
 	{"Repair",   15000,     0, ModulePrimaryUseActive,  false,     0,     0,   "Repair Module",         ""                                },
 	{"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0,     0,   "Engineer",              ""                                },
