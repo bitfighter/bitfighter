@@ -228,7 +228,8 @@ public:
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
-   Timer mModuleSecondaryCooldownTimer[ModuleCount];
+   Timer mModuleSecondaryTimer[ModuleCount];  // Timer to prevent accidentally firing in quick succession
+   static const U32 ModuleSecondaryTimerDelay = 500;
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;

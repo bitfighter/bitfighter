@@ -31,14 +31,14 @@ namespace Zap
 
 const ModuleInfo gModuleInfo[ModuleCount] =
 {
-   // name,     drain,  cost,          type,           has2,  2cost,2cooldown,    menu name,            menu help text (renders in cyan)
-	{"Shield",   27000,     0, ModulePrimaryUseActive,  false,     0,     0,   "Shield Generator",      ""                                },
-	{"Turbo",    15000,     0, ModulePrimaryUseActive,  true,      0, 10000,   "Turbo Boost",           ""                                },
-	{"Sensor",    8000,     0, ModulePrimaryUseHybrid,  true,  35000,   800,   "Enhanced Sensor",       ""                                },
-	{"Repair",   15000,     0, ModulePrimaryUseActive,  false,     0,     0,   "Repair Module",         ""                                },
-	{"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0,     0,   "Engineer",              ""                                },
-	{"Cloak",     8000,     0, ModulePrimaryUseActive,  false,     0,     0,   "Cloak Field Modulator", ""                                },
-	{"Armor",        0,     0, ModulePrimaryUsePassive, false,     0,     0,   "Armor",                 "(makes ship harder to control)"  }
+   // name,     drain,  cost,          type,           has2,   2cost,    menu name,            menu help text (renders in cyan)
+	{"Shield",   27000,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                                },
+	{"Turbo",    15000,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                                },
+	{"Sensor",    8000,     0, ModulePrimaryUseHybrid,  true,  35000, "Enhanced Sensor",       ""                                },
+	{"Repair",   15000,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                                },
+	{"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0, "Engineer",              ""                                },
+	{"Cloak",     8000,     0, ModulePrimaryUseActive,  false,     0, "Cloak Field Modulator", ""                                },
+	{"Armor",        0,     0, ModulePrimaryUsePassive, false,     0, "Armor",                 "(makes ship harder to control)"  }
 };
 
 
@@ -63,12 +63,6 @@ bool ModuleInfo::hasSecondary() const
 S32 ModuleInfo::getSecondaryPerUseCost() const
 {
    return mSecondaryUseCost;
-}
-
-
-S32 ModuleInfo::getSecondaryCooldown() const
-{
-   return mSecondaryCooldown;
 }
 
 

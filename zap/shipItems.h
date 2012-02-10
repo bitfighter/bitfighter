@@ -71,7 +71,6 @@ struct ModuleInfo
    ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
    bool hasSecondaryComponent;
    S32 mSecondaryUseCost;         // Per use energy drain of secondary component
-   S32 mSecondaryCooldown;        // Cooldown between allowed secondary component uses, in milliseconds
    const char *mMenuName;
    const char *mMenuHelp;
 
@@ -79,7 +78,6 @@ struct ModuleInfo
    S32 getPrimaryPerUseCost() const;
    bool hasSecondary() const;
    S32 getSecondaryPerUseCost() const;
-   S32 getSecondaryCooldown() const;
    const char *getName() const;
    ModulePrimaryUseType getPrimaryUseType() const;
    const char *getMenuName() const;
