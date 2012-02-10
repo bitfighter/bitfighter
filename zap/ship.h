@@ -139,6 +139,8 @@ public:
    static const S32 RepairRadius = 65;
    static const U32 SpawnShieldTime = 5000;        // Time spawn shields are active
    static const U32 SpawnShieldFlashTime = 1500;   // Time at which shields start to flash
+   static const S32 AfterburnerMaxVelocity = 2500; // Maximum impluse speed of afterburner
+   static const S32 AfterburnerMinVelocity = 1000; // Minimum impluse speed of afterburner
 
    enum {
       MaxVelocity = 450,        // points per second
