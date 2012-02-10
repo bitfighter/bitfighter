@@ -35,79 +35,65 @@ namespace Zap
 {
 
 // Constructor
-ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : UserInterface(game)
+AbstractMessageUserInterface::AbstractMessageUserInterface(ClientGame *game) : Parent(game)
 {
-   setMenuID(ErrorMessageUI);
    reset();
 }
 
 
-void ErrorMessageUserInterface::onActivate()
+void AbstractMessageUserInterface::onActivate()
 {
-   // Do nothing
-}
-
-
-void ErrorMessageUserInterface::reset()
-{
-   mTitle = "WE HAVE A PROBLEM";          // Default title
-   mInstr = "Hit any key to continue";
-   mPresentationId = 0;
-
-   for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] = "";
+   // Do nothing -- block parent's onActivate
 }
 
 
 // First line is 1
-void ErrorMessageUserInterface::setMessage(S32 id, const char *message)
+void AbstractMessageUserInterface::setMessage(S32 id, string message)
 {
    TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
    mMessage[id-1] = message;
 }
 
 
-void ErrorMessageUserInterface::setTitle(const char *message)
+void AbstractMessageUserInterface::setTitle(const char *message)
 {
    mTitle = message;
 }
 
 
-void ErrorMessageUserInterface::setPresentation(S32 presentationId)
-{
-   mPresentationId = presentationId;
-}
-
-
-void ErrorMessageUserInterface::setInstr(const char *message)
+void AbstractMessageUserInterface::setInstr(const char *message)
 {
    mInstr = message;
 }
 
 
-void ErrorMessageUserInterface::quit()
+void AbstractMessageUserInterface::quit()
 {
    getUIManager()->reactivatePrevUI();      // to gMainMenuUserInterface
 }
 
 
-bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
+void AbstractMessageUserInterface::setPresentation(S32 presentationId)
 {
-   if(!Parent::onKeyDown(inputCode, ascii))
-      quit();     // Quit the interface when any key is pressed...  any key at all.  Mostly.
-   return true;
+   mPresentationId = presentationId;
 }
 
 
-void ErrorMessageUserInterface::idle(U32 timeDelta)
+void AbstractMessageUserInterface::reset()
 {
-   Parent::idle(timeDelta);
+   mPresentationId = 0;
 }
 
 
-void ErrorMessageUserInterface::render()
+bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   getUIManager()->renderPrevUI();
+   return Parent::onKeyDown(inputCode, ascii);
+}
+
+
+void AbstractMessageUserInterface::render()
+{
+   getUIManager()->renderPrevUI(this);
    
    if(mPresentationId == 0)      // Standard presentation
       renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
@@ -117,6 +103,36 @@ void ErrorMessageUserInterface::render()
       TNLAssert(false, "Unknown value of mPresentationId!");
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+ErrorMessageUserInterface::ErrorMessageUserInterface(ClientGame *game) : Parent(game)
+{
+   setMenuID(ErrorMessageUI);
+}
+
+
+void ErrorMessageUserInterface::reset()
+{
+   Parent::reset();
+
+   mTitle = "WE HAVE A PROBLEM";          // Default title
+   mInstr = "Hit any key to continue";
+
+   for(S32 i = 0; i < MAX_LINES; i++)
+      mMessage[i] = "";
+}
+
+
+bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
+{
+   if(!Parent::onKeyDown(inputCode, ascii))
+      quit();     // Quit the interface when any key is pressed...  any key at all.  Mostly.
+
+   return true;
+}
 
 
 };

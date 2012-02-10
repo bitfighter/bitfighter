@@ -32,7 +32,7 @@
 namespace Zap
 {
 
-class ErrorMessageUserInterface : public UserInterface
+class AbstractMessageUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
@@ -40,20 +40,34 @@ private:
    S32 mPresentationId;
 
 public:
-   ErrorMessageUserInterface(ClientGame *game);      // Constructor
+   AbstractMessageUserInterface(ClientGame *game);      // Constructor
    const static S32 MAX_LINES = 9;
    const char *mTitle;
    const char *mInstr;
-   const char *mMessage[MAX_LINES];
+   string mMessage[MAX_LINES];
    void onActivate();
-   void setMessage (S32 id, const char *message);
+   void setMessage (S32 id, string message);
    void setTitle(const char *message);
-   void setPresentation(S32 presentationId);
-   void reset();
    void setInstr(const char *message);
-   void idle(U32 t);
    void render();
    void quit();
+   void setPresentation(S32 presentationId);
+   virtual void reset();
+   virtual bool onKeyDown(InputCode inputCode, char ascii);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class ErrorMessageUserInterface : public AbstractMessageUserInterface
+{
+   typedef AbstractMessageUserInterface Parent;
+
+public:
+   ErrorMessageUserInterface(ClientGame *game);      // Constructor
+   void reset();
+
    bool onKeyDown(InputCode inputCode, char ascii);
 };
 

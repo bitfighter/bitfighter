@@ -1316,10 +1316,10 @@ void NameEntryUserInterface::renderExtras()
 
    if(mReason == NetConnection::ReasonBadLogin || mReason == NetConnection::ReasonInvalidUsername)
    {
-      const char *message[] = { "If you have reserved this name by registering for",
-                                "the forums, enter your forum password below. Otherwise,",
-                                "this user name may be reserved. Please choose another."
-                              };
+      string message[] = { "If you have reserved this name by registering for",
+                           "the forums, enter your forum password below. Otherwise,",
+                           "this user name may be reserved. Please choose another."
+                         };
 
       renderMessageBox("Invalid Name or Password", "", message, 3, -190);
    }

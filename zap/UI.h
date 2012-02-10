@@ -90,7 +90,8 @@ private:
    U32 mTimeSinceLastInput;
 
 protected:
-   static bool mDisableShipKeyboardInput;  // Disable ship movement while user is in menus
+   static bool mDisableShipKeyboardInput;    // Disable ship movement while user is in menus
+   void setMenuID(UIID menuID);              // Set interface's name
 
 public:
    UserInterface(ClientGame *game);                // Constructor
@@ -100,7 +101,6 @@ public:
    static UserInterface *current;            // Currently active menu
    static UserInterface *comingFrom;         // Immediately previously active menu
 
-   void setMenuID(UIID menuID);              // Set interface's name
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
 
@@ -146,8 +146,8 @@ public:
    virtual void onMouseMoved();
    virtual void onMouseDragged();
 
-   void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
-   void renderUnboxedMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
+   void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0);
+   void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0);
 
    void dimUnderlyingUI();
 

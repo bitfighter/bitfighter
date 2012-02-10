@@ -146,7 +146,7 @@ void MessageUserInterface::render()
       fadeFactor = 1;
 
 
-   getUIManager()->renderPrevUI();
+   getUIManager()->renderPrevUI(this);
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 

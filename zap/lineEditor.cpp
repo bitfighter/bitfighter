@@ -247,28 +247,29 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, S32 width, F32 angl
 }
 
 
-void LineEditor::addChar(const char c) 
+bool LineEditor::addChar(const char c) 
 { 
    if(c == 0)
-      return;
+      return false;
 
    if((mFilter == digitsOnlyFilter) && (c < '0' || c > '9'))
-      return;
+      return false;
       
    else if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
-      return;
+      return false;
 
    else if((mFilter == noQuoteFilter) && (c == '"' ))
-      return;
+      return false;
    
    else if((mFilter == fileNameFilter) && ! ( (c >= '0' && c <= '9') ||
                                               (c == '_')             ||
                                               (c >= 'A' && c <= 'Z') ||
                                               (c >= 'a' && c <= 'z') )  )
-      return;
+      return false;
    
    if(length() < mMaxLen) mLine.append(string(1, c)); 
    mMatchIndex = -1;
+   return true;
 }
 
 

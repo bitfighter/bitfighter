@@ -558,7 +558,7 @@ void GameUserInterface::renderLostConnectionMessage()
    GameConnection *connection = getGame()->getConnectionToServer();
    if(connection && connection->lostContact())
    {
-      static const char *msg[] = { "", 
+      static string msg[] = { "", 
                                    "We may have lost contact with the server...", 
                                    "",
                                    " You can't play until the connection has been re-established ", 
@@ -580,7 +580,7 @@ void GameUserInterface::renderShutdownMessage()
 
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
-         static const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
+         string msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
          renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 7);
       }
       else                       // Remote user intiated the shutdown
@@ -588,14 +588,14 @@ void GameUserInterface::renderShutdownMessage()
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
 
-         static const char *msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
+         string msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
          renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to dismiss", msg, 7);
       }
    }
    else if(mShutdownMode == Canceled)
    {
       // Keep same number of messages as above, so if message changes, it will be a smooth transition
-      static const char *msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
+      string msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
 
       renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 7);
    }

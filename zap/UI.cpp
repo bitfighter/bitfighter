@@ -765,7 +765,7 @@ void UserInterface::renderConsole()
 //extern void glColor(const Color &c, float alpha = 1);
 extern ScreenInfo gScreenInfo;
 
-void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
+void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset)
 {
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
@@ -794,7 +794,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    S32 maxLen = 0;
    for(S32 i = 0; i < msgLines; i++)
    {
-      S32 len = getStringWidth(textSize, message[i]) + 20;     // 20 gives a little breathing room on the edges
+      S32 len = getStringWidth(textSize, message[i].c_str()) + 20;     // 20 gives a little breathing room on the edges
       if(len > maxLen)
          maxLen = len;
    }
@@ -817,14 +817,14 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
    for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + vertMargin + titleSpace + i * (textSize + textGap), textSize, message[i]);
+      drawCenteredString(boxTop + vertMargin + titleSpace + i * (textSize + textGap), textSize, message[i].c_str());
 
    drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
 }
 
 
 // This function could use some further cleaning; currently only used for the delayed spawn notification
-void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
+void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset)
 {
    dimUnderlyingUI();
 
@@ -839,7 +839,7 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 
    S32 actualLines = 0;
    for(S32 i = 0; i < msgLines; i++)
-      if(strcmp(message[i], "") != 0)
+      if(message[i] != "")
          actualLines = i + 1;
 
    S32 titleSpace = titleSize + titleGap;
@@ -864,7 +864,7 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
    drawHollowRect((canvasWidth - boxWidth) / 2, boxTop - vertMargin, canvasWidth - ((canvasWidth - boxWidth) / 2), boxTop + boxHeight + vertMargin);
 
    for(S32 i = 0; i < msgLines; i++)
-      drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i]);
+      drawCenteredString(boxTop + titleSpace + i * (textSize + textGap), textSize, message[i].c_str());
 
    drawCenteredString(boxTop + boxHeight / 2 - textSize, textSize, instr);
 }
@@ -1089,16 +1089,24 @@ bool UserInterface::onKeyDown(InputCode inputCode, char ascii)
    bool handled = false;
 
    GameSettings *settings = getGame()->getSettings();
+   UIManager *uiManager = getGame()->getUIManager();
 
    if(checkInputCode(settings, InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
    { 
-      getGame()->getUIManager()->getDiagnosticUserInterface()->activate();
+      if(uiManager->isOpen(DiagnosticsScreenUI))
+         return false;
+
+      uiManager->getDiagnosticUserInterface()->activate();
+
       playBoop();
       
       handled = true;
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
    {
+      if(uiManager->isOpen(GlobalChatUI))
+         return false;
+
       getGame()->getUIManager()->getChatUserInterface()->activate();
       playBoop();
 

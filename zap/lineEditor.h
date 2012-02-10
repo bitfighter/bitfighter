@@ -71,7 +71,7 @@ public:
    virtual ~LineEditor();
 
    U32 length();                                // Returns line length in chars
-   void addChar(char c);
+   bool addChar(char c);                        // Returns true if char was added to line
    void backspacePressed();                     // User hit Backspace
    void deletePressed();                        // User hit Delete
    void handleBackspace(InputCode inputCode);   // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!

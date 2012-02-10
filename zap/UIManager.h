@@ -153,6 +153,8 @@ public:
    UIManager(ClientGame *clientGame);  // Constructor
    ~UIManager();                       // Destructor
 
+   bool isOpen(UIID uiid);
+
    /////
    // Interface getting methods
    MainMenuUserInterface *getMainMenuUserInterface();
@@ -189,7 +191,7 @@ public:
    void reactivateMenu(const UserInterface *target);
    bool hasPrevUI();
    void clearPrevUIs();
-   void renderPrevUI();
+   void renderPrevUI(const UserInterface *ui);
    bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
    void saveUI(UserInterface *ui);
 

@@ -100,9 +100,13 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(mCurPage >= NUM_PAGES)
          mCurPage = 0;
    }
+   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
+   {
+      // Do nothing -- no global chat from diagnostics screen... it's perverse!
+   }
    else if(Parent::onKeyDown(inputCode, ascii))   
    { 
-      // Do nothing 
+      // Do nothing -- key handled
    }
    else if(inputCode == KEY_ESCAPE)
       quit();                          // Quit the interface
@@ -190,7 +194,7 @@ static S32 showFoldersBlock(FolderManager *folderManager, F32 textsize, S32 ypos
    for(S32 i = 0; i < names.size(); i++)
    {
       S32 xpos = (gScreenInfo.getGameCanvasWidth() - totLen) / 2;
-      glColor3f(0,1,1);
+      glColor(Colors::cyan);
       UserInterface::drawString(xpos, ypos, (S32)textsize, names[i]);
       xpos += nameWidth + spaceWidth;
       glColor(Colors::white);
@@ -604,31 +608,94 @@ void DiagnosticUserInterface::render()
       ypos += (textsize + gap) * (3 - j);
 
 
-      // Temporary placeholder for badge testing
+      // Temporary placeholder for badge testing -- centered at xpos, ypos, with radius of rad (i.e. 2 x rad across)
 
-      S32 xpos;
+      for(S32 i = 0; i < 2; i++)
+      {
 
-      xpos = horizMargin + 10;
-      ypos = 500;
+         F32 x;
+         F32 y;
 
-      S32 rad = 10;
+         x = horizMargin + 10;
+         y = 500 + 20 * i;
 
-      glColor(Colors::white);
-      drawPolygon(Point(xpos,ypos), 6,rad-2, 0);
-      glColor(Colors::red);
-      drawCircle(Point(xpos, ypos), 10);
+         F32 rad = 10;
+         F32 smallSize = .6;
+            
+         glPushMatrix();
+         glScale(i ? smallSize : 1);
+         y *= (i ? 1/smallSize : 1);
 
-      xpos += 3*rad;
+         
+         F32 rm2 = rad - 2;
+         F32 r3 = rad * .333;
+         F32 rm23 = rm2 * .333;
 
-      glColor(Colors::yellow);
-      drawPolygon(Point(xpos,ypos), 3,rad-2, 3.14159/6);
-      glColor(Colors::red);
-      drawCircle(Point(xpos, ypos), 10);
+         glColor(Colors::white);
+         drawPolygon(Point(x,y), rad *.666,rad-2, 0);
+         glColor(Colors::red);
+         drawCircle(Point(x, y), rad);
 
-      xpos += 3*rad;
-      glColor(Colors::green);
-      drawHollowRect(xpos - rad, ypos - rad/3, xpos + rad, ypos + rad/3);
-      drawHollowRect(xpos - rad/3, ypos - rad, xpos + rad/3, ypos + rad);
+         x += 3*rad;
+
+         glColor(Colors::yellow);
+         drawPolygon(Point(x,y), 3,rad-2, 3.14159/6);
+         glColor(Colors::red);
+         drawCircle(Point(x, y), rad);
+
+         x += 3*rad;
+         glColor(Colors::green);
+         drawHollowRect(x - rad, y - r3,  x + rad, y + r3);
+         drawHollowRect(x - r3,  y - rad, x + r3,  y + rad);
+
+
+         // Use rm2 and rm23 to make squares a little smaller to balance size of the circles
+
+         x += 3*rad;
+         glColor(Colors::red);
+         drawFilledRect(x - rm2, y - rm2, x + rm2, y + rm2);
+         glColor(Colors::white);
+         drawFilledRect(x - rm23,  y - rm2, x + rm23, y - rm23);
+         drawFilledRect(x - rm23,  y + rm2, x + rm23, y + rm23);
+         drawFilledRect(x + rm2, y - rm23,  x + rm23, y + rm23);
+         drawFilledRect(x - rm2, y - rm23,  x - rm23, y + rm23);
+
+         x += 3*rad;
+         glColor(Colors::red);
+         drawHollowRect(x - rm2, y - rm2, x + rm2, y + rm2);
+         drawCircle(Point(x, y), rm2);
+         glColor(Colors::orange67);
+         drawCircle(Point(x, y), rad / 2);
+
+         x += 3*rad;
+         glColor(Colors::red);
+         drawHollowRect(x - rm2, y - rm2, x + rm2, y + rm2);
+         drawCircle(Point(x, y), rm2);
+         glColor(Colors::yellow);
+         drawFilledCircle(Point(x, y), rad / 2);
+         glColor(Colors::orange67);
+         drawCircle(Point(x, y), rad / 2);
+
+
+         x += 3*rad;
+         glColor(Colors::red);
+         drawCircle(Point(x, y), rad);
+         glColor(Colors::white);
+         drawCircle(Point(x, y), r3 * 2);
+         glColor(Colors::red);
+         drawCircle(Point(x, y), r3);
+
+
+         x += 3*rad;
+         glColor(Colors::paleBlue);
+         drawPolygon(Point(x,y + rad * .333), 3, rad * 1.2, 3.14159/6);
+         glColor(Colors::cyan);
+         drawPolygon(Point(x,y + rad * .333), 3, rad * .6, 3.14159 * .5);
+
+
+         glPopMatrix();
+
+      }
 
    }
 }

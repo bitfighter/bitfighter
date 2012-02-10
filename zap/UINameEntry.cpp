@@ -120,28 +120,26 @@ string TextEntryUserInterface::getSaltedHashText()
 
 bool TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
+   if(Parent::onKeyDown(inputCode, ascii)) 
+      return true;
 
-   else switch (inputCode)
+   switch (inputCode)
    {
       case KEY_ENTER:
          onAccept(lineEditor.c_str());
-         break;
+         return true;
       case KEY_BACKSPACE:
          lineEditor.backspacePressed();
-         break;
+         return true;
       case KEY_DELETE:
          lineEditor.deletePressed();
-         break;
+         return true;
       case KEY_ESCAPE:
          onEscape();
-         break;
+         return true;
       default:
-         lineEditor.addChar(ascii);
-         break;
+         return lineEditor.addChar(ascii);
    }
-
-   return true;
 }
 
 
@@ -216,8 +214,10 @@ bool LevelNameEntryUserInterface::setLevelIndex()
 
 bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
-
+   if(Parent::onKeyDown(inputCode, ascii)) 
+   { 
+      // Do nothing -- key handled
+   }
    else if(inputCode == KEY_RIGHT || inputCode == KEY_DOWN || inputCode == MOUSE_WHEEL_DOWN)
    {
       if(mLevels.size() == 0)

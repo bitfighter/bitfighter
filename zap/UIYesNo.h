@@ -33,9 +33,9 @@
 namespace Zap
 {
 
-class YesNoUserInterface : public ErrorMessageUserInterface
+class YesNoUserInterface : public AbstractMessageUserInterface
 {
-   typedef ErrorMessageUserInterface Parent;
+   typedef AbstractMessageUserInterface Parent;
 
 private:
    void (*mYesFunction)(ClientGame *game);

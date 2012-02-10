@@ -423,7 +423,7 @@ void ChatUserInterface::render()
 {
    if(mRenderUnderlyingUI && getUIManager()->hasPrevUI())           // If there is an underlying menu...
    {
-      getUIManager()->renderPrevUI();  // ...render it...
+      getUIManager()->renderPrevUI(this);  // ...render it...
       dimUnderlyingUI();
    }
 
@@ -515,6 +515,7 @@ void ChatUserInterface::onActivate()
    // Only clear the chat list if the previous UI was NOT UIQueryServers
    if(getUIManager()->getPrevUI() != getUIManager()->getQueryServersUserInterface())
       mPlayersInGlobalChat.clear();
+
    mRenderUnderlyingUI = true;
    mDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }

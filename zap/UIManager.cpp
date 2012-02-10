@@ -120,6 +120,20 @@ UIManager::~UIManager()
 }
 
 
+// Check whether a particular menu is already being displayed
+bool UIManager::isOpen(UIID uiid)
+{
+   if(UserInterface::current->getMenuID() == uiid)
+      return true;
+
+   for(S32 i = 0; i < mPrevUIs.size(); i++)
+      if(mPrevUIs[i]->getMenuID() == uiid)
+         return true;
+
+   return false;
+}
+
+
 GameParamUserInterface *UIManager::getGameParamUserInterface()
 {
    // Lazily initialize
@@ -463,10 +477,12 @@ void UIManager::clearPrevUIs()
 }
 
 
-void UIManager::renderPrevUI()
+// Have to pass ui to avoid stack overflow when trying to render UIs two-levels deep
+void UIManager::renderPrevUI(const UserInterface *ui)
 {
-   if(mPrevUIs.size())
-      mPrevUIs.last()->render();
+   for(S32 i = mPrevUIs.size() - 1; i > 0; i--)    // NOT >= 0!
+      if(mPrevUIs[i] == ui)
+         mPrevUIs[i-1]->render();
 }
 
 
