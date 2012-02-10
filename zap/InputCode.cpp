@@ -478,7 +478,7 @@ void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, 
       if(isKeypad)
          mBindingsHaveKeypadEntry = true;
       else
-         isKeypad = checkIfBindingsHaveKeypad();
+         mBindingsHaveKeypadEntry = checkIfBindingsHaveKeypad();
    }
 }
 
@@ -486,6 +486,7 @@ void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, 
 void InputCodeManager::setInputMode(InputMode inputMode)
 {
    mInputMode = inputMode;
+   mBindingsHaveKeypadEntry = checkIfBindingsHaveKeypad();
 }
 
 
