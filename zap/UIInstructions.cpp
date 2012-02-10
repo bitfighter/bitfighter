@@ -279,10 +279,7 @@ void InstructionsUserInterface::renderPage1()
       else if(!strcmp(controls[i].controlString, "-"))      // Horiz spacer
       {
          glColor(0.4f);
-         glBegin(GL_LINES);
-            glVertex2i(actCol, y + 13);
-            glVertex2i(actCol + 335, y + 13);
-         glEnd();
+         drawHorizLine(actCol, actCol + 335, y + 13);
       }
       else
       {
