@@ -291,7 +291,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
       }
       else if(controls[i].command == "-")      // Horiz spacer
       {
-         glColor(0.4f);
+         glColor(Colors::gray40);
          drawHorizLine(actCol, actCol + 335, y + 13);
       }
       else if(controls[i].descr == "HEADER")

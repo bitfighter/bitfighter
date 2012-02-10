@@ -38,6 +38,12 @@ class InstructionsUserInterface : public AbstractInstructionsUserInterface
 
 private:
    U32 mCurPage;
+
+   S32 col1;
+   S32 col2;
+   S32 col3;
+   S32 col4;
+
    bool usingArrowKeys();
 
    void renderPage1();
@@ -47,6 +53,9 @@ private:
    void renderPageCommands(U32 index, const char *msg = "");
    void nextPage();
    void prevPage();
+
+   void renderKeyBindingQuad(S32 y, const char *str1, InputCodeManager::BindingName binding1, 
+                                    const char *str2, InputCodeManager::BindingName binding2);
 
 public:
    InstructionsUserInterface(ClientGame *game);      // Constructor

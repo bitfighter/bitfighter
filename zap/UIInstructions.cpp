@@ -50,6 +50,13 @@ namespace Zap
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(InstructionsUI);
+   
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
+   col1 = horizMargin + 0 * canvasWidth / 4;
+   col2 = horizMargin + canvasWidth / 4 + 45;     // +45 to make a little more room for Action col
+   col3 = horizMargin + canvasWidth / 2;
+   col4 = horizMargin + (canvasWidth * 3) / 4 + 45;
 }
 
 
@@ -227,16 +234,40 @@ bool InstructionsUserInterface::usingArrowKeys()
 }
 
 
+static const Color txtColor = Colors::cyan;
+static const Color keyColor = Colors::white;     
+static const Color secColor = Colors::yellow;
+
+void InstructionsUserInterface::renderKeyBindingQuad(S32 y, const char *str1, InputCodeManager::BindingName binding1, 
+                                                            const char *str2, InputCodeManager::BindingName binding2)
+{
+   GameSettings *settings = getGame()->getSettings();
+   
+   glColor(txtColor);
+   drawString(col1, y, 18, str1);
+
+   if(binding1 != InputCodeManager::BINDING_NONE)
+   {
+      glColor(keyColor);
+      drawStringf(col2, y, 18, "[%s]",  getInputCodeString(settings, binding1));
+   }
+
+   glColor(txtColor);
+   drawString(col3, y, 18, str2);
+
+   if(binding2 != InputCodeManager::BINDING_NONE)
+   {
+      glColor(keyColor);
+      drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, binding2));
+   }
+}
+
+
 // This has become rather ugly and inelegant.  Sorry!
 void InstructionsUserInterface::renderPage1()
 {
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 starty = 75;
    S32 y;
-   S32 col1 = horizMargin;
-   S32 col2 = horizMargin + canvasWidth / 4 + 45;     // +45 to make a little more room for Action col
-   S32 col3 = horizMargin + canvasWidth / 2;
-   S32 col4 = horizMargin + (canvasWidth * 3) / 4 + 45;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
 
@@ -247,10 +278,6 @@ void InstructionsUserInterface::renderPage1()
 
    drawHorizLine(col1, 750, starty + 26);
 
-   static const Color txtColor = Colors::cyan;
-   static const Color keyColor = Colors::white;     
-   static const Color secColor = Colors::yellow;
-
    ControlString *controls = (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
@@ -260,6 +287,7 @@ void InstructionsUserInterface::renderPage1()
    drawString(col4, starty, 20, "Control");
 
    y = starty + 28;
+
    for(S32 i = 0; !done; i++)              // Iterate over ControlStrings above
    {
       if(!controls[i].controlString)
@@ -278,7 +306,7 @@ void InstructionsUserInterface::renderPage1()
       }
       else if(!strcmp(controls[i].controlString, "-"))      // Horiz spacer
       {
-         glColor(0.4f);
+         glColor(Colors::gray40);
          drawHorizLine(actCol, actCol + 335, y + 13);
       }
       else
@@ -318,30 +346,13 @@ void InstructionsUserInterface::renderPage1()
    y += 10;
    glColor(secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
-   y += 40;
-   glColor(txtColor);
-   drawString(col1, y, 18, "Help");
-   glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", getInputCodeString(settings, InputCodeManager::BINDING_HELP));
-   glColor(txtColor);
-   drawString(col3, y, 18, "Universal Chat");
-   glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_OUTGAMECHAT));
-   y += 26;
-   glColor(txtColor);
-   drawString(col1, y, 18, "Mission");
-   glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_MISSION));
-   glColor(txtColor);
-   drawString(col3, y, 18, "Display FPS / Lag");
-   glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_FPS));
-   y += 26;
-   glColor(txtColor);
-   drawString(col3, y, 18, "Diagnostics");
-   glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]",  getInputCodeString(settings, InputCodeManager::BINDING_DIAG));
 
+   y += 40;
+   renderKeyBindingQuad(y, "Help",    InputCodeManager::BINDING_HELP,    "Universal Chat",               InputCodeManager::BINDING_OUTGAMECHAT);
+   y += 26;
+   renderKeyBindingQuad(y, "Mission", InputCodeManager::BINDING_MISSION, "Display FPS / Lag",            InputCodeManager::BINDING_FPS);
+   y += 26;
+   renderKeyBindingQuad(y, "",        InputCodeManager::BINDING_NONE,    "Diagnostics", InputCodeManager::BINDING_DIAG);
 }
 
 
@@ -709,7 +720,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
 
          case 27:    // Core
-            F32 health[] = {1,1,1,1,1,1,1,1,1,1};
+            F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
             renderCore(Point(0,0), 55, &Colors::blue, Platform::getRealMilliseconds(), health );
       }
       glPopMatrix();
@@ -785,7 +796,8 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       // Check if we've just changed sections... if so, draw a horizontal line ----------
       if(chatCmds[i].helpGroup > section)      
       {
-         glColor3f(0.4f, 0.4f, 0.4f);
+         glColor(Colors::gray40);
+
          drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
 
          section = chatCmds[i].helpGroup;
@@ -823,6 +835,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 void InstructionsUserInterface::nextPage()
 {
    mCurPage++;
+
    if(mCurPage > NUM_PAGES)
       mCurPage = 1;
 }
@@ -830,9 +843,9 @@ void InstructionsUserInterface::nextPage()
 
 void InstructionsUserInterface::prevPage()
 {
-   if(mCurPage > 1)
-      mCurPage--;
-   else
+   mCurPage--;
+
+   if(mCurPage < 1)
       mCurPage = NUM_PAGES;
 }
 

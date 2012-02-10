@@ -77,7 +77,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
    {
       if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
-         glColor(0.4);
+         glColor(Colors::gray40);
          drawHorizLine(cmdCol, cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
       }
       else

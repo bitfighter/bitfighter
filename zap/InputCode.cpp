@@ -259,6 +259,8 @@ InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputM
          return KEY_CTRL_M;
       case BINDING_DUMMY_SS_MODE:
          return KEY_CTRL_Q;
+      case BINDING_NONE:
+            return KEY_NONE;
          
    //         MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
    //KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy InputCode item in the instructions
