@@ -185,42 +185,32 @@ void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode)
 // This is possibly marginally less efficient, but will reduce maintenance burdens over time.
 InputCode UserInterface::convertJoystickToKeyboard(InputCode inputCode)
 {
-   //if(menuSitck == JOYSTICK_DPAD)
-   //{
-      if(inputCode == BUTTON_DPAD_LEFT) 
-         return KEY_LEFT;
-      if(inputCode == BUTTON_DPAD_RIGHT) 
-         return KEY_RIGHT;
-      if(inputCode == BUTTON_DPAD_UP) 
-         return KEY_UP;
-      if(inputCode == BUTTON_DPAD_DOWN) 
-         return KEY_DOWN;
-   //}
+   if(inputCode == BUTTON_DPAD_LEFT) 
+      return KEY_LEFT;
+   if(inputCode == BUTTON_DPAD_RIGHT) 
+      return KEY_RIGHT;
+   if(inputCode == BUTTON_DPAD_UP) 
+      return KEY_UP;
+   if(inputCode == BUTTON_DPAD_DOWN) 
+      return KEY_DOWN;
 
-   //if(menuStick == JOYSTICK_STICK1)
-   //{
-      if(inputCode == STICK_1_LEFT) 
-         return KEY_LEFT;
-      if(inputCode == STICK_1_RIGHT) 
-         return KEY_RIGHT;
-      if(inputCode == STICK_1_UP) 
-         return KEY_UP;
-      if(inputCode == STICK_1_DOWN) 
-         return KEY_DOWN;
-   //}
+   if(inputCode == STICK_1_LEFT) 
+      return KEY_LEFT;
+   if(inputCode == STICK_1_RIGHT) 
+      return KEY_RIGHT;
+   if(inputCode == STICK_1_UP) 
+      return KEY_UP;
+   if(inputCode == STICK_1_DOWN) 
+      return KEY_DOWN;
 
-   //if(menuStick == JOYSTICK_STICK2)
-   //{
-      if(inputCode == STICK_2_LEFT) 
-         return KEY_LEFT;
-      if(inputCode == STICK_2_RIGHT) 
-         return KEY_RIGHT;
-      if(inputCode == STICK_2_UP) 
-         return KEY_UP;
-      if(inputCode == STICK_2_DOWN) 
-         return KEY_DOWN;
-   //}
-
+   if(inputCode == STICK_2_LEFT) 
+      return KEY_LEFT;
+   if(inputCode == STICK_2_RIGHT) 
+      return KEY_RIGHT;
+   if(inputCode == STICK_2_UP) 
+      return KEY_UP;
+   if(inputCode == STICK_2_DOWN) 
+      return KEY_DOWN;
 
    if(inputCode == BUTTON_START) 
       return KEY_ENTER;
