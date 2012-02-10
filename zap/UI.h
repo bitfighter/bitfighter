@@ -131,8 +131,6 @@ public:
    void renderConsole();                  // Render game console
    virtual void renderMasterStatus();     // Render master server connection status
 
-   InputCode convertJoystickToKeyboard(InputCode inputCode);
-
    // Helpers to simplify dealing with key bindings
    InputCode getInputCode(GameSettings *settings, InputCodeManager::BindingName binding);
    void setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode);

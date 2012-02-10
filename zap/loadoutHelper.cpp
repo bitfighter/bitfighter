@@ -160,7 +160,7 @@ void LoadoutHelper::render()
 
       // Draw key controls for selecting loadout items
       GameSettings *settings = getGame()->getSettings();
-      InputMode inputMode = settings->getIniSettings()->inputMode;
+      InputMode inputMode = settings->getInputCodeManager()->getInputMode();
 
       bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
 
@@ -296,7 +296,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 InputCode LoadoutHelper::getActivationKey() 
 { 
    GameSettings *settings = getGame()->getSettings();
-   return settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LOADOUT, settings->getIniSettings()->inputMode); 
+   return settings->getInputCodeManager()->getBinding(InputCodeManager::BINDING_LOADOUT); 
 }
 
 

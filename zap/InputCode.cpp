@@ -26,9 +26,10 @@
 #include "InputCode.h"
 
 #include "../tnl/tnlJournal.h"
-#include "../tnl/tnlLog.h"         // For logprintf
+#include "../tnl/tnlLog.h"          // For logprintf
 
-#include "zapjournal.h"            // For journaling support
+#include "zapjournal.h"             // For journaling support
+#include "stringUtils.h"            // For itos
 
 #include <ctype.h>
 
@@ -38,7 +39,7 @@
 #endif
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>   // For ARRAYSIZE 
+#include <windows.h>                // For ARRAYSIZE 
 #endif
 
 
@@ -58,6 +59,9 @@ InputCodeManager::InputCodeManager()
    keyFPS = KEY_F6;               // Show FPS display
    keyDIAG = KEY_F7;              // Show diagnostic overlay
    keyMISSION = KEY_F2;           // Show current mission info
+
+   mBindingsHaveKeypadEntry = false;
+   mInputMode = InputModeKeyboard;
 }
 
 
@@ -173,6 +177,105 @@ bool isPrintable(char c)
 }
 
 
+// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  
+// This is possibly marginally less efficient, but will reduce maintenance burdens over time.
+InputCode InputCodeManager::convertJoystickToKeyboard(InputCode inputCode)
+{
+   switch((S32)inputCode)
+   {
+      case BUTTON_DPAD_LEFT:
+         return KEY_LEFT;
+      case BUTTON_DPAD_RIGHT:
+         return KEY_RIGHT;
+      case BUTTON_DPAD_UP:
+         return KEY_UP;
+      case BUTTON_DPAD_DOWN:
+         return KEY_DOWN;
+
+      case STICK_1_LEFT:
+         return KEY_LEFT;
+      case STICK_1_RIGHT:
+         return KEY_RIGHT;
+      case STICK_1_UP:
+         return KEY_UP;
+      case STICK_1_DOWN:
+         return KEY_DOWN;
+
+      case STICK_2_LEFT:
+         return KEY_LEFT;
+      case STICK_2_RIGHT:
+         return KEY_RIGHT;
+      case STICK_2_UP:
+         return KEY_UP;
+      case STICK_2_DOWN:
+         return KEY_DOWN;
+
+      case BUTTON_START:
+         return KEY_ENTER;
+      case BUTTON_BACK:
+         return KEY_ESCAPE;
+      case BUTTON_1:	    // Some game pads might not have a START button
+         return KEY_ENTER;
+      default:
+         return inputCode;
+   }
+}
+
+
+InputCode InputCodeManager::filterInputCode(InputCode inputCode)
+{
+   // We'll only apply numpad to standard key conversion if there are no keypad bindings
+   if(mBindingsHaveKeypadEntry)
+      return inputCode;
+
+   return convertNumPadToNum(inputCode);
+}
+
+
+InputCode InputCodeManager::convertNumPadToNum(InputCode inputCode)
+{
+   switch(S32(inputCode))
+   {
+      case KEY_KEYPAD0:
+	      return KEY_0;
+      case KEY_KEYPAD1:
+	      return KEY_1;
+      case KEY_KEYPAD2:
+	      return KEY_2;
+      case KEY_KEYPAD3:
+	      return KEY_3;
+      case KEY_KEYPAD4:
+	      return KEY_4;
+      case KEY_KEYPAD5:
+	      return KEY_5;
+      case KEY_KEYPAD6:
+	      return KEY_6;
+      case KEY_KEYPAD7:
+	      return KEY_7;
+      case KEY_KEYPAD8:
+	      return KEY_8;
+      case KEY_KEYPAD9:
+	      return KEY_9;
+      case KEY_KEYPAD_PERIOD:
+	      return KEY_PERIOD;
+      case KEY_KEYPAD_DIVIDE:
+	      return KEY_SLASH;
+      case KEY_KEYPAD_MULTIPLY:
+         return KEY_8;
+      case KEY_KEYPAD_MINUS:
+	      return KEY_MINUS;
+      case KEY_KEYPAD_PLUS:
+	      return KEY_PLUS;
+      case KEY_KEYPAD_ENTER:
+	      return KEY_ENTER;
+      case KEY_KEYPAD_EQUALS:
+	      return KEY_EQUALS;
+      default:
+         return inputCode;
+   }
+}
+
+
 // If there is a printable ASCII code for the pressed key, return it
 // Filter out some know spurious keystrokes
 char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
@@ -189,9 +292,17 @@ char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 }
 
 
+// We'll be using this one most of the time
+InputCode InputCodeManager::getBinding(BindingName bindingName)
+{
+   return getBinding(bindingName, mInputMode);
+}
+
+
+// Only used for saving to INI and such where we need to bulk-read bindings
 InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputMode)
 {
-   S32 mode = (S32)inputMode;
+   S32 mode = (S32)inputMode;      // Convert to S32 so we can use it as an array index
 
    switch(bindingName)
    {
@@ -260,16 +371,17 @@ InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputM
       case BINDING_DUMMY_SS_MODE:
          return KEY_CTRL_Q;
       case BINDING_NONE:
-            return KEY_NONE;
-         
-   //         MOUSE, LEFT_JOYSTICK, RIGHT_JOYSTICK,     // Not exactly keys, but helpful to have in here!
-   //KEYS_UP_DOWN, KEYS_LEFT_RIGHT,            // These are here because we need a dummy InputCode item in the instructions
-   //KEY_CTRL_M, KEY_CTRL_Q, KEY_CTRL_S,
-         
+         return KEY_NONE;
       default:
          TNLAssert(false, "Invalid key binding!");
          return KEY_NONE;
    }
+}
+
+
+void InputCodeManager::setBinding(BindingName bindingName, InputCode key)
+{
+   setBinding(bindingName, mInputMode, key);
 }
 
 
@@ -357,8 +469,59 @@ void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, 
       default:
          TNLAssert(false, "Invalid key binding!");
    }
+
+   // Try to be efficient about checking for whether we have a keypad key assigned to something
+   bool isKeypad = isKeypadKey(key);
+
+   if(mBindingsHaveKeypadEntry != isKeypadKey(key))
+   {
+      if(isKeypad)
+         mBindingsHaveKeypadEntry = true;
+      else
+         isKeypad = checkIfBindingsHaveKeypad();
+   }
 }
 
+
+void InputCodeManager::setInputMode(InputMode inputMode)
+{
+   mInputMode = inputMode;
+}
+
+
+InputMode InputCodeManager::getInputMode()
+{
+   return mInputMode;
+}
+
+
+// Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
+string InputCodeManager::getInputModeString()
+{
+#ifndef ZAP_DEDICATED
+   if(mInputMode == InputModeJoystick)
+      return "Joystick " + itos(Joystick::UseJoystickNumber + 1);    // Humans use 1-based indices!
+   else
+      return "Keyboard";
+#else
+   return "Keyboard";
+#endif
+}
+
+
+
+bool InputCodeManager::checkIfBindingsHaveKeypad()
+{
+   return isKeypadKey(inputSELWEAP1[mInputMode]) || isKeypadKey(inputSELWEAP2[mInputMode])  || isKeypadKey(inputSELWEAP3[mInputMode]) ||
+          isKeypadKey(inputADVWEAP[mInputMode])  || isKeypadKey(inputCMDRMAP[mInputMode])   || isKeypadKey(inputTEAMCHAT[mInputMode]) ||
+          isKeypadKey(inputGLOBCHAT[mInputMode]) || isKeypadKey(inputQUICKCHAT[mInputMode]) || isKeypadKey(inputCMDCHAT[mInputMode])  ||
+          isKeypadKey(inputLOADOUT[mInputMode])  || isKeypadKey(inputMOD1[mInputMode])      || isKeypadKey(inputMOD2[mInputMode])     ||
+          isKeypadKey(inputFIRE[mInputMode])     || isKeypadKey(inputDROPITEM[mInputMode])  || isKeypadKey(inputTOGVOICE[mInputMode]) ||
+          isKeypadKey(inputUP[mInputMode])       || isKeypadKey(inputDOWN[mInputMode])      || isKeypadKey(inputLEFT[mInputMode])     ||
+          isKeypadKey(inputRIGHT[mInputMode])    || isKeypadKey(inputSCRBRD[mInputMode])    || isKeypadKey(keyHELP)                   ||
+          isKeypadKey(keyOUTGAMECHAT)            || isKeypadKey(keyMISSION)                 || isKeypadKey(keyFPS)                    ||
+          isKeypadKey(keyDIAG); 
+}
 
 
 #ifndef ZAP_DEDICATED
@@ -1430,6 +1593,12 @@ bool InputCodeManager::isControllerButton(InputCode inputCode)
           inputCode == BUTTON_10   || inputCode == BUTTON_11 || inputCode == BUTTON_12 ||
           inputCode == BUTTON_BACK || inputCode == BUTTON_START;
 }       
+
+
+bool InputCodeManager::isKeypadKey(InputCode inputCode)
+{
+   return inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD_EQUALS;
+}
 
 
 // Array tying InputCodes to string representations; used for translating one to the other 

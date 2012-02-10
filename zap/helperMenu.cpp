@@ -80,9 +80,10 @@ bool HelperMenu::processInputCode(InputCode inputCode)
    // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
    // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
    // from the loadout menu.
-   if(inputCode == KEY_ESCAPE || inputCode == KEY_BACKSPACE ||
-      inputCode == KEY_LEFT   || inputCode == BUTTON_DPAD_LEFT ||
-      inputCode == BUTTON_BACK || (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard && inputCode == getActivationKey()) )
+   if(inputCode == KEY_ESCAPE  || inputCode == KEY_BACKSPACE    ||
+      inputCode == KEY_LEFT    || inputCode == BUTTON_DPAD_LEFT ||
+      inputCode == BUTTON_BACK || 
+      (getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard && inputCode == getActivationKey()) )
    {
       exitHelper();      
 
@@ -119,7 +120,7 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
    GameSettings *settings = getGame()->getSettings();
 
    // RenderedSize will be -1 if the button is not defined
-   if(settings->getIniSettings()->inputMode == InputModeKeyboard || butSize == -1)
+   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard || butSize == -1)
       UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSizeSm, 
                                  "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else

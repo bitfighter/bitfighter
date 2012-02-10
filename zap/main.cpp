@@ -617,7 +617,7 @@ void gameIdle(U32 integerTime)
 #ifndef ZAP_DEDICATED
       if(gClientGame2)
       {
-         gClientGame2->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
+         gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
 
          gClientGame1->mUserInterfaceData->get();
          gClientGame2->mUserInterfaceData->set();
@@ -625,7 +625,7 @@ void gameIdle(U32 integerTime)
          gClientGame = gClientGame2;
          gClientGame->idle(integerTime);
 
-         gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+         gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
 
          gClientGame2->mUserInterfaceData->get();
          gClientGame1->mUserInterfaceData->set();

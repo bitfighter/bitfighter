@@ -155,6 +155,7 @@ struct PluginBinding
 
 struct IniSettings      // With defaults specified
 {
+public:
    IniSettings();       // Constructor
 
    bool controlsRelative;
@@ -187,7 +188,10 @@ struct IniSettings      // With defaults specified
    U32 maxDedicatedFPS;
    U32 maxFPS;
 
-   InputMode inputMode;             // Joystick or Keyboard
+//private:
+   //InputMode inputMode;             // Joystick or Keyboard
+
+public:
    string masterAddress;            // Default address of our master server
    string name;                     // Player name (none by default)    ==> will only be present if the user added it manually
    string password;                 // Player pasword (none by default) ==> will only be present if the user added it manually
@@ -269,7 +273,6 @@ struct IniSettings      // With defaults specified
 
    string defaultRobotScript;
    string globalLevelScript;
-   string getInputMode();        // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 
    Vector<StringTableEntry> levelList;
 

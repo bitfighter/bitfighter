@@ -99,7 +99,6 @@ IniSettings::IniSettings()
    maxDedicatedFPS = 100;             // Max FPS on dedicated server
    maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
-   inputMode = InputModeKeyboard;     // Joystick or Keyboard
    masterAddress = MASTER_SERVER_LIST_ADDRESS;   // Default address of our master server
    name = "";                         // Player name (none by default)
    defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
@@ -2076,22 +2075,6 @@ void CmdLineSettings::init()
    xpos = -9999;
    ypos = -9999;
 };
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
-// Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
-string IniSettings::getInputMode()
-{
-#ifndef ZAP_DEDICATED
-   if(inputMode == InputModeJoystick)
-      return "Joystick " + itos(Joystick::UseJoystickNumber + 1);    // Humans use 1-based indices!
-   else
-#endif
-      return "Keyboard";
-}
 
 
 };

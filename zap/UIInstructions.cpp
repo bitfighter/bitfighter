@@ -278,7 +278,8 @@ void InstructionsUserInterface::renderPage1()
 
    drawHorizLine(col1, 750, starty + 26);
 
-   ControlString *controls = (getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard) ? controlsKeyboard : controlsGamepad;
+   ControlString *controls = (getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard) ? 
+                                              controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
    drawString(col1, starty, 20, "Action");

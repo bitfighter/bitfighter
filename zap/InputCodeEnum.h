@@ -94,6 +94,7 @@ enum InputCode {
    KEY_WORLD_95,
 
    // Numeric keypad keys
+   // Keep these together -- InputCodeManager::isKeypadKey() depends on order and togetherness
    KEY_KEYPAD0, KEY_KEYPAD1, KEY_KEYPAD2, KEY_KEYPAD3, KEY_KEYPAD4,
    KEY_KEYPAD5, KEY_KEYPAD6, KEY_KEYPAD7, KEY_KEYPAD8, KEY_KEYPAD9,
    KEY_KEYPAD_PERIOD, KEY_KEYPAD_DIVIDE, KEY_KEYPAD_MULTIPLY,

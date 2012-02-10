@@ -956,7 +956,8 @@ void QueryServersUserInterface::recalcCurrentIndex()
 // All key handling now under one roof!
 bool QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   inputCode = convertJoystickToKeyboard(inputCode);
+   inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);
+
    mJustMovedMouse = (inputCode == MOUSE_LEFT || inputCode == MOUSE_MIDDLE || inputCode == MOUSE_RIGHT);
    mDraggingDivider = false;
 

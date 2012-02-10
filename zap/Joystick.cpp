@@ -166,28 +166,29 @@ bool Joystick::initJoystick()
 
    // Now try and autodetect the joystick and update the game settings
    string joystickType = Joystick::autodetectJoystick();
+   GameSettings *settings = gClientGame->getSettings();
 
    // Set joystick type if we found anything
    // Otherwise, it makes more sense to remember what the user had last specified
    if (!hasBeenOpenedBefore && joystickType != "NoJoystick")
    {
-      gClientGame->getSettings()->getIniSettings()->joystickType = joystickType;
+      settings->getIniSettings()->joystickType = joystickType;
       setSelectedPresetIndex(Joystick::getJoystickIndex(joystickType));
    }
 
-   if(gClientGame->getSettings()->getIniSettings()->alwaysStartInKeyboardMode)
+   if(settings->getIniSettings()->alwaysStartInKeyboardMode)
    {
-      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+      settings->getInputCodeManager()->setInputMode(InputModeKeyboard);
       return true;
    }
 
    // Set primary input to joystick if any controllers were found, even a generic one
    if(hasBeenOpenedBefore)
-      return true;  // do nothing when this was opened before
+      return true;  // Do nothing when this was opened before
    else if(joystickType == "NoJoystick")
-      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+      settings->getInputCodeManager()->setInputMode(InputModeKeyboard);
    else
-      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
+      settings->getInputCodeManager()->setInputMode(InputModeJoystick);
 
    return true;
 }

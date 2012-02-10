@@ -228,17 +228,17 @@ static void renderMenuInstructions(GameSettings *settings)
 
    U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-   if(settings->getIniSettings()->inputMode == InputModeKeyboard)
+   if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard)
       UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
-      S32 upWidth = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_UP);
-      S32 downWidth = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_DOWN);
+      S32 upWidth    = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_UP);
+      S32 downWidth  = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_DPAD_DOWN);
       S32 startWidth = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_START);
-      S32 backWidth = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_BACK);
+      S32 backWidth  = JoystickRender::getControllerButtonRenderedSize(joystickIndex, BUTTON_BACK);
 
       S32 totalWidth = upWidth + downWidth + startWidth + backWidth +
-            UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
+                       UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
 
       S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
 
@@ -580,7 +580,7 @@ S32 MenuUserInterface::getTotalMenuItemHeight()
 // Process the keys that work on all menus
 bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 {
-   inputCode = convertJoystickToKeyboard(inputCode);
+   inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);
    
    if(Parent::onKeyDown(inputCode, ascii)) 
    { 
@@ -1045,7 +1045,12 @@ static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
       sticks = Joystick::DetectedJoystickNameList.size();
    }
 
-   game->getSettings()->getIniSettings()->inputMode = (inputModeIndex == 0) ? InputModeKeyboard : InputModeJoystick;
+   if(inputModeIndex == 0)
+      game->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
+   else
+      game->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
+
+
    if(inputModeIndex >= 1)
       Joystick::UseJoystickNumber = inputModeIndex - 1;
 }
@@ -1098,7 +1103,7 @@ void OptionsMenuUserInterface::setupMenus()
 
    addStickOptions(&opts);
 
-   InputMode inputMode = settings->getIniSettings()->inputMode;
+   InputMode inputMode = settings->getInputCodeManager()->getInputMode();
 
    addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
                                   opts, 
@@ -1574,7 +1579,10 @@ void GameMenuUserInterface::buildMenu()
 {
    clearMenuItems();
    GameSettings *settings = getGame()->getSettings();
-   lastInputMode = settings->getIniSettings()->inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
+   
+   // Save input mode so we can see if we need to display alert if it changes
+   lastInputMode = settings->getInputCodeManager()->getInputMode();  
+
 
    addMenuItem(new MenuItem("OPTIONS",      optionsSelectedCallback, "", KEY_O));
    addMenuItem(new MenuItem("INSTRUCTIONS", helpSelectedCallback,    "", KEY_I, getInputCode(settings, InputCodeManager::BINDING_HELP)));
@@ -1626,8 +1634,8 @@ void GameMenuUserInterface::onEscape()
    getUIManager()->reactivatePrevUI();      //mGameUserInterface
 
    // Show alert about input mode changing, if needed
-   bool inputModesChanged = (lastInputMode == getGame()->getSettings()->getIniSettings()->inputMode);
-   getUIManager()->getGameUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 0 : 2800);
+   bool inputModesChanged = (lastInputMode != getGame()->getSettings()->getInputCodeManager()->getInputMode());
+   getUIManager()->getGameUserInterface()->resetInputModeChangeAlertDisplayTimer(inputModesChanged ? 2800 : 0);
 }
 
 ////////////////////////////////////////

@@ -72,7 +72,7 @@ void QuickChatHelper::render()
    }
 
    Vector<QuickChatNode> renderNodes;
-   InputMode inputMode = settings->getIniSettings()->inputMode;
+   InputMode inputMode = settings->getInputCodeManager()->getInputMode();
    bool showKeyboardKeys = settings->getIniSettings()->showKeyboardKeys;
 
    S32 walk = mCurNode;

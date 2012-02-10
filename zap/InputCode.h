@@ -41,6 +41,9 @@ namespace Zap
 
 class InputCodeManager 
 {
+private:
+   bool mBindingsHaveKeypadEntry;
+   InputMode mInputMode;             // Joystick or Keyboard
 
 public:
    enum JoystickJoysticks {
@@ -97,15 +100,28 @@ public:
    static void dumpInputCodeStates();                       // Log key states for testing
    static void initializeKeyNames();
 
+   // Some converters
+   InputCode filterInputCode(InputCode inputCode);    // Calls filters below
+
    static InputCode joyHatToInputCode(int hatDirectionMask);
    static InputCode joystickButtonToInputCode(Joystick::Button button);
 
+   static InputCode convertJoystickToKeyboard(InputCode inputCode);
+private:
+   static InputCode convertNumPadToNum(InputCode inputCode);
+   bool checkIfBindingsHaveKeypad();
+
+public:
    // Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
    static string makeInputString(InputCode inputCode);
 
    static bool checkModifier(InputCode mod1);            
    static bool checkModifier(InputCode mod1, InputCode mod2);            
    static bool checkModifier(InputCode mod1, InputCode mod2, InputCode mod3);            
+
+   void setInputMode(InputMode inputMode);
+   InputMode getInputMode();
+   string getInputModeString();     // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 
    #ifndef ZAP_DEDICATED
       static InputCode sdlKeyToInputCode(int key);              // Convert SDL keys to InputCode
@@ -114,8 +130,11 @@ public:
 
    static char keyToAscii(int unicode, InputCode inputCode);    // Return a printable ascii char, if possible
    static bool isControllerButton(InputCode inputCode);         // Does inputCode represent a controller button?
+   static bool isKeypadKey(InputCode inputCode);                // Is inputCode on the numeric keypad?
 
-   InputCode getBinding(BindingName binding, InputMode inputMode);
+   InputCode getBinding(BindingName binding);
+   InputCode getBinding(BindingName bindingName, InputMode inputMode);
+   void setBinding(BindingName bindingName, InputCode key);
    void setBinding(BindingName bindingName, InputMode inputMode, InputCode key);
 
 private:
@@ -144,12 +163,6 @@ private:
    InputCode keyMISSION;
    InputCode keyFPS;
    InputCode keyDIAG;
-
-   /*typedef pair<InputCode, InputCode> KeySyn;
-
-#ifndef ZAP_DEDICATED
-   KeySyn keySynonyms[] = { KeySyn(KEY_0, KEY_KEYPAD0), KeySyn(KEY_1, KEY_KEYPAD1) };
-#endif*/
 };
 
 };     // namespace Zap

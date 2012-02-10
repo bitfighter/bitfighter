@@ -181,51 +181,6 @@ void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode)
 }
 
 
-// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  
-// This is possibly marginally less efficient, but will reduce maintenance burdens over time.
-InputCode UserInterface::convertJoystickToKeyboard(InputCode inputCode)
-{
-   switch((S32)inputCode)
-   {
-      case BUTTON_DPAD_LEFT:
-         return KEY_LEFT;
-      case BUTTON_DPAD_RIGHT:
-         return KEY_RIGHT;
-      case BUTTON_DPAD_UP:
-         return KEY_UP;
-      case BUTTON_DPAD_DOWN:
-         return KEY_DOWN;
-
-      case STICK_1_LEFT:
-         return KEY_LEFT;
-      case STICK_1_RIGHT:
-         return KEY_RIGHT;
-      case STICK_1_UP:
-         return KEY_UP;
-      case STICK_1_DOWN:
-         return KEY_DOWN;
-
-      case STICK_2_LEFT:
-         return KEY_LEFT;
-      case STICK_2_RIGHT:
-         return KEY_RIGHT;
-      case STICK_2_UP:
-         return KEY_UP;
-      case STICK_2_DOWN:
-         return KEY_DOWN;
-
-      case BUTTON_START:
-         return KEY_ENTER;
-      case BUTTON_BACK:
-         return KEY_ESCAPE;
-      case BUTTON_1:	    // Some game pads might not have a START button
-         return KEY_ENTER;
-      default:
-         return inputCode;
-   }
-}
-
-
 U32 UserInterface::getTimeSinceLastInput()
 {
    return mTimeSinceLastInput;
@@ -251,7 +206,7 @@ void UserInterface::renderCurrent()
    
    if(gClientGame2)
    {
-      gClientGame2->getSettings()->getIniSettings()->inputMode = InputModeJoystick;
+      gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
       gClientGame = gClientGame2;
       gClientGame1->mUserInterfaceData->get();
       gClientGame2->mUserInterfaceData->set();
@@ -269,7 +224,7 @@ void UserInterface::renderCurrent()
       gClientGame2->mUserInterfaceData->get();
       gClientGame1->mUserInterfaceData->set();
       glViewport(0, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
-      gClientGame->getSettings()->getIniSettings()->inputMode = InputModeKeyboard;
+      gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
    }
 
    glMatrixMode(GL_MODELVIEW);
@@ -1053,19 +1008,19 @@ void UserInterface::onMouseDragged()  { /* Do nothing */ }
 
 InputCode UserInterface::getInputCode(GameSettings *settings, InputCodeManager::BindingName binding)
 {
-   return settings->getInputCodeManager()->getBinding(binding, settings->getIniSettings()->inputMode);
+   return settings->getInputCodeManager()->getBinding(binding);
 }
 
 
 void UserInterface::setInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
 {
-   settings->getInputCodeManager()->setBinding(binding, settings->getIniSettings()->inputMode, inputCode);
+   settings->getInputCodeManager()->setBinding(binding, inputCode);
 }
 
 
 bool UserInterface::checkInputCode(GameSettings *settings, InputCodeManager::BindingName binding, InputCode inputCode)
 {
-   return inputCode == getInputCode(settings, binding);
+   return getInputCode(settings, binding) == settings->getInputCodeManager()->filterInputCode(inputCode);
 }
 
 

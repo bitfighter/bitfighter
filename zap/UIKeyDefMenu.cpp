@@ -94,7 +94,7 @@ void KeyDefMenuUserInterface::onActivate()
 
    GameSettings *settings = getGame()->getSettings();
    InputCodeManager *inputCodeManager = settings->getInputCodeManager();
-   InputMode inputMode = settings->getIniSettings()->inputMode;
+   InputMode inputMode = inputCodeManager->getInputMode();
 
    if(inputMode == InputModeJoystick)
       mMenuSubTitle = "Input Mode: Joystick";
@@ -259,7 +259,7 @@ void KeyDefMenuUserInterface::render()
 
    // Draw some suggestions
    glColor(Colors::yellow);
-   if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick)
+   if(getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeJoystick)
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
    else 
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");

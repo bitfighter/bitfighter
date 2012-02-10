@@ -315,7 +315,7 @@ void DiagnosticUserInterface::render()
 
    if(mCurPage == 0)
    {
-      string inputMode = getGame()->getSettings()->getIniSettings()->getInputMode();
+      string inputMode = getGame()->getSettings()->getInputCodeManager()->getInputModeString();
 
       glColor(Colors::red);
       drawCenteredString(vertMargin + 37, 18, "Is something wrong?");

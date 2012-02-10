@@ -106,14 +106,16 @@ void EngineerHelper::render()
       yPos += fontSize + 10;
 
       GameSettings *settings = getGame()->getSettings();
-      bool showKeys = settings->getIniSettings()->showKeyboardKeys || settings->getIniSettings()->inputMode == InputModeKeyboard;
+      InputMode inputMode = settings->getInputCodeManager()->getInputMode();
+
+      bool showKeys = settings->getIniSettings()->showKeyboardKeys || inputMode == InputModeKeyboard;
 
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
          // Draw key controls for selecting the object to be created
          U32 joystickIndex = Joystick::SelectedPresetIndex;
 
-         if(getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
+         if(inputMode == InputModeJoystick)     // Only draw joystick buttons when in joystick mode
             JoystickRender::renderControllerButton(F32(UserInterface::horizMargin + (showKeys ? 0 : 20)), (F32)yPos, 
                                                    joystickIndex, mEngineerCostructionItemInfos[i].mButton, false);
 
@@ -159,7 +161,6 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
       return true;
 
    GameConnection *gc = getGame()->getConnectionToServer();
-   InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
 
    if(mSelectedItem == -1)    // Haven't selected an item yet
@@ -172,8 +173,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
          }
 
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1, inputMode) && ship->getModule(0) == ModuleEngineer) ||
-                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2, inputMode) && ship->getModule(1) == ModuleEngineer))
+      if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer))
       {
          exitHelper();
          return true;
@@ -182,8 +183,8 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    else                       // Placing item
    {
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(ship && ((inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1, inputMode) && ship->getModule(0) == ModuleEngineer) ||
-                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2, inputMode) && ship->getModule(1) == ModuleEngineer)))
+      if(ship && ((inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
+                  (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer)))
       {
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;

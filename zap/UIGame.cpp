@@ -658,8 +658,8 @@ void GameUserInterface::renderProgressBar()
 // Draw the reticle (i.e. the mouse cursor) if we are using keyboard/mouse
 void GameUserInterface::renderReticle()
 {
-   bool shouldRender = getGame()->getSettings()->getIniSettings()->inputMode == InputModeKeyboard &&     // Reticle in keyboard mode only
-                       current->getMenuID() == GameUI;                                                   // And not when menu is active
+   bool shouldRender = getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard &&   // Reticle in keyboard mode only
+                       current->getMenuID() == GameUI;                                                           // And not when menu is active
    if(shouldRender)
    {
 #if 0 // TNL_OS_WIN32
@@ -1335,7 +1335,7 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
       else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
          dropItem();
       // Check if the user is trying to use keyboard to move when in joystick mode
-      else if(settings->getIniSettings()->inputMode == InputModeJoystick)      
+      else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
          if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
             checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
             checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
@@ -2483,7 +2483,7 @@ Move *GameUserInterface::getCurrentMove()
 {
    if((mCurrentChatType == NoChat) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
-      InputMode inputMode = getGame()->getSettings()->getIniSettings()->inputMode;
+      InputMode inputMode = getGame()->getSettings()->getInputCodeManager()->getInputMode();
 
       // Some helpers (like QuickChat or TeamShuffle) like to disable movement when they are active
       if(mHelper && mHelper->isMovementDisabled())
@@ -3102,7 +3102,7 @@ void GameUserInterface::renderInputModeChangeAlert()
 
    glColor(Colors::paleRed, alpha);
    drawCenteredStringf(vertMargin + 130, 20, "Input mode changed to %s", 
-                                      getGame()->getSettings()->getIniSettings()->inputMode == InputModeJoystick ? "Joystick" : "Keyboard");
+                       getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeJoystick ? "Joystick" : "Keyboard");
 }
 
 
