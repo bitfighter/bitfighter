@@ -89,9 +89,9 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
 
-   // Set up module secondary component cooldown
+   // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
-      mModuleSecondaryCooldownTimer[i].setPeriod(gModuleInfo[i].getSecondaryCooldown());
+      mModuleSecondaryTimer[i].setPeriod(ModuleSecondaryTimerDelay);
 
    mSensorActiveZoomTimer.setPeriod(SensorZoomTime);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
@@ -804,7 +804,7 @@ void Ship::processModules()
 {
    // Update some timers
    for(S32 i = 0; i < ModuleCount; i++)
-      mModuleSecondaryCooldownTimer[i].update(mCurrentMove.time);
+      mModuleSecondaryTimer[i].update(mCurrentMove.time);
 
    // Save the previous module primary/secondary component states; reset them - to be set later
    bool wasModulePrimaryActive[ModuleCount];
@@ -903,8 +903,8 @@ void Ship::processModules()
             getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
       }
 
-      // Fire the module secondary component if it is active and the cooldown timer has run out
-      if(mModuleSecondaryActive[i] && mModuleSecondaryCooldownTimer[i].getCurrent() == 0)
+      // Fire the module secondary component if it is active and the delay timer has run out
+      if(mModuleSecondaryActive[i] && mModuleSecondaryTimer[i].getCurrent() == 0)
       {
          S32 energyCost = gModuleInfo[i].getSecondaryPerUseCost();
          // If we have enough energy, fire the module
@@ -1033,10 +1033,10 @@ void Ship::processModules()
    {
       if(mModuleSecondaryActive[i] != wasModuleSecondaryActive[i])
       {
-         // If current state is active, reset the cooldown timer
+         // If current state is active, reset the delay timer if it has run out
          if(mModuleSecondaryActive[i])
-            if(mModuleSecondaryCooldownTimer[i].getCurrent() == 0)
-               mModuleSecondaryCooldownTimer[i].reset();
+            if(mModuleSecondaryTimer[i].getCurrent() == 0)
+               mModuleSecondaryTimer[i].reset();
 
          setMaskBits(ModuleSecondaryMask);
       }
