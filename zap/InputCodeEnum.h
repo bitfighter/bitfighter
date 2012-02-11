@@ -101,20 +101,23 @@ enum InputCode {
    KEY_KEYPAD_MINUS, KEY_KEYPAD_PLUS, KEY_KEYPAD_ENTER, KEY_KEYPAD_EQUALS,
    
 
+   // Keep these together -- InputCodeManager::isMouseAction() depends on order and togetherness
    MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_RIGHT,    // Mouse buttons
-   MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN,
+   MOUSE_WHEEL_UP, MOUSE_WHEEL_DOWN,         // Mouse wheel spinning
 
+   // Keep these together -- InputCodeManager::isControllerButton() depends on order and togetherness
    BUTTON_1, BUTTON_2, BUTTON_3,             // Controller buttons
    BUTTON_4, BUTTON_5, BUTTON_6,
    BUTTON_7, BUTTON_8,                       // Often triggers 1 and 2
    BUTTON_9, BUTTON_10, BUTTON_11, BUTTON_12,// Extra buttons that only a few game controller have
    BUTTON_BACK, BUTTON_START,                // Sometimes 9 & 10
+
+
    BUTTON_DPAD_UP, BUTTON_DPAD_DOWN,
    BUTTON_DPAD_LEFT, BUTTON_DPAD_RIGHT,
 
    STICK_1_LEFT, STICK_1_RIGHT,              // Joystick moves,
    STICK_1_UP, STICK_1_DOWN,                 // for menu navigation
-
    STICK_2_LEFT, STICK_2_RIGHT,
    STICK_2_UP, STICK_2_DOWN,
 

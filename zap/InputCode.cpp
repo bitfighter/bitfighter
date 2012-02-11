@@ -1588,17 +1588,20 @@ Joystick::Button inputCodeToJoystickButton(InputCode inputCode)
 // We'll also treat controller buttons like simulated keystrokes
 bool InputCodeManager::isControllerButton(InputCode inputCode)
 {
-   return inputCode == BUTTON_1    || inputCode == BUTTON_2  || inputCode == BUTTON_3  ||
-          inputCode == BUTTON_4    || inputCode == BUTTON_5  || inputCode == BUTTON_6  ||
-          inputCode == BUTTON_7    || inputCode == BUTTON_8  || inputCode == BUTTON_9  ||
-          inputCode == BUTTON_10   || inputCode == BUTTON_11 || inputCode == BUTTON_12 ||
-          inputCode == BUTTON_BACK || inputCode == BUTTON_START;
+   return inputCode >= BUTTON_1 && inputCode <= BUTTON_START;
 }       
 
 
 bool InputCodeManager::isKeypadKey(InputCode inputCode)
 {
    return inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD_EQUALS;
+}
+
+
+// Is inputCode related to the mouse?
+bool InputCodeManager::isMouseAction(InputCode inputCode)
+{
+   return inputCode >= MOUSE_LEFT && inputCode <= MOUSE_WHEEL_DOWN;
 }
 
 

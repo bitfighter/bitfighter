@@ -190,16 +190,23 @@ S32 MenuUserInterface::getOffset()
       else if( selectedIndex - mFirstVisibleItem > (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2)) )
          offset = selectedIndex - (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2));
       else offset = mFirstVisibleItem;
-
-      if(offset < 0)
-         offset = 0;
-      else if(offset + MAX_MENU_SIZE >= mMenuItems.size())
-         offset = mMenuItems.size() - MAX_MENU_SIZE;
    }
 
-   mFirstVisibleItem = offset;
+   mFirstVisibleItem = checkMenuIndexBounds(offset);
 
    return offset;
+}
+
+
+S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
+{
+   if(index < 0)
+      return 0;
+   
+   if(index + MAX_MENU_SIZE >= mMenuItems.size())
+      return getMaxItemIndex();
+
+   return index;
 }
 
 
@@ -372,7 +379,7 @@ void MenuUserInterface::render()
       if(offset > 0)                                     // There are items above
          renderArrowAbove(yStart, ARROW_HEIGHT);
 
-      if(offset < mMenuItems.size() - MAX_MENU_SIZE)     // There are items below
+      if(offset < getMaxItemIndex())     // There are items below
          renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * MAX_MENU_SIZE, ARROW_HEIGHT);
    }
 
@@ -392,6 +399,13 @@ void MenuUserInterface::render()
    }
 
    renderExtras();  // Draw something unique on a menu
+}
+
+
+
+S32 MenuUserInterface::getMaxItemIndex()
+{
+   return mMenuItems.size() - MAX_MENU_SIZE;
 }
 
 
@@ -486,7 +500,7 @@ void MenuUserInterface::processMouse()
    else if(selectedIndex >= mMenuItems.size())         // Scrolled off bottom of list
    {
       selectedIndex = mMenuItems.size() - 1;
-      mFirstVisibleItem = max(mMenuItems.size() - MAX_MENU_SIZE, 0);
+      mFirstVisibleItem = max(getMaxItemIndex(), 0);
    }
 }
 
@@ -497,16 +511,15 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
       return true;
    else if(inputCode == MOUSE_WHEEL_DOWN)
    {
-      if(mFirstVisibleItem < mMenuItems.size() - MAX_MENU_SIZE)
-         mFirstVisibleItem++;
+      mFirstVisibleItem = checkMenuIndexBounds(mFirstVisibleItem + 1);
 
       onMouseMoved();
       return true;
    }
    else if(inputCode == MOUSE_WHEEL_UP)
    {
-      if(mFirstVisibleItem > 0)
-         mFirstVisibleItem--;
+      mFirstVisibleItem = checkMenuIndexBounds(mFirstVisibleItem - 1);
+
       onMouseMoved();
       return true;
    }
@@ -531,6 +544,7 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
          gServerGame = NULL;
       }
 
+      // All other keystrokes will be ignored
       return true;
    }
 
@@ -543,8 +557,8 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
       processMenuSpecificKeys(inputCode, ascii) || 
       processKeys(inputCode, ascii);
 
-   // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
-   if(inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT && inputCode != KEY_ESCAPE)
+   // Finally, since the user has indicated they want to use keyboard/controller input, hide the pointer
+   if(!InputCodeManager::isMouseAction(inputCode) && inputCode != KEY_ESCAPE)
       SDL_SetCursor(Cursor::getTransparent());
 
    return true;

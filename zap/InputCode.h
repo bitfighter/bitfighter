@@ -131,6 +131,7 @@ public:
    static char keyToAscii(int unicode, InputCode inputCode);    // Return a printable ascii char, if possible
    static bool isControllerButton(InputCode inputCode);         // Does inputCode represent a controller button?
    static bool isKeypadKey(InputCode inputCode);                // Is inputCode on the numeric keypad?
+   static bool isMouseAction(InputCode inputCode);              // Is inputCode related to the mouse?
 
    InputCode getBinding(BindingName binding);
    InputCode getBinding(BindingName bindingName, InputMode inputMode);

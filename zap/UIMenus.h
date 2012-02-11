@@ -46,7 +46,8 @@ class MenuUserInterface : public UserInterface
 private:
    Vector<boost::shared_ptr<MenuItem> > mMenuItems;
 
-   virtual S32 getYStart();     // Get vert pos of first menu item
+   S32 checkMenuIndexBounds(S32 index);   // Returns corrected index
+   virtual S32 getYStart();               // Get vert pos of first menu item
    S32 getOffset(); 
    Timer mScrollTimer;
 
@@ -77,6 +78,7 @@ protected:
 
    void sortMenuItems();
    MenuItem *getLastMenuItem();
+   S32 getMaxItemIndex();
 
 public:
    // Constructor
