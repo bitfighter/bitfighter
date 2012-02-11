@@ -325,6 +325,12 @@ void SoundSystem::shutdown()
       alDeleteSources(1, &musicSource);
    }
 
+   // Clean up sources
+   for (S32 i = 0; i < NumSamples; i++)
+      alDeleteSources(1, &(gFreeSources[i]));
+
+   gFreeSources.clear();
+
    // Clean up SoundEffect buffers
    alDeleteBuffers(NumSFXBuffers, gSfxBuffers);
 
@@ -332,12 +338,6 @@ void SoundSystem::shutdown()
    for (S32 i = 0; i < 32; i++)
       alDeleteBuffers(1, &(gVoiceFreeBuffers[i]));
    gVoiceFreeBuffers.clear();
-
-   // Clean up sources
-   for (S32 i = 0; i < NumSamples; i++)
-      alDeleteSources(1, &(gFreeSources[i]));
-
-   gFreeSources.clear();
 
    // Shutdown device cv9
    alureShutdownDevice();
