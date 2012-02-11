@@ -278,12 +278,12 @@ static void renderMenuInstructions(GameSettings *settings)
 }
 
 
-static const S32 ARROW_WIDTH = 100;
-static const S32 ARROW_HEIGHT = 20;
-static const S32 ARROW_MARGIN = 5;
-
-static void renderArrow(S32 pos, S32 height, bool pointingUp)
+static void renderArrow(S32 pos, bool pointingUp)
 {
+   static const S32 ARROW_WIDTH = 100;
+   static const S32 ARROW_HEIGHT = 20;
+   static const S32 ARROW_MARGIN = 5;
+
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
    for(S32 i = 1; i >= 0; i--)
@@ -295,24 +295,24 @@ static void renderArrow(S32 pos, S32 height, bool pointingUp)
          glVertex2i( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
          
          if(pointingUp)    // Up arrow
-            glVertex2i(canvasWidth / 2, pos - (height + ARROW_MARGIN) - 7);
+            glVertex2i(canvasWidth / 2, pos - (ARROW_HEIGHT + ARROW_MARGIN) - 7);
          else              // Down arrow
-            glVertex2i(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
+            glVertex2i(canvasWidth / 2, pos + (ARROW_HEIGHT + ARROW_MARGIN) - 7);
 
       glEnd();
    }
 }
 
 
-static void renderArrowAbove(S32 pos, S32 height)
+static void renderArrowAbove(S32 pos)
 {
-   renderArrow(pos, height, true);
+   renderArrow(pos, true);
 }
 
 
-static void renderArrowBelow(S32 pos, S32 height)
+static void renderArrowBelow(S32 pos)
 {
-   renderArrow(pos, height, false);
+   renderArrow(pos, false);
 }
 
 
@@ -378,10 +378,10 @@ void MenuUserInterface::render()
       glColor(Colors::blue);
 
       if(offset > 0)                                     // There are items above
-         renderArrowAbove(yStart, ARROW_HEIGHT);
+         renderArrowAbove(yStart);
 
       if(offset < getMaxItemIndex())     // There are items below
-         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * MAX_MENU_SIZE, ARROW_HEIGHT);
+         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * MAX_MENU_SIZE);
    }
 
    // Render a help string at the bottom of the menu
