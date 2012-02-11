@@ -95,6 +95,7 @@ void MenuUserInterface::initialize()
    mFirstVisibleItem = 0;
    mRenderInstructions = true;
    mRenderSpecialInstructions = true;
+   mIgnoreNextMouseEvent = false;
 
    // Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
    mMaxMenuSize = S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
@@ -420,6 +421,12 @@ void MenuUserInterface::getMenuResponses(Vector<string> &responses)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved()
 {
+   if(mIgnoreNextMouseEvent)
+   {
+      mIgnoreNextMouseEvent = false;
+      return;
+   }
+
    Parent::onMouseMoved();
 
    // Really only matters when starting to host game... don't want to be able to change menu items while the levels are loading.
@@ -1878,6 +1885,8 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, 
          y += getTextSize(size) / 2;
 
          SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
+         SDL_SetCursor(Cursor::getTransparent());
+         mIgnoreNextMouseEvent = true;
          playBoop();
 
          return true;

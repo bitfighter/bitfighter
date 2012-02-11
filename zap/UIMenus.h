@@ -70,6 +70,7 @@ protected:
 
    bool mRenderInstructions;
    bool mRenderSpecialInstructions;
+   bool mIgnoreNextMouseEvent;
 
    // Handle keyboard input while a menu is displayed
    virtual bool processMenuSpecificKeys(InputCode inputCode, char ascii);
