@@ -321,7 +321,6 @@ void SoundSystem::shutdown()
    if(gMusicValid) 
    {
       stopMusic();
-      alureDestroyStream(musicStream, 0, NULL);
       alDeleteSources(1, &musicSource);
    }
 
@@ -780,6 +779,7 @@ void SoundSystem::playMusic(S32 listIndex)
 void SoundSystem::stopMusic()
 {
    alureStopSource(musicSource, AL_FALSE);
+   alureDestroyStream(musicStream, 0, NULL);
    musicState = MusicStopped;
 }
 
