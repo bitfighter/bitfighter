@@ -1142,7 +1142,7 @@ void actualizeScreenMode(bool changingInterfaces)
    glLoadIdentity();
 
    // Do the scissoring
-   if (displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+   if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
       glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
                 gScreenInfo.getVertPhysicalMargin(),     // y
