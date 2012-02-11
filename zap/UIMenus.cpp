@@ -583,6 +583,7 @@ bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
          selectedIndex = i;
 
          mMenuItems[i]->activatedWithShortcutKey();
+         itemSelectedWithMouse = false;
          return true;
       }
    }
@@ -1862,6 +1863,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, 
       if(inputCode == getMenuItem(indx)->key1 || inputCode == getMenuItem(indx)->key2)
       {
          selectedIndex = indx;
+         itemSelectedWithMouse = false;
          playBoop();
 
          return true;
