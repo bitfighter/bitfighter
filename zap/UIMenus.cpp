@@ -495,7 +495,21 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
    if(Parent::onKeyDown(inputCode, ascii))
       return true;
+   else if(inputCode == MOUSE_WHEEL_DOWN)
+   {
+      if(mFirstVisibleItem < mMenuItems.size() - MAX_MENU_SIZE)
+         mFirstVisibleItem++;
 
+      onMouseMoved();
+      return true;
+   }
+   else if(inputCode == MOUSE_WHEEL_UP)
+   {
+      if(mFirstVisibleItem > 0)
+         mFirstVisibleItem--;
+      onMouseMoved();
+      return true;
+   }
    if(inputCode == KEY_UNKNOWN)
       return true;
 
