@@ -1,0 +1,23 @@
+To build OpenAL-Soft
+
+# mkdir build
+# cd build
+# Set up vc++ environment vars:  C:\"Program Files"\"Microsoft Visual Studio 10.0"\VC\vcvarsall.bat
+# cmake -DUTILS=0 -DCMAKE_BUILD_TYPE=Release ..
+#* Change that last variable in the above line from 'Release' to 'Debug' if you need a debug build
+# replace all /MD with /MT in the build/ directory (this is so you don't need the vb runtime libs)
+# nmake
+# done!
+
+
+To build ALURE
+
+# mkdir build
+# cd build
+# Set up vc++ environment vars:  C:\"Program Files"\"Microsoft Visual Studio 10.0"\VC\vcvarsall.bat
+# cmake -DOPENAL_INCLUDE_DIR=C:\hg\bitfighter\openal\include -DOPENAL_LIBRARY=C:\hg\bitfighter\lib\OpenAL32.lib -DOGG_INCLUDE_DIR=C:\hg\bitfighter\libogg -DVORBIS_INCLUDE_DIR=C:\hg\bitfighter\libvorbis -DOGG_LIBRARY=C:\hg\bitfighter\lib\libogg.lib -DVORBIS_LIBRARY=C:\hg\bitfighter\lib\libvorbis.lib -DVORBISENC_LIBRARY=C:\hg\bitfighter\lib\libvorbis.lib -DVORBISFILE_LIBRARY=C:\hg\bitfighter\lib\libvorbisfile.lib -DBUILD_STATIC=0 -DBUILD_EXAMPLES=0 -DDYNLOAD=0 -DSNDFILE=0 -DCMAKE_BUILD_TYPE=Release ..
+#* Replace the 'C:\hg\' with wherever you keep your bitfighter repository
+#* Change that last variable in the above line from 'Release' to 'Debug' if you need a debug build
+# replace all /MD with /MT in the build/ directory (this is so you don't need the vb runtime libs)
+# nmake
+# done!
