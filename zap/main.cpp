@@ -754,7 +754,7 @@ void idle()
       TNLAssert(gClientGame, "Why are we here if there is no client game??");
 
       if(event.type == SDL_QUIT) // Handle quit here
-         exitToOs();
+         shutdownBitfighter();
 
       Event::onEvent(gClientGame, &event);
    }
@@ -886,7 +886,7 @@ void InitSdlVideo()
    {
       // Failed, exit
       logprintf(LogConsumer::LogFatalError, "SDL Video initialization failed: %s", SDL_GetError());
-      exitToOs();
+      shutdownBitfighter();
    }
 
    // Let's get some video information
@@ -896,7 +896,7 @@ void InitSdlVideo()
    {
       // This should probably never happen
       logprintf(LogConsumer::LogFatalError, "SDL Video query failed: %s", SDL_GetError());
-      exitToOs();
+      shutdownBitfighter();
    }
 
    // Find the desktop width/height and initialize the ScreenInfo object with it
