@@ -429,8 +429,8 @@ S32 MenuUserInterface::getSelectedMenuItem()
    S32 cumHeight = getYStart();
 
    // Mouse is above the top of the menu
-   if(mouseY <= cumHeight)
-      return 0;
+   if(mouseY <= cumHeight)    // That's cumulative height, you pervert!
+      return mFirstVisibleItem;
 
    // Mouse is on the menu
    for(S32 i = 0; i < getMenuItemCount() - 1; i++)
@@ -441,13 +441,13 @@ S32 MenuUserInterface::getSelectedMenuItem()
       cumHeight += height;
 
       if(mouseY < cumHeight)
-         return i;     
+         return i + mFirstVisibleItem;     
 
       cumHeight += getGap(size) / 2;
    }
 
    // Mouse is below bottom of menu
-   return getMenuItemCount() - 1;
+   return getMenuItemCount() - 1 + mFirstVisibleItem;
 }
 
 
