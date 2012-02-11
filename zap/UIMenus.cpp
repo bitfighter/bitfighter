@@ -203,7 +203,7 @@ S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
    if(index < 0)
       return 0;
    
-   if(index + MAX_MENU_SIZE >= mMenuItems.size())
+   if(index > getMaxItemIndex())
       return getMaxItemIndex();
 
    return index;
