@@ -456,7 +456,7 @@ void MenuUserInterface::processMouse()
 {
    if(mMenuItems.size() > MAX_MENU_SIZE)   // We have a scrolling situation here...
    {
-      if(selectedIndex < mFirstVisibleItem)      // Scroll up
+      if(selectedIndex <= mFirstVisibleItem)      // Scroll up
       {
          if(!mScrollTimer.getCurrent() && mFirstVisibleItem > 0)
          {
