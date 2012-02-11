@@ -195,7 +195,7 @@ S32 MenuUserInterface::getOffset()
 
    mFirstVisibleItem = checkMenuIndexBounds(offset);
 
-   return offset;
+   return mFirstVisibleItem;
 }
 
 
@@ -204,8 +204,8 @@ S32 MenuUserInterface::checkMenuIndexBounds(S32 index)
    if(index < 0)
       return 0;
    
-   if(index > getMaxItemIndex())
-      return getMaxItemIndex();
+   if(index > getMaxFirstItemIndex())
+      return getMaxFirstItemIndex();
 
    return index;
 }
@@ -379,8 +379,8 @@ void MenuUserInterface::render()
       if(offset > 0)                     // There are items above
          renderArrowAbove(yStart);
 
-      if(offset < getMaxItemIndex())     // There are items below
-         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * mMaxMenuSize);
+      if(offset < getMaxFirstItemIndex())     // There are items below
+         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * mMaxMenuSize + 6);
    }
 
    // Render a help string at the bottom of the menu
@@ -402,9 +402,10 @@ void MenuUserInterface::render()
 }
 
 
-S32 MenuUserInterface::getMaxItemIndex()
+// Calculates maximum index that the first item can have -- on non scrolling menus, this will be 0
+S32 MenuUserInterface::getMaxFirstItemIndex()
 {
-   return mMenuItems.size() - mMaxMenuSize;
+   return max(mMenuItems.size() - mMaxMenuSize, 0);
 }
 
 
@@ -498,7 +499,7 @@ void MenuUserInterface::processMouse()
    else if(selectedIndex >= mMenuItems.size())    // Scrolled off bottom of list
    {
       selectedIndex = mMenuItems.size() - 1;
-      mFirstVisibleItem = max(getMaxItemIndex(), 0);
+      mFirstVisibleItem = getMaxFirstItemIndex();
    }
 }
 

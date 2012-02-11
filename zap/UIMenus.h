@@ -79,7 +79,7 @@ protected:
 
    void sortMenuItems();
    MenuItem *getLastMenuItem();
-   S32 getMaxItemIndex();
+   S32 getMaxFirstItemIndex();      // Calculates maximum index that the first item can have -- on non scrolling menus, this will be 0
 
 public:
    // Constructor
