@@ -282,7 +282,7 @@ static const S32 ARROW_WIDTH = 100;
 static const S32 ARROW_HEIGHT = 20;
 static const S32 ARROW_MARGIN = 5;
 
-static void renderArrowAbove(S32 pos, S32 height)
+static void renderArrow(S32 pos, S32 height, bool pointingUp)
 {
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
@@ -293,25 +293,26 @@ static void renderArrowAbove(S32 pos, S32 height)
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2i( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
          glVertex2i( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         glVertex2i(canvasWidth / 2, pos - (height + ARROW_MARGIN ) - 7);
+         
+         if(pointingUp)    // Up arrow
+            glVertex2i(canvasWidth / 2, pos - (height + ARROW_MARGIN) - 7);
+         else              // Down arrow
+            glVertex2i(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
+
       glEnd();
    }
 }
 
 
+static void renderArrowAbove(S32 pos, S32 height)
+{
+   renderArrow(pos, height, true);
+}
+
+
 static void renderArrowBelow(S32 pos, S32 height)
 {
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-   for(S32 i = 1; i >= 0; i--)
-   {
-      // First create a black poly to blot out what's behind, then the arrow itself
-      glColor(i ? Colors::black : Colors::blue);
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-         glVertex2i( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-         glVertex2i(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
-      glEnd();
-   }
+   renderArrow(pos, height, false);
 }
 
 
