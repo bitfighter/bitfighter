@@ -54,6 +54,7 @@ private:
    // For detecting keys being held down
    bool mRepeatMode;
    bool mKeyDown;
+   S32 mMaxMenuSize;
 
    virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
    virtual S32 getGap(MenuItemSize size);       // Gap is the space between items

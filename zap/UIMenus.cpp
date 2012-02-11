@@ -69,9 +69,6 @@ extern void shutdownBitfighter();
 ////////////////////////////////////
 ////////////////////////////////////
 
-// Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
-#define MAX_MENU_SIZE S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)))   
-
 // Constructor
 MenuUserInterface::MenuUserInterface(ClientGame *game) : UserInterface(game)
 {
@@ -98,6 +95,10 @@ void MenuUserInterface::initialize()
    mFirstVisibleItem = 0;
    mRenderInstructions = true;
    mRenderSpecialInstructions = true;
+
+   // Max number of menu items we show on screen before we go into scrolling mode -- won't work with mixed size menus
+   mMaxMenuSize = S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)));
+
 }
 
 
@@ -181,14 +182,14 @@ S32 MenuUserInterface::getOffset()
    S32 offset = 0;
    S32 count = mMenuItems.size();
 
-   if(count > MAX_MENU_SIZE)     // Do some sort of scrolling
+   if(count > mMaxMenuSize)     // Do some sort of scrolling
    {
       // itemSelectedWithMouse basically lets users highlight the top and bottom items in a scrolling list,
       // which can't be done when using the keyboard
       if(selectedIndex - mFirstVisibleItem < (itemSelectedWithMouse ? 0 : 1))
          offset = selectedIndex - (itemSelectedWithMouse ? 0 : 1);
-      else if( selectedIndex - mFirstVisibleItem > (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2)) )
-         offset = selectedIndex - (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2));
+      else if( selectedIndex - mFirstVisibleItem > (mMaxMenuSize - (itemSelectedWithMouse ? 1 : 2)) )
+         offset = selectedIndex - (mMaxMenuSize - (itemSelectedWithMouse ? 1 : 2));
       else offset = mFirstVisibleItem;
    }
 
@@ -218,7 +219,7 @@ S32 MenuUserInterface::getYStart()
    if(getMenuID() == GameParamsUI)  // If we're on the GameParams menu, start at a constant position
       return 70;
    else                             // Otherwise, attpempt to center the menu vertically
-      return (gScreenInfo.getGameCanvasHeight() - min(mMenuItems.size(), MAX_MENU_SIZE) * 
+      return (gScreenInfo.getGameCanvasHeight() - min(mMenuItems.size(), mMaxMenuSize) * 
              (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL))) / 2 + vertOff;
 }
 
@@ -345,8 +346,8 @@ void MenuUserInterface::render()
 
    S32 count = mMenuItems.size();
 
-   if(count > MAX_MENU_SIZE)     // Need some sort of scrolling?
-      count = MAX_MENU_SIZE;
+   if(count > mMaxMenuSize)     // Need some sort of scrolling?
+      count = mMaxMenuSize;
 
    S32 yStart = getYStart();
    S32 offset = getOffset();
@@ -373,15 +374,13 @@ void MenuUserInterface::render()
    }
 
    // Render an indicator that there are scrollable items above and/or below
-   if(mMenuItems.size() > MAX_MENU_SIZE)
+   if(mMenuItems.size() > mMaxMenuSize)
    {
-      glColor(Colors::blue);
-
-      if(offset > 0)                                     // There are items above
+      if(offset > 0)                     // There are items above
          renderArrowAbove(yStart);
 
       if(offset < getMaxItemIndex())     // There are items below
-         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * MAX_MENU_SIZE);
+         renderArrowBelow(yStart + (getTextSize(MENU_ITEM_SIZE_NORMAL) + getGap(MENU_ITEM_SIZE_NORMAL)) * mMaxMenuSize);
    }
 
    // Render a help string at the bottom of the menu
@@ -403,10 +402,9 @@ void MenuUserInterface::render()
 }
 
 
-
 S32 MenuUserInterface::getMaxItemIndex()
 {
-   return mMenuItems.size() - MAX_MENU_SIZE;
+   return mMenuItems.size() - mMaxMenuSize;
 }
 
 
@@ -466,12 +464,11 @@ S32 MenuUserInterface::getSelectedMenuItem()
 }
 
 
-
 void MenuUserInterface::processMouse()
 {
-   if(mMenuItems.size() > MAX_MENU_SIZE)   // We have a scrolling situation here...
+   if(mMenuItems.size() > mMaxMenuSize)   // We have a scrolling situation here...
    {
-      if(selectedIndex <= mFirstVisibleItem)      // Scroll up
+      if(selectedIndex <= mFirstVisibleItem)                          // Scroll up
       {
          if(!mScrollTimer.getCurrent() && mFirstVisibleItem > 0)
          {
@@ -480,25 +477,25 @@ void MenuUserInterface::processMouse()
          }
          selectedIndex = mFirstVisibleItem;
       }
-      else if(selectedIndex > mFirstVisibleItem + MAX_MENU_SIZE - 1)   // Scroll down
+      else if(selectedIndex > mFirstVisibleItem + mMaxMenuSize - 1)  // Scroll down
       {
-         if(!mScrollTimer.getCurrent() && selectedIndex > mFirstVisibleItem + MAX_MENU_SIZE - 2)
+         if(!mScrollTimer.getCurrent() && selectedIndex > mFirstVisibleItem + mMaxMenuSize - 2)
          {
             mFirstVisibleItem++;
             mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
-         selectedIndex = mFirstVisibleItem + MAX_MENU_SIZE - 1;
+         selectedIndex = mFirstVisibleItem + mMaxMenuSize - 1;
       }
       else
          mScrollTimer.clear();
    }
 
-   if(selectedIndex < 0)                              // Scrolled off top of list
+   if(selectedIndex < 0)                          // Scrolled off top of list
    {
       selectedIndex = 0;
       mFirstVisibleItem = 0;
    }
-   else if(selectedIndex >= mMenuItems.size())         // Scrolled off bottom of list
+   else if(selectedIndex >= mMenuItems.size())    // Scrolled off bottom of list
    {
       selectedIndex = mMenuItems.size() - 1;
       mFirstVisibleItem = max(getMaxItemIndex(), 0);
@@ -622,7 +619,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
       playBoop();
    }
 
-   else if(inputCode == KEY_SPACE || inputCode == KEY_RIGHT || inputCode == KEY_ENTER || inputCode == MOUSE_LEFT)
+   else if(inputCode == KEY_SPACE || inputCode == KEY_ENTER)
    {
       playBoop();
       if(inputCode != MOUSE_LEFT)
@@ -658,13 +655,13 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 
       if(selectedIndex < 0)                        // Scrolling off the top
       {
-         if((mMenuItems.size() > MAX_MENU_SIZE) && mRepeatMode)        // Allow wrapping on long menus only when not in repeat mode
+         if((mMenuItems.size() > mMaxMenuSize) && mRepeatMode)        // Allow wrapping on long menus only when not in repeat mode
          {
             selectedIndex = 0;               // No wrap --> (first item)
             return true;                     // (leave before playBoop)
          }
-         else                                      // Always wrap on shorter menus
-            selectedIndex = mMenuItems.size() - 1;  // Wrap --> (select last item)
+         else                                         // Always wrap on shorter menus
+            selectedIndex = mMenuItems.size() - 1;    // Wrap --> (select last item)
       }
       playBoop();
    }
@@ -701,7 +698,7 @@ void MenuUserInterface::advanceItem()
 
    if(selectedIndex >= mMenuItems.size())     // Scrolling off the bottom
    {
-      if((mMenuItems.size() > MAX_MENU_SIZE) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
+      if((mMenuItems.size() > mMaxMenuSize) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
       {
          selectedIndex = getMenuItemCount() - 1;                 // No wrap --> (last item)
          return;                                                 // (leave before playBoop)
@@ -2054,7 +2051,6 @@ void TeamMenuUserInterface::onEscape()
    getUIManager()->reactivatePrevUI();
 }
 
-#undef MAX_MENU_SIZE
 
 };
 
