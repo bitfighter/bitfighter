@@ -47,8 +47,6 @@ private:
    Vector<boost::shared_ptr<MenuItem> > mMenuItems;
 
    S32 checkMenuIndexBounds(S32 index);   // Returns corrected index
-   virtual S32 getYStart();               // Get vert pos of first menu item
-   S32 getOffset(); 
    Timer mScrollTimer;
 
    // For detecting keys being held down
@@ -56,8 +54,6 @@ private:
    bool mKeyDown;
    S32 mMaxMenuSize;
 
-   virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
-   virtual S32 getGap(MenuItemSize size);       // Gap is the space between items
 
    virtual void renderExtras();     // For drawing something extra on a menu
    void advanceItem();              // What happens when we move on to the next menu item?
@@ -65,6 +61,11 @@ private:
    virtual void initialize();
 
 protected:
+   S32 getOffset();                             // Calculates index of topmost visible item         
+   virtual S32 getYStart();                     // Get vert pos of first menu item
+   virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
+   virtual S32 getGap(MenuItemSize size);       // Gap is the space between items
+
    S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
 
    bool mRenderInstructions;

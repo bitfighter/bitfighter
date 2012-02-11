@@ -176,7 +176,7 @@ void MenuUserInterface::idle(U32 timeDelta)
 }
 
 
-// Return index offset to account for scrolling menus
+// Return index offset to account for scrolling menus; basically caluclates index of topmost visible item
 S32 MenuUserInterface::getOffset()
 {
    S32 offset = 0;
@@ -1864,6 +1864,20 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, 
       {
          selectedIndex = indx;
          itemSelectedWithMouse = false;
+
+         // Move the mouse to the new selection to make things "feel better"
+         MenuItemSize size;
+         S32 y = getYStart();
+
+         for(S32 j = getOffset(); j < selectedIndex; j++)
+         {
+            size = getMenuItem(j)->getSize();
+            y += getTextSize(size) + getGap(size);
+         }
+
+         y += getTextSize(size) / 2;
+
+         SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
          playBoop();
 
          return true;
