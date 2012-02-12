@@ -347,9 +347,8 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
 }
 
 
-// A new chat message is here!  We don't actually display anything here, despite the name...
-// just add it to the list, will be displayed in render()
-void GameUserInterface::displayChatMessage(const Color &msgColor, const char *format, ...)
+// Add it to the list, will be displayed in render()
+void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
 {
    // Ignore empty message
    if(!strcmp(format, ""))

@@ -255,7 +255,7 @@ public:
 
    void displayMessage(const Color &msgColor, const char *message);
    void displayMessagef(const Color &msgColor, const char *format, ...);
-   void displayChatMessage(const Color &msgColor, const char *format, ...);
+   void onChatMessageRecieved(const Color &msgColor, const char *format, ...);
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 

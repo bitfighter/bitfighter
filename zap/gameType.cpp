@@ -3198,13 +3198,13 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringT
    Color theColor = Colors::yellow;
 
    if(fullClientInfo->getName() == toName && toName == fromName)      // Message sent to self
-      gameUI->displayChatMessage(theColor, "%s: %s", toName.getString(), message.getString());
+      gameUI->onChatMessageRecieved(theColor, "%s: %s", toName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == toName)                       // To this player
-      gameUI->displayChatMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
+      gameUI->onChatMessageRecieved(theColor, "from %s: %s", fromName.getString(), message.getString());
 
    else if(fullClientInfo->getName() == fromName)                     // From this player
-      gameUI->displayChatMessage(theColor, "to %s: %s", toName.getString(), message.getString());
+      gameUI->onChatMessageRecieved(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else  
       TNLAssert(false, "Should never get here... shouldn't be able to see PM that is not from or not to you"); 
@@ -3221,7 +3221,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
       return;
 
    Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
-   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(*color, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
 #endif
 }
 
@@ -3233,7 +3233,7 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEn
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
 
-   clientGame->getUIManager()->getGameUserInterface()->displayChatMessage(*color, "%s: %s", clientName.getString(), message.getString());
+   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
 #endif
 }
 
