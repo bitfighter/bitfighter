@@ -1680,10 +1680,10 @@ bool InputCodeManager::isMouseAction(InputCode inputCode)
 }
 
 
-//S32 InputCodeManager::getBindingCount()
-//{
-//   return ARRAYSIZE(BINDING_STRINGS);
-//}
+S32 InputCodeManager::getBindingCount()
+{
+   return ARRAYSIZE(BINDING_STRINGS);
+}
 
 
 string InputCodeManager::getBindingName(BindingName bindingName)
@@ -1694,6 +1694,17 @@ string InputCodeManager::getBindingName(BindingName bindingName)
    return BINDING_STRINGS[index];
 
    return "";
+}
+
+
+InputCode InputCodeManager::getKeyBoundToBindingCodeName(string name)
+{
+   // Linear search not at all efficient, but this will be called very infrequently, in non-performance sensitive area
+   for(S32 i = 0; i < ARRAYSIZE(BINDING_STRINGS); i++)
+      if(caseInsensitiveStringCompare(BINDING_STRINGS[i], name))
+         return this->getBinding(BindingName(i));
+
+   return KEY_UNKNOWN;
 }
 
 

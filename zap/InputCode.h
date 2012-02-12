@@ -110,9 +110,10 @@ public:
    static void dumpInputCodeStates();                       // Log key states for testing
    static void initializeKeyNames();
 
-   //static S32 getBindingCount();
+   static S32 getBindingCount();
    static string getBindingName(BindingName binding);
-   //static InputCodeManager::BindingName getBindingCode(string name);
+   
+   InputCode getKeyBoundToBindingCodeName(string name);
    
 
    // Some converters
