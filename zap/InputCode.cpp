@@ -1680,10 +1680,10 @@ bool InputCodeManager::isMouseAction(InputCode inputCode)
 }
 
 
-S32 InputCodeManager::getBindingCount()
-{
-   return ARRAYSIZE(BINDING_STRINGS);
-}
+//S32 InputCodeManager::getBindingCount()
+//{
+//   return ARRAYSIZE(BINDING_STRINGS);
+//}
 
 
 string InputCodeManager::getBindingName(BindingName bindingName)
