@@ -91,7 +91,7 @@ bool isInteger(const char *str);
 
 void s_fprintf(FILE *stream, const char *format, ...);      // throws SaveException
 
-//bool caseInsensitiveStringCompare(const string &str1, const string &str2);
+bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
 // File utils
 bool fileExists(const string &path);               // Does file exist?
