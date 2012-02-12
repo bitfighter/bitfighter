@@ -198,6 +198,8 @@ public:
 
    static void loadJoystickPresets();
    static string autodetectJoystick();
+   static S32 checkJoystickString_exact_match(const string &controllerName);     // Searches for an exact match for controllerName
+   static S32 checkJoystickString_partial_match(const string &controllerName);   // Searches for an exact match for controllerName
    static JoystickInfo getGenericJoystickInfo();
    static void setSelectedPresetIndex(U32 joystickIndex);
 

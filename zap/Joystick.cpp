@@ -206,28 +206,61 @@ void Joystick::shutdownJoystick()
 }
 
 
+// Returns -1 if there is no match, otherwise returns the index of the match
+S32 Joystick::checkJoystickString_exact_match(const string &controllerName)
+{
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(!JoystickPresetList[i].isSearchStringSubstring)  // Use exact string
+         if(controllerName == JoystickPresetList[i].searchString)
+            return i;
+
+   return -1;     // No match
+}
+
+
+// Returns -1 if there is no match, otherwise returns the index of the match
+S32 Joystick::checkJoystickString_partial_match(const string &controllerName)
+{
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(JoystickPresetList[i].isSearchStringSubstring)   // Use substring
+         if(lcase(controllerName).find(lcase(JoystickPresetList[i].searchString)) != string::npos)
+            return i;
+               // end cascading fury of death <== metacomment: not useful, but entertaining.  Wait... fury of death or furry death?
+
+   return -1;     // No match
+}
+
+
+// Returns a valid name of one of our joystick profiles
 string Joystick::autodetectJoystick()
 {
-   if (DetectedJoystickNameList.size() == 0)  // No controllers detected
+   if(DetectedJoystickNameList.size() == 0)  // No controllers detected
       return "NoJoystick";
 
    string controllerName = DetectedJoystickNameList[UseJoystickNumber];
 
+   S32 match;
    // First check against predefined joysticks that have exact search strings
    // We do this first so that a substring match doesn't override one of these (like with XBox controller)
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(!JoystickPresetList[i].isSearchStringSubstring)  // Use exact string
-         if(controllerName == JoystickPresetList[i].searchString)
-            return JoystickPresetList[i].identifier;
+   match = checkJoystickString_exact_match(controllerName);
+   if(match >= 0)    
+      return JoystickPresetList[match].identifier;
 
    // Then check against joysticks that use substrings to match
-   for(S32 i = 0; i < JoystickPresetList.size(); i++)
-      if(JoystickPresetList[i].isSearchStringSubstring)   // Use substring
-         if(lcase(controllerName).find(lcase(JoystickPresetList[i].searchString)) != string::npos)
-            return JoystickPresetList[i].identifier;
-   // end cascading fury of death
+   match = checkJoystickString_partial_match(controllerName);
+   if(match >= 0)    
+      return JoystickPresetList[match].identifier;
+   
+   // If we've made it here, let's try the value stored in the INI
+   GameSettings *settings = gClientGame->getSettings();
+   string lastStickUsed = settings->getIniSettings()->joystickType;
 
-   // If we've made it here, just return the generic one
+   // Let's validate that, shall we?
+   for(S32 i = 0; i < JoystickPresetList.size(); i++)
+      if(JoystickPresetList[i].identifier == lastStickUsed)
+         return JoystickPresetList[i].identifier;
+
+   // It's beyond hope!  Return something that will *ALWAYS* be wrong.
    return "GenericJoystick";
 }
 
