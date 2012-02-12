@@ -373,13 +373,68 @@ void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char 
    va_start(args, format);
    vsnprintf(mDisplayChatMessage[0], sizeof(mDisplayChatMessage[0]), format, args);
    va_end(args);
+
+   // Check if we have any %variables% that need substituting
+
+   bool inside = false;
+   bool replacedAny = false;
+
+   S32 startPos, endPos;
+
+   inside = false;
+
+   string s = mDisplayChatMessage[0];
+
+   for(size_t i = 0; i < s.length(); i++)
+   {
+      if(s[i] == '%')
+      {
+         if(!inside)    // Found beginning of variable
+         {
+            startPos = i + 1;
+            inside = true;
+         }
+         else           // Found end of variable
+         {
+            endPos = i - startPos;
+            inside = false;
+
+            string var = s.substr(startPos, endPos);
+            string val = getSubstVarVal(var);
+
+            s.replace(startPos - 1, endPos + 2, val);
+            replacedAny = true;
+
+            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val
+         }
+      }
+   }
+
+   if(replacedAny)
+      strncpy(mDisplayChatMessage[0], s.c_str(), sizeof(mDisplayChatMessage[0]));
    
-   strncpy(mStoreChatMessage[0], mDisplayChatMessage[0], sizeof(mStoreChatMessage[0]);
+   strncpy(mStoreChatMessage[0], mDisplayChatMessage[0], sizeof(mStoreChatMessage[0]));
 
    mDisplayChatMessageColor[0] = msgColor;
    mStoreChatMessageColor[0] = msgColor;
 
    mDisplayChatMessageTimer.reset();
+}
+
+
+// Replace %vars% in chat messages 
+// Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
+// Vars are case insensitive
+string GameUserInterface::getSubstVarVal(const string &var)
+{
+   InputCode inputCode = getGame()->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
+   if(inputCode != KEY_UNKNOWN)
+      return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
+   
+   if(caseInsensitiveStringCompare(var, "playerName"))
+      return getGame()->getClientInfo()->getName().getString();
+
+   return "%" + var + "%";
 }
 
 
