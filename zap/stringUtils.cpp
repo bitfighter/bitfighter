@@ -166,14 +166,15 @@ F64 stof(const string &s)
 
 
 // From http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string, replaceAll variant
-string replaceString(std::string& strString, const std::string& from, const std::string& to) 
+string replaceString(const string &strString, const string &from, const string &to) 
 {
    string str = strString;    // Make working copy
 
     size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    while((start_pos = str.find(from, start_pos)) != string::npos) 
+    {
         str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+        start_pos += to.length();      // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
 
    return str;
