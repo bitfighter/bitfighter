@@ -52,16 +52,45 @@ static bool inputCodeIsDown[MAX_INPUT_CODES];
 
 
 // Constructor
-InputCodeManager::InputCodeManager()
+BindingSet::BindingSet()
 {
    keyHELP = KEY_F1;              // Display help
    keyOUTGAMECHAT = KEY_F5;       // Out of game chat
    keyFPS = KEY_F6;               // Show FPS display
    keyDIAG = KEY_F7;              // Show diagnostic overlay
    keyMISSION = KEY_F2;           // Show current mission info
+}
 
+
+bool BindingSet::hasKeypad()
+{
+   return 
+      InputCodeManager::isKeypadKey(inputSELWEAP1) || InputCodeManager::isKeypadKey(inputSELWEAP2)  || InputCodeManager::isKeypadKey(inputSELWEAP3) ||
+      InputCodeManager::isKeypadKey(inputADVWEAP)  || InputCodeManager::isKeypadKey(inputCMDRMAP)   || InputCodeManager::isKeypadKey(inputTEAMCHAT) ||
+      InputCodeManager::isKeypadKey(inputGLOBCHAT) || InputCodeManager::isKeypadKey(inputQUICKCHAT) || InputCodeManager::isKeypadKey(inputCMDCHAT)  ||
+      InputCodeManager::isKeypadKey(inputLOADOUT)  || InputCodeManager::isKeypadKey(inputMOD1)      || InputCodeManager::isKeypadKey(inputMOD2)     ||
+      InputCodeManager::isKeypadKey(inputFIRE)     || InputCodeManager::isKeypadKey(inputDROPITEM)  || InputCodeManager::isKeypadKey(inputTOGVOICE) ||
+      InputCodeManager::isKeypadKey(inputUP)       || InputCodeManager::isKeypadKey(inputDOWN)      || InputCodeManager::isKeypadKey(inputLEFT)     ||
+      InputCodeManager::isKeypadKey(inputRIGHT)    || InputCodeManager::isKeypadKey(inputSCRBRD)    || InputCodeManager::isKeypadKey(keyHELP)       ||
+      InputCodeManager::isKeypadKey(keyDIAG)       || InputCodeManager::isKeypadKey(keyMISSION)     || InputCodeManager::isKeypadKey(keyFPS)        ||
+      InputCodeManager::isKeypadKey(keyOUTGAMECHAT); 
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+InputCodeManager::InputCodeManager()
+{
    mBindingsHaveKeypadEntry = false;
    mInputMode = InputModeKeyboard;
+
+   // Create two binding sets
+   mBindingSets.resize(2); 
+
+   // Set the first to be our current one
+   mCurrentBindingSet = &mBindingSets[0];     
 }
 
 
@@ -71,6 +100,7 @@ void InputCodeManager::resetStates()
    for(int i = 0; i < MAX_INPUT_CODES; i++)
       inputCodeIsDown[i] = false;
 }
+
 
 // Prints list of any input codes that are down, for debugging purposes
 void InputCodeManager::dumpInputCodeStates()
@@ -302,60 +332,64 @@ InputCode InputCodeManager::getBinding(BindingName bindingName)
 // Only used for saving to INI and such where we need to bulk-read bindings
 InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputMode)
 {
-   S32 mode = (S32)inputMode;      // Convert to S32 so we can use it as an array index
+   S32 mode = (S32)inputMode;    // 0 or 1 at present
 
+   BindingSet *bindingSet = &mBindingSets[mode];
+   
    switch(bindingName)
    {
       case BINDING_SELWEAP1:
-	      return inputSELWEAP1[mode];
+	      return bindingSet->inputSELWEAP1;
       case BINDING_SELWEAP2:
-	      return inputSELWEAP2[mode];
+	      return bindingSet->inputSELWEAP2;
       case BINDING_SELWEAP3:
-	      return inputSELWEAP3[mode];
+	      return bindingSet->inputSELWEAP3;
       case BINDING_ADVWEAP:
-	      return inputADVWEAP[mode];
+	      return bindingSet->inputADVWEAP;
       case BINDING_CMDRMAP:
-	      return inputCMDRMAP[mode];
+	      return bindingSet->inputCMDRMAP;
       case BINDING_TEAMCHAT:
-	      return inputTEAMCHAT[mode];
+	      return bindingSet->inputTEAMCHAT;
       case BINDING_GLOBCHAT:
-	      return inputGLOBCHAT[mode];
+	      return bindingSet->inputGLOBCHAT;
       case BINDING_QUICKCHAT:
-	      return inputQUICKCHAT[mode];
+	      return bindingSet->inputQUICKCHAT;
       case BINDING_CMDCHAT:
-	      return inputCMDCHAT[mode];
+	      return bindingSet->inputCMDCHAT;
       case BINDING_LOADOUT:
-	      return inputLOADOUT[mode];
+	      return bindingSet->inputLOADOUT;
       case BINDING_MOD1:
-	      return inputMOD1[mode];
+	      return bindingSet->inputMOD1;
       case BINDING_MOD2:
-	      return inputMOD2[mode];
+	      return bindingSet->inputMOD2;
       case BINDING_FIRE:
-	      return inputFIRE[mode];
+	      return bindingSet->inputFIRE;
       case BINDING_DROPITEM:
-	      return inputDROPITEM[mode];
+	      return bindingSet->inputDROPITEM;
       case BINDING_TOGVOICE:
-	      return inputTOGVOICE[mode];
+	      return bindingSet->inputTOGVOICE;
       case BINDING_UP:
-	      return inputUP[mode];
+	      return bindingSet->inputUP;
       case BINDING_DOWN:
-	      return inputDOWN[mode];
+	      return bindingSet->inputDOWN;
       case BINDING_LEFT:
-	      return inputLEFT[mode];
+	      return bindingSet->inputLEFT;
       case BINDING_RIGHT:
-	      return inputRIGHT[mode];
+	      return bindingSet->inputRIGHT;
       case BINDING_SCRBRD:
-	      return inputSCRBRD[mode];
+	      return bindingSet->inputSCRBRD;
       case BINDING_HELP:
-	      return keyHELP;
+	      return bindingSet->keyHELP;
       case BINDING_OUTGAMECHAT:
-	      return keyOUTGAMECHAT;
+	      return bindingSet->keyOUTGAMECHAT;
       case BINDING_MISSION:
-	      return keyMISSION;
+	      return bindingSet->keyMISSION;
       case BINDING_FPS:
-	      return keyFPS;
+	      return bindingSet->keyFPS;
       case BINDING_DIAG:
-	      return keyDIAG;
+	      return bindingSet->keyDIAG;
+
+      // Some special hacky cases for helping us with displaying instructions:
       case BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
          return MOUSE;
       case BINDING_DUMMY_MOVE_SHIP_KEYS_UD:
@@ -372,6 +406,8 @@ InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputM
          return KEY_CTRL_Q;
       case BINDING_NONE:
          return KEY_NONE;
+
+      // Just in case:
       default:
          TNLAssert(false, "Invalid key binding!");
          return KEY_NONE;
@@ -387,84 +423,86 @@ void InputCodeManager::setBinding(BindingName bindingName, InputCode key)
 
 void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, InputCode key)
 {
-   S32 mode = (S32)inputMode;
+   S32 mode = (S32)inputMode;    // 0 or 1 at present
+
+   BindingSet *bindingSet = &mBindingSets[mode];
 
    switch(bindingName)
    {
       case BINDING_SELWEAP1:
-	      inputSELWEAP1[mode] = key;
+	      bindingSet->inputSELWEAP1 = key;
          break;
       case BINDING_SELWEAP2:
-	      inputSELWEAP2[mode] = key;
+	      bindingSet->inputSELWEAP2 = key;
          break;
       case BINDING_SELWEAP3:
-	      inputSELWEAP3[mode] = key;
+	      bindingSet->inputSELWEAP3 = key;
          break;
       case BINDING_ADVWEAP:
-	      inputADVWEAP[mode] = key;
+	      bindingSet->inputADVWEAP = key;
          break;
       case BINDING_CMDRMAP:
-	      inputCMDRMAP[mode] = key;
+	      bindingSet->inputCMDRMAP = key;
          break;
       case BINDING_TEAMCHAT:
-	      inputTEAMCHAT[mode] = key;
+	      bindingSet->inputTEAMCHAT = key;
          break;
       case BINDING_GLOBCHAT:
-	      inputGLOBCHAT[mode] = key;
+	      bindingSet->inputGLOBCHAT = key;
          break;
       case BINDING_QUICKCHAT:
-	      inputQUICKCHAT[mode] = key;
+	      bindingSet->inputQUICKCHAT = key;
          break;
       case BINDING_CMDCHAT:
-	      inputCMDCHAT[mode] = key;
+	      bindingSet->inputCMDCHAT = key;
          break;
       case BINDING_LOADOUT:
-	      inputLOADOUT[mode] = key;
+	      bindingSet->inputLOADOUT = key;
          break;
       case BINDING_MOD1:
-	      inputMOD1[mode] = key;
+	      bindingSet->inputMOD1 = key;
          break;
       case BINDING_MOD2:
-	      inputMOD2[mode] = key;
+	      bindingSet->inputMOD2 = key;
          break;
       case BINDING_FIRE:
-	      inputFIRE[mode] = key;
+	      bindingSet->inputFIRE = key;
          break;
       case BINDING_DROPITEM:
-	      inputDROPITEM[mode] = key;
+	      bindingSet->inputDROPITEM = key;
          break;
       case BINDING_TOGVOICE:
-	      inputTOGVOICE[mode] = key;
+	      bindingSet->inputTOGVOICE = key;
          break;
       case BINDING_UP:
-	      inputUP[mode] = key;
+	      bindingSet->inputUP = key;
          break;
       case BINDING_DOWN:
-	      inputDOWN[mode] = key;
+	      bindingSet->inputDOWN = key;
          break;
       case BINDING_LEFT:
-	      inputLEFT[mode] = key;
+	      bindingSet->inputLEFT = key;
          break;
       case BINDING_RIGHT:
-	      inputRIGHT[mode] = key;
+	      bindingSet->inputRIGHT = key;
          break;
       case BINDING_SCRBRD:
-	      inputSCRBRD[mode] = key;
+	      bindingSet->inputSCRBRD = key;
          break;
       case BINDING_HELP:
-	      keyHELP = key;
+	      bindingSet->keyHELP = key;
          break;
       case BINDING_OUTGAMECHAT:
-	      keyOUTGAMECHAT = key;
+	      bindingSet->keyOUTGAMECHAT = key;
          break;
       case BINDING_MISSION:
-	      keyMISSION = key;
+	      bindingSet->keyMISSION = key;
          break;
       case BINDING_FPS:
-	      keyFPS = key;
+	      bindingSet->keyFPS = key;
          break;
       case BINDING_DIAG:
-	      keyDIAG = key;
+	      bindingSet->keyDIAG = key;
          break;
       default:
          TNLAssert(false, "Invalid key binding!");
@@ -507,21 +545,6 @@ string InputCodeManager::getInputModeString()
 #else
    return "Keyboard";
 #endif
-}
-
-
-
-bool InputCodeManager::checkIfBindingsHaveKeypad()
-{
-   return isKeypadKey(inputSELWEAP1[mInputMode]) || isKeypadKey(inputSELWEAP2[mInputMode])  || isKeypadKey(inputSELWEAP3[mInputMode]) ||
-          isKeypadKey(inputADVWEAP[mInputMode])  || isKeypadKey(inputCMDRMAP[mInputMode])   || isKeypadKey(inputTEAMCHAT[mInputMode]) ||
-          isKeypadKey(inputGLOBCHAT[mInputMode]) || isKeypadKey(inputQUICKCHAT[mInputMode]) || isKeypadKey(inputCMDCHAT[mInputMode])  ||
-          isKeypadKey(inputLOADOUT[mInputMode])  || isKeypadKey(inputMOD1[mInputMode])      || isKeypadKey(inputMOD2[mInputMode])     ||
-          isKeypadKey(inputFIRE[mInputMode])     || isKeypadKey(inputDROPITEM[mInputMode])  || isKeypadKey(inputTOGVOICE[mInputMode]) ||
-          isKeypadKey(inputUP[mInputMode])       || isKeypadKey(inputDOWN[mInputMode])      || isKeypadKey(inputLEFT[mInputMode])     ||
-          isKeypadKey(inputRIGHT[mInputMode])    || isKeypadKey(inputSCRBRD[mInputMode])    || isKeypadKey(keyHELP)                   ||
-          isKeypadKey(keyOUTGAMECHAT)            || isKeypadKey(keyMISSION)                 || isKeypadKey(keyFPS)                    ||
-          isKeypadKey(keyDIAG); 
 }
 
 
@@ -1595,6 +1618,12 @@ bool InputCodeManager::isControllerButton(InputCode inputCode)
 bool InputCodeManager::isKeypadKey(InputCode inputCode)
 {
    return inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD_EQUALS;
+}
+
+
+bool InputCodeManager::checkIfBindingsHaveKeypad()
+{
+   return mCurrentBindingSet->hasKeypad();
 }
 
 

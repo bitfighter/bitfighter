@@ -39,11 +39,50 @@ namespace Zap
 #include "InputCodeEnum.h"    // Include inside Zap namespace
 
 
+struct BindingSet
+{
+   BindingSet();     // Constructor
+   bool hasKeypad();
+
+   InputCode inputSELWEAP1;
+   InputCode inputSELWEAP2;
+   InputCode inputSELWEAP3;
+   InputCode inputADVWEAP;
+   InputCode inputCMDRMAP;
+   InputCode inputTEAMCHAT;
+   InputCode inputGLOBCHAT;
+   InputCode inputQUICKCHAT;
+   InputCode inputCMDCHAT;
+   InputCode inputLOADOUT;
+   InputCode inputMOD1;
+   InputCode inputMOD2;
+   InputCode inputFIRE;
+   InputCode inputDROPITEM;
+   InputCode inputTOGVOICE;
+   InputCode inputUP;
+   InputCode inputDOWN;
+   InputCode inputLEFT;
+   InputCode inputRIGHT;
+   InputCode inputSCRBRD;
+   InputCode keyHELP;
+   InputCode keyOUTGAMECHAT;
+   InputCode keyMISSION;
+   InputCode keyFPS;
+   InputCode keyDIAG;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class InputCodeManager 
 {
 private:
    bool mBindingsHaveKeypadEntry;
    InputMode mInputMode;             // Joystick or Keyboard
+
+   BindingSet *mCurrentBindingSet;     
+   Vector<BindingSet> mBindingSets;
 
 public:
    enum JoystickJoysticks {
@@ -137,33 +176,6 @@ public:
    InputCode getBinding(BindingName bindingName, InputMode inputMode);
    void setBinding(BindingName bindingName, InputCode key);
    void setBinding(BindingName bindingName, InputMode inputMode, InputCode key);
-
-private:
-   InputCode inputSELWEAP1[2];
-   InputCode inputSELWEAP2[2];
-   InputCode inputSELWEAP3[2];
-   InputCode inputADVWEAP[2];
-   InputCode inputCMDRMAP[2];
-   InputCode inputTEAMCHAT[2];
-   InputCode inputGLOBCHAT[2];
-   InputCode inputQUICKCHAT[2];
-   InputCode inputCMDCHAT[2];
-   InputCode inputLOADOUT[2];
-   InputCode inputMOD1[2];
-   InputCode inputMOD2[2];
-   InputCode inputFIRE[2];
-   InputCode inputDROPITEM[2];
-   InputCode inputTOGVOICE[2];
-   InputCode inputUP[2];
-   InputCode inputDOWN[2];
-   InputCode inputLEFT[2];
-   InputCode inputRIGHT[2];
-   InputCode inputSCRBRD[2];
-   InputCode keyHELP;
-   InputCode keyOUTGAMECHAT;
-   InputCode keyMISSION;
-   InputCode keyFPS;
-   InputCode keyDIAG;
 };
 
 };     // namespace Zap
