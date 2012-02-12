@@ -245,6 +245,38 @@ bool BindingSet::hasKeypad()
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+static const string BINDING_STRINGS[] = 
+{
+   "SelWeapon1",		   // BINDING_SELWEAP1 
+   "SelWeapon2",		   // BINDING_SELWEAP2 
+   "SelWeapon3",		   // BINDING_SELWEAP3 
+   "SelNextWeapon",	   // BINDING_ADVWEAP 
+   "ShowCmdrMap",		   // BINDING_CMDRMAP 
+   "TeamChat",		      // BINDING_TEAMCHAT 
+   "GlobalChat",		   // BINDING_GLOBCHAT 
+   "QuickChat",		   // BINDING_QUICKCHAT 
+   "Command",		      // BINDING_CMDCHAT 
+   "ShowLoadoutMenu",	// BINDING_LOADOUT 
+   "ActivateModule1",	// BINDING_MOD1 
+   "ActivateModule2",	// BINDING_MOD2 
+   "Fire",			      // BINDING_FIRE 
+   "DropItem",		      // BINDING_DROPITEM 
+   "VoiceChat",	      // BINDING_TOGVOICE 
+   "ShipUp",		      // BINDING_UP 
+   "ShipDown",		      // BINDING_DOWN 
+   "ShipLeft",		      // BINDING_LEFT 
+   "ShipRight",		   // BINDING_RIGHT 
+   "ShowScoreboard",	   // BINDING_SCRBRD 
+   "Help",			      // BINDING_HELP 
+   "OutOfGameChat",	   // BINDING_OUTGAMECHAT 
+   "Mission",		      // BINDING_MISSION 
+   "FPS",			      // BINDING_FPS 
+   "Diagnostics"		   // BINDING_DIAG 
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 InputCodeManager::InputCodeManager()
@@ -257,6 +289,9 @@ InputCodeManager::InputCodeManager()
 
    // Set the first to be our current one
    mCurrentBindingSet = &mBindingSets[0];     
+
+   // Check to make sure we haven't fouled things up somehow
+   TNLAssert(ARRAYSIZE(BINDING_STRINGS) == BINDING_DEFINEABLE_KEY_COUNT, "Problem somewhere!");
 }
 
 
@@ -1642,6 +1677,23 @@ bool InputCodeManager::checkIfBindingsHaveKeypad()
 bool InputCodeManager::isMouseAction(InputCode inputCode)
 {
    return inputCode >= MOUSE_LEFT && inputCode <= MOUSE_WHEEL_DOWN;
+}
+
+
+//S32 InputCodeManager::getBindingCount()
+//{
+//   return ARRAYSIZE(BINDING_STRINGS);
+//}
+
+
+string InputCodeManager::getBindingName(BindingName bindingName)
+{
+   S32 index = (S32)bindingName;
+   TNLAssert(index > 0 && index < ARRAYSIZE(BINDING_STRINGS), "Invalid value for bindingName!");
+
+   return BINDING_STRINGS[index];
+
+   return "";
 }
 
 

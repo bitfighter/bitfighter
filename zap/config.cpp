@@ -597,57 +597,62 @@ static InputCode getInputCode(CIniFile *ini, const string &section, const string
 }
 
 
+#define LOAD_BINDING(binding, key) inputCodeManager->setBinding(binding, mode, getInputCode(ini, section, InputCodeManager::getBindingName(binding), key));
+
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
 {                                
    string section = "KeyboardKeyBindings";
    InputMode mode = InputModeKeyboard;
 
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1,  mode, getInputCode(ini, section, "SelWeapon1",      KEY_1));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP2,  mode, getInputCode(ini, section, "SelWeapon2",      KEY_2));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP3,  mode, getInputCode(ini, section, "SelWeapon3",      KEY_3));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_ADVWEAP,   mode, getInputCode(ini, section, "SelNextWeapon",   KEY_E));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_CMDRMAP,   mode, getInputCode(ini, section, "ShowCmdrMap",     KEY_C));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_TEAMCHAT,  mode, getInputCode(ini, section, "TeamChat",        KEY_T));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_GLOBCHAT,  mode, getInputCode(ini, section, "GlobalChat",      KEY_G));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_QUICKCHAT, mode, getInputCode(ini, section, "QuickChat",       KEY_V));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_CMDCHAT,   mode, getInputCode(ini, section, "Command",         KEY_SLASH));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_LOADOUT,   mode, getInputCode(ini, section, "ShowLoadoutMenu", KEY_Z));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_MOD1,      mode, getInputCode(ini, section, "ActivateModule1", KEY_SPACE));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_MOD2,      mode, getInputCode(ini, section, "ActivateModule2", MOUSE_RIGHT));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_FIRE,      mode, getInputCode(ini, section, "Fire",            MOUSE_LEFT));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_DROPITEM,  mode, getInputCode(ini, section, "DropItem",        KEY_B));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_TOGVOICE,  mode, getInputCode(ini, section, "VoiceChat",       KEY_R));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_UP,        mode, getInputCode(ini, section, "ShipUp",          KEY_W));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_DOWN,      mode, getInputCode(ini, section, "ShipDown",        KEY_S));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_LEFT,      mode, getInputCode(ini, section, "ShipLeft",        KEY_A));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_RIGHT,     mode, getInputCode(ini, section, "ShipRight",       KEY_D));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SCRBRD,    mode, getInputCode(ini, section, "ShowScoreboard",  KEY_TAB));
+   // Top line expands to this:
+   // inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1,  
+   //         mode, getInputCode(ini, section, InputCodeManager::getBindingName(InputCodeManager::BINDING_SELWEAP1),  KEY_1));
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,  KEY_1);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   KEY_E);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   KEY_C);
+   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
+   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
+   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT, KEY_V);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,   KEY_SLASH);
+   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,   KEY_Z);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD1,      KEY_SPACE);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD2,      MOUSE_RIGHT);
+   LOAD_BINDING(InputCodeManager::BINDING_FIRE,      MOUSE_LEFT);
+   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,  KEY_B);
+   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,  KEY_R);
+   LOAD_BINDING(InputCodeManager::BINDING_UP,        KEY_W);
+   LOAD_BINDING(InputCodeManager::BINDING_DOWN,      KEY_S);
+   LOAD_BINDING(InputCodeManager::BINDING_LEFT,      KEY_A);
+   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,     KEY_D);
+   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,    KEY_TAB);
 
 
    section = "JoystickKeyBindings";
    mode = InputModeJoystick;
 
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP1,  mode, getInputCode(ini, section, "SelWeapon1",      KEY_1));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP2,  mode, getInputCode(ini, section, "SelWeapon2",      KEY_2));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SELWEAP3,  mode, getInputCode(ini, section, "SelWeapon3",      KEY_3));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_ADVWEAP,   mode, getInputCode(ini, section, "SelNextWeapon",   BUTTON_1));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_CMDRMAP,   mode, getInputCode(ini, section, "ShowCmdrMap",     BUTTON_2));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_TEAMCHAT,  mode, getInputCode(ini, section, "TeamChat",        KEY_T));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_GLOBCHAT,  mode, getInputCode(ini, section, "GlobalChat",      KEY_G));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_QUICKCHAT, mode, getInputCode(ini, section, "QuickChat",       BUTTON_3));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_CMDCHAT,   mode, getInputCode(ini, section, "Command",         KEY_SLASH));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_LOADOUT,   mode, getInputCode(ini, section, "ShowLoadoutMenu", BUTTON_4));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_MOD1,      mode, getInputCode(ini, section, "ActivateModule1", BUTTON_7));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_MOD2,      mode, getInputCode(ini, section, "ActivateModule2", BUTTON_6));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_FIRE,      mode, getInputCode(ini, section, "Fire",            MOUSE_LEFT));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_DROPITEM,  mode, getInputCode(ini, section, "DropItem",        KEY_B));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_TOGVOICE,  mode, getInputCode(ini, section, "VoiceChat",       KEY_R));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_UP,        mode, getInputCode(ini, section, "ShipUp",          KEY_UP));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_DOWN,      mode, getInputCode(ini, section, "ShipDown",        KEY_DOWN));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_LEFT,      mode, getInputCode(ini, section, "ShipLeft",        KEY_LEFT));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_RIGHT,     mode, getInputCode(ini, section, "ShipRight",       KEY_RIGHT));
-   inputCodeManager->setBinding(InputCodeManager::BINDING_SCRBRD,    mode, getInputCode(ini, section, "ShowScoreboard",  BUTTON_5));
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP1,  KEY_1);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
+   LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   BUTTON_1);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   BUTTON_2);
+   LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
+   LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
+   LOAD_BINDING(InputCodeManager::BINDING_QUICKCHAT, BUTTON_3);
+   LOAD_BINDING(InputCodeManager::BINDING_CMDCHAT,   KEY_SLASH);
+   LOAD_BINDING(InputCodeManager::BINDING_LOADOUT,   BUTTON_4);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD1,      BUTTON_7);
+   LOAD_BINDING(InputCodeManager::BINDING_MOD2,      BUTTON_6);
+   LOAD_BINDING(InputCodeManager::BINDING_FIRE,      MOUSE_LEFT);
+   LOAD_BINDING(InputCodeManager::BINDING_DROPITEM,  KEY_B);
+   LOAD_BINDING(InputCodeManager::BINDING_TOGVOICE,  KEY_R);
+   LOAD_BINDING(InputCodeManager::BINDING_UP,        KEY_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_DOWN,      KEY_DOWN);
+   LOAD_BINDING(InputCodeManager::BINDING_LEFT,      KEY_LEFT);
+   LOAD_BINDING(InputCodeManager::BINDING_RIGHT,     KEY_RIGHT);
+   LOAD_BINDING(InputCodeManager::BINDING_SCRBRD,    BUTTON_5);
 
    // The following key bindings are not user-defineable at the moment, mostly because we want consistency
    // throughout the game, and that would require some real constraints on what keys users could choose.
@@ -659,28 +664,35 @@ static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
    // These were moved to main.cpp to get them defined before the menus
 }
 
+
+#define SAVE_BINDING(binding) ini->SetValue(section, InputCodeManager::getBindingName(binding), \
+                                           InputCodeManager::inputCodeToString(inputCodeManager->getBinding(binding,  mode)));
+
+
 static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, const string &section, InputMode mode)
 {
-   ini->SetValue(section, "SelWeapon1",      InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1,  mode)));
-   ini->SetValue(section, "SelWeapon2",      InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP2,  mode)));
-   ini->SetValue(section, "SelWeapon3",      InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP3,  mode)));
-   ini->SetValue(section, "SelNextWeapon",   InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_ADVWEAP,   mode)));
-   ini->SetValue(section, "ShowCmdrMap",     InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_CMDRMAP,   mode)));
-   ini->SetValue(section, "TeamChat",        InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_TEAMCHAT,  mode)));
-   ini->SetValue(section, "GlobalChat",      InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_GLOBCHAT,  mode)));
-   ini->SetValue(section, "QuickChat",       InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_QUICKCHAT, mode)));
-   ini->SetValue(section, "Command",         InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_CMDCHAT,   mode)));
-   ini->SetValue(section, "ShowLoadoutMenu", InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_LOADOUT,   mode)));
-   ini->SetValue(section, "ActivateModule1", InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1,      mode)));
-   ini->SetValue(section, "ActivateModule2", InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2,      mode)));
-   ini->SetValue(section, "Fire",            InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_FIRE,      mode)));
-   ini->SetValue(section, "DropItem",        InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DROPITEM,  mode)));
-   ini->SetValue(section, "VoiceChat",       InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_TOGVOICE,  mode)));
-   ini->SetValue(section, "ShipUp",          InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_UP,        mode)));
-   ini->SetValue(section, "ShipDown",        InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_DOWN,      mode)));
-   ini->SetValue(section, "ShipLeft",        InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_LEFT,      mode)));
-   ini->SetValue(section, "ShipRight",       InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_RIGHT,     mode)));
-   ini->SetValue(section, "ShowScoreboard",  InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SCRBRD,    mode)));
+   // Top line evaluates to:
+   // ini->SetValue(section, "SelWeapon1", InputCodeManager::inputCodeToString(inputCodeManager->getBinding(InputCodeManager::BINDING_SELWEAP1,  mode)));
+   SAVE_BINDING(InputCodeManager::BINDING_SELWEAP1);
+   SAVE_BINDING(InputCodeManager::BINDING_SELWEAP2);
+   SAVE_BINDING(InputCodeManager::BINDING_SELWEAP3);
+   SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP);
+   SAVE_BINDING(InputCodeManager::BINDING_CMDRMAP);
+   SAVE_BINDING(InputCodeManager::BINDING_TEAMCHAT);
+   SAVE_BINDING(InputCodeManager::BINDING_GLOBCHAT);
+   SAVE_BINDING(InputCodeManager::BINDING_QUICKCHAT);
+   SAVE_BINDING(InputCodeManager::BINDING_CMDCHAT);
+   SAVE_BINDING(InputCodeManager::BINDING_LOADOUT);
+   SAVE_BINDING(InputCodeManager::BINDING_MOD1);
+   SAVE_BINDING(InputCodeManager::BINDING_MOD2);
+   SAVE_BINDING(InputCodeManager::BINDING_FIRE);
+   SAVE_BINDING(InputCodeManager::BINDING_DROPITEM);
+   SAVE_BINDING(InputCodeManager::BINDING_TOGVOICE);
+   SAVE_BINDING(InputCodeManager::BINDING_UP);
+   SAVE_BINDING(InputCodeManager::BINDING_DOWN);
+   SAVE_BINDING(InputCodeManager::BINDING_LEFT);
+   SAVE_BINDING(InputCodeManager::BINDING_RIGHT);
+   SAVE_BINDING(InputCodeManager::BINDING_SCRBRD);
 }
 
 

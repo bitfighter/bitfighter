@@ -62,7 +62,7 @@ public:
    };
 
    enum BindingName {
-      BINDING_SELWEAP1,
+      BINDING_SELWEAP1,    // Name def depends on these being in this order from here...
       BINDING_SELWEAP2,
       BINDING_SELWEAP3,
       BINDING_ADVWEAP,
@@ -86,7 +86,8 @@ public:
       BINDING_OUTGAMECHAT,
       BINDING_MISSION,
       BINDING_FPS,
-      BINDING_DIAG,
+      BINDING_DIAG,        // ...to here
+      BINDING_DEFINEABLE_KEY_COUNT,
       
       BINDING_NONE,
       BINDING_DUMMY_MOVE_SHIP_KEYS_UD,
@@ -108,6 +109,11 @@ public:
    static void resetStates();                               // Initialize key states
    static void dumpInputCodeStates();                       // Log key states for testing
    static void initializeKeyNames();
+
+   //static S32 getBindingCount();
+   static string getBindingName(BindingName binding);
+   //static InputCodeManager::BindingName getBindingCode(string name);
+   
 
    // Some converters
    InputCode filterInputCode(InputCode inputCode);    // Calls filters below
@@ -147,7 +153,6 @@ public:
    void setBinding(BindingName bindingName, InputCode key);
    void setBinding(BindingName bindingName, InputMode inputMode, InputCode key);
 };
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
