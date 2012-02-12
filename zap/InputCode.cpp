@@ -62,6 +62,172 @@ BindingSet::BindingSet()
 }
 
 
+InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName)
+{
+   switch(bindingName)
+   {
+      case InputCodeManager::BINDING_SELWEAP1:
+	      return inputSELWEAP1;
+      case InputCodeManager::BINDING_SELWEAP2:
+	      return inputSELWEAP2;
+      case InputCodeManager::BINDING_SELWEAP3:
+	      return inputSELWEAP3;
+      case InputCodeManager::BINDING_ADVWEAP:
+	      return inputADVWEAP;
+      case InputCodeManager::BINDING_CMDRMAP:
+	      return inputCMDRMAP;
+      case InputCodeManager::BINDING_TEAMCHAT:
+	      return inputTEAMCHAT;
+      case InputCodeManager::BINDING_GLOBCHAT:
+	      return inputGLOBCHAT;
+      case InputCodeManager::BINDING_QUICKCHAT:
+	      return inputQUICKCHAT;
+      case InputCodeManager::BINDING_CMDCHAT:
+	      return inputCMDCHAT;
+      case InputCodeManager::BINDING_LOADOUT:
+	      return inputLOADOUT;
+      case InputCodeManager::BINDING_MOD1:
+	      return inputMOD1;
+      case InputCodeManager::BINDING_MOD2:
+	      return inputMOD2;
+      case InputCodeManager::BINDING_FIRE:
+	      return inputFIRE;
+      case InputCodeManager::BINDING_DROPITEM:
+	      return inputDROPITEM;
+      case InputCodeManager::BINDING_TOGVOICE:
+	      return inputTOGVOICE;
+      case InputCodeManager::BINDING_UP:
+	      return inputUP;
+      case InputCodeManager::BINDING_DOWN:
+	      return inputDOWN;
+      case InputCodeManager::BINDING_LEFT:
+	      return inputLEFT;
+      case InputCodeManager::BINDING_RIGHT:
+	      return inputRIGHT;
+      case InputCodeManager::BINDING_SCRBRD:
+	      return inputSCRBRD;
+      case InputCodeManager::BINDING_HELP:
+	      return keyHELP;
+      case InputCodeManager::BINDING_OUTGAMECHAT:
+	      return keyOUTGAMECHAT;
+      case InputCodeManager::BINDING_MISSION:
+	      return keyMISSION;
+      case InputCodeManager::BINDING_FPS:
+	      return keyFPS;
+      case InputCodeManager::BINDING_DIAG:
+	      return keyDIAG;
+
+      // Some special hacky cases for helping us with displaying instructions:
+      case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
+         return MOUSE;
+      case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_UD:
+         return KEYS_UP_DOWN;
+      case InputCodeManager::BINDING_DUMMY_MOVE_SHIP_KEYS_LR:
+         return KEYS_LEFT_RIGHT;
+      case InputCodeManager::BINDING_DUMMY_STICK_LEFT:
+         return LEFT_JOYSTICK;
+      case InputCodeManager::BINDING_DUMMY_STICK_RIGHT:
+         return RIGHT_JOYSTICK;
+      case InputCodeManager::BINDING_DUMMY_MSG_MODE:
+         return KEY_CTRL_M;
+      case InputCodeManager::BINDING_DUMMY_SS_MODE:
+         return KEY_CTRL_Q;
+      case InputCodeManager::BINDING_NONE:
+         return KEY_NONE;
+
+      // Just in case:
+      default:
+         TNLAssert(false, "Invalid key binding!");
+         return KEY_NONE;
+   }
+}
+
+
+void BindingSet::setBinding(InputCodeManager::BindingName bindingName, InputCode key)
+{
+   switch(bindingName)
+   {
+      case InputCodeManager::BINDING_SELWEAP1:
+	      inputSELWEAP1 = key;
+         break;
+      case InputCodeManager::BINDING_SELWEAP2:
+	      inputSELWEAP2 = key;
+         break;
+      case InputCodeManager::BINDING_SELWEAP3:
+	      inputSELWEAP3 = key;
+         break;
+      case InputCodeManager::BINDING_ADVWEAP:
+	      inputADVWEAP = key;
+         break;
+      case InputCodeManager::BINDING_CMDRMAP:
+	      inputCMDRMAP = key;
+         break;
+      case InputCodeManager::BINDING_TEAMCHAT:
+	      inputTEAMCHAT = key;
+         break;
+      case InputCodeManager::BINDING_GLOBCHAT:
+	      inputGLOBCHAT = key;
+         break;
+      case InputCodeManager::BINDING_QUICKCHAT:
+	      inputQUICKCHAT = key;
+         break;
+      case InputCodeManager::BINDING_CMDCHAT:
+	      inputCMDCHAT = key;
+         break;
+      case InputCodeManager::BINDING_LOADOUT:
+	      inputLOADOUT = key;
+         break;
+      case InputCodeManager::BINDING_MOD1:
+	      inputMOD1 = key;
+         break;
+      case InputCodeManager::BINDING_MOD2:
+	      inputMOD2 = key;
+         break;
+      case InputCodeManager::BINDING_FIRE:
+	      inputFIRE = key;
+         break;
+      case InputCodeManager::BINDING_DROPITEM:
+	      inputDROPITEM = key;
+         break;
+      case InputCodeManager::BINDING_TOGVOICE:
+	      inputTOGVOICE = key;
+         break;
+      case InputCodeManager::BINDING_UP:
+	      inputUP = key;
+         break;
+      case InputCodeManager::BINDING_DOWN:
+	      inputDOWN = key;
+         break;
+      case InputCodeManager::BINDING_LEFT:
+	      inputLEFT = key;
+         break;
+      case InputCodeManager::BINDING_RIGHT:
+	      inputRIGHT = key;
+         break;
+      case InputCodeManager::BINDING_SCRBRD:
+	      inputSCRBRD = key;
+         break;
+      case InputCodeManager::BINDING_HELP:
+	      keyHELP = key;
+         break;
+      case InputCodeManager::BINDING_OUTGAMECHAT:
+	      keyOUTGAMECHAT = key;
+         break;
+      case InputCodeManager::BINDING_MISSION:
+	      keyMISSION = key;
+         break;
+      case InputCodeManager::BINDING_FPS:
+	      keyFPS = key;
+         break;
+      case InputCodeManager::BINDING_DIAG:
+	      keyDIAG = key;
+         break;
+      default:
+         TNLAssert(false, "Invalid key binding!");
+   }
+}
+
+
 bool BindingSet::hasKeypad()
 {
    return 
@@ -336,82 +502,7 @@ InputCode InputCodeManager::getBinding(BindingName bindingName, InputMode inputM
 
    BindingSet *bindingSet = &mBindingSets[mode];
    
-   switch(bindingName)
-   {
-      case BINDING_SELWEAP1:
-	      return bindingSet->inputSELWEAP1;
-      case BINDING_SELWEAP2:
-	      return bindingSet->inputSELWEAP2;
-      case BINDING_SELWEAP3:
-	      return bindingSet->inputSELWEAP3;
-      case BINDING_ADVWEAP:
-	      return bindingSet->inputADVWEAP;
-      case BINDING_CMDRMAP:
-	      return bindingSet->inputCMDRMAP;
-      case BINDING_TEAMCHAT:
-	      return bindingSet->inputTEAMCHAT;
-      case BINDING_GLOBCHAT:
-	      return bindingSet->inputGLOBCHAT;
-      case BINDING_QUICKCHAT:
-	      return bindingSet->inputQUICKCHAT;
-      case BINDING_CMDCHAT:
-	      return bindingSet->inputCMDCHAT;
-      case BINDING_LOADOUT:
-	      return bindingSet->inputLOADOUT;
-      case BINDING_MOD1:
-	      return bindingSet->inputMOD1;
-      case BINDING_MOD2:
-	      return bindingSet->inputMOD2;
-      case BINDING_FIRE:
-	      return bindingSet->inputFIRE;
-      case BINDING_DROPITEM:
-	      return bindingSet->inputDROPITEM;
-      case BINDING_TOGVOICE:
-	      return bindingSet->inputTOGVOICE;
-      case BINDING_UP:
-	      return bindingSet->inputUP;
-      case BINDING_DOWN:
-	      return bindingSet->inputDOWN;
-      case BINDING_LEFT:
-	      return bindingSet->inputLEFT;
-      case BINDING_RIGHT:
-	      return bindingSet->inputRIGHT;
-      case BINDING_SCRBRD:
-	      return bindingSet->inputSCRBRD;
-      case BINDING_HELP:
-	      return bindingSet->keyHELP;
-      case BINDING_OUTGAMECHAT:
-	      return bindingSet->keyOUTGAMECHAT;
-      case BINDING_MISSION:
-	      return bindingSet->keyMISSION;
-      case BINDING_FPS:
-	      return bindingSet->keyFPS;
-      case BINDING_DIAG:
-	      return bindingSet->keyDIAG;
-
-      // Some special hacky cases for helping us with displaying instructions:
-      case BINDING_DUMMY_MOVE_SHIP_KEYS_MOUSE:
-         return MOUSE;
-      case BINDING_DUMMY_MOVE_SHIP_KEYS_UD:
-         return KEYS_UP_DOWN;
-      case BINDING_DUMMY_MOVE_SHIP_KEYS_LR:
-         return KEYS_LEFT_RIGHT;
-      case BINDING_DUMMY_STICK_LEFT:
-         return LEFT_JOYSTICK;
-      case BINDING_DUMMY_STICK_RIGHT:
-         return RIGHT_JOYSTICK;
-      case BINDING_DUMMY_MSG_MODE:
-         return KEY_CTRL_M;
-      case BINDING_DUMMY_SS_MODE:
-         return KEY_CTRL_Q;
-      case BINDING_NONE:
-         return KEY_NONE;
-
-      // Just in case:
-      default:
-         TNLAssert(false, "Invalid key binding!");
-         return KEY_NONE;
-   }
+   return bindingSet->getBinding(bindingName);
 }
 
 
@@ -426,87 +517,7 @@ void InputCodeManager::setBinding(BindingName bindingName, InputMode inputMode, 
    S32 mode = (S32)inputMode;    // 0 or 1 at present
 
    BindingSet *bindingSet = &mBindingSets[mode];
-
-   switch(bindingName)
-   {
-      case BINDING_SELWEAP1:
-	      bindingSet->inputSELWEAP1 = key;
-         break;
-      case BINDING_SELWEAP2:
-	      bindingSet->inputSELWEAP2 = key;
-         break;
-      case BINDING_SELWEAP3:
-	      bindingSet->inputSELWEAP3 = key;
-         break;
-      case BINDING_ADVWEAP:
-	      bindingSet->inputADVWEAP = key;
-         break;
-      case BINDING_CMDRMAP:
-	      bindingSet->inputCMDRMAP = key;
-         break;
-      case BINDING_TEAMCHAT:
-	      bindingSet->inputTEAMCHAT = key;
-         break;
-      case BINDING_GLOBCHAT:
-	      bindingSet->inputGLOBCHAT = key;
-         break;
-      case BINDING_QUICKCHAT:
-	      bindingSet->inputQUICKCHAT = key;
-         break;
-      case BINDING_CMDCHAT:
-	      bindingSet->inputCMDCHAT = key;
-         break;
-      case BINDING_LOADOUT:
-	      bindingSet->inputLOADOUT = key;
-         break;
-      case BINDING_MOD1:
-	      bindingSet->inputMOD1 = key;
-         break;
-      case BINDING_MOD2:
-	      bindingSet->inputMOD2 = key;
-         break;
-      case BINDING_FIRE:
-	      bindingSet->inputFIRE = key;
-         break;
-      case BINDING_DROPITEM:
-	      bindingSet->inputDROPITEM = key;
-         break;
-      case BINDING_TOGVOICE:
-	      bindingSet->inputTOGVOICE = key;
-         break;
-      case BINDING_UP:
-	      bindingSet->inputUP = key;
-         break;
-      case BINDING_DOWN:
-	      bindingSet->inputDOWN = key;
-         break;
-      case BINDING_LEFT:
-	      bindingSet->inputLEFT = key;
-         break;
-      case BINDING_RIGHT:
-	      bindingSet->inputRIGHT = key;
-         break;
-      case BINDING_SCRBRD:
-	      bindingSet->inputSCRBRD = key;
-         break;
-      case BINDING_HELP:
-	      bindingSet->keyHELP = key;
-         break;
-      case BINDING_OUTGAMECHAT:
-	      bindingSet->keyOUTGAMECHAT = key;
-         break;
-      case BINDING_MISSION:
-	      bindingSet->keyMISSION = key;
-         break;
-      case BINDING_FPS:
-	      bindingSet->keyFPS = key;
-         break;
-      case BINDING_DIAG:
-	      bindingSet->keyDIAG = key;
-         break;
-      default:
-         TNLAssert(false, "Invalid key binding!");
-   }
+   bindingSet->setBinding(bindingName, key);
 
    // Try to be efficient about checking for whether we have a keypad key assigned to something
    bool isKeypad = isKeypadKey(key);
