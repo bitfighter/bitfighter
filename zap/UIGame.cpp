@@ -373,11 +373,13 @@ void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char 
    va_start(args, format);
    vsnprintf(mDisplayChatMessage[0], sizeof(mDisplayChatMessage[0]), format, args);
    va_end(args);
+   
    mDisplayChatMessageColor[0] = msgColor;
 
    va_start(args, format);
    vsnprintf(mStoreChatMessage[0], sizeof(mStoreChatMessage[0]), format, args);
    va_end(args);
+
    mStoreChatMessageColor[0] = msgColor;
 
    mDisplayChatMessageTimer.reset();
