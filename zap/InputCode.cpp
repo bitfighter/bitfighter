@@ -1689,7 +1689,7 @@ bool InputCodeManager::isMouseAction(InputCode inputCode)
 string InputCodeManager::getBindingName(BindingName bindingName)
 {
    S32 index = (S32)bindingName;
-   TNLAssert(index > 0 && index < ARRAYSIZE(BINDING_STRINGS), "Invalid value for bindingName!");
+   TNLAssert(index >= 0 && index < ARRAYSIZE(BINDING_STRINGS), "Invalid value for bindingName!");
 
    return BINDING_STRINGS[index];
 
