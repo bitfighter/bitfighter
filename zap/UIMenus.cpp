@@ -421,7 +421,7 @@ void MenuUserInterface::getMenuResponses(Vector<string> &responses)
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved()
 {
-   if(mIgnoreNextMouseEvent)
+   if(mIgnoreNextMouseEvent)     // Suppresses spurious mouse events from the likes of SDL_WarpMouse
    {
       mIgnoreNextMouseEvent = false;
       return;
@@ -1884,6 +1884,11 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, 
 
          y += getTextSize(size) / 2;
 
+         // WarpMouse fires a mouse event, which will cause the cursor to become visible, which we don't want.  Therefore,
+         // we must resort to the kind of gimicky/hacky method of setting a flag, telling us that we should ignore the
+         // next mouse event that comes our way.  It might be better to handle this at the Event level, by creating a custom
+         // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
+         // is here so...  well... this works.
          SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
          SDL_SetCursor(Cursor::getTransparent());
          mIgnoreNextMouseEvent = true;
