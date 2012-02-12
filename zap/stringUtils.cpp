@@ -165,18 +165,18 @@ F64 stof(const string &s)
 }
 
 
-// From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
-string replaceString( const string &strString, const string &strOld, const string &strNew )
+// From http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string, replaceAll variant
+string replaceString(std::string& strString, const std::string& from, const std::string& to) 
 {
    string str = strString;    // Make working copy
 
-    for( string::size_type nReplace = str.rfind( strOld ); nReplace != string::npos; nReplace = str.rfind( strOld, nReplace - 1 ) )
-    {
-        str.replace( nReplace, strOld.length(), strNew );
-        if( nReplace == 0 )
-            break;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
-    return str;
+
+   return str;
 }
 
 
