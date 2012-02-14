@@ -2664,11 +2664,6 @@ void EditorUserInterface::onMouseDragged()
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
-   findSnapVertex();                // Sets mSnapObject and mSnapVertexIndex
-
-   if(!mSnapObject || mSnapVertexIndex == NONE)
-      return;
-
 
    bool needToSaveUndoState = true;
 
@@ -2681,6 +2676,11 @@ void EditorUserInterface::onMouseDragged()
        startDraggingDockItem();  
        needToSaveUndoState = false;
    }
+
+   findSnapVertex();                               // Sets mSnapObject and mSnapVertexIndex
+   if(!mSnapObject || mSnapVertexIndex == NONE)    // If we've just started dragging a dock item, this will be it
+      return;
+
 
    if(!mDraggingObjects)            // Just started dragging
    {
