@@ -42,18 +42,22 @@ namespace Zap
 
 typedef bool (*TestFunc)(U8);
 
-// Interface for dealing with objects that can be in our spatial database.  Can be either GameObjects or
-// items in te
+// Interface for dealing with objects that can be in our spatial database.
 class  GridDatabase;
+class EditorObjectDatabase;
 
 class DatabaseObject
 {
+
 friend class GridDatabase;
+friend class EditorObjectDatabase;
 
 private:
    U32 mLastQueryId;
    Rect mExtent;
    GridDatabase *mDatabase;
+public:     //{P{P
+   void setDatabase(GridDatabase *database);
 
 protected:
    U8 mObjectTypeNumber;
@@ -69,7 +73,6 @@ public:
    void setObjectTypeNumber(U8 objectTypeNumber);
 
    GridDatabase *getDatabase();     // Returns the database in which this object is stored, NULL if not in any database
-   void setDatabase(GridDatabase *database);
 
    Rect getExtent() const;
    void setExtent(const Rect &extentRect);
@@ -186,7 +189,8 @@ public:
 
    const Vector<EditorObject *> *getObjectList();     
 
-   void addToDatabase(DatabaseObject *theObject, const Rect &extents);
+   void addToDatabase(DatabaseObject *theObject, const Rect &extents);     // Add a single object
+   void addToDatabase(const Vector<EditorObject *> &objects);              // Add a list of objects
 
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
    void removeEverythingFromDatabase();

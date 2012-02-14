@@ -873,6 +873,7 @@ void WallSegment::init(GridDatabase *database, S32 owner)
    resetEdges();                                            
 
    // Add item to database, set its extents.  Roughly equivalent to addToDatabase(database, Rect(corners))
+   addToDatabase(database, Rect(mCorners));
    setDatabase(database);
    setExtent(Rect(mCorners));     // Adds item to databse
 

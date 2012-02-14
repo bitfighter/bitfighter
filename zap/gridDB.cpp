@@ -564,11 +564,10 @@ void DatabaseObject::addToDatabase(GridDatabase *database)
    if(mDatabase)     // This object is already in a database!
       return;
 
-   //TNLAssert(mExtent.getWidth() > 0 && mExtent.getHeight() > 0, "Empty extents!");    // TODO Delete, these may be OK
-   mDatabase = database;
-
    if(isDatabasable())
       database->addToDatabase(this, mExtent);
+   else
+      setDatabase(database);     // What purpose does this serve?
 }
 
 
@@ -866,10 +865,23 @@ void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &ext
    EditorObject *eObj = dynamic_cast<EditorObject *>(object);
    TNLAssert(eObj, "Bad cast!");
 
-   Parent::addToDatabase(object, extents);
+   Vector<EditorObject *> objects;
+   objects.push_back(eObj);
 
-   if(eObj)
-      mAllEditorObjects.push_back(eObj);
+   addToDatabase(objects);
+}
+
+
+// Add items in bulk to avoid resorting after each of a dozen or two objects are added
+void EditorObjectDatabase::addToDatabase(const Vector<EditorObject *> &objects)
+{
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      objects[i]->setDatabase(this);
+
+      Parent::addToDatabase(objects[i], objects[i]->getExtent());
+      mAllEditorObjects.push_back(objects[i]);
+   }
 
    geomSort(mAllEditorObjects);
 }

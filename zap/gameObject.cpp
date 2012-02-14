@@ -397,7 +397,8 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
    TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
 
    mGame = game;
-   addToDatabase(database);
+   if(database)
+      addToDatabase(database);
 }
 
 

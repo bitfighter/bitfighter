@@ -117,8 +117,6 @@ private:
    Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
-   Vector<Point> mOriginalVertLocations;
-
 
    boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;
 
@@ -129,6 +127,8 @@ private:
    U32 mFirstUndoIndex;
    U32 mLastUndoIndex;
    U32 mLastRedoIndex;
+
+   bool mDragCopying;
    bool mRedoingAnUndo;
 
    static const U32 UNDO_STATES = 128;
@@ -244,6 +244,8 @@ private:
    void showCouldNotFindScriptMessage(const string &scriptName);
 
    EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
+   void translateSelectedItems(EditorObjectDatabase *database, const Point &offset);
+
 
    void render();
    void renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);

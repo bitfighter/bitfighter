@@ -227,13 +227,13 @@ void LuaRobot::setEnums(lua_State *L)
    setEnumName(ForceFieldTypeNumber, "ForceFieldType");
    setEnumName(ForceFieldProjectorTypeNumber, "ForceFieldProjectorType");
    setEnumName(SpeedZoneTypeNumber, "SpeedZoneType");
-   setEnumName(PolyWallTypeNumber, "PolyWallType");
+   setEnumName(PolyWallTypeNumber, "PolyWallType");            // a little unsure about this one         
    setEnumName(ShipSpawnTypeNumber, "ShipSpawnType");
    setEnumName(FlagSpawnTypeNumber, "FlagSpawnType");
    setEnumName(AsteroidSpawnTypeNumber, "AsteroidSpawnType");
-   setEnumName(WallItemTypeNumber, "WallItemType");
-   setEnumName(WallEdgeTypeNumber, "WallEdgeType");
-   setEnumName(WallSegmentTypeNumber, "WallSegmentType");
+   setEnumName(WallItemTypeNumber, "WallItemType");            // a little unsure about this one
+   setEnumName(WallEdgeTypeNumber, "WallEdgeType");            // not at all sure about this one
+   setEnumName(WallSegmentTypeNumber, "WallSegmentType");      // not at all sure about this one
    setEnumName(SlipZoneTypeNumber, "SlipZoneType");
    setEnumName(SpyBugTypeNumber, "SpyBugType");
    setEnumName(CoreTypeNumber, "CoreType");
@@ -258,6 +258,7 @@ void LuaRobot::setEnums(lua_State *L)
 
    // Game Types
    setEnum(BitmatchGame);
+   setEnum(CoreGame);
    setEnum(CTFGame);
    setEnum(HTFGame);
    setEnum(NexusGame);
@@ -265,7 +266,6 @@ void LuaRobot::setEnums(lua_State *L)
    setEnum(RetrieveGame);
    setEnum(SoccerGame);
    setEnum(ZoneControlGame);
-   setEnum(CoreGame);
 
    // Scoring Events
    setGTEnum(KillEnemy);

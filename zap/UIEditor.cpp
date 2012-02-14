@@ -1093,6 +1093,7 @@ void EditorUserInterface::onActivate()
    mDraggingDockItem = NULL;
    mCurrentTeam = 0;
    mPreviewMode = false;
+   mDragCopying = false;
    entryMode = EntryNone;
 
    SDL_SetCursor(Cursor::getDefault());
@@ -1672,6 +1673,8 @@ void EditorUserInterface::renderItemInfoPanel()
       glColor(Colors::white);
       drawString(xpos, ypos, upperLineTextSize, hoverText.c_str());
    }
+
+   drawStringf(10,550,25,"Undo steps: %d", this->mLastUndoIndex);     //{P{P
 }
 
 
@@ -2148,8 +2151,8 @@ void EditorUserInterface::copySelection()
    {
       if(objList->get(i)->isSelected())
       {
-         EditorObject *newItem =  objList->get(i)->copy();   
-         newItem->setSelected(false);
+         EditorObject *newObject =  objList->get(i)->copy();   
+         newObject->setSelected(false);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
          {
@@ -2157,7 +2160,7 @@ void EditorUserInterface::copySelection()
             alreadyCleared = true;
          }
 
-         mClipboard.push_back(boost::shared_ptr<EditorObject>(newItem));
+         mClipboard.push_back(boost::shared_ptr<EditorObject>(newObject));
       }
    }
 }
@@ -2171,9 +2174,9 @@ void EditorUserInterface::pasteSelection()
    if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
       return;
 
-   S32 itemCount = mClipboard.size();
+   S32 objCount = mClipboard.size();
 
-    if(itemCount == 0)        // Nothing on clipboard, nothing to do
+    if(objCount == 0)         // Nothing on clipboard, nothing to do
       return;
 
    saveUndoState();           // So we can undo the paste
@@ -2185,19 +2188,27 @@ void EditorUserInterface::pasteSelection()
    Point firstPoint = mClipboard[0]->getVert(0);
    Point offset;
 
-   for(S32 i = 0; i < itemCount; i++)
+   Vector<EditorObject *> copiedObjects;
+
+   for(S32 i = 0; i < objCount; i++)
    {
       offset = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
-
-      // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
-      newObject->addToGame(getGame(), database);
-
       newObject->setSelected(true);
       newObject->moveTo(pos - offset);
-      newObject->onGeomChanged();                                          
+
+      // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
+      newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below
+
+      copiedObjects.push_back(newObject);
    }
+
+   getDatabase()->addToDatabase(copiedObjects);
+      
+   for(S32 i = 0; i < copiedObjects.size(); i++)   
+      copiedObjects[i]->onGeomChanged();
+   
 
    onSelectionChanged();
 
@@ -2669,13 +2680,13 @@ void EditorUserInterface::onMouseDragged()
 
    bool needToSaveUndoState = true;
 
-   if(mDraggingDockItem != NULL)      // We just started dragging an item off the dock
+   if(mDraggingDockItem != NULL)    // We just started dragging an item off the dock
    {
        startDraggingDockItem();  
        needToSaveUndoState = false;
    }
 
-   findSnapVertex();    // Sets mSnapObject and mSnapVertexIndex
+   findSnapVertex();                // Sets mSnapObject and mSnapVertexIndex
 
    if(!mSnapObject || mSnapVertexIndex == NONE)
       return;
@@ -2683,29 +2694,69 @@ void EditorUserInterface::onMouseDragged()
    
    if(!mDraggingObjects)            // Just started dragging
    {
+      if(needToSaveUndoState)
+         saveUndoState(); 
+
       mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
-      mOriginalVertLocations.clear();
 
       const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
 
-      for(S32 i = 0; i < objList->size(); i++)
+      if(InputCodeManager::getState(KEY_ALT))     // Ctrl+Drag ==> copy and drag
       {
-         EditorObject *obj = objList->get(i);
+         Vector<EditorObject *> copiedObjects;
 
-         if(obj->isSelected() || obj->anyVertsSelected())
-            for(S32 j = 0; j < obj->getVertCount(); j++)
-               if(obj->isSelected() || obj->vertSelected(j))
-                  mOriginalVertLocations.push_back(obj->getVert(j));
+         for(S32 i = 0; i < objList->size(); i++)
+         {
+            EditorObject *obj = objList->get(i);
+
+            if(obj->isSelected())
+            {
+               EditorObject *newObject =  objList->get(i)->copy();   
+               newObject->setSelected(true);
+               
+               copiedObjects.push_back(newObject);
+
+               // Make mHitItem be the new copy of the old mHitItem
+               if(mHitItem == obj)
+                  mHitItem = newObject;
+
+               if(mSnapObject == obj)
+                  mSnapObject = newObject;
+            }
+         }
+
+         mDragCopying = true;
+
+         // Now mark source objects as unselected
+         for(S32 i = 0; i < objList->size(); i++)
+         {
+            objList->get(i)->setSelected(false);
+            objList->get(i)->setLitUp(false);
+         }
+
+         // Now add copied objects to our database; these were marked as selected when they were created
+         // Objects are already "in the game" (because mGame doesn't get reset when object is copied), but need to be explicitly added to the database
+         //for(S32 i = 0; i < copiedObjects.size(); i++)
+         //   copiedObjects[i]->addToDatabase(getDatabase());   
+
+         getDatabase()->addToDatabase(copiedObjects);
+
+         for(S32 i = 0; i < copiedObjects.size(); i++)   
+            copiedObjects[i]->onGeomChanged();
+
+         //findSnapVertex();       // Rerun this so our snap item is one of the new items we just copied
+
+         TNLAssert(mSnapObject, "Need mSnapObject to be set, or we'll crash below!");
       }
 
-      if(needToSaveUndoState)
-         saveUndoState();
+      mDraggingObjects = true; 
+      mSnapDelta.set(0,0);
    }
 
-   mDraggingObjects = true;
+
    SDL_SetCursor(Cursor::getSpray());
 
-
+   Point lastSnapDelta = mSnapDelta;
    // The thinking here is that for large items -- walls, polygons, etc., we may grab an item far from its snap vertex, and we
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
@@ -2714,9 +2765,14 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-
    // Update coordinates of dragged item
-   const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
+   translateSelectedItems(getDatabase(), mSnapDelta - lastSnapDelta);
+}
+
+
+void EditorUserInterface::translateSelectedItems(EditorObjectDatabase *database, const Point &offset)
+{
+   const Vector<EditorObject *> *objList = database->getObjectList();
 
    S32 count = 0;
 
@@ -2726,10 +2782,13 @@ void EditorUserInterface::onMouseDragged()
 
       if(obj->isSelected() || obj->anyVertsSelected())
       {
+         Point newVert;    // Reusable container
+
          for(S32 j = 0; j < obj->getVertCount(); j++)
             if(obj->isSelected() || obj->vertSelected(j))
             {
-               obj->setVert(mOriginalVertLocations[count] + mSnapDelta, j);
+               newVert = obj->getVert(j) + offset;
+               obj->setVert(newVert, j);
                count++;
             }
 
@@ -4028,7 +4087,7 @@ void EditorUserInterface::onFinishedDragging()
    if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
    {
       // If our snap vertex has moved then all selected items have moved
-      bool itemsMoved = mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
+      bool itemsMoved = mDragCopying || mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
 
       if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
       {
@@ -4040,6 +4099,8 @@ void EditorUserInterface::onFinishedDragging()
 
          setNeedToSave(true);
          autoSave();
+
+         mDragCopying = false;
 
          return;
       }
