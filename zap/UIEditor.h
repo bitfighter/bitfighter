@@ -129,6 +129,7 @@ private:
    U32 mLastRedoIndex;
 
    bool mDragCopying;
+   bool mJustInsertedVertex;
    bool mRedoingAnUndo;
 
    static const U32 UNDO_STATES = 128;

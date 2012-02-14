@@ -1094,6 +1094,7 @@ void EditorUserInterface::onActivate()
    mCurrentTeam = 0;
    mPreviewMode = false;
    mDragCopying = false;
+   mJustInsertedVertex = false;
    entryMode = EntryNone;
 
    SDL_SetCursor(Cursor::getDefault());
@@ -1515,6 +1516,8 @@ void EditorUserInterface::renderDock()
    drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
                   canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
                   Colors::black, (mouseOnDock() ? Colors::yellow : Colors::white));
+
+   drawStringf(100,100,20,"UNDO STEPS %d", mLastUndoIndex); //{P{P
 }
 
 
@@ -2663,7 +2666,17 @@ void EditorUserInterface::onMouseDragged()
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting)
       return;
 
+   findSnapVertex();                // Sets mSnapObject and mSnapVertexIndex
+
+   if(!mSnapObject || mSnapVertexIndex == NONE)
+      return;
+
+
    bool needToSaveUndoState = true;
+
+   // I assert we never need to save an input state here if we are right-mouse dragging
+   if(InputCodeManager::getState(MOUSE_RIGHT))
+      needToSaveUndoState = false;
 
    if(mDraggingDockItem != NULL)    // We just started dragging an item off the dock
    {
@@ -2671,12 +2684,6 @@ void EditorUserInterface::onMouseDragged()
        needToSaveUndoState = false;
    }
 
-   findSnapVertex();                // Sets mSnapObject and mSnapVertexIndex
-
-   if(!mSnapObject || mSnapVertexIndex == NONE)
-      return;
-   
-   
    if(!mDraggingObjects)            // Just started dragging
    {
       if(needToSaveUndoState)
@@ -3560,21 +3567,21 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mIn = true;
    else if(inputString == "Ctrl+Down Arrow")    // Zoom out
       mOut = true;
-   else if(inputString == "Down Arrow")   // Pan down
+   else if(inputString == "Down Arrow")         // Pan down
       mDown = true;
-   else if(inputString == "Ctrl+S")       // Save
+   else if(inputString == "Ctrl+S")             // Save
       saveLevel(true, true);
-   else if(inputString == "S"|| inputString == "Shift+S")            // Pan down
+   else if(inputString == "S"|| inputString == "Shift+S")                  // Pan down
       mDown = true;
    else if(inputString == "Left Arrow" || inputString == "A"|| inputString == "Shift+A")   // Left or A - Pan left
       mLeft = true;
-   else if(inputString == "Shift+=" || inputString == "Shift+Keypad +")      // Shifted - Increase barrier width by 1
+   else if(inputString == "Shift+=" || inputString == "Shift+Keypad +")    // Shifted - Increase barrier width by 1
       changeBarrierWidth(1);
-   else if(inputString == "=" || inputString == "Keypad +")            // Unshifted + --> by 5
+   else if(inputString == "=" || inputString == "Keypad +")                // Unshifted + --> by 5
       changeBarrierWidth(5);
-   else if(inputString == "Shift+-" || inputString == "Shift+Keypad -")      // Shifted - Decrease barrier width by 1
+   else if(inputString == "Shift+-" || inputString == "Shift+Keypad -")    // Shifted - Decrease barrier width by 1
       changeBarrierWidth(-1);
-   else if(inputString == "-" || inputString == "Keypad -")            // Unshifted --> by 5
+   else if(inputString == "-" || inputString == "Keypad -")                // Unshifted --> by 5
       changeBarrierWidth(-5);
    else if(inputString == "E")            // Zoom In
       mIn = true;
@@ -3661,6 +3668,7 @@ void EditorUserInterface::onMouseClicked_left()
 
    mDraggingDockItem = NULL;
    mMousePos.set(gScreenInfo.getMousePos());
+   mJustInsertedVertex = false;
 
    if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
    {
@@ -3805,6 +3813,7 @@ void EditorUserInterface::onMouseClicked_right()
       // Insert an extra vertex at the mouse clicked point, and then select it
       mHitItem->insertVert(newVertex, mEdgeHit + 1);
       mHitItem->selectVert(mEdgeHit + 1);
+      mJustInsertedVertex = true;
 
       // Alert the item that its geometry is changing
       mHitItem->onGeomChanging();
@@ -4014,10 +4023,10 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
          {
             if(mAddingVertex)
             {
-               deleteUndoState();
+               //deleteUndoState();
                mAddingVertex = false;
             }
-
+            
             onFinishedDragging();
          }
 
@@ -4096,8 +4105,10 @@ void EditorUserInterface::onFinishedDragging()
 
          return;
       }
-      else     // We started our move, then didn't end up moving anything... remove associated undo state
+      else if(!mJustInsertedVertex)    // We started our move, then didn't end up moving anything... remove associated undo state
          deleteUndoState();
+      else
+         mJustInsertedVertex = false;
    }
 }
 
