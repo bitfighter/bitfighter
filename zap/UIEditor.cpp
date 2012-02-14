@@ -3794,7 +3794,20 @@ void EditorUserInterface::onMouseClicked_right()
       return;
    }
 
+
+   // Select item so when we undo, it will be selected, which looks better
+   bool unselHitItem = false;
+   if(mHitItem && !mHitItem->isSelected())
+   {
+      mHitItem->setSelected(true);
+      unselHitItem = true;
+   }
+
    saveUndoState();                 // Save undo state before we clear the selection
+
+   if(unselHitItem)
+      mHitItem->setSelected(false);
+
    clearSelection(getDatabase());   // Unselect anything currently selected
    onSelectionChanged();
 
