@@ -2685,7 +2685,20 @@ void EditorUserInterface::onMouseDragged()
    if(!mDraggingObjects)            // Just started dragging
    {
       if(needToSaveUndoState)
-         saveUndoState(); 
+      {
+         // Select item so when we undo, it will be selected, which looks better
+         bool unselHitItem = false;
+         if(mHitItem && !mHitItem->isSelected())
+         {
+            mHitItem->setSelected(true);
+            unselHitItem = true;
+         }
+
+         saveUndoState();                 // Save undo state before we clear the selection
+
+         if(unselHitItem)
+            mHitItem->setSelected(false);
+      }
 
       mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
 
