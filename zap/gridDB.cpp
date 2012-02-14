@@ -559,18 +559,6 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void DatabaseObject::addToDatabase(GridDatabase *database)
-{
-   if(mDatabase)     // This object is already in a database!
-      return;
-
-   if(isDatabasable())
-      database->addToDatabase(this, mExtent);
-   else
-      setDatabase(database);     // What purpose does this serve?
-}
-
-
 void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
 {
    if(mDatabase)
@@ -578,6 +566,18 @@ void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
 
    mExtent = extent;
    addToDatabase(database);
+}
+
+
+void DatabaseObject::addToDatabase(GridDatabase *database)
+{
+   if(mDatabase)              // This object is already in a database!
+      return;
+
+   if(isDatabasable())
+      database->addToDatabase(this, mExtent);
+
+   setDatabase(database);     // What purpose does this serve for non-databasable objects?
 }
 
 

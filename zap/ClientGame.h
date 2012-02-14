@@ -124,8 +124,8 @@ public:
 
    bool getInCommanderMap();
    void setInCommanderMap(bool inCommanderMap);
-
    F32 getCommanderZoomFraction() const;
+
    Point worldToScreenPoint(const Point *p) const;
    void drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent);
 

@@ -54,8 +54,12 @@ XXX need to document timers, new luavec stuff XXX
 
 <h2>Other enhancements</h2>
 <ul>
+<li>Ctrl+left-click no longer translates to right-click on Windows or Linux
+<li>Can drag & copy in the editor with ctrl+drag (meta+drag on OSX)
+<lI>Editor performance gains when copying large numbers of objects
 <li>Can now use variable substitution in chat messages; designed primarily for bots, ideal for explaining how to do something
     Use %XXX% where XXX can be the name of a keybinding (get the names from the INI), or %playerName%.  Vars are case insensitive.
+    
 </ul>
 
 <h2>Bug fixes</h2>

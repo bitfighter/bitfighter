@@ -1673,8 +1673,6 @@ void EditorUserInterface::renderItemInfoPanel()
       glColor(Colors::white);
       drawString(xpos, ypos, upperLineTextSize, hoverText.c_str());
    }
-
-   drawStringf(10,550,25,"Undo steps: %d", this->mLastUndoIndex);     //{P{P
 }
 
 
@@ -2143,26 +2141,13 @@ void EditorUserInterface::copySelection()
    if(!anyItemsSelected(database))
       return;
 
-   bool alreadyCleared = false;
+   mClipboard.clear();     
 
    const Vector<EditorObject *> *objList = database->getObjectList();
 
    for(S32 i = 0; i < objList->size(); i++)
-   {
       if(objList->get(i)->isSelected())
-      {
-         EditorObject *newObject =  objList->get(i)->copy();   
-         newObject->setSelected(false);
-
-         if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
-         {
-            mClipboard.clear();
-            alreadyCleared = true;
-         }
-
-         mClipboard.push_back(boost::shared_ptr<EditorObject>(newObject));
-      }
-   }
+         mClipboard.push_back(boost::shared_ptr<EditorObject>(objList->get(i)->copy()));
 }
 
 
@@ -2181,22 +2166,22 @@ void EditorUserInterface::pasteSelection()
 
    saveUndoState();           // So we can undo the paste
 
-   clearSelection(database);  // Only the pasted items should be selected
+   clearSelection(database);  // Only the pasted items should be selected when we're done
 
-   Point pos = snapPoint(database, convertCanvasToLevelCoord(mMousePos));
+   Point pastePos = snapPoint(database, convertCanvasToLevelCoord(mMousePos));
 
    Point firstPoint = mClipboard[0]->getVert(0);
-   Point offset;
+   Point offsetFromFirstPoint;
 
    Vector<EditorObject *> copiedObjects;
 
    for(S32 i = 0; i < objCount; i++)
    {
-      offset = firstPoint - mClipboard[i]->getVert(0);
+      offsetFromFirstPoint = firstPoint - mClipboard[i]->getVert(0);
 
       EditorObject *newObject = mClipboard[i]->newCopy();
       newObject->setSelected(true);
-      newObject->moveTo(pos - offset);
+      newObject->moveTo(pastePos - offsetFromFirstPoint);
 
       // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
       newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below
@@ -2701,7 +2686,13 @@ void EditorUserInterface::onMouseDragged()
 
       const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
 
-      if(InputCodeManager::getState(KEY_ALT))     // Ctrl+Drag ==> copy and drag
+#ifdef TNL_OS_MAC_OSX 
+      bool ctrlDown = InputCodeManager::getState(KEY_META);
+#else
+      bool ctrlDown = InputCodeManager::getState(KEY_CTRL);
+#endif
+
+      if(ctrlDown)     // Ctrl+Drag ==> copy and drag (except for Mac)
       {
          Vector<EditorObject *> copiedObjects;
 
@@ -2711,8 +2702,9 @@ void EditorUserInterface::onMouseDragged()
 
             if(obj->isSelected())
             {
-               EditorObject *newObject =  objList->get(i)->copy();   
+               EditorObject *newObject =  obj->newCopy();   
                newObject->setSelected(true);
+               newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below
                
                copiedObjects.push_back(newObject);
 
@@ -2735,20 +2727,14 @@ void EditorUserInterface::onMouseDragged()
          }
 
          // Now add copied objects to our database; these were marked as selected when they were created
-         // Objects are already "in the game" (because mGame doesn't get reset when object is copied), but need to be explicitly added to the database
-         //for(S32 i = 0; i < copiedObjects.size(); i++)
-         //   copiedObjects[i]->addToDatabase(getDatabase());   
-
          getDatabase()->addToDatabase(copiedObjects);
 
+         // Running onGeomChanged causes any copied walls to have a full body while we're dragging them 
          for(S32 i = 0; i < copiedObjects.size(); i++)   
-            copiedObjects[i]->onGeomChanged();
-
-         //findSnapVertex();       // Rerun this so our snap item is one of the new items we just copied
-
-         TNLAssert(mSnapObject, "Need mSnapObject to be set, or we'll crash below!");
+            copiedObjects[i]->onGeomChanged(); 
       }
 
+      onSelectionChanged();
       mDraggingObjects = true; 
       mSnapDelta.set(0,0);
    }
@@ -3503,187 +3489,16 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       return true;
    }
 
-   // Ctrl-left click is same as right click for Mac users
-   else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && InputCodeManager::checkModifier(KEY_CTRL)))
-   {
-      if(InputCodeManager::getState(MOUSE_LEFT) && !InputCodeManager::checkModifier(KEY_CTRL))  // Prevent weirdness
-         return true;  
+#ifdef TNL_OS_MAC_OSX 
+      // Ctrl-left click is same as right click for Mac users
+      else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && InputCodeManager::checkModifier(KEY_CTRL)))
+#else
+      else if(inputCode == MOUSE_RIGHT)
+#endif
+      onMouseClicked_right();
 
-      mMousePos.set(gScreenInfo.getMousePos());
-
-      if(mCreatingPoly || mCreatingPolyline)
-      {
-         if(mNewItem->getVertCount() < gMaxPolygonPoints)            // Limit number of points in a polygon/polyline
-         {
-            mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
-            mNewItem->onGeomChanging();
-         }
-         
-         return true;
-      }
-
-      saveUndoState();                 // Save undo state before we clear the selection
-      clearSelection(getDatabase());   // Unselect anything currently selected
-      onSelectionChanged();
-
-      // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
-      if(mEdgeHit != NONE && mHitItem && (mHitItem->getGeomType() == geomPolyLine || mHitItem->getGeomType() >= geomPolygon))
-      {
-         if(mHitItem->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
-            return true;
-
-         Point newVertex = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
-
-         mAddingVertex = true;
-
-         // Insert an extra vertex at the mouse clicked point, and then select it
-         mHitItem->insertVert(newVertex, mEdgeHit + 1);
-         mHitItem->selectVert(mEdgeHit + 1);
-
-         // Alert the item that its geometry is changing
-         mHitItem->onGeomChanging();
-
-         mMouseDownPos = newVertex;
-      }
-      else     // Start creating a new poly or new polyline (tilde key + right-click ==> start polyline)
-      { 
-         // Was KEY_TILDE, but SDL reports this key as KEY_BACKQUOTE, at least on US American keyboards
-         if(InputCodeManager::getState(KEY_BACKQUOTE))     
-         {
-            mCreatingPolyline = true;
-            mNewItem = new LineItem();
-         }
-         else
-         {
-            mCreatingPoly = true;
-            mNewItem = new WallItem();
-         }
-
-         mNewItem->initializeEditor();
-         mNewItem->setTeam(mCurrentTeam);
-         mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
-      }
-   }
    else if(inputCode == MOUSE_LEFT)
-   {
-      if(InputCodeManager::getState(MOUSE_RIGHT))        // Prevent weirdness
-         return true;
-
-      mDraggingDockItem = NULL;
-      mMousePos.set(gScreenInfo.getMousePos());
-
-      if(mCreatingPoly || mCreatingPolyline)    // Save any polygon/polyline we might be creating
-      {
-         //saveUndoState();                       // Save state prior to addition of new polygon
-
-         if(mNewItem->getVertCount() < 2)
-         {
-            delete mNewItem;
-            removeUndoState();
-         }
-         else
-         {
-            mNewItem->addToEditor(getGame(), getDatabase());
-            mNewItem->onGeomChanged();          // Walls need to be added to editor BEFORE onGeomChanged() is run!
-         }
-
-         mNewItem = NULL;
-
-         mCreatingPoly = false;
-         mCreatingPolyline = false;
-      }
-
-      mMouseDownPos = convertCanvasToLevelCoord(mMousePos);
-
-      if(mouseOnDock())    // On the dock?  Did we hit something to start dragging off the dock?
-      {
-         clearSelection(getDatabase());
-         mDraggingDockItem = mDockItemHit;
-         SDL_SetCursor(Cursor::getSpray());
-      }
-      else                 // Mouse is not on dock
-      {
-         mDraggingDockItem = NULL;
-         SDL_SetCursor(Cursor::getDefault());
-
-         // rules for mouse down:
-         // if the click has no shift- modifier, then
-         //   if the click was on something that was selected
-         //     do nothing
-         //   else
-         //     clear the selection
-         //     add what was clicked to the selection
-         //  else
-         //    toggle the selection of what was clicked
-
-         if(!InputCodeManager::checkModifier(KEY_SHIFT))    // ==> Shift key is not down
-         {
-            // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
-            // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
-            if(mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
-            {
-               clearSelection(getDatabase());
-               mHitItem->selectVert(mHitVertex);
-               onSelectionChanged();
-            }
-
-            if(mHitItem && mHitItem->isSelected())    // Hit an already selected item -- maybe we have several items selected, so clear and reselect
-            {
-               // Actually, don't clear and reselect because it is much better to let someone drag a group of items that's already been selected
-               //clearSelection(getDatabase());
-               //mHitItem->setSelected(true);
-               //onSelectionChanged();
-            }
-            else if(mHitItem && mHitItem->getGeomType() == geomPoint)  // Hit a point item
-            {
-               clearSelection(getDatabase());
-               mHitItem->setSelected(true);
-               onSelectionChanged();
-            }
-            else if(mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
-            {        // (braces required)
-               if(!(mHitItem->vertSelected(mHitVertex)))
-               {
-                  clearSelection(getDatabase());
-                  mHitItem->selectVert(mHitVertex);
-                  onSelectionChanged();
-               }
-            }
-            else if(mHitItem)                                                          // Hit a non-point item, but not a vertex
-            {
-               clearSelection(getDatabase());
-               mHitItem->setSelected(true);
-               onSelectionChanged();
-            }
-            else     // Clicked off in space.  Starting to draw a bounding rectangle?
-            {
-               mDragSelecting = true;
-               clearSelection(getDatabase());
-               onSelectionChanged();
-            }
-         }
-         else                             // ==> Shift key is down
-         {
-            if(!mHitItem && mHitVertex != NONE)                   // If mHitItem is not NULL, we may have hit a point object
-            {
-               if(mHitItem->vertSelected(mHitVertex))
-                  mHitItem->unselectVert(mHitVertex);
-               else
-                  mHitItem->aselectVert(mHitVertex);
-            }
-            else if(mHitItem)
-            {
-               mHitItem->setSelected(!mHitItem->isSelected());    // Toggle selection of hit item
-               onSelectionChanged();
-            }
-            else
-               mDragSelecting = true;
-         }
-     }     // end mouse not on dock block, doc
-
-     findSnapVertex();     // Update snap vertex in the event an item was selected
-
-   }     // end if inputCode == MOUSE_LEFT
+      onMouseClicked_left();
 
    // Neither mouse button, let's try some keys
    else if(inputString == "D"|| inputString == "Shift+D")            // Pan right
@@ -3836,6 +3651,183 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
 
    return true;
+}
+
+
+void EditorUserInterface::onMouseClicked_left()
+{
+   if(InputCodeManager::getState(MOUSE_RIGHT))  // Prevent weirdness
+      return;
+
+   mDraggingDockItem = NULL;
+   mMousePos.set(gScreenInfo.getMousePos());
+
+   if(mCreatingPoly || mCreatingPolyline)       // Save any polygon/polyline we might be creating
+   {
+      if(mNewItem->getVertCount() < 2)
+      {
+         delete mNewItem;
+         removeUndoState();
+      }
+      else
+      {
+         mNewItem->addToEditor(getGame(), getDatabase());
+         mNewItem->onGeomChanged();             // Add walls BEFORE onGeomChanged() is run!
+      }
+
+      mNewItem = NULL;
+
+      mCreatingPoly = false;
+      mCreatingPolyline = false;
+   }
+
+   mMouseDownPos = convertCanvasToLevelCoord(mMousePos);
+
+   if(mouseOnDock())    // On the dock?  Did we hit something to start dragging off the dock?
+   {
+      clearSelection(getDatabase());
+      mDraggingDockItem = mDockItemHit;
+      SDL_SetCursor(Cursor::getSpray());
+   }
+   else                 // Mouse is not on dock
+   {
+      mDraggingDockItem = NULL;
+      SDL_SetCursor(Cursor::getDefault());
+
+      // rules for mouse down:
+      // if the click has no shift- modifier, then
+      //   if the click was on something that was selected
+      //     do nothing
+      //   else
+      //     clear the selection
+      //     add what was clicked to the selection
+      //  else
+      //    toggle the selection of what was clicked
+
+      if(InputCodeManager::checkModifier(KEY_SHIFT))  // ==> Shift key is down
+      {
+         if(!mHitItem && mHitVertex != NONE)                   // If mHitItem is not NULL, we may have hit a point object
+         {
+            if(mHitItem->vertSelected(mHitVertex))
+               mHitItem->unselectVert(mHitVertex);
+            else
+               mHitItem->aselectVert(mHitVertex);
+         }
+         else if(mHitItem)
+         {
+            mHitItem->setSelected(!mHitItem->isSelected());    // Toggle selection of hit item
+            onSelectionChanged();
+         }
+         else
+            mDragSelecting = true;
+      }
+      else                                            // ==> Shift key is NOT down
+      {
+         // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection.
+         // Note that in the case of a point item, we want to skip this step, as we don't select individual vertices.
+         if(mHitVertex != NONE && mHitItem && mHitItem->isSelected() && mHitItem->getGeomType() != geomPoint)
+         {
+            clearSelection(getDatabase());
+            mHitItem->selectVert(mHitVertex);
+            onSelectionChanged();
+         }
+
+         if(mHitItem && mHitItem->isSelected())    // Hit an already selected item
+         {
+            // Do nothing so user can drag a group of items that's already been selected
+         }
+         else if(mHitItem && mHitItem->getGeomType() == geomPoint)  // Hit a point item
+         {
+            clearSelection(getDatabase());
+            mHitItem->setSelected(true);
+            onSelectionChanged();
+         }
+         else if(mHitVertex != NONE && (mHitItem && !mHitItem->isSelected()))      // Hit a vertex of an unselected item
+         {        // (braces required)
+            if(!(mHitItem->vertSelected(mHitVertex)))
+            {
+               clearSelection(getDatabase());
+               mHitItem->selectVert(mHitVertex);
+               onSelectionChanged();
+            }
+         }
+         else if(mHitItem)                                                          // Hit a non-point item, but not a vertex
+         {
+            clearSelection(getDatabase());
+            mHitItem->setSelected(true);
+            onSelectionChanged();
+         }
+         else     // Clicked off in space.  Starting to draw a bounding rectangle?
+         {
+            mDragSelecting = true;
+            clearSelection(getDatabase());
+            onSelectionChanged();
+         }
+      }
+   }     // end mouse not on dock block, doc
+
+   findSnapVertex();     // Update snap vertex in the event an item was selected
+}
+
+
+void EditorUserInterface::onMouseClicked_right()
+{
+   if(InputCodeManager::getState(MOUSE_LEFT) && !InputCodeManager::checkModifier(KEY_CTRL))  // Prevent weirdness
+      return;  
+
+   mMousePos.set(gScreenInfo.getMousePos());
+
+   if(mCreatingPoly || mCreatingPolyline)
+   {
+      if(mNewItem->getVertCount() < gMaxPolygonPoints)            // Limit number of points in a polygon/polyline
+      {
+         mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+         mNewItem->onGeomChanging();
+      }
+         
+      return;
+   }
+
+   saveUndoState();                 // Save undo state before we clear the selection
+   clearSelection(getDatabase());   // Unselect anything currently selected
+   onSelectionChanged();
+
+   // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
+   if(mEdgeHit != NONE && mHitItem && (mHitItem->getGeomType() == geomPolyLine || mHitItem->getGeomType() >= geomPolygon))
+   {
+      if(mHitItem->getVertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
+         return;
+
+      Point newVertex = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos));   // adding vertex w/ right-mouse
+
+      mAddingVertex = true;
+
+      // Insert an extra vertex at the mouse clicked point, and then select it
+      mHitItem->insertVert(newVertex, mEdgeHit + 1);
+      mHitItem->selectVert(mEdgeHit + 1);
+
+      // Alert the item that its geometry is changing
+      mHitItem->onGeomChanging();
+
+      mMouseDownPos = newVertex;
+   }
+   else     // Start creating a new poly or new polyline (tilde key + right-click ==> start polyline)
+   { 
+      if(InputCodeManager::getState(KEY_BACKQUOTE))   // Tilde  
+      {
+         mCreatingPolyline = true;
+         mNewItem = new LineItem();
+      }
+      else
+      {
+         mCreatingPoly = true;
+         mNewItem = new WallItem();
+      }
+
+      mNewItem->initializeEditor();
+      mNewItem->setTeam(mCurrentTeam);
+      mNewItem->addVert(snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos)));
+   }
 }
 
 

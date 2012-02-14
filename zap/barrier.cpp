@@ -874,9 +874,7 @@ void WallSegment::init(GridDatabase *database, S32 owner)
 
    // Add item to database, set its extents.  Roughly equivalent to addToDatabase(database, Rect(corners))
    addToDatabase(database, Rect(mCorners));
-   setDatabase(database);
-   setExtent(Rect(mCorners));     // Adds item to databse
-
+   
    // Drawing filled wall requires that points be triangluated
    Triangulate::Process(mCorners, mTriangulatedFillPoints);    // ==> Fills mTriangulatedFillPoints
 

@@ -233,6 +233,9 @@ private:
    void onFinishedDragging();    // Called when we're done dragging an object
    void onSelectionChanged();    // Called when current selection has changed
 
+   void onMouseClicked_left();
+   void onMouseClicked_right();
+
    Point convertCanvasToLevelCoord(Point p);
    Point convertLevelToCanvasCoord(Point p, bool convert = true);
 
