@@ -544,28 +544,28 @@ const char *EditorObject::getVertLabel(S32 index)
 const char *EditorObject::getEditorHelpString()
 {
    TNLAssert(false, "getEditorHelpString method not implemented!");
-   return NULL;
+   return "getEditorHelpString method not implemented!";  // better then a NULL crash in non-debug mode or continuing past the Assert
 }
 
 
 const char *EditorObject::getPrettyNamePlural()
 {
    TNLAssert(false, "getPrettyNamePlural method not implemented!");
-   return NULL;
+   return "getPrettyNamePlural method not implemented!";
 }
 
 
 const char *EditorObject::getOnDockName()
 {
    TNLAssert(false, "getOnDockName method not implemented!");
-   return NULL;
+   return "getOnDockName method not implemented!";
 }
 
 
 const char *EditorObject::getOnScreenName()
 {
    TNLAssert(false, "getOnScreenName method not implemented!");
-   return NULL;
+   return "getOnScreenName method not implemented!";
 }
 
 
