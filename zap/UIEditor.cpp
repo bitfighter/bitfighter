@@ -280,12 +280,21 @@ void EditorUserInterface::deleteUndoState()
 
 
 // Save the current state of the editor objects for later undoing
-void EditorUserInterface::saveUndoState()
+void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
 {
    // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  
    // Our "no need to save" undo point is lost forever.
    if(mAllUndoneUndoLevel > mLastRedoIndex)     
       mAllUndoneUndoLevel = NONE;
+
+
+   // Select item so when we undo, it will be selected, which looks better
+   bool unselHitItem = false;
+   if(forceSelectionOfTargetObject && mHitItem && !mHitItem->isSelected())
+   {
+      mHitItem->setSelected(true);
+      unselHitItem = true;
+   }
 
 
    EditorObjectDatabase *eod = getDatabase();
@@ -310,6 +319,9 @@ void EditorUserInterface::saveUndoState()
    setNeedToSave(mAllUndoneUndoLevel != mLastUndoIndex);
    mRedoingAnUndo = false;
    mLastUndoStateWasBarrierWidthChange = false;
+
+   if(unselHitItem)
+      mHitItem->setSelected(false);
 }
 
 
@@ -2685,20 +2697,7 @@ void EditorUserInterface::onMouseDragged()
    if(!mDraggingObjects)            // Just started dragging
    {
       if(needToSaveUndoState)
-      {
-         // Select item so when we undo, it will be selected, which looks better
-         bool unselHitItem = false;
-         if(mHitItem && !mHitItem->isSelected())
-         {
-            mHitItem->setSelected(true);
-            unselHitItem = true;
-         }
-
-         saveUndoState();                 // Save undo state before we clear the selection
-
-         if(unselHitItem)
-            mHitItem->setSelected(false);
-      }
+         saveUndoState(true);                 // Save undo state before we clear the selection
 
       mMoveOrigin = mSnapObject->getVert(mSnapVertexIndex);
 
@@ -3807,19 +3806,7 @@ void EditorUserInterface::onMouseClicked_right()
       return;
    }
 
-
-   // Select item so when we undo, it will be selected, which looks better
-   bool unselHitItem = false;
-   if(mHitItem && !mHitItem->isSelected())
-   {
-      mHitItem->setSelected(true);
-      unselHitItem = true;
-   }
-
-   saveUndoState();                 // Save undo state before we clear the selection
-
-   if(unselHitItem)
-      mHitItem->setSelected(false);
+   saveUndoState(true);             // Save undo state before we clear the selection
 
    clearSelection(getDatabase());   // Unselect anything currently selected
    onSelectionChanged();
@@ -3839,7 +3826,7 @@ void EditorUserInterface::onMouseClicked_right()
       mHitItem->selectVert(mEdgeHit + 1);
       mJustInsertedVertex = true;
 
-      // Alert the item that its geometry is changing
+      // Alert the item that its geometry is changing -- needed by polygons so they can recompute their fill
       mHitItem->onGeomChanging();
 
       // The user might just insert a vertex and be done; in that case we'll need to rebuild the wall outlines to account
