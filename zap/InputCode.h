@@ -28,8 +28,11 @@
 
 #include "input.h"            // For InputMode enum
 #include "tnlVector.h"
-#include "Joystick.h"
 #include <string>
+
+#ifndef ZAP_DEDICATED
+#include "Joystick.h"
+#endif
 
 using namespace std;
 
@@ -52,7 +55,7 @@ private:
    InputMode mInputMode;             // Joystick or Keyboard
 
    BindingSet *mCurrentBindingSet;     
-   Vector<BindingSet> mBindingSets;
+   TNL::Vector<BindingSet> mBindingSets;
 
 public:
    enum JoystickJoysticks {
@@ -119,8 +122,10 @@ public:
    // Some converters
    InputCode filterInputCode(InputCode inputCode);    // Calls filters below
 
+#ifndef ZAP_DEDICATED
    static InputCode joyHatToInputCode(int hatDirectionMask);
    static InputCode joystickButtonToInputCode(Joystick::Button button);
+#endif
 
    static InputCode convertJoystickToKeyboard(InputCode inputCode);
 private:

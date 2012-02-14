@@ -171,13 +171,16 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = ((GameConnection *) theConnection)->getClientGame();
    TNLAssert(clientGame, "Should only be client here!");
 
-#ifndef ZAP_DEDICATED
    addToGame(clientGame, clientGame->getGameObjDatabase());
-#endif
    return true;
+#else
+   TNLAssert(false, "Should only be client here!");
+   return false;
+#endif
 }
 
 
