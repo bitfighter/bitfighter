@@ -32,6 +32,8 @@
 
 namespace TNL {
 
+#define TNL_ENABLE_ASSERTS
+
 #ifdef TNL_ENABLE_ASSERTS
 
 #ifdef WIN32
@@ -52,9 +54,14 @@ static bool displayMessageBox(const char *title, const char *message, bool retry
 }   
 
 //--------------------------------------
+
 void Assert::processAssert(const char *filename, U32 lineNumber, const char  *message)
 {
-   processing = true;
+
+	logprintf(TNL::LogConsumer::LogError, "Assert: %s in %s line %u", message, filename, lineNumber);
+
+#ifdef WIN32
+   processing = true;  // only windows appears to have message box implemented, see platform.cpp
 
    char buffer[2048];
    dSprintf(buffer, sizeof(buffer), "Fatal: (%s: %ld)", filename, lineNumber);
@@ -62,12 +69,13 @@ void Assert::processAssert(const char *filename, U32 lineNumber, const char  *me
    // In debug versions, allow a retry even for ISVs...
    bool retry = displayMessageBox(buffer, message, true);
 #else
-   bool retry = displayMessageBox(buffer, message, ((assertType == Fatal) ? true : false) );
+   bool retry = displayMessageBox(buffer, message, (assertType == Fatal) );
 #endif
    if (!retry)
       Platform::forceQuit();
 
    processing = false;
+#endif
 }
 
 bool Assert::processingAssert()
