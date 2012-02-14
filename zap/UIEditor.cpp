@@ -1516,8 +1516,6 @@ void EditorUserInterface::renderDock()
    drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
                   canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
                   Colors::black, (mouseOnDock() ? Colors::yellow : Colors::white));
-
-   drawStringf(100,100,20,"UNDO STEPS %d", mLastUndoIndex); //{P{P
 }
 
 
@@ -3817,6 +3815,11 @@ void EditorUserInterface::onMouseClicked_right()
 
       // Alert the item that its geometry is changing
       mHitItem->onGeomChanging();
+
+      // The user might just insert a vertex and be done; in that case we'll need to rebuild the wall outlines to account
+      // for the new vertex.  If the user continues to drag the vertex to a new location, this will be wasted effort...
+      mHitItem->onGeomChanged();
+
 
       mMouseDownPos = newVertex;
    }
