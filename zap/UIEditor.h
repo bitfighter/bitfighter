@@ -201,9 +201,12 @@ private:
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    //S32 countSelectedVerts();
-   bool anyItemsSelected(EditorObjectDatabase *database);      // Are any items selected?
-   bool anythingSelected();      // Are any items/vertices selected?
+   bool anyItemsSelected(EditorObjectDatabase *database);   // Are any items selected?
+   bool anythingSelected();                                 // Are any items/vertices selected?
+public:
+   S32 getItemSelectedCount();                              // How many are objects are selected?
 
+private:
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
    void findHitItemAndEdge();                         
    bool checkForVertexHit(EditorObject *object);     
@@ -370,8 +373,6 @@ public:
    Point snapPointToLevelGrid(Point const &p);
 
    bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
-
-   S32 getItemSelectedCount();      // How many are objects are selcted?
 
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();

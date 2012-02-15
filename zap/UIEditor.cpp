@@ -387,15 +387,46 @@ void EditorUserInterface::redo()
 
       mLastUndoIndex++;
 
+      // Perform a little trick here... if we're redoing, and it's our final step of the redo tree, and there's only one item selected,
+      // we'll make sure that same item is selected when we're finished.  That will help keep the focus on the item that's being modified
+      // during the redo step, and make the redo feel more natural.
+      // Act I:
+      S32 selectedItem = NONE;
+
+      const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
+      if(mLastRedoIndex == mLastUndoIndex && getItemSelectedCount() == 1)
+         for(S32 i = 0; i < objList->size(); i++)
+            if(objList->get(i)->isSelected())
+            {
+               selectedItem = objList->get(i)->getSerialNumber();
+               break;
+            }
+
       setDatabase(mUndoItems[mLastUndoIndex % UNDO_STATES]);
       EditorObjectDatabase *database = mUndoItems[mLastUndoIndex % UNDO_STATES].get();
       mLoadTarget = database;
 
+      // Act II:
+      if(selectedItem != NONE)
+      {
+         const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
+         clearSelection(getDatabase());
+         for(S32 i = 0; i < objList->size(); i++)
+            if(objList->get(i)->getSerialNumber() == selectedItem)
+            {
+               objList->get(i)->setSelected(true);
+               break;
+            }
+      }
+
+
       TNLAssert(mUndoItems[mLastUndoIndex % UNDO_STATES], "null!");
 
-      rebuildEverything(database);     // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
+      rebuildEverything(database);   // Needed?  Yes, for now, but theoretically no, because we should be restoring everything fully reconstituted...
       onSelectionChanged();
       validateLevel();
+
+      onMouseMoved();               // If anything gets undeleted under the mouse, make sure it's highlighted
    }
 }
 
