@@ -145,12 +145,11 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    {
       mModPrimaryActivated[i] = false;
       mModSecondaryActivated[i] = false;
+      mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
 
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
    mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
-   mModuleOneDoubleClickTimer.setPeriod(DoubleClickTimeout);
-   mModuleTwoDoubleClickTimer.setPeriod(DoubleClickTimeout);
    //populateChatCmdList();
 
    makeCommandCandidateList();
@@ -448,8 +447,8 @@ void GameUserInterface::idle(U32 timeDelta)
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
    mLevelInfoDisplayTimer.update(timeDelta);
-   mModuleOneDoubleClickTimer.update(timeDelta);
-   mModuleTwoDoubleClickTimer.update(timeDelta);
+   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+      mModuleDoubleTapTimer[i].update(timeDelta);
 
    // Server messages
    if(mDisplayMessageTimer.update(timeDelta))
@@ -1102,6 +1101,24 @@ void GameUserInterface::selectWeapon(U32 indx)
 }
 
 
+void GameUserInterface::activateModule(S32 index)
+{
+   // Still active, just return
+   if(mModPrimaryActivated[index])
+      return;
+
+   // Activate module primary component
+   mModPrimaryActivated[index] = true;
+
+   // If the module secondary double-tap timer hasn't run out, activate the secondary component
+   if (mModuleDoubleTapTimer[index].getCurrent() != 0)
+      mModSecondaryActivated[index] = true;
+
+   // Now reset the double-tap timer since we've just activate this module
+   mModuleDoubleTapTimer[index].reset();
+}
+
+
 // Key pressed --> take action!
 // Handles all keypress events, including mouse clicks and controller button presses
 bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
@@ -1282,25 +1299,9 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
       loadLoadoutPreset(getGame(), 2);
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode))
-   {
-      mModPrimaryActivated[0] = true;
-      // If double-click timer hasn't run out, activate the secondary active component
-      if (mModuleOneDoubleClickTimer.getCurrent() != 0)
-      {
-         mModSecondaryActivated[0] = true;
-         mModuleOneDoubleClickTimer.clear();
-      }
-   }
+      activateModule(0);
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD2, inputCode))
-   {
-      mModPrimaryActivated[1] = true;
-      // If double-click timer hasn't run out, activate the secondary active component
-      if (mModuleTwoDoubleClickTimer.getCurrent() != 0)
-      {
-         mModSecondaryActivated[1] = true;
-         mModuleTwoDoubleClickTimer.clear();
-      }
-   }
+      activateModule(1);
    else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))
       mFiring = true;
    else if(checkInputCode(settings, InputCodeManager::BINDING_SELWEAP1, inputCode))
@@ -2487,13 +2488,11 @@ void GameUserInterface::onKeyUp(InputCode inputCode)
    {
       mModPrimaryActivated[0] = false;
       mModSecondaryActivated[0] = false;
-      mModuleOneDoubleClickTimer.reset();
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_MOD2, inputCode))
    {
       mModPrimaryActivated[1] = false;
       mModSecondaryActivated[1] = false;
-      mModuleTwoDoubleClickTimer.reset();
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))
       mFiring = false;

@@ -237,9 +237,8 @@ private:
    static const S32 CHAT_FONT_GAP = 3;
    static const S32 CHAT_MULTILINE_INDENT = 12;
 
-   Timer mModuleOneDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
-   Timer mModuleTwoDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
-   static const S32 DoubleClickTimeout = 200;     // Timeout in milliseconds
+   Timer mModuleDoubleTapTimer[ShipModuleCount];  // Timer for detecting if a module key is double-tapped
+   static const S32 DoubleClickTimeout = 200;          // Timeout in milliseconds
 
 public:
    GameUserInterface(ClientGame *game);           // Constructor
@@ -313,6 +312,7 @@ public:
 
    void advanceWeapon();            // Choose next weapon
    void selectWeapon(U32 index);    // Choose weapon by its index
+   void activateModule(S32 index);  // Activate a specific module by its index
 
    void suspendGame();
    void unsuspendGame();
