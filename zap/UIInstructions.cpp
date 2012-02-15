@@ -446,7 +446,7 @@ void InstructionsUserInterface::renderModulesPage()
    y += 35;
 
 
-   for(S32 i = 0; i < ARRAYSIZE(moduleDescriptions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(moduleDescriptions); i++)
    {
       S32 x = 105;
       glColor(Colors::yellow);
@@ -723,6 +723,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 27:    // Core
             F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
             renderCore(Point(0,0), 55, &Colors::blue, Platform::getRealMilliseconds(), health );
+            break;
       }
       glPopMatrix();
       objStart.y += 75;

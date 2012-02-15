@@ -1363,27 +1363,6 @@ bool EditorUserInterface::getSnapToWallCorners()
 }
 
 
-extern bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
-
-static bool checkEdge(const Point &clickPoint, const Point &start, const Point &end, F32 &minDist, Point &snapPoint)
-{
-   static Point closest;      // Reusable container
-
-   if(findNormalPoint(clickPoint, start, end, closest))    // Fills closest, the point on line where normal through clickPoint intersects
-   {
-      F32 dist = closest.distSquared(clickPoint);
-      if(dist < minDist)
-      {
-         minDist = dist;
-         snapPoint.set(closest);  
-         return true;
-      }
-   }
-
-   return false;
-}
-
-
 static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist, Point &snapPoint)
 {
    F32 dist = point.distSquared(clickPoint);
@@ -3337,8 +3316,8 @@ static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEd
 
 void EditorUserInterface::centerView()
 {
-   const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
-   const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
+//   const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
+//   const Vector<EditorObject *> *levelGenObjList = mLevelGenDatabase.getObjectList();
 
    Rect extents = getDatabase()->getExtents();
    extents.unionRect(mLevelGenDatabase.getExtents());
@@ -4135,7 +4114,7 @@ void EditorUserInterface::onFinishedDragging()
    if(mDraggingDockItem == NULL)    // Not dragging from dock - user is moving object around screen, or dragging vertex to dock
    {
       // If our snap vertex has moved then all selected items have moved
-      bool itemsMoved = mDragCopying || mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin;
+      bool itemsMoved = mDragCopying || (mSnapObject && mSnapObject->getVert(mSnapVertexIndex) != mMoveOrigin);
 
       if(itemsMoved)    // Move consumated... update any moved items, and save our autosave
       {

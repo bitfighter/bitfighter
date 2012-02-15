@@ -1698,8 +1698,6 @@ void Circle::push(lua_State *L)
 
 TNL_IMPLEMENT_NETOBJECT(Worm);
 
-static const F32 WORM_ITEM_MASS = 1;
-
 Worm::Worm()
 {
    mNetFlags.set(Ghostable);
@@ -1820,7 +1818,6 @@ bool Worm::collide(GameObject *otherObject)
 }
 
 
-static const S32 wormVel = 250;
 void Worm::setPosAng(Point pos, F32 ang)
 {
    if(mTailLength < maxTailLength - 1)

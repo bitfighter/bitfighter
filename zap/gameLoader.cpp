@@ -328,8 +328,6 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
 
 using namespace std;
 
-extern string lcase(string strToConvert);
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////

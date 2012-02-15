@@ -285,8 +285,6 @@ void KeyDefMenuUserInterface::render()
 
 bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
-   InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
-
    if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
 
    // InputCode entry

@@ -597,6 +597,8 @@ bool LuaScriptRunner::runChunk()
       logError("Error running script %s: %s.  Aborting script.", mScriptName.c_str(), e.what());
       return false;
    }
+
+   return false;
 }
 
 
@@ -652,6 +654,8 @@ bool LuaScriptRunner::loadHelperFunctions(const string &helperName)
       logError("Error loading helper function %s: %s.  Aborting script.", helperName.c_str(), e.what());
       return false;
    }
+
+   return false;
 }
 
 

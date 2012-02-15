@@ -271,6 +271,7 @@ GeometryContainer::GeometryContainer(const GeometryContainer &container)
          break;
       default:
          TNLAssert(false, "Invalid value!");
+         break;
    }
 }
 
@@ -369,6 +370,7 @@ void BfObject::setNewGeometry(GeomType geomType)
 
       default:
          TNLAssert(false, "Unknown geometry!");
+         break;
    }
 }
 
@@ -483,7 +485,18 @@ S32  BfObject::getMinVertCount() const     {   return mGeometry.getGeometry()->g
 
 void BfObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
 
-bool BfObject::addVertFront(Point vert)    {   return mGeometry.getGeometry()->addVertFront(vert); onPointsChanged(); }
+
+bool BfObject::addVertFront(Point vert)
+{
+   if(mGeometry.getGeometry()->addVertFront(vert))
+   {
+      onPointsChanged();
+      return true;
+   }
+
+   return false;
+}
+
 
 bool BfObject::addVert(const Point &point, bool ignoreMaxPointsLimit) 
 {

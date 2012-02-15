@@ -2535,8 +2535,6 @@ Move *GameUserInterface::getCurrentMove()
 {
    if((mCurrentChatType == NoChat) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
-      InputMode inputMode = getGame()->getSettings()->getInputCodeManager()->getInputMode();
-
       // Some helpers (like QuickChat or TeamShuffle) like to disable movement when they are active
       if(mHelper && mHelper->isMovementDisabled())
       {
