@@ -136,6 +136,8 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
       error = true;
       return true;
    }
+
+   return false;
 #endif
 }
 

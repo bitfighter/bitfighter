@@ -224,6 +224,7 @@ void BindingSet::setBinding(InputCodeManager::BindingName bindingName, InputCode
          break;
       default:
          TNLAssert(false, "Invalid key binding!");
+         break;
    }
 }
 
@@ -1688,7 +1689,7 @@ bool InputCodeManager::isMouseAction(InputCode inputCode)
 
 string InputCodeManager::getBindingName(BindingName bindingName)
 {
-   S32 index = (S32)bindingName;
+   U32 index = (U32)bindingName;
    TNLAssert(index >= 0 && index < ARRAYSIZE(BINDING_STRINGS), "Invalid value for bindingName!");
 
    return BINDING_STRINGS[index];
@@ -1700,7 +1701,7 @@ string InputCodeManager::getBindingName(BindingName bindingName)
 InputCode InputCodeManager::getKeyBoundToBindingCodeName(string name)
 {
    // Linear search not at all efficient, but this will be called very infrequently, in non-performance sensitive area
-   for(S32 i = 0; i < ARRAYSIZE(BINDING_STRINGS); i++)
+   for(U32 i = 0; i < ARRAYSIZE(BINDING_STRINGS); i++)
       if(caseInsensitiveStringCompare(BINDING_STRINGS[i], name))
          return this->getBinding(BindingName(i));
 
