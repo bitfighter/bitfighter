@@ -239,7 +239,7 @@ private:
 
    Timer mModuleOneDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
    Timer mModuleTwoDoubleClickTimer;              // Timer for detecting if a module key is double-clicked
-   static const S32 DoubleClickTimeout = 250;     // Timeout in milliseconds
+   static const S32 DoubleClickTimeout = 200;     // Timeout in milliseconds
 
 public:
    GameUserInterface(ClientGame *game);           // Constructor
