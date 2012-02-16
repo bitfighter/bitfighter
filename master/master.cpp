@@ -733,7 +733,7 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo, 
                               (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                              U8 gametype, bool hasLevelGen, S32 winningScore, S32 gameDurationInSeconds))
+                              U8 gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds))
    {
       // TODO: Write levelInfo to table
    }
