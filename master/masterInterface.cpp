@@ -141,7 +141,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendUpdgradeStatus,
 // Statistics related
 
 
-// With the use of RPCGuaranteedOrderedBigData for 016, a much bigger data can be sent through.
+// With the use of RPCGuaranteedOrderedBigData for 016, a much bigger data can be sent
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, 
    (Zap::VersionedGameStats stats), 
    (stats),
@@ -157,6 +157,19 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendLevelInfo,
          U8 gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds), 
    (hash, levelName, creator, gametype, hasLevelGen, teamCount, winningScore, gameDurationInSeconds),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
+
+
+// Send leaderboard stats to client
+TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestLeaderboard, 
+   (), 
+   (),
+   NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
+
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendLeaderboard, 
+   (Vector<StringTableEntry> names, Vector<U16> scores), 
+   (names, scores),
+   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
 
 
 ////////////////////////////////////

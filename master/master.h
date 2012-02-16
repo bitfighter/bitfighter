@@ -204,6 +204,11 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
                                                U8 gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
 
+   // Send leaderboard stats to client
+   TNL_DECLARE_RPC_OVERRIDE(c2mRequestLeaderboard, ());
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendLeaderboard, (Vector<StringTableEntry> names, StringTableEntry<U16> scores));
+
+
    // Game server wants to know if user name has been verified
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
 

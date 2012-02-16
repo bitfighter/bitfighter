@@ -174,6 +174,10 @@ public:
                                       U8 gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
 
 
+   TNL_DECLARE_RPC(c2mRequestLeaderboard, ());
+   TNL_DECLARE_RPC(m2cSendLeaderboard, (Vector<StringTableEntry> names, Vector<U16> scores));
+
+
    TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // when server changes name using /setservname
    TNL_DECLARE_RPC(s2mServerDescription, (StringTableEntry descr)); // when server changes using /setservdescr
 };
