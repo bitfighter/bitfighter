@@ -170,6 +170,9 @@ public:
 
    TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
+   TNL_DECLARE_RPC(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
+                                      U8 gametype, bool hasLevelGen, S32 winningScore, S32 gameDurationInSeconds));
+
 
    TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // when server changes name using /setservname
    TNL_DECLARE_RPC(s2mServerDescription, (StringTableEntry descr)); // when server changes using /setservdescr

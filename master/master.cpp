@@ -731,6 +731,13 @@ static const char *sanitizeForJson(const char *value)
       // TODO: Write achievement to table
    }
 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo, 
+                              (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
+                              U8 gametype, bool hasLevelGen, S32 winningScore, S32 gameDurationInSeconds))
+   {
+      // TODO: Write levelInfo to table
+   }
+
 
    // Game server wants to know if user name has been verified
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
