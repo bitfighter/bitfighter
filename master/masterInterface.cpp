@@ -147,6 +147,11 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics,
    (stats),
    NetClassGroupMasterMask, RPCGuaranteedOrderedBigData, RPCDirClientToServer, 0) {}
 
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mAcheivementAchieved, 
+   (U8 achievementId, StringTableEntry playerNick), 
+   (achievementId, playerNick),
+   NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
+
 
 ////////////////////////////////////
 // Authentication RPCs

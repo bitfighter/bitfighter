@@ -718,9 +718,17 @@ static const char *sanitizeForJson(const char *value)
       databaseWriter.insertStats(*gameStats);
 
    }
+
+
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
    {
       SaveStatistics(stats);
+   }
+
+
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
+   {
+      // TODO: Write achievement to table
    }
 
 
