@@ -313,7 +313,7 @@ void NetInterface::processConnections()
    mPuzzleManager.tick(mCurrentTime);
 
    // first see if there are any delayed packets that need to be sent...
-   while(mSendPacketList && mSendPacketList->sendTime < getCurrentTime())
+   while(mSendPacketList && S32(mSendPacketList->sendTime - getCurrentTime()) < 0)
    {
       DelaySendPacket *next = mSendPacketList->nextPacket;
       mSocket.sendto(mSendPacketList->remoteAddress,
@@ -326,14 +326,14 @@ void NetInterface::processConnections()
    for(S32 i = 0; i < mConnectionList.size(); i++)
       mConnectionList[i]->checkPacketSend(false, getCurrentTime());
 
-   if(getCurrentTime() > mLastTimeoutCheckTime + TimeoutCheckInterval)
+   if(S32(mLastTimeoutCheckTime + TimeoutCheckInterval - getCurrentTime()) < 0)
    {
       for(S32 i = 0; i < mPendingConnections.size();)
       {
          NetConnection *pending = mPendingConnections[i];
 
          if(pending->getConnectionState() == NetConnection::AwaitingChallengeResponse &&
-            getCurrentTime() > pending->mConnectLastSendTime + ChallengeRetryTime)
+            getCurrentTime() - pending->mConnectLastSendTime > ChallengeRetryTime)
          {
             if(pending->mConnectSendCount > ChallengeRetryCount)
             {
@@ -346,7 +346,7 @@ void NetInterface::processConnections()
                sendConnectChallengeRequest(pending);
          }
          else if(pending->getConnectionState() == NetConnection::AwaitingConnectResponse &&
-                                    getCurrentTime() > pending->mConnectLastSendTime + ConnectRetryTime)
+                                    getCurrentTime() - pending->mConnectLastSendTime > ConnectRetryTime)
          {
             if(pending->mConnectSendCount > ConnectRetryCount)
             {
@@ -364,7 +364,7 @@ void NetInterface::processConnections()
             }
          }
          else if(pending->getConnectionState() == NetConnection::SendingPunchPackets &&
-            getCurrentTime() > pending->mConnectLastSendTime + PunchRetryTime)
+            getCurrentTime() - pending->mConnectLastSendTime > PunchRetryTime)
          {
             if(pending->mConnectSendCount > PunchRetryCount)
             {
@@ -377,7 +377,7 @@ void NetInterface::processConnections()
                sendPunchPackets(pending);
          }
          else if(pending->getConnectionState() == NetConnection::ComputingPuzzleSolution &&
-            getCurrentTime() > pending->mConnectLastSendTime + PuzzleSolutionTimeout)
+            getCurrentTime() - pending->mConnectLastSendTime > PuzzleSolutionTimeout)
          {
             pending->setConnectionState(NetConnection::ConnectTimedOut);
             pending->onConnectTerminated(NetConnection::ReasonTimedOut, "Timeout");
