@@ -197,7 +197,7 @@ public:
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
 
    void processIsAuthenticated(Zap::GameStats *gameStats);
-   void SaveStatistics(Zap::VersionedGameStats &stats);
+   void writeStatisticsToDb(Zap::VersionedGameStats &stats);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));

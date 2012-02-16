@@ -681,7 +681,7 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   void MasterServerConnection::SaveStatistics(VersionedGameStats &stats)
+   void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
    {
       if(!checkActivityTime(6000))
          return;
@@ -722,7 +722,7 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
    {
-      SaveStatistics(stats);
+      writeStatisticsToDb(stats);
    }
 
 
