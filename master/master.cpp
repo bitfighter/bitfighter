@@ -741,14 +741,14 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLeaderboard, ())
    {
-      // TODO: Write levelInfo to table
+      // TODO: Send top 12 names/scores to client with m2cSendLeaderboard
    }
 
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendLeaderboard, 
                               (Vector<StringTableEntry> names, StringTableEntry<U16> scores))
    {
-      // TODO: Write levelInfo to table
+      // TODO: update some local structure for display somewhere somehow
    }
 
 
