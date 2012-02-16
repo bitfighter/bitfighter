@@ -202,7 +202,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                                               U8 gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds));
+                                               U8 gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
 
    // Game server wants to know if user name has been verified
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
