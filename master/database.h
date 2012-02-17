@@ -75,6 +75,7 @@ public:
    sqlite3 *sqliteDb;
 
    bool isValid;
+   static bool dumpSql;
    
    DbQuery(const char *dbName);     // Constructor
    ~DbQuery();                      // Destructor
@@ -116,6 +117,8 @@ public:
 
    // SQLite constructor
    DatabaseWriter(const char *db);
+
+   void setDumpSql(bool dump);
 
    void insertStats(const GameStats &gameStats);
    void insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP);

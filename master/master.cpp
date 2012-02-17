@@ -1139,6 +1139,7 @@ StdoutLogConsumer gStdoutLogConsumer;
 S32 testDb(const char *dbName)
 {
    DatabaseWriter databaseWriter(dbName);
+   databaseWriter.setDumpSql(true);
 
    databaseWriter.insertAchievement(1, "ChumpChange", "Achievement Server", "99.99.99.99:9999");
    databaseWriter.insertLevelInfo("9aa6e5f2256c17d2d430b100032b997c", "Clown Car", "Jenkins!", "Core", false, 2, 20, 600);

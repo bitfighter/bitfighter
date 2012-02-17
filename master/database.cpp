@@ -319,7 +319,6 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
 }
 
 
-
 void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
                                      const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds)
 {
@@ -335,7 +334,6 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
       logprintf("Failure writing level info to database: %s", ex.what());
    }
 }
-
 
 
 void DatabaseWriter::createStatsDatabase() 
@@ -361,8 +359,16 @@ void DatabaseWriter::createStatsDatabase()
 }
 
 
+void DatabaseWriter::setDumpSql(bool dump)
+{
+   DbQuery::dumpSql = dump;
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+bool DbQuery::dumpSql = false;
+
 
 // Constructor
 DbQuery::DbQuery(const char *dbName)
@@ -413,6 +419,9 @@ U64 DbQuery::runQuery(const string &sql) const
 {
    if(!isValid)
       return U64_MAX;
+
+   if(dumpSql)
+      logprintf("SQL: %s", sql);
 
    if(query)
       // Should only get here when mysql has been compiled in
