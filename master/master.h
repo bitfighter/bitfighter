@@ -30,6 +30,7 @@
 
 
 class GameConnectRequest;  // at the botton of master.h
+class DatabaseWriter;
 
 namespace Zap {
    struct VersionedGameStats;  // gameStats.h
@@ -196,14 +197,18 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
 
+   DatabaseWriter getDatabaseWriter();
+
    void processIsAuthenticated(Zap::GameStats *gameStats);
    void writeStatisticsToDb(Zap::VersionedGameStats &stats);
    void writeAchievementToDb(U8 achievementId, const StringTableEntry &playerNick);
+   void writeLevelInfoToDb(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
+                           const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                                               U8 gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
+                                               StringTableEntry gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
 
    // Send leaderboard stats to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestLeaderboard, ());

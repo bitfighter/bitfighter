@@ -31,23 +31,21 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlNonce.h"
+#include <string>
 #include "../sqlite/sqlite3.h"
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
+using namespace mysqlpp;
 #endif
 
-#include <string>
 
-// Forward declaration
-namespace mysqlpp
-{
-   class TCPConnection;
-};
+#ifndef BF_WRITE_TO_MYSQL
+typedef void Query;  // probably better then an empty class
+#endif
 
 using namespace TNL;
 using namespace Zap;
-using namespace mysqlpp;
 using namespace std;
 
 
@@ -70,7 +68,23 @@ struct ServerInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Query;
+class DbQuery
+{
+public:
+   Query *query;
+   sqlite3 *sqliteDb;
+
+   bool isValid;
+   
+   DbQuery(const char *dbName);     // Constructor
+   ~DbQuery();                      // Destructor
+
+   U64 runQuery(const string &sql) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class DatabaseWriter 
 {
@@ -81,6 +95,7 @@ private:
    char mDb[64];
    char mUser[64];
    char mPassword[64];
+
    Vector<ServerInfo> cachedServers;
 
    S32 lastGameID;
@@ -88,6 +103,11 @@ private:
    void initialize(const char *server, const char *db, const char *user, const char *password);
    void createStatsDatabase();
    string getSqliteSchema();
+
+   U64 getServerID(const DbQuery &query, const string &serverName, const string &serverIP);
+
+   void addToServerCache(U64 id, const string &serverName, const string &serverIPAddr);         // Add database ID to our cache
+   U64 getServerIDFromCache(const string &serverName, const string &serverIPAddr);              // And get it back out again
 
 public:
    DatabaseWriter();
@@ -101,11 +121,8 @@ public:
 
    void insertStats(const GameStats &gameStats);
    void insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP);
-
-   U64 getServerID(Query *query, sqlite3 *sqliteDb, const string &serverName, const string &serverIP);
-
-   void addToServerCache(U64 id, const string &serverName, const string &serverIPAddr);   // Add database ID to our cache
-   U64 getServerIDFromCache(const string &serverName, const string &serverIPAddr);        // And get it back out again
+   void insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
+                        const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 };
 
 

@@ -81,12 +81,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\sqlite\sqlite3.c" />
+    <ClCompile Include="..\zap\stringUtils.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="master.cpp" />
     <ClCompile Include="masterInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\boost\boost\tokenizer.hpp" />
+    <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="master.h" />
     <ClInclude Include="masterInterface.h" />

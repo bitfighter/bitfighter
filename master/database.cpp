@@ -26,15 +26,15 @@
 #include "database.h"
 #include "tnlTypes.h"
 #include "tnlLog.h"
-#include "../zap/stringUtils.h"            // For replaceString()
+#include "../zap/stringUtils.h"            // For replaceString() and itos()
 #include "../zap/WeaponInfo.h"
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
+using namespace mysqlpp;
 #endif
 
 using namespace std;
-using namespace mysqlpp;
 using namespace TNL;
 
 
@@ -90,10 +90,6 @@ static string sanitize(const string &value)
 
 
 #ifndef BF_WRITE_TO_MYSQL     // Stats not going to mySQL
-class Query {
-   // Empty class
-};
-
 class SimpleResult{
 public:
    S32 insert_id() { return 0; }
@@ -103,48 +99,7 @@ public:
 #endif
 
 
-// Create wrapper functions to make logging easier -- every stats related query comes through these
-
-// Run a mysql query -- should never get here unless mysql has been compiled in
-static SimpleResult runQuery(Query *query, const string &sql)
-{
-#ifdef BF_WRITE_TO_MYSQL
-   return query->execute(sql);
-#else
-	throw std::exception();    // Should be impossible
-#endif
-}
-
-
-// Run a sqlite query
-static void runQuery(sqlite3 *sqliteDb, const string &sql)
-{
-   char *err = 0;
-   sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
-
-   if(err)
-      logprintf("Database error accessing sqlite databse: %s", err);
-}
-
-
-// Run the passed query on the appropriate database
-static U64 runQuery(Query *query, sqlite3 *sqliteDb, const string &sql)
-{
-   if(query)
-      return runQuery(query, sql).insert_id();     // MySQL query
-
-   else if(sqliteDb)
-   {
-      runQuery(sqliteDb, sql);                     // Sqlite query
-      return sqlite3_last_insert_rowid(sqliteDb);  
-   }
-
-   else 
-      return U64_MAX;
-}
-
-
-static void insertStatsShots(Query *query, sqlite3 *sqliteDb, U64 playerId, const Vector<WeaponStats> weaponStats)
+static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<WeaponStats> weaponStats)
 {
    for(S32 i = 0; i < weaponStats.size(); i++)
    {
@@ -154,14 +109,14 @@ static void insertStatsShots(Query *query, sqlite3 *sqliteDb, U64 playerId, cons
                        "VALUES(" + itos(playerId) + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " + 
                                   itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
          
-         runQuery(query, sqliteDb, sql);
+         query.runQuery(sql);
       }
    }
 }
 
 
 // Inserts player and all associated weapon stats
-static U64 insertStatsPlayer(Query *query, sqlite3 *sqliteDb, const PlayerStats *playerStats, U64 gameId, const string &teamId)
+static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStats, U64 gameId, const string &teamId)
 {
    string sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, "
                                                "is_authenticated, is_robot, "
@@ -174,31 +129,31 @@ static U64 insertStatsPlayer(Query *query, sqlite3 *sqliteDb, const PlayerStats 
                                  itos(playerStats->deaths) + ", " +
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeamCount != 0) + ");";
 
-   U64 playerId = runQuery(query, sqliteDb, sql);
+   U64 playerId = query.runQuery(sql);
 
-   insertStatsShots(query, sqliteDb, playerId, playerStats->weaponStats);
+   insertStatsShots(query, playerId, playerStats->weaponStats);
 
    return playerId;
 }
 
 
 // Inserts stats of team and all players
-static U64 insertStatsTeam(Query *query, sqlite3 *sqliteDb, const TeamStats *teamStats, U64 &gameId)
+static U64 insertStatsTeam(const DbQuery &query, const TeamStats *teamStats, U64 &gameId)
 {
    string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) "
                 "VALUES(" + itos(gameId) + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
                 ctos(teamStats->gameResult) + "' ,'" + teamStats->hexColor + "');";
 
-   U64 teamId = runQuery(query, sqliteDb, sql);
+   U64 teamId = query.runQuery(sql);
 
    for(S32 i = 0; i < teamStats->playerStats.size(); i++)
-      insertStatsPlayer(query, sqliteDb, &teamStats->playerStats[i], gameId, itos(teamId));
+      insertStatsPlayer(query, &teamStats->playerStats[i], gameId, itos(teamId));
 
    return teamId;
 }
 
 
-static U64 insertStatsGame(Query *query, sqlite3 *sqliteDb, const GameStats *gameStats, U64 serverId)
+static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64 serverId)
 {
    string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, "
                                        "duration_seconds, level_name, is_team_game, team_count) "
@@ -207,55 +162,46 @@ static U64 insertStatsGame(Query *query, sqlite3 *sqliteDb, const GameStats *gam
                              sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
                              itos(gameStats->teamStats.size())  + ");";
 
-   U64 gameId = runQuery(query, sqliteDb, sql);
+   U64 gameId = query.runQuery(sql);
 
    for(S32 i = 0; i < gameStats->teamStats.size(); i++)
-      insertStatsTeam(query, sqliteDb, &gameStats->teamStats[i], gameId);
+      insertStatsTeam(query, &gameStats->teamStats[i], gameId);
 
    return gameId;
 }
 
 
-static U64 insertAchievementX(Query *query, sqlite3 *sqliteDb, U8 achievementId, const StringTableEntry &playerNick, U64 serverId)
-{
-   string sql = "INSERT INTO player_achievements(player_name, achievement_id, server_id) "
-                "VALUES( " + sanitize(string(playerNick.getString())) + ", '" + itos(achievementId) + "', " + itos(serverId) + ");";
-
-   return runQuery(query, sqliteDb, sql);
-}
-
-
-static U64 insertStatsServer(Query *query, sqlite3 *sqliteDb, const string &serverName, const string &serverIP)
+static U64 insertStatsServer(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    string sql = "INSERT INTO server(server_name, ip_address) "
                 "VALUES('" + sanitize(serverName) + "', '" + sanitize(serverIP) + "');";
 
-   if(query)
-     return runQuery(query, sql).insert_id();
+   if(query.query)
+     return query.runQuery(sql);
 
-   else if(sqliteDb)
+   if(query.sqliteDb)
    {
-      runQuery(sqliteDb, sql);
-      return sqlite3_last_insert_rowid(sqliteDb);
+      query.runQuery(sql);
+      return sqlite3_last_insert_rowid(query.sqliteDb);
    }
 
-   return -1;
+   return U64_MAX;
 }
 
 
 // Looks in database to find server mathcing the one in gameStats... returns server_id, or -1 if no match was found
-static S32 getServerFromDatabase(Query *query, sqlite3 *sqliteDb, const string &serverName, const string &serverIP)
+static S32 getServerFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    // Find server in database
    string sql = "SELECT server_id FROM server AS server "
-                "WHERE server_name = '" + sanitize(serverName) + "' AND ip_address = '" + sanitize(serverIP) + "';";
+                "WHERE server_name = '" + sanitize(serverName) + "' AND ip_address = '" + serverIP + "';";
                 //"WHERE server_name = 'Bitfighter sam686' AND ip_address = '96.2.123.136';";
 
 #ifdef BF_WRITE_TO_MYSQL
-   if(query)
+   if(query.query)
    {
       S32 serverId_int = -1;
-      StoreQueryResult results = query->store(sql.c_str(), sql.length());
+      StoreQueryResult results = query.store(sql.c_str(), sql.length());
 
       if(results.num_rows() >= 1)
          serverId_int = results[0][0];
@@ -264,13 +210,13 @@ static S32 getServerFromDatabase(Query *query, sqlite3 *sqliteDb, const string &
    }
    else
 #endif
-   if(sqliteDb)
+   if(query.sqliteDb)
    {
       char *err = 0;
       char **results;
       int rows, cols;
 
-      sqlite3_get_table(sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+      sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
 
       if(rows >= 1)
       {
@@ -298,17 +244,17 @@ void DatabaseWriter::addToServerCache(U64 id, const string &serverName, const st
 
 
 // Get the serverID given its name and IP.  First we'll check our cache to see if this is a known server; if we can't find
-// it there, we'll go to the database and retrieve it there.
-U64 DatabaseWriter::getServerID(Query *query, sqlite3 *sqliteDb, const string &serverName, const string &serverIP)
+// it there, we'll go to the database to retrieve it.
+U64 DatabaseWriter::getServerID(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    U64 serverId = getServerIDFromCache(serverName, serverIP);
 
    if(serverId == U64_MAX)      // Not found in cache, check database
    {
-      serverId = getServerFromDatabase(query, sqliteDb, serverName, serverIP);
+      serverId = getServerFromDatabase(query, serverName, serverIP);
 
       if(serverId == U64_MAX)   // Not found in database, add to database
-         serverId = insertStatsServer(query, sqliteDb, serverName, serverIP);
+         serverId = insertStatsServer(query, serverName, serverIP);
 
       // Save server info to cache for future use
       addToServerCache(serverId, serverName, serverIP);     
@@ -332,56 +278,103 @@ U64 DatabaseWriter::getServerIDFromCache(const string &serverName, const string 
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
-   Query *query = NULL;
-   sqlite3 *sqliteDb = NULL;
+   DbQuery query(mDb);
 
    try
    {
-
-#ifdef BF_WRITE_TO_MYSQL
-      Connection conn;  // create Connection HERE, so it won't be destroyed later on causing errors.
-      if(mMySql)                                          // Connect to the database
+      if(query.isValid)
       {
-         conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
-         query = new Query(&conn);
+         U64 serverId = getServerID(query, gameStats.serverName, gameStats.serverIP);
+         insertStatsGame(query, &gameStats, serverId);
       }
-      else
-#endif
-      if(sqlite3_open(mDb, &sqliteDb))    // Returns true if an error occurred
-      {
-         logprintf("ERROR: Can't open stats database %s: %s", mDb, sqlite3_errmsg(sqliteDb));
-         sqlite3_close(sqliteDb);
-         return;
-      }
-
-      U64 serverId = getServerID(query, sqliteDb, gameStats.serverName, gameStats.serverIP);
-
-      insertStatsGame(query, sqliteDb, &gameStats, serverId);
    }
    catch (const Exception &ex) 
    {
       logprintf("Failure writing stats to database: %s", ex.what());
    }
+}
 
-   // Cleanup!
-   if(query)
-      delete query;
+
+void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP) 
+{
+   DbQuery query(mDb);
+
+   try
+   {
+      if(query.isValid)
+      {
+         U64 serverId = getServerID(query, serverName, serverIP);
+
+         string sql = "INSERT INTO player_achievements(player_name, achievement_id, server_id) "
+                      "VALUES( " + sanitize(string(playerNick.getString())) + ", '" + itos(achievementId) + "', " + itos(serverId) + ");";
+
+         query.runQuery(sql);
+
+      }
+   }
+   catch (const Exception &ex) 
+   {
+      logprintf("Failure writing achievement to database: %s", ex.what());
+   }
+}
+
+
+
+void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
+                                     const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds)
+{
+   DbQuery query(mDb);
+
+   try
+   {
+      //if(query.isValid)
+      //   insertLevelInfoX(query, hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
+   }
+   catch (const Exception &ex) 
+   {
+      logprintf("Failure writing level info to database: %s", ex.what());
+   }
+}
+
+
+
+void DatabaseWriter::createStatsDatabase() 
+{
+   DbQuery query(mDb);
+
+   // Create empty file on file system
+   logprintf("Creating stats database file %s", mDb);
+   ofstream dbFile;
+   dbFile.open(mDb);
+   dbFile.close();
+
+   // Import schema
+   logprintf("Building stats database schema");
+   sqlite3 *sqliteDb = NULL;
+
+   sqlite3_open(mDb, &sqliteDb);
+
+   query.runQuery(getSqliteSchema());
 
    if(sqliteDb)
       sqlite3_close(sqliteDb);
 }
 
 
-void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP) 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+DbQuery::DbQuery(const char *dbName)
 {
-   Query *query = NULL;
-   sqlite3 *sqliteDb = NULL;
+   query = NULL;
+   sqliteDb = NULL;
+   isValid = true;
 
    try
    {
-
 #ifdef BF_WRITE_TO_MYSQL
-      Connection conn;  // create Connection HERE, so it won't be destroyed later on causing errors.
+      Connection conn;  // Create Connection HERE, so it won't be destroyed later on causing errors.
       if(mMySql)                                          // Connect to the database
       {
          conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
@@ -389,23 +382,24 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
       }
       else
 #endif
-      if(sqlite3_open(mDb, &sqliteDb))    // Returns true if an error occurred
+      if(sqlite3_open(dbName, &sqliteDb))    // Returns true if an error occurred
       {
-         logprintf("ERROR: Can't open stats database %s: %s", mDb, sqlite3_errmsg(sqliteDb));
+         logprintf("ERROR: Can't open stats database %s: %s", dbName, sqlite3_errmsg(sqliteDb));
          sqlite3_close(sqliteDb);
-         return;
+         isValid = false;
       }
-
-      U64 serverId = getServerID(query, sqliteDb, serverName, serverIP);
-
-      insertAchievementX(query, sqliteDb, achievementId, playerNick, serverId);
    }
    catch (const Exception &ex) 
    {
-      logprintf("Failure writing achievement to database: %s", ex.what());
+      logprintf("Failure opening database: %s", ex.what());
+      isValid = false;
    }
+}
 
-   // Cleanup!
+
+// Destructor
+DbQuery::~DbQuery()
+{
    if(query)
       delete query;
 
@@ -414,26 +408,40 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
 }
 
 
-void DatabaseWriter::createStatsDatabase() 
+// Run the passed query on the appropriate database -- throws exceptions!
+U64 DbQuery::runQuery(const string &sql) const
 {
-   // create empty file on file system
-   logprintf("Creating stats database file %s", mDb);
-   ofstream dbFile;
-   dbFile.open(mDb);
-   dbFile.close();
+   if(!isValid)
+      return U64_MAX;
 
-   // import schema
-   logprintf("Building stats database schema");
-   sqlite3 *sqliteDb = NULL;
-   string schema = getSqliteSchema();
-
-   sqlite3_open(mDb, &sqliteDb);
-   runQuery(sqliteDb, schema);
+   if(query)
+      // Should only get here when mysql has been compiled in
+#ifdef BF_WRITE_TO_MYSQL
+         return query->execute(sql);
+#else
+	      throw std::exception();    // Should be impossible
+#endif
 
    if(sqliteDb)
-      sqlite3_close(sqliteDb);
+   {
+      char *err = 0;
+      sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
+
+      if(err)
+         logprintf("Database error accessing sqlite databse: %s", err);
+
+
+      return sqlite3_last_insert_rowid(sqliteDb);  
+   }
+
+   return U64_MAX;
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Put this at the end where it's easy to find
 
 string DatabaseWriter::getSqliteSchema() {
    string schema =
@@ -451,6 +459,7 @@ string DatabaseWriter::getSqliteSchema() {
       "CREATE TABLE server (server_id INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL, server_name TEXT, ip_address TEXT  NOT NULL);"
 
       "CREATE UNIQUE INDEX server_name_ip_unique ON server(server_name COLLATE BINARY, ip_address COLLATE BINARY);"
+
 
       /*  stats_game */
       "DROP TABLE IF EXISTS stats_game;"
@@ -538,7 +547,7 @@ string DatabaseWriter::getSqliteSchema() {
 
       "DROP TABLE IF EXISTS stats_level;"
       "CREATE TABLE stats_level ("
-      "   stats_level_id INTEGER NOT NULL auto_increment,"
+      "   stats_level_id PRIMARY KEY AUTOINCREMENT NOT NULL,"
       "   level_name VARCHAR(255) default NULL,"
       "   creator VARCHAR(255) NOT NULL,"
       "   hash VARCHAR(32) NOT NULL,"
@@ -546,8 +555,7 @@ string DatabaseWriter::getSqliteSchema() {
       "   has_levelgen TINYINT NOT NULL,"
       "   team_count INTEGER NOT NULL,"
       "   winning_score INTEGER NOT NULL,"
-      "   game_duration INTEGER NOT NULL,"
-      "   PRIMARY KEY  (stats_level_id)"
+      "   game_duration INTEGER NOT NULL"
       ");"
 
 
@@ -560,7 +568,7 @@ string DatabaseWriter::getSqliteSchema() {
       "   server_id INTEGER NOT NULL,"
       "   date_awarded DATETIME NOT NULL  DEFAULT CURRENT_TIMESTAMP );"
 
-      "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name(50));";
+      "   CREATE UNIQUE INDEX player_achievements_accomplishment_id on player_achievements(achievement_id, player_name COLLATE BINARY);";
 
    return schema;
 }
