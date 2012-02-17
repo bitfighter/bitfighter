@@ -55,6 +55,9 @@ help:
 	@echo "    nophpbb:       no phpbb; use mysql for DB stats"
 	@echo "    mysql:         phpbb; use mysql for DB stats"
 	@echo
+	@echo "    Note that you may need to build TNL and libtomcrypt befre you build this"
+	@echo "    To do that, go to the tnl and libtomcrypt folders and run make"
+	@echo
 
 
 # Compile without mysql integration for phpbb or stats (use sqlite3 for stats)
