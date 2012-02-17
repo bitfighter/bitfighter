@@ -82,27 +82,19 @@ bool gWriteStatsToMySql;
 
 
 
-//// TODO: Get this from stringUtils... doesn't work for some reason.  Too tired to track it down at the moment...
-//std::string itos(S32 i)
-//{
-//   char outString[100];
-//   dSprintf(outString, sizeof(outString), "%d", i);
-//   return outString;
-//}
-
 
 static bool isControlCharacter(char ch)
-   {
-      return ch > 0 && ch <= 0x1F;
-   }
+{
+   return ch > 0 && ch <= 0x1F;
+}
+
 
 static bool containsControlCharacter( const char* str )
 {
    while ( *str )
-   {
       if ( isControlCharacter( *(str++) ) )
          return true;
-   }
+
    return false;
 }
 
@@ -681,6 +673,18 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
+   // TODO: Should we be reusing these?
+   DatabaseWriter MasterServerConnection::getDatabaseWriter()
+   {
+      if(gWriteStatsToMySql)
+         return DatabaseWriter(gStatsDatabaseAddress.c_str(),  gStatsDatabaseName.c_str(), 
+                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+
+      else
+         return DatabaseWriter("stats.db");
+   }
+
+
    void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
    {
       if(!checkActivityTime(6000))     // 6 seconds
@@ -701,17 +705,7 @@ static const char *sanitizeForJson(const char *value)
       processIsAuthenticated(gameStats);
       processStatsResults(gameStats);
 
-      DatabaseWriter databaseWriter;
-
-      if(gWriteStatsToMySql)
-      {
-         databaseWriter = DatabaseWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
-                                         gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
-      }
-      else
-      {
-         databaseWriter = DatabaseWriter("stats.db");
-      }
+      DatabaseWriter databaseWriter = getDatabaseWriter();
 
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
       databaseWriter.insertStats(*gameStats);
@@ -727,20 +721,28 @@ static const char *sanitizeForJson(const char *value)
       if(playerNick == "")
          return;
 
-      DatabaseWriter databaseWriter;
-
-      if(gWriteStatsToMySql)
-      {
-         databaseWriter = DatabaseWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
-                                         gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
-      }
-      else
-      {
-         databaseWriter = DatabaseWriter("stats.db");
-      }
+      DatabaseWriter databaseWriter = getDatabaseWriter();
 
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
       databaseWriter.insertAchievement(achievementId, playerNick, mPlayerOrServerName.getString(), getNetAddressString());
+   }
+
+
+   void MasterServerConnection::writeLevelInfoToDb(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
+                                                   const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds)
+   {
+      if(!checkActivityTime(6000))  // 6 seconds
+         return;
+
+      // Basic sanity check
+      if(hash == "" || gameType == "")
+         return;
+
+      DatabaseWriter databaseWriter = getDatabaseWriter();
+
+
+      // Will fail if compiled without database support and gWriteStatsToDatabase is true
+      databaseWriter.insertLevelInfo(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
    }
 
 
@@ -760,9 +762,9 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo, 
                               (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                              U8 gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds))
+                               StringTableEntry gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds))
    {
-      // TODO: Write levelInfo to table
+      writeLevelInfoToDb(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
    }
 
 
@@ -1133,6 +1135,91 @@ StdoutLogConsumer gStdoutLogConsumer;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Create a test database and write some records to it.  Return exit code.
+S32 testDb(const char *dbName)
+{
+   DatabaseWriter databaseWriter(dbName);
+
+   databaseWriter.insertAchievement(1, "ChumpChange", "Achievement Server", "99.99.99.99:9999");
+   databaseWriter.insertLevelInfo("9aa6e5f2256c17d2d430b100032b997c", "Clown Car", "Jenkins!", "Core", false, 2, 20, 600);
+
+   GameStats gameStats;
+   gameStats.build_version = 100;
+   gameStats.cs_protocol_version = 101;
+   gameStats.duration = 999;
+   gameStats.gameType = "Frogger";
+   gameStats.isOfficial = false;
+   gameStats.isTeamGame = true;
+   gameStats.levelName = "LouLou";
+   gameStats.playerCount = 2;
+   gameStats.serverIP = "999.999.999.999";
+   gameStats.serverName = "Crazy IP Server";
+
+   TeamStats teamStats;
+   teamStats.gameResult = 'W';
+   teamStats.hexColor = "#FF0000";
+   teamStats.name = "Red Dudes";
+   teamStats.score = 2;
+
+   PlayerStats playerStats;
+   playerStats.changedLoadout = 1;
+   playerStats.crashedIntoAsteroid = 2;
+   playerStats.deaths = 3;
+   playerStats.flagDrop = 4;
+   playerStats.flagPickup = 5;
+   playerStats.flagReturn = 6;
+   playerStats.flagScore = 7;
+   playerStats.fratricides = 8;
+   playerStats.gameResult = 'W';
+   playerStats.isAdmin = false;
+   playerStats.isAuthenticated = true;
+   playerStats.isHosting = true;
+   playerStats.isLevelChanger = true;
+   playerStats.isRobot = false;
+   playerStats.kills = 9;
+   playerStats.name = "Player 1";
+   playerStats.playTime = 99;
+   playerStats.points = 10;
+   playerStats.suicides = 11;
+   playerStats.switchedTeamCount = 12;
+   playerStats.teleport = 13;
+   teamStats.playerStats.push_back(playerStats);
+
+   playerStats.changedLoadout = 101;
+   playerStats.crashedIntoAsteroid = 102;
+   playerStats.deaths = 103;
+   playerStats.flagDrop = 104;
+   playerStats.flagPickup = 105;
+   playerStats.flagReturn = 106;
+   playerStats.flagScore = 107;
+   playerStats.fratricides = 108;
+   playerStats.gameResult = 'W';
+   playerStats.isAdmin = false;
+   playerStats.isAuthenticated = true;
+   playerStats.isHosting = true;
+   playerStats.isLevelChanger = true;
+   playerStats.isRobot = false;
+   playerStats.kills = 109;
+   playerStats.name = "Player 1";
+   playerStats.playTime = 1099;
+   playerStats.points = 1010;
+   playerStats.suicides = 1011;
+   playerStats.switchedTeamCount = 1012;
+   playerStats.teleport = 1013;
+   teamStats.playerStats.push_back(playerStats);
+
+   gameStats.teamStats.push_back(teamStats);
+
+   databaseWriter.insertStats(gameStats);
+
+   printf("Created database %s", dbName);
+
+   return 0;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 U32 gMasterPort = 25955;      // <== Default, can be overwritten in cfg file
 
@@ -1141,6 +1228,11 @@ extern void readConfigFile();
 
 int main(int argc, const char **argv)
 {
+   if(argc == 1 && argv[0] == "-testdb")
+   {
+      exit(testDb("test_db"));
+   }
+
    gServerStartTime = Platform::getRealMilliseconds();
 
    gMasterName = "Bitfighter Master Server";    // Default, can be overridden in cfg file

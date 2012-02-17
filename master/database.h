@@ -68,6 +68,24 @@ struct ServerInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class DbQuery
+{
+public:
+   Query *query;
+   sqlite3 *sqliteDb;
+
+   bool isValid;
+   
+   DbQuery(const char *dbName);     // Constructor
+   ~DbQuery();                      // Destructor
+
+   U64 runQuery(const string &sql) const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class DatabaseWriter 
 {
 private:
@@ -85,6 +103,10 @@ private:
    void createStatsDatabase();
    string getSqliteSchema();
 
+   U64 getServerID(const DbQuery &query, const string &serverName, const string &serverIP);
+
+   void addToServerCache(U64 id, const string &serverName, const string &serverIPAddr);         // Add database ID to our cache
+   U64 getServerIDFromCache(const string &serverName, const string &serverIPAddr);              // And get it back out again
 public:
    DatabaseWriter();
 
@@ -97,11 +119,8 @@ public:
 
    void insertStats(const GameStats &gameStats);
    void insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP);
-
-   U64 getServerID(Query *query, sqlite3 *sqliteDb, const string &serverName, const string &serverIP);
-
-   void addToServerCache(U64 id, const string &serverName, const string &serverIPAddr);   // Add database ID to our cache
-   U64 getServerIDFromCache(const string &serverName, const string &serverIPAddr);        // And get it back out again
+   void insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
+                        const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 };
 
 
