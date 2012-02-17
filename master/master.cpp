@@ -1228,10 +1228,10 @@ extern void readConfigFile();
 
 int main(int argc, const char **argv)
 {
-   if(argc == 1 && argv[0] == "-testdb")
-   {
+   if(argc == 2 && strcmp(argv[1], "-testdb") == 0)
       exit(testDb("test_db"));
-   }
+
+printf("%d, %s", argc, argv[0]);
 
    gServerStartTime = Platform::getRealMilliseconds();
 

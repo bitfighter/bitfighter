@@ -547,7 +547,7 @@ string DatabaseWriter::getSqliteSchema() {
 
       "DROP TABLE IF EXISTS stats_level;"
       "CREATE TABLE stats_level ("
-      "   stats_level_id PRIMARY KEY AUTOINCREMENT NOT NULL,"
+      "   stats_level_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
       "   level_name VARCHAR(255) default NULL,"
       "   creator VARCHAR(255) NOT NULL,"
       "   hash VARCHAR(32) NOT NULL,"
