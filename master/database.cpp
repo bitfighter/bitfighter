@@ -306,7 +306,7 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
          U64 serverId = getServerID(query, serverName, serverIP);
 
          string sql = "INSERT INTO player_achievements(player_name, achievement_id, server_id) "
-                      "VALUES( " + sanitize(string(playerNick.getString())) + ", '" + itos(achievementId) + "', " + itos(serverId) + ");";
+                      "VALUES( '" + sanitize(string(playerNick.getString())) + "', '" + itos(achievementId) + "', " + itos(serverId) + ");";
 
          query.runQuery(sql);
 
@@ -421,7 +421,7 @@ U64 DbQuery::runQuery(const string &sql) const
       return U64_MAX;
 
    if(dumpSql)
-      logprintf("SQL: %s", sql);
+      logprintf("SQL: %s", sql.c_str());
 
    if(query)
       // Should only get here when mysql has been compiled in
