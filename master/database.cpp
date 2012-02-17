@@ -534,6 +534,22 @@ string DatabaseWriter::getSqliteSchema() {
 
       "  CREATE UNIQUE INDEX stats_player_shots_player_id_weapon on stats_player_shots(stats_player_id, weapon COLLATE BINARY);"
 
+      /* level info */
+
+      "DROP TABLE IF EXISTS stats_level;"
+      "CREATE TABLE stats_level ("
+      "  stats_level_id INTEGER NOT NULL auto_increment,"
+      "  level_name VARCHAR(255) default NULL,"
+      "  creator VARCHAR(255) NOT NULL,"
+      "  hash VARCHAR(32) NOT NULL,"
+      "  game_type INTEGER NOT NULL,"
+      "  has_levelgen TINYINT NOT NULL,"
+      "  team_count INTEGER NOT NULL,"
+      "  winning_score INTEGER NOT NULL,"
+      "  game_duration INTEGER NOT NULL,"
+      "  PRIMARY KEY  (stats_level_id)"
+      ");"
+
 
       /* achievements */
 
