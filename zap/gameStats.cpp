@@ -105,7 +105,8 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
             playerStats->sort(playerScoreSort);
             for(S32 j = 0; j < playerStats->size(); j++)
                (*playerStats)[j].gameResult = 
-                  getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
+                  getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 
+                                                             0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
          }
       }
 

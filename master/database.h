@@ -56,9 +56,21 @@ struct ServerInfo
    U64 id;
    string name;
    string ip;
-   ServerInfo(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
+
+   // Quickie constructor
+   ServerInfo(U64 id, const string name, const string ip) 
+   { 
+      this->id = id; 
+      this->name = name; 
+      this->ip = ip;
+   }
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Query;
 
 class DatabaseWriter 
 {
@@ -71,7 +83,7 @@ private:
    char mPassword[64];
    Vector<ServerInfo> cachedServers;
 
-   U64 lastGameID;
+   S32 lastGameID;
 
    void initialize(const char *server, const char *db, const char *user, const char *password);
    void createStatsDatabase();
@@ -88,11 +100,13 @@ public:
    DatabaseWriter(const char *db);
 
    void insertStats(const GameStats &gameStats);
-   void addToServerCache(U64 id, const GameStats &gameStats);           // Add database to our cache
-   U64 getServerFromCache(const GameStats &gameStats);                  // And get it back out again
+   void insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP);
+
+   U64 getServerID(Query *query, sqlite3 *sqliteDb, const string &serverName, const string &serverIP);
+
+   void addToServerCache(U64 id, const string &serverName, const string &serverIPAddr);   // Add database ID to our cache
+   U64 getServerIDFromCache(const string &serverName, const string &serverIPAddr);        // And get it back out again
 };
 
 
 #endif
-
-

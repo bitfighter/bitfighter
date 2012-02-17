@@ -198,6 +198,7 @@ public:
 
    void processIsAuthenticated(Zap::GameStats *gameStats);
    void writeStatisticsToDb(Zap::VersionedGameStats &stats);
+   void writeAchievementToDb(U8 achievementId, const StringTableEntry &playerNick);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
@@ -206,7 +207,7 @@ public:
 
    // Send leaderboard stats to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestLeaderboard, ());
-   TNL_DECLARE_RPC_OVERRIDE(m2cSendLeaderboard, (Vector<StringTableEntry> names, StringTableEntry<U16> scores));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendLeaderboard, (Vector<StringTableEntry> names, Vector<U16> scores));
 
 
    // Game server wants to know if user name has been verified

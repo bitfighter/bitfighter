@@ -671,7 +671,7 @@ static const char *sanitizeForJson(const char *value)
       {
          Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
 
-         for(S32 j=0; j < playerStats->size(); j++)
+         for(S32 j = 0; j < playerStats->size(); j++)
          {
             Nonce playerId = playerStats->get(j).nonce;
             MasterServerConnection *client = findClient(playerId);
@@ -683,7 +683,7 @@ static const char *sanitizeForJson(const char *value)
 
    void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
    {
-      if(!checkActivityTime(6000))
+      if(!checkActivityTime(6000))     // 6 seconds
          return;
 
       if(!stats.valid)
@@ -713,12 +713,38 @@ static const char *sanitizeForJson(const char *value)
          databaseWriter = DatabaseWriter("stats.db");
       }
 
-
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
       databaseWriter.insertStats(*gameStats);
-
    }
 
+   
+   void MasterServerConnection::writeAchievementToDb(U8 achievementId, const StringTableEntry &playerNick)
+   {
+      if(!checkActivityTime(6000))  // 6 seconds
+         return;
+
+      // Basic sanity check
+      if(playerNick == "")
+         return;
+
+      DatabaseWriter databaseWriter;
+
+      if(gWriteStatsToMySql)
+      {
+         databaseWriter = DatabaseWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
+                                         gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+      }
+      else
+      {
+         databaseWriter = DatabaseWriter("stats.db");
+      }
+
+      // Will fail if compiled without database support and gWriteStatsToDatabase is true
+      databaseWriter.insertAchievement(achievementId, playerNick, mPlayerOrServerName.getString(), getNetAddressString());
+   }
+
+
+   //////////
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
    {
@@ -728,8 +754,9 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
    {
-      // TODO: Write achievement to table
+      writeAchievementToDb(achievementId, playerNick);
    }
+
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo, 
                               (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
@@ -746,7 +773,7 @@ static const char *sanitizeForJson(const char *value)
 
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendLeaderboard, 
-                              (Vector<StringTableEntry> names, StringTableEntry<U16> scores))
+                              (Vector<StringTableEntry> names, Vector<U16> scores))
    {
       // TODO: update some local structure for display somewhere somehow
    }
