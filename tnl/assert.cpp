@@ -32,8 +32,6 @@
 
 namespace TNL {
 
-#define TNL_ENABLE_ASSERTS
-
 #ifdef TNL_ENABLE_ASSERTS
 
 #ifdef WIN32
