@@ -174,7 +174,7 @@ static U64 insertStatsGame(const DbQuery &query, const GameStats *gameStats, U64
 static U64 insertStatsServer(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    string sql = "INSERT INTO server(server_name, ip_address) "
-                "VALUES('" + sanitize(serverName) + "', '" + sanitize(serverIP) + "');";
+                "VALUES('" + sanitize(serverName) + "', '" + serverIP + "');";
 
    if(query.query)
      return query.runQuery(sql);
@@ -309,7 +309,6 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
                       "VALUES( '" + sanitize(string(playerNick.getString())) + "', '" + itos(achievementId) + "', " + itos(serverId) + ");";
 
          query.runQuery(sql);
-
       }
    }
    catch (const Exception &ex) 
@@ -326,8 +325,19 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
 
    try
    {
-      //if(query.isValid)
-      //   insertLevelInfoX(query, hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
+      if(!query.isValid)
+         return;
+
+      // Sanity check
+      if(strlen(hash.getString()) != 32)
+         return;
+
+      string sql = "INSERT INTO player_achievements(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
+                   "VALUES('" + sanitize(hash.getString())    + "', '" + sanitize(levelName.getString()) + "', " + 
+                          "'" + sanitize(creator.getString()) + "', '" + sanitize(gameType.getString())  + "', " +
+                          "'" + btos(hasLevelGen)             + "', '" + itos(teamCount)                 + "', " + 
+                          "'" + itos(winningScore)            + "', '" + itos(gameDurationInSeconds)     + "');";
+      query.runQuery(sql);
    }
    catch (const Exception &ex) 
    {

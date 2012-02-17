@@ -1164,9 +1164,9 @@ S32 testDb(const char *dbName)
 
    PlayerStats playerStats;
    playerStats.changedLoadout = 1;
-   playerStats.crashedIntoAsteroid = 2;
+   playerStats.crashedIntoAsteroid = 2;      
    playerStats.deaths = 3;
-   playerStats.flagDrop = 4;
+   playerStats.flagDrop = 4;  
    playerStats.flagPickup = 5;
    playerStats.flagReturn = 6;
    playerStats.flagScore = 7;
@@ -1182,8 +1182,8 @@ S32 testDb(const char *dbName)
    playerStats.playTime = 99;
    playerStats.points = 10;
    playerStats.suicides = 11;
-   playerStats.switchedTeamCount = 12;
-   playerStats.teleport = 13;
+   playerStats.switchedTeamCount = 12;  
+   playerStats.teleport = 13; 
    teamStats.playerStats.push_back(playerStats);
 
    playerStats.changedLoadout = 101;
