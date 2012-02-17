@@ -314,6 +314,7 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
    setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
+
    mHasExploded = false;
 
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
@@ -332,7 +333,8 @@ void CoreItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(!mHasExploded)
-      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelHealth);
+      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam),
+            getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelHealth, mStartingPanelHealth);
 #endif
 }
 
@@ -396,7 +398,7 @@ void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Retrieve the values we need from the menu
 void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()) / F32(DamageReductionRatio));
+   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()) / DamageReductionRatio);
 }
 
 
@@ -649,10 +651,13 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 void CoreItem::setStartingHealth(F32 health)
 {
    mStartingHealth = health;
+
+   // Now that starting health has been set, divide it amongst the panels
+   mStartingPanelHealth = mStartingHealth / CORE_PANELS;
    
    // Core's total health is divided evenly amongst its panels
    for(S32 i = 0; i < 10; i++)
-      mPanelHealth[i] = health / CORE_PANELS;
+      mPanelHealth[i] = mStartingPanelHealth;
 }
 
 
@@ -719,13 +724,12 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(!mHasExploded)
    {
       // Don't bother with health report if we've exploded
-      F32 startingPanelHealth = mStartingHealth / CORE_PANELS;
-
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
          if(stream->writeFlag(updateMask & (PanelDamagedMask << i))) // go through each bit mask
          {
-            F32 panelHealthRatio = mPanelHealth[i] / startingPanelHealth;
+            // Normalize between 0.0 and 1.0 for transmission
+            F32 panelHealthRatio = mPanelHealth[i] / mStartingPanelHealth;
 
             // writeFloatZeroOrNonZero will Compensate for low resolution by sending zero only if it is actually zero
             writeFloatZeroOrNonZero(*stream, panelHealthRatio, 4);     // 4 bits -> 1/16 increments, all we really need
@@ -766,7 +770,10 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
          if(stream->readFlag())                    // Panel damaged
-            mPanelHealth[i] = stream->readFloat(4);
+         {
+            // De-normalize to real health
+            mPanelHealth[i] = mStartingPanelHealth * stream->readFloat(4);
+         }
       }
    }
 

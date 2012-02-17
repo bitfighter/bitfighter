@@ -1724,7 +1724,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[])
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[], F32 panelStartingHealth)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
 
@@ -1740,7 +1740,8 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
       if(panelHealth[i] > 0)
       {
          glColor(baseColor);
-         glLineWidth(gDefaultLineWidth * (panelHealth[i] + .25));
+         // Normalize health to be between 0.0 and 1.0 with panelStartingHealth
+         glLineWidth(gDefaultLineWidth * ((panelHealth[i] / panelStartingHealth) + .25));
       }
       else     // Panel is dead
       {

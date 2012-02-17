@@ -111,6 +111,7 @@ private:
    bool mHasExploded;
    bool mBeingAttacked;
    F32 mStartingHealth;          // Health stored in the level file, will be divided amongst panels
+   F32 mStartingPanelHealth;     // Health divided up amongst panels
 
    F32 mPanelHealth[CORE_PANELS];
    Timer mHeartbeatTimer;        // Client-side timer
