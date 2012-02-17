@@ -31,23 +31,21 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlNonce.h"
+#include <string>
 #include "../sqlite/sqlite3.h"
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
+using namespace mysqlpp;
 #endif
 
-#include <string>
 
-// Forward declaration
-namespace mysqlpp
-{
-   class TCPConnection;
-};
+#ifndef BF_WRITE_TO_MYSQL
+typedef void Query;  // probably better then an empty class
+#endif
 
 using namespace TNL;
 using namespace Zap;
-using namespace mysqlpp;
 using namespace std;
 
 
@@ -69,8 +67,6 @@ struct ServerInfo
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-class Query;
 
 class DatabaseWriter 
 {

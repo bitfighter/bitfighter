@@ -31,10 +31,10 @@
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
+using namespace mysqlpp;
 #endif
 
 using namespace std;
-using namespace mysqlpp;
 using namespace TNL;
 
 
@@ -90,10 +90,6 @@ static string sanitize(const string &value)
 
 
 #ifndef BF_WRITE_TO_MYSQL     // Stats not going to mySQL
-class Query {
-   // Empty class
-};
-
 class SimpleResult{
 public:
    S32 insert_id() { return 0; }
