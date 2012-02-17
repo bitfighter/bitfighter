@@ -1232,8 +1232,6 @@ int main(int argc, const char **argv)
    if(argc == 2 && strcmp(argv[1], "-testdb") == 0)
       exit(testDb("test_db"));
 
-printf("%d, %s", argc, argv[0]);
-
    gServerStartTime = Platform::getRealMilliseconds();
 
    gMasterName = "Bitfighter Master Server";    // Default, can be overridden in cfg file

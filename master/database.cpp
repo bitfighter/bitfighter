@@ -332,7 +332,7 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
       if(strlen(hash.getString()) != 32)
          return;
 
-      string sql = "INSERT INTO player_achievements(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
+      string sql = "INSERT INTO stats_level(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
                    "VALUES('" + sanitize(hash.getString())    + "', '" + sanitize(levelName.getString()) + "', " + 
                           "'" + sanitize(creator.getString()) + "', '" + sanitize(gameType.getString())  + "', " +
                           "'" + btos(hasLevelGen)             + "', '" + itos(teamCount)                 + "', " + 
