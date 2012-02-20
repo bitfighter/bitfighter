@@ -1133,6 +1133,8 @@ void ForceFieldProjector::onEnabled()
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
       DatabaseObject *collObj;
+
+      TNLAssert(getDatabase(), "How do run ForceField::findForceFieldEnd with a NULL getDatabase()?");
 	
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 

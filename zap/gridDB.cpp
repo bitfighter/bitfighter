@@ -78,7 +78,14 @@ GridDatabase::~GridDatabase()
 
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
-   S32 minx, miny, maxx, maxy;  
+   TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again");
+   TNLAssert(!theObject->mDatabase, "Already added to database, trying to add to different database");
+   if(theObject->mDatabase)
+      return;
+	theObject->mDatabase = this;
+
+
+   S32 minx, miny, maxx, maxy;
 
    minx = S32(extents.min.x) >> BucketWidthBitShift;
    miny = S32(extents.min.y) >> BucketWidthBitShift;
@@ -113,6 +120,7 @@ void GridDatabase::removeEverythingFromDatabase()
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; )
          {
             BucketEntry *rem = walk;
+				walk->theObject->mDatabase = NULL;  // make sure object don't point to this database anymore
             walk = rem->nextInBucket;
             mChunker->free(rem);
          }
@@ -124,6 +132,11 @@ void GridDatabase::removeEverythingFromDatabase()
 
 void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &extents)
 {
+   TNLAssert(theObject->mDatabase == this || theObject->mDatabase == NULL, "Trying to remove Object from wrong database");
+   if(theObject->mDatabase != this)
+      return;
+	theObject->mDatabase = NULL;
+
    S32 minx, miny, maxx, maxy;
 
    minx = S32(extents.min.x) >> BucketWidthBitShift;
@@ -232,6 +245,7 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 
 void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
 {
+   TNLAssert(this, "findObjects 'this' is NULL");
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
    for(S32 x = minx; maxx - x >= 0; x++)
@@ -366,6 +380,7 @@ DatabaseObject::DatabaseObject(const DatabaseObject &t)
 // Destructor
 DatabaseObject::~DatabaseObject()
 {
+   TNLAssert(!mDatabase, "Must remove from database when deleting this object");
    // Do nothing
 }
 
@@ -571,13 +586,8 @@ void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
 
 void DatabaseObject::addToDatabase(GridDatabase *database)
 {
-   if(mDatabase)              // This object is already in a database!
-      return;
-
    if(isDatabasable())
       database->addToDatabase(this, mExtent);
-
-   setDatabase(database);     // What purpose does this serve for non-databasable objects?
 }
 
 
@@ -877,8 +887,6 @@ void EditorObjectDatabase::addToDatabase(const Vector<EditorObject *> &objects)
 {
    for(S32 i = 0; i < objects.size(); i++)
    {
-      objects[i]->setDatabase(this);
-
       Parent::addToDatabase(objects[i], objects[i]->getExtent());
       mAllEditorObjects.push_back(objects[i]);
    }
