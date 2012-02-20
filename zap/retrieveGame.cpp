@@ -400,7 +400,7 @@ const char *RetrieveGameType::getShortName() const
 }
 
 
-const char *RetrieveGameType::getInstructionString()
+const char *RetrieveGameType::getInstructionString() const
 {
    return "Find all the flags, and bring them to your capture zones!";
 }

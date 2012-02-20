@@ -382,7 +382,7 @@ const char *ZoneControlGameType::getShortName() const
 }
 
 
-const char *ZoneControlGameType::getInstructionString()
+const char *ZoneControlGameType::getInstructionString() const
 {
    return "Capture all the zones by carrying the flag into them! ";
 }

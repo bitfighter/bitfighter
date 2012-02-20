@@ -196,7 +196,7 @@ const char *SoccerGameType::getShortName() const
 }
 
 
-const char *SoccerGameType::getInstructionString()
+const char *SoccerGameType::getInstructionString() const
 {
    return "Push the ball into the opposing team's goal!";
 }

@@ -484,7 +484,7 @@ const char *NexusGameType::getShortName() const
 }
 
 
-const char *NexusGameType::getInstructionString()
+const char *NexusGameType::getInstructionString() const
 {
    return "Collect flags from opposing players and bring them to the Nexus!";
 }

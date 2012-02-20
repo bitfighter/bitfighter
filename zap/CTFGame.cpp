@@ -283,7 +283,7 @@ const char *CTFGameType::getShortName() const
 }
 
 
-const char *CTFGameType::getInstructionString()
+const char *CTFGameType::getInstructionString() const
 {
    return "Take the opposing team's flag and touch it to your flag!";
 }

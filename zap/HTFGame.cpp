@@ -389,7 +389,7 @@ const char *HTFGameType::getShortName() const
 }
 
 
-const char *HTFGameType::getInstructionString()
+const char *HTFGameType::getInstructionString() const
 {
    return "Hold the flags at your capture zones!";
 }

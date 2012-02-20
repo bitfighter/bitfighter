@@ -488,7 +488,7 @@ const char *RabbitGameType::getShortName() const
 }
 
 
-const char *RabbitGameType::getInstructionString()
+const char *RabbitGameType::getInstructionString() const
 {
    return "Grab the flag and hold it for as long as you can!";
 }

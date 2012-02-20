@@ -66,7 +66,7 @@ public:
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
-   virtual const char *getInstructionString();
+   virtual const char *getInstructionString() const;
    //bool isTeamGame();
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;

@@ -80,7 +80,7 @@ public:
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
-   const char *getInstructionString();
+   const char *getInstructionString() const;
    bool isTeamGame();
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
