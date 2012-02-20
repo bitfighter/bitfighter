@@ -42,7 +42,6 @@ using namespace TNL;
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
 {
-   mMySql = false;
 }
 
 
@@ -76,7 +75,6 @@ void DatabaseWriter::initialize(const char *server, const char *db, const char *
    strncpy(mDb, db, sizeof(mDb) - 1);
    strncpy(mUser, user, sizeof(mUser) - 1);
    strncpy(mPassword, password, sizeof(mPassword) - 1);
-   mMySql = (db[0] != 0);                          // Not valid if db is empty string
 }
 
 
@@ -201,7 +199,7 @@ static S32 getServerFromDatabase(const DbQuery &query, const string &serverName,
    if(query.query)
    {
       S32 serverId_int = -1;
-      StoreQueryResult results = query.store(sql.c_str(), sql.length());
+      StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
 
       if(results.num_rows() >= 1)
          serverId_int = results[0][0];
@@ -258,7 +256,7 @@ U64 DatabaseWriter::getServerID(const DbQuery &query, const string &serverName, 
 
       // Save server info to cache for future use
       addToServerCache(serverId, serverName, serverIP);     
-	}
+   }
 
    return serverId;
 }
@@ -278,7 +276,7 @@ U64 DatabaseWriter::getServerIDFromCache(const string &serverName, const string 
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
-   DbQuery query(mDb);
+   DbQuery query(mDb, mServer, mUser, mPassword);
 
    try
    {
@@ -297,7 +295,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
 void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry &playerNick, const string &serverName, const string &serverIP) 
 {
-   DbQuery query(mDb);
+   DbQuery query(mDb, mServer, mUser, mPassword);
 
    try
    {
@@ -321,7 +319,7 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
 void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
                                      const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds)
 {
-   DbQuery query(mDb);
+   DbQuery query(mDb, mServer, mUser, mPassword);
 
    try
    {
@@ -348,7 +346,7 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
 
 void DatabaseWriter::createStatsDatabase() 
 {
-   DbQuery query(mDb);
+   DbQuery query(mDb, mServer, mUser, mPassword);
 
    // Create empty file on file system
    logprintf("Creating stats database file %s", mDb);
@@ -381,37 +379,42 @@ bool DbQuery::dumpSql = false;
 
 
 // Constructor
-DbQuery::DbQuery(const char *dbName)
+DbQuery::DbQuery(const char *db, const char *server, const char *user, const char *password)
 {
    query = NULL;
    sqliteDb = NULL;
    isValid = true;
 
-   try
-   {
+   TNLAssert(db && db[0] != 0, "must have a database");
+
 #ifdef BF_WRITE_TO_MYSQL
-      Connection conn;  // Create Connection HERE, so it won't be destroyed later on causing errors.
-      if(mMySql)                                          // Connect to the database
+
+   if(server && server[0] != 0) // mysql have a server to connect to
+   {
+      TNLAssert(server, "const char * server is NULL");
+      TNLAssert(user, "const char * user is NULL");
+      TNLAssert(password, "const char * password is NULL");
+      try
       {
-         conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
+         Connection conn;
+         conn.connect(db, server, user, password);    // Will throw error if it fails
          query = new Query(&conn);
       }
-      else
-#endif
-      if(sqlite3_open(dbName, &sqliteDb))    // Returns true if an error occurred
+      catch (const Exception &ex) 
       {
-         logprintf("ERROR: Can't open stats database %s: %s", dbName, sqlite3_errmsg(sqliteDb));
-         sqlite3_close(sqliteDb);
+         logprintf("Failure opening mysql database: %s", ex.what());
          isValid = false;
       }
    }
-   catch (const Exception &ex) 
-   {
-      logprintf("Failure opening database: %s", ex.what());
-      isValid = false;
-   }
+   else
+#endif
+      if(sqlite3_open(db, &sqliteDb))    // Returns true if an error occurred
+      {
+         logprintf("ERROR: Can't open stats database %s: %s", db, sqlite3_errmsg(sqliteDb));
+         sqlite3_close(sqliteDb);
+         isValid = false;
+      }
 }
-
 
 // Destructor
 DbQuery::~DbQuery()
@@ -436,9 +439,9 @@ U64 DbQuery::runQuery(const string &sql) const
    if(query)
       // Should only get here when mysql has been compiled in
 #ifdef BF_WRITE_TO_MYSQL
-         return query->execute(sql);
+         return query->execute(sql).insert_id();
 #else
-	      throw std::exception();    // Should be impossible
+         throw std::exception();    // Should be impossible
 #endif
 
    if(sqliteDb)

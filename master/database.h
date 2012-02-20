@@ -77,7 +77,7 @@ public:
    bool isValid;
    static bool dumpSql;
    
-   DbQuery(const char *dbName);     // Constructor
+   DbQuery(const char *db, const char *server = NULL, const char *user = NULL, const char *password = NULL);     // Constructor
    ~DbQuery();                      // Destructor
 
    U64 runQuery(const string &sql) const;
@@ -90,8 +90,6 @@ public:
 class DatabaseWriter 
 {
 private:
-   bool mMySql;        // Can this connection use mysql?
-
    char mServer[64];   // was const char *, but problems when data in pointer dies.
    char mDb[64];
    char mUser[64];
