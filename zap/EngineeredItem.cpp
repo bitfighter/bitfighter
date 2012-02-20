@@ -1340,24 +1340,35 @@ ForceField::ForceField(S32 team, Point start, Point end)
    mNetFlags.set(Ghostable);
 }
 
+
 bool ForceField::collide(GameObject *hitObject)
 {
    if(!mFieldUp)
       return false;
 
-   if( ! (isShipType(hitObject->getObjectTypeNumber()) ) )
-      return true;
-
-   if(hitObject->getTeam() == mTeam)
+   // If it's a ship that collides with this forcefield, check team to allow it through
+   if(isShipType(hitObject->getObjectTypeNumber()))
    {
-      if(!isGhost())
+      if(hitObject->getTeam() == mTeam)
       {
-         mFieldUp = false;
-         mDownTimer.reset(FieldDownTime);
-         setMaskBits(StatusMask);
+         if(!isGhost())
+         {
+            mFieldUp = false;
+            mDownTimer.reset(FieldDownTime);
+            setMaskBits(StatusMask);
+         }
+         return false;
       }
-      return false;
    }
+   // If it's a flag that collides with this forcefield and we're hostile, let it through
+   else if(hitObject->getObjectTypeNumber() == FlagTypeNumber)
+   {
+      if(mTeam == TEAM_HOSTILE)
+         return false;
+      else
+         return true;
+   }
+
    return true;
 }
 
