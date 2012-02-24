@@ -13,6 +13,7 @@ userdatadir="$HOME/Library/Application Support/Bitfighter"
 if [ ! -d "$userdatadir/robots" ]; then
   mkdir "$userdatadir"
   mkdir "$userdatadir/screenshots"
+  mkdir "$userdatadir/music"
   cp -r "$datadir/levels" "$userdatadir/"
   cp -r "$datadir/robots" "$userdatadir/"
   cp -r "$datadir/scripts" "$userdatadir/"
@@ -37,14 +38,18 @@ if [ ! -f "$userdatadir/joystick_presets.ini" ]; then
   cp "$datadir/joystick_presets.ini" "$userdatadir/"
 fi
 
+# 017
+if [ ! -d "$userdatadir/music" ]; then
+  mkdir "$userdatadir/music"
+fi
+
+
 # Full path is need on some Mac systems for sfx - not sure why yet
 cd "$datadir"
 absolute_datadir="$( pwd )"
 cd -
 
 sfxdir="$absolute_datadir/sfx"
-scriptsdir="$absolute_datadir/scripts"
-musicdir="$absolute_datadir/music"
 
 # Run the program
-./Bitfighter -rootdatadir "$userdatadir" -musicdir "$musicdir" -sfxdir "$sfxdir" 
+./Bitfighter -rootdatadir "$userdatadir" -sfxdir "$sfxdir" 
