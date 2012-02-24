@@ -3480,6 +3480,7 @@
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
+				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = "x86_64-Debug";
