@@ -1835,10 +1835,10 @@ void FolderManager::resolveDirs(GameSettings *settings)
    folderManager->iniDir        = resolutionHelper(cmdLineDirs.iniDir,        rootDataDir, "");
    folderManager->logDir        = resolutionHelper(cmdLineDirs.logDir,        rootDataDir, "");
    folderManager->screenshotDir = resolutionHelper(cmdLineDirs.screenshotDir, rootDataDir, "screenshots");
+   folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      rootDataDir, "music");
 
    // rootDataDir not used for these folders
    folderManager->sfxDir        = resolutionHelper(cmdLineDirs.sfxDir,        "", "sfx");
-   folderManager->musicDir      = resolutionHelper(cmdLineDirs.musicDir,      "", "music");
 
    gSqlite = folderManager->logDir + "stats";
 }
