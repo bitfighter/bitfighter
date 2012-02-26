@@ -1007,6 +1007,8 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 {
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 
+   ui->reset();
+
    switch(reason)
    {
       case NetConnection::ReasonDuplicateId:
