@@ -374,6 +374,35 @@ void drawCentroidMark(const Point &pos, F32 radius)
 }
 
 
+// Health ranges from 0 to 1
+// Center is the centerpoint of the health bar; normal is a normalized vector along the main axis of the bar
+// length and width are in pixels, and are the dimensions of the health bar
+void renderHealthBar(F32 health, const Point &center, const Point &dir, S32 length, S32 width)
+{
+   const S32 HATCH_COUNT = 14;                     // Number of lines to draw a full health
+   U32 hatchCount = U32(HATCH_COUNT * health);     // Number of lines to draw at current health
+   Point cross(dir.y, -dir.x);                     // Direction across the health bar, perpendicular to the main axis
+
+   Point dirx = dir;                               // Needs modifiable copy for the Point math to work
+   Point base = center - dirx * length * .5;       // Point at center of end of health bar
+
+   Point segMid;                                   // Reusable container
+
+   glBegin(GL_LINES);
+
+   for(F32 i = 0; i < hatchCount; i++)
+   {
+      dirx = dir;                                  // Reset to original value
+      segMid = base + dirx * (i + 0.5) / F32(HATCH_COUNT) * length;      // Adding 0.5 causes hatches to be centered properly
+
+      glVertex(segMid - cross * F32(width) * 0.5);  
+      glVertex(segMid + cross * F32(width) * 0.5);   
+   }
+
+   glEnd();
+}
+
+
 void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor)
 {
@@ -483,14 +512,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    U32 lineCount = U32(14 * health);
    glBegin(GL_LINES);
 
-   // health bar
-   for(U32 i = 0; i < lineCount; i++)
-   {
-      S32 yo = i * 2;
-      glVertex2i(-2, -11 + yo);   // front of ship
-      glVertex2i(2, -11 + yo);    // back of ship
-   }
-   glEnd();
+   renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4);
 
    // Grey outside part
    glColor4f(0.7f, 0.7f ,0.7f , alpha);
@@ -828,16 +850,10 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
 
    // Render health bar
    glColor(c);
-   S32 lineHeight = U32(28 * health);
+
+   renderHealthBar(health, anchor + normal * 7.5, cross, 28, 5);
 
    glBegin(GL_LINES);
-      for(S32 i = 0; i < lineHeight; i += 2)
-      {
-         Point lsegStart = anchor - cross * F32(14 - i) + normal * 5.f;
-         Point lsegEnd = lsegStart + normal * (Turret::TURRET_OFFSET - 10);
-         glVertex(lsegStart);
-         glVertex(lsegEnd);
-      }
 
       Point lsegStart = anchor - cross * 14 + normal * 3;
       Point lsegEnd = anchor + cross * 14 + normal * 3;
