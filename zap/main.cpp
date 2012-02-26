@@ -1332,8 +1332,6 @@ int main(int argc, char **argv)
 
       Zap::Cursor::init();
 
-      atexit(shutdownBitfighter);      // If user clicks the X on their game window, this runs shutdownBitfighter()
-
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       actualizeScreenMode(false);      // Create a display window
 
