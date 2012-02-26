@@ -752,6 +752,9 @@ void SoundSystem::music_end_callback(void* userdata, ALuint source)
    // Set the state to stopped
    musicState = MusicStopped;
 
+   // Clean up the stream
+   alureDestroyStream(musicStream, 0, NULL);
+
    // Go to the next track, loop if at the end
    currentlyPlayingIndex = (currentlyPlayingIndex + 1) % musicList.size();
 }
@@ -779,7 +782,10 @@ void SoundSystem::playMusic(S32 listIndex)
 void SoundSystem::stopMusic()
 {
    alureStopSource(musicSource, AL_FALSE);
+
+   // Clean up the stream here since we aren't calling the callback
    alureDestroyStream(musicStream, 0, NULL);
+
    musicState = MusicStopped;
 }
 
