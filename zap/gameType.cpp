@@ -3009,7 +3009,7 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    // Toggle
    gc->mChatMute = !gc->mChatMute;
 
-   conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is not muted");
+   conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is unmuted");
 }
 
 
@@ -3429,6 +3429,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
+   // If globally muted, don't send to anyone
+   if(source->mChatMute)
+      return;
 
    if(source)
    {
