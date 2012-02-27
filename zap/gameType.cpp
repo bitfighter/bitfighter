@@ -188,7 +188,7 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
 // Menu items we want to show
 Vector<string> GameType::getGameParameterMenuKeys()
 {
-   static const string vals[] = { 
+   static const string vals[] = {
       "Level Name",
       "Level Descr",
       "Level Credits",
@@ -202,7 +202,7 @@ Vector<string> GameType::getGameParameterMenuKeys()
       "Allow Robots"
    };
 
-   return Vector<string>(vector<string>(vals, vals + sizeof(vals) / sizeof(vals[0])));
+   return Vector<string> (vals, ARRAYSIZE(vals));
 }
 
 

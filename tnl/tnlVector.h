@@ -65,6 +65,7 @@ public:
    Vector(const U32 initialSize = 0);
    Vector(const Vector& p);
    Vector(const std::vector<T>& p);
+   Vector(const T *array, U32 length);
    ~Vector();
 
    Vector<T>& operator=(const Vector<T>& p);
@@ -88,6 +89,7 @@ public:
    void reserve(U32 size);
    void resize(U32 size);
    void insert(U32 index);
+   void insert(U32 index, const T&);
    void erase(U32 index);
    void deleteAndErase(U32 index);
    void erase_fast(U32 index);
@@ -124,6 +126,11 @@ template<class T> inline Vector<T>::Vector(const Vector& p)        // Copy const
 template<class T> inline Vector<T>::Vector(const std::vector<T>& p)        // Constructor to wrap std::vector
 {
    innerVector = p;
+}
+
+template<class T> inline Vector<T>::Vector(const T *array, U32 length)        // Constructor to wrap a C-style array
+{
+   innerVector = std::vector<T>(array, array + length);
 }
 
 template<class T> inline Vector<T>::~Vector() {}       // Destructor
@@ -163,6 +170,12 @@ template<class T> inline void Vector<T>::insert(U32 index)
    innerVector.insert(innerVector.begin() + index, 1, T());
 }
 
+// inserts an object at a specified index
+template<class T> inline void Vector<T>::insert(U32 index, const T &x)
+{
+   TNLAssert(index <= innerVector.size(), "index out of range");
+   innerVector.insert(innerVector.begin() + index, x);
+}
 
 template<class T> inline void Vector<T>::erase(U32 index)
 {

@@ -148,11 +148,8 @@ Vector<string> RabbitGameType::getGameParameterMenuKeys()
    for(S32 i = 0; i < items.size(); i++)
       if(items[i] == "Win Score")
       {
-         items.insert(i - 1);
-         items[i - 1] = "Flag Return Time";
-
-         items.insert(i + 2);
-         items[i + 2] = "Point Earn Rate";
+         items.insert(i - 1, "Flag Return Time");
+         items.insert(i + 2, "Point Earn Rate");
 
          break;
       }

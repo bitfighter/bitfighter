@@ -240,14 +240,9 @@ Vector<string> NexusGameType::getGameParameterMenuKeys()
          items.erase(i);      // Delete "Win Score"
 
          // Create slots for 3 new items, and fill them with our Nexus specific items
-         items.insert(i);
-         items[i] = "Nexus Time to Open";
-
-         items.insert(i + 1);
-         items[i + 1] = "Nexus Time Remain Open";
-
-         items.insert(i + 2);
-         items[i + 2] = "Nexus Win Score";
+         items.insert(i, "Nexus Time to Open");
+         items.insert(i + 1, "Nexus Time Remain Open");
+         items.insert(i + 2, "Nexus Win Score");
 
          break;
       }
