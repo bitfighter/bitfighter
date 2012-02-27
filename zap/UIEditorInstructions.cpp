@@ -234,7 +234,8 @@ static ControlStringsEditor gControls2[] = {
          { "Scale selection", "Ctrl-Shift-X" },
 
          { "-", "" },      // Horiz. line
-         { "Hold [Space] to suspend snapping", "" },
+         { "Hold [Space] to suspend grid snapping", "" },
+         { "[Shift-Space] to suspend vertex snapping" },
          { "Hold [Tab] to view a reference ship", "" },
          { "", "" },       // End of col1
 
