@@ -1325,7 +1325,7 @@ void NameEntryUserInterface::setupMenu()
    menuItem->setSize(MENU_ITEM_SIZE_SMALL);
    addMenuItem(menuItem);
    
-   getMenuItem(1)->setFilter(LineEditor::noQuoteFilter);      // Quotes are incompatible with PHPBB3 logins
+   getMenuItem(1)->setFilter(LineEditor::noQuoteOrPercentsFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
    getMenuItem(2)->setSecret(true);
 }
 

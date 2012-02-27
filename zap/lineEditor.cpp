@@ -258,7 +258,7 @@ bool LineEditor::addChar(const char c)
    else if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
       return false;
 
-   else if((mFilter == noQuoteFilter) && (c == '"' ))
+   else if((mFilter == noQuoteOrPercentsFilter) && (c == '"' || c == '%'))
       return false;
    
    else if((mFilter == fileNameFilter) && ! ( (c >= '0' && c <= '9') ||
