@@ -1811,6 +1811,19 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
    }
 }
 
+
+// Here we render a simpler, non-animated Core to reduce distraction
+void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
+{
+   // Here we render a simpler, non-animated Core to reduce distraction in the editor
+   glColor(Colors::white);
+   drawPolygon(pos, 10, width / 2, 0);
+
+   glColor(coreColor);
+   drawCircle(pos, width / 5);
+}
+
+
 void renderSoccerBall(const Point &pos)
 {
    renderSoccerBall(pos, (F32)SoccerBallItem::SOCCER_BALL_RADIUS);

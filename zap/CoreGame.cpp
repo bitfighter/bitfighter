@@ -343,10 +343,7 @@ void CoreItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-
-   glColor(Colors::white);
-   drawPolygon(pos, 10, 5, 0);
-   drawCircle(pos, 2);
+   renderCoreSimple(pos, &Colors::white, 10);
 #endif
 }
 
@@ -355,13 +352,7 @@ void CoreItem::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-
-   // Here we render a simpler, non-animated Core to reduce distraction in the editor
-   glColor(Colors::white);
-   drawPolygon(pos, 10, CoreStartWidth / 2, 0);
-
-   glColor(getTeamColor(mTeam));
-   drawCircle(pos, CoreStartWidth / 5);
+   renderCoreSimple(pos, getTeamColor(mTeam), CoreStartWidth);
 #endif
 }
 

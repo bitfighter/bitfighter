@@ -3270,8 +3270,7 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       Team *team = (Team *)game->getTeam(i);
       Point center(xpos - 20, ypos + 19);
 
-      F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
-      renderCore(center, 10, team->getColor(), getGame()->getCurrentTime(), health, 1);
+      renderCoreSimple(center, team->getColor(), 20);
 
       // Render something if a Core is being attacked
       if(cgt->isTeamCoreBeingAttacked(i))
