@@ -2177,8 +2177,8 @@ CommandInfo chatCmds[] = {
    { "mvol",    GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set music volume"      },
    { "svol",    GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set SFX volume"        },
    { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set voice chat volume" },
-   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Hide chat messages from <name>. Run again to un-hide" },
-   { "vmute",   GameUserInterface::voiceMuteHandler, { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Hide chat messages from <name>. Run again to un-hide" },
+   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Toggle hiding chat messages from <name>" },
+   { "vmute",   GameUserInterface::voiceMuteHandler, { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Toggle muting voice chat from <name>" },
 
    { "add",         GameUserInterface::addTimeHandler,         { INT },           0,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Add time to the current game" },
    { "next",        GameUserInterface::nextLevelHandler,       {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Start next level" },
