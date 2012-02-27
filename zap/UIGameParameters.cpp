@@ -93,6 +93,7 @@ GameParamUserInterface::GameParamUserInterface(ClientGame *game) : Parent(game)
    
    mMenuTitle = "Game Parameters Menu";
    mMenuSubTitle = "";
+   mMaxMenuSize = S32_MAX;                // We never want scrolling on this menu!
 }
 
 

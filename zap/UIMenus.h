@@ -52,8 +52,6 @@ private:
    // For detecting keys being held down
    bool mRepeatMode;
    bool mKeyDown;
-   S32 mMaxMenuSize;
-
 
    virtual void renderExtras();     // For drawing something extra on a menu
    void advanceItem();              // What happens when we move on to the next menu item?
@@ -66,6 +64,7 @@ protected:
    virtual S32 getTextSize(MenuItemSize size);  // Let menus set their own text size
    virtual S32 getGap(MenuItemSize size);       // Gap is the space between items
 
+   S32 mMaxMenuSize;
    S32 mFirstVisibleItem;  // Some menus have items than will fit on the screen; this is the index of the first visible item
 
    bool mRenderInstructions;
