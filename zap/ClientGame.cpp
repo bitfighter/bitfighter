@@ -817,6 +817,34 @@ bool ClientGame::isOnMuteList(const string &name)
 }
 
 
+void ClientGame::addToVoiceMuteList(const string &name)
+{
+   mVoiceMuteList.push_back(name);
+}
+
+
+void ClientGame::removeFromVoiceMuteList(const string &name)
+{
+
+   for(S32 i = 0; i < mVoiceMuteList.size(); i++)
+      if(mVoiceMuteList[i] == name)
+      {
+         mVoiceMuteList.erase_fast(i);
+         return;
+      }
+}
+
+
+bool ClientGame::isOnVoiceMuteList(const string &name)
+{
+   for(S32 i = 0; i < mVoiceMuteList.size(); i++)
+      if(mVoiceMuteList[i] == name)
+         return true;
+
+   return false;
+}
+
+
 string ClientGame::getRemoteLevelDownloadFilename() const
 {
    return mRemoteLevelDownloadFilename;

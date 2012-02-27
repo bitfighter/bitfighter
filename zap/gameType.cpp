@@ -3457,6 +3457,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
    if(!clientInfo)
       return;
 
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   if(clientGame->isOnVoiceMuteList(clientName.getString()))
+      return;
+
    ByteBufferPtr playBuffer = clientInfo->getVoiceDecoder()->decompressBuffer(*(voiceBuffer.getPointer()));
    SoundSystem::queueVoiceChatBuffer(clientInfo->getVoiceSFX(), playBuffer);
 

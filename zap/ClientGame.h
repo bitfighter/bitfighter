@@ -75,6 +75,7 @@ private:
    bool mDebugShowMeshZones;        // Show bot nav mesh zones?
 
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
+   Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
 
    string mLoginPassword;
 
@@ -170,6 +171,10 @@ public:
    void addToMuteList(const string &name);
    void removeFromMuteList(const string &name);
    bool isOnMuteList(const string &name);
+
+   void addToVoiceMuteList(const string &name);
+   void removeFromVoiceMuteList(const string &name);
+   bool isOnVoiceMuteList(const string &name);
 
 
    void connectionToServerRejected(const char *reason);

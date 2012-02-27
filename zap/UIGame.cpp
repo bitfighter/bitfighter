@@ -1789,6 +1789,32 @@ void GameUserInterface::muteHandler(ClientGame *game, const Vector<string> &word
 }
 
 
+void GameUserInterface::voiceMuteHandler(ClientGame *game, const Vector<string> &words)
+{
+   if(words.size() < 2)
+      game->displayErrorMessage("!!! Usage: /vmute <player name>");
+   else
+   {
+      if(!game->checkName(words[1]))
+         game->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+
+      // Un-mute if already on the list
+      else if(game->isOnVoiceMuteList(words[1]))
+      {
+         game->removeFromVoiceMuteList(words[1]);
+         game->displaySuccessMessage("Voice for %s has been un-muted", words[1].c_str());
+      }
+
+      // Mute!
+      else
+      {
+         game->addToVoiceMuteList(words[1]);
+         game->displaySuccessMessage("Voice for %s has been muted", words[1].c_str());
+      }
+   }
+}
+
+
 void GameUserInterface::setTimeHandler(ClientGame *game, const Vector<string> &words)
 {
    if(game->hasLevelChange("!!! Need level change permission"))
@@ -2152,6 +2178,7 @@ CommandInfo chatCmds[] = {
    { "svol",    GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set SFX volume"        },
    { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set voice chat volume" },
    { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Hide chat messages from <name>. Run again to un-hide" },
+   { "vmute",   GameUserInterface::voiceMuteHandler, { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Hide chat messages from <name>. Run again to un-hide" },
 
    { "add",         GameUserInterface::addTimeHandler,         { INT },           0,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Add time to the current game" },
    { "next",        GameUserInterface::nextLevelHandler,       {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Start next level" },

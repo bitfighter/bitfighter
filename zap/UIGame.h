@@ -360,6 +360,7 @@ public:
    static void serverCommandHandler(ClientGame *game, const Vector<string> &words);
    static void pmHandler(ClientGame *game, const Vector<string> &words);
    static void muteHandler(ClientGame *game, const Vector<string> &words);
+   static void voiceMuteHandler(ClientGame *game, const Vector<string> &words);
    static void maxFpsHandler(ClientGame *game, const Vector<string> &words);
    static void lineWidthHandler(ClientGame *game, const Vector<string> &words);
    static void suspendHandler(ClientGame *game, const Vector<string> &words);
