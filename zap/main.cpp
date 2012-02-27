@@ -785,7 +785,6 @@ void shutdownBitfighter()
    SoundSystem::shutdown();
 
 #ifndef ZAP_DEDICATED
-   OGLCONSOLE_Quit();
    Joystick::shutdownJoystick();
 
    // Save current window position if in windowed mode
@@ -795,14 +794,16 @@ void shutdownBitfighter()
       settings->getIniSettings()->winYPos = getWindowPositionY();
    }
 
+   OGLCONSOLE_Quit();
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
+
+   // Avoids annoying shutdown crashes when logging is still trying to output to oglconsole
+   gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);
 
    settings->save();                                  // Write settings to bitfighter.ini
 
    delete settings;
-
-   gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);  // Avoids annoying shutdown error
 
    NetClassRep::logBitUsage();
    logprintf("Bye!");
