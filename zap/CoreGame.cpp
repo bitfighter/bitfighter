@@ -119,35 +119,19 @@ bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex)
 
 
 #ifndef ZAP_DEDICATED
-const char **CoreGameType::getGameParameterMenuKeys()
+Vector<string> CoreGameType::getGameParameterMenuKeys()
 {
-    static const char *items[] = {
-      "Level Name",
-      "Level Descr",
-      "Level Credits",
-      "Levelgen Script",
-      "Game Time",
-//      "Score to Win",       // There is no score to win in this game mode - it is hardcoded as 0
-      "Grid Size",
-      "Min Players",
-      "Max Players",
-      "Allow Engr",
-      "Allow Robots",
-      "" };
+   Vector<string> items = Parent::getGameParameterMenuKeys();
 
-      return items;
-}
-
-
-boost::shared_ptr<MenuItem> CoreGameType::getMenuItem(const char *key)
-{
-   return Parent::getMenuItem(key);
-}
-
-
-bool CoreGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
-{
-   return Parent::saveMenuItem(menuItem, key);
+   // Remove "Win Score" as that's not needed here -- win score is determined by the number of cores
+   for(S32 i = 0; i < items.size(); i++)
+      if(items[i] == "Win Score")
+      {
+         items.erase(i);
+         break;
+      }
+ 
+   return items;
 }
 #endif
 

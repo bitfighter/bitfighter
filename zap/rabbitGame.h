@@ -60,9 +60,9 @@ public:
    string toString() const;
 
 #ifndef ZAP_DEDICATED
-   const char **getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
-   bool saveMenuItem(const MenuItem *menuItem, const char *key);
+   Vector<string> getGameParameterMenuKeys();
+   boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
    void idle(GameObject::IdleCallPath path, U32 deltaT);

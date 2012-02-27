@@ -303,9 +303,9 @@ public:
    virtual string toString() const;
 
 #ifndef ZAP_DEDICATED
-   virtual const char **getGameParameterMenuKeys();
-   virtual boost::shared_ptr<MenuItem> getMenuItem(const char *key);
-   virtual bool saveMenuItem(const MenuItem *menuItem, const char *key);
+   virtual Vector<string> getGameParameterMenuKeys();
+   virtual boost::shared_ptr<MenuItem> getMenuItem(const string &key);
+   virtual bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
    virtual bool processSpecialsParam(const char *param);

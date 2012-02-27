@@ -229,53 +229,59 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 
 #ifndef ZAP_DEDICATED
 // Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-const char **NexusGameType::getGameParameterMenuKeys()
+Vector<string> NexusGameType::getGameParameterMenuKeys()
 {
-    static const char *items[] = {
-      "Level Name",
-      "Level Descr",
-      "Level Credits",
-      "Levelgen Script",
-      "Game Time",
-      "Nexus Time to Open",      // <=== defined here
-      "Nexus Time Remain Open",  // <=== defined here
-      "Nexus Win Score",         // <=== defined here
-      "Grid Size",
-      "Min Players",
-      "Max Players",
-      "Allow Engr",
-      "Allow Robots",
-      "" };
+   Vector<string> items = Parent::getGameParameterMenuKeys();
+   
+   // Remove Win Score, replace it with some Nexus specific items
+   for(S32 i = 0; i < items.size(); i++)
+      if(items[i] == "Win Score")
+      {
+         items.erase(i);      // Delete "Win Score"
 
-      return items;
+         // Create slots for 3 new items, and fill them with our Nexus specific items
+         items.insert(i);
+         items[i] = "Nexus Time to Open";
+
+         items.insert(i + 1);
+         items[i + 1] = "Nexus Time Remain Open";
+
+         items.insert(i + 2);
+         items[i + 2] = "Nexus Win Score";
+
+         break;
+      }
+
+   return items;
 }
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const char *key)
+boost::shared_ptr<MenuItem> NexusGameType::getMenuItem(const string &key)
 {
-   if(!strcmp(key, "Nexus Time to Open"))
+   if(key == "Nexus Time to Open")
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Time for Nexus to Open:", mNexusClosedTime, 99*60, "Never", 
                                                                  "Time it takes for the Nexus to open"));
-   else if(!strcmp(key, "Nexus Time Remain Open"))
+   else if(key == "Nexus Time Remain Open")
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItemSeconds("Time Nexus Remains Open:", mNexusOpenTime, 99*60, "Always", 
                                                                         "Time that the Nexus will remain open"));
-   else if(!strcmp(key, "Nexus Win Score"))
+   else if(key == "Nexus Win Score")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Score to Win:", getWinningScore(), 100, 100, 20000, "points", "", 
                                                              "Game ends when one player or team gets this score"));
    else return Parent::getMenuItem(key);
 }
 
 
-bool NexusGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
+bool NexusGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 {
-   if(!strcmp(key, "Nexus Time to Open"))
+   if(key == "Nexus Time to Open")
       mNexusClosedTime = menuItem->getIntValue();
-   else if(!strcmp(key, "Nexus Time Remain Open"))
+   else if(key == "Nexus Time Remain Open")
       mNexusOpenTime = menuItem->getIntValue();
-   else if(!strcmp(key, "Nexus Win Score"))
+   else if(key == "Nexus Win Score")
       setWinningScore(menuItem->getIntValue());
-   else return Parent::saveMenuItem(menuItem, key);
+   else 
+      return Parent::saveMenuItem(menuItem, key);
 
    return true;
 }

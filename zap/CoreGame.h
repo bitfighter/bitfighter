@@ -65,9 +65,7 @@ public:
    void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
 
 #ifndef ZAP_DEDICATED
-   const char **getGameParameterMenuKeys();
-   boost::shared_ptr<MenuItem> getMenuItem(const char *key);
-   bool saveMenuItem(const MenuItem *menuItem, const char *key);
+   Vector<string> getGameParameterMenuKeys();
 #endif
 
    GameTypeId getGameTypeId() const;

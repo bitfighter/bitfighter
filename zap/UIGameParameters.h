@@ -82,7 +82,7 @@ private:
    virtual S32 getTextSize(MenuItemSize size);
    virtual S32 getGap(MenuItemSize size);
 
-   typedef map<const char *, boost::shared_ptr<MenuItem> > MenuItemMap;
+   typedef map<const string, boost::shared_ptr<MenuItem> > MenuItemMap;
    MenuItemMap mMenuItemMap;
 
 

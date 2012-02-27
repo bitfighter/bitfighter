@@ -113,11 +113,9 @@ void GameParamUserInterface::onActivate()
 // Find and delete any parameters associated with the current gameType
 void GameParamUserInterface::clearCurrentGameTypeParams()
 {
-   const char **keys = getGame()->getGameType()->getGameParameterMenuKeys();
+   const Vector<string> keys = getGame()->getGameType()->getGameParameterMenuKeys();
 
-   S32 i = 0;
-
-   while(strcmp(keys[i], ""))
+   for(S32 i = 0; i < keys.size(); i++)
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
@@ -125,8 +123,6 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 
       if(iter != mMenuItemMap.end())      
          mMenuItemMap.erase(iter);
-
-      i++;
    }
 }
 
@@ -198,10 +194,10 @@ void GameParamUserInterface::updateMenuItems()
                                      "",                                  // empty val
                                      "File where this level is stored",   // help
                                      MAX_FILE_NAME_LEN));
-   const char **keys = gameType->getGameParameterMenuKeys();
 
-   S32 i = 0;
-   while(strcmp(keys[i], ""))
+   const Vector<string> keys = gameType->getGameParameterMenuKeys();
+
+   for(S32 i = 0; i < keys.size(); i++)
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
@@ -214,12 +210,10 @@ void GameParamUserInterface::updateMenuItems()
          menuItem = gameType->getMenuItem(keys[i]);
          TNLAssert(menuItem, "Failed to make a new menu item!");
 
-         mMenuItemMap.insert(pair<const char *, boost::shared_ptr<MenuItem> >(keys[i], menuItem));
+         mMenuItemMap.insert(pair<string, boost::shared_ptr<MenuItem> >(keys[i], menuItem));
       }
 
       addWrappedMenuItem(menuItem);
-
-      i++;
    }
 }
 
@@ -231,18 +225,14 @@ void GameParamUserInterface::onEscape()
 
    GameType *gameType = getGame()->getGameType();
 
-   const char **keys = gameType->getGameParameterMenuKeys();
+   const Vector<string> keys = gameType->getGameParameterMenuKeys();
 
-   S32 i = 0;
-
-   while(strcmp(keys[i], ""))    // Iterate over every item in the keys array
+   for(S32 i = 0; i < keys.size(); i++)
    {
       MenuItemMap::iterator iter = mMenuItemMap.find(keys[i]);
 
       MenuItem *menuItem = iter->second.get();
       gameType->saveMenuItem(menuItem, keys[i]);
-    
-      i++;
    }
 
    if(anythingChanged())

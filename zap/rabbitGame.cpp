@@ -140,48 +140,49 @@ string RabbitGameType::toString() const
 
 #ifndef ZAP_DEDICATED
 // Any unique items defined here must be handled in both getMenuItem() and saveMenuItem() below!
-const char **RabbitGameType::getGameParameterMenuKeys()
+Vector<string> RabbitGameType::getGameParameterMenuKeys()
 {
-    static const char *items[] = {
-      "Level Name",
-      "Level Descr",
-      "Level Credits",
-      "Levelgen Script",
-      "Game Time",
-      "Flag Return Time",   // <=== defined here
-      "Win Score",        
-      "Point Earn Rate",    // <=== defined here
-      "Grid Size",
-      "Min Players",
-      "Max Players",
-      "Allow Engr",
-      "Allow Robots",
-      "" };
+   Vector<string> items = Parent::getGameParameterMenuKeys();
 
-      return items;
+   // Use "Win Score" as an indicator of where to insert our Rabbit specific menu items
+   for(S32 i = 0; i < items.size(); i++)
+      if(items[i] == "Win Score")
+      {
+         items.insert(i - 1);
+         items[i - 1] = "Flag Return Time";
+
+         items.insert(i + 2);
+         items[i + 2] = "Point Earn Rate";
+
+         break;
+      }
+
+   return items;
 }
 
 
 // Definitions for those items
-boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const char *key)
+boost::shared_ptr<MenuItem> RabbitGameType::getMenuItem(const string &key)
 {
-   if(!strcmp(key, "Flag Return Time"))
+   if(key == "Flag Return Time")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Flag Return Timer:", mFlagReturnTimer / 1000, 1, 1, 99, 
                                                              "secs", "", "Time it takes for an uncaptured flag to return home"));
-   else if(!strcmp(key, "Point Earn Rate"))
+   else if(key == "Point Earn Rate")
       return boost::shared_ptr<MenuItem>(new CounterMenuItem("Point Earn Rate:", getFlagScore(), 1, 1, 99, 
                                                              "points per minute", "", "Rate player holding the flag accrues points"));
-   else return Parent::getMenuItem(key);
+   else 
+      return Parent::getMenuItem(key);
 }
 
 
-bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const char *key)
+bool RabbitGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 {
-   if(!strcmp(key, "Flag Return Time"))
+   if(key == "Flag Return Time")
       mFlagReturnTimer = menuItem->getIntValue() * 1000;
-   else if(!strcmp(key, "Point Earn Rate"))
+   else if(key == "Point Earn Rate")
       setFlagScore(menuItem->getIntValue());
-   else return Parent::saveMenuItem(menuItem, key);
+   else 
+      return Parent::saveMenuItem(menuItem, key);
 
    return true;
 }
