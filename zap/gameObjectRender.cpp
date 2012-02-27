@@ -377,9 +377,9 @@ void drawCentroidMark(const Point &pos, F32 radius)
 // Health ranges from 0 to 1
 // Center is the centerpoint of the health bar; normal is a normalized vector along the main axis of the bar
 // length and width are in pixels, and are the dimensions of the health bar
-void renderHealthBar(F32 health, const Point &center, const Point &dir, S32 length, S32 width)
+void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 length, F32 width)
 {
-   const S32 HATCH_COUNT = 14;                     // Number of lines to draw a full health
+   const F32 HATCH_COUNT = 14;                     // Number of lines to draw a full health
    U32 hatchCount = U32(HATCH_COUNT * health);     // Number of lines to draw at current health
    Point cross(dir.y, -dir.x);                     // Direction across the health bar, perpendicular to the main axis
 
@@ -1750,31 +1750,42 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
+
+   Point start, end, mid, dir;   // Reusable containers
    
    for(S32 i = 0; i < CoreItem::CORE_PANELS; i++)
    {
-      if(panelHealth[i] > 0)
-      {
-         glColor(baseColor);
-         // Normalize health to be between 0.0 and 1.0 with panelStartingHealth
-         glLineWidth(gDefaultLineWidth * ((panelHealth[i] / panelStartingHealth) + .25));
-      }
-      else     // Panel is dead
+      static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
+      F32 theta1 = i * PANEL_ANGLE + angle;
+      F32 theta2 = (i + 1) * PANEL_ANGLE + angle;
+      
+      start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
+      end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+
+      mid = (start + end) * .5;
+      mid = mid + (pos - mid) * .25;
+
+      dir = (mid - pos);
+      dir.normalize();
+
+      glColor(coreColor);
+      renderHealthBar(panelHealth[i] / panelStartingHealth, mid, dir, 50, 8);
+
+      if(panelHealth[i] == 0)     // Panel is dead
       {
          Color c = coreColor;
          glColor(c * .2);
          glLineWidth(gDefaultLineWidth);
-      }
-
-      static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
-      F32 theta1 = i * PANEL_ANGLE + angle;
-      F32 theta2 = (i + 1) * PANEL_ANGLE + angle;
+      }      
 
       glBegin(GL_LINES);
-         glVertex2f(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
-         glVertex2f(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+         glVertex(start);
+         glVertex(end);
       glEnd();
    }
+
+
+
 
    glLineWidth(gDefaultLineWidth);
    glColor(baseColor);
@@ -1782,7 +1793,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 
    // Draw rotating rays
    glColor(coreColor);
-   drawAngledRayCircle(pos, atomSize + 4, size - 2, 2, angle, 0);
+   //drawAngledRayCircle(pos, atomSize + 4, size - 2, 2, angle, 0);
 
    // Draw atomic like graphic
    F32 t = F32(time & 1023) / 1024.f * FloatTau;
