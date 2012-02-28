@@ -892,7 +892,8 @@ void WallSegment::init(GridDatabase *database, S32 owner)
 WallSegment::~WallSegment()
 { 
    // Make sure object is out of the database
-   getDatabase()->removeFromDatabase(this, getExtent()); 
+   if(getDatabase())
+      getDatabase()->removeFromDatabase(this, getExtent()); 
 }
 
 
