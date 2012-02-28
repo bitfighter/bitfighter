@@ -208,8 +208,8 @@ void FXManager::tick(F32 dT)
       }
       else
       {
-         mDebrisChunks[i].pos   += mDebrisChunks[i].vel      * dT * .001;    // Vel is in px/s, dT is in ms 
-         mDebrisChunks[i].angle += mDebrisChunks[i].rotation * dT * .001;    // Rotation is in rad/s, dT is in ms
+         mDebrisChunks[i].pos   += mDebrisChunks[i].vel      * dT;
+         mDebrisChunks[i].angle += mDebrisChunks[i].rotation * dT;
          mDebrisChunks[i].ttl -= dT;
       }
    }

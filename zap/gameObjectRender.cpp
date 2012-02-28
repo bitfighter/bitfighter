@@ -1775,15 +1775,23 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 
       dir = (mid - pos);
       dir.normalize();
+      Point cross(dir.y, -dir.x);
 
       glColor(coreColor);
       renderHealthBar(panelHealth[i] / panelStartingHealth, mid, dir, 30 * size / 100, 7 * size / 100);
+
+      Point x = (start + end) * .5;
+      x = x + (pos - mid) * .8;      // The smaller the multiplier, the closer to the edge the health bar will be drawn
 
       if(panelHealth[i] == 0)     // Panel is dead
       {
          Color c = coreColor;
          glColor(c * .2);
          glLineWidth(gDefaultLineWidth);
+         for(U32 i = 0; i < 1; i++)
+         {
+            gClientGame->emitSpark(pos, cross * (Random::readF() * 200 - 100) + dir * Random::readF() * 300, Color(.2), Random::readF());
+         }
       }      
 
       glBegin(GL_LINES);
@@ -1842,23 +1850,36 @@ void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i)
    end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
 
    mid = (start + end) * .5;
-   //mid = mid + (pos - mid) * .4;      // The smaller the multiplier, the closer to the edge the health bar will be drawn
 
    dir = (mid - pos);
    dir.normalize(100);
    Point cross(dir.y, -dir.x);
    
    Vector<Point> points;
-   points.push_back(Point(-4,-4));
-   points.push_back(Point(4, 4));
+   points.push_back(Point(0, 0));
+   points.push_back(Point(0, 0));      // Dummy point will be removed below
 
    S32 num = Random::readI(5, 15);
    for(S32 i = 0; i < num; i++)
    {
-      Point sparkVel = dir + cross * (Random::readF() * 50  - 25) * 50 + dir * (Random::readF() * 10  - 5) * 200;
-      static_cast<ClientGame *>(game)->emitDebrisChunk(points, Colors::red, mid, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 2000 - 1000 );
-         
-         //(mid, sparkVel, Color(Random::readF() *.2 +.1, Random::readF() *.2 + .1, Random::readF() *.2 + .1), Random::readF() * 10, FXManager::SparkTypePoint);
+      points.erase(1);
+      points.push_back(Point(0, Random::readF() * 10));
+
+      Point o = start + (end - start) * Random::readF();
+      Point sparkVel = cross * (Random::readF() * 30  - 15) * .05f + dir * (Random::readF() * 10  - 3) * .2f;
+      static_cast<ClientGame *>(game)->emitDebrisChunk(points, Colors::red, o, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
+   }
+
+   num = Random::readI(5, 15);
+
+   for(S32 i = 0; i < num; i++)
+   {
+      points.erase(1);
+      points.push_back(Point(0, Random::readF() * 10));
+
+      Point o = start + (end - start) * Random::readF();
+      Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5) * .2f;
+      static_cast<ClientGame *>(game)->emitDebrisChunk(points, Color(.2), (mid + pos)/ 2, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
    }
 }
 
