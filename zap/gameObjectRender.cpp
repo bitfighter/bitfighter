@@ -1846,12 +1846,18 @@ void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i)
    dir = (mid - pos);
    dir.normalize(100);
    Point cross(dir.y, -dir.x);
+   
+   Vector<Point> points;
+   points.push_back(Point(-4,-4));
+   points.push_back(Point(4, 4));
 
-   S32 num = Random::readI(200, 1000);
+   S32 num = Random::readI(5, 15);
    for(S32 i = 0; i < num; i++)
    {
-      Point sparkVel = dir + cross * (Random::readF() * 100  - 50) + dir * (Random::readF() * 10  - 5);
-      static_cast<ClientGame *>(game)->emitSpark(mid, sparkVel, Color(Random::readF() *.2 +.1, Random::readF() *.2 + .1, Random::readF() *.2 + .1), Random::readF() * 10, FXManager::SparkTypePoint);
+      Point sparkVel = dir + cross * (Random::readF() * 50  - 25) * 50 + dir * (Random::readF() * 10  - 5) * 200;
+      static_cast<ClientGame *>(game)->emitDebrisChunk(points, Colors::red, mid, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 2000 - 1000 );
+         
+         //(mid, sparkVel, Color(Random::readF() *.2 +.1, Random::readF() *.2 + .1, Random::readF() *.2 + .1), Random::readF() * 10, FXManager::SparkTypePoint);
    }
 }
 

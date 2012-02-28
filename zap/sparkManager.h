@@ -52,6 +52,22 @@ public: //{P{P
       Point vel;
    };
 
+   struct DebrisChunk
+   {
+      Vector<Point> points;
+      Color color;
+
+      Point pos;
+      Point vel;
+      S32 ttl;
+      F32 angle;
+      F32 rotation;
+
+      void render();
+   };
+
+   Vector<DebrisChunk> mDebrisChunks;
+
    struct TeleporterEffect;
    TeleporterEffect *teleporterEffects;
 
@@ -69,6 +85,8 @@ public:
    void emitBurst(Point pos, Point scale, Color color1, Color color2);
    void emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count);
    void emitBlast(Point pos, U32 size);
+
+   void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
 
    void emitTeleportInEffect(Point pos, U32 type);
    void tick( F32 dT);

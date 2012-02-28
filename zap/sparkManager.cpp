@@ -76,21 +76,21 @@ void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType 
    else
    {
       sparkIndex = firstFreeIndex[sparkType];
-      firstFreeIndex[sparkType] += slotsNeeded;     // Point sparks take 1 slot, line sparks need 2
+      firstFreeIndex[sparkType] += slotsNeeded;    // Point sparks take 1 slot, line sparks need 2
    }
 
-   s = gSparks[sparkType] + sparkIndex;   // Assign our spark to its slot
+   s = gSparks[sparkType] + sparkIndex;            // Assign our spark to its slot
 
    s->pos = pos;
    s->vel = vel;
    s->color = color;
 
    // Use ttl if it was specified, otherwise pick something random
-   s->ttl = ttl ? ttl : 15 * TNL::Random::readF() * TNL::Random::readF();
+   s->ttl = ttl > 0 ? ttl : 15 * TNL::Random::readF() * TNL::Random::readF();
 
-   if(sparkType == SparkTypeLine)   // Line sparks require two points; add the second here
+   if(sparkType == SparkTypeLine)                  // Line sparks require two points; add the second here
    {
-      s2 = gSparks[sparkType] + sparkIndex + 1;   // Since we know we had room for two, this one should be available
+      s2 = gSparks[sparkType] + sparkIndex + 1;    // Since we know we had room for two, this one should be available
       Point len = vel;
       len.normalize(20);
       s2->pos = (pos - len);
@@ -98,6 +98,48 @@ void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType 
       s2->color = Color(color.r * 1, color.g * 0.25, color.b * 0.25);    // Give the trailing edge of this spark a fade effect
       s2->ttl = s->ttl;
    }
+}
+
+
+#define dr(x) (float) (x) * FloatTau / 360     // degreesToRadians()
+#define rd(x) (float) (x) * 360 / FloatTau    // radiansToDegrees();
+
+
+void FXManager::DebrisChunk::render()
+{
+   glPushMatrix();
+
+   glTranslate(pos);
+   glRotatef(rd(angle), 0, 0, 1);
+
+   F32 alpha = 1;
+   if(ttl < 25)
+      alpha = ttl / 25.0f;
+
+   glColor(color, alpha);
+
+   glBegin(GL_LINE_LOOP);
+      for(S32 i = 0; i < points.size(); i++)
+         glVertex(points[i]);
+   glEnd();
+
+   glPopMatrix();
+}
+
+
+void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
+{
+   DebrisChunk debrisChunk;
+
+   debrisChunk.points = points;
+   debrisChunk.color = color;
+   debrisChunk.pos = pos;
+   debrisChunk.vel = vel;
+   debrisChunk.ttl = ttl;
+   debrisChunk.angle = angle;
+   debrisChunk.rotation = rotation;
+
+   mDebrisChunks.push_back(debrisChunk);
 }
 
 
@@ -121,7 +163,7 @@ void FXManager::emitTeleportInEffect(Point pos, U32 type)
 }
 
 
-void FXManager::tick( F32 dT )
+void FXManager::tick(F32 dT)
 {
    for(U32 j = 0; j < SparkTypeCount; j++)
       for(U32 i = 0; i < firstFreeIndex[j]; )
@@ -155,6 +197,24 @@ void FXManager::tick( F32 dT )
          }
       }
 
+
+   // Kill off any old debris chunks, advance the others
+   for(S32 i = 0; i < mDebrisChunks.size(); i++)
+   {
+      if(mDebrisChunks[i].ttl < dT)
+      {
+         mDebrisChunks.erase_fast(i);
+         i--;
+      }
+      else
+      {
+         mDebrisChunks[i].pos   += mDebrisChunks[i].vel      * dT * .001;    // Vel is in px/s, dT is in ms 
+         mDebrisChunks[i].angle += mDebrisChunks[i].rotation * dT * .001;    // Rotation is in rad/s, dT is in ms
+         mDebrisChunks[i].ttl -= dT;
+      }
+   }
+
+
    for(TeleporterEffect **walk = &teleporterEffects; *walk; )
    {
       TeleporterEffect *temp = *walk;
@@ -179,10 +239,17 @@ void FXManager::render(S32 renderPass)
       {
          F32 radius = walk->time / F32(Teleporter::TeleportInExpandTime);
          F32 alpha = 1.0;
+
          if(radius > 0.5)
             alpha = (1 - radius) / 0.5f;
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(), radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
+
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(), 
+                          radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
+
+      for(S32 i = 0; i < mDebrisChunks.size(); i++)
+         mDebrisChunks[i].render();
+
    }
    else if(renderPass == 1)      // Time for sparks!!
    {
@@ -190,13 +257,13 @@ void FXManager::render(S32 renderPass)
       {
          glPointSize(gDefaultLineWidth);
 
-         TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
+         TNLAssert(glIsEnabled(GL_BLEND), "We expect blending to be on here!");
 
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
 
          glVertexPointer(2, GL_FLOAT, sizeof(Spark), &gSparks[i][0].pos);     // Where to find the vertices -- see OpenGL docs
-         glColorPointer(4, GL_FLOAT, sizeof(Spark), &gSparks[i][0].color);    // Where to find the colors -- see OpenGL docs
+         glColorPointer (4, GL_FLOAT, sizeof(Spark), &gSparks[i][0].color);   // Where to find the colors -- see OpenGL docs
 
          if((SparkType) i == SparkTypePoint)
             glDrawArrays(GL_POINTS, 0, firstFreeIndex[i]);
@@ -209,8 +276,6 @@ void FXManager::render(S32 renderPass)
    }
 }
 
-
-#define dr(x) (float) x * FloatTau / 360     // degreesToRadians()
 
 // Create a circular pattern of long sparks, a-la bomb in Gridwars
 void FXManager::emitBlast(Point pos, U32 size)
@@ -245,26 +310,26 @@ void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2)
 }
 
 
-void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
+void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2, U32 sparkCount)
 {
    F32 size = 1;
 
-   for(U32 i = 0; i < ((F32) count * size); i++)
+   for(U32 i = 0; i < sparkCount; i++)
    {
 
-      F32 th = TNL::Random::readF() * 2 * FloatPi;
+      F32 th = TNL::Random::readF() * 2 * FloatPi;                // angle
       F32 f = (TNL::Random::readF() * 0.1f + 0.9f) * 200 * size;
-      F32 t = TNL::Random::readF();
+      F32 colorBlend = TNL::Random::readF();                               
 
-      Color r;
+      Color color;
 
-      r.interp(t, color1, color2);
+      color.interp(colorBlend, color1, color2);
 
       emitSpark(
-            pos + Point(cos(th)*scale.x, sin(th)*scale.y),
-            Point(cos(th)*scale.x*f, sin(th)*scale.y*f),
-            r,
-            TNL::Random::readF() * scale.len() * 3 + scale.len()
+            pos + Point(cos(th)*scale.x, sin(th)*scale.y),        // pos
+            Point(cos(th)*scale.x*f, sin(th)*scale.y*f),          // vel
+            color,                                                // color
+            TNL::Random::readF() * scale.len() * 3 + scale.len()  // ttl
       );
    }
 }
