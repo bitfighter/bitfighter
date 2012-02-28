@@ -1860,10 +1860,10 @@ void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i)
 void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
 {
    // Here we render a simpler, non-animated Core to reduce distraction in the editor
-   glColor(coreColor);
+   glColor(Colors::white);
    drawPolygon(pos, 10, width / 2, 0);
 
-   glColor(Colors::white);
+   glColor(coreColor);
    drawCircle(pos, width / 5);
 }
 
