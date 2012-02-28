@@ -450,6 +450,37 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    if(theInfo->damageAmount == 0)
       return;
 
+   // Special logic for handling the repairing of Core panels
+   if(theInfo->damageAmount < 0)
+   {
+      S32 repairablePanelCount = 0;
+
+      // First determine how many panels have damage and are not destroyed
+      for(S32 i = 0; i < CORE_PANELS; i++)
+         if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
+            repairablePanelCount++;
+
+      // None are repairable, return
+      if(repairablePanelCount == 0)
+         return;
+
+      // Now divide up the healing to the panels that aren't at full health
+      for(S32 i = 0; i < CORE_PANELS; i++)
+         if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
+         {
+            mPanelHealth[i] -= (theInfo->damageAmount / DamageReductionRatio) / repairablePanelCount;
+
+            // Don't overflow
+            if(mPanelHealth[i] > mStartingPanelHealth)
+               mPanelHealth[i] = mStartingPanelHealth;
+
+            setMaskBits(PanelDamagedMask << i);
+         }
+
+      // We're done if we're repairing
+      return;
+   }
+
    // Check for friendly fire
    if(theInfo->damagingObject->getTeam() == this->getTeam())
       return;
@@ -479,7 +510,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    static const F32 PANEL_ANGLE = FloatTau / F32(CORE_PANELS);
    S32 hit = (S32) (combinedAngle / PANEL_ANGLE);
 
-   bool coreDestroyed = false;
    if(mPanelHealth[hit] > 0)
    {
       mPanelHealth[hit] -= theInfo->damageAmount / DamageReductionRatio;
@@ -489,6 +519,9 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
       setMaskBits(PanelDamagedMask << hit);
    }
+
+   // Determine if Core is destroyed by checking all the panel healths
+   bool coreDestroyed = false;
 
    if(mPanelHealth[hit] == 0)
    {

@@ -1170,8 +1170,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(mHelper && mHelper->processInputCode(inputCode))   // Will return true if key was processed
    {
-      // Experimental, to keep ship from moving after entering a quick chat that has the same sortcut as a movement key
-      InputCodeManager::setState(inputCode, false);      
+      // Experimental, to keep ship from moving after entering a quick chat that has the same shortcut as a movement key
+      InputCodeManager::setState(inputCode, false);
    }
    else 
    {
@@ -2562,7 +2562,7 @@ Move *GameUserInterface::getCurrentMove()
 {
    if((mCurrentChatType == NoChat) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
-      // Some helpers (like QuickChat or TeamShuffle) like to disable movement when they are active
+      // Some helpers (like TeamShuffle) like to disable movement when they are active
       if(mHelper && mHelper->isMovementDisabled())
       {
          mCurrentMove.x = 0;

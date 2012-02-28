@@ -219,7 +219,7 @@ bool QuickChatHelper::processInputCode(InputCode inputCode)
 
 bool QuickChatHelper::isMovementDisabled()
 {
-   return true;
+   return false;
 }
 
 
