@@ -318,7 +318,7 @@ void CoreItem::renderItem(const Point &pos)
 #ifndef ZAP_DEDICATED
    if(!mHasExploded)
       renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam),
-      getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelHealth, mStartingPanelHealth);
+            getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelHealth, mStartingPanelHealth);
 #endif
 }
 
@@ -747,7 +747,12 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(stream->readFlag())                    // Panel damaged
          {
             // De-normalize to real health
+            bool hadHealth = mPanelHealth[i] > 0;
             mPanelHealth[i] = mStartingPanelHealth * stream->readFloat(4);
+
+            // Check if panel just died
+            if(hadHealth && mPanelHealth[i] == 0)  
+               emitPanelDiedSparks(getGame(), getPos(), getGame()->getGameType()->getRemainingGameTimeInMs(), i);
          }
       }
    }

@@ -41,6 +41,9 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
+#include "sparkManager.h"        // For core sparks
+#include "ClientGame.h"    // DEL ME {P{P
+
 #include "SDL/SDL_opengl.h"
 
 //#include "pictureloader.h"
@@ -1740,13 +1743,18 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
+static F32 getCoreAngle(U32 time)
+{
+   return F32(time & 16383) / 16384.f * FloatTau;
+}
+
+
 void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[], F32 panelStartingHealth)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
 
    F32 atomSize = size * 0.40f;
-   F32 angle = F32(time & 16383) / 16384.f * FloatTau;
-
+   F32 angle = getCoreAngle(time);
 
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
@@ -1763,13 +1771,13 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
       end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
 
       mid = (start + end) * .5;
-      mid = mid + (pos - mid) * .25;
+      mid = mid + (pos - mid) * .4;      // The smaller the multiplier, the closer to the edge the health bar will be drawn
 
       dir = (mid - pos);
       dir.normalize();
 
       glColor(coreColor);
-      renderHealthBar(panelHealth[i] / panelStartingHealth, mid, dir, 50, 8);
+      renderHealthBar(panelHealth[i] / panelStartingHealth, mid, dir, 30 * size / 100, 7 * size / 100);
 
       if(panelHealth[i] == 0)     // Panel is dead
       {
@@ -1782,14 +1790,18 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
          glVertex(start);
          glVertex(end);
       glEnd();
+
+      //glLineWidth(gDefaultLineWidth);
+
+      if(panelHealth[i] > 0)
+      {
+         glColor(.2);
+         glBegin(GL_LINES);
+            glVertex(pos);
+            glVertex(mid);
+         glEnd();
+      }
    }
-
-
-
-
-   glLineWidth(gDefaultLineWidth);
-   glColor(baseColor);
-   drawCircle(pos, atomSize + 2);
 
    // Draw rotating rays
    glColor(coreColor);
@@ -1808,6 +1820,38 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
          glVertex2f(pos.x + cos(rotate + angle) * x + sin(rotate + angle) * y, pos.y + sin(rotate + angle) * x - cos(rotate + angle) * y);
       }
       glEnd();
+   }
+
+   glColor(baseColor);
+   drawCircle(pos, atomSize + 2);
+}
+
+
+void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i)
+{
+   F32 angle = getCoreAngle(time);
+
+   Point start, end, mid, dir;
+   F32 size = 100;
+   static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
+   F32 theta1 = i * PANEL_ANGLE + angle;
+   F32 theta2 = (i + 1) * PANEL_ANGLE + angle;
+      
+   start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
+   end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+
+   mid = (start + end) * .5;
+   //mid = mid + (pos - mid) * .4;      // The smaller the multiplier, the closer to the edge the health bar will be drawn
+
+   dir = (mid - pos);
+   dir.normalize(100);
+   Point cross(dir.y, -dir.x);
+
+   S32 num = Random::readI(200, 1000);
+   for(S32 i = 0; i < num; i++)
+   {
+      Point sparkVel = dir + cross * (Random::readF() * 100  - 50) + dir * (Random::readF() * 10  - 5);
+      static_cast<ClientGame *>(game)->emitSpark(mid, sparkVel, Color(Random::readF() *.2 +.1, Random::readF() *.2 + .1, Random::readF() *.2 + .1), Random::readF() * 10, FXManager::SparkTypePoint);
    }
 }
 

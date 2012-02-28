@@ -217,6 +217,8 @@ void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[10], F32 panelStartingHealth);
+
+void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 panel);
 void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);
 
 void renderSoccerBall(const Point &pos, F32 size);

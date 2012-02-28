@@ -35,6 +35,7 @@ namespace Zap
 
 class FXManager
 {
+public: //{P{P
    enum SparkType
    {
       SparkTypePoint = 0,
