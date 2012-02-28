@@ -668,6 +668,7 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
    return add + updateSkips * 0.2f;
 }
 
+
 void GameObject::damageObject(DamageInfo *theInfo)
 {
    // Do nothing

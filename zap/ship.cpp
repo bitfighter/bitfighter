@@ -2151,7 +2151,7 @@ void Ship::render(S32 layerIndex)
          glColor(Colors::yellow, .4f);    // Decrease this value for fainter shield
 
       F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
-      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24, offset);
+      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
 
       // bink fading code... don't like it
       //      S32 aaa = 300;  // blink rate
@@ -2185,10 +2185,10 @@ void Ship::render(S32 layerIndex)
          else if(mRepairTargets[i])
          {
             glBegin(GL_LINES);
-            glVertex2f(pos.x, pos.y);
+            glVertex(pos);
 
             Point shipPos = mRepairTargets[i]->getPos();
-            glVertex2f(shipPos.x, shipPos.y);
+            glVertex(shipPos);
             glEnd();
          }
       }
