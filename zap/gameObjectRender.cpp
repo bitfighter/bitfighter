@@ -1795,10 +1795,11 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 
       if(panelHealth[i] > 0)
       {
-         glColor(.2);
          glBegin(GL_LINES);
-            glVertex(pos);
+            glColor(.2);
             glVertex(mid);
+            glColor(Colors::black);
+            glVertex(pos);
          glEnd();
       }
    }
