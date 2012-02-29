@@ -362,7 +362,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 
       for(S32 i = 0; i < rows; i++)
       {
-         names.push_back(results[i][0]);
+         names.push_back(StringTableEntry(results[i][0]));
          scores.push_back(results[i][1]);
       }
 

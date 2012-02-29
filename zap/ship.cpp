@@ -2150,7 +2150,7 @@ void Ship::render(S32 layerIndex)
       else
          glColor(Colors::yellow, .4f);    // Decrease this value for fainter shield
 
-      F32 offset = F32(Platform::getRealMilliseconds()) / 3500.0f;
+      F32 offset = F32(Platform::getRealMilliseconds() % 21988) * Float2Pi / 21988;
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
 
       // bink fading code... don't like it
