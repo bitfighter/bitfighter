@@ -536,6 +536,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       drawCircle(0, 0, shieldRadius);
    }
       
+   // Sensor
    if(sensorActive)
    {
       glColor(Colors::white, alpha);
@@ -543,6 +544,7 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
       drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
    }
 
+   // Repair
    if(repairActive)
    {
       glLineWidth(gLineWidth3);
