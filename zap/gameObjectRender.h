@@ -47,6 +47,8 @@ extern const Color *SELECT_COLOR;
 
 static const S32 NO_NUMBER = -1;
 
+class Ship;
+
 //////////
 // Primitives
 extern void glVertex(const Point &p);
@@ -109,7 +111,10 @@ extern void renderCenteredString(const Point &pos, S32 size, const char *string)
 extern void renderCenteredString(const Point &pos, F32 size, const char *string);
 
 extern void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
-                       bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor);
+                       bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
+
+void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<GameObject> > &repairTargets, F32 alpha);   // Render repair rays to all the repairing objects
+
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 
 extern void renderAimVector();

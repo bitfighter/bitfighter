@@ -148,7 +148,6 @@ public:
       BoostMaxVelocity = 700,   // points per second
       BoostAcceleration = 5000, // points per second per second
 
-      RepairDisplayRadius = 18,
       VisibilityRadius = 30,
       KillDeleteDelay = 1500,
       ExplosionFadeTime = 300,

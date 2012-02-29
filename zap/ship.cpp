@@ -2133,24 +2133,28 @@ void Ship::render(S32 layerIndex)
 
 
    renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
-              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), hasModule(ModuleArmor));
+              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), 
+              isModulePrimaryActive(ModuleRepair), hasModule(ModuleArmor));
 
    if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
       renderAimVector();
 
    glPopMatrix();
 
-   if(mSpawnShield.getCurrent() != 0)  // Add post-spawn invulnerability effect
+   if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
    {
-      //glColor(Colors::green, /*F32(mSpawnShield.getCurrent()) / F32(SpawnShieldTime) * .75*/0.65f);
-      
+      static const S32 blinkStartTime = 1500;
+      static const S32 blinkCycleDuration = 300;
+      static const S32 blinkDuration = blinkCycleDuration / 2;       // Time shield is yellow or green during 
 
-      if(mSpawnShield.getCurrent() > 1500 || mSpawnShield.getCurrent() % 300 > 150)
-         glColor(Colors::green, .65f);    // Decrease this value for fainter shield
+      if(mSpawnShield.getCurrent() > blinkStartTime || mSpawnShield.getCurrent() % blinkCycleDuration > blinkDuration)
+         glColor(Colors::green65);  
       else
-         glColor(Colors::yellow, .4f);    // Decrease this value for fainter shield
+         glColor(Colors::yellow40);
 
-      F32 offset = F32(Platform::getRealMilliseconds() % 21988) * Float2Pi / 21988;
+      // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
+      const S32 biggishNumber = 21988;
+      F32 offset = F32(Platform::getRealMilliseconds() % biggishNumber) * FloatTau / biggishNumber;
       drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
 
       // bink fading code... don't like it
@@ -2172,28 +2176,7 @@ void Ship::render(S32 layerIndex)
    }
 
    if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
-   {
-      glLineWidth(gLineWidth3);
-      glColor(Colors::red, alpha);
-      // render repair rays to all the repairing objects
-      Point pos = mMoveState[RenderState].pos;
-
-      for(S32 i = 0; i < mRepairTargets.size(); i++)
-      {
-         if(mRepairTargets[i].getPointer() == this)
-            drawCircle(pos, RepairDisplayRadius);
-         else if(mRepairTargets[i])
-         {
-            glBegin(GL_LINES);
-            glVertex(pos);
-
-            Point shipPos = mRepairTargets[i]->getPos();
-            glVertex(shipPos);
-            glEnd();
-         }
-      }
-      glLineWidth(gDefaultLineWidth);
-   }
+      renderShipRepairRays(mMoveState[RenderState].pos, this, mRepairTargets, alpha);
 
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)

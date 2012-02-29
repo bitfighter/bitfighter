@@ -44,24 +44,27 @@ namespace Colors
 
    const Color gray40(0.40);
    const Color gray50(0.50);
+   const Color gray70(0.70);
    const Color gray80(0.80);
 
-   const Color blue40(0, 0, .40f);
+   const Color yellow40(.40f, .40f, 0);
    const Color orange50(1, .50f, 0);      // Rabbit orange
    const Color orange67(1, .67f ,0);      // A more reddish orange
    const Color paleRed(1, .50f, .50f);    // A washed out red
    const Color paleBlue(.50f, .50f, 1);   // A washed out blue
    const Color palePurple(1, .50f, 1);    // A washed out purple (pinkish?)
+
    const Color paleGreen(.50f, 1, .50f);  // A washed out green
    const Color richGreen(0, .35f, 0);
-
-   const Color red50  (.50f, 0, 0);
-   const Color red80  (.80f, 0, 0);
+   const Color green65(0, 0.65f, 0);
    const Color green80(0, .80f, 0);
-   const Color blue80 (0, 0, .80f);
 
    const Color red40(.40f, 0, 0);
+   const Color red50(.50f, 0, 0);
+   const Color red80(.80f, 0, 0);
 
+   const Color blue40(0, 0, .40f);
+   const Color blue80(0, 0, .80f);
 
    // Some special colors
    const Color menuHelpColor(green);
