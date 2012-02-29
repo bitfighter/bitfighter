@@ -492,10 +492,17 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
 
    // Which panel was hit?  Look at shot position, compare it to core position
+   F32 angle;
    Point p = getPos();
-   Point cp = theInfo->collisionPoint;
 
-   F32 angle = p.angleTo(cp);
+   // Determine angle for Point projectiles like Phaser
+   if(theInfo->damageType == DamageTypePoint)
+      angle = p.angleTo(theInfo->collisionPoint);
+
+   // Area projectiles
+   else
+      angle = p.angleTo(theInfo->damagingObject->getPos());
+
 
    F32 coreAngle = F32(getGame()->getGameType()->getRemainingGameTimeInMs() & 16383) / 16384.f * FloatTau;
 
