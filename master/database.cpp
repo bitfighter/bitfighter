@@ -344,6 +344,64 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
 }
 
 
+void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores)
+{
+   // Find server in database
+   string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
+                "ORDER BY " + col2 + " LIMIT " + itos(count) + ";";
+
+   DbQuery query(mDb, mServer, mUser, mPassword);
+
+#ifdef BF_WRITE_TO_MYSQL
+   if(query.query)
+   {
+      S32 serverId_int = -1;
+      StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
+
+      S32 rows = results.num_rows();
+
+      for(S32 i = 0; i < rows; i++)
+      {
+         names.push_back(results[i][0]);
+         scores.push_back(results[i][1]);
+      }
+
+      // Make sure we have the correct number of responses, even if table doesn't have enough records
+      for(S32 i = rows; i < count; i++)
+      {
+         names.push_back("");
+         scores.push_back(U16_MAX);
+      }
+   }
+   else
+#endif
+   if(query.sqliteDb)
+   {
+      char *err = 0;
+      char **results;
+      int rows, cols;
+
+      sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+
+      // results[0] and results[1] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
+      for(S32 i = 0; i < rows * 2; i += 2)
+      {
+         names.push_back(results[i + 2]);
+         scores.push_back(atoi(results[i + 3]));
+      }
+
+      // Make sure we have the correct number of responses, even if table doesn't have enough records
+      for(S32 i = rows; i < count; i++)
+      {
+         names.push_back("");
+         scores.push_back(U16_MAX);
+      }
+
+      sqlite3_free_table(results);
+   }
+}
+
+
 void DatabaseWriter::createStatsDatabase() 
 {
    DbQuery query(mDb, mServer, mUser, mPassword);

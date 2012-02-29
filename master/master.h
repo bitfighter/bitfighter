@@ -205,6 +205,9 @@ public:
    void writeLevelInfoToDb(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
                            const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 
+
+   void getLeaderBoard (S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores);
+
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 

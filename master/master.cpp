@@ -729,7 +729,8 @@ static const char *sanitizeForJson(const char *value)
 
 
    void MasterServerConnection::writeLevelInfoToDb(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
-                                                   const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds)
+                                                   const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, 
+                                                   U32 gameDurationInSeconds)
    {
       if(!checkActivityTime(6000))  // 6 seconds
          return;
@@ -740,9 +741,19 @@ static const char *sanitizeForJson(const char *value)
 
       DatabaseWriter databaseWriter = getDatabaseWriter();
 
-
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
       databaseWriter.insertLevelInfo(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
+   }
+
+
+   void MasterServerConnection::getLeaderBoard(S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores)
+   {
+      DatabaseWriter databaseWriter = getDatabaseWriter();
+
+      databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  count, names, scores);
+      databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  count, names, scores);
+      databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", count, names, scores);
+      databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", count, names, scores);
    }
 
 
@@ -770,7 +781,12 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLeaderboard, ())
    {
-      // TODO: Send top 12 names/scores to client with m2cSendLeaderboard
+      Vector<StringTableEntry> names;
+      Vector<U16> scores;
+
+      getLeaderBoard(3, names, scores);      // Put leaders into names/scores Vectors
+
+      m2cSendLeaderboard(names, scores);
    }
 
 
