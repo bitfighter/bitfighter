@@ -1811,7 +1811,8 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
          glColor(c * .2);
          glLineWidth(gDefaultLineWidth);
 
-         gClientGame->emitSpark(pos, cross * (Random::readF() * 200 - 100) + dir * Random::readF() * 300, Color(.2), Random::readF());
+         if(time % 100 < 20)
+            gClientGame->emitSpark(pos, cross * (Random::readF() * 200 - 100) + dir * Random::readF() * 300, Color(.2), Random::readF());
       }      
 
       glBegin(GL_LINES);
