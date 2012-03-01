@@ -777,6 +777,10 @@ bool Ship::findRepairTargets()
       if(item->getTeam() != -1 && item->getTeam() != getTeam())
          continue;
 
+      // In case of CoreItem, don't repair if no repair locations are returned
+      if(item->getRepairLocations().size() == 0)
+         continue;
+
       mRepairTargets.push_back(item);
    }
    return mRepairTargets.size() != 0;
@@ -2143,9 +2147,9 @@ void Ship::render(S32 layerIndex)
 
    if(mSpawnShield.getCurrent() != 0)  // Add spawn shield -- has a period of being on solidly, then blinks yellow 
    {
-      static const S32 blinkStartTime = 1500;
-      static const S32 blinkCycleDuration = 300;
-      static const S32 blinkDuration = blinkCycleDuration / 2;       // Time shield is yellow or green during 
+      static const U32 blinkStartTime = 1500;
+      static const U32 blinkCycleDuration = 300;
+      static const U32 blinkDuration = blinkCycleDuration / 2;       // Time shield is yellow or green during
 
       if(mSpawnShield.getCurrent() > blinkStartTime || mSpawnShield.getCurrent() % blinkCycleDuration > blinkDuration)
          glColor(Colors::green65);  
