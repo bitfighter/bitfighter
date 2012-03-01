@@ -681,6 +681,15 @@ bool GameObject::collide(GameObject *hitObject)
 }
 
 
+Vector<Point> GameObject::getReapirLocations()
+{
+   Vector<Point> repairLocations;
+   repairLocations.push_back(getPos());
+
+   return repairLocations;
+}
+
+
 // Returns number of ships hit
 S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
 {

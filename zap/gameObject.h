@@ -363,6 +363,7 @@ public:
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
 
    virtual bool collide(GameObject *hitObject);
+   virtual Vector<Point> getReapirLocations();     // Gets location(s) where repair rays should be rendered while object is being repaired
 
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);

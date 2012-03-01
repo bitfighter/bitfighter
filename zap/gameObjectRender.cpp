@@ -509,12 +509,12 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    static F32 shipInnardPoints[] = { -12, -13,   0, 22,   12, -13 };
    renderVertexArray(shipInnardPoints, ARRAYSIZE(shipInnardPoints) / 2, GL_LINE_LOOP);
 
+   renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4);
+
    // Grey outer hull
    glColor(Colors::gray70, alpha);
    static F32 shipHullPoints[] = { -20, -15,   0, 25,   20, -15 };
    renderVertexArray(shipHullPoints, ARRAYSIZE(shipHullPoints) / 2, GL_LINE_LOOP);
-
-   renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4);
 
    // Armor
    if(hasArmor)
@@ -565,11 +565,14 @@ void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<Gam
    {
       if(repairTargets[i] && repairTargets[i].getPointer() != ship)
       {
-         Point shipPos = repairTargets[i]->getPos();
+         Vector<Point> targetRepairLocations = repairTargets[i]->getReapirLocations();
 
          glBegin(GL_LINES);
-            glVertex(pos);
-            glVertex(shipPos);
+            for(S32 i = 0; i < targetRepairLocations.size(); i++)
+            {
+               glVertex(pos);
+               glVertex(targetRepairLocations[i]);
+            }
          glEnd();
       }
    }
