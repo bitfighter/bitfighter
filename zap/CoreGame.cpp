@@ -292,6 +292,8 @@ U32 CoreItem::mCurrentExplosionNumber = 0;  // zero indexed
 // for easier bit transmission
 const F32 CoreItem::DamageReductionRatio = 1000.0f;
 
+const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CoreItem::CORE_PANELS;
+
 // Constructor
 CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
 {
@@ -515,7 +517,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    while(combinedAngle >= FloatTau)
       combinedAngle -= FloatTau;
 
-   static const F32 PANEL_ANGLE = FloatTau / F32(CORE_PANELS);
    S32 hit = (S32) (combinedAngle / PANEL_ANGLE);
 
    if(mPanelHealth[hit] > 0)
@@ -630,7 +631,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    Point start, end, mid, dir;
    F32 size = 100;
-   static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
+
    F32 theta1 = panelIndex * PANEL_ANGLE + angle;
    F32 theta2 = (panelIndex + 1) * PANEL_ANGLE + angle;
 
@@ -747,6 +748,34 @@ F32 CoreItem::getHealth()
 {
    // health is from 0 to 1.0
    return getTotalHealth() / mStartingHealth;
+}
+
+
+Point CoreItem::getPanelMidpoint(S32 panelIndex)
+{
+   F32 angle = getCoreAngle(getGame()->getGameType()->getRemainingGameTimeInMs());
+   F32 size = calcCoreWidth() / 2;
+   Point pos = getPos();
+
+   F32 theta1 = panelIndex * CoreItem::PANEL_ANGLE + angle;
+   F32 theta2 = (panelIndex + 1) * CoreItem::PANEL_ANGLE + angle;
+
+   Point start(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
+   Point end(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+
+   return (start + end) * .5;
+}
+
+
+Vector<Point> CoreItem::getRepairLocations()
+{
+   Vector<Point> repairLocations;
+
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
+         repairLocations.push_back(getPanelMidpoint(i));
+
+   return repairLocations;
 }
 
 

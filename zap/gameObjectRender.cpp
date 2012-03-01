@@ -1785,9 +1785,8 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
    
    for(S32 i = 0; i < CoreItem::CORE_PANELS; i++)
    {
-      static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
-      F32 theta1 = i * PANEL_ANGLE + angle;
-      F32 theta2 = (i + 1) * PANEL_ANGLE + angle;
+      F32 theta1 = i * CoreItem::PANEL_ANGLE + angle;
+      F32 theta2 = (i + 1) * CoreItem::PANEL_ANGLE + angle;
       
       start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
       end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);

@@ -91,6 +91,7 @@ typedef Item Parent;
 
 public:
    static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
+   static const F32 PANEL_ANGLE;
 
 private:
    static const U32 CoreStartWidth = 200;
@@ -142,6 +143,10 @@ public:
    void setStartingHealth(F32 health);
    F32 getTotalHealth();                  // Returns total health of all panels
    F32 getHealth();                       // Returns overall health of item as a ratio between 0 and 1
+
+   Point getPanelMidpoint(S32 panelIndex);
+
+   Vector<Point> getRepairLocations();
 
    void onAddedToGame(Game *theGame);
 
