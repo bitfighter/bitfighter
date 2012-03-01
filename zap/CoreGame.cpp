@@ -318,7 +318,8 @@ void CoreItem::renderItem(const Point &pos)
 #ifndef ZAP_DEDICATED
    if(!mHasExploded)
       renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam),
-            getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelHealth, mStartingPanelHealth);
+            getGame()->getGameType()->getRemainingGameTimeInMs(),
+            mPanelHealth, mStartingPanelHealth);
 #endif
 }
 
@@ -618,6 +619,61 @@ void CoreItem::doExplosion(const Point &pos)
 }
 
 
+//   void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i, const Color &color)
+void CoreItem::doPanelDebris(S32 panelIndex)
+{
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   Point pos = getPos();
+   F32 angle = getCoreAngle(game->getGameType()->getRemainingGameTimeInMs());
+
+   Point start, end, mid, dir;
+   F32 size = 100;
+   static const F32 PANEL_ANGLE = FloatTau / CoreItem::CORE_PANELS;
+   F32 theta1 = panelIndex * PANEL_ANGLE + angle;
+   F32 theta2 = (panelIndex + 1) * PANEL_ANGLE + angle;
+
+   start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
+   end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+
+   mid = (start + end) * .5;
+
+   dir = (mid - pos);
+   dir.normalize(100);
+   Point cross(dir.y, -dir.x);
+
+   Vector<Point> points;
+   points.push_back(Point(0, 0));
+   points.push_back(Point(0, 0));      // Dummy point will be removed below
+
+   // Draw debris for the panel
+   S32 num = Random::readI(5, 15);
+   for(S32 i = 0; i < num; i++)
+   {
+      points.erase(1);
+      points.push_back(Point(0, Random::readF() * 10));
+
+      Point o = start + (end - start) * Random::readF();
+      Point sparkVel = cross * (Random::readF() * 30  - 15) * .05f + dir * (Random::readF() * 10  - 3) * .2f;
+      game->emitDebrisChunk(points, *(getTeamColor(mTeam)), o, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
+   }
+
+
+   // Draw debris for the panel health 'stake'
+   num = Random::readI(5, 15);
+   for(S32 i = 0; i < num; i++)
+   {
+      points.erase(1);
+      points.push_back(Point(0, Random::readF() * 10));
+
+//      Point o = start + (end - start) * Random::readF();
+      Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5) * .2f;
+      game->emitDebrisChunk(points, Color(.2), (mid + pos)/ 2, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
+   }
+}
+
+
 void CoreItem::idle(GameObject::IdleCallPath path)
 {
    // Update attack timer on the server
@@ -792,8 +848,7 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
             // Check if panel just died
             if(hadHealth && mPanelHealth[i] == 0)  
-               emitPanelDiedSparks(getGame(), getPos(),
-                     getGame()->getGameType()->getRemainingGameTimeInMs(), i, *(getTeamColor(mTeam)));
+               doPanelDebris(i);
          }
       }
    }

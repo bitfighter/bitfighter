@@ -150,6 +150,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void onItemExploded(Point pos);
    void doExplosion(const Point &pos);
+   void doPanelDebris(S32 panelIndex);
 
    void idle(GameObject::IdleCallPath path);
 
