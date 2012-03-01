@@ -620,17 +620,12 @@ void CoreItem::doExplosion(const Point &pos)
 }
 
 
-//   void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i, const Color &color)
-void CoreItem::doPanelDebris(S32 panelIndex)
+void CoreItem::getPanelPoints(S32 panelIndex, S32 time, Point &start, Point &end, Point &mid)
 {
-   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-   ClientGame *game = static_cast<ClientGame *>(getGame());
+   F32 size = 100;
 
    Point pos = getPos();
-   F32 angle = getCoreAngle(game->getGameType()->getRemainingGameTimeInMs());
-
-   Point start, end, mid, dir;
-   F32 size = 100;
+   F32 angle = getCoreAngle(time);
 
    F32 theta1 = panelIndex * PANEL_ANGLE + angle;
    F32 theta2 = (panelIndex + 1) * PANEL_ANGLE + angle;
@@ -638,26 +633,50 @@ void CoreItem::doPanelDebris(S32 panelIndex)
    start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
    end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
 
-   mid = (start + end) * .5;
+   mid.set((start + end) * .5);
+}
 
-   dir = (mid - pos);
+
+//   void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i, const Color &color)
+void CoreItem::doPanelDebris(S32 panelIndex)
+{
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   F32 size = 100;
+
+   Point pos = getPos();               // Center of core
+
+   Point start, end, mid;
+   getPanelPoints(panelIndex, game->getGameType()->getRemainingGameTimeInMs(), start, end, mid);
+
+   Point dir = mid - pos;              // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
-   Point cross(dir.y, -dir.x);
+   Point cross(dir.y, -dir.x);         // Line parallel to the panel, perpendicular to dir
 
+   // Debris line is relative to (0,0)
    Vector<Point> points;
    points.push_back(Point(0, 0));
-   points.push_back(Point(0, 0));      // Dummy point will be removed below
+   points.push_back(Point(0, 0));      // Dummy point will be replaced below
 
    // Draw debris for the panel
    S32 num = Random::readI(5, 15);
+   const Color *teamColor = getTeamColor(mTeam);
+
+   Point chunkPos, chunkVel;           // Reusable containers
+
    for(S32 i = 0; i < num; i++)
    {
       points.erase(1);
       points.push_back(Point(0, Random::readF() * 10));
 
-      Point o = start + (end - start) * Random::readF();
-      Point sparkVel = cross * (Random::readF() * 30  - 15) * .05f + dir * (Random::readF() * 10  - 3) * .2f;
-      game->emitDebrisChunk(points, *(getTeamColor(mTeam)), o, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
+      chunkPos = start + (end - start) * Random::readF();
+      chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
+
+      F32 ttl = Random::readF() * 50  + 250;
+      F32 startAngle = Random::readF() * FloatTau;
+      F32 rotationRate = Random::readF() * 4 - 2;
+      game->emitDebrisChunk(points, *teamColor, chunkPos, chunkVel, ttl, startAngle, rotationRate);
    }
 
 

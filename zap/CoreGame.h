@@ -153,6 +153,10 @@ public:
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   // Some panel geometry
+   void getPanelPoints(S32 panelIndex, S32 time, Point &start, Point &end, Point &mid);
+
    void onItemExploded(Point pos);
    void doExplosion(const Point &pos);
    void doPanelDebris(S32 panelIndex);
