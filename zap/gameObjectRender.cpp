@@ -1822,10 +1822,14 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 
       //glLineWidth(gDefaultLineWidth);
 
+      // Draw health stakes
       if(panelHealth[i] > 0)
       {
          glBegin(GL_LINES);
-            glColor(.2);
+            if(panelHealth[i] == panelStartingHealth)
+               glColor(coreColor);
+            else
+               glColor(.2);
             glVertex(mid);
             glColor(Colors::black);
             glVertex(pos);
