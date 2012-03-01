@@ -1858,7 +1858,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 }
 
 
-void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i)
+void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i, const Color &color)
 {
    F32 angle = getCoreAngle(time);
 
@@ -1889,7 +1889,7 @@ void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i)
 
       Point o = start + (end - start) * Random::readF();
       Point sparkVel = cross * (Random::readF() * 30  - 15) * .05f + dir * (Random::readF() * 10  - 3) * .2f;
-      static_cast<ClientGame *>(game)->emitDebrisChunk(points, Colors::red, o, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
+      static_cast<ClientGame *>(game)->emitDebrisChunk(points, color, o, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
    }
 
    num = Random::readI(5, 15);

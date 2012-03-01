@@ -792,7 +792,8 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
             // Check if panel just died
             if(hadHealth && mPanelHealth[i] == 0)  
-               emitPanelDiedSparks(getGame(), getPos(), getGame()->getGameType()->getRemainingGameTimeInMs(), i);
+               emitPanelDiedSparks(getGame(), getPos(),
+                     getGame()->getGameType()->getRemainingGameTimeInMs(), i, *(getTeamColor(mTeam)));
          }
       }
    }
