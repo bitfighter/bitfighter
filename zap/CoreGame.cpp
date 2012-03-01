@@ -667,8 +667,8 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    for(S32 i = 0; i < num; i++)
    {
-      points.erase(1);
-      points.push_back(Point(0, Random::readF() * 10));
+      static const S32 MAX_CHUNK_LENGTH = 10;
+      points[1].set(0, Random::readF() * MAX_CHUNK_LENGTH);
 
       chunkPos = start + (end - start) * Random::readF();
       chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
