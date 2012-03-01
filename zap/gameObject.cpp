@@ -681,7 +681,7 @@ bool GameObject::collide(GameObject *hitObject)
 }
 
 
-Vector<Point> GameObject::getReapirLocations()
+Vector<Point> GameObject::getRepairLocations()
 {
    Vector<Point> repairLocations;
    repairLocations.push_back(getPos());
