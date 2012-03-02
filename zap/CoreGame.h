@@ -103,7 +103,7 @@ private:
    static const U32 ExplosionInterval = 600;
    static const U32 ExplosionCount = 3;
 
-   static U32 mCurrentExplosionNumber;
+   U32 mCurrentExplosionNumber;
 
    static const F32 DamageReductionRatio;
 
