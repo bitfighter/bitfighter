@@ -121,14 +121,13 @@ private:
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
 #endif
 protected:
-      enum MaskBits {
+   enum MaskBits {
       PanelDamagedMask = Parent::FirstFreeMask << 0,  // each bit mask have own panel updates (PanelDamagedMask << n)
       PanelDamagedAllMask = ((1 << CORE_PANELS) - 1) * PanelDamagedMask,  // all bits of PanelDamagedMask
       FirstFreeMask   = Parent::FirstFreeMask << CORE_PANELS
    };
 
 public:
-
    CoreItem();     // Constructor
    CoreItem *clone() const;
 
