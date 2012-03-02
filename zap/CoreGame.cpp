@@ -467,8 +467,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       for(S32 i = 0; i < CORE_PANELS; i++)
          if(isPanelDamaged(i))
          {
-            Point start, end, mid;
-            getPanelPoints(i, start, end, mid);
+            Point start, end, mid, repair;
+            getPanelPoints(i, start, end, mid, repair);
 
             F32 distanceSq1 = start.distSquared(theInfo->damagingObject->getPos());
             F32 distanceSq2 = end.distSquared(theInfo->damagingObject->getPos());
@@ -617,7 +617,7 @@ void CoreItem::doExplosion(const Point &pos)
 }
 
 
-void CoreItem::getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid)
+void CoreItem::getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid, Point &repair)
 {
    F32 size = calcCoreWidth() / 2;
 
@@ -631,6 +631,7 @@ void CoreItem::getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &m
    end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
 
    mid.set((start + end) * .5);
+   repair.set(mid + (pos - mid) * .4);
 }
 
 
@@ -641,8 +642,8 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    Point pos = getPos();               // Center of core
 
-   Point start, end, mid;
-   getPanelPoints(panelIndex, start, end, mid);
+   Point start, end, mid, repair;
+   getPanelPoints(panelIndex, start, end, mid, repair);
 
    Point dir = mid - pos;              // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
@@ -733,11 +734,11 @@ void CoreItem::idle(GameObject::IdleCallPath path)
    // Emit some sparks from dead panels
    if(Platform::getRealMilliseconds() % 100 < 20)  // 20% of the time...
    {
-      Point start, end, mid, cross, dir;
+      Point start, end, mid, cross, dir, repair;
 
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
-         getPanelPoints(i, start, end, mid);
+         getPanelPoints(i, start, end, mid, repair);
 
          if(mPanelHealth[i] == 0)                  // Panel is dead
          {
@@ -792,17 +793,14 @@ F32 CoreItem::getHealth()
 Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
-   Point start, end, mid;
+   Point start, end, mid, repair;
 
    for(S32 i = 0; i < CORE_PANELS; i++)
       if(isPanelDamaged(i))
       {
-         getPanelPoints(i, start, end, mid);    // Fills start, end, and mid
-         F32 distanceSq1 = start.distSquared(repairOrigin);
-         F32 distanceSq2 = end.distSquared(repairOrigin);
+         getPanelPoints(i, start, end, mid, repair);    // Fills start, end, mid, and repair
 
-         if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
-               distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+         if(repair.distSquared(repairOrigin) <= Ship::RepairRadius * Ship::RepairRadius)
             repairLocations.push_back(mid);
       }
 

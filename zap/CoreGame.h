@@ -154,7 +154,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    // Some panel geometry
-   void getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid);
+   void getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid, Point &repair);
 
    void onItemExploded(Point pos);
    void doExplosion(const Point &pos);
