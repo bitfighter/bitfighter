@@ -287,7 +287,6 @@ class LuaCore;
 EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 #endif
 
-U32 CoreItem::mCurrentExplosionNumber = 0;  // zero indexed
 
 // Ratio at which damage is reduced so that Core Health can fit between 0 and 1.0
 // for easier bit transmission
@@ -305,6 +304,7 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
    mHasExploded = false;
 
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
+   mCurrentExplosionNumber = 0;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
 }
@@ -463,18 +463,22 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    // Special logic for handling the repairing of Core panels
    if(theInfo->damageAmount < 0)
    {
+      Point start, end, damagerPos;
+      PanelGeom *panelGeom = getPanelGeom();
+
       // Heal each damaged core if it is in range
       for(S32 i = 0; i < CORE_PANELS; i++)
          if(isPanelDamaged(i))
          {
-            Point start, end, mid, repair;
-            getPanelPoints(i, start, end, mid, repair);
+            start.set(panelGeom->getStart(i));
+            end  .set(panelGeom->getEnd(i));
+            damagerPos = theInfo->damagingObject->getPos();
 
-            F32 distanceSq1 = start.distSquared(theInfo->damagingObject->getPos());
-            F32 distanceSq2 = end.distSquared(theInfo->damagingObject->getPos());
+            F32 distanceSq1 = start.distSquared(damagerPos);
+            F32 distanceSq2 = end  .distSquared(damagerPos);
 
             if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
-                  distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+               distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
             {
                mPanelHealth[i] -= theInfo->damageAmount / DamageReductionRatio;
 
@@ -617,21 +621,37 @@ void CoreItem::doExplosion(const Point &pos)
 }
 
 
-void CoreItem::getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid, Point &repair)
+CoreItem::PanelGeom *CoreItem::getPanelGeom()
 {
-   F32 size = calcCoreWidth() / 2;
+   if(mPanelGeom.isValid)
+      return &mPanelGeom;
+
+   F32 size = calcCoreWidth() * .5;
 
    Point pos = getPos();
    F32 angle = getCoreAngle(getGame()->getGameType()->getRemainingGameTimeInMs());
 
-   F32 theta1 = panelIndex       * PANEL_ANGLE + angle;
-   F32 theta2 = (panelIndex + 1) * PANEL_ANGLE + angle;
+   F32 angles[CORE_PANELS];
 
-   start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
-   end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      angles[i] = i * PANEL_ANGLE + angle;
 
-   mid.set((start + end) * .5);
-   repair.set(mid + (pos - mid) * .4);
+   for(S32 i = 0; i < CORE_PANELS; i++)
+      mPanelGeom.vert[i].set(pos.x + cos(angles[i]) * size, pos.y + sin(angles[i]) * size);
+
+   Point start, end;
+   for(S32 i = 0; i < CORE_PANELS; i++)
+   {
+      start = mPanelGeom.vert[i];
+      end   = mPanelGeom.vert[(i + 1) % CORE_PANELS];      // Next point, with wrap-around
+
+      mPanelGeom.mid[i].set((start + end) * .5);
+      mPanelGeom.repair[i].set(mPanelGeom.mid[i] + (pos - mPanelGeom.mid[i]) * .4);
+   }
+
+   mPanelGeom.isValid = true;
+
+   return &mPanelGeom;
 }
 
 
@@ -642,10 +662,9 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    Point pos = getPos();               // Center of core
 
-   Point start, end, mid, repair;
-   getPanelPoints(panelIndex, start, end, mid, repair);
-
-   Point dir = mid - pos;              // Line extending from the center of the core towards the center of the panel
+   PanelGeom *panelGeom = getPanelGeom();
+   
+   Point dir = panelGeom->mid[panelIndex] - pos;   // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
    Point cross(dir.y, -dir.x);         // Line parallel to the panel, perpendicular to dir
 
@@ -665,7 +684,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       static const S32 MAX_CHUNK_LENGTH = 10;
       points[1].set(0, Random::readF() * MAX_CHUNK_LENGTH);
 
-      chunkPos = start + (end - start) * Random::readF();
+      chunkPos = panelGeom->getStart(panelIndex) + (panelGeom->getEnd(panelIndex) - panelGeom->getStart(panelIndex)) * Random::readF();
       chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
 
       F32 ttl = Random::readF() * 50  + 250;
@@ -683,13 +702,19 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       points.push_back(Point(0, Random::readF() * 10));
 
       Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5) * .2f;
-      game->emitDebrisChunk(points, Color(.2), (mid + pos)/ 2, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
+      F32 ttl = Random::readF() * 50  + 250;
+      F32 angle = Random::readF() * FloatTau;
+      F32 rotation = Random::readF() * 4 - 2;
+
+      game->emitDebrisChunk(points, Colors::gray20, (panelGeom->mid[i] + pos) / 2, sparkVel, ttl, angle, rotation);
    }
 }
 
 
 void CoreItem::idle(GameObject::IdleCallPath path)
 {
+   mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
+
    // Update attack timer on the server
    if(path == GameObject::ServerIdleMainLoop)
    {
@@ -734,20 +759,19 @@ void CoreItem::idle(GameObject::IdleCallPath path)
    // Emit some sparks from dead panels
    if(Platform::getRealMilliseconds() % 100 < 20)  // 20% of the time...
    {
-      Point start, end, mid, cross, dir, repair;
+      Point cross, dir;
+
 
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
-         getPanelPoints(i, start, end, mid, repair);
-
-         if(mPanelHealth[i] == 0)                  // Panel is dead
+         if(mPanelHealth[i] == 0)                  // Panel is dead     TODO: And if panel is close enough to be worth it
          {
             Point sparkEmissionPos = getPos();
             sparkEmissionPos += dir * 3;
 
-            Point dir = mid - getPos();            // Line extending from the center of the core towards the center of the panel
+            Point dir = getPanelGeom()->mid[i] - getPos();  // Line extending from the center of the core towards the center of the panel
             dir.normalize(100);
-            Point cross(dir.y, -dir.x);            // Line parallel to the panel, perpendicular to dir
+            Point cross(dir.y, -dir.x);                     // Line parallel to the panel, perpendicular to dir
 
             Point vel = dir * (Random::readF() * 3 + 2) + cross * (Random::readF() - .2);
             F32 ttl = Random::readF() + .5;
@@ -793,19 +817,22 @@ F32 CoreItem::getHealth()
 Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
-   Point start, end, mid, repair;
 
+   Point start, end;
    for(S32 i = 0; i < CORE_PANELS; i++)
       if(isPanelDamaged(i))
       {
-         getPanelPoints(i, start, end, mid, repair);    // Fills start, end, mid, and repair
+         PanelGeom *panelGeom = getPanelGeom();
+
+         start.set(panelGeom->getStart(i));
+         end  .set(panelGeom->getEnd(i));
 
          F32 distanceSq1 = start.distSquared(repairOrigin);
-         F32 distanceSq2 = end.distSquared(repairOrigin);
+         F32 distanceSq2 = end  .distSquared(repairOrigin);
 
          if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
-               distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
-            repairLocations.push_back(repair);
+            distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+            repairLocations.push_back(panelGeom->repair[i]);
       }
 
    return repairLocations;

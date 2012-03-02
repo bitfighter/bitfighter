@@ -93,17 +93,28 @@ public:
    static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
    static const F32 PANEL_ANGLE;          // = FloatTau / (F32) CoreItem::CORE_PANELS;
 
+   struct PanelGeom {
+      Point vert[CORE_PANELS];            // Panel 0 stretches from vert 0 to vert 1
+      Point mid[CORE_PANELS];             // Midpoint of Panel 0 is mid[0]
+      Point repair[CORE_PANELS];
+      bool isValid;
+
+      Point getStart(S32 i) { return vert[i % CORE_PANELS]; }
+      Point getEnd(S32 i)   { return vert[(i + 1) % CORE_PANELS]; }
+   };
+
 private:
    static const U32 CoreStartWidth = 200;
    static const U32 CoreMinWidth = 20;
-   static const U32 CoreDefaultStartingHealth = 10;  // 1 health is the equivalent damage a normal ship can take
-   static const U32 CoreHeartbeatStartInterval = 2000;  // Milliseconds
+   static const U32 CoreDefaultStartingHealth = 10;     // In ship-damage equivalents; these will be divided amongst all panels
+   static const U32 CoreHeartbeatStartInterval = 2000;  // In milliseconds
    static const U32 CoreHeartbeatMinInterval = 500;
    static const U32 CoreAttackedWarningDuration = 600;
    static const U32 ExplosionInterval = 600;
    static const U32 ExplosionCount = 3;
 
    U32 mCurrentExplosionNumber;
+   PanelGeom mPanelGeom;
 
    static const F32 DamageReductionRatio;
 
@@ -145,15 +156,13 @@ public:
    bool isPanelDamaged(S32 panelIndex);
 
    Vector<Point> getRepairLocations(const Point &repairOrigin);
+   CoreItem::PanelGeom *getPanelGeom();
 
    void onAddedToGame(Game *theGame);
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
-
-   // Some panel geometry
-   void getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid, Point &repair);
 
    void onItemExploded(Point pos);
    void doExplosion(const Point &pos);
