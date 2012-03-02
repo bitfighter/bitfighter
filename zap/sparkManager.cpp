@@ -53,7 +53,7 @@ FXManager::FXManager()
 
 
 // Create a new spark.   ttl = Time to Live (secs)
-void FXManager::emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
+void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color, F32 ttl, SparkType sparkType)
 {
    Spark *s;
    Spark *s2;
@@ -278,7 +278,7 @@ void FXManager::render(S32 renderPass)
 
 
 // Create a circular pattern of long sparks, a-la bomb in Gridwars
-void FXManager::emitBlast(Point pos, U32 size)
+void FXManager::emitBlast(const Point &pos, U32 size)
 {
    const F32 speed = 800.0f;
    for(U32 i = 0; i < 360; i+=1)
@@ -291,7 +291,7 @@ void FXManager::emitBlast(Point pos, U32 size)
 }
 
 
-void FXManager::emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors)
+void FXManager::emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors)
 {
    for(U32 i = 0; i < (250.0 * size); i++)
    {
@@ -304,13 +304,13 @@ void FXManager::emitExplosion(Point pos, F32 size, Color *colorArray, U32 numCol
 }
 
 
-void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2)
+void FXManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2)
 {
    emitBurst(pos, scale, color1, color2, 250);
 }
 
 
-void FXManager::emitBurst(Point pos, Point scale, Color color1, Color color2, U32 sparkCount)
+void FXManager::emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 sparkCount)
 {
    F32 size = 1;
 

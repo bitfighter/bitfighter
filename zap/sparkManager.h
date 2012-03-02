@@ -80,11 +80,11 @@ public: //{P{P
 
 public:
    FXManager();
-   void emitSpark(Point pos, Point vel, Color color, F32 ttl = 0, SparkType=SparkTypePoint);
-   void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors);
-   void emitBurst(Point pos, Point scale, Color color1, Color color2);
-   void emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count);
-   void emitBlast(Point pos, U32 size);
+   void emitSpark(const Point &pos, const Point &vel, const Color &color, F32 ttl = 0, SparkType=SparkTypePoint);
+   void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
+   void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
+   void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 count);
+   void emitBlast(const Point &pos, U32 size);
 
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
 
