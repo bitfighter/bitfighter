@@ -642,8 +642,6 @@ void CoreItem::doPanelDebris(S32 panelIndex)
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   F32 size = 100;
-
    Point pos = getPos();               // Center of core
 
    Point start, end, mid;
