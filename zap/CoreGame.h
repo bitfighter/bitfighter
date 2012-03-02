@@ -144,8 +144,6 @@ public:
    F32 getTotalHealth();                  // Returns total health of all panels
    F32 getHealth();                       // Returns overall health of item as a ratio between 0 and 1
 
-   Point getPanelMidpoint(S32 panelIndex);
-
    Vector<Point> getRepairLocations();
 
    void onAddedToGame(Game *theGame);
@@ -155,7 +153,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    // Some panel geometry
-   void getPanelPoints(S32 panelIndex, S32 time, Point &start, Point &end, Point &mid);
+   void getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid);
 
    void onItemExploded(Point pos);
    void doExplosion(const Point &pos);

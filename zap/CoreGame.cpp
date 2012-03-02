@@ -620,14 +620,14 @@ void CoreItem::doExplosion(const Point &pos)
 }
 
 
-void CoreItem::getPanelPoints(S32 panelIndex, S32 time, Point &start, Point &end, Point &mid)
+void CoreItem::getPanelPoints(S32 panelIndex, Point &start, Point &end, Point &mid)
 {
-   F32 size = 100;
+   F32 size = calcCoreWidth() / 2;
 
    Point pos = getPos();
-   F32 angle = getCoreAngle(time);
+   F32 angle = getCoreAngle(getGame()->getGameType()->getRemainingGameTimeInMs());
 
-   F32 theta1 = panelIndex * PANEL_ANGLE + angle;
+   F32 theta1 = panelIndex       * PANEL_ANGLE + angle;
    F32 theta2 = (panelIndex + 1) * PANEL_ANGLE + angle;
 
    start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
@@ -637,7 +637,6 @@ void CoreItem::getPanelPoints(S32 panelIndex, S32 time, Point &start, Point &end
 }
 
 
-//   void emitPanelDiedSparks(Game *game, const Point &pos, U32 time, S32 i, const Color &color)
 void CoreItem::doPanelDebris(S32 panelIndex)
 {
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
@@ -648,7 +647,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
    Point pos = getPos();               // Center of core
 
    Point start, end, mid;
-   getPanelPoints(panelIndex, game->getGameType()->getRemainingGameTimeInMs(), start, end, mid);
+   getPanelPoints(panelIndex, start, end, mid);
 
    Point dir = mid - pos;              // Line extending from the center of the core towards the center of the panel
    dir.normalize(100);
@@ -687,7 +686,6 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       points.erase(1);
       points.push_back(Point(0, Random::readF() * 10));
 
-//      Point o = start + (end - start) * Random::readF();
       Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5) * .2f;
       game->emitDebrisChunk(points, Color(.2), (mid + pos)/ 2, sparkVel, Random::readF() * 50  + 250, Random::readF() * FloatTau, Random::readF() * 4 - 2);
    }
@@ -736,6 +734,32 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 
       mHeartbeatTimer.reset(soundInterval);
    }
+
+   // Emit some sparks from dead panels
+   if(Platform::getRealMilliseconds() % 100 < 20)  // 20% of the time...
+   {
+      Point start, end, mid, cross, dir;
+
+      for(S32 i = 0; i < CORE_PANELS; i++)
+      {
+         getPanelPoints(i, start, end, mid);
+
+         if(mPanelHealth[i] == 0)                  // Panel is dead
+         {
+            Point sparkEmissionPos = getPos();
+            sparkEmissionPos += dir * 3;
+
+            Point dir = mid - getPos();            // Line extending from the center of the core towards the center of the panel
+            dir.normalize(100);
+            Point cross(dir.y, -dir.x);            // Line parallel to the panel, perpendicular to dir
+
+            Point vel = dir * (Random::readF() * 3 + 2) + cross * (Random::readF() - .2);
+            F32 ttl = Random::readF() + .5;
+
+            static_cast<ClientGame *>(getGame())->emitSpark(sparkEmissionPos, vel, Colors::gray20, ttl);
+         }
+      }      
+   }
 }
 
 
@@ -770,29 +794,17 @@ F32 CoreItem::getHealth()
 }
 
 
-Point CoreItem::getPanelMidpoint(S32 panelIndex)
-{
-   F32 angle = getCoreAngle(getGame()->getGameType()->getRemainingGameTimeInMs());
-   F32 size = calcCoreWidth() / 2;
-   Point pos = getPos();
-
-   F32 theta1 = panelIndex * CoreItem::PANEL_ANGLE + angle;
-   F32 theta2 = (panelIndex + 1) * CoreItem::PANEL_ANGLE + angle;
-
-   Point start(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
-   Point end(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
-
-   return (start + end) * .5;
-}
-
-
 Vector<Point> CoreItem::getRepairLocations()
 {
    Vector<Point> repairLocations;
+   Point start, end, mid;
 
    for(S32 i = 0; i < CORE_PANELS; i++)
       if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
-         repairLocations.push_back(getPanelMidpoint(i));
+      {
+         getPanelPoints(i, start, end, mid);    // Fills start, end, and mid
+         repairLocations.push_back(mid);
+      }
 
    return repairLocations;
 }

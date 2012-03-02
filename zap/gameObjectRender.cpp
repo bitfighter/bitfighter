@@ -41,9 +41,6 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
-#include "sparkManager.h"        // For core sparks
-#include "ClientGame.h"    // DEL ME {P{P
-
 #include "SDL/SDL_opengl.h"
 
 //#include "pictureloader.h"
@@ -1801,29 +1798,19 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
       glColor(coreColor);
       renderHealthBar(panelHealth[i] / panelStartingHealth, mid, dir, 30 * size / 100, 7 * size / 100);
 
-      Point x = (start + end) * .5;
-      x = x + (pos - mid) * .8;      // The smaller the multiplier, the closer to the edge the health bar will be drawn
+      //Point x = (start + end) * .5;
+      //x = x + (pos - mid) * .8;        // The smaller the multiplier, the closer to the edge the health bar will be drawn
 
-      if(panelHealth[i] == 0)     // Panel is dead
+      if(panelHealth[i] == 0)          // Panel is dead
       {
          Color c = coreColor;
          glColor(c * .2);
-         glLineWidth(gDefaultLineWidth);
-
-         if(time % 100 < 20)
-         {
-            Point sparkEmissionPos = pos;
-            sparkEmissionPos += dir * 3;
-            gClientGame->emitSpark(sparkEmissionPos, cross * (Random::readF() * 200 - 100) + dir * Random::readF() * 300, Color(.2), Random::readF());
-         }
       }      
 
       glBegin(GL_LINES);
          glVertex(start);
          glVertex(end);
       glEnd();
-
-      //glLineWidth(gDefaultLineWidth);
 
       // Draw health stakes
       if(panelHealth[i] > 0)
@@ -1832,17 +1819,13 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
             if(panelHealth[i] == panelStartingHealth)
                glColor(coreColor);
             else
-               glColor(.2);
+               glColor(Colors::gray20);
             glVertex(mid);
             glColor(Colors::black);
             glVertex(pos);
          glEnd();
       }
    }
-
-   // Draw rotating rays
-   glColor(coreColor);
-   //drawAngledRayCircle(pos, atomSize + 4, size - 2, 2, angle, 0);
 
    // Draw atomic like graphic
    F32 t = F32(time & 1023) / 1024.f * FloatTau;
