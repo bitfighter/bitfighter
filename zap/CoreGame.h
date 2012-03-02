@@ -145,7 +145,7 @@ public:
    F32 getHealth();                       // Returns overall health of item as a ratio between 0 and 1
    bool isPanelDamaged(S32 panelIndex);
 
-   Vector<Point> getRepairLocations();
+   Vector<Point> getRepairLocations(const Point &repairOrigin);
 
    void onAddedToGame(Game *theGame);
 

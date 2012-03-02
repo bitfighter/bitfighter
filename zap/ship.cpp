@@ -778,7 +778,7 @@ bool Ship::findRepairTargets()
          continue;
 
       // In case of CoreItem, don't repair if no repair locations are returned
-      if(item->getRepairLocations().size() == 0)
+      if(item->getRepairLocations(pos).size() == 0)
          continue;
 
       mRepairTargets.push_back(item);

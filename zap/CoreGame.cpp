@@ -28,6 +28,7 @@
 #include "projectile.h"
 #include "game.h"
 #include "stringUtils.h"
+#include "ship.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
@@ -462,28 +463,27 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    // Special logic for handling the repairing of Core panels
    if(theInfo->damageAmount < 0)
    {
-      S32 repairablePanelCount = 0;
-
-      // First determine how many panels have damage and are not destroyed
-      for(S32 i = 0; i < CORE_PANELS; i++)
-         if(isPanelDamaged(i))
-            repairablePanelCount++;
-
-      // None are repairable, return
-      if(repairablePanelCount == 0)
-         return;
-
-      // Now divide up the healing to the panels that aren't at full health
+      // Heal each damaged core if it is in range
       for(S32 i = 0; i < CORE_PANELS; i++)
          if(isPanelDamaged(i))
          {
-            mPanelHealth[i] -= (theInfo->damageAmount / DamageReductionRatio) / repairablePanelCount;
+            Point start, end, mid;
+            getPanelPoints(i, start, end, mid);
 
-            // Don't overflow
-            if(mPanelHealth[i] > mStartingPanelHealth)
-               mPanelHealth[i] = mStartingPanelHealth;
+            F32 distanceSq1 = start.distSquared(theInfo->damagingObject->getPos());
+            F32 distanceSq2 = end.distSquared(theInfo->damagingObject->getPos());
 
-            setMaskBits(PanelDamagedMask << i);
+            if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
+                  distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+            {
+               mPanelHealth[i] -= theInfo->damageAmount / DamageReductionRatio;
+
+               // Don't overflow
+               if(mPanelHealth[i] > mStartingPanelHealth)
+                  mPanelHealth[i] = mStartingPanelHealth;
+
+               setMaskBits(PanelDamagedMask << i);
+            }
          }
 
       // We're done if we're repairing
@@ -493,12 +493,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    // Check for friendly fire
    if(theInfo->damagingObject->getTeam() == this->getTeam())
       return;
-
-   //mHealth -= theInfo->damageAmount / DamageReductionRatio / 10;
-
-   //if(mHealth < 0)
-   //   mHealth = 0;
-
 
    // Which panel was hit?  Look at shot position, compare it to core position
    F32 angle;
@@ -573,9 +567,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    // Reset the attacked warning timer if we're not healing
    if(theInfo->damageAmount > 0)
       mAttackedWarningTimer.reset(CoreAttackedWarningDuration);
-
-   //setMaskBits(ItemChangedMask);    // So our clients will get new size
-   //setRadius(calcCoreWidth());
 }
 
 
@@ -798,7 +789,7 @@ F32 CoreItem::getHealth()
 }
 
 
-Vector<Point> CoreItem::getRepairLocations()
+Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
    Point start, end, mid;
@@ -807,7 +798,12 @@ Vector<Point> CoreItem::getRepairLocations()
       if(isPanelDamaged(i))
       {
          getPanelPoints(i, start, end, mid);    // Fills start, end, and mid
-         repairLocations.push_back(mid);
+         F32 distanceSq1 = start.distSquared(repairOrigin);
+         F32 distanceSq2 = end.distSquared(repairOrigin);
+
+         if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
+               distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+            repairLocations.push_back(mid);
       }
 
    return repairLocations;

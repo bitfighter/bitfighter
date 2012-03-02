@@ -562,7 +562,7 @@ void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<Gam
    {
       if(repairTargets[i] && repairTargets[i].getPointer() != ship)
       {
-         Vector<Point> targetRepairLocations = repairTargets[i]->getRepairLocations();
+         Vector<Point> targetRepairLocations = repairTargets[i]->getRepairLocations(pos);
 
          glBegin(GL_LINES);
             for(S32 i = 0; i < targetRepairLocations.size(); i++)
