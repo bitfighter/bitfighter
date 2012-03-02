@@ -445,6 +445,12 @@ bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
+bool CoreItem::isPanelDamaged(S32 panelIndex)
+{
+   return mPanelHealth[panelIndex] < mStartingPanelHealth && mPanelHealth[panelIndex] > 0;
+}
+
+
 void CoreItem::damageObject(DamageInfo *theInfo)
 {
    if(mHasExploded)
@@ -460,7 +466,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
       // First determine how many panels have damage and are not destroyed
       for(S32 i = 0; i < CORE_PANELS; i++)
-         if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
+         if(isPanelDamaged(i))
             repairablePanelCount++;
 
       // None are repairable, return
@@ -469,7 +475,7 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
       // Now divide up the healing to the panels that aren't at full health
       for(S32 i = 0; i < CORE_PANELS; i++)
-         if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
+         if(isPanelDamaged(i))
          {
             mPanelHealth[i] -= (theInfo->damageAmount / DamageReductionRatio) / repairablePanelCount;
 
@@ -798,7 +804,7 @@ Vector<Point> CoreItem::getRepairLocations()
    Point start, end, mid;
 
    for(S32 i = 0; i < CORE_PANELS; i++)
-      if(mPanelHealth[i] < mStartingPanelHealth && mPanelHealth[i] > 0)
+      if(isPanelDamaged(i))
       {
          getPanelPoints(i, start, end, mid);    // Fills start, end, and mid
          repairLocations.push_back(mid);
