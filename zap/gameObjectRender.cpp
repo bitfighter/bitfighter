@@ -1828,7 +1828,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
    }
 
    // Draw atomic like graphic
-   F32 t = F32(time & 1023) / 1024.f * FloatTau;
+   F32 t = FloatTau - (F32(time & 1023) / 1024.f * FloatTau);  // Reverse because time is counting down
    for(F32 rotate = 0; rotate < FloatTau - 0.01f; rotate += FloatTau / 5)  //  0.01f part avoids rounding error
    {
       glBegin(GL_LINE_LOOP);
