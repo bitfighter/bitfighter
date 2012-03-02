@@ -276,7 +276,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 
       Ship *shooter = dynamic_cast<Ship *>(mShooter.getPointer());
 
-      if(hitShip && shooter)
+      if(hitShip && shooter && shooter->getClientInfo())
          shooter->getClientInfo()->getStatistics()->countHit(mWeaponType);
    }
 
