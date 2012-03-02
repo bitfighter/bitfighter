@@ -91,7 +91,7 @@ typedef Item Parent;
 
 public:
    static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
-   static const F32 PANEL_ANGLE;
+   static const F32 PANEL_ANGLE;          // = FloatTau / (F32) CoreItem::CORE_PANELS;
 
 private:
    static const U32 CoreStartWidth = 200;
