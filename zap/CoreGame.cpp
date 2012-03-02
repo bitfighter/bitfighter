@@ -800,8 +800,12 @@ Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
       {
          getPanelPoints(i, start, end, mid, repair);    // Fills start, end, mid, and repair
 
-         if(repair.distSquared(repairOrigin) <= Ship::RepairRadius * Ship::RepairRadius)
-            repairLocations.push_back(mid);
+         F32 distanceSq1 = start.distSquared(repairOrigin);
+         F32 distanceSq2 = end.distSquared(repairOrigin);
+
+         if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
+               distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+            repairLocations.push_back(repair);
       }
 
    return repairLocations;
