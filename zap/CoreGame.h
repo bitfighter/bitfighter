@@ -82,6 +82,23 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
+
+struct PanelGeom 
+{
+   Point vert[CORE_PANELS];            // Panel 0 stretches from vert 0 to vert 1
+   Point mid[CORE_PANELS];             // Midpoint of Panel 0 is mid[0]
+   Point repair[CORE_PANELS];
+   bool isValid;
+
+   Point getStart(S32 i) { return vert[i % CORE_PANELS]; }
+   Point getEnd(S32 i)   { return vert[(i + 1) % CORE_PANELS]; }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class EditorAttributeMenuUI;
 
 class CoreItem : public Item
@@ -90,18 +107,7 @@ class CoreItem : public Item
 typedef Item Parent;
 
 public:
-   static const S32 CORE_PANELS = 10;     // Note that changing this will require update of all clients, and a new CS_PROTOCOL_VERSION
    static const F32 PANEL_ANGLE;          // = FloatTau / (F32) CoreItem::CORE_PANELS;
-
-   struct PanelGeom {
-      Point vert[CORE_PANELS];            // Panel 0 stretches from vert 0 to vert 1
-      Point mid[CORE_PANELS];             // Midpoint of Panel 0 is mid[0]
-      Point repair[CORE_PANELS];
-      bool isValid;
-
-      Point getStart(S32 i) { return vert[i % CORE_PANELS]; }
-      Point getEnd(S32 i)   { return vert[(i + 1) % CORE_PANELS]; }
-   };
 
 private:
    static const U32 CoreStartWidth = 200;
@@ -142,6 +148,7 @@ public:
    CoreItem();     // Constructor
    CoreItem *clone() const;
 
+   static F32 getCoreAngle(U32 time);
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
@@ -156,7 +163,9 @@ public:
    bool isPanelDamaged(S32 panelIndex);
 
    Vector<Point> getRepairLocations(const Point &repairOrigin);
-   CoreItem::PanelGeom *getPanelGeom();
+   PanelGeom *getPanelGeom();
+   static void fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom);
+
 
    void onAddedToGame(Game *theGame);
 

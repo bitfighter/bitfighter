@@ -292,7 +292,7 @@ EditorAttributeMenuUI *CoreItem::mAttributeMenuUI = NULL;
 // for easier bit transmission
 const F32 CoreItem::DamageReductionRatio = 1000.0f;
 
-const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CoreItem::CORE_PANELS;
+const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
 // Constructor
 CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
@@ -316,13 +316,21 @@ CoreItem *CoreItem::clone() const
 }
 
 
+F32 CoreItem::getCoreAngle(U32 time)
+{
+   return F32(time & 16383) / 16384.f * FloatTau;
+}
+
+
 void CoreItem::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(!mHasExploded)
-      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam),
-            getGame()->getGameType()->getRemainingGameTimeInMs(),
-            mPanelHealth, mStartingPanelHealth);
+   {
+      S32 time = getGame()->getGameType()->getRemainingGameTimeInMs();
+      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), time, getCoreAngle(time), getPanelGeom(),
+                 mPanelHealth, mStartingPanelHealth);
+   }
 #endif
 }
 
@@ -621,15 +629,21 @@ void CoreItem::doExplosion(const Point &pos)
 }
 
 
-CoreItem::PanelGeom *CoreItem::getPanelGeom()
+PanelGeom *CoreItem::getPanelGeom()
 {
-   if(mPanelGeom.isValid)
-      return &mPanelGeom;
+   if(!mPanelGeom.isValid)
+      fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelGeom);
 
-   F32 size = calcCoreWidth() * .5;
+   return &mPanelGeom;
+}
 
-   Point pos = getPos();
-   F32 angle = getCoreAngle(getGame()->getGameType()->getRemainingGameTimeInMs());
+
+// static method
+void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
+{
+   F32 size = CoreStartWidth * .5;
+
+   F32 angle = getCoreAngle(time);
 
    F32 angles[CORE_PANELS];
 
@@ -637,21 +651,21 @@ CoreItem::PanelGeom *CoreItem::getPanelGeom()
       angles[i] = i * PANEL_ANGLE + angle;
 
    for(S32 i = 0; i < CORE_PANELS; i++)
-      mPanelGeom.vert[i].set(pos.x + cos(angles[i]) * size, pos.y + sin(angles[i]) * size);
+      panelGeom.vert[i].set(pos.x + cos(angles[i]) * size, pos.y + sin(angles[i]) * size);
 
-   Point start, end;
+   Point start, end, mid;
    for(S32 i = 0; i < CORE_PANELS; i++)
    {
-      start = mPanelGeom.vert[i];
-      end   = mPanelGeom.vert[(i + 1) % CORE_PANELS];      // Next point, with wrap-around
+      start = panelGeom.vert[i];
+      end   = panelGeom.vert[(i + 1) % CORE_PANELS];      // Next point, with wrap-around
+      mid   = (start + end) * .5;
 
-      mPanelGeom.mid[i].set((start + end) * .5);
-      mPanelGeom.repair[i].set(mPanelGeom.mid[i] + (pos - mPanelGeom.mid[i]) * .4);
+
+      panelGeom.mid[i].set(mid);
+      panelGeom.repair[i].interp(.6, mid, pos);
    }
 
-   mPanelGeom.isValid = true;
-
-   return &mPanelGeom;
+   panelGeom.isValid = true;
 }
 
 

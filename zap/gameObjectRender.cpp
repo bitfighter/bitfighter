@@ -1762,44 +1762,26 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-F32 getCoreAngle(U32 time)
-{
-   return F32(time & 16383) / 16384.f * FloatTau;
-}
-
-
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[], F32 panelStartingHealth)
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 angle, 
+                PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
 
    F32 atomSize = size * 0.40f;
-   F32 angle = getCoreAngle(time);
 
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
 
-   Point start, end, mid, dir;   // Reusable containers
+   Point dir;   // Reusable container
    
-   for(S32 i = 0; i < CoreItem::CORE_PANELS; i++)
+   for(S32 i = 0; i < CORE_PANELS; i++)
    {
-      F32 theta1 = i * CoreItem::PANEL_ANGLE + angle;
-      F32 theta2 = (i + 1) * CoreItem::PANEL_ANGLE + angle;
-      
-      start.set(pos.x + cos(theta1) * size, pos.y + sin(theta1) * size);
-      end  .set(pos.x + cos(theta2) * size, pos.y + sin(theta2) * size);
-
-      mid = (start + end) * .5;
-      mid = mid + (pos - mid) * .4;      // The smaller the multiplier, the closer to the edge the health bar will be drawn
-
-      dir = (mid - pos);
+      dir = (panelGeom->repair[i] - pos);
       dir.normalize();
       Point cross(dir.y, -dir.x);
 
       glColor(coreColor);
-      renderHealthBar(panelHealth[i] / panelStartingHealth, mid, dir, 30 * size / 100, 7 * size / 100);
-
-      //Point x = (start + end) * .5;
-      //x = x + (pos - mid) * .8;        // The smaller the multiplier, the closer to the edge the health bar will be drawn
+      renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30 * size / 100, 7 * size / 100);
 
       if(panelHealth[i] == 0)          // Panel is dead
       {
@@ -1808,26 +1790,27 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
       }      
 
       glBegin(GL_LINES);
-         glVertex(start);
-         glVertex(end);
+         glVertex(panelGeom->getStart(i));
+         glVertex(panelGeom->getEnd(i));
       glEnd();
 
       // Draw health stakes
       if(panelHealth[i] > 0)
       {
          glBegin(GL_LINES);
-            if(panelHealth[i] == panelStartingHealth)
-               glColor(coreColor);
-            else
+            //if(panelHealth[i] == panelStartingHealth)
+            //   glColor(coreColor);
+            //else
                glColor(Colors::gray20);
-            glVertex(mid);
+
+            glVertex(panelGeom->mid[i]);
             glColor(Colors::black);
             glVertex(pos);
          glEnd();
       }
    }
 
-   // Draw atomic like graphic
+   // Draw atom graphic
    F32 t = FloatTau - (F32(time & 1023) / 1024.f * FloatTau);  // Reverse because time is counting down
    for(F32 rotate = 0; rotate < FloatTau - 0.01f; rotate += FloatTau / 5)  //  0.01f part avoids rounding error
    {

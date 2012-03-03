@@ -221,8 +221,10 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
 void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
-F32 getCoreAngle(U32 time);
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 panelHealth[10], F32 panelStartingHealth);
+struct PanelGeom;
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 angle,
+                PanelGeom *panelGeom, F32 panelHealth[10], F32 panelStartingHealth);
+
 void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);
 
 void renderSoccerBall(const Point &pos, F32 size);

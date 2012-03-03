@@ -34,12 +34,13 @@
 #include "teleporter.h"
 #include "EngineeredItem.h"
 #include "input.h"
-#include "speedZone.h"           // For SpeedZone::height
-#include "GeomUtils.h"      // For polygon triangulation
+#include "speedZone.h"        // For SpeedZone::height
+#include "GeomUtils.h"        // For polygon triangulation
 #include "config.h"
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "JoystickRender.h"
+#include "CoreGame.h"         // For coreItem rendering
 
 #include "SDL/SDL_opengl.h"
 
@@ -719,7 +720,15 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
          case 27:    // Core
             F32 health[] = { 1,1,1,1,1,1,1,1,1,1 };
-            renderCore(Point(0,0), 55, &Colors::blue, Platform::getRealMilliseconds(), health, 1);
+            
+            Point pos(0,0);
+            U32 time = Platform::getRealMilliseconds();
+
+            PanelGeom panelGeom;
+            CoreItem::fillPanelGeom(pos, time, panelGeom);
+
+            renderCore(pos, 55, &Colors::blue, time, CoreItem::getCoreAngle(time), &panelGeom, health, 1.0f);
+
             break;
       }
       glPopMatrix();
