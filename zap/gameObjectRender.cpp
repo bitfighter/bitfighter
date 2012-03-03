@@ -1803,7 +1803,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
             //else
                glColor(Colors::gray20);
 
-            glVertex(panelGeom->mid[i]);
+            glVertex(panelGeom->repair[i]);
             glColor(Colors::black);
             glVertex(pos);
          glEnd();
