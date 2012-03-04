@@ -785,6 +785,7 @@ bool Ship::findRepairTargets()
 
       mRepairTargets.push_back(item);
    }
+
    return mRepairTargets.size() != 0;
 }
 

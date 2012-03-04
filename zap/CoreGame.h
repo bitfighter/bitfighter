@@ -161,6 +161,7 @@ public:
    F32 getTotalHealth();                  // Returns total health of all panels
    F32 getHealth();                       // Returns overall health of item as a ratio between 0 and 1
    bool isPanelDamaged(S32 panelIndex);
+   bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 
    Vector<Point> getRepairLocations(const Point &repairOrigin);
    PanelGeom *getPanelGeom();
