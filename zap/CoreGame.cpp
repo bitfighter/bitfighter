@@ -483,9 +483,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    // Special logic for handling the repairing of Core panels
    if(theInfo->damageAmount < 0)
    {
-      Point start, end, damagerPos;
-      PanelGeom *panelGeom = getPanelGeom();
-
       // Heal each damaged core if it is in range
       for(S32 i = 0; i < CORE_PANELS; i++)
          if(isPanelDamaged(i))
