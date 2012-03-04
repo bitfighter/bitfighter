@@ -460,6 +460,18 @@ bool CoreItem::isPanelDamaged(S32 panelIndex)
 }
 
 
+bool CoreItem::isPanelInRepairRange(const Point &origin, S32 panelIndex)
+{
+   PanelGeom *panelGeom = getPanelGeom();
+
+   F32 distanceSq1 = (panelGeom->getStart(panelIndex)).distSquared(origin);
+   F32 distanceSq2 = (panelGeom->getEnd(panelIndex)).distSquared(origin);
+
+   return (distanceSq1 < Ship::RepairRadius * Ship::RepairRadius) ||
+      (distanceSq2 < Ship::RepairRadius * Ship::RepairRadius);
+}
+
+
 void CoreItem::damageObject(DamageInfo *theInfo)
 {
    if(mHasExploded)
@@ -471,22 +483,10 @@ void CoreItem::damageObject(DamageInfo *theInfo)
    // Special logic for handling the repairing of Core panels
    if(theInfo->damageAmount < 0)
    {
-      Point start, end, damagerPos;
-      PanelGeom *panelGeom = getPanelGeom();
-
       // Heal each damaged core if it is in range
       for(S32 i = 0; i < CORE_PANELS; i++)
          if(isPanelDamaged(i))
-         {
-            start.set(panelGeom->getStart(i));
-            end  .set(panelGeom->getEnd(i));
-            damagerPos = theInfo->damagingObject->getPos();
-
-            F32 distanceSq1 = start.distSquared(damagerPos);
-            F32 distanceSq2 = end  .distSquared(damagerPos);
-
-            if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
-               distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+            if(isPanelInRepairRange(theInfo->damagingObject->getPos(), i))
             {
                mPanelHealth[i] -= theInfo->damageAmount / DamageReductionRatio;
 
@@ -496,7 +496,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 
                setMaskBits(PanelDamagedMask << i);
             }
-         }
 
       // We're done if we're repairing
       return;
@@ -832,22 +831,12 @@ Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
 
-   Point start, end;
+   PanelGeom *panelGeom = getPanelGeom();
+
    for(S32 i = 0; i < CORE_PANELS; i++)
       if(isPanelDamaged(i))
-      {
-         PanelGeom *panelGeom = getPanelGeom();
-
-         start.set(panelGeom->getStart(i));
-         end  .set(panelGeom->getEnd(i));
-
-         F32 distanceSq1 = start.distSquared(repairOrigin);
-         F32 distanceSq2 = end  .distSquared(repairOrigin);
-
-         if(distanceSq1 < Ship::RepairRadius * Ship::RepairRadius ||
-            distanceSq2 < Ship::RepairRadius * Ship::RepairRadius)
+         if(isPanelInRepairRange(repairOrigin, i))
             repairLocations.push_back(panelGeom->repair[i]);
-      }
 
    return repairLocations;
 }
@@ -880,7 +869,7 @@ static void writeFloatZeroOrNonZero(BitStream &s, F32 &val, U8 bitCount)
    if(val == 0)
       s.writeInt(0, bitCount);  // always writes zero
    else
-      s.writeInt(U32(val * ((1 << bitCount) - 2) + 0.5f) + 1, bitCount);  // never writes zero
+      s.writeInt(U32(val * ((1 << bitCount) - 1)), bitCount);  // never writes zero, and rounds down
 }
 
 

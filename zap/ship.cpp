@@ -68,6 +68,8 @@
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
+#define sq(a) ((a) * (a))
+
 static const bool showCloakedTeammates = true;    // Set to true to allow players to see their cloaked teammates
 
 namespace Zap
@@ -750,7 +752,7 @@ bool Ship::findRepairTargets()
    // ships (client)
 
    Point pos = getRenderPos();
-   Rect r(pos, RepairRadius);
+   Rect r(pos, RepairRadius + CollisionRadius);
    
    foundObjects.clear();
    findObjects((TestFunc)isWithHealthType, foundObjects, r);
@@ -768,12 +770,12 @@ bool Ship::findRepairTargets()
       if(item->isDestroyed() || item->getHealth() >= 1)
          continue;
 
-      // ...or ones too far away...
-      if((item->getPos() - pos).len() > (RepairRadius + CollisionRadius + item->getRadius()))
+      // ...or ones not on our team or neutral
+      if(item->getTeam() != TEAM_NEUTRAL && item->getTeam() != getTeam())
          continue;
 
-      // ...or ones not on our team or neutral
-      if(item->getTeam() != -1 && item->getTeam() != getTeam())
+      // Only repair items within a circle around the ship since we did an object search with a rectangle
+      if((item->getPos() - pos).lenSquared() > sq(RepairRadius + CollisionRadius + item->getRadius()))
          continue;
 
       // In case of CoreItem, don't repair if no repair locations are returned
