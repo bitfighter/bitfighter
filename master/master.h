@@ -206,16 +206,16 @@ public:
                            const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 
 
-   void getLeaderBoard (S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores);
+   void getHighScores(S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
                                                StringTableEntry gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
 
-   // Send leaderboard stats to client
-   TNL_DECLARE_RPC_OVERRIDE(c2mRequestLeaderboard, ());
-   TNL_DECLARE_RPC_OVERRIDE(m2cSendLeaderboard, (Vector<StringTableEntry> names, Vector<U16> scores));
+   // Send high scores stats to client
+   TNL_DECLARE_RPC_OVERRIDE(c2mRequestHighScores, ());
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendHighScores, (Vector<StringTableEntry> names, Vector<U16> scores));
 
 
    // Game server wants to know if user name has been verified

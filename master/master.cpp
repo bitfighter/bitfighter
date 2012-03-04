@@ -746,7 +746,7 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   void MasterServerConnection::getLeaderBoard(S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores)
+   void MasterServerConnection::getHighScores(S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores)
    {
       DatabaseWriter databaseWriter = getDatabaseWriter();
 
@@ -779,18 +779,18 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestLeaderboard, ())
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
    {
       Vector<StringTableEntry> names;
       Vector<U16> scores;
 
-      getLeaderBoard(3, names, scores);      // Put leaders into names/scores Vectors
+      getHighScores(3, names, scores);      // Put leaders into names/scores Vectors
 
-      m2cSendLeaderboard(names, scores);
+      m2cSendHighScores(names, scores);
    }
 
 
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendLeaderboard, 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, 
                               (Vector<StringTableEntry> names, Vector<U16> scores))
    {
       // TODO: update some local structure for display somewhere somehow
