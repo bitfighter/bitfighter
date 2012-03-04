@@ -86,6 +86,7 @@ enum UIID {
    GenericUI,
    GlobalChatUI,
    SuspendedUI,
+   HighScoresUI,
    HostingUI,
    InstructionsUI,
    KeyDefUI,
