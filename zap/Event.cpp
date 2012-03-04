@@ -150,92 +150,6 @@ void Event::inputCodeDown(InputCode inputCode, char ascii)
 }
 
 
-void pushSimulatedAltKeyPress()
-{
-   SDL_Event evnt;
-
-   evnt.type = 0x02;
-
-   evnt.active.gain = 0;
-   evnt.active.state = 0x01;
-   evnt.active.type = 0x02;
-
-   evnt.key.type = 0x02;
-   evnt.key.which = 0;
-   evnt.key.state = 0x01;
-   evnt.key.keysym.mod = KMOD_NONE;
-   evnt.key.keysym.scancode = 0x38;
-   evnt.key.keysym.sym = SDLK_LALT;
-   evnt.key.keysym.unicode = 0;
-
-      //SDL_PushEvent(&evnt);
-   
-
-      // Try leaving the rest at default value
-
-
-
-//-		motion	{type='' which=0x00 state='' ...}	SDL_MouseMotionEvent
-//		type	0x02 ''	unsigned char
-//		which	0x00	unsigned char
-//		state	0x01 ''	unsigned char
-//		x	0x0238	unsigned short
-//		y	0x0000	unsigned short
-//		xrel	0x0134	short
-//		yrel	0x0000	short
-//-		button	{type='' which=0x00 button='' ...}	SDL_MouseButtonEvent
-//		type	0x02 ''	unsigned char
-//		which	0x00	unsigned char
-//		button	0x01 ''	unsigned char
-//		state	0x00	unsigned char
-//		x	0x0238	unsigned short
-//		y	0x0000	unsigned short
-//-		jaxis	{type='' which=0x00 axis='' ...}	SDL_JoyAxisEvent
-//		type	0x02 ''	unsigned char
-//		which	0x00	unsigned char
-//		axis	0x01 ''	unsigned char
-//		value	0x0238	short
-//-		jball	{type='' which=0x00 ball='' ...}	SDL_JoyBallEvent
-//		type	0x02 ''	unsigned char
-//		which	0x00	unsigned char
-//		ball	0x01 ''	unsigned char
-//		xrel	0x0238	short
-//		yrel	0x0000	short
-//-		jhat	{type='' which=0x00 hat='' ...}	SDL_JoyHatEvent
-//		type	0x02 ''	unsigned char
-//		which	0x00	unsigned char
-//		hat	0x01 ''	unsigned char
-//		value	0x00	unsigned char
-//-		jbutton	{type='' which=0x00 button='' ...}	SDL_JoyButtonEvent
-//		type	0x02 ''	unsigned char
-//		which	0x00	unsigned char
-//		button	0x01 ''	unsigned char
-//		state	0x00	unsigned char
-//-		resize	{type='' w=0x00000238 h=0x00000134 }	SDL_ResizeEvent
-//		type	0x02 ''	unsigned char
-//		w	0x00000238	int
-//		h	0x00000134	int
-//-		expose	{type='' }	SDL_ExposeEvent
-//		type	0x02 ''	unsigned char
-//-		quit	{type='' }	SDL_QuitEvent
-//		type	0x02 ''	unsigned char
-//-		user	{type='' code=0x00000238 data1=0x00000134 ...}	SDL_UserEvent
-//		type	0x02 ''	unsigned char
-//		code	0x00000238	int
-//		data1	0x00000134	void *
-//		data2	0x00000000	void *
-//-		syswm	{type='' msg=0x00000238 }	SDL_SysWMEvent
-//		type	0x02 ''	unsigned char
-//-		msg	0x00000238 {version={...} hwnd=??? msg=??? ...}	SDL_SysWMmsg *
-//+		version	{major=??? minor=??? patch=??? }	SDL_version
-//		hwnd	CXX0017: Error: symbol "" not found	
-//		msg	CXX0030: Error: expression cannot be evaluated	
-//		wParam	CXX0030: Error: expression cannot be evaluated	
-//		lParam	CXX0030: Error: expression cannot be evaluated	
-
-}
-
-
 void Event::onEvent(ClientGame *game, SDL_Event* event)
 {
    IniSettings *iniSettings = game->getSettings()->getIniSettings();
@@ -387,7 +301,6 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
       const Point *pos = gScreenInfo.getMousePos();
 
       game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
-      //pushSimulatedAltKeyPress();
 
       gScreenInfo.setCanvasMousePos(pos->x, pos->y, game->getSettings()->getIniSettings()->displayMode);
 
