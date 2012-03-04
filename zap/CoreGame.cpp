@@ -869,7 +869,7 @@ static void writeFloatZeroOrNonZero(BitStream &s, F32 &val, U8 bitCount)
    if(val == 0)
       s.writeInt(0, bitCount);  // always writes zero
    else
-      s.writeInt(U32(val * ((1 << bitCount) - 2) + 0.5f) + 1, bitCount);  // never writes zero
+      s.writeInt(U32(val * ((1 << bitCount) - 1)), bitCount);  // never writes zero, and rounds down
 }
 
 
