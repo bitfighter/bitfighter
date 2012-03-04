@@ -895,7 +895,9 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
             F32 panelHealthRatio = mPanelHealth[i] / mStartingPanelHealth;
 
             // writeFloatZeroOrNonZero will Compensate for low resolution by sending zero only if it is actually zero
-            writeFloatZeroOrNonZero(*stream, panelHealthRatio, 4);     // 4 bits -> 1/16 increments, all we really need
+            // 4 bits -> 1/16 increments, all we really need - this means that client-side
+            // will NOT have the true health, rather a ratio of precision 4 bits
+            writeFloatZeroOrNonZero(*stream, panelHealthRatio, 4);
          }
       }
    }
