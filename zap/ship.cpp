@@ -706,8 +706,6 @@ void Ship::idle(GameObject::IdleCallPath path)
 
    mLastMove = mCurrentMove;
 
-
-
    if(path == GameObject::ServerIdleControlFromClient ||
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
