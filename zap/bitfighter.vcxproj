@@ -242,6 +242,7 @@
     <ClCompile Include="TeamShuffleHelper.cpp" />
     <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIEditorMenus.cpp" />
+    <ClCompile Include="UIHighScores.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
     <ClCompile Include="WallSegmentManager.cpp" />
@@ -372,6 +373,7 @@
     <ClInclude Include="TeamShuffleHelper.h" />
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIEditorMenus.h" />
+    <ClInclude Include="UIHighScores.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIMenuItems.h" />
     <ClInclude Include="version.h" />
