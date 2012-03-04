@@ -2030,9 +2030,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
       GameConnection *conn = clientInfo->getConnection();
 
       conn->resetGhosting();
-      clientInfo->mOldLoadout.clear();
-
-      clientInfo->resetLoadout();
       conn->switchedTeamCount = 0;
 
       clientInfo->setScore(0); // Reset player scores, for non team game types
@@ -2077,6 +2074,23 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    // Clear team info for all clients
    resetAllClientTeams();
+
+   // Reset loadouts now that we have GameType set up
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+      clientInfo->mOldLoadout.clear();
+
+      // Save current loadout to put on-deck
+      Vector<U32> loadout = clientInfo->getLoadout();
+
+      // Reset
+      clientInfo->resetLoadout();
+
+      // If the current level has a loadout zone, put last level's load-out on-deck
+      if(getGameType()->levelHasLoadoutZone())
+         clientInfo->sRequestLoadout(loadout);
+   }
 
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
    mClientInfos.sort(RatingSort);
