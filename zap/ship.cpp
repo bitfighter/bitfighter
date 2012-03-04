@@ -750,8 +750,7 @@ bool Ship::findRepairTargets()
    // ships (client)
 
    Point pos = getRenderPos();
-   Point extend(RepairRadius, RepairRadius);
-   Rect r(pos - extend, pos + extend);
+   Rect r(pos, RepairRadius);
    
    foundObjects.clear();
    findObjects((TestFunc)isWithHealthType, foundObjects, r);
