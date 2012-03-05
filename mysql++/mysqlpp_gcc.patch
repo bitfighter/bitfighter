@@ -1,0 +1,11 @@
+diff -r 9054af45d90b mysql++/refcounted.h
+--- a/mysql++/refcounted.h	Sun Mar 04 19:54:59 2012 -0700
++++ b/mysql++/refcounted.h	Sun Mar 04 21:06:22 2012 -0700
+@@ -29,6 +29,7 @@
+ #define MYSQLPP_REFCOUNTED_H
+ 
+ #include <memory>
++#include <cstdlib>
+ 
+ namespace mysqlpp {
+ 
