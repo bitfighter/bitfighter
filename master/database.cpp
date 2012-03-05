@@ -370,7 +370,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
       for(S32 i = rows; i < count; i++)
       {
          names.push_back("");
-         scores.push_back(U16_MAX);
+         scores.push_back("");
       }
    }
    else
