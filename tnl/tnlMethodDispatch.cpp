@@ -30,6 +30,7 @@
 
 namespace Types
 {
+
 void read(TNL::BitStream &s, TNL::StringPtr *val)
 {
    char buffer[256];
@@ -40,6 +41,18 @@ void read(TNL::BitStream &s, TNL::StringPtr *val)
 void write(TNL::BitStream &s, TNL::StringPtr &val)
 {
    s.writeString(val.getString());
+}
+
+void read(TNL::BitStream &s, std::string *val)
+{
+   char buffer[256];
+   s.readString(buffer);
+   *val = buffer;
+}
+
+void write(TNL::BitStream &s, std::string &val)
+{
+   s.writeString(val.c_str());
 }
 
 void read(TNL::BitStream &s, TNL::ByteBufferPtr *val)

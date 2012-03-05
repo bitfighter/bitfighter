@@ -206,7 +206,7 @@ public:
                            const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 
 
-   void getHighScores(S32 count, Vector<StringTableEntry> &groupNames, Vector<StringTableEntry> &names, Vector<U16> &scores);
+   void getHighScores(S32 scoresPerGroup, Vector<StringTableEntry> &groupNames, Vector<string> &names, Vector<string> &scores);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));

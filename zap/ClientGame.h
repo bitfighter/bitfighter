@@ -181,7 +181,7 @@ public:
    void setMOTD(const char *motd);
    void setNeedToUpgrade(bool needToUpgrade);
 
-   void setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores);
+   void setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores);
 
    string getRemoteLevelDownloadFilename() const;
    void setRemoteLevelDownloadFilename(const string &filename);

@@ -48,7 +48,7 @@ private:
    struct ScoreGroup {
       string title;
       Vector<string> names;
-      Vector<U16> scores;
+      Vector<string> scores;
    };
 
    Vector<ScoreGroup> mScoreGroups;
@@ -61,7 +61,7 @@ public:
    void render();
    void idle(U32 timeDelta);
 
-   void setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores);
+   void setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores);
 
    bool onKeyDown(InputCode inputCode, char ascii);
    void quit();

@@ -679,7 +679,7 @@ void ClientGame::setMOTD(const char *motd)
 }
 
 
-void ClientGame::setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores)
+void ClientGame::setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores)
 {
    getUIManager()->getHighScoresUserInterface()->setHighScores(groupNames, names, scores);
 }

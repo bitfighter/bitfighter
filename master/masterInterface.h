@@ -175,7 +175,7 @@ public:
 
 
    TNL_DECLARE_RPC(c2mRequestHighScores, ());
-   TNL_DECLARE_RPC(m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores));
+   TNL_DECLARE_RPC(m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores));
 
 
    TNL_DECLARE_RPC(s2mChangeName, (StringTableEntry name));         // when server changes name using /setservname

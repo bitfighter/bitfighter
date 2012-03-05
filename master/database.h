@@ -126,7 +126,7 @@ public:
    void insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
                         const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
 
-   void getTopPlayers(const string &table, const string &col2, S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores);
+   void getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores);
 };
 
 

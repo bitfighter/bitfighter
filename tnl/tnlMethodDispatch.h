@@ -52,6 +52,10 @@ namespace Types
    extern void read(TNL::BitStream &s, TNL::StringPtr *val);
    /// Writes a string into a BitStream.
    extern void write(TNL::BitStream &s, TNL::StringPtr &val);
+      /// Reads a string from a BitStream.
+   extern void read(TNL::BitStream &s, std::string *val);
+   /// Writes a string into a BitStream.
+   extern void write(TNL::BitStream &s, std::string &val);
    /// Reads a ByteBuffer from a BitStream.
    extern void read(TNL::BitStream &s, TNL::ByteBufferPtr *val);
    /// Writes a ByteBuffer into a BitStream.
@@ -143,24 +147,24 @@ namespace Types
       s.write(val);
    }
 */
-   inline void read(TNL::BitStream &s, bool *val) {s.read(val);}
-   inline void read(TNL::BitStream &s, TNL::S8 *val) {s.read(val);}
+   inline void read(TNL::BitStream &s, bool *val)     {s.read(val);}
+   inline void read(TNL::BitStream &s, TNL::S8 *val)  {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S16 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S32 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S64 *val) {s.read(val);}
-   inline void read(TNL::BitStream &s, TNL::U8 *val) {s.read(val);}
+   inline void read(TNL::BitStream &s, TNL::U8 *val)  {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::U16 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::U32 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::U64 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::F32 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::F64 *val) {s.read(val);}
 
-   inline void write(TNL::BitStream &s, bool val) {s.write(val);}
-   inline void write(TNL::BitStream &s, TNL::S8 val) {s.write(val);}
+   inline void write(TNL::BitStream &s, bool val)     {s.write(val);}
+   inline void write(TNL::BitStream &s, TNL::S8 val)  {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S16 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S32 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S64 val) {s.write(val);}
-   inline void write(TNL::BitStream &s, TNL::U8 val) {s.write(val);}
+   inline void write(TNL::BitStream &s, TNL::U8 val)  {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::U16 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::U32 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::U64 val) {s.write(val);}

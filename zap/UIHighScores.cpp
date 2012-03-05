@@ -139,22 +139,25 @@ void HighScoresUserInterface::idle(U32 timeDelta)
 }
 
 
-void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores)
+void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores)
 {
    mScoreGroups.clear();
+
+   S32 scoresPerGroup = names.size() / groupNames.size();
 
    for(S32 i = 0; i < groupNames.size(); i++)
    {
       ScoreGroup scoreGroup;
       Vector<string> currNames;
-      Vector<U16> currScores;
+      Vector<string> currScores;
+
 
       scoreGroup.title = string(groupNames[i].getString());
 
-      for(S32 j = 0; j < 3; j++) // Replace magic number 3 with constant showing group size
+      for(S32 j = 0; j < scoresPerGroup; j++)    
       {
-         currNames.push_back(string(names[i*3 + j].getString()));  // Magic
-         currScores.push_back(scores[i*3 + j]);            // Magic
+         currNames .push_back(names [i * scoresPerGroup + j]);    
+         currScores.push_back(scores[i  *scoresPerGroup + j]);                      
       }
 
       scoreGroup.names = currNames;

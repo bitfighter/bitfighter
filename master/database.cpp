@@ -344,7 +344,7 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
 }
 
 
-void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores)
+void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores)
 {
    // Find server in database
    string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
@@ -386,15 +386,15 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
       // results[0] and results[1] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
       for(S32 i = 0; i < rows * 2; i += 2)
       {
-         names.push_back(results[i + 2]);
-         scores.push_back(atoi(results[i + 3]));
+         names .push_back(results[i + 2]);
+         scores.push_back(results[i + 3]);
       }
 
       // Make sure we have the correct number of responses, even if table doesn't have enough records
       for(S32 i = rows; i < count; i++)
       {
          names.push_back("");
-         scores.push_back(U16_MAX);
+         scores.push_back("");
       }
 
       sqlite3_free_table(results);
