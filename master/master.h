@@ -215,8 +215,6 @@ public:
 
    // Send high scores stats to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestHighScores, ());
-   TNL_DECLARE_RPC_OVERRIDE(m2cSendHighScores, (Vector<StringTableEntry> names, Vector<U16> scores));
-
 
    // Game server wants to know if user name has been verified
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));

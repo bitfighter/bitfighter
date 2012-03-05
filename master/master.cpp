@@ -790,13 +790,6 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, 
-                              (Vector<StringTableEntry> names, Vector<U16> scores))
-   {
-      // TODO: update some local structure for display somewhere somehow
-   }
-
-
    // Game server wants to know if user name has been verified
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
    {

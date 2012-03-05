@@ -357,7 +357,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (S
    if(mGame->isServer())
       return;
 
-   ((ClientGame *)mGame)->playerJoinedGlobalChat(playerNick);
+   static_cast<ClientGame *>(mGame)->playerJoinedGlobalChat(playerNick);
 }
 
 
@@ -369,6 +369,16 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
       return;
 
    static_cast<ClientGame *>(mGame)->playerLeftGlobalChat(playerNick);
+}
+
+
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> names, Vector<U16> scores))
+{
+   if(mGame->isServer())
+      return;
+
+
 }
 #endif
 
