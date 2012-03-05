@@ -147,6 +147,7 @@ OBJECTS_CLIENT=\
    UIErrorMessage.o\
    UIYesNo.o\
    UIGame.o\
+   UIHighScores.o\
    UIInstructions.o\
    UIKeyDefMenu.o\
    UITeamDefMenu.o\
