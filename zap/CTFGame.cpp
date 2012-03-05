@@ -67,6 +67,9 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
    ClientInfo *clientInfo = theShip->getClientInfo();
 
+   if(!clientInfo)
+      return;
+
    if(theShip->getTeam() == theFlag->getTeam())      // Touch own flag
    {
       if(!theFlag->isAtHome())

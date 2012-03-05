@@ -103,6 +103,8 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       r = oneFlagTakeString;
 
    ClientInfo *clientInfo = theShip->getClientInfo();
+   if(!clientInfo)
+      return;
 
    S32 team;
    if(theFlag->getZone() == NULL)      // Picked up flag just sitting around
@@ -134,7 +136,7 @@ void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-   if(flag)
+   if(flag && ship->getClientInfo())
    {
       static StringTableEntry dropString("%e0 dropped a flag!");
       Vector<StringTableEntry> e;

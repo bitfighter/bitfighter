@@ -101,6 +101,8 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       return;
 
    ClientInfo *clientInfo = theShip->getClientInfo();
+   if(!clientInfo)
+      return;
 
    static StringTableEntry stealString("%e0 stole %e2 flag from team %e1!");
    static StringTableEntry takeString("%e0 of team %e1 took %e2 flag!");
@@ -146,7 +148,7 @@ void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-   if(flag)
+   if(flag && ship->getClientInfo())
    {
       static StringTableEntry dropString("%e0 dropped %e1 flag!");
 

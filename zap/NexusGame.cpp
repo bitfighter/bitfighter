@@ -211,6 +211,9 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
    if(flagCount == 0)  // This is needed if you drop your flags, then pick up a different item type (like resource item), and drop it
       return;
 
+   if(!ship->getClientInfo())
+      return;
+
    Vector<StringTableEntry> e;
 
    e.push_back(ship->getClientInfo()->getName());
@@ -303,7 +306,7 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
 
    updateScore(theShip, ReturnFlagsToNexus, theFlag->getFlagCount());
 
-   if(theFlag->getFlagCount() > 0)
+   if(theFlag->getFlagCount() > 0 && theShip->getClientInfo())
    {
       s2cNexusMessage(NexusMsgScore, theShip->getClientInfo()->getName().getString(), theFlag->getFlagCount(), 
                       getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
@@ -682,7 +685,8 @@ void NexusFlagItem::dropFlags(U32 flags)
 
 void NexusFlagItem::onMountDestroyed()
 {
-   mMount->getClientInfo()->getStatistics()->mFlagDrop += mFlagCount + 1;
+   if(mMount && mMount->getClientInfo())
+      mMount->getClientInfo()->getStatistics()->mFlagDrop += mFlagCount + 1;
 
    dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
 

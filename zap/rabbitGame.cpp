@@ -346,6 +346,9 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
    if(flag->getTeam() != ship->getTeam() && flag->getTeam() != -1)
       return;
 
+   if(!ship->getClientInfo())
+      return;
+
    s2cRabbitMessage(RabbitMsgGrab, ship->getClientInfo()->getName());
    flag->mTimer.reset(mFlagScoreTimer);
 
@@ -369,7 +372,7 @@ void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-   if(flag)
+   if(flag && ship->getClientInfo())
    {
       flag->mTimer.reset(mFlagReturnTimer);
       s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());

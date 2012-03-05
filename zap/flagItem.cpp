@@ -446,7 +446,8 @@ bool FlagItem::isAtHome()
 
 void FlagItem::onMountDestroyed()
 {
-   mMount->getClientInfo()->getStatistics()->mFlagDrop++;
+   if(mMount && mMount->getClientInfo())
+      mMount->getClientInfo()->getStatistics()->mFlagDrop++;
 
    onItemDropped();
 }

@@ -91,6 +91,9 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    if(theFlag->getTeam() != -1 && theShip->getTeam() != theFlag->getTeam())
       return;
 
+   if(!theShip->getClientInfo())
+      return;
+
    Vector<StringTableEntry> e;
    e.push_back(theShip->getClientInfo()->getName());
    e.push_back(getGame()->getTeamName(theShip->getTeam()));
@@ -114,7 +117,7 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-   if(flag)
+   if(flag && ship->getClientInfo())
    {
       s2cSetFlagTeam(-1);
       static StringTableEntry dropString("%e0 dropped the flag!");
