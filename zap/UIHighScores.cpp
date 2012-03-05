@@ -81,7 +81,7 @@ void HighScoresUserInterface::renderScores()
       // Now draw names
       for(S32 j = 0; j < mScoreGroups[i].names.size(); j++)
       {
-         drawStringf(x, y, textSize, "%d %s", mScoreGroups[i].scores[j], mScoreGroups[i].names[j].c_str());
+         drawStringf(x, y, textSize, "%s %s", mScoreGroups[i].scores[j].c_str(), mScoreGroups[i].names[j].c_str());
          y += textSize + 2;
       }
 
