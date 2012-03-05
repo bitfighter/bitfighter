@@ -167,8 +167,8 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestHighScores,
 
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendHighScores, 
-   (Vector<StringTableEntry> names, Vector<U16> scores), 
-   (names, scores),
+   (Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores),
+   (groupNames, names, scores),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
 
 

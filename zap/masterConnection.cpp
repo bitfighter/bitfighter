@@ -373,12 +373,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (Str
 
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> names, Vector<U16> scores))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores))
 {
    if(mGame->isServer())
       return;
 
-
+//   static_cast<ClientGame *>(mGame)->setHighScores(names, scores);
 }
 #endif
 

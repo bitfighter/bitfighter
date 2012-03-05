@@ -90,7 +90,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
-   TNL_DECLARE_RPC_OVERRIDE(m2cSendHighScores, (Vector<StringTableEntry> names, Vector<U16> scores));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendHighScores, (Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores));
 #endif
 
    void requestAuthentication(StringTableEntry mClientName, Nonce mClientId);

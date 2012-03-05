@@ -746,13 +746,20 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   void MasterServerConnection::getHighScores(S32 count, Vector<StringTableEntry> &names, Vector<U16> &scores)
+   void MasterServerConnection::getHighScores(S32 count, Vector<StringTableEntry> &groupNames, Vector<StringTableEntry> &names, Vector<U16> &scores)
    {
       DatabaseWriter databaseWriter = getDatabaseWriter();
 
+      groupNames.push_back("Official Wins Current");
       databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  count, names, scores);
+
+      groupNames.push_back("Official Wins Last Week");
       databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  count, names, scores);
+
+      groupNames.push_back("Games Played Current");
       databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", count, names, scores);
+
+      groupNames.push_back("Games Played Current");
       databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", count, names, scores);
    }
 
@@ -781,12 +788,13 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestHighScores, ())
    {
+      Vector<StringTableEntry> groupNames;
       Vector<StringTableEntry> names;
       Vector<U16> scores;
 
-      getHighScores(3, names, scores);      // Put leaders into names/scores Vectors
+      getHighScores(3, groupNames, names, scores);      // Put leaders into names/scores Vectors
 
-      m2cSendHighScores(names, scores);
+      m2cSendHighScores(groupNames, names, scores);
    }
 
 
