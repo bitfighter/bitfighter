@@ -29,6 +29,7 @@
 #include "masterConnection.h"   
 #include "ClientGame.h"
 #include "UIErrorMessage.h"
+#include "ScreenInfo.h"          // For canvas dimensions
 
 namespace Zap
 {
@@ -55,37 +56,68 @@ void HighScoresUserInterface::render()
 }
 
 
+extern ScreenInfo gScreenInfo;
+
 void HighScoresUserInterface::renderScores()
 {
-   // XXX: Ugly ugly ugly - rewrite entire method to be pretty
    S32 y = vertMargin;
    S32 headerSize = 32;
    S32 titleSize = 20;
    S32 textSize = 16;
-   S32 x = horizMargin;
+   S32 gapBetweenNames = textSize / 3;
+   S32 gapAfterTitle = 80;
+   S32 gapBetweenGroups = 40;
+   S32 scoreIndent = 10;
 
-   glColor(Colors::white);
+   glColor(Colors::green);
 
-   drawCenteredStringf(y, headerSize, "HIGH SCORES");
-   y += headerSize + 20;
+   drawCenteredUnderlinedString(y, headerSize, "BITFIGHTER HIGH SCORES");
+   y += gapAfterTitle;
+
+   S32 col = 0;   // 0 = left col, 1 = right col
+   S32 yStart;
 
    for(S32 i = 0; i < mScoreGroups.size(); i++)
    {
-      drawStringf(x, y, titleSize, mScoreGroups[i].title.c_str());
+      yStart = y;    // For future reference
+
+      S32 x = col == 0 ? horizMargin : gScreenInfo.getGameCanvasWidth() / 2;
+
+      glColor(Colors::palePurple);
+
+      drawString(x, y, titleSize, mScoreGroups[i].title.c_str());
       y += titleSize + 5;
 
       // Draw line
-      drawHorizLine(x, x + 280, y);
+      glColor(Colors::gray70);
+      drawHorizLine(x, x + gScreenInfo.getGameCanvasWidth() / 2 - 2 * horizMargin, y);
       y += 5;
+
+
+      S32 w = -1;
 
       // Now draw names
       for(S32 j = 0; j < mScoreGroups[i].names.size(); j++)
       {
-         drawStringf(x, y, textSize, "%s %s", mScoreGroups[i].scores[j].c_str(), mScoreGroups[i].names[j].c_str());
-         y += textSize + 2;
+         glColor(Colors::cyan);
+
+         // First gap will always be largest if scores are descending...
+         if(w == -1)
+            w = getStringWidth(textSize, mScoreGroups[i].scores[j].c_str());
+
+         drawStringr(x + scoreIndent + w, y, textSize, mScoreGroups[i].scores[j].c_str());
+
+         glColor(Colors::yellow);
+         drawStringAndGetWidth(x + scoreIndent + w + 15, y, textSize, mScoreGroups[i].names[j].c_str());
+
+         y += textSize + gapBetweenNames;
       }
 
-      y += 20;
+      y += gapBetweenGroups;
+
+      col = 1 - col;    // Toggle col between 0 and 1
+      if(col == 1)
+         y = yStart;
    }
 }
 
@@ -105,9 +137,8 @@ void HighScoresUserInterface::renderWaitingForScores()
    {
       errUI->setTitle("");
 
-      errUI->setMessage(1, "Waiting for scores");
-      errUI->setMessage(2, "to be sent");
-      errUI->setMessage(3, "from Master Server...");   
+      errUI->setMessage(1, "Retrieving scores");
+      errUI->setMessage(2, "from Master Server...");   
 
       errUI->setPresentation(1);
 
@@ -173,6 +204,8 @@ void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames,
 
 void HighScoresUserInterface::onActivate()
 {
+   mHaveHighScores = false;
+
    MasterServerConnection *conn = getGame()->getConnectionToMaster();
 
    if(conn)

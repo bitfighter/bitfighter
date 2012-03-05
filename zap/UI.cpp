@@ -387,19 +387,30 @@ void UserInterface::drawStringfc(F32 x, F32 y, F32 size, const char *format, ...
 }
 
 
-void UserInterface::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...)
+S32 UserInterface::drawStringfr(F32 x, F32 y, F32 size, const char *format, ...)
 {
    makeBuffer;
+
    F32 len = getStringWidth(size, buffer);
    doDrawAngleString(x - len, y, size, 0, buffer);
+
+   return S32(len);
 }
 
 
-void UserInterface::drawStringfr(S32 x, S32 y, S32 size, const char *format, ...)
+S32 UserInterface::drawStringfr(S32 x, S32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
-   S32 len = getStringWidth(size, buffer);
-   doDrawAngleString(x - len, y, (F32)size, 0, buffer);
+   return drawStringr(x, y, size, buffer);
+}
+
+
+S32 UserInterface::drawStringr(S32 x, S32 y, S32 size, const char *string)
+{
+   S32 len = getStringWidth(size, string);
+   doDrawAngleString(x - len, y + size, (F32)size, 0, string);
+
+   return len;
 }
 
    
@@ -423,6 +434,8 @@ S32 UserInterface::drawStringAndGetWidthf(S32 x, S32 y, S32 size, const char *fo
    drawString(x, y, size, buffer);
    return getStringWidth(size, buffer);
 }
+
+
 S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, S32 size, const char *format, ...)
 {
    makeBuffer;
@@ -447,6 +460,18 @@ void UserInterface::drawStringc(F32 x, F32 y, F32 size, const char *string)
 S32 UserInterface::drawCenteredString(S32 y, S32 size, const char *string)
 {
    return drawCenteredString(gScreenInfo.getGameCanvasWidth() / 2, y, size, string);
+}
+
+
+extern void drawHorizLine(S32 x1, S32 x2, S32 y);
+
+S32 UserInterface::drawCenteredUnderlinedString(S32 y, S32 size, const char *string)
+{
+   S32 x = gScreenInfo.getGameCanvasWidth() * .5;
+   S32 xpos = drawCenteredString(x, y, size, string);
+   drawHorizLine(xpos, gScreenInfo.getGameCanvasWidth() - xpos, y + size + 5);
+
+   return xpos;
 }
 
 

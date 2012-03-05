@@ -180,9 +180,9 @@ public:
 
 
    // Draw strings right-aligned at point
-   static void drawStringfr(F32 x, F32 y, F32 size, const char *format, ...);
-   static void drawStringfr(S32 x, S32 y, S32 size, const char *format, ...);
-
+   static S32 drawStringfr(F32 x, F32 y, F32 size, const char *format, ...);
+   static S32 drawStringfr(S32 x, S32 y, S32 size, const char *format, ...);
+   static S32 drawStringr(S32 x, S32 y, S32 size, const char *string);
 
    // Draw string and get it's width
    static S32 drawStringAndGetWidth(S32 x, S32 y, S32 size, const char *string);
@@ -207,6 +207,9 @@ public:
    static F32 drawCenteredString(F32 x, F32 y, F32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);
    static S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
+
+   static S32 drawCenteredUnderlinedString(S32 y, S32 size, const char *string);
+
 
    static S32 drawCenteredStringPair(S32 xpos, S32 ypos, S32 size, const Color &leftColor, const Color &rightColor, 
                                      const char *leftStr, const char *rightStr);
