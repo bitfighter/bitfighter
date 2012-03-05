@@ -759,7 +759,7 @@ static const char *sanitizeForJson(const char *value)
       groupNames.push_back("Games Played Current");
       databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", count, names, scores);
 
-      groupNames.push_back("Games Played Current");
+      groupNames.push_back("Games Played Last Week");
       databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", count, names, scores);
    }
 
