@@ -348,7 +348,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 {
    // Find server in database
    string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
-                "ORDER BY " + col2 + " LIMIT " + itos(count) + ";";
+                "LIMIT " + itos(count) + ";";
 
    DbQuery query(mDb, mServer, mUser, mPassword);
 
