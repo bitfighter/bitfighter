@@ -378,7 +378,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<St
    if(mGame->isServer())
       return;
 
-//   static_cast<ClientGame *>(mGame)->setHighScores(names, scores);
+   static_cast<ClientGame *>(mGame)->setHighScores(groupNames, names, scores);
 }
 #endif
 

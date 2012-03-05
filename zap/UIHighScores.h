@@ -45,6 +45,14 @@ private:
    void renderScores();
    void renderWaitingForScores();
 
+   struct ScoreGroup {
+      string title;
+      Vector<string> names;
+      Vector<U16> scores;
+   };
+
+   Vector<ScoreGroup> mScoreGroups;
+
 public:
    HighScoresUserInterface(ClientGame *game);    // Constructor
 
@@ -52,6 +60,8 @@ public:
    void onReactivate();
    void render();
    void idle(U32 timeDelta);
+
+   void setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores);
 
    bool onKeyDown(InputCode inputCode, char ascii);
    void quit();

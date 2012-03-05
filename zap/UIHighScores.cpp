@@ -25,6 +25,7 @@
 
 #include "UIHighScores.h"
 
+#include "gameObjectRender.h"
 #include "masterConnection.h"   
 #include "ClientGame.h"
 #include "UIErrorMessage.h"
@@ -56,7 +57,36 @@ void HighScoresUserInterface::render()
 
 void HighScoresUserInterface::renderScores()
 {
+   // XXX: Ugly ugly ugly - rewrite entire method to be pretty
+   S32 y = vertMargin;
+   S32 headerSize = 32;
+   S32 titleSize = 20;
+   S32 textSize = 16;
+   S32 x = horizMargin;
 
+   glColor(Colors::white);
+
+   drawCenteredStringf(y, headerSize, "HIGH SCORES");
+   y += headerSize + 20;
+
+   for(S32 i = 0; i < mScoreGroups.size(); i++)
+   {
+      drawStringf(x, y, titleSize, mScoreGroups[i].title.c_str());
+      y += titleSize + 5;
+
+      // Draw line
+      drawHorizLine(x, x + 280, y);
+      y += 5;
+
+      // Now draw names
+      for(S32 j = 0; j < mScoreGroups[i].names.size(); j++)
+      {
+         drawStringf(x, y, textSize, "%d %s", mScoreGroups[i].scores[j], mScoreGroups[i].names[j].c_str());
+         y += textSize + 2;
+      }
+
+      y += 20;
+   }
 }
 
 
@@ -98,20 +128,52 @@ void HighScoresUserInterface::renderWaitingForScores()
       errUI->setPresentation(0);
    }      
 
-   errUI->activate();
+   // Only render, don't activate so we don't have to deactivate when we get the high scores
+   errUI->render();
 }
 
 
 void HighScoresUserInterface::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+}
 
+
+void HighScoresUserInterface::setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores)
+{
+   mScoreGroups.clear();
+
+   for(S32 i = 0; i < groupNames.size(); i++)
+   {
+      ScoreGroup scoreGroup;
+      Vector<string> currNames;
+      Vector<U16> currScores;
+
+      scoreGroup.title = string(groupNames[i].getString());
+
+      for(S32 j = 0; j < 3; j++) // Replace magic number 3 with constant showing group size
+      {
+         currNames.push_back(string(names[i*3 + j].getString()));  // Magic
+         currScores.push_back(scores[i*3 + j]);            // Magic
+      }
+
+      scoreGroup.names = currNames;
+      scoreGroup.scores = currScores;
+
+      mScoreGroups.push_back(scoreGroup);
+   }
+
+   if(mScoreGroups.size() > 0)
+      mHaveHighScores = true;
 }
 
 
 void HighScoresUserInterface::onActivate()
 {
-   //c2mRequestHighScores();
-   mHaveHighScores = false;
+   MasterServerConnection *conn = getGame()->getConnectionToMaster();
+
+   if(conn)
+      conn->c2mRequestHighScores();
 }
 
 

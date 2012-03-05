@@ -60,6 +60,7 @@
 #include "UINameEntry.h"
 #include "UIQueryServers.h"
 #include "UIErrorMessage.h"
+#include "UIHighScores.h"
 
 #include "TeamShuffleHelper.h"   // For... wait for it... TeamShuffleHelper class!!!
 
@@ -675,6 +676,12 @@ void ClientGame::connectionToServerRejected(const char *reason)
 void ClientGame::setMOTD(const char *motd)
 {
    getUIManager()->getMainMenuUserInterface()->setMOTD(motd); 
+}
+
+
+void ClientGame::setHighScores(Vector<StringTableEntry> groupNames, Vector<StringTableEntry> names, Vector<U16> scores)
+{
+   getUIManager()->getHighScoresUserInterface()->setHighScores(groupNames, names, scores);
 }
 
 
