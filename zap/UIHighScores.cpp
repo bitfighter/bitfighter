@@ -25,8 +25,116 @@
 
 #include "UIHighScores.h"
 
+#include "masterConnection.h"   
+#include "ClientGame.h"
+#include "UIErrorMessage.h"
+
 namespace Zap
 {
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+
+// Constructor
+HighScoresUserInterface::HighScoresUserInterface(ClientGame *game) : Parent(game)
+{
+   setMenuID(HighScoresUI);
+   mHaveHighScores = false;
+}
+
+
+void HighScoresUserInterface::render()
+{
+   if(mHaveHighScores)
+      renderScores();
+   else
+      renderWaitingForScores();
+}
+
+
+void HighScoresUserInterface::renderScores()
+{
+
+}
+
+
+void HighScoresUserInterface::renderWaitingForScores()
+{
+   MasterServerConnection *connToMaster = getGame()->getConnectionToMaster();
+
+   string msg;
+
+   ErrorMessageUserInterface *errUI = getGame()->getUIManager()->getErrorMsgUserInterface();
+   errUI->reset();
+   errUI->setInstr("");
+
+
+   if(connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)
+   {
+      errUI->setTitle("");
+
+      errUI->setMessage(1, "Waiting for scores");
+      errUI->setMessage(2, "to be sent");
+      errUI->setMessage(3, "from Master Server...");   
+
+      errUI->setPresentation(1);
+
+   }
+   else     // Let the user know they are not connected to master and shouldn't wait
+   {
+      errUI->setTitle("NO CONNECTION TO MASTER");
+
+      errUI->setMessage(1, "");
+      errUI->setMessage(2, "High Scores are currently unavailable");
+      errUI->setMessage(3, "because there is no connection");
+      errUI->setMessage(4, "to the Bitfighter Master Server.");
+      errUI->setMessage(6, "");
+      errUI->setMessage(7, "Firewall issues?  Do you have the latest version?");
+      errUI->setMessage(8, "");
+      errUI->setMessage(9, "");
+
+      errUI->setPresentation(0);
+   }      
+
+   errUI->activate();
+}
+
+
+void HighScoresUserInterface::idle(U32 timeDelta)
+{
+
+}
+
+
+void HighScoresUserInterface::onActivate()
+{
+   //c2mRequestHighScores();
+   mHaveHighScores = false;
+}
+
+
+void HighScoresUserInterface::onReactivate()
+{
+   quit();     // Got here from ErrorMessageUserInterface, which we "borrow" for rendering some of our messages
+}
+
+
+bool HighScoresUserInterface::onKeyDown(InputCode inputCode, char ascii) 
+{
+   if(!Parent::onKeyDown(inputCode, ascii))
+   quit();            // Quit when any key is pressed...  any key at all.  Except a couple.
+
+   return true;
+}
+
+
+void HighScoresUserInterface::quit()
+{
+   getUIManager()->reactivatePrevUI();
+}
+
 
 
 };

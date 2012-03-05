@@ -35,9 +35,26 @@ namespace Zap
 using namespace std;
 
 
-class HighScoresUserInterface
+class HighScoresUserInterface : public UserInterface
 {
+   typedef UserInterface Parent;
 
+private:
+   bool mHaveHighScores;
+
+   void renderScores();
+   void renderWaitingForScores();
+
+public:
+   HighScoresUserInterface(ClientGame *game);    // Constructor
+
+   void onActivate();
+   void onReactivate();
+   void render();
+   void idle(U32 timeDelta);
+
+   bool onKeyDown(InputCode inputCode, char ascii);
+   void quit();
 
 };
 

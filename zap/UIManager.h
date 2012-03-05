@@ -58,6 +58,7 @@ class LevelNameEntryUserInterface;
 class ServerPasswordEntryUserInterface;
 class InstructionsUserInterface;
 class OptionsMenuUserInterface;
+class HighScoresUserInterface;
 class KeyDefMenuUserInterface;
 class DiagnosticUserInterface;
 class CreditsUserInterface;
@@ -136,6 +137,7 @@ private:
    ErrorMessageUserInterface *mErrorMsgUserInterface;
    InstructionsUserInterface *mInstructionsUserInterface;
    OptionsMenuUserInterface *mOptionsMenuUserInterface;
+   HighScoresUserInterface *mHighScoresUserInterface;
    KeyDefMenuUserInterface *mKeyDefMenuUserInterface;
    DiagnosticUserInterface *mDiagnosticUserInterface;
    CreditsUserInterface *mCreditsUserInterface;
@@ -179,6 +181,7 @@ public:
    LevelNameEntryUserInterface *getLevelNameEntryUserInterface();
    InstructionsUserInterface *getInstructionsUserInterface();
    OptionsMenuUserInterface *getOptionsMenuUserInterface();
+   HighScoresUserInterface *getHighScoresUserInterface();
    KeyDefMenuUserInterface *getKeyDefMenuUserInterface();
    DiagnosticUserInterface *getDiagnosticUserInterface();
    CreditsUserInterface *getCreditsUserInterface();

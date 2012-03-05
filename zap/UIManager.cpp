@@ -43,6 +43,7 @@
 #include "UIChat.h"
 #include "UITeamDefMenu.h"
 #include "UIGame.h"
+#include "UIHighScores.h"
 
 
 namespace Zap
@@ -71,6 +72,7 @@ UIManager::UIManager(ClientGame *clientGame)
    mErrorMsgUserInterface = NULL;
    mInstructionsUserInterface = NULL;
    mOptionsMenuUserInterface = NULL;
+   mHighScoresUserInterface = NULL;
    mKeyDefMenuUserInterface = NULL;
    mDiagnosticUserInterface = NULL;
    mCreditsUserInterface = NULL;
@@ -331,6 +333,16 @@ OptionsMenuUserInterface *UIManager::getOptionsMenuUserInterface()
       mOptionsMenuUserInterface = new OptionsMenuUserInterface(mGame);
 
    return mOptionsMenuUserInterface;
+}
+
+
+HighScoresUserInterface *UIManager::getHighScoresUserInterface()
+{
+   // Lazily initialize
+   if(!mHighScoresUserInterface)
+      mHighScoresUserInterface = new HighScoresUserInterface(mGame);
+
+   return mHighScoresUserInterface;
 }
 
 
