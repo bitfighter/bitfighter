@@ -355,15 +355,15 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 #ifdef BF_WRITE_TO_MYSQL
    if(query.query)
    {
-      S32 serverId_int = -1;
+      //S32 serverId_int = -1;
       StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
 
       S32 rows = results.num_rows();
 
       for(S32 i = 0; i < rows; i++)
       {
-         names.push_back(StringTableEntry(results[i][0]));
-         scores.push_back(results[i][1]);
+         names.push_back(string(results[i][0]));
+         scores.push_back(string(results[i][1]));
       }
 
       // Make sure we have the correct number of responses, even if table doesn't have enough records
