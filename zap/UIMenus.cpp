@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "UIMenus.h"
+
 #include "UINameEntry.h"
 #include "UIGame.h"
 #include "UIQueryServers.h"
@@ -34,6 +35,8 @@
 #include "UIDiagnostics.h"
 #include "UIKeyDefMenu.h"
 #include "UIErrorMessage.h"
+#include "UIHighScores.h"
+
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
 #include "gameType.h"
@@ -752,6 +755,13 @@ static void optionsSelectedCallback(ClientGame *game, U32 unused)
    game->getUIManager()->getOptionsMenuUserInterface()->activate();
 }
 
+
+static void highScoresSelectedCallback(ClientGame *game, U32 unused)
+{
+   game->getUIManager()->getHighScoresUserInterface()->activate();
+}
+
+
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getEditorUserInterface()->setLevelFileName("");      // Reset this so we get the level entry screen
@@ -788,13 +798,14 @@ MainMenuUserInterface::MainMenuUserInterface(ClientGame *game) : Parent(game)
 
    InputCode keyHelp = getInputCode(game->getSettings(), InputCodeManager::BINDING_HELP);
 
-   addMenuItem(new MenuItem("JOIN LAN/INTERNET GAME", joinSelectedCallback,    "", KEY_J));
-   addMenuItem(new MenuItem("HOST GAME",              hostSelectedCallback,    "", KEY_H));
-   addMenuItem(new MenuItem("INSTRUCTIONS",           helpSelectedCallback,    "", KEY_I, keyHelp));
-   addMenuItem(new MenuItem("OPTIONS",                optionsSelectedCallback, "", KEY_O));
-   addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,  "", KEY_L, KEY_E));
-   addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback, "", KEY_C));
-   addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,    "", KEY_Q));
+   addMenuItem(new MenuItem("JOIN LAN/INTERNET GAME", joinSelectedCallback,       "", KEY_J));
+   addMenuItem(new MenuItem("HOST GAME",              hostSelectedCallback,       "", KEY_H));
+   addMenuItem(new MenuItem("INSTRUCTIONS",           helpSelectedCallback,       "", KEY_I, keyHelp));
+   addMenuItem(new MenuItem("OPTIONS",                optionsSelectedCallback,    "", KEY_O));
+   addMenuItem(new MenuItem("HIGH SCORES",            highScoresSelectedCallback, "", KEY_S));
+   addMenuItem(new MenuItem("LEVEL EDITOR",           editorSelectedCallback,     "", KEY_L, KEY_E));
+   addMenuItem(new MenuItem("CREDITS",                creditsSelectedCallback,    "", KEY_C));
+   addMenuItem(new MenuItem("QUIT",                   quitSelectedCallback,       "", KEY_Q));
 }
 
 
