@@ -454,7 +454,6 @@ DbQuery::DbQuery(const char *db, const char *server, const char *user, const cha
       TNLAssert(password, "const char * password is NULL");
       try
       {
-         Connection conn;
          conn.connect(db, server, user, password);    // Will throw error if it fails
          query = new Query(&conn);
       }

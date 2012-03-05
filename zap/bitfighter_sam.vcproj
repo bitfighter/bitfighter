@@ -1157,6 +1157,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\UIHighScores.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\UIManager.cpp"
 			>
 		</File>
