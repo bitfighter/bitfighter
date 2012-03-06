@@ -25,6 +25,7 @@ OBJECTS_MASTER=\
    config.o\
    ../zap/Color.o\
    ../zap/gameStats.o\
+   ../zap/IniFile.o\
    ../zap/stringUtils.o\
    ../zap/WeaponInfo.o\
    ../sqlite/sqlite3.o\

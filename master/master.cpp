@@ -37,11 +37,13 @@
 #include <string>
 #include <stdarg.h>     // For va_args
 #include <time.h>
+#include <map>
 
 #include "../zap/stringUtils.h"     // For itos, replaceString
 
 #include "../zap/version.h"  // for MASTER_PROTOCOL_VERSION - in case we ever forget to update master...
 
+#include "../zap/IniFile.h"  // For INI reading/writing
 
 using namespace TNL;
 using namespace std;
@@ -49,11 +51,8 @@ using namespace Zap;
 
 NetInterface *gNetInterface = NULL;
 
-Vector<string> MOTDTypeVecOld;
-Vector<string> MOTDStringVecOld;
+map <U32, string> gMOTDClientMap;
 
-Vector<U32> MOTDVersionVec;
-Vector<string> MOTDStringVec;
 U32 gLatestReleasedCSProtocol = 0; // Will be updated with value from cfg file
 U32 gLatestReleasedBuildVersion = 0;
 
@@ -80,7 +79,7 @@ string gStatsDatabasePassword;
 
 bool gWriteStatsToMySql;
 
-
+CIniFile gMasterINI("dummy");
 
 
 static bool isControlCharacter(char ch)
@@ -854,6 +853,7 @@ static const char *sanitizeForJson(const char *value)
 
       bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
       bstream->read(&mClientBuild);          // Client's build number
+
       mIsGameServer = bstream->readFlag();
 
       // If it's a game server, read status info...
@@ -906,7 +906,7 @@ static const char *sanitizeForJson(const char *value)
          // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
          string name = mPlayerOrServerName.getString();
          PHPBB3AuthenticationStatus stat = verifyCredentials(name, password);
-         Int<BADGE_COUNT> badges = 0;     //<=== here we can read badges from the database
+//         Int<BADGE_COUNT> badges = 0;     //<=== here we can read badges from the database
 
          mPlayerOrServerName.set(name.c_str());
 
@@ -944,12 +944,8 @@ static const char *sanitizeForJson(const char *value)
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
       string motdString = "Welcome to Bitfighter!";  // Default msg
 
-      for(S32 i = 0; i < MOTDVersionVec.size(); i++)
-         if(mClientBuild == MOTDVersionVec[i])
-         {
-            motdString = MOTDStringVec[i];
-            break;
-         }
+      if(gMOTDClientMap[mClientBuild] != "")
+         motdString = gMOTDClientMap[mClientBuild];
 
       m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion || gLatestReleasedBuildVersion > mClientBuild);
 
@@ -1245,7 +1241,7 @@ S32 testDb(const char *dbName)
 
 U32 gMasterPort = 25955;      // <== Default, can be overwritten in cfg file
 
-extern void readConfigFile();
+extern void readConfigFile(CIniFile *ini);
 
 
 int main(int argc, const char **argv)
@@ -1272,8 +1268,12 @@ int main(int argc, const char **argv)
    gStdoutLogConsumer.setMsgTypes(events);                             // stdout
 
 
+   // Set INI location
+   gMasterINI.SetPath("master.ini");
+
    // Parse command line parameters...
-   readConfigFile();
+   readConfigFile(&gMasterINI);
+
 
    // Initialize our net interface so we can accept connections...
    gNetInterface = new NetInterface(Address(IPProtocol, Address::Any, gMasterPort));
@@ -1303,7 +1303,7 @@ int main(int argc, const char **argv)
       if(currentTime - lastConfigReadTime > REREAD_TIME)     // Reread the config file every 5000ms
       {
          lastConfigReadTime = currentTime;
-         readConfigFile();
+         readConfigFile(&gMasterINI);
       }
 
       // Write status file as need, at most every REWRITE_TIME ms
