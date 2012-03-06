@@ -2102,6 +2102,36 @@ void ServerGame::cycleLevel(S32 nextLevel)
          if(getClientInfo(i)->getConnection())                          // robots don't have GameConnection
             getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
       }
+
+
+   // Send level stats to master, but don't bother in test mode -- don't want to gum things up with a bunch of one-off levels
+   if(!mTestMode)
+   {
+      // Check if we've already sent these stats... if so, no need to waste bandwidth and resend
+      // TODO: Is there a standard container that would make this process simpler?  like a sorted hash or whatnot?
+      bool found = false;
+      for(S32 i = 0; i < mSentHashes.size(); i++)
+         if(mSentHashes[i] == mLevelFileHash)
+         {
+            found = true;
+            break;
+         }
+
+      if(!found)
+      {
+         S32 teamCountU8 = getTeamCount();
+         if(teamCountU8 > U8_MAX)            // Should never happen!
+            teamCountU8 = U8_MAX;
+
+         bool hasLevelGen = getGameType()->getScriptName() != "";
+
+         getConnectionToMaster()->s2mSendLevelInfo(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
+                                                   GameType::getGameTypeName(mGameType->getGameTypeId()), hasLevelGen, (U8)teamCountU8, 
+                                                   mGameType->getWinningScore(), mGameType->getRemainingGameTime());
+
+         mSentHashes.push_back(mLevelFileHash);
+      }
+   }
 }
 
 

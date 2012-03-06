@@ -153,8 +153,8 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mAcheivementAchieved,
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendLevelInfo, 
-   (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-    StringTableEntry gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds), 
+   (string hash, string levelName, string creator, 
+    StringTableEntry gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds), 
    (hash, levelName, creator, gametype, hasLevelGen, teamCount, winningScore, gameDurationInSeconds),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
 

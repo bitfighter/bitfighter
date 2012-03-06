@@ -727,9 +727,9 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   void MasterServerConnection::writeLevelInfoToDb(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
-                                                   const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, 
-                                                   U32 gameDurationInSeconds)
+   void MasterServerConnection::writeLevelInfoToDb(const string &hash, const string &levelName, const string &creator, 
+                                                   const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, 
+                                                   S32 gameDurationInSeconds)
    {
       if(!checkActivityTime(6000))  // 6 seconds
          return;
@@ -741,7 +741,7 @@ static const char *sanitizeForJson(const char *value)
       DatabaseWriter databaseWriter = getDatabaseWriter();
 
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      databaseWriter.insertLevelInfo(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
+      databaseWriter.insertLevelInfo(hash, levelName, creator, gameType.getString(), hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
    }
 
 
@@ -782,8 +782,8 @@ static const char *sanitizeForJson(const char *value)
 
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendLevelInfo, 
-                              (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                               StringTableEntry gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds))
+                              (string hash, string levelName, string creator, 
+                               StringTableEntry gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds))
    {
       writeLevelInfoToDb(hash, levelName, creator, gameType, hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
    }

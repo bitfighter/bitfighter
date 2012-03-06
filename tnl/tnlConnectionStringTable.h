@@ -41,8 +41,8 @@ class ConnectionStringTable
 {
 public:
    enum StringTableConstants{
-      EntryCount = 1024,
       EntryBitSize = 10,
+      EntryCount = 1024, // 1 >> EntryBitSize
    };
 
    struct Entry; 

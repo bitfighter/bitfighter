@@ -580,6 +580,8 @@ private:
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
 
+   Vector<string> mSentHashes;            // Hashes of levels already sent to master
+
    void setCurrentLevelIndex(S32 nextLevel, S32 playerCount);  // Helper for cycleLevel()
    void resetAllClientTeams();                                 // Resets all player team assignments
 

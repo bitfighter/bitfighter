@@ -188,7 +188,7 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
 
 
 // Looks in database to find server mathcing the one in gameStats... returns server_id, or -1 if no match was found
-static S32 getServerFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP)
+static S32 getServerIdFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    // Find server in database
    string sql = "SELECT server_id FROM server AS server "
@@ -249,7 +249,7 @@ U64 DatabaseWriter::getServerID(const DbQuery &query, const string &serverName, 
 
    if(serverId == U64_MAX)      // Not found in cache, check database
    {
-      serverId = getServerFromDatabase(query, serverName, serverIP);
+      serverId = getServerIdFromDatabase(query, serverName, serverIP);
 
       if(serverId == U64_MAX)   // Not found in database, add to database
          serverId = insertStatsServer(query, serverName, serverIP);
@@ -316,8 +316,8 @@ void DatabaseWriter::insertAchievement(U8 achievementId, const StringTableEntry 
 }
 
 
-void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
-                                     const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds)
+void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName, const string &creator, 
+                                     const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);
 
@@ -327,15 +327,49 @@ void DatabaseWriter::insertLevelInfo(const StringTableEntry &hash, const StringT
          return;
 
       // Sanity check
-      if(strlen(hash.getString()) != 32)
+      if(hash.length() != 32)
          return;
 
-      string sql = "INSERT INTO stats_level(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
-                   "VALUES('" + sanitize(hash.getString())    + "', '" + sanitize(levelName.getString()) + "', " + 
-                          "'" + sanitize(creator.getString()) + "', '" + sanitize(gameType.getString())  + "', " +
-                          "'" + btos(hasLevelGen)             + "', '" + itos(teamCount)                 + "', " + 
-                          "'" + itos(winningScore)            + "', '" + itos(gameDurationInSeconds)     + "');";
-      query.runQuery(sql);
+      string sql;
+      bool found = false;
+
+      // We only want to insert a record of this server if the hash does not yet exist
+      sql = "SELECT hash FROM stats_level WHERE hash = '" + sanitize(hash) + "';";
+
+#ifdef BF_WRITE_TO_MYSQL
+      if(query.query)
+      {
+         StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
+
+         if(results.num_rows() > 0)
+            found = true;
+      }
+      else
+#endif
+      if(query.sqliteDb)
+      {
+         char *err = 0;
+         char **results;
+         int rows, cols;
+
+         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+      
+         // results[0] will be the string "hash" (http://www.sqlite.org/c3ref/free_table.html)... if results[1] exists, then we found a match
+         if(rows > 1)         
+            found = true;
+
+         sqlite3_free_table(results);
+      }
+
+      if(!found) 
+      {
+         sql = "INSERT INTO stats_level(hash, level_name, creator, game_type, has_levelgen, team_count, winning_score, game_duration) "
+               "VALUES('" + sanitize(hash)      + "', '" + sanitize(levelName)         + "', " + 
+                      "'" + sanitize(creator)   + "', '" + sanitize(gameType)          + "', " +
+                      "'" + btos(hasLevelGen)   + "', '" + itos(teamCount)             + "', " + 
+                      "'" + itos(winningScore)  + "', '" + itos(gameDurationInSeconds) + "');";
+         query.runQuery(sql);
+      }
    }
    catch (const Exception &ex) 
    {

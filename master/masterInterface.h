@@ -170,8 +170,8 @@ public:
 
    TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
-   TNL_DECLARE_RPC(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                                      StringTableEntry gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
+   TNL_DECLARE_RPC(s2mSendLevelInfo, (string hash, string levelName, string creator, 
+                                      StringTableEntry gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds));
 
 
    TNL_DECLARE_RPC(c2mRequestHighScores, ());

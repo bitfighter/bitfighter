@@ -202,16 +202,16 @@ public:
    void processIsAuthenticated(Zap::GameStats *gameStats);
    void writeStatisticsToDb(Zap::VersionedGameStats &stats);
    void writeAchievementToDb(U8 achievementId, const StringTableEntry &playerNick);
-   void writeLevelInfoToDb(const StringTableEntry &hash, const StringTableEntry &levelName, const StringTableEntry &creator, 
-                           const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds);
+   void writeLevelInfoToDb(const string &hash, const string &levelName, const string &creator, 
+                           const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds);
 
 
    void getHighScores(S32 scoresPerGroup, Vector<StringTableEntry> &groupNames, Vector<string> &names, Vector<string> &scores);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (StringTableEntry hash, StringTableEntry levelName, StringTableEntry creator, 
-                                               StringTableEntry gametype, bool hasLevelGen, U8 teamCount, U32 winningScore, U32 gameDurationInSeconds));
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (string hash, string levelName, string creator, 
+                                               StringTableEntry gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds));
 
    // Send high scores stats to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestHighScores, ());
