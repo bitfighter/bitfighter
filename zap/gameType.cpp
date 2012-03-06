@@ -833,6 +833,9 @@ VersionedGameStats GameType::getGameStats()
          teamStats->playerStats.push_back(PlayerStats());
          PlayerStats *playerStats = &teamStats->playerStats.last();
 
+         if(playerStats->name == "watusimoto" || playerStats->name == "raptor" || playerStats->name == "sam686")
+            TNLAssert(playerStats->isAuthenticated, "Improper validation status!");
+
          Statistics *statistics = clientInfo->getStatistics();
             
          playerStats->name           = clientInfo->getName().getString();    // TODO: What if this is a bot??  What should go here??
