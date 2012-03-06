@@ -649,6 +649,8 @@ public:
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);   // Things like spawns that aren't really items
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
+   void sendLevelStatsToMaster();
+
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);      // Figures out the level index if the input is a relative index

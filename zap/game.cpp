@@ -2103,35 +2103,39 @@ void ServerGame::cycleLevel(S32 nextLevel)
             getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
       }
 
+   sendLevelStatsToMaster();
+}
 
+
+void ServerGame::sendLevelStatsToMaster()
+{
    // Send level stats to master, but don't bother in test mode -- don't want to gum things up with a bunch of one-off levels
-   if(!mTestMode)
-   {
-      // Check if we've already sent these stats... if so, no need to waste bandwidth and resend
-      // TODO: Is there a standard container that would make this process simpler?  like a sorted hash or whatnot?
-      bool found = false;
-      for(S32 i = 0; i < mSentHashes.size(); i++)
-         if(mSentHashes[i] == mLevelFileHash)
-         {
-            found = true;
-            break;
-         }
+   if(mTestMode)
+      return;
 
-      if(!found)
-      {
-         S32 teamCountU8 = getTeamCount();
-         if(teamCountU8 > U8_MAX)            // Should never happen!
-            teamCountU8 = U8_MAX;
+   MasterServerConnection *masterConn = getConnectionToMaster();
 
-         bool hasLevelGen = getGameType()->getScriptName() != "";
+   if(!(masterConn && masterConn->isEstablished()))
+      return;
 
-         getConnectionToMaster()->s2mSendLevelInfo(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
-                                                   GameType::getGameTypeName(mGameType->getGameTypeId()), hasLevelGen, (U8)teamCountU8, 
-                                                   mGameType->getWinningScore(), mGameType->getRemainingGameTime());
+   // Check if we've already sent these stats... if so, no need to waste bandwidth and resend
+   // TODO: Is there a standard container that would make this process simpler?  like a sorted hash or whatnot?
+   for(S32 i = 0; i < mSentHashes.size(); i++)
+      if(mSentHashes[i] == mLevelFileHash)
+         return;
 
-         mSentHashes.push_back(mLevelFileHash);
-      }
-   }
+   S32 teamCountU8 = getTeamCount();
+
+   if(teamCountU8 > U8_MAX)            // Should never happen!
+      teamCountU8 = U8_MAX;
+
+   bool hasLevelGen = getGameType()->getScriptName() != "";
+
+   masterConn->s2mSendLevelInfo(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
+                                GameType::getGameTypeName(mGameType->getGameTypeId()), hasLevelGen, (U8)teamCountU8, 
+                                mGameType->getWinningScore(), mGameType->getRemainingGameTime());
+
+   mSentHashes.push_back(mLevelFileHash);
 }
 
 
@@ -2612,7 +2616,6 @@ void ServerGame::idle(U32 timeDelta)
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);                   // Connect to master server if not connected
 
-   
    mSettings->getBanList()->updateKickList(timeDelta);   // Unban players who's bans have expired
 
    // Periodically update our status on the master, so they know what we're doing...

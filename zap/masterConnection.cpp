@@ -452,8 +452,10 @@ void MasterServerConnection::onConnectionEstablished()
       for(S32 i = 0; i < mGame->getClientCount(); i++)
          if(mGame->getClientInfo(i)->getConnection())             // robots don't have GameConnection
             mGame->getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
+
+      static_cast<ServerGame *>(mGame)->sendLevelStatsToMaster();    // We're probably in a game, and we should send the level details to the master
    }
-   else
+   else     // Client game
    {
       logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 
@@ -462,7 +464,7 @@ void MasterServerConnection::onConnectionEstablished()
 
       // Clear old player list that might be there from client's lost connection to master while in game lobby
       Vector<StringTableEntry> emptyPlayerList;
-      ((ClientGame *)mGame)->setPlayersInGlobalChat(emptyPlayerList);
+      static_cast<ClientGame *>(mGame)->setPlayersInGlobalChat(emptyPlayerList);
 #endif
    }
 
