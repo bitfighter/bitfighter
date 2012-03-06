@@ -664,7 +664,7 @@ string DatabaseWriter::getSqliteSchema() {
       "   level_name VARCHAR(255) default NULL,"
       "   creator VARCHAR(255) NOT NULL,"
       "   hash VARCHAR(32) NOT NULL,"
-      "   game_type INTEGER NOT NULL,"
+      "   game_type VARCHAR(32) NOT NULL,"
       "   has_levelgen TINYINT NOT NULL,"
       "   team_count INTEGER NOT NULL,"
       "   winning_score INTEGER NOT NULL,"
