@@ -120,12 +120,18 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
                                                "is_authenticated, is_robot, "
                                                "result, points, kill_count, "
                                                "death_count, "
-                                               "suicide_count, switched_team_count) "
+                                               "suicide_count, switched_team_count, "
+                                               "asteroid_crashes, flag_drops, "
+                                               "flag_pickups, flag_returns, flag_scores, "
+                                               "teleport_uses) "
                       "VALUES(" + itos(gameId) + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
                                  btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
                                  itos(playerStats->deaths) + ", " +
-                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeamCount != 0) + ");";
+                                 itos(playerStats->suicides) + ", " + itos(playerStats->switchedTeamCount) + ", " +
+                                 itos(playerStats->crashedIntoAsteroid) + ", " + itos(playerStats->flagDrop) + ", " + 
+                                 itos(playerStats->flagPickup) + ", " + itos(playerStats->flagReturn) + ", " + itos(playerStats->flagScore) + ", " + 
+                                 itos(playerStats->teleport) + ");";
 
    U64 playerId = query.runQuery(sql);
 
@@ -626,9 +632,14 @@ string DatabaseWriter::getSqliteSchema() {
       "   is_robot BOOL NOT NULL,"
       "   result CHAR  NOT NULL,"
       "   points INTEGER NOT NULL,"
-      "   kill_count INTEGER  NOT NULL,"
       "   death_count INTEGER  NOT NULL,"
       "   suicide_count INTEGER  NOT NULL,"
+      "   asteroid_crashes INTEGER  NOT NULL,"
+      "   flag_drops INTEGER  NOT NULL,"
+      "   flag_pickups INTEGER  NOT NULL,"
+      "   flag_returns INTEGER  NOT NULL,"
+      "   flag_scores INTEGER  NOT NULL,"
+      "   teleport_uses INTEGER  NOT NULL,"
       "   switched_team_count INTEGER  NULL,"
       "   stats_team_id INTEGER NULL,"
       "   insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
