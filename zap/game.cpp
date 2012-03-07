@@ -114,6 +114,9 @@ void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
    mNeedToCheckAuthenticationWithMaster = false;     // Once we get here, we'll treat the ruling as definitive
    mIsAuthenticated = isAuthenticated; 
    mBadges = badges;
+
+   if(getName() == "watusimoto" || getName() == "raptor" || getName() == "sam686")
+      TNLAssert(isAuthenticated, "Improper validation status!");
 }
 
 
