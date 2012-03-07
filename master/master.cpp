@@ -763,7 +763,6 @@ static const char *sanitizeForJson(const char *value)
 
       groupNames.push_back("Games Played This Week, So Far");
       databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, names, scores);
-
    }
 
 
