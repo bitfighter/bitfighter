@@ -326,7 +326,7 @@ void NetInterface::processConnections()
    for(S32 i = 0; i < mConnectionList.size(); i++)
       mConnectionList[i]->checkPacketSend(false, getCurrentTime());
 
-   if(S32(mLastTimeoutCheckTime + TimeoutCheckInterval - getCurrentTime()) < 0)
+   if(U32(getCurrentTime() - mLastTimeoutCheckTime) > TimeoutCheckInterval)
    {
       for(S32 i = 0; i < mPendingConnections.size();)
       {
