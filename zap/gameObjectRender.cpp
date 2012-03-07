@@ -1043,6 +1043,30 @@ void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outline
 }
 
 
+void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
+{
+   F32 ang = FloatTau / F32(points * 2);
+   F32 a = -ang / 2;
+   F32 r = radius;
+   bool inout = true;
+
+   Point p;
+
+   Vector<Point> pts;
+   for(S32 i = 0; i < points * 2; i++)
+   {
+      p.set(r * cos(a), r * sin(a));
+      pts.push_back(p + pos);
+
+      a += ang;
+      inout = !inout;
+      r = inout ? radius : innerRadius;
+   }
+
+   renderPolygonOutline(&pts);
+}
+
+
 void renderLoadoutZone(const Color *outlineColor, const Vector<Point> *outline, const Vector<Point> *fill)
 {
    Color fillColor = *outlineColor;

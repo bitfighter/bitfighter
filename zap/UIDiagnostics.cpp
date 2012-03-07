@@ -693,6 +693,12 @@ void DiagnosticUserInterface::render()
          drawPolygon(Point(x,y + rad * .333), 3, rad * .6, 3.14159 * .5);
 
 
+         x += 3*rad;
+         glColor(Colors::red);
+         drawCircle(Point(x, y), rad);
+         glColor(Colors::white);
+         drawStar(Point(x,y), 7, rad - 1, rad/2);
+
          glPopMatrix();
 
       }

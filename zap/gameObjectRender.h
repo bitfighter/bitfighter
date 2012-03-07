@@ -74,6 +74,9 @@ extern void drawFilledEllipse(const Point &pos, S32 width, S32 height, F32 angle
 
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
+extern void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius);
+
+
 extern void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle);
 extern void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 startAngle, F32 offset);
 extern void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle, F32 offset);
