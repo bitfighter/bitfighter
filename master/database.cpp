@@ -405,13 +405,6 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
          names.push_back(string(results[i][0]));
          scores.push_back(string(results[i][1]));
       }
-
-      // Make sure we have the correct number of responses, even if table doesn't have enough records
-      for(S32 i = rows; i < count; i++)
-      {
-         names.push_back("");
-         scores.push_back("");
-      }
    }
    else
 #endif
@@ -426,18 +419,18 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
       // results[0] and results[1] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
       for(S32 i = 0; i < rows * 2; i += 2)
       {
-         names .push_back(results[i + 2]);
+         names.push_back(results[i + 2]);
          scores.push_back(results[i + 3]);
       }
 
-      // Make sure we have the correct number of responses, even if table doesn't have enough records
-      for(S32 i = rows; i < count; i++)
-      {
-         names.push_back("");
-         scores.push_back("");
-      }
-
       sqlite3_free_table(results);
+   }
+
+   // Make sure we have the correct number of responses, even if table doesn't have enough records
+   for(S32 i = names.size(); i < count; i++)
+   {
+      names.push_back("");
+      scores.push_back("");
    }
 }
 

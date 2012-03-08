@@ -37,10 +37,25 @@ namespace Zap {
    struct GameStats;
 }
 
+
+struct HighScores
+{
+    Vector<StringTableEntry> groupNames;
+    Vector<string> names;
+    Vector<string> scores;
+    bool isValid;
+    S32 scoresPerGroup;
+
+    HighScores() { isValid = false; }
+};
+
+
 class MasterServerConnection : public MasterServerInterface
 {
 private:
    typedef MasterServerInterface Parent;
+
+   static HighScores highScores;    // Cached high scores
 
 protected:
 
@@ -206,7 +221,7 @@ public:
                            const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds);
 
 
-   void getHighScores(S32 scoresPerGroup, Vector<StringTableEntry> &groupNames, Vector<string> &names, Vector<string> &scores);
+   HighScores *getHighScores(S32 scoresPerGroup);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));

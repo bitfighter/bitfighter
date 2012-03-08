@@ -745,24 +745,36 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   void MasterServerConnection::getHighScores(S32 scoresPerGroup, Vector<StringTableEntry> &groupNames, Vector<string> &names, Vector<string> &scores)
+   HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
    {
-      DatabaseWriter databaseWriter = getDatabaseWriter();
+      // Check if we have the scores cached
+      if(!highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)
+      {
+         DatabaseWriter databaseWriter = getDatabaseWriter();
 
-      // Client will display these in two columns, row by row
+         // Client will display these in two columns, row by row
 
-      groupNames.push_back("Official Wins Last Week");
-      databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  scoresPerGroup, names, scores);
+         highScores.groupNames.clear();
+         highScores.names.clear();
+         highScores.scores.clear();
 
-      groupNames.push_back("Official Wins This Week, So Far");
-      databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  scoresPerGroup, names, scores);
+         highScores.groupNames.push_back("Official Wins Last Week");
+         databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  scoresPerGroup, highScores.names, highScores.scores);
 
+         highScores.groupNames.push_back("Official Wins This Week, So Far");
+         databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  scoresPerGroup, highScores.names, highScores.scores);
 
-      groupNames.push_back("Games Played Last Week");
-      databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", scoresPerGroup, names, scores);
+         highScores.groupNames.push_back("Games Played Last Week");
+         databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", scoresPerGroup, highScores.names, highScores.scores);
 
-      groupNames.push_back("Games Played This Week, So Far");
-      databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, names, scores);
+         highScores.groupNames.push_back("Games Played This Week, So Far");
+         databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, highScores.names, highScores.scores);
+
+         highScores.scoresPerGroup = scoresPerGroup;
+         highScores.isValid = true;
+      }
+      
+      return &highScores;
    }
 
 
@@ -771,6 +783,7 @@ static const char *sanitizeForJson(const char *value)
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mSendStatistics, (VersionedGameStats stats))
    {
       writeStatisticsToDb(stats);
+      highScores.isValid = false;
    }
 
 
@@ -794,9 +807,9 @@ static const char *sanitizeForJson(const char *value)
       Vector<string> names;
       Vector<string> scores;
 
-      getHighScores(3, groupNames, names, scores);      // Put leaders into names/scores Vectors
+      HighScores *hightScores = getHighScores(3);     
 
-      m2cSendHighScores(groupNames, names, scores);
+      m2cSendHighScores(hightScores->groupNames, hightScores->names, hightScores->scores);
    }
 
 
