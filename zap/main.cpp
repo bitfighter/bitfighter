@@ -1142,19 +1142,24 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    gINI.deleteAllSectionComments();
 
    // version specific changes
-   // 015a
-   //   if(settings->getIniSettings()->version < 1836)
-   //      settings->getIniSettings()->useLineSmoothing = true;
-
    // 016:
    if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
 
-   //if(settings->getIniSettings()->version < 3007)  <<=== after 016 release, replace this number with 016 release number, and uncomment
-   //{
+   if(settings->getIniSettings()->version < 3737)
+   {
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
       gINI.addSection("EditorPlugins");
       gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+;|draw_arcs.lua|Make curves!");
+   }
+
+   // 017:
+   //if(settings->getIniSettings()->version < 3795)    <<=== after 017 release, replace this number with 017 release number, and uncomment
+   //{
+#ifdef TNL_OS_MAC_OSX
+      settings->getIniSettings()->useFakeFullscreen = true;
+#endif
+
    //}
 }
 
