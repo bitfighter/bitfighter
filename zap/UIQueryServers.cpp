@@ -243,16 +243,16 @@ void QueryServersUserInterface::contactEveryone()
    }
 
    // If we already have a connection to the Master, start the server query... otherwise, don't
-   MasterServerConnection *conn = getGame()->getConnectionToMaster();
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
 
-   if(conn)
+   if(masterConn && masterConn->isEstablished())
    {
       if(!mAnnounced)
       {
-         conn->c2mJoinGlobalChat();    // Announce our presence in the chat room
+         masterConn->c2mJoinGlobalChat();    // Announce our presence in the chat room
          mAnnounced = true;
       }
-      conn->startServerQuery();
+      masterConn->startServerQuery();
       mWaitingForResponseFromMaster = true;
    }
    else     // Don't have a valid connection object
@@ -660,13 +660,13 @@ void QueryServersUserInterface::render()
    for(S32 i = 0; i < buttons.size(); i++)
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
 
-   MasterServerConnection *conn = getGame()->getConnectionToMaster();
-   bool connectedToMaster = conn && conn->isEstablished();
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+   bool connectedToMaster = masterConn && masterConn->isEstablished();
 
    if(connectedToMaster)
    {
       glColor(gMasterServerBlue);
-      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", conn->getMasterName().c_str() );
+      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", masterConn->getMasterName().c_str() );
    }
    else
    {

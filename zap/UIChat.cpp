@@ -455,7 +455,8 @@ void ChatUserInterface::render()
    renderMessageComposition(vertFooterPos - 45);
 
    // Give user notice that there is no connection to master, and thus chatting is ineffectual
-   if(!(getGame()->getConnectionToMaster() && getGame()->getConnectionToMaster()->getConnectionState() == NetConnection::Connected))
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+   if(!(masterConn && masterConn->getConnectionState() == NetConnection::Connected))
    {
       glColor(Colors::red);
       drawCenteredString(200, 20, "Not connected to Master Server");
@@ -508,9 +509,10 @@ bool ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
 // Run when UIChat is called in normal UI mode
 void ChatUserInterface::onActivate()
 {
-   MasterServerConnection *conn = getGame()->getConnectionToMaster();
-   if(conn)
-      conn->c2mJoinGlobalChat();
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+
+   if(masterConn && masterConn->isEstablished())
+      masterConn->c2mJoinGlobalChat();
 
    // Only clear the chat list if the previous UI was NOT UIQueryServers
    if(getUIManager()->getPrevUI() != getUIManager()->getQueryServersUserInterface())

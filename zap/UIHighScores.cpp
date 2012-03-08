@@ -124,7 +124,7 @@ void HighScoresUserInterface::renderScores()
 
 void HighScoresUserInterface::renderWaitingForScores()
 {
-   MasterServerConnection *connToMaster = getGame()->getConnectionToMaster();
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
 
    string msg;
 
@@ -133,7 +133,7 @@ void HighScoresUserInterface::renderWaitingForScores()
    errUI->setInstr("");
 
 
-   if(connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)
+   if(masterConn && masterConn->isEstablished())
    {
       errUI->setTitle("");
 
@@ -206,10 +206,10 @@ void HighScoresUserInterface::onActivate()
 {
    mHaveHighScores = false;
 
-   MasterServerConnection *conn = getGame()->getConnectionToMaster();
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
 
-   if(conn)
-      conn->c2mRequestHighScores();
+   if(masterConn && masterConn->isEstablished())
+      masterConn->c2mRequestHighScores();
 }
 
 
