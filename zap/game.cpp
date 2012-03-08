@@ -666,6 +666,17 @@ S32 Game::getPlayerCount() const
 }
 
 
+S32 Game::getAuthenticatedPlayerCount() const
+{
+   S32 count = 0;
+   for(S32 i = 0; i < mClientInfos.size(); i++)
+      if(!mClientInfos[i]->isRobot() && mClientInfos[i]->isAuthenticated())
+         count++;
+
+   return count;
+}
+
+
 S32 Game::getRobotCount() const
 {
    return mRobotCount;
