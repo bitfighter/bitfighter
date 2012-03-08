@@ -135,6 +135,7 @@
 		7385CBAD14147824008470C8 /* Spawn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA614147824008470C8 /* Spawn.cpp */; };
 		7385CBAE14147824008470C8 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA814147824008470C8 /* Timer.cpp */; };
 		7388F06C139D5B46003C6BB0 /* music in Resources */ = {isa = PBXBuildFile; fileRef = 7388F069139D5B46003C6BB0 /* music */; };
+		738A4ED215085E6B001C4F67 /* UIHighScores.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738A4ED015085E6B001C4F67 /* UIHighScores.cpp */; };
 		738B57711446185700F25FDF /* BanList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57681446185700F25FDF /* BanList.cpp */; };
 		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
@@ -691,6 +692,8 @@
 		7388F266139D6B5F003C6BB0 /* codec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = codec.h; sourceTree = "<group>"; };
 		7388F267139D6B5F003C6BB0 /* vorbisenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisenc.h; sourceTree = "<group>"; };
 		7388F268139D6B5F003C6BB0 /* vorbisfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vorbisfile.h; sourceTree = "<group>"; };
+		738A4ED015085E6B001C4F67 /* UIHighScores.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UIHighScores.cpp; path = ../../../zap/UIHighScores.cpp; sourceTree = SOURCE_ROOT; };
+		738A4ED115085E6B001C4F67 /* UIHighScores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UIHighScores.h; path = ../../../zap/UIHighScores.h; sourceTree = SOURCE_ROOT; };
 		738B57681446185700F25FDF /* BanList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BanList.cpp; path = ../../../zap/BanList.cpp; sourceTree = SOURCE_ROOT; };
 		738B57691446185700F25FDF /* BanList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BanList.h; path = ../../../zap/BanList.h; sourceTree = SOURCE_ROOT; };
 		738B576A1446185700F25FDF /* ConfigEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConfigEnum.h; path = ../../../zap/ConfigEnum.h; sourceTree = SOURCE_ROOT; };
@@ -836,7 +839,7 @@
 		73D2F2DA12E2D7E800EA5EBE /* luaObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaObject.h; path = ../../../zap/luaObject.h; sourceTree = SOURCE_ROOT; };
 		73D2F2DB12E2D7E800EA5EBE /* luaUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luaUtil.cpp; path = ../../../zap/luaUtil.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2DC12E2D7E800EA5EBE /* luaUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaUtil.h; path = ../../../zap/luaUtil.h; sourceTree = SOURCE_ROOT; };
-		73D2F2DD12E2D7E800EA5EBE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../zap/main.cpp; sourceTree = SOURCE_ROOT; };
+		73D2F2DD12E2D7E800EA5EBE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../zap/main.cpp; sourceTree = SOURCE_ROOT; tabWidth = 4; usesTabs = 0; };
 		73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterConnection.cpp; path = ../../../zap/masterConnection.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2E012E2D7E800EA5EBE /* masterConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterConnection.h; path = ../../../zap/masterConnection.h; sourceTree = SOURCE_ROOT; };
 		73D2F2E112E2D7E800EA5EBE /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5.cpp; path = ../../../zap/md5.cpp; sourceTree = SOURCE_ROOT; };
@@ -1743,6 +1746,8 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738A4ED015085E6B001C4F67 /* UIHighScores.cpp */,
+				738A4ED115085E6B001C4F67 /* UIHighScores.h */,
 				73846BA714CDD57900A5553F /* CoreGame.cpp */,
 				73846BA814CDD57900A5553F /* CoreGame.h */,
 				73846BA914CDD57900A5553F /* WallSegmentManager.cpp */,
@@ -2854,6 +2859,7 @@
 				739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */,
 				73846BAB14CDD57900A5553F /* CoreGame.cpp in Sources */,
 				73846BAC14CDD57900A5553F /* WallSegmentManager.cpp in Sources */,
+				738A4ED215085E6B001C4F67 /* UIHighScores.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
