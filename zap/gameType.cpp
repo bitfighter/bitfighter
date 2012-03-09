@@ -1149,21 +1149,23 @@ void GameType::onLevelLoaded()
 {
    catalogSpybugs();
 
-   // Figure out if this level has any loadout zones
-   fillVector.clear();
-   mGame->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, fillVector);
+   GridDatabase *gridDatabase =  mGame->getGameObjDatabase();
 
-   mLevelHasLoadoutZone = (fillVector.size() > 0);
+   mLevelHasLoadoutZone      = gridDatabase->hasObjectOfType(LoadoutZoneTypeNumber);
+   mLevelHasPredeployedFlags = gridDatabase->hasObjectOfType(FlagTypeNumber);
+   mLevelHasFlagSpawns       = mFlagSpawnPoints.size();
 
    Robot::startAllBots();           // Cycle through all our bots and start them up
 }
 
 
+bool GameType::hasFlagSpawns() const       {   return mLevelHasFlagSpawns;         }
+bool GameType::hasPredeployedFlags() const {   return mLevelHasPredeployedFlags;   }
+
+
 // Gets run in editor and game
 void GameType::onAddedToGame(Game *game)
 {
-   //game->setGameType(this);    // also set in GameType::addToGame(), which I think is a better place
-
    if(mGame->isServer())
       mShowAllBots = mGame->isTestServer();  // Default to true to show all bots if on testing mode
 }
@@ -3692,13 +3694,6 @@ const Vector<WallRec> *GameType::getBarrierList()
 }
 
 
-
-S32 GameType::getFlagSpawnCount() const
-{
-   return mFlagSpawnPoints.size();
-}
-
-
 const FlagSpawn *GameType::getFlagSpawn(S32 index) const
 {
    return &mFlagSpawnPoints[index];
@@ -3708,6 +3703,12 @@ const FlagSpawn *GameType::getFlagSpawn(S32 index) const
 const Vector<FlagSpawn> *GameType::getFlagSpawns() const
 {
    return &mFlagSpawnPoints;
+}
+
+
+S32 GameType::getFlagSpawnCount() const
+{
+   return mFlagSpawnPoints.size();
 }
 
 

@@ -27,6 +27,7 @@
 #include "robot.h"            // For EventManager
 
 #include "stringUtils.h"      // For ftos et al
+#include "masterConnection.h" // For master connection details
 
 #ifndef ZAP_DEDICATED
 #   include "gameObjectRender.h"
@@ -306,13 +307,35 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
 
    updateScore(theShip, ReturnFlagsToNexus, theFlag->getFlagCount());
 
-   if(theFlag->getFlagCount() > 0 && theShip->getClientInfo())
+   S32 flagsReturned = theFlag->getFlagCount();
+   ClientInfo *scorer = theShip->getClientInfo();
+
+   if(flagsReturned > 0 && scorer)
    {
-      s2cNexusMessage(NexusMsgScore, theShip->getClientInfo()->getName().getString(), theFlag->getFlagCount(), 
+      s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), theFlag->getFlagCount(), 
                       getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
    }
    theFlag->changeFlagCount(0);
+
+   // See if this event qualifies for an achievement
+   if(flagsReturned >= 25 &&                              // Return 25+ flags
+      scorer && scorer->isAuthenticated() &&              // Player must be authenticated
+      getGame()->getPlayerCount() >= 4 &&                 // Game must have 4+ human players
+      getGame()->getAuthenticatedPlayerCount() >= 2 &&    // Two of whom must be authenticated
+      !hasFlagSpawns() && !hasPredeployedFlags())         // Level can have no flag spawns, nor any predeployed flags
+   {
+      MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+      if(masterConn && masterConn->isEstablished())
+      {
+         Vector<StringTableEntry> e;
+         e.push_back(scorer->getName());
+
+         masterConn->s2mAcheivementAchieved(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());
+         StringTableEntry msg("%0 has earned the TWENTY FIVE FLAGS badge!");
+         broadcastMessage(GameConnection::ColorYellow, SFXFlagCapture, msg, e);
+      }
+   }
 }
 
 

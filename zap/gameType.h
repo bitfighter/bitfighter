@@ -69,10 +69,14 @@ class GameType : public NetObject
 
 private:
    Game *mGame;
-   Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
+   Point getSpawnPoint(S32 team);        // Picks a spawn point for ship or robot
 
    Vector<SafePtr<Object> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
+
    bool mLevelHasLoadoutZone;
+   bool mLevelHasPredeployedFlags;
+   bool mLevelHasFlagSpawns;
+
    bool mShowAllBots;
    U32 mTotalGamePlay;
 
@@ -174,6 +178,10 @@ public:
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
 
+   // Info about the level itself
+   bool hasFlagSpawns() const;      
+   bool hasPredeployedFlags() const;
+
    void setGameTime(F32 timeInSeconds);
 
    U32 getTotalGameTime() const;            // In seconds
@@ -228,9 +236,10 @@ public:
 
    const Vector<WallRec> *getBarrierList();
 
-   S32 getFlagSpawnCount() const;
    const FlagSpawn *getFlagSpawn(S32 index) const;
    const Vector<FlagSpawn> *getFlagSpawns() const;
+   S32 getFlagSpawnCount() const;
+
    void addFlagSpawn(FlagSpawn flagSpawn);
    void addItemSpawn(ItemSpawn *spawn);
 
