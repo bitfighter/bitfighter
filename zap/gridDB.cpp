@@ -559,7 +559,7 @@ S32 GridDatabase::getObjectCount()
 }
 
 
-S32 GridDatabase::hasObjectOfType(U8 typeNumber)
+bool GridDatabase::hasObjectOfType(U8 typeNumber)
 {
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)

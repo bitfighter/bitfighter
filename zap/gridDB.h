@@ -163,7 +163,7 @@ public:
    virtual void removeEverythingFromDatabase();
 
    S32 getObjectCount();                          // Return the number of objects currently in the database
-   S32 hasObjectOfType(U8 typeNumber);
+   bool hasObjectOfType(U8 typeNumber);
    DatabaseObject *getObjectByIndex(S32 index);   // Kind of hacky, kind of useful
 };
 
