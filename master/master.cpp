@@ -750,7 +750,7 @@ static const char *sanitizeForJson(const char *value)
    HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
    {
       // Check if we have the scores cached
-      if(!highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)
+      if(!highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)     // Remember... highScores is static!
       {
          DatabaseWriter databaseWriter = getDatabaseWriter();
 
