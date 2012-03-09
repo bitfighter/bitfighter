@@ -398,7 +398,7 @@ void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<st
          values.push_back(Vector<string>());     // Add another row
 
          for(S32 j = 0; j < cols; j++)
-            values[i].push_back(string(results[i * cols + j][0]));
+            values[i].push_back(string(results[i][j]));
       }
    }
    else
