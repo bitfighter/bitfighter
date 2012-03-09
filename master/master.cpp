@@ -81,6 +81,8 @@ bool gWriteStatsToMySql;
 
 CIniFile gMasterINI("dummy");
 
+HighScores MasterServerConnection::highScores;
+
 
 static bool isControlCharacter(char ch)
 {
