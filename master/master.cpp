@@ -641,12 +641,9 @@ static const char *sanitizeForJson(const char *value)
    ////////////////////////////////////////
    ////////////////////////////////////////
 
-   Int<BADGE_COUNT> getBadges(StringTableEntry name)
+   Int<BADGE_COUNT> MasterServerConnection::getBadges(StringTableEntry name)
    {
       DatabaseWriter databaseWriter = getDatabaseWriter();
-
-      // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      databaseWriter.insertStats(*gameStats);
 
       Int<BADGE_COUNT> badges = databaseWriter.getAchievements(name);
 

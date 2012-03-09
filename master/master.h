@@ -57,6 +57,8 @@ private:
 
    static HighScores highScores;    // Cached high scores
 
+   Int<BADGE_COUNT> getBadges(StringTableEntry name);
+
 protected:
 
    /// @name Linked List
