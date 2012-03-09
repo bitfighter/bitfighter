@@ -364,6 +364,23 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 }
 
 
+Int<BADGE_COUNT> DatabaseWriter::getAchievements(const StringTableEntry &name)
+{
+   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + string(name.getString()) + "';";
+
+   Vector<Vector<string> > results;
+
+   selectHandler(sql, 1, results);
+
+   S32 badges = 0;
+
+   for(S32 i = 0; i < results.size(); i++)
+      badges &= atoi(results[i][0].c_str());
+
+   return (Int<BADGE_COUNT>)badges;
+}
+
+
 void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values)
 {
    DbQuery query(mDb, mServer, mUser, mPassword);

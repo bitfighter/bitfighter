@@ -28,11 +28,13 @@
 
 #include "../zap/gameWeapons.h"     // For WeaponType enum
 #include "../zap/gameStats.h"
+#include "../zap/SharedConstants.h"
+
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlNonce.h"
-#include <string>
 #include "../sqlite/sqlite3.h"
+#include <string>
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
@@ -132,6 +134,8 @@ public:
                         const string &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds);
 
    void getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores);
+
+   Int<BADGE_COUNT> getAchievements(const StringTableEntry &name);
 };
 
 

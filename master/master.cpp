@@ -643,14 +643,19 @@ static const char *sanitizeForJson(const char *value)
 
    Int<BADGE_COUNT> getBadges(StringTableEntry name)
    {
-      Int<BADGE_COUNT> badges = NO_BADGES;   // <=== Look up some badge info in the player DB here!
+      DatabaseWriter databaseWriter = getDatabaseWriter();
 
-      // This is, obviously, temporary; can be removed when we have a real master-side badge system in place
-      if(stricmp(name.getString(), "watusimoto") == 0 || stricmp(name.getString(), "raptor") == 0 ||
-         stricmp(name.getString(), "sam686") == 0 )
-      {
-         badges.value = DEVELOPER_BADGE;
-      }
+      // Will fail if compiled without database support and gWriteStatsToDatabase is true
+      databaseWriter.insertStats(*gameStats);
+
+      Int<BADGE_COUNT> badges = databaseWriter.getAchievements(name);
+
+      //// This is, obviously, temporary; can be removed when we have a real master-side badge system in place
+      //if(stricmp(name.getString(), "watusimoto") == 0 || stricmp(name.getString(), "raptor") == 0 ||
+      //   stricmp(name.getString(), "sam686") == 0 )
+      //{
+      //   badges.value = DEVELOPER_BADGE;
+      //}
 
       return badges;
    }
