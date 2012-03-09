@@ -109,6 +109,9 @@ private:
 
    void addToServerCache(U64 id, const string &serverName, const string &serverIPAddr);         // Add database ID to our cache
    U64 getServerIDFromCache(const string &serverName, const string &serverIPAddr);              // And get it back out again
+
+   S32 getServerIdFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP);
+
 public:
    DatabaseWriter();
 
@@ -118,6 +121,8 @@ public:
 
    // SQLite constructor
    DatabaseWriter(const char *db);
+
+   void selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values);
 
    void setDumpSql(bool dump);
 

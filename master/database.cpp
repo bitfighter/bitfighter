@@ -194,42 +194,18 @@ static U64 insertStatsServer(const DbQuery &query, const string &serverName, con
 
 
 // Looks in database to find server mathcing the one in gameStats... returns server_id, or -1 if no match was found
-static S32 getServerIdFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP)
+S32 DatabaseWriter::getServerIdFromDatabase(const DbQuery &query, const string &serverName, const string &serverIP)
 {
    // Find server in database
    string sql = "SELECT server_id FROM server AS server "
-                "WHERE server_name = '" + sanitize(serverName) + "' AND ip_address = '" + serverIP + "';";
+                "WHERE server_name = '" + sanitize(serverName) + "' AND ip_address = '" + serverIP + "' LIMIT 1;";
                 //"WHERE server_name = 'Bitfighter sam686' AND ip_address = '96.2.123.136';";
 
-#ifdef BF_WRITE_TO_MYSQL
-   if(query.query)
-   {
-      S32 serverId_int = -1;
-      StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
+   Vector<Vector<string> > results;
+   selectHandler(sql, 1, results);
 
-      if(results.num_rows() >= 1)
-         serverId_int = results[0][0];
-
-      return serverId_int;
-   }
-   else
-#endif
-   if(query.sqliteDb)
-   {
-      char *err = 0;
-      char **results;
-      int rows, cols;
-
-      sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
-
-      if(rows >= 1)
-      {
-         string result = results[1];      // results[0] will contain the col header, or "server_id"
-         return atoi(result.c_str());
-      }
-
-      sqlite3_free_table(results);
-   }
+   if(results.size() == 1 && results[0].size() == 1)
+      return atoi(results[0][0].c_str());
 
    return -1;
 }
@@ -337,35 +313,15 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
          return;
 
       string sql;
-      bool found = false;
+      
 
       // We only want to insert a record of this server if the hash does not yet exist
-      sql = "SELECT hash FROM stats_level WHERE hash = '" + sanitize(hash) + "';";
+      sql = "SELECT hash FROM stats_level WHERE hash = '" + sanitize(hash) + "' LIMIT 1;";
 
-#ifdef BF_WRITE_TO_MYSQL
-      if(query.query)
-      {
-         StoreQueryResult results = query.query->store(sql.c_str(), sql.length());
+      Vector<Vector<string> > results;
+      selectHandler(sql, 1, results);
 
-         if(results.num_rows() > 0)
-            found = true;
-      }
-      else
-#endif
-      if(query.sqliteDb)
-      {
-         char *err = 0;
-         char **results;
-         int rows, cols;
-
-         sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
-      
-         // results[0] will be the string "hash" (http://www.sqlite.org/c3ref/free_table.html)... if results[1] exists, then we found a match
-         if(rows > 1)         
-            found = true;
-
-         sqlite3_free_table(results);
-      }
+      bool found = (results.size() == 1 && results[0].size() == 1);
 
       if(!found) 
       {
@@ -390,6 +346,27 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
    string sql = "SELECT player_name, " + col2 + " FROM " + table + " " +
                 "LIMIT " + itos(count) + ";";
 
+   Vector<Vector<string> > results;
+
+   selectHandler(sql, 2, results);
+
+   for(S32 i = 0; i < results.size(); i++)
+   {
+      names.push_back(results[i][0]);
+      scores.push_back(results[i][1]);
+   }
+
+   // Make sure we have the correct number of responses, even if table doesn't have enough records
+   for(S32 i = names.size(); i < count; i++)
+   {
+      names.push_back("");
+      scores.push_back("");
+   }
+}
+
+
+void DatabaseWriter::selectHandler(const string &sql, S32 cols, Vector<Vector<string> > &values)
+{
    DbQuery query(mDb, mServer, mUser, mPassword);
 
 #ifdef BF_WRITE_TO_MYSQL
@@ -402,8 +379,10 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 
       for(S32 i = 0; i < rows; i++)
       {
-         names.push_back(string(results[i][0]));
-         scores.push_back(string(results[i][1]));
+         values.push_back(Vector<string>());     // Add another row
+
+         for(S32 j = 0; j < cols; j++)
+            values[i].push_back(string(results[i][0]));
       }
    }
    else
@@ -416,21 +395,16 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 
       sqlite3_get_table(query.sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
 
-      // results[0] and results[1] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
-      for(S32 i = 0; i < rows * 2; i += 2)
+      // results[0]...results[cols] contain the col headers ==> http://www.sqlite.org/c3ref/free_table.html
+      for(S32 i = 0; i < rows * cols; i += cols)
       {
-         names.push_back(results[i + 2]);
-         scores.push_back(results[i + 3]);
+         values.push_back(Vector<string>());     // Add another row
+
+         for(S32 j = 0; j < cols; j++)
+            values[i].push_back(results[cols + i + j]);
       }
 
       sqlite3_free_table(results);
-   }
-
-   // Make sure we have the correct number of responses, even if table doesn't have enough records
-   for(S32 i = names.size(); i < count; i++)
-   {
-      names.push_back("");
-      scores.push_back("");
    }
 }
 
