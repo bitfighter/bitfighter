@@ -356,7 +356,8 @@ void DiagnosticUserInterface::render()
       // If the server modifies a user name to make it unique, this will display the modified version.
       drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)", 
                                   clientInfo->getName().getString(), 
-                                  clientInfo->isAuthenticated() ? "Verified" : "Not verified");
+                                  clientInfo->isAuthenticated() ? 
+                                       string("Verified - " + itos(clientInfo->getBadges())).c_str() : "Not verified");
 
       ypos += textsize + gap;
 
