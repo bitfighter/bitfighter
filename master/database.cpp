@@ -313,7 +313,6 @@ void DatabaseWriter::insertLevelInfo(const string &hash, const string &levelName
          return;
 
       string sql;
-      
 
       // We only want to insert a record of this server if the hash does not yet exist
       sql = "SELECT hash FROM stats_level WHERE hash = '" + sanitize(hash) + "' LIMIT 1;";
