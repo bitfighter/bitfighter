@@ -3080,7 +3080,7 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
          S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
 
-         if(playerScores[j]->getBadges() & DEVELOPER_BADGE)
+         if(playerScores[j]->getBadges() & BADGE_TWENTY_FIVE_FLAGS)
             glColor(Colors::yellow);
          else
             glColor(Colors::white);
