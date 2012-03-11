@@ -11,7 +11,7 @@
 #include "tnlLog.h"
 #include "tnlByteBuffer.h"
 
-#if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
+#if !defined (ZAP_DEDICATED)
 
 #include "alInclude.h"
 #include "../alure/AL/alure.h"
@@ -19,6 +19,8 @@
 #include "SFXProfile.h"
 #include "config.h"
 #include "stringUtils.h"
+#include "UI.h"
+#include "UIManager.h"
 
 #include "tnlNetBase.h"
 
@@ -196,14 +198,15 @@ SFXProfile *gSFXProfiles;
 static ALuint gSfxBuffers[NumSFXBuffers];
 static Vector<ALuint> gFreeSources;
 static Vector<ALuint> gVoiceFreeBuffers;
+static Vector<SFXHandle> gPlayList;
 
 // Music specific
-static Vector<SFXHandle> gPlayList;
-static alureStream* musicStream;
-static ALuint musicSource;  // dedicated source for Music
-static MusicState musicState;
+MusicInfo musicInfos[MaxMusicTypes];
+static alureStream* musicStream; // We only need one stream at a time...  I think
+
 static ALfloat musicVolume = 0;
 string SoundSystem::mMusicDir;
+string SoundSystem::mMenuMusicFile = "menu.ogg";
 
 static Vector<string> musicList;
 static S32 currentlyPlayingIndex;
@@ -291,17 +294,31 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else     // Got some music!
    {
-      // Create dedicated music source
-      alGenSources(1, &musicSource);
+      // Remove the menu music from the file list
+      for(S32 i = 0; i < musicList.size(); i++)
+         if(musicList[i] == mMenuMusicFile)
+         {
+            musicList.erase(i);
+            break;
+         }
 
       // Set up other relevant data
       currentlyPlayingIndex = 0;
       gMusicValid = true;
-      musicState = MusicStopped;
 
-      // Initialize to the proper volume level
+      // Set static volume
       musicVolume = musicVolLevel;
-      alSourcef(musicSource, AL_GAIN, musicVolume);
+
+      for(S32 i = 0; i < MaxMusicTypes; i++)
+      {
+         // Create dedicated music sources
+         alGenSources(1, &(musicInfos[i].source));
+         musicInfos[i].state = MusicStopped;
+         musicInfos[i].type = (MusicInfoType)i;
+
+         // Initialize source to the proper volume level
+         alSourcef(musicInfos[i].source, AL_GAIN, musicVolume);
+      }
    }
 
    // Set up voice chat buffers
@@ -320,8 +337,12 @@ void SoundSystem::shutdown()
    // Stop and clean up music
    if(gMusicValid) 
    {
-      stopMusic();
-      alDeleteSources(1, &musicSource);
+      for(S32 i = 0; i < MaxMusicTypes; i++)
+      {
+         stopMusic(musicInfos[i]);
+
+         alDeleteSources(1, &(musicInfos[i].source));
+      }
    }
 
    // Clean up sources
@@ -511,32 +532,68 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
    // Adjust music volume only if changed
    if(S32(newMusicVolLevel * 10) != S32(musicVolume * 10)) {
       musicVolume = newMusicVolLevel;
-      alSourcef(musicSource, AL_GAIN, musicVolume);
+
+      for(S32 i = 0; i < MaxMusicTypes; i++)
+         alSourcef(musicInfos[i].source, AL_GAIN, musicVolume);
    }
 
-   // Now check the music state and act accordingly
-   switch(musicState)
+   // Determine if we are in-game playing (or elsewhere in other menus)
+   bool inGame = UserInterface::current->getMenuID() == GameUI;
+   bool inEditor = UserInterface::current->getMenuID() == EditorUI || UserInterface::current->getMenuID() == EditorMenuUI;
+
+   if(inGame)
    {
-      case MusicPlaying:
-         // If volume is set to zero, pause the music
+      // If menu music is playing, stop it
+      if(musicInfos[MusicTypeMenu].state == MusicPlaying)
+         stopMusic(musicInfos[MusicTypeMenu]);
+
+
+      // If game music is playing, pause it if volume is set to zero
+      if(musicInfos[MusicTypeGame].state == MusicPlaying)
          if(S32(newMusicVolLevel * 10) == 0)
-            pauseMusic();
-         break;
+            pauseMusic(musicInfos[MusicTypeGame]);
 
-      case MusicStopped:
-         // Don't play the next track unless the music is stopped
-         playMusicList();
-         break;
+      // If game music is stopped (end of last track?) continue playing
+      if(musicInfos[MusicTypeGame].state == MusicStopped)
+         playGameMusic();
 
-      case MusicPaused:
-         // If the music is paused and the volume is not zero, resume the music
+      // If the music was paused, resume, as long as the volume isn't zero
+      if(musicInfos[MusicTypeGame].state == MusicPaused)
          if(S32(newMusicVolLevel * 10) != 0)
-            resumeMusic();
-         break;
-
-      default:
-         break;
+            resumeMusic(musicInfos[MusicTypeGame]);
    }
+   // If in editor, no music (for now)
+   else if(inEditor)
+   {
+      if(musicInfos[MusicTypeMenu].state == MusicPlaying)
+         stopMusic(musicInfos[MusicTypeMenu]);
+
+      if(musicInfos[MusicTypeGame].state == MusicPlaying)
+         stopMusic(musicInfos[MusicTypeGame]);
+   }
+   // Else, menu music!
+   else
+   {
+      // If we were playing music in-game, just pause it
+      if(musicInfos[MusicTypeGame].state == MusicPlaying)
+         pauseMusic(musicInfos[MusicTypeGame]);
+
+
+      // If menu music is playing, pause it if volume is set to zero
+      if(musicInfos[MusicTypeMenu].state == MusicPlaying)
+         if(S32(newMusicVolLevel * 10) == 0)
+            pauseMusic(musicInfos[MusicTypeMenu]);
+
+      // If menu music is stopped, play
+      if(musicInfos[MusicTypeMenu].state == MusicStopped)
+         playMenuMusic();
+
+      // If menu music is paused, play if volume isn't zero
+      if(musicInfos[MusicTypeMenu].state == MusicPaused)
+         if(S32(newMusicVolLevel * 10) != 0)
+            resumeMusic(musicInfos[MusicTypeMenu]);
+   }
+
 }
 
 
@@ -745,12 +802,12 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
 
 
 // This method is called after a music track finishes playing
-void SoundSystem::music_end_callback(void* userdata, ALuint source)
+void SoundSystem::game_music_end_callback(void* userdata, ALuint source)
 {
 //   logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
 
    // Set the state to stopped
-   musicState = MusicStopped;
+   musicInfos[MusicTypeGame].state = MusicStopped;
 
    // Clean up the stream
    alureDestroyStream(musicStream, 0, NULL);
@@ -759,48 +816,70 @@ void SoundSystem::music_end_callback(void* userdata, ALuint source)
    currentlyPlayingIndex = (currentlyPlayingIndex + 1) % musicList.size();
 }
 
-void SoundSystem::playMusicList()
+
+// This method is called after a music track finishes playing
+void SoundSystem::menu_music_end_callback(void* userdata, ALuint source)
 {
-   playMusic(currentlyPlayingIndex);
+   // Set the state to stopped
+   musicInfos[MusicTypeMenu].state = MusicStopped;
+
+   // Clean up the stream
+   alureDestroyStream(musicStream, 0, NULL);
 }
 
-void SoundSystem::playMusic(S32 listIndex)
-{
-   musicState = MusicPlaying;
 
-   string musicFile = joindir(mMusicDir, musicList[listIndex]);
+void SoundSystem::playGameMusic()
+{
+   musicInfos[MusicTypeGame].state = MusicPlaying;
+
+   string musicFile = joindir(mMusicDir, musicList[currentlyPlayingIndex]);
    musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
    if(!musicStream)
-      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[listIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[currentlyPlayingIndex].c_str());
 
-   if(!alurePlaySourceStream(musicSource, musicStream, NumMusicStreamBuffers, 0, music_end_callback, NULL))
-      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[listIndex].c_str());
+   if(!alurePlaySourceStream(musicInfos[MusicTypeGame].source, musicStream, NumMusicStreamBuffers, 0, game_music_end_callback, NULL))
+      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[currentlyPlayingIndex].c_str());
 }
 
 
-void SoundSystem::stopMusic()
+void SoundSystem::playMenuMusic()
 {
-   alureStopSource(musicSource, AL_FALSE);
+   musicInfos[MusicTypeMenu].state = MusicPlaying;
+
+   string musicFileFullPath = joindir(mMusicDir, mMenuMusicFile);
+   musicStream = alureCreateStreamFromFile(musicFileFullPath.c_str(), MusicChunkSize, 0, NULL);
+
+   if(!musicStream)
+      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", mMenuMusicFile.c_str());
+
+   if(!alurePlaySourceStream(musicInfos[MusicTypeMenu].source, musicStream, NumMusicStreamBuffers, -1, menu_music_end_callback, NULL))
+      logprintf(LogConsumer::LogError, "Failed to play music file: %s", mMenuMusicFile.c_str());
+}
+
+
+void SoundSystem::stopMusic(MusicInfo &musicInfo)
+{
+   alureStopSource(musicInfo.source, AL_FALSE);
 
    // Clean up the stream here since we aren't calling the callback
    alureDestroyStream(musicStream, 0, NULL);
 
-   musicState = MusicStopped;
+   musicInfo.state = MusicStopped;
 }
 
 
-void SoundSystem::pauseMusic()
+void SoundSystem::pauseMusic(MusicInfo &musicInfo)
 {
-   alurePauseSource(musicSource);
-   musicState = MusicPaused;
+   alurePauseSource(musicInfo.source);
+   musicInfo.state = MusicPaused;
 }
 
 
-void SoundSystem::resumeMusic()
+void SoundSystem::resumeMusic(MusicInfo &musicInfo)
 {
-   alureResumeSource(musicSource);
-   musicState = MusicPlaying;
+   alureResumeSource(musicInfo.source);
+   musicInfo.state = MusicPlaying;
 }
 
 };

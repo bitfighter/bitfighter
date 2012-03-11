@@ -109,10 +109,24 @@ enum SFXProfiles
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
 
+
 enum MusicState {
    MusicPlaying,
    MusicStopped,
    MusicPaused
+};
+
+enum MusicInfoType {
+   MusicTypeMenu = 0,
+   MusicTypeGame,
+   MaxMusicTypes,
+};
+
+struct MusicInfo
+{
+   MusicInfoType type;
+   ALuint source;
+   MusicState state;
 };
 
 
@@ -128,9 +142,11 @@ private:
    static void updateGain(SFXHandle& effect, F32 sfxVolLevel, F32 voiceVolLevel);
    static void playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol);
 
-   static void music_end_callback(void* userdata, ALuint source);
+   static void game_music_end_callback(void* userData, ALuint source);
+   static void menu_music_end_callback(void* userData, ALuint source);
 
    static string mMusicDir;
+   static string mMenuMusicFile;
 
 public:
    SoundSystem();
@@ -163,11 +179,11 @@ public:
 
    // Music functions
    static void processMusic(F32 newMusicVolLevel);
-   static void playMusic(S32 listIndex);
-   static void playMusicList();
-   static void stopMusic();
-   static void pauseMusic();
-   static void resumeMusic();
+   static void playGameMusic();
+   static void playMenuMusic();
+   static void stopMusic(MusicInfo &musicInfo);
+   static void pauseMusic(MusicInfo &musicInfo);
+   static void resumeMusic(MusicInfo &musicInfo);
 };
 
 }
