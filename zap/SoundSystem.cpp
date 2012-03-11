@@ -318,6 +318,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
 
          // Initialize source to the proper volume level
          alSourcef(musicInfos[i].source, AL_GAIN, musicVolume);
+         alSourcei(musicInfos[i].source, AL_SOURCE_RELATIVE, true);
       }
    }
 
@@ -801,7 +802,7 @@ void SoundSystem::queueVoiceChatBuffer(const SFXHandle &effect, ByteBufferPtr p)
 }
 
 
-// This method is called after a music track finishes playing
+// This method is called after a music track finishes playing in-game
 void SoundSystem::game_music_end_callback(void* userdata, ALuint source)
 {
 //   logprintf("finished playing: %s", musicList[currentlyPlayingIndex].c_str());
@@ -817,7 +818,7 @@ void SoundSystem::game_music_end_callback(void* userdata, ALuint source)
 }
 
 
-// This method is called after a music track finishes playing
+// This method is called if menu music is stopped
 void SoundSystem::menu_music_end_callback(void* userdata, ALuint source)
 {
    // Set the state to stopped
