@@ -151,6 +151,8 @@ public:
 
    static void drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled = false);
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2);
+   static void drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2);
+
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor);
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
 

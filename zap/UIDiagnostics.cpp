@@ -613,7 +613,6 @@ void DiagnosticUserInterface::render()
 
       for(S32 i = 0; i < 2; i++)
       {
-
          F32 x;
          F32 y;
 
@@ -700,6 +699,10 @@ void DiagnosticUserInterface::render()
          glColor(Colors::white);
          drawStar(Point(x,y), 7, rad - 1, rad/2);
 
+         x += 3*rad;
+         render25FlagsBadge(x, y, rad);
+
+         ///// After all badge rendering
          glPopMatrix();
 
       }

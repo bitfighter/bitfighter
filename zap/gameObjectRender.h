@@ -110,8 +110,8 @@ extern void drawCircle(F32 x, F32 y, F32 radius);
 // Some things for rendering on screen display
 void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
 
-extern void renderCenteredString(const Point &pos, S32 size, const char *string);
-extern void renderCenteredString(const Point &pos, F32 size, const char *string);
+extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
+extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
 extern void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
                        bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
@@ -243,6 +243,9 @@ extern void renderForceField(Point start, Point end, const Color *c, bool fieldU
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
 extern void renderStaticBitfighterLogo();
+
+// Badges
+extern void render25FlagsBadge(F32 x, F32 y, F32 rad);
 
 };
 

@@ -980,16 +980,18 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 }
 
 
-void renderCenteredString(const Point &pos, S32 size, const char *string)
+F32 renderCenteredString(const Point &pos, S32 size, const char *string)
 {
    F32 width = UserInterface::getStringWidth((F32)size, string);
    UserInterface::drawString((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
+
+   return width;
 }
 
 
-void renderCenteredString(const Point &pos, F32 size, const char *string)
+F32 renderCenteredString(const Point &pos, F32 size, const char *string)
 {
-   renderCenteredString(pos, S32(size + 0.5f), string);
+   return renderCenteredString(pos, S32(size + 0.5f), string);
 }
 
 
@@ -2245,6 +2247,34 @@ void drawCircle(const Point &pos, F32 radius)
 {
    drawCircle(pos.x, pos.y, radius);
 }
+
+
+void render25FlagsBadge(F32 x, F32 y, F32 rad)
+{
+   glPushMatrix();
+      glTranslate(x, y, 0);
+      glScale(.50);
+      glColor(Colors::gray40);
+      drawEllipse(Point(-16, 15), 6, 2, 0);
+
+      renderFlag(-.10 * rad, -.10 * rad, &Colors::red50);
+   glPopMatrix();
+         
+   glColor(Colors::red);
+   F32 ts = rad - 3;
+   F32 width = UserInterface::getStringWidth(ts, "25");
+   F32 tx = x + .30 * rad;
+   F32 ty = y + rad - .40 * rad;
+
+   glColor(Colors::yellow);
+   UserInterface::drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0), 
+                                 F32(tx + width / 2.0 + 0.5), F32(ty + (ts + 2.0) / 2.0));
+   glColor(Colors::gray20);
+   renderCenteredString(Point(tx, ty), ts, "25");
+
+   //glColor(Colors::gray20);
+   //drawHollowRect(x - rad, y - rad, x + rad, y + rad);
+ }
 
 
 };
