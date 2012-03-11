@@ -3080,11 +3080,7 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
          S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
 
-         if(playerScores[j]->getBadges() & BADGE_TWENTY_FIVE_FLAGS)
-            glColor(Colors::yellow);
-         else
-            glColor(Colors::white);
-
+         glColor(Colors::white);
 
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
@@ -3098,7 +3094,11 @@ void GameUserInterface::renderScoreboard()
          if(playerScores[j]->isAdmin())
             drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
-         drawString(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
+         S32 width = drawStringAndGetWidth(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
+
+         // Append any known badges
+         if(playerScores[j]->getBadges() & BADGE_TWENTY_FIVE_FLAGS)   
+            render25FlagsBadge(x + width + 8, curRowY + 15, 10);
 
          static char buff[255] = "";
 
