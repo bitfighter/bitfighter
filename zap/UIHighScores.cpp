@@ -119,6 +119,10 @@ void HighScoresUserInterface::renderScores()
       if(col == 1)
          y = yStart;
    }
+
+   glColor(Colors::red80);
+
+   drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - titleSize, titleSize, "The week ends Sunday/Monday at 0:00:00 UTC Time");
 }
 
 
