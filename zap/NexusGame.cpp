@@ -559,9 +559,9 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
    const S32 size = 20;
 
    if(mNexusTimer.getPeriod() == 0)
-      UserInterface::drawStringfr(x, y, size, NEXUS_NEVER_STR);
+      UserInterface::drawStringfr(x, y - size, size, NEXUS_NEVER_STR);
    else
-      UserInterface::drawStringfr(x, y, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
+      UserInterface::drawStringfr(x, y - size, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
