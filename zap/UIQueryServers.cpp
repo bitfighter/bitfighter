@@ -842,7 +842,7 @@ void QueryServersUserInterface::renderTopBanner()
 
    const S32 FONT_SIZE = 12;
    drawStringf(horizMargin, vertMargin, FONT_SIZE, "SERVERS: %d", servers.size());
-   drawStringfr(canvasWidth - horizMargin, vertMargin + FONT_SIZE, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+   drawStringfr(canvasWidth - horizMargin, vertMargin, FONT_SIZE, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
 }
 
 
