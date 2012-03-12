@@ -356,7 +356,7 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
    }
 
    // Make sure we have the correct number of responses, even if table doesn't have enough records
-   for(S32 i = names.size(); i < count; i++)
+   for(S32 i = results.size(); i < count; i++)
    {
       names.push_back("");
       scores.push_back("");
