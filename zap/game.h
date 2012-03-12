@@ -155,7 +155,7 @@ public:
 
    bool isSpawnDelayed();
 
-   Ship *getShip();
+   Ship *getShip();                    // NULL on client
    void setShip(Ship *ship);
 
    virtual void setRating(F32 rating) = 0;
