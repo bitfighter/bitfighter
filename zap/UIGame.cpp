@@ -3124,13 +3124,6 @@ void GameUserInterface::renderScoreboard()
 }
 
 
-// Sorts teams by score, high to low
-S32 QSORT_CALLBACK teamScoreSort(Team **a, Team **b)
-{
-   return (*b)->getScore() - (*a)->getScore();  
-}
-
-
 void GameUserInterface::renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible)
 {
    if(mLevelInfoDisplayTimer.getCurrent() || mMissionOverlayActive)
@@ -3229,27 +3222,17 @@ void GameUserInterface::renderTeamFlagScores(const GameType *gameType, U32 right
 {
    S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
 
-   // Build a list of teams, so we can sort by score
    Game *game = getGame();
    S32 teamCount = game->getTeamCount();
 
-   static Vector<Team *> teams;
-   teams.resize(teamCount);
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      teams[i] = (Team *)game->getTeam(i);
-      teams[i]->mId = i;
-   }
-
-   teams.sort(teamScoreSort);    
+   //Vector<Team *> *teams = game->getSortedTeamList_score();
 
    const S32 textsize = 32;
    S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textsize, "0");
 
-   for(S32 i = 0; i < teams.size(); i++)
+   for(S32 i = 0; i < teamCount; i++)
    {
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teams.size() - i - 1) * 38;
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teamCount - i - 1) * 38;
 
       Team *team = (Team *)game->getTeam(i);
 
@@ -3271,28 +3254,18 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
 
    S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom();
 
-   // Build a list of teams, so we can sort by score
    Game *game = getGame();
    S32 teamCount = game->getTeamCount();
 
-   static Vector<Team *> teams;
-   teams.resize(teamCount);
-
-   for(S32 i = 0; i < teamCount; i++)
-   {
-      teams[i] = (Team *)game->getTeam(i);
-      teams[i]->mId = i;
-   }
-
-   teams.sort(teamScoreSort);
+   //Vector<Team *> *teams = game->getSortedTeamList_score();
 
    const S32 textSize = 32;
    S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textSize, "0");
 
    // Here we show the number of Cores remaining INSTEAD OF the score, which is negative
-   for(S32 i = 0; i < teams.size(); i++)
+   for(S32 i = 0; i < teamCount; i++)
    {
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teams.size() - i - 1) * 38;
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teamCount - i - 1) * 38;
 
       Team *team = (Team *)game->getTeam(i);
       Point center(xpos - 20, ypos + 19);
@@ -3302,16 +3275,12 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       // Render something if a Core is being attacked
       if(cgt->isTeamCoreBeingAttacked(i))
       {
-         if(getGame()->getCurrentTime() % 300 > 150)
-         {
+         if(game->getCurrentTime() % 300 > 150)
             glColor(Colors::red80);
-            drawCircle(center, 15);
-         }
          else
-         {
             glColor(Colors::yellow, 0.6f);
-            drawCircle(center, 15);
-         }
+         
+         drawCircle(center, 15);
       }
 
       glColor(Colors::white);
@@ -3370,7 +3339,7 @@ void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 
       ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - 0 * 16;
 
       glColor(Colors::red, 0.6f);
-      drawStringfr(rightAlignCoord, ypos + textsize, textsize, "%s %d", nameBottom, scoreBottom);
+      drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", nameBottom, scoreBottom);
    }
 
    // Render top score only if we have a leader
@@ -3380,7 +3349,7 @@ void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 
 
       // Draw leader name + score
       glColor(Colors::red);
-      drawStringfr(rightAlignCoord, ypos + textsize, textsize, "%s %d", nameTop, scoreTop);
+      drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", nameTop, scoreTop);
    }
 }
 
@@ -3404,7 +3373,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
    S32 y = gScreenInfo.getGameCanvasHeight() - vertMargin - 20;
 
    glColor(Colors::cyan);
-   drawStringfr(x - 5, y + ((size - gtsize) / 2) + gtsize + 2, gtsize, txt.c_str());
+   drawStringfr(x - 5, y + ((size - gtsize) / 2) + 2, gtsize, txt.c_str());
    
    glColor(Colors::white);
 

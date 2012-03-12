@@ -483,6 +483,7 @@ public:
    // Team functions
    S32 getTeamCount() const;
    AbstractTeam *getTeam(S32 teamIndex) const;
+   Vector<Team *> *getSortedTeamList_score() const;
 
    S32 getTeamIndex(const StringTableEntry &playerName);
 
