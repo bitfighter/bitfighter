@@ -864,7 +864,8 @@ void SoundSystem::stopMusic(MusicInfo &musicInfo)
    alureStopSource(musicInfo.source, AL_FALSE);
 
    // Clean up the stream here since we aren't calling the callback
-   alureDestroyStream(musicStream, 0, NULL);
+   if(musicStream)
+      alureDestroyStream(musicStream, 0, NULL);
 
    musicInfo.state = MusicStopped;
 }
