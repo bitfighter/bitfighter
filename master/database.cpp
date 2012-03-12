@@ -375,7 +375,7 @@ Int<BADGE_COUNT> DatabaseWriter::getAchievements(const StringTableEntry &name)
    S32 badges = 0;
 
    for(S32 i = 0; i < results.size(); i++)
-      badges |= atoi(results[i][0].c_str());
+      badges |= BIT(atoi(results[i][0].c_str()));
 
    return (Int<BADGE_COUNT>)badges;
 }

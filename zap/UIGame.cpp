@@ -3097,7 +3097,7 @@ void GameUserInterface::renderScoreboard()
          S32 width = drawStringAndGetWidth(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
 
          // Append any known badges
-         if(playerScores[j]->getBadges() & BADGE_TWENTY_FIVE_FLAGS)   
+         if(playerScores[j]->getBadges() & BIT(BADGE_TWENTY_FIVE_FLAGS))   
             render25FlagsBadge(x + width + 8, curRowY + 15, 10);
          
          glColor(Colors::white);
