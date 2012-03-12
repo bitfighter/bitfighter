@@ -3099,7 +3099,8 @@ void GameUserInterface::renderScoreboard()
          // Append any known badges
          if(playerScores[j]->getBadges() & BADGE_TWENTY_FIVE_FLAGS)   
             render25FlagsBadge(x + width + 8, curRowY + 15, 10);
-
+         
+         glColor(Colors::white);
          static char buff[255] = "";
 
          if(isTeamGame)
