@@ -359,6 +359,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\zap\IniFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\master.cpp"
 				>
 			</File>

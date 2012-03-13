@@ -581,9 +581,9 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 }
 
 
+#ifndef ZAP_DEDICATED
 void CoreItem::doExplosion(const Point &pos)
 {
-#ifndef ZAP_DEDICATED
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
@@ -623,9 +623,9 @@ void CoreItem::doExplosion(const Point &pos)
    game->emitBlast(blastPoint, 600 - 100 * mCurrentExplosionNumber);
    game->emitExplosion(blastPoint, 4.f - F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
 
-#endif
    mCurrentExplosionNumber++;
 }
+#endif
 
 
 PanelGeom *CoreItem::getPanelGeom()
@@ -667,6 +667,7 @@ void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
    panelGeom.isValid = true;
 }
 
+#ifndef ZAP_DEDICATED
 
 void CoreItem::doPanelDebris(S32 panelIndex)
 {
@@ -723,6 +724,8 @@ void CoreItem::doPanelDebris(S32 panelIndex)
    }
 }
 
+#endif
+
 
 void CoreItem::idle(GameObject::IdleCallPath path)
 {
@@ -738,6 +741,7 @@ void CoreItem::idle(GameObject::IdleCallPath path)
    }
 
    // Only run the following on the client
+#ifndef ZAP_DEDICATED
    if(path != GameObject::ClientIdleMainRemote)
       return;
 
@@ -791,8 +795,9 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 
             static_cast<ClientGame *>(getGame())->emitSpark(sparkEmissionPos, vel, Colors::gray20, ttl);
          }
-      }      
+      }
    }
+#endif
 }
 
 
@@ -916,6 +921,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 }
 
 
+#ifndef ZAP_DEDICATED
 
 void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -958,6 +964,8 @@ void CoreItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mBeingAttacked = stream->readFlag();
 }
 
+#endif
+
 
 bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 {
@@ -998,6 +1006,7 @@ bool CoreItem::collide(GameObject *otherObject)
 }
 
 
+#ifndef ZAP_DEDICATED
 // Client only
 void CoreItem::onItemExploded(Point pos)
 {
@@ -1007,7 +1016,7 @@ void CoreItem::onItemExploded(Point pos)
    // Start with an explosion at the center.  See idle() for other called explosions
    doExplosion(pos);
 }
-
+#endif
 
 const char CoreItem::className[] = "CoreItem";      // Class name as it appears to Lua scripts
 
