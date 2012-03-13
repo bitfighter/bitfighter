@@ -82,8 +82,8 @@ class UserInterface
 {
 private:
    UIID mInternalMenuID;                     // Unique interface ID
-   static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
-   static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
+   static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
+   static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
 
    ClientGame *mClientGame;
 
@@ -177,7 +177,7 @@ public:
 
    // Draw strings centered at point
    static void drawStringfc(F32 x, F32 y, F32 size, const char *format, ...);
-   static void drawStringc(F32 x, F32 y, F32 size, const char *string);
+   static void drawStringc(F32 x, F32 y, F32 size, const char *string, bool autoSize = true);
    static void drawStringc(S32 x, S32 y, S32 size, const char *string);
 
 
@@ -196,7 +196,7 @@ public:
    // Original drawAngleString has a bug in positioning, but fixing it everywhere in the app would be a huge pain, so
    // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,
    // which is marked private.  I think all usage of broken function has been removed, and _fixed can be renamed to something better.
-   static void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
+   static void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
    static void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
 
    // Center text between two points

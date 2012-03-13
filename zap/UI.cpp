@@ -305,20 +305,23 @@ void UserInterface::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const ch
 
 
 // New, fixed version
-void UserInterface::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
+void UserInterface::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth)
 {
-   doDrawAngleString(x, y, size, angle, string);
+   doDrawAngleString(x, y, size, angle, string, autoLineWidth);
 }
 
 
-void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
+void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth)
 {
    static F32 modelview[16];
    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);    // Fills modelview[]
 
-   F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 20, 1.0f), 0.5f)    // Clamp to range of 0.5 - 1
-                                                                        * gDefaultLineWidth;       // then multiply by line width (2 by default)
-   glLineWidth(linewidth);
+   if(autoLineWidth)
+   {
+      F32 linewidth = MAX(MIN(size * gScreenInfo.getPixelRatio() * modelview[0] / 20, 1.0f), 0.5f)    // Clamp to range of 0.5 - 1
+                                                                           * gDefaultLineWidth;       // then multiply by line width (2 by default)
+      glLineWidth(linewidth);
+   }
 
    F32 scaleFactor = size / 120.0f;
    glPushMatrix();
@@ -329,14 +332,15 @@ void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const c
          OpenglUtils::drawCharacter(string[i]);
    glPopMatrix();
 
-   glLineWidth(gDefaultLineWidth);
+   if(autoLineWidth)
+      glLineWidth(gDefaultLineWidth);
 }
 
 
 // Same but accepts S32 args
-void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string)
+void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool autoLineWidth)
 {
-   doDrawAngleString(F32(x), F32(y), size, angle, string);
+   doDrawAngleString(F32(x), F32(y), size, angle, string, autoLineWidth);
 }
 
 
@@ -450,10 +454,10 @@ void UserInterface::drawStringc(S32 x, S32 y, S32 size, const char *string)
 }
 
 
-void UserInterface::drawStringc(F32 x, F32 y, F32 size, const char *string)
+void UserInterface::drawStringc(F32 x, F32 y, F32 size, const char *string, bool autoLineWidth)
 {
    F32 len = getStringWidth(size, string);
-   drawAngleString(x - len / 2, y, size, 0, string);
+   drawAngleString(x - len / 2, y, size, 0, string, autoLineWidth);
 }
 
 

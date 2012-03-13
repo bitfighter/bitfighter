@@ -67,6 +67,22 @@ class FXManager
 
    Vector<DebrisChunk> mDebrisChunks;
 
+
+   struct TextEffect
+   {
+      string text;
+      Color color;
+      Point pos;
+      Point vel;
+      F32 size;
+      F32 growthRate;
+      S32 ttl;
+      
+      void render();
+   };
+
+   Vector<TextEffect> mTextEffects;
+
    struct TeleporterEffect;
    TeleporterEffect *teleporterEffects;
 
@@ -86,6 +102,7 @@ public:
    void emitBlast(const Point &pos, U32 size);
 
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
+   void emitTextEffect(string text, Color color, Point pos, Point vel, F32 size, F32 growthRate, S32 ttl);
 
    void emitTeleportInEffect(Point pos, U32 type);
    void tick( F32 dT);

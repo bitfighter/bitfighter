@@ -73,8 +73,20 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
    if(msgIndex == NexusMsgScore)
    {
       SoundSystem::playSoundEffect(SFXFlagCapture);
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),"%s returned %d flag%s to the Nexus for %d points!", 
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
                                  clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
+
+      Vector<DatabaseObject *> fillVector;
+      clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+         if(ship->getClientInfo()->getName() == clientName)
+         {
+            clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos(), Point(0,0), 12, 600, 100);
+            break;
+         }
+      }
    }
    else if(msgIndex == NexusMsgYardSale)
    {

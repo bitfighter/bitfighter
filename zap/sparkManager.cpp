@@ -127,6 +127,15 @@ void FXManager::DebrisChunk::render()
 }
 
 
+void FXManager::TextEffect::render()
+{
+   glColor(color);
+   glLineWidth(size / 12.0);
+   UserInterface::drawStringc(pos.x, pos.y, size, text.c_str(), false);
+   glLineWidth(gDefaultLineWidth);
+}
+
+
 void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation)
 {
    DebrisChunk debrisChunk;
@@ -140,6 +149,22 @@ void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
    debrisChunk.rotation = rotation;
 
    mDebrisChunks.push_back(debrisChunk);
+}
+
+
+void FXManager::emitTextEffect(string text, Color color, Point pos, Point vel, F32 size, F32 growthRate, S32 ttl)
+{
+   TextEffect textEffect;
+
+   textEffect.text = text;
+   textEffect.color = color;
+   textEffect.pos = pos;
+   textEffect.vel = vel;
+   textEffect.size = size;
+   textEffect.growthRate = growthRate;
+   textEffect.ttl = ttl;
+
+   mTextEffects.push_back(textEffect);
 }
 
 
@@ -214,6 +239,23 @@ void FXManager::tick(F32 dT)
       }
    }
 
+   
+   // Same for our TextEffects
+   for(S32 i = 0; i < mTextEffects.size(); i++)
+   {
+      if(mTextEffects[i].ttl < dT)
+      {
+         mTextEffects.erase_fast(i);
+         i--;
+      }
+      else
+      {
+         mTextEffects[i].pos += mTextEffects[i].vel * dT;
+         mTextEffects[i].size += mTextEffects[i].growthRate * dT;
+         mTextEffects[i].ttl -= dT;
+      }
+   }
+
 
    for(TeleporterEffect **walk = &teleporterEffects; *walk; )
    {
@@ -249,6 +291,9 @@ void FXManager::render(S32 renderPass)
 
       for(S32 i = 0; i < mDebrisChunks.size(); i++)
          mDebrisChunks[i].render();
+
+      for(S32 i = 0; i < mTextEffects.size(); i++)
+         mTextEffects[i].render();
 
    }
    else if(renderPass == 1)      // Time for sparks!!
