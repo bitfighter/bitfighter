@@ -148,6 +148,14 @@ private:
    static string mMusicDir;
    static string mMenuMusicFile;
 
+   static bool mMenuMusicValid;
+   static bool mGameMusicValid;
+
+   static Vector<string> mMusicList;
+   static S32 mCurrentlyPlayingIndex;
+
+   static bool musicSystemValid();
+
 public:
    SoundSystem();
    virtual ~SoundSystem();
