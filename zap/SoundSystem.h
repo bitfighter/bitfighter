@@ -11,6 +11,13 @@
 #include "ConfigEnum.h"     // For sfxSets
 #include "tnlTypes.h"
 #include "tnlVector.h"
+
+#ifndef ZAP_DEDICATED
+#include "../alure/AL/alure.h"
+#else
+class alureStream;
+#endif
+
 #include <string>
 
 // forward declarations
@@ -109,7 +116,6 @@ enum SFXProfiles
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
 
-
 enum MusicState {
    MusicPlaying,
    MusicStopped,
@@ -125,8 +131,9 @@ enum MusicInfoType {
 struct MusicInfo
 {
    MusicInfoType type;
-   ALuint source;
    MusicState state;
+   ALuint source;
+   alureStream* stream;
 };
 
 
