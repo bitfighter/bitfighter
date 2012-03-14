@@ -2938,16 +2938,16 @@ void GameUserInterface::VoiceRecorder::process()
 
 void GameUserInterface::suspendGame()
 {
-   getGame()->getConnectionToServer()->suspendGame();     // Tell server we're suspending
-   getGame()->suspendGame();                              // Suspend locally
-   getUIManager()->getSuspendedUserInterface()->activate();          // And enter chat mode
+   getGame()->getConnectionToServer()->suspendGame();          // Tell server we're suspending
+   getGame()->suspendGame();                                   // Suspend locally
+   getUIManager()->getSuspendedUserInterface()->activate();    // And enter chat mode
 }
 
 
 void GameUserInterface::unsuspendGame()
 {
-   getGame()->unsuspendGame();                            // Unsuspend locally
-   getGame()->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
+   getGame()->unsuspendGame();                                 // Unsuspend locally
+   getGame()->getConnectionToServer()->unsuspendGame();        // Tell the server we're unsuspending
 }
 
 
