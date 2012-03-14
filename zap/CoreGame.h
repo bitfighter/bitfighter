@@ -172,11 +172,14 @@ public:
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+
+#ifndef ZAP_DEDICATED
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void onItemExploded(Point pos);
    void doExplosion(const Point &pos);
    void doPanelDebris(S32 panelIndex);
+#endif
 
    void idle(GameObject::IdleCallPath path);
 

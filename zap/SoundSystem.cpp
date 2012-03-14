@@ -188,7 +188,6 @@ static SFXProfile sfxProfilesClassic[] = {
 
 // TODO clean up this rif-raff; maybe put in config.h?
 static bool gSFXValid = false;
-static bool gMusicValid = false;
 F32 mMaxDistance = 500;
 Point mListenerPosition;
 Point mListenerVelocity;
@@ -207,9 +206,11 @@ static alureStream* musicStream; // We only need one stream at a time...  I thin
 static ALfloat musicVolume = 0;
 string SoundSystem::mMusicDir;
 string SoundSystem::mMenuMusicFile = "menu.ogg";
+bool SoundSystem::mMenuMusicValid = false;
+bool SoundSystem::mGameMusicValid = false;
 
-static Vector<string> musicList;
-static S32 currentlyPlayingIndex;
+Vector<string> SoundSystem::mMusicList;
+S32 SoundSystem::mCurrentlyPlayingIndex = 0;
 
 // Constructor
 SoundSystem::SoundSystem()
@@ -288,37 +289,40 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
    }
 
    // Set up music list for streaming later
-   if(!getFilesFromFolder(mMusicDir, musicList))
+   if(!getFilesFromFolder(mMusicDir, mMusicList))
       logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", musicDir.c_str());
-   else if(musicList.size() == 0)
+   else if(mMusicList.size() == 0)
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else     // Got some music!
    {
       // Remove the menu music from the file list
-      for(S32 i = 0; i < musicList.size(); i++)
-         if(musicList[i] == mMenuMusicFile)
+      for(S32 i = 0; i < mMusicList.size(); i++)
+         if(mMusicList[i] == mMenuMusicFile)
          {
-            musicList.erase(i);
+            mMenuMusicValid = true;
+            mMusicList.erase(i);
             break;
          }
 
-      // Set up other relevant data
-      currentlyPlayingIndex = 0;
-      gMusicValid = true;
+      if(mMusicList.size() > 0)
+         mGameMusicValid = true;
 
-      // Set static volume
-      musicVolume = musicVolLevel;
-
-      for(S32 i = 0; i < MaxMusicTypes; i++)
+      if(musicSystemValid())
       {
-         // Create dedicated music sources
-         alGenSources(1, &(musicInfos[i].source));
-         musicInfos[i].state = MusicStopped;
-         musicInfos[i].type = (MusicInfoType)i;
+         // Set static volume
+         musicVolume = musicVolLevel;
 
-         // Initialize source to the proper volume level
-         alSourcef(musicInfos[i].source, AL_GAIN, musicVolume);
-         alSourcei(musicInfos[i].source, AL_SOURCE_RELATIVE, true);
+         for(S32 i = 0; i < MaxMusicTypes; i++)
+         {
+            // Create dedicated music sources
+            alGenSources(1, &(musicInfos[i].source));
+            musicInfos[i].state = MusicStopped;
+            musicInfos[i].type = (MusicInfoType)i;
+
+            // Initialize source to the proper volume level
+            alSourcef(musicInfos[i].source, AL_GAIN, musicVolume);
+            alSourcei(musicInfos[i].source, AL_SOURCE_RELATIVE, true);
+         }
       }
    }
 
@@ -336,7 +340,7 @@ void SoundSystem::shutdown()
       return;
 
    // Stop and clean up music
-   if(gMusicValid) 
+   if(musicSystemValid())
    {
       for(S32 i = 0; i < MaxMusicTypes; i++)
       {
@@ -362,6 +366,12 @@ void SoundSystem::shutdown()
 
    // Shutdown device cv9
    alureShutdownDevice();
+}
+
+
+bool SoundSystem::musicSystemValid()
+{
+   return mGameMusicValid || mMenuMusicValid;
 }
 
 
@@ -527,7 +537,7 @@ void SoundSystem::processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol)
 void SoundSystem::processMusic(F32 newMusicVolLevel)
 {
    // If music system failed to initialize, just return
-   if(!gMusicValid)
+   if(!musicSystemValid())
       return;
 
    // Adjust music volume only if changed
@@ -539,7 +549,7 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
    }
 
    // Determine if we are in-game playing (or elsewhere in other menus)
-   bool inGame = UserInterface::current->getMenuID() == GameUI;
+   bool inGame = UserInterface::current->getMenuID() == GameUI || UserInterface::current->getUIManager()->cameFrom(GameUI);
    bool inEditor = UserInterface::current->getMenuID() == EditorUI || UserInterface::current->getMenuID() == EditorMenuUI;
 
    if(inGame)
@@ -548,6 +558,9 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
       if(musicInfos[MusicTypeMenu].state == MusicPlaying)
          stopMusic(musicInfos[MusicTypeMenu]);
 
+      // No game music tracks found, just return
+      if(!mGameMusicValid)
+         return;
 
       // If game music is playing, pause it if volume is set to zero
       if(musicInfos[MusicTypeGame].state == MusicPlaying)
@@ -579,6 +592,9 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
       if(musicInfos[MusicTypeGame].state == MusicPlaying)
          pauseMusic(musicInfos[MusicTypeGame]);
 
+      // No menu music found, just return
+      if(!mMenuMusicValid)
+         return;
 
       // If menu music is playing, pause it if volume is set to zero
       if(musicInfos[MusicTypeMenu].state == MusicPlaying)
@@ -814,7 +830,7 @@ void SoundSystem::game_music_end_callback(void* userdata, ALuint source)
    alureDestroyStream(musicStream, 0, NULL);
 
    // Go to the next track, loop if at the end
-   currentlyPlayingIndex = (currentlyPlayingIndex + 1) % musicList.size();
+   mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mMusicList.size();
 }
 
 
@@ -833,14 +849,14 @@ void SoundSystem::playGameMusic()
 {
    musicInfos[MusicTypeGame].state = MusicPlaying;
 
-   string musicFile = joindir(mMusicDir, musicList[currentlyPlayingIndex]);
+   string musicFile = joindir(mMusicDir, mMusicList[mCurrentlyPlayingIndex]);
    musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
    if(!musicStream)
-      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", musicList[currentlyPlayingIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", mMusicList[mCurrentlyPlayingIndex].c_str());
 
    if(!alurePlaySourceStream(musicInfos[MusicTypeGame].source, musicStream, NumMusicStreamBuffers, 0, game_music_end_callback, NULL))
-      logprintf(LogConsumer::LogError, "Failed to play music file: %s", musicList[currentlyPlayingIndex].c_str());
+      logprintf(LogConsumer::LogError, "Failed to play music file: %s", mMusicList[mCurrentlyPlayingIndex].c_str());
 }
 
 
