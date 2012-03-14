@@ -14,7 +14,6 @@
 #if !defined (ZAP_DEDICATED)
 
 #include "alInclude.h"
-#include "../alure/AL/alure.h"
 
 #include "SFXProfile.h"
 #include "config.h"
@@ -201,7 +200,6 @@ static Vector<SFXHandle> gPlayList;
 
 // Music specific
 MusicInfo musicInfos[MaxMusicTypes];
-static alureStream* musicStream; // We only need one stream at a time...  I think
 
 static ALfloat musicVolume = 0;
 string SoundSystem::mMusicDir;
@@ -549,8 +547,12 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
    }
 
    // Determine if we are in-game playing (or elsewhere in other menus)
-   bool inGame = UserInterface::current->getMenuID() == GameUI || UserInterface::current->getUIManager()->cameFrom(GameUI);
-   bool inEditor = UserInterface::current->getMenuID() == EditorUI || UserInterface::current->getMenuID() == EditorMenuUI;
+   bool inGame = UserInterface::current->getMenuID() == GameUI ||
+         UserInterface::current->getUIManager()->cameFrom(GameUI);
+
+   bool inEditor = UserInterface::current->getMenuID() == EditorUI ||
+         UserInterface::current->getMenuID() == EditorMenuUI ||
+         UserInterface::current->getUIManager()->cameFrom(EditorMenuUI);
 
    if(inGame)
    {
@@ -827,7 +829,7 @@ void SoundSystem::game_music_end_callback(void* userdata, ALuint source)
    musicInfos[MusicTypeGame].state = MusicStopped;
 
    // Clean up the stream
-   alureDestroyStream(musicStream, 0, NULL);
+   alureDestroyStream(musicInfos[MusicTypeGame].stream, 0, NULL);
 
    // Go to the next track, loop if at the end
    mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mMusicList.size();
@@ -841,7 +843,7 @@ void SoundSystem::menu_music_end_callback(void* userdata, ALuint source)
    musicInfos[MusicTypeMenu].state = MusicStopped;
 
    // Clean up the stream
-   alureDestroyStream(musicStream, 0, NULL);
+   alureDestroyStream(musicInfos[MusicTypeMenu].stream, 0, NULL);
 }
 
 
@@ -850,12 +852,12 @@ void SoundSystem::playGameMusic()
    musicInfos[MusicTypeGame].state = MusicPlaying;
 
    string musicFile = joindir(mMusicDir, mMusicList[mCurrentlyPlayingIndex]);
-   musicStream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
+   musicInfos[MusicTypeGame].stream = alureCreateStreamFromFile(musicFile.c_str(), MusicChunkSize, 0, NULL);
 
-   if(!musicStream)
+   if(!musicInfos[MusicTypeGame].stream)
       logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", mMusicList[mCurrentlyPlayingIndex].c_str());
 
-   if(!alurePlaySourceStream(musicInfos[MusicTypeGame].source, musicStream, NumMusicStreamBuffers, 0, game_music_end_callback, NULL))
+   if(!alurePlaySourceStream(musicInfos[MusicTypeGame].source, musicInfos[MusicTypeGame].stream, NumMusicStreamBuffers, 0, game_music_end_callback, NULL))
       logprintf(LogConsumer::LogError, "Failed to play music file: %s", mMusicList[mCurrentlyPlayingIndex].c_str());
 }
 
@@ -865,12 +867,13 @@ void SoundSystem::playMenuMusic()
    musicInfos[MusicTypeMenu].state = MusicPlaying;
 
    string musicFileFullPath = joindir(mMusicDir, mMenuMusicFile);
-   musicStream = alureCreateStreamFromFile(musicFileFullPath.c_str(), MusicChunkSize, 0, NULL);
+   musicInfos[MusicTypeMenu].stream = alureCreateStreamFromFile(musicFileFullPath.c_str(), MusicChunkSize, 0, NULL);
 
-   if(!musicStream)
+   if(!musicInfos[MusicTypeMenu].stream)
       logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", mMenuMusicFile.c_str());
 
-   if(!alurePlaySourceStream(musicInfos[MusicTypeMenu].source, musicStream, NumMusicStreamBuffers, -1, menu_music_end_callback, NULL))
+   // Loop forever (paramater -1)
+   if(!alurePlaySourceStream(musicInfos[MusicTypeMenu].source, musicInfos[MusicTypeMenu].stream, NumMusicStreamBuffers, -1, menu_music_end_callback, NULL))
       logprintf(LogConsumer::LogError, "Failed to play music file: %s", mMenuMusicFile.c_str());
 }
 
@@ -880,8 +883,8 @@ void SoundSystem::stopMusic(MusicInfo &musicInfo)
    alureStopSource(musicInfo.source, AL_FALSE);
 
    // Clean up the stream here since we aren't calling the callback
-   if(musicStream)
-      alureDestroyStream(musicStream, 0, NULL);
+   if(musicInfo.stream)
+      alureDestroyStream(musicInfo.stream, 0, NULL);
 
    musicInfo.state = MusicStopped;
 }
