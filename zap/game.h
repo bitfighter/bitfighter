@@ -115,6 +115,7 @@ private:
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
    Vector<U32> mLoadout;
    bool mNeedToCheckAuthenticationWithMaster;
+   bool mWasDelayed;
 
 protected:
    StringTableEntry mName;
@@ -154,6 +155,7 @@ public:
    bool getNeedToCheckAuthenticationWithMaster();
 
    bool isSpawnDelayed();
+   bool wasSpawnDelayed();
 
    Ship *getShip();                    // NULL on client
    void setShip(Ship *ship);
@@ -685,6 +687,7 @@ public:
 
    void suspenderLeftGame();
    GameConnection *getSuspendor();
+   void suspendIfNoActivePlayers();
 
    S32 addUploadedLevelInfo(const char *filename, LevelInfo &info);
 

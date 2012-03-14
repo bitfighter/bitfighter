@@ -1679,7 +1679,7 @@ void GameUserInterface::suspendHandler(ClientGame *game, const Vector<string> &w
    if(game->getPlayerCount() > 1)
       game->displayErrorMessage("!!! Can't suspend when others are playing");
    else
-      game->suspendGame();
+      game->getUIManager()->getGameUserInterface()->suspendGame();
 }
 
 

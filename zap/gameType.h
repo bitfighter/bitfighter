@@ -366,7 +366,7 @@ public:
 
    void serverAddClient(ClientInfo *clientInfo);         
 
-   void serverRemoveClient(ClientInfo *clientInfo);    // Remove a client from the game
+   void serverRemoveClient(ClientInfo *clientInfo);   // Remove a client from the game
 
    virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    virtual void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);

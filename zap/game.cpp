@@ -99,6 +99,7 @@ ClientInfo::ClientInfo()
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
    mNeedToCheckAuthenticationWithMaster = false;     // Does client report that they are verified
+   mWasDelayed = false;
 }
 
 
@@ -184,6 +185,15 @@ bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 bool ClientInfo::isSpawnDelayed()
 {
    return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > 20000;    // 20 secs
+}
+
+
+bool ClientInfo::wasSpawnDelayed()
+{
+   bool wasDelayed = mWasDelayed;
+   mWasDelayed = isSpawnDelayed();
+
+   return wasDelayed;
 }
 
 
@@ -2145,6 +2155,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
       }
 
    sendLevelStatsToMaster();
+
+   if(!mGameSuspended)
+      suspendIfNoActivePlayers();
 }
 
 
@@ -2268,6 +2281,9 @@ void ServerGame::suspendGame(GameConnection *requestor)
 // Resume game after it is no longer suspended
 void ServerGame::unsuspendGame(bool remoteRequest)
 {
+   if(!mGameSuspended)
+      return;
+
    mGameSuspended = false;
    if(mSuspendor && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
       mSuspendor->s2cUnsuspend();
@@ -2285,6 +2301,22 @@ void ServerGame::suspenderLeftGame()
 GameConnection *ServerGame::getSuspendor()
 {
    return mSuspendor;
+}
+
+
+// Check to see if there are any players who are active; suspend the game if not.  Server only.
+void ServerGame::suspendIfNoActivePlayers()
+{
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+
+      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
+         return;
+   }
+
+   // No active players at the moment... time to suspend!
+   mGameSuspended = true;
 }
 
 
@@ -2386,6 +2418,11 @@ void ServerGame::addClient(ClientInfo *clientInfo)
       mGameType->serverAddClient(clientInfo);
       addToClientList(clientInfo);
    }
+   
+   // When a new player joins, game is always unsuspended!
+   if(mGameSuspended)
+      unsuspendGame(false);
+
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
@@ -2647,13 +2684,10 @@ void ServerGame::idle(U32 timeDelta)
    // connect.  A little hacky, but works!
    if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
       suspendGame();
-   else if(mGameSuspended && ( (getPlayerCount() > 0 && !mSuspendor) || getPlayerCount() > 1 ))
-      unsuspendGame(false);
 
    if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen
       timeDelta = 100;
 
-   mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);                   // Connect to master server if not connected
 
@@ -2703,6 +2737,9 @@ void ServerGame::idle(U32 timeDelta)
 
    if(mGameSuspended)     // If game is suspended, we need do nothing more
       return;
+
+   mCurrentTime += timeDelta;
+
 
    for(S32 i = 0; i < getClientCount(); i++)
    {

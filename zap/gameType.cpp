@@ -1174,14 +1174,16 @@ void GameType::onAddedToGame(Game *game)
 // Server only! (overridden in NexusGame)
 bool GameType::spawnShip(ClientInfo *clientInfo)
 {
-   GameConnection *conn = clientInfo->getConnection();      // Will be NULL for robots
-
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delay bots.
    if(clientInfo->isSpawnDelayed())
    {
-      conn->s2cPlayerSpawnDelayed();
+      clientInfo->getConnection()->s2cPlayerSpawnDelayed();
+      static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
+
       return false;
    }
+
+   static_cast<ServerGame *>(getGame())->unsuspendGame(false);
 
    U32 teamIndex = clientInfo->getTeamIndex();
 
@@ -1204,7 +1206,6 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
 
       newShip->setOwner(clientInfo);
       newShip->addToGame(mGame, mGame->getGameObjDatabase());
-  
 
       if(!levelHasLoadoutZone())
       {
@@ -2237,7 +2238,10 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
    getGame()->removeFromClientList(clientInfo);   
 
    updateLeadingPlayerAndScore();
+   
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
+
+   static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
 }
 
 
