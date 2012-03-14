@@ -549,8 +549,12 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
    }
 
    // Determine if we are in-game playing (or elsewhere in other menus)
-   bool inGame = UserInterface::current->getMenuID() == GameUI || UserInterface::current->getUIManager()->cameFrom(GameUI);
-   bool inEditor = UserInterface::current->getMenuID() == EditorUI || UserInterface::current->getMenuID() == EditorMenuUI;
+   bool inGame = UserInterface::current->getMenuID() == GameUI ||
+         UserInterface::current->getUIManager()->cameFrom(GameUI);
+
+   bool inEditor = UserInterface::current->getMenuID() == EditorUI ||
+         UserInterface::current->getMenuID() == EditorMenuUI ||
+         UserInterface::current->getUIManager()->cameFrom(EditorMenuUI);
 
    if(inGame)
    {
