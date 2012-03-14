@@ -105,6 +105,16 @@ void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color
 #define rd(x) (float) (x) * 360 / FloatTau    // radiansToDegrees();
 
 
+void FXManager::DebrisChunk::idle(U32 timeDelta)
+{
+   F32 dT = F32(timeDelta) * 0.001f;
+
+   pos   += vel      * dT;
+   angle += rotation * dT;
+   ttl   -= dT;
+}
+
+
 void FXManager::DebrisChunk::render()
 {
    glPushMatrix();
@@ -124,6 +134,16 @@ void FXManager::DebrisChunk::render()
    glEnd();
 
    glPopMatrix();
+}
+
+
+void FXManager::TextEffect::idle(U32 timeDelta)
+{
+   F32 dT = F32(timeDelta) * 0.001f;
+
+   pos  += vel        * dT;
+   size += growthRate * dT;
+   ttl  -= dT;
 }
 
 
@@ -152,17 +172,18 @@ void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 }
 
 
-void FXManager::emitTextEffect(string text, Color color, Point pos, Point vel, F32 size, F32 growthRate, S32 ttl)
+void FXManager::emitTextEffect(string text, Color color, Point pos)
 {
    TextEffect textEffect;
 
    textEffect.text = text;
    textEffect.color = color;
    textEffect.pos = pos;
-   textEffect.vel = vel;
-   textEffect.size = size;
-   textEffect.growthRate = growthRate;
-   textEffect.ttl = ttl;
+
+   textEffect.vel = Point(0,0);
+   textEffect.size = 12;
+   textEffect.growthRate = 600;
+   textEffect.ttl = 100;
 
    mTextEffects.push_back(textEffect);
 }
@@ -188,8 +209,10 @@ void FXManager::emitTeleportInEffect(Point pos, U32 type)
 }
 
 
-void FXManager::tick(F32 dT)
+void FXManager::idle(U32 timeDelta)
 {
+   F32 dT = timeDelta * .001f;
+
    for(U32 j = 0; j < SparkTypeCount; j++)
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
@@ -232,11 +255,7 @@ void FXManager::tick(F32 dT)
          i--;
       }
       else
-      {
-         mDebrisChunks[i].pos   += mDebrisChunks[i].vel      * dT;
-         mDebrisChunks[i].angle += mDebrisChunks[i].rotation * dT;
-         mDebrisChunks[i].ttl -= dT;
-      }
+         mDebrisChunks[i].idle(timeDelta);
    }
 
    
@@ -249,11 +268,7 @@ void FXManager::tick(F32 dT)
          i--;
       }
       else
-      {
-         mTextEffects[i].pos += mTextEffects[i].vel * dT;
-         mTextEffects[i].size += mTextEffects[i].growthRate * dT;
-         mTextEffects[i].ttl -= dT;
-      }
+         mTextEffects[i].idle(timeDelta);
    }
 
 
@@ -430,7 +445,7 @@ void FXTrail::update(Point pos, bool boosted, bool invisible)
 }
 
 
-void FXTrail::tick(U32 dT)
+void FXTrail::idle(U32 dT)
 {
    if(mNodes.size() == 0)
       return;
@@ -445,7 +460,7 @@ void FXTrail::render()
 {
    glBegin(GL_LINE_STRIP);
 
-   for(S32 i = 0; i  <mNodes.size(); i++)
+   for(S32 i = 0; i < mNodes.size(); i++)
    {
       F32 t = ((F32)i/(F32)mNodes.size());
 

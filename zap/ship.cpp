@@ -730,10 +730,11 @@ void Ship::idle(GameObject::IdleCallPath path)
       path == GameObject::ClientIdleMainRemote)
    {
       mWarpInTimer.update(mCurrentMove.time);
+
       // Emit some particles, trail sections and update the turbo noise
       emitMovementSparks();
-      for(U32 i=0; i<TrailCount; i++)
-         mTrail[i].tick(mCurrentMove.time);
+      for(U32 i = 0; i < TrailCount; i++)
+         mTrail[i].idle(mCurrentMove.time);
       updateModuleSounds();
    }
 #endif

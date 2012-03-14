@@ -565,7 +565,7 @@ void ClientGame::idle(U32 timeDelta)
    }
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
-   FXManager::tick((F32)timeDelta * 0.001f);             // Processes sparks and teleporter effects
+   FXManager::idle(timeDelta);                           // Processes sparks and teleporter effects
    SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
                              mSettings->getIniSettings()->voiceChatVolLevel);  // Process sound effects (SFX)
 

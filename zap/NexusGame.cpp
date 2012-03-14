@@ -83,7 +83,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
          Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
          if(ship->getClientInfo()->getName() == clientName)
          {
-            clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos(), Point(0,0), 12, 600, 100);
+            clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
             break;
          }
       }

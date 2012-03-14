@@ -62,6 +62,7 @@ class FXManager
       F32 angle;
       F32 rotation;
 
+      void idle(U32 timeDelta);
       void render();
    };
 
@@ -78,6 +79,7 @@ class FXManager
       F32 growthRate;
       S32 ttl;
       
+      void idle(U32 timeDelta);
       void render();
    };
 
@@ -102,10 +104,10 @@ public:
    void emitBlast(const Point &pos, U32 size);
 
    void emitDebrisChunk(const Vector<Point> &points, const Color &color, const Point &pos, const Point &vel, S32 ttl, F32 angle, F32 rotation);
-   void emitTextEffect(string text, Color color, Point pos, Point vel, F32 size, F32 growthRate, S32 ttl);
+   void emitTextEffect(string text, Color color, Point pos);
 
    void emitTeleportInEffect(Point pos, U32 type);
-   void tick( F32 dT);
+   void idle(U32 timeDelta);
    void render(S32 renderPass);
    void clearSparks();
 };
@@ -139,7 +141,7 @@ public:
    /// Update the point this trail is attached to.
    void update(Point pos, bool boosted = false, bool invisible = false);
 
-   void tick(U32 dT);
+   void idle(U32 timeDelta);
 
    void render();
 
