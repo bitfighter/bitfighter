@@ -5,6 +5,7 @@
  *      Author: dbuck
  */
 
+
 #include "SoundSystem.h"
 #include "SoundEffect.h"
 #include "Point.h"
@@ -13,7 +14,6 @@
 
 #if !defined (ZAP_DEDICATED)
 
-#include "alInclude.h"
 
 #include "SFXProfile.h"
 #include "config.h"

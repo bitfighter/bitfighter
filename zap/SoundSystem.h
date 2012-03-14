@@ -9,14 +9,16 @@
 #define SOUNDSYSTEM_H_
 
 #include "ConfigEnum.h"     // For sfxSets
-#include "tnlTypes.h"
-#include "tnlVector.h"
+#include "alInclude.h"
 
 #ifndef ZAP_DEDICATED
 #include "../alure/AL/alure.h"
 #else
 class alureStream;
 #endif
+
+#include "tnlTypes.h"
+#include "tnlVector.h"
 
 #include <string>
 
