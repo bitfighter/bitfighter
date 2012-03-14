@@ -79,7 +79,7 @@ enum UIID {
    DiagnosticsScreenUI,
    EditorInstructionsUI,
    EditorUI,
-   EditorMenuUI,
+   EditorMenuUI,        // <=== Don't confuse this with EditorUI!!!
    ErrorMessageUI,
    GameMenuUI,
    GameParamsUI,
