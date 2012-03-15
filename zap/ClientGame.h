@@ -148,6 +148,8 @@ public:
    bool isShowingDebugMeshZones()  const;     // Show bot nav mesh zones?
    void toggleShowingMeshZones();
 
+   Ship *findShip(const StringTableEntry &clientName);
+
    void gotServerListFromMaster(const Vector<IPAddress> &serverList);
    void gotChatMessage(const char *playerNick, const char *message, bool isPrivate, bool isSystem);
    void setPlayersInGlobalChat(const Vector<StringTableEntry> &playerNicks);

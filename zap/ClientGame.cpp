@@ -691,7 +691,6 @@ void ClientGame::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
-
 void ClientGame::displayMessage(const Color &msgColor, const char *format, ...)
 {
    va_list args;
@@ -1290,6 +1289,24 @@ void ClientGame::toggleShowingMeshZones()
 {
    mDebugShowMeshZones = !mDebugShowMeshZones;
 }
+
+
+Ship *ClientGame::findShip(const StringTableEntry &clientName)
+{
+   fillVector.clear();
+
+   getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+      if(ship->getClientInfo()->getName() == clientName)
+         return ship;
+   }
+
+   return NULL;
+}
+
 
 
 void ClientGame::zoomCommanderMap()

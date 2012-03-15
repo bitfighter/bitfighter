@@ -3336,6 +3336,26 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
 }
 
 
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
+                            (U32 achievement, StringTableEntry clientName), (achievement, clientName),
+                             NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
+{
+#ifndef ZAP_DEDICATED
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+
+   if(achievement == BADGE_TWENTY_FIVE_FLAGS)
+   {
+      clientGame->displayMessage(Colors::yellow, "%s has earned the TWENTY FIVE FLAGS badge!", clientName.getString());
+      SoundSystem::playSoundEffect(SFXFlagCapture);
+
+      Ship *ship = clientGame->findShip(clientName);
+      if(ship)
+         clientGame->emitTextEffect("25 FLAGS BADGE", Colors::yellow, ship->getRenderPos() + Point(0,150));
+   }
+#endif
+}
+
+
 // Client tells server that they chose the specified weapon
 GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))
 {

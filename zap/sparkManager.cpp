@@ -312,13 +312,6 @@ void FXManager::render(S32 renderPass)
          renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(), 
                           radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
-
-      for(S32 i = 0; i < mDebrisChunks.size(); i++)
-         mDebrisChunks[i].render();
-
-      for(S32 i = 0; i < mTextEffects.size(); i++)
-         mTextEffects[i].render();
-
    }
    else if(renderPass == 1)      // Time for sparks!!
    {
@@ -342,6 +335,12 @@ void FXManager::render(S32 renderPass)
          glDisableClientState(GL_COLOR_ARRAY);
          glDisableClientState(GL_VERTEX_ARRAY);
       }
+
+      for(S32 i = 0; i < mDebrisChunks.size(); i++)
+         mDebrisChunks[i].render();
+
+      for(S32 i = 0; i < mTextEffects.size(); i++)
+         mTextEffects[i].render();
    }
 }
 

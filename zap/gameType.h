@@ -438,6 +438,8 @@ public:
 
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
+   TNL_DECLARE_RPC(s2cAchievementMessage, (U32 achievement, StringTableEntry clientName));
+
    // Not all of these actually used?
    void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);              
    void updateScore(ClientInfo *clientInfo, ScoringEvent scoringEvent, S32 data = 0); 

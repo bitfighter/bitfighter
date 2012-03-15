@@ -72,34 +72,26 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
 
    if(msgIndex == NexusMsgScore)
    {
-      SoundSystem::playSoundEffect(SFXFlagCapture);
       clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s returned %d flag%s to the Nexus for %d points!", 
                                  clientName.getString(), flagCount, flagCount > 1 ? "s" : "", score);
+      SoundSystem::playSoundEffect(SFXFlagCapture);
 
-      Vector<DatabaseObject *> fillVector;
-      clientGame->getGameObjDatabase()->findObjects(PlayerShipTypeNumber, fillVector);
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
-         if(ship->getClientInfo()->getName() == clientName)
-         {
-            clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
-            break;
-         }
-      }
+      Ship *ship = clientGame->findShip(clientName);
+      if(ship)
+         clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
    }
    else if(msgIndex == NexusMsgYardSale)
    {
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
-                                 "%s is having a YARD SALE!",
-                                 clientName.getString());
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "%s is having a YARD SALE!", clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagSnatch);
+
+      Ship *ship = clientGame->findShip(clientName);
+      if(ship)
+         clientGame->emitTextEffect("YARD SALE!", Colors::red80, ship->getRenderPos());
    }
    else if(msgIndex == NexusMsgGameOverWin)
    {
-      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f),
-                                 "Player %s wins the game!",
-                                 clientName.getString());
+      clientGame->displayMessage(Color(0.6f, 1.0f, 0.8f), "Player %s wins the game!", clientName.getString());
       SoundSystem::playSoundEffect(SFXFlagCapture);
    }
    else if(msgIndex == NexusMsgGameOverTie)
@@ -327,27 +319,24 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
       s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), theFlag->getFlagCount(), 
                       getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
-   }
-   theFlag->changeFlagCount(0);
 
-   // See if this event qualifies for an achievement
-   if(flagsReturned >= 25 &&                              // Return 25+ flags
-      scorer && scorer->isAuthenticated() &&              // Player must be authenticated
-      getGame()->getPlayerCount() >= 4 &&                 // Game must have 4+ human players
-      getGame()->getAuthenticatedPlayerCount() >= 2 &&    // Two of whom must be authenticated
-      !hasFlagSpawns() && !hasPredeployedFlags())         // Level can have no flag spawns, nor any predeployed flags
-   {
-      MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
-      if(masterConn && masterConn->isEstablished())
+      // See if this event qualifies for an achievement
+      if(flagsReturned >= 25 &&                              // Return 25+ flags
+         scorer && scorer->isAuthenticated() &&              // Player must be authenticated
+         getGame()->getPlayerCount() >= 4 &&                 // Game must have 4+ human players
+         getGame()->getAuthenticatedPlayerCount() >= 2 &&    // Two of whom must be authenticated
+         !hasFlagSpawns() && !hasPredeployedFlags())         // Level can have no flag spawns, nor any predeployed flags
       {
-         Vector<StringTableEntry> e;
-         e.push_back(scorer->getName());
-
-         masterConn->s2mAcheivementAchieved(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());
-         StringTableEntry msg("%0 has earned the TWENTY FIVE FLAGS badge!");
-         broadcastMessage(GameConnection::ColorYellow, SFXFlagCapture, msg, e);
+         MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+         if(masterConn && masterConn->isEstablished())
+         {
+            masterConn->s2mAcheivementAchieved(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());     // Notify the master
+            s2cAchievementMessage(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());                  // Alert other players
+         } 
       }
    }
+
+   theFlag->changeFlagCount(0);
 }
 
 
