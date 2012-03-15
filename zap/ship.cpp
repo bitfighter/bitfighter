@@ -956,9 +956,9 @@ void Ship::processModules()
          if(object->getTeam() == TEAM_HOSTILE)
          {
             if(isIdle)
-               mEnergy -= S32(EnergyRechargeRateInHostileLoadoutZoneWhenIdle * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenIdle * scaleFactor);
             else
-               mEnergy -= S32(EnergyRechargeRateInHostileLoadoutZoneWhenActive * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenActive * scaleFactor);
          }
 
          /// IN FRIENDLY ZONE

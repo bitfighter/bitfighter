@@ -156,16 +156,16 @@ public:
       EnergyMax = 100000,
 
       // The following are all measured in units of energy/second
-      EnergyRechargeRateWhenInNoZoneWhenIdle = 8000, 
-      EnergyRechargeRateWhenInNoZoneWhenActive = 6000,         
+      EnergyRechargeRateWhenInNoZoneWhenIdle = 8000,
+      EnergyRechargeRateWhenInNoZoneWhenActive = 6000,
       EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle = 12000,
       EnergyRechargeRateInFriendlyLoadoutZoneWhenActive = 6000,
-      EnergyRechargeRateInEnemyLoadoutZoneWhenIdle = 12000,
-      EnergyRechargeRateInEnemyLoadoutZoneWhenActive = 6000,
+      EnergyRechargeRateInEnemyLoadoutZoneWhenIdle = 5400,        // Enemy zone recharge at 90% normal
+      EnergyRechargeRateInEnemyLoadoutZoneWhenActive = 5400,
       EnergyRechargeRateInNeutralLoadoutZoneWhenIdle = 12000,
       EnergyRechargeRateInNeutralLoadoutZoneWhenActive = 6000,
-      EnergyRechargeRateInHostileLoadoutZoneWhenIdle = -12000,  
-      EnergyRechargeRateInHostileLoadoutZoneWhenActive = -12000,  
+      EnergyRechargeRateInHostileLoadoutZoneWhenIdle = -12000,
+      EnergyRechargeRateInHostileLoadoutZoneWhenActive = -12000,
 
 
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
