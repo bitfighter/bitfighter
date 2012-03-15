@@ -142,17 +142,26 @@ void FXManager::TextEffect::idle(U32 timeDelta)
    F32 dT = F32(timeDelta) * 0.001f;
 
    pos  += vel        * dT;
-   size += growthRate * dT;
+   if(size < 10)
+      size += growthRate * dT;
+
    ttl  -= dT;
 }
 
 
 void FXManager::TextEffect::render()
 {
-   glColor(color);
-   glLineWidth(size / 12.0);
-   UserInterface::drawStringc(pos.x, pos.y, size, text.c_str(), false);
-   glLineWidth(gDefaultLineWidth);
+   F32 alpha = 1;
+   if(ttl < 30)
+      alpha = F32(ttl) / 30;
+   glColor(color, alpha);
+   //glLineWidth(size);
+   glPushMatrix();
+   glTranslate(pos);
+   glScale(size);
+   UserInterface::drawStringc(0, 0, 12, text.c_str(), false);
+   glPopMatrix();
+   //glLineWidth(gDefaultLineWidth);
 }
 
 
@@ -180,10 +189,10 @@ void FXManager::emitTextEffect(string text, Color color, Point pos)
    textEffect.color = color;
    textEffect.pos = pos;
 
-   textEffect.vel = Point(0,0);
-   textEffect.size = 12;
-   textEffect.growthRate = 600;
-   textEffect.ttl = 100;
+   textEffect.vel = Point(0,-130);
+   textEffect.size = 0;
+   textEffect.growthRate = 20;
+   textEffect.ttl = 150;
 
    mTextEffects.push_back(textEffect);
 }
