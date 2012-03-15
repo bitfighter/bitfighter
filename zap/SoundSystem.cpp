@@ -551,8 +551,7 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
          UserInterface::current->getUIManager()->cameFrom(GameUI);
 
    bool inEditor = UserInterface::current->getMenuID() == EditorUI ||
-         UserInterface::current->getMenuID() == EditorMenuUI ||
-         UserInterface::current->getUIManager()->cameFrom(EditorMenuUI);
+         UserInterface::current->getUIManager()->cameFrom(EditorUI);
 
    if(inGame)
    {
