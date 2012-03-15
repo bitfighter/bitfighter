@@ -702,6 +702,18 @@ void DiagnosticUserInterface::render()
          x += 3*rad;
          render25FlagsBadge(x, y, rad);
 
+         // Possible developer badge?
+         x += 3*rad;
+         glColor(Colors::green80);
+         glPointSize((i ? smallSize * rad : rad) * 0.4f);
+         glBegin(GL_POINTS);
+            glVertex2f(x, y - (2*rm23));
+            glVertex2f(x + (2*rm23), y);
+            glVertex2f(x - (2*rm23), y + (2*rm23));
+            glVertex2f(x, y + (2*rm23));
+            glVertex2f(x + (2*rm23), y + (2*rm23));
+         glEnd();
+
          ///// After all badge rendering
          glPopMatrix();
 
