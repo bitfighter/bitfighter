@@ -212,6 +212,7 @@ public:
 
    // Suspend/unsuspend game
    TNL_DECLARE_RPC(c2sSuspendGame, (bool suspend));
+   TNL_DECLARE_RPC(s2cSuspendGame, ());
    TNL_DECLARE_RPC(s2cUnsuspend, ());
 
    // Delay/undelay spawn

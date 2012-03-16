@@ -382,7 +382,6 @@ void GameConnection::submitPassword(const char *password)
 }
 
 
-
 void GameConnection::suspendGame()
 {
    c2sSuspendGame(true);
@@ -403,7 +402,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
       mServerGame->unsuspendGame(true);
 }
 
+
+// If the server thinks everyone is alseep, it will suspend the game
+TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   mClientGame->suspendGame();       
+#endif
+}
   
+
 // Here, the server has sent a message to a suspended client to wake up, action's coming in hot!
 // We'll also play the playerJoined sfx to alert local client that the game is on again.
 TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
