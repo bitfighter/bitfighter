@@ -115,7 +115,7 @@ private:
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
    Vector<U32> mLoadout;
    bool mNeedToCheckAuthenticationWithMaster;
-   bool mWasDelayed;
+   bool mSpawnDelayed;
 
 protected:
    StringTableEntry mName;
@@ -154,8 +154,9 @@ public:
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();
 
-   bool isSpawnDelayed();
-   bool wasSpawnDelayed();
+   bool shouldDelaySpawn();
+   bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
+   void setSpawnDelayed(bool spawnDelayed);
 
    Ship *getShip();                    // NULL on client
    void setShip(Ship *ship);

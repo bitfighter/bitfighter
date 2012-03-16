@@ -463,7 +463,6 @@ U32 prevTimeDelta = 0;
 
 void ClientGame::idle(U32 timeDelta)
 {
-   mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
 
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
@@ -475,6 +474,8 @@ void ClientGame::idle(U32 timeDelta)
                                 mSettings->getIniSettings()->voiceChatVolLevel);     // Process sound effects (SFX)
       return;
    }
+
+   mCurrentTime += timeDelta;
 
    computeWorldObjectExtents();
 

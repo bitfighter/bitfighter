@@ -1175,15 +1175,15 @@ void GameType::onAddedToGame(Game *game)
 bool GameType::spawnShip(ClientInfo *clientInfo)
 {
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delay bots.
-   if(clientInfo->isSpawnDelayed())
+   if(clientInfo->shouldDelaySpawn())
    {
-      clientInfo->getConnection()->s2cPlayerSpawnDelayed();
+      clientInfo->setSpawnDelayed(true);
       static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
 
       return false;
    }
 
-   static_cast<ServerGame *>(getGame())->unsuspendGame(false);
+   //static_cast<ServerGame *>(getGame())->unsuspendGame(false);
 
    U32 teamIndex = clientInfo->getTeamIndex();
 
@@ -3603,7 +3603,8 @@ U32 GameType::getTotalGameTime() const
 }
 
 
-S32 GameType::getRemainingGameTime() const
+// Return time remaining in seconds
+S32 GameType::getRemainingGameTime() const         
 {
    return (mGameTimer.getCurrent() / 1000);
 }

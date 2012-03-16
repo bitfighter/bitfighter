@@ -99,7 +99,7 @@ ClientInfo::ClientInfo()
    mIsAuthenticated = false;
    mBadges = NO_BADGES;
    mNeedToCheckAuthenticationWithMaster = false;     // Does client report that they are verified
-   mWasDelayed = false;
+   mSpawnDelayed = false;
 }
 
 
@@ -116,8 +116,8 @@ void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
    mIsAuthenticated = isAuthenticated; 
    mBadges = badges;
 
-   if(getName() == "watusimoto" || getName() == "raptor" || getName() == "sam686")
-      TNLAssert(isAuthenticated, "Improper validation status!");
+   //if(getName() == "watusimoto" || getName() == "raptor" || getName() == "sam686")
+   //   TNLAssert(isAuthenticated, "Improper validation status!");
 }
 
 
@@ -182,18 +182,25 @@ bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 
 
 // Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
-bool ClientInfo::isSpawnDelayed()
+bool ClientInfo::shouldDelaySpawn()
 {
    return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > 20000;    // 20 secs
 }
 
 
-bool ClientInfo::wasSpawnDelayed()
+// Returns true if spawn has actually been delayed 
+bool ClientInfo::isSpawnDelayed()
 {
-   bool wasDelayed = mWasDelayed;
-   mWasDelayed = isSpawnDelayed();
+   return mSpawnDelayed;
+}
 
-   return wasDelayed;
+
+void ClientInfo::setSpawnDelayed(bool spawnDelayed)
+{
+   if(spawnDelayed && !mSpawnDelayed)
+      getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
+
+   mSpawnDelayed = spawnDelayed;
 }
 
 
@@ -515,13 +522,12 @@ VoiceDecoder *RemoteClientInfo::getVoiceDecoder()
 ////////////////////////////////////////
 
 // Constructor
-NameToAddressThread::NameToAddressThread(const char *address_string) :
-      mAddress_string(address_string)
+NameToAddressThread::NameToAddressThread(const char *address_string) : mAddress_string(address_string)
 {
    mDone = false;
 }
 
-//Destructor
+// Destructor
 NameToAddressThread::~NameToAddressThread()
 {
    // Do nothing
@@ -530,7 +536,7 @@ NameToAddressThread::~NameToAddressThread()
 
 U32 NameToAddressThread::run()
 {
-   // this can take a lot of time converting name (such as "bitfighter.org:25955") into IP address.
+   // This can take a lot of time converting name (such as "bitfighter.org:25955") into IP address.
    mAddress.set(mAddress_string);
    mDone = true;
    return 0;
@@ -2154,7 +2160,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
             getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
       }
 
-   sendLevelStatsToMaster();
+   sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
    if(!mGameSuspended)
       suspendIfNoActivePlayers();
@@ -2311,11 +2317,11 @@ void ServerGame::suspendIfNoActivePlayers()
    {
       ClientInfo *clientInfo = getClientInfo(i);
 
-      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
+      if(!clientInfo->isRobot() && !clientInfo->shouldDelaySpawn())
          return;
    }
 
-   // No active players at the moment... time to suspend!
+   // No active players at the moment... mark game as suspended, and alert players
    mGameSuspended = true;
 }
 

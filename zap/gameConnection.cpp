@@ -239,7 +239,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGa
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    resetTimeSinceLastMove();
-   mServerGame->getGameType()->spawnShip(getClientInfo());
+
+   ClientInfo *clientInfo = getClientInfo();
+
+   mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
+
+   clientInfo->setSpawnDelayed(false);
+   mServerGame->getGameType()->spawnShip(clientInfo);
 }
 
 
