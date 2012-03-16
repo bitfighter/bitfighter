@@ -1178,7 +1178,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->shouldDelaySpawn())
    {
       clientInfo->setSpawnDelayed(true);
-      static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
+      //static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
 
       return false;
    }
