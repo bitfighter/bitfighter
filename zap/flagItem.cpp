@@ -137,7 +137,7 @@ void FlagItem::setZone(GoalZone *goalZone)
 
 GoalZone *FlagItem::getZone()
 {
-	return mZone;
+   return mZone;
 }
 
 
@@ -277,7 +277,10 @@ void FlagItem::sendHome()
 
    // First, make a temp list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
 
-   Vector<FlagSpawn> spawnPoints = *getSpawnPoints();    // Makes a copy?  Hopefully!
+   Vector<const FlagSpawn *> spawnPoints;
+   for(S32 i = 0; i < getSpawnPoints()->size(); i++)
+      spawnPoints.push_back(&getSpawnPoints()->get(i));
+
    Game *game = getGame();
    GameType *gt = game->getGameType();
 
@@ -291,9 +294,9 @@ void FlagItem::sendHome()
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
          // on the unoccupied list, unless a second flag at this location removes it from the list on a subsequent pass.
          for(S32 j = 0; j < spawnPoints.size(); j++)
-            if(spawnPoints[j].getPos() == flag->mInitialPos)
+            if(spawnPoints[j]->getPos() == flag->mInitialPos)
             {
-               spawnPoints.erase_fast(j);
+               spawnPoints.erase(j);
                break;
             }
       }
@@ -309,7 +312,7 @@ void FlagItem::sendHome()
    else
    {
       S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-      mInitialPos = spawnPoints[spawnIndex].getPos();
+      mInitialPos = spawnPoints[spawnIndex]->getPos();
    }
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = mInitialPos;

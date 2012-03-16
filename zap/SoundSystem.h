@@ -9,9 +9,9 @@
 #define SOUNDSYSTEM_H_
 
 #include "ConfigEnum.h"     // For sfxSets
-#include "alInclude.h"
 
 #ifndef ZAP_DEDICATED
+#include "alInclude.h"
 #include "../alure/AL/alure.h"
 #else
 class alureStream;
