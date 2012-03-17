@@ -54,6 +54,7 @@ public:
 
    void setPeriod(U32 period);
    U32 getPeriod() const;
+   U32 getElapsed() const;
 
    void reset(); // Start timer over, using last time set
 

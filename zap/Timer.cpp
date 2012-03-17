@@ -84,6 +84,12 @@ U32 Timer::getPeriod() const
 }
 
 
+U32 Timer::getElapsed() const
+{
+   return mPeriod - mCurrentCounter;
+}
+
+
 void Timer::reset()
 {
    mCurrentCounter = mPeriod;
@@ -101,8 +107,7 @@ void Timer::extend(S32 time)
    else
    {
       mPeriod = mPeriod > U32time ? mPeriod - U32time : 0;
-      mCurrentCounter =
-            mCurrentCounter > U32time ? mCurrentCounter - U32time : 0;
+      mCurrentCounter = mCurrentCounter > U32time ? mCurrentCounter - U32time : 0;
    }
 }
 
