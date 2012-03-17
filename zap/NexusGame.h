@@ -44,7 +44,7 @@ private:
 
    S32 mNexusClosedTime;      // Time Nexus remains closed, in seconds
    S32 mNexusOpenTime;        // Time Nexus remains open, in seconds
-   Timer mNexusTimer;
+   //Timer mNexusTimer;
 
    struct YardSaleWaypoint
    {
@@ -59,12 +59,13 @@ private:
    void idle_server(U32 deltaT);     // Idle for server
 
 public:
-   NexusGameType();      // Constructor
+   NexusGameType();           // Constructor
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
-   bool mNexusIsOpen;      // Is the nexus open?
-   S32 getNexusTimeLeft();
+   bool mNexusIsOpen;         // Is the nexus open?
+   bool nexusShouldBeOpen();  // Should nexus be open, according to the timer?
+   S32 getNexusTimeLeft();    // Get time until the nexus changes state
 
    // Info about this game type:
    bool isFlagGame();
@@ -121,6 +122,7 @@ public:
 
    TNL_DECLARE_RPC(s2cAddYardSaleWaypoint, (F32 x, F32 y));
    TNL_DECLARE_RPC(s2cSetNexusTimer, (U32 nexusTime, bool isOpen));
+   TNL_DECLARE_RPC(s2cSendNexusTimes, (S32 nexusClosedTime, S32 nexusOpenTime));
    TNL_DECLARE_RPC(s2cNexusMessage, (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score));
 
    TNL_DECLARE_CLASS(NexusGameType);

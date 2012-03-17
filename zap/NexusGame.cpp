@@ -47,11 +47,20 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), 
+                            NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-   mNexusTimer.reset(nexusTime);
-   mNexusIsOpen = isOpen;
+   //mNexusTimer.reset(nexusTime);
+   //mNexusIsOpen = isOpen;
 }
+
+
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSendNexusTimes, (S32 nexusClosedTime, S32 nexusOpenTime), (nexusClosedTime, nexusOpenTime),                                            NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
+{
+   mNexusClosedTime = nexusClosedTime;
+   mNexusOpenTime = nexusOpenTime;
+}
+
 
 GAMETYPE_RPC_S2C(NexusGameType, s2cAddYardSaleWaypoint, (F32 x, F32 y), (x, y))
 {
@@ -108,7 +117,7 @@ NexusGameType::NexusGameType() : GameType(100)
 {
    mNexusClosedTime = 60;
    mNexusOpenTime = 15;
-   mNexusTimer.reset(mNexusClosedTime * 1000);
+   //mNexusTimer.reset(mNexusClosedTime * 1000);
    mNexusIsOpen = false;
 }
 
@@ -129,7 +138,7 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
          }
       }
    }
-   mNexusTimer.reset(mNexusClosedTime * 1000);
+   //mNexusTimer.reset(mNexusClosedTime * 1000);
 
    return true;
 }
@@ -142,9 +151,47 @@ string NexusGameType::toString() const
 }
 
 
+// Returns time left in current Nexus cycle -- if we're open, this will be the time until Nexus closes; if we're closed,
+// it will return the time until Nexus opens
 S32 NexusGameType::getNexusTimeLeft()
 {
-   return mNexusTimer.getCurrent();
+   // All times in ms
+   S32 closedTime = mNexusClosedTime * 1000;
+   S32 openTime = mNexusOpenTime * 1000;
+   S32 fullCycle = closedTime + openTime;
+
+   if(fullCycle == 0)
+      return S32_MAX;
+
+   //mGameTimer.mCurrentCounter  ||   return mPeriod - mCurrentCounter
+   S32 remainder = mGameTimer.getElapsed() % fullCycle;  // Time remaining once all full cycles have been factored out  
+
+   // Cycle goes close -> open.  Check which part we're in:
+   if(remainder < closedTime)                      // Nexus is in the closed cycle
+      return closedTime - remainder;                  // Time left until Nexus opens
+   else                                            // Nexus is in the opened cycle
+     return openTime - (remainder - closedTime);      // Time left until Nexus closes
+}
+
+
+bool NexusGameType::nexusShouldBeOpen()
+{
+   // All times in ms
+   S32 closedTime = mNexusClosedTime * 1000;
+   S32 openTime = mNexusOpenTime * 1000;
+   U32 elapsed = mGameTimer.getElapsed();
+
+   // Special cases:
+   if(closedTime == 0)                          // Nexus will never open
+      return false;
+
+   if(openTime == 0 && elapsed > closedTime)    // Never will never close once opened
+      return true;
+
+   S32 fullCycle = closedTime + openTime;
+   S32 remainder = elapsed % fullCycle;         // Time remaining once all full cycles have been factored out  
+
+   return (remainder >= closedTime);
 }
 
 
@@ -346,7 +393,8 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
    Parent::onGhostAvailable(theConnection);
 
    NetObject::setRPCDestConnection(theConnection);
-   s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
+   //s2cSetNexusTimer(/*mNexusTimer.getCurrent()*/0, mNexusIsOpen);
+   s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);
    NetObject::setRPCDestConnection(NULL);
 }
 
@@ -379,7 +427,31 @@ void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
 void NexusGameType::idle_client(U32 deltaT)
  {
-   mNexusTimer.update(deltaT);
+   //mNexusTimer.update(deltaT);
+
+   if(!mNexusIsOpen && nexusShouldBeOpen())         // Nexus has just opened
+   {
+      if(!isGameOver())
+      {
+         static_cast<ClientGame *>(getGame())->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now OPEN!");
+         SoundSystem::playSoundEffect(SFXFlagSnatch);
+      }
+
+      mNexusIsOpen = true;
+   }
+
+   else if(mNexusIsOpen && !nexusShouldBeOpen())       // Nexus has just closed
+   {
+      if(!isGameOver())
+      {
+         static_cast<ClientGame *>(getGame())->displayMessage(Color(0.6f, 1, 0.8f), "The Nexus is now CLOSED!");
+         SoundSystem::playSoundEffect(SFXFlagDrop);
+      }
+
+      mNexusIsOpen = false;
+   }
+
+
    for(S32 i = 0; i < mYardSaleWaypoints.size();)
    {
       if(mYardSaleWaypoints[i].timeLeft.update(deltaT))
@@ -392,15 +464,15 @@ void NexusGameType::idle_client(U32 deltaT)
 
 void NexusGameType::idle_server(U32 deltaT)
 {
-   if(!mNexusIsOpen && mNexusTimer.update(deltaT))         // Nexus has just opened
+   if(!mNexusIsOpen && nexusShouldBeOpen())         // Nexus has just opened
    {
-      mNexusTimer.reset(mNexusOpenTime * 1000);
+      //mNexusTimer.reset(mNexusOpenTime * 1000);
       mNexusIsOpen = true;
-      s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
-      static StringTableEntry msg("The Nexus is now OPEN!");
+      //s2cSetNexusTimer(/*mNexusTimer.getCurrent()*/0, mNexusIsOpen);
+      //static StringTableEntry msg("The Nexus is now OPEN!");
 
-      // Broadcast a message
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
+      //// Broadcast a message
+      //broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
 
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getGame()->getClientCount(); i++)
@@ -419,14 +491,14 @@ void NexusGameType::idle_server(U32 deltaT)
       // Fire an event
       EventManager::get()->fireEvent(EventManager::NexusOpenedEvent);
    }
-   else if(mNexusIsOpen && mNexusTimer.update(deltaT))       // Nexus has just closed
+   else if(mNexusIsOpen && !nexusShouldBeOpen())       // Nexus has just closed
    {
-      mNexusTimer.reset(mNexusClosedTime * 1000);
+      //mNexusTimer.reset(mNexusClosedTime * 1000);
       mNexusIsOpen = false;
-      s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
+      //s2cSetNexusTimer(/*mNexusTimer.getCurrent()*/0, mNexusIsOpen);
 
-      static StringTableEntry msg("The Nexus is now CLOSED.");
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
+      //static StringTableEntry msg("The Nexus is now CLOSED.");
+      //broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
 
       // Fire an event
       EventManager::get()->fireEvent(EventManager::NexusClosedEvent);
@@ -541,28 +613,32 @@ U32 NexusGameType::getLowerRightCornerScoreboardOffsetFromBottom() const
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-#define NEXUS_STR mNexusIsOpen ?  "Nexus closes: " : "Nexus opens: "
-#define NEXUS_NEVER_STR mNexusIsOpen ? "Nexus never closes" : "Nexus never opens"
-
 #ifndef ZAP_DEDICATED
 void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
 
-   glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
-
-   U32 timeLeft = mNexusTimer.getCurrent();
-   U32 minsRemaining = timeLeft / (60 * 1000);
-   U32 secsRemaining = (timeLeft - (minsRemaining * 60 * 1000)) / 1000;
-
-   const S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin;
+   const S32 x = gScreenInfo.getGameCanvasWidth()  - UserInterface::horizMargin;
    const S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 25;
    const S32 size = 20;
 
-   if(mNexusTimer.getPeriod() == 0)
-      UserInterface::drawStringfr(x, y - size, size, NEXUS_NEVER_STR);
-   else
-      UserInterface::drawStringfr(x, y - size, size, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
+   glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
+
+   if(mNexusIsOpen && mNexusOpenTime == 0)
+      UserInterface::drawStringfr(x, y - size, size, "Nexus never closes");
+   else if(!mNexusIsOpen && mNexusClosedTime == 0)
+      UserInterface::drawStringfr(x, y - size, size, "Nexus never opens");
+   else if(!isGameOver())
+   {
+      static const U32 w00     = UserInterface::getStringWidth(size, "00:00");
+      static const U32 wCloses = UserInterface::getStringWidth(size, "Nexus closes: ");
+      static const U32 wOpens  = UserInterface::getStringWidth(size, "Nexus opens: ");
+
+      S32 w = w00 + (mNexusIsOpen ? wCloses : wOpens);
+      UserInterface::drawTime(x - w, y - size, size, getNexusTimeLeft(), mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
+
+      //logprintf("%d  %d", getRemainingGameTimeInMs(), getNexusTimeLeft());
+   }
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
@@ -571,8 +647,6 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
       renderObjectiveArrow(dynamic_cast<GameObject *>(mNexus[i].getPointer()), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
 }
 #endif
-
-#undef NEXUS_STR
 
 
 //////////  END Client only code
