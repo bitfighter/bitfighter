@@ -3381,13 +3381,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
    if(useUnlim)  // Don't render "Unlim" when time is 0 because it has expired
       drawString(x, y, size, "Unlim.");
    else
-   {
-      U32 timeLeft = gameType->getRemainingGameTime();               
-      U32 minsRemaining = timeLeft / 60;
-      U32 secsRemaining = timeLeft - (minsRemaining * 60);
-
-      drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
-   }
+      drawTime(x, y, size, gameType->getRemainingGameTimeInMs());
 }
 
 
