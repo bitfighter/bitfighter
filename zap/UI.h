@@ -242,6 +242,8 @@ public:
    static void drawString4Col(S32 y, S32 size, U32 col, const char *str);
    static void drawString4Colf(S32 y, S32 size, U32 col, const char *format, ...);
 
+   static void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString = "");
+
    // Return string rendering width (normal and formatted versions)
    static F32 getStringWidth(F32 size, const char *str);
    static S32 getStringWidth(S32 size, const char *str);

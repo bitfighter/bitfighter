@@ -350,11 +350,13 @@ void UserInterface::drawString(S32 x, S32 y, S32 size, const char *string)
    drawAngleString(F32(x), F32(y), F32(size), 0, string);
 }
 
+
 void UserInterface::drawString(F32 x, F32 y, S32 size, const char *string)
 {
    y += size;     // TODO: Adjust all callers so we can get rid of this!
    drawAngleString(x, y, F32(size), 0, string);
 }
+
 
 void UserInterface::drawString(F32 x, F32 y, F32 size, const char *string)
 {
@@ -662,6 +664,18 @@ void UserInterface::drawString4Colf(S32 y, S32 size, U32 col, const char *format
 }
 
 
+void UserInterface::drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
+{
+   F32 F32time = (F32)timeInMs;
+
+   U32 minsRemaining = U32(F32time / (60 * 1000));
+   U32 secsRemaining = U32((F32time - F32(minsRemaining * 60 * 1000)) / 1000);
+
+   drawStringf(x, y, size, "%s%02d:%02d", prefixString, minsRemaining, secsRemaining);
+}
+
+
+
 #ifndef ZAP_DEDICATED
 S32 UserInterface::getStringWidth(S32 size, const char *string)
 {
@@ -680,6 +694,8 @@ S32 UserInterface::getStringWidth(S32 size, const char *string)
 {
    return 1;
 }
+
+
 F32 UserInterface::getStringWidth(F32 size, const char *string)
 {
    return 1;
