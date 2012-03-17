@@ -114,6 +114,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mLocalRemoteClientInfo = NULL;
 
    mSpawnDelayed = false;
+   mGameIsRunning = true;                    // Only matters when game is suspended
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -472,6 +473,11 @@ void ClientGame::idle(U32 timeDelta)
       mNetInterface->processConnections();
       SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
                                 mSettings->getIniSettings()->voiceChatVolLevel);     // Process sound effects (SFX)
+
+      // Need to update the game clock to keep it in sync with the 
+      if(mGameIsRunning)
+         getGameType()->advanceGameClock(timeDelta);
+
       return;
    }
 
@@ -1203,9 +1209,10 @@ string ClientGame::getHashedServerPassword()
 }
 
 
-void ClientGame::suspendGame()
+void ClientGame::suspendGame(bool gameIsRunning)
 {
    mGameSuspended = true;
+   mGameIsRunning = gameIsRunning;
 }
 
 

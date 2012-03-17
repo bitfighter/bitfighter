@@ -2939,7 +2939,7 @@ void GameUserInterface::VoiceRecorder::process()
 void GameUserInterface::suspendGame()
 {
    getGame()->getConnectionToServer()->suspendGame();          // Tell server we're suspending
-   getGame()->suspendGame();                                   // Suspend locally
+   getGame()->suspendGame(false);                              // Suspend locally
    getUIManager()->getSuspendedUserInterface()->activate();    // And enter chat mode
 }
 

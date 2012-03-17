@@ -2294,6 +2294,13 @@ void ServerGame::unsuspendGame(bool remoteRequest)
    if(mSuspendor && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
       mSuspendor->s2cUnsuspend();
 
+
+   // Alert any spawn-delayed clients that the game has resumed without them...
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(getClientInfo(i)->isSpawnDelayed())
+         if(mSuspendor != getClientInfo(i)->getConnection())
+            getClientInfo(i)->getConnection()->s2cSuspendGame(true);
+
    mSuspendor = NULL;
 }
 
@@ -2327,7 +2334,7 @@ void ServerGame::suspendIfNoActivePlayers()
    // Alert any connected players
    for(S32 i = 0; i < getClientCount(); i++)
       if(!getClientInfo(i)->isRobot())  
-         getClientInfo(i)->getConnection()->s2cSuspendGame();          
+         getClientInfo(i)->getConnection()->s2cSuspendGame(false);          
 }
 
 

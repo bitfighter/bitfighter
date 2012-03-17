@@ -78,6 +78,8 @@ private:
    Vector<string> mVoiceMuteList;   // List of players we mute because they are abusing voice chat
 
    string mLoginPassword;
+   bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
+
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
@@ -222,7 +224,7 @@ public:
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
 
-   void suspendGame();
+   void suspendGame(bool gameIsRunning);
    void unsuspendGame();
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);        // For loading levels in editor

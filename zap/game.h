@@ -381,7 +381,7 @@ protected:
    SafePtr<MasterServerConnection> mConnectionToMaster;
    SafePtr<GameType> mGameType;
 
-   bool mGameSuspended;                      // True if we're in "suspended animation" mode
+   bool mGameSuspended;       // True if we're in "suspended animation" mode
 
    GameSettings *mSettings;
 

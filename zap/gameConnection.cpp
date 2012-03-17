@@ -242,9 +242,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 
    ClientInfo *clientInfo = getClientInfo();
 
+   clientInfo->setSpawnDelayed(false);
    mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
 
-   clientInfo->setSpawnDelayed(false);
    mServerGame->getGameType()->spawnShip(clientInfo);
 }
 
@@ -394,7 +394,8 @@ void GameConnection::unsuspendGame()
 }
 
 // Client requests that the game be suspended while he waits for other players.  This runs on the server.
-TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    if(suspend)
       mServerGame->suspendGame(this);
@@ -404,10 +405,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
 
 
 // If the server thinks everyone is alseep, it will suspend the game
-TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+TNL_IMPLEMENT_RPC(GameConnection, s2cSuspendGame, (bool gameIsRunning), (gameIsRunning), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   mClientGame->suspendGame();       
+   mClientGame->suspendGame(gameIsRunning);       
 #endif
 }
   

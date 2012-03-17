@@ -640,15 +640,21 @@ void GameType::idle_server(U32 deltaT)
    EventManager::get()->update();
 
    // If game time has expired... game is over, man, it's over
-   if(mGameTimer.update(deltaT))
+   if(advanceGameClock(deltaT))
       gameOverManGameOver();
 }
 
 
 void GameType::idle_client(U32 deltaT)
 {
-   mGameTimer.update(deltaT);
+   advanceGameClock(deltaT);
    mZoneGlowTimer.update(deltaT);
+}
+
+
+bool GameType::advanceGameClock(U32 deltaT)
+{
+   return mGameTimer.update(deltaT);
 }
 
 

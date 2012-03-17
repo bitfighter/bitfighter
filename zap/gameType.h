@@ -221,6 +221,8 @@ public:
 
    bool levelHasLoadoutZone();           // Does the level have a loadout zone?
 
+   bool advanceGameClock(U32 deltaT);
+
    // Game-specific location for the bottom of the scoreboard on the lower-right corner
    // (because games like nexus have more stuff down there we need to look out for)
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
