@@ -116,13 +116,15 @@ private:
    Vector<boost::shared_ptr<ItemSpawn> > mItemSpawnPoints;    // List of spawn points for asteroids, circles, etc.
 
    Timer mScoreboardUpdateTimer;
-   Timer mGameTimer;                      // Track when current game will end
    Timer mGameTimeUpdateTimer;
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // speed up c2sResendItemStatus
 
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
+
+protected:
+   Timer mGameTimer;                            // Track when current game will end
 
 public:
    // Potentially scoring events
