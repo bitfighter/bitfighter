@@ -3457,7 +3457,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
             clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")
-            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
+            clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine laid by %s", victim.getString(), killer.getString());
          else
             clientGame->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
    }
