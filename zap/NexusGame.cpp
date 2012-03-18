@@ -167,9 +167,16 @@ void NexusGameType::setTimeRemaining(U32 timeLeft)
       mNexusChangeAtTime = timeLeft / 1000 - mNexusClosedTime;
    else
    {
+      S32 futureTime;
+
+      if(timeLeft == 0)
+         futureTime = S32_MAX;      // Near enough to infinity for our purposes... (something like 24 days)
+      else
+         futureTime = timeLeft;
+
       // Note: To avoid rounding problems, you MUST divide before subtracting!
       S32 currDisplayTime = mGameTimer.getCurrent() / 1000;
-      S32 futureDisplayTime = S32(timeLeft) / 1000;
+      S32 futureDisplayTime = S32(futureTime) / 1000;
 
       mNexusChangeAtTime += futureDisplayTime - currDisplayTime;
    }

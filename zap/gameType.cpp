@@ -2255,7 +2255,7 @@ void GameType::setTimeRemaining(U32 timeLeft)
 {
    if(timeLeft == 0)                      // Special case -- game to last indefinitely
    {
-      mGameTimer.reset(U32_MAX, 0);       // Close enough to forever for our purposes
+      mGameTimer.reset(S32_MAX, 0);       // S32_MAX, not U32_MAX to stay compatible with NexusGame override
       mGameTimer.setPeriod(0);            // No, really, set the #$%^& period to 0!
    }
    else
@@ -2710,7 +2710,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
    }
 
    setTimeRemaining(time);
-   s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
+   s2cSetTimeRemaining(time);         // Broadcast time to clients
 
    static StringTableEntry msg("%e0 has changed the amount of time left in the game");
    Vector<StringTableEntry> e;
