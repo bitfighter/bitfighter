@@ -3367,7 +3367,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
    static const U32 w00 = getStringWidth(size, "00:00");
    static const U32 wUnlim = getStringWidth(size, "Unlim.");
 
-   bool useUnlim = gameType->getTotalGameTime() == 0;// && !gameType->isGameOver();    // Time remaining in game
+   bool useUnlim = gameType->getTotalGameTime() == 0; 
    U32 w = useUnlim ? wUnlim : w00;
 
    S32 x = rightAlignCoord - w;
