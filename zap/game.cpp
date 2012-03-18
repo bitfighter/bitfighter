@@ -2324,7 +2324,7 @@ void ServerGame::suspendIfNoActivePlayers()
    {
       ClientInfo *clientInfo = getClientInfo(i);
 
-      if(!clientInfo->isRobot() && !clientInfo->shouldDelaySpawn())
+      if(!clientInfo->isRobot() && !clientInfo->isSpawnDelayed())
          return;
    }
 
