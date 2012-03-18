@@ -1793,7 +1793,13 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
 
-   F32 atomSize = size * 0.40f;
+   if(size != 100)
+   {
+      glPushMatrix();
+      glTranslate(pos);
+      glScale(size / 100);
+   }
+
 
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
@@ -1836,6 +1842,8 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
       }
    }
 
+   F32 atomSize = size * 0.40f;
+
    // Draw atom graphic
    F32 t = FloatTau - (F32(time & 1023) / 1024.f * FloatTau);  // Reverse because time is counting down
    for(F32 rotate = 0; rotate < FloatTau - 0.01f; rotate += FloatTau / 5)  //  0.01f part avoids rounding error
@@ -1853,6 +1861,9 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
 
    glColor(baseColor);
    drawCircle(pos, atomSize + 2);
+
+   if(size != 100)
+      glPopMatrix();
 }
 
 
