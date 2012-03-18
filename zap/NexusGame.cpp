@@ -178,7 +178,7 @@ void NexusGameType::setTimeRemaining(U32 timeLeft)
       S32 currDisplayTime = mGameTimer.getCurrent() / 1000;
       S32 futureDisplayTime = S32(futureTime) / 1000;
 
-      mNexusChangeAtTime += futureDisplayTime - currDisplayTime;
+      mNexusChangeAtTime = futureDisplayTime - (currDisplayTime - mNexusChangeAtTime);
    }
 
    Parent::setTimeRemaining(timeLeft);
