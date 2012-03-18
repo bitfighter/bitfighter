@@ -34,7 +34,7 @@
 #include "md5wrapper.h"
 #include "ScreenInfo.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <string>
 #include <math.h>

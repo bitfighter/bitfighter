@@ -125,9 +125,9 @@ using namespace TNL;
 #include "Cursor.h"          // For cursor defs
 #include "Joystick.h"
 #include "Event.h"
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
-#include "SDL/SDL_syswm.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
+#include "VideoSystem.h"
 #endif
 
 #include "version.h"       // For BUILD_VERSION def
@@ -158,11 +158,6 @@ using namespace TNL;
 #include <unistd.h>
 #endif
 
-#ifdef TNL_OS_LINUX
-#ifndef ZAP_DEDICATED
-#include <X11/Xlib.h>
-#endif
-#endif
 
 // Maybe don't enable by default?
 //#if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
@@ -180,8 +175,6 @@ namespace Zap
 #ifndef ZAP_DEDICATED
 extern ClientGame *gClientGame1;
 extern ClientGame *gClientGame2;
-
-extern void setDefaultBlendFunction();
 #endif
 
 // Handle any md5 requests
@@ -430,112 +423,25 @@ void hostGame()
 
 
 #ifndef ZAP_DEDICATED
+
 // Draw the screen
 void display()
 {
-   glFlush();
-
    gClientGame->getUIManager()->renderCurrent();
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
    // Double buffering prevents nasty visual tearing from the application drawing on areas of the
    // screen that are being updated at the same time.
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_GL_SwapWindow(gScreenInfo.sdlWindow);
+#else
    SDL_GL_SwapBuffers();  // Use this if we convert to SDL
-}
-
-
-static SDL_SysWMinfo windowManagerInfo;
-
-void setWindowPosition(S32 left, S32 top)
-{
-#ifdef TNL_OS_MAC_OSX
-   // We cannot set window position on Mac with SDL 1.2.  Abort!
-   return;
-#endif
-
-   SDL_VERSION(&windowManagerInfo.version);
-
-   // No window information..  Abort!!
-   if(!SDL_GetWMInfo(&windowManagerInfo))
-   {
-      logprintf(LogConsumer::LogError, "Failed to set window position");
-      return;
-   }
-
-#ifdef TNL_OS_LINUX
-   if (windowManagerInfo.subsystem == SDL_SYSWM_X11) {
-       windowManagerInfo.info.x11.lock_func();
-       XMoveWindow(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow, left, top);
-       windowManagerInfo.info.x11.unlock_func();
-   }
-#endif
-
-#ifdef TNL_OS_WIN32
-   SetWindowPos(windowManagerInfo.window, HWND_TOP, left, top, 0, 0, SWP_NOSIZE);
 #endif
 }
 
 
-S32 getWindowPositionCoord(bool getX)
-{
-   SDL_VERSION(&windowManagerInfo.version);
-
-   if(!SDL_GetWMInfo(&windowManagerInfo))
-      logprintf(LogConsumer::LogError, "Failed to set window position");
-
-#ifdef TNL_OS_LINUX
-   if (windowManagerInfo.subsystem == SDL_SYSWM_X11) {
-      XWindowAttributes xAttributes;
-      Window parent, childIgnore, rootIgnore;
-      Window *childrenIgnore;
-      U32 childrenCountIgnore;
-      S32 x, y;
-
-      windowManagerInfo.info.x11.lock_func();
-
-      // Find parent window of managed window to get proper coordinates
-      XQueryTree(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow,
-              &rootIgnore, &parent, &childrenIgnore, &childrenCountIgnore);
-
-      // Get Window attributes
-      XGetWindowAttributes(windowManagerInfo.info.x11.display, parent, &xAttributes);
-
-      // Now find absolute values
-      XTranslateCoordinates(windowManagerInfo.info.x11.display, parent,
-            xAttributes.root, 0, 0, &x, &y, &childIgnore);
-
-      windowManagerInfo.info.x11.unlock_func();
-      return getX ? x : y;
-   }
-#endif
-
-#ifdef TNL_OS_MAC_OSX
-   // I don't know if anything can be done here..
-#endif
-
-#ifdef TNL_OS_WIN32
-   RECT rect;
-   GetWindowRect(windowManagerInfo.window, &rect);
-   return getX ? rect.left : rect.top;
-#endif
-
-   // Otherwise just return 0
-   return 0;
-}
-
-
-S32 getWindowPositionX()
-{
-   return getWindowPositionCoord(true);
-}
-
-
-S32 getWindowPositionY()
-{
-   return getWindowPositionCoord(false);
-}
-#endif
+#endif // ZAP_DEDICATED
 
 
 
@@ -790,8 +696,8 @@ void shutdownBitfighter()
    // Save current window position if in windowed mode
    if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
    {
-      settings->getIniSettings()->winXPos = getWindowPositionX();
-      settings->getIniSettings()->winYPos = getWindowPositionY();
+      settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
+      settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
    }
 
    OGLCONSOLE_Quit();
@@ -810,74 +716,6 @@ void shutdownBitfighter()
 
    exitToOs();    // Do not pass Go
 }
-
-
-#ifndef ZAP_DEDICATED
-void InitSdlVideo()
-{
-   // Information about the current video settings
-   const SDL_VideoInfo* info = NULL;
-
-   // Init!
-   SDL_Init(0);
-
-   // First, initialize SDL's video subsystem
-   if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
-   {
-      // Failed, exit
-      logprintf(LogConsumer::LogFatalError, "SDL Video initialization failed: %s", SDL_GetError());
-      shutdownBitfighter();
-   }
-
-   // Let's get some video information
-   info = SDL_GetVideoInfo();
-
-   if(!info)
-   {
-      // This should probably never happen
-      logprintf(LogConsumer::LogFatalError, "SDL Video query failed: %s", SDL_GetError());
-      shutdownBitfighter();
-   }
-
-   // Find the desktop width/height and initialize the ScreenInfo object with it
-   gScreenInfo.init(info->current_w, info->current_h);
-
-   // Now, we want to setup our requested
-   // window attributes for our OpenGL window.
-   // We want *at least* 5 bits of red, green
-   // and blue. We also want at least a 16-bit
-   // depth buffer.
-   //
-   // The last thing we do is request a double
-   // buffered window. '1' turns on double
-   // buffering, '0' turns it off.
-   //
-   // Note that we do not use SDL_DOUBLEBUF in
-   // the flags to SDL_SetVideoMode. That does
-   // not affect the GL attribute state, only
-   // the standard 2D blitting setup.
-
-   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
-   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
-   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
-   SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-   static const char *WINDOW_TITLE = "Bitfighter";
-   SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);  // Icon name is same as window title -- set here so window will be created with proper name
-
-   // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will downscale it to 16x16 with no interpolation.  Therefore, 
-   // it's best to start with a finely crafted 16x16 icon, then scale it up to 32x32 with no interpolation.  It will look crappy at 32x32, 
-   // but good at 16x16, and that's all that really matters.
-   SDL_Surface *image = SDL_LoadBMP("bficon.bmp");            // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
-   if(image != NULL)
-      SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format, 0, 0, 0));
-
-   SDL_WM_SetIcon(image,NULL);
-
-   // We will run SDL_SetVideoMode in actualizeScreenMode()
-}
-#endif
 
 
 void setupLogging(IniSettings *iniSettings)
@@ -975,158 +813,6 @@ void setupLogging(const string &logDir)
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
-
-
-#ifndef ZAP_DEDICATED
-// Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
-// This has the unfortunate side-effect of triggering a mouse move event.  
-void actualizeScreenMode(bool changingInterfaces)
-{
-   GameSettings *settings = gClientGame->getSettings();
-
-   DisplayMode displayMode = settings->getIniSettings()->displayMode;
-
-   gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
-
-
-   // If old display mode is windowed or current is windowed but we change interfaces,
-   // save the window position
-   if(settings->getIniSettings()->oldDisplayMode == DISPLAY_MODE_WINDOWED ||
-         (changingInterfaces && displayMode == DISPLAY_MODE_WINDOWED))
-   {
-      settings->getIniSettings()->winXPos = getWindowPositionX();
-      settings->getIniSettings()->winYPos = getWindowPositionY();
-
-      gINI.SetValueI("Settings", "WindowXPos", settings->getIniSettings()->winXPos, true);
-      gINI.SetValueI("Settings", "WindowYPos", settings->getIniSettings()->winYPos, true);
-   }
-
-   // When we're in the editor, let's take advantage of the entire screen unstretched
-   if(UserInterface::current->usesEditorScreenMode() && 
-         (displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
-   {
-      // Smaller values give bigger magnification; makes small things easier to see on full screen
-      F32 magFactor = 0.85f;      
-
-      // For screens smaller than normal, we need to readjust magFactor to make sure we get the full canvas height crammed onto
-      // the screen; otherwise our dock will break.  Since this mode is only used in the editor, we don't really care about
-      // screen width; tall skinny screens will work just fine.
-      magFactor = max(magFactor, (F32)gScreenInfo.getGameCanvasHeight() / (F32)gScreenInfo.getPhysicalScreenHeight());
-
-      gScreenInfo.setGameCanvasSize(S32(gScreenInfo.getPhysicalScreenWidth() * magFactor), S32(gScreenInfo.getPhysicalScreenHeight() * magFactor));
-
-      displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
-   }
-
-   S32 sdlVideoFlags = 0;
-   S32 sdlWindowWidth, sdlWindowHeight;
-   F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
-
-   // Always use OpenGL
-   sdlVideoFlags = SDL_OPENGL;
-
-   // Set up variables according to display mode
-   switch (displayMode)
-   {
-   case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
-
-      orthoRight = gScreenInfo.getGameCanvasWidth();
-      orthoBottom = gScreenInfo.getGameCanvasHeight();
-      break;
-
-   case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
-
-      orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
-      orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
-      orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
-      orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
-      break;
-
-   case DISPLAY_MODE_WINDOWED:
-   default:  //  DISPLAY_MODE_WINDOWED
-      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
-      sdlVideoFlags |= SDL_RESIZABLE;
-
-      orthoRight = gScreenInfo.getGameCanvasWidth();
-      orthoBottom = gScreenInfo.getGameCanvasHeight();
-      break;
-   }
-
-   // Set the SDL screen size and change to it
-   if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
-      logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
-
-   // Now save the new window dimensions in ScreenInfo
-   gScreenInfo.setWindowSize(sdlWindowWidth, sdlWindowHeight);
-
-   glClearColor( 0, 0, 0, 0 );
-
-   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
-
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-
-   // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
-   // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would
-   // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
-   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
-
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-
-   // Do the scissoring
-   if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-   {
-      glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
-                gScreenInfo.getVertPhysicalMargin(),     // y
-                gScreenInfo.getDrawAreaWidth(),          // width
-                gScreenInfo.getDrawAreaHeight());        // height
-   }
-   else
-   {
-      // Enabling scissor appears to fix crashing problem switching screen mode
-      // in linux and "Mobile 945GME Express Integrated Graphics Controller",
-      // probably due to lines and points was not being clipped,
-      // causing some lines to wrap around the screen, or by writing other
-      // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
-      // This is probably a BUG in linux intel graphics driver.
-      glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-   }
-
-   glEnable(GL_SCISSOR_TEST);    // Turn on clipping
-
-   setDefaultBlendFunction();
-   glLineWidth(gDefaultLineWidth);
-
-   // Enable Line smoothing everywhere!  Make sure to disable temporarily for filled polygons and such
-   glEnable(GL_LINE_SMOOTH);
-   //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-   glEnable(GL_BLEND);
-
-   // If OGLconsole has been created, recreate font texture and handle resize event
-   if (gConsole)
-   {
-      OGLCONSOLE_CreateFont();
-      OGLCONSOLE_Reshape();
-   }
-
-   // Now set the window position
-   if (displayMode == DISPLAY_MODE_WINDOWED)
-      setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
-   else
-      setWindowPosition(0, 0);
-
-   UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
-}
-
-#endif
 
 
 // Function to handle one-time update tasks
@@ -1332,14 +1018,19 @@ int main(int argc, char **argv)
       moveToAppPath();        // On OS X, make sure we're in the right directory
 #endif
 
-      InitSdlVideo();         // Get our main SDL rendering window all set up
+      VideoSystem::init();                // Initialize video and window system
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+      SDL_StartTextInput();
+#else
       SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
       SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
+#endif
 
       Zap::Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
-      actualizeScreenMode(false);      // Create a display window
+      VideoSystem::actualizeScreenMode(false);      // Create a display window
 
       gConsole = OGLCONSOLE_Create();  // Create our console *after* the screen mode has been actualized
 

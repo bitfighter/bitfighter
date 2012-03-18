@@ -1,6 +1,6 @@
 #include "../tnl/tnlTypes.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 using namespace TNL;
 

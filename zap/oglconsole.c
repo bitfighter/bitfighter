@@ -26,7 +26,7 @@
 
 // Begin Bitfighter specific block
 #ifndef ZAP_DEDICATED
-   #include "SDL/SDL_opengl.h"
+   #include "SDL_opengl.h"
 #endif
 // End Bitfighter specific block
 

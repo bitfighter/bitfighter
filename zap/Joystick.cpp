@@ -30,7 +30,7 @@
 #include "IniFile.h"
 #include "Colors.h"
 
-#include "SDL/SDL.h"
+#include "SDL.h"
 
 #include <map>
 
@@ -87,6 +87,7 @@ Joystick::~Joystick()
 bool Joystick::initJoystick()
 {
 #ifdef TNL_OS_LINUX
+#if !SDL_VERSION_ATLEAST(2,0,0)
    // Hackety hack hack for some joysticks that seem calibrated horribly wrong.
    //
    // What happens is that SDL uses the newer event system at /dev/input/eventX for joystick enumeration
@@ -111,6 +112,7 @@ bool Joystick::initJoystick()
 
       logprintf("Using older Linux joystick device system to workaround calibration problems");
    }
+#endif
 #endif
 
    DetectedJoystickNameList.clear();

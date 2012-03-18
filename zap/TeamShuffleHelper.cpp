@@ -30,7 +30,7 @@
 #include "ScreenInfo.h"
 #include "gameType.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <algorithm>
 #include <math.h> 

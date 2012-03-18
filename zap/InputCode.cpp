@@ -35,7 +35,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "Joystick.h"
-#include "SDL/SDL.h"
+#include "SDL.h"
 #endif
 
 #ifdef TNL_OS_WIN32
@@ -745,6 +745,9 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 	   case SDLK_DELETE:
 		   return KEY_DELETE;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+		// TODO: SDL2 replacement for international keys, see SDL_Scancode
+#else
 	   // International keyboard syms
 	   case SDLK_WORLD_0:
 		   return KEY_WORLD_0;
@@ -938,6 +941,21 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 		   return KEY_WORLD_94;
 	   case SDLK_WORLD_95:
 		   return KEY_WORLD_95;
+#endif
+
+// Numpad keys were renamed in SDL2
+#if SDL_VERSION_ATLEAST(2,0,0)
+#define SDLK_KP0 SDLK_KP_0
+#define SDLK_KP1 SDLK_KP_1
+#define SDLK_KP2 SDLK_KP_2
+#define SDLK_KP3 SDLK_KP_3
+#define SDLK_KP4 SDLK_KP_4
+#define SDLK_KP5 SDLK_KP_5
+#define SDLK_KP6 SDLK_KP_6
+#define SDLK_KP7 SDLK_KP_7
+#define SDLK_KP8 SDLK_KP_8
+#define SDLK_KP9 SDLK_KP_9
+#endif
 
 	   // Numeric keypad
 	   case SDLK_KP0:
@@ -960,6 +978,7 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 		   return KEY_KEYPAD8;
 	   case SDLK_KP9:
 		   return KEY_KEYPAD9;
+
 	   case SDLK_KP_PERIOD:
 		   return KEY_KEYPAD_PERIOD;
 	   case SDLK_KP_DIVIDE:
@@ -1027,6 +1046,15 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 	   case SDLK_F15:
 		   return KEY_F15;
 
+
+// Some modifier keys were renamed in SDL2
+#if SDL_VERSION_ATLEAST(2,0,0)
+#define SDLK_NUMLOCK SDLK_NUMLOCKCLEAR
+#define SDLK_SCROLLOCK SDLK_SCROLLLOCK
+#define SDLK_RMETA SDLK_RGUI
+#define SDLK_LMETA SDLK_LGUI
+#define SDLK_COMPOSE SDLK_APPLICATION
+#endif
 	   // Key state modifier keys
 	   case SDLK_NUMLOCK:
 		   return KEY_NUMLOCK;
@@ -1046,14 +1074,21 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 	   case SDLK_RMETA:
 	   case SDLK_LMETA:
 		   return KEY_META;
+#if !SDL_VERSION_ATLEAST(2,0,0)
 	   case SDLK_LSUPER:
 	   case SDLK_RSUPER:
 		   return KEY_SUPER;
+#endif
 	   case SDLK_MODE:
 		   return KEY_MODE;
 	   case SDLK_COMPOSE:
 		   return KEY_COMPOSE;
 
+
+// Some misc. keys were renamed in SDL2
+#if SDL_VERSION_ATLEAST(2,0,0)
+#define SDLK_PRINT SDLK_PRINTSCREEN
+#endif
 	   // Miscellaneous function keys
 	   case SDLK_HELP:
 		   return KEY_HELP;
@@ -1061,14 +1096,16 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 		   return KEY_PRINT;
 	   case SDLK_SYSREQ:
 		   return KEY_SYSREQ;
+      case SDLK_MENU:
+         return KEY_MENU;
+      case SDLK_POWER:
+         return KEY_POWER;
+#if !SDL_VERSION_ATLEAST(2,0,0)
 	   case SDLK_BREAK:
 		   return KEY_BREAK;
-	   case SDLK_MENU:
-		   return KEY_MENU;
-	   case SDLK_POWER:
-		   return KEY_POWER;
 	   case SDLK_EURO:
 		   return KEY_EURO;
+#endif
 	   case SDLK_UNDO:
 		   return KEY_UNDO;
       default:
@@ -1227,6 +1264,9 @@ S32 InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 		   return SDLK_DELETE;
 
 	   // International keyboard syms
+#if SDL_VERSION_ATLEAST(2,0,0)
+		// TODO: SDL2 replacement for international keys, see SDL_Scancode
+#else
 	   case KEY_WORLD_0:
 		   return SDLK_WORLD_0;
 	   case KEY_WORLD_1:
@@ -1419,6 +1459,7 @@ S32 InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 		   return SDLK_WORLD_94;
 	   case KEY_WORLD_95:
 		   return SDLK_WORLD_95;
+#endif
 
 	   // Numeric keypad
 	   case KEY_KEYPAD0:
@@ -1527,14 +1568,16 @@ S32 InputCodeManager::inputCodeToSDLKey(InputCode inputCode)
 		   return SDLK_PRINT;
 	   case KEY_SYSREQ:
 		   return SDLK_SYSREQ;
-	   case KEY_BREAK:
-		   return SDLK_BREAK;
 	   case KEY_MENU:
 		   return SDLK_MENU;
 	   case KEY_POWER:
 		   return SDLK_POWER;
+#if !SDL_VERSION_ATLEAST(2,0,0)
 	   case KEY_EURO:
 		   return SDLK_EURO;
+      case KEY_BREAK:
+         return SDLK_BREAK;
+#endif
 	   case KEY_UNDO:
 		   return SDLK_UNDO;
       default:

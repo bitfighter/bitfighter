@@ -41,7 +41,7 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 //#include "pictureloader.h"
 

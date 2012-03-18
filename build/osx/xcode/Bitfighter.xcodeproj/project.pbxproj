@@ -2988,7 +2988,7 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../libsdl,
+					../../../libsdl/SDL,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
@@ -3359,7 +3359,7 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../libsdl,
+					../../../libsdl/SDL,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
@@ -3691,7 +3691,7 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../libsdl,
+					../../../libsdl/SDL,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
@@ -3729,7 +3729,7 @@
 					../../../libvorbis,
 					../../../boost,
 					../../../openal,
-					../../../libsdl,
+					../../../libsdl/SDL,
 					../../../tnl,
 				);
 				INFOPLIST_FILE = "Bitfighter-Info.plist";

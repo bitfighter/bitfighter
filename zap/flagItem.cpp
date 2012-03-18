@@ -32,7 +32,7 @@
 #include "gameObjectRender.h"
 
 #ifndef ZAP_DEDICATED
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 #endif
 
 namespace Zap

@@ -48,9 +48,10 @@
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "Cursor.h"
+#include "VideoSystem.h"
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
 
 #include <algorithm>
 #include <string>
@@ -66,7 +67,6 @@ S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shar
 }
 
 
-extern void actualizeScreenMode(bool);
 extern void shutdownBitfighter();
 
 ////////////////////////////////////
@@ -1028,7 +1028,7 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
    game->getSettings()->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
 
    game->getSettings()->getIniSettings()->displayMode = (DisplayMode)mode;
-   actualizeScreenMode(false);
+   VideoSystem::actualizeScreenMode(false);
 }
 
 
@@ -1241,7 +1241,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       settings->getIniSettings()->displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
    }
 
-   actualizeScreenMode(false);
+   VideoSystem::actualizeScreenMode(false);
 }
 
 
@@ -1899,7 +1899,11 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, 
          // next mouse event that comes our way.  It might be better to handle this at the Event level, by creating a custom
          // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
          // is here so...  well... this works.
+#if SDL_VERSION_ATLEAST(2,0,0)
+         SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, gScreenInfo.getMousePos()->x, y);
+#else
          SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
+#endif
          SDL_SetCursor(Cursor::getTransparent());
          mIgnoreNextMouseEvent = true;
          playBoop();

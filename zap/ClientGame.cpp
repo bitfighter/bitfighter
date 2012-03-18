@@ -71,7 +71,7 @@
 
 #include "md5wrapper.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <boost/shared_ptr.hpp>
 #include <sys/stat.h>

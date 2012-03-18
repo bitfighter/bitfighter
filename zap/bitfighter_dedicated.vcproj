@@ -943,6 +943,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\VideoSystem.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\VideoSystem.h"
+			>
+		</File>
+		<File
 			RelativePath=".\WallSegmentManager.cpp"
 			>
 		</File>

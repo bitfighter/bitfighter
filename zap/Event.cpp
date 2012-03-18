@@ -18,7 +18,7 @@
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <cmath>
 
@@ -157,11 +157,11 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
    switch (event->type)
    {
       case SDL_KEYDOWN:
-         onKeyDown(game, event->key.keysym.sym, event->key.keysym.mod, event->key.keysym.unicode);
+         onKeyDown(game, event->key.keysym.sym, (SDLMod)event->key.keysym.mod, event->key.keysym.unicode);
          break;
 
       case SDL_KEYUP:
-         onKeyUp(event->key.keysym.sym, event->key.keysym.mod, event->key.keysym.unicode);
+         onKeyUp(event->key.keysym.sym, (SDLMod)event->key.keysym.mod, event->key.keysym.unicode);
          break;
 
       case SDL_MOUSEMOTION:
@@ -182,14 +182,26 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
             case SDL_BUTTON_MIDDLE:
                onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
                break;
+#if !SDL_VERSION_ATLEAST(2,0,0)
             case SDL_BUTTON_WHEELUP:
                onMouseWheel(true, false);
                break;
             case SDL_BUTTON_WHEELDOWN:
                onMouseWheel(false, true);
                break;
+#endif
          }
          break;
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+      case SDL_MOUSEWHEEL:
+         if(event->wheel.x > 0)  // This may need to be reversed...  blindly coded
+            onMouseWheel(true, false);
+         else
+            onMouseWheel(false, true);
+
+         break;
+#endif
 
       case SDL_MOUSEBUTTONUP:
          switch (event->button.button)
@@ -232,59 +244,27 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
       case SDL_SYSWMEVENT:
          //Ignore
          break;
+#if SDL_VERSION_ATLEAST(2,0,0)
+      case SDL_WINDOWEVENT:
+         switch (event->window.event) {
+            case SDL_WINDOWEVENT_RESIZED:
+               onResize(game, event->window.data1, event->window.data2);
+               break;
 
+            default:
+               break;
+            }
+         break;
+
+#else
       case SDL_VIDEORESIZE:
          onResize(game, event->resize.w, event->resize.h);
          break;
-
-      case SDL_VIDEOEXPOSE:
-         onExpose();
-         break;
-
-      case SDL_ACTIVEEVENT:
-         switch (event->active.state)
-         {
-            case SDL_APPMOUSEFOCUS:
-               if (event->active.gain)
-                  onMouseFocus();
-               else
-                  onMouseBlur();
-
-               break;
-
-            case SDL_APPINPUTFOCUS:
-               if (event->active.gain)
-                  onInputFocus();
-               else
-                  onInputBlur();
-
-               break;
-
-            case SDL_APPACTIVE:
-               if (event->active.gain)
-                  onRestore();
-               else
-                  onMinimize();
-
-               break;
-         }
-         break;
-
+#endif
       default:
          onUser(event->user.type, event->user.code, event->user.data1, event->user.data2);
          break;
    }
-}
-
-void Event::onInputFocus()
-{
-   // Do nothing
-}
-
-
-void Event::onInputBlur()     // <=== what does this do??
-{
-   // Do nothing
 }
 
 
@@ -304,7 +284,11 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
 
       gScreenInfo.setCanvasMousePos(pos->x, pos->y, game->getSettings()->getIniSettings()->displayMode);
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+      SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
+#else
       SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
+#endif
    }
 
    // CTRL+Q --> screenshot!
@@ -323,18 +307,6 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
 void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
 {
    inputCodeUp(InputCodeManager::sdlKeyToInputCode(key));
-}
-
-
-void Event::onMouseFocus()
-{
-   // Do nothing
-}
-
-
-void Event::onMouseBlur()
-{
-   // Do nothing
 }
 
 
@@ -446,21 +418,10 @@ void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
    Joystick::HatInputCodeMask = directionMask;
 }
 
+
 void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)
 {
 //   logprintf("SDL Ball number: %u, relative x: %d, relative y: %d", ball, xrel, yrel);
-}
-
-
-void Event::onMinimize()
-{
-   // Do nothing
-}
-
-
-void Event::onRestore()
-{
-   // Do nothing
 }
 
 
@@ -481,9 +442,13 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    S32 newWidth  = (S32)floor(canvasWidth  * iniSettings->winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
    S32 newHeight = (S32)floor(canvasHeight * iniSettings->winSizeFact + 0.5f);
 
-   S32 flags = 0;
-   flags = SDL_OPENGL | SDL_RESIZABLE;
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_SetWindowSize(gScreenInfo.sdlWindow, newWidth, newHeight);
+#else
+   S32 flags = SDL_OPENGL | SDL_RESIZABLE;
    SDL_SetVideoMode(newWidth, newHeight, 0, flags);
+#endif
+
    gScreenInfo.setWindowSize(newWidth, newHeight);
   
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
@@ -494,11 +459,6 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());    // See comment on identical line in main.cpp
 }
 
-
-void Event::onExpose()
-{
-   // Do nothing
-}
 
 void Event::onUser(U8 type, S32 code, void* data1, void* data2)
 {

@@ -35,7 +35,7 @@
 
 #include "ClientGame.h"
 #include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #endif
 

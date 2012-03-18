@@ -41,13 +41,14 @@ using namespace TNL;
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "masterConnection.h"    // For MasterServerConnection def
+#include "VideoSystem.h"
 
 #include <string>
 #include <stdarg.h>              // For va_args
 
 #include <math.h>
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 using namespace std;
 namespace Zap
@@ -172,12 +173,10 @@ void UserInterface::onReactivate() { /* Do nothing */ }
 
 void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 
-extern void actualizeScreenMode(bool);
-
 void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode) 
 {
    if(prevUIUsesEditorScreenMode != usesEditorScreenMode())
-      actualizeScreenMode(true);
+      VideoSystem::actualizeScreenMode(true);
 }
 
 

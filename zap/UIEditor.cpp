@@ -63,9 +63,10 @@
 
 #include "oglconsole.h"          // Our console object
 #include "ScreenInfo.h"
+#include "VideoSystem.h"
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -1080,8 +1081,6 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 }
 
 
-extern void actualizeScreenMode(bool);
-
 void EditorUserInterface::onActivate()
 {
    FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
@@ -1146,7 +1145,7 @@ void EditorUserInterface::onActivate()
 
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Setup callback for processing console commands
 
-   actualizeScreenMode(true);
+   VideoSystem::actualizeScreenMode(true);
 
    centerView();
 }
@@ -1188,7 +1187,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
 
    if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
-      actualizeScreenMode(true);
+      VideoSystem::actualizeScreenMode(true);
 
    mDockItemHit = NULL;
 }

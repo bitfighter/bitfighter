@@ -32,7 +32,7 @@
 #ifndef FREEGLUT_STROKE_H_
 #define FREEGLUT_STROKE_H_
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 typedef struct tagSFG_StrokeVertex SFG_StrokeVertex;
 struct tagSFG_StrokeVertex

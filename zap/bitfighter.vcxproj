@@ -57,7 +57,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\libsdl;..\openal;..\libspeex;..\alure;..\libpng;..\zlib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\libsdl\SDL;..\openal;..\libspeex;..\alure;..\libpng;..\zlib;</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessToFile>false</PreprocessToFile>
@@ -100,7 +100,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\libsdl;..\openal;..\libspeex;..\alure;..\libpng;..\zlib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\libsdl\SDL;..\openal;..\libspeex;..\alure;..\libpng;..\zlib;</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -229,6 +229,7 @@
     <ClCompile Include="..\zap\UIQueryServers.cpp" />
     <ClCompile Include="..\zap\UITeamDefMenu.cpp" />
     <ClCompile Include="..\zap\UIYesNo.cpp" />
+    <ClCompile Include="..\zap\VideoSystem.cpp" />
     <ClCompile Include="..\zap\voiceCodec.cpp" />
     <ClCompile Include="..\zap\WeaponInfo.cpp" />
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
@@ -358,6 +359,7 @@
     <ClInclude Include="..\zap\UIQueryServers.h" />
     <ClInclude Include="..\zap\UITeamDefMenu.h" />
     <ClInclude Include="..\zap\UIYesNo.h" />
+    <ClInclude Include="..\zap\VideoSystem.h" />
     <ClInclude Include="..\zap\voiceCodec.h" />
     <ClInclude Include="..\zap\WeaponInfo.h" />
     <ClInclude Include="..\zap\zapjournal.h" />
