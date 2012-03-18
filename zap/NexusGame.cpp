@@ -47,7 +47,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), 
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (S32 nextChangeTime, bool isOpen), (nextChangeTime, isOpen), 
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mNexusChangeAtTime = nextChangeTime;
