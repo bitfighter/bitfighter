@@ -500,7 +500,7 @@ void Ship::selectWeapon(S32 weaponIdx)
    while(weaponIdx < 0)
       weaponIdx += ShipWeaponCount;
 
-   mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
+   mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to selected weapon
 }
 
 
