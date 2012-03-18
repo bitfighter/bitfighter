@@ -1084,11 +1084,19 @@ void GameUserInterface::setBusyChatting(bool busy)
 
 
 // Select next weapon
-void GameUserInterface::advanceWeapon()
+void GameUserInterface::chooseNextWeapon()
 {
    GameType *gameType = getGame()->getGameType();
    if(gameType)
-      gameType->c2sAdvanceWeapon();
+      gameType->c2sChooseNextWeapon();
+}
+
+
+void GameUserInterface::choosePrevWeapon()
+{
+   GameType *gameType = getGame()->getGameType();
+   if(gameType)
+      gameType->c2sChoosePrevWeapon();
 }
 
 
@@ -1313,7 +1321,14 @@ void GameUserInterface::processPlayModeKey(InputCode inputCode, char ascii)
    else if(checkInputCode(settings, InputCodeManager::BINDING_FPS, inputCode))
       mFPSVisible = !mFPSVisible;
    else if(checkInputCode(settings, InputCodeManager::BINDING_ADVWEAP, inputCode))
-      advanceWeapon();
+      chooseNextWeapon();
+
+   // Handle mouse wheel
+   else if(inputCode == MOUSE_WHEEL_UP && InputCodeManager::checkModifier(KEY_NONE)) 
+      chooseNextWeapon();
+   else if(inputCode == MOUSE_WHEEL_DOWN && InputCodeManager::checkModifier(KEY_NONE)) 
+      choosePrevWeapon();
+
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)
    {
       if(mShutdownMode == ShuttingDown)

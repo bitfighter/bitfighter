@@ -3293,13 +3293,24 @@ GAMETYPE_RPC_C2S(GameType, c2sRequestScoreboardUpdates, (bool updates), (updates
 
 
 // Client tells server that they chose the next weapon
-GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
+GAMETYPE_RPC_C2S(GameType, c2sChooseNextWeapon, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
 
    if(ship)
-      ship->selectWeapon();
+      ship->selectNextWeapon();
+}
+
+
+// Client tells server that they chose the next weapon
+GAMETYPE_RPC_C2S(GameType, c2sChoosePrevWeapon, (), ())
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+
+   if(ship)
+      ship->selectPrevWeapon();
 }
 
 

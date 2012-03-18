@@ -216,8 +216,9 @@ public:
 
    U32 mActiveWeaponIndx;                 // Index of selected weapon on ship
 
-   void selectWeapon();                   // Select next weapon
-   void selectWeapon(U32 weaponIndex);    // Select weapon by index
+   void selectNextWeapon();                   
+   void selectPrevWeapon();
+   void selectWeapon(S32 weaponIndex);    // Select weapon by index
    WeaponType getWeapon(U32 indx);        // Returns weapon in slot indx
    ShipModule getModule(U32 indx);        // Returns module in slot indx
 

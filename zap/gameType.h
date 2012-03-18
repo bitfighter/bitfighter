@@ -467,7 +467,8 @@ public:
 
    void updateClientScoreboard(ClientInfo *clientInfo);
 
-   TNL_DECLARE_RPC(c2sAdvanceWeapon, ());
+   TNL_DECLARE_RPC(c2sChooseNextWeapon, ());
+   TNL_DECLARE_RPC(c2sChoosePrevWeapon, ());
    TNL_DECLARE_RPC(c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index));
    TNL_DECLARE_RPC(c2sDropItem, ());
 

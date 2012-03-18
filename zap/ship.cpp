@@ -482,15 +482,24 @@ Point Ship::getAimVector()
 }
 
 
-void Ship::selectWeapon()
+void Ship::selectNextWeapon()
 {
    selectWeapon(mActiveWeaponIndx + 1);
 }
 
 
-// I *think* this runs only on the server
-void Ship::selectWeapon(U32 weaponIdx)
+void Ship::selectPrevWeapon()
 {
+   selectWeapon(mActiveWeaponIndx - 1);
+}
+
+
+// I *think* this runs only on the server
+void Ship::selectWeapon(S32 weaponIdx)
+{
+   while(weaponIdx < 0)
+      weaponIdx += ShipWeaponCount;
+
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 }
 
