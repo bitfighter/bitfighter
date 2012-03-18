@@ -158,6 +158,7 @@ OBJECTS_CLIENT=\
    UINameEntry.o\
    UIQueryServers.o\
    UIGameParameters.o\
+   VideoSystem.o\
    voiceCodec.o\
    $(OBJECTS_SHARED)
 

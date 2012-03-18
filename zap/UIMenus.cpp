@@ -48,6 +48,7 @@
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "Cursor.h"
+#include "VideoSystem.h"
 
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -66,7 +67,6 @@ S32 QSORT_CALLBACK menuItemValueSort(boost::shared_ptr<MenuItem> *a, boost::shar
 }
 
 
-extern void actualizeScreenMode(bool);
 extern void shutdownBitfighter();
 
 ////////////////////////////////////
@@ -1028,7 +1028,7 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
    game->getSettings()->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
 
    game->getSettings()->getIniSettings()->displayMode = (DisplayMode)mode;
-   actualizeScreenMode(false);
+   VideoSystem::actualizeScreenMode(false);
 }
 
 
@@ -1241,7 +1241,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       settings->getIniSettings()->displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
    }
 
-   actualizeScreenMode(false);
+   VideoSystem::actualizeScreenMode(false);
 }
 
 

@@ -41,6 +41,7 @@ using namespace TNL;
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "masterConnection.h"    // For MasterServerConnection def
+#include "VideoSystem.h"
 
 #include <string>
 #include <stdarg.h>              // For va_args
@@ -172,12 +173,10 @@ void UserInterface::onReactivate() { /* Do nothing */ }
 
 void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 
-extern void actualizeScreenMode(bool);
-
 void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode) 
 {
    if(prevUIUsesEditorScreenMode != usesEditorScreenMode())
-      actualizeScreenMode(true);
+      VideoSystem::actualizeScreenMode(true);
 }
 
 
