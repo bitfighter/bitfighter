@@ -3623,13 +3623,13 @@ U32 GameType::getTotalGameTime() const
 // Return time remaining in seconds
 S32 GameType::getRemainingGameTime() const         
 {
-   return (mGameTimer.getCurrent() / 1000);
+   return mGameTimer.getCurrent() / 1000;
 }
 
 
 S32 GameType::getRemainingGameTimeInMs() const
 {
-   return (mGameTimer.getCurrent());
+   return mGameTimer.getCurrent();
 }
 
 
