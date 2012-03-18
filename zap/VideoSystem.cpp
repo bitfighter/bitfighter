@@ -35,7 +35,10 @@
 
 #include "SDL.h"
 #include "SDL_opengl.h"
+
+#if !SDL_VERSION_ATLEAST(2,0,0)
 #include "SDL_syswm.h"
+#endif
 
 #include <cmath>
 
@@ -159,7 +162,9 @@ void VideoSystem::init()
 }
 
 
+#if !SDL_VERSION_ATLEAST(2,0,0)
 static SDL_SysWMinfo windowManagerInfo;
+#endif
 
 void VideoSystem::setWindowPosition(S32 left, S32 top)
 {
