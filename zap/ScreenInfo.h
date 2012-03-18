@@ -30,6 +30,8 @@
 #include "Point.h"
 #include "ConfigEnum.h"
 
+#include "SDL.h"
+
 using namespace TNL;
 
 namespace Zap {
@@ -117,6 +119,13 @@ public:
 
    const Point *getMousePos();
    const Point *getWindowMousePos();
+
+
+   // SDL information
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_Window *sdlWindow;
+   SDL_GLContext *sdlGlContext;
+#endif
 
 };
 

@@ -430,6 +430,7 @@ void hostGame()
 
 
 #ifndef ZAP_DEDICATED
+
 // Draw the screen
 void display()
 {
@@ -439,10 +440,33 @@ void display()
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
    // Double buffering prevents nasty visual tearing from the application drawing on areas of the
    // screen that are being updated at the same time.
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_GL_SwapWindow(gScreenInfo.sdlWindow);
+#else
    SDL_GL_SwapBuffers();  // Use this if we convert to SDL
+#endif
 }
 
 
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+
+void setWindowPosition(S32 left, S32 top)
+{
+   SDL_SetWindowPosition(gScreenInfo.sdlWindow, left, top);
+}
+
+S32 getWindowPositionCoord(bool getX)
+{
+   S32 x, y;
+   SDL_GetWindowPosition(gScreenInfo.sdlWindow, &x, &y);
+
+   return getX ? x : y;
+}
+
+#else // SDL_VERSION_ATLEAST(2,0,0)
+
+// SDL 1.2 requires a lot more rigmarole to get and set window positions
 static SDL_SysWMinfo windowManagerInfo;
 
 void setWindowPosition(S32 left, S32 top)
@@ -521,6 +545,7 @@ S32 getWindowPositionCoord(bool getX)
    // Otherwise just return 0
    return 0;
 }
+#endif // SDL_VERSION_ATLEAST(2,0,0)
 
 
 S32 getWindowPositionX()
@@ -533,7 +558,8 @@ S32 getWindowPositionY()
 {
    return getWindowPositionCoord(false);
 }
-#endif
+
+#endif // ZAP_DEDICATED
 
 
 
@@ -811,11 +837,11 @@ void shutdownBitfighter()
 
 
 #ifndef ZAP_DEDICATED
+
+static const char *WINDOW_TITLE = "Bitfighter";
+
 void InitSdlVideo()
 {
-   // Information about the current video settings
-   const SDL_VideoInfo* info = NULL;
-
    // Init!
    SDL_Init(0);
 
@@ -827,53 +853,87 @@ void InitSdlVideo()
       shutdownBitfighter();
    }
 
-   // Let's get some video information
-   info = SDL_GetVideoInfo();
+   // Get information about the current desktop video settings and initialize
+   // our ScreenInfo class with with current width and height
 
-   if(!info)
+#if SDL_VERSION_ATLEAST(2,0,0)
+
+   SDL_DisplayMode mode;
+
+   SDL_GetCurrentDisplayMode(0, &mode);  // We only have one display..  for now
+
+   gScreenInfo.init(mode.w, mode.h);
+
+   S32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+   // Fake fullscreen might not be needed with SDL2 - I think it does the fast switching
+   // on platforms that support it
+//   if(gClientGame->getSettings()->getIniSettings()->useFakeFullscreen)
+//      flags |= SDL_WINDOW_BORDERLESS;
+
+   // SDL 2.0 lets us create the window first, only once
+   gScreenInfo.sdlWindow = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight(), flags);
+
+   if (!gScreenInfo.sdlWindow)
    {
-      // This should probably never happen
-      logprintf(LogConsumer::LogFatalError, "SDL Video query failed: %s", SDL_GetError());
+      logprintf(LogConsumer::LogFatalError, "SDL window creation failed: %s", SDL_GetError());
       shutdownBitfighter();
    }
 
-   // Find the desktop width/height and initialize the ScreenInfo object with it
+   // Create our OpenGL context; save it in case we ever need it
+   SDL_GLContext context = SDL_GL_CreateContext(gScreenInfo.sdlWindow);
+   gScreenInfo.sdlGlContext = &context;
+
+   // We can set up vsync, too
+   SDL_GL_SetSwapInterval(1);
+
+#else
+
+   const SDL_VideoInfo* info = SDL_GetVideoInfo();
+
    gScreenInfo.init(info->current_w, info->current_h);
+
+#endif
+
 
    // Now, we want to setup our requested
    // window attributes for our OpenGL window.
-   // We want *at least* 5 bits of red, green
-   // and blue. We also want at least a 16-bit
-   // depth buffer.
-   //
-   // The last thing we do is request a double
-   // buffered window. '1' turns on double
-   // buffering, '0' turns it off.
-   //
-   // Note that we do not use SDL_DOUBLEBUF in
-   // the flags to SDL_SetVideoMode. That does
-   // not affect the GL attribute state, only
-   // the standard 2D blitting setup.
-
-   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
-   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
-   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
+   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+   SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-   static const char *WINDOW_TITLE = "Bitfighter";
-   SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);  // Icon name is same as window title -- set here so window will be created with proper name
 
-   // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will downscale it to 16x16 with no interpolation.  Therefore, 
-   // it's best to start with a finely crafted 16x16 icon, then scale it up to 32x32 with no interpolation.  It will look crappy at 32x32, 
-   // but good at 16x16, and that's all that really matters.
-   SDL_Surface *image = SDL_LoadBMP("bficon.bmp");            // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
+   // Set the window icon -- note that the icon must be a 32x32 bmp, and SDL will
+   // downscale it to 16x16 with no interpolation.  Therefore, it's best to start
+   // with a finely crafted 16x16 icon, then scale it up to 32x32 with no interpolation.
+   // It will look crappy at 32x32, but good at 16x16, and that's all that really matters.
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_Surface *icon = SDL_LoadBMP("bficon.bmp");
+
+   if(icon != NULL)
+   {
+      // flag must be non-zero to enable color key
+      SDL_SetColorKey(icon, 1, SDL_MapRGB(icon->format, 0, 0, 0));
+      SDL_SetWindowIcon(gScreenInfo.sdlWindow, icon);
+   }
+#else
+   // Set window and icon title here so window will be created with proper name later
+   SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);
+
+   // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
+   SDL_Surface *image = SDL_LoadBMP("bficon.bmp");
    if(image != NULL)
+   {
       SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format, 0, 0, 0));
+      SDL_WM_SetIcon(image,NULL);
+   }
+#endif
 
-   SDL_WM_SetIcon(image,NULL);
-
-   // We will run SDL_SetVideoMode in actualizeScreenMode()
+   // We will set the resolution, position, and flags in actualizeScreenMode()
 }
 #endif
 
@@ -1016,50 +1076,98 @@ void actualizeScreenMode(bool changingInterfaces)
       displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
    }
 
-   S32 sdlVideoFlags = 0;
+
+   // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;
    F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
-
-   // Always use OpenGL
-   sdlVideoFlags = SDL_OPENGL;
 
    // Set up variables according to display mode
    switch (displayMode)
    {
-   case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
+      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         orthoRight = gScreenInfo.getGameCanvasWidth();
+         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         break;
 
-      orthoRight = gScreenInfo.getGameCanvasWidth();
-      orthoBottom = gScreenInfo.getGameCanvasHeight();
+      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
+         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
+         orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
+         orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
+         orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
+         break;
+
+      case DISPLAY_MODE_WINDOWED:
+      default:  //  DISPLAY_MODE_WINDOWED
+         sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
+         sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+         orthoRight = gScreenInfo.getGameCanvasWidth();
+         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         break;
+   }
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+   // Change video modes based on selected display mode
+   // Note:  going into fullscreen you have to do in order:
+   //  - SDL_SetWindowSize()
+   //  - SDL_SetWindowFullscreen()
+   //
+   // However, coming out of fullscreen mode you must do the reverse
+   switch (displayMode)
+   {
+   case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+      SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
+
+      // Fake fullscreen needed anymore?  not in linux...  windows?
+//      if(!settings->getIniSettings()->useFakeFullscreen)
+         SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_TRUE);
+
       break;
 
    case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-      sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-      sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-      sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
+      SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
 
-      orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
-      orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
-      orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
-      orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
+//      if(!settings->getIniSettings()->useFakeFullscreen)
+         SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_TRUE);
+
       break;
 
    case DISPLAY_MODE_WINDOWED:
-   default:  //  DISPLAY_MODE_WINDOWED
-      sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-      sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
-      sdlVideoFlags |= SDL_RESIZABLE;
-
-      orthoRight = gScreenInfo.getGameCanvasWidth();
-      orthoBottom = gScreenInfo.getGameCanvasHeight();
+   default:
+      // Reverse order, leave fullscreen before setting size
+      SDL_SetWindowFullscreen(gScreenInfo.sdlWindow, SDL_FALSE);
+      SDL_SetWindowSize(gScreenInfo.sdlWindow, sdlWindowWidth, sdlWindowHeight);
       break;
    }
 
-   // Set the SDL screen size and change to it
+#else
+   // Set up sdl video flags according to display mode
+   S32 sdlVideoFlags = SDL_OPENGL;
+
+   switch (displayMode)
+   {
+      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+         sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
+         break;
+
+      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
+         sdlVideoFlags |= settings->getIniSettings()->useFakeFullscreen ? SDL_NOFRAME : SDL_FULLSCREEN;
+         break;
+
+      case DISPLAY_MODE_WINDOWED:
+      default:  //  DISPLAY_MODE_WINDOWED
+         sdlVideoFlags |= SDL_RESIZABLE;
+         break;
+   }
+
+   // Finally change the video mode
    if(SDL_SetVideoMode(sdlWindowWidth, sdlWindowHeight, 0, sdlVideoFlags) == NULL)
       logprintf(LogConsumer::LogFatalError, "Setting display mode failed: %s", SDL_GetError());
+#endif
+
 
    // Now save the new window dimensions in ScreenInfo
    gScreenInfo.setWindowSize(sdlWindowWidth, sdlWindowHeight);
@@ -1331,8 +1439,13 @@ int main(int argc, char **argv)
 #endif
 
       InitSdlVideo();         // Get our main SDL rendering window all set up
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+      SDL_StartTextInput();
+#else
       SDL_EnableUNICODE(1);   // Activate unicode ==> http://sdl.beuc.net/sdl.wiki/SDL_EnableUNICODE
       SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);      // SDL_DEFAULT_REPEAT_DELAY defined as 500
+#endif
 
       Zap::Cursor::init();
 

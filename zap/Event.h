@@ -13,6 +13,11 @@
 
 #include "SDL.h"
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+#define SDLKey SDL_Keycode
+#define SDLMod SDL_Keymod
+#endif
+
 using namespace TNL;
 
 namespace Zap {
@@ -34,12 +39,8 @@ public:
 
    static void onEvent(ClientGame *game, SDL_Event* event);
 
-   static void onInputFocus();
-   static void onInputBlur();
    static void onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode);
    static void onKeyUp(SDLKey key, SDLMod mod, U16 unicode);
-   static void onMouseFocus();
-   static void onMouseBlur();
    static void onMouseMoved(S32 x, S32 y, DisplayMode mode);
    static void onMouseWheel(bool Up, bool Down);  //Not implemented
    static void onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
@@ -49,11 +50,7 @@ public:
    static void onJoyButtonUp(U8 which, U8 button);
    static void onJoyHat(U8 which, U8 hat, U8 directionMask);
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
-   static void onMinimize();
-   static void onRestore();
    static void onResize(ClientGame *game, S32 w, S32 h);
-   static void onExpose();
-   static void onExit();
    static void onUser(U8 type, S32 code, void* data1, void* data2);
 };
 

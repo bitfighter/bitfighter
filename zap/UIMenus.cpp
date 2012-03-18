@@ -1899,7 +1899,11 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, 
          // next mouse event that comes our way.  It might be better to handle this at the Event level, by creating a custom
          // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
          // is here so...  well... this works.
+#if SDL_VERSION_ATLEAST(2,0,0)
+         SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, gScreenInfo.getMousePos()->x, y);
+#else
          SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
+#endif
          SDL_SetCursor(Cursor::getTransparent());
          mIgnoreNextMouseEvent = true;
          playBoop();
