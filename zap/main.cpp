@@ -433,8 +433,6 @@ void hostGame()
 // Draw the screen
 void display()
 {
-   glFlush();
-
    gClientGame->getUIManager()->renderCurrent();
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
