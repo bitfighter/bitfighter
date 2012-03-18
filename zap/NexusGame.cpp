@@ -52,7 +52,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (S32 nextChangeTime
 {
    mNexusChangeAtTime = nextChangeTime;
    mNexusIsOpen = isOpen;
-   logprintf(isOpen ? "Open" : "Closed");
 }
 
 
