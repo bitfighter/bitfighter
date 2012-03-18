@@ -193,13 +193,6 @@ void Ship::setDefaultLoadout()
 ClientInfo *Ship::getClientInfo()
 {
    return mClientInfo;
-   //if(getControllingClient())
-      //return getControllingClient()->getClientInfo();
-   //else
-   //{
-   //   TNLAssert(false, "No controlling client --> is this legit?");
-   //   return NULL;
-   //}
 }
 
 
