@@ -598,7 +598,7 @@ void GameType::idle_server(U32 deltaT)
    if(mGameTimeUpdateTimer.update(deltaT) && mGameTimer.getCurrent() != 0)
    {
       mGameTimeUpdateTimer.reset();
-      s2cSetTimeRemaining(mGameTimer.getCurrent());
+      broadcastRemainingTime();
    }
 
 
@@ -2106,7 +2106,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
       return;
 
    mGameTimer.extend(time);                         // Increase "official time"
-   s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
+   broadcastRemainingTime();
 
    static StringTableEntry EXTEND_MESSAGE("%e0 has extended the game");
    Vector<StringTableEntry> e;
@@ -2262,6 +2262,19 @@ void GameType::setTimeRemaining(U32 timeLeft)
       mGameTimer.extend(timeLeft - mGameTimer.getCurrent());
 }
 
+
+// Send remaining time to all clients
+void GameType::broadcastRemainingTime()
+{
+   S32 time;
+
+   if(getTotalGameTime() == 0)
+      time = 0;
+   else
+      time = getRemainingGameTimeInMs();
+
+   s2cSetTimeRemaining(time);    // Broadcast time to clients
+}
 
 
 // Server notifies clients that a player has changed name
@@ -2511,7 +2524,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    for(S32 i = 0; i < mWalls.size(); i++)
       s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
-   s2cSetTimeRemaining(mGameTimer.getCurrent());      // Tell client how much time left in current game
+   broadcastRemainingTime();
    s2cSetGameOver(mGameOver);
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
 

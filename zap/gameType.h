@@ -118,11 +118,12 @@ private:
    Timer mScoreboardUpdateTimer;
    Timer mGameTimeUpdateTimer;
 
-   Vector<SafePtr<MoveItem> > mCacheResendItem;  // speed up c2sResendItemStatus
+   Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
+   void broadcastRemainingTime();               // Send remaining time to all clients
 
 protected:
    Timer mGameTimer;                            // Track when current game will end
