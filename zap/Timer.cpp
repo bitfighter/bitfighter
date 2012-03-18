@@ -110,11 +110,6 @@ void Timer::extend(S32 time)
       mPeriod = mPeriod > U32time ? mPeriod - U32time : 0;
       mCurrentCounter = mCurrentCounter > U32time ? mCurrentCounter - U32time : 0;
    }
-   else
-   {
-      mPeriod = 0;
-      //mCurrentCounter
-   }
 }
 
 
