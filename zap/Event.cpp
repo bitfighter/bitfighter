@@ -18,7 +18,7 @@
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <cmath>
 

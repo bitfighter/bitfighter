@@ -64,8 +64,8 @@
 
 #include "../tnl/tnlEndian.h"
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
 
 #include <ctype.h>
 #include <stdio.h>

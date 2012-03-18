@@ -41,7 +41,7 @@
 
 #include "tnl.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <stdio.h>
 #include <cmath>

@@ -37,7 +37,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "UI.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 #endif
 
 namespace Zap

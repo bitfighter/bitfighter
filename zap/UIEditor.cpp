@@ -64,8 +64,8 @@
 #include "oglconsole.h"          // Our console object
 #include "ScreenInfo.h"
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
 
 #include <boost/shared_ptr.hpp>
 

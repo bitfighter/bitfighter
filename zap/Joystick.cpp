@@ -30,7 +30,7 @@
 #include "IniFile.h"
 #include "Colors.h"
 
-#include "SDL/SDL.h"
+#include "SDL.h"
 
 #include <map>
 

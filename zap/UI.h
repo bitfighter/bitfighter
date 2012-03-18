@@ -42,7 +42,7 @@
 #include "tnl.h"
 #include "tnlLog.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 #include <string>
 

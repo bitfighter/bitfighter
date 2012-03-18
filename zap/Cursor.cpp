@@ -31,8 +31,8 @@
 #include "gameObjectRender.h"
 #include "ScreenInfo.h"
 
-#include "SDL/SDL_opengl.h"
-#include "SDL/SDL_mouse.h"
+#include "SDL_opengl.h"
+#include "SDL_mouse.h"
 
 namespace Zap
 {

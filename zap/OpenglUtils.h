@@ -10,7 +10,7 @@
 #define OPENGLUTILS_H_
 
 #include "tnlTypes.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 
 using namespace TNL;

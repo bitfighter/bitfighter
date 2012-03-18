@@ -47,7 +47,7 @@ using namespace TNL;
 
 #include <math.h>
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 using namespace std;
 namespace Zap

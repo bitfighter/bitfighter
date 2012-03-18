@@ -125,9 +125,9 @@ using namespace TNL;
 #include "Cursor.h"          // For cursor defs
 #include "Joystick.h"
 #include "Event.h"
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
-#include "SDL/SDL_syswm.h"
+#include "SDL.h"
+#include "SDL_opengl.h"
+#include "SDL_syswm.h"
 #endif
 
 #include "version.h"       // For BUILD_VERSION def

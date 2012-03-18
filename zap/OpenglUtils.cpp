@@ -31,7 +31,7 @@
 
 #include "OpenglUtils.h"
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 #include "freeglut_stroke.h"
 #include "freeglut_stroke_roman.h"
 

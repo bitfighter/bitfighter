@@ -35,7 +35,7 @@
 #   include "ClientGame.h"
 #   include "UIGame.h"
 #   include "UIMenuItems.h"
-#   include "SDL/SDL_opengl.h"
+#   include "SDL_opengl.h"
 #endif
 
 

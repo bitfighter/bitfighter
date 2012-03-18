@@ -35,7 +35,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "Joystick.h"
-#include "SDL/SDL.h"
+#include "SDL.h"
 #endif
 
 #ifdef TNL_OS_WIN32

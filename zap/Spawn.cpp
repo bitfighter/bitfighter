@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #ifndef ZAP_DEDICATED
-#  include "SDL/SDL_opengl.h"
+#  include "SDL_opengl.h"
 #  include "UIMenuItems.h"
 #  include "UIEditorMenus.h"
 #  include "ClientGame.h"

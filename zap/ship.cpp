@@ -51,7 +51,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 #include "sparkManager.h"
 #include "UI.h"
 #include "UIMenus.h"

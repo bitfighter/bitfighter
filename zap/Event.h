@@ -11,7 +11,7 @@
 #include "InputCode.h"
 #include "ConfigEnum.h"
 
-#include "SDL/SDL.h"
+#include "SDL.h"
 
 using namespace TNL;
 

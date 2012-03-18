@@ -28,7 +28,7 @@
 #include "UI.h"
 #include "ScreenInfo.h"    // For gScreenInfo stuff
 
-#include "SDL/SDL_opengl.h"
+#include "SDL_opengl.h"
 
 
 namespace Zap

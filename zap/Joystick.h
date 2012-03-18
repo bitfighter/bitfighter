@@ -34,7 +34,7 @@
 #include "tnlVector.h"
 #include "Color.h"
 
-#include "SDL/SDL_joystick.h"
+#include "SDL_joystick.h"
 
 #include <string>
 

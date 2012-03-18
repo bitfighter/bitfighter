@@ -44,7 +44,7 @@
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"       // For ClientGame and getUIManager()
 #   include "UIEditorMenus.h"    // For EditorAttributeMenuUI def
-#   include "SDL/SDL_opengl.h"
+#   include "SDL_opengl.h"
 #endif
 
 using namespace boost;
