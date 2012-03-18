@@ -684,6 +684,16 @@ void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       if(theFlag)
       {
          theFlag->changeFlagCount(theFlag->getFlagCount() + 1);
+
+         if(mNexusIsOpen)
+         {
+            // Check if ship is sitting on an open Nexus (can use static_cast because we already know the type, even though it could be NULL)
+            NexusObject *nexus = static_cast<NexusObject *>(theShip->isInZone(NexusTypeNumber));
+
+            if(nexus)         
+               shipTouchNexus(theShip, nexus);
+         }
+
          break;
       }
    }
