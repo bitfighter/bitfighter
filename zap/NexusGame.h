@@ -44,7 +44,7 @@ private:
 
    S32 mNexusClosedTime;      // Time Nexus remains closed, in seconds
    S32 mNexusOpenTime;        // Time Nexus remains open, in seconds
-   U32 mNexusChangeAtTime;    // When the next Nexus status change will occur
+   S32 mNexusChangeAtTime;    // When the next Nexus status change will occur
 
    struct YardSaleWaypoint
    {
