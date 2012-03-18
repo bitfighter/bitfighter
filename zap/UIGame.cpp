@@ -3367,7 +3367,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
    static const U32 w00 = getStringWidth(size, "00:00");
    static const U32 wUnlim = getStringWidth(size, "Unlim.");
 
-   bool useUnlim = gameType->getTotalGameTime() == 0 && !gameType->isGameOver();    // Time remaining in game
+   bool useUnlim = gameType->getTotalGameTime() == 0;// && !gameType->isGameOver();    // Time remaining in game
    U32 w = useUnlim ? wUnlim : w00;
 
    S32 x = rightAlignCoord - w;
@@ -3378,7 +3378,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
    
    glColor(Colors::white);
 
-   if(useUnlim)  // Don't render "Unlim" when time is 0 because it has expired
+   if(useUnlim)  
       drawString(x, y, size, "Unlim.");
    else
       drawTime(x, y, size, gameType->getRemainingGameTimeInMs());
