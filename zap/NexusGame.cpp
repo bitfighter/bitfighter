@@ -185,7 +185,7 @@ bool NexusGameType::nexusShouldBeOpen()
    if(closedTime == 0)                          // Nexus will never open
       return false;
 
-   if(openTime == 0 && elapsed > closedTime)    // Never will never close once opened
+   if(openTime == 0 && elapsed > (U32)closedTime)    // Never will never close once opened
       return true;
 
    S32 fullCycle = closedTime + openTime;
