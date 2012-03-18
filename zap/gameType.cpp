@@ -3616,7 +3616,7 @@ void GameType::setGameTime(F32 timeInSeconds)
 
 U32 GameType::getTotalGameTime() const
 {
-   return (mGameTimer.getPeriod() / 1000);
+   return mGameTimer.getPeriod() / 1000;
 }
 
 
