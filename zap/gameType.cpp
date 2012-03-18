@@ -2251,6 +2251,19 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 }
 
 
+void GameType::setTimeRemaining(U32 timeLeft)
+{
+   if(timeLeft == 0)                      // Special case -- game to last indefinitely
+   {
+      mGameTimer.reset(U32_MAX, 0);       // Close enough to forever for our purposes
+      mGameTimer.setPeriod(0);            // No, really, set the #$%^& period to 0!
+   }
+   else
+      mGameTimer.extend(timeLeft - mGameTimer.getCurrent());
+}
+
+
+
 // Server notifies clients that a player has changed name
 GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName), (oldName, newName))
 {
@@ -2345,13 +2358,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, sc
 // Server has sent us (the client) a message telling us how much longer we have in the current game
 GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
 {
-   if(timeLeft == 0)                      // Special case -- game to last indefinitely
-   {
-      mGameTimer.reset(U32_MAX, 0);       // Close enough to forever for our purposes
-      mGameTimer.setPeriod(0);            // No, really, set the #$%^& period to 0!
-   }
-   else
-      mGameTimer.extend(timeLeft - mGameTimer.getCurrent());
+   setTimeRemaining(timeLeft);
 }
 
 
@@ -2702,19 +2709,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
          return;
    }
 
-   if(time == 0)
-   {
-      mGameTimer.reset(U32_MAX, 0);
-      mGameTimer.setPeriod(0);
-      s2cSetTimeRemaining(0);          // Broadcast time to clients
-   }
-   else
-   {
-      mGameTimer.extend(time - mGameTimer.getCurrent());    // Preserve the actual, overall time of the game in mGameTimer's period
-      s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
-   }
-
-   
+   setTimeRemaining(time);
+   s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
 
    static StringTableEntry msg("%e0 has changed the amount of time left in the game");
    Vector<StringTableEntry> e;

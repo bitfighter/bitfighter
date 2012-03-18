@@ -47,11 +47,12 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), 
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cSetNexusTimer, (S32 nextChangeTime, bool isOpen), (nextChangeTime, isOpen), 
                             NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-   //mNexusTimer.reset(nexusTime);
-   //mNexusIsOpen = isOpen;
+   mNexusChangeAtTime = nextChangeTime;
+   mNexusIsOpen = isOpen;
+   logprintf(isOpen ? "Open" : "Closed");
 }
 
 
@@ -119,6 +120,7 @@ NexusGameType::NexusGameType() : GameType(100)
    mNexusOpenTime = 15;
    //mNexusTimer.reset(mNexusClosedTime * 1000);
    mNexusIsOpen = false;
+   mNexusChangeAtTime = -1;
 }
 
 
@@ -138,7 +140,8 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
          }
       }
    }
-   //mNexusTimer.reset(mNexusClosedTime * 1000);
+
+   mNexusChangeAtTime = mGameTimer.getPeriod() / 1000 - mNexusClosedTime;
 
    return true;
 }
@@ -155,43 +158,33 @@ string NexusGameType::toString() const
 // it will return the time until Nexus opens
 S32 NexusGameType::getNexusTimeLeft()
 {
-   // All times in ms
-   S32 closedTime = mNexusClosedTime * 1000;
-   S32 openTime = mNexusOpenTime * 1000;
-   S32 fullCycle = closedTime + openTime;
-
-   if(fullCycle == 0)
-      return S32_MAX;
-
-   //mGameTimer.mCurrentCounter  ||   return mPeriod - mCurrentCounter
-   S32 remainder = mGameTimer.getElapsed() % fullCycle;  // Time remaining once all full cycles have been factored out  
-
-   // Cycle goes close -> open.  Check which part we're in:
-   if(remainder < closedTime)                      // Nexus is in the closed cycle
-      return closedTime - remainder;                  // Time left until Nexus opens
-   else                                            // Nexus is in the opened cycle
-     return openTime - (remainder - closedTime);      // Time left until Nexus closes
+   return mGameTimer.getCurrent() / 1000 - mNexusChangeAtTime;
 }
 
 
-bool NexusGameType::nexusShouldBeOpen()
+void NexusGameType::setTimeRemaining(U32 timeLeft)
 {
-   // All times in ms
-   S32 closedTime = mNexusClosedTime * 1000;
-   S32 openTime = mNexusOpenTime * 1000;
-   U32 elapsed = mGameTimer.getElapsed();
+   if(mNexusChangeAtTime == -1)     // Initial visit to this function, will happen on client when they first join a level
+      mNexusChangeAtTime = timeLeft / 1000 - mNexusClosedTime;
+   else
+   {
+      // Note: To avoid rounding problems, you MUST divide before subtracting!
+      S32 currDisplayTime = mGameTimer.getCurrent() / 1000;
+      S32 futureDisplayTime = S32(timeLeft) / 1000;
 
-   // Special cases:
-   if(closedTime == 0)                          // Nexus will never open
+      mNexusChangeAtTime += futureDisplayTime - currDisplayTime;
+   }
+
+   Parent::setTimeRemaining(timeLeft);
+}
+
+
+bool NexusGameType::nexusShouldChange()
+{
+   if(mNexusChangeAtTime == -1)
       return false;
 
-   if(openTime == 0 && elapsed > closedTime)    // Never will never close once opened
-      return true;
-
-   S32 fullCycle = closedTime + openTime;
-   S32 remainder = elapsed % fullCycle;         // Time remaining once all full cycles have been factored out  
-
-   return (remainder >= closedTime);
+   return mNexusChangeAtTime * 1000 > (S32)mGameTimer.getCurrent();
 }
 
 
@@ -393,8 +386,10 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
    Parent::onGhostAvailable(theConnection);
 
    NetObject::setRPCDestConnection(theConnection);
-   //s2cSetNexusTimer(/*mNexusTimer.getCurrent()*/0, mNexusIsOpen);
-   s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);
+
+   s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);     // Send info about Nexus hours of business
+   s2cSetNexusTimer(mNexusChangeAtTime, mNexusIsOpen);      // Send info about current state of Nexus
+   
    NetObject::setRPCDestConnection(NULL);
 }
 
@@ -429,7 +424,7 @@ void NexusGameType::idle_client(U32 deltaT)
  {
    //mNexusTimer.update(deltaT);
 
-   if(!mNexusIsOpen && nexusShouldBeOpen())         // Nexus has just opened
+   if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
    {
       if(!isGameOver())
       {
@@ -438,9 +433,10 @@ void NexusGameType::idle_client(U32 deltaT)
       }
 
       mNexusIsOpen = true;
+      mNexusChangeAtTime -= mNexusOpenTime;
    }
 
-   else if(mNexusIsOpen && !nexusShouldBeOpen())       // Nexus has just closed
+   else if(mNexusIsOpen && nexusShouldChange())       // Nexus has just closed
    {
       if(!isGameOver())
       {
@@ -449,6 +445,7 @@ void NexusGameType::idle_client(U32 deltaT)
       }
 
       mNexusIsOpen = false;
+      mNexusChangeAtTime -= mNexusClosedTime;
    }
 
 
@@ -464,15 +461,10 @@ void NexusGameType::idle_client(U32 deltaT)
 
 void NexusGameType::idle_server(U32 deltaT)
 {
-   if(!mNexusIsOpen && nexusShouldBeOpen())         // Nexus has just opened
+   if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
    {
-      //mNexusTimer.reset(mNexusOpenTime * 1000);
       mNexusIsOpen = true;
-      //s2cSetNexusTimer(/*mNexusTimer.getCurrent()*/0, mNexusIsOpen);
-      //static StringTableEntry msg("The Nexus is now OPEN!");
-
-      //// Broadcast a message
-      //broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, msg);
+      mNexusChangeAtTime -= mNexusOpenTime;
 
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getGame()->getClientCount(); i++)
@@ -491,14 +483,10 @@ void NexusGameType::idle_server(U32 deltaT)
       // Fire an event
       EventManager::get()->fireEvent(EventManager::NexusOpenedEvent);
    }
-   else if(mNexusIsOpen && !nexusShouldBeOpen())       // Nexus has just closed
+   else if(mNexusIsOpen && nexusShouldChange())       // Nexus has just closed
    {
-      //mNexusTimer.reset(mNexusClosedTime * 1000);
       mNexusIsOpen = false;
-      //s2cSetNexusTimer(/*mNexusTimer.getCurrent()*/0, mNexusIsOpen);
-
-      //static StringTableEntry msg("The Nexus is now CLOSED.");
-      //broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
+      mNexusChangeAtTime -= mNexusClosedTime;
 
       // Fire an event
       EventManager::get()->fireEvent(EventManager::NexusClosedEvent);
@@ -635,9 +623,7 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
       static const U32 wOpens  = UserInterface::getStringWidth(size, "Nexus opens: ");
 
       S32 w = w00 + (mNexusIsOpen ? wCloses : wOpens);
-      UserInterface::drawTime(x - w, y - size, size, getNexusTimeLeft(), mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
-
-      //logprintf("%d  %d", getRemainingGameTimeInMs(), getNexusTimeLeft());
+      UserInterface::drawTime(x - w, y - size, size, getNexusTimeLeft() * 1000, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
    }
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)

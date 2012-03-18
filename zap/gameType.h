@@ -123,8 +123,10 @@ private:
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
+
 protected:
    Timer mGameTimer;                            // Track when current game will end
+   virtual void setTimeRemaining(U32 timeLeft);
 
 public:
    // Potentially scoring events
