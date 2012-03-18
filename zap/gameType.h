@@ -123,8 +123,6 @@ private:
    void idle_client(U32 deltaT);
    void idle_server(U32 deltaT);
 
-   void broadcastRemainingTime();               // Send remaining time to all clients
-
 protected:
    Timer mGameTimer;                            // Track when current game will end
    virtual void setTimeRemaining(U32 timeLeft);
@@ -169,6 +167,9 @@ public:
 
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
+
+   void broadcastRemainingTime();               // Send remaining time to all clients
+
 
    static StringTableEntry getGameTypeName(GameTypeId gameType);
 
@@ -434,7 +435,7 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
-   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeftInMs));
+   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeftInMs, bool isUnlim));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
    
 

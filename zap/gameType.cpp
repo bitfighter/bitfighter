@@ -2266,14 +2266,7 @@ void GameType::setTimeRemaining(U32 timeLeft)
 // Send remaining time to all clients
 void GameType::broadcastRemainingTime()
 {
-   S32 time;
-
-   if(getTotalGameTime() == 0)
-      time = 0;
-   else
-      time = getRemainingGameTimeInMs();
-
-   s2cSetTimeRemaining(time);    // Broadcast time to clients
+   s2cSetTimeRemaining(getRemainingGameTimeInMs(), getTotalGameTime() == 0);
 }
 
 
@@ -2369,9 +2362,11 @@ GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, sc
 
 
 // Server has sent us (the client) a message telling us how much longer we have in the current game
-GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
+GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft, bool isUnlim), (timeLeft, isUnlim))
 {
    setTimeRemaining(timeLeft);
+   if(isUnlim)
+      mGameTimer.setPeriod(0);
 }
 
 
@@ -2723,7 +2718,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
    }
 
    setTimeRemaining(time);
-   s2cSetTimeRemaining(time);         // Broadcast time to clients
+   broadcastRemainingTime();         
 
    static StringTableEntry msg("%e0 has changed the amount of time left in the game");
    Vector<StringTableEntry> e;

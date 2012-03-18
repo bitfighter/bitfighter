@@ -2623,22 +2623,22 @@ void ServerGame::idle(U32 timeDelta)
                case 1:
                   if(mGameType)
                   {
-                     mGameType->extendGameTime(mVoteNumber);                                  // Increase "official time"
-                     mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());   // Broadcast time to clients
+                     mGameType->extendGameTime(mVoteNumber);                           // Increase "official time"
+                     mGameType->broadcastRemainingTime();   
                   }
                   break;   
                case 2:
                   if(mGameType)
                   {
                      mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
-                     mGameType->s2cSetTimeRemaining(mGameType->getRemainingGameTimeInMs());    // Broadcast time to clients
+                     mGameType->broadcastRemainingTime();                                   
                   }
                   break;
                case 3:
                   if(mGameType)
                   {
                      mGameType->setWinningScore(mVoteNumber);
-                     mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);    // Broadcast score to clients
+                     mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);     // Broadcast score to clients
                   }
                   break;
                case 4:
