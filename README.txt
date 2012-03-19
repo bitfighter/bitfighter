@@ -18,6 +18,8 @@ Bitfighter README
       * openal
       * libvorbis
       * libspeex
+      * readline (Linux-only)
+      * ncurses (Linux-only)
 
    These dependencies are provided for you on Windows/Mac, with the exception
    of SDL on Mac which can be obtained from:
@@ -32,7 +34,7 @@ Bitfighter README
  a) Linux
 
    You will need the development headers of the above dependencies installed 
-   as well as the following software:
+   as well as the following software to compile:
       * gcc / g++
       * make
 
@@ -65,7 +67,7 @@ Bitfighter README
    Click Debug > Start Debugging (or press F5) to run the game.
 
 
- c) MacOS X (10.4 - 10.6; 10.7+ unknown..)
+ c) MacOS X (10.4 - 10.7)
 
    Bitfighter is built with the Xcode IDE.  The Xcode project is found in the directory:
 
