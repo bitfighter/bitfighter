@@ -32,7 +32,11 @@ Bitfighter README
  a) Linux
 
    You will need the development headers of the above dependencies installed 
-   as well as the following software:
+   as well as the headers for the following:
+      * readline
+      * ncurses
+
+   You also need the following software to compile:
       * gcc / g++
       * make
 
