@@ -1092,7 +1092,22 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->activate();
          break;
 
+      case NetConnection::ReasonTimedOut:
+         ui->setMessage(2, "Unable to connect to the master server, with error:");
+         ui->setMessage(3, "\"Attempt Timed Out.\"");
+         ui->setMessage(5, "Please check your Internet Connection");
+         ui->setMessage(6, "and firewall settings.");
+         ui->activate();
+         break;
+
       default:  // Not handled
+         ui->setMessage(2, "Unable to connect to the master server, with error code:");
+         ui->setMessage(3, "MasterServer Error #" + itos(reason));
+         ui->setMessage(5, "Check your Internet Connection and firewall settings.");
+         ui->setMessage(7, "Please report this error code to the");
+         ui->setMessage(8, "Bitfighter developers.");
+         ui->activate();
+
          break;
    }
 }
