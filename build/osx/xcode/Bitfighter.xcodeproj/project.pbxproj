@@ -129,6 +129,7 @@
 		73851F7113ABF55000D88D2A /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73851F6913ABF55000D88D2A /* Event.cpp */; };
 		73851F7213ABF55000D88D2A /* OpenglUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73851F6D13ABF55000D88D2A /* OpenglUtils.cpp */; };
 		7385200E13ABFDDB00D88D2A /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 7385200D13ABFDDB00D88D2A /* SDLMain.m */; };
+		738562B71516BBA900437B06 /* VideoSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738562B51516BBA900437B06 /* VideoSystem.cpp */; };
 		7385CBAA14147824008470C8 /* ClientGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CB9F14147824008470C8 /* ClientGame.cpp */; };
 		7385CBAB14147824008470C8 /* EngineeredItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA114147824008470C8 /* EngineeredItem.cpp */; };
 		7385CBAC14147824008470C8 /* PickupItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7385CBA414147824008470C8 /* PickupItem.cpp */; };
@@ -656,6 +657,8 @@
 		73851F6F13ABF55000D88D2A /* zoneControlGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zoneControlGame.h; path = ../../../zap/zoneControlGame.h; sourceTree = SOURCE_ROOT; };
 		7385200C13ABFDDB00D88D2A /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLMain.h; path = ../../../zap/SDLMain.h; sourceTree = SOURCE_ROOT; };
 		7385200D13ABFDDB00D88D2A /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = ../../../zap/SDLMain.m; sourceTree = SOURCE_ROOT; };
+		738562B51516BBA900437B06 /* VideoSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSystem.cpp; path = ../../../zap/VideoSystem.cpp; sourceTree = SOURCE_ROOT; };
+		738562B61516BBA900437B06 /* VideoSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VideoSystem.h; path = ../../../zap/VideoSystem.h; sourceTree = SOURCE_ROOT; };
 		7385CB9F14147824008470C8 /* ClientGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientGame.cpp; path = ../../../zap/ClientGame.cpp; sourceTree = SOURCE_ROOT; };
 		7385CBA014147824008470C8 /* ClientGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClientGame.h; path = ../../../zap/ClientGame.h; sourceTree = SOURCE_ROOT; };
 		7385CBA114147824008470C8 /* EngineeredItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EngineeredItem.cpp; path = ../../../zap/EngineeredItem.cpp; sourceTree = SOURCE_ROOT; };
@@ -1746,6 +1749,8 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738562B51516BBA900437B06 /* VideoSystem.cpp */,
+				738562B61516BBA900437B06 /* VideoSystem.h */,
 				738A4ED015085E6B001C4F67 /* UIHighScores.cpp */,
 				738A4ED115085E6B001C4F67 /* UIHighScores.h */,
 				73846BA714CDD57900A5553F /* CoreGame.cpp */,
@@ -2860,6 +2865,7 @@
 				73846BAB14CDD57900A5553F /* CoreGame.cpp in Sources */,
 				73846BAC14CDD57900A5553F /* WallSegmentManager.cpp in Sources */,
 				738A4ED215085E6B001C4F67 /* UIHighScores.cpp in Sources */,
+				738562B71516BBA900437B06 /* VideoSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
