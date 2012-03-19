@@ -128,19 +128,25 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
    if(argc > 0)
    {
       setGameTime(F32(atof(argv[0]) * 60.0));                 // Game time, stored in minutes in level file
+
       if(argc > 1)
       {
          mNexusClosedTime = S32(atof(argv[1]) * 60.f + 0.5);  // Time until nexus opens, specified in minutes (0.5 converts truncation into rounding)
+
          if(argc > 2)
          {
             mNexusOpenTime = S32(atof(argv[2]));              // Time nexus remains open, specified in seconds
+
             if(argc > 3)
                setWinningScore(atoi(argv[3]));                // Winning score
          }
       }
    }
 
-   mNexusChangeAtTime = mGameTimer.getPeriod() / 1000 - mNexusClosedTime;
+   if(mTimeIsUnlimited)
+      mNexusChangeAtTime = S32_MAX / 1000 - mNexusClosedTime;
+   else
+      mNexusChangeAtTime = mGameTimer.getPeriod() / 1000 - mNexusClosedTime;
 
    return true;
 }
@@ -148,7 +154,8 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string NexusGameType::toString() const
 {
-   return string(getClassName()) + " " + ftos(F32(getTotalGameTime()) / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
+   F32 gameTime = mTimeIsUnlimited ? 0 : F32(getTotalGameTime());
+   return string(getClassName()) + " " + ftos(gameTime / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
                                          ftos(F32(mNexusOpenTime), 3) + " " + itos(getWinningScore());
 }
 
@@ -161,7 +168,7 @@ S32 NexusGameType::getNexusTimeLeft()
 }
 
 
-void NexusGameType::setTimeRemaining(U32 timeLeft)
+void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
    if(mNexusChangeAtTime == -1)     // Initial visit to this function, will happen on client when they first join a level
       mNexusChangeAtTime = timeLeft / 1000 - mNexusClosedTime;
@@ -169,7 +176,7 @@ void NexusGameType::setTimeRemaining(U32 timeLeft)
    {
       S32 futureTime;
 
-      if(timeLeft == 0)
+      if(isUnlimited)
          futureTime = S32_MAX;      // Near enough to infinity for our purposes... (something like 24 days)
       else
          futureTime = timeLeft;
@@ -181,7 +188,7 @@ void NexusGameType::setTimeRemaining(U32 timeLeft)
       mNexusChangeAtTime = futureDisplayTime - (currDisplayTime - mNexusChangeAtTime);
    }
 
-   Parent::setTimeRemaining(timeLeft);
+   Parent::setTimeRemaining(timeLeft, isUnlimited);
 }
 
 

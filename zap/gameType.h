@@ -123,9 +123,10 @@ private:
 protected:
    Timer mScoreboardUpdateTimer;
    Timer mGameTimer;
+   bool mTimeIsUnlimited;
    Timer mGameTimeUpdateTimer;
                        // Track when current game will end
-   virtual void setTimeRemaining(U32 timeLeft);
+   virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);
 
 public:
    // Potentially scoring events
@@ -168,7 +169,7 @@ public:
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
-   void broadcastRemainingTime();               // Send remaining time to all clients
+   void broadcastRemainingTime(bool isUnlimited);                    // Send remaining time to all clients
 
 
    static StringTableEntry getGameTypeName(GameTypeId gameType);
@@ -193,6 +194,7 @@ public:
    U32 getTotalGameTime() const;            // In seconds
    S32 getRemainingGameTime() const;        // In seconds
    S32 getRemainingGameTimeInMs() const;    // In ms
+   bool isTimeUnlimited() const;
    void extendGameTime(S32 timeInMs);
 
    S32 getLeadingScore() const;
@@ -435,7 +437,7 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
-   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeftInMs, bool isUnlim));
+   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeftInMs, bool isUnlimited));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
    
 

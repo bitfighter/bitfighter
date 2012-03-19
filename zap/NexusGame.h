@@ -44,7 +44,7 @@ private:
 
    S32 mNexusClosedTime;      // Time Nexus remains closed, in seconds
    S32 mNexusOpenTime;        // Time Nexus remains open, in seconds
-   S32 mNexusChangeAtTime;    // When the next Nexus status change will occur
+   U32 mNexusChangeAtTime;    // When the next Nexus status change will occur  --> use U32 so this doesn't overflow
 
    struct YardSaleWaypoint
    {
@@ -61,7 +61,7 @@ private:
    void idle_server(U32 deltaT);     // Idle for server
 
 protected:
-   void setTimeRemaining(U32 timeLeft);
+   void setTimeRemaining(U32 timeLeft, bool isUnlimited);
 
 public:
    NexusGameType();           // Constructor
