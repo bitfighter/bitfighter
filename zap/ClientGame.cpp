@@ -1107,7 +1107,6 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(7, "Please report this error code to the");
          ui->setMessage(8, "Bitfighter developers.");
          ui->activate();
-
          break;
    }
 }
