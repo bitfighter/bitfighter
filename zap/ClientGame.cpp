@@ -1094,7 +1094,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 
       case NetConnection::ReasonTimedOut:
          ui->setMessage(2, "Unable to connect to the master server, with error:");
-         ui->setMessage(3, "\"Attempt Timed Out.\"");
+         ui->setMessage(3, "\"Attempt Timed Out\"");
          ui->setMessage(5, "Please check your Internet Connection");
          ui->setMessage(6, "and firewall settings.");
          ui->activate();
