@@ -3384,7 +3384,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
 
    U32 w = gameType->isTimeUnlimited() ? wUnlim : w00;
 
-   S32 x = rightAlignCoord - w;
+   S32 x = rightAlignCoord - w - 100;
    S32 y = gScreenInfo.getGameCanvasHeight() - vertMargin - 20;
 
    glColor(Colors::cyan);
@@ -3392,7 +3392,7 @@ void GameUserInterface::renderTimeLeft(U32 rightAlignCoord)
    
    glColor(Colors::white);
 
-   if(gameType->isTimeUnlimited())  
+   if(gameType->isTimeUnlimited() && false)  
       drawString(x, y, size, "Unlim.");
    else
       drawTime(x, y, size, gameType->getRemainingGameTimeInMs());

@@ -64,9 +64,7 @@ bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreGameType::toString() const
 {
-   F32 gameTime = mTimeIsUnlimited ? 0 : F32(getTotalGameTime());
-
-   return string(getClassName()) + " " + ftos(gameTime / 60 , 3);
+   return string(getClassName()) + " " + mGameTimer.toString_minutes();
 }
 
 

@@ -63,6 +63,29 @@ struct WallRec;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class GameTimer
+{
+private:
+   Timer mTimer;
+   bool mIsUnlimited;
+
+public:
+   void reset(U32 timeInMs);
+   bool update(U32 deltaT);
+   void extend(S32 deltaT);
+
+   bool isUnlimited() const;
+   void setIsUnlimited();
+   U32 getCurrent() const; 
+   U32 getTotalGameTime() const;
+
+   string toString_minutes() const;      // Creates string representation of timer for level saving purposes
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class GameType : public NetObject
 {
    typedef NetObject Parent;
@@ -106,8 +129,8 @@ private:
    StringTableEntry mLevelDescription;
    StringTableEntry mLevelCredits;
 
-   string mScriptName;                    // Name of levelgen script, if any
-   Vector<string> mScriptArgs;            // List of script params  
+   string mScriptName;                 // Name of levelgen script, if any
+   Vector<string> mScriptArgs;         // List of script params  
 
    S32 mMinRecPlayers;         // Recommended min players for this level
    S32 mMaxRecPlayers;         // Recommended max players for this level
@@ -122,10 +145,10 @@ private:
 
 protected:
    Timer mScoreboardUpdateTimer;
-   Timer mGameTimer;
-   bool mTimeIsUnlimited;
-   Timer mGameTimeUpdateTimer;
-                       // Track when current game will end
+
+   GameTimer mGameTimer;              // Track when current game will end
+   Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
+                       
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);
 
 public:
@@ -169,7 +192,7 @@ public:
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
-   void broadcastRemainingTime(bool isUnlimited);                    // Send remaining time to all clients
+   void broadcastRemainingTime();                      // Send remaining time to all clients
 
 
    static StringTableEntry getGameTypeName(GameTypeId gameType);
@@ -539,6 +562,8 @@ public:
    void addBot(Vector<StringTableEntry> args);
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
+
+   GameTimer *getTimer();
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \

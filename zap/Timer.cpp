@@ -48,11 +48,12 @@ bool Timer::update(U32 timeDelta)
    if(mCurrentCounter == 0)
       return false;
 
-   if (timeDelta >= mCurrentCounter)
+   if(timeDelta >= mCurrentCounter)
    {
       mCurrentCounter = 0;
       return true;
    }
+
    mCurrentCounter -= timeDelta;
    return false;
 }
@@ -96,19 +97,35 @@ void Timer::reset()
 }
 
 
+// Note that time could be negative to shorten timer!  -- TODO: Do we really want to alter the timer period here?
 void Timer::extend(S32 time)
 {
    U32 U32time = U32(abs(time));
 
    if(time > 0)
    {
-      mPeriod += U32time;
-      mCurrentCounter += U32time;
+      if(U32time > (U32_MAX - mPeriod))            // Overflow protection
+         mPeriod = U32time;
+      else
+         mPeriod += U32time;
+
+      if(U32time > (U32_MAX - mCurrentCounter))    // Overflow protection
+         mCurrentCounter = U32_MAX;
+      else
+         mCurrentCounter += U32time;
    }
+
    else if(time < 0)
    {
-      mPeriod = mPeriod > U32time ? mPeriod - U32time : 0;
-      mCurrentCounter = mCurrentCounter > U32time ? mCurrentCounter - U32time : 0;
+      if(U32time > mPeriod)                        // Underflow protection
+         mPeriod = 0;
+      else
+         mPeriod -= U32time;
+
+      if(U32time > mCurrentCounter)                // Underflow protection
+         mCurrentCounter = 0;
+      else
+         mCurrentCounter -= U32time;
    }
 }
 

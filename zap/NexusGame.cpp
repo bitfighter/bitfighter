@@ -143,10 +143,10 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
       }
    }
 
-   if(mTimeIsUnlimited)
+   if(mGameTimer.isUnlimited())
       mNexusChangeAtTime = S32_MAX / 1000 - mNexusClosedTime;
    else
-      mNexusChangeAtTime = mGameTimer.getPeriod() / 1000 - mNexusClosedTime;
+      mNexusChangeAtTime = mGameTimer.getTotalGameTime() / 1000 - mNexusClosedTime;
 
    return true;
 }
@@ -154,8 +154,7 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string NexusGameType::toString() const
 {
-   F32 gameTime = mTimeIsUnlimited ? 0 : F32(getTotalGameTime());
-   return string(getClassName()) + " " + ftos(gameTime / 60 , 3) + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
+   return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
                                          ftos(F32(mNexusOpenTime), 3) + " " + itos(getWinningScore());
 }
 
@@ -170,25 +169,21 @@ S32 NexusGameType::getNexusTimeLeft()
 
 void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
-   if(mNexusChangeAtTime == -1)     // Initial visit to this function, will happen on client when they first join a level
-      mNexusChangeAtTime = timeLeft / 1000 - mNexusClosedTime;
-   else
-   {
-      S32 futureTime;
-
-      if(isUnlimited)
-         futureTime = S32_MAX;      // Near enough to infinity for our purposes... (something like 24 days)
-      else
-         futureTime = timeLeft;
-
-      // Note: To avoid rounding problems, you MUST divide before subtracting!
-      S32 currDisplayTime = mGameTimer.getCurrent() / 1000;
-      S32 futureDisplayTime = S32(futureTime) / 1000;
-
-      mNexusChangeAtTime = futureDisplayTime - (currDisplayTime - mNexusChangeAtTime);
-   }
+   U32 currDisplayTime = mGameTimer.getCurrent() / 1000;    // Record current timer info
 
    Parent::setTimeRemaining(timeLeft, isUnlimited);
+
+   U32 futureDisplayTime = mGameTimer.getCurrent() / 1000;
+
+   if(mNexusChangeAtTime == -1)     // Initial visit to this function, will happen on client when they first join a level
+   {
+      if(isUnlimited)
+         mNexusChangeAtTime = futureDisplayTime - mNexusClosedTime;
+      else
+         mNexusChangeAtTime = timeLeft / 1000 - mNexusClosedTime;
+   }
+   else
+      mNexusChangeAtTime = futureDisplayTime - (currDisplayTime - mNexusChangeAtTime);
 }
 
 
@@ -197,7 +192,7 @@ bool NexusGameType::nexusShouldChange()
    if(mNexusChangeAtTime == -1)
       return false;
 
-   return mNexusChangeAtTime * 1000 > (S32)mGameTimer.getCurrent();
+   return mNexusChangeAtTime * 1000 > mGameTimer.getCurrent();
 }
 
 

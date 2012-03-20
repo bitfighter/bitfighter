@@ -2624,14 +2624,14 @@ void ServerGame::idle(U32 timeDelta)
                   if(mGameType)
                   {
                      mGameType->extendGameTime(mVoteNumber);                           // Increase "official time"
-                     mGameType->broadcastRemainingTime(mGameType->isTimeUnlimited());   
+                     mGameType->broadcastRemainingTime();   
                   }
                   break;   
                case 2:
                   if(mGameType)
                   {
                      mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
-                     mGameType->broadcastRemainingTime(mGameType->isTimeUnlimited());                                   
+                     mGameType->broadcastRemainingTime();                                   
                   }
                   break;
                case 3:

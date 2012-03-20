@@ -69,8 +69,6 @@ namespace Zap
 const S32 GameType::MAX_TEAMS;
 #endif
 
-//static Timer mTestTimer(10 * 1000);
-//static bool on = true;
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
@@ -90,6 +88,78 @@ const char *gGameTypeNames[] = {
 
 S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
 
+////////////////////////////////////////               
+////////////////////////////////////////
+
+
+// Pass 0 for unlmited game
+void GameTimer::reset(U32 timeInMs)
+{
+   if(timeInMs == 0)
+   {
+      mTimer.reset(S32_MAX);
+      mIsUnlimited = true;
+   }
+   else
+   {
+      mTimer.reset(timeInMs);
+      mIsUnlimited = false;
+   }
+}
+
+
+// Return true if timer has expired, false otherwise -- unlimited games never expire
+bool GameTimer::update(U32 deltaT)
+{
+   bool status = mTimer.update(deltaT);
+
+   if(mIsUnlimited)
+      return false;
+
+   return status;
+}
+
+
+U32 GameTimer::getCurrent() const
+{
+   return mTimer.getCurrent();
+}
+
+
+void GameTimer::extend(S32 deltaT)
+{
+   mTimer.extend(deltaT);
+}
+
+
+void GameTimer::setIsUnlimited()
+{
+   mIsUnlimited = true;
+}
+
+
+bool GameTimer::isUnlimited() const
+{
+   return mIsUnlimited;
+}
+
+
+U32 GameTimer::getTotalGameTime() const      // in ms
+{
+   //if(mIsUnlimited)
+   //   return U32_MAX;
+   
+   return mTimer.getPeriod();
+}
+
+
+string GameTimer::toString_minutes() const
+{
+   F32 gameTime = mIsUnlimited ? 0 : F32(mTimer.getPeriod());
+
+   return ftos(gameTime / (60 * 1000), 3);
+}
+
 
 ////////////////////////////////////////      __              ___           
 ////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
@@ -99,7 +169,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 // Constructor
-GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
+GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUpdateTimer(30000)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
@@ -126,6 +196,8 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000) , mGameTimer
    mEngineerEnabled = false;
    mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
+
+   mGameTimer.reset(DefaultGameTime);
 
 #ifndef ZAP_DEDICATED
    // I *think* this is only here to provide a default for the editor
@@ -157,8 +229,7 @@ bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 
 string GameType::toString() const
 {
-   F32 gameTime = mTimeIsUnlimited ? 0 : F32(getTotalGameTime());
-   return string(getClassName()) + " " + ftos(gameTime / 60, 3) + " " + itos(mWinningScore);
+   return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + itos(mWinningScore);
 }
 
 
@@ -238,7 +309,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
                                                               255));
    else if(key == "Game Time")
    {
-      S32 gameTime = mTimeIsUnlimited ? 0 : getTotalGameTime();
+      S32 gameTime = mGameTimer.isUnlimited() ? 0 : mGameTimer.getTotalGameTime() / 1000;
       return boost::shared_ptr<MenuItem>(new TimeCounterMenuItem("Game Time:", gameTime, 99*60, "Unlimited", "Time game will last"));
    }
    else if(key == "Win Score")
@@ -601,7 +672,7 @@ void GameType::idle_server(U32 deltaT)
    // Periodically send time-remaining updates to the clients to keep everyone in sync
    if(mGameTimeUpdateTimer.update(deltaT))
    {
-      broadcastRemainingTime(mTimeIsUnlimited);
+      broadcastRemainingTime();
       mGameTimeUpdateTimer.reset();
    }
 
@@ -658,6 +729,7 @@ void GameType::idle_client(U32 deltaT)
 
 bool GameType::advanceGameClock(U32 deltaT)
 {
+   logprintf("%d",deltaT);
    return mGameTimer.update(deltaT);
 }
 
@@ -2109,10 +2181,14 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
             getGame()->getPlayerCount() > 1 && ((ServerGame *)getGame())->voteStart(clientInfo, 1, time))
       return;
 
-   mGameTimer.extend(time);                         // Increase "official time"
-   mTimeIsUnlimited = (time == 0);
+   if(time == 0)
+      mGameTimer.setIsUnlimited();
+   else if(!mGameTimer.isUnlimited())
+      mGameTimer.extend(time);            // Increase "official time"
+   else
+      return;                             // Adding time to an already unlimited game is... pointless!
 
-   broadcastRemainingTime(mTimeIsUnlimited);
+   broadcastRemainingTime();
 
    static StringTableEntry EXTEND_MESSAGE("%e0 has extended the game");
    Vector<StringTableEntry> e;
@@ -2260,18 +2336,16 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
    if(isUnlimited)                        
-      mGameTimer.reset(S32_MAX);          // S32_MAX, not U32_MAX to stay compatible with NexusGame override
+      mGameTimer.reset(0);   
    else
-      mGameTimer.extend(timeLeft - mGameTimer.getCurrent());
-
-   mTimeIsUnlimited = isUnlimited;
+      mGameTimer.reset(timeLeft);
 }
 
 
 // Send remaining time to all clients
-void GameType::broadcastRemainingTime(bool isUnlimited)
+void GameType::broadcastRemainingTime()
 {
-   s2cSetTimeRemaining(getRemainingGameTimeInMs(), isUnlimited);
+   s2cSetTimeRemaining(mGameTimer.getCurrent(), mGameTimer.isUnlimited());
 }
 
 
@@ -2523,7 +2597,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    for(S32 i = 0; i < mWalls.size(); i++)
       s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
-   broadcastRemainingTime(mTimeIsUnlimited);
+   broadcastRemainingTime();
    s2cSetGameOver(mGameOver);
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
 
@@ -2722,11 +2796,11 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
    }
 
    if(time == 0)
-      setTimeRemaining(S32_MAX, true);
+      setTimeRemaining(0, true);
    else
       setTimeRemaining(time, false);
 
-   broadcastRemainingTime(time == 0);         
+   broadcastRemainingTime();         
 
    static StringTableEntry msg("%e0 has changed the amount of time left in the game");
    Vector<StringTableEntry> e;
@@ -3635,28 +3709,22 @@ void GameType::setWinningScore(S32 score)
 }
 
 
+
+// Mostly used while reading a level file
 void GameType::setGameTime(F32 timeInSeconds)
 {
-   if(timeInSeconds == 0)
-   {
-      mGameTimer.reset(S32_MAX);
-      mTimeIsUnlimited = true;
-   }
-   else
-   {
-      mGameTimer.reset(U32(timeInSeconds) * 1000);
-      mTimeIsUnlimited = false;
-   }
+   mGameTimer.reset(U32(timeInSeconds * 1000));    // reset handles case of time being 0
 }
 
 
+// Return time in seconds; returns 0 if game is unlimited
 U32 GameType::getTotalGameTime() const
 {
-   return mGameTimer.getPeriod() / 1000;
+   return mGameTimer.getTotalGameTime() / 1000;
 }
 
 
-// Return time remaining in seconds
+// Return time remaining in seconds; currently used for Lua on the server, and display purposes on the client
 S32 GameType::getRemainingGameTime() const         
 {
    return mGameTimer.getCurrent() / 1000;
@@ -3671,13 +3739,14 @@ S32 GameType::getRemainingGameTimeInMs() const
 
 bool GameType::isTimeUnlimited() const
 {
-   return mTimeIsUnlimited;
+   return mGameTimer.isUnlimited();
 }
 
 
+// Only called by various voting codes
 void GameType::extendGameTime(S32 timeInMs)
 {
-   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, timeInMs == 0);
+   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, timeInMs == 0); 
 }
 
 
