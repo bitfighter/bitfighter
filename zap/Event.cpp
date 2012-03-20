@@ -248,6 +248,10 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
       case SDL_WINDOWEVENT:
          switch (event->window.event) {
             case SDL_WINDOWEVENT_RESIZED:
+               // Ignore window resize events if we are in fullscreen mode
+               if(SDL_GetWindowFlags(gScreenInfo.sdlWindow) & SDL_WINDOW_FULLSCREEN)
+                  break;
+
                onResize(game, event->window.data1, event->window.data2);
                break;
 
