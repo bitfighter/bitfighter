@@ -92,7 +92,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 ////////////////////////////////////////
 
 
-// Pass 0 for unlmited game
+// Pass 0 for unlimited game
 void GameTimer::reset(U32 timeInMs)
 {
    if(timeInMs == 0)
@@ -729,7 +729,6 @@ void GameType::idle_client(U32 deltaT)
 
 bool GameType::advanceGameClock(U32 deltaT)
 {
-   logprintf("%d",deltaT);
    return mGameTimer.update(deltaT);
 }
 
@@ -2335,10 +2334,10 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
 void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
+   mGameTimer.reset(timeLeft);
+
    if(isUnlimited)                        
-      mGameTimer.reset(0);   
-   else
-      mGameTimer.reset(timeLeft);
+      mGameTimer.setIsUnlimited();
 }
 
 
@@ -2796,7 +2795,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
    }
 
    if(time == 0)
-      setTimeRemaining(0, true);
+      setTimeRemaining(S32_MAX, true);
    else
       setTimeRemaining(time, false);
 
