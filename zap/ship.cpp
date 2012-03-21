@@ -849,7 +849,7 @@ void Ship::processModules()
       }
    }
 
-   // No boost or afterburner if we're not moving
+   // No Turbo or Pulse if we're not moving
    if(mModulePrimaryActive[ModuleBoost] && mCurrentMove.x == 0 && mCurrentMove.y == 0)
    {
       mModulePrimaryActive[ModuleBoost] = false;
@@ -926,14 +926,14 @@ void Ship::processModules()
                GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos,
                                                    mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
             }
-            // Afterburner uses up all energy and applies an impulse vector
+            // Pulse uses up all energy and applies an impulse vector
             else if(i == ModuleBoost)
             {
                // The impulse should be in the same direction you're already going
                mImpulseVector = mMoveState[ActualState].vel;
 
-               // Change to Afterburner speed based on current energy
-               mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (AfterburnerMaxVelocity - AfterburnerMinVelocity)) + AfterburnerMinVelocity);
+               // Change to Pulse speed based on current energy
+               mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (PulseMaxVelocity - PulseMinVelocity)) + PulseMinVelocity);
 
                mEnergy = 0;
             }
