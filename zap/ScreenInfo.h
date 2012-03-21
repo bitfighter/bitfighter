@@ -30,7 +30,9 @@
 #include "Point.h"
 #include "ConfigEnum.h"
 
+#ifndef ZAP_DEDICATED
 #include "SDL.h"
+#endif
 
 using namespace TNL;
 
@@ -122,9 +124,11 @@ public:
 
 
    // SDL information
+#ifndef ZAP_DEDICATED
 #if SDL_VERSION_ATLEAST(2,0,0)
    SDL_Window *sdlWindow;
    SDL_GLContext *sdlGlContext;
+#endif
 #endif
 
 };

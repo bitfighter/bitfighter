@@ -429,8 +429,10 @@ void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 
 
 void NexusGameType::idle_client(U32 deltaT)
- {
+{
+#ifndef ZAP_DEDICATED
    //mNexusTimer.update(deltaT);
+
 
    if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
    {
@@ -464,6 +466,7 @@ void NexusGameType::idle_client(U32 deltaT)
       else
          i++;
    }
+#endif
 }
 
 
