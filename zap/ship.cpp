@@ -753,7 +753,7 @@ bool Ship::findRepairTargets()
    // ships (client)
 
    Point pos = getRenderPos();
-   Rect r(pos, RepairRadius + CollisionRadius);
+   Rect r(pos, 2 * (RepairRadius + CollisionRadius));
    
    foundObjects.clear();
    findObjects((TestFunc)isWithHealthType, foundObjects, r);
@@ -849,7 +849,7 @@ void Ship::processModules()
       }
    }
 
-   // No boost or afterburner if we're not moving
+   // No Turbo or Pulse if we're not moving
    if(mModulePrimaryActive[ModuleBoost] && mCurrentMove.x == 0 && mCurrentMove.y == 0)
    {
       mModulePrimaryActive[ModuleBoost] = false;
@@ -926,14 +926,14 @@ void Ship::processModules()
                GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos,
                                                    mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
             }
-            // Afterburner uses up all energy and applies an impulse vector
+            // Pulse uses up all energy and applies an impulse vector
             else if(i == ModuleBoost)
             {
                // The impulse should be in the same direction you're already going
                mImpulseVector = mMoveState[ActualState].vel;
 
-               // Change to Afterburner speed based on current energy
-               mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (AfterburnerMaxVelocity - AfterburnerMinVelocity)) + AfterburnerMinVelocity);
+               // Change to Pulse speed based on current energy
+               mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (PulseMaxVelocity - PulseMinVelocity)) + PulseMinVelocity);
 
                mEnergy = 0;
             }
@@ -945,14 +945,17 @@ void Ship::processModules()
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
       mCooldownNeeded = true;
 
-   // See if we are in a loadout zone -- special energy rules apply here.  But not if you have your spawn shield up.
-   if(mSpawnShield.getCurrent() == 0)
+   // Energy will recharge with special rules
+   // It will not recharge if you have an activated module or spawn shield is up
+   if(!anyActive && mSpawnShield.getCurrent() == 0)
    {
-      bool isIdle = !anyActive && mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
+      // Idle = not moving or shooting
+      bool isIdle = mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
 
       GameObject *object = isInZone(LoadoutZoneTypeNumber);
 
-      if(object)     // In zone
+      // In load-out zone
+      if(object)
       {
          /// IN HOSTILE ZONE
          if(object->getTeam() == TEAM_HOSTILE)

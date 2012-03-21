@@ -415,7 +415,7 @@ static const char *moduleInstructions[] = {
 };
 
 static const char *moduleDescriptions[][2] = {
-   { "Boost: ",    "Turbo (A), Super (K)" },
+   { "Boost: ",    "Turbo (A), Pulse (K)" },
    { "Shield: ",   "Reflects incoming projectiles (A)" },
    { "Armor: ",    "Reduces damage, makes ship harder to control (P)" },
    { "",           "Incoming bouncers do more damage" },
