@@ -945,14 +945,17 @@ void Ship::processModules()
    if(!anyActive && mEnergy <= EnergyCooldownThreshold)
       mCooldownNeeded = true;
 
-   // See if we are in a loadout zone -- special energy rules apply here.  But not if you have your spawn shield up.
-   if(mSpawnShield.getCurrent() == 0)
+   // Energy will recharge with special rules
+   // It will not recharge if you have an activated module or spawn shield is up
+   if(!anyActive && mSpawnShield.getCurrent() == 0)
    {
-      bool isIdle = !anyActive && mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
+      // Idle = not moving or shooting
+      bool isIdle = mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
 
       GameObject *object = isInZone(LoadoutZoneTypeNumber);
 
-      if(object)     // In zone
+      // In load-out zone
+      if(object)
       {
          /// IN HOSTILE ZONE
          if(object->getTeam() == TEAM_HOSTILE)
