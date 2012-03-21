@@ -327,7 +327,10 @@ void CoreItem::renderItem(const Point &pos)
 #ifndef ZAP_DEDICATED
    if(!mHasExploded)
    {
-      S32 time = getGame()->getGameType()->getRemainingGameTimeInMs();
+      GameType *gameType = getGame()->getGameType();
+
+      S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
+
       renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), time, getCoreAngle(time), getPanelGeom(),
                  mPanelHealth, mStartingPanelHealth);
    }

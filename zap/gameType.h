@@ -68,16 +68,20 @@ class GameTimer
 private:
    Timer mTimer;
    bool mIsUnlimited;
+   S32 mRenderingOffset;
 
 public:
    void reset(U32 timeInMs);
+   void sync(U32 deltaT);
    bool update(U32 deltaT);
    void extend(S32 deltaT);
 
    bool isUnlimited() const;
-   void setIsUnlimited();
+   void setIsUnlimited(bool isUnlimited);
    U32 getCurrent() const; 
    U32 getTotalGameTime() const;
+   S32 getRenderingOffset() const;
+   void setRenderingOffset(S32 offset);
 
    string toString_minutes() const;      // Creates string representation of timer for level saving purposes
 };
@@ -149,7 +153,9 @@ protected:
    GameTimer mGameTimer;              // Track when current game will end
    Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
                        
-   virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);
+   virtual void syncTimeRemaining(U32 timeLeft);
+   virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);                         // Runs on server
+   virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset);    // Runs on client
 
 public:
    // Potentially scoring events
@@ -184,6 +190,8 @@ public:
       ScoringEventsCount
    };
 
+   static const S32 MAX_GAME_TIME = S32_MAX;
+
    static const S32 MAX_TEAMS = 9;                                   // Max teams allowed -- careful changing this; used for RPC ranges
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = MAX_TEAMS - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
@@ -192,7 +200,8 @@ public:
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
 
-   void broadcastRemainingTime();                      // Send remaining time to all clients
+   void broadcastTimeSyncSignal();                     // Send remaining time to all clients
+   void broadcastNewRemainingTime();                   // Send remaining time to all clients after time has been updated
 
 
    static StringTableEntry getGameTypeName(GameTypeId gameType);
@@ -217,6 +226,7 @@ public:
    U32 getTotalGameTime() const;            // In seconds
    S32 getRemainingGameTime() const;        // In seconds
    S32 getRemainingGameTimeInMs() const;    // In ms
+   S32 getRenderingOffset() const;
    bool isTimeUnlimited() const;
    void extendGameTime(S32 timeInMs);
 
@@ -460,7 +470,8 @@ public:
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
-   TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeftInMs, bool isUnlimited));
+   TNL_DECLARE_RPC(s2cSyncTimeRemaining, (U32 timeLeftInMs));
+   TNL_DECLARE_RPC(s2cSetNewTimeRemaining, (U32 timeLeftInMs, bool isUnlimited, S32 renderingOffset));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
    
 
@@ -512,6 +523,7 @@ public:
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
+   void processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, S32 voteType);
 
    TNL_DECLARE_RPC(c2sSendChatPM, (StringTableEntry toName, StringPtr message));                        // using /pm command
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat

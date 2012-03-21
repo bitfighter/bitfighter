@@ -97,7 +97,7 @@ void GameTimer::reset(U32 timeInMs)
 {
    if(timeInMs == 0)
    {
-      mTimer.reset(S32_MAX);
+      mTimer.reset(GameType::MAX_GAME_TIME);
       mIsUnlimited = true;
    }
    else
@@ -105,6 +105,14 @@ void GameTimer::reset(U32 timeInMs)
       mTimer.reset(timeInMs);
       mIsUnlimited = false;
    }
+
+   mRenderingOffset = 0;
+}
+
+
+void GameTimer::sync(U32 deltaT)
+{
+   mTimer.reset(deltaT);
 }
 
 
@@ -128,13 +136,15 @@ U32 GameTimer::getCurrent() const
 
 void GameTimer::extend(S32 deltaT)
 {
+   if(mTimer.getPeriod() + (U32)deltaT > GameType::MAX_GAME_TIME)
+      deltaT = GameType::MAX_GAME_TIME - mTimer.getPeriod();
    mTimer.extend(deltaT);
 }
 
 
-void GameTimer::setIsUnlimited()
+void GameTimer::setIsUnlimited(bool isUnlimited)
 {
-   mIsUnlimited = true;
+   mIsUnlimited = isUnlimited;
 }
 
 
@@ -146,9 +156,6 @@ bool GameTimer::isUnlimited() const
 
 U32 GameTimer::getTotalGameTime() const      // in ms
 {
-   //if(mIsUnlimited)
-   //   return U32_MAX;
-   
    return mTimer.getPeriod();
 }
 
@@ -159,6 +166,19 @@ string GameTimer::toString_minutes() const
 
    return ftos(gameTime / (60 * 1000), 3);
 }
+
+
+S32 GameTimer::getRenderingOffset() const
+{
+   return mRenderingOffset;
+}
+
+
+void GameTimer::setRenderingOffset(S32 offset)
+{
+   mRenderingOffset = offset;
+}
+
 
 
 ////////////////////////////////////////      __              ___           
@@ -672,7 +692,7 @@ void GameType::idle_server(U32 deltaT)
    // Periodically send time-remaining updates to the clients to keep everyone in sync
    if(mGameTimeUpdateTimer.update(deltaT))
    {
-      broadcastRemainingTime();
+      broadcastTimeSyncSignal();
       mGameTimeUpdateTimer.reset();
    }
 
@@ -2167,33 +2187,55 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 }
 
 
+GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
+{
+   processClientRequestForChangingGameTime(time, time == 0, true, 2);
+}
+
+
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
 {
-   GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
-   ClientInfo *clientInfo = source->getClientInfo();
+   processClientRequestForChangingGameTime(time += mGameTimer.getCurrent(), false, false, 1);
+}
 
-   if(!clientInfo->isLevelChanger())                // Level changers and above
+
+void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, S32 voteType)
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientInfo *clientInfo = source->getClientInfo();
+   GameSettings *settings = getGame()->getSettings();
+
+   if(!clientInfo->isLevelChanger())  // Extra check in case of hacked client
+      return;
+
+   // No setting time after game is over...
+   if(mGameOver)
       return;
 
    // Use voting when no level change password and more then 1 players
-   if(!clientInfo->isAdmin() && getGame()->getSettings()->getLevelChangePassword() == "" && 
-            getGame()->getPlayerCount() > 1 && ((ServerGame *)getGame())->voteStart(clientInfo, 1, time))
+   if(!clientInfo->isAdmin() && 
+         getGame()->getSettings()->getLevelChangePassword() == "" && 
+         getGame()->getPlayerCount() > 1)
+   {
+      if(static_cast<ServerGame *>(getGame())->voteStart(clientInfo, voteType, time))     // Returns true if handled
+         return;
+   }
+
+
+   if(isUnlimited)
+      setTimeRemaining(MAX_GAME_TIME, true);
+   else if(changeTimeIfAlreadyUnlimited || !mGameTimer.isUnlimited())
+      setTimeRemaining(time, false);
+   else
       return;
 
-   if(time == 0)
-      mGameTimer.setIsUnlimited();
-   else if(!mGameTimer.isUnlimited())
-      mGameTimer.extend(time);            // Increase "official time"
-   else
-      return;                             // Adding time to an already unlimited game is... pointless!
+   broadcastNewRemainingTime();
 
-   broadcastRemainingTime();
-
-   static StringTableEntry EXTEND_MESSAGE("%e0 has extended the game");
+   static const StringTableEntry msg("%e0 has changed the game time");
    Vector<StringTableEntry> e;
    e.push_back(clientInfo->getName());
 
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, EXTEND_MESSAGE, e);
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
 }
 
 
@@ -2332,19 +2374,47 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 }
 
 
-void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
+// This method should only be used for periodic updates, not for events that change the actual time left in the game
+void GameType::syncTimeRemaining(U32 timeLeft)
 {
-   mGameTimer.reset(timeLeft);
-
-   if(isUnlimited)                        
-      mGameTimer.setIsUnlimited();
+   mGameTimer.sync(timeLeft);
 }
 
 
-// Send remaining time to all clients
-void GameType::broadcastRemainingTime()
+void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
-   s2cSetTimeRemaining(mGameTimer.getCurrent(), mGameTimer.isUnlimited());
+   TNLAssert(getGame()->isServer(), "This should only run on the server!");
+
+   U32 offset = mGameTimer.getCurrent() + mGameTimer.getRenderingOffset();
+
+   mGameTimer.reset(timeLeft);
+   mGameTimer.setIsUnlimited(isUnlimited);
+   mGameTimer.setRenderingOffset(timeLeft + offset);
+}
+
+
+// Game time has changed -- need to do an update
+void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset)
+{
+   TNLAssert(!getGame()->isServer(), "This should only run on the client!");
+
+   mGameTimer.reset(timeLeft);
+   mGameTimer.setIsUnlimited(isUnlimited);
+   mGameTimer.setRenderingOffset(renderingOffset);
+}
+
+
+// Send remaining time to all clients -- used for synchronization only
+void GameType::broadcastTimeSyncSignal()
+{
+   s2cSyncTimeRemaining(mGameTimer.getCurrent());
+}
+
+
+// Send remaining time to all clients after time has been updated
+void GameType::broadcastNewRemainingTime()
+{
+   s2cSetNewTimeRemaining(mGameTimer.getCurrent(), mGameTimer.isUnlimited(), mGameTimer.getRenderingOffset());
 }
 
 
@@ -2440,9 +2510,16 @@ GAMETYPE_RPC_S2C(GameType, s2cSetPlayerScore, (U16 index, S32 score), (index, sc
 
 
 // Server has sent us (the client) a message telling us how much longer we have in the current game
-GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft, bool isUnlimited), (timeLeft, isUnlimited))
+GAMETYPE_RPC_S2C(GameType, s2cSyncTimeRemaining, (U32 timeLeftInMs), (timeLeftInMs))
 {
-   setTimeRemaining(timeLeft, isUnlimited);
+   syncTimeRemaining(timeLeftInMs);
+}
+
+
+// Server has sent us (the client) a message telling us how much longer we have in the current game
+GAMETYPE_RPC_S2C(GameType, s2cSetNewTimeRemaining, (U32 timeLeftInMs, bool isUnlimited, S32 renderingOffset), (timeLeftInMs, isUnlimited, renderingOffset))
+{
+   setTimeRemaining(timeLeftInMs, isUnlimited, renderingOffset);
 }
 
 
@@ -2596,7 +2673,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    for(S32 i = 0; i < mWalls.size(); i++)
       s2cAddWalls(mWalls[i].verts, mWalls[i].width, mWalls[i].solid);
 
-   broadcastRemainingTime();
+   broadcastNewRemainingTime();
    s2cSetGameOver(mGameOver);
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
 
@@ -2775,37 +2852,6 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
       prevRobotSize = Robot::getBotCount();
       addBot(args);
    }
-}
-
-
-GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
-{
-   GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = getGame()->getSettings();
-
-   if(!clientInfo->isLevelChanger())  // Extra check in case of hacked client
-      return;
-
-   // Use voting when there is no level change password, and there is more then 1 player
-   if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && getGame()->getPlayerCount() > 1)
-   {
-      if(((ServerGame *) getGame())->voteStart(clientInfo, 2, time))
-         return;
-   }
-
-   if(time == 0)
-      setTimeRemaining(S32_MAX, true);
-   else
-      setTimeRemaining(time, false);
-
-   broadcastRemainingTime();         
-
-   static StringTableEntry msg("%e0 has changed the amount of time left in the game");
-   Vector<StringTableEntry> e;
-   e.push_back(clientInfo->getName());
-
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
 }
 
 
@@ -3736,16 +3782,22 @@ S32 GameType::getRemainingGameTimeInMs() const
 }
 
 
+S32 GameType::getRenderingOffset() const
+{
+   return mGameTimer.getRenderingOffset();
+}
+
+
 bool GameType::isTimeUnlimited() const
 {
    return mGameTimer.isUnlimited();
 }
 
 
-// Only called by various voting codes
+// Only called by various voting codes, server only
 void GameType::extendGameTime(S32 timeInMs)
 {
-   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, timeInMs == 0); 
+   setTimeRemaining(mGameTimer.getCurrent() + timeInMs, false); 
 }
 
 
