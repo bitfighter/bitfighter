@@ -725,6 +725,9 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
       game->emitDebrisChunk(points, Colors::gray20, (panelGeom->mid[i] + pos) / 2, sparkVel, ttl, angle, rotation);
    }
+
+   // And do the sound effect
+   SoundSystem::playSoundEffect(SFXCorePanelExplode, panelGeom->mid[panelIndex]);
 }
 
 #endif

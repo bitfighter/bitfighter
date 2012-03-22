@@ -131,7 +131,7 @@ enum SFXProfiles
    // Other
    SFXCoreHeartbeat,
    SFXCoreExplode,
-   SFXCoreExplodeSecondary,
+   SFXCorePanelExplode,
 
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
