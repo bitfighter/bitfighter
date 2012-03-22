@@ -935,6 +935,13 @@ U32 Game::getTimeUnconnectedToMaster()
 }
 
 
+// Note: lots of stuff for this method in child classes!
+void Game::onConnectedToMaster()
+{
+   getSettings()->saveMasterAddressListInIniUnlessItCameFromCmdLine();
+}
+
+
 void Game::resetLevelInfo()
 {
    setGridSize((F32)DefaultGridSize);
@@ -2164,6 +2171,23 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    if(!mGameSuspended)
       suspendIfNoActivePlayers();
+}
+
+
+void ServerGame::onConnectedToMaster()
+{
+   Parent::onConnectedToMaster();
+
+   // Check if we have any clients that need to have their authentication status checked; might happen if we've lost touch with master 
+   // and clients have connected in the meantime.  In some rare circumstances, could lead to double-verification, but I don't think this
+   // would be a real problem
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(!getClientInfo(i)->isRobot())
+         getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
+
+   sendLevelStatsToMaster();    // We're probably in a game, and we should send the level details to the master
+
+   logprintf(LogConsumer::MsgType(LogConsumer::LogConnection | LogConsumer::ServerFilter), "Server established connection with Master Server");
 }
 
 

@@ -446,6 +446,7 @@ public:
    Point computePlayerVisArea(Ship *ship) const;
 
    U32 getTimeUnconnectedToMaster();
+   void onConnectedToMaster();
 
    void resetLevelInfo();
 
@@ -655,6 +656,8 @@ public:
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
+
+   void onConnectedToMaster();
 
 
    StringTableEntry getLevelNameFromIndex(S32 indx);

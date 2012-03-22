@@ -442,33 +442,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
 void MasterServerConnection::onConnectionEstablished()
 {
-   if(mGame->isServer())        
-   {
-      logprintf(LogConsumer::MsgType(LogConsumer::LogConnection | LogConsumer::ServerFilter), "Server established connection with Master Server");
-
-      // Check if we have any clients that need to have their authentication status checked; might happen if we've lost touch with master 
-      // and clients have connected in the meantime.  In some rare circumstances, could lead to double-verification, but I don't think this
-      // would be a real problem
-      for(S32 i = 0; i < mGame->getClientCount(); i++)
-         if(!mGame->getClientInfo(i)->isRobot())
-            mGame->getClientInfo(i)->getConnection()->requestAuthenticationVerificationFromMaster();
-
-      static_cast<ServerGame *>(mGame)->sendLevelStatsToMaster();    // We're probably in a game, and we should send the level details to the master
-   }
-   else     // Client game
-   {
-      logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
-
-#ifndef ZAP_DEDICATED
-      TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
-
-      // Clear old player list that might be there from client's lost connection to master while in game lobby
-      Vector<StringTableEntry> emptyPlayerList;
-      static_cast<ClientGame *>(mGame)->setPlayersInGlobalChat(emptyPlayerList);
-#endif
-   }
-
-   mGame->getSettings()->saveMasterAddressListInIniUnlessItCameFromCmdLine();
+   mGame->onConnectedToMaster();
 }
 
 

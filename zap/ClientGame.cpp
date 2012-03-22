@@ -116,6 +116,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mSpawnDelayed = false;
    mGameIsRunning = true;                    // Only matters when game is suspended
 
+   mSeenTimeOutMessage = false;
+
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
    {
@@ -241,6 +243,20 @@ void ClientGame::closeConnectionToGameServer()
    getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 
    clearClientList();      // Get rid of any ClientInfos we have for remote players
+}
+
+
+void ClientGame::onConnectedToMaster()
+{
+   Parent::onConnectedToMaster();
+
+   // Clear old player list that might be there from client's lost connection to master while in game lobby
+   Vector<StringTableEntry> emptyPlayerList;
+   setPlayersInGlobalChat(emptyPlayerList);
+
+   mSeenTimeOutMessage = false;     // Reset display of connection error
+
+   logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 }
 
 
@@ -1047,6 +1063,10 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
 
 void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
 {
+   // Avoid spamming the player if they are not connected to the Internet
+   if(reason == NetConnection::ReasonTimedOut && mSeenTimeOutMessage)
+      return;
+
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 
    ui->reset();
@@ -1093,11 +1113,17 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          break;
 
       case NetConnection::ReasonTimedOut:
-         ui->setMessage(2, "Unable to connect to the master server, with error:");
-         ui->setMessage(3, "\"Attempt Timed Out\"");
-         ui->setMessage(5, "Please check your Internet Connection");
-         ui->setMessage(6, "and firewall settings.");
+         ui->setMessage(2, "My attempt to connect to the Master Server failed because");
+         ui->setMessage(3, "the server did not respond.  Either the server is down,");
+         ui->setMessage(4, "or, more likely, you are either not connected to the internet");
+         ui->setMessage(5, "or your firewall is blocking the connection.");
+         ui->setMessage(7, "I will continue to try connecting, but you will not see this");
+         ui->setMessage(8, "message again until you successfully connect or restart Bitfighter.");
+
+         
          ui->activate();
+
+         mSeenTimeOutMessage = true;
          break;
 
       default:  // Not handled

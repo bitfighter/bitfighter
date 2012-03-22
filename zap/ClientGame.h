@@ -80,6 +80,8 @@ private:
    string mLoginPassword;
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
+   bool mSeenTimeOutMessage;
+
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
@@ -210,6 +212,7 @@ public:
    void displayMessageBox(const StringTableEntry &title, const StringTableEntry &instr, const Vector<StringTableEntry> &message) const;
    void displayMessage(const Color &msgColor, const char *format, ...);
 
+   void onConnectedToMaster();
    void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
    void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr);
 
