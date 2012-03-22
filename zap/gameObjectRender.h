@@ -246,6 +246,7 @@ extern void renderStaticBitfighterLogo();
 
 // Badges
 extern void render25FlagsBadge(F32 x, F32 y, F32 rad);
+extern void renderDeveloperBadge(F32 x, F32 y, F32 rad);
 
 };
 

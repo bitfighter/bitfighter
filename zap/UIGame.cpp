@@ -3109,11 +3109,9 @@ void GameUserInterface::renderScoreboard()
          if(playerScores[j]->isAdmin())
             drawString(x - symbolSize, curRowY + vertAdjustFact + 2, symbolFontSize, adminSymbol);
 
-         S32 width = drawStringAndGetWidth(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
+         S32 nameWidth = drawStringAndGetWidth(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
 
-         // Append any known badges
-         if(playerScores[j]->getBadges() & BIT(BADGE_TWENTY_FIVE_FLAGS))   
-            render25FlagsBadge(x + width + 8, curRowY + 15, 10);
+         renderBadges(playerScores[j], x + nameWidth + 8, curRowY + 15);
          
          glColor(Colors::white);
          static char buff[255] = "";
@@ -3136,6 +3134,30 @@ void GameUserInterface::renderScoreboard()
 #ifdef USE_DUMMY_PLAYER_SCORES
       playerScores.deleteAndClear();      // Clean up
 #endif
+   }
+}
+
+
+void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y)
+{
+   Int<BADGE_COUNT> badges = clientInfo->getBadges();
+
+   F32 badgeRadius = 10.f;
+   S32 badgeOffset = 2 * badgeRadius + 5;
+   F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
+
+
+   if(badges & BIT(BADGE_TWENTY_FIVE_FLAGS))
+   {
+      drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
+      render25FlagsBadge(x, y, badgeRadius);
+      x += badgeOffset;
+   }
+   if(badges & BIT(DEVELOPER_BADGE))
+   {
+      drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
+      renderDeveloperBadge(x, y, badgeRadius);
+      x += badgeOffset;
    }
 }
 
