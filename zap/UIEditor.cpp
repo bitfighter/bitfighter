@@ -2839,7 +2839,7 @@ void EditorUserInterface::startDraggingDockItem()
    EditorObjectDatabase *database = getDatabase();
 
    item->addToEditor(getGame(), database); 
-   database->dumpObjects();
+//   database->dumpObjects();
    
    clearSelection(database);    // No items are selected...
    item->setSelected(true);     // ...except for the new one

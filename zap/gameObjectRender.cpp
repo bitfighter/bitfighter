@@ -2270,7 +2270,7 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 
       renderFlag(-.10 * rad, -.10 * rad, &Colors::red50);
    glPopMatrix();
-         
+
    glColor(Colors::red);
    F32 ts = rad - 3;
    F32 width = UserInterface::getStringWidth(ts, "25");
@@ -2282,10 +2282,24 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
                                  F32(tx + width / 2.0 + 0.5), F32(ty + (ts + 2.0) / 2.0));
    glColor(Colors::gray20);
    renderCenteredString(Point(tx, ty), ts, "25");
+}
 
-   //glColor(Colors::gray20);
-   //drawHollowRect(x - rad, y - rad, x + rad, y + rad);
- }
+
+void renderDeveloperBadge(F32 x, F32 y, F32 rad)
+{
+   F32 rm2 = rad - 2;
+   F32 rm23 = rm2 * .333;
+
+   glColor(Colors::green80);
+   glPointSize(rad * 0.4f);
+   glBegin(GL_POINTS);
+      glVertex2f(x, y - (2*rm23));
+      glVertex2f(x + (2*rm23), y);
+      glVertex2f(x - (2*rm23), y + (2*rm23));
+      glVertex2f(x, y + (2*rm23));
+      glVertex2f(x + (2*rm23), y + (2*rm23));
+   glEnd();
+}
 
 
 };
