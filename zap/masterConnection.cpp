@@ -210,6 +210,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
    }
 }
 
+
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData))
 {
    if(mGame->isServer())
@@ -226,6 +227,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
       static_cast<ClientGame *>(mGame)->connectionToServerRejected(rejectString);
    }
 }
+
 
 // Display the MOTD that is set by the master server
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr masterName, StringPtr motdString))
