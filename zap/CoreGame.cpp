@@ -469,9 +469,10 @@ bool CoreItem::isPanelInRepairRange(const Point &origin, S32 panelIndex)
 
    F32 distanceSq1 = (panelGeom->getStart(panelIndex)).distSquared(origin);
    F32 distanceSq2 = (panelGeom->getEnd(panelIndex)).distSquared(origin);
+   S32 radiusSq = Ship::RepairRadius * Ship::RepairRadius;
 
-   return (distanceSq1 < Ship::RepairRadius * Ship::RepairRadius) ||
-      (distanceSq2 < Ship::RepairRadius * Ship::RepairRadius);
+   // Ignoring case where center is in range while endpoints are not...
+   return (distanceSq1 < radiusSq) || (distanceSq2 < radiusSq);
 }
 
 
@@ -509,21 +510,22 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       return;
 
    // Which panel was hit?  Look at shot position, compare it to core position
-   F32 angle;
+   F32 shotAngle;
    Point p = getPos();
 
    // Determine angle for Point projectiles like Phaser
    if(theInfo->damageType == DamageTypePoint)
-      angle = p.angleTo(theInfo->collisionPoint);
+      shotAngle = p.angleTo(theInfo->collisionPoint);
 
    // Area projectiles
    else
-      angle = p.angleTo(theInfo->damagingObject->getPos());
+      shotAngle = p.angleTo(theInfo->damagingObject->getPos());
 
 
-   F32 coreAngle = F32(getGame()->getGameType()->getRemainingGameTimeInMs() & 16383) / 16384.f * FloatTau;
+   PanelGeom *panelGeom = getPanelGeom();
+   F32 coreAngle = panelGeom->angle;
 
-   F32 combinedAngle = (angle - coreAngle);
+   F32 combinedAngle = (shotAngle - coreAngle);
 
    // Make sure combinedAngle is between 0 and Tau -- sometimes angleTo returns odd values
    while(combinedAngle < 0)
@@ -634,7 +636,7 @@ void CoreItem::doExplosion(const Point &pos)
 PanelGeom *CoreItem::getPanelGeom()
 {
    if(!mPanelGeom.isValid)
-      fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs(), mPanelGeom);
+      fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs() + getGame()->getGameType()->getRenderingOffset(), mPanelGeom);
 
    return &mPanelGeom;
 }
@@ -646,6 +648,7 @@ void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
    F32 size = CoreStartWidth * .5;
 
    F32 angle = getCoreAngle(time);
+   panelGeom.angle = angle;
 
    F32 angles[CORE_PANELS];
 
@@ -873,7 +876,7 @@ void CoreItem::onAddedToGame(Game *theGame)
 }
 
 
-// compatible with readFloat at the same number of bits
+// Compatible with readFloat at the same number of bits
 static void writeFloatZeroOrNonZero(BitStream &s, F32 &val, U8 bitCount)
 {
    TNLAssert(val >= 0 && val <= 1, "writeFloat Must be between 0.0 and 1.0");
@@ -1023,6 +1026,7 @@ void CoreItem::onItemExploded(Point pos)
    doExplosion(pos);
 }
 #endif
+
 
 const char CoreItem::className[] = "CoreItem";      // Class name as it appears to Lua scripts
 

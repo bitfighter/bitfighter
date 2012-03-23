@@ -89,6 +89,7 @@ struct PanelGeom
    Point vert[CORE_PANELS];            // Panel 0 stretches from vert 0 to vert 1
    Point mid[CORE_PANELS];             // Midpoint of Panel 0 is mid[0]
    Point repair[CORE_PANELS];
+   F32 angle;
    bool isValid;
 
    Point getStart(S32 i) { return vert[i % CORE_PANELS]; }

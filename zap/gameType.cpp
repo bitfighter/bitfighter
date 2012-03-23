@@ -2386,11 +2386,11 @@ void GameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 {
    TNLAssert(getGame()->isServer(), "This should only run on the server!");
 
-   U32 offset = mGameTimer.getCurrent() + mGameTimer.getRenderingOffset();
+   U32 offset = mGameTimer.getCurrent() + mGameTimer.getRenderingOffset() - timeLeft;
 
    mGameTimer.reset(timeLeft);
    mGameTimer.setIsUnlimited(isUnlimited);
-   mGameTimer.setRenderingOffset(timeLeft + offset);
+   mGameTimer.setRenderingOffset(offset);
 }
 
 
