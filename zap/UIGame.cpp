@@ -3145,19 +3145,17 @@ void GameUserInterface::renderScoreboard()
 
 void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
-   Int<BADGE_COUNT> badges = clientInfo->getBadges();
-
    F32 badgeRadius = 10.f * scaleRatio;
    S32 badgeOffset = 2 * badgeRadius + 5;
    F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
 
-   if(badges & BIT(BADGE_TWENTY_FIVE_FLAGS))
+   if(clientInfo->hasBadge(BADGE_TWENTY_FIVE_FLAGS))
    {
       drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
       render25FlagsBadge(x, y, badgeRadius);
       x += badgeOffset;
    }
-   if(badges & BIT(DEVELOPER_BADGE))
+   if(clientInfo->hasBadge(DEVELOPER_BADGE))
    {
       drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
       renderDeveloperBadge(x, y, badgeRadius);

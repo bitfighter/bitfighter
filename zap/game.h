@@ -175,7 +175,9 @@ public:
 
    virtual void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
    bool isAuthenticated();
+
    Int<BADGE_COUNT> getBadges();
+   bool hasBadge(MeritBadges badge);
 
    bool isLevelChanger();
    void setIsLevelChanger(bool isLevelChanger);

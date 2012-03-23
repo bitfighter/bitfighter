@@ -127,6 +127,12 @@ Int<BADGE_COUNT> ClientInfo::getBadges()
 }
 
 
+bool ClientInfo::hasBadge(MeritBadges badge)
+{
+   return mBadges & BIT(badge);
+}
+
+
 const StringTableEntry ClientInfo::getName()
 {
    return mName;

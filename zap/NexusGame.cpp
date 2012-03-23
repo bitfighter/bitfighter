@@ -392,7 +392,7 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
          getGame()->getPlayerCount() >= 4 &&                      // Game must have 4+ human players
          getGame()->getAuthenticatedPlayerCount() >= 2 &&         // Two of whom must be authenticated
          !hasFlagSpawns() && !hasPredeployedFlags() &&            // Level can have no flag spawns, nor any predeployed flags
-         !(scorer->getBadges() & BIT(BADGE_TWENTY_FIVE_FLAGS)))   // Player doesn't already have the badge
+         !scorer->hasBadge(BADGE_TWENTY_FIVE_FLAGS))              // Player doesn't already have the badge
       {
          MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
          if(masterConn && masterConn->isEstablished())
