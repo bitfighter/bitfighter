@@ -270,7 +270,7 @@ public:
    void renderLostConnectionMessage(); 
 
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
-   void renderBadges(ClientInfo *clientInfo, S32 x, S32 y);
+   void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
    void idle(U32 timeDelta);
 

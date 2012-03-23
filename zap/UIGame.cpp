@@ -3044,6 +3044,9 @@ void GameUserInterface::renderScoreboard()
    U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
    totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
+   // vertical scale ratio to maximum line height
+   F32 scaleRatio = ((F32)maxHeight)/30.f;
+
    for(S32 i = 0; i < teams; i++)
    {
       S32 yt = (gScreenInfo.getGameCanvasHeight() - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
@@ -3111,7 +3114,7 @@ void GameUserInterface::renderScoreboard()
 
          S32 nameWidth = drawStringAndGetWidth(x - 8, curRowY, fontSize, playerScores[j]->getName().getString());
 
-         renderBadges(playerScores[j], x + nameWidth + 8, curRowY + 15);
+         renderBadges(playerScores[j], x + nameWidth + 8, curRowY + (maxHeight / 2), scaleRatio);
          
          glColor(Colors::white);
          static char buff[255] = "";
@@ -3138,14 +3141,13 @@ void GameUserInterface::renderScoreboard()
 }
 
 
-void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y)
+void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
    Int<BADGE_COUNT> badges = clientInfo->getBadges();
 
-   F32 badgeRadius = 10.f;
+   F32 badgeRadius = 10.f * scaleRatio;
    S32 badgeOffset = 2 * badgeRadius + 5;
    F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
-
 
    if(badges & BIT(BADGE_TWENTY_FIVE_FLAGS))
    {
