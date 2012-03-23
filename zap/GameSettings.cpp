@@ -90,7 +90,9 @@ ParamInfo paramDefs[] = {
 { "dedicated",             NO_PARAMETERS,  DEDICATED,             1, "",          "Run as a dedicated game server (i.e. no game window, console mode)",                     "" },
 { "serverpassword",        ONE_REQUIRED,   SERVER_PASSWORD,       1, "<string>",  "Specify a server password (players will need to know this to connect to your server)",    "You must enter a password with the -serverpassword option" },
 { "adminpassword",         ONE_REQUIRED,   ADMIN_PASSWORD,        1, "<string>",  "Specify an admin password (allowing those with the password to kick players and change their teams) when you host a game or run a dedicated server", "You must specify an admin password with the -adminpassword option" },
+{ "noadminpassword",       NO_PARAMETERS,  NO_ADMIN_PASSWORD,     1, "",          "Overrides admin password specified in the INI (or cmd line), and will not allow anyone to have admin permissions", "" },
 { "levelchangepassword",   ONE_REQUIRED,   LEVEL_CHANGE_PASSWORD, 1, "<string>",  "Specify the password required for players to be able to change levels on your server when you host a game or run a dedicated server", "You must specify an level-change password with the -levelchangepassword option" },
+{ "nolevelchangepassword", NO_PARAMETERS,  NO_LEVEL_CHANGE_PASSWORD, 1, "",          "Overrides level change password specified in the INI (or cmd line), and will allow any player to change levels", "" },
 { "hostname",              ONE_REQUIRED,   HOST_NAME,             1, "<string>",  "Set the name that will appear in the server browser when searching for servers", "You must specify a server name with the -hostname option" },
 { "hostdescr",             ONE_REQUIRED,   HOST_DESCRIPTION,      1, "<string>",  "Set a brief description of the server, which will be visible when players browse for game servers. Use double quotes (\") for descriptions containing spaces.", "You must specify a description (use quotes) with the -hostdescr option" },
 { "maxplayers",            ONE_REQUIRED,   MAX_PLAYERS_PARAM,     1, "<int>",     "Max players allowed in a game (default is 128)", "You must specify the max number of players on your server with the -maxplayers option" }, 
@@ -717,7 +719,6 @@ void GameSettings::runCmdLineDirectives()
          exitToOs(0);                                                                     // Exit the game (in case the command itself doesn't)
       }
    }
-   
 }
 
 
@@ -730,10 +731,21 @@ void GameSettings::onFinishedLoading()
    // Some parameters can be specified both on the cmd line and in the INI... in those cases, the cmd line version takes precedence
    //                                First choice (cmdLine)             Second choice (INI)                  Third choice (fallback)
    mServerPassword      = *choose( getString(SERVER_PASSWORD),       mIniSettings.serverPassword );
-   mAdminPassword       = *choose( getString(ADMIN_PASSWORD),        mIniSettings.adminPassword );
-   mLevelChangePassword = *choose( getString(LEVEL_CHANGE_PASSWORD), mIniSettings.levelChangePassword );
-   mHostName            = *choose( getString(HOST_NAME),             mIniSettings.hostname );
-   mHostDescr           = *choose( getString(HOST_DESCRIPTION),      mIniSettings.hostdescr );
+
+   // Admin and level change passwords have special overrides that force them to be blank... handle those below
+   if(getSpecified(NO_ADMIN_PASSWORD))
+      mAdminPassword = "";
+   else
+      mAdminPassword       = *choose( getString(ADMIN_PASSWORD),        mIniSettings.adminPassword );
+
+   if(getSpecified(NO_LEVEL_CHANGE_PASSWORD))
+      mLevelChangePassword = "";
+   else
+      mLevelChangePassword = *choose( getString(LEVEL_CHANGE_PASSWORD), mIniSettings.levelChangePassword );
+
+
+   mHostName               = *choose( getString(HOST_NAME),             mIniSettings.hostname );
+   mHostDescr              = *choose( getString(HOST_DESCRIPTION),      mIniSettings.hostdescr );
 
 
    cmdLineVal = getString(LOGIN_NAME);
