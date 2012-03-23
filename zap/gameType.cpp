@@ -1882,8 +1882,6 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
             for(S32 i = 0; i < mGame->getClientCount(); i++)  // TODO: try to get rid of this for loop
                if(getGame()->getClientInfo(i) == player)      // and this pointer checks (we need to get the index, for veriable "i")
                   s2cSetPlayerScore(i, player->getScore());
-
-         updateLeadingPlayerAndScore();
       }
    }
 
@@ -1962,12 +1960,12 @@ void GameType::updateLeadingTeamAndScore()
 }
 
 
-// Sets mLeadingTeamScore and mLeadingTeam; runs on client and server
+// Sets mLeadingTeamScore and mLeadingTeam; runs on client only
 void GameType::updateLeadingPlayerAndScore()
 {
-   mLeadingPlayerScore = 0;
+   mLeadingPlayerScore = S32_MIN;
    mLeadingPlayer = -1;
-   mSecondLeadingPlayerScore = 0;
+   mSecondLeadingPlayerScore = S32_MIN;
    mSecondLeadingPlayer = -1;
 
    // Find the leading player
@@ -1981,8 +1979,13 @@ void GameType::updateLeadingPlayerAndScore()
 
       if(score > mLeadingPlayerScore)
       {
+         // Demote leading player to 2nd place
+         mSecondLeadingPlayerScore = mLeadingPlayerScore;
+         mSecondLeadingPlayer = mLeadingPlayer;
+
          mLeadingPlayerScore = score;
          mLeadingPlayer = i;
+
          continue;
       }
 
@@ -2366,8 +2369,6 @@ void GameType::serverRemoveClient(ClientInfo *clientInfo)
 
    getGame()->removeFromClientList(clientInfo);   
 
-   updateLeadingPlayerAndScore();
-   
    // Note that we do not need to delete clientConnection... TNL handles that, and the destructor gets runs shortly after we get here
 
    static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
@@ -2699,7 +2700,11 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    //clientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
    //clientGame->clearZoomDelta();                  // No in zoom effect
    
-  clientGame->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
+   clientGame->getUIManager()->getGameUserInterface()->mProgressBarFadeTimer.reset(1000);
+
+   // Prepare scoreboard
+   updateLeadingPlayerAndScore();
+
 #endif
 }
 

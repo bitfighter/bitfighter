@@ -660,6 +660,8 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
 
    if(getUIMode() == TeamShuffleMode)
       mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerJoined();
+
+   mGameType->updateLeadingPlayerAndScore();
 }
 
 

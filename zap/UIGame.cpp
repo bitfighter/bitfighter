@@ -1588,10 +1588,13 @@ void GameUserInterface::kickPlayerHandler(ClientGame *game, const Vector<string>
 
 void GameUserInterface::submitPassHandler(ClientGame *game, const Vector<string> &words)
 {
-   GameConnection *conn = game->getConnectionToServer();
+   if(words.size() < 2)
+      return;
 
+   GameConnection *conn = game->getConnectionToServer();
    conn->submitPassword(words[1].c_str());
 }
+
 
 void GameUserInterface::showCoordsHandler(ClientGame *game, const Vector<string> &words)
 {
@@ -2410,8 +2413,7 @@ static Vector<string> *getCandidateList(Game *game, const char *first, S32 arg)
             makeTeamNameList(game, nameCandidateList);
             return &nameCandidateList;
          }
-         else
-            TNLAssert(false, "Invalid argType!");
+         // else no arg completion for you!
       }
    }
    
@@ -3336,60 +3338,58 @@ void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 
    if(getGame()->getLocalRemoteClientInfo() == NULL)
       return;
 
-   Game *game = gameType->getGame();
+   if(gameType->getLeadingPlayer() < 0)
+      return;
+
+   Game *game = static_cast<Game *>(getGame());    // This is a sign of a problem
 
    S32 lroff = gameType->getLowerRightCornerScoreboardOffsetFromBottom() - 22;
 
    const S32 textsize = 12;
 
    /// Render player score
-   bool hasLeader = gameType->getLeadingPlayer() >= 0;
    bool hasSecondLeader = gameType->getSecondLeadingPlayer() >= 0;
 
-   const char *clientName = getGame()->getClientInfo()->getName().getString();
+
+   const StringTableEntry localClientName = getGame()->getClientInfo()->getName();
 
    // The player is the leader if a leader is detected and it matches his name
-   bool clientIsLeader = hasLeader &&
-         !strcmp(clientName, game->getClientInfo(gameType->getLeadingPlayer())->getName().getString());
+   bool localClientIsLeader = localClientName == game->getClientInfo(gameType->getLeadingPlayer())->getName();
 
-   // The top rendered name is the leading player or none if no leading player
-   // (no scoring even has occured yet)
-   const char *nameTop = hasLeader ? game->getClientInfo(gameType->getLeadingPlayer())->getName().getString() : "";
-   S32 scoreTop = hasLeader ? gameType->getLeadingPlayerScore() : S32_MIN;
+   const char *name;
+   S32 topScore, bottomScore;
 
-   // The bottom rendered name is either second leader or the current player
-   const char *nameBottom = clientIsLeader && hasSecondLeader ?
-                                 game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString() :
-                                 clientName;
 
-   S32 scoreBottom;
-   if(getGame()->getLocalRemoteClientInfo())
-      scoreBottom = clientIsLeader && hasSecondLeader ?
-                           gameType->getSecondLeadingPlayerScore() :
-                           getGame()->getLocalRemoteClientInfo()->getScore();
-   else
-      scoreBottom = 0;
-                     
+   const Color *winnerColor = &Colors::red;
+   const Color *loserColor = &Colors::red60;
 
-   S32 ypos;
+   S32 vertOffset = hasSecondLeader ? textsize * 4 / 3 : 0;    // Make room for a second entry, as needed
+   S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - vertOffset;
 
-   // Render bottom score if player isn't the leader or we have a second leader
-   if(!clientIsLeader || hasSecondLeader)
+   glColor(winnerColor);
+
+   name = game->getClientInfo(gameType->getLeadingPlayer())->getName().getString();
+   topScore = gameType->getLeadingPlayerScore();
+
+   drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", name, topScore);
+
+
+   // Render bottom score if we have one
+   if(hasSecondLeader)
    {
-      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - 0 * 16;
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff;
 
-      glColor(Colors::red, 0.6f);
-      drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", nameBottom, scoreBottom);
-   }
+      bottomScore = gameType->getSecondLeadingPlayerScore();
 
-   // Render top score only if we have a leader
-   if(hasLeader)
-   {
-      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - 1 * 16;
+      // Special case: if players are tied, render both with winner's color
+      if(topScore == bottomScore)
+         glColor(winnerColor);
+      else
+         glColor(loserColor);
 
-      // Draw leader name + score
-      glColor(Colors::red);
-      drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", nameTop, scoreTop);
+      name = game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString();
+
+      drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", name, bottomScore);
    }
 }
 
