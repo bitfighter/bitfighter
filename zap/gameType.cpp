@@ -3514,7 +3514,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
    if(achievement == BADGE_TWENTY_FIVE_FLAGS)
    {
       clientGame->displayMessage(Colors::yellow, "%s has earned the TWENTY FIVE FLAGS badge!", clientName.getString());
-      SoundSystem::playSoundEffect(SFXFlagCapture);
+      SoundSystem::playSoundEffect(SFXAchievementEarned);
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship)

@@ -128,10 +128,13 @@ enum SFXProfiles
    SFXUICommDown,
    SFXIncomingMessage,
 
-   // Other
+   // Core-related noises
    SFXCoreHeartbeat,
    SFXCoreExplode,
    SFXCorePanelExplode,
+
+   // Other noises
+   SFXAchievementEarned,
 
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
