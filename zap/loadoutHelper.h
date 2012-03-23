@@ -57,6 +57,8 @@ struct LoadoutItem
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class UIManager;
+
 class LoadoutHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -78,6 +80,8 @@ public:
    void render();                
    void onMenuShow();  
    bool processInputCode(InputCode inputCode);   
+
+   void activateHelp(UIManager *uiManager);  // Open help to an appropriate page
 };
 
 };
