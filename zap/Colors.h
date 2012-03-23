@@ -33,6 +33,7 @@ namespace Zap
 
 namespace Colors 
 {
+   // Basic colors
    const Color red(1,0,0);
    const Color green(0,1,0);
    const Color blue(0,0,1);
@@ -42,28 +43,36 @@ namespace Colors
    const Color black(0,0,0);
    const Color white(1,1,1);
 
+   // Grays
    const Color gray20(0.20);
    const Color gray40(0.40);
    const Color gray50(0.50);
    const Color gray70(0.70);
    const Color gray80(0.80);
 
+   // Yellow-oranges
    const Color yellow40(.40f, .40f, 0);
    const Color orange50(1, .50f, 0);      // Rabbit orange
    const Color orange67(1, .67f ,0);      // A more reddish orange
+
+   // "Pale" colors
    const Color paleRed(1, .50f, .50f);    // A washed out red
+   const Color paleGreen(.50f, 1, .50f);  // A washed out green
    const Color paleBlue(.50f, .50f, 1);   // A washed out blue
    const Color palePurple(1, .50f, 1);    // A washed out purple (pinkish?)
 
-   const Color paleGreen(.50f, 1, .50f);  // A washed out green
-   const Color richGreen(0, .35f, 0);
-   const Color green65(0, 0.65f, 0);
-   const Color green80(0, .80f, 0);
-
+   // Reds
    const Color red40(.40f, 0, 0);
    const Color red50(.50f, 0, 0);
+   const Color red60(.60f, 0, 0);
    const Color red80(.80f, 0, 0);
 
+   // Greens
+   const Color richGreen(0, .35f, 0);
+   const Color green65(0, .65f, 0);
+   const Color green80(0, .80f, 0);
+
+   // Blues
    const Color blue40(0, 0, .40f);
    const Color blue80(0, 0, .80f);
 
