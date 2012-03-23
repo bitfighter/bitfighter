@@ -68,7 +68,6 @@ void InstructionsUserInterface::onActivate()
 
 
 static const U32 NUM_PAGES = 13;
-static const S32 FIRST_COMMAND_PAGE = 9;
 
 static const char *pageHeaders[] = {
    "CONTROLS",
@@ -152,10 +151,10 @@ void InstructionsUserInterface::render()
 }
 
 
-void InstructionsUserInterface::activateInCommandMode()
+void InstructionsUserInterface::activatePage(U32 pageIndex)
 {
    this->activate();
-   mCurPage = FIRST_COMMAND_PAGE;
+   mCurPage = pageIndex;
 }
 
 

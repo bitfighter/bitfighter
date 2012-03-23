@@ -1151,6 +1151,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
       // If we have a helper, let that determine what happens when the help key is pressed.  Otherwise, show help normally.
       if(mHelper)
          mHelper->activateHelp(getUIManager());
+      else if(mCurrentChatType == CmdChat)
+         getUIManager()->getInstructionsUserInterface()->activatePage(9);   //ADVANCED COMMANDS
       else
          getUIManager()->getInstructionsUserInterface()->activate();
    }

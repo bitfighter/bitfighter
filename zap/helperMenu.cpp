@@ -137,7 +137,7 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 
 void HelperMenu::activateHelp(UIManager *uiManager)
 {
-    uiManager->getInstructionsUserInterface()->activateInCommandMode();
+    uiManager->getInstructionsUserInterface()->activate();
 }
 
 

@@ -63,7 +63,7 @@ public:
 
    bool onKeyDown(InputCode inputCode, char ascii);
 
-   void activateInCommandMode();
+   void activatePage(U32 pageIndex);
    void onActivate();
    void exitInstructions();
 };

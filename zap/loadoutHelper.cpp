@@ -28,6 +28,8 @@
 #include "InputCode.h"     // For BindingName enum
 #include "UIGame.h"
 #include "UIMenus.h"
+#include "UIManager.h"
+#include "UIInstructions.h"
 #include "gameType.h"
 #include "Colors.h"
 #include "ClientGame.h"
@@ -303,6 +305,19 @@ InputCode LoadoutHelper::getActivationKey()
 const char *LoadoutHelper::getCancelMessage()
 {
    return "Modifications canceled -- ship design unchanged.";
+}
+
+
+
+
+void LoadoutHelper::activateHelp(UIManager *uiManager)
+{
+   // Go to module help page
+   if(mCurrentIndex < ShipModuleCount)
+      uiManager->getInstructionsUserInterface()->activatePage(3);
+   // Go to weapons help page
+   else
+      uiManager->getInstructionsUserInterface()->activatePage(4);
 }
 
 
