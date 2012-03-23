@@ -2860,7 +2860,7 @@ void ServerGame::idle(U32 timeDelta)
 
    // Lastly, play any sounds server might have made...
    if(isDedicated())   // non-dedicated will process sound in client side.
-      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel, 0, 0);    // No music or voice on server!
+      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
 }
 
 
