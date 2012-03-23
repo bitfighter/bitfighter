@@ -1788,7 +1788,7 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 angle, 
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
@@ -1843,6 +1843,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F3
    }
 
    F32 atomSize = size * 0.40f;
+   F32 angle = CoreItem::getCoreAngle(time);
 
    // Draw atom graphic
    F32 t = FloatTau - (F32(time & 1023) / 1024.f * FloatTau);  // Reverse because time is counting down

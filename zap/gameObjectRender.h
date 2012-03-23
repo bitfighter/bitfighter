@@ -225,7 +225,7 @@ void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
 struct PanelGeom;
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, F32 angle,
+void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[10], F32 panelStartingHealth);
 
 void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width);

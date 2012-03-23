@@ -727,7 +727,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             PanelGeom panelGeom;
             CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-            renderCore(pos, 55, &Colors::blue, time, CoreItem::getCoreAngle(time), &panelGeom, health, 1.0f);
+            renderCore(pos, 55, &Colors::blue, time, &panelGeom, health, 1.0f);
 
             break;
       }

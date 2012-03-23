@@ -331,8 +331,8 @@ void CoreItem::renderItem(const Point &pos)
 
       S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
 
-      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), time, getCoreAngle(time), getPanelGeom(),
-                 mPanelHealth, mStartingPanelHealth);
+      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), time,
+                 getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }
@@ -441,18 +441,6 @@ bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 
 bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   // This poly rotates with time to match what is rendered
-   // problem with shooting through moving polygon, and client and server may have different getCurrentTime()
-   //F32 coreRotateTime = F32(getGame()->getCurrentTime() & 16383) / 16384.f * FloatTau;
-   //Point pos = getActualPos();
-   //F32 radius = calcCoreWidth() / 2;
-
-   //for(F32 theta = 0; theta < FloatTau; theta += FloatTau / 10)  // 10 sides
-   //{
-   //   Point p = Point(pos.x + cos(theta + coreRotateTime) * radius, pos.y + sin(theta + coreRotateTime) * radius);
-   //   polyPoints.push_back(p);
-   //}
-
    return false;
 }
 
@@ -664,7 +652,6 @@ void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
       start = panelGeom.vert[i];
       end   = panelGeom.vert[(i + 1) % CORE_PANELS];      // Next point, with wrap-around
       mid   = (start + end) * .5;
-
 
       panelGeom.mid[i].set(mid);
       panelGeom.repair[i].interp(.6, mid, pos);
