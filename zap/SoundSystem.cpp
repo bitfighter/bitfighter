@@ -539,11 +539,21 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
 }
 
 
+// Client version
 void SoundSystem::processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol)
 {
    processSoundEffects(sfxVol, voiceVol);
    processMusic(musicVol);
    processVoiceChat();
+
+   alureUpdate();
+}
+
+
+// Server version, with no music or voice
+void SoundSystem::processAudio(F32 sfxVol)
+{
+   processSoundEffects(sfxVol, 0);
 
    alureUpdate();
 }
@@ -989,6 +999,11 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
 }
 
 void SoundSystem::processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol)
+{
+   // Do nothing
+}
+
+void SoundSystem::processAudio(F32 sfxVol)
 {
    // Do nothing
 }

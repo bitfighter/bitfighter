@@ -191,7 +191,8 @@ public:
    static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
-   static void processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol);
+   static void processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol);    // Client version
+   static void processAudio(F32 sfxVol);                                // Server version
 
    // Sound Effect functions
    static void processSoundEffects(F32 sfxVol, F32 voiceVol);
