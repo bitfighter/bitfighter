@@ -136,7 +136,7 @@ U32 GameTimer::getCurrent() const
 
 void GameTimer::extend(S32 deltaT)
 {
-   if(mTimer.getPeriod() + (U32)deltaT > GameType::MAX_GAME_TIME)
+   if(mTimer.getPeriod() + (U32)deltaT > (U32)GameType::MAX_GAME_TIME)
       deltaT = GameType::MAX_GAME_TIME - mTimer.getPeriod();
    mTimer.extend(deltaT);
 }
@@ -2206,7 +2206,6 @@ void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimite
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
-   GameSettings *settings = getGame()->getSettings();
 
    if(!clientInfo->isLevelChanger())  // Extra check in case of hacked client
       return;
