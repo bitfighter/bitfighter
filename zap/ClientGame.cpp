@@ -490,7 +490,7 @@ void ClientGame::idle(U32 timeDelta)
       SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
                                 mSettings->getIniSettings()->voiceChatVolLevel);     // Process sound effects (SFX)
 
-      // Need to update the game clock to keep it in sync with the 
+      // Need to update the game clock to keep it in sync with the clients
       if(mGameIsRunning)
          getGameType()->advanceGameClock(timeDelta);
 
