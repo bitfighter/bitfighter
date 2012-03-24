@@ -267,7 +267,9 @@ void GameUserInterface::onReactivate()
 
    mDisableShipKeyboardInput = false;
    SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
-   enterMode(PlayMode);
+
+   // Removed because coming out of help screen would deactivate helpers and chat boxes
+//   enterMode(PlayMode);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
