@@ -324,10 +324,10 @@ void AbstractChat::renderMessageComposition(S32 ypos)
       width = UserInterface::getStringWidth(CHAT_FONT_SIZE, displayString.c_str());
    }
 
-   glColor3f(0,1,1);
+   glColor(Colors::cyan);
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
-   glColor3f(1,1,1);
+   glColor(Colors::white);
    UserInterface::drawString(xStartPos, ypos, CHAT_FONT_SIZE, displayString.c_str());
 
    mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE, width);
