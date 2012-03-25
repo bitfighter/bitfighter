@@ -1156,6 +1156,9 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
    GameSettings *settings = getGame()->getSettings();
 
+   bool startedInHelper = mHelper || mCurrentChatType != NoChat;
+
+
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       setBusyChatting(true);
 
@@ -1238,7 +1241,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
          processChatModeKey(inputCode, ascii);
    }
    
-   if(!mHelper && mCurrentChatType == NoChat)
+   if(!startedInHelper || (!mHelper && mCurrentChatType == NoChat))
       getGame()->undelaySpawn();
 
    return true;
