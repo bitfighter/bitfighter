@@ -268,6 +268,7 @@ public:
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down
    void renderLostConnectionMessage(); 
+   void renderSuspendedMessage();
 
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);

@@ -144,7 +144,7 @@ public:
    virtual void onMouseMoved();
    virtual void onMouseDragged();
 
-   void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0);
+   void renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0, S32 style = 1);
    void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0);
 
    void dimUnderlyingUI();

@@ -62,6 +62,7 @@ namespace Colors
    const Color palePurple(1, .50f, 1);    // A washed out purple (pinkish?)
 
    // Reds
+   const Color red30(.30f, 0, 0);
    const Color red40(.40f, 0, 0);
    const Color red50(.50f, 0, 0);
    const Color red60(.60f, 0, 0);

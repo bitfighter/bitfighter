@@ -257,7 +257,7 @@ const char *CoreGameType::getShortName() const
 
 const char *CoreGameType::getInstructionString() const
 {
-   return "Destroy all of the opposing team's Cores";
+   return "Destroy all the opposing team's Cores";
 }
 
 

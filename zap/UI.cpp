@@ -757,7 +757,7 @@ void UserInterface::renderConsole()
 //extern void glColor(const Color &c, float alpha = 1);
 extern ScreenInfo gScreenInfo;
 
-void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset)
+void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style)
 {
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
@@ -765,7 +765,14 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    S32 inset = 100;                    // Inset for left and right edges of box
    const S32 titleSize = 30;           // Size of title
    const S32 titleGap = titleSize / 3; // Spacing between title and first line of text
-   const S32 textSize = 18;            // Size of text and instructions
+
+   S32 textSize;
+
+   if(style == 1)
+      textSize = 18;            // Size of text and instructions
+   else if(style == 2)
+      textSize = 30;
+
    const S32 textGap = textSize / 3;   // Spacing between text lines
    const S32 instrGap = 15;            // Gap between last line of text and instruction line
 
@@ -794,18 +801,23 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, strin
    if(canvasWidth - 2 * inset < maxLen)
       inset = (canvasWidth - maxLen) / 2;
 
-   glDisable(GL_BLEND);
 
-   for(S32 i = 1; i >= 0; i--)
+   if(style == 1)       
    {
-      if(i == 0)
-         glEnable(GL_BLEND);
-
-      drawFilledRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Color(.3,0,0), Colors::white);
+      // Solid red box with white border
+      glDisable(GL_BLEND);
+      drawFilledRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Colors::red30, Colors::white);
+      glEnable(GL_BLEND);
+      glColor(Colors::white);
+   }
+   else if(style == 2)
+   {
+      // Hollow blue box
+      drawHollowRect(inset, boxTop, canvasWidth - inset, boxTop + boxHeight, Colors::blue);
+      glColor(Colors::blue);
    }
 
    // Draw title, message, and footer
-   glColor(Colors::white);
    drawCenteredString(boxTop + vertMargin, titleSize, title);
 
    for(S32 i = 0; i < msgLines; i++)
