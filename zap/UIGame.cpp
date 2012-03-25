@@ -252,8 +252,6 @@ void GameUserInterface::onActivate()
 
    mShutdownMode = None;
 
-   getGame()->unsuspendGame();                            // Never suspended when we start
-
    OGLCONSOLE_EnterKey(processGameConsoleCommand);        // Setup callback for processing console commands
 }
 
@@ -550,7 +548,15 @@ void GameUserInterface::render()
 
    getGame()->render();
 
-   if(!getGame()->isSuspended())
+   if(getGame()->isSuspended()  || getGame()->isSpawnDelayed())
+   {
+      renderCurrentChat();
+      renderSuspendedMessage();
+
+      if(mHelper)
+         mHelper->render();
+   }
+   else
    {
       renderReticle();              // Draw crosshairs if using mouse
       renderMessageDisplay();       // Render incoming server msgs
@@ -607,16 +613,29 @@ if(mGotControlUpdate)
 }
 
 
+void GameUserInterface::renderSuspendedMessage()
+{
+   static string msg[] = { "", 
+                           "PRESS ANY",
+                           "KEY TO",
+                           "RESPAWN",
+                           "" };
+
+   renderMessageBox("", "", msg, 5, -30);
+}
+
+
 void GameUserInterface::renderLostConnectionMessage()
 {
    GameConnection *connection = getGame()->getConnectionToServer();
+
    if(connection && connection->lostContact())
    {
       static string msg[] = { "", 
-                                   "We may have lost contact with the server...", 
-                                   "",
-                                   " You can't play until the connection has been re-established ", 
-                                   "" };
+                              "We may have lost contact with the server...", 
+                              "",
+                              " You can't play until the connection has been re-established ", 
+                              "" };
       renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 5, -30);
    }
 }
@@ -910,7 +929,7 @@ void GameUserInterface::renderChatMessageDisplay()
       {
          if(mDisplayChatMessage[i][0])
          {
-            if (mHelper)   // fade out text if a helper menu is active
+            if(mHelper)   // fade out text if a helper menu is active
                glColor(mDisplayChatMessageColor[i], 0.2f);
             else
                glColor(mDisplayChatMessageColor[i]);
@@ -930,7 +949,7 @@ void GameUserInterface::renderChatMessageDisplay()
       {
          if(mStoreChatMessage[i][0])
          {
-            if (mHelper)   // fade out text if a helper menu is active
+            if(mHelper)   // fade out text if a helper menu is active
                glColor(mStoreChatMessageColor[i], 0.2f);
             else
                glColor(mStoreChatMessageColor[i]);
@@ -1001,7 +1020,7 @@ UIMode GameUserInterface::getUIMode()
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(UIMode mode)
 {
-   TNLAssert(mode != ChatMode, "Should not called to enter chat mode!");
+   TNLAssert(mode != ChatMode, "Should not be called to enter chat mode!");
 
    playBoop();
    mCurrentChatType = NoChat;
@@ -1020,6 +1039,8 @@ void GameUserInterface::enterMode(UIMode mode)
    {
       cancelChat();
       mHelper = NULL;
+
+      getGame()->unsuspendGame();  
    }
    else
       TNLAssert(false, "Invalid mode!");
@@ -1216,6 +1237,9 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
       else
          processChatModeKey(inputCode, ascii);
    }
+   
+   if(!mHelper && mCurrentChatType == NoChat)
+      getGame()->undelaySpawn();
 
    return true;
 }
