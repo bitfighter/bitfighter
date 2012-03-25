@@ -873,9 +873,9 @@ static void writeFloatZeroOrNonZero(BitStream &s, F32 &val, U8 bitCount)
    {
       U32 transmissionValue = U32(val * ((1 << bitCount) - 1));  // rounds down
 
-      // If we're not truly at zero, don't send zero
+      // If we're not truly at zero, don't send '0', send '1'
       if(transmissionValue == 0)
-         s.writeInt(U32(val * ((1 << bitCount) - 1) + 0.5f), bitCount);
+         s.writeInt(1, bitCount);
       else
          s.writeInt(transmissionValue, bitCount);
    }
@@ -903,7 +903,7 @@ U32 CoreItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
             // Normalize between 0.0 and 1.0 for transmission
             F32 panelHealthRatio = mPanelHealth[i] / mStartingPanelHealth;
 
-            // writeFloatZeroOrNonZero will Compensate for low resolution by sending zero only if it is actually zero
+            // writeFloatZeroOrNonZero will compensate for low resolution by sending zero only if it is actually zero
             // 4 bits -> 1/16 increments, all we really need - this means that client-side
             // will NOT have the true health, rather a ratio of precision 4 bits
             writeFloatZeroOrNonZero(*stream, panelHealthRatio, 4);
