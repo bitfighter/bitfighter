@@ -68,6 +68,7 @@ class GameTimer
 private:
    Timer mTimer;
    bool mIsUnlimited;
+   bool mGameOver;
    S32 mRenderingOffset;
 
 public:
@@ -82,6 +83,7 @@ public:
    U32 getTotalGameTime() const;
    S32 getRenderingOffset() const;
    void setRenderingOffset(S32 offset);
+   void setGameIsOver();
 
    string toString_minutes() const;      // Creates string representation of timer for level saving purposes
 };

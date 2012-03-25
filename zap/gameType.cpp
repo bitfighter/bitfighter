@@ -107,6 +107,7 @@ void GameTimer::reset(U32 timeInMs)
    }
 
    mRenderingOffset = 0;
+   mGameOver = false;
 }
 
 
@@ -121,6 +122,9 @@ bool GameTimer::update(U32 deltaT)
 {
    bool status = mTimer.update(deltaT);
 
+   if(mGameOver)
+      mRenderingOffset -= deltaT;
+
    if(mIsUnlimited)
       return false;
 
@@ -130,7 +134,7 @@ bool GameTimer::update(U32 deltaT)
 
 U32 GameTimer::getCurrent() const
 {
-   return mTimer.getCurrent();
+    return mTimer.getCurrent();
 }
 
 
@@ -177,6 +181,12 @@ S32 GameTimer::getRenderingOffset() const
 void GameTimer::setRenderingOffset(S32 offset)
 {
    mRenderingOffset = offset;
+}
+
+
+void GameTimer::setGameIsOver()
+{
+   mGameOver = true;
 }
 
 
@@ -886,6 +896,8 @@ void GameType::gameOverManGameOver()
 
    onGameOver();                         // Call game-specific end-of-game code
 
+   mGameTimer.setGameIsOver();
+
    saveGameStats();
 }
 
@@ -1182,13 +1194,17 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
    mBetweenLevels = gameOver;
    mGameOver = gameOver;
 
-   // Exit shuffle mode
    if(gameOver)
    {
+      // Exit shuffle mode
       ClientGame *clientGame = static_cast<ClientGame *>(mGame);
       if(clientGame->getUIMode() == TeamShuffleMode) 
          clientGame->enterMode(PlayMode);
+
+      // Tell timer it's all over
+      mGameTimer.setGameIsOver();
    }
+
 #endif
 }
 
@@ -3756,7 +3772,6 @@ void GameType::setWinningScore(S32 score)
 {
    mWinningScore = score;
 }
-
 
 
 // Mostly used while reading a level file
