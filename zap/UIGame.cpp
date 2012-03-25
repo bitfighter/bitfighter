@@ -621,7 +621,7 @@ void GameUserInterface::renderSuspendedMessage()
                            "RESPAWN",
                            "" };
 
-   renderMessageBox("", "", msg, 5, -30);
+   renderMessageBox("", "", msg, 5, -30, 2);
 }
 
 
@@ -1158,6 +1158,12 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
    bool startedInHelper = mHelper || mCurrentChatType != NoChat;
 
+   // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
+   if(!startedInHelper && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
+   {
+      getGame()->undelaySpawn();
+      return true;
+   }
 
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       setBusyChatting(true);
