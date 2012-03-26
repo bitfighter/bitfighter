@@ -1623,6 +1623,7 @@ U32 Ship::getSelectedWeaponIndex()
 }
 
 
+// Fills loadout 
 void Ship::getLoadout(Vector<U32> &loadout)
 {
    loadout.clear();
