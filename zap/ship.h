@@ -280,10 +280,10 @@ public:
    F32 getSensorEquipZoomFraction();
    Point getAimVector();
 
-   void getLoadout(Vector<U32> &loadout);
+   void getLoadout(Vector<U32> &loadout);    // Fills loadout
    void setLoadout(const Vector<U32> &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const Vector<U32> &loadout);
-   void setDefaultLoadout();           // Set the ship's loadout to the default values
+   void setDefaultLoadout();                 // Set the ship's loadout to the default values
 
    ClientInfo *getClientInfo();
    static string loadoutToString(const Vector<U32> &loadout);
