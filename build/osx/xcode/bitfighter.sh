@@ -39,15 +39,16 @@ fi
 if [ ! -f "$userdatadir/joystick_presets.ini" ]; then
   cp "$datadir/joystick_presets.ini" "$userdatadir/"
 fi
-# Other upgraded resources
-cp -f "$datadir/levels/"* "$userdatadir/levels/"
+if [ ! -f "$userdatadir/levels/core.level" ]; then
+  cp -f "$datadir/levels/"* "$userdatadir/levels/"
+fi
 
 # 017
 if [ ! -f "$userdatadir/music/menu.ogg" ]; then
   cp -r "$datadir/music" "$userdatadir/"
+  # Just once upgrade s_bot
+  cp -f "$datadir/robots/s_bot.bot" "$userdatadir/robots/"
 fi
-# Other upgraded resources
-cp -f "$datadir/robots/s_bot.bot" "$userdatadir/robots/"
 
 
 # Full path is need on some Mac systems for sfx - not sure why yet
