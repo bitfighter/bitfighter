@@ -9,7 +9,8 @@ cd "$launch_dir"
 datadir="../Resources"
 userdatadir="$HOME/Library/Application Support/Bitfighter"
 
-# create settings dir in users home directory
+## First time run
+# create settings dir in users home directory and copy resources
 if [ ! -d "$userdatadir/robots" ]; then
   mkdir "$userdatadir"
   mkdir "$userdatadir/screenshots"
@@ -18,6 +19,7 @@ if [ ! -d "$userdatadir/robots" ]; then
   cp -r "$datadir/robots" "$userdatadir/"
   cp -r "$datadir/scripts" "$userdatadir/"
   cp -r "$datadir/editor_plugins" "$userdatadir/"
+  cp -r "$datadir/music" "$userdatadir/"
   ln -s "$userdatadir" "$HOME/Documents/bitfighter_settings"
 fi
 
@@ -37,10 +39,15 @@ fi
 if [ ! -f "$userdatadir/joystick_presets.ini" ]; then
   cp "$datadir/joystick_presets.ini" "$userdatadir/"
 fi
+if [ ! -f "$userdatadir/levels/core.level" ]; then
+  cp -f "$datadir/levels/"* "$userdatadir/levels/"
+fi
 
 # 017
-if [ ! -d "$userdatadir/music" ]; then
-  mkdir "$userdatadir/music"
+if [ ! -f "$userdatadir/music/menu.ogg" ]; then
+  cp -r "$datadir/music" "$userdatadir/"
+  # Just once upgrade s_bot
+  cp -f "$datadir/robots/s_bot.bot" "$userdatadir/robots/"
 fi
 
 

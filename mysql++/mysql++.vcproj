@@ -70,7 +70,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libmysql.lib"
 				OutputFile="..\lib\mysqlppd.lib"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\lib\opt&quot;"
+				AdditionalLibraryDirectories=""
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -148,7 +148,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libmysql.lib"
 				OutputFile="..\lib\mysqlpp.lib"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\MySQL\MySQL Server 5.1\lib\opt&quot;"
+				AdditionalLibraryDirectories=""
 				SuppressStartupBanner="true"
 			/>
 			<Tool
