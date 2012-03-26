@@ -115,9 +115,6 @@ void ClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges)
    mNeedToCheckAuthenticationWithMaster = false;     // Once we get here, we'll treat the ruling as definitive
    mIsAuthenticated = isAuthenticated; 
    mBadges = badges;
-
-   //if(getName() == "watusimoto" || getName() == "raptor" || getName() == "sam686")
-   //   TNLAssert(isAuthenticated, "Improper validation status!");
 }
 
 
@@ -207,6 +204,21 @@ void ClientInfo::setSpawnDelayed(bool spawnDelayed)
       getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
 
    mSpawnDelayed = spawnDelayed;
+}
+
+
+void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
+{
+   mOldLoadout.clear();
+
+   // Save current loadout to put on-deck
+   Vector<U32> loadout = getLoadout();
+
+   resetLoadout();
+
+   // If the current level has a loadout zone, put last level's load-out on-deck
+   if(levelHasLoadoutZone)
+      sRequestLoadout(loadout);
 }
 
 
@@ -2130,9 +2142,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    computeWorldObjectExtents();                       // Compute world Extents nice and early
 
-   // Not sure if this is needed, but might be as long as we are still loading zones from level files... but I think we aren't anymore
-   //mDatabaseForBotZones.removeEverythingFromDatabase(); // Causes memory leak (removed from database, but not deleted), better off disabling this in BotNavMeshZone::processArguments
-
    // Try and load Bot Zones for this level, set flag if failed
    // We need to run buildBotMeshZones in order to set mAllZones properly, which is why I (sort of) disabled the use of hand-built zones in level files
 #ifdef ZAP_DEDICATED
@@ -2140,27 +2149,20 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #else
    mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame != NULL);
 #endif
-   //}
 
    // Clear team info for all clients
    resetAllClientTeams();
 
    // Reset loadouts now that we have GameType set up
+   bool levelHasLoadoutZone = getGameType()->levelHasLoadoutZone();
    for(S32 i = 0; i < getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = getClientInfo(i);
-      clientInfo->mOldLoadout.clear();
+      getClientInfo(i)->resetLoadout(levelHasLoadoutZone);
+  
+   // Also reset clientMovedThisGame flag
+   for(S32 i = 0; i < getClientCount(); i++)
+      if(!getClientInfo(i)->isRobot())
+         getClientInfo(i)->getConnection()->setObjectMovedThisGame(false);
 
-      // Save current loadout to put on-deck
-      Vector<U32> loadout = clientInfo->getLoadout();
-
-      // Reset
-      clientInfo->resetLoadout();
-
-      // If the current level has a loadout zone, put last level's load-out on-deck
-      if(getGameType()->levelHasLoadoutZone())
-         clientInfo->sRequestLoadout(loadout);
-   }
 
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
    mClientInfos.sort(RatingSort);

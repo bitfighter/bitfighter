@@ -43,6 +43,8 @@ ControlObjectConnection::ControlObjectConnection()
 
    mTimeSinceLastMove = 0;
    mPrevAngle = 0;
+
+   mObjectMovedThisGame = false;
 }
 
 
@@ -254,7 +256,10 @@ void ControlObjectConnection::onGotNewMove(const Move &move)
 {
    // See if the player actually moved, or if this is just an empty "do nothing" move
    if(move.x != 0 || move.y != 0 || move.fire || move.isAnyModActive() || move.angle != mPrevAngle)
-      mTimeSinceLastMove = 0;
+   {
+      resetTimeSinceLastMove();
+      setObjectMovedThisGame(true);
+   }
 
    mPrevAngle = move.angle;
 }
@@ -275,6 +280,18 @@ void ControlObjectConnection::addTimeSinceLastMove(U32 time)
 void ControlObjectConnection::resetTimeSinceLastMove()
 {
    mTimeSinceLastMove = 0;
+}
+
+
+void ControlObjectConnection::setObjectMovedThisGame(bool moved)
+{
+   mObjectMovedThisGame = moved;
+}
+
+
+bool ControlObjectConnection::getObjectMovedThisGame()
+{
+   return mObjectMovedThisGame;
 }
 
 

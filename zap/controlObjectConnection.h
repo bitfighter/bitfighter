@@ -65,6 +65,8 @@ private:
    U32 mTimeSinceLastMove; 
    F32 mPrevAngle;
 
+   bool mObjectMovedThisGame;
+
    void onGotNewMove(const Move &move);
 
 public:
@@ -99,6 +101,9 @@ public:
    void addTimeSinceLastMove(U32 time);
    U32 getTimeSinceLastMove();
    void resetTimeSinceLastMove();
+
+   void setObjectMovedThisGame(bool moved);
+   bool getObjectMovedThisGame();
 };
 
 

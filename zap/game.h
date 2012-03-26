@@ -147,8 +147,9 @@ public:
    const Vector<U32> &getLoadout();
    Timer respawnTimer;
 
+   Vector<U32> mOldLoadout;            // Server: to respawn with old loadout  Client: to check if using same loadout configuration
+   void resetLoadout(bool levelHasLoadoutZone);
    void resetLoadout();
-   Vector<U32> mOldLoadout;      // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    void sRequestLoadout(Vector<U32> &loadout);
 
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
