@@ -209,7 +209,7 @@ void LuaRobot::setEnums(lua_State *L)
    setEnumName(ResourceItemTypeNumber, "ResourceItemType");
    setEnumName(TextItemTypeNumber, "TextItemType");
    setEnumName(LoadoutZoneTypeNumber, "LoadoutZoneType");
-   setEnumName(TestItemTypeNumber, "TestItem");
+   setEnumName(TestItemTypeNumber, "TestItemType");
    setEnumName(FlagTypeNumber, "FlagType");
    setEnumName(BulletTypeNumber, "BulletType");
    setEnumName(MineTypeNumber, "MineType");

@@ -138,6 +138,6 @@ function _main()
    if _declared("main") and type(main) == "function" then
       main()
    else   
-      error("WARNING: No main() function could be found!")
+      logprint("WARNING: No main() function could be found!")
    end
 end

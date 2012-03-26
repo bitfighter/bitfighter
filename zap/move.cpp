@@ -80,7 +80,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeFlag(y < 0);
 
       // This needs to be signed, otherwise, the ship can't face up!
-      S32 writeAngle = S32(radiansToUnit(angle) * 0x1000);
+      S32 writeAngle = (S32) floor(radiansToUnit(angle) * 0x1000 + 0.5f);
 
       //RDW Should this be writeSignedInt?
       //The BitStream header leads me to believe it should.

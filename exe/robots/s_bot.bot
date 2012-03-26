@@ -288,17 +288,17 @@ function getObjective(objType, team, onTeam)
 				currentIndex = currentIndex + 1
  			end
 		elseif objType == GoalZoneType and (gameType == HTFGame or gameType == RetrieveGame) then
-			if (itTeamIndex == team and onTeam) or (itTeamIndex ~= team and not onTeam) then
+			if (itTeamIndex == team) == onTeam then
 				if not it:hasFlag() then
 					itemsOnMyTeam[currentIndex] = it
 					currentIndex = currentIndex + 1
  				end
 			end
 		else
-			if itTeamIndex == NeutralTeamIndx then  -- anything Neutral is on our team
-				itTeamIndex = team
+			if (itTeamIndex == NeutralTeamIndx and (objType ~= FlagType or gameType ~= ZoneControlGame)) then
+				itTeamIndex = team   -- anything Neutral is on our team (except zone control neutral goal zone)
 			end
-			if (itTeamIndex == team and onTeam) or (itTeamIndex ~= team and not onTeam) then
+			if (itTeamIndex == team) == onTeam then
 				itemsOnMyTeam[currentIndex] = it
 				currentIndex = currentIndex + 1
 			end
