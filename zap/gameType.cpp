@@ -329,7 +329,7 @@ boost::shared_ptr<MenuItem> GameType::getMenuItem(const string &key)
       return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Level By:",       
                                                               mLevelCredits.getString(), 
                                                               "", 
-                                                              "Who created this level",                                  
+                                                              "Who created this level?",                                  
                                                               MAX_GAME_DESCR_LEN));
    else if(key == "Levelgen Script")
       return boost::shared_ptr<MenuItem>(new TextEntryMenuItem("Levelgen Script:", 
@@ -899,6 +899,20 @@ void GameType::gameOverManGameOver()
    mGameTimer.setGameIsOver();
 
    saveGameStats();
+
+   // Kick any players who were idle the entire previous game.  But DO NOT kick the hosting player!
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mGame->getClientInfo(i);
+
+      if(!clientInfo->isRobot())
+      {
+         GameConnection *connection = clientInfo->getConnection();
+            
+         if(!connection->getObjectMovedThisGame() && !connection->isLocalConnection())    // Don't kick the host, please!
+            connection->disconnect(NetConnection::ReasonIdle, "");
+      }
+   }
 }
 
 
@@ -939,8 +953,12 @@ VersionedGameStats GameType::getGameStats()
       {
          ClientInfo *clientInfo = mGame->getClientInfo(j);
 
-         // Only looking for players on the current team
-         if(clientInfo->getTeamIndex() != i)  // this is not sorted... 
+         // Find players on the current team 
+         if(clientInfo->getTeamIndex() != i) 
+            continue;
+
+         // Skip inactive players.  You snooze, you lose!
+         if(!clientInfo->isRobot() && !clientInfo->getConnection()->getObjectMovedThisGame())
             continue;
 
          teamStats->playerStats.push_back(PlayerStats());
@@ -1702,7 +1720,7 @@ const Color *GameType::getShipColor(Ship *s)
 
 
 // These run on the server.
-// Adds a new client to the game when a player joins, or when a level cycles.
+// Adds a new client to the game when a player or bot joins, or when a level cycles.
 // Note that when a new game starts, players will be added in order from
 // strongest to weakest.  Bots will be added to their predefined teams, or if that is invalid, to the lowest ranked team.
 void GameType::serverAddClient(ClientInfo *clientInfo)

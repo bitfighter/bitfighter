@@ -308,6 +308,8 @@ public:
    void setConnectionSpeed(S32 speed);
 
    void onConnectionEstablished();
+   void onConnectionEstablished_client();
+   void onConnectionEstablished_server();
 
    void onConnectTerminated(TerminationReason r, const char *notUsed);
 
