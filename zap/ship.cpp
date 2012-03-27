@@ -114,12 +114,12 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
    mIsRobot = isRobot;
 
-   if(!isRobot)         // Robots will run this during their own initialization; no need to run it twice!
+   if(!isRobot)               // Robots will run this during their own initialization; no need to run it twice!
       initialize(p);
    else
-      hasExploded = false;  // client need this false for unpackUpdate
+      hasExploded = false;    // Client needs this false for unpackUpdate
 
-   isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
+   mIsBusy = false;           // On client, will be updated in initial packet set from server.  Not used on server.
 
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
@@ -1416,7 +1416,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mHealth = stream->readFloat(6);
    }
 
-   isBusy = stream->readFlag();
+   mIsBusy = stream->readFlag();
 
    if(stream->readFlag())        // Ship made a large change in position
       shipwarped = true;
@@ -2066,7 +2066,7 @@ void Ship::render(S32 layerIndex)
       string str = getClientInfo() ? getClientInfo()->getName().getString() : string();
 
       // Modify name if owner is "busy"
-      if(isBusy)
+      if(mIsBusy)
          str = "<<" + str + ">>";
 
       TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");

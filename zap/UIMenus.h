@@ -87,6 +87,8 @@ public:
    MenuUserInterface(ClientGame *game);      
    MenuUserInterface(ClientGame *game, const string &title);
 
+   bool isScrollingMenu();
+
    void clearMenuItems();
    void addMenuItem(MenuItem *menuItem);
    void addWrappedMenuItem(boost::shared_ptr<MenuItem> menuItem);

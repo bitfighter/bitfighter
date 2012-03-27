@@ -222,6 +222,7 @@ public:
    enum TerminationReason {
       // Reasons the server might terminate an existing connection
       ReasonTimedOut,
+      ReasonIdle,                   // Client is asleep at the wheel
       ReasonSelfDisconnect,
       ReasonKickedByAdmin,
       ReasonFloodControl,

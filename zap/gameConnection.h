@@ -268,6 +268,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
+   TNL_DECLARE_RPC(s2cSetIsIdle, (StringTableEntry name, bool idle));
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
 
@@ -308,6 +309,8 @@ public:
    void setConnectionSpeed(S32 speed);
 
    void onConnectionEstablished();
+   void onConnectionEstablished_client();
+   void onConnectionEstablished_server();
 
    void onConnectTerminated(TerminationReason r, const char *notUsed);
 

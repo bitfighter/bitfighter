@@ -183,9 +183,8 @@ void MenuUserInterface::idle(U32 timeDelta)
 S32 MenuUserInterface::getOffset()
 {
    S32 offset = 0;
-   S32 count = mMenuItems.size();
 
-   if(count > mMaxMenuSize)     // Do some sort of scrolling
+   if(isScrollingMenu())     // Do some sort of scrolling
    {
       // itemSelectedWithMouse basically lets users highlight the top and bottom items in a scrolling list,
       // which can't be done when using the keyboard
@@ -199,6 +198,12 @@ S32 MenuUserInterface::getOffset()
    mFirstVisibleItem = checkMenuIndexBounds(offset);
 
    return mFirstVisibleItem;
+}
+
+
+bool MenuUserInterface::isScrollingMenu()
+{
+   return mMenuItems.size() > mMaxMenuSize;
 }
 
 
@@ -349,7 +354,7 @@ void MenuUserInterface::render()
 
    S32 count = mMenuItems.size();
 
-   if(count > mMaxMenuSize)     // Need some sort of scrolling?
+   if(isScrollingMenu())     // Need some sort of scrolling?
       count = mMaxMenuSize;
 
    S32 yStart = getYStart();
@@ -377,7 +382,7 @@ void MenuUserInterface::render()
    }
 
    // Render an indicator that there are scrollable items above and/or below
-   if(mMenuItems.size() > mMaxMenuSize)
+   if(isScrollingMenu())
    {
       if(offset > 0)                     // There are items above
          renderArrowAbove(yStart);
@@ -390,14 +395,17 @@ void MenuUserInterface::render()
    if(U32(selectedIndex) < U32(mMenuItems.size()))
    {
       const S32 helpFontSize = 15;
-      glColor(Colors::menuHelpColor);
       S32 ypos = canvasHeight - vertMargin - 50;
 
       // Render a special instruction line
       if(mRenderSpecialInstructions)
+      {
+         glColor(Colors::menuHelpColor);  
          drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getSpecialEditingInstructions());
+      }
 
       ypos -= helpFontSize + 5;
+      glColor(Colors::yellow);
       drawCenteredString(ypos, helpFontSize, mMenuItems[selectedIndex]->getHelp());
    }
 
@@ -476,7 +484,7 @@ S32 MenuUserInterface::getSelectedMenuItem()
 
 void MenuUserInterface::processMouse()
 {
-   if(mMenuItems.size() > mMaxMenuSize)   // We have a scrolling situation here...
+   if(isScrollingMenu())   // We have a scrolling situation here...
    {
       if(selectedIndex <= mFirstVisibleItem)                          // Scroll up
       {
@@ -517,20 +525,27 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 {
    if(Parent::onKeyDown(inputCode, ascii))
       return true;
-   else if(inputCode == MOUSE_WHEEL_DOWN)
-   {
-      mFirstVisibleItem = checkMenuIndexBounds(mFirstVisibleItem + 1);
 
-      onMouseMoved();
-      return true;
-   }
-   else if(inputCode == MOUSE_WHEEL_UP)
+   // Capture mouse wheel on scrolling menus and use it to scroll.  Otherwise, let it be processed by individual menu items.
+   // This will usually work because scrolling menus do not (at this time) contain menu items that themselves use the wheel.
+   if(isScrollingMenu())
    {
-      mFirstVisibleItem = checkMenuIndexBounds(mFirstVisibleItem - 1);
+      if(inputCode == MOUSE_WHEEL_DOWN)
+      {
+         mFirstVisibleItem = checkMenuIndexBounds(mFirstVisibleItem + 1);
 
-      onMouseMoved();
-      return true;
+         onMouseMoved();
+         return true;
+      }
+      else if(inputCode == MOUSE_WHEEL_UP)
+      {
+         mFirstVisibleItem = checkMenuIndexBounds(mFirstVisibleItem - 1);
+
+         onMouseMoved();
+         return true;
+      }
    }
+
    if(inputCode == KEY_UNKNOWN)
       return true;
 
@@ -666,7 +681,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
 
       if(selectedIndex < 0)                        // Scrolling off the top
       {
-         if((mMenuItems.size() > mMaxMenuSize) && mRepeatMode)        // Allow wrapping on long menus only when not in repeat mode
+         if(isScrollingMenu() && mRepeatMode)      // Allow wrapping on long menus only when not in repeat mode
          {
             selectedIndex = 0;               // No wrap --> (first item)
             return true;                     // (leave before playBoop)
@@ -709,7 +724,7 @@ void MenuUserInterface::advanceItem()
 
    if(selectedIndex >= mMenuItems.size())     // Scrolling off the bottom
    {
-      if((mMenuItems.size() > mMaxMenuSize) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
+      if(isScrollingMenu() && mRepeatMode)    // Allow wrapping on long menus only when not in repeat mode
       {
          selectedIndex = getMenuItemCount() - 1;                 // No wrap --> (last item)
          return;                                                 // (leave before playBoop)

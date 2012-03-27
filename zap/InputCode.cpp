@@ -512,9 +512,6 @@ InputCode InputCodeManager::convertNumPadToNum(InputCode inputCode)
 // Filter out some know spurious keystrokes
 char InputCodeManager::keyToAscii(int unicode, InputCode inputCode)
 {
-   //if(inputCode == KEY_UP || inputCode == KEY_DOWN || inputCode == KEY_LEFT || inputCode == KEY_RIGHT)
-   //   return 0;
-
    if((unicode & 0xFF80) != 0) 
       return 0;
 

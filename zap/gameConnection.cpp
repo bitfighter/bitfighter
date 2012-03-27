@@ -242,7 +242,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 
    ClientInfo *clientInfo = getClientInfo();
 
-   clientInfo->setSpawnDelayed(false);
+   clientInfo->setSpawnDelayed(mServerGame, false);
    mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
 
    mServerGame->getGameType()->spawnShip(clientInfo);
@@ -1166,6 +1166,21 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMa
 }
 
 
+// Server tells clients that another player is idle and will not be joining us for the moment
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
+
+   TNLAssert(clientInfo, "Could not find clientInfo!");
+
+   if(!clientInfo)
+      return;
+
+   clientInfo->setSpawnDelayed(NULL, idle);
+}
+
+
 // Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
@@ -1562,86 +1577,96 @@ void GameConnection::setConnectionSpeed(S32 speed)
    setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);
 }
 
-// Runs on client and server?
+// Runs on client and server
 void GameConnection::onConnectionEstablished()
 {
    Parent::onConnectionEstablished();
 
-   if(isInitiator())    // Runs on client
-   {
+   if(isInitiator())    
+      onConnectionEstablished_client();
+   else                 
+      onConnectionEstablished_server();
+}
+
+
+void GameConnection::onConnectionEstablished_client()
+{
 #ifndef ZAP_DEDICATED
-      setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
-      mClientGame->setInCommanderMap(false);       // Start game in regular mode
-      mClientGame->clearZoomDelta();               // No in zoom effect
-      setGhostFrom(false);
-      setGhostTo(true);
-      logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
+   setConnectionSpeed(mClientGame->getSettings()->getIniSettings()->connectionSpeed);  // set speed depending on client
+   mClientGame->setInCommanderMap(false);       // Start game in regular mode
+   mClientGame->clearZoomDelta();               // No in zoom effect
+   setGhostFrom(false);
+   setGhostTo(true);
+   logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
 
 
-      // If we entered a password, and it worked, let's save it for next time.  If we arrive here and the saved password is empty
-      // it means that the user entered a good password.  So we save.
-      bool isLocal = mServerGame;
+   // If we arrive here and the saved password is empty it means that the user entered a good password.  
+   // So let's save it for next time.
+   bool isLocal = gServerGame;
+
+   TNLAssert(isLocal == isLocalConnection(), "If this triggers, make a note, and delete this assert.  If not, we can get replace isLocal with isLocalConnection().");
       
-      string lastServerName = mClientGame->getRequestedServerName();
+   string lastServerName = mClientGame->getRequestedServerName();
 
-      if(!isLocal && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
-         gINI.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
+   if(!isLocal && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
+      gINI.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
 
 
-      if(!isLocalConnection())    // Might use /connect, want to add to list after successfully connected. Does nothing while connected to master.
-      {         
-         string addr = getNetAddressString();
-         bool found = false;
+   if(!isLocalConnection())    // Might use /connect, want to add to list after successfully connected. Does nothing while connected to master.
+   {         
+      string addr = getNetAddressString();
+      bool found = false;
 
-         for(S32 i = 0; i < mSettings->getIniSettings()->prevServerListFromMaster.size(); i++)
-            if(mSettings->getIniSettings()->prevServerListFromMaster[i].compare(addr) == 0) 
-            {
-               found = true;
-               break;
-            }
+      for(S32 i = 0; i < mSettings->getIniSettings()->prevServerListFromMaster.size(); i++)
+         if(mSettings->getIniSettings()->prevServerListFromMaster[i].compare(addr) == 0) 
+         {
+            found = true;
+            break;
+         }
 
-         if(!found) 
-            mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
-      }
+      if(!found) 
+         mSettings->getIniSettings()->prevServerListFromMaster.push_back(addr);
+   }
 
-      if(mSettings->getIniSettings()->voiceChatVolLevel == 0)
-         s2rVoiceChatEnable(false);
+   if(mSettings->getIniSettings()->voiceChatVolLevel == 0)
+      s2rVoiceChatEnable(false);
 #endif
-   }
-   else                 // Runs on server
-   {
-      setConnectionSpeed(2);  // high speed, most servers often have a lot of bandwidth available.
-      mServerGame->addClient(mClientInfo);
-      setGhostFrom(true);
-      setGhostTo(false);
-      activateGhosting();
-      //setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);  // make this client only?
+}
 
-      // Ideally, the server name would be part of the connection handshake, but this will work as well
-      s2cSetServerName(mServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here
 
-      time(&joinTime);
-      mAcheivedConnection = true;
+void GameConnection::onConnectionEstablished_server()
+{
+   setConnectionSpeed(2);  // high speed, most servers often have a lot of bandwidth available.
+   mServerGame->addClient(mClientInfo);
+   setGhostFrom(true);
+   setGhostTo(false);
+   activateGhosting();
+   //setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);  // make this client only?
+
+   // Ideally, the server name would be part of the connection handshake, but this will work as well
+   s2cSetServerName(mServerGame->getSettings()->getHostName());   // Note: mSettings is NULL here
+
+   time(&joinTime);
+   mAcheivedConnection = true;
       
-      // Notify the bots that a new player has joined
-      EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
+   // Notify the bots that a new player has joined
+   EventManager::get()->fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientInfo()->getPlayerInfo());
 
-      if(mServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
-      {
-         mClientInfo->setIsLevelChanger(true);
-         s2cSetIsLevelChanger(true, false);          // Tell client, but don't display notification
-         sendLevelList();
-      }
-
-      const char *name =  mClientInfo->getName().getString();
-
-      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), name);
-      logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
-                                             isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
-
-      if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)
-         s2rSendableFlags(1);
+   if(mServerGame->getSettings()->getLevelChangePassword() == "")   // Grant level change permissions if level change PW is blank
+   {
+      mClientInfo->setIsLevelChanger(true);
+      s2cSetIsLevelChanger(true, false);          // Tell client, but don't display notification
+      sendLevelList();
    }
+
+   const char *name =  mClientInfo->getName().getString();
+
+   logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), name);
+   logprintf(LogConsumer::ServerFilter,  "%s [%s] joined [%s]", name, 
+                                          isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
+
+   if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)
+      s2rSendableFlags(1);
 }
 
 

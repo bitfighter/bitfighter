@@ -187,7 +187,7 @@ bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 // Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
 bool ClientInfo::shouldDelaySpawn()
 {
-   return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > 20000;    // 20 secs
+   return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > 20000;    // 20 secs -- includes time between games
 }
 
 
@@ -197,14 +197,6 @@ bool ClientInfo::isSpawnDelayed()
    return mSpawnDelayed;
 }
 
-
-void ClientInfo::setSpawnDelayed(bool spawnDelayed)
-{
-   if(spawnDelayed && !mSpawnDelayed)
-      getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
-
-   mSpawnDelayed = spawnDelayed;
-}
 
 
 void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
@@ -435,6 +427,32 @@ F32 FullClientInfo::getRating()
 }
 
 
+// Server only -- RemoteClientInfo has a client-side override
+void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
+{
+   if(spawnDelayed == mSpawnDelayed)
+      return;
+
+   if(spawnDelayed && !mSpawnDelayed)
+      getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
+
+   for(S32 i = 0; i < game->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = game->getClientInfo(i);
+
+      if(clientInfo->isRobot())
+         continue;
+
+      if(clientInfo == this)
+         continue;
+
+      clientInfo->getConnection()->s2cSetIsIdle(mName, spawnDelayed);
+   }
+
+   mSpawnDelayed = spawnDelayed;
+}
+
+
 GameConnection *FullClientInfo::getConnection()
 {
    return mClientConnection;
@@ -490,6 +508,7 @@ RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenti
 }
 
 
+// Destructor
 RemoteClientInfo::~RemoteClientInfo()
 {
    delete mDecoder;
@@ -506,6 +525,13 @@ GameConnection *RemoteClientInfo::getConnection()
 void RemoteClientInfo::setConnection(GameConnection *conn)
 {
    TNLAssert(false, "Can't set a GameConnection on a RemoteClientInfo!");
+}
+
+
+// game is only needed for signature compatibility
+void RemoteClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
+{
+   mSpawnDelayed = spawnDelayed;
 }
 
 
@@ -717,7 +743,7 @@ S32 Game::getRobotCount() const
 }
 
 
-ClientInfo *Game::getClientInfo(S32 index) 
+ClientInfo *Game::getClientInfo(S32 index) const
 { 
    return mClientInfos[index]; 
 }
@@ -2087,9 +2113,22 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
+// Sort by order in which players should be added to teams
 // Highest ratings first -- runs on server only, so these should be FullClientInfos
-static S32 QSORT_CALLBACK RatingSort(ClientInfo **a, ClientInfo **b)
+// Return 1 if a is above b, -1 if b is above a, and 0 if they are equal
+static S32 QSORT_CALLBACK AddOrderSort(ClientInfo **a, ClientInfo **b)
 {
+   bool aIsIdle = !(*a)->getConnection()->getObjectMovedThisGame();
+   bool bIsIdle = !(*b)->getConnection()->getObjectMovedThisGame();
+
+   // If either player is idle, put them at the bottom of the list
+   if(aIsIdle && !bIsIdle)
+      return -1;
+
+   if(!aIsIdle && bIsIdle)
+      return 1;
+
+   // If neither (or both) are idle, sort by ranking
    F32 diff = (*a)->getCalculatedRating() - (*b)->getCalculatedRating();
 
    if(diff == 0) 
@@ -2102,6 +2141,7 @@ static S32 QSORT_CALLBACK RatingSort(ClientInfo **a, ClientInfo **b)
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
+
    cleanUp();
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
@@ -2147,7 +2187,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #ifdef ZAP_DEDICATED
    mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, false);
 #else
-   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, gClientGame != NULL);
+   TNLAssert((gClientGame != NULL) == (!isDedicated()), "Pretty sure this is true -- if this triggers, replace !isDedicated() below with gClientGame != NULL and make a note.");
+   mGameType->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this, !isDedicated());
 #endif
 
    // Clear team info for all clients
@@ -2158,27 +2199,27 @@ void ServerGame::cycleLevel(S32 nextLevel)
    for(S32 i = 0; i < getClientCount(); i++)
       getClientInfo(i)->resetLoadout(levelHasLoadoutZone);
   
-   // Also reset clientMovedThisGame flag
-   for(S32 i = 0; i < getClientCount(); i++)
-      if(!getClientInfo(i)->isRobot())
-         getClientInfo(i)->getConnection()->setObjectMovedThisGame(false);
 
 
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
-   mClientInfos.sort(RatingSort);
+   // Sorting also puts idle players at the end of the list, regardless of their rating
+   mClientInfos.sort(AddOrderSort);
 
    if(mGameType.isValid())
       for(S32 i = 0; i < getClientCount(); i++)
       {
-         mGameType->serverAddClient(getClientInfo(i));
-         if(getClientInfo(i)->getConnection())                          // robots don't have GameConnection
-            getClientInfo(i)->getConnection()->activateGhosting();      // Tell clients we're done sending objects and are ready to start playing
+         ClientInfo *clientInfo = getClientInfo(i);
+         TNLAssert(!clientInfo->isRobot(), "We have bots here!!  Who knew?   Please add a comment noting this.  Otherwise, add a note that there are no bots here and remove this assert!");
+         mGameType->serverAddClient(clientInfo);
+
+         GameConnection *connection = clientInfo->getConnection();
+         connection->setObjectMovedThisGame(false);
+         connection->activateGhosting();                 // Tell clients we're done sending objects and are ready to start playing
       }
 
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
-   if(!mGameSuspended)
-      suspendIfNoActivePlayers();
+   suspendIfNoActivePlayers();   // Does nothing if we're already suspended
 }
 
 
@@ -2352,6 +2393,9 @@ GameConnection *ServerGame::getSuspendor()
 // Check to see if there are any players who are active; suspend the game if not.  Server only.
 void ServerGame::suspendIfNoActivePlayers()
 {
+   if(mGameSuspended)
+      return;
+
    for(S32 i = 0; i < getClientCount(); i++)
    {
       ClientInfo *clientInfo = getClientInfo(i);

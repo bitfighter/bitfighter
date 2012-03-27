@@ -412,7 +412,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
 {
    U32 nextValAfterWrap = mWrap ? 0 : mIndex;
 
-   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT)
+   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_DOWN)
    {
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
@@ -422,7 +422,7 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
       UserInterface::playBoop();
       return true;
    }
-   else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT)
+   else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_UP)
    {      
       U32 nextValAfterWrap = mWrap ? mOptions.size() - 1 : mIndex;
       mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
@@ -513,7 +513,7 @@ string ToggleMenuItem::getValueForDisplayingInMenu()
 
 const char *ToggleMenuItem::getSpecialEditingInstructions()
 {
-   return "Use [<-] and [->] keys to change value.";
+   return "Use [<-] and [->] keys or mouse wheel to change value.";
 }
 
 
@@ -700,7 +700,7 @@ S32 CounterMenuItem::getWidth(S32 textsize)
 
 bool CounterMenuItem::handleKey(InputCode inputCode, char ascii)
 {
-   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT)  
+   if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_UP)  
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
@@ -712,7 +712,7 @@ bool CounterMenuItem::handleKey(InputCode inputCode, char ascii)
 
       return true;
    }
-   else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT)
+   else if(inputCode == KEY_LEFT || inputCode == MOUSE_RIGHT || inputCode == MOUSE_WHEEL_DOWN)
    {
       if(InputCodeManager::checkModifier(KEY_SHIFT))
       {
@@ -779,7 +779,7 @@ string CounterMenuItem::getValue() const
 
 const char *CounterMenuItem::getSpecialEditingInstructions()
 {
-   return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change.";
+   return "Use [<-] and [->] keys or mouse wheel to change value. Hold [Shift] for bigger change.";
 }
 
 
