@@ -77,6 +77,7 @@ static const char *pageHeaders[] = {
    "GAME OBJECTS",
    "MORE GAME OBJECTS",
    "MORE GAME OBJECTS",
+   "GAME INDICATORS",
    "ADVANCED COMMANDS",
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
@@ -128,6 +129,9 @@ void InstructionsUserInterface::render()
          break;
       case InstructionGameObjects3:
          renderPageObjectDesc(4);
+         break;
+      case InstructionGameIndicators:
+         renderPageGameIndicators();
          break;
       case InstructionAdvancedCommands:
          renderPageCommands(0);
@@ -405,6 +409,83 @@ void InstructionsUserInterface::renderPage2()
 }
 
 
+static const char *indicatorInstructions1[] = {
+   "Game indicators are helps on the scoreboard or other areas that",
+   "give you more information about the game or players."
+};
+
+
+static const char *scoreboardMarks[][3] = {
+   {"@ ",  "ChumpChange",  "Indicates the player is a server administrator"},
+   {"+ ",  "ChumpChange",  "Indicates the player has level change permissions"},
+   {"B ",  "S_Bot",  "Indicates the player is a bot"}
+};
+
+
+void InstructionsUserInterface::renderPageGameIndicators()
+{
+   S32 y = 40;
+   S32 descSize = 20;
+   S32 textSize = 17;
+   S32 symbolSize = textSize * 0.8f;
+   S32 vertAdjustFact = (textSize - symbolSize) / 2 - 1;
+
+   // Description
+   glColor(Colors::white);
+   for(U32 i = 0; i < ARRAYSIZE(indicatorInstructions1); i++)
+   {
+      drawCenteredString(y, descSize, indicatorInstructions1[i]);
+      y += 26;
+   }
+
+   y += 20;
+
+   glColor(Colors::yellow);
+   drawCenteredString(y, descSize, "SCOREBOARD INDICATORS");
+   y += 26;
+
+   // Scoreboard marks
+   for(U32 i = 0; i < ARRAYSIZE(scoreboardMarks); i++)
+   {
+      S32 x = 30;
+
+      // Draw the mark
+      glColor(Colors::cyan);
+      x += drawStringAndGetWidth(x, y + vertAdjustFact, symbolSize, scoreboardMarks[i][0]);
+
+      // Draw sample nickname
+      glColor(Colors::white);
+      drawString(x, y, textSize, scoreboardMarks[i][1]);
+
+      // Draw description
+      x = 250;
+      drawString(x, y, textSize, scoreboardMarks[i][2]);
+      y += 26;
+   }
+
+   y += 20;
+
+   // Badges
+   glColor(Colors::yellow);
+   drawCenteredString(y, descSize, "BADGES / ACHIEVEMENTS");
+   y += 26;
+
+   // Name
+   glColor(Colors::white);
+   S32 x = 30;
+   x += drawStringAndGetWidth(x, y, textSize, "ChumpChange");
+
+   // Badge
+   x += textSize/2 + 10;
+   render25FlagsBadge(x, y + textSize/2, textSize/2);
+
+   // Description
+   glColor(Colors::white);
+   x = 250;
+   drawString(x, y, textSize, "Badges may appear next to the players name");
+}
+
+
 static const char *moduleInstructions[] = {
    "Modules have up to 3 modes: Passive, Active, and Kinetic (P/A/K)",
    "Passive mode is always active and costs no energy (e.g. Armor).",
@@ -453,7 +534,7 @@ void InstructionsUserInterface::renderModulesPage()
 
       // Hacky special case  TODO: find a way to generalize this
       if(i == 3 || i == 6)
-   {
+      {
          x += getStringWidth(textsize, moduleDescriptions[i - 1][0]);
          y -= 20;
       }
@@ -842,7 +923,7 @@ void InstructionsUserInterface::nextPage()
 {
    mCurPage++;
 
-   if(mCurPage >= InstructionMaxPages)
+   if(mCurPage > InstructionMaxPages - 1)
       mCurPage = 0;
 }
 

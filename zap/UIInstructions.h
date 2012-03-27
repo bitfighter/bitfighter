@@ -50,6 +50,7 @@ private:
    void renderPage2();
    void renderModulesPage();
    void renderPageObjectDesc(U32 index);
+   void renderPageGameIndicators();
    void renderPageCommands(U32 index, const char *msg = "");
    void nextPage();
    void prevPage();
@@ -69,6 +70,7 @@ public:
       InstructionGameObjects1,
       InstructionGameObjects2,
       InstructionGameObjects3,
+      InstructionGameIndicators,
       InstructionAdvancedCommands,
       InstructionLevelCommands,
       InstructionAdminCommands,
