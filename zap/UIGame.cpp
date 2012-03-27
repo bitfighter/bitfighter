@@ -3398,7 +3398,7 @@ void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 
    const Color *winnerColor = &Colors::red;
    const Color *loserColor = &Colors::red60;
 
-   S32 vertOffset = hasSecondLeader ? textsize * 4 / 3 : 0;    // Make room for a second entry, as needed
+   S32 vertOffset = (hasSecondLeader || !localClientIsLeader) ? textsize * 4 / 3 : 0;    // Make room for a second entry, as needed
    S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - vertOffset;
 
    glColor(winnerColor);
@@ -3410,19 +3410,30 @@ void GameUserInterface::renderLeadingPlayerScores(const GameType *gameType, U32 
 
 
    // Render bottom score if we have one
-   if(hasSecondLeader)
+   // This will either render the current client on the bottom; or, if he is the leader
+   // it will render the second leader
+   if(hasSecondLeader || !localClientIsLeader)
    {
-      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff;
+      // Should test if leader first
+      if(!localClientIsLeader)
+      {
+         bottomScore = getGame()->getLocalRemoteClientInfo()->getScore();
+         name = getGame()->getLocalRemoteClientInfo()->getName().getString();
+      }
+      // hasSecondLeader
+      else
+      {
+         bottomScore = gameType->getSecondLeadingPlayerScore();
+         name = game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString();
+      }
 
-      bottomScore = gameType->getSecondLeadingPlayerScore();
+      S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff;
 
       // Special case: if players are tied, render both with winner's color
       if(topScore == bottomScore)
          glColor(winnerColor);
       else
          glColor(loserColor);
-
-      name = game->getClientInfo(gameType->getSecondLeadingPlayer())->getName().getString();
 
       drawStringfr(rightAlignCoord, ypos, textsize, "%s %d", name, bottomScore);
    }
