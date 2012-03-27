@@ -1010,6 +1010,12 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          ui->activate();
          break;
 
+      case NetConnection::ReasonIdle:
+         ui->setMessage(2, "The server kicked you because you were idle too long.");
+         ui->setMessage(4, "Feel free to rejoin the game when you are ready.");
+         ui->activate();
+         break;
+
       case NetConnection::ReasonPuzzle:
          ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
          ui->setMessage(3, "Invalid puzzle solution");
