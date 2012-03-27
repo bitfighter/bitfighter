@@ -86,7 +86,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusGameType, s2cNexusMessage,
       SoundSystem::playSoundEffect(SFXFlagCapture);
 
       Ship *ship = clientGame->findShip(clientName);
-      if(ship)
+      if(ship && score >= 100)
          clientGame->emitTextEffect(itos(score) + " POINTS!", Colors::red80, ship->getRenderPos());
    }
    else if(msgIndex == NexusMsgYardSale)
