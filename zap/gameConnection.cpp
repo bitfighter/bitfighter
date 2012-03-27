@@ -242,7 +242,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 
    ClientInfo *clientInfo = getClientInfo();
 
-   clientInfo->setSpawnDelayed(false);
+   clientInfo->setSpawnDelayed(mServerGame, false);
    mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
 
    mServerGame->getGameType()->spawnShip(clientInfo);
@@ -1163,6 +1163,21 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMa
 #ifndef ZAP_DEDICATED
    mClientGame->cancelShutdown();
 #endif
+}
+
+
+// Server tells clients that another player is idle and will not be joining us for the moment
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
+
+   TNLAssert(clientInfo, "Could not find clientInfo!");
+
+   if(!clientInfo)
+      return;
+
+   clientInfo->setSpawnDelayed(NULL, idle);
 }
 
 

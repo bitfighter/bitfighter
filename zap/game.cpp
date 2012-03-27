@@ -198,14 +198,6 @@ bool ClientInfo::isSpawnDelayed()
 }
 
 
-void ClientInfo::setSpawnDelayed(bool spawnDelayed)
-{
-   if(spawnDelayed && !mSpawnDelayed)
-      getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
-
-   mSpawnDelayed = spawnDelayed;
-}
-
 
 void ClientInfo::resetLoadout(bool levelHasLoadoutZone)
 {
@@ -435,6 +427,32 @@ F32 FullClientInfo::getRating()
 }
 
 
+// Server only -- RemoteClientInfo has a client-side override
+void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
+{
+   if(spawnDelayed == mSpawnDelayed)
+      return;
+
+   if(spawnDelayed && !mSpawnDelayed)
+      getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
+
+   for(S32 i = 0; i < game->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = game->getClientInfo(i);
+
+      if(clientInfo->isRobot())
+         continue;
+
+      if(clientInfo == this)
+         continue;
+
+      clientInfo->getConnection()->s2cSetIsIdle(mName, spawnDelayed);
+   }
+
+   mSpawnDelayed = spawnDelayed;
+}
+
+
 GameConnection *FullClientInfo::getConnection()
 {
    return mClientConnection;
@@ -507,6 +525,13 @@ GameConnection *RemoteClientInfo::getConnection()
 void RemoteClientInfo::setConnection(GameConnection *conn)
 {
    TNLAssert(false, "Can't set a GameConnection on a RemoteClientInfo!");
+}
+
+
+// game is only needed for signature compatibility
+void RemoteClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
+{
+   mSpawnDelayed = spawnDelayed;
 }
 
 
@@ -718,7 +743,7 @@ S32 Game::getRobotCount() const
 }
 
 
-ClientInfo *Game::getClientInfo(S32 index) 
+ClientInfo *Game::getClientInfo(S32 index) const
 { 
    return mClientInfos[index]; 
 }

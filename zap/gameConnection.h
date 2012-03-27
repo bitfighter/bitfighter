@@ -268,6 +268,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
+   TNL_DECLARE_RPC(s2cSetIsIdle, (StringTableEntry name, bool idle));
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
 

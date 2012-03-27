@@ -3083,7 +3083,7 @@ void GameUserInterface::renderScoreboard()
    U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
    totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
-   // vertical scale ratio to maximum line height
+   // Vertical scale ratio to maximum line height
    F32 scaleRatio = ((F32)maxHeight)/30.f;
 
    for(S32 i = 0; i < teams; i++)
@@ -3137,7 +3137,11 @@ void GameUserInterface::renderScoreboard()
          S32 x = xl + 40;
          S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
 
-         glColor(Colors::white);
+         bool isDelayed = playerScores[j]->isSpawnDelayed();
+         const Color *nameColor = isDelayed ? &Colors::gray50 : &Colors::white;
+
+
+         glColor(nameColor);
 
          // Add the mark of the bot
          if(playerScores[j]->isRobot())
@@ -3155,7 +3159,7 @@ void GameUserInterface::renderScoreboard()
 
          renderBadges(playerScores[j], x + nameWidth + 8, curRowY + (maxHeight / 2), scaleRatio);
          
-         glColor(Colors::white);
+         glColor(nameColor);
          static char buff[255] = "";
 
          if(isTeamGame)

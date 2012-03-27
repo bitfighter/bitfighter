@@ -1309,9 +1309,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delay bots.
    if(clientInfo->shouldDelaySpawn())
    {
-      clientInfo->setSpawnDelayed(true);
-      //static_cast<ServerGame *>(getGame())->suspendIfNoActivePlayers();
-
+      clientInfo->setSpawnDelayed(getGame(), true);
       return false;
    }
 

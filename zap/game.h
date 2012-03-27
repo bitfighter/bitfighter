@@ -115,7 +115,6 @@ private:
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
    Vector<U32> mLoadout;
    bool mNeedToCheckAuthenticationWithMaster;
-   bool mSpawnDelayed;
 
 protected:
    StringTableEntry mName;
@@ -128,6 +127,7 @@ protected:
    bool mIsAdmin;
    bool mIsRobot;
    bool mIsAuthenticated;
+   bool mSpawnDelayed;
    Int<BADGE_COUNT> mBadges;
 
 public:
@@ -157,7 +157,7 @@ public:
 
    bool shouldDelaySpawn();
    bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
-   void setSpawnDelayed(bool spawnDelayed);
+   virtual void setSpawnDelayed(const Game *game, bool spawnDelayed) = 0;
 
    Ship *getShip();                    // NULL on client
    void setShip(Ship *ship);
@@ -224,6 +224,8 @@ public:
 
    void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
 
+   void setSpawnDelayed(const Game *game, bool spawnDelayed);
+
    void setRating(F32 rating);
    F32 getRating();
 
@@ -250,7 +252,9 @@ private:
 
 public:
    RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isRobot, bool isAdmin);  // Constructor
-   virtual ~RemoteClientInfo();                                                                       // Destructor
+   virtual ~RemoteClientInfo();      
+   // Destructor
+   void initialize();
 
    GameConnection *getConnection();
    void setConnection(GameConnection *conn);
@@ -258,7 +262,7 @@ public:
    F32 getRating();
    void setRating(F32 rating);
 
-   void initialize();
+   void setSpawnDelayed(const Game *game, bool spawnDelayed);
 
    // Voice chat stuff -- these will be invalid on the server side
    SoundEffect *getVoiceSFX();
@@ -425,7 +429,7 @@ public:
    S32 getAuthenticatedPlayerCount() const;                             // Number of authenticated human players
    S32 getRobotCount() const;                                           // Returns number of bots
 
-   ClientInfo *getClientInfo(S32 index);
+   ClientInfo *getClientInfo(S32 index) const;
    const Vector<ClientInfo *> *getClientInfos();
 
    void addToClientList(ClientInfo *clientInfo);               
