@@ -37,7 +37,7 @@ class InstructionsUserInterface : public AbstractInstructionsUserInterface
    typedef AbstractInstructionsUserInterface Parent;
 
 private:
-   U32 mCurPage;
+   S32 mCurPage;
 
    S32 col1;
    S32 col2;
@@ -58,12 +58,31 @@ private:
                                     const char *str2, InputCodeManager::BindingName binding2);
 
 public:
+
+   // This must be kept aligned with pageHeaders[]
+   enum IntructionPages {
+      InstructionControls,
+      InstructionLoadout,
+      InstructionModules,
+      InstructionWeaponProjectiles,
+      InstructionSpyBugs,
+      InstructionGameObjects1,
+      InstructionGameObjects2,
+      InstructionGameObjects3,
+      InstructionAdvancedCommands,
+      InstructionLevelCommands,
+      InstructionAdminCommands,
+      InstructionDebugCommands,
+      InstructionScriptingConsole,
+      InstructionMaxPages
+   };
+
    InstructionsUserInterface(ClientGame *game);      // Constructor
    void render();
 
    bool onKeyDown(InputCode inputCode, char ascii);
 
-   void activatePage(U32 pageIndex);
+   void activatePage(IntructionPages pageIndex);
    void onActivate();
    void exitInstructions();
 };

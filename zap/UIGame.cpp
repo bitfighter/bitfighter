@@ -1184,7 +1184,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
       if(mHelper)
          mHelper->activateHelp(getUIManager());
       else if(mCurrentChatType == CmdChat)
-         getUIManager()->getInstructionsUserInterface()->activatePage(9);   //ADVANCED COMMANDS
+         getUIManager()->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
       else
          getUIManager()->getInstructionsUserInterface()->activate();
    }

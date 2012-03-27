@@ -314,10 +314,10 @@ void LoadoutHelper::activateHelp(UIManager *uiManager)
 {
    // Go to module help page
    if(mCurrentIndex < ShipModuleCount)
-      uiManager->getInstructionsUserInterface()->activatePage(3);
+      uiManager->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionModules);
    // Go to weapons help page
    else
-      uiManager->getInstructionsUserInterface()->activatePage(4);
+      uiManager->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionWeaponProjectiles);
 }
 
 
