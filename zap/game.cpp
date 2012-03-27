@@ -490,6 +490,7 @@ RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenti
 }
 
 
+// Destructor
 RemoteClientInfo::~RemoteClientInfo()
 {
    delete mDecoder;
