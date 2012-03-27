@@ -669,7 +669,7 @@ public:
 
    StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  
    StringTableEntry getCurrentLevelName();      // Return name of level currently in play
-   GameTypeId getCurrentLevelType();             // Return type of level currently in play
+   GameTypeId getCurrentLevelType();            // Return type of level currently in play
    StringTableEntry getCurrentLevelTypeName();  // Return name of type of level currently in play
 
    bool isServer();
