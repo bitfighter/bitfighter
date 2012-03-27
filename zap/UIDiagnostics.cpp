@@ -610,7 +610,7 @@ void DiagnosticUserInterface::render()
 
 
       // Temporary placeholder for badge testing -- centered at xpos, ypos, with radius of rad (i.e. 2 x rad across)
-
+#ifdef TNL_DEBUG
       for(S32 i = 0; i < 2; i++)
       {
          F32 x;
@@ -709,7 +709,7 @@ void DiagnosticUserInterface::render()
          glPopMatrix();
 
       }
-
+#endif // TNL_DEBUG
    }
 }
 
