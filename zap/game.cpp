@@ -2781,9 +2781,9 @@ void ServerGame::idle(U32 timeDelta)
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
    // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
    // connect.  A little hacky, but works!
-   /*if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
-      suspendGame();
-*/
+      /*if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
+         suspendGame();
+   */
    if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen
       timeDelta = 100;
 
