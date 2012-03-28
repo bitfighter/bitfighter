@@ -182,7 +182,7 @@ void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderi
    else
       mNexusChangeAtTime = newDisplayTime - (oldDisplayTime - mNexusChangeAtTime);
 
-   logprintf("Nexus (setTimeRemaining client)change time: %d",mNexusChangeAtTime);    //{P{P
+//   logprintf("Nexus (setTimeRemaining client)change time: %d",mNexusChangeAtTime);    //{P{P
 }
 
 
@@ -201,7 +201,7 @@ void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
    else
       mNexusChangeAtTime = newDisplayTime - (oldDisplayTime - mNexusChangeAtTime);
 
-   logprintf("Nexus (setTimeRemaining server)change time: %d",mNexusChangeAtTime);    //{P{P
+//   logprintf("Nexus (setTimeRemaining server)change time: %d",mNexusChangeAtTime);    //{P{P
 }
 
 
@@ -469,7 +469,7 @@ void NexusGameType::idle_client(U32 deltaT)
 
       mNexusIsOpen = true;
       mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusOpenTime);
-      logprintf("Nexus (idle client)change time: %d",mNexusChangeAtTime);    //{P{P
+//      logprintf("Nexus (idle client)change time: %d",mNexusChangeAtTime);    //{P{P
    }
 
    else if(mNexusIsOpen && nexusShouldChange())       // Nexus has just closed
@@ -482,7 +482,7 @@ void NexusGameType::idle_client(U32 deltaT)
 
       mNexusIsOpen = false;
       mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusClosedTime);
-      logprintf("Nexus (idle client)change time: %d",mNexusChangeAtTime);    //{P{P
+//      logprintf("Nexus (idle client)change time: %d",mNexusChangeAtTime);    //{P{P
    }
 
 
@@ -503,7 +503,7 @@ void NexusGameType::idle_server(U32 deltaT)
    {
       mNexusIsOpen = true;
       mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusOpenTime);
-      logprintf("Nexus (idle server)change time: %d",mNexusChangeAtTime);    //{P{P
+//      logprintf("Nexus (idle server)change time: %d",mNexusChangeAtTime);    //{P{P
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getGame()->getClientCount(); i++)
       {
@@ -525,7 +525,7 @@ void NexusGameType::idle_server(U32 deltaT)
    {
       mNexusIsOpen = false;
       mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusClosedTime);
-      logprintf("Nexus (idle server)change time: %d",mNexusChangeAtTime);    //{P{P
+//      logprintf("Nexus (idle server)change time: %d",mNexusChangeAtTime);    //{P{P
 
       // Fire an event
       EventManager::get()->fireEvent(EventManager::NexusClosedEvent);
