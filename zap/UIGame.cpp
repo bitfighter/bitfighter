@@ -1101,8 +1101,9 @@ void GameUserInterface::dropItem()
 // Send a message to the server that we are (or are not) busy chatting
 void GameUserInterface::setBusyChatting(bool busy)
 {
-   if(getGame()->getConnectionToServer())
-      getGame()->getConnectionToServer()->c2sSetIsBusy(busy);
+   GameConnection *conn = getGame()->getConnectionToServer();
+   if(conn)
+      conn->c2sSetIsBusy(busy);
 }
 
 
