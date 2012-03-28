@@ -446,9 +446,6 @@ void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
          if(clientInfo->isRobot())
             continue;
 
-         if(clientInfo == this)
-            continue;
-
          clientInfo->getConnection()->s2cSetIsIdle(mName, spawnDelayed);
       }
    }
