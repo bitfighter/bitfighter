@@ -1170,6 +1170,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMa
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = mClientGame->findClientInfo(name);
 
    TNLAssert(clientInfo, "Could not find clientInfo!");
@@ -1178,6 +1179,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idl
       return;
 
    clientInfo->setSpawnDelayed(NULL, idle);
+#endif
 }
 
 
