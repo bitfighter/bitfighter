@@ -50,21 +50,62 @@ XXX need to document timers, new luavec stuff XXX
 <h2>New features</h2>
 <ul>
 <li>Core now features shootable panels
+<li>New menu music
+<li>Pulse: new kinetic component to the Boost module.  Uses all available energy; speed is dependent on available energy
+<li>Voice chat mute by player with /vmute
+<li>25 Flags achievement/badge:  return 25 flags during nexus in an official game with not flag spawns or preset flags
+<li>High Scores screen selectable from main menu
 </ul>
 
 <h2>Other enhancements</h2>
 <ul>
 <li>Ctrl+left-click no longer translates to right-click on Windows or Linux
 <li>Can drag & copy in the editor with ctrl+drag (meta+drag on OSX)
-<lI>Editor performance gains when copying large numbers of objects
+<li>Editor performance gains when copying large numbers of objects
 <li>Can now use variable substitution in chat messages; designed primarily for bots, ideal for explaining how to do something
     Use %XXX% where XXX can be the name of a keybinding (get the names from the INI), or %playerName%.  Vars are case insensitive.
-    
+<li>Hostile load-out zones always drain energy, even if moving
+<li>Hostile FFs allow flags through again
+<li>Save previous level's loadout as on-deck for the next level, if the next level has load-out zones
+<li>Music for menu and in-game is separate.  Bitfighter looks for menu.ogg in the 'music' folder, anything else will play in-game
+<li>New help page for in-game indicators like scoreboard marks
+<li>Scroll wheel can be used in menus and in-game weapon switching
+<li>In case of unrecognized joysticks, use a default profile from the INI so users can edit it
+<li>Fancy text effect when returning more than 100 flags in nexus
+<li>Idle players are grayed-out in the scoreboard
+<li>Idle players are no longer included in game statistics if they've been idle the entire level
+<li>Idle players may be kicked if they've idled too long
+<li>Server will suspend if all players go idle
+<li>Server command line options:  -nolevelchangepassword, -noadminpassword
 </ul>
 
 <h2>Bug fixes</h2>
 <ul>
-<li>
+<li>Sparks from previous levels are cleared when a new level loads
+<li>Fixed bullets not shown in commander's map with sensor module equipped
+<li>Mac basic shortcut keys work
+<li>Fix game shutdown crash on PPC
+<li>Fix Mac fullscreen crash by forcing fake fullscreen for now (you will have to hid the dock)
+<li>On Windows, fix playing music spiking the CPU and not allowing the bitfighter process to finish
+<li>Fix gametype instuctions (F2)
+<li>Restore movement in quickchat menus
+<li>Fix repair distance behavior.  This may allow healing at a slightly longer distance
+<li>Fix music not being played from local music folder on Mac
+<li>Fix some memory leaks
+<li>Fix some connection issues
+<li>Fix several random game crashes
+<li>Fix s_bot on Retrieve gametype
+<li>Fix some Editor object copy problems
+<li>Fix Editor not reading in 2-point walls with both points the same
+<li>Keypad numbers should work as regular numbers in-game
+<li>Fix mouse menu scrolling
+<li>Single-team game leaderboard should now always display correctly
+<li>Fix inserting vertices into diagonal barriers
+<li>Fix black screen of death when chatting + idle on level change
+<li>Fix several player idle/spawn-delay issues
+<li>Better handling of idle players and balancing teams
+<li>Fix animation of Core not spinning when game time was set to unlimited
+<li>Fix Core stuttering with time changes
 </ul>
 */
 
