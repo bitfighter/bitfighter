@@ -1173,12 +1173,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idl
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = mClientGame->findClientInfo(name);
 
-   TNLAssert(clientInfo, "Could not find clientInfo!");
+   // Might not find clientInfo if level just cycled and players haven't been re-sent to client yet.  In which case,
+   // this is ok, since spawn-delay status will be sent with s2cAddClient().
 
-   if(!clientInfo)
+   if(!clientInfo)      
       return;
 
-   clientInfo->setSpawnDelayed(NULL, idle);
+   clientInfo->setSpawnDelayed(NULL, idle);     // Calls remoteClientInfo version
 #endif
 }
 

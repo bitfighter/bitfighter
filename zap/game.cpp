@@ -428,6 +428,7 @@ F32 FullClientInfo::getRating()
 
 
 // Server only -- RemoteClientInfo has a client-side override
+// Can pass NULL for game if level just changed and remote clients won't have player list yet
 void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
 {
    if(spawnDelayed == mSpawnDelayed)
@@ -436,17 +437,20 @@ void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
    if(spawnDelayed && !mSpawnDelayed)
       getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
 
-   for(S32 i = 0; i < game->getClientCount(); i++)
+   if(game)
    {
-      ClientInfo *clientInfo = game->getClientInfo(i);
+      for(S32 i = 0; i < game->getClientCount(); i++)
+      {
+         ClientInfo *clientInfo = game->getClientInfo(i);
 
-      if(clientInfo->isRobot())
-         continue;
+         if(clientInfo->isRobot())
+            continue;
 
-      if(clientInfo == this)
-         continue;
+         if(clientInfo == this)
+            continue;
 
-      clientInfo->getConnection()->s2cSetIsIdle(mName, spawnDelayed);
+         clientInfo->getConnection()->s2cSetIsIdle(mName, spawnDelayed);
+      }
    }
 
    mSpawnDelayed = spawnDelayed;
@@ -492,7 +496,7 @@ VoiceDecoder *FullClientInfo::getVoiceDecoder()
 #ifndef ZAP_DEDICATED
 // Constructor
 RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                   bool isRobot, bool isAdmin) : ClientInfo()
+                                   bool isRobot, bool isAdmin, bool isSpawnDelayed) : ClientInfo()
 {
    mName = name;
    mIsAuthenticated = isAuthenticated;
@@ -501,10 +505,11 @@ RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenti
    mTeamIndex = NO_TEAM;
    mRating = 0;
    mBadges = badges;
+   mSpawnDelayed = isSpawnDelayed;
 
-   // Initialize speech stuff, will be deleted in destructor
-   mDecoder = new SpeexVoiceDecoder();
-   mVoiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());
+   // Initialize speech stuff
+   mDecoder = new SpeexVoiceDecoder();                                  // Deleted in destructor
+   mVoiceSFX = new SoundEffect(SFXVoice, NULL, 1, Point(), Point());    // RefPtr, will self-delete
 }
 
 

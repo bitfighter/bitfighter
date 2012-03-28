@@ -251,7 +251,8 @@ private:
    VoiceDecoder *mDecoder;
 
 public:
-   RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isRobot, bool isAdmin);  // Constructor
+   RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
+                    bool isRobot, bool isAdmin, bool isSpawnDelayed);  
    virtual ~RemoteClientInfo();      
    // Destructor
    void initialize();
