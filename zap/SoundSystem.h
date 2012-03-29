@@ -29,7 +29,7 @@
 #include "ConfigEnum.h"     // For sfxSets
 
 #ifndef ZAP_DEDICATED
-#include "alInclude.h"
+#include "../openal/alInclude.h"
 #include "../alure/AL/alure.h"
 #else
 class alureStream;
