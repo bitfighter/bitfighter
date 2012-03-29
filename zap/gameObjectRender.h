@@ -34,6 +34,8 @@
 
 #include "Rect.h"
 #include "Color.h"
+#include "SharedConstants.h"     // For MeritBadges enum
+
 #include <string>
 
 using namespace TNL;
@@ -211,7 +213,7 @@ void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 
 void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Color &outlineColor, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
-void renderSpeedZone(const Vector<Point> *pts, U32 time);
+void renderSpeedZone(const Vector<Point> &pts, U32 time);
 
 void renderTestItem(const Point &pos, F32 alpha = 1);
 void renderTestItem(const Point &pos, S32 size, F32 alpha = 1);
@@ -244,9 +246,7 @@ extern void renderForceField(Point start, Point end, const Color *c, bool fieldU
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
 extern void renderStaticBitfighterLogo();
 
-// Badges
-extern void render25FlagsBadge(F32 x, F32 y, F32 rad);
-extern void renderDeveloperBadge(F32 x, F32 y, F32 rad);
+extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 
 };
 

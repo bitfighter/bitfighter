@@ -1266,7 +1266,7 @@ static void saveLoadoutPreset(ClientGame *game, S32 slot)
    if(!ship)
       return;
 
-   Vector<U32> loadout(ShipModuleCount + ShipWeaponCount);
+   Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);
    ship->getLoadout(loadout);
 
    game->getSettings()->setLoadoutPreset(slot, loadout);
@@ -1276,7 +1276,7 @@ static void saveLoadoutPreset(ClientGame *game, S32 slot)
 
 static void loadLoadoutPreset(ClientGame *game, S32 slot)
 {
-   Vector<U32> loadout(ShipModuleCount + ShipWeaponCount);     // Define it
+   Vector<U8> loadout(ShipModuleCount + ShipWeaponCount);      // Define it
    game->getSettings()->getLoadoutPreset(slot, loadout);       // Fill it
 
    if(loadout.size() == 0)    // Looks like the preset might be empty!
@@ -1743,7 +1743,7 @@ extern S32 LOADOUT_PRESETS;
 
 void GameUserInterface::showPresetsHandler(ClientGame *game, const Vector<string> &words)
 {
-   Vector<U32> preset(ShipModuleCount + ShipWeaponCount);
+   Vector<U8> preset(ShipModuleCount + ShipWeaponCount);
 
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
    {
@@ -2224,7 +2224,7 @@ void GameUserInterface::serverCommandHandler(ClientGame *game, const Vector<stri
 
 
 CommandInfo chatCmds[] = {   
-   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory  helpGroup lines,  helpArgString            helpTextSstring
+   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory  helpGroup lines,  helpArgString            helpTextString
    { "password",GameUserInterface::submitPassHandler,{ STR },      1,       ADV_COMMANDS,    0,     1,     {"<password>"},         "Request admin or level change permissions"  },
    { "servvol", GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,     1,     {"<0-10>"},             "Set volume of server"  },
    { "getmap",  GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,     1,     {"[file]"},             "Save currently playing level in [file], if allowed" },
@@ -2236,41 +2236,41 @@ CommandInfo chatCmds[] = {
    { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Toggle hiding chat messages from <name>" },
    { "vmute",   GameUserInterface::voiceMuteHandler, { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Toggle muting voice chat from <name>" },
 
-   { "add",         GameUserInterface::addTimeHandler,         { INT },           0,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Add time to the current game" },
-   { "next",        GameUserInterface::nextLevelHandler,       {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Start next level" },
-   { "prev",        GameUserInterface::prevLevelHandler,       {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Replay previous level" },
-   { "restart",     GameUserInterface::restartLevelHandler,    {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Restart current level" },
-   { "settime",     GameUserInterface::setTimeHandler,         { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<time in minutes>"},                  "Set play time for the level" },
-   { "setscore",    GameUserInterface::setWinningScoreHandler, { INT },           1,      LEVEL_COMMANDS,  0,  1, {"<score>"},                            "Set score to win the level" },
-   { "resetscore",  GameUserInterface::resetScoreHandler,      {  },              0,      LEVEL_COMMANDS,  0,  1, {  },                                   "Reset all scores to zero" },
-   { "addbot",      GameUserInterface::addBotHandler,          { STR, TEAM, STR },3,      LEVEL_COMMANDS,  1,  2, {"[file]", "[team num]","[args]"},           "Add bot from [file] to [team num], pass [args] to bot" },
-   { "addbots",     GameUserInterface::addBotsHandler,         { INT, STR, TEAM, STR },4, LEVEL_COMMANDS,  1, 2,  {"[count]","[file]","[team num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
-   { "kickbot",     GameUserInterface::kickBotHandler,         {  },              1,      LEVEL_COMMANDS,  1, 1,  {  },                                   "Kick most recently added bot" },
-   { "kickbots",    GameUserInterface::kickBotsHandler,        {  },              1,      LEVEL_COMMANDS,  1, 1,  {  },                                   "Kick all bots" },
+   { "add",         GameUserInterface::addTimeHandler,         { INT },                 0, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Add time to the current game" },
+   { "next",        GameUserInterface::nextLevelHandler,       {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start next level" },
+   { "prev",        GameUserInterface::prevLevelHandler,       {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
+   { "restart",     GameUserInterface::restartLevelHandler,    {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
+   { "settime",     GameUserInterface::setTimeHandler,         { INT },                 1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
+   { "setscore",    GameUserInterface::setWinningScoreHandler, { INT },                 1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
+   { "resetscore",  GameUserInterface::resetScoreHandler,      {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
+   { "addbot",      GameUserInterface::addBotHandler,          { STR, TEAM, STR },      3, LEVEL_COMMANDS,  1,  2,  {"[file]", "[team num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
+   { "addbots",     GameUserInterface::addBotsHandler,         { INT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
+   { "kickbot",     GameUserInterface::kickBotHandler,         {  },                    1, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
+   { "kickbots",    GameUserInterface::kickBotsHandler,        {  },                    1, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
 
-   { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },      1,ADMIN_COMMANDS, 0,  1,  {"<name>"},              "Kick a player from the game" },
-   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2,ADMIN_COMMANDS, 0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
-   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2,ADMIN_COMMANDS, 0,  1,  {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 mins)" },
-   { "shutdown",           GameUserInterface::shutdownServerHandler,     { INT, STR },  2,ADMIN_COMMANDS, 0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
-   { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1,ADMIN_COMMANDS, 0,  1,  {"[passwd]"},            "Set server password (use blank to clear)" },
-   { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },       1,ADMIN_COMMANDS, 0,  1,  {"[passwd]"},            "Set level change password (use blank to clear)" },
-   { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },       1,ADMIN_COMMANDS, 0,  1,  {"<passwd>"},            "Set admin password" },
-   { "leveldir",           GameUserInterface::setLevelDirHandler,        { STR },       1,ADMIN_COMMANDS, 0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
-   { "setservername",      GameUserInterface::setServerNameHandler,      { STR },       1,ADMIN_COMMANDS, 0,  1,  {"<name>"},              "Set server name" },
-   { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },       1,ADMIN_COMMANDS, 0,  1,  {"<descr>"},             "Set server description" },
-   { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },           0,ADMIN_COMMANDS, 0,  1,  {""},                    "Remove current level from server" },
-   { "gmute",              GameUserInterface::globalMuteHandler,         { NAME },      1,ADMIN_COMMANDS, 0,  1,  {"<name>"},              "Globally mute/unmute a player" },
-   { "rename",             GameUserInterface::renamePlayerHandler,       { NAME, STR }, 2,ADMIN_COMMANDS, 0,  1,  {"<from>","<to>"},   "Give a player a new name" },
-   { "maxbots",            GameUserInterface::setMaxBotsHandler,         { INT },       1,ADMIN_COMMANDS, 0,  1,  {"<count>"},             "Set the maximum bots allowed for this server" },
-   { "shuffle",            GameUserInterface::shuffleTeams,              { },           0,ADMIN_COMMANDS, 0,  1,   { "" },                 "Randomly reshuffle teams" },
+   { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },      1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
+   { "ban",                GameUserInterface::banPlayerHandler,          { NAME, INT }, 2, ADMIN_COMMANDS,  0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
+   { "banip",              GameUserInterface::banIpHandler,              { STR, INT },  2, ADMIN_COMMANDS,  0,  1,  {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 mins)" },
+   { "shutdown",           GameUserInterface::shutdownServerHandler,     { INT, STR },  2, ADMIN_COMMANDS,  0,  1,  {"[time]","[message]"},  "Start orderly shutdown of server (def. = 10 secs)" },
+   { "setlevpass",         GameUserInterface::setLevPassHandler,         { STR },       1, ADMIN_COMMANDS,  0,  1,  {"[passwd]"},            "Set server password (use blank to clear)" },
+   { "setadminpass",       GameUserInterface::setAdminPassHandler,       { STR },       1, ADMIN_COMMANDS,  0,  1,  {"[passwd]"},            "Set level change password (use blank to clear)" },
+   { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },       1, ADMIN_COMMANDS,  0,  1,  {"<passwd>"},            "Set admin password" },
+   { "leveldir",           GameUserInterface::setLevelDirHandler,        { STR },       1, ADMIN_COMMANDS,  0,  1,  {"<new level folder>"},  "Set leveldir param on the server (changes levels available)" },
+   { "setservername",      GameUserInterface::setServerNameHandler,      { STR },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Set server name" },
+   { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },       1, ADMIN_COMMANDS,  0,  1,  {"<descr>"},             "Set server description" },
+   { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },           0, ADMIN_COMMANDS,  0,  1,  {""},                    "Remove current level from server" },
+   { "gmute",              GameUserInterface::globalMuteHandler,         { NAME },      1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Globally mute/unmute a player" },
+   { "rename",             GameUserInterface::renamePlayerHandler,       { NAME, STR }, 2, ADMIN_COMMANDS,  0,  1,  {"<from>","<to>"},       "Give a player a new name" },
+   { "maxbots",            GameUserInterface::setMaxBotsHandler,         { INT },       1, ADMIN_COMMANDS,  0,  1,  {"<count>"},             "Set the maximum bots allowed for this server" },
+   { "shuffle",            GameUserInterface::shuffleTeams,              { },           0, ADMIN_COMMANDS,  0,  1,   { "" },                 "Randomly reshuffle teams" },
 
    { "showcoords", GameUserInterface::showCoordsHandler,    {  },    0,DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0,DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },
    { "showpaths",  GameUserInterface::showPathsHandler,     {  },    0,DEBUG_COMMANDS, 0,  1, {  },         "Show robot paths" },
    { "showbots",   GameUserInterface::showBotsHandler,      {  },    0,DEBUG_COMMANDS, 0,  1, {  },         "Show all robots" },
    { "pausebots",  GameUserInterface::pauseBotsHandler,     {  },    0,DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots. Reissue to start again" },
-   { "stepbots",   GameUserInterface::stepBotsHandler,      { INT }, 1,DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (def. = 1)"},
-   { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1,DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (def. = 2)" },
+   { "stepbots",   GameUserInterface::stepBotsHandler,      { INT }, 1,DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (default = 1)"},
+   { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1,DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
    { "maxfps",     GameUserInterface::maxFpsHandler,        { INT }, 1,DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
 };
 
@@ -3139,7 +3139,7 @@ void GameUserInterface::renderScoreboard()
          S32 vertAdjustFact = (fontSize - symbolFontSize) / 2 - 1;
 
          bool isDelayed = playerScores[j]->isSpawnDelayed();
-         const Color *nameColor = isDelayed ? &Colors::gray50 : &Colors::white;
+         const Color *nameColor = isDelayed ? &Colors::idlePlayerScoreboardColor : &Colors::standardPlayerScoreboardColor;
 
 
          glColor(nameColor);
@@ -3191,17 +3191,16 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
    S32 badgeOffset = 2 * badgeRadius + 5;
    F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
 
-   if(clientInfo->hasBadge(BADGE_TWENTY_FIVE_FLAGS))
+   for(S32 i = 0; i < BADGE_COUNT; i++)
    {
-      drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
-      render25FlagsBadge(x, y, badgeRadius);
-      x += badgeOffset;
-   }
-   if(clientInfo->hasBadge(DEVELOPER_BADGE))
-   {
-      drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
-      renderDeveloperBadge(x, y, badgeRadius);
-      x += badgeOffset;
+      MeritBadges badge = MeritBadges(i);    // C++ enums can be rather tedious...
+
+      if(clientInfo->hasBadge(badge))
+      {
+         drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
+         renderBadge(x, y, badgeRadius, badge);
+         x += badgeOffset;
+      }
    }
 }
 

@@ -50,7 +50,7 @@
 #include "../master/database.h"
 
 #include "statistics.h"
-#include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
+#include "masterConnection.h"    
 
 
 #include "tnlThread.h"
@@ -1408,7 +1408,7 @@ void GameType::SRV_updateShipLoadout(GameObject *shipObject)
 
 // Return error message if loadout is invalid, return "" if it looks ok
 // Runs on client and server
-string GameType::validateLoadout(const Vector<U32> &loadout)
+string GameType::validateLoadout(const Vector<U8> &loadout)
 {
    bool spyBugAllowed = false;
 
@@ -1450,7 +1450,7 @@ string GameType::validateLoadout(const Vector<U32> &loadout)
 
 // Set the "on-deck" loadout for a ship, and make it effective immediately if we're in a loadout zone
 // Server only, called in direct response to request from client via c2sRequestLoadout()
-void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout)
+void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout)
 {
    Ship *ship = clientInfo->getShip();
 
@@ -1467,7 +1467,7 @@ void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U32
 
 // Called from above and elsewhere
 // Server only -- to trigger this on client, use GameConnection::c2sRequestLoadout()
-void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout, bool silent)
+void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent)
 {
    if(validateLoadout(loadout) != "")
       return;
@@ -1476,6 +1476,12 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U32> &l
 
    if(ship)
       ship->setLoadout(loadout, silent);
+
+   // Send loadout to the master server for logging purposes
+   MasterServerConnection *masterConn = mGame->getConnectionToMaster();
+
+   if(masterConn)
+      masterConn->s2mLogLoadout(clientInfo->getName(), loadout);
 }
 
 
@@ -3703,13 +3709,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
 
 
 // Server tells clients that another player is idle and will not be joining us for the moment
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle), (name, idle), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = getGame()->findClientInfo(name);
 
-   TNLAssert(clientInfo, "Could not find clientInfo!");
+   TNLAssert(clientInfo, "Could not find clientInfo!");  // with RPCGuaranteedOrdered, GameType::s2cAddClient should always be sent first.
 
    if(!clientInfo)
       return;

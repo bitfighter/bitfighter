@@ -270,7 +270,7 @@ LuaLoadout::LuaLoadout(lua_State *L)
 }
 
 // C++ Constructor -- specify items
-LuaLoadout::LuaLoadout(U32 loadoutItems[])
+LuaLoadout::LuaLoadout(U8 loadoutItems[])
 {
    // When creating a new loadout object, load it up with the
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
@@ -376,7 +376,7 @@ S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout th
 
 
 // Private helper function for above
-U32 LuaLoadout::getLoadoutItem(S32 indx)
+U8 LuaLoadout::getLoadoutItem(S32 indx)
 {
    return mLoadout[indx];
 }

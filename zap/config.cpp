@@ -217,7 +217,7 @@ static void writeLoadoutPresets(CIniFile *ini, GameSettings *settings)
       addComment("----------------");
    }
 
-   Vector<U32> preset;
+   Vector<U8> preset;
 
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
    {
@@ -449,7 +449,7 @@ static void loadLoadoutPresets(CIniFile *ini, GameSettings *settings)
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
       rawPresets.push_back(ini->GetValue("LoadoutPresets", "Preset" + itos(i + 1), ""));
    
-   Vector<U32> loadout;
+   Vector<U8> loadout;
 
    for(S32 i = 0; i < LOADOUT_PRESETS; i++)
    {

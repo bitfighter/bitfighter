@@ -410,41 +410,155 @@ void InstructionsUserInterface::renderPage2()
 
 
 static const char *indicatorPageHeadings[] = {
-   "SCOREBOARD INDICATORS",
+   "PLAYER INDICATORS",
    "BADGES / ACHIEVEMENTS"
 };
 
 
-static const char *indicatorInstructions1[] = {
-   "Game indicators are helps on the scoreboard or other areas that",
-   "give you more information about the game or players."
+
+
+
+static S32 renderScoreboardMarks(S32 y, S32 textSize)
+{
+   S32 symbolSize = textSize * 0.8f;
+   S32 vertAdjustFact = (textSize - symbolSize) / 2 - 1;
+
+   static const char *scoreboardMarks[][3] = {
+      { "@ ",  "ChumpChange",  "Player is a server administrator" },
+      { "+ ",  "ChumpChange",  "Player has level change permissions" },
+      { "B ",  "S_Bot",        "Player is a bot" },
+      { "  ",  "ChumpChange",  "Player is idle and is not currently playing" }
+   };
+
+   S32 markWidth = UserInterface::getStringWidth(symbolSize, scoreboardMarks[0][0]);
+
+   for(U32 i = 0; i < ARRAYSIZE(scoreboardMarks); i++)
+   {
+      S32 x = 30;
+
+      // Draw the mark
+      glColor(Colors::cyan);
+      UserInterface::drawString(x, y + vertAdjustFact, symbolSize, scoreboardMarks[i][0]);
+      x += markWidth;
+
+      // Draw sample nickname
+      if(i == 3)  
+         glColor(Colors::idlePlayerScoreboardColor);
+      else
+         glColor(Colors::standardPlayerScoreboardColor);
+
+      UserInterface::drawString(x, y, textSize, scoreboardMarks[i][1]);
+
+      // Draw description
+      x = 250;
+      glColor(Colors::yellow);
+      UserInterface::drawString(x, y, textSize, scoreboardMarks[i][2]);
+      y += 26;
+   }
+
+   y += 20;
+
+
+   static const char *otherIndicators[][2] = {
+      { "ChumpChange",  "Player is authenticated" },
+      { "ChumpChange",  "Player is busy (in menus or chatting)" }
+   }; 
+
+   // === Other marks
+   for(U32 i = 0; i < ARRAYSIZE(otherIndicators); i++)
+   {
+      S32 x = 30 + markWidth;
+
+      string name = string(otherIndicators[i][0]);
+
+      switch(i)
+      {
+         case 0:
+         {
+            glColor(Colors::white);
+            S32 width = UserInterface::getStringWidth(textSize, name.c_str());
+            drawHorizLine(x, x + width, y + textSize + 3);
+            break;
+         }
+
+         case 1:
+            name = "<<" + name + ">>";
+            x -= UserInterface::getStringWidth(textSize, "<<");
+            break;
+      }
+
+      // Draw name
+      glColor(Colors::standardPlayerScoreboardColor);
+      UserInterface::drawString(x, y, textSize, name.c_str());
+
+      // Draw description
+      x = 250;
+      glColor(Colors::yellow);
+      UserInterface::drawString(x, y, textSize, otherIndicators[i][1]);
+      y += 26;
+   }
+
+   return y;
+}
+
+
+static void renderBadgeLine(S32 y, S32 textSize, MeritBadges badge, S32 radius, const char *name, const char *descr)
+{
+   S32 x = 50;
+
+   renderBadge(x, y + radius, radius, badge);
+   x += radius + 10;
+
+   glColor(Colors::yellow);
+   x += UserInterface::drawStringAndGetWidth(x, y, textSize, name);
+
+   glColor(Colors::cyan);
+   x += UserInterface::drawStringAndGetWidth(x, y, textSize, " - ");
+
+   glColor(Colors::white);
+   UserInterface::drawString(x, y, textSize, descr);
+}
+
+
+struct BadgeDescr {
+   MeritBadges badge;
+   const char *name;
+   const char *descr;
 };
 
 
-static const char *scoreboardMarks[][3] = {
-   {"@ ",  "ChumpChange",  "Indicates the player is a server administrator"},
-   {"+ ",  "ChumpChange",  "Indicates the player has level change permissions"},
-   {"B ",  "S_Bot",  "Indicates the player is a bot"},
-   {"  ",  "ChumpChange",  "Player has gone idle and is taken out of play"}
-};
+static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
+{
+   // Heading
+   glColor(Colors::cyan);
+   UserInterface::drawCenteredString(y, descSize, indicatorPageHeadings[1]);
+   y += 26;
 
+   static const char *badgeHeadingDescription[] = {
+      "Badges may appear next to the players name on the scoreboard",
+      "More will be available in subsequent Bitfighter releases"
+   };
 
-static const char *otherIndicators[][2] = {
-   {"ChumpChange",  "Player is authenticated"},
-   {"ChumpChange",  "Player is busy chatting"}
-};
+   // Description
+   glColor(Colors::green);
+   UserInterface::drawCenteredString(y, textSize, badgeHeadingDescription[0]);
+   y += 46;
 
+   S32 radius = descSize / 2;
 
-static const char *badgeHeadingDescription[] = {
-   "Badges may appear next to the players name on the scoreboard",
-   "More will be available in subsequent Bitfighter releases"
-};
+   static BadgeDescr badgeDescrs[] = {
+      { DEVELOPER_BADGE,         "Developer", "Have code accepted into the codebase" },
+      { BADGE_TWENTY_FIVE_FLAGS, "25 Flags",  "Return 25 flags to the Nexus" }
+   };
 
+   for(S32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)
+   {
+      renderBadgeLine(y, textSize, badgeDescrs[i].badge, radius, badgeDescrs[i].name, badgeDescrs[i].descr);
+      y += 26;
+   }
 
-static const char *badgeDescriptions[] = {
-   "Developer",
-   "25 Flags"
-};
+   return y;
+}
 
 
 void InstructionsUserInterface::renderPageGameIndicators()
@@ -452,11 +566,14 @@ void InstructionsUserInterface::renderPageGameIndicators()
    S32 y = 40;
    S32 descSize = 20;
    S32 textSize = 17;
-   S32 symbolSize = textSize * 0.8f;
-   S32 vertAdjustFact = (textSize - symbolSize) / 2 - 1;
+
+   static const char *indicatorInstructions1[] = {
+      "Special indicators are helps on the scoreboard or other areas that",
+      "give you more information about the game or players."
+   };
 
    // Description
-   glColor(Colors::white);
+   glColor(Colors::green);
    for(U32 i = 0; i < ARRAYSIZE(indicatorInstructions1); i++)
    {
       drawCenteredString(y, descSize, indicatorInstructions1[i]);
@@ -465,95 +582,12 @@ void InstructionsUserInterface::renderPageGameIndicators()
 
    y += 20;
 
-   glColor(Colors::yellow);
+   glColor(Colors::cyan);
    drawCenteredString(y, descSize, indicatorPageHeadings[0]);
    y += 26;
 
-   // === Scoreboard marks
-   for(U32 i = 0; i < ARRAYSIZE(scoreboardMarks); i++)
-   {
-      S32 x = 30;
-
-      // Draw the mark
-      glColor(Colors::cyan);
-      x += drawStringAndGetWidth(x, y + vertAdjustFact, symbolSize, scoreboardMarks[i][0]);
-
-      // Draw sample nickname
-      if(i == 3)  // Hacky for idle player
-         glColor(Colors::gray50);
-      else
-         glColor(Colors::white);
-      drawString(x, y, textSize, scoreboardMarks[i][1]);
-
-      // Draw description
-      x = 250;
-      glColor(Colors::white);
-      drawString(x, y, textSize, scoreboardMarks[i][2]);
-      y += 26;
-   }
-
-   y += 20;
-
-   // === Other
-   for(U32 i = 0; i < ARRAYSIZE(otherIndicators); i++)
-   {
-      S32 x = 30;
-
-      string name = string(otherIndicators[i][0]);
-
-      switch(i)
-      {
-         case 0:
-         {
-            S32 width = getStringWidth(textSize, name.c_str());
-            drawHorizLine(x, x + width, y + textSize + 3);
-            break;
-         }
-         case 1:
-            name = "<<" + name + ">>";
-            break;
-      }
-
-      // Draw name
-      glColor(Colors::white);
-      drawString(x, y, textSize, name.c_str());
-
-      // Draw description
-      x = 250;
-      glColor(Colors::white);
-      drawString(x, y, textSize, otherIndicators[i][1]);
-      y += 26;
-   }
-
-   y += 20;
-
-   // === Badges
-   // Heading
-   glColor(Colors::yellow);
-   drawCenteredString(y, descSize, indicatorPageHeadings[1]);
-   y += 26;
-
-   // Description
-   glColor(Colors::white);
-   drawCenteredString(y, textSize, badgeHeadingDescription[0]);
-   y += 46;
-
-   S32 radius = descSize / 2;
-   S32 x = 50;
-
-   // Developer
-   renderDeveloperBadge(x, y + radius, radius);
-   x += radius + 10;
-   glColor(Colors::white);
-   drawString(x, y, textSize, badgeDescriptions[0]);
-   y += 26;
-
-   // 25 flags badge
-   x = 50;
-   render25FlagsBadge(x, y + radius, radius);
-   x += radius + 10;
-   glColor(Colors::white);
-   drawString(x, y, textSize, badgeDescriptions[1]);
+   y = renderScoreboardMarks(y, textSize) + 60;
+   y = renderBadges(y, textSize, descSize);
 }
 
 
@@ -603,8 +637,8 @@ void InstructionsUserInterface::renderModulesPage()
       glColor(Colors::yellow);
       x += drawStringAndGetWidth(x, y, textsize, moduleDescriptions[i][0]);
 
-      // Hacky special case  TODO: find a way to generalize this
-      if(i == 3 || i == 6)
+      // If first element is blank, it is a continution of the previous description
+      if(strcmp(moduleDescriptions[i][0], "") == 0)
       {
          x += getStringWidth(textsize, moduleDescriptions[i - 1][0]);
          y -= 20;
@@ -730,6 +764,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
    U32 objectsPerPage = 6;
    U32 startIndex = index * objectsPerPage;
    U32 endIndex = startIndex + objectsPerPage;
+
    if(endIndex > GameObjectCount)
       endIndex = GameObjectCount;
 
@@ -753,10 +788,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       glTranslate(objStart);
       glScale(0.7f);
 
-
-      // TODO: Do this once, elsewhere
-      Vector<Point> speedZoneRenderPoints;
-      SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), 1, speedZoneRenderPoints);
 
       switch(i)
       {
@@ -853,8 +884,13 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
 
          case 23:    // SpeedZone
-            renderSpeedZone(&speedZoneRenderPoints, getGame()->getCurrentTime());
+         {
+            Vector<Point> speedZoneRenderPoints;
+            SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0), 1, speedZoneRenderPoints);
+
+            renderSpeedZone(speedZoneRenderPoints, getGame()->getCurrentTime());
             break;
+         }
 
          case 24:    // TestItem
             renderTestItem(Point(0,0));

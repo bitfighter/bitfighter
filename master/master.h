@@ -226,6 +226,7 @@ public:
    HighScores *getHighScores(S32 scoresPerGroup);
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (Zap::VersionedGameStats stats));
+   TNL_DECLARE_RPC_OVERRIDE(s2mLogLoadout, (StringTableEntry playerNick, Vector<U8> loadout));
    TNL_DECLARE_RPC_OVERRIDE(s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (string hash, string levelName, string creator, 
                                                StringTableEntry gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds));

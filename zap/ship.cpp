@@ -194,7 +194,6 @@ ClientInfo *Ship::getClientInfo()
 }
 
 
-
 // Push a LuaShip proxy onto the stack
 void Ship::push(lua_State *L)
 {
@@ -569,7 +568,7 @@ void Ship::controlMoveReplayComplete()
    Point delta = mMoveState[ActualState].pos - mMoveState[RenderState].pos;
    F32 deltaLen = delta.len();
 
-   // if the delta is either very small, or greater than the
+   // If the delta is either very small, or greater than the
    // max interpolation threshold, just warp to the new position
    if(deltaLen <= 0.5 || deltaLen > MaxControlObjectInterpDistance)
    {
@@ -660,9 +659,9 @@ void Ship::idle(GameObject::IdleCallPath path)
          // as having changed Position state.  An optimization
          // here would check the before and after positions
          // so as to not update unmoving ships.
-         if(    mMoveState[RenderState].angle != mMoveState[ActualState].angle
-             || mMoveState[RenderState].pos != mMoveState[ActualState].pos
-             || mMoveState[RenderState].vel != mMoveState[ActualState].vel )
+         if(mMoveState[RenderState].angle != mMoveState[ActualState].angle ||
+            mMoveState[RenderState].pos   != mMoveState[ActualState].pos   ||
+            mMoveState[RenderState].vel   != mMoveState[ActualState].vel )
             setMaskBits(PositionMask);
 
          mMoveState[RenderState] = mMoveState[ActualState];
@@ -739,6 +738,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    }
 #endif
 }
+
 
 static Vector<DatabaseObject *> foundObjects;
 
@@ -1618,7 +1618,7 @@ U32 Ship::getSelectedWeaponIndex()
 
 
 // Fills loadout 
-void Ship::getLoadout(Vector<U32> &loadout)
+void Ship::getLoadout(Vector<U8> &loadout)
 {
    loadout.clear();
    for(S32 i = 0; i < ShipModuleCount; i++)
@@ -1629,14 +1629,14 @@ void Ship::getLoadout(Vector<U32> &loadout)
 }
 
 
-bool Ship::isLoadoutSameAsCurrent(const Vector<U32> &loadout)
+bool Ship::isLoadoutSameAsCurrent(const Vector<U8> &loadout)
 {
    for(S32 i = 0; i < ShipModuleCount; i++)
-      if(loadout[i] != (U32)mModule[i])
+      if(loadout[i] != (U8)mModule[i])
          return false;
 
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      if(loadout[i] != (U32)mWeapon[i - ShipModuleCount])
+      if(loadout[i] != (U8)mWeapon[i - ShipModuleCount])
          return false;
 
    return true;
@@ -1645,7 +1645,7 @@ bool Ship::isLoadoutSameAsCurrent(const Vector<U32> &loadout)
 
 // This actualizes the requested loadout... when, for example the user enters a loadout zone
 // To set the "on-deck" loadout, use GameType->setClientShipLoadout()
-void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
+void Ship::setLoadout(const Vector<U8> &loadout, bool silent)
 {
    // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
    if(isLoadoutSameAsCurrent(loadout))      // Don't bother if ship config hasn't changed
@@ -1713,7 +1713,7 @@ void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 
 
 // Will return an empty string if loadout looks invalid
-string Ship::loadoutToString(const Vector<U32> &loadout)
+string Ship::loadoutToString(const Vector<U8> &loadout)
 {
    // Only expect missized loadout when presets haven't all been set, and loadout.size will be 0
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)
@@ -1736,7 +1736,7 @@ string Ship::loadoutToString(const Vector<U32> &loadout)
 // Fills loadout with appropriate values; returns true if string looks valid, false if not
 // Note that even if we are able to parse the loadout successfully, it might still be invalid for a 
 // particular server or gameType... engineer, for example, is not allowed everywhere.
-bool Ship::stringToLoadout(string loadoutStr, Vector<U32> &loadout)
+bool Ship::stringToLoadout(string loadoutStr, Vector<U8> &loadout)
 {
    loadout.clear();
 
@@ -2208,8 +2208,8 @@ void Ship::calcThrustComponents(F32 *thrusts)
       Point shipDirs[4];
       shipDirs[0].set(cos(mMoveState[RenderState].angle), sin(mMoveState[RenderState].angle) );
       shipDirs[1].set(-shipDirs[0]);
-      shipDirs[2].set(shipDirs[0].y, -shipDirs[0].x);
-      shipDirs[3].set(-shipDirs[0].y, shipDirs[0].x);
+      shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
+      shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
 
       for(U32 i = 0; i < ARRAYSIZE(shipDirs); i++)
          thrusts[i] = shipDirs[i].dot(velDir);
@@ -2381,13 +2381,13 @@ S32 LuaShip::getMountedItems(lua_State *L)
 // Return current loadout
 S32 LuaShip::getCurrLoadout(lua_State *L)
 {
-   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+   U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U32) thisShip->getModule(i);
+      loadoutItems[i] = (U8)thisShip->getModule(i);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U32) thisShip->getWeapon(i);
+      loadoutItems[i + ShipModuleCount] = (U8)thisShip->getWeapon(i);
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
@@ -2399,10 +2399,10 @@ S32 LuaShip::getCurrLoadout(lua_State *L)
 // Return requested loadout
 S32 LuaShip::getReqLoadout(lua_State *L)
 {
-   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+   U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
    ClientInfo *clientInfo = thisShip->getOwner();
 
-   const Vector<U32> requestedLoadout = clientInfo ? clientInfo->getLoadout() : Vector<U32>();
+   const Vector<U8> requestedLoadout = clientInfo ? clientInfo->getLoadout() : Vector<U8>();
 
    if(!clientInfo || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout
       return getCurrLoadout(L);

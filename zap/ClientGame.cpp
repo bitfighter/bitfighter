@@ -386,7 +386,7 @@ void ClientGame::updatePlayerNameAndPassword(const string &name, const string &p
 }
 
 
-void ClientGame::displayShipDesignChangedMessage(const Vector<U32> &loadout, const char *msgToShowIfLoadoutsAreTheSame)
+void ClientGame::displayShipDesignChangedMessage(const Vector<U8> &loadout, const char *msgToShowIfLoadoutsAreTheSame)
 {
    if(!getConnectionToServer())
       return;

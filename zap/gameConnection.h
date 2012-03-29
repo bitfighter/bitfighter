@@ -96,7 +96,7 @@ private:
    void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message);    // Helper function
 
    StringTableEntry mServerName;
-   Vector<U32> mLoadout;
+   Vector<U8> mLoadout;
    GameSettings *mSettings;
 
 public:
@@ -242,7 +242,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCommanderMap, ());
    TNL_DECLARE_RPC(c2sReleaseCommanderMap, ());
 
-   TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U32> loadout));     // Client has changed his loadout configuration
+   TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U8> loadout));     // Client has changed his loadout configuration
 
    TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx,
                    StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
@@ -293,7 +293,7 @@ public:
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 
-   const Vector<U32> &getLoadout();
+   const Vector<U8> &getLoadout();
 
    static const U8 CONNECT_VERSION;  // may be useful in future version (such as 016a)
    U8 mConnectionVersion;  // the CONNECT_VERSION of the other side of this connection

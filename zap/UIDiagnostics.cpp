@@ -595,10 +595,10 @@ void DiagnosticUserInterface::render()
       
       for(j = 0; j < 4 && i < allLevels.length(); j++)
       {
-         for(; getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < 
-               gScreenInfo.getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length(); i++)   // first arg empty
+         while(getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < 
+               gScreenInfo.getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length()) 
          {
-            ;     // Do nothing...
+            i++;
          }
 
          drawString(horizMargin, ypos, textsize - 6, allLevels.substr(k, i - k).c_str());
@@ -700,10 +700,10 @@ void DiagnosticUserInterface::render()
          drawStar(Point(x,y), 7, rad - 1, rad/2);
 
          x += 3*rad;
-         render25FlagsBadge(x, y, rad);
+         renderBadge(x, y, rad, BADGE_TWENTY_FIVE_FLAGS);
 
          x += 3*rad;
-         renderDeveloperBadge(x, y, rad);
+         renderBadge(x, y, rad, DEVELOPER_BADGE);
 
          ///// After all badge rendering
          glPopMatrix();

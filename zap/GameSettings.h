@@ -152,7 +152,7 @@ private:
 
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
 
-   Vector<Vector<U32> > mLoadoutPresets;
+   Vector<Vector<U8> > mLoadoutPresets;
 
 public:
    GameSettings();    // Constructor
@@ -238,8 +238,8 @@ public:
    string getLevelDir(SettingSource source);
 
 
-   bool getLoadoutPreset(S32 index, Vector<U32> &preset);
-   void setLoadoutPreset(S32 index, const Vector<U32> &preset);
+   bool getLoadoutPreset(S32 index, Vector<U8> &preset);
+   void setLoadoutPreset(S32 index, const Vector<U8> &preset);
 
    // Other methods
    void saveLevelChangePassword(const string &serverName, const string &password);

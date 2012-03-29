@@ -1688,18 +1688,18 @@ void renderWallEdges(const Vector<Point> *edges, const Point &offset, const Colo
 }
 
 
-void renderSpeedZone(const Vector<Point> *points, U32 time)
+void renderSpeedZone(const Vector<Point> &points, U32 time)
 {
    glColor(Colors::red);
 
    for(S32 j = 0; j < 2; j++)
    {
-      S32 start = j * points->size() / 2;    // GoFast comes in two equal shapes
+      S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
 
       glEnableClientState(GL_VERTEX_ARRAY);
 
-      glVertexPointer(2, GL_FLOAT, sizeof(Point), points->address());    
-      glDrawArrays(GL_LINE_LOOP, start, points->size() / 2);
+      glVertexPointer(2, GL_FLOAT, sizeof(Point), points.address());    
+      glDrawArrays(GL_LINE_LOOP, start, points.size() / 2);
 
       glDisableClientState(GL_VERTEX_ARRAY);
    }
@@ -2289,17 +2289,33 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 void renderDeveloperBadge(F32 x, F32 y, F32 rad)
 {
    F32 rm2 = rad - 2;
-   F32 rm23 = rm2 * .333;
+   F32 rm26 = rm2 * .666;
 
    glColor(Colors::green80);
    glPointSize(rad * 0.4f);
    glBegin(GL_POINTS);
-      glVertex2f(x, y - (2*rm23));
-      glVertex2f(x + (2*rm23), y);
-      glVertex2f(x - (2*rm23), y + (2*rm23));
-      glVertex2f(x, y + (2*rm23));
-      glVertex2f(x + (2*rm23), y + (2*rm23));
+      glVertex2f(x, y - rm26);
+      glVertex2f(x + rm26, y);
+      glVertex2f(x -rm26, y + rm26);
+      glVertex2f(x, y + rm26);
+      glVertex2f(x + rm26, y + rm26);
    glEnd();
+}
+
+
+void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
+{
+   switch(S32(badge))
+   {
+      case DEVELOPER_BADGE:
+         renderDeveloperBadge(x, y, rad);
+         return;
+      case BADGE_TWENTY_FIVE_FLAGS:
+         render25FlagsBadge(x, y, rad);
+         return;
+      default:
+         TNLAssert(false, "Unknown Badge!");
+   }
 }
 
 

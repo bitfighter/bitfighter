@@ -45,7 +45,7 @@ class SpeedZone;
 
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
-static const U32 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
+static const U8 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
 
 
 //////////////////////////////////////////////
@@ -279,14 +279,14 @@ public:
    F32 getSensorEquipZoomFraction();
    Point getAimVector();
 
-   void getLoadout(Vector<U32> &loadout);    // Fills loadout
-   void setLoadout(const Vector<U32> &loadout, bool silent = false);
-   bool isLoadoutSameAsCurrent(const Vector<U32> &loadout);
+   void getLoadout(Vector<U8> &loadout);    // Fills loadout
+   void setLoadout(const Vector<U8> &loadout, bool silent = false);
+   bool isLoadoutSameAsCurrent(const Vector<U8> &loadout);
    void setDefaultLoadout();                 // Set the ship's loadout to the default values
 
    ClientInfo *getClientInfo();
-   static string loadoutToString(const Vector<U32> &loadout);
-   static bool stringToLoadout(string loadoutStr, Vector<U32> &loadout);
+   static string loadoutToString(const Vector<U8> &loadout);
+   static bool stringToLoadout(string loadoutStr, Vector<U8> &loadout);
 
 
    virtual void idle(IdleCallPath path);

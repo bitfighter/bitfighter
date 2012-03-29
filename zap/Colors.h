@@ -79,6 +79,8 @@ namespace Colors
 
    // Some special colors
    const Color menuHelpColor(green);
+   const Color idlePlayerScoreboardColor(gray50);
+   const Color standardPlayerScoreboardColor(white);
 };
 
 }

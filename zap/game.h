@@ -113,7 +113,7 @@ private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class
    Statistics mStatistics;       // Statistics tracker
    SafePtr<Ship> mShip;          // SafePtr will return NULL if ship object is deleted
-   Vector<U32> mLoadout;
+   Vector<U8> mLoadout;
    bool mNeedToCheckAuthenticationWithMaster;
 
 protected:
@@ -145,13 +145,13 @@ public:
    void setScore(S32 score);
    void addScore(S32 score);
 
-   const Vector<U32> &getLoadout();
+   const Vector<U8> &getLoadout();
    Timer respawnTimer;
 
-   Vector<U32> mOldLoadout;            // Server: to respawn with old loadout  Client: to check if using same loadout configuration
+   Vector<U8> mOldLoadout;            // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    void resetLoadout(bool levelHasLoadoutZone);
    void resetLoadout();
-   void sRequestLoadout(Vector<U32> &loadout);
+   void sRequestLoadout(Vector<U8> &loadout);
 
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();

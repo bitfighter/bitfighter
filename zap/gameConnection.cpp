@@ -878,7 +878,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sReleaseCommanderMap, (), (),
 
 
 // Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U32> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U8> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
    getClientInfo()->sRequestLoadout(loadout);
 }
@@ -1163,24 +1163,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMa
    mClientGame->cancelShutdown();
 #endif
 }
-
-
-//// Server tells clients that another player is idle and will not be joining us for the moment
-//TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsSpawnDelayed, (StringTableEntry name, bool isDelayed), (name, isDelayed), 
-//                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
-//{
-//#ifndef ZAP_DEDICATED
-//   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
-//
-//   // Might not find clientInfo if level just cycled and players haven't been re-sent to client yet.  In which case,
-//   // this is ok, since spawn-delay status will be sent with s2cAddClient().
-//
-//   if(!clientInfo)      
-//      return;
-//
-//   clientInfo->setSpawnDelayed(NULL, isDelayed);     // Calls remoteClientInfo version
-//#endif
-//}
 
 
 // Server tells clients that another player is idle and will not be joining us for the moment
@@ -1816,7 +1798,7 @@ bool GameConnection::isInCommanderMap()
 }
 
 
-const Vector<U32> &GameConnection::getLoadout()
+const Vector<U8> &GameConnection::getLoadout()
 {
    return mLoadout;
 }

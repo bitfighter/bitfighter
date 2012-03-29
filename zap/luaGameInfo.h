@@ -130,11 +130,11 @@ public:
 class LuaLoadout : public LuaObject
 {
 private:
-   U32 mLoadout[ShipModuleCount + ShipWeaponCount];
+   U8 mLoadout[ShipModuleCount + ShipWeaponCount];
 
 public:
    LuaLoadout(lua_State *L);        // Lua constructor
-   LuaLoadout(U32 loadoutItems[]);  // C++ constructor
+   LuaLoadout(U8 loadoutItems[]);   // C++ constructor
 
    virtual ~LuaLoadout();                   // Destructor
 
@@ -149,7 +149,7 @@ public:
    S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
    S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
 
-   U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
+   U8 getLoadoutItem(S32 indx);     // Helper function, not accessible from Lua
 };
 
 

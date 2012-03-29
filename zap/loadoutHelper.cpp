@@ -266,7 +266,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
    {
       // Load the loadouts into a vector, and send them off to the GameConnection
-      Vector<U32> loadout;
+      Vector<U8> loadout;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
          loadout.push_back(gLoadoutModules[mModule[i]].index);

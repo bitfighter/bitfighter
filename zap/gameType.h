@@ -429,10 +429,10 @@ public:
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
-   void SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout);
+   void SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout);
    void SRV_updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-   string validateLoadout(const Vector<U32> &loadout);
-   void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U32> &loadout, bool silent = false);
+   string validateLoadout(const Vector<U8> &loadout);
+   void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent = false);
 
 
    bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
@@ -560,7 +560,7 @@ public:
    TNL_DECLARE_RPC(c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex));
    TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
 
-   TNL_DECLARE_RPC(s2cSetIsIdle, (StringTableEntry name, bool idle));
+   TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle));
 
    TNL_DECLARE_CLASS(GameType);
 

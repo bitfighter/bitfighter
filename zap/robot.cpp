@@ -699,7 +699,7 @@ S32 LuaRobot::setReqLoadout(lua_State *L)
    checkArgCount(L, 1, "Robot:setReqLoadout()");
 
    LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
-   Vector<U32> vec;
+   Vector<U8> vec;
 
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       vec.push_back(loadout->getLoadoutItem(i));
@@ -715,7 +715,7 @@ S32 LuaRobot::setCurrLoadout(lua_State *L)
    checkArgCount(L, 1, "Robot:setCurrLoadout()");
 
    LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
-   Vector<U32> vec;
+   Vector<U8> vec;
 
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       vec.push_back(loadout->getLoadoutItem(i));
