@@ -280,7 +280,7 @@ public:
    Point getAimVector();
 
    void getLoadout(Vector<U8> &loadout);    // Fills loadout
-   void setLoadout(const Vector<U8> &loadout, bool silent = false);
+   bool setLoadout(const Vector<U8> &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const Vector<U8> &loadout);
    void setDefaultLoadout();                 // Set the ship's loadout to the default values
 

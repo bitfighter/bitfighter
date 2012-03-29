@@ -1645,11 +1645,12 @@ bool Ship::isLoadoutSameAsCurrent(const Vector<U8> &loadout)
 
 // This actualizes the requested loadout... when, for example the user enters a loadout zone
 // To set the "on-deck" loadout, use GameType->setClientShipLoadout()
-void Ship::setLoadout(const Vector<U8> &loadout, bool silent)
+// Returns true if loadout has changed
+bool Ship::setLoadout(const Vector<U8> &loadout, bool silent)
 {
    // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
    if(isLoadoutSameAsCurrent(loadout))      // Don't bother if ship config hasn't changed
-      return;
+      return false;
 
    if(getClientInfo())
       getClientInfo()->getStatistics()->mChangedLoadout++;
@@ -1665,7 +1666,7 @@ void Ship::setLoadout(const Vector<U8> &loadout, bool silent)
    setMaskBits(LoadoutMask);
 
    if(silent) 
-      return;
+      return true;
 
    // Try to see if we can maintain the same weapon we had before.
    S32 i;
@@ -1708,7 +1709,7 @@ void Ship::setLoadout(const Vector<U8> &loadout, bool silent)
       cc->s2cDisplayMessage(GameConnection::ColorAqua, SFXUIBoop, msg);
    }
 
-   return;
+   return true;
 }
 
 

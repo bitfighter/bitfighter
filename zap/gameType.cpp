@@ -1474,14 +1474,18 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 
    Ship *ship = clientInfo->getShip();
 
+   bool loadoutChanged = false;
    if(ship)
-      ship->setLoadout(loadout, silent);
+      loadoutChanged = ship->setLoadout(loadout, silent);
 
-   // Send loadout to the master server for logging purposes
-   MasterServerConnection *masterConn = mGame->getConnectionToMaster();
+   if(loadoutChanged)
+   {
+      // Send loadout to the master server for logging purposes
+      MasterServerConnection *masterConn = mGame->getConnectionToMaster();
 
-   if(masterConn)
-      masterConn->s2mLogLoadout(clientInfo->getName(), loadout);
+      if(masterConn)
+         masterConn->s2mLogLoadout(clientInfo->getName(), loadout);
+   }
 }
 
 
