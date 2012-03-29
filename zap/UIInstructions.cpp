@@ -551,7 +551,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
       { BADGE_TWENTY_FIVE_FLAGS, "25 Flags",  "Return 25 flags to the Nexus" }
    };
 
-   for(S32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)
+   for(U32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)
    {
       renderBadgeLine(y, textSize, badgeDescrs[i].badge, radius, badgeDescrs[i].name, badgeDescrs[i].descr);
       y += 26;
