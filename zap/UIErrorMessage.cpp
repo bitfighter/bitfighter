@@ -93,7 +93,8 @@ bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
 void AbstractMessageUserInterface::render()
 {
-   getUIManager()->renderPrevUI(this);
+   if(getUIManager()->getPrevUI() != this)
+      getUIManager()->renderPrevUI(this);
    
    if(mPresentationId == 0)      // Standard presentation
       renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
