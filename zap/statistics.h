@@ -59,6 +59,8 @@ private:
    U32 mTotalSuicides;     // Total suicides over the lifetime of this connection
    U32 mGamesPlayed;       // Number of games played, obviously
 
+   Vector<U32> mLoadouts;
+
 public:
    U32 mFlagPickup;
    U32 mFlagDrop;
@@ -103,6 +105,8 @@ public:
    void addFratricide();   // Player killed teammate
    U32 getFratricides();   // Report cumulated fratricides
 
+   void addLoadout(U32 loadoutHash);  // Add loadout hash
+   Vector<U32> getLoadouts();         // Return all loadouts
 
    F32 getCalculatedRating();
 

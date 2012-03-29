@@ -54,6 +54,11 @@ struct ModuleStats
    U32 seconds;
 };
 
+struct LoadoutStats
+{
+   U32 loadoutHash;
+};
+
 struct PlayerStats
 {
    string name;
@@ -68,6 +73,7 @@ struct PlayerStats
    U32 switchedTeamCount;
    Vector<WeaponStats> weaponStats;
    Vector<ModuleStats> moduleStats;
+   Vector<LoadoutStats> loadoutStats;
 
    U32 flagPickup;
    U32 flagDrop;

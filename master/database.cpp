@@ -97,6 +97,18 @@ public:
 #endif
 
 
+static void insertStatsLoadout(const DbQuery &query, U64 playerId, const Vector<LoadoutStats> loadoutStats)
+{
+   for(S32 i = 0; i < loadoutStats.size(); i++)
+   {
+         string sql = "INSERT INTO stats_player_loadout(stats_player_id, loadout) "
+                       "VALUES(" + itos(playerId) + ", " + itos(loadoutStats[i].loadoutHash) + ");";
+
+         query.runQuery(sql);
+   }
+}
+
+
 static void insertStatsShots(const DbQuery &query, U64 playerId, const Vector<WeaponStats> weaponStats)
 {
    for(S32 i = 0; i < weaponStats.size(); i++)
@@ -136,6 +148,7 @@ static U64 insertStatsPlayer(const DbQuery &query, const PlayerStats *playerStat
    U64 playerId = query.runQuery(sql);
 
    insertStatsShots(query, playerId, playerStats->weaponStats);
+   insertStatsLoadout(query, playerId, playerStats->loadoutStats);
 
    return playerId;
 }
@@ -650,6 +663,16 @@ string DatabaseWriter::getSqliteSchema() {
       "   FOREIGN KEY(stats_player_id) REFERENCES stats_player(stats_player_id));"
          
       "   CREATE UNIQUE INDEX stats_player_shots_player_id_weapon on stats_player_shots(stats_player_id, weapon COLLATE BINARY);"
+
+      /* stats_player_shots */
+      "DROP TABLE IF EXISTS stats_player_loadout;"
+      "CREATE TABLE  stats_player_loadout ("
+      "   stats_player_loadout_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+      "   stats_player_id INTEGER NOT NULL,"
+      "   loadout INTEGER NOT NULL,"
+      "   FOREIGN KEY(stats_player_id) REFERENCES stats_player(stats_player_id));"
+
+      "CREATE INDEX stats_player_loadout_stats_player_id ON stats_player_loadout(stats_player_id);"
 
       /* level info */
 

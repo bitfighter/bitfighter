@@ -211,6 +211,18 @@ U32 Statistics::getFratricides()
 }
 
 
+void Statistics::addLoadout(U32 loadoutHash)
+{
+   mLoadouts.push_back(loadoutHash);
+}
+
+
+Vector<U32> Statistics::getLoadouts()
+{
+   return mLoadouts;
+}
+
+
 // Return a measure of a player's strength.
 // Right now this is roughly a kill - death / kill + death ratio
 // Better might be: https://secure.wikimedia.org/wikipedia/en/wiki/Elo_rating_system

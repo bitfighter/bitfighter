@@ -1029,6 +1029,17 @@ VersionedGameStats GameType::getGameStats()
                playerStats->moduleStats.push_back(moduleStats);
          }
 
+
+         Vector<U32> loadouts = statistics->getLoadouts();
+
+         for(S32 i = 0; i < loadouts.size(); i++)
+         {
+            LoadoutStats loadoutStats;
+            loadoutStats.loadoutHash = loadouts[i];
+            if(loadoutStats.loadoutHash != 0)
+               playerStats->loadoutStats.push_back(loadoutStats);
+         }
+
          gameStats->playerCount++;
       }
    }
@@ -1480,11 +1491,14 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 
    if(loadoutChanged)
    {
-      // Send loadout to the master server for logging purposes
-      MasterServerConnection *masterConn = mGame->getConnectionToMaster();
+      U32 loadoutHash = 0;
+      for(S32 i = 0; i < ShipModuleCount; i++)
+         loadoutHash |= BIT(loadout[i]);
 
-      if(masterConn)
-         masterConn->s2mLogLoadout(clientInfo->getName(), loadout);
+      for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+         loadoutHash |= BIT(loadout[i]) << 16;
+
+      clientInfo->getStatistics()->addLoadout(loadoutHash);
    }
 }
 
