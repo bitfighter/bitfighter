@@ -431,7 +431,7 @@ static const char *scoreboardMarks[][3] = {
 
 static const char *otherIndicators[][2] = {
    {"ChumpChange",  "Player is authenticated"},
-   {"ChumpChange",  "Player is busy chatting"}
+   {"ChumpChange",  "Player is busy (in menus or chatting)"}
 };
 
 
