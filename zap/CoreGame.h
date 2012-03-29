@@ -207,6 +207,9 @@ public:
    void renderEditor(F32 currentScale);      // Render item in the editor
    void renderDock();
 
+   bool canBeHostile();
+   bool canBeNeutral();
+
    ///// Lua interface
 public:
    CoreItem(lua_State *L);    // Constructor

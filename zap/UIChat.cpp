@@ -536,7 +536,11 @@ void ChatUserInterface::onOutGameChat()
 
 void ChatUserInterface::onEscape()
 {
-   leaveGlobalChat();
+   // Don't leave if UIQueryServers is a parent unless we're in-game..
+   // Is UIQueryServers supposed to be a parent of UIGame??
+   if(!getUIManager()->cameFrom(QueryServersScreenUI) || getUIManager()->cameFrom(GameUI))
+      leaveGlobalChat();
+
    getUIManager()->reactivatePrevUI();
    playBoop();
 }

@@ -1015,6 +1015,18 @@ void CoreItem::onItemExploded(Point pos)
 #endif
 
 
+bool CoreItem::canBeHostile()
+{
+   return false;
+}
+
+
+bool CoreItem::canBeNeutral()
+{
+   return false;
+}
+
+
 const char CoreItem::className[] = "CoreItem";      // Class name as it appears to Lua scripts
 
 // Lua constructor

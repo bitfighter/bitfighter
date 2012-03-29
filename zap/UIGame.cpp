@@ -269,6 +269,9 @@ void GameUserInterface::onReactivate()
    // Removed because coming out of help screen would deactivate helpers and chat boxes
 //   enterMode(PlayMode);
 
+   if(mCurrentChatType == NoChat)
+      setBusyChatting(false);
+
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
       mModPrimaryActivated[i] = false;
@@ -1180,6 +1183,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(checkInputCode(settings, InputCodeManager::BINDING_HELP, inputCode))   // Turn on help screen
    {
       playBoop();
+      setBusyChatting(true);
 
       // If we have a helper, let that determine what happens when the help key is pressed.  Otherwise, show help normally.
       if(mHelper)
