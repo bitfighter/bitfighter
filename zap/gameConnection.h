@@ -264,7 +264,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
-   TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool isDelayed));
+  
    TNL_DECLARE_RPC(s2cSetIsBusy, (StringTableEntry name, bool isBusy));
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool isBusy));
