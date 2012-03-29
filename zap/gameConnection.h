@@ -84,7 +84,6 @@ private:
    bool mInCommanderMap;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
-   bool mIsBusy;                    // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
    bool mWantsScoreboardUpdates;    // Indicates if client has requested scoreboard streaming (e.g. pressing Tab key)
    bool mReadyForRegularGhosts;
@@ -188,9 +187,6 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   bool isBusy();
-   void setIsBusy(bool busy);
-
    void sendLevelList();
 
    bool isReadyForRegularGhosts();
@@ -268,9 +264,10 @@ public:
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
-   TNL_DECLARE_RPC(s2cSetIsIdle, (StringTableEntry name, bool idle));
+   TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool isDelayed));
+   TNL_DECLARE_RPC(s2cSetIsBusy, (StringTableEntry name, bool isBusy));
 
-   TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
+   TNL_DECLARE_RPC(c2sSetIsBusy, (bool isBusy));
 
    TNL_DECLARE_RPC(c2sSetServerAlertVolume, (S8 vol));
    TNL_DECLARE_RPC(c2sRenameClient, (StringTableEntry newName));

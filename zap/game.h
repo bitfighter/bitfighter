@@ -128,6 +128,7 @@ protected:
    bool mIsRobot;
    bool mIsAuthenticated;
    bool mSpawnDelayed;
+   bool mIsBusy;
    Int<BADGE_COUNT> mBadges;
 
 public:
@@ -158,6 +159,9 @@ public:
    bool shouldDelaySpawn();
    bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
    virtual void setSpawnDelayed(const Game *game, bool spawnDelayed) = 0;
+
+   bool isBusy();
+   void setIsBusy(bool isBusy);
 
    Ship *getShip();                    // NULL on client
    void setShip(Ship *ship);
@@ -252,7 +256,7 @@ private:
 
 public:
    RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
-                    bool isRobot, bool isAdmin, bool isSpawnDelayed);  
+                    bool isRobot, bool isAdmin, bool isSpawnDelayed, bool isBusy);  
    virtual ~RemoteClientInfo();      
    // Destructor
    void initialize();

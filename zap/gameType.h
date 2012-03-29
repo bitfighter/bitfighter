@@ -463,7 +463,7 @@ public:
    TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                  bool isMyClient, bool isAdmin, bool isRobot, bool isSpawnDelayed, bool playAlert));
+                                  bool isMyClient, bool isAdmin, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert));
    TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, MAX_TEAMS> teamIndex));
    TNL_DECLARE_RPC(s2cClientBecameAdmin, (StringTableEntry clientName));
    TNL_DECLARE_RPC(s2cClientBecameLevelChanger, (StringTableEntry clientName));

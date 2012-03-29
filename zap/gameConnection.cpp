@@ -101,7 +101,6 @@ void GameConnection::initialize()
    mServerGame = NULL;
    setTranslatesStrings();
    mInCommanderMap = false;
-   mIsBusy = false;
    mGotPermissionsReply = false;
    mWaitingForPermissionsReply = false;
    mSwitchTimer.reset(0);
@@ -1167,8 +1166,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMa
 
 
 // Server tells clients that another player is idle and will not be joining us for the moment
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsSpawnDelayed, (StringTableEntry name, bool isDelayed), (name, isDelayed), 
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = mClientGame->findClientInfo(name);
@@ -1179,15 +1178,46 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idl
    if(!clientInfo)      
       return;
 
-   clientInfo->setSpawnDelayed(NULL, idle);     // Calls remoteClientInfo version
+   clientInfo->setSpawnDelayed(NULL, isDelayed);     // Calls remoteClientInfo version
+#endif
+}
+
+
+// Server tells clients that another player is idle and will not be joining us for the moment
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsBusy, (StringTableEntry name, bool isBusy), (name, isBusy), 
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+#ifndef ZAP_DEDICATED
+   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
+
+   // Might not find clientInfo if level just cycled and players haven't been re-sent to client yet.  In which case,
+   // this is ok, since busy status will be sent with s2cAddClient().
+
+   if(!clientInfo)      
+      return;
+
+   clientInfo->setIsBusy(isBusy);     
 #endif
 }
 
 
 // Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   setIsBusy(busy);
+   if(mClientInfo->isBusy() == isBusy)
+      return;
+
+   for(S32 i = 0; i < mServerGame->getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = mServerGame->getClientInfo(i);
+
+      if(clientInfo->isRobot())
+         continue;
+
+      clientInfo->getConnection()->s2cSetIsBusy(mClientInfo->getName(), isBusy);
+   }
+
+   mClientInfo->setIsBusy(isBusy);
 }
 
 
@@ -1711,21 +1741,6 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *r
 #endif
 
    }
-}
-
-
-bool GameConnection::isBusy()
-{
-   if (!this)
-      return false;
-   else
-      return mIsBusy;
-}
-
-
-void GameConnection::setIsBusy(bool busy)
-{
-   mIsBusy = busy;
 }
 
 

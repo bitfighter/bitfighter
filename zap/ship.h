@@ -114,7 +114,6 @@ class Ship : public MoveObject
    typedef MoveObject Parent;
 
 private:
-   bool mIsBusy;
    bool mIsRobot;
 
    U32 mRespawnTime;

@@ -119,8 +119,6 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    else
       hasExploded = false;    // Client needs this false for unpackUpdate
 
-   mIsBusy = false;           // On client, will be updated in initial packet set from server.  Not used on server.
-
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
 #endif
@@ -1279,8 +1277,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          stream->writeFloat(mHealth, 6);
    }
 
-   stream->writeFlag(getControllingClient()->isBusy());
-
    stream->writeFlag((updateMask & WarpPositionMask) && updateMask != 0xFFFFFFFF);
 
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
@@ -1415,8 +1411,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(stream->readFlag())        // Health
          mHealth = stream->readFloat(6);
    }
-
-   mIsBusy = stream->readFlag();
 
    if(stream->readFlag())        // Ship made a large change in position
       shipwarped = true;
@@ -2061,12 +2055,14 @@ void Ship::render(S32 layerIndex)
    glPushMatrix();
    glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
 
-   if(!localShip && layerIndex == 1 && getClientInfo())      // Need to draw this before the glRotatef below, but only on layer 1...
-   {
-      string str = getClientInfo() ? getClientInfo()->getName().getString() : string();
+   ClientInfo *clientInfo = getClientInfo();
 
-      // Modify name if owner is "busy"
-      if(mIsBusy)
+   if(!localShip && layerIndex == 1 && clientInfo)      // Need to draw this before the glRotatef below, but only on layer 1...
+   {
+      string str = getClientInfo() ? clientInfo->getName().getString() : string();
+
+      // Modify name if owner is busy
+      if(clientInfo->isBusy())
          str = "<<" + str + ">>";
 
       TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
