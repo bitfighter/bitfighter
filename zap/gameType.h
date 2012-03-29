@@ -560,7 +560,7 @@ public:
    TNL_DECLARE_RPC(c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex));
    TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
 
-   TNL_DECLARE_RPC(s2cSetIsIdle, (StringTableEntry name, bool idle));
+   TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle));
 
    TNL_DECLARE_CLASS(GameType);
 

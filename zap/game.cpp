@@ -450,7 +450,8 @@ void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
    if(spawnDelayed && !mSpawnDelayed)
       getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
 
-   game->getGameType()->s2cSetIsIdle(mName, spawnDelayed);
+   game->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);
+	// Clients that joins mid game will get this SpawnDelayed set in GameType::s2cAddClient
 
    mSpawnDelayed = spawnDelayed;
 }

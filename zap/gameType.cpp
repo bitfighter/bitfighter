@@ -3703,13 +3703,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
 
 
 // Server tells clients that another player is idle and will not be joining us for the moment
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle), (name, idle), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = getGame()->findClientInfo(name);
 
-   TNLAssert(clientInfo, "Could not find clientInfo!");
+   TNLAssert(clientInfo, "Could not find clientInfo!");  // with RPCGuaranteedOrdered, GameType::s2cAddClient should always be sent first.
 
    if(!clientInfo)
       return;
