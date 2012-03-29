@@ -262,6 +262,8 @@ void Statistics::resetStatistics()
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleUsedTime[i] = 0;
 
+   mLoadouts.clear();
+
    mFlagPickup = 0;
    mFlagReturn = 0;
    mFlagScore = 0;
