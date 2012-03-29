@@ -536,7 +536,10 @@ void ChatUserInterface::onOutGameChat()
 
 void ChatUserInterface::onEscape()
 {
-   leaveGlobalChat();
+   // Don't leave if UIQueryServers is a parent
+   if(!getUIManager()->cameFrom(QueryServersScreenUI))
+      leaveGlobalChat();
+
    getUIManager()->reactivatePrevUI();
    playBoop();
 }
