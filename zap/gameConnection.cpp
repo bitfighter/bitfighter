@@ -1166,24 +1166,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMa
 }
 
 
-// Server tells clients that another player is idle and will not be joining us for the moment
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsIdle, (StringTableEntry name, bool idle), (name, idle), 
-                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
-{
-#ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = mClientGame->findClientInfo(name);
-
-   // Might not find clientInfo if level just cycled and players haven't been re-sent to client yet.  In which case,
-   // this is ok, since spawn-delay status will be sent with s2cAddClient().
-
-   if(!clientInfo)      
-      return;
-
-   clientInfo->setSpawnDelayed(NULL, idle);     // Calls remoteClientInfo version
-#endif
-}
-
-
 // Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {

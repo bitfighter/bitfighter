@@ -437,21 +437,7 @@ void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
    if(spawnDelayed && !mSpawnDelayed)
       getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
 
-   if(game)
-   {
-      for(S32 i = 0; i < game->getClientCount(); i++)
-      {
-         ClientInfo *clientInfo = game->getClientInfo(i);
-
-         if(clientInfo->isRobot())
-            continue;
-
-         if(clientInfo == this)
-            continue;
-
-         clientInfo->getConnection()->s2cSetIsIdle(mName, spawnDelayed);
-      }
-   }
+   game->getGameType()->s2cSetIsIdle(mName, spawnDelayed);
 
    mSpawnDelayed = spawnDelayed;
 }
