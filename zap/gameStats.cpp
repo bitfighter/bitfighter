@@ -206,6 +206,22 @@ namespace Types
          return 0;
    }
 
+   void read(TNL::BitStream &s, Zap::LoadoutStats *val, U8 version)
+   {
+      if(version >= 2)
+      {
+         val->loadoutHash = readCompressedU32(s);
+      }
+   }
+
+   void write(TNL::BitStream &s, Zap::LoadoutStats &val, U8 version)
+   {
+      if(version >= 2)
+      {
+         writeCompressedU32(s, val.loadoutHash);
+      }
+   }
+
    void read(TNL::BitStream &s, Zap::WeaponStats *val, U8 version)
    {
       val->weaponType = WeaponType(readU8(s));

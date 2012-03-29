@@ -123,7 +123,7 @@ struct GameStats
 
 struct VersionedGameStats
 {
-   static const U8 CURRENT_VERSION = 1;
+   static const U8 CURRENT_VERSION = 2;
 
    U8 version;
    bool valid;
@@ -143,6 +143,8 @@ extern void logGameStats(VersionedGameStats *stats);
 
 namespace Types
 {
+   extern void read(TNL::BitStream &s, Zap::LoadoutStats *val, U8 version);
+   extern void write(TNL::BitStream &s, Zap::LoadoutStats &val, U8 version);
    extern void read(TNL::BitStream &s, Zap::WeaponStats *val, U8 version);
    extern void write(TNL::BitStream &s, Zap::WeaponStats &val, U8 version);
    extern void read(TNL::BitStream &s, Zap::ModuleStats *val, U8 version);
