@@ -321,6 +321,10 @@ namespace Types
          val->playTime = readCompressedU32(s);
          read(s, &val->moduleStats, version);
       }
+      if(version >= 2)
+      {
+         read(s, &val->loadoutStats, version);
+      }
       read(s, &val->weaponStats, version);
 
       val->gameResult = 0;  // will fill in later
@@ -366,6 +370,10 @@ namespace Types
          writeCompressedU32(s, val.teleport);
          writeCompressedU32(s, val.playTime);
          write(s, val.moduleStats, version);
+      }
+      if(version >= 2)
+      {
+         write(s, val.loadoutStats, version);
       }
       write(s, val.weaponStats, version);
    }
