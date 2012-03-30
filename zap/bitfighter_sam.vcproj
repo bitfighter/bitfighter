@@ -313,7 +313,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="2"
+				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="../tnl;../boost;../libsdl/SDL;../openal;../libspeex;../libpng;../zlib;&quot;../mysql++&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;TNL_ENABLE_LOGGING;_SECURE_SCL=0;BF_WRITE_TO_MYSQL;MYSQLPP_NO_DLL"

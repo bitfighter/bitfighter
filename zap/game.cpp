@@ -2265,9 +2265,11 @@ void ServerGame::sendLevelStatsToMaster()
 
    bool hasLevelGen = getGameType()->getScriptName() != "";
 
-   masterConn->s2mSendLevelInfo(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
+   // construct the info now, to be later sent, sending later avoids overloading the master with too much data
+   mSendLevelInfoDelayNetInfo = masterConn->s2mSendLevelInfo_construct(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
                                 GameType::getGameTypeName(mGameType->getGameTypeId()), hasLevelGen, (U8)teamCountU8, 
                                 mGameType->getWinningScore(), mGameType->getRemainingGameTime());
+	mSendLevelInfoDelayCount.reset(6000);  // set time left to send
 
    mSentHashes.push_back(mLevelFileHash);
 }
@@ -2777,6 +2779,13 @@ void ServerGame::idle(U32 timeDelta)
             }
          }
       }
+   }
+
+
+   if(mSendLevelInfoDelayCount.update(timeDelta) && mSendLevelInfoDelayNetInfo.isValid() && this->getConnectionToMaster())
+   {
+      this->getConnectionToMaster()->postNetEvent(mSendLevelInfoDelayNetInfo);
+      mSendLevelInfoDelayNetInfo = NULL; // we can now let it free memory
    }
 
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.

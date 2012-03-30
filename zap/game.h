@@ -609,6 +609,9 @@ private:
 
    AbstractTeam *getNewTeam();
 
+   RefPtr<NetEvent> mSendLevelInfoDelayNetInfo;
+   Timer mSendLevelInfoDelayCount;
+
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
    virtual ~ServerGame();   // Destructor
