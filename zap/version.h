@@ -33,7 +33,7 @@
 #define CS_PROTOCOL_VERSION 35     // Change this when releasing an incompatible cs protocol (must be int)
 // 016 = 33 
 
-#define BUILD_VERSION 3795         // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION 4252         // Version of the game according to hg, will be unique every release (must be int)
 // 016 = 3737                      // Get from "hg summary"
 
 #define ZAP_GAME_RELEASE "017"     // Change this with every release -- for display purposes only, string, 
