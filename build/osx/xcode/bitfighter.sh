@@ -44,7 +44,7 @@ if [ ! -f "$userdatadir/levels/core.level" ]; then
 fi
 
 # 017
-if [ ! -f "$userdatadir/music/menu.ogg" ]; then
+if [ ! -f "$userdatadir/music/menu.ogg" -o ! -f "$userdatadir/music/game.ogg" ]; then
   cp -r "$datadir/music" "$userdatadir/"
   # Just once upgrade s_bot
   cp -f "$datadir/robots/s_bot.bot" "$userdatadir/robots/"
