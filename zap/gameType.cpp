@@ -1491,6 +1491,9 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 
    if(loadoutChanged)
    {
+      // This builds a loadout 'hash' by devoting the first 16 bits to modules, the
+      // second 16 bits to weapons.  The integer created might look like so:
+      //    00000000000001110000000000000011
       U32 loadoutHash = 0;
       for(S32 i = 0; i < ShipModuleCount; i++)
          loadoutHash |= BIT(loadout[i]);
