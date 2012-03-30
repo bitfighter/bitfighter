@@ -791,12 +791,6 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mLogLoadout, (StringTableEntry playerNick, Vector<U8> loadout))
-   {
-      // TODO: Write loadout to database!
-   }
-
-
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
    {
       writeAchievementToDb(achievementId, playerNick);

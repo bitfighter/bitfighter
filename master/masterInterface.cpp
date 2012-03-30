@@ -171,12 +171,6 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendHighScores,
    (groupNames, names, scores),
    NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 1) {}
 
-// Log load-outs
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mLogLoadout,
-   (StringTableEntry playerNick, Vector<U8> loadout),
-   (playerNick, loadout),
-   NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 1) {}
-
 
 ////////////////////////////////////
 // Authentication RPCs
