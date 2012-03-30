@@ -117,7 +117,7 @@ static SFXProfile sfxProfilesModern[] = {
  // Core-related noises
  {  "core_heartbeat.wav",  false, 1.0f,  false, 150, 1000 },
  {  "core_explode.wav",    false, 1.0f,  false, 300, 1000 },
- {  "core_panel_explode.wav",    false, 0.7f,  false, 300, 1000 },
+ {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
 
  // Other
  {  "achievement_earned.wav",  true,  1.0f, false, 0,   0 },
@@ -199,7 +199,7 @@ static SFXProfile sfxProfilesClassic[] = {
  // Core-related noises
  {  "core_heartbeat.wav",  false, 1.0f,  false, 150, 1000 },
  {  "core_explode.wav",    false, 1.0f,  false, 300, 1000 },
- {  "core_panel_explode.wav",    false, 0.7f,  false, 300, 1000 },
+ {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
 
  // Other
  {  "achievement_earned.wav",  true,  1.0f, false, 0,   0 },
