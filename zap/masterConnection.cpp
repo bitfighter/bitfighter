@@ -31,6 +31,7 @@
 #include "config.h"
 #include "ClientInfo.h"
 #include "stringUtils.h"
+#include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
 #  include "Joystick.h"

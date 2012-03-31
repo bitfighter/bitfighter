@@ -944,10 +944,9 @@ void EngineeredItem::healObject(S32 time)
 }
 
 
+// Server only
 const Vector<Point> *EngineeredItem::getBufferForBotZone()
 {
-   TNLAssert(getGame() == gServerGame, "Called in client game?!?");
-
    return &mBufferedObjectPointsForBotZone;
 }
 
@@ -1721,7 +1720,6 @@ void Turret::idle(IdleCallPath path)
          Ship *potential = dynamic_cast<Ship *>(fillVector[i]);
 
          // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
-         TNLAssert(gServerGame->getGameType(), "Bad GameType!");
          if(!potential->isVisible() || potential->hasExploded)
             continue;
       }
