@@ -194,6 +194,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
          // I _think_ gc is the server view of the local connection, where as gameConnection is the client's view.
          // Likewise with the clientInfos.  A little confusing, as they really represent the same thing in a way.  But different.
          GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject()); 
+         TNLAssert(gc, "gc should never be NULL here -- if it is, it means our connection to ourselves has failed for some reason");
 
          // Stuff on server side
          if(gc)                              
@@ -1593,7 +1594,7 @@ void ClientGame::renderCommander()
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    // Put (0,0) at the center of the screen
-   glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5, gScreenInfo.getGameCanvasHeight() * 0.5, 0);    
+   glTranslatef(gScreenInfo.getGameCanvasWidth() * 0.5f, gScreenInfo.getGameCanvasHeight() * 0.5f, 0);    
 
    glScalef(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y, 1);
 

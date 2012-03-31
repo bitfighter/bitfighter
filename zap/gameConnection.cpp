@@ -1333,7 +1333,8 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 #ifndef ZAP_DEDICATED
    Parent::writeConnectRequest(stream);
 
-   bool isLocal = mServerGame;      // Only way to have mServerGame defined is if we're also hosting... ergo, we must be local
+   bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
+                                    // Note: mServerGame is not yet defined!!!
 
    stream->write(CONNECT_VERSION);
 
