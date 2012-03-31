@@ -24,14 +24,12 @@
 //------------------------------------------------------------------------------------
 
 #include "CTFGame.h"
-#include "ship.h"
 #include "flagItem.h"
-#include "game.h"
-#include "gameConnection.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIGame.h"
+#  include "ClientGame.h"
+#  include "UIGame.h"
 #endif
 
 #include <stdio.h>
@@ -44,18 +42,6 @@ TNL_IMPLEMENT_NETOBJECT(CTFGameType);
 
 void CTFGameType::addFlag(FlagItem *flag)
 {
-   //S32 i;
-   //for(i = 0; i < mFlags.size(); i++)     // What is this for???
-   //{
-   //   if(mFlags[i] == NULL)
-   //   {
-   //      mFlags[i] = theFlag;
-   //      break;
-   //   }
-   //}
-   //if(i == mFlags.size())
-   //   mFlags.push_back(theFlag); 
-
    Parent::addFlag(flag);
 
    if(!isGhost())

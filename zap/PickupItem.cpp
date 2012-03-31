@@ -25,14 +25,13 @@
 
 #include "PickupItem.h"
 #include "gameType.h"
-#include "game.h"
 #include "gameConnection.h"
+#include "ClientInfo.h"
+#include "game.h"
 
 
 #ifndef ZAP_DEDICATED
-
-#include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
-
+#  include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
 #endif
 
 

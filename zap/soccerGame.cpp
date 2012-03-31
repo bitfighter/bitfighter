@@ -25,16 +25,15 @@
 
 #include "soccerGame.h"
 #include "gameNetInterface.h"
-#include "ship.h"
 #include "projectile.h"
 #include "gameObjectRender.h"
 #include "goalZone.h"
-#include "game.h"
 #include "gameConnection.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIGame.h"
+#  include "ClientGame.h"
+#  include "UIGame.h"
 #endif
 
 

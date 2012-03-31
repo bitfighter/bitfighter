@@ -25,14 +25,12 @@
 
 #include "HTFGame.h"
 #include "goalZone.h"
-#include "ship.h"
 #include "flagItem.h"
 #include "gameObjectRender.h"
-#include "game.h"
-#include "gameConnection.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
+#  include "ClientGame.h"
 #endif
 
 

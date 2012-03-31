@@ -24,22 +24,21 @@
 //------------------------------------------------------------------------------------
 
 #include "masterConnection.h"
-//#include "UIQueryServers.h"
 #include "gameConnection.h"
 #include "gameNetInterface.h"
 #include "gameObject.h"
 #include "version.h"
 #include "config.h"
-#include "game.h"
+#include "ClientInfo.h"
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "Joystick.h"
-#include "UIMenus.h"
-#include "UINameEntry.h"
-#include "UIChat.h"
-#include "UIErrorMessage.h"
-#include "ClientGame.h"
+#  include "Joystick.h"
+#  include "UIMenus.h"
+#  include "UINameEntry.h"
+#  include "UIChat.h"
+#  include "UIErrorMessage.h"
+#  include "ClientGame.h"
 #endif
 
 #include "SharedConstants.h"    // For AuthenticationStatus enum

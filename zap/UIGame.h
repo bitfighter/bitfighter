@@ -31,7 +31,9 @@
 #include "voiceCodec.h"
 #include "Point.h"
 #include "Color.h"
+#include "Timer.h"
 #include "game.h"
+#include "ship.h"          // For ShipModuleCount
 
 namespace Zap
 {
@@ -75,6 +77,8 @@ class QuickChatHelper;
 class LoadoutHelper;
 class EngineerHelper;
 class TeamShuffleHelper;
+class Move;
+class SoundEffect;
 
 
 class GameUserInterface : public UserInterface

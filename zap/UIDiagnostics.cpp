@@ -35,6 +35,7 @@
 #include "Joystick.h"
 #include "JoystickRender.h"
 #include "ClientGame.h"
+#include "ClientInfo.h"
 
 #include "gameObjectRender.h"    // For drawCircle in badge rendering below
 

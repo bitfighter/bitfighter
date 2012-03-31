@@ -25,6 +25,7 @@
 
 #include "playerInfo.h"
 #include "gameConnection.h"
+#include "ClientInfo.h"
 
 namespace Zap
 {

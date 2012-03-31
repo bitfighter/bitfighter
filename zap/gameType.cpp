@@ -35,6 +35,7 @@
 #include "version.h"
 #include "BanList.h"
 #include "IniFile.h"          // For CIniFile
+#include "ClientInfo.h"
 
 
 #ifndef ZAP_DEDICATED

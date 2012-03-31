@@ -34,6 +34,7 @@
 #include "Colors.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
+#include "ClientInfo.h"
 
 #include "SDL_opengl.h"
 

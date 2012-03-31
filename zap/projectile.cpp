@@ -25,19 +25,18 @@
 
 #include "projectile.h"
 #include "gameWeapons.h"
-#include "ship.h"
 #include "SoundSystem.h"
 #include "gameObject.h"
 #include "gameObjectRender.h"
-#include "game.h"
 #include "gameConnection.h"
 #include "stringUtils.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "sparkManager.h"
-#include "SDL_opengl.h"
-#include "UI.h"
+#  include "ClientGame.h"
+#  include "sparkManager.h"
+#  include "SDL_opengl.h"
+#  include "UI.h"
 #endif
 
 
