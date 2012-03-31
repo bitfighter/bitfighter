@@ -2119,8 +2119,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 // Return 1 if a is above b, -1 if b is above a, and 0 if they are equal
 static S32 QSORT_CALLBACK AddOrderSort(ClientInfo **a, ClientInfo **b)
 {
-   bool aIsIdle = !(*a)->getConnection()->getObjectMovedThisGame();
-   bool bIsIdle = !(*b)->getConnection()->getObjectMovedThisGame();
+   bool aIsIdle = !(*a)->getConnection() || !(*a)->getConnection()->getObjectMovedThisGame();
+   bool bIsIdle = !(*b)->getConnection() || !(*b)->getConnection()->getObjectMovedThisGame();
 
    // If either player is idle, put them at the bottom of the list
    if(aIsIdle && !bIsIdle)
