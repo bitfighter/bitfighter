@@ -26,15 +26,14 @@
 #include "CoreGame.h"
 #include "item.h"
 #include "projectile.h"
-#include "game.h"
 #include "stringUtils.h"
-#include "ship.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIEditorMenus.h"
-#include "UI.h"
-#include "gameObjectRender.h"
+#  include "ClientGame.h"
+#  include "UIEditorMenus.h"
+#  include "UI.h"
+#  include "gameObjectRender.h"
 #endif
 
 #include <cmath>

@@ -42,8 +42,9 @@
 #include "Colors.h"
 #include "robot.h"            // For EventManager def
 #include "stringUtils.h"      // For itos
-#include "game.h"
+//#include "game.h"
 #include "shipItems.h"
+#include "ClientInfo.h"
 
 #ifdef TNL_OS_WIN32
 #include <windows.h>   // For ARRAYSIZE

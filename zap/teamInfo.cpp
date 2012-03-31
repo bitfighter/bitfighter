@@ -28,6 +28,7 @@
 #include "gameType.h"
 #include "game.h"
 #include "stringUtils.h"
+#include "ClientInfo.h"
 
 #ifdef ZAP_DEDICATED
 #   include "Colors.h"

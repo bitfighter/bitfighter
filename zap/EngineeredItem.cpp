@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "EngineeredItem.h"
-#include "ship.h"
 #include "projectile.h"
 #include "gameType.h"
 #include "gameWeapons.h"
@@ -32,9 +31,9 @@
 #include "gameObjectRender.h"
 #include "GeomUtils.h"
 #include "BotNavMeshZone.h"
-#include "game.h"
 #include "gameConnection.h"
 #include "WallSegmentManager.h"
+#include "ClientInfo.h"
 
 
 #ifndef ZAP_DEDICATED

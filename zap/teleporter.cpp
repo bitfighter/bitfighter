@@ -26,11 +26,10 @@
 #include "teleporter.h"
 
 using namespace TNL;
-#include "ship.h"
-#include "game.h"
 #include "loadoutZone.h"          // For when ship teleports onto a loadout zone
 #include "gameLoader.h"
 #include "gameObjectRender.h"
+#include "ClientInfo.h"
 
 #include "Colors.h"
 #include "SoundSystem.h"

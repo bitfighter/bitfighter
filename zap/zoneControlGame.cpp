@@ -25,14 +25,13 @@
 
 #include "zoneControlGame.h"
 #include "goalZone.h"
-#include "ship.h"
 #include "flagItem.h"
 #include "gameObjectRender.h"
-#include "game.h"
+#include "ClientInfo.h"
 #include "gameConnection.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
+#  include "ClientGame.h"
 #endif
 
 

@@ -34,7 +34,7 @@
 #include "TeamShuffleHelper.h"
 
 #include "gameConnection.h"
-#include "game.h"
+//#include "game.h"
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
@@ -44,8 +44,8 @@
 #include "robot.h"               // For robot stuff
 #include "gameType.h"
 #include "IniFile.h"             // For access to gINI functions
-#include "EngineeredItem.h"   // For EngineerModuleDeployer
-#include "ship.h"
+#include "EngineeredItem.h"      // For EngineerModuleDeployer
+//#include "ship.h"
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
 #include "input.h"
@@ -58,6 +58,7 @@
 #include "config.h"              // for Getmap level dir
 #include "ScreenInfo.h"
 #include "ClientGame.h"
+#include "ClientInfo.h"
 #include "Colors.h"
 #include "Cursor.h"
 #include "CoreGame.h"

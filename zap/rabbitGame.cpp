@@ -24,18 +24,17 @@
 //------------------------------------------------------------------------------------
 
 #include "rabbitGame.h"
-#include "ship.h"
 #include "SoundSystem.h"
 #include "flagItem.h"
 #include "Colors.h"
-#include "game.h"
 #include "gameConnection.h"
 #include "stringUtils.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIGame.h"
-#include "UIMenuItems.h"
+#  include "ClientGame.h"
+#  include "UIGame.h"
+#  include "UIMenuItems.h"
 #endif
 
 #include <stdio.h>

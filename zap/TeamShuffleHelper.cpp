@@ -29,6 +29,7 @@
 #include "UIMenus.h"
 #include "ScreenInfo.h"
 #include "gameType.h"
+#include "ClientInfo.h"
 
 #include "SDL_opengl.h"
 

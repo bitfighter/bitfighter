@@ -144,6 +144,7 @@
     <ClCompile Include="..\zap\controlObjectConnection.cpp" />
     <ClCompile Include="..\zap\CTFGame.cpp" />
     <ClCompile Include="BanList.cpp" />
+    <ClCompile Include="ClientInfo.cpp" />
     <ClCompile Include="CoreGame.cpp" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="EngineeredItem.cpp" />
@@ -236,6 +237,7 @@
     <ClCompile Include="dataConnection.cpp" />
     <ClCompile Include="oglconsole.c" />
     <ClCompile Include="GameSettings.cpp" />
+    <ClCompile Include="ServerGame.cpp" />
     <ClCompile Include="shipItems.cpp" />
     <ClCompile Include="SimpleLine.cpp" />
     <ClCompile Include="Spawn.cpp" />
@@ -265,6 +267,7 @@
     <ClInclude Include="..\zap\CTFGame.h" />
     <ClInclude Include="..\zap\Directory.h" />
     <ClInclude Include="..\zap\dirent.h" />
+    <ClInclude Include="ClientInfo.h" />
     <ClInclude Include="CoreGame.h" />
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="EngineeredItem.h" />
@@ -368,6 +371,7 @@
     <ClInclude Include="oglconsole.h" />
     <ClInclude Include="retrieveGame.h" />
     <ClInclude Include="GameSettings.h" />
+    <ClInclude Include="ServerGame.h" />
     <ClInclude Include="SimpleLine.h" />
     <ClInclude Include="SlipZone.h" />
     <ClInclude Include="Spawn.h" />

@@ -173,7 +173,6 @@ public:
 
    void enterMode(UIMode mode);
 
-
    void addToMuteList(const string &name);
    void removeFromMuteList(const string &name);
    bool isOnMuteList(const string &name);

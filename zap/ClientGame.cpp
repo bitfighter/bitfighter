@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "ClientGame.h"
+#include "ClientInfo.h"
 #include "barrier.h"
 #include "config.h"
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
@@ -37,7 +38,6 @@
 #include "moveObject.h"
 #include "projectile.h"          // For SpyBug class
 #include "SharedConstants.h"     // For ServerInfoFlags enum
-#include "ship.h"
 #include "sparkManager.h"
 #include "GeomUtils.h"
 #include "luaLevelGenerator.h"

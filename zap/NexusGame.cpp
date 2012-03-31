@@ -29,6 +29,8 @@
 #include "stringUtils.h"      // For ftos et al
 #include "masterConnection.h" // For master connection details
 
+#include "ClientInfo.h"
+
 #ifndef ZAP_DEDICATED
 #   include "gameObjectRender.h"
 #   include "ScreenInfo.h"
