@@ -28,8 +28,8 @@
 #include "playerInfo.h"
 #include "gameType.h"
 #include "NexusGame.h"
-#include "game.h"
-
+#include "ServerGame.h"
+#include "ClientInfo.h"
 
 
 namespace Zap

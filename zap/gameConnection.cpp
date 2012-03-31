@@ -24,7 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "gameConnection.h"
-#include "game.h"
+//#include "game.h"
+#include "ServerGame.h"
 #include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "IniFile.h"             // For CIniFile def
 #include "playerInfo.h"
@@ -33,6 +34,7 @@
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
 #include "BanList.h"
 #include "gameNetInterface.h"
+#include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"

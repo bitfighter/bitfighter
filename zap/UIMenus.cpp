@@ -39,6 +39,7 @@
 
 #include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "ClientGame.h"
+#include "ServerGame.h"
 #include "ClientInfo.h"
 #include "gameType.h"
 #include "input.h"
