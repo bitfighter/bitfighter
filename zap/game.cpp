@@ -446,7 +446,7 @@ void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
       getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
 
    game->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);
-	// Clients that joins mid game will get this SpawnDelayed set in GameType::s2cAddClient
+   // Clients that joins mid game will get this SpawnDelayed set in GameType::s2cAddClient
 
    mSpawnDelayed = spawnDelayed;
 }
@@ -2210,12 +2210,16 @@ void ServerGame::cycleLevel(S32 nextLevel)
       for(S32 i = 0; i < getClientCount(); i++)
       {
          ClientInfo *clientInfo = getClientInfo(i);
-         TNLAssert(!clientInfo->isRobot(), "We have bots here!!  Who knew?   Please add a comment noting this.  Otherwise, add a note that there are no bots here and remove this assert!");
+         // Robots could be added when level have "Robot" line, or a global levelgen adds "Robots"
+         //TNLAssert(!clientInfo->isRobot(), "We have bots here!!  Who knew?   Please add a comment noting this.  Otherwise, add a note that there are no bots here and remove this assert!");
          mGameType->serverAddClient(clientInfo);
 
          GameConnection *connection = clientInfo->getConnection();
-         connection->setObjectMovedThisGame(false);
-         connection->activateGhosting();                 // Tell clients we're done sending objects and are ready to start playing
+         if(connection)
+         {
+            connection->setObjectMovedThisGame(false);
+            connection->activateGhosting();                 // Tell clients we're done sending objects and are ready to start playing
+         }
       }
 
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
@@ -2269,7 +2273,7 @@ void ServerGame::sendLevelStatsToMaster()
    mSendLevelInfoDelayNetInfo = masterConn->s2mSendLevelInfo_construct(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
                                 GameType::getGameTypeName(mGameType->getGameTypeId()), hasLevelGen, (U8)teamCountU8, 
                                 mGameType->getWinningScore(), mGameType->getRemainingGameTime());
-	mSendLevelInfoDelayCount.reset(6000);  // set time left to send
+   mSendLevelInfoDelayCount.reset(6000);  // set time left to send
 
    mSentHashes.push_back(mLevelFileHash);
 }
