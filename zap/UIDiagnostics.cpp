@@ -388,8 +388,8 @@ void DiagnosticUserInterface::render()
 
       if(joystickDetected)
       {
-         F32 x = 500;
-         F32 y = 290;
+         S32 x = 500;
+         S32 y = 290;
 
          glColor(Colors::white);
          drawString(x, y, textsize - 2, "Raw Analog Axis Values:");
@@ -408,7 +408,7 @@ void DiagnosticUserInterface::render()
                drawHorizLine(x, x + len, y + textsize + 3);
 
                glColor(Colors::yellow);
-               drawHorizLine(x + len / 2, x + len / 2 + a * len / 2, y + textsize + 3);
+               drawHorizLine(x + len / 2, x + len / 2 + S32(a * F32(len / 2)), y + textsize + 3);
 
                x += len + 8;
             }
