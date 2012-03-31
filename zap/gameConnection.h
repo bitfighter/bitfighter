@@ -39,6 +39,7 @@
 #include "boost/smart_ptr/shared_ptr.hpp"
 
 #include "GameTypesEnum.h"
+#include "ServerGame.h"
 
 
 
@@ -52,7 +53,6 @@ namespace Zap
 ////////////////////////////////////////
 
 class ClientGame;
-class ServerGame;
 struct LevelInfo;
 class GameSettings;
 class LuaPlayerInfo;

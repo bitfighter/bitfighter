@@ -25,13 +25,14 @@
 
 #include "luaLevelGenerator.h"
 #include "gameType.h"
-#include "config.h"     // For definition of FolderManager struct
+#include "config.h"              // For definition of FolderManager struct
 #include "game.h"
 #include "stringUtils.h"
 #include "luaUtil.h"
+#include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
-#include "UIMenuItems.h"      // delete
+#  include "UIMenuItems.h"      // delete
 #endif
 
 namespace Zap

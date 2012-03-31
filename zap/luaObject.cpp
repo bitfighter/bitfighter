@@ -31,7 +31,7 @@
 #include "item.h"             // For getItem()
 #include "flagItem.h"         // For getItem()
 #include "robot.h"            // For getItem()
-#include "NexusGame.h"      // For getItem()
+#include "NexusGame.h"        // For getItem()
 #include "soccerGame.h"       // For getItem()
 #include "projectile.h"       // For getItem()
 #include "teleporter.h"
@@ -42,6 +42,7 @@
 #include "UIMenuItems.h"      // For MenuItem def
 #include "config.h"
 #include "CoreGame.h"         // For getItem()
+#include "ClientInfo.h"
 
 #include "stringUtils.h"      // For joindir  
 #include "lua.h"
