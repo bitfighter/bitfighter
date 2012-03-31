@@ -1537,7 +1537,7 @@ void EditorUserInterface::renderDock()
 
    drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
                   canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
-                  Colors::red35, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
+                  Colors::red30, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
 }
 
 
