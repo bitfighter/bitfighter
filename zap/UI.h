@@ -156,8 +156,10 @@ public:
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor);
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, F32 fillAlpha, const Color &outlineColor);
 
+   static void drawHollowRect(const Point &p1, const Point &p2);
    static void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2);
    static void drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor);
+
    static void drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode);
    static void drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode);
 

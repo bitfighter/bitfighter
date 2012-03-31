@@ -1418,6 +1418,7 @@ void EditorUserInterface::renderGrid()
       {
          F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
          
+         // Use F32 to avoid cumulative rounding errors
          F32 xStart = fmod(mCurrentOffset.x, gridScale);
          F32 yStart = fmod(mCurrentOffset.y, gridScale);
 
@@ -1426,12 +1427,12 @@ void EditorUserInterface::renderGrid()
 
          while(yStart < gScreenInfo.getGameCanvasHeight())
          {
-            drawHorizLine(0, (F32)gScreenInfo.getGameCanvasWidth(), yStart);
+            drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)yStart);
             yStart += gridScale;
          }
          while(xStart < gScreenInfo.getGameCanvasWidth())
          {
-            drawVertLine(xStart, 0, (F32)gScreenInfo.getGameCanvasHeight());
+            drawVertLine((S32)xStart, 0, gScreenInfo.getGameCanvasHeight());
             xStart += gridScale;
          }
       }
@@ -1443,8 +1444,8 @@ void EditorUserInterface::renderGrid()
 
    Point origin = convertLevelToCanvasCoord(Point(0,0));
 
-   drawHorizLine(0, (F32)gScreenInfo.getGameCanvasWidth(), origin.y);
-   drawVertLine(origin.x, 0, (F32)gScreenInfo.getGameCanvasHeight());
+   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)origin.y);
+   drawVertLine((S32)origin.x, 0, gScreenInfo.getGameCanvasHeight());
 
    glLineWidth(gDefaultLineWidth);
 }
@@ -1536,7 +1537,7 @@ void EditorUserInterface::renderDock()
 
    drawFilledRect(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin, 
                   canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight, 
-                  Colors::black, (mouseOnDock() ? Colors::yellow : Colors::white));
+                  Colors::red35, .7f, (mouseOnDock() ? Colors::yellow : Colors::white));
 }
 
 
@@ -1968,7 +1969,7 @@ void EditorUserInterface::renderDragSelectBox()
    
    glColor(Colors::white);
    Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
-   drawHollowRect(downPos.x, downPos.y, mMousePos.x, mMousePos.y);
+   drawHollowRect(downPos, mMousePos);
 }
 
 

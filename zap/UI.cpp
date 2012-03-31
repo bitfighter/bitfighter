@@ -943,6 +943,12 @@ void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &
 }
 
 
+void UserInterface::drawHollowRect(const Point &p1, const Point &p2)
+{
+   drawHollowRect((S32)p1.x, (S32)p1.y, (S32)p2.x, (S32)p2.y);
+}
+
+
 void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &outlineColor)
 {
    glColor(outlineColor);

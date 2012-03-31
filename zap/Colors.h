@@ -63,6 +63,7 @@ namespace Colors
 
    // Reds
    const Color red30(.30f, 0, 0);
+   const Color red35(.35f, 0, 0);
    const Color red40(.40f, 0, 0);
    const Color red50(.50f, 0, 0);
    const Color red60(.60f, 0, 0);
