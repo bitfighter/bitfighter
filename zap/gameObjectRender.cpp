@@ -393,7 +393,7 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
    for(F32 i = 0; i < hatchCount; i++)
    {
       dirx = dir;                                  // Reset to original value
-      segMid = base + dirx * (i + 0.5) / F32(HATCH_COUNT) * length;      // Adding 0.5 causes hatches to be centered properly
+      segMid = base + dirx * (i + 0.5f) / F32(HATCH_COUNT) * length;      // Adding 0.5 causes hatches to be centered properly
 
       glVertex(segMid - cross * F32(width) * 0.5);  
       glVertex(segMid + cross * F32(width) * 0.5);   
@@ -1818,7 +1818,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time,
       if(panelHealth[i] == 0)          // Panel is dead
       {
          Color c = coreColor;
-         glColor(c * .2);
+         glColor(c * .2f);
       }      
 
       glBegin(GL_LINES);
@@ -1873,10 +1873,10 @@ void renderCoreSimple(const Point &pos, const Color *coreColor, S32 width)
 {
    // Here we render a simpler, non-animated Core to reduce distraction in the editor
    glColor(Colors::white);
-   drawPolygon(pos, 10, width / 2, 0);
+   drawPolygon(pos, 10, (F32)width / 2, 0);
 
    glColor(coreColor);
-   drawCircle(pos, width / 5);
+   drawCircle(pos, (F32)width / 5);
 }
 
 
@@ -2269,14 +2269,14 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
       glColor(Colors::gray40);
       drawEllipse(Point(-16, 15), 6, 2, 0);
 
-      renderFlag(-.10 * rad, -.10 * rad, &Colors::red50);
+      renderFlag(-.10f * rad, -.10f * rad, &Colors::red50);
    glPopMatrix();
 
    glColor(Colors::red);
    F32 ts = rad - 3;
    F32 width = UserInterface::getStringWidth(ts, "25");
-   F32 tx = x + .30 * rad;
-   F32 ty = y + rad - .40 * rad;
+   F32 tx = x + .30f * rad;
+   F32 ty = y + rad - .40f * rad;
 
    glColor(Colors::yellow);
    UserInterface::drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0), 
@@ -2289,7 +2289,7 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 void renderDeveloperBadge(F32 x, F32 y, F32 rad)
 {
    F32 rm2 = rad - 2;
-   F32 rm26 = rm2 * .666;
+   F32 rm26 = rm2 * .666f;
 
    glColor(Colors::green80);
    glPointSize(rad * 0.4f);
