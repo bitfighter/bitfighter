@@ -35,6 +35,7 @@
 #include "CoreGame.h"            // For lua object defs
 #include "GameTypesEnum.h"
 #include "ClientInfo.h"
+#include "ServerGame.h"
 
 #include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition

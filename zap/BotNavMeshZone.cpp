@@ -32,11 +32,10 @@
 #include "EngineeredItem.h"   // For Turret and ForceFieldProjector methods in generating zones
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
-#include "game.h"
+#include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
-#include "UIMenus.h"
-//#include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones
+#  include "UIMenus.h"
 #endif
 
 #include <vector>

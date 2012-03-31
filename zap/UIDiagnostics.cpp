@@ -39,6 +39,7 @@
 
 #include "gameObjectRender.h"    // For drawCircle in badge rendering below
 
+#include "ServerGame.h"          // For gServerGame refs
 
 #include "tnl.h"
 

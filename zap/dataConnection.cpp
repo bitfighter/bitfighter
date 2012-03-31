@@ -2,7 +2,7 @@
 
 #include "dataConnection.h"
 #include "tnlEventConnection.h"
-#include "game.h"                         // For ServerGame def
+#include "ServerGame.h"
 #include "gameNetInterface.h"             // for GetGame() through GameNetInterface
 
 #include "tnl.h"

@@ -34,7 +34,7 @@
 #include "TeamShuffleHelper.h"
 
 #include "gameConnection.h"
-//#include "game.h"
+#include "ServerGame.h"          // For gServerGame refs
 #include "UIMenus.h"
 #include "UIInstructions.h"
 #include "UIChat.h"
@@ -45,7 +45,6 @@
 #include "gameType.h"
 #include "IniFile.h"             // For access to gINI functions
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
-//#include "ship.h"
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
 #include "input.h"

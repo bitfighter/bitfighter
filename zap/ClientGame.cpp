@@ -24,6 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "ClientGame.h"
+#include "ServerGame.h"    // For gServerGame refs
+
 #include "ClientInfo.h"
 #include "barrier.h"
 #include "config.h"

@@ -109,6 +109,7 @@ using namespace TNL;
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
 #include "ClientGame.h"
+#include "ServerGame.h"
 #include "Cursor.h"          // For cursor defs
 #include "Joystick.h"
 #include "Event.h"

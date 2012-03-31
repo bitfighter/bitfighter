@@ -26,7 +26,7 @@
 #include "flagItem.h"
 #include "goalZone.h"
 #include "gameType.h"
-#include "game.h"
+#include "ServerGame.h"
 #include "stringUtils.h"      // For itos
 #include "gameConnection.h"
 #include "gameObjectRender.h"
