@@ -34,7 +34,7 @@
 // 016 = 33 
 // 017, 017a = 35
 
-#define BUILD_VERSION 4262         // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION 4265         // Version of the game according to hg, will be unique every release (must be int)
 // 016 = 3737                      // Get from "hg summary"
 // 017 = 4252
 // 017a = 4262
