@@ -215,9 +215,6 @@ Section "Install"
   File ".\twoplayers.bat"
   File "..\..\..\resource\bficon.bmp"
   
-  SetOutPath "$INSTDIR\scripts"
-  File /r "..\..\..\resource\scripts\*.lua"
-  
   SetOutPath "$INSTDIR\updater"
   File /r ".\updater\bfup.exe"
   File /r ".\updater\bfup.xml"
@@ -228,11 +225,14 @@ Section "Install"
   SetOutPath "$INSTDIR\sfx"
   File /r "..\..\..\resource\sfx\*.wav"
 
-  SetOutPath "$INSTDIR\music"
+  SetOutPath "$DOCUMENTS\Bitfighter\music"
   File /r "..\..\..\resource\music\*.ogg"
   
-  SetOutPath "$INSTDIR\editor_plugins"
+  SetOutPath "$DOCUMENTS\Bitfighter\editor_plugins"
   File /r "..\..\..\resource\editor_plugins\*.*"
+  
+  SetOutPath "$DOCUMENTS\Bitfighter\scripts"
+  File /r "..\..\..\resource\scripts\*.lua"
 
   SetOutPath "$DOCUMENTS\Bitfighter\levels"
   File /r "..\..\..\resource\levels\*.level"  
