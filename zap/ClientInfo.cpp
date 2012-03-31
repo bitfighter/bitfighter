@@ -30,7 +30,6 @@
 #include "EditorObject.h"        // For NO_TEAM def
 #include "EngineeredItem.h"      // For EngineerModuleDeployer def
 #include "gameConnection.h"
-#include "ServerGame.h"
 
 #include "voiceCodec.h"
 
@@ -325,7 +324,7 @@ void ClientInfo::sRequestLoadout(Vector<U8> &loadout)
 {
    mLoadout = loadout;
 
-   GameType *gt = gServerGame->getGameType();
+   GameType *gt = getShip()->getGame()->getGameType();
 
    if(gt)
       gt->SRV_clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
