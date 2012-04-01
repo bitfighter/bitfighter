@@ -36,20 +36,17 @@
 #include "tnlNonce.h"
 
 
+namespace Zap
+{
+
 class Game;
 class GameConnection;
 class SoundEffect;
+class VoiceDecoder;
 
 class LuaPlayerInfo;
 
 
-#ifndef ZAP_DEDICATED
-#  include "voiceCodec.h"
-#endif
-
-
-namespace Zap
-{
 
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.

@@ -108,16 +108,16 @@ using namespace TNL;
 #include "UINameEntry.h"
 #include "UIEditor.h"
 #include "UIErrorMessage.h"
-#include "ClientGame.h"
-#include "ServerGame.h"
 #include "Cursor.h"          // For cursor defs
 #include "Joystick.h"
 #include "Event.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "VideoSystem.h"
+#include "ClientGame.h"
 #endif
 
+#include "ServerGame.h"
 #include "version.h"       // For BUILD_VERSION def
 #include "Colors.h"
 #include "ScreenInfo.h"

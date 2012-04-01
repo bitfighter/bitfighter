@@ -1336,8 +1336,8 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 #ifndef ZAP_DEDICATED
    Parent::writeConnectRequest(stream);
 
-   bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
-                                    // Note: mServerGame is not yet defined!!!
+   //bool isLocal = isLocalConnection();
+   TNLAssert((gServerGame != NULL) == isLocalConnection(), "If this triggers, make a note, and delete this assert.  If not, we can get replace isLocal with isLocalConnection().");
 
    stream->write(CONNECT_VERSION);
 
@@ -1345,7 +1345,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    string lastServerName = mClientGame->getRequestedServerName();
 
    // If we're local, just use the password we already know because, you know, we're the server
-   if(isLocal)
+   if(isLocalConnection())
       serverPW = md5.getSaltedHashFromString(mSettings->getServerPassword());
 
    // If we have a saved password for this server, use that
@@ -1623,13 +1623,13 @@ void GameConnection::onConnectionEstablished_client()
 
    // If we arrive here and the saved password is empty it means that the user entered a good password.  
    // So let's save it for next time.
-   bool isLocal = gServerGame;
 
-   TNLAssert(isLocal == isLocalConnection(), "If this triggers, make a note, and delete this assert.  If not, we can get replace isLocal with isLocalConnection().");
+   //bool isLocal = gServerGame;
+   TNLAssert((gServerGame != NULL) == isLocalConnection(), "If this triggers, make a note, and delete this assert.  If not, we can get replace isLocal with isLocalConnection().");
       
    string lastServerName = mClientGame->getRequestedServerName();
 
-   if(!isLocal && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
+   if(!isLocalConnection() && gINI.GetValue("SavedServerPasswords", lastServerName) == "")
       gINI.SetValue("SavedServerPasswords", lastServerName, mClientGame->getServerPassword(), true);
 
 
