@@ -778,6 +778,7 @@ void Game::setGameTime(F32 time)
 }
 
 
+// Runs on server (levelgen) and client (Editor)
 bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                                    GridDatabase *targetDatabase)
 {
