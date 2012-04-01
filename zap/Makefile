@@ -44,6 +44,7 @@ OBJECTS_SHARED=\
    BanList.o\
    barrier.o\
    BotNavMeshZone.o\
+   ClientInfo.o\
    Color.o\
    config.o\
    controlObjectConnection.o\
@@ -93,6 +94,7 @@ OBJECTS_SHARED=\
    retrieveGame.o\
    robot.o\
    ScreenInfo.o\
+   ServerGame.o\
    ship.o\
    shipItems.o\
    SimpleLine.o\
