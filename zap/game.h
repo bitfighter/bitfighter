@@ -304,9 +304,6 @@ public:
    GameNetInterface *getNetInterface();
    virtual GridDatabase *getGameObjDatabase();
 
-   bool runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
-                          GridDatabase *targetDatabase);
-
    const Vector<SafePtr<GameObject> > &getScopeAlwaysList();
 
    void setScopeAlwaysObject(GameObject *theObject);

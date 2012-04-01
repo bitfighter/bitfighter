@@ -966,23 +966,42 @@ bool ServerGame::loadLevel(const string &levelFileName)
    }
 
 
-   // If there was a script specified in the level file, now might be a fine time to try running it!
-   string scriptName = getGameType()->getScriptName();
+   // Levelgens:
+   runLevelGenScript(getGameType()->getScriptName());                   // Run level's levelgen script (if any)
+   runLevelGenScript(mSettings->getIniSettings()->globalLevelScript);   // And our global levelgen (if defined)
 
-   if(scriptName != "")
-      runLevelGenScript(folderManager, scriptName, *getGameType()->getScriptArgs(), getGameObjDatabase());
-
-   // Script specified in INI globalLevelLoadScript
-   if(mSettings->getIniSettings()->globalLevelScript != "")
-      runLevelGenScript(folderManager, mSettings->getIniSettings()->globalLevelScript, *getGameType()->getScriptArgs(), getGameObjDatabase());
-
-   //  Check after script, script might add Teams
+   // Check after script, script might add Teams
    if(getGameType()->makeSureTeamCountIsNotZero())
       logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", levelFileName.c_str());
 
    getGameType()->onLevelLoaded();
 
    return true;
+}
+
+
+void ServerGame::runLevelGenScript(const string &scriptName)
+{
+   if(scriptName == "")
+      return;
+
+   FolderManager *folderManager = getSettings()->getFolderManager();
+
+   // Find full name of levelgen script -- returns "" if file not found
+   string fullname = getSettings()->getFolderManager()->findLevelGenScript(scriptName);  
+
+   if(fullname == "")
+   {
+      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
+                "Warning: Could not find levelgen script \"%s\"", scriptName.c_str());
+      return;
+   }
+
+   // The script file will be the first argument, subsequent args will be passed on to the script
+   LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
+                                                  getGameObjDatabase(), this);
+
+   levelgen.runScript();
 }
 
 

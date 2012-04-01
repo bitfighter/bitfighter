@@ -778,33 +778,6 @@ void Game::setGameTime(F32 time)
 }
 
 
-// Runs on server (levelgen) and client (Editor)
-bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
-                                   GridDatabase *targetDatabase)
-{
-   string fullname = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script -- returns "" if file not found
-
-   if(fullname == "")
-   {
-      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
-                "Warning: Could not find levelgen script \"%s\"", scriptName.c_str());
-      return false;
-   }
-
-   // The script file will be the first argument, subsequent args will be passed on to the script
-   LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, scriptArgs, getGridSize(), 
-                                                  targetDatabase, this);
-   if(!levelgen.runScript())
-   {
-      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator),
-                "Error running levelgen %s", scriptName.c_str());
-      return false;
-   }
-
-   return true;
-}
-
-
 // If there is no valid connection to master server, perodically try to create one.
 // If user is playing a game they're hosting, they should get one master connection
 // for the client and one for the server.
