@@ -284,6 +284,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
    }
 }
 
+
 const U32 maxDataBufferSize = 1024*256;
 
 // << DataSendable >>
