@@ -56,6 +56,7 @@ struct EventDef {
 
 
 static const EventDef eventDefs[] = {
+   // Name           // Lua function
    { "Tick",         "onTick" },
    { "ShipSpawned",  "onShipSpawned" },
    { "ShipKilled",   "onShipKilled" },
