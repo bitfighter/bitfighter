@@ -325,7 +325,7 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 
    checkArgCount(L, 2, methodName);
 
-   Point p1 = getVec(L, 1, methodName) *= mGridSize;
+   Point p1 = getVec(L, 1, methodName) *= mGridSize;     // TODO: Still need this * mGridSize?
    Point p2 = getVec(L, 2, methodName) *= mGridSize;
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
