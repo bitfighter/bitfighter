@@ -48,27 +48,22 @@ Vector<lua_State *> EventManager::pendingSubscriptions[EventTypes];
 Vector<lua_State *> EventManager::pendingUnsubscriptions[EventTypes];
 bool EventManager::mConstructed = false;  // Prevent duplicate instantiation
 
-// The list of the function names to be called in the bot when a particular event is fired
-static const char *eventNames[] = {
-   "Tick",
-   "ShipSpawned",
-   "ShipKilled",
-   "PlayerJoined",
-   "PlayerLeft",
-   "MsgReceived",
-   "NexusOpened",
-   "NexusClosed"
+
+struct EventDef {
+   const char *name;
+   const char *function;
 };
 
-static const char *eventFunctions[] = {
-   "onTick",
-   "onShipSpawned",
-   "onShipKilled",
-   "onPlayerJoined",
-   "onPlayerLeft",
-   "onMsgReceived",
-   "onNexusOpened",
-   "onNexusClosed"
+
+static const EventDef eventDefs[] = {
+   { "Tick",         "onTick" },
+   { "ShipSpawned",  "onShipSpawned" },
+   { "ShipKilled",   "onShipKilled" },
+   { "PlayerJoined", "onPlayerJoined" },
+   { "PlayerLeft",   "onPlayerLeft" },
+   { "MsgReceived",  "onMsgReceived" },
+   { "NexusOpened",  "onNexusOpened" },
+   { "NexusClosed"   "onNexusClosed" }
 };
 
 
@@ -104,14 +99,14 @@ void EventManager::subscribe(lua_State *L, EventType eventType)
       return;
 
    // Make sure the script has the proper event listener
-   lua_getglobal(L, eventFunctions[eventType]);
+   lua_getglobal(L, eventDefs[eventType].function);
 
    if(!lua_isfunction(L, -1))
    {
       lua_pop(L, 1);    // Remove the item from the stack
 
-      logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventNames[eventType]);
-      OGLCONSOLE_Print("Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventNames[eventType]);
+      logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
+      OGLCONSOLE_Print(                "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
 
       return;
    }
@@ -240,7 +235,7 @@ void EventManager::fireEvent(EventType eventType)
       lua_State *L = subscriptions[eventType][i];
       try
       {
-         lua_getglobal(L, eventFunctions[eventType]);
+         lua_getglobal(L, eventDefs[eventType].function);
 
          if(lua_pcall(L, 0, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
@@ -269,7 +264,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       
       try   
       {
-         lua_getglobal(L, eventFunctions[eventType]);  
+         lua_getglobal(L, eventDefs[eventType].function);  
          lua_pushinteger(L, deltaT);
 
          if(lua_pcall(L, 1, 0, 0) != 0)
@@ -294,7 +289,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       lua_State *L = subscriptions[eventType][i];
       try
       {
-         lua_getglobal(L, eventFunctions[eventType]);
+         lua_getglobal(L, eventDefs[eventType].function);
          ship->push(L);
 
          if(lua_pcall(L, 1, 0, 0) != 0)
@@ -323,7 +318,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
 
       try
       {
-         lua_getglobal(L, eventFunctions[eventType]);  
+         lua_getglobal(L, eventDefs[eventType].function);  
          lua_pushstring(L, message);
          player->push(L);
          lua_pushboolean(L, global);
@@ -355,7 +350,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
 
       try   
       {
-         lua_getglobal(L, eventFunctions[eventType]);  
+         lua_getglobal(L, eventDefs[eventType].function);  
          player->push(L);
 
          if(lua_pcall(L, 1, 0, 0) != 0)
@@ -376,7 +371,7 @@ void EventManager::handleEventFiringError(lua_State *L, EventType eventType, con
    Robot *robot = Robot::findBot(L);
 
    if(robot)
-      robot->logError( "Robot error handling event %s: %s. Shutting bot down.", eventNames[eventType], errorMsg);
+      robot->logError( "Robot error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
 
    delete robot;
 }
