@@ -1571,6 +1571,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
       addComment(" LogStats - Save game stats locally to built-in sqlite database (saves the same stats as are sent to the master)");
       addComment(" DefaultRobotScript - If user adds a robot, this script is used if none is specified");
+      addComment(" GlobalLevelScript - Specify a levelgen that will get run on every level");
       addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
       addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
