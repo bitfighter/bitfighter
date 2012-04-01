@@ -1457,12 +1457,14 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    return true;
 }
 
+
 // Server side writes ConnectAccept
 void GameConnection::writeConnectAccept(BitStream *stream)
 {
    Parent::writeConnectAccept(stream);
    stream->write(CONNECT_VERSION);
 }
+
 
 // Client side reads ConnectAccept
 bool GameConnection::readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason)
