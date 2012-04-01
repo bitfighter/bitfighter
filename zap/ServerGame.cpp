@@ -982,7 +982,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 
 void ServerGame::runLevelGenScript(const string &scriptName)
 {
-   if(scriptName == "")
+   if(scriptName == "")    // No script specified!
       return;
 
    FolderManager *folderManager = getSettings()->getFolderManager();
