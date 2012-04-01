@@ -27,88 +27,18 @@
 #define _ROBOT_H_
 
 
-#include "ship.h"          // Parent class
+#include "ship.h"             // Parent class
 #include "luaObject.h"
-#include "game.h"          // For ClientInfo def
+#include "game.h"             // For ClientInfo def
+
+#include "EventManager.h"
 
 namespace Zap
 {
 
-class Robot;
-class LuaPlayerInfo;
-
-class EventManager
-{
-public:
-   // Need to keep synced with eventFunctions!
-   enum EventType {
-      TickEvent = 0,          // (time) --> Standard game tick event
-      ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
-      ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
-      PlayerJoinedEvent,      // (playerInfo) --> Player joined game
-      PlayerLeftEvent,        // (playerInfo) --> Player left game
-      MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
-      NexusOpenedEvent,       // () --> Nexus opened (nexus games only)
-      NexusClosedEvent,       // () --> Nexus closed (nexus games only)
-      EventTypes
-   };
-
-private:
-   // Some helper functions
-   bool isSubscribed(lua_State *L, EventType eventType);
-   bool isPendingSubscribed(lua_State *L, EventType eventType);
-   bool isPendingUnsubscribed(lua_State *L, EventType eventType);
-
-   void removeFromSubscribedList(lua_State *L, EventType eventType);
-   void removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType);
-   void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
-
-   void handleEventFiringError(lua_State *L, EventType eventType, const char *errorMsg);
-
-   bool mIsPaused;
-   S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
-   static bool mConstructed;
-
-public:
-   EventManager();                  // C++ constructor
-   EventManager(lua_State *L);      // Lua Constructor
-
-   static EventManager *get();      // Provide access to the single EventManager instance
-   bool suppressEvents();
-
-   static Vector<lua_State *> subscriptions[EventTypes];
-   static Vector<lua_State *> pendingSubscriptions[EventTypes];
-   static Vector<lua_State *> pendingUnsubscriptions[EventTypes];
-   static bool anyPending;
-
-   void subscribe(lua_State *L, EventType eventType);
-   void unsubscribe(lua_State *L, EventType eventType);
-   void unsubscribeImmediate(lua_State *L, EventType eventType);     // Used when bot dies, and we know there won't be subscription conflicts
-   void update();                                                    // Act on events sitting in the pending lists
-
-   // We'll have several different signatures for this one...
-   void fireEvent(EventType eventType);
-   void fireEvent(EventType eventType, U32 deltaT);      // Tick
-   void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
-   void fireEvent(lua_State *L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
-   void fireEvent(lua_State *L, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
-
-   // Allow the pausing of event firing for debugging purposes
-   void setPaused(bool isPaused);
-   void togglePauseStatus();
-   bool isPaused();
-   void addSteps(S32 steps);     // Each robot will cause the step counter to decrement
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-
 class MoveItem;
 class LuaRobot;
 class ServerGame;
-//class ClientInfo;
 
 /**
  * This is the wrapper around the C++ object found in object.cc

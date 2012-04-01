@@ -53,6 +53,7 @@ OBJECTS_SHARED=\
    dataConnection.o\
    EditorObject.o\
    EngineeredItem.o\
+   EventManager.o\
    flagItem.o\
    game.o\
    gameConnection.o\

@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "NexusGame.h"
-#include "robot.h"            // For EventManager
+#include "EventManager.h"      
 
 #include "stringUtils.h"      // For ftos et al
 #include "masterConnection.h" // For master connection details

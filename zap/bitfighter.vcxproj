@@ -169,6 +169,7 @@
     <ClCompile Include="EditorObject.cpp" />
     <ClCompile Include="engineerHelper.cpp" />
     <ClCompile Include="Event.cpp" />
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="helperMenu.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="..\zap\IniFile.h" />
     <ClInclude Include="..\zap\input.h" />
     <ClInclude Include="..\zap\item.h" />
+    <ClInclude Include="EventManager.h" />
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
     <ClInclude Include="InputCodeEnum.h" />
