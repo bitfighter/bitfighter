@@ -782,7 +782,7 @@ void Game::setGameTime(F32 time)
 bool Game::runLevelGenScript(const FolderManager *folderManager, const string &scriptName, const Vector<string> &scriptArgs, 
                                    GridDatabase *targetDatabase)
 {
-   string fullname = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script
+   string fullname = folderManager->findLevelGenScript(scriptName);  // Find full name of levelgen script -- returns "" if file not found
 
    if(fullname == "")
    {
