@@ -786,10 +786,8 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
 
    if(fullname == "")
    {
-      Vector<StringTableEntry> e;
-      e.push_back(scriptName.c_str());
-      getGameType()->broadcastMessage(GameConnection::ColorRed, SFXNone, "!!! Error running levelgen %e0: Could not find file", e);
-      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"", scriptName.c_str());
+      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator), 
+                "Warning: Could not find levelgen script \"%s\"", scriptName.c_str());
       return false;
    }
 
@@ -798,10 +796,8 @@ bool Game::runLevelGenScript(const FolderManager *folderManager, const string &s
                                                   targetDatabase, this);
    if(!levelgen.runScript())
    {
-      Vector<StringTableEntry> e;
-      e.push_back(scriptName.c_str());
-
-      getGameType()->broadcastMessage(GameConnection::ColorRed, SFXNone, "!!! Error running levelgen %e0: See server log for details", e);
+      logprintf(LogConsumer::MsgType(LogConsumer::LogWarning | LogConsumer::LuaLevelGenerator),
+                "Error running levelgen %s", scriptName.c_str());
       return false;
    }
 
