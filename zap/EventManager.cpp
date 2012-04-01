@@ -68,6 +68,9 @@ static const EventDef eventDefs[] = {
 };
 
 
+static EventManager eventManager;   // Singleton event manager, one copy is used by all listeners
+
+
 // C++ constructor
 EventManager::EventManager()
 {

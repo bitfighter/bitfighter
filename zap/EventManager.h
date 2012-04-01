@@ -100,11 +100,9 @@ public:
    void setPaused(bool isPaused);
    void togglePauseStatus();
    bool isPaused();
-   void addSteps(S32 steps);     // Each robot will cause the step counter to decrement
+   void addSteps(S32 steps);        // Each robot will cause the step counter to decrement
 };
 
-
-static EventManager eventManager;   // Singleton event manager, one copy is used by all listeners
 
 };
 
