@@ -137,6 +137,8 @@ void ServerGame::cleanUp()
    fillVector.clear();
    mDatabaseForBotZones.findObjects(fillVector);
 
+   mLevelGens.deleteAndClear();
+
    for(S32 i = 0; i < fillVector.size(); i++)
       delete dynamic_cast<Object *>(fillVector[i]);
 
@@ -625,7 +627,6 @@ static S32 QSORT_CALLBACK AddOrderSort(ClientInfo **a, ClientInfo **b)
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
-
    cleanUp();
    mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
@@ -997,11 +998,14 @@ void ServerGame::runLevelGenScript(const string &scriptName)
       return;
    }
 
-   // The script file will be the first argument, subsequent args will be passed on to the script
-   LuaLevelGenerator levelgen = LuaLevelGenerator(fullname, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
-                                                  getGameObjDatabase(), this);
+   // The script file will be the first argument, subsequent args will be passed on to the script -- will be deleted when level ends
+   LuaLevelGenerator *levelgen = new LuaLevelGenerator(fullname, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
+                                                       getGameObjDatabase(), this);
 
-   levelgen.runScript();
+   if(!levelgen->runScript())
+      delete levelgen;
+   else
+      mLevelGens.push_back(levelgen);
 }
 
 

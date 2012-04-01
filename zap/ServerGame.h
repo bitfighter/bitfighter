@@ -26,12 +26,14 @@
 #ifndef _SERVER_GAME_H_
 #define _SERVER_GAME_H_
 
-#include "game.h"                // Parent class def
+#include "game.h"       // Parent class def
 
 using namespace std;
 
 namespace Zap
 {
+
+class LuaLevelGenerator;
 
 class ServerGame : public Game
 {
@@ -82,6 +84,8 @@ private:
 
    RefPtr<NetEvent> mSendLevelInfoDelayNetInfo;
    Timer mSendLevelInfoDelayCount;
+
+   Vector<LuaLevelGenerator *> mLevelGens;
 
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor
