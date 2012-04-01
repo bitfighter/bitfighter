@@ -1023,7 +1023,6 @@ void ServerGame::addClient(ClientInfo *clientInfo)
    if(mShuttingDown)
       conn->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientInfo()->getName(), 
                                          "Sorry -- server shutting down", false);
-
    if(mGameType.isValid())
    {
       mGameType->serverAddClient(clientInfo);
@@ -1033,7 +1032,6 @@ void ServerGame::addClient(ClientInfo *clientInfo)
    // When a new player joins, game is always unsuspended!
    if(mGameSuspended)
       unsuspendGame(false);
-
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
