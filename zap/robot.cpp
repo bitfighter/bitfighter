@@ -1317,7 +1317,7 @@ bool Robot::startLua()
    if(!LuaScriptRunner::startLua(ROBOT) || !loadScript())
       return false;
 
-   string name = runGetName();                                          // Run bot's getName function
+   string name = runGetName();                                             // Run bot's getName function
    getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
    return true;
