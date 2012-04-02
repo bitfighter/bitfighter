@@ -146,6 +146,8 @@ private:
    bool loadScript(const string &scriptName);
    bool runChunk();
 
+   void setEnums(lua_State *L);
+
 protected:
    lua_State *L;                 // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
