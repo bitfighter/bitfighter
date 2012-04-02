@@ -118,9 +118,9 @@ string TextEntryUserInterface::getSaltedHashText()
 }
 
 
-bool TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool TextEntryUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) 
+   if(Parent::onKeyDown(inputCode))
       return true;
 
    switch (inputCode)
@@ -138,8 +138,14 @@ bool TextEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
          onEscape();
          return true;
       default:
-         return lineEditor.addChar(ascii);
+         return false;
    }
+}
+
+
+void TextEntryUserInterface::onTextInput(char ascii)
+{
+   lineEditor.addChar(ascii);
 }
 
 
@@ -212,9 +218,9 @@ bool LevelNameEntryUserInterface::setLevelIndex()
 }
 
 
-bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) 
+   if(Parent::onKeyDown(inputCode))
    { 
       // Do nothing -- key handled
    }
@@ -255,9 +261,13 @@ bool LevelNameEntryUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(inputCode == KEY_TAB)       // Tab will try to complete a name from whatever the user has already typed
       completePartial();
 
-   else                                // Normal typed key
+   else                                // Normal typed key - not handled
+   {
       mFoundLevel = setLevelIndex();   // Update levelIndex to reflect current level
+      return false;
+   }
 
+   // Something was handled!
    return true;
 }
 

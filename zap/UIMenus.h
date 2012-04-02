@@ -72,8 +72,8 @@ protected:
    bool mIgnoreNextMouseEvent;
 
    // Handle keyboard input while a menu is displayed
-   virtual bool processMenuSpecificKeys(InputCode inputCode, char ascii);
-   virtual bool processKeys(InputCode inputCode, char ascii);
+   virtual bool processMenuSpecificKeys(InputCode inputCode);
+   virtual bool processKeys(InputCode inputCode);
    virtual S32 getSelectedMenuItem();
 
    S32 getTotalMenuItemHeight();    // Add up height of all menu items
@@ -112,8 +112,9 @@ public:
    void getMenuResponses(Vector<string> &responses);     // Fill responses with values from menu
 
    void render();                                        // Draw the basic menu
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);
+   void onTextInput(char ascii);
    void onMouseMoved();
    void processMouse();
 
@@ -313,7 +314,7 @@ public:
    LevelMenuSelectUserInterface(ClientGame *game);        // Constructor
    string category;
    void onActivate();
-   bool processMenuSpecificKeys(InputCode inputCode, char ascii);  // Custom key handling for level selection menus
+   bool processMenuSpecificKeys(InputCode inputCode);  // Custom key handling for level selection menus
 
    void processSelection(U32 index);
    void onEscape();

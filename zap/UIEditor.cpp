@@ -3442,42 +3442,14 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 }
 
 
-// Handle key presses
-bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
+void EditorUserInterface::onTextInput(char ascii)
 {
-   if(Parent::onKeyDown(inputCode, ascii))
-      return true;
+   // Pass the key on to the console for processing
+   if(OGLCONSOLE_ProcessBitfighterTextInputEvent(ascii) != 0)
+      return;
 
-   if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode, ascii))      // Pass the key on to the console for processing
-      return true;
-
-   string inputString = InputCodeManager::makeInputString(inputCode);
-
-   // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
-   // This is where we handle entering things like rotation angle and other data that requires a special entry box.
-   // NOT for editing an item's attributes.  Still used, but untested in refactor.
    if(entryMode != EntryNone)
-      textEntryKeyHandler(inputCode, ascii);
-
-   else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
-      startAttributeEditor();
-
-   // Mouse wheel zooms in and out
-
-   else if(inputCode == MOUSE_WHEEL_UP)
-      zoom(0.2f);
-   else if(inputCode == MOUSE_WHEEL_DOWN)
-      zoom(-0.2f);
-   else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
-   {
-      mScrollWithMouseLocation = mMousePos;
-      mAutoScrollWithMouseReady = !mAutoScrollWithMouse; // Ready to scroll when button is released
-      mAutoScrollWithMouse = false;  // turn off in case we were already auto scrolling.
-   }
-
-   // Regular key handling from here on down
-   else if(InputCodeManager::checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
-      setCurrentTeam(-2);
+      textEntryTextInputHandler(ascii);
 
    else if(ascii == '#' || ascii == '!')
    {
@@ -3503,24 +3475,62 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
       onSelectionChanged();
 
       if(selected == NONE)      // Nothing selected, nothing to do!
-         return true;
+         return ;
 
-      mEntryBox = getNewEntryBox(objList->get(selected)->getItemId() <= 0 ? "" : itos(objList->get(selected)->getItemId()), 
+      mEntryBox = getNewEntryBox(objList->get(selected)->getItemId() <= 0 ? "" : itos(objList->get(selected)->getItemId()),
                                  "Item ID:", 10, LineEditor::digitsOnlyFilter);
       entryMode = EntryID;
    }
+}
 
-   else if(ascii >= '0' && ascii <= '9' && InputCodeManager::checkModifier(KEY_NONE))  // Change team affiliation of selection with 0-9 keys
+
+// Handle key presses
+bool EditorUserInterface::onKeyDown(InputCode inputCode)
+{
+   if(Parent::onKeyDown(inputCode))
+      return true;
+
+   if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode))      // Pass the key on to the console for processing
+      return true;
+
+   string inputString = InputCodeManager::makeInputString(inputCode);
+
+   // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
+   // This is where we handle entering things like rotation angle and other data that requires a special entry box.
+   // NOT for editing an item's attributes.  Still used, but untested in refactor.
+   if(entryMode != EntryNone)
+      textEntryInputCodeHandler(inputCode);
+
+   else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
+      startAttributeEditor();
+
+   // Mouse wheel zooms in and out
+
+   else if(inputCode == MOUSE_WHEEL_UP)
+      zoom(0.2f);
+   else if(inputCode == MOUSE_WHEEL_DOWN)
+      zoom(-0.2f);
+   else if(inputCode == MOUSE_MIDDLE)     // Click wheel to drag
    {
-      setCurrentTeam(ascii - '1');
+      mScrollWithMouseLocation = mMousePos;
+      mAutoScrollWithMouseReady = !mAutoScrollWithMouse; // Ready to scroll when button is released
+      mAutoScrollWithMouse = false;  // turn off in case we were already auto scrolling.
+   }
+
+   // Regular key handling from here on down
+   else if(InputCodeManager::checkModifier(KEY_SHIFT) && inputCode == KEY_0)  // Shift-0 -> Set team to hostile
+      setCurrentTeam(-2);
+   else if(inputCode >= KEY_0 && inputCode <= KEY_9 && InputCodeManager::checkModifier(KEY_NONE))  // Change team affiliation of selection with 0-9 keys
+   {
+      setCurrentTeam((inputCode - KEY_0) - 1);
       return true;
    }
 
 #ifdef TNL_OS_MAC_OSX 
-      // Ctrl-left click is same as right click for Mac users
-      else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && InputCodeManager::checkModifier(KEY_CTRL)))
+   // Ctrl-left click is same as right click for Mac users
+   else if(inputCode == MOUSE_RIGHT || (inputCode == MOUSE_LEFT && InputCodeManager::checkModifier(KEY_CTRL)))
 #else
-      else if(inputCode == MOUSE_RIGHT)
+   else if(inputCode == MOUSE_RIGHT)
 #endif
       onMouseClicked_right();
 
@@ -3676,7 +3686,10 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode, char ascii)
    {
       // Do nothing
    }
+   else
+      return false;
 
+   // A key was handled
    return true;
 }
 
@@ -3883,8 +3896,14 @@ bool EditorUserInterface::checkPluginKeyBindings(string inputString)
 }
 
 
+void EditorUserInterface::textEntryTextInputHandler(char ascii)
+{
+   mEntryBox.addChar(ascii);
+}
+
+
 // Handle keyboard activity when we're editing an item's attributes
-void EditorUserInterface::textEntryKeyHandler(InputCode inputCode, char ascii)
+void EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
 {
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
    {
@@ -3927,9 +3946,6 @@ void EditorUserInterface::textEntryKeyHandler(InputCode inputCode, char ascii)
    }
    else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
       mEntryBox.handleBackspace(inputCode);
-
-   else
-      mEntryBox.addChar(ascii);
 
    // else ignore keystroke
 }

@@ -27,20 +27,17 @@ class ClientGame;
 class Event 
 {
 private:
+   static bool mAllowTextInput;   // Flag to allow text translation pass-through
+
    static void setMousePos(S32 x, S32 y, DisplayMode mode);
    static void updateJoyAxesDirections(U32 axisMask, S16 value);
 
    static void inputCodeUp(InputCode inputCode);
-   static void inputCodeDown(InputCode inputCode, char ascii = 0);
+   static bool inputCodeDown(InputCode inputCode);
 
-public:
-   Event();
-   virtual ~Event();
-
-   static void onEvent(ClientGame *game, SDL_Event* event);
-
-   static void onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode);
-   static void onKeyUp(SDLKey key, SDLMod mod, U16 unicode);
+   static void onKeyDown(ClientGame *game, SDL_Event *event);
+   static void onKeyUp(SDL_Event *event);
+   static void onTextInput(char unicode);
    static void onMouseMoved(S32 x, S32 y, DisplayMode mode);
    static void onMouseWheel(bool Up, bool Down);  //Not implemented
    static void onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
@@ -52,6 +49,12 @@ public:
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
    static void onResize(ClientGame *game, S32 w, S32 h);
    static void onUser(U8 type, S32 code, void* data1, void* data2);
+
+public:
+   Event();
+   virtual ~Event();
+
+   static void onEvent(ClientGame *game, SDL_Event* event);
 };
 
 }

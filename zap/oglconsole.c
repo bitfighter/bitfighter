@@ -1107,16 +1107,23 @@ extern int getState_c(int inputCode);
 
 // Munge the Bitfighter key handling system into something that works with this setup
 // Returns true if console is open, false if it has been closed
-int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode, char ascii)
+int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode)
 {
    if(OGLCONSOLE_KeyEvent(inputCode, getState_c(KEY_SHIFT)))
-      return 1;
-   if(OGLCONSOLE_CharEvent(ascii))
       return 1;
 
    return 0;
 
    //return (userConsole->visibility >= 1);    // True if console visible, false if hidden
+}
+
+
+int OGLCONSOLE_ProcessBitfighterTextInputEvent(char ascii)
+{
+   if(OGLCONSOLE_CharEvent(ascii))
+      return 1;
+
+   return 0;
 }
 
 

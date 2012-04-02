@@ -490,9 +490,9 @@ void ChatUserInterface::renderHeader()
 }
 
 
-bool ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool ChatUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) 
+   if(Parent::onKeyDown(inputCode))
       { /* Do nothing */ }
    else if(inputCode == KEY_ESCAPE)
       onEscape();
@@ -500,10 +500,18 @@ bool ChatUserInterface::onKeyDown(InputCode inputCode, char ascii)
       issueChat();
    else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(inputCode);
-   else if(ascii)                                  // Other keys - add key to message
-      mLineEditor.addChar(ascii);
+   else
+      return false;
 
+   // A key was handled
    return true;
+}
+
+
+void ChatUserInterface::onTextInput(char ascii)
+{
+   if(ascii)                                  // Other keys - add key to message
+      mLineEditor.addChar(ascii);
 }
 
 

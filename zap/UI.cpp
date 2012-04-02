@@ -1097,7 +1097,7 @@ const char *UserInterface::getInputCodeString(GameSettings *settings, InputCodeM
 }
 
  
-bool UserInterface::onKeyDown(InputCode inputCode, char ascii) 
+bool UserInterface::onKeyDown(InputCode inputCode)
 { 
    mTimeSinceLastInput = 0;
 
@@ -1134,6 +1134,7 @@ bool UserInterface::onKeyDown(InputCode inputCode, char ascii)
 
 void UserInterface::onKeyUp(InputCode inputCode)  { /* Do nothing */ }
 
+void UserInterface::onTextInput(char ascii)  { /* Do nothing */ }
 
 UserInterfaceData::UserInterfaceData() 
 {

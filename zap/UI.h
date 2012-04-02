@@ -139,8 +139,9 @@ public:
 
 
    // Input event handlers
-   virtual bool onKeyDown(InputCode inputCode, char ascii);
+   virtual bool onKeyDown(InputCode inputCode);
    virtual void onKeyUp(InputCode inputCode);
+   virtual void onTextInput(char ascii);
    virtual void onMouseMoved();
    virtual void onMouseDragged();
 

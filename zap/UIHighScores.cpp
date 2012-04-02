@@ -223,12 +223,14 @@ void HighScoresUserInterface::onReactivate()
 }
 
 
-bool HighScoresUserInterface::onKeyDown(InputCode inputCode, char ascii) 
+bool HighScoresUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(!Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
+      return true;
+   else
       quit();            // Quit when any key is pressed...  any key at all.  Except a couple.
 
-   return true;
+   return false;
 }
 
 

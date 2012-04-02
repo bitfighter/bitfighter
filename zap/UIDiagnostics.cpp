@@ -94,7 +94,7 @@ void DiagnosticUserInterface::quit()
 }
 
 
-bool DiagnosticUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
 {
    if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_DIAG, inputCode))
    {
@@ -106,13 +106,16 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode, char ascii)
    {
       // Do nothing -- no global chat from diagnostics screen... it's perverse!
    }
-   else if(Parent::onKeyDown(inputCode, ascii))   
+   else if(Parent::onKeyDown(inputCode))
    { 
       // Do nothing -- key handled
    }
    else if(inputCode == KEY_ESCAPE)
       quit();                          // Quit the interface
+   else
+      return false;
 
+   // A key was handled
    return true;
 }
 

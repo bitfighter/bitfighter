@@ -309,11 +309,12 @@ public:
    //ofstream mOutputFile;            // For saving downloaded levels
    //FILE *mOutputFile;               // For saving downloaded levels
 
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
    void onKeyUp(InputCode inputCode);
+   void onTextInput(char ascii);
 
-   void processPlayModeKey(InputCode inputCode, char ascii);
-   void processChatModeKey(InputCode inputCode, char ascii);
+   bool processPlayModeKey(InputCode inputCode);
+   bool processChatModeKey(InputCode inputCode);
 
    void chooseNextWeapon();           
    void choosePrevWeapon();   

@@ -53,7 +53,7 @@ public:
    void quit();
    void setPresentation(S32 presentationId);
    virtual void reset();
-   virtual bool onKeyDown(InputCode inputCode, char ascii);
+   virtual bool onKeyDown(InputCode inputCode);
 };
 
 
@@ -68,7 +68,7 @@ public:
    ErrorMessageUserInterface(ClientGame *game);      // Constructor
    void reset();
 
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
 };
 
 

@@ -136,7 +136,8 @@ public:
    virtual void setValue(const string &val);
    virtual void setIntValue(S32 val);
 
-   virtual bool handleKey(InputCode inputCode, char ascii);
+   virtual bool handleKey(InputCode inputCode);
+   virtual void handleTextInput(char ascii);
    virtual void setFilter(LineEditor::LineEditorFilter filter);
    virtual void activatedWithShortcutKey();
 
@@ -219,7 +220,8 @@ public:
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual bool handleKey(InputCode inputCode, char ascii);
+   virtual bool handleKey(InputCode inputCode);
+   virtual void handleTextInput(char ascii);
 
    virtual void activatedWithShortcutKey();
 
@@ -301,7 +303,7 @@ public:
    virtual void setIntValue(S32 val);
    virtual string getValue() const;
    virtual const char *getSpecialEditingInstructions();
-   virtual bool handleKey(InputCode inputCode, char ascii);
+   virtual bool handleKey(InputCode inputCode);
 
    virtual string getUnits() const;
 
@@ -386,7 +388,8 @@ public:
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
 
-   virtual bool handleKey(InputCode inputCode, char ascii);
+   virtual bool handleKey(InputCode inputCode);
+   virtual void handleTextInput(char ascii);
 
    LineEditor getLineEditor();
    void setLineEditor(LineEditor editor);

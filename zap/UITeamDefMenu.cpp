@@ -232,9 +232,49 @@ class Team;
 string origName;
 extern bool isPrintable(char c);
 
-bool TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
+
+
+void TeamDefUserInterface::onTextInput(char ascii)
 {
-   if(Parent::onKeyDown(inputCode, ascii))
+   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+
+   if(mEditing)
+   {
+      if(isPrintable(ascii))
+      {
+         ui->getTeam(selectedIndex)->getLineEditor()->addChar(ascii);
+      }
+   }
+
+   // TODO:  This should not be text input, it should be processed as an input code
+   else if(ascii >= '1' && ascii <= '9')              // Keys 1-9 --> use preset
+   {
+      if(InputCodeManager::checkModifier(KEY_ALT))    // Replace all teams with # of teams based on presets
+      {
+         U32 count = (ascii - '0');
+         ui->clearTeams();
+         for(U32 i = 0; i < count; i++)
+         {
+            EditorTeam *team = new EditorTeam;
+            team->setName(gTeamPresets[i].name);
+            team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
+            ui->addTeam(team);
+         }
+      }
+      else                          // Replace selection with preset of number pressed
+      {
+         U32 indx = (ascii - '1');
+         ui->getTeam(selectedIndex)->setName(gTeamPresets[indx].name);
+         ui->getTeam(selectedIndex)->setColor(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
+      }
+   }
+}
+
+
+
+bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
+{
+   if(Parent::onKeyDown(inputCode))
       return true;
 
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
@@ -256,31 +296,8 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       {
          ui->getTeam(selectedIndex)->getLineEditor()->handleBackspace(inputCode);
       }
-      else if(isPrintable(ascii))
-      {
-         ui->getTeam(selectedIndex)->getLineEditor()->addChar(ascii);
-      }
-   }
-   else if(ascii >= '1' && ascii <= '9')              // Keys 1-9 --> use preset
-   {
-      if(InputCodeManager::checkModifier(KEY_ALT))    // Replace all teams with # of teams based on presets
-      {
-         U32 count = (ascii - '0');
-         ui->clearTeams();
-         for(U32 i = 0; i < count; i++)
-         {
-            EditorTeam *team = new EditorTeam;
-            team->setName(gTeamPresets[i].name);
-            team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
-            ui->addTeam(team);
-         }
-      }
-      else                          // Replace selection with preset of number pressed
-      {
-         U32 indx = (ascii - '1');
-         ui->getTeam(selectedIndex)->setName(gTeamPresets[indx].name);
-         ui->getTeam(selectedIndex)->setColor(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
-      }
+      else
+         return false;
    }
 
    else if(inputCode == KEY_DELETE || inputCode == KEY_MINUS)            // Del or Minus - Delete current team
@@ -352,7 +369,10 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode, char ascii)
       playBoop();
       SDL_SetCursor(Cursor::getTransparent());
    }
+   else
+      return false;
 
+   // A key was handled
    return true;
 }
 

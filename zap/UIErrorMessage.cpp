@@ -85,9 +85,9 @@ void AbstractMessageUserInterface::reset()
 }
 
 
-bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool AbstractMessageUserInterface::onKeyDown(InputCode inputCode)
 {
-   return Parent::onKeyDown(inputCode, ascii);
+   return Parent::onKeyDown(inputCode);
 }
 
 
@@ -127,12 +127,14 @@ void ErrorMessageUserInterface::reset()
 }
 
 
-bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool ErrorMessageUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(!Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
+      return true;
+   else
       quit();     // Quit the interface when any key is pressed...  any key at all.  Mostly.
 
-   return true;
+   return false;
 }
 
 

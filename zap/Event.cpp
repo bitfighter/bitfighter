@@ -25,6 +25,9 @@
 namespace Zap
 {
 
+bool Event::mAllowTextInput = false;
+
+
 Event::Event()
 {
    // Do nothing -- never called?
@@ -117,7 +120,7 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
       // If the current axes direction is set in the inputCodeDownDeltaMask, set the input code down
       if(Joystick::JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
       {
-         inputCodeDown(Joystick::JoystickInputData[i].inputCode, 0);
+         inputCodeDown(Joystick::JoystickInputData[i].inputCode);
          continue;
       }
 
@@ -141,12 +144,14 @@ void Event::inputCodeUp(InputCode inputCode)
 }
 
 
-void Event::inputCodeDown(InputCode inputCode, char ascii)
+bool Event::inputCodeDown(InputCode inputCode)
 {
    InputCodeManager::setState(inputCode, true);
 
    if(UserInterface::current)
-      UserInterface::current->onKeyDown(inputCode, ascii);
+      return UserInterface::current->onKeyDown(inputCode);
+
+   return false;
 }
 
 
@@ -157,12 +162,20 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
    switch (event->type)
    {
       case SDL_KEYDOWN:
-         onKeyDown(game, event->key.keysym.sym, (SDLMod)event->key.keysym.mod, event->key.keysym.unicode);
+         onKeyDown(game, event);
          break;
 
       case SDL_KEYUP:
-         onKeyUp(event->key.keysym.sym, (SDLMod)event->key.keysym.mod, event->key.keysym.unicode);
+         onKeyUp(event);
          break;
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+      case SDL_TEXTINPUT:
+         if(mAllowTextInput)
+            onTextInput(event->text.text[0]);
+
+         break;
+#endif
 
       case SDL_MOUSEMOTION:
             onMouseMoved(event->motion.x, event->motion.y, iniSettings->displayMode);
@@ -224,7 +237,6 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          onJoyAxis(event->jaxis.which, event->jaxis.axis, event->jaxis.value);
          break;
 
-         // TODO:  Do we need joyball?
       case SDL_JOYBALLMOTION:
          onJoyBall(event->jball.which, event->jball.ball, event->jball.xrel, event->jball.yrel);
          break;
@@ -272,8 +284,12 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
 }
 
 
-void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
+void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 {
+   // We first disallow key-to-text translation
+   mAllowTextInput = false;
+
+   SDLKey key = event->key.keysym.sym;
    // Use InputCodeManager::getState() instead of checking the mod flag to prevent hyper annoying case
    // of user pressing and holding Alt, selecting another window, releasing Alt, returning to
    // Bitfighter window, and pressing enter, and having this block think we pressed alt-enter.
@@ -303,14 +319,29 @@ void Event::onKeyDown(ClientGame *game, SDLKey key, SDLMod mod, U16 unicode)
    else
    {
       InputCode inputCode = InputCodeManager::sdlKeyToInputCode(key);
-      inputCodeDown(inputCode, InputCodeManager::keyToAscii(unicode, inputCode));
+
+      // If an input code is not handled by a UI, then we will allow text translation to pass through
+      mAllowTextInput = !inputCodeDown(inputCode);
+
+      // SDL 1.2 has the translated key along with the keysym, so we trigger text input from here
+#if !SDL_VERSION_ATLEAST(2,0,0)
+      if(mAllowTextInput)
+         onTextInput(InputCodeManager::keyToAscii(event->key.keysym.unicode, inputCode));
+#endif
    }
 }
 
 
-void Event::onKeyUp(SDLKey key, SDLMod mod, U16 unicode)
+void Event::onKeyUp(SDL_Event *event)
 {
-   inputCodeUp(InputCodeManager::sdlKeyToInputCode(key));
+   inputCodeUp(InputCodeManager::sdlKeyToInputCode(event->key.keysym.sym));
+}
+
+
+void Event::onTextInput(char unicode)
+{
+   if(UserInterface::current)
+      UserInterface::current->onTextInput(unicode);
 }
 
 
@@ -343,7 +374,7 @@ void Event::onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mod
 {
    setMousePos(x, y, mode);
 
-   inputCodeDown(inputCode, 0);
+   inputCodeDown(inputCode);
 }
 
 
@@ -383,7 +414,7 @@ void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 void Event::onJoyButtonDown(U8 which, U8 button)
 {
 //   logprintf("SDL button down number: %u", button);
-   inputCodeDown(InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)), 0);
+   inputCodeDown(InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
    Joystick::ButtonMask |= BIT(button);
 }
 
@@ -411,7 +442,7 @@ void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
 
       // If the current hat direction is set in the inputCodeDownDeltaMask, set the input code down
       if(inputCodeDownDeltaMask & BIT(i))
-         inputCodeDown(inputCode, 0);
+         inputCodeDown(inputCode);
 
       // If the current hat direction is set in the inputCodeUpDeltaMask, set the input code up
       if(inputCodeUpDeltaMask & BIT(i))
@@ -425,6 +456,7 @@ void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
 
 void Event::onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel)
 {
+   // TODO:  Do we need joyball?
 //   logprintf("SDL Ball number: %u, relative x: %d, relative y: %d", ball, xrel, yrel);
 }
 

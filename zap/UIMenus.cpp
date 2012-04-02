@@ -523,9 +523,9 @@ void MenuUserInterface::processMouse()
 }
 
 
-bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool MenuUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
       return true;
 
    // Capture mouse wheel on scrolling menus and use it to scroll.  Otherwise, let it be processed by individual menu items.
@@ -578,15 +578,30 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
    if(!ui->mFirstTime)
       ui->showAnimation = false;    // Stop animations if a key is pressed
 
-   (U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->handleKey(inputCode, ascii)) || 
-      processMenuSpecificKeys(inputCode, ascii) || 
-      processKeys(inputCode, ascii);
+
+   // Process each key handler in turn until one works
+   bool keyHandled = (U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->handleKey(inputCode));
+
+   if(!keyHandled)
+      keyHandled = processMenuSpecificKeys(inputCode);
+
+   if(!keyHandled)
+      keyHandled = processKeys(inputCode);
+
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the pointer
    if(!InputCodeManager::isMouseAction(inputCode) && inputCode != KEY_ESCAPE)
       SDL_SetCursor(Cursor::getTransparent());
 
-   return true;
+   return keyHandled;
+}
+
+
+void MenuUserInterface::onTextInput(char ascii)
+{
+
+   if(U32(selectedIndex) < U32(mMenuItems.size()))
+      mMenuItems[selectedIndex]->handleTextInput(ascii);
 }
 
 
@@ -598,7 +613,7 @@ void MenuUserInterface::onKeyUp(InputCode inputCode)
 
 
 // Generic handler looks for keystrokes and translates them into menu actions
-bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
+bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
    // First check for some shortcut keys
 
@@ -632,18 +647,18 @@ S32 MenuUserInterface::getTotalMenuItemHeight()
 
 
 // Process the keys that work on all menus
-bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
+bool MenuUserInterface::processKeys(InputCode inputCode)
 {
    inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);
    
-   if(Parent::onKeyDown(inputCode, ascii)) 
+   if(Parent::onKeyDown(inputCode))
    { 
       // Do nothing 
    }
 
    else if(inputCode == KEY_LEFT || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_RIGHT)
    {
-      mMenuItems[selectedIndex]->handleKey(inputCode, ascii);
+      mMenuItems[selectedIndex]->handleKey(inputCode);
       playBoop();
    }
 
@@ -665,7 +680,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
             return true;
       }
 
-      mMenuItems[selectedIndex]->handleKey(inputCode, ascii);
+      mMenuItems[selectedIndex]->handleKey(inputCode);
 
       if(mMenuItems[selectedIndex]->enterAdvancesItem())
          advanceItem();
@@ -697,7 +712,12 @@ bool MenuUserInterface::processKeys(InputCode inputCode, char ascii)
    else if(inputCode == KEY_DOWN || inputCode == KEY_TAB)    // Next item
       advanceItem();
 
-   return true;      // Probably wrong, but doesn't really matter at this point
+   // If nothing was handled, return false
+   else
+      return false;
+
+   // If we made it here, then something was handled
+   return true;
 }
 
 
@@ -1276,7 +1296,7 @@ void OptionsMenuUserInterface::onEscape()
 // Constructor
 NameEntryUserInterface::NameEntryUserInterface(ClientGame *game) : MenuUserInterface(game)
 {
-   setMenuID(OptionsUI);
+   setMenuID(NameEntryUI);
    mMenuTitle = "ENTER YOUR NICKNAME:";
    mReason = NetConnection::ReasonNone;
 }
@@ -1884,7 +1904,7 @@ void LevelMenuSelectUserInterface::onActivate()
 
 
 // Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
-bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode, char ascii)
+bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
    // First check for some shortcut keys
    for(S32 i = 0; i < getMenuItemCount(); i++)

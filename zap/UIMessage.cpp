@@ -109,15 +109,15 @@ void MessageUserInterface::quit()
 }
 
 
-bool MessageUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool MessageUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
       return true;
 
    if(!mFadeTime)    // If message isn't the fading sort, then...
       quit();        // ...quit the interface when any key is pressed...  any key at all.  Sort of.
 
-   return true;
+   return false;
 }
 
 

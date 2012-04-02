@@ -63,7 +63,7 @@ public:
 
    void setHighScores(Vector<StringTableEntry> groupNames, Vector<string> names, Vector<string> scores);
 
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
    void quit();
 
 };

@@ -171,12 +171,14 @@ void CreditsUserInterface::quit()
 }
 
 
-bool CreditsUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool CreditsUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(!Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
+      return true;
+   else
       quit();     // Quit the interface when any key is pressed...  any key at all.  Except those handled by Parent.
 
-   return true;
+   return false;
 }
 
 //-----------------------------------------------------
@@ -383,9 +385,9 @@ void SplashUserInterface::quit()
 }
 
 
-bool SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool SplashUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(!Parent::onKeyDown(inputCode, ascii))
+   if(!Parent::onKeyDown(inputCode))
    {
 
       quitting = true;
@@ -393,7 +395,7 @@ bool SplashUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       // Unless user hit Enter or Escape, or some other thing...
       if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)    
-         current->onKeyDown(inputCode, ascii);                // ...pass keystroke on  (after reactivate in quit(), current is now the underlying
+         current->onKeyDown(inputCode);                // ...pass keystroke on  (after reactivate in quit(), current is now the underlying
 
       if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)
          current->onMouseMoved();

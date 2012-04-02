@@ -1051,9 +1051,9 @@ void InstructionsUserInterface::exitInstructions()
 }
 
 
-bool InstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool InstructionsUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
+   if(Parent::onKeyDown(inputCode)) { /* Do nothing */ }
 
    else if(inputCode == KEY_LEFT || inputCode == BUTTON_DPAD_LEFT || inputCode == BUTTON_DPAD_UP || inputCode == KEY_UP)
    {
@@ -1069,7 +1069,10 @@ bool InstructionsUserInterface::onKeyDown(InputCode inputCode, char ascii)
    else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode) || 
            inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
+   else
+      return false;
 
+   // A key was handled
    return true;
 }
 

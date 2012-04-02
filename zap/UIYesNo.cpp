@@ -68,9 +68,9 @@ void YesNoUserInterface::reset()
 }
 
 
-bool YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool YesNoUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
       return true;
 
    if(inputCode == KEY_Y)
@@ -89,7 +89,10 @@ bool YesNoUserInterface::onKeyDown(InputCode inputCode, char ascii)
    }
    else if(inputCode == KEY_ESCAPE)
       quit();
+   else
+      return false;
 
+   // A key was handled
    return true;
 }
 

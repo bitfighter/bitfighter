@@ -140,7 +140,8 @@ public:
 
    // UI related
    void render();
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
+   void onTextInput(char ascii);
 
    void onActivate();
    void onActivateLobbyMode();

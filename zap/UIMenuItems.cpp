@@ -197,7 +197,7 @@ S32 MenuItem::getWidth(S32 textsize)
 }
 
 
-bool MenuItem::handleKey(InputCode inputCode, char ascii)
+bool MenuItem::handleKey(InputCode inputCode)
 {
    if(inputCode == KEY_ENTER || inputCode == KEY_SPACE || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT)
    {
@@ -212,6 +212,13 @@ bool MenuItem::handleKey(InputCode inputCode, char ascii)
       // Check individual entries for any shortcut keys
       return false;
    }
+}
+
+
+
+void MenuItem::handleTextInput(char ascii)
+{
+
 }
 
 
@@ -271,7 +278,7 @@ void MenuItem::setFilter(LineEditor::LineEditorFilter filter)
 
 void MenuItem::activatedWithShortcutKey()
 {
-   handleKey(MOUSE_LEFT, 0);
+   handleKey(MOUSE_LEFT);
 }
 
 
@@ -408,7 +415,7 @@ S32 ToggleMenuItem::getWidth(S32 textsize)
 }
 
 
-bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
+bool ToggleMenuItem::handleKey(InputCode inputCode)
 {
    U32 nextValAfterWrap = mWrap ? 0 : mIndex;
 
@@ -445,23 +452,27 @@ bool ToggleMenuItem::handleKey(InputCode inputCode, char ascii)
       return true;
    }
 
-   else if(ascii)     // Check for the first key of a menu entry. 
+   return false;
+}
+
+
+void ToggleMenuItem::handleTextInput(char ascii)
+{
+   if(ascii)     // Check for the first key of a menu entry.
       for(S32 i = 0; i < mOptions.size(); i++)
       {
          S32 index = (i + mIndex + 1) % mOptions.size();
          if(tolower(ascii) == tolower(mOptions[index].data()[0]))
          {
             mIndex = index;
-            
+
             if(mCallback)
                mCallback(getMenu()->getGame(), mIndex);
 
             UserInterface::playBoop();
-            return true;
+            return;
          }
       }
-
-   return false;
 }
 
 
@@ -698,7 +709,7 @@ S32 CounterMenuItem::getWidth(S32 textsize)
 }
 
 
-bool CounterMenuItem::handleKey(InputCode inputCode, char ascii)
+bool CounterMenuItem::handleKey(InputCode inputCode)
 {
    if(inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_WHEEL_UP)  
    {
@@ -1084,7 +1095,7 @@ S32 TextEntryMenuItem::getWidth(S32 textsize)
 }
 
 
-bool TextEntryMenuItem::handleKey(InputCode inputCode, char ascii) 
+bool TextEntryMenuItem::handleKey(InputCode inputCode)
 { 
    if(inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)
    {
@@ -1095,17 +1106,24 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode, char ascii)
 
       return true;
    }
-   else if(ascii > 0)
+   // Don't advance with the space key - which seems to be default behavior? See:
+   // MenuUserInterface::processKeys()
+   else if(inputCode == KEY_SPACE)
+      return true;
+
+   return false;
+}
+
+
+void TextEntryMenuItem::handleTextInput(char ascii)
+{
+   if(ascii)
    {
       mLineEditor.addChar(ascii);
 
       if(mTextEditedCallback)
          mTextEditedCallback(mLineEditor.getString());
-
-      return true;
    }
-   
-   return false;
 }
 
 

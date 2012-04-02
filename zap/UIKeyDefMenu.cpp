@@ -283,9 +283,9 @@ void KeyDefMenuUserInterface::render()
 }
 
 
-bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
 {
-   if(Parent::onKeyDown(inputCode, ascii)) { /* Do nothing */ }
+   if(Parent::onKeyDown(inputCode)) { /* Do nothing */ }
 
    // InputCode entry
    else if(changingItem > -1)
@@ -376,7 +376,10 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode, char ascii)
 
       SDL_SetCursor(Cursor::getTransparent());                       // Turn off cursor
    }
+   else              // No key has been handled
+      return false;
 
+   // A key was handled
    return true;
 }
 

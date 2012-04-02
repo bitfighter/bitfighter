@@ -98,7 +98,7 @@ public:
    void idle(U32 timeDelta);
    void render();
    void quit();
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
 };
 
 
@@ -127,7 +127,7 @@ public:
    void idle(U32 timeDelta);
    void render();
    void quit();
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
 };
 
 }

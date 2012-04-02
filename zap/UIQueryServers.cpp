@@ -953,8 +953,15 @@ void QueryServersUserInterface::recalcCurrentIndex()
 }
 
 
+void QueryServersUserInterface::onTextInput(char ascii)
+{
+   if(ascii)
+      mLineEditor.addChar(ascii);
+}
+
+
 // All key handling now under one roof!
-bool QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
+bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 {
    inputCode = InputCodeManager::convertJoystickToKeyboard(inputCode);
 
@@ -976,7 +983,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
       return true;
    }
 
-   if(Parent::onKeyDown(inputCode, ascii))
+   if(Parent::onKeyDown(inputCode))
       return true;
 
    S32 currentIndex = -1;
@@ -1069,9 +1076,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mItemSelectedWithMouse = false;
    }
    else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
-      mLineEditor.handleBackspace(inputCode);   
-   else if(ascii)                               // Other keys - add key to message
-      mLineEditor.addChar(ascii);
+      mLineEditor.handleBackspace(inputCode);
 
    // The following keys only make sense if there are some servers to browse through
    else if(servers.size() == 0)
@@ -1100,7 +1105,11 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode, char ascii)
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
+   // If no key is handled
+   else
+      return false;
 
+   // A key was handled
    return true;
 }
 

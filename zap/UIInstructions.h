@@ -82,7 +82,7 @@ public:
    InstructionsUserInterface(ClientGame *game);      // Constructor
    void render();
 
-   bool onKeyDown(InputCode inputCode, char ascii);
+   bool onKeyDown(InputCode inputCode);
 
    void activatePage(IntructionPages pageIndex);
    void onActivate();

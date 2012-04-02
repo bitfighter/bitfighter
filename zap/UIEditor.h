@@ -318,9 +318,11 @@ public:
    bool mDraggingObjects;     // Should be private
 
    // Handle input
-   bool onKeyDown(InputCode inputCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
+   bool onKeyDown(InputCode inputCode);                         // Handle all keyboard inputs, mouse clicks, and button presses
+   void onTextInput(char ascii);                                // Handle all text input characters
    bool checkPluginKeyBindings(string inputString);             // Handle keys bound to plugins
-   void textEntryKeyHandler(InputCode inputCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
+   void textEntryInputCodeHandler(InputCode inputCode);         // Handle keyboard activity when we're editing an item's attributes
+   void textEntryTextInputHandler(char ascii);                  // Handle text input when we're editing an item's attributes
    void specialAttributeKeyHandler(InputCode inputCode, char ascii);
    void startAttributeEditor();
 
