@@ -1,0 +1,20 @@
+diff -r 6bb657898f55 include/SDL_config_macosx.h
+--- a/include/SDL_config_macosx.h	Tue Feb 28 21:58:36 2012 -0500
++++ b/include/SDL_config_macosx.h	Mon Apr 02 18:40:05 2012 -0600
+@@ -130,6 +130,7 @@
+ /* Enable various video drivers */
+ #define SDL_VIDEO_DRIVER_COCOA	1
+ #define SDL_VIDEO_DRIVER_DUMMY	1
++
+ #define SDL_VIDEO_DRIVER_X11 1
+ #define SDL_VIDEO_DRIVER_X11_DYNAMIC "/usr/X11R6/lib/libX11.6.dylib"
+ #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/usr/X11R6/lib/libXext.6.dylib"
+@@ -166,7 +167,7 @@
+ /* Enable assembly routines */
+ #define SDL_ASSEMBLY_ROUTINES	1
+ #ifdef __ppc__
+-#define SDL_ALTIVEC_BLITTERS	1
++#define SDL_ALTIVEC_BLITTERS	0
+ #endif
+ 
+ #endif /* _SDL_config_macosx_h */
