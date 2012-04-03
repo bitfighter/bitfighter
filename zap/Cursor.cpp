@@ -216,6 +216,26 @@ void Cursor::reverseBits()
 }
 
 
+void Cursor::enableCursor()
+{
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_ShowCursor(1);
+#else
+   SDL_SetCursor(getDefault());
+#endif
+}
+
+
+void Cursor::disableCursor()
+{
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_ShowCursor(0);
+#else
+   SDL_SetCursor(getTransparent());
+#endif
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

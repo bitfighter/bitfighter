@@ -1139,7 +1139,7 @@ void EditorUserInterface::onActivate()
    mJustInsertedVertex = false;
    entryMode = EntryNone;
 
-   SDL_SetCursor(Cursor::getDefault());
+   Cursor::enableCursor();
 
    mSaveMsgTimer = 0;
 
@@ -1166,7 +1166,7 @@ bool EditorUserInterface::usesEditorScreenMode()
 void EditorUserInterface::onReactivate()     // Run when user re-enters the editor after testing, among other things
 {
    mDraggingObjects = false;  
-   SDL_SetCursor(Cursor::getDefault());
+   Cursor::enableCursor();
 
    if(mWasTesting)
    {
@@ -2668,7 +2668,7 @@ void EditorUserInterface::onMouseMoved()
       mHitItem->setLitUp(true);
 
    findSnapVertex();
-   SDL_SetCursor(Cursor::getDefault());
+   Cursor::enableCursor();
 }
 
 
@@ -4364,7 +4364,7 @@ void EditorUserInterface::testLevelStart()
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
 
-   SDL_SetCursor(Cursor::getTransparent());  // Turn off cursor
+   Cursor::disableCursor();            // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
    S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
 
@@ -4491,7 +4491,7 @@ void EditorMenuUserInterface::setupMenus()
 
 void EditorMenuUserInterface::onEscape()
 {
-   SDL_SetCursor(Cursor::getTransparent());
+   Cursor::disableCursor();
    getUIManager()->reactivatePrevUI();
 }
 

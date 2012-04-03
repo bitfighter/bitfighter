@@ -447,7 +447,7 @@ void MenuUserInterface::onMouseMoved()
       return;
 
    itemSelectedWithMouse = true;
-   SDL_SetCursor(Cursor::getDefault());  // Show cursor when user moves mouse
+   Cursor::enableCursor();  // Show cursor when user moves mouse
 
    selectedIndex = getSelectedMenuItem();
 
@@ -591,7 +591,7 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the pointer
    if(!InputCodeManager::isMouseAction(inputCode) && inputCode != KEY_ESCAPE)
-      SDL_SetCursor(Cursor::getTransparent());
+      Cursor::disableCursor();
 
    return keyHandled;
 }
@@ -1941,7 +1941,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
 #else
          SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
 #endif
-         SDL_SetCursor(Cursor::getTransparent());
+         Cursor::disableCursor();
          mIgnoreNextMouseEvent = true;
          playBoop();
 

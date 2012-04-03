@@ -1065,14 +1065,14 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    {
       backPage();
 
-      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
+      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
    else if(inputCode == KEY_PAGEDOWN) 
    {
       advancePage();
 
-      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
+      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
    else if (inputCode == KEY_DELETE || inputCode == KEY_BACKSPACE)       // Do backspacey things
@@ -1089,7 +1089,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
          currentIndex = servers.size() - 1;
       mPage = currentIndex / getServersPerPage(); 
 
-      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
+      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
@@ -1101,7 +1101,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
 
       mPage = currentIndex / getServersPerPage();
 
-      SDL_SetCursor(Cursor::getTransparent());        // Hide cursor when navigating with keyboard or joystick
+      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
@@ -1210,7 +1210,7 @@ void QueryServersUserInterface::onMouseMoved()
 
    const Point *mousePos = gScreenInfo.getMousePos();
 
-   SDL_SetCursor(Cursor::getDefault());
+   Cursor::enableCursor();
 
    if(mouseInHeaderRow(mousePos))
    {
@@ -1222,12 +1222,14 @@ void QueryServersUserInterface::onMouseMoved()
             break;
          }
    }
-
-   else if(isMouseOverDivider())
-      SDL_SetCursor(Cursor::getVerticalResize());
-
    else
       mHighlightColumn = mSortColumn;
+
+   if(isMouseOverDivider())
+      SDL_SetCursor(Cursor::getVerticalResize());
+   else
+      SDL_SetCursor(Cursor::getDefault());
+
 
    mItemSelectedWithMouse = true;
    mJustMovedMouse = true;

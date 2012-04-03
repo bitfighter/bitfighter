@@ -347,7 +347,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
             selectedIndex--;
       }
 
-      SDL_SetCursor(Cursor::getTransparent());                    // Turn off cursor
+      Cursor::disableCursor();                    // Turn off cursor
    }
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)   // Quit
    {
@@ -364,7 +364,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
       if(selectedIndex < 0)
          selectedIndex = menuItems.size() - 1;
 
-      SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
+      Cursor::disableCursor();    // Turn off cursor
    }
    else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)   // Next item
    {
@@ -374,7 +374,7 @@ bool KeyDefMenuUserInterface::onKeyDown(InputCode inputCode)
       if(selectedIndex >= menuItems.size())
          selectedIndex = 0;
 
-      SDL_SetCursor(Cursor::getTransparent());                       // Turn off cursor
+      Cursor::disableCursor();                       // Turn off cursor
    }
    else              // No key has been handled
       return false;
@@ -389,7 +389,7 @@ void KeyDefMenuUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
 
-   SDL_SetCursor(Cursor::getDefault());  // Show cursor when user moves mouse
+   Cursor::enableCursor();  // Show cursor when user moves mouse
 
    const Point *mousePos = gScreenInfo.getMousePos();
 
