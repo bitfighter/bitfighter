@@ -964,7 +964,7 @@ Vector<Robot *> Robot::robots;
 
 
 // Constructor, runs on client and server
-Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),   // FullClientInfo deleted in destructor
+Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),   
                  LuaScriptRunner() 
 {
    mHasSpawned = false;
