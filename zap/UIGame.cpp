@@ -231,7 +231,7 @@ void GameUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = false;  // Make sure our ship controls are active
    mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
-   SDL_SetCursor(Cursor::getTransparent());        // Turn off cursor
+   Cursor::disableCursor();            // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
@@ -264,10 +264,7 @@ void GameUserInterface::onReactivate()
    getGame()->undelaySpawn();
 
    mDisableShipKeyboardInput = false;
-   SDL_SetCursor(Cursor::getTransparent());    // Turn off cursor
-
-   // Removed because coming out of help screen would deactivate helpers and chat boxes
-//   enterMode(PlayMode);
+   Cursor::disableCursor();    // Turn off cursor
 
    if(mCurrentChatType == NoChat)
       setBusyChatting(false);

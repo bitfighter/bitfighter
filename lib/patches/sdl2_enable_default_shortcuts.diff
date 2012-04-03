@@ -1,0 +1,33 @@
+diff -r 6bb657898f55 src/video/cocoa/SDL_cocoaevents.m
+--- a/src/video/cocoa/SDL_cocoaevents.m	Tue Feb 28 21:58:36 2012 -0500
++++ b/src/video/cocoa/SDL_cocoaevents.m	Mon Apr 02 18:40:51 2012 -0600
+@@ -102,9 +102,9 @@
+     [appleMenu addItem:[NSMenuItem separatorItem]];
+ 
+     title = [@"Hide " stringByAppendingString:appName];
+-    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@/*"h"*/""];
++    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
+ 
+-    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@/*"h"*/""];
++    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+     [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+ 
+     [appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
+@@ -112,7 +112,7 @@
+     [appleMenu addItem:[NSMenuItem separatorItem]];
+ 
+     title = [@"Quit " stringByAppendingString:appName];
+-    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@/*"q"*/""];
++    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
+     
+     /* Put menu into the menubar */
+     menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+@@ -129,7 +129,7 @@
+     windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
+     
+     /* "Minimize" item */
+-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@/*"m"*/""];
++    menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
+     [windowMenu addItem:menuItem];
+     [menuItem release];
+     

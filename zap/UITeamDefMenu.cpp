@@ -114,7 +114,7 @@ void TeamDefUserInterface::onActivate()
    // Display an intitial message to users
    errorMsgTimer.reset(errorMsgDisplayTime);
    errorMsg = "";
-   SDL_SetCursor(Cursor::getTransparent());
+   Cursor::disableCursor();
 }
 
 
@@ -358,7 +358,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(selectedIndex < 0)
          selectedIndex = ui->getTeamCount() - 1;
       playBoop();
-      SDL_SetCursor(Cursor::getTransparent());
+      Cursor::disableCursor();
 
    }
    else if(inputCode == KEY_DOWN || inputCode == BUTTON_DPAD_DOWN)    // Next item
@@ -367,7 +367,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
       if(selectedIndex >= ui->getTeamCount())
          selectedIndex = 0;
       playBoop();
-      SDL_SetCursor(Cursor::getTransparent());
+      Cursor::disableCursor();
    }
    else
       return false;
@@ -381,7 +381,7 @@ void TeamDefUserInterface::onMouseMoved()
 {
    Parent::onMouseMoved();
 
-   SDL_SetCursor(Cursor::getDefault());
+   Cursor::enableCursor();
 
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
 

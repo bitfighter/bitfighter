@@ -46,6 +46,8 @@
 namespace Zap
 {
 
+const S32 MAX_DROP_FLAGS = 200;
+
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
@@ -421,15 +423,24 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
 
 // Runs on the server
 // If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
-void releaseFlag(Game *game, Point pos, Point startVel)
+void releaseFlag(Game *game, Point pos, Point startVel, S32 count = 0)
 {
    F32 th = TNL::Random::readF() * Float2Pi;
    F32 f = (TNL::Random::readF() * 2 - 1) * 100;
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
 
-   FlagItem *newFlag = new FlagItem(pos, vel, true);
-   newFlag->addToGame(game, game->getGameObjDatabase());
+   if(count > 1)
+   {
+      NexusFlagItem *newFlag = new NexusFlagItem(pos, vel, true);
+      newFlag->changeFlagCount(count);
+      newFlag->addToGame(game, game->getGameObjDatabase());
+   }
+   else
+   {
+      FlagItem *newFlag = new FlagItem(pos, vel, true);
+      newFlag->addToGame(game, game->getGameObjDatabase());
+   }
 }
 
 
@@ -706,16 +717,22 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObje
 }
 
 
-void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
+void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theOtherFlag)
 {
    // Don't mount to ship, instead increase current mounted NexusFlag
    //    flagCount, and remove collided flag from game
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
    {
-      NexusFlagItem *theFlag = dynamic_cast<NexusFlagItem *>(theShip->mMountedItems[i].getPointer());
-      if(theFlag)
+      NexusFlagItem *shipFlag = dynamic_cast<NexusFlagItem *>(theShip->mMountedItems[i].getPointer());
+      if(shipFlag)
       {
-         theFlag->changeFlagCount(theFlag->getFlagCount() + 1);
+         U32 flagCount = shipFlag->getFlagCount();
+         NexusFlagItem *theOtherNexusFlag = dynamic_cast<NexusFlagItem *>(theOtherFlag);
+         if(theOtherNexusFlag)
+            flagCount += theOtherNexusFlag->getFlagCount();
+         else
+            flagCount += 1;
+         shipFlag->changeFlagCount(flagCount);
 
          if(mNexusIsOpen)
          {
@@ -730,9 +747,9 @@ void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       }
    }
 
-   theFlag->setCollideable(false);
-   theFlag->removeFromDatabase();
-   theFlag->deleteObject();
+   theOtherFlag->setCollideable(false);
+   theOtherFlag->removeFromDatabase();
+   theOtherFlag->deleteObject();
 }
 
 
@@ -808,8 +825,19 @@ void NexusFlagItem::dropFlags(U32 flags)
    if(isGhost())  //avoid problem with adding flag to client, when it doesn't really exist on server.
       return;
 
-   for(U32 i = 0; i < flags; i++)
-      releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
+   if(flags > MAX_DROP_FLAGS)
+   {
+      for(U32 i = MAX_DROP_FLAGS; i > 0; i--)
+      {
+         // By dividing and subtracting, it works by using integer divide, subtracting from "flags" left, and the last loop is (i == 1), dropping exact amount using only limited FlagItems
+         U32 thisFlagDropped = flags / i;
+         flags -= thisFlagDropped;
+         releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel(), thisFlagDropped);
+      }
+   }
+   else
+      for(U32 i = 0; i < flags; i++)
+         releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
 }

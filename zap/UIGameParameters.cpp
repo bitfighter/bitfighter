@@ -107,7 +107,7 @@ void GameParamUserInterface::onActivate()
 
    updateMenuItems();   
    origGameParams = getGame()->toString();     // Save a copy of the params coming in for comparison when we leave to see what changed
-   SDL_SetCursor(Cursor::getTransparent());
+   Cursor::disableCursor();
 }
 
 

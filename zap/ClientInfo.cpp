@@ -324,10 +324,7 @@ void ClientInfo::sRequestLoadout(Vector<U8> &loadout)
 {
    mLoadout = loadout;
 
-   if(!getShip())
-      return;
-
-   GameType *gt = getShip()->getGame()->getGameType();
+   GameType *gt = mGame->getGameType();
 
    if(gt)
       gt->SRV_clientRequestLoadout(this, mLoadout);    // This will set loadout if ship is in loadout zone
@@ -351,10 +348,11 @@ Nonce *ClientInfo::getId()
 ////////////////////////////////////////
 
 // Constructor
-FullClientInfo::FullClientInfo(GameConnection *gameConnection, bool isRobot) : ClientInfo()
+FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, bool isRobot) : ClientInfo()
 {
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
+   mGame = game;
 }
 
 
@@ -395,8 +393,7 @@ F32 FullClientInfo::getRating()
 
 
 // Server only -- RemoteClientInfo has a client-side override
-// Can pass NULL for game if level just changed and remote clients won't have player list yet
-void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
+void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
 {
    if(spawnDelayed == mSpawnDelayed)
       return;
@@ -404,7 +401,7 @@ void FullClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
    if(spawnDelayed && !mSpawnDelayed)
       getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
 
-   game->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);
+   mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);
    // Clients that joins mid game will get this SpawnDelayed set in GameType::s2cAddClient
 
    mSpawnDelayed = spawnDelayed;
@@ -449,9 +446,10 @@ VoiceDecoder *FullClientInfo::getVoiceDecoder()
 
 #ifndef ZAP_DEDICATED
 // Constructor
-RemoteClientInfo::RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
+RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
                                    bool isRobot, bool isAdmin, bool isSpawnDelayed, bool isBusy) : ClientInfo()
 {
+   mGame = game;
    mName = name;
    mIsAuthenticated = isAuthenticated;
    mIsRobot = isRobot;
@@ -489,7 +487,7 @@ void RemoteClientInfo::setConnection(GameConnection *conn)
 
 
 // game is only needed for signature compatibility
-void RemoteClientInfo::setSpawnDelayed(const Game *game, bool spawnDelayed)
+void RemoteClientInfo::setSpawnDelayed(bool spawnDelayed)
 {
    mSpawnDelayed = spawnDelayed;
 }
