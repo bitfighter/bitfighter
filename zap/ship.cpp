@@ -2303,10 +2303,10 @@ S32 LuaShip::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber
 S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid()); }
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
-S32 LuaShip::getRad(lua_State *L)  { return thisShip ? returnFloat(L, thisShip->getRadius())    : returnNil(L); }
-S32 LuaShip::getLoc(lua_State *L)  { return thisShip ? returnPoint(L, thisShip->getActualPos()) : returnNil(L); }
-S32 LuaShip::getVel(lua_State *L)  { return thisShip ? returnPoint(L, thisShip->getActualVel()) : returnNil(L); }
-S32 LuaShip::hasFlag(lua_State *L) { return thisShip ? returnBool(L,  thisShip->getFlagCount()) : returnNil(L); }
+S32 LuaShip::getRad(lua_State *L)  { return thisShip ? returnFloat(L, thisShip->getRadius())        : returnNil(L); }
+S32 LuaShip::getLoc(lua_State *L)  { return thisShip ? returnPoint(L, thisShip->getActualPos())     : returnNil(L); }
+S32 LuaShip::getVel(lua_State *L)  { return thisShip ? returnPoint(L, thisShip->getActualVel())     : returnNil(L); }
+S32 LuaShip::hasFlag(lua_State *L) { return thisShip ? returnBool (L, thisShip->getFlagCount() > 0) : returnNil(L); }
 
 // Returns number of flags ship is carrying (most games will always be 0 or 1)
 S32 LuaShip::getFlagCount(lua_State *L) { return thisShip ? returnInt(L, thisShip->getFlagCount()) : returnNil(L); }
