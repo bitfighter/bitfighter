@@ -964,7 +964,7 @@ Vector<Robot *> Robot::robots;
 
 
 // Constructor, runs on client and server
-Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
+Robot::Robot() : Ship(new FullClientInfo(NULL, true), TEAM_NEUTRAL, Point(), 1, true),   // FullClientInfo deleted in destructor
                  LuaScriptRunner() 
 {
    mHasSpawned = false;
@@ -972,6 +972,9 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
 
    mCurrentZone = U16_MAX;
    flightPlanTo = U16_MAX;
+
+   mClientInfo->setShip(this);
+   this->setOwner(mClientInfo);  // To make Rabbit game work without bots shooting each other...
 
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
@@ -1270,14 +1273,6 @@ void Robot::registerClasses()
 // Runs on client and server 
 void Robot::onAddedToGame(Game *game)
 {
-   if(!isGhost())
-   {
-      TNLAssert(mClientInfo.isNull(), "mClientInfo should be NULL");
-      mClientInfo = new FullClientInfo(game, NULL, true);  // deleted in destructor
-      mClientInfo->setShip(this);
-      this->setOwner(mClientInfo);
-   }
-
    Parent::onAddedToGame(game);
    
    if(isGhost())
