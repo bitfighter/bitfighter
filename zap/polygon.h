@@ -77,6 +77,7 @@ public:
    S32 getVel(lua_State *L);       // Velocity of item (returns point)
    S32 getTeamIndx(lua_State *L);  // Team of item (in bots, teams start with 1)
 
+   GameObject *getGameObject();
 };
 
 };

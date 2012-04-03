@@ -53,6 +53,7 @@ LuaPlayerInfo::LuaPlayerInfo()
    defunct = false;
 }
 
+
 // Lua constructor
 LuaPlayerInfo::LuaPlayerInfo(lua_State *L)
 {
@@ -136,6 +137,7 @@ PlayerInfo::PlayerInfo(ClientInfo *clientInfo)
 {
    mClientInfo = clientInfo;
 }
+
 
 // Destuctor
 PlayerInfo::~PlayerInfo()

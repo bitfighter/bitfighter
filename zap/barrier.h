@@ -199,7 +199,6 @@ public:
    // Lua interface  ==>  don't need these!!
 
    PolyWall(lua_State *L);         //  Lua constructor
-   GameObject *getGameObject();    // Return the underlying GameObject
 
    static const char className[];  // Class name as it appears to Lua scripts
    static Lunar<PolyWall>::RegType methods[];

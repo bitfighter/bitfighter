@@ -3367,15 +3367,20 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
    if(!source->checkMessage(message.getString(), global ? 0 : 1))
       return;
 
-   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, sourceClientInfo->getName(), message));
-   sendChatDisplayEvent(sourceClientInfo, global, message.getString(), theEvent);
+   sendChat(sourceClientInfo->getName(), sourceClientInfo, message, global);
 }
 
 
-void GameType::sendChatFromRobot(bool global, StringPtr message, ClientInfo *botClientInfo)
+void GameType::sendChatFromRobot(bool global, const StringPtr &message, ClientInfo *botClientInfo)
 {
-   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, botClientInfo->getName(), StringPtr(message)));
-   sendChatDisplayEvent(botClientInfo, global, message, theEvent);
+   sendChat(botClientInfo->getName(), botClientInfo, message, global);
+}
+
+
+// For the moment, all Controller chats are global
+void GameType::sendChatFromController(const StringPtr &message)
+{
+   sendChat("LevelController", NULL, message, true);
 }
 
 
@@ -3388,20 +3393,21 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry messag
       return;
 
    ClientInfo *sourceClientInfo = source->getClientInfo();
-
-   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessageSTE, (global, sourceClientInfo->getName(), message));
-   sendChatDisplayEvent(sourceClientInfo, global, message.getString(), theEvent);
+   sendChat(sourceClientInfo->getName(), sourceClientInfo, message.getString(), global);
 }
 
 
 // Send a chat message that will be displayed in-game
 // If not global, send message only to other players on team
-void GameType::sendChatDisplayEvent(ClientInfo *sender, bool global, const char *message, NetEvent *theEvent)
+// Note that sender may be NULL, if the message has been sent by a LevelController script
+void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global)
 {
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatMessage, (global, senderName, message));
+
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = mGame->getClientInfo(i);
-      S32 senderTeamIndex = sender->getTeamIndex();
+      S32 senderTeamIndex = senderClientInfo ? senderClientInfo->getTeamIndex() : NO_TEAM;
 
       if(global || clientInfo->getTeamIndex() == senderTeamIndex)
       {
@@ -3412,8 +3418,8 @@ void GameType::sendChatDisplayEvent(ClientInfo *sender, bool global, const char 
 
    // And fire an event handler...
    // But don't add event if called by robot - it is already called in LuaRobot::globalMsg/teamMsg
-   if(!sender->isRobot())
-      EventManager::get()->fireEvent(NULL, EventManager::MsgReceivedEvent, message, sender->getPlayerInfo(), global);
+   if(senderClientInfo && !senderClientInfo->isRobot())
+      EventManager::get()->fireEvent(NULL, EventManager::MsgReceivedEvent, message, senderClientInfo->getPlayerInfo(), global);
 }
 
 
@@ -3461,16 +3467,16 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 }
 
 
-// Server sends message to the client for display using StringTableEntry
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
-{
-#ifndef ZAP_DEDICATED
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
-
-   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
-#endif
-}
+//// Server sends message to the client for display using StringTableEntry
+//GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
+//{
+//#ifndef ZAP_DEDICATED
+//   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+//   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
+//
+//   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
+//#endif
+//}
 
 
 // Client requests start/stop of streaming pings and scores from server to client

@@ -60,9 +60,9 @@ public:
    S32 getVel(lua_State *L);             // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L);        // Team of shooter
 
-   virtual GameObject *getGameObject();  // Return the underlying GameObject
-   
    void push(lua_State *L);
+
+   GameObject *getGameObject();
 };
 
 
@@ -122,10 +122,10 @@ public:
    S32 getVel(lua_State *L);     // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L);   // Return team of shooter     
 
-   GameObject *getGameObject();  // Return the underlying GameObject
    S32 getWeapon(lua_State *L);  // Return which type of weapon this is
 
    void push(lua_State *L);
+   GameObject *getGameObject();  // Return the underlying GameObject
 };
 
 
@@ -173,17 +173,17 @@ public:
    S32 getVel(lua_State *L);       // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L);  // Team of shooter
 
-   GameObject *getGameObject();    // Return the underlying GameObject
    S32 getWeapon(lua_State *L);    // Return which type of weapon this is
 
    void push(lua_State *L);
+   GameObject *getGameObject();  // Return the underlying GameObject
 };
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Mine : public GrenadeProjectile/*, public EditorPointObject*/
+class Mine : public GrenadeProjectile
 {
    typedef GrenadeProjectile Parent;
 
@@ -241,7 +241,6 @@ public:
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
 
-   GameObject *getGameObject();  // Return the underlying GameObject
    S32 getWeapon(lua_State *L);  // Return which type of weapon this is
 
    void push(lua_State *L);
@@ -251,7 +250,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SpyBug : public GrenadeProjectile/*, public EditorPointObject*/
+class SpyBug : public GrenadeProjectile
 {
    typedef GrenadeProjectile Parent;
 
@@ -306,7 +305,6 @@ public:
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
 
-   GameObject *getGameObject();  // Return the underlying GameObject
    S32 getWeapon(lua_State *L);  // Return which type of weapon this is
 
    void push(lua_State *L);

@@ -324,6 +324,9 @@ void ClientInfo::sRequestLoadout(Vector<U8> &loadout)
 {
    mLoadout = loadout;
 
+   if(!getShip())
+      return;
+
    GameType *gt = getShip()->getGame()->getGameType();
 
    if(gt)

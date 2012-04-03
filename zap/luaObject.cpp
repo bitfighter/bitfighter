@@ -34,6 +34,8 @@
 #include "NexusGame.h"        // For getItem()
 #include "soccerGame.h"       // For getItem()
 #include "projectile.h"       // For getItem()
+#include "loadoutZone.h"
+#include "goalZone.h"
 #include "teleporter.h"
 #include "speedZone.h"
 #include "EngineeredItem.h"   // For getItem()
@@ -133,6 +135,7 @@ S32 LuaObject::returnVec(lua_State *L, F32 x, F32 y)
    lua_pushvec(L, x, y);
    return 1;
 }
+
 
 // Returns a float to a calling Lua function
 S32 LuaObject::returnFloat(lua_State *L, F32 num)
@@ -530,12 +533,22 @@ LuaScriptRunner::LuaScriptRunner()
 {
    L = NULL;
    mScriptingDirSet = false;
+
+   // Initialize all subscriptions to unsubscribed -- bits will automatically subscribe to onTick later
+   for(S32 i = 0; i < EventManager::EventTypes; i++)
+      mSubscriptions[i] = false;
 }
 
 
 // Destructor
 LuaScriptRunner::~LuaScriptRunner()
 {
+   // Make sure we're unsubscribed to all those events we subscribed to.  Don't want to
+   // send an event to a dead bot, after all...
+   for(S32 i = 0; i < EventManager::EventTypes; i++)
+      if(mSubscriptions[i])
+         EventManager::get()->unsubscribeImmediate(L, (EventManager::EventType)i);
+
    if(L)
       lua_close(L);
 }
@@ -676,7 +689,9 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
 
    registerClasses();
 
-   lua_atpanic(L, luaPanicked);     // Register our panic function 
+   lua_atpanic(L, luaPanicked);  // Register our panic function 
+
+   setEnums(L);                  // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
 #ifdef USE_PROFILER
    init_profiler(L);
@@ -700,6 +715,46 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
       TNLAssert(false, "Helper functions not defined for scriptType!");
    
    return(loadHelperFunctions("lua_helper_functions.lua") && loadHelperFunctions(helperFunctions)); 
+}
+
+
+// Register classes needed by all script runners
+void LuaScriptRunner::registerClasses()
+{
+   Lunar<LuaUtil>::Register(L);
+
+   Lunar<LuaGameInfo>::Register(L);
+   Lunar<LuaTeamInfo>::Register(L);
+   Lunar<LuaPlayerInfo>::Register(L);
+
+   Lunar<LuaWeaponInfo>::Register(L);
+   Lunar<LuaModuleInfo>::Register(L);
+
+   Lunar<LuaLoadout>::Register(L);
+
+   Lunar<LuaRobot>::Register(L);
+   Lunar<LuaShip>::Register(L);
+
+   Lunar<RepairItem>::Register(L);
+   Lunar<ResourceItem>::Register(L);
+   Lunar<TestItem>::Register(L);
+   Lunar<Asteroid>::Register(L);
+   Lunar<Turret>::Register(L);
+   Lunar<Teleporter>::Register(L);
+
+   Lunar<ForceFieldProjector>::Register(L);
+   Lunar<FlagItem>::Register(L);
+   Lunar<SoccerBallItem>::Register(L);
+   Lunar<ResourceItem>::Register(L);
+
+   Lunar<LuaProjectile>::Register(L);
+   Lunar<Mine>::Register(L);
+   Lunar<SpyBug>::Register(L);
+
+   Lunar<GoalZone>::Register(L);
+   Lunar<LoadoutZone>::Register(L);
+   Lunar<NexusObject>::Register(L);
+   Lunar<CoreItem>::Register(L);
 }
 
 
@@ -745,9 +800,162 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
+int LuaScriptRunner::subscribe(lua_State *L)
+{
+   // Get the event off the stack
+   static const char *methodName = "LuaUtil:subscribe()";
+   LuaObject::checkArgCount(L, 1, methodName);
 
+   lua_Integer eventType = LuaObject::getInt(L, 0, methodName);
+   if(eventType < 0 || eventType >= EventManager::EventTypes)
+      return 0;
+
+   EventManager::get()->subscribe(L, (EventManager::EventType)eventType);
+   mSubscriptions[eventType] = true;
+
+   return 0;
+}
+
+
+int LuaScriptRunner::unsubscribe(lua_State *L)
+{
+   // Get the event off the stack
+   static const char *methodName = "LuaUtil:unsubscribe()";
+   LuaObject::checkArgCount(L, 1, methodName);
+
+   lua_Integer eventType = LuaObject::getInt(L, 0, methodName);
+   if(eventType < 0 || eventType >= EventManager::EventTypes)
+      return 0;
+
+   EventManager::get()->unsubscribe(L, (EventManager::EventType)eventType);
+   mSubscriptions[eventType] = false;
+   return 0;
+}
+
+
+#define setEnumName(number, name) { lua_pushinteger(L, number);             lua_setglobal(L, name); }
+#define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
+#define setGTEnum(name)           { lua_pushinteger(L, GameType::name);     lua_setglobal(L, #name); }
+#define setEventEnum(name)        { lua_pushinteger(L, EventManager::name); lua_setglobal(L, #name); }
+
+// Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
+void LuaScriptRunner::setEnums(lua_State *L)
+{
+   setEnumName(BarrierTypeNumber, "BarrierType");
+   setEnumName(PlayerShipTypeNumber, "ShipType");
+   setEnumName(LineTypeNumber, "LineType");
+   setEnumName(ResourceItemTypeNumber, "ResourceItemType");
+   setEnumName(TextItemTypeNumber, "TextItemType");
+   setEnumName(LoadoutZoneTypeNumber, "LoadoutZoneType");
+   setEnumName(TestItemTypeNumber, "TestItemType");
+   setEnumName(FlagTypeNumber, "FlagType");
+   setEnumName(BulletTypeNumber, "BulletType");
+   setEnumName(MineTypeNumber, "MineType");
+   setEnumName(NexusTypeNumber, "NexusType");
+   setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
+   setEnumName(RobotShipTypeNumber, "RobotType");
+   setEnumName(TeleportTypeNumber, "TeleportType");
+   setEnumName(GoalZoneTypeNumber, "GoalZoneType");
+   setEnumName(AsteroidTypeNumber, "AsteroidType");
+   setEnumName(RepairItemTypeNumber, "RepairItemType");
+   setEnumName(EnergyItemTypeNumber, "EnergyItemType");
+   setEnumName(SoccerBallItemTypeNumber, "SoccerBallItemType");
+   setEnumName(WormTypeNumber, "WormType");
+   setEnumName(TurretTypeNumber, "TurretType");
+   setEnumName(ForceFieldTypeNumber, "ForceFieldType");
+   setEnumName(ForceFieldProjectorTypeNumber, "ForceFieldProjectorType");
+   setEnumName(SpeedZoneTypeNumber, "SpeedZoneType");
+   setEnumName(PolyWallTypeNumber, "PolyWallType");            // a little unsure about this one         
+   setEnumName(ShipSpawnTypeNumber, "ShipSpawnType");
+   setEnumName(FlagSpawnTypeNumber, "FlagSpawnType");
+   setEnumName(AsteroidSpawnTypeNumber, "AsteroidSpawnType");
+   setEnumName(WallItemTypeNumber, "WallItemType");            // a little unsure about this one
+   setEnumName(WallEdgeTypeNumber, "WallEdgeType");            // not at all sure about this one
+   setEnumName(WallSegmentTypeNumber, "WallSegmentType");      // not at all sure about this one
+   setEnumName(SlipZoneTypeNumber, "SlipZoneType");
+   setEnumName(SpyBugTypeNumber, "SpyBugType");
+   setEnumName(CoreTypeNumber, "CoreType");
+
+   // Modules
+   setEnum(ModuleShield);
+   setEnum(ModuleBoost);
+   setEnum(ModuleSensor);
+   setEnum(ModuleRepair);
+   setEnum(ModuleEngineer);
+   setEnum(ModuleCloak);
+   setEnum(ModuleArmor);
+
+   // Weapons
+   setEnum(WeaponPhaser);
+   setEnum(WeaponBounce);
+   setEnum(WeaponTriple);
+   setEnum(WeaponBurst);
+   setEnum(WeaponMine);
+   setEnum(WeaponSpyBug);
+   setEnum(WeaponTurret);
+
+   // Game Types
+   setEnum(BitmatchGame);
+   setEnum(CoreGame);
+   setEnum(CTFGame);
+   setEnum(HTFGame);
+   setEnum(NexusGame);
+   setEnum(RabbitGame);
+   setEnum(RetrieveGame);
+   setEnum(SoccerGame);
+   setEnum(ZoneControlGame);
+
+   // Scoring Events
+   setGTEnum(KillEnemy);
+   setGTEnum(KillSelf);
+   setGTEnum(KillTeammate);
+   setGTEnum(KillEnemyTurret);
+   setGTEnum(KillOwnTurret);
+   setGTEnum(KilledByAsteroid);
+   setGTEnum(KilledByTurret);
+   setGTEnum(CaptureFlag);
+   setGTEnum(CaptureZone);
+   setGTEnum(UncaptureZone);
+   setGTEnum(HoldFlagInZone);
+   setGTEnum(RemoveFlagFromEnemyZone);
+   setGTEnum(RabbitHoldsFlag);
+   setGTEnum(RabbitKilled);
+   setGTEnum(RabbitKills);
+   setGTEnum(ReturnFlagsToNexus);
+   setGTEnum(ReturnFlagToZone);
+   setGTEnum(LostFlag);
+   setGTEnum(ReturnTeamFlag);
+   setGTEnum(ScoreGoalEnemyTeam);
+   setGTEnum(ScoreGoalHostileTeam);
+   setGTEnum(ScoreGoalOwnTeam);
+
+   // Event handler events
+   setEventEnum(TickEvent);
+   setEventEnum(ShipSpawnedEvent);
+   setEventEnum(ShipKilledEvent);
+   setEventEnum(MsgReceivedEvent);
+   setEventEnum(PlayerJoinedEvent);
+   setEventEnum(PlayerLeftEvent);
+   setEventEnum(NexusOpenedEvent);
+   setEventEnum(NexusClosedEvent);
+
+   setEnum(EngineeredTurret);
+   setEnum(EngineeredForceField);
+
+   // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
+   lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
+   lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
+
+}
+
+#undef setEnumName
+#undef setEnum
+#undef setGTEnum
+#undef setEventEnum
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
 {
@@ -758,7 +966,7 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
         return  Lunar<LuaShip>::check(L, index);
 
       case BulletTypeNumber:  // pass through
-      case MineTypeNumber:
+      case MineTypeNumber:    // pass through
       case SpyBugTypeNumber:
          return Lunar<LuaProjectile>::check(L, index);
 
@@ -808,6 +1016,7 @@ S32 LuaItem::getClassID(lua_State *L)
    TNLAssert(false, "Unimplemented method!");
    return -1;
 }
+
 
 
 };

@@ -220,6 +220,7 @@ S32 Item::getShip(lua_State *L)
 }
 
 
+// For getting the underlying object when all we have is a Lua pointer to it
 GameObject *Item::getGameObject()
 {
    return this;

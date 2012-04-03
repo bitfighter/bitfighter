@@ -65,10 +65,6 @@ public:
    void renderEditor(F32 currentScale);
 
 
-   /////
-   // Future home for Lua methods
-   GameObject *getGameObject();   // Return the underlying GameObject
-
    TNL_DECLARE_CLASS(SlipZone);
 };
 

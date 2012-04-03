@@ -1111,12 +1111,6 @@ NexusObject::NexusObject(lua_State *L)
 }
 
 
-GameObject *NexusObject::getGameObject()
-{
-   return this;
-}
-
-
 S32 NexusObject::getClassID(lua_State *L)
 {
    return returnInt(L, NexusTypeNumber);

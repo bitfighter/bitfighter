@@ -304,11 +304,6 @@ GoalZone::GoalZone(lua_State *L)
    // Do nothing
 }
 
-GameObject *GoalZone::getGameObject()
-{
-   return this;
-}
-
 
 S32 GoalZone::hasFlag(lua_State *L)
 {

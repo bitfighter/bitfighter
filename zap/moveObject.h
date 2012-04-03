@@ -182,8 +182,6 @@ public:
 
    bool collide(GameObject *otherObject);
 
-   GameObject *getGameObject();
-
    // LuaItem interface
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);

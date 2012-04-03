@@ -101,11 +101,9 @@ public:
    static const char className[];                 // Class name as it appears to Lua scripts
    static Lunar<GoalZone>::RegType methods[];
 
-   GameObject *getGameObject();   // Return the underlying GameObject
    S32 hasFlag(lua_State *L);
    S32 getClassID(lua_State *L);
 
-//private:
   void push(lua_State *L);
 };
 

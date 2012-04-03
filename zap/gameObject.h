@@ -384,9 +384,10 @@ public:
 
    S32 getTeamIndx(lua_State *L);      // Return item team to Lua
    virtual void push(lua_State *L);    // Lua-aware classes will implement this
-   
+  
    void readThisTeam(BitStream *stream);
    void writeThisTeam(BitStream *stream);
+
 };
 
 

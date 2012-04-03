@@ -111,7 +111,8 @@ private:
 
    Vector<WallRec> mWalls;
 
-   void sendChatDisplayEvent(ClientInfo *sender, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
+   // In-game chat message:
+   void sendChat(const StringTableEntry &senderName, ClientInfo *senderClientInfo, const StringPtr &message, bool global);
 
    S32 mWinningScore;               // Game over when team (or player in individual games) gets this score
    S32 mLeadingTeam;                // Team with highest score
@@ -521,7 +522,8 @@ public:
    virtual void addAdminGameMenuOptions(MenuUserInterface *menu);
 #endif
 
-   void sendChatFromRobot(bool global, StringPtr message, ClientInfo *botClientInfo);
+   void sendChatFromRobot(bool global, const StringPtr &message, ClientInfo *botClientInfo);
+   void sendChatFromController(const StringPtr &message);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
@@ -534,7 +536,7 @@ public:
 
    TNL_DECLARE_RPC(s2cDisplayChatPM, (StringTableEntry clientName, StringTableEntry toName, StringPtr message));
    TNL_DECLARE_RPC(s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message));
-   TNL_DECLARE_RPC(s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message));
+   //TNL_DECLARE_RPC(s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message));
 
 
    // killerName will be ignored if killer is supplied

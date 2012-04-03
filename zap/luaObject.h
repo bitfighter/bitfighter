@@ -27,24 +27,23 @@
 #define _LUAOBJECT_H_
 
 
+#include "GameTypesEnum.h"
+#include "EventManager.h"
+
 #include "lua.h"
 #include "../lua/include/lunar.h"
-#include "GameTypesEnum.h"
-#include "tnl.h"
+
 #include "Point.h"
+
+#include "tnl.h"
+
 #include <string>
 
 using namespace std;
 using namespace TNL;
 
 
-// Set some enumeration helpers that we'll need to pass enumeration constants to programs
-#define setEnum(name) { lua_pushinteger(L, name); lua_setglobal(L, #name); }
-#define setGTEnum(name) { lua_pushinteger(L, GameType::name); lua_setglobal(L, #name); }
-#define setEventEnum(name) { lua_pushinteger(L, EventManager::name); lua_setglobal(L, #name); }
-
 #define method(class, name) {#name, &class::name}
-
 
 namespace Zap
 {
@@ -58,20 +57,6 @@ class MenuItem;
 class LuaObject
 {
 protected:
-   static void clearStack(lua_State *L);
-   static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
-   static F32 getFloat(lua_State *L, S32 index, const char *methodName);
-
-   static bool getBool(lua_State *L, S32 index, const char *methodName);
-   static bool getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
-
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 defaultVal);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
-
-   static const char *getString(lua_State *L, S32 index, const char *methodName);
-   static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
-
    static MenuItem *pushMenuItem (lua_State *L, MenuItem *menuItem);
 
    // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
@@ -101,6 +86,8 @@ public:
    static S32 returnBool(lua_State *L, bool boolean);
    static S32 returnNil(lua_State *L);
 
+   static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
+
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
@@ -108,6 +95,21 @@ public:
 
    static S32 returnPlayerInfo(lua_State *L, Ship *ship);
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
+
+
+   static void clearStack(lua_State *L);
+   static F32 getFloat(lua_State *L, S32 index, const char *methodName);
+
+   static bool getBool(lua_State *L, S32 index, const char *methodName);
+   static bool getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
+
+   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName);
+   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 defaultVal);
+   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
+
+   static const char *getString(lua_State *L, S32 index, const char *methodName);
+   static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
+
 
    static void dumpStack(lua_State* L);
 
@@ -146,6 +148,9 @@ private:
    bool loadScript(const string &scriptName);
    bool runChunk();
 
+   bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
+   void setEnums(lua_State *L);                    // Set a whole slew of enum values that we want the scripts to have access to
+
 protected:
    lua_State *L;                 // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
@@ -158,7 +163,7 @@ protected:
 
    static int luaPanicked(lua_State *L);
 
-   virtual void registerClasses() = 0;
+   virtual void registerClasses();
    virtual void setPointerToThis() = 0;
 
 public:
@@ -170,6 +175,10 @@ public:
 
    bool runMain();                              // Run a script's main() function
    bool runMain(const Vector<string> &args);    // Run a script's main() function, putting args into Lua's arg table
+
+   // Event handling
+   int subscribe(lua_State *L);
+   int unsubscribe(lua_State *L);
 };
 
 

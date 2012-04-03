@@ -67,31 +67,14 @@ GridDatabase *LuaRobot::getBotZoneDatabase()
 // Constructor
 LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
 {
-   //lua_atpanic(L, luaPanicked);                  // Register our panic function
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
-
-   // Initialize all subscriptions to unsubscribed -- we'll subscribe to onTick later
-   for(S32 i = 0; i < EventManager::EventTypes; i++)
-      subscriptions[i] = false;
-
-   setEnums(L);      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
-
-   // A few misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
-   lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
-   lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
 }
 
 
 // Destructor
 LuaRobot::~LuaRobot()
 {
-   // Make sure we're unsubscribed to all those events we subscribed to.  Don't want to
-   // send an event to a dead bot, after all...
-   for(S32 i = 0; i < EventManager::EventTypes; i++)
-      if(subscriptions[i])
-         EventManager::get()->unsubscribeImmediate(thisRobot->getL(), (EventManager::EventType)i);
-
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted Lua Robot Object (%p)\n", this);
 }
 
@@ -172,116 +155,6 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    {0,0}    // End method list
 };
-
-
-#define setEnumName(number, name) { lua_pushinteger(L, number); lua_setglobal(L, name); }
-
-// Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
-void LuaRobot::setEnums(lua_State *L)
-{
-   setEnumName(BarrierTypeNumber, "BarrierType");
-   setEnumName(PlayerShipTypeNumber, "ShipType");
-   setEnumName(LineTypeNumber, "LineType");
-   setEnumName(ResourceItemTypeNumber, "ResourceItemType");
-   setEnumName(TextItemTypeNumber, "TextItemType");
-   setEnumName(LoadoutZoneTypeNumber, "LoadoutZoneType");
-   setEnumName(TestItemTypeNumber, "TestItemType");
-   setEnumName(FlagTypeNumber, "FlagType");
-   setEnumName(BulletTypeNumber, "BulletType");
-   setEnumName(MineTypeNumber, "MineType");
-   setEnumName(NexusTypeNumber, "NexusType");
-   setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
-   setEnumName(RobotShipTypeNumber, "RobotType");
-   setEnumName(TeleportTypeNumber, "TeleportType");
-   setEnumName(GoalZoneTypeNumber, "GoalZoneType");
-   setEnumName(AsteroidTypeNumber, "AsteroidType");
-   setEnumName(RepairItemTypeNumber, "RepairItemType");
-   setEnumName(EnergyItemTypeNumber, "EnergyItemType");
-   setEnumName(SoccerBallItemTypeNumber, "SoccerBallItemType");
-   setEnumName(WormTypeNumber, "WormType");
-   setEnumName(TurretTypeNumber, "TurretType");
-   setEnumName(ForceFieldTypeNumber, "ForceFieldType");
-   setEnumName(ForceFieldProjectorTypeNumber, "ForceFieldProjectorType");
-   setEnumName(SpeedZoneTypeNumber, "SpeedZoneType");
-   setEnumName(PolyWallTypeNumber, "PolyWallType");            // a little unsure about this one         
-   setEnumName(ShipSpawnTypeNumber, "ShipSpawnType");
-   setEnumName(FlagSpawnTypeNumber, "FlagSpawnType");
-   setEnumName(AsteroidSpawnTypeNumber, "AsteroidSpawnType");
-   setEnumName(WallItemTypeNumber, "WallItemType");            // a little unsure about this one
-   setEnumName(WallEdgeTypeNumber, "WallEdgeType");            // not at all sure about this one
-   setEnumName(WallSegmentTypeNumber, "WallSegmentType");      // not at all sure about this one
-   setEnumName(SlipZoneTypeNumber, "SlipZoneType");
-   setEnumName(SpyBugTypeNumber, "SpyBugType");
-   setEnumName(CoreTypeNumber, "CoreType");
-
-   // Modules
-   setEnum(ModuleShield);
-   setEnum(ModuleBoost);
-   setEnum(ModuleSensor);
-   setEnum(ModuleRepair);
-   setEnum(ModuleEngineer);
-   setEnum(ModuleCloak);
-   setEnum(ModuleArmor);
-
-   // Weapons
-   setEnum(WeaponPhaser);
-   setEnum(WeaponBounce);
-   setEnum(WeaponTriple);
-   setEnum(WeaponBurst);
-   setEnum(WeaponMine);
-   setEnum(WeaponSpyBug);
-   setEnum(WeaponTurret);
-
-   // Game Types
-   setEnum(BitmatchGame);
-   setEnum(CoreGame);
-   setEnum(CTFGame);
-   setEnum(HTFGame);
-   setEnum(NexusGame);
-   setEnum(RabbitGame);
-   setEnum(RetrieveGame);
-   setEnum(SoccerGame);
-   setEnum(ZoneControlGame);
-
-   // Scoring Events
-   setGTEnum(KillEnemy);
-   setGTEnum(KillSelf);
-   setGTEnum(KillTeammate);
-   setGTEnum(KillEnemyTurret);
-   setGTEnum(KillOwnTurret);
-   setGTEnum(KilledByAsteroid);
-   setGTEnum(KilledByTurret);
-   setGTEnum(CaptureFlag);
-   setGTEnum(CaptureZone);
-   setGTEnum(UncaptureZone);
-   setGTEnum(HoldFlagInZone);
-   setGTEnum(RemoveFlagFromEnemyZone);
-   setGTEnum(RabbitHoldsFlag);
-   setGTEnum(RabbitKilled);
-   setGTEnum(RabbitKills);
-   setGTEnum(ReturnFlagsToNexus);
-   setGTEnum(ReturnFlagToZone);
-   setGTEnum(LostFlag);
-   setGTEnum(ReturnTeamFlag);
-   setGTEnum(ScoreGoalEnemyTeam);
-   setGTEnum(ScoreGoalHostileTeam);
-   setGTEnum(ScoreGoalOwnTeam);
-
-   // Event handler events
-   setEventEnum(TickEvent);
-   setEventEnum(ShipSpawnedEvent);
-   setEventEnum(ShipKilledEvent);
-   setEventEnum(MsgReceivedEvent);
-   setEventEnum(PlayerJoinedEvent);
-   setEventEnum(PlayerLeftEvent);
-   setEventEnum(NexusOpenedEvent);
-   setEventEnum(NexusClosedEvent);
-
-   setEnum(EngineeredTurret);
-   setEnum(EngineeredForceField);
-}
-
-#undef setEnumName
 
 
 S32 LuaRobot::getClassID(lua_State *L)
@@ -985,7 +858,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
    }
 
    // Target must be outside extents of the map, find nearest zone if a straight line was drawn
-   if (closestZone == U16_MAX)
+   if(closestZone == U16_MAX)
    {
       Point extentsCenter = thisRobot->getGame()->getWorldExtents().getCenter();
 
@@ -1021,39 +894,14 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
 
 S32 LuaRobot::subscribe(lua_State *L)
 {
-   // Get the event off the stack
-   static const char *methodName = "Robot:subscribe()";
-   checkArgCount(L, 1, methodName);
-
-   S32 eventType = (S32)getInt(L, 0, methodName);
-   if(eventType < 0 || eventType >= EventManager::EventTypes)
-      return 0;
-
-   doSubscribe(L, EventManager::EventType(eventType));
-
+   thisRobot->subscribe(L);
    return 0;
-}
-
-
-void LuaRobot::doSubscribe(lua_State *L, EventManager::EventType eventType)
-{
-   EventManager::get()->subscribe(L, eventType);
-   subscriptions[eventType] = true;
 }
 
 
 S32 LuaRobot::unsubscribe(lua_State *L)
 {
-   // Get the event off the stack
-   static const char *methodName = "Robot:unsubscribe()";
-   checkArgCount(L, 1, methodName);
-
-   S32 eventType = (S32)getInt(L, 0, methodName);
-   if(eventType < 0 || eventType >= EventManager::EventTypes)
-      return 0;
-
-   EventManager::get()->unsubscribe(L, (EventManager::EventType) eventType);
-   subscriptions[eventType] = false;
+   thisRobot->unsubscribe(L);
    return 0;
 }
 

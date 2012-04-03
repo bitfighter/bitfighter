@@ -215,7 +215,6 @@ public:
    NexusObject(lua_State *L);      //  Lua constructor
    static const char className[];  // Class name as it appears to Lua scripts
    static Lunar<NexusObject>::RegType methods[];
-   GameObject *getGameObject();    // Return the underlying GameObject
    S32 getClassID(lua_State *L);
 
 private:

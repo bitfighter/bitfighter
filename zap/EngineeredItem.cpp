@@ -1026,12 +1026,6 @@ S32 EngineeredItem::getAngle(lua_State *L)
 }
 
 
-GameObject *EngineeredItem::getGameObject()
-{
-   return this;
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 

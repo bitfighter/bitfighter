@@ -136,6 +136,7 @@ void LuaProjectile::push(lua_State *L)
 }
 
 
+
 /////////////////////////////////////
 /////////////////////////////////////
 
@@ -552,12 +553,6 @@ S32 Projectile::getTeamIndx(lua_State *L)
 }
 
 
-GameObject *Projectile::getGameObject()
-{
-   return this;
-}
-
-
 S32 Projectile::getWeapon(lua_State *L)
 {
    return returnInt(L, mWeaponType);
@@ -570,7 +565,16 @@ void Projectile::push(lua_State *L)
 }
 
 
-//-----------------------------------------------------------------------------
+// For getting the underlying object when all we have is a Lua pointer to it
+GameObject *Projectile::getGameObject()
+{
+   return this;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 
 GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
@@ -793,12 +797,6 @@ S32 GrenadeProjectile::getTeamIndx(lua_State *L)
 }
 
 
-GameObject *GrenadeProjectile::getGameObject()
-{
-   return this;
-}
-
-
 S32 GrenadeProjectile::getWeapon(lua_State *L)
 {
    return returnInt(L, WeaponBurst);
@@ -808,6 +806,13 @@ S32 GrenadeProjectile::getWeapon(lua_State *L)
 void GrenadeProjectile::push(lua_State *L)
 {
    Lunar<LuaProjectile>::push(L, this);
+}
+
+
+// For getting the underlying object when all we have is a Lua pointer to it
+GameObject *GrenadeProjectile::getGameObject()
+{
+   return this;
 }
 
 
@@ -1131,12 +1136,6 @@ S32 Mine::getVel(lua_State *L)
 }
 
 
-GameObject *Mine::getGameObject()
-{
-   return this;
-}
-
-
 S32 Mine::getWeapon(lua_State *L)
 {
    return returnInt(L, WeaponMine);
@@ -1437,12 +1436,6 @@ S32 SpyBug::getRad(lua_State *L)
 S32 SpyBug::getVel(lua_State *L)
 {
    return Parent::getVel(L);
-}
-
-
-GameObject *SpyBug::getGameObject()
-{
-   return this;
 }
 
 

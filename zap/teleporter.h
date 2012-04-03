@@ -88,8 +88,6 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   //Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
-
    Vector<Point> mDests;   // need public for BotNavMeshZones
 
    TNL_DECLARE_CLASS(Teleporter);
@@ -126,8 +124,8 @@ public:
    S32 getRad(lua_State *L);       // Radius of item (returns number)
    S32 getVel(lua_State *L);       // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L);  // All teleporters are neutral
-   GameObject *getGameObject();    // Return the underlying GameObject
 
+   GameObject *getGameObject();
 };
 
 

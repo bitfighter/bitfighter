@@ -210,12 +210,6 @@ LoadoutZone::LoadoutZone(lua_State *L)
 }
 
 
-GameObject *LoadoutZone::getGameObject()
-{
-   return this;
-}
-
-
 S32 LoadoutZone::getClassID(lua_State *L)
 {
    return returnInt(L, LoadoutZoneTypeNumber);

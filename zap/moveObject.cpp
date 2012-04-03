@@ -1036,12 +1036,6 @@ bool MoveItem::collide(GameObject *otherObject)
 }
 
 
-GameObject *MoveItem::getGameObject()
-{
-   return this;
-}
-
-
 ////
 // LuaItem interface
 

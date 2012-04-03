@@ -68,7 +68,6 @@ public:
    /////
    // Lua interface
    LoadoutZone(lua_State *L);      // Lua constructor
-   GameObject *getGameObject();    // Return the underlying GameObject
 
    static const char className[];                        // Class name as it appears to Lua scripts
    static Lunar<LoadoutZone>::RegType methods[];

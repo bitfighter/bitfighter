@@ -86,6 +86,9 @@ public:
    S32 getGridSize(lua_State *L);
    S32 getPlayerCount(lua_State *L);
 
+   S32 globalMsg(lua_State *L);
+   S32 teamMsg(lua_State *L);
+
    // Implement LevelLoader abstract method
    void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);
 };

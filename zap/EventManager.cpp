@@ -308,6 +308,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 }
 
 
+// Note that player can be NULL, in which case we'll pass nil to the listeners
 void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
 {
    if(suppressEvents())   
@@ -324,7 +325,12 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       {
          lua_getglobal(L, eventDefs[eventType].function);  
          lua_pushstring(L, message);
-         player->push(L);
+
+         if(player)
+            player->push(L);
+         else
+            lua_pushnil(L);
+
          lua_pushboolean(L, global);
 
          if(lua_pcall(L, 3, 0, 0) != 0)
@@ -371,13 +377,16 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
 
 void EventManager::handleEventFiringError(lua_State *L, EventType eventType, const char *errorMsg)
 {
-   // Figure out which bot caused the error
+   // Figure out which, if any, bot caused the error
    Robot *robot = Robot::findBot(L);
 
    if(robot)
-      robot->logError( "Robot error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
-
-   delete robot;
+   {
+      robot->logError("Robot error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
+      delete robot;
+   }
+   else
+      logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
 }
 
 

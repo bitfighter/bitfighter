@@ -773,12 +773,6 @@ PolyWall::PolyWall(lua_State *L)
 }
 
 
-GameObject *PolyWall::getGameObject()
-{
-   return this;
-}
-
-
 S32 PolyWall::getClassID(lua_State *L)
 {
    return returnInt(L, PolyWallTypeNumber);

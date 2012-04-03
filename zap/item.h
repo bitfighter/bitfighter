@@ -88,7 +88,8 @@ public:
    virtual S32 isOnShip(lua_State *L);             // Is item being carried by a ship? NO!
    virtual S32 getCaptureZone(lua_State *L);
    virtual S32 getShip(lua_State *L);
-   virtual GameObject *getGameObject();            // Return the underlying GameObject
+
+    GameObject *getGameObject();                   // For getting the underlying object when all we have is a Lua pointer to it
 };
 
 

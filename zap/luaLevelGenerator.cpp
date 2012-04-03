@@ -192,6 +192,11 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
    method(LuaLevelGenerator, setGameTime),
    method(LuaLevelGenerator, pointCanSeePoint),
 
+   method(LuaLevelGenerator, subscribe),
+   method(LuaLevelGenerator, unsubscribe),
+
+   method(LuaLevelGenerator, globalMsg),
+
    {0,0}    // End method list
 };
 
@@ -366,13 +371,36 @@ void LuaLevelGenerator::setPointerToThis()
 }
 
 
+// Send message to all players
+S32 LuaLevelGenerator::globalMsg(lua_State *L)
+{
+   static const char *methodName = "LuaLevelGenerator:globalMsg()";
+   checkArgCount(L, 1, methodName);
+
+   const char *message = getString(L, 1, methodName);
+
+   GameType *gt = gServerGame->getGameType();
+   if(gt)
+   {
+      gt->sendChatFromController(message);
+
+      // Fire our event handler
+      EventManager::get()->fireEvent(getL(), EventManager::MsgReceivedEvent, message, NULL, true);
+   }
+
+   return 0;
+}
+
+
 // Register our connector types with Lua
 void LuaLevelGenerator::registerClasses()
 {
+   LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
+
    Lunar<LuaLevelGenerator>::Register(L);
-   Lunar<LuaUtil>::Register(L);
 
 #ifndef ZAP_DEDICATED
+   // These are for creating editor plugins
    Lunar<ToggleMenuItem>::Register(L);
    Lunar<YesNoMenuItem>::Register(L);
    Lunar<CounterMenuItem>::Register(L);

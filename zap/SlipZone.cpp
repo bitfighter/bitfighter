@@ -184,12 +184,4 @@ void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 TNL_IMPLEMENT_NETOBJECT(SlipZone);
 
 
-/////
-// Future home for Lua methods
-
-GameObject *SlipZone::getGameObject()
-{
-   return this;
-}
-
 };

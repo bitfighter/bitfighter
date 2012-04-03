@@ -196,5 +196,11 @@ S32 EditorPolygon::getTeamIndx(lua_State *L)
 }
 
 
+GameObject *EditorPolygon::getGameObject()
+{
+   return this;
+}
+
+
 };
 

@@ -38,7 +38,6 @@ namespace Zap
 
 class LuaUtil: public LuaObject
 {
-
 public:
    void logError(const char *format, ...);
 
@@ -53,8 +52,8 @@ public:
    S32 printToOglConsole(lua_State *L);
    S32 getMachineTime(lua_State *L);
    S32 getRandomNumber(lua_State *L);
-
 };
+
 
 };
 
