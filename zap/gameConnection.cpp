@@ -131,7 +131,7 @@ void GameConnection::initialize()
 GameConnection::~GameConnection()
 {
    // Log the disconnect...
-   if(!mClientInfo->isRobot())        // Avoid cluttering log with useless messages like "IP:any:0 - client quickbot disconnected."
+   if(mClientInfo && !mClientInfo->isRobot())        // Avoid cluttering log with useless messages like "IP:any:0 - client quickbot disconnected."
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientInfo->getName().getString());
 
    if(isConnectionToClient())    // Only true if we're the server
