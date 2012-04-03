@@ -68,7 +68,7 @@ GameConnection::GameConnection()
 
    // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
    // in the arguments makes VC++ nervous, which in turn makes me nervous.
-   mClientInfo = new FullClientInfo(this, false);    // Deleted in destructor
+   mClientInfo = NULL;    /// FullClientInfo created when we know what the ServerGame is, in readConnectRequest
    mClientInfoWasCreatedLocally = true;
 
 #ifndef ZAP_DEDICATED
@@ -155,7 +155,7 @@ GameConnection::~GameConnection()
 
    delete mDataBuffer;
 
-   if(mClientInfoWasCreatedLocally)
+   if(mClientInfoWasCreatedLocally && mClientInfo != NULL)
       delete mClientInfo;
 }
 
@@ -243,7 +243,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 
    ClientInfo *clientInfo = getClientInfo();
 
-   clientInfo->setSpawnDelayed(mServerGame, false);
+   clientInfo->setSpawnDelayed(false);
    mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
 
    mServerGame->getGameType()->spawnShip(clientInfo);
@@ -1386,6 +1386,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    if(!mServerGame)
       return false;  // need a ServerGame
 
+   TNLAssert(!mClientInfo, "mClientInfo should be NULL");
+   mClientInfo = new FullClientInfo(mServerGame, this, false);         // Deleted in destructor
    mSettings = mServerGame->getSettings();  // now that we got the server, set the settings.
 
    stream->read(&mConnectionVersion);

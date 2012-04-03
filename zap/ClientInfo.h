@@ -74,6 +74,7 @@ protected:
    bool mSpawnDelayed;
    bool mIsBusy;
    Int<BADGE_COUNT> mBadges;
+   Game *mGame;
 
 public:
    ClientInfo();           // Constructor
@@ -102,7 +103,7 @@ public:
 
    bool shouldDelaySpawn();
    bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
-   virtual void setSpawnDelayed(const Game *game, bool spawnDelayed) = 0;
+   virtual void setSpawnDelayed(bool spawnDelayed) = 0;
 
    bool isBusy();
    void setIsBusy(bool isBusy);
@@ -162,7 +163,7 @@ private:
    GameConnection *mClientConnection;
    
 public:
-   FullClientInfo(GameConnection *clientConnection, bool isRobot);     // Constructor
+   FullClientInfo(Game *game, GameConnection *clientConnection, bool isRobot);     // Constructor
    virtual ~FullClientInfo();                                          // Destructor
 
    // WARNING!! mClientConnection can be NULL on client and server's robots
@@ -171,7 +172,7 @@ public:
 
    void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
 
-   void setSpawnDelayed(const Game *game, bool spawnDelayed);
+   void setSpawnDelayed(bool spawnDelayed);
 
    void setRating(F32 rating);
    F32 getRating();
@@ -198,7 +199,7 @@ private:
    VoiceDecoder *mDecoder;
 
 public:
-   RemoteClientInfo(const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
+   RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
                     bool isRobot, bool isAdmin, bool isSpawnDelayed, bool isBusy);  
    virtual ~RemoteClientInfo();      
    // Destructor
@@ -210,7 +211,7 @@ public:
    F32 getRating();
    void setRating(F32 rating);
 
-   void setSpawnDelayed(const Game *game, bool spawnDelayed);
+   void setSpawnDelayed(bool spawnDelayed);
 
    // Voice chat stuff -- these will be invalid on the server side
    SoundEffect *getVoiceSFX();

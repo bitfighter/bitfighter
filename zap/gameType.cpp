@@ -1326,7 +1326,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    // if it's not apparent.  isInitialUpdate() might work for this purpose.  Will require some testing.
    if(clientInfo->shouldDelaySpawn())
    {
-      clientInfo->setSpawnDelayed(getGame(), true);
+      clientInfo->setSpawnDelayed(true);
       return false;
    }
 
@@ -2405,7 +2405,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
    // The new ClientInfo will be deleted in s2cRemoveClient   
-   ClientInfo *clientInfo = new RemoteClientInfo(name, isAuthenticated, badges, isRobot, isAdmin, isSpawnDelayed, isBusy);  
+   ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, isAdmin, isSpawnDelayed, isBusy);  
 
    clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
 
@@ -3743,7 +3743,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry na
    if(!clientInfo)
       return;
 
-   clientInfo->setSpawnDelayed(NULL, idle);
+   clientInfo->setSpawnDelayed(idle);
 #endif
 }
 
