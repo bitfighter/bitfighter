@@ -79,11 +79,22 @@ LuaRobot::~LuaRobot()
 }
 
 
+Vector<Lunar<LuaRobot>::RegType> getLuaMethods()
+{
+   Vector<Lunar<LuaRobot>::RegType> methods;
+   //Parent::getLuaMethods;
+
+   return methods;
+}
+
+// typedef int (T::*mfp)(lua_State *L);
+// typedef struct { const char *name; mfp mfunc; } RegType;
+// RegType is a name and a pointer to a function that takes an L
+
 // Define the methods we will expose to Lua
 // Methods defined here need to be defined in the LuaRobot in robot.h
-
 Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
-   method(LuaRobot, getClassID),
+   method(LuaRobot, getClassID),    // RegType("getClassID", &LuaRobot::getClassID)
 
    method(LuaRobot, getCPUTime),
    method(LuaRobot, getTime),
@@ -1226,42 +1237,11 @@ string Robot::runGetName()
 // Register our connector types with Lua
 void Robot::registerClasses()
 {
+   // General classes 
+   LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
+
+   // Robot-specific classes
    Lunar<LuaUtil>::Register(L);
-
-   Lunar<LuaGameInfo>::Register(L);
-   Lunar<LuaTeamInfo>::Register(L);
-   Lunar<LuaPlayerInfo>::Register(L);
-   //Lunar<LuaTimer>::Register(L);
-
-   Lunar<LuaWeaponInfo>::Register(L);
-   Lunar<LuaModuleInfo>::Register(L);
-
-   Lunar<LuaLoadout>::Register(L);
-
-   Lunar<LuaRobot>::Register(L);
-   Lunar<LuaShip>::Register(L);
-
-   Lunar<RepairItem>::Register(L);
-   Lunar<ResourceItem>::Register(L);
-   Lunar<TestItem>::Register(L);
-   Lunar<Asteroid>::Register(L);
-   Lunar<Turret>::Register(L);
-   Lunar<Teleporter>::Register(L);
-
-   Lunar<ForceFieldProjector>::Register(L);
-   Lunar<FlagItem>::Register(L);
-   Lunar<SoccerBallItem>::Register(L);
-   //Lunar<NexusFlagItem>::Register(L);
-   Lunar<ResourceItem>::Register(L);
-
-   Lunar<LuaProjectile>::Register(L);
-   Lunar<Mine>::Register(L);
-   Lunar<SpyBug>::Register(L);
-
-   Lunar<GoalZone>::Register(L);
-   Lunar<LoadoutZone>::Register(L);
-   Lunar<NexusObject>::Register(L);
-   Lunar<CoreItem>::Register(L);
 }
 
 

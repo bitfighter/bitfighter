@@ -132,6 +132,24 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
    }
    catch(LuaException &e)
    {
+
+      // stack trace from naev
+      
+      //lua_getglobal(L, "debug");
+      //if (!lua_istable(L, -1)) {
+      //   lua_pop(L, 1);
+      //   return 1;
+      //}
+      //lua_getfield(L, -1, "traceback");
+      //if (!lua_isfunction(L, -1)) {
+      //   lua_pop(L, 2);
+      //   return 1;
+      //}
+      //lua_pushvalue(L, 1);
+      //lua_pushinteger(L, 2);
+      //lua_call(L, 2, 1);
+      //return 1;
+
       logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
       error = true;
       return true;
@@ -330,7 +348,9 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 
    checkArgCount(L, 2, methodName);
 
-   Point p1 = getVec(L, 1, methodName) *= mGridSize;     // TODO: Still need this * mGridSize?
+   // Still need mGridSize because we deal with the coordinates used in the level file, which have to be multiplied by
+   // GridSize to get in-game coordinates
+   Point p1 = getVec(L, 1, methodName) *= mGridSize;    
    Point p2 = getVec(L, 2, methodName) *= mGridSize;
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
@@ -395,8 +415,10 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
 // Register our connector types with Lua
 void LuaLevelGenerator::registerClasses()
 {
+   // General classes
    LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
 
+   // Specific classes needed for LevelGen scripts
    Lunar<LuaLevelGenerator>::Register(L);
 
 #ifndef ZAP_DEDICATED

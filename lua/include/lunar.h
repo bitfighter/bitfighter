@@ -36,49 +36,68 @@ public:
   typedef struct { const char *name; mfp mfunc; } RegType;
 
   static void Register(lua_State *L) {
-    lua_newtable(L);
-    int methods = lua_gettop(L);       // Returns number of elements in the stack == index of the top element
+    lua_newtable(L);                         // Creates a new empty table and places it on the stack -- this will be our method table
+    int methods = lua_gettop(L);             // Index of the new method table
 
-    luaL_newmetatable(L, T::className);
-    int metatable = lua_gettop(L);     // Index of new metatable
+    luaL_newmetatable(L, T::className);      // Create a metatable for this class, using the className the class has defined
+    int metatable = lua_gettop(L);           // Index of new metatable
 
-    // store method table in globals so that
-    // scripts can add functions written in Lua.
+    // Store method table in globals so that scripts can add functions written in Lua
     lua_pushvalue(L, methods);
-    set(L, LUA_GLOBALSINDEX, T::className);    //  Globals live at pseudo-index LUA_GLOBALSINDEX
+    set(L, LUA_GLOBALSINDEX, T::className);  //  Globals live at pseudo-index LUA_GLOBALSINDEX
 
-    // hide metatable from Lua getmetatable()
+    // Hide the metatable.  When "getmetatable( myTable )" is called, if the metatable for myTable has a __metatable key, 
+    // the value of that key is returned instead of the actual metatable.  Here, getmetatable() will return the
+    // method table.
     lua_pushvalue(L, methods);
     set(L, metatable, "__metatable");
 
+    // When accessing "myTable[key]" and the key does not appear in the table, but the metatable has an __index property:
+    // If the value is another table (as is the case here), the value of the key in that table is asked for and returned.
+    // So if a script requests a value with a key that is a method name, the method itself (stored in the method table) is returned.
     lua_pushvalue(L, methods);
     set(L, metatable, "__index");
 
-    lua_pushcfunction(L, tostring_T);  // Set a custom tostring method
+    // Set a custom tostring method... i.e. when a script runs tostring, they are passed off to the tostring_T function
+    lua_pushcfunction(L, tostring_T);  // tostring_T(L) is defined below
     set(L, metatable, "__tostring");
 
-    lua_pushcfunction(L, gc_T);        // and a custom gc method
+    // When userdata is set to be garbage collected, if the metatable has a __gc field pointing to a function, that function  
+    // is first invoked, passing the userdata to it. 
+    lua_pushcfunction(L, gc_T);        // gc_T(L) is defined below   
     set(L, metatable, "__gc");
 
+    // __call - Treat a table like a function. When a table is followed by parenthesis such as "myTable( 'foo' )" 
+    // and the metatable has a __call key pointing to a function, that function is invoked (passing any specified arguments) 
+    // and the return value is returned.
     lua_newtable(L);                   // mt for method table
-    lua_pushcfunction(L, new_T);       // When lua runs "new" method, new_T will be called
+    lua_pushcfunction(L, new_T);       // When lua runs "new" method, new_T(L) will be called
     lua_pushvalue(L, -1);              // dup new_T function
     set(L, methods, "new");            // add new_T to method table
     set(L, -3, "__call");              // mt.__call = new_T
     lua_setmetatable(L, methods);
 
-    // fill method table with methods from class T
-    for (RegType *l = T::methods; l->name; l++) {     // example: method(LuaRobot, getZoneCenter)  ::: (name, function)
-      lua_pushstring(L, l->name);
-      lua_pushlightuserdata(L, (void*)l);
-      lua_pushcclosure(L, thunk, 1);                  // thunk casts an pointer l to type T
-      lua_settable(L, methods);
+    // Fill method table with methods from class T
+    for(RegType *l = T::methods; l->name; l++)        // Example: method(LuaRobot, getZoneCenter)  ::: (name, function)
+    {
+      lua_pushstring(L, l->name);                     // Pushes "getZoneCenter"
+      lua_pushlightuserdata(L, (void*)l);             // Pushes pointer to RegType for this method
+
+      // When a C function is created, it is possible to associate some values with it, thus creating a C closure; these values 
+      // are then accessible to the function whenever it is called.  To associate values with a C function, first these values 
+      // should be pushed onto the stack (when there are multiple values, the first value is pushed first). Then lua_pushcclosure 
+      // is called to create and push the C function onto the stack, with the argument n telling how many values should be associated 
+      // with the function.  lua_pushcclosure also pops these values from the stack.
+      // Here, we create a closure around the thunk function, folding in the RegType pointer pushed above, which is also removed from the stack
+      lua_pushcclosure(L, thunk, 1);                  // thunk(L) casts a pointer l to type T
+      lua_settable(L, methods);                       // Sets method_table["getZoneCenter"] = closure we just created
     }
 
-    lua_pop(L, 2);  // drop metatable and method table
+    lua_pop(L, 2);  // Remove metatable and method table from the stack
   }
 
-  // call named lua method from userdata method table
+
+  // Call named lua method from userdata method table
   static int call(lua_State *L, const char *method,
                   int nargs=0, int nresults=LUA_MULTRET, int errfunc=0)
   {
@@ -164,10 +183,10 @@ private:
      try
      {
         lua_remove(L, 1);   // use classname:new(), instead of classname.new()         <=== Why?
-        T *obj = new T(L);  // call constructor for T objects
+        T *obj = new T(L);  // call constructor for T objects  (i.e. new TestItem(L) )
 
-        // Lua gc will delete this object if shouldLuaGarbageCollectThisObject() returns true
-        push(L, obj, T::shouldLuaGarbageCollectThisObject()); 
+        // Lua gc will delete this object if T::shouldLuaGarbageCollectThisObject() returns true
+        push(L, obj, T::shouldLuaGarbageCollectThisObject());  
 
         return 1;           // userdata containing pointer to T object
      }
@@ -197,7 +216,7 @@ private:
     userdataType *ud = static_cast<userdataType*>(lua_touserdata(L, 1));
     T *obj = ud->pT;
 #ifdef _MSC_VER
-#pragma warning(disable : 4996)      // Disable warning about sprintf below -CE
+#  pragma warning(disable : 4996)      // Disable warning about sprintf below -CE
 #endif
     sprintf(buff, "%p", (void*)obj);
     lua_pushfstring(L, "%s (%s)", T::className, buff);
@@ -205,10 +224,11 @@ private:
     return 1;
   }
 
+  // Sets table at table_index[key] = value at top of stack
   static void set(lua_State *L, int table_index, const char *key) {
     lua_pushstring(L, key);
     lua_insert(L, -2);  // swap value and key
-    lua_settable(L, table_index);
+    lua_settable(L, table_index);      
   }
 
   static void weaktable(lua_State *L, const char *mode) {

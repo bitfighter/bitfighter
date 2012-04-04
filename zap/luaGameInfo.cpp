@@ -269,6 +269,7 @@ LuaLoadout::LuaLoadout(lua_State *L)
       mLoadout[i] = DefaultLoadout[i];
 }
 
+
 // C++ Constructor -- specify items
 LuaLoadout::LuaLoadout(U8 loadoutItems[])
 {
@@ -398,68 +399,6 @@ S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at
    U32 mod = (U32) getInt(L, 1, methodName, 1, ShipModuleCount);
    return returnInt(L, mLoadout[mod - 1]);
 }
-
-
-//////////////////////////////////////
-//////////////////////////////////////
-//
-//const char LuaTimer::className[] = "Timer";      // Class name as it appears to Lua scripts
-//
-//// Lua Constructor
-//LuaTimer::LuaTimer(lua_State *L)
-//{
-//   static const char *methodName = "Timer() constructor";
-//   checkArgCount(L, 1, methodName);
-//   mTimer.setPeriod((U32) getInt(L, 1, methodName));
-//   mTimer.reset();
-//}
-//
-//
-//// Define the methods we will expose to Lua
-//Lunar<LuaTimer>::RegType LuaTimer::methods[] =
-//{
-//   method(LuaTimer, reset),
-//   method(LuaTimer, update),
-//   method(LuaTimer, getTime),
-//   method(LuaTimer, getFraction),
-//   method(LuaTimer, setPeriod),
-//
-//   {0,0}    // End method list
-//};
-//
-//
-//S32 LuaTimer::reset(lua_State *L)
-//{
-//   mTimer.reset();
-//   return 0;
-//}
-//
-//
-//S32 LuaTimer::update(lua_State *L)
-//{
-//   static const char *methodName = "Timer:update()";
-//   checkArgCount(L, 1, methodName);
-//   return returnBool(L, mTimer.update((U32) getInt(L, 1, methodName)));
-//}
-//
-//S32 LuaTimer::getTime(lua_State *L)
-//{
-//   return returnInt(L, mTimer.getCurrent());
-//}
-//
-//S32 LuaTimer::getFraction(lua_State *L)
-//{
-//   return returnFloat(L, mTimer.getFraction());
-//}
-//
-//S32 LuaTimer::setPeriod(lua_State *L)
-//{
-//   static const char *methodName = "Timer:setPeriod()";
-//   checkArgCount(L, 1, methodName);
-//   mTimer.setPeriod((U32) getInt(L, 1, methodName));
-//   mTimer.reset();
-//   return 0;
-//}
 
 
 };

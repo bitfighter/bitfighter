@@ -136,7 +136,7 @@ public:
    LuaLoadout(lua_State *L);        // Lua constructor
    LuaLoadout(U8 loadoutItems[]);   // C++ constructor
 
-   virtual ~LuaLoadout();                   // Destructor
+   virtual ~LuaLoadout();           // Destructor
 
    static const char className[];
 
