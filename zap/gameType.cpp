@@ -3467,16 +3467,18 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 }
 
 
-//// Server sends message to the client for display using StringTableEntry
-//GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
-//{
-//#ifndef ZAP_DEDICATED
-//   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
-//   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
-//
-//   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
-//#endif
-//}
+#if CS_PROTOCOL_VERSION <= 35
+// Server sends message to the client for display using StringTableEntry
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
+{
+#ifndef ZAP_DEDICATED
+   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   Color *color = global ? &gGlobalChatColor : &gTeamChatColor;
+
+   clientGame->getUIManager()->getGameUserInterface()->onChatMessageRecieved(*color, "%s: %s", clientName.getString(), message.getString());
+#endif
+}
+#endif
 
 
 // Client requests start/stop of streaming pings and scores from server to client
