@@ -344,8 +344,8 @@ public:
    // TODO: Move these to ClientGame???  They could really go anywhere!
    static void mVolHandler(ClientGame *game, const Vector<string> &args);    
    static void sVolHandler(ClientGame *game, const Vector<string> &args);    
-   static void vVolHandler(ClientGame *game, const Vector<string> &args);    
-   static void servVolHandler(ClientGame *game, const Vector<string> &args);  
+   static void vVolHandler(ClientGame *game, const Vector<string> &args);
+   static void servVolHandler(ClientGame *game, const Vector<string> &args);
    static void getMapHandler(ClientGame *game, const Vector<string> &words);
    static void nextLevelHandler(ClientGame *game, const Vector<string> &words);
    static void prevLevelHandler(ClientGame *game, const Vector<string> &words);

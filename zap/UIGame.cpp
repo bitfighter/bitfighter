@@ -1538,22 +1538,24 @@ void GameUserInterface::addTimeHandler(ClientGame *game, const Vector<string> &w
 
 void GameUserInterface::sVolHandler(ClientGame *game, const Vector<string> &words)
 {
-   game->setVolume(SfxVolumeType, words);
+   // Let's just come back to UIGame in a round-about way
+   game->getUIManager()->getGameUserInterface()->setVolume(SfxVolumeType, words);
 }
 
 void GameUserInterface::mVolHandler(ClientGame *game, const Vector<string> &words)
 {
-   game->setVolume(MusicVolumeType, words);
+   game->getUIManager()->getGameUserInterface()->setVolume(MusicVolumeType, words);
 }
 
 void GameUserInterface::vVolHandler(ClientGame *game, const Vector<string> &words)
 {
-   game->setVolume(VoiceVolumeType, words);
+   game->getUIManager()->getGameUserInterface()->setVolume(VoiceVolumeType, words);
 }
+
 
 void GameUserInterface::servVolHandler(ClientGame *game, const Vector<string> &words)
 {
-   game->setVolume(ServerAlertVolumeType, words);
+   game->getUIManager()->getGameUserInterface()->setVolume(ServerAlertVolumeType, words);
 }
 
 
