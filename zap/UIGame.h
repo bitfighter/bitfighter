@@ -346,6 +346,8 @@ public:
    void sVolHandler(const Vector<string> &args);    
    void vVolHandler(const Vector<string> &args);
    void servVolHandler(const Vector<string> &args);
+   void mNextHandler(const Vector<string> &words);
+   void mPrevHandler(const Vector<string> &words);
    void getMapHandler(const Vector<string> &words);
    void nextLevelHandler(const Vector<string> &words);
    void prevLevelHandler(const Vector<string> &words);

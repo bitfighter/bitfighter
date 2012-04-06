@@ -1558,6 +1558,18 @@ void GameUserInterface::servVolHandler(const Vector<string> &words)
 }
 
 
+void GameUserInterface::mNextHandler(const Vector<string> &words)
+{
+   SoundSystem::playNextTrack();
+}
+
+
+void GameUserInterface::mPrevHandler(const Vector<string> &words)
+{
+   SoundSystem::playPrevTrack();
+}
+
+
 void GameUserInterface::getMapHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
@@ -2309,6 +2321,8 @@ CommandInfo chatCmds[] = {
    { "mvol",    &GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set music volume"      },
    { "svol",    &GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set SFX volume"        },
    { "vvol",    &GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set voice chat volume" },
+   { "mnext",   &GameUserInterface::mNextHandler,     {  },         0,       ADV_COMMANDS,    2,     1,     {  },                   "Play next track in the music list" },
+   { "mprev",   &GameUserInterface::mPrevHandler,     {  },         0,       ADV_COMMANDS,    2,     1,     {  },                   "Play previous track in the music list" },
    { "mute",    &GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Toggle hiding chat messages from <name>" },
    { "vmute",   &GameUserInterface::voiceMuteHandler, { NAME },     1,       ADV_COMMANDS,    3,     1,     {"<name>"},             "Toggle muting voice chat from <name>" },
 

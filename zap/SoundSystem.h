@@ -223,6 +223,8 @@ public:
    static void stopMusic(MusicInfo &musicInfo);
    static void pauseMusic(MusicInfo &musicInfo);
    static void resumeMusic(MusicInfo &musicInfo);
+   static void playNextTrack();
+   static void playPrevTrack();
 };
 
 }

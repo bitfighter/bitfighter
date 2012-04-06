@@ -904,7 +904,7 @@ void SoundSystem::playMenuMusic()
    if(!musicInfos[MusicTypeMenu].stream)
       logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", mMenuMusicFile.c_str());
 
-   // Loop forever (paramater -1)
+   // Loop forever (parameter -1)
    if(!alurePlaySourceStream(musicInfos[MusicTypeMenu].source, musicInfos[MusicTypeMenu].stream, NumMusicStreamBuffers, -1, menu_music_end_callback, NULL))
       logprintf(LogConsumer::LogError, "Failed to play music file: %s", mMenuMusicFile.c_str());
 }
@@ -934,6 +934,31 @@ void SoundSystem::resumeMusic(MusicInfo &musicInfo)
    alureResumeSource(musicInfo.source);
    musicInfo.state = MusicPlaying;
 }
+
+
+void SoundSystem::playNextTrack()
+{
+   stopMusic(musicInfos[MusicTypeGame]);
+
+   // Increment the playing index
+   mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mMusicList.size();
+
+   playGameMusic();
+}
+
+
+void SoundSystem::playPrevTrack()
+{
+   stopMusic(musicInfos[MusicTypeGame]);
+
+   // Decrement the playing index
+   mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mMusicList.size();
+   if(mCurrentlyPlayingIndex < 0)
+      mCurrentlyPlayingIndex += mMusicList.size();
+
+   playGameMusic();
+}
+
 
 };
 
