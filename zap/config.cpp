@@ -2024,6 +2024,17 @@ Vector<string> FolderManager::getScriptFolderList() const
 }
 
 
+Vector<string> FolderManager::getHelperScriptFolderList() const
+{
+   Vector<string> folders;
+   folders.push_back(luaDir);
+   folders.push_back(levelDir);
+   folders.push_back(robotDir);
+
+   return folders;
+}
+
+
 Vector<string> FolderManager::getPluginFolderList() const
 {
    Vector<string> folders;
@@ -2038,6 +2049,14 @@ string FolderManager::findLevelGenScript(const string &filename) const
    const char *extensions[] = { ".levelgen", ".lua", "" };
 
    return checkName(filename, getScriptFolderList(), extensions);
+}
+
+
+string FolderManager::findScriptFile(const string &filename) const
+{
+   const char *extensions[] = { ".lua", "" };
+
+   return checkName(filename, getHelperScriptFolderList(), extensions);
 }
 
 

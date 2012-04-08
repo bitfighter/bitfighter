@@ -85,10 +85,12 @@ struct FolderManager
 
    Vector<string> getScriptFolderList() const;
    Vector<string> getPluginFolderList() const;
+   Vector<string> getHelperScriptFolderList() const;
 
    string findLevelGenScript(const string &fileName) const;
    string findPlugin(const string &filename) const;
    string findBotFile(const string &filename) const;
+   string findScriptFile(const string &filename) const;
 };
 
 
