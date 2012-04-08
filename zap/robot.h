@@ -122,7 +122,7 @@ public:
    static void deleteBot(const StringTableEntry &name);  // Delete bot by name
    static void deleteAllBots();
 
-   static Robot *findBot(lua_State *L);   // Find the bot that owns this L
+   static Robot *findBot(const char *id); // Find the bot with specified script id
 
    bool startLua();                       // Fire up bot's Lua processor
    void setPointerToThis();
