@@ -72,6 +72,7 @@ struct ParamInfo {
    const char *errorMsg;
 };
 
+
 ParamInfo paramDefs[] = {   
 // Parameter               Args required   ParamId           Doc. tier  Args                  Help string            Error message (not needed for NO_PARAMETERS)
 
@@ -159,9 +160,12 @@ const char *helpTitles[] = {
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+// Define statics
+FolderManager *GameSettings::mFolderManager = NULL;
 
-////////////////////////////////////////
-////////////////////////////////////////
+
 // For now...  soon all these things will be contained herein
 extern CIniFile gINI;
 extern S32 LOADOUT_PRESETS;
@@ -169,7 +173,7 @@ extern S32 LOADOUT_PRESETS;
 // Constructor
 GameSettings::GameSettings()
 {
-   mBanList = new BanList(mFolderManager.iniDir);
+   mBanList = new BanList(getFolderManager()->iniDir);
    mLoadoutPresets.resize(LOADOUT_PRESETS);           // Make sure we have the right number of slots available
 }
 
@@ -293,9 +297,13 @@ bool GameSettings::getSpecified(ParamId paramId)
 }
 
 
+// Lazily initialize
 FolderManager *GameSettings::getFolderManager()
 {
-   return &mFolderManager;
+   if(!mFolderManager)
+      mFolderManager = new FolderManager();
+
+   return mFolderManager;
 }
 
 
@@ -760,12 +768,12 @@ void GameSettings::onFinishedLoading()
 
    masterAddressList    = *choose( getString(MASTER_ADDRESS),          getIniSettings()->masterAddress );    // The INI will always have a value
 
-   parseString(masterAddressList, mMasterServerList, ',');     // Move the list of master servers into mMasterServerList
+   parseString(masterAddressList, mMasterServerList, ',');        // Move the list of master servers into mMasterServerList
 
-   mFolderManager.resolveLevelDir(this);                       // Figure out where the heck our levels are stored
+   getFolderManager()->resolveLevelDir(this);                     // Figure out where the heck our levels are stored
 
-   if(getIniSettings()->levelDir == "")                        // If there is nothing in the INI,
-      getIniSettings()->levelDir = mFolderManager.levelDir;    // write a good default to the INI
+   if(getIniSettings()->levelDir == "")                           // If there is nothing in the INI,
+      getIniSettings()->levelDir = getFolderManager()->levelDir;  // write a good default to the INI
 
    // Now we turn to the size and position of the game window
    // First, figure out what display mode to start in...
