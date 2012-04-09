@@ -103,6 +103,8 @@ class GridDatabase
 private:
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
+   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
+
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
    static U32 mQueryId;
    static U32 mCountGridDatabase;
@@ -145,10 +147,19 @@ public:
 
    void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
    const Vector<DatabaseObject *> *findObjects_fast() const;   // Faster than above, but results can't be modified
+
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector);
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector);
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+
+   void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector);
+   void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+
+
+   bool testTypes(const Vector<U8> &types, U8 objectType) const;
+
 
    void dumpObjects();     // For debugging purposes
 

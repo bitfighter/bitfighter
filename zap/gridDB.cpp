@@ -196,6 +196,17 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast() const
 
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
 {
+   static Vector<U8> types;
+   types.resize(1);
+
+   types[0] = typeNumber;
+
+   findObjects(types, fillVector, extents, minx, miny, maxx, maxy);
+}
+
+
+void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+{
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
    for(S32 x = minx; maxx - x >= 0; x++)
@@ -204,9 +215,9 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
          {
             DatabaseObject *theObject = walk->theObject;
 
-            if(theObject->mLastQueryId != mQueryId &&                      // Object hasn't been queried; and
-               (theObject->getObjectTypeNumber() == typeNumber) &&         // is of the right type; and
-               (!extents || theObject->mExtent.intersects(*extents)) )     // overlaps our extents (if passed)
+            if(theObject->mLastQueryId != mQueryId &&                         // Object hasn't been queried; and
+               testTypes(typeNumbers, theObject->getObjectTypeNumber()) &&    // is of the right type; and
+               (!extents || theObject->mExtent.intersects(*extents)) )        // overlaps our extents (if passed)
             {
                walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
                fillVector.push_back(walk->theObject);       // And save it as a found item
@@ -271,6 +282,44 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(testFunc(mAllObjects[i]->getObjectTypeNumber()))
          fillVector.push_back(mAllObjects[i]);
+}
+
+
+// Find all objects in database using derived type test function
+void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+{
+   S32 minx, miny, maxx, maxy;
+
+   minx = S32(extents.min.x) >> BucketWidthBitShift;
+   miny = S32(extents.min.y) >> BucketWidthBitShift;
+   maxx = S32(extents.max.x) >> BucketWidthBitShift;
+   maxy = S32(extents.max.y) >> BucketWidthBitShift;
+
+   if(U32(maxx - minx) >= BucketRowCount)
+      maxx = minx + BucketRowCount - 1;
+   if(U32(maxy - miny) >= BucketRowCount)
+      maxy = miny + BucketRowCount - 1;
+
+   findObjects(types, fillVector, &extents, minx, miny, maxx, maxy);
+}
+
+
+// Find all objects in database using derived type test function
+void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector)
+{
+   for(S32 i = 0; i < mAllObjects.size(); i++)
+      if(testTypes(types, mAllObjects[i]->getObjectTypeNumber()))
+         fillVector.push_back(mAllObjects[i]);
+}
+
+
+bool GridDatabase::testTypes(const Vector<U8> &types, U8 objectType) const
+{
+   for(S32 i = 0; i < types.size(); i++)
+      if(types[i] == objectType)
+         return true;
+
+   return false;
 }
 
 
