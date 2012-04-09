@@ -696,7 +696,11 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       F32 ttl = Random::readF() * 50  + 250;
       F32 startAngle = Random::readF() * FloatTau;
       F32 rotationRate = Random::readF() * 4 - 2;
-      game->emitDebrisChunk(points, *teamColor, chunkPos, chunkVel, ttl, startAngle, rotationRate);
+
+      // Every-other chunk is team color instead of panel color
+      Color chunkColor = i % 2 == 0 ? Colors::gray80 : *teamColor;
+
+      game->emitDebrisChunk(points, chunkColor, chunkPos, chunkVel, ttl, startAngle, rotationRate);
    }
 
 

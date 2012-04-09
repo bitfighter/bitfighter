@@ -1237,13 +1237,6 @@ void ClientGame::runCommand(const char *command)
 }
 
 
-void ClientGame::setVolume(VolumeType volType, const Vector<string> &words)
-{
-   getUIManager()->getGameUserInterface()->setVolume(volType, words);
-}
-
-
-
 string ClientGame::getRequestedServerName()
 {
    return getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();

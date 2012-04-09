@@ -217,7 +217,6 @@ public:
 
    void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
    void runCommand(const char *command);
-   void setVolume(VolumeType volType, const Vector<string> &words);
 
    string getRequestedServerName();
    string getServerPassword();

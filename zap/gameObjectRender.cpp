@@ -1816,10 +1816,9 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time,
       renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30 * size / 100, 7 * size / 100);
 
       if(panelHealth[i] == 0)          // Panel is dead
-      {
-         Color c = coreColor;
-         glColor(c * .2f);
-      }      
+         glColor(baseColor * .2f);
+      else
+         glColor(baseColor);
 
       glBegin(GL_LINES);
          glVertex(panelGeom->getStart(i));
@@ -2309,12 +2308,13 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
    {
       case DEVELOPER_BADGE:
          renderDeveloperBadge(x, y, rad);
-         return;
+         break;
       case BADGE_TWENTY_FIVE_FLAGS:
          render25FlagsBadge(x, y, rad);
-         return;
+         break;
       default:
          TNLAssert(false, "Unknown Badge!");
+         break;
    }
 }
 
