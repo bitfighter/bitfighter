@@ -3212,7 +3212,7 @@ void GameUserInterface::renderScoreboard()
 void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio)
 {
    F32 badgeRadius = 10.f * scaleRatio;
-   S32 badgeOffset = 2 * badgeRadius + 5;
+   S32 badgeOffset = S32(2 * badgeRadius) + 5;
    F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
 
    for(S32 i = 0; i < BADGE_COUNT; i++)
