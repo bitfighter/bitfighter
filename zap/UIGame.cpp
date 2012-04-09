@@ -3222,7 +3222,7 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
       if(clientInfo->hasBadge(badge))
       {
          drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
-         renderBadge(x, y, badgeRadius, badge);
+         renderBadge((F32)x, (F32)y, badgeRadius, badge);
          x += badgeOffset;
       }
    }
