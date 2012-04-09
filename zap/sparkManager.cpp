@@ -111,7 +111,7 @@ void FXManager::DebrisChunk::idle(U32 timeDelta)
 
    pos   += vel      * dT;
    angle += rotation * dT;
-   ttl   -= dT;
+   ttl   -= (S32)dT;
 }
 
 
@@ -145,7 +145,7 @@ void FXManager::TextEffect::idle(U32 timeDelta)
    if(size < 10)
       size += growthRate * dT;
 
-   ttl  -= dT;
+   ttl  -= (S32)dT;
 }
 
 
