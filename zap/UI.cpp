@@ -472,7 +472,7 @@ extern void drawHorizLine(S32 x1, S32 x2, S32 y);
 
 S32 UserInterface::drawCenteredUnderlinedString(S32 y, S32 size, const char *string)
 {
-   S32 x = gScreenInfo.getGameCanvasWidth() * .5;
+   S32 x = gScreenInfo.getGameCanvasWidth() / 2;
    S32 xpos = drawCenteredString(x, y, size, string);
    drawHorizLine(xpos, gScreenInfo.getGameCanvasWidth() - xpos, y + size + 5);
 
