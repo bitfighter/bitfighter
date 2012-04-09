@@ -102,14 +102,16 @@ class GridDatabase
 {
 private:
 
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
-   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
+   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
 
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy);
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
    static U32 mQueryId;
    static U32 mCountGridDatabase;
 
    WallSegmentManager *mWallSegmentManager;    
+
+   void fillBins(const Rect &extents, IntRect &bins);          // Helper function -- translates extents into bins to search
 
 protected:
    Vector<DatabaseObject *> mAllObjects;

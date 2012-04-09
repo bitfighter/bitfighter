@@ -85,20 +85,11 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 	theObject->mDatabase = this;
 
 
-   S32 minx, miny, maxx, maxy;
+   static IntRect bins;
+   fillBins(extents, bins);
 
-   minx = S32(extents.min.x) >> BucketWidthBitShift;
-   miny = S32(extents.min.y) >> BucketWidthBitShift;
-   maxx = S32(extents.max.x) >> BucketWidthBitShift;
-   maxy = S32(extents.max.y) >> BucketWidthBitShift;
-
-   if(U32(maxx - minx) >= BucketRowCount)
-      maxx = minx + BucketRowCount - 1;
-   if(U32(maxy - miny) >= BucketRowCount)
-      maxy = miny + BucketRowCount - 1;
-
-   for(S32 x = minx; maxx - x >= 0; x++)
-      for(S32 y = miny; maxy - y >= 0; y++)
+   for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
+      for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
       {
          BucketEntry *be = mChunker->alloc();
          be->theObject = theObject;
@@ -130,6 +121,7 @@ void GridDatabase::removeEverythingFromDatabase()
    mAllObjects.clear();
 }
 
+
 void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    TNLAssert(theObject->mDatabase == this || theObject->mDatabase == NULL, "Trying to remove Object from wrong database");
@@ -137,22 +129,12 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
       return;
 	theObject->mDatabase = NULL;
 
-   S32 minx, miny, maxx, maxy;
+   static IntRect bins;
+   fillBins(extents, bins);
 
-   minx = S32(extents.min.x) >> BucketWidthBitShift;
-   miny = S32(extents.min.y) >> BucketWidthBitShift;
-   maxx = S32(extents.max.x) >> BucketWidthBitShift;
-   maxy = S32(extents.max.y) >> BucketWidthBitShift;
-
-   if(U32(maxx - minx) >= BucketRowCount)
-      maxx = minx + BucketRowCount - 1;
-   if(U32(maxy - miny) >= BucketRowCount)
-      maxy = miny + BucketRowCount - 1;
-
-
-   for(S32 x = minx; maxx - x >= 0; x++)
+   for(S32 x = bins.minx; bins.maxx - x >= 0; x++)
    {
-      for(S32 y = miny; maxy - y >= 0; y++)
+      for(S32 y = bins.miny; bins.maxy - y >= 0; y++)
       {
          for(BucketEntry **walk = &mBuckets[x & BucketMask][y & BucketMask]; *walk; walk = &((*walk)->nextInBucket))
          {
@@ -194,23 +176,23 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast() const
 }
 
 
-void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins)
 {
    static Vector<U8> types;
    types.resize(1);
 
    types[0] = typeNumber;
 
-   findObjects(types, fillVector, extents, minx, miny, maxx, maxy);
+   findObjects(types, fillVector, extents, bins);
 }
 
 
-void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins)
 {
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
-   for(S32 x = minx; maxx - x >= 0; x++)
-      for(S32 y = miny; maxy - y >= 0; y++)
+   for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
+      for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
@@ -235,32 +217,39 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 }
 
 
-// Find all objects in &extents that are of type typeNumber
-void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+// Translates extents into bins to search
+void GridDatabase::fillBins(const Rect &extents, IntRect &bins)
 {
-   S32 minx, miny, maxx, maxy;
+   bins.minx = S32(extents.min.x) >> BucketWidthBitShift;
+   bins.miny = S32(extents.min.y) >> BucketWidthBitShift;
+   bins.maxx = S32(extents.max.x) >> BucketWidthBitShift;
+   bins.maxy = S32(extents.max.y) >> BucketWidthBitShift;
 
-   minx = S32(extents.min.x) >> BucketWidthBitShift;
-   miny = S32(extents.min.y) >> BucketWidthBitShift;
-   maxx = S32(extents.max.x) >> BucketWidthBitShift;
-   maxy = S32(extents.max.y) >> BucketWidthBitShift;
+   if(U32(bins.maxx - bins.minx) >= BucketRowCount)
+      bins.maxx = bins.minx + BucketRowCount - 1;
 
-   if(U32(maxx - minx) >= BucketRowCount)
-      maxx = minx + BucketRowCount - 1;
-   if(U32(maxy - miny) >= BucketRowCount)
-      maxy = miny + BucketRowCount - 1;
-
-   findObjects(typeNumber, fillVector, &extents, minx, miny, maxx, maxy);
+   if(U32(bins.maxy - bins.miny) >= BucketRowCount)
+      bins.maxy = bins.miny + BucketRowCount - 1;
 }
 
 
-void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, S32 minx, S32 miny, S32 maxx, S32 maxy)
+// Find all objects in &extents that are of type typeNumber
+void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+{
+   static IntRect bins;
+   fillBins(extents, bins);
+
+   findObjects(typeNumber, fillVector, &extents, &bins);
+}
+
+
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins)
 {
    TNLAssert(this, "findObjects 'this' is NULL");
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
-   for(S32 x = minx; maxx - x >= 0; x++)
-      for(S32 y = miny; maxy - y >= 0; y++)
+   for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
+      for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
@@ -288,19 +277,10 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
 // Find all objects in database using derived type test function
 void GridDatabase::findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
-   S32 minx, miny, maxx, maxy;
+   static IntRect bins;
+   fillBins(extents, bins);
 
-   minx = S32(extents.min.x) >> BucketWidthBitShift;
-   miny = S32(extents.min.y) >> BucketWidthBitShift;
-   maxx = S32(extents.max.x) >> BucketWidthBitShift;
-   maxy = S32(extents.max.y) >> BucketWidthBitShift;
-
-   if(U32(maxx - minx) >= BucketRowCount)
-      maxx = minx + BucketRowCount - 1;
-   if(U32(maxy - miny) >= BucketRowCount)
-      maxy = miny + BucketRowCount - 1;
-
-   findObjects(types, fillVector, &extents, minx, miny, maxx, maxy);
+   findObjects(types, fillVector, &extents, &bins);
 }
 
 
@@ -326,19 +306,10 @@ bool GridDatabase::testTypes(const Vector<U8> &types, U8 objectType) const
 // Find all objects in &extents derived type test function
 void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
-   S32 minx, miny, maxx, maxy;
+   static IntRect bins;
+   fillBins(extents, bins);
 
-   minx = S32(extents.min.x) >> BucketWidthBitShift;
-   miny = S32(extents.min.y) >> BucketWidthBitShift;
-   maxx = S32(extents.max.x) >> BucketWidthBitShift;
-   maxy = S32(extents.max.y) >> BucketWidthBitShift;
-
-   if(U32(maxx - minx) >= BucketRowCount)
-      maxx = minx + BucketRowCount - 1;
-   if(U32(maxy - miny) >= BucketRowCount)
-      maxy = miny + BucketRowCount - 1;
-
-   findObjects(testFunc, fillVector, &extents, minx, miny, maxx, maxy);
+   findObjects(testFunc, fillVector, &extents, &bins);
 }
 
 
