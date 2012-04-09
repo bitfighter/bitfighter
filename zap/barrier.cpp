@@ -80,7 +80,7 @@ WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
 // Constructor
 WallRec::WallRec(const WallItem &wallItem)
 {
-   width = wallItem.getWidth();
+   width = (F32)wallItem.getWidth();
    solid = false;
 
    for(S32 i = 0; i < wallItem.getVertCount(); i++)
