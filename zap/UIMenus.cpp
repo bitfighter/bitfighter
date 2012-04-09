@@ -1937,7 +1937,7 @@ bool LevelMenuSelectUserInterface::processMenuSpecificKeys(InputCode inputCode)
          // method called WarpMouse that adds the suppression.  At this point, however, the only place we care about this
          // is here so...  well... this works.
 #if SDL_VERSION_ATLEAST(2,0,0)
-         SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, gScreenInfo.getMousePos()->x, y);
+         SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getMousePos()->x, y);
 #else
          SDL_WarpMouse(gScreenInfo.getMousePos()->x, y);
 #endif
