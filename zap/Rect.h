@@ -27,9 +27,9 @@
 #define _RECT_H_
 
 #include "Point.h"
+#include "tnlTypes.h"
 
 namespace TNL {
-   typedef float F32;
    template<class T> class Vector;
 };
 
