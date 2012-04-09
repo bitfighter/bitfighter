@@ -47,7 +47,7 @@ public:
 
    // Lua methods
    S32 logprint(lua_State *L);
-   S32 printToOglConsole(lua_State *L);
+   S32 printToConsole(lua_State *L);
    S32 getMachineTime(lua_State *L);
    S32 getRandomNumber(lua_State *L);
    S32 findFile(lua_State *L);

@@ -60,7 +60,7 @@ function vectorY(dir, dist)
 end
  
 function shieldSelf()
-	local bullets = bot:findItems(BulletType,AsteroidType,MineType)
+	local bullets = findItems(BulletType,AsteroidType,MineType)
 	local distToShieldAt = bot:getRad()*2 + (1-difficulty)*100
 	if (bullets ~= nil) then
 		for i,bullet in ipairs(bullets) do
@@ -81,7 +81,7 @@ function angleDifference(angleA,angleB)
 end
 
 function fireAtObjects()
-	local enemies = bot:findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
+	local enemies = findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
 	for index,enemy in ipairs(enemies) do
 		if(fireAtObject(enemy, WeaponPhaser)) then
 			break
@@ -131,7 +131,7 @@ function getName()
 end
  
 function findEnemy()
-	local enemies = bot:findItems(ShipType, RobotType)
+	local enemies = findItems(ShipType, RobotType)
 	local target = nil
 	local smallestDist = 999999
 	
@@ -154,7 +154,7 @@ function findEnemy()
 	return(nil)
 end
 function getNearestEnemy()
-	local enemies = bot:findItems(ShipType, RobotType)
+	local enemies = findItems(ShipType, RobotType)
 	local target = nil
 	local smallestDist = 99999999
 	
@@ -245,7 +245,7 @@ function attackNearbyEnemies(agressionLevel)
 	  
 		local dist = vec.distanceTo(botLoc, targetLoc)
 		local myPow = (bot:getEnergy() + bot:getHealth() )
-		local enemies = bot:findItems(ShipType, RobotType)
+		local enemies = findItems(ShipType, RobotType)
 	  
 		--for index, otherShip in ipairs(enemies) do
 		-- otherPow = otherPow + target:getEnergy() + target:getHealth()
@@ -270,7 +270,7 @@ end
  
 --Returns the objective for the bot based on myNum.  This makes bots choose different defending locations.
 function getObjective(objType, team, onTeam)
-	local items = bot:findGlobalItems(objType)
+	local items = findGlobalItems(objType)
 	local itemsOnMyTeam = {}
 	local currentIndex = 1
 	for ind, it in ipairs(items) do
