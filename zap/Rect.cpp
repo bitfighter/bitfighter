@@ -32,6 +32,29 @@
 namespace Zap
 {
 
+// Constructors
+IntRect::IntRect()
+{
+   set(0, 0, 0, 0);
+}
+
+
+IntRect::IntRect(S32 x1, S32 y1, S32 x2, S32 y2)
+{
+   set(x1, y1, x2, y2);
+}
+
+
+void IntRect::set(S32 x1, S32 y1, S32 x2, S32 y2)
+{
+   minx = min(x1, x2);
+   miny = min(y1, y2);
+   maxx = max(x1, x2);
+   maxy = max(y1, y2);
+}
+
+
+
 // Constuctors
 Rect::Rect()
 {

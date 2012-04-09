@@ -39,6 +39,19 @@ using namespace TNL;
 namespace Zap
 {
 
+class IntRect
+{
+   S32 minx, miny, maxx, maxy;
+   IntRect();
+   IntRect(S32 x1, S32 y1, S32 x2, S32 y2);
+
+   void set(S32 x1, S32 y1, S32 x2, S32 y2);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class Rect
 {
 
