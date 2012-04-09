@@ -135,6 +135,26 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
 
       // stack trace from naev
       
+//      #if DEBUGGING
+//   lua_pushcfunction(L, nlua_errTrace);
+//   errf = -3;
+//#else /* DEBUGGING */
+//   errf = 0;
+//#endif /* DEBUGGING */
+//
+//   /* Run the function. */
+//   lua_getglobal(L, "news"); /* f */
+//   lua_pushnumber(L, n); /* f, n */
+//   if (lua_pcall(L, 1, 2, errf)) { /* error has occurred */
+//      WARN("News: '%s' : %s", "news", lua_tostring(L,-1));
+//#if DEBUGGING
+//      lua_pop(L,2);
+//#else /* DEBUGGING */
+//      lua_pop(L,1);
+//#endif /* DEBUGGING */
+//      return NULL;
+
+      // nlua-errTrace:
       //lua_getglobal(L, "debug");
       //if (!lua_istable(L, -1)) {
       //   lua_pop(L, 1);
@@ -191,7 +211,7 @@ void LuaLevelGenerator::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
 
-   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", mScriptName.c_str(), buffer);
+   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** %s",buffer);
 
    va_end(args);
 }
@@ -405,7 +425,7 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
       gt->sendChatFromController(message);
 
       // Fire our event handler
-      EventManager::get()->fireEvent(getL(), EventManager::MsgReceivedEvent, message, NULL, true);
+      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, NULL, true);
    }
 
    return 0;

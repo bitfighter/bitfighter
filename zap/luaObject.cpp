@@ -66,13 +66,6 @@ LuaObject::~LuaObject()
 }
 
 
-void LuaObject::openLibs(lua_State *L)      // static
-{
-   luaL_openlibs(L);    // Load the standard libraries
-   luaopen_vec(L);      // For vector math
-}
-
-
 bool LuaObject::shouldLuaGarbageCollectThisObject()
 {
    return true;
@@ -497,12 +490,12 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 }
 
 
-// Adapted from PiL book section 24.2.3
-void LuaObject::dumpStack(lua_State* L)
+// Adapted from PiL book section 24.2.3.  Always returns false so can be used in TNLAsserts easily.
+bool LuaObject::dumpStack(lua_State* L)
 {
     int top = lua_gettop(L);
 
-    logprintf("\nTotal in stack: %d",top);
+    logprintf("\nTotal in stack: %d   [listed bottom to top]",top);
 
     for (S32 i = 1; i <= top; i++)
     {  // Repeat for each level 
@@ -522,21 +515,31 @@ void LuaObject::dumpStack(lua_State* L)
                 break;
         }
     }
+
+    return false;
  }
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Initialize statics:
+U32 LuaScriptRunner::mNextScriptId = 0;
+lua_State *LuaScriptRunner::L = NULL;
+bool  LuaScriptRunner::mScriptingDirSet = false;
+string LuaScriptRunner::mScriptingDir;
+
+
+
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
-   L = NULL;
-   mScriptingDirSet = false;
-
    // Initialize all subscriptions to unsubscribed -- bits will automatically subscribe to onTick later
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       mSubscriptions[i] = false;
+
+   mScriptId = "script" + itos(mNextScriptId);
+   mNextScriptId++;
 }
 
 
@@ -547,10 +550,7 @@ LuaScriptRunner::~LuaScriptRunner()
    // send an event to a dead bot, after all...
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       if(mSubscriptions[i])
-         EventManager::get()->unsubscribeImmediate(L, (EventManager::EventType)i);
-
-   if(L)
-      lua_close(L);
+         EventManager::get()->unsubscribeImmediate(getScriptId(), (EventManager::EventType)i);
 }
 
 
@@ -563,57 +563,94 @@ void LuaScriptRunner::setScriptingDir(const string &scriptingDir)
 
 lua_State *LuaScriptRunner::getL()
 {
+   TNLAssert(L, "L not yet instantiated!");
    return L;
 }
 
 
+void LuaScriptRunner::shutdown()
+{
+   if(L)
+   {
+      lua_close(L);
+      L = NULL;
+   }
+}
+
+
+const char *LuaScriptRunner::getScriptId()
+{
+   return mScriptId.c_str();
+}
 
 
 // Loads ouf script file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
-   return loadScript(mScriptName) && runChunk();
+   return loadScript(mScriptName);
 }
 
 
+// Creates a new table and stores it in the registry using the key passed in as name
+void LuaScriptRunner::createEnvironment()
+{
+   luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create sandbox_env
+   lua_getglobal(L, "sandbox_env");                                  // -- sandbox   
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());                // -- <<empty stack>>
+}
+
+
+// Sets the environment for the function on the top of the stack to that associated with name
+// Starts with a function on the stack
+void LuaScriptRunner::setEnvironment()
+{                                    
+   // Grab the script's environment table from the registry, place it on the stack
+   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());       // -- function, table (table created with same name in createEnvironment)
+   lua_setfenv(L, -2);                                      // -- function
+}
+
+
+void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
+{
+   lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Retrieve the environment from the registry            -- table
+   lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
+
+   lua_remove(L, -2);                              // Remove table                                          -- function
+}
+
+
+// Loads specified file from disk, and executes it in the function's private environment
 bool LuaScriptRunner::loadScript(const string &scriptName)
 {
    TNLAssert(mScriptingDirSet, "Must set scripting folder before intializing script!");
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   // Load the script
+   // Load the specified file, place contents on stack as a function
    if(luaL_loadfile(L, scriptName.c_str()))
    {
-      logError("Script error: %s -- Aborting.", /*scriptName.c_str(),*/ lua_tostring(L, -1));
+      logError("%s -- Aborting.", lua_tostring(L, -1));
+      lua_pop(L, 1);    // Remove error message from stack
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return false;
    }
 
-   return true;
-}
+   setEnvironment();
 
+   S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
 
-// Runs the most recently loaded chunk
-bool LuaScriptRunner::runChunk()
-{
-   try
+   if(!error)
    {
-      setLuaArgs(mScriptArgs);  // Some scripts reads arguments outside the "main" function
-
-      // Initialize it by running all the code that's not contained in a function -- this loads all the functions into the global namespace
-      if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting 0 back
-      {
-         logError("Error initializing script %s: %s -- Aborting.", mScriptName.c_str(), lua_tostring(L, -1));
-         return false;
-      }
-
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return true;
    }
-   catch(LuaException &e)
-   {
-      logError("Error running script %s: %s.  Aborting script.", mScriptName.c_str(), e.what());
-      return false;
-   }
 
+   logError("%s -- Aborting.", lua_tostring(L, -1));
+
+   lua_pop(L, 1);       // Remove error message from stack
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
    return false;
 }
 
@@ -628,30 +665,53 @@ bool LuaScriptRunner::runMain()
 
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   // Retrieve the bot's getName function, and put it on top of the stack
+   bool ok = retrieveFunction("_main");     
+
+   TNLAssert(ok, "_main function not found -- is lua_helper_functions corrupt?");
+
+   if(!ok)
+   {      
+      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+      logError("Function main() could not be found! Script may still run, but please edit your script to have a main() function.");
+   }
+
    setLuaArgs(args);    // TODO: Do we still need this here with Sam's addition of setLuaArgs in runChunk()???  -- might need it for plugins -CE
                         // Adds script name to 0th argument
-   try
-   {   
-      lua_getglobal(L, "_main");
-   }
-   catch(...)
+
+   S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
+
+   if(error == 0)
    {
-      logError("Function main() could not be found! Script will run, but please edit your script to have a main() function.");
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return true;
    }
 
-   try
-   {
-      if(lua_pcall(L, 0, 0, 0) != 0)
-         throw LuaException(lua_tostring(L, -1));
-   }
-   catch(LuaException &e)
-   {
-      logError("Error encountered while running main(): %s.  Aborting script.", e.what());
-      return false;
-   }
+   logError("Error encountered while attempting to run script's main() function: %s.  Aborting script.", lua_tostring(L, -1));
+   lua_pop(L, 1);    // Remove error message from stack
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   return false;
+}
 
-   return true;
+
+// Get a function from the currently running script, and place it on top of the stack.  Returns true if it works, false
+// if the specified function could not be found.  If this fails will remove the non-function from the stack.
+bool LuaScriptRunner::retrieveFunction(const char *functionName)
+{
+   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put bot's environment table onto the stack -- table
+   lua_pushstring(L, functionName);                      //                                            -- table, functionName
+   lua_gettable(L, -2);                                  // Push requested function onto the stack     -- table, fn
+   lua_remove(L, lua_gettop(L) - 1);                     // Remove environment table from stack        -- fn
+
+   // Check if the top stack item is indeed a function (as we would expect)
+   if(lua_isfunction(L, -1))
+      return true;      // If so, return true
+
+   // else
+   lua_pop(L, 1);
+   return false;
 }
 
 
@@ -661,48 +721,47 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 //       every time a bot or levelgen or plugin is created.  Or compile to bytecode and store that.  Or anything, really, that's more efficient.
 bool LuaScriptRunner::loadHelperFunctions(const string &helperName)
 {
-   try
-   {
-      return loadScript(joindir(mScriptingDir, helperName).c_str()) && runChunk();
-   }
-   catch(LuaException &e)
-   {
-      logError("Error loading helper function %s: %s.  Aborting script.", helperName.c_str(), e.what());
-      return false;
-   }
-
-   return false;
+   return loadScript(joindir(mScriptingDir, helperName).c_str());
 }
 
 
 bool LuaScriptRunner::startLua(ScriptType scriptType)
 {
-   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
-   TNLAssert(!L, "L should never be set here!");
-
-   L = lua_open();     // Create a new Lua interpreter; will be shutdown in the destructor
-
+   // Check if Lua has already been started
    if(!L)
-   {  
-      // Failure here is likely to be something systemic, something bad.  Like smallpox.
-      logError("Could not create Lua interpreter.  Aborting script.");     
-      return false;
+   {
+      L = lua_open();     // Create a new Lua interpreter; will be shutdown in the destructor
+
+      if(!L)
+      {  
+         // Failure here is likely to be something systemic, something bad.  Like smallpox.
+         logError("Could not create Lua interpreter.  Aborting script.");     
+         return false;
+      }
    }
+
+   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
 
    registerClasses();
 
    lua_atpanic(L, luaPanicked);  // Register our panic function 
 
-   setEnums(L);                  // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
+   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+   // These will be copied into the script's environment when we run createEnvironment.
+   setEnums(L);                  
 
 #ifdef USE_PROFILER
    init_profiler(L);
 #endif
 
-   LuaUtil::openLibs(L);
-   setModulePath();
-
+   luaL_openlibs(L);    // Load the standard libraries
+   luaopen_vec(L);      // For vector math (lua-vec)
    setPointerToThis();     
+
+   setModulePath();
+   
+   // Create a protected sandbox for script to run in
+   createEnvironment();
 
 
    // Load two sets of helper functions: the first is loaded for every script, the second is different for bots, levelgens, plugins, etc.
@@ -760,43 +819,64 @@ void LuaScriptRunner::registerClasses()
 }
 
 
-// Hand off any script arguments to Lua, by packing them in the args table, which is where Lua traditionally stores cmd line args
+// Hand off any script arguments to Lua, by packing them in the arg table, which is where Lua traditionally stores cmd line args.
+// By Lua convention, we'll put the name of the script into the 0th element.
 void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 {
-   // Put args into a table that the Lua script can read.  By Lua convention, we'll put the name of the robot/script into the 0th element.
-   lua_createtable(L, args.size() + 1, 0);
+   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId()); // Put script's env table onto the stack  -- ..., env_table
+   lua_pushliteral(L, "arg");                         //                                        -- ..., env_table, "arg"
+   lua_createtable(L, args.size() + 1, 0);            // Create table with predefined slots     -- ..., env_table, "arg", table
 
-   lua_pushstring(L, mScriptName.c_str());
-   lua_rawseti(L, -2, 0);
+   lua_pushstring(L, mScriptName.c_str());            //                                        -- ..., env_table, "arg", table, scriptName
+   lua_rawseti(L, -2, 0);                             //                                        -- ..., env_table, "arg", table
 
    for(S32 i = 0; i < args.size(); i++)
    {
-      lua_pushstring(L, args[i].c_str());
-      lua_rawseti(L, -2, i + 1);
+      lua_pushstring(L, args[i].c_str());             //                                        -- ..., env_table, "arg", table, string
+      lua_rawseti(L, -2, i + 1);                      //                                        -- ..., env_table, "arg", table
    }
-
-   lua_setglobal(L, "arg");
+   
+   lua_settable(L, -3);                               // Save it: env_table["arg"] = table      -- ..., env_table
+   lua_pop(L, 1);                                     // Remove environment table from stack    -- ...
 }
 
 
- void LuaScriptRunner::setModulePath()   
- {                                                          // What's on the stack:
-   lua_pushstring(L, "package");                            // "package"
-   lua_gettable(L, LUA_GLOBALSINDEX);                       // value of package global -- appears to be a table
-   lua_pushstring(L, "path");                               // table, "path"
-   lua_pushstring(L, (mScriptingDir + "/?.lua").c_str());   // table, "path", mScriptingDir + "/?.lua"
-   lua_settable(L, -3);                                     // table
-   lua_pop(L, 1);                                           // stack should be empty
- }
+// Set up paths so that we can use require to load code in our scripts 
+void LuaScriptRunner::setModulePath()   
+{
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   lua_pushliteral(L, "package");                           // -- "package"
+   lua_gettable(L, LUA_GLOBALSINDEX);                       // -- table (value of package global)
+   //lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());       // -- function, table (table created with same name in createEnvironment)
+
+   lua_pushliteral(L, "path");                              // -- table, "path"
+   lua_pushstring(L, (mScriptingDir + "/?.lua").c_str());   // -- table, "path", mScriptingDir + "/?.lua"
+   lua_settable(L, -3);                                     // -- table
+   lua_pop(L, 1);                                           // -- <<empty stack>>
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+}
 
 
-// Overwrite Lua's panicky panic function with something that doesn't kill the whole game
-// if something goes wrong!
+// Advance timers by deltaT
+void LuaScriptRunner::tickTimer(U32 deltaT)
+{
+   TNLAssert(false, "Not (yet) implemented!");
+}
+
+
+extern void shutdownBitfighter();
+
+// Since all calls to lua are now done via lua_pcall, if we get here, we've probably encountered a fatal error such as running out of memory.
+// Best just to shut the whole thing down.
 int LuaScriptRunner::luaPanicked(lua_State *L)
 {
    string msg = lua_tostring(L, 1);
 
-   throw LuaException(msg);
+   logprintf("Fatal error running Lua code: %s.  Possibly out of memory?  Shutting down Bitfighter.");
+
+   shutdownBitfighter();
 
    return 0;
 }
@@ -809,10 +889,12 @@ int LuaScriptRunner::subscribe(lua_State *L)
    LuaObject::checkArgCount(L, 1, methodName);
 
    lua_Integer eventType = LuaObject::getInt(L, 0, methodName);
+   lua_pop(L, 1);    // Remove event from the stack
+
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
-   EventManager::get()->subscribe(L, (EventManager::EventType)eventType);
+   EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType);
    mSubscriptions[eventType] = true;
 
    return 0;
@@ -829,7 +911,7 @@ int LuaScriptRunner::unsubscribe(lua_State *L)
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
-   EventManager::get()->unsubscribe(L, (EventManager::EventType)eventType);
+   EventManager::get()->unsubscribe(getScriptId(), (EventManager::EventType)eventType);
    mSubscriptions[eventType] = false;
    return 0;
 }

@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "luaUtil.h"
+#include "GameSettings.h"
 #include "oglconsole.h"
 
 namespace Zap
@@ -48,6 +49,7 @@ Lunar<LuaUtil>::RegType LuaUtil::methods[] =
    method(LuaUtil, logprint),
    method(LuaUtil, printToOglConsole),
    method(LuaUtil, getRandomNumber),
+   method(LuaUtil, findFile),
 
    {0,0}    // End method list
 };
@@ -82,6 +84,31 @@ S32 LuaUtil::printToOglConsole(lua_State *L)
 S32 LuaUtil::getMachineTime(lua_State *L)
 {
    return returnInt(L, Platform::getRealMilliseconds());
+}
+
+
+// Find the specified file, in preparation for loading
+S32 LuaUtil::findFile(lua_State *L)
+{
+   static const char *methodName = "LuaUtil:findFile()";
+   checkArgCount(L, 1, methodName);
+
+   string filename = getString(L, 1, methodName, "");
+
+   FolderManager *folderManager = GameSettings::getFolderManager();
+
+   string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
+
+   lua_pop(L, 1);    // Remove passed arg from stack
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   if(fullname == "")
+   {
+      logprintf(LogConsumer::LogError, "Could not find script file \"%s\"...", filename.c_str());
+      return returnNil(L);
+   }
+
+   return returnString(L, fullname.c_str());
 }
 
 

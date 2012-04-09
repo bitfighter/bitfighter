@@ -647,6 +647,8 @@ FileLogConsumer gServerLog;            // We'll apply a filter later on, in main
 // 4) Host a game with no levels as a dedicated server
 // 5) Admin issues a shutdown command to a remote dedicated server
 // 6) Click the X on the window to close the game window   <=== NOTE: This scenario fails for me when running a dedicated server on windows.
+// and one illigitimate way
+// 7) Lua panics!!
 void shutdownBitfighter()
 {
    GameSettings *settings = NULL;
@@ -675,8 +677,11 @@ void shutdownBitfighter()
       gServerGame = NULL;
    }
 
+
    TNLAssert(settings, "Should always have a value here!");
 
+   EventManager::shutdown();
+   LuaScriptRunner::shutdown();
    SoundSystem::shutdown();
 
 #ifndef ZAP_DEDICATED

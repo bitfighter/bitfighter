@@ -98,17 +98,10 @@ end
 
 
 --
--- This will be called every tick... update timer, then call robot's onTick() method if it exists
---
-function _tickTimer(self, deltaT)
-   Timer:_tick(deltaT)     -- Really should only be called once for all bots
-end
-
---
--- Convenience function... let user use logprint directly, without referencing luaUtil
+-- Convenience function... let user use logprint directly, without referencing LuaUtil
 --
 function logprint(msg)
-    luaUtil:logprint("Robot", tostring(msg))
+    LuaUtil:logprint("Robot", tostring(msg))
 end
 
 --
@@ -121,6 +114,10 @@ end
 function unsubscribe(event)
    bot:unsubscribe(event)
 end  
+
+function globalMsg(message)
+   bot:globalMsg(message)
+end
 
 --
 -- Let the log know that this file was processed correctly

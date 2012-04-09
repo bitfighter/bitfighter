@@ -39,8 +39,6 @@ namespace Zap
 class LuaUtil: public LuaObject
 {
 public:
-   void logError(const char *format, ...);
-
    LuaUtil(lua_State *L);      // Lua constructor
 
    static const char className[];
@@ -52,6 +50,7 @@ public:
    S32 printToOglConsole(lua_State *L);
    S32 getMachineTime(lua_State *L);
    S32 getRandomNumber(lua_State *L);
+   S32 findFile(lua_State *L);
 };
 
 

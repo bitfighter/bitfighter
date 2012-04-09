@@ -59,6 +59,7 @@ public:
    virtual ~LuaLevelGenerator();         // Destructor
 
    void setPointerToThis();
+   
    void registerClasses();
    void onScriptInitialized();
    bool loadScript();

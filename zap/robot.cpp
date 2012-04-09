@@ -601,7 +601,7 @@ S32 LuaRobot::globalMsg(lua_State *L)
       gt->sendChatFromRobot(true, message, thisRobot->getClientInfo());
 
       // Fire our event handler
-      EventManager::get()->fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
+      EventManager::get()->fireEvent(thisRobot->getScriptId(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
    }
 
    return 0;
@@ -622,7 +622,7 @@ S32 LuaRobot::teamMsg(lua_State *L)
       gt->sendChatFromRobot(false, message, thisRobot->getClientInfo());
 
       // Fire our event handler
-      EventManager::get()->fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);
+      EventManager::get()->fireEvent(thisRobot->getScriptId(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);
    }
 
    return 0;
@@ -642,62 +642,81 @@ S32 LuaRobot::findItems(lua_State *L)
    Rect queryRect(pos, pos);
    queryRect.expand(thisRobot->getGame()->computePlayerVisArea(thisRobot));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
 
-   return doFindItems(L, &queryRect);
+   return doFindItems(L, "Robot:findItems", &queryRect);
 }
 
 
 // Same but gets all visible items from whole game... out-of-scope items will be ignored
 S32 LuaRobot::findGlobalItems(lua_State *L)
 {
-   return doFindItems(L);
+   return doFindItems(L, "Robot:findGlobalItems");
 }
 
 
-S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
+// If scope is NULL, we find all items
+S32 LuaRobot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
 {
-   S32 index = 1;
-   S32 pushed = 0;      // Count of items actually pushed onto the stack
-
    fillVector.clear();
+   static Vector<U8> types;
 
-   while(lua_isnumber(L, index))
+   types.clear();
+
+   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
+   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
+   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
+   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
+   while(lua_isnumber(L, -1))
    {
-      GridDatabase *gridDB;
-      U8 number = (U8)lua_tointeger(L, index);
+      U8 typenum = (U8)LuaObject::getInt(L, -1, methodName);
 
-
-      if(number == BotNavMeshZoneTypeNumber)
-         gridDB = getBotZoneDatabase();
+      // Requests for botzones have to be handled separately; not a problem, we'll just do the search here, and add them to
+      // fillVector, where they'll be merged with the rest of our search results.
+      if(typenum != BotNavMeshZoneTypeNumber)
+         types.push_back(typenum);
       else
-         gridDB = thisRobot->getGame()->getGameObjDatabase();
+      {
+         if(scope)   // Get other objects on screen-visible area only
+            getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, *scope);
+         else        // Get all objects
+            getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
+      }
 
-      if(scope)    // Get other objects on screen-visible area only
-         gridDB->findObjects(number, fillVector, *scope);
-      else
-         gridDB->findObjects(number, fillVector);
+      lua_pop(L, 1);
+   }
+   
+   if(scope)      // Get other objects on screen-visible area only
+      thisRobot->getGame()->getGameObjDatabase()->findObjects(types, fillVector, *scope);
+   else           // Get all objects
+      thisRobot->getGame()->getGameObjDatabase()->findObjects(types, fillVector);
 
-      index++;
+
+   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      logprintf(LogConsumer::LogWarning, 
+                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
+      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
 
-   clearStack(L);
+   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack not cleared!");
 
-   lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+
+   S32 pushed = 0;      // Count of items we put into our table
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(isShipType(fillVector[i]->getObjectTypeNumber()))      // Skip cloaked ships & robots!
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
-         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
-         if(ship)
-         {
-
-         if(dynamic_cast<Robot *>(fillVector[i]) == thisRobot)             // Do not find self
+         // Ignore self (use cheaper typeNumber check first)
+         if(fillVector[i]->getObjectTypeNumber() == RobotShipTypeNumber && dynamic_cast<Robot *>(fillVector[i]) == thisRobot) 
             continue;
 
          // Ignore ship/robot if it's dead or cloaked
+         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
          if(!ship->isVisible() || ship->hasExploded)
             continue;
-         }
       }
 
       GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
@@ -706,8 +725,11 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect *scope)
       lua_rawseti(L, 1, pushed);
    }
 
+   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack has unexpected items on it!");
+
    return 1;
 }
+
 
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
@@ -1021,7 +1043,7 @@ Robot::~Robot()
       }
 
    mPlayerInfo->setDefunct();
-   EventManager::get()->fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
+   EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerLeftEvent, getPlayerInfo());
 
    delete mPlayerInfo;
    if(mClientInfo.isValid())
@@ -1147,10 +1169,10 @@ bool Robot::start()
 
 
 // Find the bot that owns this L (static)
-Robot *Robot::findBot(lua_State *L)
+Robot *Robot::findBot(const char *id)
 {
    for(S32 i = 0; i < robots.size(); i++)
-      if(robots[i]->getL() == L)
+      if(strcmp(robots[i]->getScriptId(), id) == 0)
          return robots[i];
 
    return NULL;
@@ -1198,40 +1220,87 @@ static string getNextName()
 // Run bot's getName function, return default name if fn isn't defined
 string Robot::runGetName()
 {
-   // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
-   lua_getglobal(L, "getName");
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   try
+   // Retrieve the bot's getName function, and put it on top of the stack
+   bool ok = retrieveFunction("getName");     
+
+   TNLAssert(ok, "getName function not found -- is robot_helper_functions corrupt?");
+
+   if(!ok)
    {
-      if(!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting 1 back
+      string name = getNextName();
+      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+      logError("Could not find getName function -- using default name \"%s\".", name.c_str());
+      return name;
+   }
+
+   S32 error = lua_pcall(L, 0, 1, 0);    // Passing 0 params, expecting 1 back
+
+   if(error == 0)    // Function returned normally     
+   {
+      if(!lua_isstring(L, -1))
       {
-         // This should really never happen -- can only occur if robot_helper_functions is corrupted, or if bot is wildly misbehaving
          string name = getNextName();
-         logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
+         logError("Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
+
+         lua_pop(L, 1);          // Remove thing that wasn't a name from the stack
+         TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
          return name;
       }
-      else
-      {
-         if(!lua_isstring(L, -1))
-         {
-            string name = getNextName();
-            logError("Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
-            return name;
-         }
 
-         string name = lua_tostring(L, -1);
-         lua_pop(L, 1);
-         return name;
-      }
-   }
-   catch(LuaException &e)
-   {
-      logError("Exception encountered trying to retrieve robot name: %s.  Aborting script.", e.what());
-      return "";
+      string name = lua_tostring(L, -1);
+
+      lua_pop(L, 1);
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+      return name;
    }
 
-   return "";     // Will never get here
+   // Got an error running getName()
+   string name = getNextName();
+   logError("Error running getName function (%s) -- using default name \"%s\".", lua_tostring(L, -1), name.c_str());
+
+   lua_pop(L, 1);             // Remove error message from stack
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   return name;
 }
+
+
+// Advance timers by deltaT
+void Robot::tickTimer(U32 deltaT)
+{
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   bool ok = retrieveFunction("_tickTimer");       // Push timer function onto stack            -- function 
+   TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
+
+   if(!ok)
+   {      
+      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+      logError("Function _tickTimer() could not be found!  Terminating script.");
+
+      deleteObject();      // Will probably fail for levelgens...
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      return;
+   }
+
+   Lunar<LuaRobot>::push(L, this->mLuaRobot);   //                                                 -- function, object
+   lua_pushnumber(L, deltaT);                   // Pass the time elapsed since we were last here   -- function, object, time
+   S32 error = lua_pcall(L, 2, 0, 0);           // Pass two objects, expect none in return         -- <<empty stack>>
+
+   if(error != 0)
+   {
+      logError("Robot error running _tickTimer(): %s.  Shutting robot down.", lua_tostring(L, -1));
+      lua_pop(L, 1);    // Remove error message from stack
+
+      deleteObject();   // Add bot to delete list, where it will be deleted in the proper manner
+   }
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+}
+
 
 
 // Register our connector types with Lua
@@ -1270,7 +1339,7 @@ void Robot::onAddedToGame(Game *game)
    disableCollision();
 
    robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
-   EventManager::get()->fireEvent(L, EventManager::PlayerJoinedEvent, getPlayerInfo());
+   EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerJoinedEvent, getPlayerInfo());
 }
 
 
@@ -1349,8 +1418,7 @@ void Robot::logError(const char *format, ...)
    vsnprintf(buffer, sizeof(buffer), format, args);
 
    // Log the error to the logging system and also to the game console
-   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** in %s ::: %s",   mScriptName.c_str(), buffer);
-   OGLCONSOLE_Print(                "***ROBOT ERROR*** in %s ::: %s\n", mScriptName.c_str(), buffer);
+   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** %s", buffer);
 
    va_end(args);
 }
@@ -1502,31 +1570,6 @@ void Robot::clearMove()
    {
       mCurrentMove.modulePrimary[i] = false;
       mCurrentMove.moduleSecondary[i] = false;
-   }
-}
-
-
-// Advance timers by deltaT
-void Robot::tickTimer(U32 deltaT)
-{
-   try
-   {
-      lua_getglobal(L, "_tickTimer");   
-      Lunar<LuaRobot>::push(L, this->mLuaRobot);
-
-      lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
-
-      if(lua_pcall(L, 2, 0, 0) != 0)
-         throw LuaException(lua_tostring(L, -1));
-   }
-   catch(LuaException &e)
-   {
-      logError("Robot error running _tickTimer(): %s.  Shutting robot down.", e.what());
-
-      // Safer than "delete this" -- adds bot to delete list, where it will be deleted later (or at least outside this construct)
-      deleteObject();
-
-      return;
    }
 }
 

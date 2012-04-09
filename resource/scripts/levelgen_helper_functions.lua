@@ -42,6 +42,22 @@ function logprint(msg)
 end
 
 --
+-- And two more
+--
+function subscribe(event)
+   levelgen:subscribe(event)
+end   
+
+function unsubscribe(event)
+   levelgen:unsubscribe(event)
+end  
+
+
+function globalMsg(message)
+   levelgen:globalMsg(message)
+end   
+
+--
 -- Override the default print() method to print to the oglconsole instead of stdout
 --
 function print(msg)

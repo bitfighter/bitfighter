@@ -34,20 +34,30 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+-----------------------------------------------------------
+
+-- Our utility object
+LuaUtil = LuaUtil()  -- Could put a call to C++ random function in here...
+
+
+-- Smarter implementation of dofile; finds script before loading it into current environment
+function include(filename)
+   fullName = LuaUtil:findFile(filename)
+   
+   if(fullName) then
+      f = loadfile(fullName)
+      setfenv(f, getfenv())
+      return f()
+   end
+end
+
+
 -- Load some additional libraries
-require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
-require("timer");
-require("list");
-	--
--- Blot out some functions that seem particularly insecure
---
-dofile = nil
-loadfile = nil
---[[  -- Not sure about these...
-debug.debug = nil
-debug.getfenv = getfenv
-debug.getregistry = nil
---]]
+include("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
+include("timer")
+include("list")
+
+assert(Timer)
 
 arg = arg or { }  -- Make sure arg is defined before we ban globals
 
@@ -64,6 +74,33 @@ function _main()
 end
 
 
+xfillTable = {}
+
+function table.clear(tab)
+   for k,v in pairs(tab) do tab[k]=nil end
+end
+
+function findItems(...)
+   table.clear(xfillTable)
+   return bot:findItems(xfillTable, ...)
+end
+
+
+function findGlobalItems(...)
+   table.clear(xfillTable)
+   return bot:findGlobalItems(xfillTable, ...)
+end
+
+
+
+--
+-- This will be called every tick... updates timers
+--
+function _tickTimer(self, deltaT)
+   Timer:_tick(deltaT)     -- Really should only be called once for all bots
+end
+
+
 --
 -- strict.lua
 -- Checks uses of undeclared global variables
@@ -73,10 +110,10 @@ end
 --
 
 
-local mt = getmetatable(_G)
+local mt = getmetatable(getfenv())
 if mt == nil then
   mt = {}
-  setmetatable(_G, mt)
+  setmetatable(getfenv(), mt)
 end
 
 __STRICT = true
@@ -110,7 +147,7 @@ end
 
 
 function _declared(fname)
-   local mt = getmetatable(_G)
+   local mt = getmetatable(getfenv())
 
    if mt.__declared[fname] then
       return true
@@ -136,14 +173,9 @@ end
 
 
 
-
------------------------------------------------------------
--- Our utility object
-luaUtil = LuaUtil()  -- Could put a call to C++ random function in here...
-
 -- Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
 math.random = function (x, y)
-   return luaUtil:getRandomNumber(x, y)
+   return LuaUtil:getRandomNumber(x, y)
 end
 
 

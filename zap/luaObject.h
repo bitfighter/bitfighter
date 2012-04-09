@@ -111,9 +111,7 @@ public:
    static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
 
 
-   static void dumpStack(lua_State* L);
-
-   static void openLibs(lua_State *L);
+   static bool dumpStack(lua_State* L);
 
    static bool shouldLuaGarbageCollectThisObject();     
 };
@@ -138,21 +136,26 @@ public:
    };
 
 private:
-   string mScriptingDir;
-   bool mScriptingDirSet;
+   static string mScriptingDir;
+   static bool mScriptingDirSet;
 
    bool loadHelperFunctions(const string &helperName);
    void setLuaArgs(const Vector<string> &args);
    void setModulePath();
 
    bool loadScript(const string &scriptName);
-   bool runChunk();
+
+   void createEnvironment();
+   void setEnvironment();
 
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
    void setEnums(lua_State *L);                    // Set a whole slew of enum values that we want the scripts to have access to
 
+   string mScriptId;             // Unique id for this script
+   static U32 mNextScriptId;
+
 protected:
-   lua_State *L;                 // Main Lua state variable
+   static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
@@ -166,19 +169,28 @@ protected:
    virtual void registerClasses();
    virtual void setPointerToThis() = 0;
 
+   virtual void tickTimer(U32 deltaT);      // Advance script timers
+
 public:
    LuaScriptRunner();               // Constructor
    virtual ~LuaScriptRunner();      // Destructor
 
    void setScriptingDir(const string &scriptingDir);
-   lua_State *getL();
 
-   bool runMain();                              // Run a script's main() function
-   bool runMain(const Vector<string> &args);    // Run a script's main() function, putting args into Lua's arg table
+   static lua_State *getL();
+   static void shutdown();
+
+   bool runMain();                                    // Run a script's main() function
+   bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
+
+   bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
 
    // Event handling
    int subscribe(lua_State *L);
    int unsubscribe(lua_State *L);
+
+   const char *getScriptId();
+   static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
 };
 
 

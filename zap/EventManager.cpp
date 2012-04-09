@@ -43,9 +43,9 @@ namespace Zap
 
 // Statics:
 bool EventManager::anyPending = false; 
-Vector<lua_State *> EventManager::subscriptions[EventTypes];
-Vector<lua_State *> EventManager::pendingSubscriptions[EventTypes];
-Vector<lua_State *> EventManager::pendingUnsubscriptions[EventTypes];
+Vector<const char *> EventManager::subscriptions[EventTypes];
+Vector<const char *> EventManager::pendingSubscriptions[EventTypes];
+Vector<const char *> EventManager::pendingUnsubscriptions[EventTypes];
 bool EventManager::mConstructed = false;  // Prevent duplicate instantiation
 
 
@@ -68,7 +68,7 @@ static const EventDef eventDefs[] = {
 };
 
 
-static EventManager eventManager;   // Singleton event manager, one copy is used by all listeners
+static EventManager *eventManager = NULL;   // Singleton event manager, one copy is used by all listeners
 
 
 // C++ constructor
@@ -85,57 +85,76 @@ EventManager::EventManager()
 // Lua constructor
 EventManager::EventManager(lua_State *L)
 {
-   // Do nothing
+   TNLAssert(false, "Should never be called!");
 }
 
 
-// Provide access to the single EventManager instance
+void EventManager::shutdown()
+{
+   if(eventManager)
+   {
+      delete eventManager;
+      eventManager = NULL;
+   }
+}
+
+
+// Provide access to the single EventManager instance; lazily initialized
 EventManager *EventManager::get()
 {
-   return &eventManager;
+   if(!eventManager)
+      eventManager = new EventManager();      // Deleted in cleanup, which is called from Game destuctor
+
+   return eventManager;
 }
 
 
-void EventManager::subscribe(lua_State *L, EventType eventType)
+void EventManager::subscribe(const char *subscriber, EventType eventType)
 {
    // First, see if we're already subscribed
-   if(isSubscribed(L, eventType) || isPendingSubscribed(L, eventType))
+   if(isSubscribed(subscriber, eventType) || isPendingSubscribed(subscriber, eventType))
       return;
 
+   lua_State *L = LuaScriptRunner::getL();
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
    // Make sure the script has the proper event listener
-   lua_getglobal(L, eventDefs[eventType].function);
+   LuaScriptRunner::loadFunction(L, subscriber, eventDefs[eventType].function);     // -- function
 
    if(!lua_isfunction(L, -1))
    {
-      lua_pop(L, 1);    // Remove the item from the stack
-
       logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
-      OGLCONSOLE_Print(                "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
 
+      lua_pop(L, 1);    // Remove offending item from the stack
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return;
    }
 
-   removeFromPendingUnsubscribeList(L, eventType);
-   pendingSubscriptions[eventType].push_back(L);
+   removeFromPendingUnsubscribeList(subscriber, eventType);
+   pendingSubscriptions[eventType].push_back(subscriber);
    anyPending = true;
+
+   lua_pop(L, 1);    // Remove function from stack                                  -- <<empty stack>>
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
 
 
-void EventManager::unsubscribe(lua_State *L, EventType eventType)
+void EventManager::unsubscribe(const char *subscriber, EventType eventType)
 {
-   if((isSubscribed(L, eventType) || isPendingSubscribed(L, eventType)) && !isPendingUnsubscribed(L, eventType))
+   if((isSubscribed(subscriber, eventType) || isPendingSubscribed(subscriber, eventType)) && !isPendingUnsubscribed(subscriber, eventType))
    {
-      removeFromPendingSubscribeList(L, eventType);
-      pendingUnsubscriptions[eventType].push_back(L);
+      removeFromPendingSubscribeList(subscriber, eventType);
+      pendingUnsubscriptions[eventType].push_back(subscriber);
       anyPending = true;
    }
 }
 
 
-void EventManager::removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType)
+void EventManager::removeFromPendingSubscribeList(const char *subscriber, EventType eventType)
 {
    for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
-      if(pendingSubscriptions[eventType][i] == subscriber)
+      if(strcmp(pendingSubscriptions[eventType][i], subscriber) == 0)
       {
          pendingSubscriptions[eventType].erase_fast(i);
          return;
@@ -143,10 +162,10 @@ void EventManager::removeFromPendingSubscribeList(lua_State *subscriber, EventTy
 }
 
 
-void EventManager::removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType)
+void EventManager::removeFromPendingUnsubscribeList(const char *subscriber, EventType eventType)
 {
    for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
-      if(pendingUnsubscriptions[eventType][i] == unsubscriber)
+      if(strcmp(pendingUnsubscriptions[eventType][i], subscriber) == 0)
       {
          pendingUnsubscriptions[eventType].erase_fast(i);
          return;
@@ -154,10 +173,10 @@ void EventManager::removeFromPendingUnsubscribeList(lua_State *unsubscriber, Eve
 }
 
 
-void EventManager::removeFromSubscribedList(lua_State *subscriber, EventType eventType)
+void EventManager::removeFromSubscribedList(const char *subscriber, EventType eventType)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
-      if(subscriptions[eventType][i] == subscriber)
+      if(strcmp(subscriptions[eventType][i], subscriber) == 0)
       {
          subscriptions[eventType].erase_fast(i);
          return;
@@ -166,39 +185,39 @@ void EventManager::removeFromSubscribedList(lua_State *subscriber, EventType eve
 
 
 // Unsubscribe an event bypassing the pending unsubscribe queue, when we know it will be OK
-void EventManager::unsubscribeImmediate(lua_State *L, EventType eventType)
+void EventManager::unsubscribeImmediate(const char *subscriber, EventType eventType)
 {
-   removeFromSubscribedList(L, eventType);
-   removeFromPendingSubscribeList(L, eventType);
-   removeFromPendingUnsubscribeList(L, eventType);    // Probably not really necessary...
+   removeFromSubscribedList(subscriber, eventType);
+   removeFromPendingSubscribeList(subscriber, eventType);
+   removeFromPendingUnsubscribeList(subscriber, eventType);    // Probably not really necessary...
 }
 
 
 // Check if we're subscribed to an event
-bool EventManager::isSubscribed(lua_State *L, EventType eventType)
+bool EventManager::isSubscribed(const char *subscriber, EventType eventType)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
-      if(subscriptions[eventType][i] == L)
+      if(strcmp(subscriptions[eventType][i], subscriber) == 0)
          return true;
 
    return false;
 }
 
 
-bool EventManager::isPendingSubscribed(lua_State *L, EventType eventType)
+bool EventManager::isPendingSubscribed(const char *subscriber, EventType eventType)
 {
    for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
-      if(pendingSubscriptions[eventType][i] == L)
+      if(strcmp(pendingSubscriptions[eventType][i], subscriber) == 0)
          return true;
 
    return false;
 }
 
 
-bool EventManager::isPendingUnsubscribed(lua_State *L, EventType eventType)
+bool EventManager::isPendingUnsubscribed(const char *subscriber, EventType eventType)
 {
    for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
-      if(pendingUnsubscriptions[eventType][i] == L)
+      if(strcmp(pendingUnsubscriptions[eventType][i], subscriber) == 0)
          return true;
 
    return false;
@@ -231,22 +250,23 @@ void EventManager::update()
 // onNexusOpened, onNexusClosed
 void EventManager::fireEvent(EventType eventType)
 {
-   if(suppressEvents())   
+   if(suppressEvents(eventType))   
       return;
+
+   lua_State *L = LuaScriptRunner::getL();
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      lua_State *L = subscriptions[eventType][i];
       try
       {
-         lua_getglobal(L, eventDefs[eventType].function);
+         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i], eventDefs[eventType].function);
 
          if(lua_pcall(L, 0, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(L, eventType, e.what());
+         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -256,19 +276,19 @@ void EventManager::fireEvent(EventType eventType)
 // onTick
 void EventManager::fireEvent(EventType eventType, U32 deltaT)
 {
-   if(suppressEvents())   
+   if(suppressEvents(eventType))   
       return;
 
    if(eventType == TickEvent)
       mStepCount--;   
 
+   lua_State *L = LuaScriptRunner::getL();
+
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      lua_State *L = subscriptions[eventType][i];
-      
       try   
       {
-         lua_getglobal(L, eventDefs[eventType].function);  
+         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i], eventDefs[eventType].function);
          lua_pushinteger(L, deltaT);
 
          if(lua_pcall(L, 1, 0, 0) != 0)
@@ -276,24 +296,26 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(L, eventType, e.what());
+         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
 }
 
 
+// onShipSpawned, onShipKilled
 void EventManager::fireEvent(EventType eventType, Ship *ship)
 {
-   if(suppressEvents())   
+   if(suppressEvents(eventType))   
       return;
+
+   lua_State *L = LuaScriptRunner::getL();
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      lua_State *L = subscriptions[eventType][i];
       try
       {
-         lua_getglobal(L, eventDefs[eventType].function);
+         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i], eventDefs[eventType].function);
          ship->push(L);
 
          if(lua_pcall(L, 1, 0, 0) != 0)
@@ -301,7 +323,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(L, eventType, e.what());
+         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -309,21 +331,21 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
 
 // Note that player can be NULL, in which case we'll pass nil to the listeners
-void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
+void EventManager::fireEvent(const char *callerId, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
 {
-   if(suppressEvents())   
+   if(suppressEvents(eventType))   
       return;
+
+   lua_State *L = LuaScriptRunner::getL();
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      lua_State *L = subscriptions[eventType][i];
-
-      if(L == caller_L)    // Don't alert bot about own message!
+      if(strcmp(callerId, subscriptions[eventType][i]) == 0)    // Don't alert bot about own message!
          continue;
 
       try
       {
-         lua_getglobal(L, eventDefs[eventType].function);  
+         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i], eventDefs[eventType].function);
          lua_pushstring(L, message);
 
          if(player)
@@ -338,7 +360,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(L, eventType, e.what());
+         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -346,21 +368,21 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
 
 
 // onPlayerJoined, onPlayerLeft
-void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayerInfo *player)
+void EventManager::fireEvent(const char *callerId, EventType eventType, LuaPlayerInfo *player)
 {
-   if(suppressEvents())   
+   if(suppressEvents(eventType))   
       return;
+
+   lua_State *L = LuaScriptRunner::getL();
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      lua_State *L = subscriptions[eventType][i];
-      
-      if(L == caller_L)    // Don't alert bot about own joinage or leavage!
+      if(strcmp(callerId, subscriptions[eventType][i]) == 0)    // Don't trouble bot with own joinage or leavage!
          continue;
 
       try   
       {
-         lua_getglobal(L, eventDefs[eventType].function);  
+         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i], eventDefs[eventType].function);
          player->push(L);
 
          if(lua_pcall(L, 1, 0, 0) != 0)
@@ -368,17 +390,17 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(L, eventType, e.what());
+         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
 }
 
 
-void EventManager::handleEventFiringError(lua_State *L, EventType eventType, const char *errorMsg)
+void EventManager::handleEventFiringError(const char *subscriber, EventType eventType, const char *errorMsg)
 {
    // Figure out which, if any, bot caused the error
-   Robot *robot = Robot::findBot(L);
+   Robot *robot = Robot::findBot(subscriber);
 
    if(robot)
    {
@@ -391,8 +413,11 @@ void EventManager::handleEventFiringError(lua_State *L, EventType eventType, con
 
 
 // If true, events will not fire!
-bool EventManager::suppressEvents()
+bool EventManager::suppressEvents(EventType eventType)
 {
+   if(subscriptions[eventType].size() == 0)
+      return true;
+
    return mIsPaused && mStepCount <= 0;    // Paused bots should still respond to events as long as stepCount > 0
 }
 
