@@ -131,9 +131,16 @@ public:
 
   // push onto the Lua stack a userdata containing a pointer to T object
   static int push(lua_State *L, T *obj, bool gc=false) {
-    if (!obj) { lua_pushnil(L); return 0; }
+    if (!obj) 
+    { 
+       lua_pushnil(L); 
+       return 0; 
+    }
+
     luaL_getmetatable(L, T::className);  // lookup metatable in Lua registry
-    if (lua_isnil(L, -1)) luaL_error(L, "%s missing metatable -- perhaps you forgot to register the class?", T::className);
+    if (lua_isnil(L, -1)) 
+      luaL_error(L, "%s missing metatable -- perhaps you forgot to register the class?", T::className);
+
     int mt = lua_gettop(L);
     subtable(L, mt, "userdata", "v");
     userdataType *ud =
