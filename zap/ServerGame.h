@@ -44,6 +44,7 @@ private:
       LevelSwitchTime = 5000,
       UpdateServerStatusTime = 20000,    // How often we update our status on the master server (ms)
       CheckServerStatusTime = 5000,      // If it did not send updates, recheck after ms
+      BotControlTickInterval = 33,       // Interval for how often should we let bots fire the onTick event (ms)
    };
 
    bool mTestMode;           // True if being tested from editor
@@ -86,6 +87,8 @@ private:
    Timer mSendLevelInfoDelayCount;
 
    Vector<LuaLevelGenerator *> mLevelGens;
+
+   Timer botControlTickTimer;
 
 public:
    ServerGame(const Address &address, GameSettings *settings, bool testMode, bool dedicated);    // Constructor

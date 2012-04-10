@@ -122,6 +122,8 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
    mStutterTimer.reset(1001 - stutter);    // Use 1001 to ensure timer is never set to 0
    mStutterSleepTimer.reset(stutter);
    mAccumulatedSleepTime = 0;
+
+   botControlTickTimer.reset(BotControlTickInterval);
 }
 
 
@@ -1388,11 +1390,16 @@ void ServerGame::idle(U32 timeDelta)
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
 
-   // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
-   Robot::clearBotMoves();           
+   if(botControlTickTimer.update(timeDelta))
+   {
+      // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
+      Robot::clearBotMoves();
 
-   // Fire TickEvent, in case anyone is listening
-   EventManager::get()->fireEvent(EventManager::TickEvent, timeDelta);
+      // Fire TickEvent, in case anyone is listening
+      EventManager::get()->fireEvent(EventManager::TickEvent, timeDelta);
+
+      botControlTickTimer.reset();
+   }
 
    fillVector2.clear();  // Don't want to clobber fillVector here...
    mGameObjDatabase->findObjects(fillVector2);
