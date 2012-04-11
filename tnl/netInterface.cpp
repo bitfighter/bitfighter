@@ -405,6 +405,7 @@ void NetInterface::processConnections()
    {
       if(mPendingConnections[i]->getConnectionState() == NetConnection::ComputingPuzzleSolution)
       {
+         logprintf("computing puzzle solution");
          continuePuzzleSolution(mPendingConnections[i]);
          break;
       }
