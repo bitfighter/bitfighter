@@ -764,6 +764,8 @@ bool LuaScriptRunner::configureLua()
    //local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})
    luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create robot_env & levelgen_env [[ xxx_env = table.copy(_G) ]]
 
+
+   // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
    if(!loadHelper(joindir(mScriptingDir, "lua_helper_functions.lua").c_str()))
       return false;
    lua_setfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");       // Save compiled code in registry
