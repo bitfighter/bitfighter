@@ -1180,9 +1180,11 @@ void Robot::prepareEnvironment()
    // This is the name that we'll use to refer to this robot from our Lua code.  
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   luaL_dostring(L, "e = table.copy(robot_env)");        // Copy robot_env in the global environment 
+   //luaL_loadstring(L, "local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})");
+
+   luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the environment  -- <<empty stack>> 
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
    lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
    setEnvironment(getScriptId(), false);                 // Set the environment for the code
