@@ -58,7 +58,7 @@ public:
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    virtual ~LuaLevelGenerator();         // Destructor
 
-   void setPointerToThis();
+   void prepareEnvironment();
    
    void registerClasses();
    void onScriptInitialized();

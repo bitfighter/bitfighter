@@ -57,7 +57,8 @@ include("geometry")   -- Load geometry functions into Geom namespace; call with 
 include("timer")
 include("list")
 
-assert(Timer)
+
+
 
 arg = arg or { }  -- Make sure arg is defined before we ban globals
 
@@ -68,27 +69,27 @@ arg = arg or { }  -- Make sure arg is defined before we ban globals
 function _main()
    if _declared("main") and type(main) == "function" then
       main()
---   else   
---      error("WARNING: No main() function could be found!")
+   else   
+      error("WARNING: No main() function could be found!")
    end
 end
 
 
-xfillTable = {}
+_fillTable = {}
 
 function table.clear(tab)
    for k,v in pairs(tab) do tab[k]=nil end
 end
 
 function findItems(...)
-   table.clear(xfillTable)
-   return bot:findItems(xfillTable, ...)
+   table.clear(_fillTable)
+   return bot:findItems(_fillTable, ...)
 end
 
 
 function findGlobalItems(...)
-   table.clear(xfillTable)
-   return bot:findGlobalItems(xfillTable, ...)
+   table.clear(_fillTable)
+   return bot:findGlobalItems(_fillTable, ...)
 end
 
 

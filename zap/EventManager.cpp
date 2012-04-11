@@ -296,6 +296,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       }
       catch(LuaException &e)
       {
+         LuaObject::clearStack(L);
          handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
          return;
       }

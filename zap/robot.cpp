@@ -1079,11 +1079,6 @@ bool Robot::initialize(Point &pos)
 
       TNLAssert(!isGhost(), "Didn't expect ghost here... this is supposed to only run on the server!");
 
-      setPointerToThis();
-
-      if(!loadScript() || !runMain())        // Try to run, can fail on script error
-         return false;
-
       EventManager::get()->update();   // Ensure registrations made during bot initialization are ready to go
    }
    catch(LuaException &e)
@@ -1178,22 +1173,49 @@ Robot *Robot::findBot(const char *id)
    return NULL;
 }
 
-
-void Robot::setPointerToThis()
+//local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})
+void Robot::prepareEnvironment()
 {
-   // Push a pointer to this Robot to the Lua stack, then set the global name of this pointer.  
+   // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
    // This is the name that we'll use to refer to this robot from our Lua code.  
-   // Note that all globals need to be set before running lua_helper_functions, which makes it more difficult to set globals
-   lua_pushlightuserdata(L, (void *)this);
-   lua_setglobal(L, "Robot");
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   luaL_dostring(L, "e = table.copy(robot_env)");        // Copy robot_env in the global environment 
+   lua_getglobal(L, "e");                                //                                        -- environment e   
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the environment  -- <<empty stack>> 
+
+   lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
+   setEnvironment(getScriptId(), false);                 // Set the environment for the code
+   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+
+   lua_getfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");
+   setEnvironment(getScriptId(), false);                 // Set the environment for the code
+   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+
+   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
+   lua_pushliteral(L, "Robot");                          //                                        -- env_table, "Robot"
+   lua_pushlightuserdata(L, (void *)this);               //                                        -- env_table, "Robot", *this
+
+   lua_rawset(L, -3);                                    // env_table["Robot"] = *this             -- env_table
+   lua_pop(L, 1);                                        //                                        -- <<empty stack>>
+
+   luaL_loadstring(L, "bot = LuaRobot(Robot)");          // Create our bot reference               -- <<compiled code>>
+   setEnvironment(getScriptId(), false);                 // Set the environment for the code
+   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
 
 
 // Loads script, runs getName, stores result in bot's clientInfo
 bool Robot::startLua()
 {
-   if(!LuaScriptRunner::startLua(ROBOT) || !loadScript())
+   if(!LuaScriptRunner::startLua(ROBOT) || !loadScript() || !runMain())
       return false;
+
+   
+   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent);
+   mSubscriptions[EventManager::TickEvent] = true;
 
    string name = runGetName();                                             // Run bot's getName function
    getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique

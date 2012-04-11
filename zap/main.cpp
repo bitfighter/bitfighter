@@ -53,6 +53,13 @@ XXX need to document timers, new luavec stuff XXX
 </ul>
 
 
+// Scripting nots
+bot:findItems --> findItems
+bot:findGlobalItems --> findItems
+
+printToOglConsole --> printToConsole
+include (replaces require)
+
 */
 
 

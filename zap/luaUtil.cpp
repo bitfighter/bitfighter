@@ -63,9 +63,6 @@ S32 LuaUtil::logprint(lua_State *L)
 
    logprintf(LogConsumer::LuaBotMessage, "%s: %s", getString(L, 1, methodName), getString(L, 2, methodName));
 
-   lua_pop(L, 2);
-   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack not cleared!");
-
    return 0;
 }
 
@@ -118,8 +115,6 @@ S32 LuaUtil::findFile(lua_State *L)
 
 S32 LuaUtil::getRandomNumber(lua_State *L)
 {
-//   S32 args = lua_gettop(L);
-
    static const char *methodName = "LuaUtil:getRandomNumber()";
    checkArgCount(L, 2, methodName);
 

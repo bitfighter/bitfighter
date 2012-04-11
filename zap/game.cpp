@@ -855,20 +855,16 @@ void Game::addToDeleteList(GameObject *theObject, U32 delay)
 // Cycle through our pending delete list, and either delete an object or update its timer
 void Game::processDeleteList(U32 timeDelta)
 {
-   for(S32 i = 0; i < mPendingDeleteObjects.size(); )    // no i++
-   {     // braces required
+   for(S32 i = 0; i < mPendingDeleteObjects.size(); i++) 
       if(timeDelta > mPendingDeleteObjects[i].delay)
       {
          GameObject *g = mPendingDeleteObjects[i].theObject;
          delete g;
          mPendingDeleteObjects.erase_fast(i);
+         i--;
       }
       else
-      {
          mPendingDeleteObjects[i].delay -= timeDelta;
-         i++;
-      }
-   }
 }
 
 

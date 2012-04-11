@@ -139,14 +139,12 @@ private:
    static string mScriptingDir;
    static bool mScriptingDirSet;
 
-   bool loadHelperFunctions(const string &helperName);
+   bool loadHelperFunctions(const string &helperName, const char *environmentName);
    void setLuaArgs(const Vector<string> &args);
    void setModulePath();
+public:     //{P{P
 
-   bool loadScript(const string &scriptName);
-
-   void createEnvironment();
-   void setEnvironment();
+   bool loadScript(const string &scriptName, const string &environmentName, bool environmentIsGlobal);
 
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
    void setEnums(lua_State *L);                    // Set a whole slew of enum values that we want the scripts to have access to
@@ -167,7 +165,9 @@ protected:
    static int luaPanicked(lua_State *L);
 
    virtual void registerClasses();
-   virtual void setPointerToThis() = 0;
+   virtual void prepareEnvironment() = 0;
+   
+   void setEnvironment(const char *environmentName, bool environmentIsGlobal);
 
    virtual void tickTimer(U32 deltaT);      // Advance script timers
 

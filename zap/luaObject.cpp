@@ -588,25 +588,20 @@ const char *LuaScriptRunner::getScriptId()
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
-   return loadScript(mScriptName);
-}
-
-
-// Creates a new table and stores it in the registry using the key passed in as name
-void LuaScriptRunner::createEnvironment()
-{
-   luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create sandbox_env
-   lua_getglobal(L, "sandbox_env");                                  // -- sandbox   
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());                // -- <<empty stack>>
+   return loadScript(mScriptName, getScriptId(), false);
 }
 
 
 // Sets the environment for the function on the top of the stack to that associated with name
 // Starts with a function on the stack
-void LuaScriptRunner::setEnvironment()
+void LuaScriptRunner::setEnvironment(const char *environmentName, bool environmentIsGlobal)
 {                                    
    // Grab the script's environment table from the registry, place it on the stack
-   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());       // -- function, table (table created with same name in createEnvironment)
+   if(environmentIsGlobal)
+      lua_getglobal(L, environmentName);                    // -- function, table
+   else                                                     //      ** OR **
+      lua_getfield(L, LUA_REGISTRYINDEX, environmentName);  // -- function, table
+
    lua_setfenv(L, -2);                                      // -- function
 }
 
@@ -620,10 +615,9 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
-// Loads specified file from disk, and executes it in the function's private environment
-bool LuaScriptRunner::loadScript(const string &scriptName)
+// Loads specified file from disk, and executes it in the function's private environment (script name must be full path & filename)
+bool LuaScriptRunner::loadScript(const string &scriptName, const string &environmentName, bool environmentIsGlobal)
 {
-   TNLAssert(mScriptingDirSet, "Must set scripting folder before intializing script!");
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    // Load the specified file, place contents on stack as a function
@@ -636,7 +630,7 @@ bool LuaScriptRunner::loadScript(const string &scriptName)
       return false;
    }
 
-   setEnvironment();
+   setEnvironment(environmentName.c_str(), environmentIsGlobal);
 
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
 
@@ -674,12 +668,13 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 
    if(!ok)
    {      
-      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-      logError("Function main() could not be found! Script may still run, but please edit your script to have a main() function.");
+      const char *msg = "Function _main() could not be found! Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.";
+      logError(msg);
+      throw LuaException(msg);
    }
 
    setLuaArgs(args);    // TODO: Do we still need this here with Sam's addition of setLuaArgs in runChunk()???  -- might need it for plugins -CE
-                        // Adds script name to 0th argument
+                        // Adds script name to 0th argument  <--- TODO: Broken
 
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
 
@@ -715,21 +710,21 @@ bool LuaScriptRunner::retrieveFunction(const char *functionName)
 }
 
 
-// Load our standard lua helper functions  
-// TODO: Read helpers into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
-//       or better, find some way to load these into lua once, and then reuse the interpreter for every bot and levelgen and plugin
-//       every time a bot or levelgen or plugin is created.  Or compile to bytecode and store that.  Or anything, really, that's more efficient.
-bool LuaScriptRunner::loadHelperFunctions(const string &helperName)
+// Load our standard lua helper functions (robot_helper_functions and levelgen_helper_functions.lua)
+bool LuaScriptRunner::loadHelperFunctions(const string &helperName, const char *environmentName)
 {
-   return loadScript(joindir(mScriptingDir, helperName).c_str());
+   return loadScript(joindir(mScriptingDir, helperName).c_str(), environmentName, true);
 }
 
 
 bool LuaScriptRunner::startLua(ScriptType scriptType)
 {
-   // Check if Lua has already been started
+   // Start Lua and get everything configured if we haven't already done so
    if(!L)
    {
+      TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
+
+      // Prepare the Lua global environment
       L = lua_open();     // Create a new Lua interpreter; will be shutdown in the destructor
 
       if(!L)
@@ -738,44 +733,46 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
          logError("Could not create Lua interpreter.  Aborting script.");     
          return false;
       }
-   }
 
-   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
+      registerClasses();
 
-   registerClasses();
+      lua_atpanic(L, luaPanicked);  // Register our panic function 
 
-   lua_atpanic(L, luaPanicked);  // Register our panic function 
-
-   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
-   // These will be copied into the script's environment when we run createEnvironment.
-   setEnums(L);                  
+      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+      // These will be copied into the script's environment when we run createEnvironment.
+      setEnums(L);                  
 
 #ifdef USE_PROFILER
-   init_profiler(L);
+      init_profiler(L);
 #endif
 
-   luaL_openlibs(L);    // Load the standard libraries
-   luaopen_vec(L);      // For vector math (lua-vec)
-   setPointerToThis();     
+      luaL_openlibs(L);    // Load the standard libraries
+      luaopen_vec(L);      // For vector math (lua-vec)
 
-   setModulePath();
-   
-   // Create a protected sandbox for script to run in
-   createEnvironment();
+      setModulePath();
+
+      luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create robot_env & levelgen_env [[ xxx_env = table.copy(_G) ]]
+
+      // Create two standard environments, one for robots, one for levelgens.  These will be replicated as needed by prepareEnvironment().
+      //loadHelperFunctions("lua_helper_functions.lua",      "robot_env");
+
+      luaL_loadfile(L, joindir(mScriptingDir, "lua_helper_functions.lua").c_str());
+      // TODO: error checking
+      lua_setfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
+
+      luaL_loadfile(L, joindir(mScriptingDir, "robot_helper_functions.lua").c_str());
+      // TODO: error checking
+      lua_setfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");
 
 
-   // Load two sets of helper functions: the first is loaded for every script, the second is different for bots, levelgens, plugins, etc.
-   // We expect to find these helper functions in mScriptingDir
-   string helperFunctions;
+      luaL_loadfile(L, joindir(mScriptingDir, "levelgen_helper_functions.lua").c_str());
+      // TODO: error checking
+      lua_setfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");
+   }
 
-   if(scriptType == ROBOT)
-      helperFunctions = "robot_helper_functions.lua";
-   else if(scriptType == LEVELGEN)
-      helperFunctions = "levelgen_helper_functions.lua";
-   else
-      TNLAssert(false, "Helper functions not defined for scriptType!");
-   
-   return(loadHelperFunctions("lua_helper_functions.lua") && loadHelperFunctions(helperFunctions)); 
+   prepareEnvironment();     // Bots and Levelgens each override this -- sets vars in the created environment
+
+   return true;
 }
 
 
@@ -848,7 +845,6 @@ void LuaScriptRunner::setModulePath()
 
    lua_pushliteral(L, "package");                           // -- "package"
    lua_gettable(L, LUA_GLOBALSINDEX);                       // -- table (value of package global)
-   //lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());       // -- function, table (table created with same name in createEnvironment)
 
    lua_pushliteral(L, "path");                              // -- table, "path"
    lua_pushstring(L, (mScriptingDir + "/?.lua").c_str());   // -- table, "path", mScriptingDir + "/?.lua"

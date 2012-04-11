@@ -35,12 +35,6 @@
 -------------------------------------------------------------------------------
 
 --
--- Create a reference to our bot
---
-bot = LuaRobot(Robot)
-
-
---
 -- Returning nil will grab the next bot name; however, this is a fallback and should be overridden by robots...
 --
 function getName()
@@ -124,17 +118,3 @@ end
 --
 logprint("Loaded robot helper functions...")
 
---
--- Wrapper to call the script's main() function in a safe manner -- overwrites the one in lua_helper_functions
---
-function _main()
-   if _declared("onTick") and type(onTick) == "function" then
-      subscribe(TickEvent);
-   end
-
-   if _declared("main") and type(main) == "function" then
-      main()
-   else   
-      logprint("WARNING: No main() function could be found!")
-   end
-end
