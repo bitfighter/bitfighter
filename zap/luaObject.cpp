@@ -621,7 +621,7 @@ bool LuaScriptRunner::loadScript(const string &scriptName, const string &environ
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    // Load the specified file, place contents on stack as a function
-   if(luaL_loadfile(L, joindir(mScriptingDir, scriptName).c_str()) != 0)
+   if(luaL_loadfile(L, scriptName.c_str()) != 0)
    {
       logError("%s -- Aborting.", lua_tostring(L, -1));
       lua_pop(L, 1);    // Remove error message from stack
