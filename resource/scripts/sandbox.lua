@@ -4,5 +4,6 @@ function table.copy(t)
   return setmetatable(u, getmetatable(t))
 end
 
-sandbox_env = table.copy(_G)
+robot_env = table.copy(_G)
+levelgen_env = table.copy(_G)
 
