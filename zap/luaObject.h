@@ -139,9 +139,11 @@ private:
    static string mScriptingDir;
    static bool mScriptingDirSet;
 
-   bool loadHelperFunctions(const string &helperName, const char *environmentName);
    void setLuaArgs(const Vector<string> &args);
+   bool loadHelper(const char *filename);    // Tries to load specified file with luaL_loadfile()
    void setModulePath();
+
+   bool configureLua();          // Prepare a new Lua environment for use
 public:     //{P{P
 
    bool loadScript(const string &scriptName, const string &environmentName, bool environmentIsGlobal);

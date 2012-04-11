@@ -1173,7 +1173,7 @@ Robot *Robot::findBot(const char *id)
    return NULL;
 }
 
-//local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})
+
 void Robot::prepareEnvironment()
 {
    // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  

@@ -615,13 +615,13 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
-// Loads specified file from disk, and executes it in the function's private environment (script name must be full path & filename)
+// Loads specified file from disk, and executes it in the function's private environment
 bool LuaScriptRunner::loadScript(const string &scriptName, const string &environmentName, bool environmentIsGlobal)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    // Load the specified file, place contents on stack as a function
-   if(luaL_loadfile(L, scriptName.c_str()))
+   if(luaL_loadfile(L, joindir(mScriptingDir, scriptName).c_str()) != 0)
    {
       logError("%s -- Aborting.", lua_tostring(L, -1));
       lua_pop(L, 1);    // Remove error message from stack
@@ -710,13 +710,6 @@ bool LuaScriptRunner::retrieveFunction(const char *functionName)
 }
 
 
-// Load our standard lua helper functions (robot_helper_functions and levelgen_helper_functions.lua)
-bool LuaScriptRunner::loadHelperFunctions(const string &helperName, const char *environmentName)
-{
-   return loadScript(joindir(mScriptingDir, helperName).c_str(), environmentName, true);
-}
-
-
 bool LuaScriptRunner::startLua(ScriptType scriptType)
 {
    // Start Lua and get everything configured if we haven't already done so
@@ -734,45 +727,78 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
          return false;
       }
 
-      registerClasses();
-
-      lua_atpanic(L, luaPanicked);  // Register our panic function 
-
-      // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
-      // These will be copied into the script's environment when we run createEnvironment.
-      setEnums(L);                  
-
-#ifdef USE_PROFILER
-      init_profiler(L);
-#endif
-
-      luaL_openlibs(L);    // Load the standard libraries
-      luaopen_vec(L);      // For vector math (lua-vec)
-
-      setModulePath();
-
-      luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create robot_env & levelgen_env [[ xxx_env = table.copy(_G) ]]
-
-      // Create two standard environments, one for robots, one for levelgens.  These will be replicated as needed by prepareEnvironment().
-      //loadHelperFunctions("lua_helper_functions.lua",      "robot_env");
-
-      luaL_loadfile(L, joindir(mScriptingDir, "lua_helper_functions.lua").c_str());
-      // TODO: error checking
-      lua_setfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
-
-      luaL_loadfile(L, joindir(mScriptingDir, "robot_helper_functions.lua").c_str());
-      // TODO: error checking
-      lua_setfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");
-
-
-      luaL_loadfile(L, joindir(mScriptingDir, "levelgen_helper_functions.lua").c_str());
-      // TODO: error checking
-      lua_setfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");
+      if(!configureLua())
+      {
+         logError("Could not configure Lua interpreter.  I cannot run any scripts until the problem is resolved.");
+         lua_close(L);
+         return false;
+      }
    }
-
+   
    prepareEnvironment();     // Bots and Levelgens each override this -- sets vars in the created environment
 
    return true;
+}
+
+
+// Prepare a new Lua environment for use
+bool LuaScriptRunner::configureLua()
+{
+   registerClasses();
+
+   lua_atpanic(L, luaPanicked);  // Register our panic function 
+
+   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+   // These will be copied into the script's environment when we run createEnvironment.
+   setEnums(L);                  
+
+#ifdef USE_PROFILER
+   init_profiler(L);
+#endif
+
+   luaL_openlibs(L);    // Load the standard libraries
+   luaopen_vec(L);      // For vector math (lua-vec)
+
+   setModulePath();
+
+   //local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})
+   luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create robot_env & levelgen_env [[ xxx_env = table.copy(_G) ]]
+
+   if(!loadHelper(joindir(mScriptingDir, "lua_helper_functions.lua").c_str()))
+      return false;
+   lua_setfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");       // Save compiled code in registry
+
+   if(!loadHelper(joindir(mScriptingDir, "robot_helper_functions.lua").c_str()))
+      return false;
+   lua_setfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");     // Save compiled code in registry
+
+   if(!loadHelper(joindir(mScriptingDir, "levelgen_helper_functions.lua").c_str()))
+      return false;
+   lua_setfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");  // Save compiled code in registry
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   return true;
+}
+
+
+// Load file, place on top of stack as a function, ready for pcall()
+bool LuaScriptRunner::loadHelper(const char *filename)
+{
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   S32 err = luaL_loadfile(L, filename);
+
+   if(err != 0)
+   {
+      logprintf(LogConsumer::LogError, "Could not initialize scripting environment; error running %s: %s.",  
+                                       filename, lua_tostring(L, -1));
+      lua_pop(L, 1);    // Remove error message from stack
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   }
+
+   return err == 0;
 }
 
 
