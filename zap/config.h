@@ -239,7 +239,6 @@ public:
    bool useFakeFullscreen;
 
    // Testing values
-   S32 burstGraphicsMode;           // Choose a burst graphic representation
    bool neverConnectDirect;
    Color wallFillColor;
    Color wallOutlineColor;
