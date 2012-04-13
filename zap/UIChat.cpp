@@ -494,7 +494,7 @@ bool ChatUserInterface::onKeyDown(InputCode inputCode)
 {
    if(Parent::onKeyDown(inputCode))
       { /* Do nothing */ }
-   else if(inputCode == KEY_ESCAPE)
+   else if(inputCode == KEY_ESCAPE || checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       onEscape();
    else if (inputCode == KEY_ENTER)                // Submits message
       issueChat();
