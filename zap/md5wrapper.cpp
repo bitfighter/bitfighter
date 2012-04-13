@@ -7,7 +7,7 @@
  *	what ever you want with it.
  *
  *	Feb. 2005
- *	Benjamin Grüdelbach
+ *	Benjamin Grï¿½delbach
  */
 
 #ifdef _MSC_VER
@@ -21,7 +21,7 @@
 
 //my includes
 #include "md5wrapper.h"
-#include "md5.h"
+#include "../libtomcrypt/mycrypt.h"
 
 //---------privates--------------------------
 
@@ -31,21 +31,14 @@
  */	
 std::string md5wrapper::hashit(std::string text)
 {
-	HL_MD5_CTX ctx;
-	
-	//init md5
-	md5->MD5Init(&ctx);
-	//update with our string
-	md5->MD5Update(&ctx,
-		 (unsigned char*)text.c_str(),
-		  (unsigned int)text.length());
-	
-	//create the hash
-	unsigned char buff[16] = "";	
-	md5->MD5Final((unsigned char*)buff,&ctx);
+   unsigned char outBuffer[16] = "";
+   hash_state md;
+   md5_init(&md);
+   md5_process(&md, (unsigned char*)text.c_str(), (unsigned int)text.length());
+   md5_done(&md, outBuffer);
 
-	//converte the hash to a string and return it
-	return convToString(buff);	
+	//convert the hash to a string and return it
+	return convToString(outBuffer);
 }
 
 /*
@@ -79,17 +72,17 @@ std::string lcase(std::string strToConvert)
 
 //---------publics--------------------------
 
-//constructor
+// Constructor
 md5wrapper::md5wrapper()
 {
-	md5 = new MD5();
+   //	Do nothing
 }
 
 
-//destructor
+// Destructor
 md5wrapper::~md5wrapper()
 {
-	delete md5;
+	// Do nothing
 }
 
 /*
@@ -150,8 +143,8 @@ std::string md5wrapper::getSaltedHashFromString(const char *text)
 std::string md5wrapper::getHashFromFile(std::string filename)	
 {
 	FILE *file;
-  	HL_MD5_CTX context;
-  
+   hash_state md;
+
 	unsigned int len;
   	unsigned char buffer[1024], digest[16];
 
@@ -162,22 +155,23 @@ std::string md5wrapper::getHashFromFile(std::string filename)
 	}
 
 	//init md5
- 	md5->MD5Init (&context);
- 	
+   md5_init(&md);
+
 	//read the filecontent
 	while ( (len = (unsigned int)fread (buffer, 1, 1024, file)) )
    {
-		md5->MD5Update (&context, buffer, len);
+	   md5_process(&md, buffer, len);
 	}
-	
+
 	/*
 	generate hash, close the file and return the
 	hash as std::string
 	*/
-	md5->MD5Final (digest, &context);
+   md5_done(&md, digest);
  	fclose (file);
+
 	return convToString(digest);
- }	
+}
 
 /*
  * EOF
