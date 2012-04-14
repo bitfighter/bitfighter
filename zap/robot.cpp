@@ -1220,6 +1220,7 @@ bool Robot::startLua()
 
    
    EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent);
+
    mSubscriptions[EventManager::TickEvent] = true;
 
    string name = runGetName();                                             // Run bot's getName function
