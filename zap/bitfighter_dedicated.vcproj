@@ -634,14 +634,6 @@
 			Name="MD5"
 			>
 			<File
-				RelativePath=".\md5.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\md5.h"
-				>
-			</File>
-			<File
 				RelativePath=".\md5wrapper.cpp"
 				>
 			</File>

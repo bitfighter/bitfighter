@@ -450,9 +450,9 @@ function goInDirection()
 	bot:setThrust(speed,dirToGo)
 end
  
-function onTick()
+function onTick(deltaTime)
 	botLoc = bot:getLoc()
-	pathTimer=pathTimer-bot:getTime()
+	pathTimer=pathTimer-deltaTime
 	assert(bot:getLoc() ~= nil)
 	
 	if not attackNearbyEnemies(1-agression) then

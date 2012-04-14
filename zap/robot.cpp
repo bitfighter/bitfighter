@@ -389,6 +389,9 @@ S32 LuaRobot::setThrustToPt(lua_State *L)
 
    F32 vel = dist / ((F32) move.time);      // v = d / t, t is in ms
 
+   if(vel > 1.f)
+      vel = 1.f;
+
    move.x = vel * cos(ang);
    move.y = vel * sin(ang);
 

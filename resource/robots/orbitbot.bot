@@ -12,10 +12,10 @@
 -- This is called by the robot's idle routine each tick.
 -- This function must be present for the robot to work!
 
-function getMove()
+function onTick(deltaTime)
 
     if(targetItem == nil) then
-        targetItem = findClosest(bot:findGlobalItems(TestItemType))
+        targetItem = findClosest(findGlobalItems(TestItemType))
     end
 
     if(targetItem == nil) then return end
@@ -24,36 +24,36 @@ function getMove()
     local botLoc = bot:getLoc()
     local itemLoc = targetItem:getLoc()
 
-    local dist = botLoc:distanceTo( itemLoc )
+    local distSq = vec.distSquared( botLoc, itemLoc )
 
-    -- Here we use the getTime() function to make the motion look smooth.
+    -- Here we use the deltaTime to make the motion look smooth.
     -- If we just advanced orbitAng by a fixed amount each frame, it would
     -- appear jerky, as each frame is a slightly different length.
 
     -- .0015 determined experimentally
-    orbitAng = orbitAng + .0015 * bot:getTime()
+    orbitAng = orbitAng + .0015 * deltaTime
 
 
     local dest
 
-    if( dist <= orbitRadius * 1.1 ) then    -- Close enough to enter orbit
-        dest = itemLoc
-        dest:setxy( itemLoc:x() + orbitRadius * math.cos (orbitAng),
-                    itemLoc:y() + orbitRadius * math.sin (orbitAng)  )
+    if( distSq <= orbitRadius * orbitRadius * 1.1 ) then    -- Close enough to enter orbit
+         dest = vec.new( itemLoc.x + orbitRadius * math.cos (orbitAng),
+         itemLoc.y + orbitRadius * math.sin (orbitAng) )
+
         if( not isInOrbit ) then
-            orbitAng = botLoc:angleTo( dest ) - math.pi / 2
+            orbitAng = vec.angleTo( botLoc, dest ) - math.pi / 2
         end    
         
         isInOrbit = true
                     
     else                                    -- Travel directly toward object
         dest = itemLoc
-        orbitAng = botLoc:angleTo( dest )
+        orbitAng = vec.angleTo( botLoc, dest )
         isInOrbit = false
     end
 
-    bot:setThrustToPt( dest )                  -- Travel towards calculated point
-    bot:setAngle( botLoc:angleTo( itemLoc ) )  -- Aim ship that way too
+    bot:setThrustToPt( dest )                       -- Travel towards calculated point
+    bot:setAngle( vec.angleTo( botLoc, itemLoc ) )  -- Aim ship that way too
 end
 
 -------------------------------------------------------------------------------
@@ -82,3 +82,7 @@ orbitAng = 0
 orbitRadius = 300
 isInOrbit = false
 targetItem = nil
+
+function main()
+
+end

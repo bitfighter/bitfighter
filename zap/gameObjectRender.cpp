@@ -1391,13 +1391,14 @@ void renderMine(const Point &pos, bool armed, bool visible)
 // 3 = color change only
 // 4 = normal rendering, filled circle
 // 5 = normal rendering
-void renderGrenade(const Point &pos, F32 lifeLeft, S32 style)
+void renderGrenade(const Point &pos, F32 lifeLeft)
 {
    glColor(Colors::white);
    drawCircle(pos, 10);
 
    bool innerVis = true;
 
+   // TODO:  replace with algorithm?
    if(lifeLeft > .85)
       innerVis = false;
    else if(lifeLeft > .7)
@@ -1417,13 +1418,9 @@ void renderGrenade(const Point &pos, F32 lifeLeft, S32 style)
    else if(lifeLeft > .05)
       innerVis = false;
 
-   if(style == 1 || style == 3)
-      glColor3f(1, min(1.25f - lifeLeft, 1), 0);
-   else
-      glColor(Colors::red);
+   glColor3f(1, min(1.25f - lifeLeft, 1), 0);
 
-   // if(innerVis)
-   if((innerVis && (style == 1 || style == 2)) || style == 3 || style == 4 )
+   if(innerVis)
       drawFilledCircle(pos, 6);
    else
       drawCircle(pos, 6);

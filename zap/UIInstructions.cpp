@@ -801,7 +801,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderProjectile(Point(0, 0), 2, getGame()->getCurrentTime());
             break;
          case 3:
-            renderGrenade(Point(0, 0), 1, getGame()->getSettings()->getIniSettings()->burstGraphicsMode);
+            renderGrenade(Point(0, 0), 1);
             break;
          case 4:
             renderMine(Point(0, 0), true, true);

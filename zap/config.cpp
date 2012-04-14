@@ -143,7 +143,6 @@ IniSettings::IniSettings()
 
    useFakeFullscreen = true;
 
-   burstGraphicsMode = 1;
    neverConnectDirect = false;
 
    // Specify which events to log
@@ -433,7 +432,6 @@ static void loadDiagnostics(CIniFile *ini, IniSettings *iniSettings)
 
 static void loadTestSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings->burstGraphicsMode = max(ini->GetValueI("Testing", "BurstGraphics", iniSettings->burstGraphicsMode), 0);
    iniSettings->neverConnectDirect = ini->GetValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
    iniSettings->wallFillColor.set(ini->GetValue("Testing", "WallFillColor", iniSettings->wallFillColor.toRGBString()));
    iniSettings->wallOutlineColor.set(ini->GetValue("Testing", "WallOutlineColor", iniSettings->wallOutlineColor.toRGBString()));
@@ -1657,7 +1655,6 @@ static void writeTesting(CIniFile *ini, GameSettings *settings)
       ini->sectionComment("Testing", "----------------");
    }
 
-   ini->SetValueI ("Testing", "BurstGraphics",  (S32) (iniSettings->burstGraphicsMode), true);
    ini->setValueYN("Testing", "NeverConnectDirect", iniSettings->neverConnectDirect);
 
    // Maybe we should not write these if they are the default values?

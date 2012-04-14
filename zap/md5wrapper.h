@@ -7,7 +7,7 @@
  *	what ever you want with it.
  *
  *	Feb. 2005
- *	Benjamin Grüdelbach
+ *	Benjamin Grï¿½delbach
  */
 
 //include protection
@@ -17,13 +17,9 @@
 //basic includes
 #include <string>
 
-//forwards
-class MD5;
-
 class md5wrapper
 {
 	private:
-		MD5 *md5;
 	
 		/*
 		 * internal hash function, calling
@@ -43,7 +39,7 @@ class md5wrapper
 		md5wrapper();
 
 		//destructor
-		~md5wrapper();
+		virtual ~md5wrapper();
 		
 		/*
 		 * creates a MD5 hash from
@@ -65,11 +61,5 @@ class md5wrapper
 		std::string getHashFromFile(std::string filename);
 };
 
-
 //include protection
-#endif
-
-/*
- * EOF
- */
-
+#endif // MD5WRAPPER_H

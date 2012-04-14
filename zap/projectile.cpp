@@ -760,7 +760,7 @@ void GrenadeProjectile::renderItem(const Point &pos)
 
    WeaponInfo *wi = GameWeapon::weaponInfo + WeaponBurst;
    F32 initTTL = (F32) wi->projLiveTime;
-   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL, getGame()->getSettings()->getIniSettings()->burstGraphicsMode );
+   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
 }
 
 

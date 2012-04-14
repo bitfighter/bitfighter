@@ -80,7 +80,6 @@ OBJECTS_SHARED=\
    luaUtil.o\
    main.o\
    masterConnection.o\
-   md5.o\
    md5wrapper.o\
    move.o\
    moveObject.o\
