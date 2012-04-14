@@ -763,7 +763,6 @@ bool LuaScriptRunner::configureLua()
    setModulePath();
 
    /*luaL_dostring(L, "local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})");*/
-   //luaL_dofile(L, joindir(mScriptingDir, "sandbox.lua").c_str());    // Create robot_env & levelgen_env [[ xxx_env = table.copy(_G) ]]
 
    // Define a function for copying the global environment to create a private environment for our scripts to run in
    luaL_dostring(L, " function table.copy(t)"
