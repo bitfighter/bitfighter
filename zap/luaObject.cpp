@@ -591,17 +591,17 @@ const char *LuaScriptRunner::getScriptId()
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
-   return loadScript(mScriptName, getScriptId());
+   return loadScript(mScriptName);
 }
 
 
 // Sets the environment for the function on the top of the stack to that associated with name
 // Starts with a function on the stack
-void LuaScriptRunner::setEnvironment(const char *environmentName)
+void LuaScriptRunner::setEnvironment()
 {                                    
    // Grab the script's environment table from the registry, place it on the stack
-   lua_getfield(L, LUA_REGISTRYINDEX, environmentName);     // Push REGISTRY[envrionmentName] onto stack    -- function, table
-   lua_setfenv(L, -2);                                      // Set that table to be the env for function    -- function
+   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Push REGISTRY[scriptId] onto stack           -- function, table
+   lua_setfenv(L, -2);                                   // Set that table to be the env for function    -- function
 }
 
 
@@ -624,7 +624,7 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 
 
 // Loads specified file from disk, and executes it in the function's private environment
-bool LuaScriptRunner::loadScript(const string &scriptName, const string &environmentName)
+bool LuaScriptRunner::loadScript(const string &scriptName)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
@@ -638,7 +638,7 @@ bool LuaScriptRunner::loadScript(const string &scriptName, const string &environ
       return false;
    }
 
-   setEnvironment(environmentName.c_str());
+   setEnvironment();
 
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
 
