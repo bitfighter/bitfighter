@@ -773,15 +773,15 @@ bool LuaScriptRunner::configureLua()
                     " end");
 
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   if(!loadHelper(joindir(mScriptingDir, "lua_helper_functions.lua").c_str()))
+   if(!loadHelper("lua_helper_functions.lua"))
       return false;
    lua_setfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");       // Save compiled code in registry
 
-   if(!loadHelper(joindir(mScriptingDir, "robot_helper_functions.lua").c_str()))
+   if(!loadHelper("robot_helper_functions.lua"))
       return false;
    lua_setfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");     // Save compiled code in registry
 
-   if(!loadHelper(joindir(mScriptingDir, "levelgen_helper_functions.lua").c_str()))
+   if(!loadHelper("levelgen_helper_functions.lua"))
       return false;
    lua_setfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");  // Save compiled code in registry
 
@@ -792,9 +792,11 @@ bool LuaScriptRunner::configureLua()
 
 
 // Load file, place on top of stack as a function, ready for pcall()
-bool LuaScriptRunner::loadHelper(const char *filename)
+bool LuaScriptRunner::loadHelper(const string &script)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   const char *filename = joindir(mScriptingDir, script).c_str();
 
    S32 err = luaL_loadfile(L, filename);
 

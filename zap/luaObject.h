@@ -140,7 +140,7 @@ private:
    static bool mScriptingDirSet;
 
    void setLuaArgs(const Vector<string> &args);
-   bool loadHelper(const char *filename);    // Tries to load specified file with luaL_loadfile()
+   bool loadHelper(const string &script);    // Tries to load specified file with luaL_loadfile()
    void setModulePath();
 
    bool configureLua();          // Prepare a new Lua environment for use
