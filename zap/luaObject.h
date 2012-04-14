@@ -144,9 +144,7 @@ private:
    void setModulePath();
 
    bool configureLua();          // Prepare a new Lua environment for use
-public: //{P{P
-   bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
-   void setEnums(lua_State *L);                    // Set a whole slew of enum values that we want the scripts to have access to
+   void setEnums(lua_State *L);  // Set a whole slew of enum values that we want the scripts to have access to
 
    string mScriptId;             // Unique id for this script
    static U32 mNextScriptId;
@@ -158,6 +156,7 @@ protected:
 
    virtual bool loadScript();
    bool startLua(ScriptType scriptType);
+   bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
    virtual void logError(const char *format, ...) = 0;
 
