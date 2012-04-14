@@ -144,7 +144,7 @@ private:
    void setModulePath();
 
    bool configureLua();          // Prepare a new Lua environment for use
-
+public: //{P{P
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
    void setEnums(lua_State *L);                    // Set a whole slew of enum values that we want the scripts to have access to
 
