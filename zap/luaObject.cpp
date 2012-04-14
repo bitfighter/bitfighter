@@ -588,14 +588,6 @@ const char *LuaScriptRunner::getScriptId()
 }
 
 
-// Loads ouf script file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
-// defining any globals, and executing any "loose" code not defined in a function.
-bool LuaScriptRunner::loadScript()
-{
-   return loadScript(mScriptName);
-}
-
-
 // Sets the environment for the function on the top of the stack to that associated with name
 // Starts with a function on the stack
 void LuaScriptRunner::setEnvironment()
@@ -624,13 +616,14 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
-// Loads specified file from disk, and executes it in the function's private environment
-bool LuaScriptRunner::loadScript(const string &scriptName)
+// Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
+// defining any globals, and executing any "loose" code not defined in a function.
+bool LuaScriptRunner::loadScript()
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    // Load the specified file, place contents on stack as a function
-   if(luaL_loadfile(L, scriptName.c_str()) != 0)
+   if(luaL_loadfile(L, mScriptName.c_str()) != 0)
    {
       logError("%s -- Aborting.", lua_tostring(L, -1));
       lua_pop(L, 1);    // Remove error message from stack
