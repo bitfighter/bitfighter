@@ -551,6 +551,9 @@ LuaScriptRunner::~LuaScriptRunner()
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       if(mSubscriptions[i])
          EventManager::get()->unsubscribeImmediate(getScriptId(), (EventManager::EventType)i);
+
+   // And delete the script's environment table from the Lua instance
+   deleteEnvironment();
 }
 
 
@@ -588,27 +591,32 @@ const char *LuaScriptRunner::getScriptId()
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
-   return loadScript(mScriptName, getScriptId(), false);
+   return loadScript(mScriptName, getScriptId());
 }
 
 
 // Sets the environment for the function on the top of the stack to that associated with name
 // Starts with a function on the stack
-void LuaScriptRunner::setEnvironment(const char *environmentName, bool environmentIsGlobal)
+void LuaScriptRunner::setEnvironment(const char *environmentName)
 {                                    
    // Grab the script's environment table from the registry, place it on the stack
-   if(environmentIsGlobal)
-      lua_getglobal(L, environmentName);                    // -- function, table
-   else                                                     //      ** OR **
-      lua_getfield(L, LUA_REGISTRYINDEX, environmentName);  // -- function, table
-
-   lua_setfenv(L, -2);                                      // -- function
+   lua_getfield(L, LUA_REGISTRYINDEX, environmentName);     // Push REGISTRY[envrionmentName] onto stack    -- function, table
+   lua_setfenv(L, -2);                                      // Set that table to be the env for function    -- function
 }
 
 
+// Delete script's environment from the registry -- actually set the registry entry to nil so the table can be collected
+void LuaScriptRunner::deleteEnvironment()
+{
+   lua_pushnil(L);                                       //                             -- nil
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // REGISTRY[scriptId] = nil    -- <<empty stack>>
+}
+
+
+// Retrieve the environment from the registry, and put the requested function from that environment onto the stack
 void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Retrieve the environment from the registry            -- table
+   lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
    lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
 
    lua_remove(L, -2);                              // Remove table                                          -- function
@@ -616,7 +624,7 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 
 
 // Loads specified file from disk, and executes it in the function's private environment
-bool LuaScriptRunner::loadScript(const string &scriptName, const string &environmentName, bool environmentIsGlobal)
+bool LuaScriptRunner::loadScript(const string &scriptName, const string &environmentName)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
@@ -630,7 +638,7 @@ bool LuaScriptRunner::loadScript(const string &scriptName, const string &environ
       return false;
    }
 
-   setEnvironment(environmentName.c_str(), environmentIsGlobal);
+   setEnvironment(environmentName.c_str());
 
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
 

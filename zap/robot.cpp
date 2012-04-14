@@ -1187,11 +1187,11 @@ void Robot::prepareEnvironment()
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
    lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
-   setEnvironment(getScriptId(), false);                 // Set the environment for the code
+   setEnvironment(getScriptId());                        // Set the environment for the code
    lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
 
    lua_getfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");
-   setEnvironment(getScriptId(), false);                 // Set the environment for the code
+   setEnvironment(getScriptId());                        // Set the environment for the code
    lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
 
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
@@ -1202,7 +1202,7 @@ void Robot::prepareEnvironment()
    lua_pop(L, 1);                                        //                                        -- <<empty stack>>
 
    luaL_loadstring(L, "bot = LuaRobot(Robot)");          // Create our bot reference               -- <<compiled code>>
-   setEnvironment(getScriptId(), false);                 // Set the environment for the code
+   setEnvironment(getScriptId());                        // Set the environment for the code
    lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
