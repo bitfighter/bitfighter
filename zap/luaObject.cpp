@@ -675,8 +675,7 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
       throw LuaException(msg);
    }
 
-   setLuaArgs(args);    // TODO: Do we still need this here with Sam's addition of setLuaArgs in runChunk()???  -- might need it for plugins -CE
-                        // Adds script name to 0th argument  <--- TODO: Broken
+   setLuaArgs(args);
 
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
 
