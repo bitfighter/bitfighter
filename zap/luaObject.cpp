@@ -344,7 +344,8 @@ void LuaObject::getStringVectorFromTable(lua_State *L, S32 index, const char *me
       if(!lua_isstring(L, -1))
       {
          char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d", methodName, index, strings.size() + 1);
+         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d", 
+                                    methodName, index, strings.size() + 1);
          logprintf(LogConsumer::LogError, msg);
 
          throw LuaException(msg);
