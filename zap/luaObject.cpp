@@ -757,6 +757,7 @@ bool LuaScriptRunner::configureNewLuaInstance()
    /*luaL_dostring(L, "local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})");*/
 
    // Define a function for copying the global environment to create a private environment for our scripts to run in
+   // TODO: This needs to be a deep copy
    luaL_dostring(L, " function table.copy(t)"
                     "    local u = { }"
                     "    for k, v in pairs(t) do u[k] = v end"
