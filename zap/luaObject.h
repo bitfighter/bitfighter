@@ -30,7 +30,6 @@
 #include "GameTypesEnum.h"
 #include "EventManager.h"
 
-
 #include "lua.h"
 #include "../lua/include/lunar.h"
 
@@ -39,8 +38,8 @@
 #include "tnl.h"
 #include "tnlVector.h"
 
+#include <deque>
 #include <string>
-#include <set>
 
 using namespace std;
 using namespace TNL;
@@ -139,7 +138,7 @@ public:
    };
 
 private:
-   static Vector<string> mCachedScripts;
+   static deque<string> mCachedScripts;
 
    static string mScriptingDir;
    static bool mScriptingDirSet;

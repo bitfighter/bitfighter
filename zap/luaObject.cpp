@@ -530,7 +530,7 @@ lua_State *LuaScriptRunner::L = NULL;
 bool  LuaScriptRunner::mScriptingDirSet = false;
 string LuaScriptRunner::mScriptingDir;
 
-Vector<string> LuaScriptRunner::mCachedScripts;
+deque<string> LuaScriptRunner::mCachedScripts;
 
 
 
@@ -629,7 +629,9 @@ bool LuaScriptRunner::loadScript()
       bool found = false;
 
       // Check if script is in our cache
-      for(S32 i = 0; i < mCachedScripts.size(); i++)
+      S32 cacheSize = (S32)mCachedScripts.size();
+
+      for(S32 i = 0; i < cacheSize; i++)
          if(mCachedScripts[i] == mScriptName)
          {
             logprintf("Found cached script");
@@ -637,16 +639,15 @@ bool LuaScriptRunner::loadScript()
             break;
          }
 
-
       if(!found)     // Script is not (yet) cached
       {
          logprintf("Not cached!");
 
-         if(mCachedScripts.size() > MAX_CACHE_SIZE)
+         if(cacheSize > MAX_CACHE_SIZE)
          {
             // Remove oldest script from the cache
-            deleteScript(mCachedScripts[0].c_str());
-            mCachedScripts.erase(0);
+            deleteScript(mCachedScripts.front().c_str());
+            mCachedScripts.pop_front();
          }
 
          // Load new script into cache using full name as registry key
@@ -678,7 +679,6 @@ bool LuaScriptRunner::loadScript()
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
    return false;
 }
-
 
 
 // Don't forget to update the eventManager after running a robot's main function!
