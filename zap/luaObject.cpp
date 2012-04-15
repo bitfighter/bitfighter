@@ -844,8 +844,13 @@ bool LuaScriptRunner::loadCompileScript(const char *filename)
 // Delete script's environment from the registry -- actually set the registry entry to nil so the table can be collected
 void LuaScriptRunner::deleteScript(const char *name)
 {
-   lua_pushnil(L);                                       //                             -- nil
-   lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
+   // If a script is not found, or there is some other problem with the bot (or levelgen), we might get here before our L has been
+   // set up.  If L hasn't been defined, there's no point in mucking with the registry, right?
+   if(L)    
+   {
+      lua_pushnil(L);                                       //                             -- nil
+      lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
+   }
 }
 
 
