@@ -679,19 +679,22 @@ void shutdownBitfighter()
 
    SoundSystem::shutdown();
 
-#ifndef ZAP_DEDICATED
-   Joystick::shutdownJoystick();
-
-   // Save current window position if in windowed mode
-   if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
+   if(!settings->isDedicatedServer())
    {
-      settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
-      settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
-   }
+#ifndef ZAP_DEDICATED
+      Joystick::shutdownJoystick();
 
-   OGLCONSOLE_Quit();
-   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+      // Save current window position if in windowed mode
+      if(settings->getIniSettings()->displayMode == DISPLAY_MODE_WINDOWED)
+      {
+         settings->getIniSettings()->winXPos = VideoSystem::getWindowPositionX();
+         settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
+      }
+
+      OGLCONSOLE_Quit();
+      SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
+   }
 
    // Avoids annoying shutdown crashes when logging is still trying to output to oglconsole
    gOglConsoleLog.setMsgTypes(LogConsumer::LogNone);
