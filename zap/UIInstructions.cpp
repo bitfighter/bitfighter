@@ -506,7 +506,7 @@ static void renderBadgeLine(S32 y, S32 textSize, MeritBadges badge, S32 radius, 
 {
    S32 x = 50;
 
-   renderBadge(x, y + radius, radius, badge);
+   renderBadge((F32)x, (F32)y + radius, (F32)radius, badge);
    x += radius + 10;
 
    glColor(Colors::yellow);
