@@ -554,7 +554,7 @@ LuaScriptRunner::~LuaScriptRunner()
          EventManager::get()->unsubscribeImmediate(getScriptId(), (EventManager::EventType)i);
 
    // And delete the script's environment table from the Lua instance
-   deleteEnvironment();
+   deleteScript(getScriptId());
 }
 
 
@@ -595,14 +595,6 @@ void LuaScriptRunner::setEnvironment()
    // Grab the script's environment table from the registry, place it on the stack
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Push REGISTRY[scriptId] onto stack           -- function, table
    lua_setfenv(L, -2);                                   // Set that table to be the env for function    -- function
-}
-
-
-// Delete script's environment from the registry -- actually set the registry entry to nil so the table can be collected
-void LuaScriptRunner::deleteEnvironment()
-{
-   lua_pushnil(L);                                       //                             -- nil
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // REGISTRY[scriptId] = nil    -- <<empty stack>>
 }
 
 
@@ -786,6 +778,14 @@ bool LuaScriptRunner::loadCompileSaveScript(const string &scriptName, const char
    lua_setfield(L, LUA_REGISTRYINDEX, registryKey);      // Save compiled code in registry
 
    return true;
+}
+
+
+// Delete script's environment from the registry -- actually set the registry entry to nil so the table can be collected
+void LuaScriptRunner::deleteScript(const char *name)
+{
+   lua_pushnil(L);                                       //                             -- nil
+   lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
 }
 
 

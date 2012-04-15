@@ -66,7 +66,7 @@ bool LuaLevelGenerator::loadScript()
 
 bool LuaLevelGenerator::runScript()
 {
-   return loadScript() && runMain();
+   return loadScript() && runMain(); 
 }
 
 

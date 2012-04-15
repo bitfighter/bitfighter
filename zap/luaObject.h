@@ -168,9 +168,10 @@ protected:
    virtual void prepareEnvironment() = 0;
    
    void setEnvironment();
-   void deleteEnvironment();
 
-   virtual void tickTimer(U32 deltaT);      // Advance script timers
+   void deleteScript(const char *name);      // Remove saved script from the Lua registry
+
+   virtual void tickTimer(U32 deltaT);       // Advance script timers
 
 public:
    LuaScriptRunner();               // Constructor
