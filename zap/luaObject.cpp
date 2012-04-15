@@ -901,8 +901,8 @@ void LuaScriptRunner::tickTimer(U32 deltaT)
 
 extern void shutdownBitfighter();
 
-// Since all calls to lua are now done via lua_pcall, if we get here, we've probably encountered a fatal error such as running out of memory.
-// Best just to shut the whole thing down.
+// Since all calls to lua are now done in protected mode, via lua_pcall, if we get here, we've probably encountered 
+// a fatal error such as running out of memory.  Best just to shut the whole thing down.
 int LuaScriptRunner::luaPanicked(lua_State *L)
 {
    string msg = lua_tostring(L, 1);
