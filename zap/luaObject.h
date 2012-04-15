@@ -30,14 +30,17 @@
 #include "GameTypesEnum.h"
 #include "EventManager.h"
 
+
 #include "lua.h"
 #include "../lua/include/lunar.h"
 
 #include "Point.h"
 
 #include "tnl.h"
+#include "tnlVector.h"
 
 #include <string>
+#include <set>
 
 using namespace std;
 using namespace TNL;
@@ -136,15 +139,19 @@ public:
    };
 
 private:
+   static Vector<string> mCachedScripts;
+
    static string mScriptingDir;
    static bool mScriptingDirSet;
 
    void setLuaArgs(const Vector<string> &args);
-   bool loadHelper(const string &script);    // Tries to load specified file with luaL_loadfile()
    void setModulePath();
 
    bool configureNewLuaInstance();           // Prepare a new Lua environment for use
-   bool loadCompileSaveScript(const string &scriptName, const char *registryKey);
+
+   bool loadCompileSaveHelper(const string &scriptName, const char *registryKey);
+   bool loadCompileSaveScript(const char *filename, const char *registryKey);
+   bool loadCompileScript(const char *filename);
 
    void setEnums(lua_State *L);  // Set a whole slew of enum values that we want the scripts to have access to
 

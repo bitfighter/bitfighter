@@ -524,11 +524,13 @@ bool LuaObject::dumpStack(lua_State* L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Initialize statics:
+// Declare and Initialize statics:
 U32 LuaScriptRunner::mNextScriptId = 0;
 lua_State *LuaScriptRunner::L = NULL;
 bool  LuaScriptRunner::mScriptingDirSet = false;
 string LuaScriptRunner::mScriptingDir;
+
+Vector<string> LuaScriptRunner::mCachedScripts;
 
 
 
@@ -612,17 +614,52 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
+   static const S32 MAX_CACHE_SIZE = 2;      // For now -- can be bigger when we know this works
+
+   bool cacheScripts = true;     // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
+
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   // Load the specified file, place contents on stack as a function
-   if(luaL_loadfile(L, mScriptName.c_str()) != 0)
-   {
-      logError("%s -- Aborting.", lua_tostring(L, -1));
-      lua_pop(L, 1);    // Remove error message from stack
+   logprintf("Loading script: %s", mScriptName.c_str());
 
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-      return false;
+   if(!cacheScripts)
+      loadCompileScript(mScriptName.c_str());
+   else
+   {
+      bool found = false;
+
+      // Check if script is in our cache
+      for(S32 i = 0; i < mCachedScripts.size(); i++)
+         if(mCachedScripts[i] == mScriptName)
+         {
+            logprintf("Found cached script");
+            found = true;
+            break;
+         }
+
+
+      if(!found)     // Script is not (yet) cached
+      {
+         logprintf("Not cached!");
+
+         if(mCachedScripts.size() > MAX_CACHE_SIZE)
+         {
+            // Remove oldest script from the cache
+            deleteScript(mCachedScripts[0].c_str());
+            mCachedScripts.erase(0);
+         }
+
+         // Load new script into cache using full name as registry key
+         loadCompileSaveScript(mScriptName.c_str(), mScriptName.c_str());
+         mCachedScripts.push_back(mScriptName);
+      }
+
+      lua_getfield(L, LUA_REGISTRYINDEX, mScriptName.c_str());    // Load script from cache
    }
+
+
+   // So, however we got here, the script we want to run is now sitting on top of the stack
+   TNLAssert((lua_gettop(L) == 1 && lua_isfunction(L, 1)) || LuaObject::dumpStack(L), "Expected a single function on the stack!");
 
    setEnvironment();
 
@@ -641,6 +678,7 @@ bool LuaScriptRunner::loadScript()
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
    return false;
 }
+
 
 
 // Don't forget to update the eventManager after running a robot's main function!
@@ -765,16 +803,22 @@ bool LuaScriptRunner::configureNewLuaInstance()
                     " end");
 
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   return(!loadCompileSaveScript("lua_helper_functions.lua", "lua_helper_functions")     ||
-          !loadCompileSaveScript("robot_helper_functions.lua", "robot_helper_functions") ||
-          !loadCompileSaveScript("levelgen_helper_functions.lua", "levelgen_helper_functions"));
+   return(loadCompileSaveHelper("lua_helper_functions.lua",      "lua_helper_functions")   &&
+          loadCompileSaveHelper("robot_helper_functions.lua",    "robot_helper_functions") &&
+          loadCompileSaveHelper("levelgen_helper_functions.lua", "levelgen_helper_functions"));
+}
+
+
+bool LuaScriptRunner::loadCompileSaveHelper(const string &scriptName, const char *registryKey)
+{
+   return loadCompileSaveScript(joindir(mScriptingDir, scriptName).c_str(), registryKey);
 }
 
 
 // Load script from specified file, compile it, and store it in the registry
-bool LuaScriptRunner::loadCompileSaveScript(const string &scriptName, const char *registryKey)
+bool LuaScriptRunner::loadCompileSaveScript(const char *filename, const char *registryKey)
 {
-   if(!loadHelper(scriptName))                           // Load and compile script
+   if(!loadCompileScript(filename))
       return false;
 
    lua_setfield(L, LUA_REGISTRYINDEX, registryKey);      // Save compiled code in registry
@@ -783,33 +827,25 @@ bool LuaScriptRunner::loadCompileSaveScript(const string &scriptName, const char
 }
 
 
+// Load script and place on top of the stack
+bool LuaScriptRunner::loadCompileScript(const char *filename)
+{
+   S32 err = luaL_loadfile(L, filename);     
+
+   if(err == 0)
+      return true;
+
+   logprintf(LogConsumer::LogError, "Error loading script %s: %s.", filename, lua_tostring(L, -1));
+   lua_pop(L, 1);    // Remove error message from stack
+   return false;
+}
+
+
 // Delete script's environment from the registry -- actually set the registry entry to nil so the table can be collected
 void LuaScriptRunner::deleteScript(const char *name)
 {
    lua_pushnil(L);                                       //                             -- nil
    lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
-}
-
-
-// Load file, place on top of stack as a function, ready for pcall()
-bool LuaScriptRunner::loadHelper(const string &script)
-{
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-   const char *filename = joindir(mScriptingDir, script).c_str();
-
-   S32 err = luaL_loadfile(L, filename);
-
-   if(err != 0)
-   {
-      logprintf(LogConsumer::LogError, "Could not initialize scripting environment; error running %s: %s.",  
-                                       filename, lua_tostring(L, -1));
-      lua_pop(L, 1);    // Remove error message from stack
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-   }
-
-   return err == 0;
 }
 
 
