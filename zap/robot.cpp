@@ -1390,6 +1390,7 @@ void Robot::kill()
          mMountedItems[i]->onMountDestroyed();
 }
 
+
 // Need this, as this may come from level or levelgen
 bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 {
