@@ -143,7 +143,7 @@ private:
    bool loadHelper(const string &script);    // Tries to load specified file with luaL_loadfile()
    void setModulePath();
 
-   bool configureLua();          // Prepare a new Lua environment for use
+   bool configureNewLuaInstance();           // Prepare a new Lua environment for use
    bool loadCompileSaveScript(const string &scriptName, const char *registryKey);
 
    void setEnums(lua_State *L);  // Set a whole slew of enum values that we want the scripts to have access to

@@ -720,7 +720,7 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
          return false;
       }
 
-      if(!configureLua())
+      if(!configureNewLuaInstance())
       {
          logError("Could not configure Lua interpreter.  I cannot run any scripts until the problem is resolved.");
          lua_close(L);
@@ -735,7 +735,7 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
 
 
 // Prepare a new Lua environment for use
-bool LuaScriptRunner::configureLua()
+bool LuaScriptRunner::configureNewLuaInstance()
 {
    registerClasses();
 
@@ -770,6 +770,7 @@ bool LuaScriptRunner::configureLua()
 }
 
 
+// Load script from specified file, compile it, and store it in the registry
 bool LuaScriptRunner::loadCompileSaveScript(const string &scriptName, const char *registryKey)
 {
    if(!loadHelper(scriptName))                           // Load and compile script
