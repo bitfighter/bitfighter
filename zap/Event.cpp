@@ -302,7 +302,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 
       game->getUIManager()->getOptionsMenuUserInterface()->toggleDisplayMode();
 
-      gScreenInfo.setCanvasMousePos(pos->x, pos->y, game->getSettings()->getIniSettings()->displayMode);
+      gScreenInfo.setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->displayMode);
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
