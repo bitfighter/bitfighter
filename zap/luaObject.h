@@ -144,6 +144,8 @@ private:
    void setModulePath();
 
    bool configureLua();          // Prepare a new Lua environment for use
+   bool loadCompileSaveScript(const string &scriptName, const char *registryKey);
+
    void setEnums(lua_State *L);  // Set a whole slew of enum values that we want the scripts to have access to
 
    string mScriptId;             // Unique id for this script

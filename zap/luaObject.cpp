@@ -772,19 +772,18 @@ bool LuaScriptRunner::configureLua()
                     " end");
 
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   if(!loadHelper("lua_helper_functions.lua"))
-      return false;
-   lua_setfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");       // Save compiled code in registry
+   return(!loadCompileSaveScript("lua_helper_functions.lua", "lua_helper_functions")     ||
+          !loadCompileSaveScript("robot_helper_functions.lua", "robot_helper_functions") ||
+          !loadCompileSaveScript("levelgen_helper_functions.lua", "levelgen_helper_functions"));
+}
 
-   if(!loadHelper("robot_helper_functions.lua"))
-      return false;
-   lua_setfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");     // Save compiled code in registry
 
-   if(!loadHelper("levelgen_helper_functions.lua"))
+bool LuaScriptRunner::loadCompileSaveScript(const string &scriptName, const char *registryKey)
+{
+   if(!loadHelper(scriptName))                           // Load and compile script
       return false;
-   lua_setfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");  // Save compiled code in registry
 
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   lua_setfield(L, LUA_REGISTRYINDEX, registryKey);      // Save compiled code in registry
 
    return true;
 }
