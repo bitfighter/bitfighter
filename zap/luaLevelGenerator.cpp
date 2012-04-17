@@ -410,15 +410,15 @@ void LuaLevelGenerator::prepareEnvironment()
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
-    LuaObject::dumpStack(L);
+
    lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
    setEnvironment();                                     // Set the environment for the code
    lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
-    LuaObject::dumpStack(L);
+
    lua_getfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");
    setEnvironment();                                     // Set the environment for the code
    lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
-    LuaObject::dumpStack(L);
+
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
 
    // TODO: Do we still really need GRID_SIZE?           
