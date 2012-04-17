@@ -106,9 +106,11 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
    error = false;
    try
    {   
-      lua_getglobal(L, "getArgsMenu");
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-      if(!lua_isfunction(L, -1))    // No getArgsMenu function, return false
+      bool ok = retrieveFunction("getArgsMenu");     // If not found, it's OK... Not all plugins will have this
+
+      if(!ok)
       {
          LuaObject::clearStack(L);
          return false;     
@@ -130,6 +132,10 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
 
       menuTitle = getString(L, 1, "getArgsMenu");
       getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
+
+      lua_pop(L, 2);
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 
       return true;
    }

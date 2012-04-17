@@ -724,7 +724,7 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 // if the specified function could not be found.  If this fails will remove the non-function from the stack.
 bool LuaScriptRunner::retrieveFunction(const char *functionName)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put bot's environment table onto the stack -- table
+   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's environment table onto stack  -- table
    lua_pushstring(L, functionName);                      //                                            -- table, functionName
    lua_gettable(L, -2);                                  // Push requested function onto the stack     -- table, fn
    lua_remove(L, lua_gettop(L) - 1);                     // Remove environment table from stack        -- fn
