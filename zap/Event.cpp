@@ -208,7 +208,7 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       case SDL_MOUSEWHEEL:
-         if(event->wheel.y < 0)  // This may need to be reversed...  blindly coded
+         if(event->wheel.y > 0)
             onMouseWheel(true, false);
          else
             onMouseWheel(false, true);
