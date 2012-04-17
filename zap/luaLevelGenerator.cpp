@@ -407,11 +407,20 @@ void LuaLevelGenerator::prepareEnvironment()
    // This is the name that we'll use to refer to this levelgen from our Lua code.  
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   lua_getglobal(L, "levelgen_env");                     // Copy desired environment to the stack  -- levelgen_env   
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store it in the registry               -- <<empty stack>>
-                                                         
+   luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
+   lua_getglobal(L, "e");                                //                                        -- environment e   
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+    LuaObject::dumpStack(L);
+   lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
+   setEnvironment();                                     // Set the environment for the code
+   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+    LuaObject::dumpStack(L);
+   lua_getfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");
+   setEnvironment();                                     // Set the environment for the code
+   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+    LuaObject::dumpStack(L);
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
-                                                         
+
    // TODO: Do we still really need GRID_SIZE?           
    lua_pushnumber(L, mGridSize);                         //                                        -- env_table, mGridSize
    lua_pushliteral(L, "_GRID_SIZE");                     //                                        -- env_table, mGridSize, "_GRID_SIZE"
@@ -420,7 +429,8 @@ void LuaLevelGenerator::prepareEnvironment()
    lua_pushliteral(L, "levelgen");                       //                                        -- env_table, "levelgen"
    Lunar<LuaLevelGenerator>::push(L, this);              //                                        -- env_table, "levelgen", *this
    lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
-   lua_pop(L, 1);                                        //                                        -- <<empty stack>>
+
+   lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
