@@ -109,7 +109,10 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
       lua_getglobal(L, "getArgsMenu");
 
       if(!lua_isfunction(L, -1))    // No getArgsMenu function, return false
+      {
+         LuaObject::clearStack(L);
          return false;     
+      }
 
       if(lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
       {

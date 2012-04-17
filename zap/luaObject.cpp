@@ -620,8 +620,6 @@ bool LuaScriptRunner::loadScript()
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   logprintf("Loading script: %s", mScriptName.c_str());
-
    if(!cacheScripts)
       loadCompileScript(mScriptName.c_str());
    else
@@ -767,7 +765,9 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
    }
    
    prepareEnvironment();     // Bots and Levelgens each override this -- sets vars in the created environment
-
+   
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   
    return true;
 }
 

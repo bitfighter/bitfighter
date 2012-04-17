@@ -38,7 +38,7 @@
 -- Convenience function... let user use logprint directly, without referencing luaUtil
 --
 function logprint(msg)
-    luaUtil:logprint("Levelgen", tostring(msg))
+    LuaUtil:logprint("Levelgen", tostring(msg))
 end
 
 --
@@ -61,7 +61,7 @@ end
 -- Override the default print() method to print to the oglconsole instead of stdout
 --
 function print(msg)
-    luaUtil:printToOglConsole(msg)
+    LuaUtil:printToOglConsole(msg)
 end
 
 --
