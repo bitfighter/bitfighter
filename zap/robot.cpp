@@ -1177,25 +1177,18 @@ Robot *Robot::findBot(const char *id)
 }
 
 
-void Robot::prepareEnvironment()
+bool Robot::prepareEnvironment()
 {
    // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
    // This is the name that we'll use to refer to this robot from our Lua code.  
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   //luaL_loadstring(L, "local env = setmetatable({}, {__index=function(t,k) if k=='_G' then return nil else return _G[k] end})");
-
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
-   lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
-   setEnvironment();                                     // Set the environment for the code
-   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
-
-   lua_getfield(L, LUA_REGISTRYINDEX, "robot_helper_functions");
-   setEnvironment();                                     // Set the environment for the code
-   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+   if(!loadAndRunGlobalFunction(L, "lua_helper_functions") || !loadAndRunGlobalFunction(L, "robot_helper_functions"))
+      return false;
 
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
    lua_pushliteral(L, "Robot");                          //                                        -- env_table, "Robot"
@@ -1209,6 +1202,8 @@ void Robot::prepareEnvironment()
    lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   return true;
 }
 
 

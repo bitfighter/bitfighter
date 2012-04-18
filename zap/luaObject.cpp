@@ -610,6 +610,27 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
+bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *functionName)
+{
+   lua_getfield(L, LUA_REGISTRYINDEX, functionName);     // Get function out of the registry      -- functionName()
+   setEnvironment();                                     // Set the environment for the code
+   S32 err = lua_pcall(L, 0, 0, 0);                      // Run it                                 -- <<empty stack>>
+
+   if(err != 0)
+   {
+      logError("Failed to load startup functions %s: %s", functionName, lua_tostring(L, -1));
+
+      lua_pop(L, 1);             // Remove error message from stack
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      return false;
+   }
+
+   return true;
+}
+
+
+
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
@@ -632,15 +653,12 @@ bool LuaScriptRunner::loadScript()
       for(S32 i = 0; i < cacheSize; i++)
          if(mCachedScripts[i] == mScriptName)
          {
-            logprintf("Found cached script");
             found = true;
             break;
          }
 
       if(!found)     // Script is not (yet) cached
       {
-         logprintf("Not cached!");
-
          if(cacheSize > MAX_CACHE_SIZE)
          {
             // Remove oldest script from the cache
@@ -764,11 +782,7 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
       }
    }
    
-   prepareEnvironment();     // Bots and Levelgens each override this -- sets vars in the created environment
-   
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-   
-   return true;
+   return prepareEnvironment();     // Bots and Levelgens each override this -- sets vars in the created environment
 }
 
 

@@ -171,7 +171,7 @@ protected:
    static int luaPanicked(lua_State *L);
 
    virtual void registerClasses();
-   virtual void prepareEnvironment() = 0;
+   virtual bool prepareEnvironment() = 0;
    
    void setEnvironment();
 
@@ -199,6 +199,8 @@ public:
 
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
+   bool loadAndRunGlobalFunction(lua_State *L, const char *functionName);
+
 };
 
 
