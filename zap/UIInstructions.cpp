@@ -658,7 +658,7 @@ void InstructionsUserInterface::renderModulesPage()
       switch(i)
       {
          case 0:     // Boost
-            renderShip(&Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
             glBegin(GL_LINES);
                glColor(Colors::yellow);
                glVertex2f(-20, -17);
@@ -672,11 +672,11 @@ void InstructionsUserInterface::renderModulesPage()
             break;
 
          case 1:     // Shield
-            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, true, false, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, true, false, false, false);
             break;
 
          case 2:     // Armor
-            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, true);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, true);
             break;
 
          // skip 3 for 2nd line of armor
@@ -686,12 +686,12 @@ void InstructionsUserInterface::renderModulesPage()
                F32 health = (getGame()->getCurrentTime() & 0x7FF) * 0.0005f;
 
                F32 alpha = 1.0;
-               renderShip(&Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, false, true, false);
+               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, health, (F32)Ship::CollisionRadius, 0, false, false, false, true, false);
             }
             break;
 
          case 5:     // Sensor
-            renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, false, true, false, false);
+            renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, getGame()->getCurrentTime(), false, false, true, false, false);
             break;
 
          // skip 6 for 2nd line of sensor
@@ -705,13 +705,13 @@ void InstructionsUserInterface::renderModulesPage()
                   alpha = frac * 0.001f;
                else
                   alpha = 1 - (frac * 0.001f);
-               renderShip(&Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
+               renderShip(ShipShape::Normal, &Colors::blue, alpha, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
             }
             break;
 
          case 8:     // Engineer
             {
-               renderShip(&Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
+               renderShip(ShipShape::Normal, &Colors::blue, 1, thrusts, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
                renderResourceItem(Point(0,0));
             }
             break;

@@ -392,6 +392,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ShipShape.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ShipShape.h"
+				>
+			</File>
+			<File
 				RelativePath=".\UI.cpp"
 				>
 			</File>

@@ -37,6 +37,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "sparkManager.h"
+#include "ShipShape.h"
 #endif
 
 namespace Zap
@@ -234,6 +235,7 @@ public:
    U32 mSparkElapsed;
    S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
    FXTrail mTrail[TrailCount];
+   ShipShape::ShipShapeType mShapeType;
 #endif
 
    F32 mass;            // Mass of ship, not used

@@ -122,6 +122,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
+   mShapeType = ShipShape::BirdOfPrey;
 #endif
 
    // Create our proxy object for Lua access
@@ -1893,12 +1894,14 @@ void Ship::emitMovementSparks()
    bool boostActive = isModulePrimaryActive(ModuleBoost);
    bool cloakActive = isModulePrimaryActive(ModuleCloak);
 
-   Point corners[3];
-   Point shipDirs[3];
+   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[mShapeType];
+   S32 cornerCount = shipShapeInfo->cornerCount;
 
-   corners[0].set(-20, -15);
-   corners[1].set(  0,  25);
-   corners[2].set( 20, -15);
+   Point corners[cornerCount];
+   Point shipDirs[cornerCount];
+
+   for(S32 i = 0; i < cornerCount; i++)
+      corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i*2 + 1]);
 
    F32 th = FloatHalfPi - mMoveState[RenderState].angle;
 
@@ -1906,7 +1909,7 @@ void Ship::emitMovementSparks()
    F32 cosTh = cos(th);
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
 
-   for(S32 i = 0; i < 3; i++)
+   for(S32 i = 0; i < cornerCount; i++)
    {
       shipDirs[i].x = corners[i].x * cosTh + corners[i].y * sinTh;
       shipDirs[i].y = corners[i].y * cosTh - corners[i].x * sinTh;
@@ -1923,7 +1926,7 @@ void Ship::emitMovementSparks()
    F32 bestDot = -1;
 
    // Find the left-wards match
-   for(S32 i = 0; i < 3; i++)
+   for(S32 i = 0; i < cornerCount; i++)
    {
       F32 d = leftVec.dot(shipDirs[i]);
       if(d >= bestDot)
@@ -1940,7 +1943,7 @@ void Ship::emitMovementSparks()
    bestId = -1;
    bestDot = -1;
 
-   for(S32 i = 0; i < 3; i++)
+   for(S32 i = 0; i < cornerCount; i++)
    {
       F32 d = rightVec.dot(shipDirs[i]);
       if(d >= bestDot)
@@ -2140,7 +2143,7 @@ void Ship::render(S32 layerIndex)
    }
 
 
-   renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime, 
+   renderShip(mShapeType, gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime,
               isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), 
               isModulePrimaryActive(ModuleRepair), hasModule(ModuleArmor));
 

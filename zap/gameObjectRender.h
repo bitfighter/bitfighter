@@ -35,6 +35,7 @@
 #include "Rect.h"
 #include "Color.h"
 #include "SharedConstants.h"     // For MeritBadges enum
+#include "ShipShape.h"
 
 #include <string>
 
@@ -115,7 +116,7 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
 extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
 extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 
-extern void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
+extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                        bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
 void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<GameObject> > &repairTargets, F32 alpha);   // Render repair rays to all the repairing objects

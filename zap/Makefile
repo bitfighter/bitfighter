@@ -136,6 +136,7 @@ OBJECTS_CLIENT=\
    OpenglUtils.o\
    quickChatHelper.o\
    ScreenShooter.o\
+   ShipShape.o\
    sparkManager.o\
    TeamShuffleHelper.o\
    UI.o\

@@ -403,7 +403,49 @@ void renderHealthBar(F32 health, const Point &center, const Point &dir, F32 leng
 }
 
 
-void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive,
+      bool hasArmor)
+{
+   // Armor
+   if(hasArmor)
+   {
+      glLineWidth(gLineWidth3);
+      glColor(Colors::yellow, alpha);
+
+      drawPolygon(Point(0,0), 5, 30, FloatHalfPi);
+
+      glLineWidth(gDefaultLineWidth);
+   }
+
+   // Shields
+   if(shieldActive)
+   {
+      F32 shieldRadius = radius + 3;
+
+      glColor(Colors::yellow, alpha);
+      drawCircle(0, 0, shieldRadius);
+   }
+
+   // Sensor
+   if(sensorActive)
+   {
+      glColor(Colors::white, alpha);
+      F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time
+      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
+   }
+
+   // Repair
+   if(repairActive)
+   {
+      glLineWidth(gLineWidth3);
+      glColor(Colors::red, alpha);
+      drawCircle(0, 0, 18);
+      glLineWidth(gDefaultLineWidth);
+   }
+}
+
+
+void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -501,54 +543,23 @@ void renderShip(const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F3
    static F32 flamePortPoints[] = { -12.5, 0,   -12.5,10,    -12.5, 10,   -7.5, 10,    7.5, 10,   12.5, 10,   12.5, 10,   12.5, 0 };
    renderVertexArray(flamePortPoints, ARRAYSIZE(flamePortPoints) / 2, GL_LINES);
 
-   // Colored insides
-   glColor(shipColor, alpha);
-   static F32 shipInnardPoints[] = { -12, -13,   0, 22,   12, -13 };
-   renderVertexArray(shipInnardPoints, ARRAYSIZE(shipInnardPoints) / 2, GL_LINE_LOOP);
 
+   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
+
+   // Inner hull with colored insides
+   glColor(shipColor, alpha);
+   for(S32 i = 0; i < shipShapeInfo->innerHullPieceCount; i++)
+      renderVertexArray(shipShapeInfo->innerHullPieces[i].points, shipShapeInfo->innerHullPieces[i].pointCount, GL_LINE_STRIP);
+
+   // Render health bar
    renderHealthBar(health, Point(0,1.5), Point(0,1), 28, 4);
 
-   // Grey outer hull
+   // Grey outer hull drawn last, on top
    glColor(Colors::gray70, alpha);
-   static F32 shipHullPoints[] = { -20, -15,   0, 25,   20, -15 };
-   renderVertexArray(shipHullPoints, ARRAYSIZE(shipHullPoints) / 2, GL_LINE_LOOP);
+   renderVertexArray(shipShapeInfo->outerHullPoints, shipShapeInfo->outerHullPointCount, GL_LINE_LOOP);
 
-   // Armor
-   if(hasArmor)
-   {
-      glLineWidth(gLineWidth3);
-      glColor(Colors::yellow ,alpha);   
-
-      drawPolygon(Point(0,0), 5, 30, FloatHalfPi);
-
-      glLineWidth(gDefaultLineWidth);
-   }
-
-   // Shields
-   if(shieldActive)
-   {
-      F32 shieldRadius = radius + 3;
-
-      glColor(Colors::yellow, alpha);
-      drawCircle(0, 0, shieldRadius);
-   }
-      
-   // Sensor
-   if(sensorActive)
-   {
-      glColor(Colors::white, alpha);
-      F32 radius = (sensorTime & 0x1FF) * 0.002f;    // Radius changes over time    
-      drawCircle(0, 0, radius * Ship::CollisionRadius + 4);
-   }
-
-   // Repair
-   if(repairActive)
-   {
-      glLineWidth(gLineWidth3);
-      glColor(Colors::red, alpha);
-      drawCircle(0, 0, 18);
-      glLineWidth(gDefaultLineWidth);
-   }
+   // Now render any module states
+   renderActiveModules(alpha, radius, sensorTime, cloakActive, shieldActive, sensorActive, repairActive, hasArmor);
 }
 
 
