@@ -122,7 +122,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
-   mShapeType = ShipShape::BirdOfPrey;
+   mShapeType = ShipShape::Normal;
 #endif
 
    // Create our proxy object for Lua access
