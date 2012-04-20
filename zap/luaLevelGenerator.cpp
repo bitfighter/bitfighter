@@ -410,7 +410,7 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 
 
 ///// Initialize levelgen specific stuff
-void LuaLevelGenerator::prepareEnvironment()
+bool LuaLevelGenerator::prepareEnvironment()
 {
    // Push a pointer to this Script to the Lua stack, then set the name of this pointer in the protected environment.  
    // This is the name that we'll use to refer to this levelgen from our Lua code.  
@@ -420,13 +420,8 @@ void LuaLevelGenerator::prepareEnvironment()
    lua_getglobal(L, "e");                                //                                        -- environment e   
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
-   lua_getfield(L, LUA_REGISTRYINDEX, "lua_helper_functions");
-   setEnvironment();                                     // Set the environment for the code
-   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
-
-   lua_getfield(L, LUA_REGISTRYINDEX, "levelgen_helper_functions");
-   setEnvironment();                                     // Set the environment for the code
-   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
+   if(!loadAndRunGlobalFunction(L, "lua_helper_functions") || !loadAndRunGlobalFunction(L, "levelgen_helper_functions"))
+      return false;
 
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
 
@@ -442,6 +437,8 @@ void LuaLevelGenerator::prepareEnvironment()
    lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   return true;
 }
 
 

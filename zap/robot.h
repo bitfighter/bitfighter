@@ -125,7 +125,7 @@ public:
    static Robot *findBot(const char *id); // Find the bot with specified script id
 
    bool startLua();                       // Fire up bot's Lua processor
-   void prepareEnvironment();
+   bool prepareEnvironment();
    void registerClasses();
    string runGetName();                   // Run bot's getName() function
 
