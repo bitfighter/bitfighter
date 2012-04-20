@@ -51,6 +51,9 @@ struct ShipShapeInfo
 
    S32 cornerCount;
    F32 cornerPoints[16];
+
+   S32 flamePortPointCount;
+   F32 flamePortPoints[16];
 };
 
 

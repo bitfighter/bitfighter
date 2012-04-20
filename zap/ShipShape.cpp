@@ -48,9 +48,14 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
          },
       },
 
-      // Corners - these create trails
+      // Corners - movement trails show from these
       3,
       { -20, -15,   0,  25,   20, -15 },
+
+      // Flame ports
+      // Uses GL_LINES - each pair is drawn as a separate line
+      8,
+      { -12.5, 0,   -12.5, 10,    -12.5, 10,   -7.5, 10,    7.5, 10,   12.5, 10,   12.5, 10,   12.5, 0 },
    },
 
 
@@ -124,6 +129,10 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
             22.5, -10,
             20, 10,
       },
+
+      // Flame ports
+      0,
+      { 0, 0 },
    },
 };
 
