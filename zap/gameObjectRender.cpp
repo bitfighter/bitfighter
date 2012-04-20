@@ -538,13 +538,11 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
    }
 
    // Then render the ship:
+   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
+
    // flameports...
    glColor(Colors::gray50, alpha);
-   static F32 flamePortPoints[] = { -12.5, 0,   -12.5,10,    -12.5, 10,   -7.5, 10,    7.5, 10,   12.5, 10,   12.5, 10,   12.5, 0 };
-   renderVertexArray(flamePortPoints, ARRAYSIZE(flamePortPoints) / 2, GL_LINES);
-
-
-   ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
+   renderVertexArray(shipShapeInfo->flamePortPoints, shipShapeInfo->flamePortPointCount, GL_LINES);
 
    // Inner hull with colored insides
    glColor(shipColor, alpha);
