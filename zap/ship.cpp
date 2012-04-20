@@ -1897,8 +1897,11 @@ void Ship::emitMovementSparks()
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[mShapeType];
    S32 cornerCount = shipShapeInfo->cornerCount;
 
-   Point corners[cornerCount];
-   Point shipDirs[cornerCount];
+   Vector<Point> corners;
+   corners.resize(cornerCount);
+
+   Vector<Point> shipDirs;
+   shipDirs.resize(cornerCount);
 
    for(S32 i = 0; i < cornerCount; i++)
       corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i*2 + 1]);
