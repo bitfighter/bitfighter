@@ -83,7 +83,7 @@ TeamDefUserInterface::TeamDefUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(TeamDefUI);
    mMenuTitle = "Configure Teams";
-   mMenuSubTitle = "For quick configuration, press [ALT]1-9 to specify number of teams";
+   mMenuSubTitle = "For quick configuration, press [ALT-1] - [ALT-9] to specify number of teams";
    mMenuSubTitleColor = Colors::white;
 }
 
