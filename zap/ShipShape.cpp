@@ -29,7 +29,8 @@
 namespace Zap
 {
 
-
+// TODO:  Some other data format?  Perhaps in some resource file for loading on start-up
+// and easier editing??
 ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
 {
    // Normal
@@ -128,18 +129,18 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
             {
                {
                   Colors::red,
-                  { 12.5, 10,   12.5, 5,   12.5, 0 },
-                  18.75,
+                  { -12.5, 10,   -12.5, 5,   -12.5, 0 },
+                  -18.75,
                },
                {
                   Colors::orange50,
-                  { 12.5, 8,   12.5, 5,   12.5, 2 },
-                  12.5,
+                  { -12.5, 8,   -12.5, 5,   -12.5, 2 },
+                  -12.5,
                },
                {
                   Colors::yellow,
-                  { 12.5, 6,   12.5, 5,   12.5, 4 },
-                  6.25,
+                  { -12.5, 6,   -12.5, 5,   -12.5, 4 },
+                  -6.25,
                },
             },
          },
@@ -153,18 +154,18 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
             {
                {
                   Colors::red,
-                  { -12.5, 10,   -12.5, 5,   -12.5, 0 },
-                  -18.75,
+                  { 12.5, 10,   12.5, 5,   12.5, 0 },
+                  18.75,
                },
                {
                   Colors::orange50,
-                  { -12.5, 8,   -12.5, 5,   -12.5, 2 },
-                  -12.5,
+                  { 12.5, 8,   12.5, 5,   12.5, 2 },
+                  12.5,
                },
                {
                   Colors::yellow,
-                  { -12.5, 6,   -12.5, 5,   -12.5, 4 },
-                  -6.25,
+                  { 12.5, 6,   12.5, 5,   12.5, 4 },
+                  6.25,
                },
             },
          },
@@ -247,7 +248,156 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
       // Flame ports
       0,
       { 0, 0 },
+
+
    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   // Cube
+   {
+      // Outer hull
+      4,
+      { -17.5, -17.5,   17.5, -17.5,   17.5, 17.5,   -17.5, 17.5, },
+
+      // Inner hull
+      3,
+      {
+         {
+            5,
+            { -15, -15,   15, -15,   15, 15,   -15, 15,   -15, -15, },
+         },
+      },
+
+      // Corners - movement trails show from these
+      4,
+      { -17.5, -17.5,   17.5, -17.5,   17.5, 17.5,   -17.5, 17.5, },
+
+      // Flame ports
+      0,
+      { 0, 0 },
+
+      // Flames
+      // Forward
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { -8, -17.5,   0, -17.5,   8, -17.5 },
+                  -20,
+               },
+               {
+                  Colors::orange50,
+                  { -6, -17.5,   0, -17.5,   6, -17.5 },
+                  -15,
+               },
+               {
+                  Colors::yellow,
+                  { -4, -17.5,   0, -17.5,   4, -17.5 },
+                  -8,
+               },
+            },
+         },
+      },
+
+      // Reverse
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { -8, 17.5,   0, 17.5,   8, 17.5 },
+                  20,
+               },
+               {
+                  Colors::orange50,
+                  { -6, 17.5,   0, 17.5,   6, 17.5 },
+                  15,
+               },
+               {
+                  Colors::yellow,
+                  { -4, 17.5,   0, 17.5,   4, 17.5 },
+                  8,
+               },
+            },
+         },
+      },
+
+      // Port
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { -17.5, -8,   -17.5, 0,   -17.5, 8, },
+                  -20,
+               },
+               {
+                  Colors::orange50,
+                  { -17.5, -6,  -17.5,  0,  -17.5,  6, },
+                  -15,
+               },
+               {
+                  Colors::yellow,
+                  { -17.5, -4,   -17.5, 0,   -17.5, 4, },
+                  -8,
+               },
+            },
+         },
+      },
+
+      // Starboard
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { 17.5, -8,   17.5, 0,   17.5, 8, },
+                  20,
+               },
+               {
+                  Colors::orange50,
+                  { 17.5, -6,  17.5,  0,  17.5,  6, },
+                  15,
+               },
+               {
+                  Colors::yellow,
+                  { 17.5, -4,   17.5, 0,   17.5, 4, },
+                  8,
+               },
+            },
+         },
+      },
+
+   },
+
 };
 
 } /* namespace Zap */

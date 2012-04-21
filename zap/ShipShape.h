@@ -94,6 +94,7 @@ public:
    {
       Normal,          // Our beloved triangle
       BirdOfPrey,      // tlhIngan toQDuj!
+      Cube,            // You will be assimilated
       ShapeTypeCount
    };
 

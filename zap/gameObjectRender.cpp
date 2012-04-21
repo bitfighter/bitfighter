@@ -481,11 +481,11 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
       renderShipFlame(shipShapeInfo->reverseFlames, shipShapeInfo->reverseFlameCount, thrusts[1], true);
 
    // Right/left rotational thrusters - only one or the other
-   if(thrusts[3] > 0)
-      renderShipFlame(shipShapeInfo->portFlames, shipShapeInfo->portFlameCount, thrusts[3], false);
+   if(thrusts[2] > 0)
+      renderShipFlame(shipShapeInfo->portFlames, shipShapeInfo->portFlameCount, thrusts[2], false);
 
-   else if(thrusts[2] > 0)
-      renderShipFlame(shipShapeInfo->starboardFlames, shipShapeInfo->starboardFlameCount, thrusts[2], false);
+   else if(thrusts[3] > 0)
+      renderShipFlame(shipShapeInfo->starboardFlames, shipShapeInfo->starboardFlameCount, thrusts[3], false);
 
    // Flame ports...
    glColor(Colors::gray50, alpha);
