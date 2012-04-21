@@ -445,102 +445,49 @@ void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive
 }
 
 
+static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, bool yThruster)
+{
+   for(S32 i = 0; i < flameCount; i++)
+      for(S32 j = 0; j < flames[i].layerCount; j++)
+      {
+         ShipFlameLayer *flameLayer = &flames[i].layers[j];
+         glColor(flameLayer->color);
+         glBegin(GL_LINE_STRIP);
+            glVertex2f(flameLayer->points[0], flameLayer->points[1]);
+
+            if(yThruster)
+               glVertex2f(flameLayer->points[2], flameLayer->points[3] + (flameLayer->multiplier * thrust));
+            else
+               glVertex2f(flameLayer->points[2] + (flameLayer->multiplier * thrust), flameLayer->points[3]);
+
+            glVertex2f(flameLayer->points[4], flameLayer->points[5]);
+         glEnd();
+      }
+}
+
+
 void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   // First render the thrusters
-   if(thrusts[0] > 0) // forward thrust
-   {
-      glColor(Colors::red, alpha);
-      glBegin(GL_LINES);
-         glVertex2f(-8, -15);
-         glVertex2f(0, -15 - 20 * thrusts[0]);
-         glVertex2f(0, -15 - 20 * thrusts[0]);
-         glVertex2f(8, -15);
-      glEnd();
-
-      glColor(Colors::orange50, alpha);
-      glBegin(GL_LINES);
-         glVertex2f(-6, -15);
-         glVertex2f(0, -15 - 15 * thrusts[0]);
-         glVertex2f(0, -15 - 15 * thrusts[0]);
-         glVertex2f(6, -15);
-      glEnd();
-
-      glColor(Colors::yellow, alpha);
-      glBegin(GL_LINES);
-         glVertex2f(-4, -15);
-         glVertex2f(0, -15 - 8 * thrusts[0]);
-         glVertex2f(0, -15 - 8 * thrusts[0]);
-         glVertex2f(4, -15);
-      glEnd();
-   }
-   if(thrusts[1] > 0) // back thrust
-   {
-      // two jets:
-      // left and right side:
-      // from 7.5, 10 -> 12.5, 10 and from -7.5, 10 to -12.5, 10
-      glColor(Colors::orange50, alpha);
-      glBegin(GL_LINES);
-         glVertex2f(7.5, 10);
-         glVertex2f(10, 10 + thrusts[1] * 15);
-         glVertex2f(12.5, 10);
-         glVertex2f(10, 10 + thrusts[1] * 15);
-         glVertex2f(-7.5, 10);
-         glVertex2f(-10, 10 + thrusts[1] * 15);
-         glVertex2f(-12.5, 10);
-         glVertex2f(-10, 10 + thrusts[1] * 15);
-      glEnd();
-
-      glColor(Colors::yellow, alpha);
-      glBegin(GL_LINES);
-         glVertex2f(9, 10);
-         glVertex2f(10, 10 + thrusts[1] * 10);
-         glVertex2f(11, 10);
-         glVertex2f(10, 10 + thrusts[1] * 10);
-         glVertex2f(-9, 10);
-         glVertex2f(-10, 10 + thrusts[1] * 10);
-         glVertex2f(-11, 10);
-         glVertex2f(-10, 10 + thrusts[1] * 10);
-      glEnd();
-
-   }
-   float xThrust = -12.5;
-   if(thrusts[3] > 0)
-   {
-      xThrust = -xThrust;
-      thrusts[2] = thrusts[3];
-   }
-   if(thrusts[2] > 0)
-   {
-      glColor(Colors::red, alpha);
-      glBegin(GL_LINE_STRIP);
-         glVertex2f(xThrust, 10);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5f, 5);
-         glVertex2f(xThrust, 0);
-      glEnd();
-
-      glColor(Colors::orange50, alpha);
-      glBegin(GL_LINE_STRIP);
-         glVertex2f(xThrust, 8);
-         glVertex2f(xThrust + thrusts[2] * xThrust, 5);
-         glVertex2f(xThrust, 2);
-      glEnd();
-
-      glColor(Colors::yellow, alpha);
-      glBegin(GL_LINE_STRIP);
-         glVertex2f(xThrust, 6);
-         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5f, 5);
-         glVertex2f(xThrust, 4);
-      glEnd();
-   }
-
-   // Then render the ship:
    ShipShapeInfo *shipShapeInfo = &ShipShape::shipShapeInfos[shapeType];
 
-   // flameports...
+   // First render the thruster flames
+   if(thrusts[0] > 0) // forward thrust
+      renderShipFlame(shipShapeInfo->forwardFlames, shipShapeInfo->forwardFlameCount, thrusts[0], true);
+
+   if(thrusts[1] > 0) // back thrust
+      renderShipFlame(shipShapeInfo->reverseFlames, shipShapeInfo->reverseFlameCount, thrusts[1], true);
+
+   // Right/left rotational thrusters - only one or the other
+   if(thrusts[2] > 0)
+      renderShipFlame(shipShapeInfo->portFlames, shipShapeInfo->portFlameCount, thrusts[2], false);
+
+   else if(thrusts[3] > 0)
+      renderShipFlame(shipShapeInfo->starboardFlames, shipShapeInfo->starboardFlameCount, thrusts[3], false);
+
+   // Flame ports...
    glColor(Colors::gray50, alpha);
    renderVertexArray(shipShapeInfo->flamePortPoints, shipShapeInfo->flamePortPointCount, GL_LINES);
 

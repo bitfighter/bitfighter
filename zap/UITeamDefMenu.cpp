@@ -245,29 +245,6 @@ void TeamDefUserInterface::onTextInput(char ascii)
          ui->getTeam(selectedIndex)->getLineEditor()->addChar(ascii);
       }
    }
-
-   // TODO:  This should not be text input, it should be processed as an input code
-   else if(ascii >= '1' && ascii <= '9')              // Keys 1-9 --> use preset
-   {
-      if(InputCodeManager::checkModifier(KEY_ALT))    // Replace all teams with # of teams based on presets
-      {
-         U32 count = (ascii - '0');
-         ui->clearTeams();
-         for(U32 i = 0; i < count; i++)
-         {
-            EditorTeam *team = new EditorTeam;
-            team->setName(gTeamPresets[i].name);
-            team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
-            ui->addTeam(team);
-         }
-      }
-      else                          // Replace selection with preset of number pressed
-      {
-         U32 indx = (ascii - '1');
-         ui->getTeam(selectedIndex)->setName(gTeamPresets[indx].name);
-         ui->getTeam(selectedIndex)->setColor(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
-      }
-   }
 }
 
 
@@ -368,6 +345,31 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
          selectedIndex = 0;
       playBoop();
       Cursor::disableCursor();
+   }
+
+   // Keys 1-9 --> use team preset
+   else if(inputCode >= KEY_1 && inputCode <= KEY_9)
+   {
+      // Replace all teams with # of teams based on presets
+      if(InputCodeManager::checkModifier(KEY_ALT))
+      {
+         U32 count = (inputCode - KEY_1) + 1;
+         ui->clearTeams();
+         for(U32 i = 0; i < count; i++)
+         {
+            EditorTeam *team = new EditorTeam;
+            team->setName(gTeamPresets[i].name);
+            team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
+            ui->addTeam(team);
+         }
+      }
+      // Replace selection with preset of number pressed
+      else
+      {
+         U32 index = (inputCode - KEY_1);
+         ui->getTeam(selectedIndex)->setName(gTeamPresets[index].name);
+         ui->getTeam(selectedIndex)->setColor(gTeamPresets[index].r, gTeamPresets[index].g, gTeamPresets[index].b);
+      }
    }
    else
       return false;
