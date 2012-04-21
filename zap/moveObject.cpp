@@ -35,11 +35,13 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "sparkManager.h"
-#include "UI.h" // for extern void glColor
-#include "UIEditorMenus.h"
+#  include "ClientGame.h"
+#  include "sparkManager.h"
+#  include "UI.h" // for extern void glColor
+#  include "UIEditorMenus.h"
 #endif
+
+#include "LuaWrapper.h"
 
 #include <math.h>
 
@@ -2001,10 +2003,73 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
+///////////////////////////////////////////////////////
+
+
+static S32 TestItemL_getClassId(lua_State* L)
+{
+   return LuaObject::returnInt(L, TestItemTypeNumber);
+}
+
+
+S32 TestItem::getClassID(lua_State *L)
+{
+   return returnInt(L, TestItemTypeNumber);
+}
+
+
+static S32 TestItemL_getLoc(lua_State* L)
+{
+   TestItem* w = luaW_check<TestItem>(L, 1); 
+   
+   return w->getLoc(L);
+}
+
+
+static S32 TestItemL_getRad(lua_State* L)
+{
+   TestItem* w = luaW_check<TestItem>(L, 1); 
+
+   return w->getRad(L);
+}
+
+
+static S32 TestItemL_getVel(lua_State* L)
+{
+   TestItem* w = luaW_check<TestItem>(L, 1); 
+   
+   return w->getVel(L);
+}
+
+
+
+static luaL_reg testItemMetatable[] =
+{
+    { "getClassID",  TestItemL_getClassId },
+    { "getLoc",      TestItemL_getLoc },
+    { "getRad",      TestItemL_getRad },
+    { "getVel",      TestItemL_getVel },
+    { NULL, NULL }
+};
+
+
+void TestItem::push(lua_State *L)
+{
+   logprintf("Before");
+   LuaObject::dumpStack(L);
+   luaW_register<TestItem>(L, "TestItem", NULL, testItemMetatable);     // Should really only do this once
+   lua_pop(L, 1);    // Bug?
+   logprintf("After");
+   LuaObject::dumpStack(L);
+
+   luaW_push<TestItem>(L, this);
+}
+
+
 ///// Lua Interface
 
 const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
-
+/*
 // Lua constructor
 TestItem::TestItem(lua_State *L)
 {
@@ -2035,7 +2100,7 @@ void TestItem::push(lua_State *L)
 {
    Lunar<TestItem>::push(L, this);
 }
-
+*/
 
 ////////////////////////////////////////
 ////////////////////////////////////////

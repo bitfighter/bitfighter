@@ -128,6 +128,10 @@ typedef struct { LuaObject *objectPtr; } UserData;
 ////////////////////////////////////////
 
 
+#define LUA_HELPER_FUNCTIONS_KEY      "lua_helper_functions"
+#define ROBOT_HELPER_FUNCTIONS_KEY    "robot_helper_functions"
+#define LEVELGEN_HELPER_FUNCTIONS_KEY "levelgen_helper_functions"
+
 class LuaScriptRunner
 {
 public:
@@ -199,7 +203,7 @@ public:
 
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
-   bool loadAndRunGlobalFunction(lua_State *L, const char *functionName);
+   bool loadAndRunGlobalFunction(lua_State *L, const char *key);
 
 };
 

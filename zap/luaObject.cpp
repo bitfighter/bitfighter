@@ -610,15 +610,15 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
-bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *functionName)
+bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, functionName);     // Get function out of the registry      -- functionName()
-   setEnvironment();                                     // Set the environment for the code
-   S32 err = lua_pcall(L, 0, 0, 0);                      // Run it                                 -- <<empty stack>>
+   lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
+   setEnvironment();                            // Set the environment for the code
+   S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                 -- <<empty stack>>
 
    if(err != 0)
    {
-      logError("Failed to load startup functions %s: %s", functionName, lua_tostring(L, -1));
+      logError("Failed to load startup functions %s: %s", key, lua_tostring(L, -1));
 
       lua_pop(L, 1);             // Remove error message from stack
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
@@ -637,7 +637,7 @@ bool LuaScriptRunner::loadScript()
 {
    static const S32 MAX_CACHE_SIZE = 2;      // For now -- can be bigger when we know this works
 
-   bool cacheScripts = true;     // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
+   bool cacheScripts = false;     // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
@@ -817,9 +817,9 @@ bool LuaScriptRunner::configureNewLuaInstance()
                     " end");
 
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   return(loadCompileSaveHelper("lua_helper_functions.lua",      "lua_helper_functions")   &&
-          loadCompileSaveHelper("robot_helper_functions.lua",    "robot_helper_functions") &&
-          loadCompileSaveHelper("levelgen_helper_functions.lua", "levelgen_helper_functions"));
+   return(loadCompileSaveHelper("lua_helper_functions.lua",      LUA_HELPER_FUNCTIONS_KEY)   &&
+          loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY) &&
+          loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY));
 }
 
 
@@ -887,7 +887,7 @@ void LuaScriptRunner::registerClasses()
 
    Lunar<RepairItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
-   Lunar<TestItem>::Register(L);
+   //Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
    Lunar<Turret>::Register(L);
    Lunar<Teleporter>::Register(L);

@@ -324,6 +324,8 @@
     <ClInclude Include="..\zap\Colors.h" />
     <ClInclude Include="..\zap\polygon.h" />
     <ClInclude Include="..\zap\projectile.h" />
+    <ClInclude Include="LuaWrapper.h" />
+    <ClInclude Include="LuaWrapperUtils.h" />
     <ClInclude Include="OpenglUtils.h" />
     <ClInclude Include="PickupItem.h" />
     <ClInclude Include="quickChatHelper.h" />

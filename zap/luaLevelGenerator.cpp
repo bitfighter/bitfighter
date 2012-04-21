@@ -420,7 +420,7 @@ bool LuaLevelGenerator::prepareEnvironment()
    lua_getglobal(L, "e");                                //                                        -- environment e   
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
-   if(!loadAndRunGlobalFunction(L, "lua_helper_functions") || !loadAndRunGlobalFunction(L, "levelgen_helper_functions"))
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
       return false;
 
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
