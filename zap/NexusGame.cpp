@@ -46,7 +46,7 @@
 namespace Zap
 {
 
-const S32 MAX_DROP_FLAGS = 200;
+const U32 MAX_DROP_FLAGS = 200;
 
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
