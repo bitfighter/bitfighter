@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "ShipShape.h"
+#include "Colors.h"
 
 namespace Zap
 {
@@ -56,6 +57,119 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
       // Uses GL_LINES - each pair is drawn as a separate line
       8,
       { -12.5, 0,   -12.5, 10,    -12.5, 10,   -7.5, 10,    7.5, 10,   12.5, 10,   12.5, 10,   12.5, 0 },
+
+      // Flames
+      // Uses GL_LINE_STRIP
+      // Forward
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { -8, -15,   0, -15,   8, -15 },
+                  -20,
+               },
+               {
+                  Colors::orange50,
+                  { -6, -15,   0, -15,   6, -15 },
+                  -15,
+               },
+               {
+                  Colors::yellow,
+                  { -4, -15,   0, -15,   4, -15 },
+                  -8,
+               },
+            },
+         },
+      },
+
+      // Reverse
+      2,
+      {
+         {
+            2,
+            {
+               {
+                  Colors::orange50,
+                  { 7.5, 10,   10, 10,   12.5, 10 },
+                  15,
+               },
+               {
+                  Colors::yellow,
+                  { 9, 10,   10, 10,   11, 10 },
+                  10,
+               },
+            },
+         },
+         {
+            2,
+            {
+               {
+                  Colors::orange50,
+                  { -7.5, 10,   -10, 10,   -12.5, 10 },
+                  15,
+               },
+               {
+                  Colors::yellow,
+                  { -9, 10,   -10, 10,   -11, 10 },
+                  10,
+               },
+            },
+         },
+      },
+
+      // Port
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { 12.5, 10,   12.5, 5,   12.5, 0 },
+                  18.75,
+               },
+               {
+                  Colors::orange50,
+                  { 12.5, 8,   12.5, 5,   12.5, 2 },
+                  12.5,
+               },
+               {
+                  Colors::yellow,
+                  { 12.5, 6,   12.5, 5,   12.5, 4 },
+                  6.25,
+               },
+            },
+         },
+      },
+
+      // Starboard
+      1,
+      {
+         {
+            3,
+            {
+               {
+                  Colors::red,
+                  { -12.5, 10,   -12.5, 5,   -12.5, 0 },
+                  -18.75,
+               },
+               {
+                  Colors::orange50,
+                  { -12.5, 8,   -12.5, 5,   -12.5, 2 },
+                  -12.5,
+               },
+               {
+                  Colors::yellow,
+                  { -12.5, 6,   -12.5, 5,   -12.5, 4 },
+                  -6.25,
+               },
+            },
+         },
+      },
+
    },
 
 
@@ -135,6 +249,5 @@ ShipShapeInfo ShipShape::shipShapeInfos[ShapeTypeCount] =
       { 0, 0 },
    },
 };
-
 
 } /* namespace Zap */

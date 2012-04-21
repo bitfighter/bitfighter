@@ -27,11 +27,27 @@
 #define SHIPSHAPE_H_
 
 #include "tnlTypes.h"
+#include "Color.h"
 
 using namespace TNL;
 
 namespace Zap
 {
+
+
+struct ShipFlameLayer
+{
+   Color color;
+   F32 points[6];             // 3 points for a triangle
+   F32 multiplier;            // Thrust multiplier
+};
+
+
+struct ShipFlame
+{
+   S32 layerCount;
+   ShipFlameLayer layers[3];  // 2 or 3 triangles
+};
 
 
 struct ShipInnerHull
@@ -54,6 +70,19 @@ struct ShipShapeInfo
 
    S32 flamePortPointCount;
    F32 flamePortPoints[16];
+
+   // Flames
+   S32 forwardFlameCount;
+   ShipFlame forwardFlames[2];
+
+   S32 reverseFlameCount;
+   ShipFlame reverseFlames[2];
+
+   S32 portFlameCount;
+   ShipFlame portFlames[2];
+
+   S32 starboardFlameCount;
+   ShipFlame starboardFlames[2];
 };
 
 
