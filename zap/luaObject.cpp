@@ -871,6 +871,12 @@ void LuaScriptRunner::deleteScript(const char *name)
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
+   // LuaWrapper managed objects
+   TestItem::Register(L);
+
+   ///////////////////////////////////////
+
+   // Lunar managed objects
    Lunar<LuaUtil>::Register(L);
 
    Lunar<LuaGameInfo>::Register(L);

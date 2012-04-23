@@ -28,7 +28,6 @@
 
 #include "item.h"          // Parent class
 
-
 namespace Zap
 {
 
@@ -400,13 +399,19 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class LuaTestItem;
+
 class TestItem : public MoveItem
 {
    typedef MoveItem Parent;
 
 public:
    TestItem();     // Constructor
+   ~TestItem();
    TestItem *clone() const;
+
+   // Test methods
+   void idle(GameObject::IdleCallPath path);
 
    static const S32 TEST_ITEM_RADIUS = 60;
 
@@ -428,6 +433,9 @@ public:
    ///// Lua Interface
 
    TestItem(lua_State *L);             //  Lua constructor
+   LuaTestItem *mLuaProxy;          // Proxy object
+
+   static void Register(lua_State *L);
 
    static const char className[];
 
@@ -436,6 +444,27 @@ public:
    S32 getClassID(lua_State *L);
    void push(lua_State *L);
 };
+
+
+// Proxy object for testItem -- we want this as generic as possible
+class LuaTestItem 
+{
+public:
+   TestItem *mTestItem;    
+   bool mDefunct;
+
+   static S32 id;
+   S32 mId;
+
+public:
+   LuaTestItem::LuaTestItem();                     // Constructor (unused, but required by LuaWrapper)
+   LuaTestItem::LuaTestItem(TestItem *testItem);   // Constructor
+   LuaTestItem::~LuaTestItem();                    // Destructor
+
+   void setDefunct(bool isDefunct);
+   bool isDefunct();
+};
+
 
 
 ////////////////////////////////////////

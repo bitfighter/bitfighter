@@ -64,6 +64,7 @@ GridDatabase *LuaRobot::getBotZoneDatabase()
    return ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
 }
 
+
 // Constructor
 LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
 {
