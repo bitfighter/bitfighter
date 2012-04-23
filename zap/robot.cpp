@@ -1020,7 +1020,7 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
       mModuleSecondaryActive[i] = false;
    }
 #ifndef ZAP_DEDICATED
-   mShapeType = ShipShape::Cube;
+   mShapeType = ShipShape::Normal;
 #endif
 }
 
