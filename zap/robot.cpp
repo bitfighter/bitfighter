@@ -704,7 +704,7 @@ S32 LuaRobot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
       lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
 
-   TNLAssert(lua_gettop(L) == 1 && lua_istable(L, -1)|| LuaObject::dumpStack(L), "Should only have table!");
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaObject::dumpStack(L), "Should only have table!");
 
 
    S32 pushed = 0;      // Count of items we put into our table
