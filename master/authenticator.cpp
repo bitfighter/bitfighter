@@ -87,7 +87,6 @@ bool Authenticator::authenticate(string &username, string password){
 
 bool Authenticator::authenticate(string &username, string password, int &errorCode){
 	try{
-		for (unsigned int i=0; i<username.length(); i++) username[i] = tolower(username[i]);
 		if (!isSqlSafe(username)){
 			errorCode = 3; //invalid username, possible sql injection attempt.
 			return false;
