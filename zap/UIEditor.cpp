@@ -3511,6 +3511,10 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode))      // Pass the key on to the console for processing
       return true;
 
+   // If console is open, then we want to capture text, so return false
+   if(OGLCONSOLE_GetVisibility())
+      return false;
+
    string inputString = InputCodeManager::makeInputString(inputCode);
 
    // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
