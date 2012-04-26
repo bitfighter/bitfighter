@@ -604,7 +604,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 // Sort by order in which players should be added to teams
 // Highest ratings first -- runs on server only, so these should be FullClientInfos
 // Return 1 if a is above b, -1 if b is above a, and 0 if they are equal
-static S32 QSORT_CALLBACK AddOrderSort(ClientInfo **a, ClientInfo **b)
+static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo> *b)
 {
    bool aIsIdle = !(*a)->getConnection() || !(*a)->getConnection()->getObjectMovedThisGame();
    bool bIsIdle = !(*b)->getConnection() || !(*b)->getConnection()->getObjectMovedThisGame();

@@ -27,7 +27,6 @@
 #define _PLAYERINFO_H_
 
 #include "gameType.h"      // For PlayerInfo below...
-#include "robot.h"         // Used in RobotPlayerInfo below...
 
 namespace Zap
 {
@@ -86,6 +85,8 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+class Robot;
 
 class RobotPlayerInfo : public LuaPlayerInfo
 {

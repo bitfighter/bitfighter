@@ -37,6 +37,7 @@
 #include "IniFile.h"          // For CIniFile
 #include "ClientInfo.h"
 #include "ServerGame.h"
+#include "robot.h"
 
 
 #ifndef ZAP_DEDICATED
@@ -2525,8 +2526,6 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    clientGame->onPlayerQuit(name);
 
    updateLeadingPlayerAndScore();
-
-   delete clientInfo;
 #endif
 }
 

@@ -30,6 +30,7 @@
 #include "stringUtils.h"
 #include "ClientInfo.h"
 #include "ServerGame.h"
+#include "robot.h"
 
 #ifdef ZAP_DEDICATED
 #   include "Colors.h"

@@ -269,7 +269,7 @@ ClientInfo *Game::getClientInfo(S32 index) const
 }
 
 
-const Vector<ClientInfo *> *Game::getClientInfos()
+const Vector<RefPtr<ClientInfo> > *Game::getClientInfos()
 {
    return &mClientInfos;
 }

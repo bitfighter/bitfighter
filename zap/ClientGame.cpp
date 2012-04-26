@@ -113,7 +113,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    mUIManager = new UIManager(this);               // Gets deleted in destructor
 
    mClientInfo = new FullClientInfo(this, NULL, false);  // Will be deleted in destructor
-   mLocalRemoteClientInfo = NULL;
 
    mSpawnDelayed = false;
    mGameIsRunning = true;                    // Only matters when game is suspended
@@ -159,7 +158,6 @@ ClientGame::~ClientGame()
    delete mUserInterfaceData;
    delete mUIManager; 
    delete mConnectionToServer.getPointer();
-   delete mClientInfo;
 }
 
 
@@ -993,6 +991,8 @@ void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTa
 // Established connection is terminated.  Compare to onConnectTerminate() below.
 void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
 {
+   clearClientList();  // this can fix all cases of extra names appearing on score board when connecting to server after getting disconnected other then "SelfDisconnect"
+
    if(getUIManager()->cameFrom(EditorUI))
      getUIManager()->reactivateMenu(getUIManager()->getEditorUserInterface());
    else

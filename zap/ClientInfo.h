@@ -51,7 +51,7 @@ class LuaPlayerInfo;
 // This object only concerns itself with things that one client tracks about another.  We use it for other purposes, of course, 
 // as a convenient strucure for holding certain settings about the local client, or about remote clients when we are running on the server.
 // But the general scope of what we track should be limited; other items should be stored directly on the GameConnection object itself.
-class ClientInfo : public SafePtrData
+class ClientInfo : public SafePtrData, public RefPtrData
 {
 private:
    LuaPlayerInfo *mPlayerInfo;   // Lua access to this class

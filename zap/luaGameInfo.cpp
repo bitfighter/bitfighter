@@ -30,6 +30,7 @@
 #include "NexusGame.h"
 #include "ServerGame.h"
 #include "ClientInfo.h"
+#include "robot.h"
 
 
 namespace Zap
