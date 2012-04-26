@@ -25,6 +25,7 @@
 
 #include "EventManager.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
+#include "robot.h"
 
 //#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "oglconsole.h"

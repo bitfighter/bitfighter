@@ -87,8 +87,8 @@ private:
    // about the local player.  When a player connects to a server, all players (including the connecting player) are sent a much briefer
    // set of info about the player, which is stored in a RemoteClientInfo.  So when a player connects, they get several RemoteClientInfos,
    // one of which describes themselves.  It is occasionally useful to have a handle on that, which is what mLocalRemoteClientInfo provides.
-   ClientInfo *mClientInfo;               // ClientInfo object for local client
-   ClientInfo *mLocalRemoteClientInfo;    // ClientInfo pointer to the remote ClientInfo received from the server
+   RefPtr<ClientInfo> mClientInfo;               // ClientInfo object for local client
+   SafePtr<ClientInfo> mLocalRemoteClientInfo;    // ClientInfo pointer to the remote ClientInfo received from the server
 
    S32 findClientIndex(const StringTableEntry &name);
 

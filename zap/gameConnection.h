@@ -73,7 +73,7 @@ private:
    // For saving passwords
    string mLastEnteredPassword;
 
-   ClientInfo *mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
+   RefPtr<ClientInfo> mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
    bool mClientInfoWasCreatedLocally;     // Track whether we are responsible for deleting the clientInfo in the destructor
 
 #ifndef ZAP_DEDICATED

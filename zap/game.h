@@ -218,7 +218,7 @@ protected:
    // On the Client, this list will track info about every player in the game.  Note that the local client will also be represented here,
    // but the info in these records will only be managed by the server.  E.g. if the local client's name changes, the client's record
    // should not be updated directly, but rather by notifying the server, and having the server notify us.
-   Vector<ClientInfo *> mClientInfos;
+   Vector<RefPtr<ClientInfo> > mClientInfos;
 
    TeamManager *mTeamManager;
 
@@ -251,7 +251,7 @@ public:
    S32 getRobotCount() const;                                           // Returns number of bots
 
    ClientInfo *getClientInfo(S32 index) const;
-   const Vector<ClientInfo *> *getClientInfos();
+   const Vector<RefPtr<ClientInfo> > *getClientInfos();
 
    void addToClientList(ClientInfo *clientInfo);               
    void removeFromClientList(const StringTableEntry &name);             // Client side

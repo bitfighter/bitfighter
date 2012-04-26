@@ -69,7 +69,6 @@ GameConnection::GameConnection()
    // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
    // in the arguments makes VC++ nervous, which in turn makes me nervous.
    mClientInfo = NULL;    /// FullClientInfo created when we know what the ServerGame is, in readConnectRequest
-   mClientInfoWasCreatedLocally = true;
 
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
@@ -86,7 +85,6 @@ GameConnection::GameConnection(ClientGame *clientGame)
 
    mSettings = clientGame->getSettings();
    mClientInfo = clientGame->getClientInfo();      // Now have a FullClientInfo representing the local player
-   mClientInfoWasCreatedLocally = false;
 
    TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
    if(mClientInfo->getName() == "")
@@ -155,8 +153,6 @@ GameConnection::~GameConnection()
 
    delete mDataBuffer;
 
-   if(mClientInfoWasCreatedLocally && mClientInfo != NULL)
-      delete mClientInfo;
 }
 
 
