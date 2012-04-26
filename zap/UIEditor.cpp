@@ -166,8 +166,7 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<EditorObjectDatabase> da
 // Really quitting... no going back!
 void EditorUserInterface::onQuitted()
 {
-   clearUndoHistory();     // Clear up a little memory
-   mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
+   cleanUp();
 }
 
 
@@ -502,14 +501,15 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 }
 
 
-extern S32 gMaxPolygonPoints;
 
-// Loads a level
-void EditorUserInterface::loadLevel()
+
+void EditorUserInterface::cleanUp()
 {
    ClientGame *game = getGame();
 
-   // Initialize
+   clearUndoHistory();     // Clear up a little memory
+   mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
+   
    mLoadTarget = getDatabase();
    clearDatabase(mLoadTarget);
    game->clearTeams();
@@ -522,25 +522,43 @@ void EditorUserInterface::loadLevel()
 
    game->resetLevelInfo();
 
-   GameType *gameType = new GameType;
-   gameType->addToGame(game, mLoadTarget);
+   if(game->getGameType())
+      delete game->getGameType();
+}
+
+extern S32 gMaxPolygonPoints;
+
+// Loads a level
+void EditorUserInterface::loadLevel()
+{
+   ClientGame *game = getGame();
+
+   cleanUp();
 
    FolderManager *folderManager = game->getSettings()->getFolderManager();
    string fileName = joindir(folderManager->levelDir, mEditFileName).c_str();
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   if(game->loadLevelFromFile(fileName, true, mLoadTarget))   
+   bool levelLoaded = game->loadLevelFromFile(fileName, true, mLoadTarget);
+
+   if(!game->getGameType())  // make sure we have GameType
+   {
+      GameType *gameType = new GameType;
+      gameType->addToGame(game, mLoadTarget);
+   }
+
+   makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
+
+   if(levelLoaded)   
    {
       // Loaded a level!
-      makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
    }
    else     
    {
       // New level!
-      makeSureThereIsAtLeastOneTeam();                               // Make sure we at least have one team, like the man said.
    }
 
    clearUndoHistory();                 // Clean out undo/redo buffers
