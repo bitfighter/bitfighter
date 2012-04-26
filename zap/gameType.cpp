@@ -2521,8 +2521,6 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   ClientInfo *clientInfo = clientGame->findClientInfo(name);
-
    clientGame->onPlayerQuit(name);
 
    updateLeadingPlayerAndScore();
