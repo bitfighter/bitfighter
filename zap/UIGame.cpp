@@ -1620,6 +1620,14 @@ void GameUserInterface::restartLevelHandler(const Vector<string> &words)
    if(game->hasLevelChange("!!! You don't have permission to change levels"))
       game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
 }
+void GameUserInterface::randomLevelHandler(const Vector<string> &words)
+{
+   ClientGame *game = getGame();
+   if(game->getConnectionToServer()->mConnectionVersion < 3)
+      game->displayErrorMessage("!!! Not available on outdated server"); // outdated server will ack like REPLAY_LEVEL
+   else if(game->hasLevelChange("!!! You don't have permission to change levels"))
+      game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::RANDOM_LEVEL, false);
+}
 
 
 void GameUserInterface::shutdownServerHandler(const Vector<string> &words)
@@ -2330,6 +2338,7 @@ CommandInfo chatCmds[] = {
    { "next",        &GameUserInterface::nextLevelHandler,       {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start next level" },
    { "prev",        &GameUserInterface::prevLevelHandler,       {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
    { "restart",     &GameUserInterface::restartLevelHandler,    {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
+   { "random",      &GameUserInterface::randomLevelHandler,     {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start random level" },
    { "settime",     &GameUserInterface::setTimeHandler,         { INT },                 1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
    { "setscore",    &GameUserInterface::setWinningScoreHandler, { INT },                 1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
    { "resetscore",  &GameUserInterface::resetScoreHandler,      {  },                    0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },

@@ -352,6 +352,7 @@ public:
    void nextLevelHandler(const Vector<string> &words);
    void prevLevelHandler(const Vector<string> &words);
    void restartLevelHandler(const Vector<string> &words);
+   void randomLevelHandler(const Vector<string> &words);
    void shutdownServerHandler(const Vector<string> &words);
    void kickPlayerHandler(const Vector<string> &words);
    void submitPassHandler(const Vector<string> &words);
