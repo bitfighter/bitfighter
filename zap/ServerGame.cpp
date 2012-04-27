@@ -89,7 +89,8 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 {
    mVoteTimer = 0;
 
-   // Stupid c++ spec doesn't allow ternary logic with static const if there is no declaration
+   // Stupid c++ spec doesn't allow ternary logic with static const if there is no definition
+   // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
    mNextLevel = settings->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
 
