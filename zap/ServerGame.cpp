@@ -88,7 +88,10 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
       Game(address, settings)
 {
    mVoteTimer = 0;
-   mNextLevel = settings->getIniSettings()->randomLevels ? RANDOM_LEVEL : NEXT_LEVEL;
+
+   // Stupid c++ spec doesn't allow ternary logic with static const if there is no declaration
+   // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
+   mNextLevel = settings->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
 
    mShuttingDown = false;
 
@@ -790,7 +793,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
       bool first = true;
       bool found = false;
 
-      U32 currLevel = CurrentLevelIndex;
+      S32 currLevel = CurrentLevelIndex;
 
       // Cycle through the levels looking for one that matches our player counts
       while(first || CurrentLevelIndex != currLevel)
@@ -823,7 +826,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
    }
    else if(nextLevel == RANDOM_LEVEL)
    {
-      U32 newLevel;
+      S32 newLevel;
       U32 RetryLeft = 200;
       S32 playerCount = getPlayerCount();
       if(mGameSuspended)
@@ -850,7 +853,7 @@ S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
 void ServerGame::suspendGame()
 {
    mGameSuspended = true;
-   cycleLevel(getSettings()->getIniSettings()->randomLevels ? RANDOM_LEVEL : NEXT_LEVEL);    // Advance to beginning of next level
+   cycleLevel(getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL);    // Advance to beginning of next level
 }
 
 
@@ -1455,7 +1458,7 @@ void ServerGame::idle(U32 timeDelta)
       // Normalize ratings for this game
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
-      mNextLevel = getSettings()->getIniSettings()->randomLevels ? RANDOM_LEVEL : NEXT_LEVEL;
+      mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
 
 
