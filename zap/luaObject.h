@@ -179,13 +179,15 @@ protected:
    
    void setEnvironment();
 
-   void deleteScript(const char *name);      // Remove saved script from the Lua registry
+   static void deleteScript(const char *name);      // Remove saved script from the Lua registry
 
    virtual void tickTimer(U32 deltaT);       // Advance script timers
 
 public:
    LuaScriptRunner();               // Constructor
    virtual ~LuaScriptRunner();      // Destructor
+
+   static void ClearAllCachedScripts();
 
    void setScriptingDir(const string &scriptingDir);
 
