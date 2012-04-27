@@ -88,7 +88,7 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
       Game(address, settings)
 {
    mVoteTimer = 0;
-   mNextLevel = NEXT_LEVEL;
+   mNextLevel = settings->getIniSettings()->randomLevels ? RANDOM_LEVEL : NEXT_LEVEL;
 
    mShuttingDown = false;
 
@@ -450,28 +450,6 @@ bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
 }
 
 
-// Helps resolve meta-indices such as NEXT_LEVEL.  If you pass it a normal level index, you'll just get that back.
-S32 ServerGame::getAbsoluteLevelIndex(S32 indx)
-{
-   if(indx == NEXT_LEVEL)
-      return (mCurrentLevelIndex + 1) % mLevelInfos.size();
-
-   else if(indx == PREVIOUS_LEVEL)
-   {
-      indx = mCurrentLevelIndex - 1;
-      return (indx >= 0) ? indx : mLevelInfos.size() - 1;
-   }
-
-   else if(indx == REPLAY_LEVEL)
-      return mCurrentLevelIndex;
-
-   else if(indx < 0 || indx >= mLevelInfos.size())    // Out of bounds index specified
-      return 0;
-
-   return indx;
-}
-
-
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
 {
@@ -643,9 +621,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
       clientInfo->setScore(0); // Reset player scores, for non team game types
    }
-   
-   setCurrentLevelIndex(nextLevel, getPlayerCount());
-   
+
+   mCurrentLevelIndex = getAbsoluteLevelIndex(nextLevel); // Set mCurrentLevelIndex to refer to the next level we'll play
+
    string levelFile = getLevelFileNameFromIndex(mCurrentLevelIndex);
 
    logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", getLevelNameFromIndex(mCurrentLevelIndex).getString(), levelFile.c_str());
@@ -772,36 +750,54 @@ void ServerGame::resetAllClientTeams()
 }
 
 
-// Set mCurrentLevelIndex to refer to the next level we'll play
-void ServerGame::setCurrentLevelIndex(S32 nextLevel, S32 playerCount)
+static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 playerCount)
 {
-   if(nextLevel >= FIRST_LEVEL)          // Go to specified level
-      mCurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
+   S32 minPlayers = levelInfo.minRecPlayers;
+   S32 maxPlayers = levelInfo.maxRecPlayers;
+
+   if(maxPlayers <= 0)        // i.e. limit doesn't apply or is invalid (note if limit doesn't apply on the minPlayers, 
+      maxPlayers = S32_MAX;   // then it works out because the smallest number of players is 1).
+
+   if(playerCount < minPlayers)
+      return false;
+   if(playerCount > maxPlayers)
+      return false;
+
+   if(game->getSettings()->getIniSettings()->skipUploads)
+      if(!strncmp(levelInfo.levelFileName.getString(), "upload_", 7))
+         return false;
+
+   return true;
+
+}
+
+
+// Helps resolve meta-indices such as NEXT_LEVEL.  If you pass it a normal level index, you'll just get that back.
+S32 ServerGame::getAbsoluteLevelIndex(S32 nextLevel)
+{
+   S32 CurrentLevelIndex = mCurrentLevelIndex;
+   if(nextLevel >= FIRST_LEVEL && nextLevel < mLevelInfos.size())          // Go to specified level
+      CurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
 
    else if(nextLevel == NEXT_LEVEL)      // Next level
    {
       // If game is supended, then we are waiting for another player to join.  That means that (probably)
       // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
+      S32 playerCount = getPlayerCount();
       if(mGameSuspended)
          playerCount++;
 
       bool first = true;
       bool found = false;
 
-      U32 currLevel = mCurrentLevelIndex;
+      U32 currLevel = CurrentLevelIndex;
 
       // Cycle through the levels looking for one that matches our player counts
-      while(first || mCurrentLevelIndex != currLevel)
+      while(first || CurrentLevelIndex != currLevel)
       {
-         mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();
+         CurrentLevelIndex = (CurrentLevelIndex + 1) % mLevelInfos.size();
 
-         S32 minPlayers = mLevelInfos[mCurrentLevelIndex].minRecPlayers;
-         S32 maxPlayers = mLevelInfos[mCurrentLevelIndex].maxRecPlayers;
-
-         if(maxPlayers <= 0)        // i.e. limit doesn't apply or is invalid (note if limit doesn't apply on the minPlayers, 
-            maxPlayers = S32_MAX;   // then it works out because the smallest number of players is 1).
-
-         if(playerCount >= minPlayers && playerCount <= maxPlayers)
+         if(checkIfLevelIsOk(this, mLevelInfos[CurrentLevelIndex], playerCount))
          {
             found = true;
             break;
@@ -814,24 +810,47 @@ void ServerGame::setCurrentLevelIndex(S32 nextLevel, S32 playerCount)
       // We didn't find a suitable level... just proceed to the next one in the list
       if(!found)
       {
-         mCurrentLevelIndex++;
-         if(S32(mCurrentLevelIndex) >= mLevelInfos.size())
-            mCurrentLevelIndex = FIRST_LEVEL;
+         CurrentLevelIndex++;
+         if(S32(CurrentLevelIndex) >= mLevelInfos.size())
+            CurrentLevelIndex = FIRST_LEVEL;
       }
    } 
    else if(nextLevel == PREVIOUS_LEVEL)
-      mCurrentLevelIndex = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevelInfos.size() - 1;
+   {
+      CurrentLevelIndex--;
+      if(CurrentLevelIndex < 0)
+         CurrentLevelIndex = mLevelInfos.size() - 1;
+   }
+   else if(nextLevel == RANDOM_LEVEL)
+   {
+      U32 newLevel;
+      U32 RetryLeft = 200;
+      S32 playerCount = getPlayerCount();
+      if(mGameSuspended)
+         playerCount++;
+
+      do
+      {
+         newLevel = TNL::Random::readI(0, mLevelInfos.size() - 1);
+         RetryLeft--;  // once we hit zero, this loop should exit to prevent endless loop.
+
+      } while(RetryLeft != 0 && (CurrentLevelIndex == newLevel || !checkIfLevelIsOk(this, mLevelInfos[CurrentLevelIndex], playerCount)));
+      CurrentLevelIndex = newLevel;
+   }
 
    //else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
-   //   mCurrentLevelIndex += 0;
-}
+   //   CurrentLevelIndex += 0;
 
+   if(CurrentLevelIndex >= mLevelInfos.size())  // some safety check in case of trying to replay the level that have just deleted
+      CurrentLevelIndex = 0;
+   return CurrentLevelIndex;
+}
 
 // Enter suspended animation mode
 void ServerGame::suspendGame()
 {
    mGameSuspended = true;
-   cycleLevel(NEXT_LEVEL);    // Advance to beginning of next level
+   cycleLevel(getSettings()->getIniSettings()->randomLevels ? RANDOM_LEVEL : NEXT_LEVEL);    // Advance to beginning of next level
 }
 
 
@@ -1436,7 +1455,7 @@ void ServerGame::idle(U32 timeDelta)
       // Normalize ratings for this game
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
-      mNextLevel = NEXT_LEVEL;
+      mNextLevel = getSettings()->getIniSettings()->randomLevels ? RANDOM_LEVEL : NEXT_LEVEL;
    }
 
 

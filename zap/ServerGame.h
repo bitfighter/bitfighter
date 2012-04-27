@@ -74,8 +74,7 @@ private:
 
    Vector<string> mSentHashes;            // Hashes of levels already sent to master
 
-   void setCurrentLevelIndex(S32 nextLevel, S32 playerCount);  // Helper for cycleLevel()
-   void resetAllClientTeams();                                 // Resets all player team assignments
+   void resetAllClientTeams();            // Resets all player team assignments
 
    bool onlyClientIs(GameConnection *client);
 
@@ -120,6 +119,7 @@ public:
    static const S32 NEXT_LEVEL = -1;
    static const S32 REPLAY_LEVEL = -2;
    static const S32 PREVIOUS_LEVEL = -3;
+   static const S32 RANDOM_LEVEL = -4;
    static const S32 FIRST_LEVEL = 0;
 
    GridDatabase *getBotZoneDatabase();

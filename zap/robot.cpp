@@ -181,6 +181,11 @@ S32 LuaRobot::getCPUTime(lua_State *L)
    return returnInt(L, thisRobot->getGame()->getCurrentTime());
 }
 
+S32 LuaRobot::getTime(lua_State *L)
+{
+   return returnInt(L, thisRobot->getCurrentMove().time);
+}
+
 
 // Turn to angle a (in radians, or toward a point)
 S32 LuaRobot::setAngle(lua_State *L)
@@ -630,12 +635,6 @@ S32 LuaRobot::teamMsg(lua_State *L)
    }
 
    return 0;
-}
-
-
-S32 LuaRobot::getTime(lua_State *L)
-{
-   return returnInt(L, thisRobot->getCurrentMove().time);
 }
 
 

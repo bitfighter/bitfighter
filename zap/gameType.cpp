@@ -2808,6 +2808,8 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       serverGame->voteClient(clientInfo, true);
    else if(!stricmp(cmd, "no"))
       serverGame->voteClient(clientInfo, false);
+   else if(!stricmp(cmd, "random"))
+      clientInfo->getConnection()->c2sRequestLevelChange_remote(ServerGame::RANDOM_LEVEL, false); // new after 017a
    else
       clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Invalid Command");
 }

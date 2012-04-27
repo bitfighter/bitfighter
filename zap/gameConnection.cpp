@@ -44,7 +44,7 @@
 
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
-  
+
 
 namespace Zap
 {
@@ -1072,14 +1072,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
                               NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   c2sRequestLevelChange2(newLevelIndex, isRelative);
-}
-
-
-void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
-{
    if(!mClientInfo->isLevelChanger())
+   {
+      s2cDisplayErrorMessage("!!! Need level change permission");  // currently can come from GameType::processServerCommand "/random"
       return;
+   }
 
    // Use voting when there is no level change password and there is more then 1 player (unless changer is an admin)
    if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
@@ -1276,7 +1273,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          fclose(f);
          logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename);
          S32 id = mServerGame->addUploadedLevelInfo(filename, levelInfo);
-         c2sRequestLevelChange2(id, false);
+         c2sRequestLevelChange_remote(id, false);  // we are server (switching to it after fully uploaded)
       }
       else
          s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
