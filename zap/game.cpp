@@ -269,7 +269,7 @@ ClientInfo *Game::getClientInfo(S32 index) const
 }
 
 
-const Vector<ClientInfo *> *Game::getClientInfos()
+const Vector<RefPtr<ClientInfo> > *Game::getClientInfos()
 {
    return &mClientInfos;
 }
@@ -536,6 +536,12 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    // Parse GameType line... All game types are of form XXXXGameType
    else if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
    {
+      if(mGameType.isValid())
+      {
+         logprintf(LogConsumer::LogLevelError, "Duplicate GameType is not allowed");
+         return;
+      }
+
       // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
       TNL::Object *theObject;
       if(!strcmp(argv[0], "HuntersGameType"))
@@ -551,7 +557,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          if(!validArgs)
             logprintf(LogConsumer::LogLevelError, "GameType have incorrect parameters");
 
-         gt->addToGame(this, database);    
+         gt->addToGame(this, database);
       }
       else
          logprintf(LogConsumer::LogLevelError, "Could not create a GameType");
@@ -582,6 +588,15 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
       else
          strncpy(obj, argv[0], LevelLoader::MaxArgLen);
+
+
+      if(!getGameType())   // Must have a GameType at this point, if not, we will add one to prevent problems loading a level with missing GameType
+      {
+         logprintf(LogConsumer::LogLevelError, "First line of level is missing GameType in level \"%s\"", levelFileName.c_str());
+         GameType *gt = new GameType();
+         gt->addToGame(this, database);
+      }
+
 
       obj[LevelLoader::MaxArgLen] = '\0';
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line

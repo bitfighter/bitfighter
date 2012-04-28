@@ -214,6 +214,9 @@ public:
 
    S32 connectionSpeed;
 
+   bool randomLevels;
+   bool skipUploads;
+
    bool allowMapUpload;
    bool allowAdminMapUpload;
 

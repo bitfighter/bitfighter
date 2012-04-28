@@ -57,7 +57,7 @@ void TeamShuffleHelper::shuffle()
    for(S32 i = 0; i < teamCount; i++)
       mTeams[i].clear();
 
-   const Vector<ClientInfo *> *clientInfos = getGame()->getClientInfos();
+   const Vector<RefPtr<ClientInfo> > *clientInfos = getGame()->getClientInfos();
 
    playersPerTeam = S32(ceil(F32(clientInfos->size()) / F32(mTeams.size())));
 

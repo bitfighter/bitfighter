@@ -14,7 +14,7 @@ function getArgsMenu()
    return "Create Arc",         -- Title shown on menu
       {
          CounterMenuItem:new("Angle",          90, 1,     0,  360, "deg.",        "", "Sweep of arc"),    
-         CounterMenuItem:new("Points",         64, 1,     4,  512, "points",      "", "Number of points to complete a full circle"),
+         CounterMenuItem:new("Precision",         16, 1,     4,  62, "divisions",      "", "Number of sections per arc"),
          CounterMenuItem:new("Radius of arc", 100, 1,     1,  500, "grid units",  "", "Radius of the arc"),
          CounterMenuItem:new("Start of arc",   90, 1,     0,  360, "degrees",     "", "Start angle of arc from the positive x axis"),
          ToggleMenuItem:new ("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert"),
@@ -43,7 +43,7 @@ function main()
    
    local scriptName = arg[0]
    local degrees = arg[1]
-   local precision = arg[2]
+   local divisions = arg[2]
    local radius = arg[3] / gridsize
    local startPoint = arg[4]
    local itemType = arg[5]
@@ -61,9 +61,12 @@ function main()
        levelLine = itemType .. " 0 "
    end
    
+   -- Each division is this many radians
+   local step = toRads(degrees / divisions)
+   
    -- Now add some coordinates
-   for x = toRads(startPoint), toRads(degrees) + toRads(startPoint), 2 * math.pi / precision do
-      levelLine = levelLine .. radius * math.cos(x) + centerX .. " " .. radius * math.sin(x) - centerY .. "  "
+   for x = 0, divisions do
+      levelLine = levelLine .. radius * math.cos(x * step) + centerX .. " " .. radius * math.sin(x * step) - centerY .. "  "
    end
 
    if(degrees == 360) then

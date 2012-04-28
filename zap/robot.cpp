@@ -181,6 +181,11 @@ S32 LuaRobot::getCPUTime(lua_State *L)
    return returnInt(L, thisRobot->getGame()->getCurrentTime());
 }
 
+S32 LuaRobot::getTime(lua_State *L)
+{
+   return returnInt(L, thisRobot->getCurrentMove().time);
+}
+
 
 // Turn to angle a (in radians, or toward a point)
 S32 LuaRobot::setAngle(lua_State *L)
@@ -633,12 +638,6 @@ S32 LuaRobot::teamMsg(lua_State *L)
 }
 
 
-S32 LuaRobot::getTime(lua_State *L)
-{
-   return returnInt(L, thisRobot->getCurrentMove().time);
-}
-
-
 // Return list of all items of specified type within normal visible range... does no screening at this point
 S32 LuaRobot::findItems(lua_State *L)
 {
@@ -704,7 +703,7 @@ S32 LuaRobot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
       lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    }
 
-   TNLAssert(lua_gettop(L) == 1 && lua_istable(L, -1)|| LuaObject::dumpStack(L), "Should only have table!");
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaObject::dumpStack(L), "Should only have table!");
 
 
    S32 pushed = 0;      // Count of items we put into our table

@@ -278,6 +278,7 @@ public:
    void setLevelGenScriptName(string name);
 
    string getLevelFileName();
+   void cleanUp();
    void loadLevel();
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 

@@ -44,14 +44,15 @@
 
 #include "Colors.h"
 #include "stringUtils.h"         // For strictjoindir()
-  
+
 
 namespace Zap
 {
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-const U8 GameConnection::CONNECT_VERSION = 2;  // GameConnection's version, for possible future use with changes on compatible versions
+const U8 GameConnection::CONNECT_VERSION = 3;  // GameConnection's version, for possible future use with changes on compatible versions
+// CONNECT_VERSION <= 1 is probably different, older CS protocol... CONNECT_VERSION == 3 adds "/random"
 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
@@ -69,7 +70,6 @@ GameConnection::GameConnection()
    // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
    // in the arguments makes VC++ nervous, which in turn makes me nervous.
    mClientInfo = NULL;    /// FullClientInfo created when we know what the ServerGame is, in readConnectRequest
-   mClientInfoWasCreatedLocally = true;
 
 #ifndef ZAP_DEDICATED
    mClientGame = NULL;
@@ -86,7 +86,6 @@ GameConnection::GameConnection(ClientGame *clientGame)
 
    mSettings = clientGame->getSettings();
    mClientInfo = clientGame->getClientInfo();      // Now have a FullClientInfo representing the local player
-   mClientInfoWasCreatedLocally = false;
 
    TNLAssert(mClientInfo->getName() != "", "Client has invalid name!");
    if(mClientInfo->getName() == "")
@@ -155,8 +154,6 @@ GameConnection::~GameConnection()
 
    delete mDataBuffer;
 
-   if(mClientInfoWasCreatedLocally && mClientInfo != NULL)
-      delete mClientInfo;
 }
 
 
@@ -1076,14 +1073,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cRemoveLevel, (S32 index), (index),
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
                               NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   c2sRequestLevelChange2(newLevelIndex, isRelative);
-}
-
-
-void GameConnection::c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative)
-{
    if(!mClientInfo->isLevelChanger())
+   {
+      s2cDisplayErrorMessage("!!! Need level change permission");  // currently can come from GameType::processServerCommand "/random"
       return;
+   }
 
    // Use voting when there is no level change password and there is more then 1 player (unless changer is an admin)
    if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
@@ -1280,7 +1274,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          fclose(f);
          logprintf(LogConsumer::ServerFilter, "%s %s Uploaded %s", getNetAddressString(), mClientInfo->getName().getString(), filename);
          S32 id = mServerGame->addUploadedLevelInfo(filename, levelInfo);
-         c2sRequestLevelChange2(id, false);
+         c2sRequestLevelChange_remote(id, false);  // we are server (switching to it after fully uploaded)
       }
       else
          s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");

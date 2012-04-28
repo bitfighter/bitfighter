@@ -37,6 +37,7 @@
 #include "IniFile.h"          // For CIniFile
 #include "ClientInfo.h"
 #include "ServerGame.h"
+#include "robot.h"
 
 
 #ifndef ZAP_DEDICATED
@@ -2520,13 +2521,9 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   ClientInfo *clientInfo = clientGame->findClientInfo(name);
-
    clientGame->onPlayerQuit(name);
 
    updateLeadingPlayerAndScore();
-
-   delete clientInfo;
 #endif
 }
 
@@ -2811,6 +2808,10 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       serverGame->voteClient(clientInfo, true);
    else if(!stricmp(cmd, "no"))
       serverGame->voteClient(clientInfo, false);
+   else if(!stricmp(cmd, "random"))
+      clientInfo->getConnection()->c2sRequestLevelChange_remote(ServerGame::RANDOM_LEVEL, false); // new after 017a, for old clients
+   else if(!stricmp(cmd, "clearcache"))
+      LuaScriptRunner::ClearAllCachedScripts();
    else
       clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Invalid Command");
 }

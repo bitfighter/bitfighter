@@ -73,8 +73,7 @@ private:
    // For saving passwords
    string mLastEnteredPassword;
 
-   ClientInfo *mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
-   bool mClientInfoWasCreatedLocally;     // Track whether we are responsible for deleting the clientInfo in the destructor
+   RefPtr<ClientInfo> mClientInfo;               // This could be either a FullClientInfo or a RemoteClientInfo
 
 #ifndef ZAP_DEDICATED
    ClientGame *mClientGame;         // NULL on server side, not available for dedicated build
@@ -259,7 +258,6 @@ public:
    TNL_DECLARE_RPC(s2cRemoveLevel, (S32 index));
 
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
-   void c2sRequestLevelChange2(S32 newLevelIndex, bool isRelative);
    TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time, StringPtr reason));
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
@@ -295,7 +293,7 @@ public:
 
    const Vector<U8> &getLoadout();
 
-   static const U8 CONNECT_VERSION;  // may be useful in future version (such as 016a)
+   static const U8 CONNECT_VERSION;  // may be useful in future version with same CS protocol number
    U8 mConnectionVersion;  // the CONNECT_VERSION of the other side of this connection
 
    void writeConnectRequest(BitStream *stream);

@@ -532,6 +532,14 @@ string LuaScriptRunner::mScriptingDir;
 
 deque<string> LuaScriptRunner::mCachedScripts;
 
+void LuaScriptRunner::ClearAllCachedScripts()
+{
+	while(mCachedScripts.size() != 0)
+	{
+		deleteScript(mCachedScripts.front().c_str());
+		mCachedScripts.pop_front();
+	}
+}
 
 
 // Constructor
@@ -637,7 +645,11 @@ bool LuaScriptRunner::loadScript()
 {
    static const S32 MAX_CACHE_SIZE = 2;      // For now -- can be bigger when we know this works
 
-   bool cacheScripts = false;     // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
+#ifdef ZAP_DEDICATED
+   bool cacheScripts = true;
+#else
+   bool cacheScripts = true;    // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
+#endif
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 

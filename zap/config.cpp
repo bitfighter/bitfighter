@@ -123,6 +123,9 @@ IniSettings::IniSettings()
    wallOutlineColor.set(Colors::blue);
    clientPortNumber = 0;
 
+   randomLevels = false;
+   skipUploads = false;
+
    allowMapUpload = false;
    allowAdminMapUpload = true;
 
@@ -551,6 +554,9 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    //iniSettings->SendStatsToMaster = (lcase(ini->GetValue(section, "SendStatsToMaster", "yes")) != "no");
 
    iniSettings->alertsVolLevel = checkVol(iniSettings->alertsVolLevel);
+
+   iniSettings->randomLevels           = (U32) ini->GetValueYN(section, "RandomLevels", S32(iniSettings->randomLevels) );
+   iniSettings->skipUploads            = (U32) ini->GetValueYN(section, "SkipUploads", S32(iniSettings->skipUploads) );
 
    iniSettings->allowMapUpload         = (U32) ini->GetValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
    iniSettings->allowAdminMapUpload    = (U32) ini->GetValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );
@@ -1564,6 +1570,8 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" MaxBots - The max number of bots allowed on this server.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
+      addComment(" RandomLevels - When current level ends, this can enable randomly switching to any available levels.");
+      addComment(" SkipUploads - When current level ends, enables skipping all uploaded levels.");
       addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
       addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
@@ -1592,6 +1600,9 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "AllowDataConnections", iniSettings->allowDataConnections);
    ini->SetValueI (section, "MaxFPS", iniSettings->maxDedicatedFPS);
    ini->setValueYN(section, "LogStats", iniSettings->logStats);
+
+   ini->setValueYN(section, "RandomLevels", S32(iniSettings->randomLevels) );
+   ini->setValueYN(section, "SkipUploads", S32(iniSettings->skipUploads) );
 
    ini->setValueYN(section, "AllowMapUpload", S32(iniSettings->allowMapUpload) );
    ini->setValueYN(section, "AllowAdminMapUpload", S32(iniSettings->allowAdminMapUpload) );

@@ -458,9 +458,9 @@ public:
    S32 mId;
 
 public:
-   LuaTestItem::LuaTestItem();                     // Constructor (unused, but required by LuaWrapper)
-   LuaTestItem::LuaTestItem(TestItem *testItem);   // Constructor
-   LuaTestItem::~LuaTestItem();                    // Destructor
+   LuaTestItem();                     // Constructor (unused, but required by LuaWrapper)
+   LuaTestItem(TestItem *testItem);   // Constructor
+   ~LuaTestItem();                    // Destructor
 
    void setDefunct(bool isDefunct);
    bool isDefunct();

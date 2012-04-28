@@ -2306,7 +2306,7 @@ LuaShip::~LuaShip()
 
 
 S32 LuaShip::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }
-S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid()); }
+S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid() && !thisShip->isDestroyed()); }
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
 S32 LuaShip::getRad(lua_State *L)  { return thisShip ? returnFloat(L, thisShip->getRadius())        : returnNil(L); }
