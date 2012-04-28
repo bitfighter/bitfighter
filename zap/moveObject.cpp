@@ -2056,7 +2056,7 @@ static S32 TestItemL_getRad(lua_State* L)
 
 static S32 TestItemL_getVel(lua_State* L)
 {
-   LuaProxy<TestItem>  *w = luaW_check<LuaProxy<TestItem> >(L, 1); 
+   LuaProxy<TestItem>  *w = luaW_check<TestItem>(L, 1); 
    if(w->isDefunct())
       return LuaObject::returnNil(L);
 
@@ -2077,6 +2077,7 @@ const luaL_reg *TestItem::getMethods()
 
    return metatable;
 }
+
 
 void TestItem::setLuaProxy(LuaProxy<TestItem> *obj)
 {
