@@ -872,7 +872,7 @@ void LuaScriptRunner::deleteScript(const char *name)
 void LuaScriptRunner::registerClasses()
 {
    // LuaWrapper managed objects
-   TestItem::Register(L);
+   LuaProxy<TestItem>::Register(L);
 
    ///////////////////////////////////////
 

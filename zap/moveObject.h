@@ -27,6 +27,7 @@
 #define _MOVEOBJECT_H_
 
 #include "item.h"          // Parent class
+#include "LuaWrapper.h"
 
 namespace Zap
 {
@@ -399,7 +400,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LuaTestItem;
 
 class TestItem : public MoveItem
 {
@@ -419,6 +419,8 @@ public:
    void damageObject(DamageInfo *theInfo);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
+   static const luaL_reg *getMethods();
+
    TNL_DECLARE_CLASS(TestItem);
 
    ///// Editor methods
@@ -433,9 +435,8 @@ public:
    ///// Lua Interface
 
    TestItem(lua_State *L);             //  Lua constructor
-   LuaTestItem *mLuaProxy;          // Proxy object
-
-   static void Register(lua_State *L);
+   LuaProxy<TestItem> *mLuaProxy;      // Proxy object
+   void setLuaProxy(LuaProxy<TestItem> *obj);
 
    static const char className[];
 

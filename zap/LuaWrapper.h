@@ -130,6 +130,7 @@ luaW_Userdata luaW_cast(const luaW_Userdata& obj)
 template <typename T>
 bool luaW_is(lua_State *L, int index, bool strict = false)
 {
+   logprintf("XXXXX LuaIs %s", typeid(T).name());
     bool equal = false;// lua_isnil(L, index);
     if (!equal && lua_isuserdata(L, index) && lua_getmetatable(L, index))
     {
@@ -194,12 +195,16 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
             ud = pud->cast(*pud);
             pud = &ud;
         }
-        obj = (T*)pud->data;
+
+        LuaProxy<T> *proxy = (LuaProxy<T>*)pud->data;
+        if(!proxy->isDefunct())
+         obj = proxy->getProxiedObject();
     }
     else
     {
         luaL_typerror(L, index, LuaWrapper<T>::classname);
     }
+
     return obj;
 }
 
@@ -211,10 +216,13 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
 template <typename T>
 void luaW_push(lua_State* L, T* obj)
 {
+   logprintf("XXXXX Pushing %s", typeid(T).name());
     if (obj)
     {
+        LuaProxy<T> *proxy = new LuaProxy<T>(obj);
+
         luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // ... obj
-        ud->data = obj;
+        ud->data = proxy;
         ud->cast = LuaWrapper<T>::cast;
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj mt
         lua_setmetatable(L, -2); // ... obj
@@ -234,6 +242,69 @@ void luaW_push(lua_State* L, T* obj)
     }
 }
 
+
+//static S32 id = 0;
+
+template <class T>
+class LuaProxy 
+{
+private:
+    S32 mId;
+    bool mDefunct;
+    T *mProxiedObject;
+
+public:
+    // Default constructor
+    LuaProxy() { TNLAssert(false, "Not used"); }
+
+    // Typical constructor
+    LuaProxy(T *obj)     
+    {
+      //mId = id++;
+
+      mProxiedObject = obj;  
+      obj->setLuaProxy(this);
+      mDefunct = false;
+
+      logprintf("XXXXX Creating testItem proxy for %p (this: %p)", mProxiedObject, this);
+    }
+
+   // Destructor
+   ~LuaProxy()
+   {
+      if(!mDefunct)
+         mProxiedObject->mLuaProxy = NULL;
+   }
+
+
+   T *getProxiedObject() 
+   {
+      return mProxiedObject;
+   }
+
+
+   void setDefunct(bool isDefunct)
+   {
+      mDefunct = isDefunct;
+   }
+
+
+   bool isDefunct()
+   {
+      return mDefunct;
+   }
+
+
+   static void Register(lua_State *L)
+   {
+      logprintf("XXXXX Registering %s", typeid(T).name());
+      luaW_register<T>(L, "TestItem", NULL, T::getMethods()); 
+      lua_pop(L, 1);                            // Remove metatable from stack
+   }
+
+};
+
+
 // Instructs LuaWrapper that it owns the userdata, and can manage its memory.
 // When all references to the object are removed, Lua is free to garbage
 // collect it and delete the object.
@@ -243,6 +314,7 @@ void luaW_push(lua_State* L, T* obj)
 template <typename T>
 bool luaW_hold(lua_State* L, T* obj)
 {
+   logprintf("XXXXX Holding %s", typeid(T).name());
     luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... LuaWrapper
 
     lua_getfield(L, -1, LUAW_HOLDS_KEY); // ... LuaWrapper LuaWrapper.holds
@@ -546,6 +618,7 @@ int luaW__gc(lua_State* L)
 template <typename T>
 void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>)
 {
+   logprintf("XXXXX luaW_register: %s", typeid(T).name());
     LuaWrapper<T>::classname = classname;
     LuaWrapper<T>::identifier = identifier;
     LuaWrapper<T>::allocator = allocator;

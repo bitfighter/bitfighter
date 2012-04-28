@@ -1941,7 +1941,6 @@ TestItem::~TestItem()
 {
    if(mLuaProxy)
       mLuaProxy->setDefunct(true);
-   logprintf("TestItem destroyed!");
 }
 
 
@@ -2039,11 +2038,11 @@ S32 TestItem::getClassID(lua_State *L)
 
 static S32 TestItemL_getLoc(lua_State* L)
 {
-   LuaTestItem* w = luaW_check<LuaTestItem>(L, 1); 
-   if(w->isDefunct())
+   TestItem *w = luaW_check<TestItem>(L, 1);    // Will return NULL if object is defunct
+   if(!w)
       return LuaObject::returnNil(L);
 
-   return w->mTestItem->getLoc(L);
+   return w->getLoc(L);
 }
 
 
@@ -2057,13 +2056,15 @@ static S32 TestItemL_getRad(lua_State* L)
 
 static S32 TestItemL_getVel(lua_State* L)
 {
-   LuaTestItem* w = luaW_check<LuaTestItem>(L, 1); 
-   
-   return w->mTestItem->getVel(L);
+   LuaProxy<TestItem>  *w = luaW_check<LuaProxy<TestItem> >(L, 1); 
+   if(w->isDefunct())
+      return LuaObject::returnNil(L);
+
+   return w->getProxiedObject()->getVel(L);
 }
 
 
-void TestItem::Register(lua_State *L)
+const luaL_reg *TestItem::getMethods()
 {
    static const luaL_reg metatable[] =
    {
@@ -2074,60 +2075,71 @@ void TestItem::Register(lua_State *L)
        { NULL, NULL }
    };
 
-   luaW_register<LuaTestItem>(L, "TestItem", NULL, metatable); 
-   lua_pop(L, 1);                            // Remove metatable from stack
+   return metatable;
+}
+
+void TestItem::setLuaProxy(LuaProxy<TestItem> *obj)
+{
+   mLuaProxy = obj;
 }
 
 
 void TestItem::push(lua_State *L)
 {
-   if(!mLuaProxy)                            // Create a proxy if we don't yet have one
-      mLuaProxy = new LuaTestItem(this);     // Proxy will be deleted by Lua
+   //if(!mLuaProxy)                            // Create a proxy if we don't yet have one
+   //   mLuaProxy = new LuaTestItem(this);     // Proxy will be deleted by Lua
 
-   luaW_push<LuaTestItem>(L, mLuaProxy);     // Tell Lua about the proxy
-   luaW_hold<LuaTestItem>(L, mLuaProxy);     // Tell Lua to collect the proxy when it's done with it
+   luaW_push<TestItem>(L, this);     // Tell Lua about the proxy
+   luaW_hold<TestItem>(L, this);     // Tell Lua to collect the proxy when it's done with it
 }
 
 
-S32 LuaTestItem::id = 0;
+
+
+
+
+//S32 LuaTestItem::id = 0;
 
 // Constructor -- required (but not used) by LuaWrapper
-LuaTestItem::LuaTestItem() { TNLAssert(false, "Unused"); }
+//LuaTestItem::LuaTestItem() { TNLAssert(false, "Unused"); }
+
+
+
 
 
 // Constructor
-LuaTestItem::LuaTestItem(TestItem *testItem)
-{
-   mId = id++;
-
-   mTestItem = testItem;  
-   mTestItem->mLuaProxy = this;
-   mDefunct = false;
-
-   logprintf("Creating testItem proxy %d for %p (this: %p)", mId, mTestItem, this);
-}
-
-
-// Destructor
-LuaTestItem::~LuaTestItem()
-{
-   if(!mDefunct)
-      mTestItem->mLuaProxy = NULL;
-}
-
-
-void LuaTestItem::setDefunct(bool isDefunct)
-{
-   mDefunct = isDefunct;
-}
-
-
-bool LuaTestItem::isDefunct()
-{
-   return mDefunct;
-}
-
-
+//LuaTestItem::LuaTestItem(TestItem *testItem)
+//{
+//   mId = id++;
+//
+//   mTestItem = testItem;  
+//   mTestItem->mLuaProxy = this;
+//   mDefunct = false;
+//
+//   logprintf("Creating testItem proxy %d for %p (this: %p)", mId, mTestItem, this);
+//}
+//
+//
+//// Destructor
+//LuaTestItem::~LuaTestItem()
+//{
+//   if(!mDefunct)
+//      mTestItem->mLuaProxy = NULL;
+//}
+//
+//
+//void LuaTestItem::setDefunct(bool isDefunct)
+//{
+//   mDefunct = isDefunct;
+//}
+//
+//
+//bool LuaTestItem::isDefunct()
+//{
+//   return mDefunct;
+//}
+//
+//
 
 ///// Lua Interface
 
