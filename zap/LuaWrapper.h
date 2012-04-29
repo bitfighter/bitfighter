@@ -55,6 +55,11 @@ extern "C"
 #define LUAW_HOLDS_KEY "__holds"
 #define LUAW_WRAPPER_KEY "LuaWrapper"
 
+
+// Forward declaration
+template <class T> class LuaProxy;
+
+
 // These are the default allocator and deallocator. If you would prefer an
 // alternative option, you may select a different function when registering
 // your class.
@@ -193,9 +198,6 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
 }
 
 
-// Forward declaration
-template <class T> class LuaProxy;
-
 // Analogous to luaL_check(boolean|string|*)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
@@ -225,6 +227,12 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
 
     return obj;
 }
+
+
+// Forward declaration
+template <typename T>
+bool luaW_hold(lua_State* L, T* obj);
+
 
 // Analogous to lua_push(boolean|string|*)
 //
@@ -266,70 +274,6 @@ void luaW_push(lua_State* L, T* obj)
         lua_pushnil(L);
     }
 }
-
-
-//static S32 id = 0;
-
-template <class T>
-class LuaProxy 
-{
-private:
-    S32 mId;
-    bool mDefunct;
-    T *mProxiedObject;
-
-public:
-    // Default constructor
-    LuaProxy() { TNLAssert(false, "Not used"); }
-
-    // Typical constructor
-    LuaProxy(T *obj)     
-    {
-      //mId = id++;
-
-      mProxiedObject = obj;  
-      obj->setLuaProxy(this);
-      mDefunct = false;
-
-      logprintf("XXXXX Creating %s proxy for %p (proxy addr: %p)", typeid(T).name(), mProxiedObject, this);
-    }
-
-   // Destructor
-   ~LuaProxy()
-   {
-      TNLAssert(false, "");
-      logprintf("XXXXX Deleting LuaProxy for %s%p (proxy addr %p)", mDefunct ? "Defunct " : "", mProxiedObject, this);
-
-      if(!mDefunct)
-         mProxiedObject->mLuaProxy = NULL;
-   }
-
-
-   T *getProxiedObject() 
-   {
-      return mProxiedObject;
-   }
-
-
-   void setDefunct(bool isDefunct)
-   {
-      mDefunct = isDefunct;
-   }
-
-
-   bool isDefunct()
-   {
-      return mDefunct;
-   }
-
-
-   static void Register(lua_State *L)
-   {
-      luaW_register<T>(L, "TestItem", NULL, T::luaMethods/*, luaW_defaultallocator<T>, luaW_defaultdeallocator<T>, luaW_proxiedidentifier<T>*/); 
-      lua_pop(L, 1);                            // Remove metatable from stack
-   }
-
-};
 
 
 // Instructs LuaWrapper that it owns the userdata, and can manage its memory.
@@ -748,6 +692,71 @@ void luaW_extend(lua_State* L)
 
 #undef luaW_getregistry
 #undef luaW_setregistry
+
+
+//static S32 id = 0;
+
+template <class T>
+class LuaProxy
+{
+private:
+    S32 mId;
+    bool mDefunct;
+    T *mProxiedObject;
+
+public:
+    // Default constructor
+    LuaProxy() { TNLAssert(false, "Not used"); }
+
+    // Typical constructor
+    LuaProxy(T *obj)
+    {
+      //mId = id++;
+
+      mProxiedObject = obj;
+      obj->setLuaProxy(this);
+      mDefunct = false;
+
+      logprintf("XXXXX Creating %s proxy for %p (proxy addr: %p)", typeid(T).name(), mProxiedObject, this);
+    }
+
+   // Destructor
+   ~LuaProxy()
+   {
+      TNLAssert(false, "");
+      logprintf("XXXXX Deleting LuaProxy for %s%p (proxy addr %p)", mDefunct ? "Defunct " : "", mProxiedObject, this);
+
+      if(!mDefunct)
+         mProxiedObject->mLuaProxy = NULL;
+   }
+
+
+   T *getProxiedObject()
+   {
+      return mProxiedObject;
+   }
+
+
+   void setDefunct(bool isDefunct)
+   {
+      mDefunct = isDefunct;
+   }
+
+
+   bool isDefunct()
+   {
+      return mDefunct;
+   }
+
+
+   static void Register(lua_State *L)
+   {
+      luaW_register<T>(L, "TestItem", NULL, T::luaMethods/*, luaW_defaultallocator<T>, luaW_defaultdeallocator<T>, luaW_proxiedidentifier<T>*/);
+      lua_pop(L, 1);                            // Remove metatable from stack
+   }
+
+};
+
 
 /*
  * Copyright (c) 2010-2011 Alexander Ames
