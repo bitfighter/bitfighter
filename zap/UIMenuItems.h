@@ -143,6 +143,10 @@ public:
 
    virtual bool enterAdvancesItem();
 
+   // Some menu items have text input that require that key presses like KEY_SPACE and
+   // shortcut keys be be turned off (i.e. not processed as a key press)
+   virtual bool hasTextInput();
+
    void setSelectedColor(const Color &color);
    void setUnselectedColor(const Color &color);
    virtual void setSelectedValueColor(const Color &color);
@@ -407,6 +411,8 @@ public:
    virtual void setTextEditedCallback(void (*callback)(string));
 
    virtual void setSecret(bool secret);
+
+   virtual bool hasTextInput();
 
    /////// Lua Interface
    static const char className[];

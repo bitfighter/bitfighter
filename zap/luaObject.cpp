@@ -980,9 +980,10 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 {
    string msg = lua_tostring(L, 1);
 
-   logprintf("Fatal error running Lua code: %s.  Possibly out of memory?  Shutting down Bitfighter.");
+   logprintf("Fatal error running Lua code: %s.  Possibly out of memory?  Shutting down Bitfighter.", msg.c_str());
 
-   shutdownBitfighter();
+   throw LuaException(msg);
+   //shutdownBitfighter();
 
    return 0;
 }

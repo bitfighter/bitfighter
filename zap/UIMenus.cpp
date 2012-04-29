@@ -615,8 +615,11 @@ void MenuUserInterface::onKeyUp(InputCode inputCode)
 // Generic handler looks for keystrokes and translates them into menu actions
 bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
-   // First check for some shortcut keys
+   // Don't process shortcut keys if the current menuitem has text input
+   if(mMenuItems[selectedIndex]->hasTextInput())
+      return false;
 
+   // Check for some shortcut keys
    for(S32 i = 0; i < mMenuItems.size(); i++)
    {
       if(inputCode == mMenuItems[i]->key1 || inputCode == mMenuItems[i]->key2)
@@ -662,7 +665,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
       playBoop();
    }
 
-   else if(inputCode == KEY_SPACE || inputCode == KEY_ENTER)
+   else if(inputCode == KEY_ENTER || (inputCode == KEY_SPACE && !mMenuItems[selectedIndex]->hasTextInput()))
    {
       playBoop();
       if(inputCode != MOUSE_LEFT)

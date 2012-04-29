@@ -445,13 +445,13 @@ void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive
 }
 
 
-static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, bool yThruster)
+static void renderShipFlame(ShipFlame *flames, S32 flameCount, F32 thrust, F32 alpha, bool yThruster)
 {
    for(S32 i = 0; i < flameCount; i++)
       for(S32 j = 0; j < flames[i].layerCount; j++)
       {
          ShipFlameLayer *flameLayer = &flames[i].layers[j];
-         glColor(flameLayer->color);
+         glColor(flameLayer->color, alpha);
          glBegin(GL_LINE_STRIP);
             glVertex2f(flameLayer->points[0], flameLayer->points[1]);
 
@@ -475,17 +475,17 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
 
    // First render the thruster flames
    if(thrusts[0] > 0) // forward thrust
-      renderShipFlame(shipShapeInfo->forwardFlames, shipShapeInfo->forwardFlameCount, thrusts[0], true);
+      renderShipFlame(shipShapeInfo->forwardFlames, shipShapeInfo->forwardFlameCount, thrusts[0], alpha, true);
 
    if(thrusts[1] > 0) // back thrust
-      renderShipFlame(shipShapeInfo->reverseFlames, shipShapeInfo->reverseFlameCount, thrusts[1], true);
+      renderShipFlame(shipShapeInfo->reverseFlames, shipShapeInfo->reverseFlameCount, thrusts[1], alpha, true);
 
    // Right/left rotational thrusters - only one or the other
    if(thrusts[2] > 0)
-      renderShipFlame(shipShapeInfo->portFlames, shipShapeInfo->portFlameCount, thrusts[2], false);
+      renderShipFlame(shipShapeInfo->portFlames, shipShapeInfo->portFlameCount, thrusts[2], alpha, false);
 
    else if(thrusts[3] > 0)
-      renderShipFlame(shipShapeInfo->starboardFlames, shipShapeInfo->starboardFlameCount, thrusts[3], false);
+      renderShipFlame(shipShapeInfo->starboardFlames, shipShapeInfo->starboardFlameCount, thrusts[3], alpha, false);
 
    // Flame ports...
    glColor(Colors::gray50, alpha);

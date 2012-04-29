@@ -192,6 +192,10 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
     return NULL;
 }
 
+
+// Forward declaration
+template <class T> class LuaProxy;
+
 // Analogous to luaL_check(boolean|string|*)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
@@ -239,7 +243,7 @@ void luaW_push(lua_State* L, T* obj)
         luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // ... obj
 
         ud->data = proxy;
-        ud->cast = LuaWrapper<LuaProxy<T>>::cast;
+        ud->cast = LuaWrapper<LuaProxy<T> >::cast;
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj mt
         lua_setmetatable(L, -2); // ... obj
         luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... obj LuaWrapper
