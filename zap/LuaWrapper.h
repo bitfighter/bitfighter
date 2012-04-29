@@ -251,7 +251,7 @@ void luaW_push(lua_State* L, T* obj)
 
 // Forward declaration
 template <typename T>
-void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>);
+void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*), void (*deallocator)(lua_State*, T*), void (*identifier)(lua_State*, T*));
 
 template <class T>
 class LuaProxy 
