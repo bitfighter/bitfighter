@@ -247,72 +247,6 @@ void luaW_push(lua_State* L, T* obj)
 }
 
 
-//static S32 id = 0;
-
-// Forward declaration
-template <typename T>
-void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*), void (*deallocator)(lua_State*, T*), void (*identifier)(lua_State*, T*));
-
-template <class T>
-class LuaProxy 
-{
-private:
-    S32 mId;
-    bool mDefunct;
-    T *mProxiedObject;
-
-public:
-    // Default constructor
-    LuaProxy() { TNLAssert(false, "Not used"); }
-
-    // Typical constructor
-    LuaProxy(T *obj)     
-    {
-      //mId = id++;
-
-      mProxiedObject = obj;  
-      obj->setLuaProxy(this);
-      mDefunct = false;
-
-      logprintf("XXXXX Creating testItem proxy for %p (this: %p)", mProxiedObject, this);
-    }
-
-   // Destructor
-   ~LuaProxy()
-   {
-      if(!mDefunct)
-         mProxiedObject->mLuaProxy = NULL;
-   }
-
-
-   T *getProxiedObject() 
-   {
-      return mProxiedObject;
-   }
-
-
-   void setDefunct(bool isDefunct)
-   {
-      mDefunct = isDefunct;
-   }
-
-
-   bool isDefunct()
-   {
-      return mDefunct;
-   }
-
-
-   static void Register(lua_State *L)
-   {
-      logprintf("XXXXX Registering %s", typeid(T).name());
-      luaW_register<T>(L, "TestItem", NULL, T::getMethods()); 
-      lua_pop(L, 1);                            // Remove metatable from stack
-   }
-
-};
-
-
 // Instructs LuaWrapper that it owns the userdata, and can manage its memory.
 // When all references to the object are removed, Lua is free to garbage
 // collect it and delete the object.
@@ -726,6 +660,69 @@ void luaW_extend(lua_State* L)
 
 #undef luaW_getregistry
 #undef luaW_setregistry
+
+
+//static S32 id = 0;
+
+template <class T>
+class LuaProxy
+{
+private:
+    S32 mId;
+    bool mDefunct;
+    T *mProxiedObject;
+
+public:
+    // Default constructor
+    LuaProxy() { TNLAssert(false, "Not used"); }
+
+    // Typical constructor
+    LuaProxy(T *obj)
+    {
+      //mId = id++;
+
+      mProxiedObject = obj;
+      obj->setLuaProxy(this);
+      mDefunct = false;
+
+      logprintf("XXXXX Creating testItem proxy for %p (this: %p)", mProxiedObject, this);
+    }
+
+   // Destructor
+   ~LuaProxy()
+   {
+      if(!mDefunct)
+         mProxiedObject->mLuaProxy = NULL;
+   }
+
+
+   T *getProxiedObject()
+   {
+      return mProxiedObject;
+   }
+
+
+   void setDefunct(bool isDefunct)
+   {
+      mDefunct = isDefunct;
+   }
+
+
+   bool isDefunct()
+   {
+      return mDefunct;
+   }
+
+
+   static void Register(lua_State *L)
+   {
+      logprintf("XXXXX Registering %s", typeid(T).name());
+      luaW_register<T>(L, "TestItem", NULL, T::getMethods());
+      lua_pop(L, 1);                            // Remove metatable from stack
+   }
+
+};
+
 
 /*
  * Copyright (c) 2010-2011 Alexander Ames
