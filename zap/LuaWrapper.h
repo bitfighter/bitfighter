@@ -80,6 +80,19 @@ void luaW_defaultidentifier(lua_State* L, T* obj)
     lua_pushlightuserdata(L, obj);
 }
 
+
+// As above, but only to be called with proxied objects
+template <typename T>
+void luaW_proxiedidentifier(lua_State* L, T* obj)
+{
+    LuaProxy<T> *proxy = obj->getLuaProxy();
+    if(!proxy)
+       proxy = new LuaProxy<T>(obj);
+
+    lua_pushlightuserdata(L, obj->getLuaProxy());
+}
+
+
 // This class is what is used by LuaWrapper to contain the userdata. data
 // stores a pointer to the object itself, and cast is used to cast toward the
 // base class if there is one and it is necessary. Rather than use RTTI and
@@ -130,7 +143,6 @@ luaW_Userdata luaW_cast(const luaW_Userdata& obj)
 template <typename T>
 bool luaW_is(lua_State *L, int index, bool strict = false)
 {
-   logprintf("XXXXX LuaIs %s", typeid(T).name());
     bool equal = false;// lua_isnil(L, index);
     if (!equal && lua_isuserdata(L, index) && lua_getmetatable(L, index))
     {
@@ -168,12 +180,14 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
     {
         luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
         luaW_Userdata ud;
-        while (!strict && LuaWrapper<T>::cast != pud->cast)
+        while (!strict && LuaWrapper<LuaProxy<T> >::cast != pud->cast)
         {
             ud = pud->cast(*pud);
             pud = &ud;
         }
-        return (T*)pud->data;
+        LuaProxy<T> *proxy = (LuaProxy<T> *)pud->data;
+        if(!proxy->isDefunct())
+           return proxy->getProxiedObject();
     }
     return NULL;
 }
@@ -216,14 +230,16 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
 template <typename T>
 void luaW_push(lua_State* L, T* obj)
 {
-   logprintf("XXXXX Pushing %s", typeid(T).name());
     if (obj)
     {
-        LuaProxy<T> *proxy = new LuaProxy<T>(obj);
+        LuaProxy<T> *proxy = obj->getLuaProxy();
+        if(!proxy)
+           proxy = new LuaProxy<T>(obj);
 
         luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // ... obj
+
         ud->data = proxy;
-        ud->cast = LuaWrapper<T>::cast;
+        ud->cast = LuaWrapper<LuaProxy<T>>::cast;
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj mt
         lua_setmetatable(L, -2); // ... obj
         luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... obj LuaWrapper
@@ -231,10 +247,15 @@ void luaW_push(lua_State* L, T* obj)
         LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts id
         lua_gettable(L, -2); // ... obj LuaWrapper LuaWrapper.counts count
         int count = lua_tointeger(L, -1);
+
+           logprintf("XXXXX Pushing obj %p as %s  [[ count = %d ]]", obj, typeid(T).name(), count);
+
         LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts count id
         lua_pushinteger(L, count+1); // ... obj LuaWrapper LuaWrapper.counts count id count+1
         lua_settable(L, -4); // ... obj LuaWrapper LuaWrapper.counts count
         lua_pop(L, 3); // ... obj
+
+        luaW_hold<T>(L, obj);     // Tell Lua to collect the proxy when it's done with it
     }
     else
     {
@@ -266,12 +287,15 @@ public:
       obj->setLuaProxy(this);
       mDefunct = false;
 
-      logprintf("XXXXX Creating testItem proxy for %p (this: %p)", mProxiedObject, this);
+      logprintf("XXXXX Creating %s proxy for %p (proxy addr: %p)", typeid(T).name(), mProxiedObject, this);
     }
 
    // Destructor
    ~LuaProxy()
    {
+      TNLAssert(false, "");
+      logprintf("XXXXX Deleting LuaProxy for %s%p (proxy addr %p)", mDefunct> "Defunct " : "", mProxiedObject, this);
+
       if(!mDefunct)
          mProxiedObject->mLuaProxy = NULL;
    }
@@ -297,8 +321,7 @@ public:
 
    static void Register(lua_State *L)
    {
-      logprintf("XXXXX Registering %s", typeid(T).name());
-      luaW_register<T>(L, "TestItem", NULL, T::getMethods()); 
+      luaW_register<T>(L, "TestItem", NULL, T::luaMethods/*, luaW_defaultallocator<T>, luaW_defaultdeallocator<T>, luaW_proxiedidentifier<T>*/); 
       lua_pop(L, 1);                            // Remove metatable from stack
    }
 
@@ -314,7 +337,7 @@ public:
 template <typename T>
 bool luaW_hold(lua_State* L, T* obj)
 {
-   logprintf("XXXXX Holding %s", typeid(T).name());
+   logprintf("XXXXX Holding %s for obj %p", typeid(T).name(), obj);
     luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... LuaWrapper
 
     lua_getfield(L, -1, LUAW_HOLDS_KEY); // ... LuaWrapper LuaWrapper.holds
@@ -364,6 +387,7 @@ bool luaW_hold(lua_State* L, T* obj)
     lua_pop(L, 3); // ...
     return false;
 }
+
 
 // Releases LuaWrapper's hold on an object. This allows the user to remove
 // all references to an object in Lua and ensure that Lua will not attempt to
@@ -579,6 +603,8 @@ int luaW__gc(lua_State* L)
     lua_pushvalue(L, 2); // obj id LuaWrapper LuaWrapper.counts count id
     lua_pushinteger(L, --count); // obj id LuaWrapper LuaWrapper.counts count id count-1
     lua_settable(L, -4); // obj id LuaWrapper LuaWrapper.counts count
+
+    logprintf("XXXXX Garbage collecting obj %p (count = %d)", obj, count);
 
     if (obj && 0 == count)
     {

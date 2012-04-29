@@ -419,7 +419,7 @@ public:
    void damageObject(DamageInfo *theInfo);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
-   static const luaL_reg *getMethods();
+   static const luaL_reg luaMethods[];
 
    TNL_DECLARE_CLASS(TestItem);
 
@@ -437,6 +437,7 @@ public:
    TestItem(lua_State *L);             //  Lua constructor
    LuaProxy<TestItem> *mLuaProxy;      // Proxy object
    void setLuaProxy(LuaProxy<TestItem> *obj);
+   LuaProxy<TestItem> *getLuaProxy();
 
    static const char className[];
 
