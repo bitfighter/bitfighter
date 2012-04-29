@@ -298,7 +298,7 @@ public:
    ~LuaProxy()
    {
       TNLAssert(false, "");
-      logprintf("XXXXX Deleting LuaProxy for %s%p (proxy addr %p)", mDefunct> "Defunct " : "", mProxiedObject, this);
+      logprintf("XXXXX Deleting LuaProxy for %s%p (proxy addr %p)", mDefunct ? "Defunct " : "", mProxiedObject, this);
 
       if(!mDefunct)
          mProxiedObject->mLuaProxy = NULL;
