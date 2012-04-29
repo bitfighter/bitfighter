@@ -662,7 +662,7 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
       playBoop();
    }
 
-   else if(inputCode == KEY_SPACE || inputCode == KEY_ENTER)
+   else if(inputCode == KEY_ENTER || (inputCode == KEY_SPACE && !mMenuItems[selectedIndex]->usesSpaceBarForTextInput()))
    {
       playBoop();
       if(inputCode != MOUSE_LEFT)

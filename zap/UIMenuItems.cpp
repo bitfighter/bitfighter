@@ -288,6 +288,12 @@ bool MenuItem::enterAdvancesItem()
 }
 
 
+bool MenuItem::usesSpaceBarForTextInput()
+{
+   return false;
+}
+
+
 void MenuItem::setSelectedColor(const Color &color)
 {
    mSelectedColor = color;
@@ -1106,12 +1112,14 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode)
 
       return true;
    }
-   // Don't advance with the space key - which seems to be default behavior? See:
-   // MenuUserInterface::processKeys()
-   else if(inputCode == KEY_SPACE)
-      return true;
 
    return false;
+}
+
+
+bool TextEntryMenuItem::usesSpaceBarForTextInput()
+{
+   return true;
 }
 
 

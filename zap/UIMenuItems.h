@@ -142,6 +142,7 @@ public:
    virtual void activatedWithShortcutKey();
 
    virtual bool enterAdvancesItem();
+   virtual bool usesSpaceBarForTextInput();
 
    void setSelectedColor(const Color &color);
    void setUnselectedColor(const Color &color);
@@ -407,6 +408,8 @@ public:
    virtual void setTextEditedCallback(void (*callback)(string));
 
    virtual void setSecret(bool secret);
+
+   virtual bool usesSpaceBarForTextInput();
 
    /////// Lua Interface
    static const char className[];
