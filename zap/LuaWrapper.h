@@ -178,6 +178,10 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
     return NULL;
 }
 
+
+// Forward declaration
+template <class T> class LuaProxy;
+
 // Analogous to luaL_check(boolean|string|*)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
@@ -244,6 +248,10 @@ void luaW_push(lua_State* L, T* obj)
 
 
 //static S32 id = 0;
+
+// Forward declaration
+template <typename T>
+void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>);
 
 template <class T>
 class LuaProxy 
