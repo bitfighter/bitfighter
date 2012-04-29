@@ -288,7 +288,7 @@ bool MenuItem::enterAdvancesItem()
 }
 
 
-bool MenuItem::usesSpaceBarForTextInput()
+bool MenuItem::hasTextInput()
 {
    return false;
 }
@@ -1117,7 +1117,7 @@ bool TextEntryMenuItem::handleKey(InputCode inputCode)
 }
 
 
-bool TextEntryMenuItem::usesSpaceBarForTextInput()
+bool TextEntryMenuItem::hasTextInput()
 {
    return true;
 }

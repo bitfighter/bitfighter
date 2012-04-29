@@ -142,7 +142,10 @@ public:
    virtual void activatedWithShortcutKey();
 
    virtual bool enterAdvancesItem();
-   virtual bool usesSpaceBarForTextInput();
+
+   // Some menu items have text input that require that key presses like KEY_SPACE and
+   // shortcut keys be be turned off (i.e. not processed as a key press)
+   virtual bool hasTextInput();
 
    void setSelectedColor(const Color &color);
    void setUnselectedColor(const Color &color);
@@ -409,7 +412,7 @@ public:
 
    virtual void setSecret(bool secret);
 
-   virtual bool usesSpaceBarForTextInput();
+   virtual bool hasTextInput();
 
    /////// Lua Interface
    static const char className[];
