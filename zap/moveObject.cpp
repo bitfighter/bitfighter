@@ -2089,9 +2089,6 @@ LuaProxy<TestItem> *TestItem::getLuaProxy()
 
 void TestItem::push(lua_State *L)
 {
-   //if(!mLuaProxy)                            // Create a proxy if we don't yet have one
-   //   mLuaProxy = new LuaTestItem(this);     // Proxy will be deleted by Lua
-
    luaW_push<TestItem>(L, this);    // Tell Lua about the proxy
 }
 

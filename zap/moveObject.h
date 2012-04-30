@@ -448,27 +448,6 @@ public:
 };
 
 
-// Proxy object for testItem -- we want this as generic as possible
-class LuaTestItem 
-{
-public:
-   TestItem *mTestItem;    
-   bool mDefunct;
-
-   static S32 id;
-   S32 mId;
-
-public:
-   LuaTestItem();                     // Constructor (unused, but required by LuaWrapper)
-   LuaTestItem(TestItem *testItem);   // Constructor
-   ~LuaTestItem();                    // Destructor
-
-   void setDefunct(bool isDefunct);
-   bool isDefunct();
-};
-
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
