@@ -439,10 +439,6 @@ public:
    void setLuaProxy(LuaProxy<TestItem> *obj);
    LuaProxy<TestItem> *getLuaProxy();
    void push(lua_State *L);
-
-   static const char className[];
-
-   static Lunar<TestItem>::RegType methods[];
 };
 
 
