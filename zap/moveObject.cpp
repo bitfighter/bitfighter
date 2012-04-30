@@ -2030,10 +2030,10 @@ static S32 TestItemL_getClassId(lua_State* L)
 }
 
 
-S32 TestItem::getClassID(lua_State *L)
-{
-   return returnInt(L, TestItemTypeNumber);
-}
+//S32 TestItem::getClassID(lua_State *L)
+//{
+//   return returnInt(L, TestItemTypeNumber);
+//}
 
 
 static S32 TestItemL_getLoc(lua_State* L)
@@ -2095,7 +2095,7 @@ void TestItem::push(lua_State *L)
 
 ///// Lua Interface
 
-const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
+//const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
 /*
 // Lua constructor
 TestItem::TestItem(lua_State *L)

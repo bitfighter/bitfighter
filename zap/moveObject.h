@@ -438,13 +438,13 @@ public:
    LuaProxy<TestItem> *mLuaProxy;      // Proxy object
    void setLuaProxy(LuaProxy<TestItem> *obj);
    LuaProxy<TestItem> *getLuaProxy();
+   void push(lua_State *L);
 
    static const char className[];
 
    static Lunar<TestItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L);
-   void push(lua_State *L);
+   //S32 getClassID(lua_State *L);
 };
 
 
