@@ -179,26 +179,6 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
 //
 // Converts the given acceptable index to a T*. That value must be of (or
 // convertable to) type T; otherwise, returns NULL.
-
-
-template <typename T>
-LuaProxy<T>* luaW_toProxy(lua_State* L, int index, bool strict = false)
-{
-    if (luaW_is<T>(L, index, strict))
-    {
-        luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
-        luaW_Userdata ud;
-        while (!strict && LuaWrapper<T>::cast != pud->cast)
-        {
-            ud = pud->cast(*pud);
-            pud = &ud;
-        }
-        return (LuaProxy<T>*)pud->data;
-    }
-    return NULL;
-}
-
-
 template <typename T>
 T* luaW_to(lua_State* L, int index, bool strict = false)
 {
@@ -214,6 +194,25 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
         LuaProxy<T> *proxy = (LuaProxy<T> *)pud->data;
         if(!proxy->isDefunct())
            return proxy->getProxiedObject();
+    }
+    return NULL;
+}
+
+
+// As above, but returns the proxy instead of the object itself
+template <typename T>
+LuaProxy<T>* luaW_toProxy(lua_State* L, int index, bool strict = false)
+{
+    if (luaW_is<T>(L, index, strict))
+    {
+        luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
+        luaW_Userdata ud;
+        while (!strict && LuaWrapper<T>::cast != pud->cast)
+        {
+            ud = pud->cast(*pud);
+            pud = &ud;
+        }
+        return (LuaProxy<T>*)pud->data;
     }
     return NULL;
 }
