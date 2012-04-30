@@ -443,8 +443,6 @@ public:
    static const char className[];
 
    static Lunar<TestItem>::RegType methods[];
-
-   //S32 getClassID(lua_State *L);
 };
 
 

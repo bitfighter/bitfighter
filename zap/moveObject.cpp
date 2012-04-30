@@ -2030,12 +2030,6 @@ static S32 TestItemL_getClassId(lua_State* L)
 }
 
 
-//S32 TestItem::getClassID(lua_State *L)
-//{
-//   return returnInt(L, TestItemTypeNumber);
-//}
-
-
 static S32 TestItemL_getLoc(lua_State* L)
 {
    TestItem *w = luaW_check<TestItem>(L, 1);    // Will return NULL if object is defunct
@@ -2074,7 +2068,6 @@ const luaL_reg TestItem::luaMethods[] =
 };
 
 
-
 void TestItem::setLuaProxy(LuaProxy<TestItem> *obj)
 {
    mLuaProxy = obj;
@@ -2091,43 +2084,6 @@ void TestItem::push(lua_State *L)
 {
    luaW_push<TestItem>(L, this);    // Tell Lua about the proxy
 }
-
-
-///// Lua Interface
-
-//const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
-/*
-// Lua constructor
-TestItem::TestItem(lua_State *L)
-{
-   // Do nothing, for now...  should take params from stack and create testItem object
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<TestItem>::RegType TestItem::methods[] =
-{
-   // Standard gameItem methods
-   method(TestItem, getClassID),
-   method(TestItem, getLoc),
-   method(TestItem, getRad),
-   method(TestItem, getVel),
-
-   {0,0}    // End method list
-};
-
-
-S32 TestItem::getClassID(lua_State *L)
-{
-   return returnInt(L, TestItemTypeNumber);
-}
-
-
-void TestItem::push(lua_State *L)
-{
-   Lunar<TestItem>::push(L, this);
-}
-*/
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -2148,7 +2104,6 @@ ResourceItem *ResourceItem::clone() const
 {
    return new ResourceItem(*this);
 }
-
 
 
 void ResourceItem::renderItem(const Point &pos)
