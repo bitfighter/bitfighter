@@ -187,7 +187,7 @@ public:
    LuaScriptRunner();               // Constructor
    virtual ~LuaScriptRunner();      // Destructor
 
-   static void ClearAllCachedScripts();
+   static void clearScriptCache();
 
    void setScriptingDir(const string &scriptingDir);
 

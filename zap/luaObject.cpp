@@ -532,7 +532,7 @@ string LuaScriptRunner::mScriptingDir;
 
 deque<string> LuaScriptRunner::mCachedScripts;
 
-void LuaScriptRunner::ClearAllCachedScripts()
+void LuaScriptRunner::clearScriptCache()
 {
 	while(mCachedScripts.size() != 0)
 	{
@@ -648,7 +648,7 @@ bool LuaScriptRunner::loadScript()
 #ifdef ZAP_DEDICATED
    bool cacheScripts = true;
 #else
-   bool cacheScripts = true;    // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
+   bool cacheScripts = !(gServerGame && gServerGame->isTestServer());    // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
 #endif
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
