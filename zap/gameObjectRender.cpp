@@ -1741,18 +1741,10 @@ void renderSoccerBall(const Point &pos, F32 size)
 }
 
 
-void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time, 
+void renderCore(const Point &pos, const Color *coreColor, U32 time, 
                 PanelGeom *panelGeom, F32 panelHealth[], F32 panelStartingHealth)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Expect blending to be on here!");
-
-   if(size != 100)
-   {
-      glPushMatrix();
-      glTranslate(pos);
-      glScale(size / 100);
-   }
-
 
    // Draw outer polygon and inner circle
    Color baseColor = Colors::gray80;
@@ -1766,7 +1758,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time,
       Point cross(dir.y, -dir.x);
 
       glColor(coreColor);
-      renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30 * size / 100, 7 * size / 100);
+      renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30, 7);
 
       if(panelHealth[i] == 0)          // Panel is dead
          glColor(baseColor * .2f);
@@ -1794,7 +1786,7 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time,
       }
    }
 
-   F32 atomSize = size * 0.40f;
+   F32 atomSize = 40;
    F32 angle = CoreItem::getCoreAngle(time);
 
    // Draw atom graphic
@@ -1814,9 +1806,6 @@ void renderCore(const Point &pos, F32 size, const Color *coreColor, U32 time,
 
    glColor(baseColor);
    drawCircle(pos, atomSize + 2);
-
-   if(size != 100)
-      glPopMatrix();
 }
 
 

@@ -420,7 +420,7 @@ static const char *indicatorPageHeadings[] = {
 
 static S32 renderScoreboardMarks(S32 y, S32 textSize)
 {
-   S32 symbolSize = textSize * 0.8f;
+   S32 symbolSize = S32(textSize * 0.8f);
    S32 vertAdjustFact = (textSize - symbolSize) / 2 - 1;
 
    static const char *scoreboardMarks[][3] = {
@@ -913,7 +913,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             PanelGeom panelGeom;
             CoreItem::fillPanelGeom(pos, time, panelGeom);
 
-            renderCore(pos, 55, &Colors::blue, time, &panelGeom, health, 1.0f);
+            glPushMatrix();
+               glTranslate(pos);
+               glScale(.55f);
+               renderCore(pos, &Colors::blue, time, &panelGeom, health, 1.0f);
+            glPopMatrix();
 
             break;
       }

@@ -294,7 +294,7 @@ const F32 CoreItem::DamageReductionRatio = 1000.0f;
 const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
 // Constructor
-CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreStartWidth))
+CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreRadius * 2))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
@@ -330,8 +330,7 @@ void CoreItem::renderItem(const Point &pos)
 
       S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
 
-      renderCore(pos, calcCoreWidth() / 2, getTeamColor(mTeam), time,
-                 getPanelGeom(), mPanelHealth, mStartingPanelHealth);
+      renderCore(pos, getTeamColor(mTeam), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }
@@ -350,7 +349,7 @@ void CoreItem::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderCoreSimple(pos, getTeamColor(mTeam), CoreStartWidth);
+   renderCoreSimple(pos, getTeamColor(mTeam), CoreRadius * 2);
 #endif
 }
 
@@ -426,14 +425,14 @@ const char *CoreItem::getOnScreenName()
 
 F32 CoreItem::getEditorRadius(F32 currentScale)
 {
-   return (calcCoreWidth() / 2) * currentScale + 5;
+   return CoreRadius * currentScale + 5;
 }
 
 
 bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
    center = getPos();
-   radius = calcCoreWidth() / 2;
+   radius = CoreRadius;
    return true;
 }
 
@@ -600,8 +599,8 @@ void CoreItem::doExplosion(const Point &pos)
    S32 xNeg = TNL::Random::readB() ? 1 : -1;
    S32 yNeg = TNL::Random::readB() ? 1 : -1;
 
-   F32 x = TNL::Random::readF() * xNeg * .71f  * F32(CoreStartWidth) / 2;  // rougly sin(45)
-   F32 y = TNL::Random::readF() * yNeg * .71f  * F32(CoreStartWidth) / 2;
+   F32 x = TNL::Random::readF() * xNeg * FloatSqrtHalf * CoreRadius;  // exactly sin(45)
+   F32 y = TNL::Random::readF() * yNeg * FloatSqrtHalf * CoreRadius;
 
    // First explosion is at the center
    Point blastPoint = isStart ? pos : pos + Point(x, y);
@@ -613,7 +612,7 @@ void CoreItem::doExplosion(const Point &pos)
    SoundSystem::playSoundEffect(SFXCoreExplode, blastPoint, Point(), 1 - 0.25f * F32(mCurrentExplosionNumber));
 
    game->emitBlast(blastPoint, 600 - 100 * mCurrentExplosionNumber);
-   game->emitExplosion(blastPoint, 4.f - F32(mCurrentExplosionNumber), CoreExplosionColors, 12);
+   game->emitExplosion(blastPoint, 4.f - F32(mCurrentExplosionNumber), CoreExplosionColors, ARRAYSIZE(CoreExplosionColors));
 
    mCurrentExplosionNumber++;
 }
@@ -632,7 +631,7 @@ PanelGeom *CoreItem::getPanelGeom()
 // static method
 void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
 {
-   F32 size = CoreStartWidth * .5;
+   F32 size = CoreRadius;
 
    F32 angle = getCoreAngle(time);
    panelGeom.angle = angle;
@@ -653,7 +652,7 @@ void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
       mid   = (start + end) * .5;
 
       panelGeom.mid[i].set(mid);
-      panelGeom.repair[i].interp(.6, mid, pos);
+      panelGeom.repair[i].interp(.6f, mid, pos);
    }
 
    panelGeom.isValid = true;
@@ -693,7 +692,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       chunkPos = panelGeom->getStart(panelIndex) + (panelGeom->getEnd(panelIndex) - panelGeom->getStart(panelIndex)) * Random::readF();
       chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
 
-      F32 ttl = Random::readF() * 50  + 250;
+      S32 ttl = S32(Random::readF() * 50)  + 250;
       F32 startAngle = Random::readF() * FloatTau;
       F32 rotationRate = Random::readF() * 4 - 2;
 
@@ -711,8 +710,8 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       points.erase(1);
       points.push_back(Point(0, Random::readF() * 10));
 
-      Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5) * .2f;
-      F32 ttl = Random::readF() * 50  + 250;
+      Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5f) * .2f;
+      S32 ttl = S32(Random::readF() * 50)  + 250;
       F32 angle = Random::readF() * FloatTau;
       F32 rotation = Random::readF() * 4 - 2;
 
@@ -789,8 +788,8 @@ void CoreItem::idle(GameObject::IdleCallPath path)
             dir.normalize(100);
             Point cross(dir.y, -dir.x);                     // Line parallel to the panel, perpendicular to dir
 
-            Point vel = dir * (Random::readF() * 3 + 2) + cross * (Random::readF() - .2);
-            F32 ttl = Random::readF() + .5;
+            Point vel = dir * (Random::readF() * 3 + 2) + cross * (Random::readF() - .2f);
+            F32 ttl = Random::readF() + .5f;
 
             static_cast<ClientGame *>(getGame())->emitSpark(sparkEmissionPos, vel, Colors::gray20, ttl);
          }
@@ -972,7 +971,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
       return false;
 
    mTeam = atoi(argv[0]);
-   setStartingHealth(atof(argv[1]) / DamageReductionRatio);
+   setStartingHealth((F32)atof(argv[1]) / DamageReductionRatio);
 
    if(!Parent::processArguments(argc-2, argv+2, game))
       return false;
@@ -990,12 +989,6 @@ string CoreItem::toString(F32 gridSize) const
 bool CoreItem::isBeingAttacked()
 {
    return mBeingAttacked;
-}
-
-
-F32 CoreItem::calcCoreWidth() const
-{
-   return CoreStartWidth; //(F32(CoreStartWidth - CoreMinWidth) * mHealth) + CoreMinWidth;
 }
 
 

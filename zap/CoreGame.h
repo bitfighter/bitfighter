@@ -109,9 +109,9 @@ typedef Item Parent;
 
 public:
    static const F32 PANEL_ANGLE;          // = FloatTau / (F32) CoreItem::CORE_PANELS;
+   static const U32 CoreRadius = 100;
 
 private:
-   static const U32 CoreStartWidth = 200;
    static const U32 CoreMinWidth = 20;
    static const U32 CoreDefaultStartingHealth = 10;     // In ship-damage equivalents; these will be divided amongst all panels
    static const U32 CoreHeartbeatStartInterval = 2000;  // In milliseconds
@@ -155,7 +155,6 @@ public:
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
 
-   F32 calcCoreWidth() const;
    bool isBeingAttacked();
 
    void setStartingHealth(F32 health);
