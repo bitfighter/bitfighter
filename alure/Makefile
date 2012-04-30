@@ -6,7 +6,12 @@
 LFLAGS=-lstdc++ -lopenal -lvorbis
 EXTRA_FLAGS=-D_GNU_SOURCE -DALURE_STATIC_LIBRARY -DDYNLOAD=1 -DHAVE_CONFIG_H -fPIC
 
-CC=g++ -I. -I../libvorbis -I../libogg -W -O2
+CC=g++ -I. -I../libvorbis -I../libogg -W
+release: default
+default: CC += -O2
+debug: CC += -g
+debug: default
+
 AR=ar cr
 
 OBJECTS=\

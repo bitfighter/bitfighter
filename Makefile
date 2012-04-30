@@ -26,7 +26,7 @@ debug:
 	@$(MAKE) -C libtomcrypt
 	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
-	@$(MAKE) -C alure
+	@$(MAKE) -C alure debug
 	@$(MAKE) -C zap	debug
 
 dedicated:
