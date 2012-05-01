@@ -38,7 +38,7 @@
 #include "ClientInfo.h"
 #include "ServerGame.h"
 
-#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
+//#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaUtil.h"
 #include "oglconsole.h"
