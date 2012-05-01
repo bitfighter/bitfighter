@@ -6,7 +6,7 @@
 LFLAGS=-lstdc++ -lopenal -lvorbis
 EXTRA_FLAGS=-D_GNU_SOURCE -DALURE_STATIC_LIBRARY -DDYNLOAD=1 -DHAVE_CONFIG_H -fPIC
 
-CC=g++ -I. -I../libvorbis -I../libogg -W -O2
+CC=g++ -I. -I../libvorbis -I../libogg -W
 AR=ar cr
 
 OBJECTS=\
@@ -25,9 +25,16 @@ codec_vorbisfile.o
 
 
 # Compile default with mysql for everything
+default: release
 
-default: $(OBJECTS)
-default: 
+release: CC += -O2
+release: alure
+
+debug: CC += -g
+debug: alure
+
+alure: $(OBJECTS)
+alure: 
 #	$(CC) -o libalure.a $(OBJECTS) $(LFLAGS)
 	$(AR) libalure.a $(OBJECTS)
  
