@@ -195,6 +195,8 @@ public:
    MoveItem(lua_State *L);             //  Lua constructor
    
    template <class T> void push(lua_State *L) { luaW_push<T>(L, this); }   // Tell Lua about the proxy
+   //void GameObject::push(lua_State *L)       // Lua-aware classes will implement this
+
    LuaProxy<MoveItem> *getLuaProxy() { return mLuaProxy; }
    void setLuaProxy(LuaProxy<MoveItem> *obj) { mLuaProxy = obj; }
 };
