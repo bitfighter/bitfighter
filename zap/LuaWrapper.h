@@ -771,14 +771,6 @@ public:
    {
       return mDefunct;
    }
-
-
-   static void Register(lua_State *L)
-   {
-      luaW_register<T>(L, "TestItem", NULL, T::luaMethods/*, luaW_defaultallocator<T>, luaW_defaultdeallocator<T>, luaW_proxiedidentifier<T>*/);
-      lua_pop(L, 1);                            // Remove metatable from stack
-   }
-
 };
 
 

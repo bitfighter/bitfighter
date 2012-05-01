@@ -648,7 +648,7 @@ bool LuaScriptRunner::loadScript()
 #ifdef ZAP_DEDICATED
    bool cacheScripts = true;
 #else
-   bool cacheScripts = !(gServerGame && gServerGame->isTestServer());    // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
+   bool cacheScripts = true;    // For now -- will be set accordingly -- off when in editor, on in game, unless /nocachescripts is run
 #endif
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
@@ -884,7 +884,9 @@ void LuaScriptRunner::deleteScript(const char *name)
 void LuaScriptRunner::registerClasses()
 {
    // LuaWrapper managed objects
-   LuaProxy<TestItem>::Register(L);
+   //LuaWrapper<TestItem>::Register(L);
+   luaW_register<TestItem>(L, TestItem::className, NULL, TestItem::luaMethods);
+   lua_pop(L, 1);                            // Remove metatable from stack
 
    ///////////////////////////////////////
 
