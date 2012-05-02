@@ -774,6 +774,25 @@ public:
 };
 
 
+// This goes in the header of a "wrapped class"
+#define  LUAW_DECLARE_CLASS(className) \
+   LuaProxy<className> *mLuaProxy; \
+   LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
+   void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
+   className (lua_State *L) { }  /* Unused but required constructor */ \
+   void push(lua_State *L) { luaW_push(L, this); }
+
+
+// This goes in the constructor of the "wrapped class"
+#define LUAW_CONSTRUCTOR_INITIALIZATIONS \
+   mLuaProxy = NULL
+
+
+// And this in the destructor of the "wrapped class"
+#define LUAW_DESTRUCTOR_CLEANUP \
+   if(mLuaProxy) mLuaProxy->setDefunct(true)
+
+
 /*
  * Copyright (c) 2010-2011 Alexander Ames
  *

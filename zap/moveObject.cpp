@@ -381,6 +381,7 @@ static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject *
    return ((*b)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0) - ((*a)->getObjectTypeNumber() == BarrierTypeNumber ? 1 : 0);
 }
 
+
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
    // Check for collisions against other objects
@@ -725,16 +726,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
    mInitial = false;
 
    updateTimer = 0;
-
-   mLuaProxy = NULL;
-}
-
-
-// Destructor
-MoveItem::~MoveItem()
-{
-   if(mLuaProxy)
-      mLuaProxy->setDefunct(true);
 }
 
 
@@ -1964,6 +1955,15 @@ TestItem::TestItem() : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+TestItem::~TestItem() 
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -1993,8 +1993,6 @@ void TestItem::renderDock()
    renderTestItem(getActualPos(), 8);
 }
 
-
-const char TestItem::className[] = "TestItem";     // For LuaW
 
 const char *TestItem::getOnScreenName()      {  return "TestItem";   }
 const char *TestItem::getPrettyNamePlural()  {  return "TestItems";  }
