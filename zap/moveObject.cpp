@@ -1039,31 +1039,6 @@ bool MoveItem::collide(GameObject *otherObject)
 }
 
 
-////
-// LuaItem interface
-
-//template <class T> 
-//void MoveItem::setLuaProxy(LuaProxy<T> *obj)
-//{
-//   mLuaProxy = obj;
-//}
-//
-//
-//template <class T> 
-//LuaProxy<T> *MoveItem::getLuaProxy()
-//{
-//   return mLuaProxy;
-//}
-
-// void GameObject::push(lua_State *L)       // Lua-aware classes will implement this
-
-//template <class T> 
-//void MoveItem::push(lua_State *L)
-//{
-//   luaW_push<T>(L, this);    // Tell Lua about the proxy
-//}
-
-
 S32 MoveItem::isOnShip(lua_State *L)
 {
    return returnBool(L, mIsMounted);
@@ -1178,14 +1153,10 @@ const char *Asteroid::getOnScreenName()
 }
 
 
-//S32 Asteroid::getDockRadius() { return 11; }
-
-
 F32 Asteroid::getEditorRadius(F32 currentScale)
 {
    return mRadius * currentScale;
 }
-
 
 
 bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
@@ -2085,6 +2056,15 @@ ResourceItem::ResourceItem() : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIU
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+ResourceItem::~ResourceItem() 
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -2106,28 +2086,10 @@ void ResourceItem::renderDock()
 }
 
 
-const char *ResourceItem::getEditorHelpString()
-{
-   return "Small bouncy object; capture one to activate Engineer module";
-}
-
-
-const char *ResourceItem::getPrettyNamePlural()
-{
-   return "Resource Items";
-}
-
-
-const char *ResourceItem::getOnDockName()
-{
-   return "Res.";
-}
-
-
-const char *ResourceItem::getOnScreenName()
-{
-   return "ResourceItem";
-}
+const char *ResourceItem::getOnScreenName()     { return "ResourceItem"; }
+const char *ResourceItem::getPrettyNamePlural() { return "Resource Items"; }
+const char *ResourceItem::getOnDockName()       { return "Res."; }
+const char *ResourceItem::getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
 
 
 bool ResourceItem::collide(GameObject *hitObject)
@@ -2176,44 +2138,99 @@ void ResourceItem::onItemDropped()
 
 ///// Lua Interface
 
-const char ResourceItem::className[] = "ResourceItem";      // Class name as it appears to Lua scripts
 
-// Lua constructor
-ResourceItem::ResourceItem(lua_State *L)
+///////////////////////////////////////////////////////
+
+
+static S32 ResourceItemL_getClassId(lua_State* L)
 {
-   // Do nothing, for now...  should take params from stack and create testItem object
+   return LuaObject::returnInt(L, ResourceItemTypeNumber);
 }
 
 
-// Define the methods we will expose to Lua
-Lunar<ResourceItem>::RegType ResourceItem::methods[] =
+static S32 ResourceItemL_getLoc(lua_State* L)
 {
-   // Standard gameItem methods
-   method(ResourceItem, getClassID),
-   method(ResourceItem, getLoc),
-   method(ResourceItem, getRad),
-   method(ResourceItem, getVel),
-   method(ResourceItem, getTeamIndx),
+   ResourceItem *w = luaW_check<ResourceItem>(L, 1);    // Will return NULL if object is defunct
+   if(w)
+      return w->getLoc(L);
+
+   return LuaObject::returnNil(L);
+}
+
+
+static S32 ResourceItemL_getRad(lua_State* L)
+{
+   ResourceItem* w = luaW_check<ResourceItem>(L, 1); 
+
+   return w->getRad(L);
+}
+
+
+static S32 ResourceItemL_getVel(lua_State* L)
+{
+   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
+   if(w)
+      return w->getVel(L);
+
+   return LuaObject::returnNil(L);
+}
+
+
+static S32 ResourceItemL_getTeamIndex(lua_State *L)
+{
+   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
+   if(w)
+      return w->getTeamIndx(L);
+
+   return LuaObject::returnNil(L);
+}
+
+
+static S32 ResourceItemL_isInCaptureZone(lua_State *L)
+{
+   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
+   if(w)
+      return w->isInCaptureZone(L);
+
+   return LuaObject::returnNil(L);
+}
+
+
+static S32 ResourceItemL_isOnShip(lua_State *L)
+{
+   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
+   if(w)
+      return w->isOnShip(L);
+
+   return LuaObject::returnNil(L);
+}
+
+
+static S32 ResourceItemL_getShip(lua_State *L)
+{
+   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
+   if(w)
+      return w->getShip(L);
+
+   return LuaObject::returnNil(L);
+}
+
+
+const luaL_reg ResourceItem::luaMethods[] =
+{
+   { "getClassID",  ResourceItemL_getClassId },
+   { "getLoc",      ResourceItemL_getLoc },
+   { "getRad",      ResourceItemL_getRad },
+   { "getVel",      ResourceItemL_getVel },
+   { "getTeamIndx", ResourceItemL_getTeamIndex },
 
    // item methods
-   method(ResourceItem, isInCaptureZone),
-   method(ResourceItem, isOnShip),
-   method(ResourceItem, getShip),
+   { "isInCaptureZone", ResourceItemL_isInCaptureZone },
+   { "isOnShip",        ResourceItemL_isOnShip },
+   { "getShip",         ResourceItemL_getShip },
 
-   {0,0}    // End method list
+   { NULL, NULL }
 };
-
-
-S32 ResourceItem::getClassID(lua_State *L)
-{
-   return returnInt(L, ResourceItemTypeNumber);
-}
-
-
-void ResourceItem::push(lua_State *L)
-{
-   Lunar<ResourceItem>::push(L, this);
-}
 
 
 };

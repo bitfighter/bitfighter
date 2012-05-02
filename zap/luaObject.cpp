@@ -884,8 +884,10 @@ void LuaScriptRunner::deleteScript(const char *name)
 void LuaScriptRunner::registerClasses()
 {
    // LuaWrapper managed objects
-   //LuaWrapper<TestItem>::Register(L);
    luaW_register<TestItem>(L, "TestItem", NULL, TestItem::luaMethods);
+   lua_pop(L, 1);                            // Remove metatable from stack
+
+   luaW_register<ResourceItem>(L, "ResourceItem", NULL, ResourceItem::luaMethods);
    lua_pop(L, 1);                            // Remove metatable from stack
 
    ///////////////////////////////////////
@@ -906,8 +908,8 @@ void LuaScriptRunner::registerClasses()
    Lunar<LuaShip>::Register(L);
 
    Lunar<RepairItem>::Register(L);
-   Lunar<ResourceItem>::Register(L);
    //Lunar<TestItem>::Register(L);
+   //Lunar<ResourceItem>::Register(L);
    Lunar<Asteroid>::Register(L);
    Lunar<Turret>::Register(L);
    Lunar<Teleporter>::Register(L);
@@ -915,7 +917,6 @@ void LuaScriptRunner::registerClasses()
    Lunar<ForceFieldProjector>::Register(L);
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);
-   Lunar<ResourceItem>::Register(L);
 
    Lunar<LuaProjectile>::Register(L);
    Lunar<Mine>::Register(L);
@@ -1164,7 +1165,7 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
          return Lunar<LuaProjectile>::check(L, index);
 
       case ResourceItemTypeNumber:
-         return Lunar<ResourceItem>::check(L, index);
+         return luaW_check<ResourceItem>(L, index);
       case TestItemTypeNumber:
          return luaW_check<TestItem>(L, index);
       case FlagTypeNumber:

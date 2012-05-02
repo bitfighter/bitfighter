@@ -442,6 +442,8 @@ class ResourceItem : public MoveItem
 
 public:
    ResourceItem();      // Constructor
+   ~ResourceItem();     // Destructor
+
    ResourceItem *clone() const;
 
    static const S32 RESOURCE_ITEM_RADIUS = 20;
@@ -452,6 +454,9 @@ public:
    void onItemDropped();
 
    TNL_DECLARE_CLASS(ResourceItem);
+   LUAW_DECLARE_CLASS(ResourceItem);
+
+   static const luaL_reg luaMethods[];
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -463,15 +468,14 @@ public:
 
    ///// Lua Interface
 
-   ResourceItem(lua_State *L);             //  Lua constructor
+   //ResourceItem(lua_State *L);             //  Lua constructor
 
-   static const char className[];
+   //static const char className[];
 
-   static Lunar<ResourceItem>::RegType methods[];
+   //static Lunar<ResourceItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L);
-   void push(lua_State *L);
-
+   //S32 getClassID(lua_State *L);
+   //void push(lua_State *L);
 };
 
 
