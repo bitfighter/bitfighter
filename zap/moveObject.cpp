@@ -2006,9 +2006,10 @@ static S32 TestItemL_getClassId(lua_State* L)
 }
 
 
-static S32 TestItemL_getLoc(lua_State* L)
+template <class T>
+static S32 lua_getLoc(lua_State* L)
 {
-   TestItem *w = luaW_check<TestItem>(L, 1);    // Will return NULL if object is defunct
+   T *w = luaW_check<T>(L, 1);    // Will return NULL if object is defunct
    if(w)
       return w->getLoc(L);
 
@@ -2037,7 +2038,7 @@ static S32 TestItemL_getVel(lua_State* L)
 const luaL_reg TestItem::luaMethods[] =
 {
    { "getClassID",  TestItemL_getClassId },
-   { "getLoc",      TestItemL_getLoc },
+   { "getLoc",      lua_getLoc<TestItem> },
    { "getRad",      TestItemL_getRad },
    { "getVel",      TestItemL_getVel },
    { NULL, NULL }
@@ -2148,16 +2149,6 @@ static S32 ResourceItemL_getClassId(lua_State* L)
 }
 
 
-static S32 ResourceItemL_getLoc(lua_State* L)
-{
-   ResourceItem *w = luaW_check<ResourceItem>(L, 1);    // Will return NULL if object is defunct
-   if(w)
-      return w->getLoc(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
 static S32 ResourceItemL_getRad(lua_State* L)
 {
    ResourceItem* w = luaW_check<ResourceItem>(L, 1); 
@@ -2219,7 +2210,7 @@ static S32 ResourceItemL_getShip(lua_State *L)
 const luaL_reg ResourceItem::luaMethods[] =
 {
    { "getClassID",  ResourceItemL_getClassId },
-   { "getLoc",      ResourceItemL_getLoc },
+   { "getLoc",      lua_getLoc<ResourceItem> },
    { "getRad",      ResourceItemL_getRad },
    { "getVel",      ResourceItemL_getVel },
    { "getTeamIndx", ResourceItemL_getTeamIndex },
