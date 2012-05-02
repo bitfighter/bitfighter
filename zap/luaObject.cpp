@@ -1167,7 +1167,6 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
          return Lunar<ResourceItem>::check(L, index);
       case TestItemTypeNumber:
          return luaW_check<TestItem>(L, index);
-         //return Lunar<TestItem>::check(L, index);  // get userdata from Lua stack and return pointer to T object       {P{P
       case FlagTypeNumber:
          return Lunar<FlagItem>::check(L, index);
 
