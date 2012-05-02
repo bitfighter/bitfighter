@@ -148,7 +148,6 @@ protected:
 
 public:
    MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-   virtual ~MoveItem();                                                                          // Destructor
 
    void idle(GameObject::IdleCallPath path);
 
@@ -186,19 +185,6 @@ public:
    // LuaItem interface
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);
-
-   // Lua interface
-private:
-   LuaProxy<MoveItem> *mLuaProxy;      // Proxy object
-
-public:
-   MoveItem(lua_State *L);             //  Lua constructor
-   
-   template <class T> void push(lua_State *L) { luaW_push<T>(L, this); }   // Tell Lua about the proxy
-   //void GameObject::push(lua_State *L)       // Lua-aware classes will implement this
-
-   LuaProxy<MoveItem> *getLuaProxy() { return mLuaProxy; }
-   void setLuaProxy(LuaProxy<MoveItem> *obj) { mLuaProxy = obj; }
 };
 
 
@@ -412,13 +398,13 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
 class TestItem : public MoveItem
 {
    typedef MoveItem Parent;
 
 public:
-   TestItem();     // Constructor
+   TestItem();                // Constructor
+   ~TestItem();               // Destructor
    TestItem *clone() const;
 
    // Test methods
@@ -430,9 +416,11 @@ public:
    void damageObject(DamageInfo *theInfo);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
-   static const luaL_reg luaMethods[];
 
    TNL_DECLARE_CLASS(TestItem);
+   LUAW_DECLARE_CLASS(TestItem);
+
+   static const luaL_reg luaMethods[];
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -442,26 +430,6 @@ public:
 
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
-
-   ///// Lua Interface
-   static const char className[];
-
-
-//////////////////////////////////////////////////////
-//////////////////////////////////////////////////////
-// TEMPLATE CHALLENGE -- Remove the remaining code in this class, and 
-// provide the functionality generically from parent class (MoveItem)
-// Can you do it?
-//////////////////////////////////////////////////////
-//////////////////////////////////////////////////////
-
-private:
-   LuaProxy<TestItem> *mLuaProxy;      // Proxy object
-
-public:
-   LuaProxy<TestItem> *getLuaProxy() { return mLuaProxy; }
-   void setLuaProxy(LuaProxy<TestItem> *obj) { mLuaProxy = obj; }
-
 };
 
 

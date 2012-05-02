@@ -885,7 +885,7 @@ void LuaScriptRunner::registerClasses()
 {
    // LuaWrapper managed objects
    //LuaWrapper<TestItem>::Register(L);
-   luaW_register<TestItem>(L, TestItem::className, NULL, TestItem::luaMethods);
+   luaW_register<TestItem>(L, "TestItem", NULL, TestItem::luaMethods);
    lua_pop(L, 1);                            // Remove metatable from stack
 
    ///////////////////////////////////////
@@ -1166,7 +1166,8 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
       case ResourceItemTypeNumber:
          return Lunar<ResourceItem>::check(L, index);
       case TestItemTypeNumber:
-         return Lunar<TestItem>::check(L, index);
+         return luaW_check<TestItem>(L, index);
+         //return Lunar<TestItem>::check(L, index);  // get userdata from Lua stack and return pointer to T object       {P{P
       case FlagTypeNumber:
          return Lunar<FlagItem>::check(L, index);
 
