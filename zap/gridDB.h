@@ -68,10 +68,7 @@ public:
 
    void initialize();
 
-   U8 getObjectTypeNumber();
-   void setObjectTypeNumber(U8 objectTypeNumber);
-
-   GridDatabase *getDatabase();     // Returns the database in which this object is stored, NULL if not in any database
+   GridDatabase *getDatabase();           // Returns the database in which this object is stored, NULL if not in any database
 
    Rect getExtent() const;
    void setExtent(const Rect &extentRect);
@@ -88,6 +85,8 @@ public:
    void addToDatabase(GridDatabase *database, const Rect &extent);
 
    void removeFromDatabase();
+
+   U8 getObjectTypeNumber();
 
    virtual bool isDatabasable();    // Can this item actually be inserted into a database?
 };

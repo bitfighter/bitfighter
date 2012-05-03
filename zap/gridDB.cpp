@@ -673,12 +673,6 @@ U8 DatabaseObject::getObjectTypeNumber()
 }
 
 
-void DatabaseObject::setObjectTypeNumber(U8 objectTypeNumber)
-{
-   mObjectTypeNumber = objectTypeNumber;
-}
-
-
 GridDatabase *DatabaseObject::getDatabase()
 {
    return mDatabase;
