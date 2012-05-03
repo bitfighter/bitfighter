@@ -883,12 +883,30 @@ void LuaScriptRunner::deleteScript(const char *name)
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
+
+   luaW_register<MoveItem>(L, "MoveItem", NULL, MoveItem::luaMethods);
+   lua_pop(L, 1);                            // Remove metatable from stack
+
    // LuaWrapper managed objects
+   luaW_register<Asteroid>(L, "Asteroid", NULL, Asteroid::luaMethods);
+   luaW_extend<Asteroid, MoveItem>(L);
+   lua_pop(L, 1);                            // Remove metatable from stack
+
+
+   luaW_register<Circle>(L, "Circle", NULL, Circle::luaMethods);
+   luaW_extend<Circle, MoveItem>(L);
+   lua_pop(L, 1);                            // Remove metatable from stack
+
+
    luaW_register<TestItem>(L, "TestItem", NULL, TestItem::luaMethods);
+   luaW_extend<TestItem, MoveItem>(L);
    lua_pop(L, 1);                            // Remove metatable from stack
 
    luaW_register<ResourceItem>(L, "ResourceItem", NULL, ResourceItem::luaMethods);
+   luaW_extend<ResourceItem, MoveItem>(L);
    lua_pop(L, 1);                            // Remove metatable from stack
+
+
 
    ///////////////////////////////////////
 
@@ -908,9 +926,6 @@ void LuaScriptRunner::registerClasses()
    Lunar<LuaShip>::Register(L);
 
    Lunar<RepairItem>::Register(L);
-   //Lunar<TestItem>::Register(L);
-   //Lunar<ResourceItem>::Register(L);
-   Lunar<Asteroid>::Register(L);
    Lunar<Turret>::Register(L);
    Lunar<Teleporter>::Register(L);
 
@@ -1174,7 +1189,10 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
       case TeleportTypeNumber:
          return Lunar<Teleporter>::check(L, index);
       case AsteroidTypeNumber:
-         return Lunar<Asteroid>::check(L, index);
+         return luaW_check<Asteroid>(L, index);
+      case CircleTypeNumber:
+         return luaW_check<Circle>(L, index);
+
       case RepairItemTypeNumber:
          return Lunar<RepairItem>::check(L, index);
       case EnergyItemTypeNumber:

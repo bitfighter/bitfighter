@@ -726,6 +726,15 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
    mInitial = false;
 
    updateTimer = 0;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+MoveItem::~MoveItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -815,6 +824,12 @@ bool MoveItem::isItemThatMakesYouVisibleWhileCloaked()
 void MoveItem::setCollideable(bool isCollideable)
 {
    mIsCollideable = isCollideable;
+}
+
+
+void MoveItem::renderItem(const Point &pos)
+{
+   TNLAssert(false, "Unimplemented function!");
 }
 
 
@@ -1057,6 +1072,36 @@ S32 MoveItem::getShip(lua_State *L)
 }
 
 
+// ==> This one is a good candidate for moving directly into LuaW's index table rather than having a C++ method to support it
+static S32 MoveItemL_getClassId(lua_State *L) 
+{ 
+   MoveItem *w = luaW_check<MoveItem>(L, 1); 
+   if(w) 
+      return w->getObjectTypeNumber(); 
+      
+   return LuaObject::returnNil(L); 
+}
+
+
+static S32 getVelWrapper(lua_State *L)       { return luaW_doMethod<MoveItem>(&Item    ::getVel,      L); }
+static S32 getLocWrapper(lua_State *L)       { return luaW_doMethod<MoveItem>(&MoveItem::getLoc,      L); } 
+static S32 getRadWrapper(lua_State *L)       { return luaW_doMethod<MoveItem>(&MoveItem::getRad,      L); } 
+static S32 getTeamIndxWrapper(lua_State *L)  { return luaW_doMethod<MoveItem>(&MoveItem::getTeamIndx, L); }
+
+
+// Standard methods available to all MoveItems
+const luaL_reg MoveItem::luaMethods[] =
+{
+   { "getClassID",  MoveItemL_getClassId },
+   { "getLoc",      getLocWrapper },
+   { "getRad",      getRadWrapper },
+   { "getVel",      getVelWrapper },
+   { "getTeamIndx", getTeamIndxWrapper },
+
+   { NULL, NULL }
+};
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -1101,6 +1146,15 @@ Asteroid::Asteroid() : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITI
    }
 
    mKillString = "crashed into an asteroid";
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+Asteroid::~Asteroid()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -1129,28 +1183,10 @@ void Asteroid::renderDock()
 }
 
 
-const char *Asteroid::getEditorHelpString()
-{
-   return "Shootable asteroid object.  Just like the arcade game.";
-}
-
-
-const char *Asteroid::getPrettyNamePlural()
-{
-   return "Asteroids";
-}
-
-
-const char *Asteroid::getOnDockName()
-{
-   return "Ast.";
-}
-
-
-const char *Asteroid::getOnScreenName()
-{
-   return "Asteroid";
-}
+const char *Asteroid::getOnScreenName()     { return "Asteroid";  }
+const char *Asteroid::getPrettyNamePlural() { return "Asteroids"; }
+const char *Asteroid::getOnDockName()       { return "Ast.";      }
+const char *Asteroid::getEditorHelpString() { return "Shootable asteroid object.  Just like the arcade game."; }
 
 
 F32 Asteroid::getEditorRadius(F32 currentScale)
@@ -1395,33 +1431,6 @@ string Asteroid::getAttributeString()
 #endif
 
 
-
-const char Asteroid::className[] = "Asteroid";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-Asteroid::Asteroid(lua_State *L)
-{
-   // Do we want to construct these from Lua?  If so, do that here!
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<Asteroid>::RegType Asteroid::methods[] =
-{
-   // Standard gameItem methods
-   method(Asteroid, getClassID),
-   method(Asteroid, getLoc),
-   method(Asteroid, getRad),
-   method(Asteroid, getVel),
-   method(Asteroid, getTeamIndx),
-
-   // Class specific methods
-   method(Asteroid, getSize),
-   method(Asteroid, getSizeCount),
-
-   {0,0}    // End method list
-};
-
 ///// Lua interface
 S32 Asteroid::getSize(lua_State *L)
 {
@@ -1435,16 +1444,21 @@ S32 Asteroid::getSizeCount(lua_State *L)
 }
 
 
-S32 Asteroid::getClassID(lua_State *L)
-{
-   return returnInt(L, AsteroidTypeNumber);
-}
+static S32 getSizeWrapper(lua_State *L)      { return luaW_doMethod<Asteroid>(&Asteroid::getSize,      L); } 
+static S32 getSizeCountWrapper(lua_State *L) { return luaW_doMethod<Asteroid>(&Asteroid::getSizeCount, L); } 
 
 
-void Asteroid::push(lua_State *L)
+// Define the methods we will expose to Lua
+const luaL_reg Asteroid::luaMethods[] =
 {
-   Lunar<Asteroid>::push(L, this);
-}
+   // Class specific methods
+   { "getSize",       getSizeWrapper },
+   { "getSizeCount",  getSizeCountWrapper },    // <=== could be static
+
+   {0,0}    // End method list
+};
+
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1474,6 +1488,13 @@ Circle::Circle() : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
    }
 
    mKillString = "crashed into an circle";
+}
+
+
+// Destructor
+Circle::~Circle()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -1538,28 +1559,10 @@ void Circle::renderDock()
 }
 
 
-const char *Circle::getEditorHelpString()
-{
-   return "Shootable circle object.  Scary.";
-}
-
-
-const char *Circle::getPrettyNamePlural()
-{
-   return "Circles";
-}
-
-
-const char *Circle::getOnDockName()
-{
-   return "Circ.";
-}
-
-
-const char *Circle::getOnScreenName()
-{
-   return "Circle";
-}
+const char *Circle::getOnScreenName()     { return "Circle";  }
+const char *Circle::getPrettyNamePlural() { return "Circles"; }
+const char *Circle::getOnDockName()       { return "Circ.";   }
+const char *Circle::getEditorHelpString() { return "Shootable circle object.  Scary."; }
 
 
 F32 Circle::getEditorRadius(F32 currentScale)
@@ -1646,41 +1649,11 @@ U32 Circle::getDesignCount()
 }
 
 
-///// Lua interface
-
-const char Circle::className[] = "Circle";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-Circle::Circle(lua_State *L)
+// Inherits all MoveItem methods, has no custom methods
+const luaL_reg Circle::luaMethods[] =
 {
-   // Do we want to construct these from Lua?  If so, do that here!
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<Circle>::RegType Circle::methods[] =
-{
-   // Standard gameItem methods
-   method(Circle, getClassID),
-   method(Circle, getLoc),
-   method(Circle, getRad),
-   method(Circle, getVel),
-   method(Circle, getTeamIndx),
-
-   {0,0}    // End method list
+   {0,0}   
 };
-
-
-S32 Circle::getClassID(lua_State *L)
-{
-   return returnInt(L, CircleTypeNumber);
-}
-
-
-void Circle::push(lua_State *L)
-{
-   Lunar<Circle>::push(L, this);
-}
 
 
 ////////////////////////////////////////
@@ -1997,50 +1970,9 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-///////////////////////////////////////////////////////
-
-
-static S32 TestItemL_getClassId(lua_State* L)
-{
-   return LuaObject::returnInt(L, TestItemTypeNumber);
-}
-
-
-template <class T>
-static S32 lua_getLoc(lua_State* L)
-{
-   T *w = luaW_check<T>(L, 1);    // Will return NULL if object is defunct
-   if(w)
-      return w->getLoc(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
-static S32 TestItemL_getRad(lua_State* L)
-{
-   TestItem* w = luaW_check<TestItem>(L, 1); 
-
-   return w->getRad(L);
-}
-
-
-static S32 TestItemL_getVel(lua_State* L)
-{
-   TestItem *w = luaW_check<TestItem>(L, 1); 
-   if(w)
-      return w->getVel(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
+// Inherits all MoveItem methods, has no custom methods
 const luaL_reg TestItem::luaMethods[] =
 {
-   { "getClassID",  TestItemL_getClassId },
-   { "getLoc",      lua_getLoc<TestItem> },
-   { "getRad",      TestItemL_getRad },
-   { "getVel",      TestItemL_getVel },
    { NULL, NULL }
 };
 
@@ -2139,91 +2071,21 @@ void ResourceItem::onItemDropped()
 
 ///// Lua Interface
 
-
-///////////////////////////////////////////////////////
-
-
-static S32 ResourceItemL_getClassId(lua_State* L)
-{
-   return LuaObject::returnInt(L, ResourceItemTypeNumber);
-}
+static S32 isInCaptureZoneWrapper(lua_State *L) { return luaW_doMethod<ResourceItem>(&ResourceItem::isInCaptureZone, L); } 
+static S32 isOnShipWrapper(lua_State *L)        { return luaW_doMethod<ResourceItem>(&ResourceItem::isOnShip,        L); } 
+static S32 getShipWrapper(lua_State *L)         { return luaW_doMethod<ResourceItem>(&ResourceItem::getShip,         L); } 
 
 
-static S32 ResourceItemL_getRad(lua_State* L)
-{
-   ResourceItem* w = luaW_check<ResourceItem>(L, 1); 
-
-   return w->getRad(L);
-}
-
-
-static S32 ResourceItemL_getVel(lua_State* L)
-{
-   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
-   if(w)
-      return w->getVel(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
-static S32 ResourceItemL_getTeamIndex(lua_State *L)
-{
-   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
-   if(w)
-      return w->getTeamIndx(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
-static S32 ResourceItemL_isInCaptureZone(lua_State *L)
-{
-   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
-   if(w)
-      return w->isInCaptureZone(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
-static S32 ResourceItemL_isOnShip(lua_State *L)
-{
-   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
-   if(w)
-      return w->isOnShip(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
-static S32 ResourceItemL_getShip(lua_State *L)
-{
-   ResourceItem *w = luaW_check<ResourceItem>(L, 1); 
-   if(w)
-      return w->getShip(L);
-
-   return LuaObject::returnNil(L);
-}
-
-
+// Inherits all MoveItem methods, and has a few of its own
 const luaL_reg ResourceItem::luaMethods[] =
 {
-   { "getClassID",  ResourceItemL_getClassId },
-   { "getLoc",      lua_getLoc<ResourceItem> },
-   { "getRad",      ResourceItemL_getRad },
-   { "getVel",      ResourceItemL_getVel },
-   { "getTeamIndx", ResourceItemL_getTeamIndex },
-
-   // item methods
-   { "isInCaptureZone", ResourceItemL_isInCaptureZone },
-   { "isOnShip",        ResourceItemL_isOnShip },
-   { "getShip",         ResourceItemL_getShip },
+   { "isInCaptureZone", isInCaptureZoneWrapper },
+   { "isOnShip",        isOnShipWrapper },
+   { "getShip",         getShipWrapper },
 
    { NULL, NULL }
 };
 
 
 };
-
 

@@ -40,6 +40,8 @@ extern "C"
 #include "../lua/lua-vec/src/lauxlib.h"
 }
 
+//#include "luaObject.h"     // For returnNil function
+
 #define LUAW_BUILDER
 
 #define luaW_getregistry(L, s) \
@@ -191,7 +193,7 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
             ud = pud->cast(*pud);
             pud = &ud;
         }
-        LuaProxy<T> *proxy = (LuaProxy<T> *)pud->data;
+          LuaProxy<T> *proxy = (LuaProxy<T> *)pud->data;
         if(!proxy->isDefunct())
            return proxy->getProxiedObject();
     }
@@ -687,7 +689,7 @@ void luaW_extend(lua_State* L)
     if(!LuaWrapper<U>::classname)
         luaL_error(L, "attempting to extend %s by a type that has not been registered", LuaWrapper<T>::classname);
 
-    LuaWrapper<T>::cast = luaW_cast<T, U>;
+    LuaWrapper<LuaProxy<T> >::cast = luaW_cast<T, U>;
 
     luaL_getmetatable(L, LuaWrapper<T>::classname); // mt
     luaL_getmetatable(L, LuaWrapper<U>::classname); // mt emt
@@ -792,6 +794,17 @@ public:
 #define LUAW_DESTRUCTOR_CLEANUP \
    if(mLuaProxy) mLuaProxy->setDefunct(true)
 
+
+// Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
+template <typename T, typename FType>
+int luaW_doMethod(FType f, lua_State *L)
+{
+   T *w = luaW_check<T>(L, 1); 
+   if(w) 
+      return (w->*f)(L); 
+      
+   return Zap::LuaObject::returnNil(L); 
+}
 
 /*
  * Copyright (c) 2010-2011 Alexander Ames

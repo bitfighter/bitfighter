@@ -147,7 +147,13 @@ protected:
    static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
 
 public:
+  
+   static const luaL_reg luaMethods[];
+
    MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+   virtual ~MoveItem();                                                                          // Destructor
+
+   LUAW_DECLARE_CLASS(MoveItem);
 
    void idle(GameObject::IdleCallPath path);
 
@@ -175,7 +181,7 @@ public:
    void dismount();
    void render();
 
-   virtual void renderItem(const Point &pos) = 0;      // Does actual rendering, allowing render() to be generic for all Items
+   virtual void renderItem(const Point &pos);         // Does actual rendering, allowing render() to be generic for all Items
 
    virtual void onMountDestroyed();
    virtual void onItemDropped();
@@ -214,7 +220,8 @@ private:
    S32 mDesign;
 
 public:
-   Asteroid();     // Constructor  
+   Asteroid();       // Constructor  
+   ~Asteroid();      // Destructor
    Asteroid *clone() const;
 
    static F32 getAsteroidRadius(S32 size_left);
@@ -252,6 +259,8 @@ public:
    static U32 getDesignCount();
 
    TNL_DECLARE_CLASS(Asteroid);
+   LUAW_DECLARE_CLASS(Asteroid);
+
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -266,17 +275,10 @@ public:
    ///// Lua interface
 
    public:
-   Asteroid(lua_State *L);    // Constructor
-
-   static const char className[];
-
-   static Lunar<Asteroid>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
+   static const luaL_reg luaMethods[];
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
-   void push(lua_State *L);
 };
 
 
@@ -292,7 +294,8 @@ private:
    bool hasExploded;
 
 public:
-   Circle();     // Constructor  
+   Circle();      // Constructor  
+   ~Circle();     // Destructor
    Circle *clone() const;
 
    static const S32 CIRCLE_RADIUS = 10;
@@ -314,6 +317,7 @@ public:
    static U32 getDesignCount();
 
    TNL_DECLARE_CLASS(Circle);
+   LUAW_DECLARE_CLASS(Circle);
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -325,17 +329,8 @@ public:
    void renderDock();
 
    ///// Lua interface
-
-   public:
-   Circle(lua_State *L);    // Lua constructor
-
-   static const char className[];
-
-   static Lunar<Circle>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-
-   void push(lua_State *L);
+public:
+   static const luaL_reg luaMethods[];
 };
 
 
