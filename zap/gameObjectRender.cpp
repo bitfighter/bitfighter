@@ -1698,7 +1698,7 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *co
    glColor(color ? *color : Color(.7), alpha);
       // Design 1
       glBegin(GL_LINE_LOOP);
-         for(S32 i = 0; i < AsteroidPoints; i++)
+         for(S32 i = 0; i < ASTEROID_POINTS; i++)
          {
             F32 x = AsteroidCoords[design][i][0] * scaleFact;
             F32 y = AsteroidCoords[design][i][1] * scaleFact;

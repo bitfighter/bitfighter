@@ -1133,7 +1133,7 @@ Asteroid::Asteroid() : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITI
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = AsteroidTypeNumber;
    hasExploded = false;
-   mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);
+   mDesign = TNL::Random::readI(0, ASTEROID_DESIGNS - 1);
 
    // Give the asteroids some intial motion in a random direction
    F32 ang = TNL::Random::readF() * Float2Pi;
@@ -1166,7 +1166,7 @@ Asteroid *Asteroid::clone() const
 
 U32 Asteroid::getDesignCount()
 {
-   return AsteroidDesigns;
+   return ASTEROID_DESIGNS;
 }
 
 
@@ -1197,7 +1197,7 @@ F32 Asteroid::getEditorRadius(F32 currentScale)
 
 bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
 {
-   //for(S32 i = 0; i < AsteroidPoints; i++)
+   //for(S32 i = 0; i < ASTEROID_POINTS; i++)
    //{
    //   Point p = Point(mMoveState[MoveObject::ActualState].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
    //                   mMoveState[MoveObject::ActualState].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
@@ -1275,7 +1275,7 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & ItemChangedMask))
    {
       stream->writeInt(mSizeLeft, ASTEROID_SIZELEFT_BIT_COUNT);
-      stream->writeEnum(mDesign, AsteroidDesigns);
+      stream->writeEnum(mDesign, ASTEROID_DESIGNS);
    }
 
    stream->writeFlag(hasExploded);
@@ -1293,7 +1293,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mSizeLeft = stream->readInt(ASTEROID_SIZELEFT_BIT_COUNT);
       setRadius(getAsteroidRadius(mSizeLeft));
       setMass(getAsteroidMass(mSizeLeft));
-      mDesign = stream->readEnum(AsteroidDesigns);
+      mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
       if(!mInitial)
          SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos);
@@ -1645,7 +1645,7 @@ void Circle::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit
 
 U32 Circle::getDesignCount()
 {
-   return AsteroidDesigns;
+   return ASTEROID_DESIGNS;
 }
 
 

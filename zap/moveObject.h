@@ -197,10 +197,10 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static const S32 AsteroidDesigns = 4;
-static const S32 AsteroidPoints = 12;
+static const S32 ASTEROID_DESIGNS = 4;
+static const S32 ASTEROID_POINTS = 12;
 
-static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wow!  A 3D array!
+static const S8 AsteroidCoords[ASTEROID_DESIGNS][ASTEROID_POINTS][2] =   // <== Wow!  A 3D array!
 {
   { { 80, -43}, { 47, -84 }, { 5, -58 }, { -41, -81 }, { -79, -21 }, { -79, -0 }, { -79, 10 }, { -79, 47 }, { -49, 78 }, { 43, 78 }, { 80, 40 }, { 46, -0 } },
   { { -41, -83 }, { 18, -83 }, { 81, -42 }, { 83, -42 }, { 7, -2 }, { 81, 38 }, { 41, 79 }, { 10, 56 }, { -48, 79 }, { -80, 15 }, { -80, -43 }, { -17, -43 } },
