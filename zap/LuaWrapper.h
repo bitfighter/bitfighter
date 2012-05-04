@@ -720,8 +720,6 @@ void luaW_extend(lua_State* L)
 #undef luaW_setregistry
 
 
-//static S32 id = 0;
-
 template <class T>
 class LuaProxy
 {
@@ -737,8 +735,6 @@ public:
     // Typical constructor
     LuaProxy(T *obj)
     {
-      //mId = id++;
-
       mProxiedObject = obj;
       obj->setLuaProxy(this);
       mDefunct = false;
