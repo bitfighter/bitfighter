@@ -796,12 +796,13 @@ public:
 
 
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
-template <typename T, typename FType>
-int luaW_doMethod(FType f, lua_State *L)
+// Wraps a standard method (one that takes L as a single parameter) within a proxy check. 
+template <typename T, TNL::S32 (T::*methodName)(lua_State * )>
+int luaW_doMethod(lua_State *L)
 {
    T *w = luaW_check<T>(L, 1); 
    if(w) 
-      return (w->*f)(L); 
+      return (w->*methodName)(L); 
       
    return Zap::LuaObject::returnNil(L); 
 }

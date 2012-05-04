@@ -1072,32 +1072,11 @@ S32 MoveItem::getShip(lua_State *L)
 }
 
 
-// ==> This one is a good candidate for moving directly into LuaW's index table rather than having a C++ method to support it
-static S32 MoveItemL_getClassId(lua_State *L) 
-{ 
-   MoveItem *w = luaW_check<MoveItem>(L, 1); 
-   if(w) 
-      return w->getObjectTypeNumber(); 
-      
-   return LuaObject::returnNil(L); 
-}
-
-
-static S32 getVelWrapper(lua_State *L)       { return luaW_doMethod<MoveItem>(&Item    ::getVel,      L); }
-static S32 getLocWrapper(lua_State *L)       { return luaW_doMethod<MoveItem>(&MoveItem::getLoc,      L); } 
-static S32 getRadWrapper(lua_State *L)       { return luaW_doMethod<MoveItem>(&MoveItem::getRad,      L); } 
-static S32 getTeamIndxWrapper(lua_State *L)  { return luaW_doMethod<MoveItem>(&MoveItem::getTeamIndx, L); }
-
-
 // Standard methods available to all MoveItems
 const luaL_reg MoveItem::luaMethods[] =
 {
-   { "getClassID",  MoveItemL_getClassId },
-   { "getLoc",      getLocWrapper },
-   { "getRad",      getRadWrapper },
-   { "getVel",      getVelWrapper },
-   { "getTeamIndx", getTeamIndxWrapper },
-
+   { "isOnShip",        luaW_doMethod<MoveItem, &isOnShip> },
+   { "getShip",         luaW_doMethod<MoveItem, &getShip>  },
    { NULL, NULL }
 };
 
@@ -1444,16 +1423,12 @@ S32 Asteroid::getSizeCount(lua_State *L)
 }
 
 
-static S32 getSizeWrapper(lua_State *L)      { return luaW_doMethod<Asteroid>(&Asteroid::getSize,      L); } 
-static S32 getSizeCountWrapper(lua_State *L) { return luaW_doMethod<Asteroid>(&Asteroid::getSizeCount, L); } 
-
-
 // Define the methods we will expose to Lua
 const luaL_reg Asteroid::luaMethods[] =
 {
    // Class specific methods
-   { "getSize",       getSizeWrapper },
-   { "getSizeCount",  getSizeCountWrapper },    // <=== could be static
+   { "getSize",       luaW_doMethod<Asteroid, &getSize> },
+   { "getSizeCount",  luaW_doMethod<Asteroid, &getSizeCount> },    // <=== could be static
 
    {0,0}    // End method list
 };
@@ -1652,7 +1627,7 @@ U32 Circle::getDesignCount()
 // Inherits all MoveItem methods, has no custom methods
 const luaL_reg Circle::luaMethods[] =
 {
-   {0,0}   
+   {NULL, NULL}   
 };
 
 
@@ -2071,18 +2046,9 @@ void ResourceItem::onItemDropped()
 
 ///// Lua Interface
 
-static S32 isInCaptureZoneWrapper(lua_State *L) { return luaW_doMethod<ResourceItem>(&ResourceItem::isInCaptureZone, L); } 
-static S32 isOnShipWrapper(lua_State *L)        { return luaW_doMethod<ResourceItem>(&ResourceItem::isOnShip,        L); } 
-static S32 getShipWrapper(lua_State *L)         { return luaW_doMethod<ResourceItem>(&ResourceItem::getShip,         L); } 
-
-
 // Inherits all MoveItem methods, and has a few of its own
 const luaL_reg ResourceItem::luaMethods[] =
 {
-   { "isInCaptureZone", isInCaptureZoneWrapper },
-   { "isOnShip",        isOnShipWrapper },
-   { "getShip",         getShipWrapper },
-
    { NULL, NULL }
 };
 

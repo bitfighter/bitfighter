@@ -883,11 +883,15 @@ void LuaScriptRunner::deleteScript(const char *name)
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-
-   luaW_register<MoveItem>(L, "MoveItem", NULL, MoveItem::luaMethods);
+   luaW_register<Item>(L, "Item", NULL, Item::luaMethods);
    lua_pop(L, 1);                            // Remove metatable from stack
 
-   // LuaWrapper managed objects
+
+   luaW_register<MoveItem>(L, "MoveItem", NULL, MoveItem::luaMethods);
+   luaW_extend<MoveItem, Item>(L);
+   lua_pop(L, 1);                            // Remove metatable from stack
+
+
    luaW_register<Asteroid>(L, "Asteroid", NULL, Asteroid::luaMethods);
    luaW_extend<Asteroid, MoveItem>(L);
    lua_pop(L, 1);                            // Remove metatable from stack
@@ -901,6 +905,7 @@ void LuaScriptRunner::registerClasses()
    luaW_register<TestItem>(L, "TestItem", NULL, TestItem::luaMethods);
    luaW_extend<TestItem, MoveItem>(L);
    lua_pop(L, 1);                            // Remove metatable from stack
+
 
    luaW_register<ResourceItem>(L, "ResourceItem", NULL, ResourceItem::luaMethods);
    luaW_extend<ResourceItem, MoveItem>(L);

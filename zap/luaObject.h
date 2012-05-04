@@ -33,6 +33,8 @@
 #include "lua.h"
 #include "../lua/include/lunar.h"
 
+#include "LuaWrapper.h"
+
 #include "Point.h"
 
 #include "tnl.h"

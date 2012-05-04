@@ -54,6 +54,15 @@ Item::Item(const Point &pos, F32 radius)
 
    mItemId = sItemId;
    sItemId++;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+Item::~Item()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -218,6 +227,31 @@ S32 Item::getShip(lua_State *L)
 {
    return returnNil(L);
 }
+
+
+// ==> This one is a good candidate for moving directly into LuaW's index table rather than having a C++ method to support it
+static S32 doGetClassId(lua_State *L) 
+{ 
+   MoveItem *w = luaW_check<MoveItem>(L, 1); 
+   if(w) 
+      return w->getObjectTypeNumber(); 
+      
+   return LuaObject::returnNil(L); 
+}
+
+
+// Standard methods available to all Items
+const luaL_reg Item::luaMethods[] =
+{
+   { "getClassID",      doGetClassId                          },
+   { "getLoc",          luaW_doMethod<Item, &getLoc>          },
+   { "getRad",          luaW_doMethod<Item, &getRad>          },
+   { "getVel",          luaW_doMethod<Item, &getVel>          },
+   { "getTeamIndx",     luaW_doMethod<Item, &getTeamIndx>     },
+   { "isInCaptureZone", luaW_doMethod<Item, &isInCaptureZone> },
+
+   { NULL, NULL }
+};
 
 
 // For getting the underlying object when all we have is a Lua pointer to it

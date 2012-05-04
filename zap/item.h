@@ -55,7 +55,8 @@ protected:
    static bool mInitial;       // True on initial unpack, false thereafter
 
 public:
-   Item(const Point &pos = Point(0,0), F32 radius = 1);      // Constructor
+   Item(const Point &pos = Point(0,0), F32 radius = 1);     // Constructor
+   virtual ~Item();                                         // Destructor
 
    virtual void setPos(const Point &p);
 
@@ -80,6 +81,9 @@ public:
    virtual Rect calcExtents(); 
 
    // LuaItem interface
+   LUAW_DECLARE_CLASS(Item);
+   static const luaL_reg luaMethods[];
+
    virtual S32 getLoc(lua_State *L);
    virtual S32 getRad(lua_State *L);
    virtual S32 getVel(lua_State *L);
