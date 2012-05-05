@@ -1080,6 +1080,8 @@ const luaL_reg MoveItem::luaMethods[] =
    { NULL, NULL }
 };
 
+const char *MoveItem::luaClassName = "MoveItem";
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1433,6 +1435,7 @@ const luaL_reg Asteroid::luaMethods[] =
    {0,0}    // End method list
 };
 
+const char *Asteroid::luaClassName = "Asteroid";
 
 
 ////////////////////////////////////////
@@ -1629,6 +1632,8 @@ const luaL_reg Circle::luaMethods[] =
 {
    {NULL, NULL}   
 };
+
+const char *Circle::luaClassName = "Circle";
 
 
 ////////////////////////////////////////
@@ -1951,6 +1956,7 @@ const luaL_reg TestItem::luaMethods[] =
    { NULL, NULL }
 };
 
+const char *TestItem::luaClassName = "TestItem";
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -2051,6 +2057,8 @@ const luaL_reg ResourceItem::luaMethods[] =
 {
    { NULL, NULL }
 };
+
+const char *ResourceItem::luaClassName = "ResourceItem";
 
 
 };

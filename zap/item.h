@@ -83,6 +83,7 @@ public:
    // LuaItem interface
    LUAW_DECLARE_CLASS(Item);
    static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    virtual S32 getLoc(lua_State *L);
    virtual S32 getRad(lua_State *L);

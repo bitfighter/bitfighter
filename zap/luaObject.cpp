@@ -882,17 +882,17 @@ void LuaScriptRunner::deleteScript(const char *name)
 
 // Helpers to make registration cleaner
 template<class T>
-static void registerClass(lua_State *L, const char *className)
+static void registerClass(lua_State *L)
 {
-   luaW_register<T>(L, className, NULL, T::luaMethods);
+   luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
    lua_pop(L, 1);                            // Remove metatable from stack
 }
 
 
 template<class T, class U>
-static void registerClass(lua_State *L, const char *className)
+static void registerClass(lua_State *L)
 {
-   luaW_register<T>(L, className, NULL, T::luaMethods);
+   luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
    luaW_extend<T, U>(L);
 
    lua_pop(L, 1);                            // Remove metatable from stack
@@ -902,13 +902,13 @@ static void registerClass(lua_State *L, const char *className)
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-   //            Class         Parent        Name in Lua
-   registerClass<Item>                   (L, "Item");
-   registerClass<MoveItem,     Item>     (L, "MoveItem");
-   registerClass<Asteroid,     MoveItem> (L, "Asteroid");
-   registerClass<Circle,       MoveItem> (L, "Circle");
-   registerClass<TestItem,     MoveItem> (L, "TestItem");
-   registerClass<ResourceItem, MoveItem> (L, "ResourceItem");
+   //            Class         Parent      
+   registerClass<Item>                  (L);
+   registerClass<MoveItem,     Item>    (L);
+   registerClass<Asteroid,     MoveItem>(L);
+   registerClass<Circle,       MoveItem>(L);
+   registerClass<TestItem,     MoveItem>(L);
+   registerClass<ResourceItem, MoveItem>(L);
 
 
    ///////////////////////////////////////

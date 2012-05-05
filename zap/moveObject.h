@@ -149,6 +149,7 @@ protected:
 public:
   
    static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
    virtual ~MoveItem();                                                                          // Destructor
@@ -274,8 +275,9 @@ public:
 
    ///// Lua interface
 
-   public:
+public:
    static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
@@ -331,6 +333,7 @@ public:
    ///// Lua interface
 public:
    static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 
@@ -416,6 +419,7 @@ public:
    LUAW_DECLARE_CLASS(TestItem);
 
    static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -452,6 +456,7 @@ public:
    LUAW_DECLARE_CLASS(ResourceItem);
 
    static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    ///// Editor methods
    const char *getEditorHelpString();
