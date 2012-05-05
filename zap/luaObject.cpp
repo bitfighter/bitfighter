@@ -655,7 +655,7 @@ bool LuaScriptRunner::loadScript()
 
    if(!cacheScripts)
       loadCompileScript(mScriptName.c_str());
-   else
+   else  
    {
       bool found = false;
 
@@ -880,37 +880,34 @@ void LuaScriptRunner::deleteScript(const char *name)
 }
 
 
+// Helpers to make registration cleaner
+template<class T>
+static void registerClass(lua_State *L, const char *className)
+{
+   luaW_register<T>(L, className, NULL, T::luaMethods);
+   lua_pop(L, 1);                            // Remove metatable from stack
+}
+
+
+template<class T, class U>
+static void registerClass(lua_State *L, const char *className)
+{
+   luaW_register<T>(L, className, NULL, T::luaMethods);
+   luaW_extend<T, U>(L);
+
+   lua_pop(L, 1);                            // Remove metatable from stack
+}
+
+
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-   luaW_register<Item>(L, "Item", NULL, Item::luaMethods);
-   lua_pop(L, 1);                            // Remove metatable from stack
-
-
-   luaW_register<MoveItem>(L, "MoveItem", NULL, MoveItem::luaMethods);
-   luaW_extend<MoveItem, Item>(L);
-   lua_pop(L, 1);                            // Remove metatable from stack
-
-
-   luaW_register<Asteroid>(L, "Asteroid", NULL, Asteroid::luaMethods);
-   luaW_extend<Asteroid, MoveItem>(L);
-   lua_pop(L, 1);                            // Remove metatable from stack
-
-
-   luaW_register<Circle>(L, "Circle", NULL, Circle::luaMethods);
-   luaW_extend<Circle, MoveItem>(L);
-   lua_pop(L, 1);                            // Remove metatable from stack
-
-
-   luaW_register<TestItem>(L, "TestItem", NULL, TestItem::luaMethods);
-   luaW_extend<TestItem, MoveItem>(L);
-   lua_pop(L, 1);                            // Remove metatable from stack
-
-
-   luaW_register<ResourceItem>(L, "ResourceItem", NULL, ResourceItem::luaMethods);
-   luaW_extend<ResourceItem, MoveItem>(L);
-   lua_pop(L, 1);                            // Remove metatable from stack
-
+   registerClass<Item>                   (L, "Item");
+   registerClass<MoveItem,     Item>     (L, "MoveItem");
+   registerClass<Asteroid,     MoveItem> (L, "Asteroid");
+   registerClass<Circle,       MoveItem> (L, "Circle");
+   registerClass<TestItem,     MoveItem> (L, "TestItem");
+   registerClass<ResourceItem, MoveItem> (L, "ResourceItem");
 
 
    ///////////////////////////////////////
