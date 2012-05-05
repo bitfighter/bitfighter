@@ -40,7 +40,6 @@ extern "C"
 #include "../lua/lua-vec/src/lauxlib.h"
 }
 
-//#include "luaObject.h"     // For returnNil function
 
 #define LUAW_BUILDER
 
@@ -795,6 +794,15 @@ public:
    if(mLuaProxy) mLuaProxy->setDefunct(true)
 
 
+// Returns nil to calling Lua function
+// Taken from LuaObject to avoid circular include conundrum
+int returnNil(lua_State *L)
+{
+   lua_pushnil(L);
+   return 1;
+}
+
+
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
 // Wraps a standard method (one that takes L as a single parameter) within a proxy check. 
 template <typename T, TNL::S32 (T::*methodName)(lua_State * )>
@@ -804,7 +812,7 @@ int luaW_doMethod(lua_State *L)
    if(w) 
       return (w->*methodName)(L); 
       
-   return Zap::LuaObject::returnNil(L); 
+   return returnNil(L);
 }
 
 /*
