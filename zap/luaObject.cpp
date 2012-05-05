@@ -902,6 +902,7 @@ static void registerClass(lua_State *L, const char *className)
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
+   //            Class         Parent        Name in Lua
    registerClass<Item>                   (L, "Item");
    registerClass<MoveItem,     Item>     (L, "MoveItem");
    registerClass<Asteroid,     MoveItem> (L, "Asteroid");
