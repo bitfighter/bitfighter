@@ -880,35 +880,46 @@ void LuaScriptRunner::deleteScript(const char *name)
 }
 
 
-// Helpers to make registration cleaner
-template<class T>
-static void registerClass(lua_State *L)
+// Statics
+//std::vector<RegFunc> registrationFunctions;
+//std::vector<RegFunc> registrationFunctions2;
+//std::vector<RegFunc> extensionFunctions;
+
+
+vector<RegFunc>& LuaScriptRunner::getRegistrationFunctions()
 {
-   luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
-   lua_pop(L, 1);                            // Remove metatable from stack
+   static vector<RegFunc> functions; 
+   return functions;
 }
 
 
-template<class T, class U>
-static void registerClass(lua_State *L)
+vector<RegFunc>& LuaScriptRunner::getExtensionFunctions()
 {
-   luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
-   luaW_extend<T, U>(L);
-
-   lua_pop(L, 1);                            // Remove metatable from stack
+   static vector<RegFunc> functions; 
+   return functions;
 }
-
 
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-   //            Class         Parent      
-   registerClass<Item>                  (L);
-   registerClass<MoveItem,     Item>    (L);
-   registerClass<Asteroid,     MoveItem>(L);
-   registerClass<Circle,       MoveItem>(L);
-   registerClass<TestItem,     MoveItem>(L);
-   registerClass<ResourceItem, MoveItem>(L);
+   printf("Reading Reg Functions 2: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
+
+   // Register all our classes
+   for(U32 i = 0; i < LuaScriptRunner::getRegistrationFunctions().size(); i++)
+      LuaScriptRunner::getRegistrationFunctions()[i](L);
+
+   // Extend those that need extending
+   for(U32 i = 0; i < LuaScriptRunner::getExtensionFunctions().size(); i++)
+      LuaScriptRunner::getExtensionFunctions()[i](L);
+
+
+   //            Class      Parent (if any)      
+   //registerClass<Item>                  (L);
+   //registerClass<MoveItem,     Item>    (L);
+   //registerClass<Asteroid,     MoveItem>(L);
+   //registerClass<Circle,       MoveItem>(L);
+   //registerClass<TestItem,     MoveItem>(L);
+   //registerClass<ResourceItem, MoveItem>(L);
 
 
    ///////////////////////////////////////

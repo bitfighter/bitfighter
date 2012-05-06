@@ -40,6 +40,8 @@ extern "C"
 #include "../lua/lua-vec/src/lauxlib.h"
 }
 
+#include <vector>
+
 
 #define LUAW_BUILDER
 
@@ -771,6 +773,9 @@ public:
 };
 
 
+
+
+
 // This goes in the header of a "wrapped class"
 #define  LUAW_DECLARE_CLASS(className) \
    LuaProxy<className> *mLuaProxy; \
@@ -790,9 +795,10 @@ public:
    if(mLuaProxy) mLuaProxy->setDefunct(true)
 
 
+
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
 // Wraps a standard method (one that takes L as a single parameter) within a proxy check. 
-template <typename T, TNL::S32 (T::*methodName)(lua_State * )>
+template <typename T, int (T::*methodName)(lua_State * )>
 int luaW_doMethod(lua_State *L)
 {
    T *w = luaW_check<T>(L, 1); 

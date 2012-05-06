@@ -256,6 +256,8 @@ const luaL_reg Item::luaMethods[] =
 
 const char *Item::luaClassName = "Item";
 
+REGISTER_CLASS_XXX(Item);
+
 
 // For getting the underlying object when all we have is a Lua pointer to it
 GameObject *Item::getGameObject()

@@ -34,6 +34,8 @@
 #include "gameConnection.h"
 #include "stringUtils.h"
 
+#include "luaObject.h"
+
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "sparkManager.h"
@@ -1082,6 +1084,8 @@ const luaL_reg MoveItem::luaMethods[] =
 
 const char *MoveItem::luaClassName = "MoveItem";
 
+REGISTER_CLASS(MoveItem, Item);
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1437,6 +1441,7 @@ const luaL_reg Asteroid::luaMethods[] =
 
 const char *Asteroid::luaClassName = "Asteroid";
 
+REGISTER_CLASS(Asteroid, MoveItem);
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1634,6 +1639,8 @@ const luaL_reg Circle::luaMethods[] =
 };
 
 const char *Circle::luaClassName = "Circle";
+
+REGISTER_CLASS(Circle, MoveItem);
 
 
 ////////////////////////////////////////
@@ -1958,6 +1965,9 @@ const luaL_reg TestItem::luaMethods[] =
 
 const char *TestItem::luaClassName = "TestItem";
 
+REGISTER_CLASS(TestItem, MoveItem);
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -2060,6 +2070,7 @@ const luaL_reg ResourceItem::luaMethods[] =
 
 const char *ResourceItem::luaClassName = "ResourceItem";
 
+REGISTER_CLASS(ResourceItem, MoveItem);
 
 };
 
