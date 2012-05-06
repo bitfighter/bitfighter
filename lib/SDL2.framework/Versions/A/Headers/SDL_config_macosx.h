@@ -130,7 +130,6 @@
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_COCOA	1
 #define SDL_VIDEO_DRIVER_DUMMY	1
-
 #define SDL_VIDEO_DRIVER_X11 1
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC "/usr/X11R6/lib/libX11.6.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/usr/X11R6/lib/libXext.6.dylib"
@@ -167,7 +166,7 @@
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1
 #ifdef __ppc__
-#define SDL_ALTIVEC_BLITTERS	0
+#define SDL_ALTIVEC_BLITTERS	1
 #endif
 
 #endif /* _SDL_config_macosx_h */
