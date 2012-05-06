@@ -1077,8 +1077,8 @@ S32 MoveItem::getShip(lua_State *L)
 // Standard methods available to all MoveItems
 const luaL_reg MoveItem::luaMethods[] =
 {
-   { "isOnShip",        luaW_doMethod<MoveItem, &isOnShip> },
-   { "getShip",         luaW_doMethod<MoveItem, &getShip>  },
+   { "isOnShip",        luaW_doMethod<MoveItem, &MoveItem::isOnShip> },
+   { "getShip",         luaW_doMethod<MoveItem, &MoveItem::getShip>  },
    { NULL, NULL }
 };
 
@@ -1433,8 +1433,8 @@ S32 Asteroid::getSizeCount(lua_State *L)
 const luaL_reg Asteroid::luaMethods[] =
 {
    // Class specific methods
-   { "getSize",       luaW_doMethod<Asteroid, &getSize> },
-   { "getSizeCount",  luaW_doMethod<Asteroid, &getSizeCount> },    // <=== could be static
+   { "getSize",       luaW_doMethod<Asteroid, &Asteroid::getSize> },
+   { "getSizeCount",  luaW_doMethod<Asteroid, &Asteroid::getSizeCount> },    // <=== could be static
 
    {0,0}    // End method list
 };

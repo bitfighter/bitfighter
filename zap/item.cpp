@@ -244,11 +244,11 @@ static S32 doGetClassId(lua_State *L)
 const luaL_reg Item::luaMethods[] =
 {
    { "getClassID",      doGetClassId                          },
-   { "getLoc",          luaW_doMethod<Item, &getLoc>          },
-   { "getRad",          luaW_doMethod<Item, &getRad>          },
-   { "getVel",          luaW_doMethod<Item, &getVel>          },
-   { "getTeamIndx",     luaW_doMethod<Item, &getTeamIndx>     },
-   { "isInCaptureZone", luaW_doMethod<Item, &isInCaptureZone> },
+   { "getLoc",          luaW_doMethod<Item, &Item::getLoc>          },
+   { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
+   { "getVel",          luaW_doMethod<Item, &Item::getVel>          },
+   { "getTeamIndx",     luaW_doMethod<Item, &Item::getTeamIndx>     },
+   { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
 
    { NULL, NULL }
 };

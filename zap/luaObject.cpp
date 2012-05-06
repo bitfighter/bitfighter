@@ -902,7 +902,7 @@ vector<RegFunc>& LuaScriptRunner::getExtensionFunctions()
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-   printf("Reading Reg Functions 2: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
+   printf("Reading Reg Functions 2: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions(), (int)LuaScriptRunner::getRegistrationFunctions().size());
 
    // Register all our classes
    for(U32 i = 0; i < LuaScriptRunner::getRegistrationFunctions().size(); i++)
@@ -1003,8 +1003,6 @@ void LuaScriptRunner::tickTimer(U32 deltaT)
    TNLAssert(false, "Not (yet) implemented!");
 }
 
-
-extern void shutdownBitfighter();
 
 // Since all calls to lua are now done in protected mode, via lua_pcall, if we get here, we've probably encountered 
 // a fatal error such as running out of memory.  Best just to shut the whole thing down.

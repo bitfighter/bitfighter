@@ -239,7 +239,7 @@ public:
    void static registerClass1()
    {
       LuaScriptRunner::getRegistrationFunctions().push_back(&registerClass);
-      printf("Registering Reg Functions 1: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
+      printf("Registering Reg Functions 1: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions, (int)LuaScriptRunner::getRegistrationFunctions().size());
    }
 };
 
@@ -259,7 +259,7 @@ public:
       LuaScriptRunner::getRegistrationFunctions().push_back(&registerClass);
       LuaScriptRunner::getExtensionFunctions()   .push_back(&luaW_extend<T, U>);
 
-      printf("Registering Reg Functions 2: %p   %d  [[]]\n", LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
+      printf("Registering Reg Functions 2: %p   %d  [[]]\n", &LuaScriptRunner::getRegistrationFunctions, (int)LuaScriptRunner::getRegistrationFunctions().size());
    }
 };
 
@@ -268,7 +268,7 @@ template<class T>
 class LuaW_Registrar : public LuaRegistrarBase1<T>
 {
 public:
-   LuaW_Registrar() { registerClass1(); }
+   LuaW_Registrar() { LuaRegistrarBase1<T>::registerClass1(); }
 };
 
 
@@ -276,7 +276,7 @@ template<class T, class U>
 class LuaW_Registrar2 : public LuaRegistrarBase2<T, U>
 {
 public:
-   LuaW_Registrar2() { registerClass2(); }
+   LuaW_Registrar2() { LuaRegistrarBase2<T, U>::registerClass2(); }
 };
 
 
