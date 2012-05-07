@@ -1266,6 +1266,7 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    return ret;
 }
 
+
 void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
