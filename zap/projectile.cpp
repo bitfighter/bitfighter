@@ -1415,6 +1415,7 @@ SpyBug::SpyBug(lua_State *L)
    // Do not use
 }
 
+
 S32 SpyBug::getClassID(lua_State *L)
 {
    return returnInt(L, SpyBugTypeNumber);
