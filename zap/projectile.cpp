@@ -1390,7 +1390,6 @@ bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool
 }
 
 
-
 // Lua methods
 const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
 
