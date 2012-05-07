@@ -134,9 +134,6 @@ typedef struct { LuaObject *objectPtr; } UserData;
 #define ROBOT_HELPER_FUNCTIONS_KEY    "robot_helper_functions"
 #define LEVELGEN_HELPER_FUNCTIONS_KEY "levelgen_helper_functions"
 
-typedef void (*RegFunc)(lua_State *);
-
-
 class LuaScriptRunner
 {
 public:
@@ -192,8 +189,6 @@ public:
    LuaScriptRunner();               // Constructor
    virtual ~LuaScriptRunner();      // Destructor
 
-   typedef void (*RegFunc)(lua_State *);
-
    static void clearScriptCache();
 
    void setScriptingDir(const string &scriptingDir);
@@ -213,83 +208,11 @@ public:
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
    bool loadAndRunGlobalFunction(lua_State *L, const char *key);
-
-   static vector<RegFunc>& getRegistrationFunctions();
-   static vector<RegFunc>& getExtensionFunctions();
 };
-
-
-
-//extern std::vector<RegFunc> registrationFunctions1;
-//extern std::vector<RegFunc> registrationFunctions2;
-//extern std::vector<RegFunc> extensionFunctions;
-
-
-
-template<class T>
-class LuaRegistrarBase1 
-{
-public:
-   static void registerClass(lua_State *L)
-   {
-      luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
-      lua_pop(L, 1);                            // Remove metatable from stack
-   }
-
-   void static registerClass1()
-   {
-      LuaScriptRunner::getRegistrationFunctions().push_back(&registerClass);
-      printf("Registering Reg Functions 1: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
-   }
-};
-
-
-template<class T, class U>
-class LuaRegistrarBase2 
-{
-public:
-   static void registerClass(lua_State *L)
-   {
-      luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
-      lua_pop(L, 1);                            // Remove metatable from stack
-   }
-
-   static void registerClass2()
-   {
-      LuaScriptRunner::getRegistrationFunctions().push_back(&registerClass);
-      LuaScriptRunner::getExtensionFunctions()   .push_back(&luaW_extend<T, U>);
-
-      printf("Registering Reg Functions 2: %p   %d  [[]]\n", LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
-   }
-};
-
-
-template<class T>
-class LuaW_Registrar : public LuaRegistrarBase1<T>
-{
-public:
-   LuaW_Registrar() { registerClass1(); }
-};
-
-
-template<class T, class U>
-class LuaW_Registrar2 : public LuaRegistrarBase2<T, U>
-{
-public:
-   LuaW_Registrar2() { registerClass2(); }
-};
-
-
-#define REGISTER_CLASS_XXX(cls) \
-   static LuaW_Registrar<cls> luaclass_##cls
-
-#define REGISTER_CLASS(cls, parent) \
-   LuaW_Registrar2<cls, parent> luaclass_##cls
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 class LuaItem : public LuaObject
 {

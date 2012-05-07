@@ -721,6 +721,95 @@ void luaW_extend(lua_State* L)
 #undef luaW_setregistry
 
 
+
+// Class to facilitate the semi-autonomous self-registration of LuaW classes.
+// To use this system, classes must implement the following:
+//    class name:  const char *luaClassName
+//    method list: const luaL_reg Item::luaMethods[] = { }
+// Then, somewhere in the class definition (.cpp file), add the line:
+//    REGISTER_LUA_CLASS(className);
+// or
+//    REGISTER_LUA_SUBCLASS(className, parentClass);
+// And with that, your class will be registered with LuaWrapper.
+class LuaW_Registrar
+{
+private:
+   typedef void (*luaW_regFunc)(lua_State *);
+
+   static std::vector<luaW_regFunc> &getRegistrationFunctions() 
+   {
+      static std::vector<luaW_regFunc> registrationFunctions;
+      return registrationFunctions;
+   }
+
+   static std::vector<luaW_regFunc> &getExtensionFunctions()
+   {
+      static std::vector<luaW_regFunc> extensionFunctions; 
+      return extensionFunctions;
+   }
+
+protected:
+   template<class T>
+   static void registerClass(lua_State *L)
+   {
+      luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
+      lua_pop(L, 1);                            // Remove metatable from stack
+   }
+
+   template<class T>
+   void static registerClass()
+   {
+      getRegistrationFunctions().push_back(&registerClass<T>);
+   }
+
+   template<class T, class U>
+   static void registerClass()
+   {
+      getRegistrationFunctions().push_back(&registerClass<T>);
+      getExtensionFunctions()   .push_back(&luaW_extend<T, U>);
+   }
+
+public:
+   static void registerClasses(lua_State *L)
+   {
+      // Register all our classes
+      for(unsigned int i = 0; i < getRegistrationFunctions().size(); i++)
+         getRegistrationFunctions()[i](L);
+
+      // Extend those that need extending
+      for(unsigned int i = 0; i < getExtensionFunctions().size(); i++)
+         getExtensionFunctions()[i](L);
+   }
+};
+
+// Helper classes that extend LuaW_Registrar.  These are intended for use
+// only by one of the two macro definitions below.
+template<class T>
+class LuaW_Registrar1Arg : public LuaW_Registrar
+{
+public:
+   LuaW_Registrar1Arg() { registerClass<T>(); }
+};
+
+
+template<class T, class U>
+class LuaW_Registrar2Args : public LuaW_Registrar
+{
+public:
+   LuaW_Registrar2Args() { registerClass<T, U>(); }
+};
+
+
+#define REGISTER_LUA_CLASS(cls) \
+   static LuaW_Registrar1Arg<cls> luaclass_##cls
+
+#define REGISTER_LUA_SUBCLASS(cls, parent) \
+   static LuaW_Registrar2Args<cls, parent> luaclass_##cls
+
+
+
+
+
 template <class T>
 class LuaProxy
 {

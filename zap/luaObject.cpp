@@ -879,39 +879,14 @@ void LuaScriptRunner::deleteScript(const char *name)
    }
 }
 
-
-// Statics
-//std::vector<RegFunc> registrationFunctions;
-//std::vector<RegFunc> registrationFunctions2;
-//std::vector<RegFunc> extensionFunctions;
+   
 
 
-vector<RegFunc>& LuaScriptRunner::getRegistrationFunctions()
-{
-   static vector<RegFunc> functions; 
-   return functions;
-}
-
-
-vector<RegFunc>& LuaScriptRunner::getExtensionFunctions()
-{
-   static vector<RegFunc> functions; 
-   return functions;
-}
 
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-   printf("Reading Reg Functions 2: %p   %d\n", &LuaScriptRunner::getRegistrationFunctions(), LuaScriptRunner::getRegistrationFunctions().size());
-
-   // Register all our classes
-   for(U32 i = 0; i < LuaScriptRunner::getRegistrationFunctions().size(); i++)
-      LuaScriptRunner::getRegistrationFunctions()[i](L);
-
-   // Extend those that need extending
-   for(U32 i = 0; i < LuaScriptRunner::getExtensionFunctions().size(); i++)
-      LuaScriptRunner::getExtensionFunctions()[i](L);
-
+   LuaW_Registrar::registerClasses(L);
 
    //            Class      Parent (if any)      
    //registerClass<Item>                  (L);
@@ -1003,8 +978,6 @@ void LuaScriptRunner::tickTimer(U32 deltaT)
    TNLAssert(false, "Not (yet) implemented!");
 }
 
-
-extern void shutdownBitfighter();
 
 // Since all calls to lua are now done in protected mode, via lua_pcall, if we get here, we've probably encountered 
 // a fatal error such as running out of memory.  Best just to shut the whole thing down.

@@ -243,12 +243,12 @@ static S32 doGetClassId(lua_State *L)
 // Standard methods available to all Items
 const luaL_reg Item::luaMethods[] =
 {
-   { "getClassID",      doGetClassId                          },
-   { "getLoc",          luaW_doMethod<Item, &getLoc>          },
-   { "getRad",          luaW_doMethod<Item, &getRad>          },
-   { "getVel",          luaW_doMethod<Item, &getVel>          },
-   { "getTeamIndx",     luaW_doMethod<Item, &getTeamIndx>     },
-   { "isInCaptureZone", luaW_doMethod<Item, &isInCaptureZone> },
+   { "getClassID",      doGetClassId                                },
+   { "getLoc",          luaW_doMethod<Item, &Item::getLoc>          },
+   { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
+   { "getVel",          luaW_doMethod<Item, &Item::getVel>          },
+   { "getTeamIndx",     luaW_doMethod<Item, &Item::getTeamIndx>     },
+   { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
 
    { NULL, NULL }
 };
@@ -256,7 +256,7 @@ const luaL_reg Item::luaMethods[] =
 
 const char *Item::luaClassName = "Item";
 
-REGISTER_CLASS_XXX(Item);
+REGISTER_LUA_CLASS(Item);
 
 
 // For getting the underlying object when all we have is a Lua pointer to it

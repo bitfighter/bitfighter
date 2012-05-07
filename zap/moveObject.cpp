@@ -1077,14 +1077,14 @@ S32 MoveItem::getShip(lua_State *L)
 // Standard methods available to all MoveItems
 const luaL_reg MoveItem::luaMethods[] =
 {
-   { "isOnShip",        luaW_doMethod<MoveItem, &isOnShip> },
-   { "getShip",         luaW_doMethod<MoveItem, &getShip>  },
+   { "isOnShip",        luaW_doMethod<MoveItem, &MoveItem::isOnShip> },
+   { "getShip",         luaW_doMethod<MoveItem, &MoveItem::getShip>  },
    { NULL, NULL }
 };
 
 const char *MoveItem::luaClassName = "MoveItem";
 
-REGISTER_CLASS(MoveItem, Item);
+REGISTER_LUA_SUBCLASS(MoveItem, Item);
 
 
 ////////////////////////////////////////
@@ -1433,15 +1433,15 @@ S32 Asteroid::getSizeCount(lua_State *L)
 const luaL_reg Asteroid::luaMethods[] =
 {
    // Class specific methods
-   { "getSize",       luaW_doMethod<Asteroid, &getSize> },
-   { "getSizeCount",  luaW_doMethod<Asteroid, &getSizeCount> },    // <=== could be static
+   { "getSize",       luaW_doMethod<Asteroid, &Asteroid::getSize> },
+   { "getSizeCount",  luaW_doMethod<Asteroid, &Asteroid::getSizeCount> },    // <=== could be static
 
    {0,0}    // End method list
 };
 
 const char *Asteroid::luaClassName = "Asteroid";
 
-REGISTER_CLASS(Asteroid, MoveItem);
+REGISTER_LUA_SUBCLASS(Asteroid, MoveItem);
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1640,7 +1640,7 @@ const luaL_reg Circle::luaMethods[] =
 
 const char *Circle::luaClassName = "Circle";
 
-REGISTER_CLASS(Circle, MoveItem);
+REGISTER_LUA_SUBCLASS(Circle, MoveItem);
 
 
 ////////////////////////////////////////
@@ -1965,7 +1965,7 @@ const luaL_reg TestItem::luaMethods[] =
 
 const char *TestItem::luaClassName = "TestItem";
 
-REGISTER_CLASS(TestItem, MoveItem);
+REGISTER_LUA_SUBCLASS(TestItem, MoveItem);
 
 
 ////////////////////////////////////////
@@ -2070,7 +2070,7 @@ const luaL_reg ResourceItem::luaMethods[] =
 
 const char *ResourceItem::luaClassName = "ResourceItem";
 
-REGISTER_CLASS(ResourceItem, MoveItem);
+REGISTER_LUA_SUBCLASS(ResourceItem, MoveItem);
 
 };
 
