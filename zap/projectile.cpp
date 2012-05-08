@@ -703,9 +703,6 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 #ifndef ZAP_DEDICATED
    if(isGhost())
    {
-      // Make us go boom!
-      Color b(1,1,1);
-
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
       //static_cast<ClientGame *>(getGame())->emitExplosion(getRenderPos(), 0.5, GameWeapon::projectileInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
       static_cast<ClientGame *>(getGame())->emitBlast(pos, OuterBlastRadius);          // New, manly explosion
