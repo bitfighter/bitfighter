@@ -1673,8 +1673,6 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-extern ServerGame *gServerGame;
-
 // Choose target, aim, and, if possible, fire
 void Turret::idle(IdleCallPath path)
 {

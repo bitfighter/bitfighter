@@ -2234,7 +2234,6 @@ void EditorUserInterface::pasteSelection()
       
    for(S32 i = 0; i < copiedObjects.size(); i++)   
       copiedObjects[i]->onGeomChanged();
-   
 
    onSelectionChanged();
 
