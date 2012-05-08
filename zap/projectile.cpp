@@ -248,10 +248,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       explode(NULL, getPos());
 
    if(!collided && initial)
-   {
       mCurrentMove.time = U32(connection->getOneWayTime());
-     //idle(GameObject::ClientIdleMainRemote);   // not CE
-   }
 }
 
 
