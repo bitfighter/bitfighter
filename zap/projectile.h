@@ -69,6 +69,7 @@ public:
 ////////////////////////////////////
 ////////////////////////////////////
 
+// Basic bullet object
 class Projectile : public GameObject, public LuaProjectile
 {
    typedef GameObject Parent;
@@ -129,7 +130,7 @@ public:
 };
 
 
-// GrenadeProjectiles are the base clase used for both mines and spybugs
+// Basic burst object, and the base clase used for both mines and spybugs
 class GrenadeProjectile : public MoveItem, public LuaProjectile
 {
 private:
