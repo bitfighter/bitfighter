@@ -182,6 +182,13 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shoote
 }
 
 
+// Destructor
+Projectile::~Projectile()
+{
+
+}
+
+
 U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & PositionMask))
@@ -574,6 +581,7 @@ GameObject *Projectile::getGameObject()
 
 TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 
+// Constructor
 GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
 {
    mObjectTypeNumber = BulletTypeNumber;
@@ -600,6 +608,13 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 
    mRadius = 7;
    mMass = 1;
+}
+
+
+// Destructor
+GrenadeProjectile::~GrenadeProjectile()
+{
+
 }
 
 
@@ -846,6 +861,13 @@ Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
    mKillString = "mine";      // Triggers special message when player killed
 
    setExtent(Rect(pos, pos));
+}
+
+
+// Destructor
+Mine::~Mine()
+{
+
 }
 
 

@@ -97,8 +97,8 @@ public:
    bool hasBounced;
    SafePtr<GameObject> mShooter;
 
-   // Constructor
-   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);
+   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);    // Constructor
+   ~Projectile();                                                                                                       // Destructor
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -137,7 +137,8 @@ private:
    typedef MoveItem Parent;
 
 public:
-   GrenadeProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);
+   GrenadeProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);     // Constructor
+   ~GrenadeProjectile();                                                                        // Destructor
 
    enum Constants
    {
@@ -199,6 +200,7 @@ public:
    static const S32 OuterBlastRadius = 250;
 
    Mine(Point pos = Point(), Ship *owner=NULL);    // Constructor
+   ~Mine();                                        // Destructor
    Mine *clone() const;
 
    bool mArmed;
