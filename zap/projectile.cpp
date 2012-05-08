@@ -746,15 +746,6 @@ void GrenadeProjectile::renderItem(const Point &pos)
    if(exploded)
       return;
 
-   // Add some sparks... this needs work, as it is rather dooky  Looks too much like a comet!
-   //S32 num = Random::readI(1, 10);
-   //for(S32 i = 0; i < num; i++)
-   //{
-   //   Point sparkVel = mMoveState[RenderState].vel * Point(Random::readF() * -.5 + .55, Random::readF() * -.5 + .55);
-   //   //sparkVel.normalize(Random::readF());
-   //   FXManager::emitSpark(pos, sparkVel, Color(Random::readF() *.5 +.5, Random::readF() *.5, 0), Random::readF() * 2, FXManager::SparkTypePoint);
-   //}
-
    WeaponInfo *wi = GameWeapon::weaponInfo + WeaponBurst;
    F32 initTTL = (F32) wi->projLiveTime;
    renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL);
