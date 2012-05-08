@@ -1126,14 +1126,18 @@ void ForceFieldProjector::setEndSegment(WallSegment *endSegment)
 // Runs on both client and server
 void ForceFieldProjector::onEnabled()
 {
+   // Database can be NULL here if adding a forcefield from the editor:  The editor will
+   // add a new game object *without* adding it to a grid database in order to optimize
+   // adding large groups of objects with copy/paste/undo/redo
+   if(!getDatabase())
+      return;
+
    if(!isGhost() && mField.isNull())  // server only, add mField only when we don't have any
    {
       Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
       Point end;
       DatabaseObject *collObj;
 
-      TNLAssert(getDatabase(), "How do run ForceField::findForceFieldEnd with a NULL getDatabase()?");
-	
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
       mField = new ForceField(mTeam, start, end);
