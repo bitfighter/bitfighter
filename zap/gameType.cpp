@@ -1840,7 +1840,7 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 
    if( Projectile *proj = dynamic_cast<Projectile *>(damager) )
       weaponType = proj->mWeaponType;
-   else if( GrenadeProjectile *grenproj = dynamic_cast<GrenadeProjectile*>(damager) )
+   else if( BurstProjectile *grenproj = dynamic_cast<BurstProjectile*>(damager) )
       weaponType = grenproj->mWeaponType;
    else
       return false;
@@ -2628,7 +2628,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GrenadeProjectile *gp = dynamic_cast<GrenadeProjectile *>(fillVector[i]);
+      BurstProjectile *gp = dynamic_cast<BurstProjectile *>(fillVector[i]);
 
       if(gp->mSetBy == name)
          gp->mSetBy = "";                                    // No longer set-by-self

@@ -131,14 +131,14 @@ public:
 
 
 // Basic burst object, and the base clase used for both mines and spybugs
-class GrenadeProjectile : public MoveItem, public LuaProjectile
+class BurstProjectile : public MoveItem, public LuaProjectile
 {
 private:
    typedef MoveItem Parent;
 
 public:
-   GrenadeProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);     // Constructor
-   ~GrenadeProjectile();                                                                        // Destructor
+   BurstProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);     // Constructor
+   ~BurstProjectile();                                                                        // Destructor
 
    enum Constants
    {
@@ -163,10 +163,10 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   TNL_DECLARE_CLASS(GrenadeProjectile);
+   TNL_DECLARE_CLASS(BurstProjectile);
 
    // Lua interface
-   GrenadeProjectile(lua_State *L);            //  Lua constructor
+   BurstProjectile(lua_State *L);            //  Lua constructor
 
    // Need to provide these methods to deal with the complex web of inheritence... these come from both
    // Item and LuaProjectile, and by providing these, everything works.
@@ -185,14 +185,14 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Mine : public GrenadeProjectile
+class Mine : public BurstProjectile
 {
-   typedef GrenadeProjectile Parent;
+   typedef BurstProjectile Parent;
 
 public:
    enum Constants
    {
-      ArmedMask = GrenadeProjectile::FirstFreeMask,
+      ArmedMask = BurstProjectile::FirstFreeMask,
       SensorRadius     = 50,
    };
 
@@ -253,9 +253,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SpyBug : public GrenadeProjectile
+class SpyBug : public BurstProjectile
 {
-   typedef GrenadeProjectile Parent;
+   typedef BurstProjectile Parent;
 
 public:
    SpyBug(Point pos = Point(), Ship *owner = NULL);      // Constructor

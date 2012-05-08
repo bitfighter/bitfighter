@@ -579,10 +579,10 @@ GameObject *Projectile::getGameObject()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
+TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
 
 // Constructor
-GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
+BurstProjectile::BurstProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
 {
    mObjectTypeNumber = BulletTypeNumber;
 
@@ -612,14 +612,14 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 
 
 // Destructor
-GrenadeProjectile::~GrenadeProjectile()
+BurstProjectile::~BurstProjectile()
 {
 
 }
 
 
 // Runs on client and server
-void GrenadeProjectile::idle(IdleCallPath path)
+void BurstProjectile::idle(IdleCallPath path)
 {
    bool collisionDisabled = false;
    GameConnection *gc = NULL;
@@ -668,7 +668,7 @@ void GrenadeProjectile::idle(IdleCallPath path)
 }
 
 
-U32 GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 BurstProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
@@ -678,23 +678,23 @@ U32 GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, B
 }
 
 
-void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void BurstProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
-   TNLAssert(connection, "Invalid connection to server in GrenadeProjectile//projectile.cpp");
+   TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
 
    if(stream->readFlag())
       explode(getActualPos(), WeaponBurst);
 
    if(stream->readFlag())
-      SoundSystem::playSoundEffect(SFXGrenadeProjectile, getActualPos(), getActualVel());
+      SoundSystem::playSoundEffect(SFXBurstProjectile, getActualPos(), getActualVel());
 }
 
 
-void GrenadeProjectile::damageObject(DamageInfo *theInfo)
+void BurstProjectile::damageObject(DamageInfo *theInfo)
 {
-   // If we're being damaged by another grenade, explode...
+   // If we're being damaged by another burst, explode...
    if(theInfo->damageType == DamageTypeArea)
    {
       explode(getActualPos(), WeaponBurst);
@@ -708,7 +708,7 @@ void GrenadeProjectile::damageObject(DamageInfo *theInfo)
 
 
 // Also used for mines and spybugs  --> not sure if we really need to pass weaponType
-void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
+void BurstProjectile::explode(Point pos, WeaponType weaponType)
 {
    if(exploded) return;
 
@@ -747,13 +747,13 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 }
 
 
-bool GrenadeProjectile::collide(GameObject *otherObj)
+bool BurstProjectile::collide(GameObject *otherObj)
 {
    return true;
 }
 
 
-void GrenadeProjectile::renderItem(const Point &pos)
+void BurstProjectile::renderItem(const Point &pos)
 {
    if(exploded)
       return;
@@ -767,50 +767,50 @@ void GrenadeProjectile::renderItem(const Point &pos)
 ///// Lua interface
 
 //  Lua constructor
-GrenadeProjectile::GrenadeProjectile(lua_State *L)
+BurstProjectile::BurstProjectile(lua_State *L)
 {
    // Do not use
 }
 
 
-S32 GrenadeProjectile::getLoc(lua_State *L)
+S32 BurstProjectile::getLoc(lua_State *L)
 {
    return Parent::getLoc(L);
 }
 
 
-S32 GrenadeProjectile::getRad(lua_State *L)
+S32 BurstProjectile::getRad(lua_State *L)
 {
    return Parent::getRad(L);
 }
 
 
-S32 GrenadeProjectile::getVel(lua_State *L)
+S32 BurstProjectile::getVel(lua_State *L)
 {
    return Parent::getVel(L);
 }
 
 
-S32 GrenadeProjectile::getTeamIndx(lua_State *L)
+S32 BurstProjectile::getTeamIndx(lua_State *L)
 {
    return returnInt(L, mTeam + 1);
 }
 
 
-S32 GrenadeProjectile::getWeapon(lua_State *L)
+S32 BurstProjectile::getWeapon(lua_State *L)
 {
    return returnInt(L, WeaponBurst);
 }
 
 
-void GrenadeProjectile::push(lua_State *L)
+void BurstProjectile::push(lua_State *L)
 {
    Lunar<LuaProjectile>::push(L, this);
 }
 
 
 // For getting the underlying object when all we have is a Lua pointer to it
-GameObject *GrenadeProjectile::getGameObject()
+GameObject *BurstProjectile::getGameObject()
 {
    return this;
 }
@@ -841,7 +841,7 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor (planter defaults to null)
-Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
+Mine::Mine(Point pos, Ship *planter) : BurstProjectile(pos, Point())
 {
    mObjectTypeNumber = MineTypeNumber;
    mWeaponType = WeaponMine;
@@ -1160,7 +1160,7 @@ void Mine::push(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(SpyBug);
 
 // Constructor
-SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
+SpyBug::SpyBug(Point pos, Ship *planter) : BurstProjectile(pos, Point())
 {
    mObjectTypeNumber = SpyBugTypeNumber;
 
