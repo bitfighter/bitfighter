@@ -1924,15 +1924,15 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderMo
 {
    const Vector<EditorObject *> *objList = database->getObjectList();
 
+   bool wantSelected = (renderMode == RENDER_SELECTED_NONWALLS || renderMode == RENDER_SELECTED_WALLS);
+   bool wantWalls =    (renderMode == RENDER_UNSELECTED_WALLS  || renderMode == RENDER_SELECTED_WALLS);
+
    for(S32 i = 0; i < objList->size(); i++)
    {
       EditorObject *obj = objList->get(i);
 
       bool isSelected = obj->isSelected() || obj->isLitUp();
       bool isWall = isWallType(obj->getObjectTypeNumber());
-
-      bool wantSelected = (renderMode == RENDER_SELECTED_NONWALLS || renderMode == RENDER_SELECTED_WALLS);
-      bool wantWalls =    (renderMode == RENDER_UNSELECTED_WALLS  || renderMode == RENDER_SELECTED_WALLS);
 
       if(isSelected == wantSelected && isWall == wantWalls)     
       {
