@@ -35,6 +35,7 @@
 #include "BanList.h"
 #include "gameNetInterface.h"
 #include "ClientInfo.h"
+#include "EventManager.h"
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
