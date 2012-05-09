@@ -281,7 +281,7 @@ void luaW_push(lua_State* L, T* obj)
         lua_getfield(L, -1, LUAW_COUNT_KEY); // ... obj LuaWrapper LuaWrapper.counts
         LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts id
         lua_gettable(L, -2); // ... obj LuaWrapper LuaWrapper.counts count
-        int count = lua_tointeger(L, -1);
+        int count = (int) lua_tointeger(L, -1);
 
            logprintf("XXXXX Pushing obj %p as %s  [[ count = %d ]]", obj, typeid(T).name(), count);
 

@@ -39,6 +39,8 @@
 #  include "UI.h"
 #endif
 
+#include "version.h"
+
 
 namespace Zap
 {
@@ -579,7 +581,12 @@ GameObject *Projectile::getGameObject()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+#if CS_PROTOCOL_VERSION == 35
+// the net will see this class as "GrenadeProjectile" to keep compatible with existing Client-Server protocol
+TNL_IMPLEMENT_NETOBJECT_NETRENAME(BurstProjectile, "GrenadeProjectile"); 
+#else
 TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
+#endif
 
 // Constructor
 BurstProjectile::BurstProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
