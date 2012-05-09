@@ -325,7 +325,6 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 EditorObject *EditorObject::copy()
 {
    EditorObject *newObject = clone();     
-   //newObject->setPos(getPos());    
    newObject->initializeEditor();         // Marks all vertices as unselected
 
    return newObject;
