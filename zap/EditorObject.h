@@ -158,7 +158,7 @@ public:
    void offset(const Point &offset);                     // Offset object by a certain amount
 
    //////
-   // Vertex management functions
+
    virtual void onGeomChanging();                        // Item geom is interactively changing
    virtual void onGeomChanged();                         // Item changed geometry (or moved), do any internal updating that might be required
 
@@ -168,6 +168,7 @@ public:
    virtual void onAttrsChanged();                        // Attrs changed
 
    /////
+
    S32 getItemId();
    void setItemId(S32 itemId);
    
