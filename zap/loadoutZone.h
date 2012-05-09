@@ -35,7 +35,7 @@
 namespace Zap
 {
 
-class LoadoutZone : public EditorPolygon
+class LoadoutZone : public PolygonObject
 {
 private:
    typedef GameObject Parent;

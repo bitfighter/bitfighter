@@ -42,21 +42,21 @@ static const S32 INSTRUCTION_TEXTSIZE = 9;
 static const S32 INSTRUCTION_TEXTGAP = 3;
 
 // Constructor
-EditorPolygon::EditorPolygon()
+PolygonObject::PolygonObject()
 {  
    setNewGeometry(geomPolygon);
 }
 
 
 // Destructor
-EditorPolygon::~EditorPolygon()
+PolygonObject::~PolygonObject()
 {
    // Do nothing
 }
 
 
 // Offset: negative below the item, positive above
-void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScale)
+void PolygonObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    EditorParent::renderItemText(text, offset, currentScale);
@@ -70,21 +70,21 @@ void EditorPolygon::renderItemText(const char *text, S32 offset, F32 currentScal
 }
 
 
-void EditorPolygon::onItemDragging()
+void PolygonObject::onItemDragging()
 {
    onGeomChanged();
 }
 
 
 // Tell the geometry that things have changed
-void EditorPolygon::onGeomChanged() 
+void PolygonObject::onGeomChanged() 
 { 
    onPointsChanged(); 
    EditorParent::onGeomChanged();
 }  
 
 
-void EditorPolygon::renderEditor(F32 currentScale)
+void PolygonObject::renderEditor(F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    if(mSelected || mLitUp)
@@ -95,19 +95,19 @@ void EditorPolygon::renderEditor(F32 currentScale)
 }
 
 
-void EditorPolygon::renderDock()
+void PolygonObject::renderDock()
 {
    renderEditor(1);
 }
 
 
-void EditorPolygon::highlightDockItem() 
+void PolygonObject::highlightDockItem() 
 {   
    renderPolyHighlight(); 
 }
 
 
-void EditorPolygon::renderPolyHighlight()
+void PolygonObject::renderPolyHighlight()
 {
 #ifndef ZAP_DEDICATED
    glLineWidth(gLineWidth3);
@@ -118,7 +118,7 @@ void EditorPolygon::renderPolyHighlight()
 }
 
 
-void EditorPolygon::labelDockItem()
+void PolygonObject::labelDockItem()
 {
 #ifndef ZAP_DEDICATED
    renderDockItemLabel(getCentroid(), getOnDockName(), -2);
@@ -126,7 +126,7 @@ void EditorPolygon::labelDockItem()
 }
 
 
-void EditorPolygon::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    F32 h = 16;    // Entire height
@@ -147,7 +147,7 @@ static const F32 INITIAL_HEIGHT = 0.9f;
 static const F32 INITIAL_WIDTH = 0.3f;
 
 // Called when we create a brand new object and insert it in the editor, like when we drag a new item from the dock
-void EditorPolygon::newObjectFromDock(F32 gridSize)
+void PolygonObject::newObjectFromDock(F32 gridSize)
 {
 #ifndef ZAP_DEDICATED
    F32 w = INITIAL_HEIGHT * gridSize / 2;
@@ -164,7 +164,7 @@ void EditorPolygon::newObjectFromDock(F32 gridSize)
 
 
 // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-Point EditorPolygon::getInitialPlacementOffset(F32 gridSize)
+Point PolygonObject::getInitialPlacementOffset(F32 gridSize)
 { 
    return Point(INITIAL_HEIGHT * gridSize / 2, INITIAL_WIDTH * gridSize / 2); 
 }
@@ -172,31 +172,31 @@ Point EditorPolygon::getInitialPlacementOffset(F32 gridSize)
 
 /////
 // Former LuaPolygon methods
-S32 EditorPolygon::getLoc(lua_State *L)
+S32 PolygonObject::getLoc(lua_State *L)
 {
    return LuaObject::returnPoint(L, getCentroid());
 }
 
 
-S32 EditorPolygon::getRad(lua_State *L)
+S32 PolygonObject::getRad(lua_State *L)
 {
    return LuaObject::returnInt(L, 0);
 }
 
 
-S32 EditorPolygon::getVel(lua_State *L)
+S32 PolygonObject::getVel(lua_State *L)
 {
    return LuaObject::returnPoint(L, Point(0,0));
 }
 
 
-S32 EditorPolygon::getTeamIndx(lua_State *L)
+S32 PolygonObject::getTeamIndx(lua_State *L)
 {
    return LuaObject::returnInt(L, getTeam() + 1);
 }
 
 
-GameObject *EditorPolygon::getGameObject()
+GameObject *PolygonObject::getGameObject()
 {
    return this;
 }

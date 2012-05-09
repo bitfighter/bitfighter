@@ -172,7 +172,7 @@ public:
 };
 
 
-class NexusObject : public EditorPolygon
+class NexusObject : public PolygonObject
 {
    typedef GameObject Parent;
 

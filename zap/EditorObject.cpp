@@ -53,7 +53,6 @@ namespace Zap
 {
  
 // Declare statics
-S32 EditorObject::mNextSerialNumber = 0;
 bool EditorObject::mBatchUpdatingGeom = false;
 
 // Constructor
@@ -62,7 +61,6 @@ EditorObject::EditorObject()
    mDockItem = false; 
    mLitUp = false; 
    mSelected = false; 
-   mIsBeingEdited = false;
    assignNewSerialNumber();
 }
 
@@ -80,19 +78,6 @@ EditorObject *EditorObject::clone() const
    return NULL;
 }
 
-
-//void EditorObject::copyAttrs(EditorObject *target)
-//{
-//   target->mGeometry = mGeometry->copyGeometry();
-//   target->mGame = mGame;
-//
-//   target->mDockItem = mDockItem; 
-//   target->mLitUp = mLitUp; 
-//   target->mSelected = mSelected; 
-//   target->setObjectTypeMask(getObjectTypeMask()); 
-//   mIsBeingEdited = false;
-//   mSerialNumber = mNextSerialNumber++;
-//}
 
 #ifndef ZAP_DEDICATED
 void EditorObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
@@ -120,7 +105,15 @@ void EditorObject::addToEditor(ClientGame *game, GridDatabase *database)
 
 void EditorObject::assignNewSerialNumber()
 {
+   static S32 mNextSerialNumber = 0;
+
    mSerialNumber = mNextSerialNumber++;
+}
+
+
+S32 EditorObject::getSerialNumber()
+{
+   return mSerialNumber;
 }
 
 
@@ -239,12 +232,6 @@ void EditorObject::setItemId(S32 itemId)
 }
 
 
-S32 EditorObject::getSerialNumber()
-{
-   return mSerialNumber;
-}
-
-
 bool EditorObject::isSelected()
 {
    return mSelected;
@@ -269,18 +256,6 @@ void EditorObject::setLitUp(bool litUp)
 
    if(!litUp) 
       setVertexLitUp(NONE); 
-}
-
-
-bool EditorObject::isBeingEdited()
-{
-   return mIsBeingEdited;
-}
-
-
-void EditorObject::setIsBeingEdited(bool isBeingEdited)
-{
-   mIsBeingEdited = isBeingEdited;
 }
 
 
@@ -596,27 +571,6 @@ void EditorObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
- bool EditorObject::hasTeam()
-{
-   return true;
-}
-
-
-bool EditorObject::canBeNeutral()
-{
-   return true;
-}
-
-
-bool EditorObject::canBeHostile()
-{
-   return true;
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // TODO: merge with simpleLine values, put in editor
 static const S32 INSTRUCTION_TEXTSIZE = 12;      
 static const S32 INSTRUCTION_TEXTGAP = 4;
@@ -624,21 +578,21 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in e
 
 
 // Constructor
-EditorPointObject::EditorPointObject()
+PointObject::PointObject()
 {
    setNewGeometry(geomPoint);
 }
 
 
 // Destructor
-EditorPointObject::~EditorPointObject()
+PointObject::~PointObject()
 {
    // Do nothing
 }
 
 
 // Offset: negative below the item, positive above
-void EditorPointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
+void PointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
 {
 #ifndef ZAP_DEDICATED
    Parent::renderItemText(text, offset, currentScale);
@@ -654,34 +608,12 @@ void EditorPointObject::renderItemText(const char *text, S32 offset, F32 current
 }
 
 
-void EditorPointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED
    setPos(point);
    Parent::prepareForDock(game, point, teamIndex);
 #endif
 }
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-//string EditorItem::toString(F32 gridSize) const
-//{
-//   return string(getClassName()) + " " + geomToString(gridSize);
-//}
-//
-//
-//void EditorItem::renderEditor(F32 currentScale)
-//{
-//   renderItem(getActualPos());                    
-//}
-//
-//
-//F32 EditorItem::getEditorRadius(F32 currentScale)
-//{
-//   return (getRadius() + 2) * currentScale;
-//}
-
 
 };

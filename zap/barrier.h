@@ -163,9 +163,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PolyWall : public EditorPolygon     // Don't need GameObject component of this...
+class PolyWall : public PolygonObject     // Don't need GameObject component of this...
 {
-   typedef EditorPolygon Parent;
+   typedef PolygonObject Parent;
 
 private:
    //void computeExtent();

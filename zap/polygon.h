@@ -27,7 +27,7 @@
 #define _POLYGON_H_
 
 #include "gameObject.h"
-#include "EditorObject.h"     // For EditorPolygon parentage
+#include "EditorObject.h"     // For PolygonObject parentage
 #include "luaObject.h"
 #include "Geometry.h"
 
@@ -36,7 +36,7 @@ namespace Zap
 
 
 // Provide editor related methods to the polygon class
-class EditorPolygon : public GameObject, public EditorObject, public LuaItem
+class PolygonObject : public GameObject, public EditorObject, public LuaItem
 {
    typedef GameObject Parent;
    typedef EditorObject EditorParent;
@@ -57,8 +57,8 @@ protected:
     void renderPolyHighlight();
 
 public:
-   EditorPolygon();              // Constructor
-   virtual ~EditorPolygon();     // Destructor
+   PolygonObject();              // Constructor
+   virtual ~PolygonObject();     // Destructor
 
    void newObjectFromDock(F32 gridSize);
 

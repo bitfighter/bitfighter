@@ -730,7 +730,15 @@ void luaW_extend(lua_State* L)
 //    REGISTER_LUA_CLASS(className);
 // or
 //    REGISTER_LUA_SUBCLASS(className, parentClass);
+// When you actually create your Lua instance (L), call LuaW_Registrar::registerClasses(L)
+// to make your methods available.
 // And with that, your class will be registered with LuaWrapper.
+//
+// A quick overview of how the registration system works is REGISTER_LUA_CLASS and REGISTER_LUA_SUBCLASS 
+// are actually dummy declarations that during initialization, build lists of registration functions 
+// called registrationFunctions and extensionFunctions.  When you actually create your L object and 
+// want to register your methods with it, calling registerClass() uses those lists to call the 
+// appropriate LuaW registration/extension methods.  
 class LuaW_Registrar
 {
 private:

@@ -27,7 +27,7 @@
 #ifndef _SPAWN_H_
 #define _SPAWN_H_
 
-#include "EditorObject.h"     // For EditorPointObject def
+#include "EditorObject.h"     // For PointObject def
 #include "Timer.h"
 
 
@@ -37,7 +37,7 @@ namespace Zap
 class EditorAttributeMenuUI;     // Needed in case class def hasn't been included in dedicated build
 
 // Parent class for spawns that generate items
-class AbstractSpawn : public EditorPointObject
+class AbstractSpawn : public PointObject
 {
    typedef EditorObject Parent;
 

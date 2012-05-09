@@ -313,14 +313,6 @@ EditorObject *EditorAttributeMenuUI::getObject()
 }
 
 
-// Escape cancels without saving
-void EditorAttributeMenuUI::onEscape()
-{
-   mObject->setIsBeingEdited(false);
-   Parent::onEscape();     // Back to the editor!
-}
-
-
 string EditorAttributeMenuUI::getTitle()
 {
    EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
@@ -359,10 +351,7 @@ void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object)
    // Only run on object that is the subject of this editor.  See TextItemEditorAttributeMenuUI::doneEditingAttrs() for explanation
    // of why this may be run on objects that are not actually the ones being edited (hence the need for passing an object in).
    if(object == mObject)   
-   {
-      mObject->setIsBeingEdited(false);
       getUIManager()->getEditorUserInterface()->doneEditingAttributes(this, mObject); 
-   }
 }
 
 

@@ -90,7 +90,7 @@ void GoalZone::renderEditor(F32 currentScale)
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
 
    renderGoalZone(*getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, useOldStyle);
-   EditorPolygon::renderEditor(currentScale);
+   PolygonObject::renderEditor(currentScale);
 }
 
 

@@ -33,7 +33,7 @@
 namespace Zap
 {
 
-class GoalZone : public EditorPolygon
+class GoalZone : public PolygonObject
 {
    typedef GameObject Parent;
 

@@ -38,7 +38,7 @@ namespace Zap
 // A note on terminology here: an "object" is any game object, whereas an "item" is a point object that the player will interact with
 // Item is now parent class of MoveItem, EngineeredItem, PickupItem
 
-class Item : public GameObject, public EditorItem, public LuaItem
+class Item : public GameObject, public PointObject, public LuaItem
 {
    typedef GameObject Parent;
 
@@ -73,7 +73,7 @@ public:
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
 
-   // EditorItem interface
+   // Editor interface
    virtual void renderEditor(F32 currentScale);
    virtual F32 getEditorRadius(F32 currentScale);
    virtual string toString(F32 gridSize) const;

@@ -3997,7 +3997,6 @@ void EditorUserInterface::startAttributeEditor()
          EditorAttributeMenuUI *menu = obj_i->getAttributeMenu();
          if(menu)
          {
-            obj_i->setIsBeingEdited(true);
             menu->startEditingAttrs(obj_i);
             menu->activate();
 

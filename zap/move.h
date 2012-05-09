@@ -52,11 +52,12 @@ inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
 
 
 // Can represent a move by a human player or a robot
-class Move : public Point
+class Move /*: public Point*/
 {
 public:
    Move();                          // Constructor
 
+   F32 x, y;
    F32 angle;
    bool fire;
    bool modulePrimary[ShipModuleCount];    // Is given module primary component active?

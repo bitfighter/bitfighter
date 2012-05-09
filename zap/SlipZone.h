@@ -32,7 +32,7 @@
 namespace Zap
 {
 
-class SlipZone : public EditorPolygon
+class SlipZone : public PolygonObject
 {
    typedef GameObject Parent;
 

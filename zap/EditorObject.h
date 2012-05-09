@@ -72,10 +72,6 @@ class EditorObject : virtual public BfObject   // Interface class  -- All editor
 
 private:
    S32 mVertexLitUp;
-
-   bool mIsBeingEdited;
-
-   static S32 mNextSerialNumber;
    static bool mBatchUpdatingGeom;
 
 protected:
@@ -189,18 +185,10 @@ public:
    bool isLitUp();
    void setLitUp(bool litUp);
 
-   bool isBeingEdited();
-   void setIsBeingEdited(bool isBeingEdited);
-
-
    virtual void initializeEditor();
 
    S32 mScore;
    S32 getScore();     // Goal zones only, return zone's score
-
-   virtual bool canBeHostile();
-   virtual bool canBeNeutral();
-   virtual bool hasTeam();
 
    virtual const char *getEditorHelpString();
    virtual const char *getPrettyNamePlural();
@@ -228,32 +216,24 @@ public:
 
 // Class with editor methods related to point things
 
-class EditorPointObject : public EditorObject
+class PointObject : public EditorObject
 {
    typedef EditorObject Parent;
 
 public:
-   EditorPointObject();             // Constructor
-   virtual ~EditorPointObject();    // Destructor
+   PointObject();             // Constructor
+   virtual ~PointObject();    // Destructor
 
    virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
-};
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class EditorItem : public EditorPointObject
-{
-   typedef EditorPointObject Parent;
-
-public:
+   // Some functionality needed by the editor
    virtual void renderEditor(F32 currentScale) = 0;
    virtual F32 getEditorRadius(F32 currentScale) = 0;
    virtual string toString(F32 gridSize) const = 0;
-
 };
+
 
 };
 #endif
