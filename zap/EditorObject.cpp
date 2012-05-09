@@ -284,11 +284,11 @@ void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
    for(S32 j = 0; j < getVertCount(); j++)
    {
       if(vertSelected(j))
-         renderVertex(SelectedVertex, getVert(j), j, currentScale, alpha);             // Hollow yellow boxes with number
+         renderVertex(SelectedVertex,     getVert(j), j, currentScale, alpha);   // Hollow yellow boxes with number
       else if(mLitUp && isVertexLitUp(j))
-         renderVertex(HighlightedVertex, getVert(j), j, currentScale, alpha);          // Hollow yellow boxes with number
+         renderVertex(HighlightedVertex,  getVert(j), j, currentScale, alpha);   // Hollow yellow boxes with number
       else if(mSelected || mLitUp || anyVertsSelected())
-         renderVertex(SelectedItemVertex, getVert(j), j, currentScale, alpha);         // Hollow red boxes with number
+         renderVertex(SelectedItemVertex, getVert(j), j, currentScale, alpha);   // Hollow red boxes with number
       else
          // Using getUIManager() here is a horrible hack... but not sure how to improve the situation...
          renderSmallSolidVertex(currentScale, getVert(j), clientGame->getUIManager()->getEditorUserInterface()->getSnapToWallCorners());
