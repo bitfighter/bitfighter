@@ -380,6 +380,10 @@ inline U32 NetObject::getHashId() const
    TNL::NetClassRep* className::getClassRep() const { return &className::dynClassRep; } \
    TNL::NetClassRepInstance<className> className::dynClassRep(#className, TNL::NetClassGroupGameMask, TNL::NetClassTypeObject, 0)
 
+#define TNL_IMPLEMENT_NETOBJECT_NETRENAME(className, netName) \
+   TNL::NetClassRep* className::getClassRep() const { return &className::dynClassRep; } \
+   TNL::NetClassRepInstance<className> className::dynClassRep(netName, TNL::NetClassGroupGameMask, TNL::NetClassTypeObject, 0)
+
 /// Direction that a NetObject RPC method call should travel.
 enum NetObjectRPCDirection {
    RPCToGhost = 1,
