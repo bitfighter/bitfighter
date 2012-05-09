@@ -450,7 +450,7 @@ Point BfObject::getPos() const
 
 void BfObject::setPos(const Point &pos)
 {
-   setVert(pos, 0);
+   setVert(pos, 0);  
    setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
 }
 
