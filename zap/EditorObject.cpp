@@ -180,6 +180,7 @@ void EditorObject::highlightDockItem()
 
 static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
 {
+#ifndef ZAP_DEDICATED
    F32 alpha = getRenderingAlpha(isScriptItem);
 
    if(isSelected)
@@ -188,6 +189,7 @@ static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
       glColor(HIGHLIGHT_COLOR, alpha);    // white
    else  // Normal
       glColor(Color(.75), alpha);
+#endif
 }
 
 
