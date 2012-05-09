@@ -72,7 +72,7 @@ void LoadoutZone::render()
 void LoadoutZone::renderEditor(F32 currentScale)
 {
    render();
-   EditorPolygon::renderEditor(currentScale);
+   PolygonObject::renderEditor(currentScale);
 }
 
 

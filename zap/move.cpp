@@ -32,7 +32,11 @@ namespace Zap
 // Constructor
 Move::Move()
 {
-   fire = false; time = 32;
+   fire = false; 
+   time = 32; 
+   x = 0;
+   y = 0;
+
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       modulePrimary[i] = false;

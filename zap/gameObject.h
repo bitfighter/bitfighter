@@ -240,7 +240,13 @@ public:
    bool deleteVert(S32 vertIndex);
    bool insertVert(Point vertex, S32 vertIndex);
 
-   // These functions are declered in Geometry.cpp
+   // These methods used to be in EditorObject, but we'll need to know about them as we add
+   // the ability to manipulate objects more using Lua
+   virtual bool canBeHostile();
+   virtual bool canBeNeutral();
+   virtual bool hasTeam();
+
+   // These functions are declared in Geometry.cpp
    void rotateAboutPoint(const Point &center, F32 angle);
    void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
    void scale(const Point &center, F32 scale);

@@ -1718,20 +1718,30 @@ void Worm::render()
 #endif
 }
 
+
 Worm *Worm::clone() const
 {
    return new Worm(*this);
 }
+
 
 void Worm::renderEditor(F32 currentScale)
 {
    render();
 }
 
+
 void Worm::renderDock()
 {
    render();
 }
+
+
+F32 Worm::getEditorRadius(F32 currentScale)
+{
+   return 10;     // Or something... who knows??
+}
+
 
 bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {

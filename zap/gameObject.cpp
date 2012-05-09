@@ -394,6 +394,24 @@ Game *BfObject::getGame() const
 }
 
 
+bool BfObject::hasTeam()
+{
+   return true;
+}
+
+
+bool BfObject::canBeNeutral()
+{
+   return true;
+}
+
+
+bool BfObject::canBeHostile()
+{
+   return true;
+}
+
+
 void BfObject::addToGame(Game *game, GridDatabase *database)
 {   
    TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
@@ -511,7 +529,7 @@ bool BfObject::addVert(const Point &point, bool ignoreMaxPointsLimit)
 }
 
 
-// Vertex selection 
+// Vertex selection -- only needed in editor
 void BfObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->selectVert(vertIndex);            }
 void BfObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
 void BfObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
@@ -561,7 +579,6 @@ GameObject::GameObject() : BfObject()
 {
    mGame = NULL;
    mTeam = -1;
-   /*mLastQueryId = 0;*/
    mDisableCollisionCount = 0;
    mCreationTime = 0;
 

@@ -87,7 +87,7 @@ public:
 
 class SoccerBallItem : public MoveItem
 {
-   typedef MoveItem Parent;      // TODO: Should be EditorItem???
+   typedef MoveItem Parent;      // TODO: Should be PointObject???
 
 private:
    Point initialPos;

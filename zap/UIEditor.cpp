@@ -2234,7 +2234,6 @@ void EditorUserInterface::pasteSelection()
       
    for(S32 i = 0; i < copiedObjects.size(); i++)   
       copiedObjects[i]->onGeomChanged();
-   
 
    onSelectionChanged();
 
@@ -3998,7 +3997,6 @@ void EditorUserInterface::startAttributeEditor()
          EditorAttributeMenuUI *menu = obj_i->getAttributeMenu();
          if(menu)
          {
-            obj_i->setIsBeingEdited(true);
             menu->startEditingAttrs(obj_i);
             menu->activate();
 

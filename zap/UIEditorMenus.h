@@ -96,7 +96,6 @@ protected:
 public:
    EditorAttributeMenuUI(ClientGame *game);    // Constructor
    EditorObject *getObject();
-   void onEscape();
 
    virtual void startEditingAttrs(EditorObject *object);
    virtual void doneEditing();

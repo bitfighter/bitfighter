@@ -1066,7 +1066,7 @@ S32 NexusObject::getRenderSortValue()
 void NexusObject::renderEditor(F32 currentScale)
 {
    render();
-   EditorPolygon::renderEditor(currentScale);
+   PolygonObject::renderEditor(currentScale);
 }
 
 

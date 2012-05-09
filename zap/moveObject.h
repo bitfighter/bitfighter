@@ -213,7 +213,7 @@ static const S8 AsteroidCoords[ASTEROID_DESIGNS][ASTEROID_POINTS][2] =   // <== 
 class Asteroid : public MoveItem
 {
 
-typedef MoveItem Parent;      // TODO: Should be EditorItem???
+typedef MoveItem Parent;      // TODO: Should be PointObject???
 
 private:
    S32 mSizeLeft;
@@ -340,7 +340,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Worm : public GameObject, public EditorPointObject
+class Worm : public GameObject, public PointObject
 {
 typedef GameObject Parent;
 
@@ -377,6 +377,9 @@ public:
    void render();
    void renderEditor(F32 currentScale);
    void renderDock();
+
+   F32 getEditorRadius(F32 currentScale);
+
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(GameObject *otherObject);
