@@ -195,11 +195,6 @@ public:
    virtual EditorAttributeMenuUI *getAttributeMenu();                      // Override in child if it has an attribute menu
    virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
    virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
-
-
-   //////////////
-
-   void renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip);
 };
 
 

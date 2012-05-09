@@ -1906,6 +1906,19 @@ void EditorUserInterface::render()
 }
 
 
+static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
+{
+   F32 alpha = isScriptItem ? .6f : 1;     // So script items will appear somewhat translucent
+
+   if(isSelected)
+      glColor(SELECT_COLOR, alpha);       // yellow
+   else if(isLitUp)
+      glColor(HIGHLIGHT_COLOR, alpha);    // white
+   else  // Normal
+      glColor(PLAIN_COLOR, alpha);
+}
+
+
 // Render objects in the specified database
 void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay)
 {
@@ -1922,7 +1935,22 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderMo
       bool wantWalls =    (renderMode == RENDER_UNSELECTED_WALLS  || renderMode == RENDER_SELECTED_WALLS);
 
       if(isSelected == wantSelected && isWall == wantWalls)     
-         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, isLevelgenOverlay, mPreviewMode); // <== wall centerlines rendered in here
+      {
+         // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
+         setColor(obj->isSelected(), obj->isLitUp(), isLevelgenOverlay);
+
+         if(mPreviewMode)
+         {
+            GameObject *gameObject = dynamic_cast<GameObject *>(obj);
+            if(gameObject)
+               gameObject->render();
+         }
+         else
+         {
+            obj->renderEditor(mCurrentScale);
+            obj->renderAndLabelHighlightedVertices(mCurrentScale);
+         }
+      }
    }
 }
 

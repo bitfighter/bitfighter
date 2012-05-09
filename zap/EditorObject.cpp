@@ -157,41 +157,6 @@ void EditorObject::highlightDockItem()
 }
 
 
-static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
-{
-   F32 alpha = isScriptItem ? .6f : 1;     // So script items will appear somewhat translucent
-
-   if(isSelected)
-      glColor(SELECT_COLOR, alpha);       // yellow
-   else if(isLitUp)
-      glColor(HIGHLIGHT_COLOR, alpha);    // white
-   else  // Normal
-      glColor(PLAIN_COLOR, alpha);
-}
-
-
-// Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool inPreviewMode)
-{
-#ifndef ZAP_DEDICATED
-
-   setColor(mSelected, mLitUp, isScriptItem);
-
-   if(inPreviewMode)
-   {
-      GameObject *gameObject = dynamic_cast<GameObject *>(this);
-      if(gameObject)
-         gameObject->render();
-   }
-   else
-   {
-      renderEditor(currentScale);
-      renderAndLabelHighlightedVertices(currentScale);
-   }
-#endif
-}
-
-
 S32 EditorObject::getItemId()
 {
    return mItemId;
