@@ -140,22 +140,6 @@ void SimpleLine::renderEditor(F32 currentScale)
 }
 
 
-// Offset: negative below the item, positive above
-void SimpleLine::renderItemText(const char *text, S32 offset, F32 currentScale)
-{
-#ifndef ZAP_DEDICATED
-
-   EditorParent::renderItemText(text, offset, currentScale);
-   return;
-
-   glColor(INSTRUCTION_TEXTCOLOR);
-
-   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -3.f / currentScale, text);
-   UserInterface::drawStringf_2pt(getVert(0), getVert(1) , F32(INSTRUCTION_TEXTSIZE) / currentScale, -21.f / currentScale, "[Enter] to edit");
-#endif
-}
-
-
 void SimpleLine::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED

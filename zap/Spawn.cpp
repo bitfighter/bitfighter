@@ -125,12 +125,6 @@ U32 AbstractSpawn::getPeriod()
 }
 
 
-void AbstractSpawn::renderEditorPreview(F32 currentScale)
-{
-   // Do nothing -- spawns are not visible in-game
-}
-
-
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *AbstractSpawn::getAttributeMenu()

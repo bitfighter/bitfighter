@@ -58,7 +58,6 @@ bool EditorObject::mBatchUpdatingGeom = false;
 // Constructor
 EditorObject::EditorObject() 
 { 
-   mDockItem = false; 
    mLitUp = false; 
    mSelected = false; 
    assignNewSerialNumber();
@@ -84,8 +83,6 @@ void EditorObject::prepareForDock(ClientGame *game, const Point &point, S32 team
 {
    mGame = game;
 
-   mDockItem = true;
-   
    unselectVerts();
    setTeam(teamIndex);
 }
@@ -149,23 +146,26 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
          drawSquare(center, radius / currentScale);
       }
 }
-
-
-void EditorObject::renderDockItemLabel(const Point &pos, const char *label, F32 yOffset)
-{
-   F32 xpos = pos.x;
-   F32 ypos = pos.y - DOCK_LABEL_SIZE / 2 + yOffset;
-   glColor(Colors::white);
-   UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
-}
 #endif
 
 
-void EditorObject::labelDockItem()
+void EditorObject::renderDockItemLabel(const Point &pos, const char *label)
 {
 #ifndef ZAP_DEDICATED
-   renderDockItemLabel(getPos(), getOnDockName(), 11);
+   F32 xpos = pos.x;
+   F32 ypos = pos.y - DOCK_LABEL_SIZE / 2;
+   glColor(Colors::white);
+   UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
 #endif
+}
+
+
+
+Point EditorObject::getDockLabelPos()
+{
+   static const Point labelOffset(0, 11);
+
+   return getPos() + labelOffset;
 }
 
 
@@ -178,44 +178,52 @@ void EditorObject::highlightDockItem()
 }
 
 
+static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
+{
+   F32 alpha = getRenderingAlpha(isScriptItem);
+
+   if(isSelected)
+      glColor(SELECT_COLOR, alpha);       // yellow
+   else if(isLitUp)
+      glColor(HIGHLIGHT_COLOR, alpha);    // white
+   else  // Normal
+      glColor(Color(.75), alpha);
+}
+
+
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
 void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip)
 {
 #ifndef ZAP_DEDICATED
-   Point pos, dest;
-   F32 alpha = getRenderingAlpha(isScriptItem);
 
-   Color drawColor;
+   setColor(mSelected, mLitUp, isScriptItem);
 
-   if(mSelected)
-      glColor(SELECT_COLOR, alpha);       // yellow
-   else if(mLitUp)
-      glColor(HIGHLIGHT_COLOR, alpha);    // white
-   else  // Normal
-      glColor(Color(.75), alpha);
-
-   // Override drawColor for this special case
-   if(anyVertsSelected())
-      drawColor = *SELECT_COLOR;
-
-   if(mDockItem)
+   if(showingReferenceShip)
    {
-      renderDock();
-      labelDockItem();
-
-      if(mLitUp)
-         highlightDockItem();
+      GameObject *gameObject = dynamic_cast<GameObject *>(this);
+      if(gameObject)
+         gameObject->render();
    }
-   else  // Not a dock item
+   else
    {
-      if(showingReferenceShip)
-         renderEditorPreview(currentScale);
-      else
-      {
-         renderEditor(currentScale);
-         renderAndLabelHighlightedVertices(currentScale);
-      }
+      renderEditor(currentScale);
+      renderAndLabelHighlightedVertices(currentScale);
    }
+#endif
+}
+
+
+//{P{P
+void EditorObject::renderOnDock(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip)
+{
+#ifndef ZAP_DEDICATED
+   setColor(false, false, false);
+
+   this->renderDock();
+   renderDockItemLabel(getDockLabelPos(), getOnDockName());
+
+   if(this->mLitUp)
+      this->highlightDockItem();
 #endif
 }
 
@@ -304,12 +312,6 @@ void EditorObject::onAttrsChanged()
 }
 
 
-void EditorObject::saveItem(FILE *f, F32 gridSize)
-{
-   s_fprintf(f, "%s\n", toString(gridSize).c_str());
-}
-
-
 // Size of object in editor 
 F32 EditorObject::getEditorRadius(F32 currentScale)
 {
@@ -346,17 +348,6 @@ EditorObject *EditorObject::newCopy()
 const Color *EditorObject::getTeamColor(S32 teamId) 
 { 
    return mGame->getTeamColor(teamId);
-}
-
-
-// By default, we'll just render this as we do in game.  Occasionally (like with textItems), we may need to do something special.
-void EditorObject::renderEditorPreview(F32 currentScale)
-{
-   GameObject *gameObject = dynamic_cast<GameObject *>(this);
-   TNLAssert(gameObject, "This object cannot be cast to a GameObject, therefore I can't render it in preview mode!");
-
-   if(gameObject)
-      gameObject->render();
 }
 
 
@@ -405,7 +396,6 @@ void EditorObject::newObjectFromDock(F32 gridSize)
    assignNewSerialNumber();
 
    updateExtentInDatabase();
-   mDockItem = false;
    clearGame();
 }   
 
@@ -433,14 +423,6 @@ Point EditorObject::getEditorSelectionOffset(F32 scale)
 Point EditorObject::getInitialPlacementOffset(F32 gridSize)
 {
    return Point(0, 0);
-}
-
-
-void EditorObject::renderItemText(const char *text, S32 offset, F32 currentScale)
-{
-#ifndef ZAP_DEDICATED
-   UserInterface::drawString(F32(580), F32(120), 12 / currentScale, text );     // TODO: Fix
-#endif
 }
 
 
@@ -588,23 +570,6 @@ PointObject::PointObject()
 PointObject::~PointObject()
 {
    // Do nothing
-}
-
-
-// Offset: negative below the item, positive above
-void PointObject::renderItemText(const char *text, S32 offset, F32 currentScale)
-{
-#ifndef ZAP_DEDICATED
-   Parent::renderItemText(text, offset, currentScale);
-   return;
-   glColor(INSTRUCTION_TEXTCOLOR);
-
-   Point pos = getPos();
-   
-   // Dividing by currentScale keeps the text a constant size in pixels
-   UserInterface::drawCenteredString(pos.x, pos.y + getEditorRadius(currentScale) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, text);
-   UserInterface::drawCenteredString(pos.x, pos.y + (getEditorRadius(currentScale) + INSTRUCTION_TEXTSIZE * 1.25f) / currentScale, F32(INSTRUCTION_TEXTSIZE) / currentScale, "[Enter] to edit");
-#endif
 }
 
 

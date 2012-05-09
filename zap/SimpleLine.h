@@ -59,8 +59,6 @@ public:
    void renderEditor(F32 currentScale);      // Render item in the editor
    virtual void renderEditorItem() = 0;      // Helper for renderEditor
 
-   void renderItemText(const char *text, S32 offset, F32 currentScale);
-
    virtual void newObjectFromDock(F32 gridSize);
    virtual Point getInitialPlacementOffset(F32 gridSize);
 

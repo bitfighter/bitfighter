@@ -55,21 +55,6 @@ PolygonObject::~PolygonObject()
 }
 
 
-// Offset: negative below the item, positive above
-void PolygonObject::renderItemText(const char *text, S32 offset, F32 currentScale)
-{
-#ifndef ZAP_DEDICATED
-   EditorParent::renderItemText(text, offset, currentScale);
-   return;
-
-   glColor(INSTRUCTION_TEXTCOLOR);
-   S32 off = (INSTRUCTION_TEXTSIZE + INSTRUCTION_TEXTGAP) * offset - 10 - ((offset > 0) ? 5 : 0);
-   Point pos = getVert(0) * currentScale;
-   UserInterface::drawCenteredString(pos.x, pos.y - off, INSTRUCTION_TEXTSIZE, text);
-#endif
-}
-
-
 void PolygonObject::onItemDragging()
 {
    onGeomChanged();
@@ -118,11 +103,11 @@ void PolygonObject::renderPolyHighlight()
 }
 
 
-void PolygonObject::labelDockItem()
+Point PolygonObject::getDockLabelPos()
 {
-#ifndef ZAP_DEDICATED
-   renderDockItemLabel(getCentroid(), getOnDockName(), -2);
-#endif
+   static const Point labelOffset(0, -2);
+
+   return getCentroid() + labelOffset;
 }
 
 

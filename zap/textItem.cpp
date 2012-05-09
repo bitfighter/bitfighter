@@ -119,23 +119,16 @@ void TextItem::render()
 #ifndef ZAP_DEDICATED
    ClientGame *game = static_cast<ClientGame *>(getGame());
    
-   // Don't render opposing team's text items
-   if(!game->getConnectionToServer() || !game->getGameType())
-      return;
+   // Don't render opposing team's text items if we are in a game... but in editor preview mode, where
+   // we don't have a connection to the server, text will be rendered normally
+   if(game->getConnectionToServer())
+   {
+      Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
+      if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
+         return;
+   }
 
-   Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
-   if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
-      return;
-
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
-#endif
-}
-
-
-void TextItem::renderEditorPreview(F32 currentScale)
-{
-#ifndef ZAP_DEDICATED
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
+   renderEditorItem();
 #endif
 }
 

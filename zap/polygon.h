@@ -42,8 +42,7 @@ class PolygonObject : public GameObject, public EditorObject, public LuaItem
    typedef EditorObject EditorParent;
 
 private:
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
-   virtual void labelDockItem();
+   virtual Point getDockLabelPos();
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
    virtual void renderDock();

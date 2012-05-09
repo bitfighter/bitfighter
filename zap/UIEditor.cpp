@@ -1866,16 +1866,6 @@ void EditorUserInterface::render()
          }
       }
 
-      // Draw map items (teleporters, etc.) that are being dragged  (above the dock).  But don't draw walls here, or
-      // we'll lose our wall centernlines.
-      //if(mDraggingObjects)
-      //   for(S32 i = 0; i < objList->size(); i++)
-      //   {
-      //      EditorObject *obj = objList->get(i);
-      //      if(obj->isSelected() && !isWallType(obj->getObjectTypeNumber()))    // Object is selected and is not a wall
-      //         obj->renderInEditor(mCurrentScale, mSnapVertexIndex, false, mPreviewMode);
-      //   }
-
       // Render our snap vertex as a hollow magenta box...
       if(!mPreviewMode && mSnapObject && mSnapObject->isSelected() && mSnapVertexIndex != NONE &&        // ...but not in preview mode...
          mSnapObject->getGeomType() != geomPoint &&                                                      // ...and not on point objects...
@@ -1929,7 +1919,7 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderMo
       bool isWall = isWallType(obj->getObjectTypeNumber());
 
       bool wantSelected = (renderMode == RENDER_SELECTED_NONWALLS || renderMode == RENDER_SELECTED_WALLS);
-      bool wantWalls = ( renderMode == RENDER_UNSELECTED_WALLS || renderMode == RENDER_SELECTED_WALLS);
+      bool wantWalls =    (renderMode == RENDER_UNSELECTED_WALLS  || renderMode == RENDER_SELECTED_WALLS);
 
       if(isSelected == wantSelected && isWall == wantWalls)     
          obj->renderInEditor(mCurrentScale, mSnapVertexIndex, isLevelgenOverlay, mPreviewMode); // <== wall centerlines rendered in here
@@ -1995,7 +1985,7 @@ void EditorUserInterface::renderDockItems()
 {
    for(S32 i = 0; i < mDockItems.size(); i++)
    {
-      mDockItems[i]->renderInEditor(mCurrentScale, mSnapVertexIndex, false, false);
+      mDockItems[i]->renderOnDock(mCurrentScale, mSnapVertexIndex, false, false);
       mDockItems[i]->setLitUp(false);
    }
 }
@@ -4300,6 +4290,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
       const Vector<EditorObject *> *objList = getDatabase()->getObjectList();
 
+      F32 gridSize = getGame()->getGridSize();
+
       for(S32 j = 0; j < 2; j++)
          for(S32 i = 0; i < objList->size(); i++)
          {
@@ -4307,7 +4299,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
             if((j == 0 && isWallType(p->getObjectTypeNumber())) || (j == 1 && ! isWallType(p->getObjectTypeNumber())) )
-               p->saveItem(f, getGame()->getGridSize());
+               s_fprintf(f, "%s\n", p->toString(gridSize).c_str());
          }
       fclose(f);
    }

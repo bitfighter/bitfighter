@@ -71,11 +71,10 @@ class EditorObject : virtual public BfObject   // Interface class  -- All editor
 {
 
 private:
-   S32 mVertexLitUp;
-   static bool mBatchUpdatingGeom;
+   S32 mVertexLitUp;                   // XX Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
+   static bool mBatchUpdatingGeom;     // XX Should be somewhere else
 
 protected:
-   bool mDockItem;      // True if this item lives on the dock
    bool mSelected;      // True if item is selected
    bool mLitUp;         // True if user is hovering over the item and it's "lit up"
 
@@ -108,12 +107,9 @@ public:
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 
 #ifndef ZAP_DEDICATED
-   void renderAndLabelHighlightedVertices(F32 currentScale);   // Render selected and highlighted vertices, called from renderEditor
-   void renderDockItemLabel(const Point &pos, const char *label, F32 yOffset = 0);    // This could be moved anywhere... it's essentially a static method
+   void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
 #endif
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);    // Render some text, with specified vertical offset
    virtual void renderEditor(F32 currentScale);
-   virtual void renderEditorPreview(F32 currentScale);         // Render objects when tab is pressed
 
 
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
@@ -126,11 +122,9 @@ public:
    // Should we show item attributes when it is selected? (only overridden by TextItem)
    virtual bool showAttribsWhenSelected();
 
-   virtual string getAttributeString();
-
    void unselect();
 
-   void setSnapped(bool snapped);                  // Overridden in EngineeredItem
+   void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
 
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 
@@ -145,13 +139,13 @@ public:
    virtual S32 getDockRadius();                     // Size of object on dock
    virtual F32 getEditorRadius(F32 currentScale);   // Size of object in editor
    virtual const char *getVertLabel(S32 index);     // Label for vertex, if any... only overridden by SimpleLine objects
+   virtual string getAttributeString();             // Used for displaying text in lower-left in editor
 
-   void saveItem(FILE *f, F32 gridSize);
-   virtual string toString(F32 gridSize) const = 0; 
+   virtual string toString(F32 gridSize) const = 0; // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
 
    // Dock item rendering methods
    virtual void renderDock();    // Need not be abstract -- some of our objects do not go on dock
-   virtual void labelDockItem();
+   virtual Point getDockLabelPos();
    virtual void highlightDockItem();
 
    void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);    // Only for polylines and polygons  --> move there
@@ -205,9 +199,11 @@ public:
 
    //////////////
 
-   //TODO: Get rid of this altogether
    void renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip);
 
+   // For rendering on the dock -- can these be moved to UIEditor?
+   void renderOnDock(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip);
+   void renderDockItemLabel(const Point &pos, const char *label); // This could be moved anywhere... it's essentially a static method
 };
 
 
@@ -224,7 +220,6 @@ public:
    PointObject();             // Constructor
    virtual ~PointObject();    // Destructor
 
-   virtual void renderItemText(const char *text, S32 offset, F32 currentScale);
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
 
 
