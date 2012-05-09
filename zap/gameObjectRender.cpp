@@ -52,6 +52,7 @@ namespace Zap
 
 const Color *HIGHLIGHT_COLOR = &Colors::white;
 const Color *SELECT_COLOR = &Colors::yellow;
+const Color *PLAIN_COLOR = &Colors::gray75;
 
 const float gShapeLineWidth = 2.0f;
 

@@ -1981,13 +1981,39 @@ void EditorUserInterface::renderDragSelectBox()
 }
 
 
+static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
+
+// Forward declarations to allow us to put functions in human readable order
+static void renderDockItemLabel(const Point &pos, const char *label);
+static void renderDockItem(EditorObject *object, F32 currentScale, S32 snapVertexIndex);
+
 void EditorUserInterface::renderDockItems()
 {
    for(S32 i = 0; i < mDockItems.size(); i++)
-   {
-      mDockItems[i]->renderOnDock(mCurrentScale, mSnapVertexIndex, false, false);
-      mDockItems[i]->setLitUp(false);
-   }
+      renderDockItem(mDockItems[i].get(), mCurrentScale, mSnapVertexIndex);
+}
+
+
+static void renderDockItem(EditorObject *object, F32 currentScale, S32 snapVertexIndex)
+{
+   glColor(PLAIN_COLOR);
+
+   object->renderDock();
+   renderDockItemLabel(object->getDockLabelPos(), object->getOnDockName());
+
+   if(object->isLitUp())
+     object->highlightDockItem();
+
+   object->setLitUp(false);
+}
+
+
+static void renderDockItemLabel(const Point &pos, const char *label)
+{
+   F32 xpos = pos.x;
+   F32 ypos = pos.y - DOCK_LABEL_SIZE / 2;
+   glColor(Colors::white);
+   UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
 }
 
 

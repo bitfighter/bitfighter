@@ -47,6 +47,7 @@ namespace Zap
 
 extern const Color *HIGHLIGHT_COLOR;
 extern const Color *SELECT_COLOR;
+extern const Color *PLAIN_COLOR;
 
 static const S32 NO_NUMBER = -1;
 

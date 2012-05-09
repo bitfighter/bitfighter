@@ -200,10 +200,6 @@ public:
    //////////////
 
    void renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip);
-
-   // For rendering on the dock -- can these be moved to UIEditor?
-   void renderOnDock(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip);
-   void renderDockItemLabel(const Point &pos, const char *label); // This could be moved anywhere... it's essentially a static method
 };
 
 

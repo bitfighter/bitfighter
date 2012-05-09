@@ -120,15 +120,6 @@ bool EditorObject::isBatchUpdatingGeom()
 }
 
 
-// TODO: Merge with copy in editor, if it's really needed
-static F32 getRenderingAlpha(bool isScriptItem)
-{
-   return isScriptItem ? .6f : 1;     // Script items will appear somewhat translucent
-}
-
-
-static const S32 DOCK_LABEL_SIZE = 9;      // Size to label items on the dock
-
 #ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
@@ -147,18 +138,6 @@ void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
       }
 }
 #endif
-
-
-void EditorObject::renderDockItemLabel(const Point &pos, const char *label)
-{
-#ifndef ZAP_DEDICATED
-   F32 xpos = pos.x;
-   F32 ypos = pos.y - DOCK_LABEL_SIZE / 2;
-   glColor(Colors::white);
-   UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
-#endif
-}
-
 
 
 Point EditorObject::getDockLabelPos()
@@ -180,25 +159,25 @@ void EditorObject::highlightDockItem()
 
 static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
 {
-   F32 alpha = getRenderingAlpha(isScriptItem);
+   F32 alpha = isScriptItem ? .6f : 1;     // So script items will appear somewhat translucent
 
    if(isSelected)
       glColor(SELECT_COLOR, alpha);       // yellow
    else if(isLitUp)
       glColor(HIGHLIGHT_COLOR, alpha);    // white
    else  // Normal
-      glColor(Color(.75), alpha);
+      glColor(PLAIN_COLOR, alpha);
 }
 
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip)
+void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScriptItem, bool inPreviewMode)
 {
 #ifndef ZAP_DEDICATED
 
    setColor(mSelected, mLitUp, isScriptItem);
 
-   if(showingReferenceShip)
+   if(inPreviewMode)
    {
       GameObject *gameObject = dynamic_cast<GameObject *>(this);
       if(gameObject)
@@ -209,21 +188,6 @@ void EditorObject::renderInEditor(F32 currentScale, S32 snapIndex, bool isScript
       renderEditor(currentScale);
       renderAndLabelHighlightedVertices(currentScale);
    }
-#endif
-}
-
-
-//{P{P
-void EditorObject::renderOnDock(F32 currentScale, S32 snapIndex, bool isScriptItem, bool showingReferenceShip)
-{
-#ifndef ZAP_DEDICATED
-   setColor(false, false, false);
-
-   this->renderDock();
-   renderDockItemLabel(getDockLabelPos(), getOnDockName());
-
-   if(this->mLitUp)
-      this->highlightDockItem();
 #endif
 }
 
