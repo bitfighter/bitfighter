@@ -182,10 +182,10 @@ public:
 
    virtual void initializeEditor();
 
-   virtual const char *getEditorHelpString();
+   virtual const char *getOnScreenName();
    virtual const char *getPrettyNamePlural();
    virtual const char *getOnDockName();
-   virtual const char *getOnScreenName();
+   virtual const char *getEditorHelpString();
 
    virtual const char *getInstructionMsg();                                // Message printed below item when it is selected
 
