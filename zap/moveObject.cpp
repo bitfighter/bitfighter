@@ -160,6 +160,7 @@ void MoveObject::setPos(const Point &pos)
 {
    mMoveState[ActualState].pos = pos;
    mMoveState[RenderState].pos = pos;
+   Parent::setVert(pos, 0);      // Kind of hacky... need to get this point into the geom object, need to avoid stack overflow
    updateExtentInDatabase();
 }
 
