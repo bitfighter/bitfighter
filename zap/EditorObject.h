@@ -182,9 +182,6 @@ public:
 
    virtual void initializeEditor();
 
-   S32 mScore;
-   S32 getScore();     // Goal zones only, return zone's score
-
    virtual const char *getEditorHelpString();
    virtual const char *getPrettyNamePlural();
    virtual const char *getOnDockName();

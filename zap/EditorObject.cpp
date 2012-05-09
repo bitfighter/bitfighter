@@ -202,12 +202,6 @@ void EditorObject::initializeEditor()
 }
 
 
-S32 EditorObject::getScore()
-{
-   return mScore;
-}
-
-
 void EditorObject::onGeomChanging()
 {
    if(getGeomType() == geomPolygon)
