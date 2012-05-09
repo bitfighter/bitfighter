@@ -4221,8 +4221,6 @@ void EditorUserInterface::idle(U32 timeDelta)
       onMouseMoved();  // Prevents skippy problem while dragging something
    }
 
-//   Point mouseLevelPoint = convertCanvasToLevelCoord(mMousePos);
-
    if(mIn && !mOut)
       zoom(timeDelta * 0.002f);
    else if(mOut && !mIn)
