@@ -26,6 +26,7 @@
 #include "gameNetInterface.h"
 #include "game.h"
 #include "version.h"
+#include "ServerGame.h"
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
