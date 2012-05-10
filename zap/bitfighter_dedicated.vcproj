@@ -659,6 +659,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ClientInfo.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>
@@ -892,6 +896,10 @@
 		</File>
 		<File
 			RelativePath=".\ScreenInfo.h"
+			>
+		</File>
+		<File
+			RelativePath=".\ServerGame.cpp"
 			>
 		</File>
 		<File
