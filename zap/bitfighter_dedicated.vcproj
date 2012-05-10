@@ -715,6 +715,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\EventManager.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\game.cpp"
 			>
 		</File>
