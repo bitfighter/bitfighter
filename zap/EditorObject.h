@@ -51,17 +51,6 @@ static const S32 NONE = -1;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-enum ShowMode
-{
-   ShowAllObjects,
-   ShowWallsOnly,
-   ShowModesCount
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class EditorAttributeMenuUI;
 class WallSegment;
 class ClientGame;
@@ -133,14 +122,14 @@ public:
    virtual void highlightDockItem();
 
    //////
+   // Things are happening in the editor; the editor must respond!
+   virtual void onGeomChanging();      // Item geom is interactively changing
+   virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
 
-   virtual void onGeomChanging();                        // Item geom is interactively changing
-   virtual void onGeomChanged();                         // Item changed geometry (or moved), do any internal updating that might be required
+   virtual void onItemDragging();      // Item is being dragged around the screen
 
-   virtual void onItemDragging();                        // Item is being dragged around the screen
-
-   virtual void onAttrsChanging();                       // Attr is in the process of being changed (i.e. a char was typed for a textItem)
-   virtual void onAttrsChanged();                        // Attrs changed
+   virtual void onAttrsChanging();     // Attr is in the process of being changed (i.e. a char was typed for a textItem)
+   virtual void onAttrsChanged();      // Attrs changed
 
    /////
 
