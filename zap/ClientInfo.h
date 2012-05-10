@@ -46,6 +46,7 @@ class LuaPlayerInfo;
 #ifndef ZAP_DEDICATED
 #  include "voiceCodec.h"
 #endif
+class VoiceDecoder;
 
 
 namespace Zap
