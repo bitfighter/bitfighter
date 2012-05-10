@@ -181,7 +181,7 @@ void TeamDefUserInterface::render()
          dSprintf(namestr, sizeof(namestr), "%s%s", numstr, ui->getTeam(j)->getName().getString());
 
          char colorstr[16];                  // Need enough room for "(100, 100, 100)" + 1 for null
-         const Color *color = ui->getTeamColor(j);
+         const Color *color = ui->getGame()->getTeamColor(j);
          dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(color->r * 100 + 0.5), S32(color->g * 100 + 0.5), S32(color->b * 100 + 0.5));
          
          static const char *nameColorStr = "%s  %s";

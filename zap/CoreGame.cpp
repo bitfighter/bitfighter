@@ -83,7 +83,7 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
       CoreItem *coreItem = mCores[i];  // Core may have been destroyed
       if(coreItem)
          if(coreItem->getTeam() != ship->getTeam())
-            renderObjectiveArrow(coreItem, getTeamColor(coreItem->getTeam()));
+            renderObjectiveArrow(coreItem, coreItem->getColor());
    }
 #endif
 }
@@ -330,7 +330,7 @@ void CoreItem::renderItem(const Point &pos)
 
       S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
 
-      renderCore(pos, getTeamColor(mTeam), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
+      renderCore(pos, getColor(), time, getPanelGeom(), mPanelHealth, mStartingPanelHealth);
    }
 #endif
 }
@@ -345,11 +345,11 @@ void CoreItem::renderDock()
 }
 
 
-void CoreItem::renderEditor(F32 currentScale)
+void CoreItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
-   renderCoreSimple(pos, getTeamColor(mTeam), CoreRadius * 2);
+   renderCoreSimple(pos, getColor(), CoreRadius * 2);
 #endif
 }
 
@@ -578,7 +578,7 @@ void CoreItem::doExplosion(const Point &pos)
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   Color teamColor = getTeamColor(mTeam);
+   Color teamColor = getColor();
    Color CoreExplosionColors[12] = {
       Colors::red,
       teamColor,
@@ -680,7 +680,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 
    // Draw debris for the panel
    S32 num = Random::readI(5, 15);
-   const Color *teamColor = getTeamColor(mTeam);
+   const Color *teamColor = getColor();
 
    Point chunkPos, chunkVel;           // Reusable containers
 

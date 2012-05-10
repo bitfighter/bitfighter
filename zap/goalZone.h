@@ -91,7 +91,7 @@ public:
    const char *getOnScreenName();
    string toString(F32 gridSize) const;
 
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
    /////

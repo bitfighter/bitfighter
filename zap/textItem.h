@@ -47,7 +47,6 @@ private:
    string mText;         // Text itself
 
    // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getVertLabel(S32 index);
    const char *getInstructionMsg();
 
 #ifndef ZAP_DEDICATED
@@ -120,8 +119,6 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
 
-   bool showAttribsWhenSelected();      // We already show the attributes, as the text itself
-
    void newObjectFromDock(F32 gridSize);
 
    TNL_DECLARE_CLASS(TextItem);
@@ -163,7 +160,7 @@ public:
    /////
    // Editor methods
    string toString(F32 gridSize) const;
-   virtual void renderEditor(F32 currentScale);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    virtual const Color *getEditorRenderColor();
 
 

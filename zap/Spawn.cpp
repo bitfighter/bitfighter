@@ -257,7 +257,7 @@ S32 Spawn::getDefaultRespawnTime()
 }
 
 
-void Spawn::renderEditor(F32 currentScale)
+void Spawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -265,7 +265,7 @@ void Spawn::renderEditor(F32 currentScale)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
       glScalef(1/currentScale, 1/currentScale, 1);    // Make item draw at constant size, regardless of zoom
-      renderSquareItem(Point(0,0), getGame()->getTeamColor(mTeam), 1, &Colors::white, 'S');
+      renderSquareItem(Point(0,0), getColor(), 1, &Colors::white, 'S');
    glPopMatrix();
 #endif
 }
@@ -273,7 +273,7 @@ void Spawn::renderEditor(F32 currentScale)
 
 void Spawn::renderDock()
 {
-   renderEditor(1);
+   renderEditor(1, false);
 }
 
 
@@ -375,7 +375,7 @@ static void renderAsteroidSpawn(const Point &pos)
 }
 
 
-void AsteroidSpawn::renderEditor(F32 currentScale)
+void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -479,7 +479,7 @@ static void renderCircleSpawn(const Point &pos)
 }
 
 
-void CircleSpawn::renderEditor(F32 currentScale)
+void CircleSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -569,7 +569,7 @@ S32 FlagSpawn::getDefaultRespawnTime()
 }
 
 
-void FlagSpawn::renderEditor(F32 currentScale)
+void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getPos();
@@ -577,7 +577,7 @@ void FlagSpawn::renderEditor(F32 currentScale)
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);
       glScalef(0.4f/currentScale, 0.4f/currentScale, 1);
-      Color color = getTeamColor(mTeam);  // To avoid taking address of temporary
+      Color color = getColor();  // To avoid taking address of temporary
       renderFlag(0, 0, &color);
 
       glColor(Colors::white);
@@ -589,7 +589,7 @@ void FlagSpawn::renderEditor(F32 currentScale)
 
 void FlagSpawn::renderDock()
 {
-   renderEditor(1);
+   renderEditor(1, false);
 }
 
 

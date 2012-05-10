@@ -1042,7 +1042,7 @@ void Mine::renderItem(const Point &pos)
 }
 
 
-void Mine::renderEditor(F32 currentScale)
+void Mine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    renderMine(getActualPos(), true, true);
 }
@@ -1326,14 +1326,14 @@ void SpyBug::renderItem(const Point &pos)
    else    
       visible = true;      // We get here in editor when in preview mode
 
-   renderSpyBug(pos, getGame()->getTeamColor(mTeam), visible, true);
+   renderSpyBug(pos, getColor(), visible, true);
 #endif
 }
 
 
-void SpyBug::renderEditor(F32 currentScale)
+void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   renderSpyBug(getRenderPos(), getTeamColor(getTeam()), true, true);
+   renderSpyBug(getRenderPos(), getColor(), true, true);
 }
 
 
@@ -1344,10 +1344,10 @@ void SpyBug::renderDock()
 
    Point pos = getRenderPos();
 
-   glColor(getTeamColor(mTeam));
+   glColor(getColor());
    drawFilledCircle(pos, radius);
 
-   glColor(.7f);
+   glColor(Colors::gray70);
    drawCircle(pos, radius);
    drawLetter('S', pos, Color(mTeam < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif

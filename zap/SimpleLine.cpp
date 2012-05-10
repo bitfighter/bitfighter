@@ -104,7 +104,7 @@ static const S32 INSTRUCTION_TEXTGAP = 3;
 
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
-void SimpleLine::renderEditor(F32 currentScale)
+void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    Point pos = getVert(0);

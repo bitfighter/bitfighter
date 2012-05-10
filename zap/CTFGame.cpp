@@ -187,10 +187,10 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          Ship *mount = mFlags[i]->getMount();
          if(mount)
-            renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
+            renderObjectiveArrow(mount, mount->getColor());
       }
       else
-         renderObjectiveArrow(mFlags[i], getTeamColor(mFlags[i]->getTeam()));
+         renderObjectiveArrow(mFlags[i], mFlags[i]->getColor());
    }
 #endif
 }

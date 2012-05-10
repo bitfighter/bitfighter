@@ -61,9 +61,6 @@ public:
 private:
    S32 mLastDest;    // Destination of last ship through
 
-   // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getVertLabel(S32 index);
-
 public:
    Teleporter();     // Constructor
 

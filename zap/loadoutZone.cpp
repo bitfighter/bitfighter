@@ -65,20 +65,20 @@ LoadoutZone *LoadoutZone::clone() const
 
 void LoadoutZone::render()
 {
-   renderLoadoutZone(getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle());
+   renderLoadoutZone(getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle());
 }
 
 
-void LoadoutZone::renderEditor(F32 currentScale)
+void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    render();
-   PolygonObject::renderEditor(currentScale);
+   PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
 void LoadoutZone::renderDock()
 {
-  renderLoadoutZone(getTeamColor(getTeam()), getOutline(), getFill());
+  renderLoadoutZone(getColor(), getOutline(), getFill());
 }
 
 

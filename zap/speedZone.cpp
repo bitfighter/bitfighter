@@ -325,12 +325,6 @@ string SpeedZone::toString(F32 gridSize) const
 }
 
 
-const char *SpeedZone::getVertLabel(S32 index)
-{
-   return index == 0 ? "Location" : "Direction";
-}
-
-
 const char *SpeedZone::getInstructionMsg()
 {
    return "[Enter] to edit attributes";

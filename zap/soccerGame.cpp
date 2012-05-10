@@ -175,7 +175,7 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
    for(S32 i = 0; i < mGoals.size(); i++)
    {
       if(mGoals[i]->getTeam() != team)
-         renderObjectiveArrow(mGoals[i], getTeamColor(mGoals[i]->getTeam()));
+         renderObjectiveArrow(mGoals[i], mGoals[i]->getColor());
    }
    if(mBall.isValid())
       renderObjectiveArrow(mBall, getTeamColor(-1));
@@ -493,7 +493,7 @@ void SoccerBallItem::renderDock()
 }
 
 
-void SoccerBallItem::renderEditor(F32 currentScale)
+void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    renderItem(getRenderPos());
 }

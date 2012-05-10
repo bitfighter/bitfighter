@@ -42,8 +42,6 @@ class SimpleLine : public EditorObject, public GameObject
 private:
    virtual Color getEditorRenderColor() = 0;
 
-   virtual const char *getVertLabel(S32 index) = 0;          
-
 protected:
    virtual S32 getDockRadius();                       // Size of object on dock
    virtual F32 getEditorRadius(F32 currentScale);     // Size of object (or in this case vertex) in editor
@@ -55,8 +53,8 @@ public:
    // Some properties about the item that will be needed in the editor
    virtual const char *getOnDockName() = 0;
 
-   void renderDock();                        // Render item on the dock
-   void renderEditor(F32 currentScale);      // Render item in the editor
+   void renderDock();                       
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);     
    virtual void renderEditorItem() = 0;      // Helper for renderEditor
 
    virtual void newObjectFromDock(F32 gridSize);

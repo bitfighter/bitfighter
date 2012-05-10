@@ -294,7 +294,7 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
                   break;
             }
             if(k == mFlags.size())
-               renderObjectiveArrow(mZones[j], getTeamColor(team));
+               renderObjectiveArrow(mZones[j], mZones[j]->getColor());
          }
          uFlag = true;
          break;
@@ -311,16 +311,17 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
          GoalZone *gz = mFlags[i]->getZone();
 
          if(gz && gz->getTeam() != team)
-            renderObjectiveArrow(mFlags[i], getTeamColor(gz->getTeam()));
+            renderObjectiveArrow(mFlags[i], gz->getColor());
          else if(!gz)
             renderObjectiveArrow(mFlags[i], getTeamColor(-1));
       }
       else
       {
+         // Arrow to ship carrying flag
          Ship *mount = mFlags[i]->getMount();
 
          if(mount && mount != ship)
-            renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
+            renderObjectiveArrow(mount, mount->getColor());
       }
    }
 #endif

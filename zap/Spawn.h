@@ -85,7 +85,7 @@ public:
    void resetTimer();
    U32 getPeriod();     // temp debugging
 
-   virtual void renderEditor(F32 currentScale) = 0;
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) = 0;
    virtual void renderDock() = 0;
 };
 
@@ -111,7 +111,7 @@ public:
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
 
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 };
 
@@ -152,7 +152,7 @@ public:
    S32 getDefaultRespawnTime();
 
    void spawn(Game *game, const Point &pos);
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 };
 
@@ -180,7 +180,7 @@ public:
    S32 getDefaultRespawnTime();
 
    void spawn(Game *game, const Point &pos);
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 };
 
@@ -211,7 +211,7 @@ public:
    S32 getDefaultRespawnTime();
 
    void spawn(Game *game, const Point &pos);
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
    bool processArguments(S32 argc, const char **argv, Game *game);

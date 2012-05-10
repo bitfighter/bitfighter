@@ -255,11 +255,11 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
       for(S32 i = 0; i < mZones.size(); i++)
       {
          if(mZones[i]->getTeam() != mFlagTeam)
-            renderObjectiveArrow(mZones[i], getTeamColor(mZones[i]), hasFlag ? 1.0f : 0.4f);
+            renderObjectiveArrow(mZones[i], mZones[i]->getColor(), hasFlag ? 1.0f : 0.4f);
          else if(mZones[i]->didRecentlyChangeTeam() && mZones[i]->getTeam() != -1 && ship->getTeam() != mFlagTeam)
          {
             // Render a blinky arrow for a recently taken zone
-            Color c = getTeamColor(mZones[i]);
+            Color c = mZones[i]->getColor();
             if(mZones[i]->isFlashing())
                c *= 0.7f;
             renderObjectiveArrow(mZones[i], &c);
@@ -271,12 +271,12 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
       if(mFlag.isValid())
       {
          if(!mFlag->isMounted())
-            renderObjectiveArrow(mFlag, getTeamColor(mFlag));     // Arrow to flag, if not held by player
+            renderObjectiveArrow(mFlag, mFlag->getColor());     // Arrow to flag, if not held by player
          else
          {
             Ship *mount = mFlag->getMount();
             if(mount)
-               renderObjectiveArrow(mount, getTeamColor(mount));
+               renderObjectiveArrow(mount, mount->getColor());
          }
       }
    }

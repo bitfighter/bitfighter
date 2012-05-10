@@ -498,7 +498,7 @@ void WallItem::onGeomChanged()
 
    EditorObjectDatabase *db = getEditorObjectDatabase();
 
-   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, mSerialNumber);
+   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, getSerialNumber());
    Parent::onGeomChanged();
 }
 
@@ -620,7 +620,7 @@ void WallItem::setSelected(bool selected)
    Parent::setSelected(selected);
    
    // Find the associated segment(s) and mark them as selected (or not)
-   setWallSelected(getDatabase(), mSerialNumber, selected);
+   setWallSelected(getDatabase(), getSerialNumber(), selected);
 }
 
 
@@ -732,7 +732,7 @@ void PolyWall::setSelected(bool selected)
 {
    Parent::setSelected(selected);
 
-   setWallSelected(getDatabase(), mSerialNumber, selected);
+   setWallSelected(getDatabase(), getSerialNumber(), selected);
 }
 
 
@@ -741,7 +741,7 @@ void PolyWall::onGeomChanged()
 {
    EditorObjectDatabase *db = getEditorObjectDatabase();
 
-   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, mSerialNumber);
+   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, getSerialNumber());
    Parent::onGeomChanged();
 }
 

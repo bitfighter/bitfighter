@@ -209,7 +209,7 @@ public:
    const char *getOnScreenName();
    string toString(F32 gridSiz) const;
    
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
 
    NexusObject(lua_State *L);      //  Lua constructor

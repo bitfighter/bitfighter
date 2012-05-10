@@ -69,20 +69,20 @@ void PolygonObject::onGeomChanged()
 }  
 
 
-void PolygonObject::renderEditor(F32 currentScale)
+void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    if(mSelected || mLitUp)
       renderPolyHighlight();
 
-   renderLinePolyVertices(currentScale);
+   renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 
 
 void PolygonObject::renderDock()
 {
-   renderEditor(1);
+   renderEditor(1, false);
 }
 
 

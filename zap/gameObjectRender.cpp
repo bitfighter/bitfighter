@@ -593,6 +593,7 @@ void renderAimVector()
    glEnd();
 }
 
+
 #ifndef ABS
 #define ABS(x) (((x) > 0) ? (x) : -(x))
 #endif
@@ -766,6 +767,29 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
    }
 
    glPopMatrix();
+}
+
+
+// Render vertices of polyline; only used in the editor
+void renderPolyLineVertices(EditorObject *obj, bool snapping, F32 currentScale)
+{
+   // Draw the vertices of the wall or the polygon area
+   S32 verts = obj->getVertCount();
+
+   for(S32 j = 0; j < verts; j++)
+   {
+      if(obj->vertSelected(j))
+         renderVertex(SelectedVertex,     obj->getVert(j), j, currentScale, 1);   // Hollow yellow boxes with number
+
+      else if(obj->isLitUp() && obj->isVertexLitUp(j))
+         renderVertex(HighlightedVertex,  obj->getVert(j), j, currentScale, 1);   // Hollow yellow boxes with number
+
+      else if(obj->isSelected() || obj->isLitUp() || obj->anyVertsSelected())
+         renderVertex(SelectedItemVertex, obj->getVert(j), j, currentScale, 1);   // Hollow red boxes with number
+
+      else
+         renderSmallSolidVertex(currentScale, obj->getVert(j), snapping);          // Tiny red or magenta dot
+   }
 }
 
 
@@ -2107,7 +2131,7 @@ void drawFilledSquare(const Point &pos, S32 size)
 // Red vertices in walls, and magenta snapping vertices
 void renderSmallSolidVertex(F32 currentScale, const Point &pos, bool snapping)
 {
-   F32 size = MIN(MAX(currentScale, 1), 2);
+   F32 size = MIN(MAX(currentScale, 1), 2);              // currentScale, but limited to range 1-2
    glColor(snapping ? Colors::magenta : Colors::red);
 
    drawFilledSquare(pos, (F32)size / currentScale);

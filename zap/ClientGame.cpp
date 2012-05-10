@@ -1632,7 +1632,7 @@ void ClientGame::renderCommander()
       if(gt)
       {
          playerTeam = ship->getTeam();
-         Color teamColor = *getTeamColor(playerTeam);
+         Color teamColor = *ship->getColor();
 
          for(S32 i = 0; i < renderObjects.size(); i++)
          {

@@ -74,12 +74,6 @@ Teleporter *Teleporter::clone() const
 }
 
 
-const char *Teleporter::getVertLabel(S32 index)
-{
-   return index == 0 ? "Intake Vortex" : "Destination";
-}
-
-
 //void Teleporter::copyAttrs(Teleporter *target)
 //{
 //   SimpleLine::copyAttrs(target);

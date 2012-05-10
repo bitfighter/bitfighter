@@ -58,10 +58,10 @@ void SlipZone::render()
 }
 
 
-void SlipZone::renderEditor(F32 currentScale)
+void SlipZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    render();
-   PolygonObject::renderEditor(currentScale);
+   PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 

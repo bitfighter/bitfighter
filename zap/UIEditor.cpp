@@ -1511,7 +1511,7 @@ void EditorUserInterface::renderTurretRanges(EditorObjectDatabase *editorDb)
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
+         renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
       }
 
       setDefaultBlendFunction();
@@ -1533,7 +1533,7 @@ void EditorUserInterface::renderTurretRanges(EditorObjectDatabase *editorDb)
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderTurretFiringRange(pos, getTeamColor(editorObj->getTeam()), mCurrentScale);
+         renderTurretFiringRange(pos, editorObj->getColor(), mCurrentScale);
       }
    }
 }
@@ -1947,7 +1947,7 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderMo
          }
          else
          {
-            obj->renderEditor(mCurrentScale);
+            obj->renderEditor(mCurrentScale, getSnapToWallCorners());
             obj->renderAndLabelHighlightedVertices(mCurrentScale);
          }
       }
@@ -1977,7 +1977,7 @@ void EditorUserInterface::renderObjectsUnderConstruction()
    if(mCreatingPoly) // Wall
       glColor(*SELECT_COLOR);
    else              // LineItem
-      glColor(getTeamColor(mNewItem->getTeam()));
+      glColor(mNewItem->getColor());
 
    renderLine(mNewItem->getOutline());
 
@@ -2055,13 +2055,6 @@ void EditorUserInterface::renderHelpMessage()
       return;
 
    mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
-
-   //glColor(Colors::green);
-
-   //// Center string between left side of screen and edge of dock
-   //const char *helpString = mDockItemHit->getEditorHelpString();
-   //S32 x = (gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - getStringWidth(15, helpString)) / 2;
-   //drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, helpString);
 }
 
 
@@ -2117,13 +2110,6 @@ void EditorUserInterface::renderWarnings()
       }
    }
 }
-
-
-const Color *EditorUserInterface::getTeamColor(S32 team)
-{
-   return getGame()->getTeamColor(team);
-}
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////

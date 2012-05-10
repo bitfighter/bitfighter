@@ -130,6 +130,7 @@ const S32 gSpyBugRange = 300;                // How far can a spy bug see?
 class GameObject;
 class Game;
 class GameConnection;
+class Color;
 
 
 ////////////////////////////////////////
@@ -186,6 +187,7 @@ class BfObject : public DatabaseObject
 {
 private:
    GeometryContainer mGeometry;
+   S32 mSerialNumber;   // Autoincremented serial number   
 
 protected:
    Game *mGame;
@@ -197,10 +199,13 @@ public:
 
    S32 getTeam();
    void setTeam(S32 team);
+   const Color *getColor();
 
    Game *getGame() const;
    void setNewGeometry(GeomType geomType);
 
+   void assignNewSerialNumber();
+   S32 getSerialNumber();
 
    virtual void addToGame(Game *game, GridDatabase *database);
    virtual void removeFromGame();

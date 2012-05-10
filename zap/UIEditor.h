@@ -302,8 +302,6 @@ public:
 
    void onQuitted();       // Releases some memory when quitting the editor
 
-   const Color *getTeamColor(S32 teamId);
-
    S32 getTeamCount();
    EditorTeam *getTeam(S32 teamId);
 

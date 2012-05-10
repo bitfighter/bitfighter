@@ -262,7 +262,7 @@ public:
    bool canBeNeutral();
 
    void renderDock();
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    void onItemDragging();   // Item is being actively dragged
 
@@ -348,7 +348,7 @@ public:
    void onItemDragging();
 
    void renderDock();
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    ///// 
    //Lua Interface

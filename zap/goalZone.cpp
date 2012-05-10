@@ -81,22 +81,22 @@ void GoalZone::render()
       glow = 0;
 
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
-   renderGoalZone(*getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
+   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
 }
 
 
-void GoalZone::renderEditor(F32 currentScale)
+void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
 
-   renderGoalZone(*getTeamColor(getTeam()), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, useOldStyle);
-   PolygonObject::renderEditor(currentScale);
+   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), false, 0, 0, 0, useOldStyle);
+   PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
 void GoalZone::renderDock()
 {
-  renderGoalZone(*getTeamColor(getTeam()), getOutline(), getFill());
+  renderGoalZone(*getColor(), getOutline(), getFill());
 }
 
 

@@ -376,6 +376,22 @@ void BfObject::setNewGeometry(GeomType geomType)
 }
 
 
+// Serial numbers are used in a couple of ways: in the editor, they are used to identify same objects in different databases,
+// for example to identify objects across undo/redo states.  They are also used by walls to help identify which segments belong
+// to which wall, even as walls are being moved around, and wall edits are undone/redone.
+void BfObject::assignNewSerialNumber()
+{
+   static S32 mNextSerialNumber = 0;
+
+   mSerialNumber = mNextSerialNumber++;
+}
+
+
+S32 BfObject::getSerialNumber()
+{
+   return mSerialNumber;
+}
+
 S32 BfObject::getTeam()
 {
    return mTeam;
@@ -385,6 +401,12 @@ S32 BfObject::getTeam()
 void BfObject::setTeam(S32 team)
 {
    mTeam = team;
+}
+
+
+const Color *BfObject::getColor() 
+{ 
+   return mGame->getTeamColor(mTeam);
 }
 
 

@@ -1063,10 +1063,10 @@ S32 NexusObject::getRenderSortValue()
 }
 
 
-void NexusObject::renderEditor(F32 currentScale)
+void NexusObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    render();
-   PolygonObject::renderEditor(currentScale);
+   PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 

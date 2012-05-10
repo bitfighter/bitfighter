@@ -77,10 +77,7 @@ protected:
    bool mSelected;      // True if item is selected
    bool mLitUp;         // True if user is hovering over the item and it's "lit up"
 
-   S32 mSerialNumber;   // Autoincremented serial number   
    S32 mItemId;         // Item's unique id... 0 if there is none
-
-   const Color *getTeamColor(S32 teamId);    // Convenience function, calls mGame version
 
 public:
    EditorObject();                  // Constructor
@@ -91,14 +88,8 @@ public:
    EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
 
 #ifndef ZAP_DEDICATED
-   virtual void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
    void addToEditor(ClientGame *game, GridDatabase *database);
 #endif
-
-   void assignNewSerialNumber();
-
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   virtual Point getInitialPlacementOffset(F32 gridSize);
 
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
@@ -106,19 +97,14 @@ public:
 #ifndef ZAP_DEDICATED
    void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
 #endif
-   virtual void renderEditor(F32 currentScale);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
 
    EditorObjectDatabase *getEditorObjectDatabase();
 
-   // Should we show item attributes when it is selected? (only overridden by TextItem)
-   virtual bool showAttribsWhenSelected();
-
    void unselect();
 
    void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
-
-   virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
 
 
    // Keep track which vertex, if any is lit up in the currently selected item
@@ -130,22 +116,24 @@ public:
    // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
    virtual S32 getDockRadius();                     // Size of object on dock
    virtual F32 getEditorRadius(F32 currentScale);   // Size of object in editor
-   virtual const char *getVertLabel(S32 index);     // Label for vertex, if any... only overridden by SimpleLine objects
    virtual string getAttributeString();             // Used for displaying text in lower-left in editor
 
    virtual string toString(F32 gridSize) const = 0; // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
 
-   // Dock item rendering methods
-   virtual void renderDock();    // Need not be abstract -- some of our objects do not go on dock
+   ///// Dock related
+#ifndef ZAP_DEDICATED
+   virtual void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+#endif
+   virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   virtual Point getInitialPlacementOffset(F32 gridSize);
+
+   ///// Dock item rendering methods
+   virtual void renderDock();   
    virtual Point getDockLabelPos();
    virtual void highlightDockItem();
 
-   void renderLinePolyVertices(F32 scale, F32 alpha = 1.0);    // Only for polylines and polygons  --> move there
-  
-
-   // TODO: Get rid of this ==> most of this code already in polygon
-   void initializePolyGeom();     // Once we have our points, do some geom preprocessing ==> only for polygons
-
+   ///// Geometric manipulations
    void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
    void offset(const Point &offset);                     // Offset object by a certain amount
 
@@ -164,8 +152,6 @@ public:
    S32 getItemId();
    void setItemId(S32 itemId);
    
-   S32 getSerialNumber();
-
    bool isSelected();
    virtual void setSelected(bool selected);     // Overridden by walls who need special tracking for selected items
 
@@ -205,7 +191,7 @@ public:
 
 
    // Some functionality needed by the editor
-   virtual void renderEditor(F32 currentScale) = 0;
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) = 0;
    virtual F32 getEditorRadius(F32 currentScale) = 0;
    virtual string toString(F32 gridSize) const = 0;
 };

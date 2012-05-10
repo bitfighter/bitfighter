@@ -277,9 +277,10 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          for(S32 j = 0; j < mZones.size(); j++)
          {
-            // see if this is one of our zones and that it doesn't have a flag in it.
+            // Find our zones that have no flags
             if(mZones[j]->getTeam() != team)
                continue;
+
             S32 k;
             for(k = 0; k < mFlags.size(); k++)
             {
@@ -289,7 +290,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
                   break;
             }
             if(k == mFlags.size())
-               renderObjectiveArrow( mZones[j], getTeamColor(team) );
+               renderObjectiveArrow(mZones[j], mZones[j]->getColor());
          }
          uFlag = true;
          break;
@@ -305,7 +306,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          GoalZone *goalZone = mFlags[i]->getZone();
          if(goalZone && goalZone->getTeam() != team)
-            renderObjectiveArrow(mFlags[i], getTeamColor(goalZone->getTeam()));
+            renderObjectiveArrow(mFlags[i], goalZone->getColor());
          else if(!goalZone)
             renderObjectiveArrow(mFlags[i], getTeamColor(-1));
       }
@@ -313,7 +314,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          Ship *mount = mFlags[i]->getMount();
          if(mount && mount != ship)
-            renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
+            renderObjectiveArrow(mount, mount->getColor());
       }
    }
 #endif

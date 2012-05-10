@@ -375,7 +375,7 @@ public:
    Worm *clone() const;
 
    void render();
-   void renderEditor(F32 currentScale);
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
    F32 getEditorRadius(F32 currentScale);

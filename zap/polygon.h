@@ -65,7 +65,7 @@ public:
    virtual void onItemDragging();  // maybe not for polywalls??
    virtual void onGeomChanged();   // Tell the geometry that things have changed
 
-   virtual void renderEditor(F32 currentScale);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    /////
    // Former LuaPolygon methods

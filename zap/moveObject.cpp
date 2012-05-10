@@ -1726,7 +1726,7 @@ Worm *Worm::clone() const
 }
 
 
-void Worm::renderEditor(F32 currentScale)
+void Worm::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    render();
 }

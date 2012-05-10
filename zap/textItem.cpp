@@ -81,12 +81,6 @@ TextItem *TextItem::clone() const
 }
 
 
-const char *TextItem::getVertLabel(S32 index)
-{
-   return index == 0 ? "Start" : "Direction";
-}
-
-
 const char *TextItem::getInstructionMsg()
 {
    return "[Enter] to edit text";
@@ -136,7 +130,7 @@ void TextItem::render()
 // Called by SimpleItem::renderEditor()
 void TextItem::renderEditorItem()
 {
-   renderTextItem(getVert(0), getVert(1), mSize, mText, getTeamColor(mTeam));
+   renderTextItem(getVert(0), getVert(1), mSize, mText, getColor());
 }
 
 
@@ -179,12 +173,6 @@ bool TextItem::canBeHostile()
 bool TextItem::canBeNeutral()
 {
    return true;
-}
-
-
-bool TextItem::showAttribsWhenSelected()
-{
-   return false;
 }
 
 
@@ -518,28 +506,27 @@ void LineItem::render()
          return;
    }
 
-   glColor(getTeamColor(mTeam));
+   glColor(getColor());
    renderLine(getOutline());
 #endif
 }
 
 
-void LineItem::renderEditor(F32 currentScale)
+void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
    if(!mSelected && !mLitUp)
       glColor(getEditorRenderColor());
 
    renderLine(getOutline());
-
-   renderLinePolyVertices(currentScale);
+   renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
 
 
 const Color *LineItem::getEditorRenderColor() 
 { 
-   return getTeamColor(mTeam); 
+   return getColor(); 
 }
 
 

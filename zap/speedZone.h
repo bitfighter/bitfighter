@@ -50,7 +50,6 @@ private:
    void preparePoints();
 
    // How are things labeled in the editor? 
-   const char *getVertLabel(S32 index);
    const char *getInstructionMsg();
 
 #ifndef ZAP_DEDICATED

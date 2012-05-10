@@ -162,7 +162,7 @@ void Item::render()
 }
 
 
-void Item::renderEditor(F32 currentScale)
+void Item::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    renderItem(getPos());                    
 }

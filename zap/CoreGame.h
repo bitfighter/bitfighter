@@ -203,7 +203,7 @@ public:
    const char *getOnScreenName();
 
    F32 getEditorRadius(F32 currentScale);
-   void renderEditor(F32 currentScale);      // Render item in the editor
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);    
    void renderDock();
 
    bool canBeHostile();

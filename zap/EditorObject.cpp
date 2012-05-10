@@ -98,20 +98,6 @@ void EditorObject::addToEditor(ClientGame *game, GridDatabase *database)
 #endif
 
 
-void EditorObject::assignNewSerialNumber()
-{
-   static S32 mNextSerialNumber = 0;
-
-   mSerialNumber = mNextSerialNumber++;
-}
-
-
-S32 EditorObject::getSerialNumber()
-{
-   return mSerialNumber;
-}
-
-
 #ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
 void EditorObject::renderAndLabelHighlightedVertices(F32 currentScale)
@@ -259,36 +245,6 @@ EditorObject *EditorObject::newCopy()
 }
 
 
-const Color *EditorObject::getTeamColor(S32 teamId) 
-{ 
-   return mGame->getTeamColor(teamId);
-}
-
-
-// Draw the vertices for a polygon or line item (i.e. walls)
-void EditorObject::renderLinePolyVertices(F32 currentScale, F32 alpha)
-{
-#ifndef ZAP_DEDICATED
-
-   const ClientGame *clientGame = dynamic_cast<ClientGame *>(mGame);
-
-   // Draw the vertices of the wall or the polygon area
-   for(S32 j = 0; j < getVertCount(); j++)
-   {
-      if(vertSelected(j))
-         renderVertex(SelectedVertex,     getVert(j), j, currentScale, alpha);   // Hollow yellow boxes with number
-      else if(mLitUp && isVertexLitUp(j))
-         renderVertex(HighlightedVertex,  getVert(j), j, currentScale, alpha);   // Hollow yellow boxes with number
-      else if(mSelected || mLitUp || anyVertsSelected())
-         renderVertex(SelectedItemVertex, getVert(j), j, currentScale, alpha);   // Hollow red boxes with number
-      else
-         // Using getUIManager() here is a horrible hack... but not sure how to improve the situation...
-         renderSmallSolidVertex(currentScale, getVert(j), clientGame->getUIManager()->getEditorUserInterface()->getSnapToWallCorners());
-   }
-#endif
-}
-
-
 void EditorObject::unselect()
 {
    setSelected(false);
@@ -340,7 +296,7 @@ Point EditorObject::getInitialPlacementOffset(F32 gridSize)
 }
 
 
-void EditorObject::renderEditor(F32 currentScale)
+void EditorObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    TNLAssert(false, "renderEditor not implemented!");
 }
@@ -356,12 +312,6 @@ EditorObjectDatabase *EditorObject::getEditorObjectDatabase()
 {
    TNLAssert(dynamic_cast<EditorObjectDatabase *>(getDatabase()), "This should be a EditorObjectDatabase!");
    return static_cast<EditorObjectDatabase *>(getDatabase());
-}
-
-
-bool EditorObject::showAttribsWhenSelected()
-{
-   return true;
 }
 
 
@@ -386,12 +336,6 @@ void EditorObject::setVertexLitUp(S32 vertexIndex)
 S32 EditorObject::getDockRadius()
 {
    return 10;
-}
-
-
-const char *EditorObject::getVertLabel(S32 index)
-{
-   return "";
 }
 
 
