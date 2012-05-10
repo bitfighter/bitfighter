@@ -843,14 +843,13 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
       gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+;|draw_arcs.lua|Make curves!");
    }
 
-   // 017:
-   //if(settings->getIniSettings()->version < 3795)    <<=== after 017 release, replace this number with 017 release number, and uncomment
-   //{
+   // 017a:
+   if(settings->getIniSettings()->version < 4262)
+   {
 #ifdef TNL_OS_MAC_OSX
       settings->getIniSettings()->useFakeFullscreen = true;
 #endif
-
-   //}
+   }
 }
 
 
