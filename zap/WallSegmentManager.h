@@ -48,6 +48,8 @@ private:
    GridDatabase *mWallSegmentDatabase;
    GridDatabase *mWallEdgeDatabase;
 
+   static bool mBatchUpdatingGeom;     
+
    void rebuildEdges();
    void buildWallSegmentEdgesAndPoints(GridDatabase *gameDatabase, DatabaseObject *object, const Vector<DatabaseObject *> &engrObjects);
 
@@ -57,6 +59,11 @@ public:
 
    GridDatabase *getWallSegmentDatabase();
    GridDatabase *getWallEdgeDatabase();
+
+   static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
+   static void endBatchGeomUpdate(EditorObjectDatabase *db, bool modifiedWalls);   // this method is called
+
+   void onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber);
 
    void finishedChangingWalls(EditorObjectDatabase *editorDatabase,  S32 changedWallSerialNumber);
    void finishedChangingWalls(EditorObjectDatabase *editorDatabase);

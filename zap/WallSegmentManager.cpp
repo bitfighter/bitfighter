@@ -75,6 +75,36 @@ GridDatabase *WallSegmentManager::getWallEdgeDatabase()
 }
 
 
+
+bool WallSegmentManager::mBatchUpdatingGeom = false;
+
+
+void WallSegmentManager::beginBatchGeomUpdate()
+{
+   mBatchUpdatingGeom = true;
+}
+
+
+void WallSegmentManager::endBatchGeomUpdate(EditorObjectDatabase *database, bool modifiedWalls)      // static method
+{
+   if(modifiedWalls)
+      database->getWallSegmentManager()->finishedChangingWalls(database);
+
+   mBatchUpdatingGeom = false;
+}
+
+
+// Find the associated segment(s) and mark them as selected (or not)
+void WallSegmentManager::onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber)
+{
+   computeWallSegmentIntersections(editorDatabase, wall);
+   setSelected(serialNumber, selected);     // Make sure newly generated segments retain selection state of parent wall
+
+   if(!mBatchUpdatingGeom)
+      finishedChangingWalls(editorDatabase, serialNumber);
+}
+
+
 // This variant only resnaps engineered items that were attached to a segment that moved
 void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjectDatabase, S32 changedWallSerialNumber)
 {

@@ -2453,8 +2453,9 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
    const Vector<EditorObject *> *objList = database->getObjectList();
 
    bool modifiedWalls = false;
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
-   EditorObject::beginBatchGeomUpdate();
+   wallSegmentManager->beginBatchGeomUpdate();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
@@ -2470,7 +2471,7 @@ void EditorUserInterface::flipSelection(F32 center, bool isHoriz)
       }
    }
 
-   EditorObject::endBatchGeomUpdate(database, modifiedWalls);
+   wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
 
    setNeedToSave(true);
    autoSave();

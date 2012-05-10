@@ -72,7 +72,6 @@ class EditorObject : virtual public BfObject   // Interface class  -- All editor
 
 private:
    S32 mVertexLitUp;                   // XX Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
-   static bool mBatchUpdatingGeom;     // XX Should be somewhere else
 
 protected:
    bool mSelected;      // True if item is selected
@@ -82,8 +81,6 @@ protected:
    S32 mItemId;         // Item's unique id... 0 if there is none
 
    const Color *getTeamColor(S32 teamId);    // Convenience function, calls mGame version
-
-   static bool isBatchUpdatingGeom();
 
 public:
    EditorObject();                  // Constructor
@@ -111,11 +108,6 @@ public:
 #endif
    virtual void renderEditor(F32 currentScale);
 
-
-   static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
-#ifndef ZAP_DEDICATED
-   static void endBatchGeomUpdate(EditorObjectDatabase *database, bool modifiedWalls);   // this method is called
-#endif
 
    EditorObjectDatabase *getEditorObjectDatabase();
 

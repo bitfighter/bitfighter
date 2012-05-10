@@ -52,8 +52,6 @@ using namespace boost;
 namespace Zap
 {
  
-// Declare statics
-bool EditorObject::mBatchUpdatingGeom = false;
 
 // Constructor
 EditorObject::EditorObject() 
@@ -111,12 +109,6 @@ void EditorObject::assignNewSerialNumber()
 S32 EditorObject::getSerialNumber()
 {
    return mSerialNumber;
-}
-
-
-bool EditorObject::isBatchUpdatingGeom()
-{
-   return mBatchUpdatingGeom;
 }
 
 
@@ -360,28 +352,11 @@ void EditorObject::renderDock()
 }
 
 
-void EditorObject::beginBatchGeomUpdate()
-{
-   mBatchUpdatingGeom = true;
-}
-
-
 EditorObjectDatabase *EditorObject::getEditorObjectDatabase()
 {
    TNLAssert(dynamic_cast<EditorObjectDatabase *>(getDatabase()), "This should be a EditorObjectDatabase!");
    return static_cast<EditorObjectDatabase *>(getDatabase());
 }
-
-
-#ifndef ZAP_DEDICATED
-void EditorObject::endBatchGeomUpdate(EditorObjectDatabase *database, bool modifiedWalls)      // static method
-{
-   if(modifiedWalls)
-      database->getWallSegmentManager()->finishedChangingWalls(database);
-
-   mBatchUpdatingGeom = false;
-}
-#endif
 
 
 bool EditorObject::showAttribsWhenSelected()

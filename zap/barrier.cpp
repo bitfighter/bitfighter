@@ -475,19 +475,6 @@ WallItem *WallItem::clone() const
    return new WallItem(*this);
 }
 
- 
-// These methods are a clue that there should be a closer relationship between WallItem and PolyWall
-static void onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber, bool isBatchUpdating)
-{
-   WallSegmentManager *wallSegmentManager = editorDatabase->getWallSegmentManager();
-
-   wallSegmentManager->computeWallSegmentIntersections(editorDatabase, wall);
-   wallSegmentManager->setSelected(serialNumber, selected);     // Make sure newly generated segments retain selection state of parent wall
-
-   if(!isBatchUpdating)
-      wallSegmentManager->finishedChangingWalls(editorDatabase, serialNumber);
-}
-
 
 static void setWallSelected(GridDatabase *database, S32 serialNumber, bool selected)
 {
@@ -509,8 +496,9 @@ void WallItem::onGeomChanged()
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
    processEndPoints();
 
-   onWallGeomChanged(getEditorObjectDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
+   EditorObjectDatabase *db = getEditorObjectDatabase();
 
+   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, mSerialNumber);
    Parent::onGeomChanged();
 }
 
@@ -751,8 +739,9 @@ void PolyWall::setSelected(bool selected)
 // Only called from editor
 void PolyWall::onGeomChanged()
 {
-   onWallGeomChanged(getEditorObjectDatabase(), this, mSelected, mSerialNumber, isBatchUpdatingGeom());
+   EditorObjectDatabase *db = getEditorObjectDatabase();
 
+   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, mSerialNumber);
    Parent::onGeomChanged();
 }
 
