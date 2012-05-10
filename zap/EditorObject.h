@@ -31,7 +31,6 @@
 
 #include "Point.h"
 #include "tnlVector.h"
-#include "Color.h"
 #include "Geometry.h"
 
 using namespace std;
@@ -188,12 +187,6 @@ public:
    virtual ~PointObject();    // Destructor
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
-
-
-   // Some functionality needed by the editor
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) = 0;
-   virtual F32 getEditorRadius(F32 currentScale) = 0;
-   virtual string toString(F32 gridSize) const = 0;
 };
 
 
