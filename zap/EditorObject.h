@@ -39,18 +39,6 @@ using namespace TNL;
 namespace Zap
 {
 
-// These need to be available for client and dedicated server
-static const S32 TEAM_NEUTRAL = -1;
-static const S32 TEAM_HOSTILE = -2;
-static const S32 NO_TEAM = -3;      // Not exposed to lua, not used in level files, only used internally
-
-
-static const S32 NONE = -1;
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class EditorAttributeMenuUI;
 class WallSegment;
 class ClientGame;
@@ -74,10 +62,6 @@ public:
 
    EditorObject *copy();            // Makes a duplicate of the item (see method for explanation)
    EditorObject *newCopy();         // Creates a brand new object based on the current one (see method for explanation)
-
-#ifndef ZAP_DEDICATED
-   void addToEditor(ClientGame *game, GridDatabase *database);
-#endif
 
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  

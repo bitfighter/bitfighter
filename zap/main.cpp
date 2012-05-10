@@ -206,7 +206,6 @@ ZapJournal gZapJournal;          // Our main journaling object
 
 S32 LOADOUT_PRESETS = 3;
 
-
 void exitToOs(S32 errcode)
 {
 #ifdef TNL_OS_XBOX

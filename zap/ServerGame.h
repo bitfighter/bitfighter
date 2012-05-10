@@ -33,6 +33,7 @@ using namespace std;
 namespace Zap
 {
 
+
 class LuaLevelGenerator;
 
 class ServerGame : public Game

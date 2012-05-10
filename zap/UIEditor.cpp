@@ -598,7 +598,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    {
       EditorObject* obj = tempList[i];
       obj->removeFromGame();
-      obj->addToEditor(getGame(), getDatabase());
+      addToEditor(obj, getGame(), getDatabase());
    }
       
    mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
@@ -606,6 +606,17 @@ void EditorUserInterface::copyScriptItemsToEditor()
    rebuildEverything(getDatabase());
 
    mLastUndoStateWasBarrierWidthChange = false;
+}
+
+
+void EditorUserInterface::addToEditor(EditorObject *obj, ClientGame *game, GridDatabase *database)
+{
+   obj->addToGame(game, database);
+   // constists of:
+   //    mGame = game;
+   //    addToDatabase();
+
+   obj->onGeomChanged();     // Added primarily as a generic way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 
@@ -2887,7 +2898,7 @@ void EditorUserInterface::startDraggingDockItem()
       
    EditorObjectDatabase *database = getDatabase();
 
-   item->addToEditor(getGame(), database); 
+   addToEditor(item, getGame(), database); 
 //   database->dumpObjects();
    
    clearSelection(database);    // No items are selected...
@@ -3155,7 +3166,7 @@ void EditorUserInterface::doSplit(EditorObject *object, S32 vertex)
       }
    }
 
-   newObj->addToEditor(getGame(), object->getEditorObjectDatabase());     // Needs to happen before onGeomChanged, so mGame will not be NULL
+   addToEditor(newObj, getGame(), object->getEditorObjectDatabase());     // Needs to happen before onGeomChanged, so mGame will not be NULL
 
    // Tell the new segments that they have new geometry
    object->onGeomChanged();
@@ -3342,7 +3353,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
 
    newObject->moveTo(snapPoint(database, convertCanvasToLevelCoord(mMousePos)));
-   newObject->addToEditor(getGame(), database);    
+   addToEditor(newObject, getGame(), database);    
    newObject->onGeomChanged();
 
    validateLevel();
@@ -3764,7 +3775,7 @@ void EditorUserInterface::onMouseClicked_left()
       }
       else
       {
-         mNewItem->addToEditor(getGame(), getDatabase());
+         addToEditor(mNewItem, getGame(), getDatabase());
          mNewItem->onGeomChanged();             // Add walls BEFORE onGeomChanged() is run!
       }
 

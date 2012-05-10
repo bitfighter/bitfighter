@@ -85,16 +85,6 @@ void EditorObject::prepareForDock(ClientGame *game, const Point &point, S32 team
    setTeam(teamIndex);
 }
 
-
-void EditorObject::addToEditor(ClientGame *game, GridDatabase *database)
-{
-   BfObject::addToGame(game, database);
-   // constists of:
-   //    mGame = game;
-   //    addToDatabase();
-
-   onGeomChanged();     // Added primarily as a generic way to get PolyWalls to build themselves after being dragged from the dock
-}
 #endif
 
 
