@@ -525,7 +525,6 @@ bool LuaObject::dumpStack(lua_State* L)
 ////////////////////////////////////////
 
 // Declare and Initialize statics:
-U32 LuaScriptRunner::mNextScriptId = 0;
 lua_State *LuaScriptRunner::L = NULL;
 bool  LuaScriptRunner::mScriptingDirSet = false;
 string LuaScriptRunner::mScriptingDir;
@@ -545,12 +544,13 @@ void LuaScriptRunner::clearScriptCache()
 // Constructor
 LuaScriptRunner::LuaScriptRunner()
 {
+   static U32 mNextScriptId = 0;
+
    // Initialize all subscriptions to unsubscribed -- bits will automatically subscribe to onTick later
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       mSubscriptions[i] = false;
 
-   mScriptId = "script" + itos(mNextScriptId);
-   mNextScriptId++;
+   mScriptId = "script" + itos(mNextScriptId++);
 }
 
 

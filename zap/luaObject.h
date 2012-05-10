@@ -161,7 +161,6 @@ private:
    void setEnums(lua_State *L);  // Set a whole slew of enum values that we want the scripts to have access to
 
    string mScriptId;             // Unique id for this script
-   static U32 mNextScriptId;
 
 protected:
    static lua_State *L;          // Main Lua state variable
