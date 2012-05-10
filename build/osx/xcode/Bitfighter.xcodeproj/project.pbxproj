@@ -141,6 +141,9 @@
 		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
 		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
+		738DAAF6155B7AA200F212F9 /* ClientInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738DAAF0155B7AA200F212F9 /* ClientInfo.cpp */; };
+		738DAAF7155B7AA200F212F9 /* EventManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738DAAF2155B7AA200F212F9 /* EventManager.cpp */; };
+		738DAAF8155B7AA200F212F9 /* ServerGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738DAAF4155B7AA200F212F9 /* ServerGame.cpp */; };
 		73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */ = {isa = PBXBuildFile; fileRef = 73946E6014D50F0F00B95333 /* joystick_presets.ini */; };
 		739746A014B373980053CCF4 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
 		739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739746EF14B374E30053CCF4 /* WeaponInfo.cpp */; };
@@ -706,6 +709,12 @@
 		738B576E1446185700F25FDF /* InputCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCode.h; path = ../../../zap/InputCode.h; sourceTree = SOURCE_ROOT; };
 		738B576F1446185700F25FDF /* InputCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCodeEnum.h; path = ../../../zap/InputCodeEnum.h; sourceTree = SOURCE_ROOT; };
 		738B57701446185700F25FDF /* shipItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shipItems.cpp; path = ../../../zap/shipItems.cpp; sourceTree = SOURCE_ROOT; };
+		738DAAF0155B7AA200F212F9 /* ClientInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientInfo.cpp; path = ../../../zap/ClientInfo.cpp; sourceTree = SOURCE_ROOT; };
+		738DAAF1155B7AA200F212F9 /* ClientInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClientInfo.h; path = ../../../zap/ClientInfo.h; sourceTree = SOURCE_ROOT; };
+		738DAAF2155B7AA200F212F9 /* EventManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EventManager.cpp; path = ../../../zap/EventManager.cpp; sourceTree = SOURCE_ROOT; };
+		738DAAF3155B7AA200F212F9 /* EventManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventManager.h; path = ../../../zap/EventManager.h; sourceTree = SOURCE_ROOT; };
+		738DAAF4155B7AA200F212F9 /* ServerGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ServerGame.cpp; path = ../../../zap/ServerGame.cpp; sourceTree = SOURCE_ROOT; };
+		738DAAF5155B7AA200F212F9 /* ServerGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerGame.h; path = ../../../zap/ServerGame.h; sourceTree = SOURCE_ROOT; };
 		73946E6014D50F0F00B95333 /* joystick_presets.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = joystick_presets.ini; path = ../../../exe/joystick_presets.ini; sourceTree = SOURCE_ROOT; };
 		7397469F14B373980053CCF4 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = ../../../lib/libpng.framework; sourceTree = SOURCE_ROOT; };
 		739746EE14B374E30053CCF4 /* GameTypesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameTypesEnum.h; path = ../../../zap/GameTypesEnum.h; sourceTree = SOURCE_ROOT; };
@@ -1749,6 +1758,12 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738DAAF0155B7AA200F212F9 /* ClientInfo.cpp */,
+				738DAAF1155B7AA200F212F9 /* ClientInfo.h */,
+				738DAAF2155B7AA200F212F9 /* EventManager.cpp */,
+				738DAAF3155B7AA200F212F9 /* EventManager.h */,
+				738DAAF4155B7AA200F212F9 /* ServerGame.cpp */,
+				738DAAF5155B7AA200F212F9 /* ServerGame.h */,
 				738562B51516BBA900437B06 /* VideoSystem.cpp */,
 				738562B61516BBA900437B06 /* VideoSystem.h */,
 				738A4ED015085E6B001C4F67 /* UIHighScores.cpp */,
@@ -2866,6 +2881,9 @@
 				73846BAC14CDD57900A5553F /* WallSegmentManager.cpp in Sources */,
 				738A4ED215085E6B001C4F67 /* UIHighScores.cpp in Sources */,
 				738562B71516BBA900437B06 /* VideoSystem.cpp in Sources */,
+				738DAAF6155B7AA200F212F9 /* ClientInfo.cpp in Sources */,
+				738DAAF7155B7AA200F212F9 /* EventManager.cpp in Sources */,
+				738DAAF8155B7AA200F212F9 /* ServerGame.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
