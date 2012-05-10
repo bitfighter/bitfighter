@@ -1188,6 +1188,7 @@ bool Robot::prepareEnvironment()
 
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
+   luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
    if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY))
