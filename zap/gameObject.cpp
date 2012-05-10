@@ -577,6 +577,10 @@ void BfObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.ge
 void BfObject::flip(F32 center, bool isHoriz)                    {  mGeometry.getGeometry()->flip(center, isHoriz);             }
 void BfObject::scale(const Point &center, F32 scale)             {  mGeometry.getGeometry()->scale(center, scale);              }
 
+// Move object to location, specifying (optional) vertex to be positioned at pos
+void BfObject::moveTo(const Point &pos, S32 snapVertex)          {  mGeometry.getGeometry()->moveTo(pos, snapVertex);           }
+void BfObject::offset(const Point &offset)                       {  mGeometry.getGeometry()->offset(offset);                    }
+
 // Geom in-out
 void BfObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
 void BfObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }

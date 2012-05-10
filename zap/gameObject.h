@@ -240,6 +240,11 @@ public:
    bool addVertFront(Point vert);
 
 
+   ///// Some geometric manipulations
+   void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
+   void offset(const Point &offset);                     // Offset object by a certain amount
+
+
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill()    const;
    bool deleteVert(S32 vertIndex);

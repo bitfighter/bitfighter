@@ -248,7 +248,9 @@ void Geometry::rotateAboutPoint(const Point &center, F32 angle)
 
 void Geometry::flip(F32 center, bool isHoriz)
 {
-   for(S32 i = 0; i < getVertCount(); i++)
+   S32 count = getVertCount();
+
+   for(S32 i = 0; i < count; i++)
    {
       Point p = getVert(i);
       
@@ -265,8 +267,26 @@ void Geometry::flip(F32 center, bool isHoriz)
 // Make object bigger or smaller
 void Geometry::scale(const Point &center, F32 scale) 
 {
-   for(S32 j = 0; j < getVertCount(); j++)
+   S32 count = getVertCount();
+
+   for(S32 j = 0; j < count; j++)
       setVert((getVert(j) - center) * scale + center, j);
+}
+
+
+// Move object to location, specifying (optional) vertex to be positioned at pos
+void Geometry::moveTo(const Point &pos, S32 vertexIndexToBePositionedAtPos)
+{
+   offset(pos - getVert(vertexIndexToBePositionedAtPos));
+}
+
+
+void Geometry::offset(const Point &offset)
+{
+   S32 count = getVertCount();
+
+   for(S32 i = 0; i < count; i++)
+      setVert(getVert(i) + offset, i);
 }
 
 

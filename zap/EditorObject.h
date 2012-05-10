@@ -132,10 +132,6 @@ public:
    virtual Point getDockLabelPos();
    virtual void highlightDockItem();
 
-   ///// Geometric manipulations
-   void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
-   void offset(const Point &offset);                     // Offset object by a certain amount
-
    //////
 
    virtual void onGeomChanging();                        // Item geom is interactively changing

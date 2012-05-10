@@ -270,18 +270,7 @@ void EditorObject::newObjectFromDock(F32 gridSize)
 }   
 
 
-// Move object to location, specifying (optional) vertex to be positioned at pos
-void EditorObject::moveTo(const Point &pos, S32 snapVertex)
-{
-   offset(pos - getVert(snapVertex));
-}
 
-
-void EditorObject::offset(const Point &offset)
-{
-   for(S32 i = 0; i < getVertCount(); i++)
-      setVert(getVert(i) + offset, i);
-}
 
 
 Point EditorObject::getEditorSelectionOffset(F32 scale)
