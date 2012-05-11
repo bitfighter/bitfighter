@@ -127,6 +127,7 @@ public:
 
    void push(lua_State *L);
    GameObject *getGameObject();  // Return the underlying GameObject
+
 };
 
 

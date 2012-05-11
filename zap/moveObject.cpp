@@ -1,3 +1,4 @@
+
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
@@ -899,12 +900,6 @@ void MoveItem::setActualVel(const Point &vel)
 }
 
 
-U16 MoveItem::getItemId()
-{
-   return mItemId;
-}
-
-
 Ship *MoveItem::getMount()
 {
    return mMount;
@@ -978,7 +973,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & InitialMask))
    {
       // Send id in inital packet
-      stream->writeRangedU32(mItemId, 0, U16_MAX);
+      stream->writeRangedU32(getItemId(), 0, U16_MAX);
    }
    if(stream->writeFlag(updateMask & PositionMask))
    {
@@ -1007,9 +1002,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mInitial = stream->readFlag();
 
    if(mInitial)     // InitialMask
-   {
-      mItemId = stream->readRangedU32(0, U16_MAX);
-   }
+      setItemId(stream->readRangedU32(0, U16_MAX));
 
    if(stream->readFlag())     // PositionMask
    {

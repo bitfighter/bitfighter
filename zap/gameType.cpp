@@ -3560,7 +3560,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
       if(item && item->getItemId() == itemId)
       {
          item->setPositionMask();
-         for(S32 j=0; j < 1024; j += 256)
+         for(S32 j = 0; j < 1024; j += 256)
          {
             if(mCacheResendItem[S32(itemId & 255) | j].isNull())
             {
@@ -3568,7 +3568,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
             }
             return;
          }
-         mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0,3) * 256)].set(item);
+         mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0, 3) * 256)].set(item);
          break;
       }
    }
@@ -3589,7 +3589,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 
       Ship *ship = clientGame->findShip(clientName);
       if(ship)
-         clientGame->emitTextEffect("25 FLAGS BADGE", Colors::yellow, ship->getRenderPos() + Point(0,150));
+         clientGame->emitTextEffect("25 FLAGS BADGE", Colors::yellow, ship->getRenderPos() + Point(0, 150));
    }
 #endif
 }

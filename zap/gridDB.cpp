@@ -320,8 +320,8 @@ void GridDatabase::dumpObjects()
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
-            logprintf("Found object in (%d,%d) with extents %s", x,y,theObject->getExtent().toString().c_str());
-            logprintf("Obj coords: %s", dynamic_cast<EditorObject *>(theObject)->getPos().toString().c_str());
+            logprintf("Found object in (%d,%d) with extents %s", x, y, theObject->getExtent().toString().c_str());
+            logprintf("Obj coords: %s", dynamic_cast<BfObject *>(theObject)->getPos().toString().c_str());
          }
 }
 
@@ -780,7 +780,7 @@ void DatabaseObject::setExtent(const Rect &extents)
 
 // This sort will put points on top of lines on top of polygons...  as they should be
 // We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
+S32 QSORT_CALLBACK geometricSort(BfObject * &a, BfObject * &b)
 {
    if(isWallType(a->getObjectTypeNumber()))
       return 1;
@@ -791,13 +791,13 @@ S32 QSORT_CALLBACK geometricSort(EditorObject * &a, EditorObject * &b)
 }
 
 
-static void geomSort(Vector<EditorObject *> &objects)
+static void geomSort(Vector<BfObject *> &objects)
 {
    if(objects.size() >= 2)       // No point sorting unless there are two or more objects!
 
       // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
       //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
-      qsort(&objects[0], objects.size(), sizeof(EditorObject *), (qsort_compare_func) geometricSort);
+      qsort(&objects[0], objects.size(), sizeof(BfObject *), (qsort_compare_func) geometricSort);
 }
 
 
@@ -827,7 +827,7 @@ EditorObjectDatabase &EditorObjectDatabase::operator= (const EditorObjectDatabas
 }
 
 
-typedef map<DatabaseObject *, EditorObject *> dbMap;
+typedef map<DatabaseObject *, BfObject *> dbMap;
 
 static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
 {
@@ -839,10 +839,10 @@ static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
 
    else                          // This is a new object, copy and add to our map
    {
-      EditorObject *newObject = dynamic_cast<EditorObject *>(theObject)->copy();
+      BfObject *newObject = dynamic_cast<BfObject *>(theObject)->copy();
 
       pair<dbMap::iterator, bool> retval;
-      retval = dbObjectMap.insert(pair<DatabaseObject *, EditorObject *>(theObject, newObject));
+      retval = dbObjectMap.insert(pair<DatabaseObject *, BfObject *>(theObject, newObject));
 
       TNLAssert(retval.second, "Invalid attempt to insert object into map (duplicate insert?)");
 
@@ -896,10 +896,10 @@ void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
 
 void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)
 {
-   EditorObject *eObj = dynamic_cast<EditorObject *>(object);
+   BfObject *eObj = dynamic_cast<BfObject *>(object);
    TNLAssert(eObj, "Bad cast!");
 
-   Vector<EditorObject *> objects;
+   Vector<BfObject *> objects;
    objects.push_back(eObj);
 
    addToDatabase(objects);
@@ -907,7 +907,7 @@ void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &ext
 
 
 // Add items in bulk to avoid resorting after each of a dozen or two objects are added
-void EditorObjectDatabase::addToDatabase(const Vector<EditorObject *> &objects)
+void EditorObjectDatabase::addToDatabase(const Vector<BfObject *> &objects)
 {
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -935,7 +935,7 @@ void EditorObjectDatabase::removeFromDatabase(DatabaseObject *object, const Rect
 
 void EditorObjectDatabase::removeEverythingFromDatabase()
 {
-   Vector<EditorObject *> tempVector(mAllEditorObjects);  // To keep synchronization
+   Vector<BfObject *> tempVector(mAllEditorObjects);  // To keep synchronization
 
    for(S32 i = 0; i < tempVector.size(); i++)
       removeFromDatabase(tempVector[i], tempVector[i]->getExtent());
@@ -947,7 +947,7 @@ void EditorObjectDatabase::removeEverythingFromDatabase()
 
 
 // Provide a read-only shortcut to a pre-cast list of editor objects
-const Vector<EditorObject *> *EditorObjectDatabase::getObjectList()
+const Vector<BfObject *> *EditorObjectDatabase::getObjectList()
 {
    return &mAllEditorObjects;
 }

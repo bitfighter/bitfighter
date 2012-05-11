@@ -91,15 +91,15 @@ private:
    string getTitle();
 
 protected:
-   EditorObject *mObject;      // Object whose attributes are being edited
+   BfObject *mObject;         // Object whose attributes are being edited
 
 public:
    EditorAttributeMenuUI(ClientGame *game);    // Constructor
-   EditorObject *getObject();
+   BfObject *getObject();
 
-   virtual void startEditingAttrs(EditorObject *object);
+   virtual void startEditingAttrs(BfObject *object);
    virtual void doneEditing();
-   virtual void doneEditingAttrs(EditorObject *object);
+   virtual void doneEditingAttrs(BfObject *object);
 };
 
 

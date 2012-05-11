@@ -82,7 +82,7 @@ public:
    void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);     // Called when we're done to retrieve values set by the menu
 
    // Provide a static hook into the object currently being edited with the attrubute editor for callback purposes
-   static EditorObject *getAttributeEditorObject();
+   static BfObject *getAttributeEditorObject();
 
 #endif
 

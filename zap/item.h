@@ -42,6 +42,9 @@ class Item : public GameObject, public PointObject, public LuaItem
 {
    typedef GameObject Parent;
 
+private:
+   U16 mItemId;                  // Item ID, shared between client and server
+
 protected:
    F32 mRadius;
 
@@ -72,6 +75,9 @@ public:
 
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
+
+   U16 getItemId();
+   void setItemId(U16 id);
 
    // Editor interface
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);

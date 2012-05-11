@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gameObject.h"
-#include "moveObject.h"    // For ActualState definition
+#include "moveObject.h"          // For ActualState definition
 #include "gameType.h"
 #include "ship.h"
 #include "GeomUtils.h"
@@ -32,18 +32,20 @@
 #include "gameConnection.h"
 #include "ClientInfo.h"
 
+#include "gameObjectRender.h"    // For drawSquare
+
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #endif
 
 #include "projectile.h"
 
-#include <math.h>
-
-#include "luaObject.h"     // For LuaObject def and returnInt method
-#include "lua.h"           // For push prototype
+#include "luaObject.h"           // For LuaObject def and returnInt method
+#include "lua.h"                 // For push prototype
 
 #include "tnlBitStream.h"
+
+#include <math.h>
 
 using namespace TNL;
 
@@ -336,6 +338,10 @@ BfObject::BfObject()
 {
    mGame = NULL;
    mObjectTypeNumber = UnknownTypeNumber;
+
+   mLitUp = false; 
+   mSelected = false; 
+   assignNewSerialNumber();
 }
 
 
@@ -391,6 +397,20 @@ S32 BfObject::getSerialNumber()
 {
    return mSerialNumber;
 }
+
+
+// User assigned id, if any
+S32 BfObject::getUserDefinedItemId()
+{
+   return mUserDefinedItemId;
+}
+
+
+void BfObject::setUserDefinedItemId(S32 itemId)
+{
+   mUserDefinedItemId = itemId;
+}
+
 
 S32 BfObject::getTeam()
 {
@@ -643,6 +663,232 @@ string BfObject::geomToString(F32 gridSize) const {  return mGeometry.geomToStri
 
 // Settings
 void BfObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
+
+
+void BfObject::onGeomChanging()
+{
+   if(getGeomType() == geomPolygon)
+      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
+
+   onPointsChanged();
+}
+
+
+void BfObject::onGeomChanged()
+{
+   updateExtentInDatabase();
+}
+
+
+void BfObject::onItemDragging()  { /* Do nothing */ }
+void BfObject::onAttrsChanging() { /* Do nothing */ }
+void BfObject::onAttrsChanged()  { /* Do nothing */ }
+
+
+const char *BfObject::getEditorHelpString()
+{
+   TNLAssert(false, "getEditorHelpString method not implemented!");
+   return "getEditorHelpString method not implemented!";  // better then a NULL crash in non-debug mode or continuing past the Assert
+}
+
+
+const char *BfObject::getPrettyNamePlural()
+{
+   TNLAssert(false, "getPrettyNamePlural method not implemented!");
+   return "getPrettyNamePlural method not implemented!";
+}
+
+
+const char *BfObject::getOnDockName()
+{
+   TNLAssert(false, "getOnDockName method not implemented!");
+   return "getOnDockName method not implemented!";
+}
+
+
+const char *BfObject::getOnScreenName()
+{
+   TNLAssert(false, "getOnScreenName method not implemented!");
+   return "getOnScreenName method not implemented!";
+}
+
+
+// Not all editor objects will implement this
+const char *BfObject::getInstructionMsg()
+{
+   return "";
+}
+
+
+#ifndef ZAP_DEDICATED
+void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
+{
+   mGame = game;
+
+   unselectVerts();
+   setTeam(teamIndex);
+}
+
+#endif
+
+
+extern void glColor(const Color &c, float alpha = 1.0);
+
+#ifndef ZAP_DEDICATED
+// Render selected and highlighted vertices, called from renderEditor
+void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
+{
+   F32 radius = getEditorRadius(currentScale);
+
+   // Label and highlight any selected or lit up vertices.  This will also highlight point items.
+   for(S32 i = 0; i < getVertCount(); i++)
+      if(vertSelected(i) || isVertexLitUp(i) || ((mSelected || mLitUp)  && getVertCount() == 1))
+      {
+         glColor((vertSelected(i) || (mSelected && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR);
+
+         Point center = getVert(i) + getEditorSelectionOffset(currentScale);
+
+         drawSquare(center, radius / currentScale);
+      }
+}
+#endif
+
+
+Point BfObject::getDockLabelPos()
+{
+   static const Point labelOffset(0, 11);
+
+   return getPos() + labelOffset;
+}
+
+
+void BfObject::highlightDockItem()
+{
+#ifndef ZAP_DEDICATED
+   glColor(HIGHLIGHT_COLOR);
+   drawSquare(getPos(), getDockRadius());
+#endif
+}
+
+
+void BfObject::initializeEditor()
+{
+   unselectVerts();
+}
+
+
+// Size of object in editor 
+F32 BfObject::getEditorRadius(F32 currentScale)
+{
+   return 10 * currentScale;   // 10 pixels is base size
+}
+
+
+string BfObject::toString(F32) const
+{
+   TNLAssert(false, "This object not be serialized");
+   return "";
+}
+
+
+// Return a pointer to a new copy of the object.  This is more like a duplicate or twin of the object -- it has the same
+// serial number, and is already assigned to a game.
+// You will have to delete this copy when you are done with it!
+BfObject *BfObject::copy()
+{
+   BfObject *newObject = clone();     
+   newObject->initializeEditor();         // Marks all vertices as unselected
+
+   return newObject;
+}
+
+
+// Return a pointer to a new copy of the object.  This copy will be completely new -- new serial number, mGame set to NULL, everything.
+// You will have to delete this copy when you are done with it!
+BfObject *BfObject::newCopy()
+{
+   BfObject *newObject = copy();
+   newObject->mGame = NULL;
+
+   newObject->assignNewSerialNumber();    // Give this object an identity of its own
+
+   return newObject;
+}
+
+
+BfObject *BfObject::clone() const
+{
+   TNLAssert(false, "Clone method not implemented!");
+   return NULL;
+}
+
+
+void BfObject::setSnapped(bool snapped)
+{
+   // Do nothing
+}
+
+
+// Called when item dragged from dock to editor -- overridden by several objects
+void BfObject::newObjectFromDock(F32 gridSize) 
+{  
+   assignNewSerialNumber();
+
+   updateExtentInDatabase();
+   clearGame();
+}   
+
+
+
+
+
+Point BfObject::getEditorSelectionOffset(F32 scale)
+{
+   return Point(0,0);     // No offset for most items
+}
+
+
+Point BfObject::getInitialPlacementOffset(F32 gridSize)
+{
+   return Point(0, 0);
+}
+
+
+void BfObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+{
+   TNLAssert(false, "renderEditor not implemented!");
+}
+
+
+void BfObject::renderDock()
+{
+   TNLAssert(false, "renderDock not implemented!");
+}
+
+
+EditorObjectDatabase *BfObject::getEditorObjectDatabase()
+{
+   TNLAssert(dynamic_cast<EditorObjectDatabase *>(getDatabase()), "This should be a EditorObjectDatabase!");
+   return static_cast<EditorObjectDatabase *>(getDatabase());
+}
+
+
+string BfObject::getAttributeString()
+{
+   return "";
+}
+
+
+S32 BfObject::getDockRadius()
+{
+   return 10;
+}
+
+
+// For editing attributes -- all implementation will need to be provided by the children
+EditorAttributeMenuUI *BfObject::getAttributeMenu()                                      { return NULL; }
+void                   BfObject::startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { /* Do nothing */ }
+void                   BfObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)  { /* Do nothing */ }
 
 
 ////////////////////////////////////////

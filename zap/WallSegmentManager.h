@@ -63,7 +63,7 @@ public:
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
    static void endBatchGeomUpdate(EditorObjectDatabase *db, bool modifiedWalls);   // this method is called
 
-   void onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber);
+   void onWallGeomChanged(EditorObjectDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber);
 
    void finishedChangingWalls(EditorObjectDatabase *editorDatabase,  S32 changedWallSerialNumber);
    void finishedChangingWalls(EditorObjectDatabase *editorDatabase);
@@ -89,10 +89,10 @@ public:
 
 
    // Takes a wall, finds all intersecting segments, and marks them invalid
-   //void invalidateIntersectingSegments(GridDatabase *gameDatabase, EditorObject *item);      // unused
+   //void invalidateIntersectingSegments(GridDatabase *gameDatabase, BfObject *item);      // unused
 
    // Recalucate edge geometry for all walls when item has changed
-   void computeWallSegmentIntersections(GridDatabase *gameDatabase, EditorObject *item); 
+   void computeWallSegmentIntersections(GridDatabase *gameDatabase, BfObject *item); 
 
    void recomputeAllWallGeometry(GridDatabase *gameDatabase);
 

@@ -44,7 +44,6 @@ namespace Zap
 {
 
 bool Item::mInitial;
-static U32 sItemId = 1;
 
 // Constructor
 Item::Item(const Point &pos, F32 radius)
@@ -52,8 +51,8 @@ Item::Item(const Point &pos, F32 radius)
    mRadius = radius;
    setPos(pos);
 
-   mItemId = sItemId;
-   sItemId++;
+   static U16 itemId = 1;
+   mItemId = itemId++;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -100,6 +99,19 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 string Item::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
+}
+
+
+U16 Item::getItemId()
+{
+   return mItemId;
+}
+
+
+// Client only
+void Item::setItemId(U16 id)
+{
+   mItemId = id;
 }
 
 

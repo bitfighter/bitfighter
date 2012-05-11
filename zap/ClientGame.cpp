@@ -1892,7 +1892,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 {
    if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn") || !stricmp(argv[0], "CircleSpawn"))
    {
-      EditorObject *newObject;
+      BfObject *newObject;
 
       if(!stricmp(argv[0], "Spawn"))
          newObject = new Spawn();
@@ -1942,7 +1942,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(argc >= 2)
       {
-         EditorObject *newObject = new PolyWall();  
+         BfObject *newObject = new PolyWall();  
          
          S32 skipArgs = 0;
          if(!stricmp(argv[0], "BarrierMakerS"))

@@ -182,12 +182,19 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class ClientGame;
+class EditorAttributeMenuUI;
+class WallSegment;
+
+
 // Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
 class BfObject : public DatabaseObject
 {
 private:
    GeometryContainer mGeometry;
-   S32 mSerialNumber;   // Autoincremented serial number   
+   S32 mSerialNumber;         // Autoincremented serial number  
+   S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
+
 
 protected:
    Game *mGame;
@@ -199,8 +206,14 @@ protected:
    S32 mVertexLitUp;    // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
 
 public:
-   BfObject();                // Constructor
-   virtual ~BfObject();       // Provide virtual destructor
+   BfObject();             // Constructor
+   virtual ~BfObject();    // Provide virtual destructor
+
+   BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
+   BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
+   virtual BfObject *clone() const;
+   //template<class T>
+   //T *T::clone() const { return new T(*this); }
 
    S32 getTeam();
    void setTeam(S32 team);
@@ -209,8 +222,14 @@ public:
    Game *getGame() const;
    void setNewGeometry(GeomType geomType);
 
+   // Manage serial numbers -- every object gets a unique number to help identify it
    void assignNewSerialNumber();
    S32 getSerialNumber();
+
+   // Manage user-assigned IDs -- intended for use by scripts to identify user-designated items
+   S32 getUserDefinedItemId();
+   void setUserDefinedItemId(S32 itemId);
+
 
    virtual void addToGame(Game *game, GridDatabase *database);
    virtual void removeFromGame();
@@ -294,6 +313,71 @@ public:
    virtual Rect calcExtents();
 
    void disableTriangulation();
+
+   //////
+   // Things are happening in the editor; the object must respond!
+   // Actually, onGeomChanged() and onAttrsChanged() might need to do something if changed by a script in-game
+   virtual void onGeomChanging();      // Item geom is interactively changing
+   virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
+
+   virtual void onItemDragging();      // Item is being dragged around the screen
+
+   virtual void onAttrsChanging();     // Attr is in the process of being changed (e.g. a char was typed for a textItem)
+   virtual void onAttrsChanged();      // Attrs changed -- only used by TextItem
+
+   /////
+   // Messages and such for the editor
+   virtual const char *getOnScreenName();
+   virtual const char *getPrettyNamePlural();
+   virtual const char *getOnDockName();
+   virtual const char *getEditorHelpString();
+   virtual const char *getInstructionMsg();        // Message printed below item when it is selected
+   virtual string getAttributeString();            // Used for displaying object attributes in lower-left of editor
+
+
+
+   ///////////////////////////  Random stuff from EditorObject
+      // Account for the fact that the apparent selection center and actual object center are not quite aligned
+   virtual Point getEditorSelectionOffset(F32 currentScale);  
+
+#ifndef ZAP_DEDICATED
+   void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
+#endif
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+
+
+   EditorObjectDatabase *getEditorObjectDatabase();
+
+   void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
+
+   // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
+   // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
+   // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
+   virtual S32 getDockRadius();                    // Size of object on dock
+   virtual F32 getEditorRadius(F32 currentScale);  // Size of object in editor
+
+   virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
+
+   ///// Dock related
+#ifndef ZAP_DEDICATED
+   virtual void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+#endif
+   virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   virtual Point getInitialPlacementOffset(F32 gridSize);
+
+   ///// Dock item rendering methods
+   virtual void renderDock();   
+   virtual Point getDockLabelPos();
+   virtual void highlightDockItem();
+
+   virtual void initializeEditor();
+
+   // For editing attributes:
+   virtual EditorAttributeMenuUI *getAttributeMenu();                      // Override in child if it has an attribute menu
+   virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
+   virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
+
 };
 
 

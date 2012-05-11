@@ -69,7 +69,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public GameObject
+class BotNavMeshZone : public GameObject     // Does this really need to be a gameObject?
 {
 private:   
    typedef GameObject Parent;
@@ -92,13 +92,13 @@ public:
 
    S32 getRenderSortValue();
 
-
    // Create objects from parameters stored in level file
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    GridDatabase *getGameObjDatabase();
    void addToGame(Game *theGame, GridDatabase *database = NULL);
    void onAddedToGame(Game *theGame);
+
    Point getCenter();      // Return center of zone
 
    // More precise boundary for precise collision detection

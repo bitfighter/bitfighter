@@ -428,9 +428,11 @@ void Barrier::prepareRenderingGeometry(Game *game)
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
 
+
 #ifndef ZAP_DEDICATED
 extern void glColor(const Color *c, float alpha = 1.0);
 #endif
+
 
 // Render wall fill only for this wall; all edges rendered in a single pass later
 void Barrier::render(S32 layerIndex)
@@ -601,7 +603,7 @@ string WallItem::toString(F32 gridSize) const
 
 void WallItem::scale(const Point &center, F32 scale)
 {
-   EditorObject::scale(center, scale);
+   Parent::scale(center, scale);
 
    // Adjust the wall thickness
    // Scale might not be accurate due to conversion to S32

@@ -183,26 +183,26 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class EditorObject;
+class BfObject;
 
 class EditorObjectDatabase : public GridDatabase
 {
    typedef GridDatabase Parent;
 
 private:
-   Vector<EditorObject *> mAllEditorObjects;
+   Vector<BfObject *> mAllEditorObjects;
 
 public:
    EditorObjectDatabase();      // Constructor
    EditorObjectDatabase(const EditorObjectDatabase &database);    // Copy constructor
    EditorObjectDatabase &operator= (const EditorObjectDatabase &database);
 
-   void copy(const EditorObjectDatabase &database);       // Copy contents of source into this
+   void copy(const EditorObjectDatabase &database);               // Copy contents of source into this
 
-   const Vector<EditorObject *> *getObjectList();     
+   const Vector<BfObject *> *getObjectList();     
 
-   void addToDatabase(DatabaseObject *theObject, const Rect &extents);     // Add a single object
-   void addToDatabase(const Vector<EditorObject *> &objects);              // Add a list of objects
+   void addToDatabase(DatabaseObject *theObject, const Rect &extents);  // Add a single object
+   void addToDatabase(const Vector<BfObject *> &objects);               // Add a list of objects
 
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
    void removeEverythingFromDatabase();

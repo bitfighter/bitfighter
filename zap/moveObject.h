@@ -141,13 +141,10 @@ protected:
    bool mIsMounted;
    bool mIsCollideable;
 
-   U16 mItemId;         // Item ID, shared between client and server
-
    Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
    static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
 
 public:
-  
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
@@ -167,7 +164,6 @@ public:
    void setActualPos(const Point &p);
    void setActualVel(const Point &vel);
 
-   U16 getItemId();
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();

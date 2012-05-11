@@ -602,7 +602,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
 
       SafePtr<GameObject> object  = dynamic_cast<GameObject *>(theObject);  // Force our new object to be a GameObject
-      EditorObject *eObject = dynamic_cast<EditorObject *>(theObject);
+      BfObject *eObject = dynamic_cast<BfObject *>(theObject);
 
 
       if(!object && !eObject)    // Well... that was a bad idea!

@@ -771,7 +771,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 
 
 // Render vertices of polyline; only used in the editor
-void renderPolyLineVertices(EditorObject *obj, bool snapping, F32 currentScale)
+void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale)
 {
    // Draw the vertices of the wall or the polygon area
    S32 verts = obj->getVertCount();

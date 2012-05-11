@@ -240,7 +240,7 @@ void renderSoccerBall(const Point &pos);
 void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &text, const Color *color);
 
 // Editor support items
-extern void renderPolyLineVertices(EditorObject *obj, bool snapping, F32 currentScale);
+extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale);
 
 
 extern void renderForceFieldProjector(Point pos, Point normal);

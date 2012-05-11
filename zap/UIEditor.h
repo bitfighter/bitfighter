@@ -27,12 +27,11 @@
 #define _UIEDITOR_H_
 
 #include "UIMenus.h"
-#include "EditorObject.h"
 
 #include "UIEditorMenus.h"       // For PluginMenuUI
 
 #include "gameLoader.h"
-#include "gameObject.h"          // For EditorObject definition
+#include "gameObject.h"          // For BfObject definition
 #include "gridDB.h"              // For DatabaseObject definition
 #include "Timer.h"
 #include "Point.h"
@@ -122,7 +121,7 @@ private:
 
    void setDatabase(boost::shared_ptr<EditorObjectDatabase> database);
 
-   Vector<boost::shared_ptr<EditorObject> > mDockItems;    // Items sitting in the dock
+   Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
 
    U32 mFirstUndoIndex;
    U32 mLastUndoIndex;
@@ -140,13 +139,13 @@ private:
 
    void autoSave();                    // Hope for the best, prepare for the worst
 
-   Vector<boost::shared_ptr<EditorObject> > mClipboard;    // Items on clipboard
+   Vector<boost::shared_ptr<BfObject> > mClipboard;    // Items on clipboard
 
    bool mLastUndoStateWasBarrierWidthChange;
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
-   EditorObject *mNewItem;
+   BfObject *mNewItem;
    TeamManager *mTeamManager;
 
    F32 mCurrentScale;
@@ -187,7 +186,7 @@ private:
 
    boost::shared_ptr<LuaLevelGenerator> mPluginRunner;
 
-   EditorObject *mDraggingDockItem;
+   BfObject *mDraggingDockItem;
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
@@ -197,7 +196,7 @@ private:
 
    void centerView();            // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
-   void doSplit(EditorObject *object, S32 vertex);
+   void doSplit(BfObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    //S32 countSelectedVerts();
@@ -209,21 +208,21 @@ public:
 private:
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
    void findHitItemAndEdge();                         
-   bool checkForVertexHit(EditorObject *object);     
-   bool checkForEdgeHit(const Point &point, EditorObject *object);        
+   bool checkForVertexHit(BfObject *object);     
+   bool checkForEdgeHit(const Point &point, BfObject *object);        
    bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
-   bool checkForPolygonHit(const Point &point, EditorObject *object);    
+   bool checkForPolygonHit(const Point &point, BfObject *object);    
 
    void findHitItemOnDock();     // Sets mDockItemHit
 
    void findSnapVertex();
-   EditorObject *mSnapObject;
+   BfObject *mSnapObject;
    S32 mSnapVertexIndex;
 
    S32 mEdgeHit;
    S32 mHitVertex;
-   EditorObject *mHitItem;
-   EditorObject *mDockItemHit;
+   BfObject *mHitItem;
+   BfObject *mDockItemHit;
 
    void computeSelectionMinMax(EditorObjectDatabase *database, Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
@@ -290,7 +289,7 @@ public:
    F32 getCurrentScale();
    Point getCurrentOffset();
 
-   void doneEditingAttributes(EditorAttributeMenuUI *editor, EditorObject *object);   // Gets run when user exits attribute editor
+   void doneEditingAttributes(EditorAttributeMenuUI *editor, BfObject *object);   // Gets run when user exits attribute editor
 
    void clearUndoHistory();        // Wipe undo/redo history
 
@@ -331,11 +330,11 @@ public:
    void onMouseMoved();
    void onMouseDragged();
    void startDraggingDockItem();
-   EditorObject *copyDockItem(EditorObject *source);
+   BfObject *copyDockItem(BfObject *source);
    bool mouseIgnore;
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
-   void addDockObject(EditorObject *object, F32 xPos, F32 yPos);
+   void addDockObject(BfObject *object, F32 xPos, F32 yPos);
 
    string mScriptLine;                           // Script and args, if any
 
@@ -396,7 +395,7 @@ public:
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
-   void addToEditor(EditorObject *obj, ClientGame *game, GridDatabase *database);
+   void addToEditor(BfObject *obj, ClientGame *game, GridDatabase *database);
 };
 
 

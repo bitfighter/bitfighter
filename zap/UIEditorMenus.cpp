@@ -307,7 +307,7 @@ EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) :
 }
 
 
-EditorObject *EditorAttributeMenuUI::getObject()
+BfObject *EditorAttributeMenuUI::getObject()
 {
    return mObject;
 }
@@ -323,7 +323,7 @@ string EditorAttributeMenuUI::getTitle()
 }
 
 
-void EditorAttributeMenuUI::startEditingAttrs(EditorObject *object) 
+void EditorAttributeMenuUI::startEditingAttrs(BfObject *object) 
 { 
    mObject = object; 
 
@@ -342,7 +342,7 @@ void EditorAttributeMenuUI::doneEditing()
 }
 
 
-void EditorAttributeMenuUI::doneEditingAttrs(EditorObject *object) 
+void EditorAttributeMenuUI::doneEditingAttrs(BfObject *object) 
 {
    // Has to be object, not mObject... this gets run once for every selected item of same type as mObject, and we need to make
    // sure that those objects (passed in as object), get updated.

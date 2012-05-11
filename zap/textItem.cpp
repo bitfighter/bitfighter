@@ -408,7 +408,7 @@ void TextItem::onGeomChanged()
 
 #ifndef ZAP_DEDICATED
 // Static method: Provide hook into the object currently being edited with the attrubute editor for callback purposes
-EditorObject *TextItem::getAttributeEditorObject()     
+BfObject *TextItem::getAttributeEditorObject()     
 {
    return mAttributeMenuUI->getObject(); 
 }

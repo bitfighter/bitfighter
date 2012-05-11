@@ -95,7 +95,7 @@ void WallSegmentManager::endBatchGeomUpdate(EditorObjectDatabase *database, bool
 
 
 // Find the associated segment(s) and mark them as selected (or not)
-void WallSegmentManager::onWallGeomChanged(EditorObjectDatabase *editorDatabase, EditorObject *wall, bool selected, S32 serialNumber)
+void WallSegmentManager::onWallGeomChanged(EditorObjectDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber)
 {
    computeWallSegmentIntersections(editorDatabase, wall);
    setSelected(serialNumber, selected);     // Make sure newly generated segments retain selection state of parent wall
@@ -297,7 +297,7 @@ void WallSegmentManager::updateAllMountedItems(EditorObjectDatabase *database)
 
 // Called when a wall segment has somehow changed.  All current and previously intersecting segments 
 // need to be recomputed.  This only operates on the specified item.  rebuildEdges() will need to be run separately.
-void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, EditorObject *item)
+void WallSegmentManager::computeWallSegmentIntersections(GridDatabase *gameObjDatabase, BfObject *item)
 {
    Vector<DatabaseObject *> engrObjects;
    gameObjDatabase->findObjects((TestFunc)isEngineeredType, engrObjects);   // All engineered objects
