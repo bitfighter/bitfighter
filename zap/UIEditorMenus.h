@@ -81,8 +81,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class EditorObject;
-
 class EditorAttributeMenuUI : public QuickMenuUI
 {
    typedef QuickMenuUI Parent;

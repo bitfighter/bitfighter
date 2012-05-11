@@ -204,7 +204,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
    Vector<EngineeredItem *> toBeRemounted;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
-   EditorObject *wall = dynamic_cast<EditorObject *>(wallDbObject);     // Wall we're deleting and rebuilding
+   BfObject *wall = dynamic_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
    TNLAssert(wall, "Bad cast -- expected an EditorObject!");
    
 

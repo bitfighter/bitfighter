@@ -52,28 +52,6 @@ using namespace boost;
 namespace Zap
 {
  
-
-// Constructor
-EditorObject::EditorObject() 
-{ 
-
-}
-
-
-// Destructor
-EditorObject::~EditorObject()
-{
-   // Do nothing
-}
-
-
-
-
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // TODO: merge with simpleLine values, put in editor
 static const S32 INSTRUCTION_TEXTSIZE = 12;      
 static const S32 INSTRUCTION_TEXTGAP = 4;

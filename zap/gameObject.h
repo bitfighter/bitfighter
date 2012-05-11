@@ -386,7 +386,7 @@ public:
 
 class ClientInfo;
 
-class GameObject : public virtual BfObject, public NetObject
+class GameObject : public BfObject, public NetObject
 {
    typedef NetObject Parent;
 

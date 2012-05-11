@@ -128,7 +128,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LineItem : public GameObject, public EditorObject
+class LineItem : public GameObject
 {
    typedef GameObject Parent;
 

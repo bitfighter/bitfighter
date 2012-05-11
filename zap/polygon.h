@@ -36,10 +36,9 @@ namespace Zap
 
 
 // Provide editor related methods to the polygon class
-class PolygonObject : public GameObject, public EditorObject, public LuaItem
+class PolygonObject : public GameObject, public LuaItem
 {
    typedef GameObject Parent;
-   typedef EditorObject EditorParent;
 
 private:
    virtual Point getDockLabelPos();

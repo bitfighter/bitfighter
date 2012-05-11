@@ -39,22 +39,11 @@ using namespace TNL;
 namespace Zap
 {
 
-class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
-{
-public:
-   EditorObject();                  // Constructor
-   virtual ~EditorObject();         // Virtual destructor
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 // Class with editor methods related to point things
 
-class PointObject : public EditorObject
+class PointObject : public GameObject
 {
-   typedef EditorObject Parent;
+   typedef GameObject Parent;
 
 public:
    PointObject();             // Constructor

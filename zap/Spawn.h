@@ -39,7 +39,7 @@ class EditorAttributeMenuUI;     // Needed in case class def hasn't been include
 // Parent class for spawns that generate items
 class AbstractSpawn : public PointObject
 {
-   typedef EditorObject Parent;
+   typedef PointObject Parent;
 
 private:
    static EditorAttributeMenuUI *mAttributeMenuUI;

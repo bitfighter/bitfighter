@@ -65,7 +65,7 @@ void PolygonObject::onItemDragging()
 void PolygonObject::onGeomChanged() 
 { 
    onPointsChanged(); 
-   EditorParent::onGeomChanged();
+   Parent::onGeomChanged();
 }  
 
 
@@ -123,7 +123,7 @@ void PolygonObject::prepareForDock(ClientGame *game, const Point &point, S32 tea
    addVert(point + Point( w, h)); 
    addVert(point + Point(-w, h)); 
 
-   EditorObject::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(game, point, teamIndex);
 #endif
 }
 
@@ -143,7 +143,7 @@ void PolygonObject::newObjectFromDock(F32 gridSize)
    setVert(Point( w,  h), 2);
    setVert(Point( w, -h), 3);
 
-   EditorParent::newObjectFromDock(gridSize);
+   Parent::newObjectFromDock(gridSize);
 #endif
 }
 

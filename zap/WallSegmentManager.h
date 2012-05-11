@@ -36,7 +36,6 @@
 namespace Zap
 {
 
-class EditorObject;
 class GameSettings;
 class WallEdge;
 class WallSegment;

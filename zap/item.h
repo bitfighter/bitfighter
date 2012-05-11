@@ -38,7 +38,7 @@ namespace Zap
 // A note on terminology here: an "object" is any game object, whereas an "item" is a point object that the player will interact with
 // Item is now parent class of MoveItem, EngineeredItem, PickupItem
 
-class Item : public GameObject, public PointObject, public LuaItem
+class Item : public PointObject, public LuaItem
 {
    typedef GameObject Parent;
 

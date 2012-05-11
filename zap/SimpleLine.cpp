@@ -83,7 +83,7 @@ void SimpleLine::newObjectFromDock(F32 gridSize)
    setVert(Point(0,0), 0);
    setVert(Point(1,0) * INITIAL_ITEM_LENGTH * gridSize, 1);
 
-   EditorParent::newObjectFromDock(gridSize);
+   Parent::newObjectFromDock(gridSize);
 #endif
 }
 
@@ -144,7 +144,7 @@ void SimpleLine::prepareForDock(ClientGame *game, const Point &point, S32 teamIn
 {
 #ifndef ZAP_DEDICATED
    setVert(point, 0);
-   EditorParent::prepareForDock(game, point, teamIndex);
+   Parent::prepareForDock(game, point, teamIndex);
 #endif
 }
 

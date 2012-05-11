@@ -336,7 +336,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Worm : public GameObject, public PointObject
+class Worm : public PointObject
 {
 typedef GameObject Parent;
 
