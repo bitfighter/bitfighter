@@ -45,14 +45,7 @@ class ClientGame;
 
 class EditorObject : virtual public BfObject   // Interface class  -- All editor objects need to implement this
 {
-
-private:
-   S32 mVertexLitUp;                   // XX Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
-
 protected:
-   bool mSelected;      // True if item is selected
-   bool mLitUp;         // True if user is hovering over the item and it's "lit up"
-
    S32 mItemId;         // Item's unique id... 0 if there is none
 
 public:
@@ -74,14 +67,7 @@ public:
 
    EditorObjectDatabase *getEditorObjectDatabase();
 
-   void unselect();
-
    void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
-
-
-   // Keep track which vertex, if any is lit up in the currently selected item
-   bool isVertexLitUp(S32 vertexIndex);
-   void setVertexLitUp(S32 vertexIndex);
 
    // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
    // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
@@ -120,12 +106,6 @@ public:
    S32 getItemId();
    void setItemId(S32 itemId);
    
-   bool isSelected();
-   virtual void setSelected(bool selected);     // Overridden by walls who need special tracking for selected items
-
-   bool isLitUp();
-   void setLitUp(bool litUp);
-
    virtual void initializeEditor();
 
    virtual const char *getOnScreenName();

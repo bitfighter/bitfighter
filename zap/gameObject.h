@@ -193,6 +193,11 @@ protected:
    Game *mGame;
    S32 mTeam;
 
+   // Used only in the editor
+   bool mSelected;      // True if item is selected
+   bool mLitUp;         // True if user is hovering over the item and it's "lit up"
+   S32 mVertexLitUp;    // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
+
 public:
    BfObject();                // Constructor
    virtual ~BfObject();       // Provide virtual destructor
@@ -238,6 +243,19 @@ public:
    void clearVerts();
    bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
    bool addVertFront(Point vert);
+
+   // Track some items used in the editor
+   void setSelected(bool selected);
+   bool isSelected();
+   
+   void unselect();
+
+   bool isLitUp();
+   void setLitUp(bool litUp);
+
+   // Keep track which vertex, if any is lit up in the currently selected item
+   bool isVertexLitUp(S32 vertexIndex);
+   void setVertexLitUp(S32 vertexIndex);
 
 
    ///// Some geometric manipulations

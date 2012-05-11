@@ -137,32 +137,6 @@ void EditorObject::setItemId(S32 itemId)
 }
 
 
-bool EditorObject::isSelected()
-{
-   return mSelected;
-}
-
-
-void EditorObject::setSelected(bool selected)
-{
-   mSelected = selected;
-}
-
-
-bool EditorObject::isLitUp() 
-{ 
-   return mLitUp; 
-}
-
-
-void EditorObject::setLitUp(bool litUp) 
-{ 
-   mLitUp = litUp; 
-
-   if(!litUp) 
-      setVertexLitUp(NONE); 
-}
-
 
 void EditorObject::initializeEditor()
 {
@@ -235,14 +209,6 @@ EditorObject *EditorObject::newCopy()
 }
 
 
-void EditorObject::unselect()
-{
-   setSelected(false);
-   setLitUp(false);
-
-   unselectVerts();
-}
-
 
 void EditorObject::setSnapped(bool snapped)
 {
@@ -297,18 +263,6 @@ EditorObjectDatabase *EditorObject::getEditorObjectDatabase()
 string EditorObject::getAttributeString()
 {
    return "";
-}
-
-
-bool EditorObject::isVertexLitUp(S32 vertexIndex)
-{
-   return mVertexLitUp == vertexIndex;
-}
-
-
-void EditorObject::setVertexLitUp(S32 vertexIndex)
-{
-   mVertexLitUp = vertexIndex;
 }
 
 

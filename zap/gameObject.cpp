@@ -560,6 +560,54 @@ void BfObject::unselectVerts()             {   mGeometry.getGeometry()->unselect
 bool BfObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
 
 
+void BfObject::unselect()
+{
+   setSelected(false);
+   setLitUp(false);
+
+   unselectVerts();
+}
+
+
+bool BfObject::isSelected()
+{
+   return mSelected;
+}
+
+
+void BfObject::setSelected(bool selected)
+{
+   mSelected = selected;
+}
+
+
+bool BfObject::isLitUp() 
+{ 
+   return mLitUp; 
+}
+
+
+void BfObject::setLitUp(bool litUp) 
+{ 
+   mLitUp = litUp; 
+
+   if(!litUp) 
+      setVertexLitUp(NONE); 
+}
+
+
+bool BfObject::isVertexLitUp(S32 vertexIndex)
+{
+   return mVertexLitUp == vertexIndex;
+}
+
+
+void BfObject::setVertexLitUp(S32 vertexIndex)
+{
+   mVertexLitUp = vertexIndex;
+}
+
+
 // Geometric calculations
 Point BfObject::getCentroid()     {   return mGeometry.getGeometry()->getCentroid();     }
 F32   BfObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
