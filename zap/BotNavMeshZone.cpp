@@ -61,7 +61,7 @@ namespace Zap
 static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited
 Vector<BotNavMeshZone *> BotNavMeshZone::mAllZones;
 
-TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
+//TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 
 // Constructor

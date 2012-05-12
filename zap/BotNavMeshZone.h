@@ -69,7 +69,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public BfObject     // Does this really need to be a gameObject?
+class BotNavMeshZone : public BfObject     // Does this really need to be a BfObject?
 {
    typedef BfObject Parent;
 
@@ -128,7 +128,7 @@ public:
    static bool buildBotNavMeshZoneConnectionsRecastStyle(ServerGame *game, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
    static void linkTeleportersBotNavMeshZoneConnections(ServerGame *game);
 
-   TNL_DECLARE_CLASS(BotNavMeshZone);
+   //TNL_DECLARE_CLASS(BotNavMeshZone);
 };
 
 
