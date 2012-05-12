@@ -360,8 +360,8 @@ public:
    void enableCollision();
    bool isCollisionEnabled();
 
-   bool collisionPolyPointIntersect(Point point);
-   bool collisionPolyPointIntersect(Vector<Point> points);
+   //bool collisionPolyPointIntersect(Point point);
+   //bool collisionPolyPointIntersect(Vector<Point> points);
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
    void setScopeAlways();

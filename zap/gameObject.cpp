@@ -1327,52 +1327,52 @@ bool BfObject::isCollisionEnabled()
    return mDisableCollisionCount == 0;
 }
 
-
-// Find if the specified point is in theObject's collisionPoly or collisonCircle
-bool BfObject::collisionPolyPointIntersect(Point point)
-{
-   Point center;
-   F32 radius;
-   Rect rect;
-
-   Vector<Point> polyPoints;
-
-   polyPoints.clear();
-
-   if(getCollisionPoly(polyPoints))
-      return PolygonContains2(polyPoints.address(), polyPoints.size(), point);
-
-   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
-      return(center.distanceTo(point) <= radius);
-
-   else
-      return false;
-}
-
-
-// Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
-bool BfObject::collisionPolyPointIntersect(Vector<Point> points)
-{
-   Point center;
-   Rect rect;
-   F32 radius;
-   Vector<Point> polyPoints;
-
-   polyPoints.clear();
-
-   if(getCollisionPoly(polyPoints))
-      return polygonsIntersect(polyPoints, points);
-
-   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
-   {
-      Point unusedPt;
-      return polygonCircleIntersect(&points[0], points.size(), center, radius * radius, unusedPt);
-   }
-
-   else
-      return false;
-}
-
+//
+//// Find if the specified point is in theObject's collisionPoly or collisonCircle
+//bool BfObject::collisionPolyPointIntersect(Point point)
+//{
+//   Point center;
+//   F32 radius;
+//   Rect rect;
+//
+//   Vector<Point> polyPoints;
+//
+//   polyPoints.clear();
+//
+//   if(getCollisionPoly(polyPoints))
+//      return PolygonContains2(polyPoints.address(), polyPoints.size(), point);
+//
+//   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
+//      return(center.distanceTo(point) <= radius);
+//
+//   else
+//      return false;
+//}
+//
+//
+//// Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
+//bool BfObject::collisionPolyPointIntersect(Vector<Point> points)
+//{
+//   Point center;
+//   Rect rect;
+//   F32 radius;
+//   Vector<Point> polyPoints;
+//
+//   polyPoints.clear();
+//
+//   if(getCollisionPoly(polyPoints))
+//      return polygonsIntersect(polyPoints, points);
+//
+//   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
+//   {
+//      Point unusedPt;
+//      return polygonCircleIntersect(&points[0], points.size(), center, radius * radius, unusedPt);
+//   }
+//
+//   else
+//      return false;
+//}
+//
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
 bool BfObject::collisionPolyPointIntersect(Point center, F32 radius)
