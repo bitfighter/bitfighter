@@ -300,7 +300,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
       if(objectHit->isMoveObject())     // Collided with a MoveObject
       {
-         MoveObject *moveObjectThatWasHit = (MoveObject *) objectHit;  
+         MoveObject *moveObjectThatWasHit = static_cast<MoveObject *>(objectHit);  
 
          Point velDelta = moveObjectThatWasHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
          Point posDelta = moveObjectThatWasHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
