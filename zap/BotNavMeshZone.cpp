@@ -33,6 +33,7 @@
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 #include "ServerGame.h"
+#include "version.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UIMenus.h"
@@ -62,6 +63,11 @@ static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 
 Vector<BotNavMeshZone *> BotNavMeshZone::mAllZones;
 
 //TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
+
+#if CS_PROTOCOL_VERSION == 35
+   // Looks like the "BotNavMeshZone" name need to be somewhere for the remainder of version 017, for compatibility
+   static NetClassRepInstance<Object> BotNavMeshZone_NetNotUsed("BotNavMeshZone", TNL::NetClassGroupGameMask, TNL::NetClassTypeObject, 0);
+#endif
 
 
 // Constructor

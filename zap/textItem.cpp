@@ -29,7 +29,7 @@
 #include "game.h"
 #include "item.h"
 #include "stringUtils.h"
-
+#include "teamInfo.h"            // for TEAM_NEUTRAL
 
 #ifndef ZAP_DEDICATED
 
