@@ -109,22 +109,16 @@ void BotNavMeshZone::render(S32 layerIndex)
 
 // Use this to help keep track of which robots are where
 // Only gets run on the server, never on client, obviously, because that's where the bots are!!!
-bool BotNavMeshZone::collide(BfObject *hitObject)
-{
-   // This does not get run anymore, it is in a seperate database.
-   if(hitObject->getObjectTypeNumber() == RobotShipTypeNumber)     // Only care about robots...
-   {
-      Robot *r = (Robot *) hitObject;
-      r->setCurrentZone(mZoneId);
-   }
-   return false;
-}
-
-
-S32 BotNavMeshZone::getRenderSortValue()
-{
-   return -2;
-}
+//bool BotNavMeshZone::collide(BfObject *hitObject)
+//{
+//   // This does not get run anymore, it is in a seperate database.
+//   if(hitObject->getObjectTypeNumber() == RobotShipTypeNumber)     // Only care about robots...
+//   {
+//      Robot *r = (Robot *) hitObject;
+//      r->setCurrentZone(mZoneId);
+//   }
+//   return false;
+//}
 
 
 GridDatabase *BotNavMeshZone::getBotZoneDatabase()

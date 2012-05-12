@@ -97,8 +97,6 @@ public:
 
    void render(S32 layerIndex);
 
-   S32 getRenderSortValue();
-
    GridDatabase *getGameObjDatabase();
    void addToZoneDatabase();
 
@@ -110,7 +108,7 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
    // Only gets run on the server, never on client
-   bool collide(BfObject *hitObject);
+   //bool collide(BfObject *hitObject);
 
    U16 getZoneId() { return mZoneId; }
 
