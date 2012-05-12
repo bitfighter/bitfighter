@@ -99,11 +99,6 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
-   //if(!dynamic_cast<ClientGame *>(getGame())->isShowingDebugMeshZones())
-   //   return;
-   // isShowingDebugMeshZones doesn't work, and not needed. getGame() is ServerGame, because gClientGame is rendering server's BotZones
-   // Client does not have any BotZones
-
    if(layerIndex == 0)
       renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId, true);
 
@@ -138,24 +133,10 @@ GridDatabase *BotNavMeshZone::getBotZoneDatabase()
 }
 
 
-// Create objects from parameters stored in level file -- use of this function is deprecated
-bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
-{
-   logprintf(LogConsumer::LogLevelError, "BotNavMeshZones are now created automatically -- remove them from your level files to improve performance.");
-   return false;
-}
-
-
 void BotNavMeshZone::addToZoneDatabase()
 {
    setExtent(calcExtents());
    DatabaseObject::addToDatabase(&mBotZoneDatabase);
-}
-
-
-void BotNavMeshZone::onAddedToGame(Game *theGame)
-{
-   TNLAssert(false, "Should not be added to game");
 }
 
 
@@ -164,19 +145,6 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints = *getOutline();
    return true;
-}
-
-
-U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
-{
-   // Do nothing, not used
-   return 0;
-}
-
-
-void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
-{
-   // Do nothing, not used
 }
 
 
@@ -505,6 +473,8 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif
+
+   mAllZones.deleteAndClear();
 
    Rect bounds = game->getWorldExtents();
    bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
