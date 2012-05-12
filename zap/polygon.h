@@ -36,9 +36,9 @@ namespace Zap
 
 
 // Provide editor related methods to the polygon class
-class PolygonObject : public GameObject, public LuaItem
+class PolygonObject : public BfObject, public LuaItem
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    virtual Point getDockLabelPos();
@@ -75,7 +75,7 @@ public:
    S32 getVel(lua_State *L);       // Velocity of item (returns point)
    S32 getTeamIndx(lua_State *L);  // Team of item (in bots, teams start with 1)
 
-   GameObject *getGameObject();
+   BfObject *getGameObject();
 };
 
 };

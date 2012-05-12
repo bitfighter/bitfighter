@@ -212,7 +212,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
 
 // Could probably be consolodated with HTF & others
-void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
+void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
 

@@ -500,7 +500,7 @@ void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEn
 
 
 
-void SoccerBallItem::idle(GameObject::IdleCallPath path)
+void SoccerBallItem::idle(BfObject::IdleCallPath path)
 {
    if(mSendHomeTimer.update(mCurrentMove.time))
    {
@@ -590,7 +590,7 @@ void SoccerBallItem::sendHome()
 }
 
 
-bool SoccerBallItem::collide(GameObject *hitObject)
+bool SoccerBallItem::collide(BfObject *hitObject)
 {
    if(mSendHomeTimer.getCurrent())     // If we've already scored, and we're waiting for the ball to reset, there's nothing to do
       return true;

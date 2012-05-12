@@ -80,7 +80,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
    void render();
 
    void onAddedToGame(Game *theGame);
@@ -122,7 +122,7 @@ public:
    S32 getVel(lua_State *L);       // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L);  // All teleporters are neutral
 
-   GameObject *getGameObject();
+   BfObject *getGameObject();
 };
 
 

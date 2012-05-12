@@ -38,7 +38,7 @@ namespace Zap
 class LoadoutZone : public PolygonObject
 {
 private:
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 public:
    LoadoutZone();    // C++ constructor
@@ -50,7 +50,7 @@ public:
    void onAddedToGame(Game *theGame);
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;     // More precise boundary for precise collision detection
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 

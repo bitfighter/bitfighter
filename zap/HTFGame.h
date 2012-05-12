@@ -64,10 +64,10 @@ public:
    void shipTouchZone(Ship *s, GoalZone *z);
 
 
-   void idle(GameObject::IdleCallPath path, U32 deltaT);
+   void idle(BfObject::IdleCallPath path, U32 deltaT);
 
    // Same code as in retrieveGame, CTF
-   void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
+   void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
    void renderInterfaceOverlay(bool scoreboardVisible);
 

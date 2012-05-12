@@ -540,7 +540,7 @@ void ClientGame::idle(U32 timeDelta)
    if(mConnectionToServer.isValid())
    {
       // Disable controls if we are going too fast (usually by being blasted around by a GoFast or mine or whatever)
-      GameObject *controlObject = mConnectionToServer->getControlObject();
+      BfObject *controlObject = mConnectionToServer->getControlObject();
 
       // Don't saturate server with moves...
       if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
@@ -567,24 +567,24 @@ void ClientGame::idle(U32 timeDelta)
          if(fillVector2[i]->isDeleted())
             continue;
 
-         GameObject *obj = dynamic_cast<GameObject *>(fillVector2[i]);
+         BfObject *obj = dynamic_cast<BfObject *>(fillVector2[i]);
          TNLAssert(obj, "Bad cast!");
 
          if(obj == controlObject)
          {
             obj->setCurrentMove(*theMove);
-            obj->idle(GameObject::ClientIdleControlMain);  // on client, object is our control object
+            obj->idle(BfObject::ClientIdleControlMain);  // on client, object is our control object
          }
          else
          {
             Move m = obj->getCurrentMove();
             m.time = timeDelta;
             obj->setCurrentMove(m);
-            obj->idle(GameObject::ClientIdleMainRemote);    // on client, object is not our control object
+            obj->idle(BfObject::ClientIdleMainRemote);    // on client, object is not our control object
          }
       }
       if(mGameType)
-         mGameType->idle(GameObject::ClientIdleMainRemote, timeDelta);
+         mGameType->idle(BfObject::ClientIdleMainRemote, timeDelta);
 
       if(controlObject)
          SoundSystem::setListenerParams(controlObject->getPos(), controlObject->getVel());
@@ -1459,7 +1459,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 }
 
 
-S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
+S32 QSORT_CALLBACK renderSortCompare(BfObject **a, BfObject **b)
 {
    return (*a)->getRenderSortValue() - (*b)->getRenderSortValue();
 }
@@ -1495,7 +1495,7 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   GameObject *controlObject = mConnectionToServer->getControlObject();
+   BfObject *controlObject = mConnectionToServer->getControlObject();
 
    Ship *ship = dynamic_cast<Ship *>(controlObject);
    if(!ship)
@@ -1555,7 +1555,7 @@ void ClientGame::renderSuspended()
 
 
 static Vector<DatabaseObject *> rawRenderObjects;
-static Vector<GameObject *> renderObjects;
+static Vector<BfObject *> renderObjects;
 
 void ClientGame::renderCommander()
 {
@@ -1580,7 +1580,7 @@ void ClientGame::renderCommander()
 
    glPushMatrix();
 
-   GameObject *controlObject = mConnectionToServer->getControlObject();
+   BfObject *controlObject = mConnectionToServer->getControlObject();
    Ship *ship = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
    
    Point position = ship ? ship->getRenderPos() : Point(0,0);
@@ -1617,7 +1617,7 @@ void ClientGame::renderCommander()
    renderObjects.clear();
 
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
+      renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
       for(S32 i = 0; i < Robot::getBotCount(); i++)
@@ -1723,7 +1723,7 @@ void ClientGame::renderOverlayMap()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   GameObject *controlObject = mConnectionToServer->getControlObject();
+   BfObject *controlObject = mConnectionToServer->getControlObject();
    Ship *ship = dynamic_cast<Ship *>(controlObject);
 
    Point position = ship->getRenderPos();
@@ -1762,7 +1762,7 @@ void ClientGame::renderOverlayMap()
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
+      renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
 
 
    renderObjects.sort(renderSortCompare);
@@ -1833,7 +1833,7 @@ void ClientGame::renderNormal()
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
+      renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
       for(S32 i = 0; i < Robot::getBotCount(); i++)

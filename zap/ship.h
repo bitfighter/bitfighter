@@ -93,7 +93,7 @@ public:
    S32 getCurrLoadout(lua_State *L);
    S32 getReqLoadout(lua_State *L);
 
-   GameObject *getGameObject();
+   BfObject *getGameObject();
    const char *getClassName() const;
 
    void push(lua_State *L);      // Push item onto stack
@@ -242,7 +242,7 @@ public:
    bool hasExploded;
 
    Vector<SafePtr<MoveItem> > mMountedItems;
-   Vector<SafePtr<GameObject> > mRepairTargets;
+   Vector<SafePtr<BfObject> > mRepairTargets;
 
    virtual void render(S32 layerIndex);
    void calcThrustComponents(F32 *thrust);
@@ -336,11 +336,11 @@ public:
    bool isRobot();
    void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 
-   GameObject *isInZone(U8 zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
-   //GameObject *isInZone(GameObject *zone);
+   BfObject *isInZone(U8 zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
+   //BfObject *isInZone(BfObject *zone);
    DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
 
-   bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item
+   bool isOnObject(BfObject *object);               // Return whether or not ship is sitting on a particular item
 
    virtual Ship *clone() const;
 

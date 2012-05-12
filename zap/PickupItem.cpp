@@ -58,9 +58,9 @@ PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius
 }
 
 
-void PickupItem::idle(GameObject::IdleCallPath path)
+void PickupItem::idle(BfObject::IdleCallPath path)
 {
-   if(!mIsVisible && path == GameObject::ServerIdleMainLoop)
+   if(!mIsVisible && path == BfObject::ServerIdleMainLoop)
    {
       if(mRepopTimer.update(mCurrentMove.time))
       {
@@ -155,7 +155,7 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 // Runs on both client and server, but does nothing on client
-bool PickupItem::collide(GameObject *otherObject)
+bool PickupItem::collide(BfObject *otherObject)
 {
    if(mIsVisible && !isGhost() && isShipType(otherObject->getObjectTypeNumber()))
    {

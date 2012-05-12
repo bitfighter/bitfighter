@@ -149,7 +149,7 @@ struct DamageInfo
    F32 damageAmount;
    F32 damageSelfMultiplier;
    DamageType damageType;       // see enum above!
-   GameObject *damagingObject;  // see class below!
+   BfObject *damagingObject;  // see class below!
 
    DamageInfo();  // Constructor
 };
@@ -185,11 +185,135 @@ public:
 class ClientGame;
 class EditorAttributeMenuUI;
 class WallSegment;
+class ClientInfo;
 
-
-// Interface class that feeds GameObject and EditorObject -- these things are common to in-game and editor instances of an object
-class BfObject : public DatabaseObject
+class BfObject : public DatabaseObject, public NetObject
 {
+   typedef NetObject Parent;
+
+private:
+   SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
+   SafePtr<ClientInfo> mOwner;
+   U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
+
+   U32 mCreationTime;
+
+protected:
+   Move mLastMove;      // The move for the previous update
+   Move mCurrentMove;   // The move for the current update
+   StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
+
+public:
+   BfObject();                // Constructor
+   virtual ~BfObject();       // Destructor
+
+   virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
+   virtual void onAddedToGame(Game *game);
+
+   void markAsGhost();
+
+   virtual bool isMoveObject();
+   virtual Point getVel();
+
+   U32 getCreationTime();
+   void setCreationTime(U32 creationTime);
+
+   void deleteObject(U32 deleteTimeInterval = 0);
+   
+   StringTableEntry getKillString();
+
+   F32 getRating();
+   S32 getScore();
+
+   enum MaskBits {
+      //InitialMask = BIT(0),
+      FirstFreeMask = BIT(0)
+   };
+
+   BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
+   BfObject *findObjectLOS(TestFunc, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
+
+   bool isControlled();
+
+   SafePtr<GameConnection> getControllingClient();
+   void setControllingClient(GameConnection *c);         // This only gets run on the server
+
+   void setOwner(ClientInfo *clientInfo);
+   ClientInfo *getOwner();
+
+   F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
+
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+
+   virtual S32 getRenderSortValue();
+
+   Rect getBounds(U32 stateIndex) const;
+
+   const Move &getCurrentMove();
+   const Move &getLastMove();
+   void setCurrentMove(const Move &theMove);
+   void setLastMove(const Move &theMove);
+
+   // Render is called twice for every object that is in the
+   // render list.  By default BfObject will call the render()
+   // method one time (when layerIndex == 0).
+   virtual void render(S32 layerIndex);
+   virtual void render();
+
+   enum IdleCallPath {
+      ServerIdleMainLoop,              // Idle called from top-level idle loop on server
+      ServerIdleControlFromClient,
+      ClientIdleMainRemote,            // On client, when object is not our control object
+      ClientIdleControlMain,           // On client, when object is our control object
+      ClientIdleControlReplay,
+   };
+
+   virtual void idle(IdleCallPath path);
+
+   virtual void writeControlState(BitStream *stream);
+   virtual void readControlState(BitStream *stream);
+   virtual F32 getHealth();
+   virtual bool isDestroyed();
+
+   virtual void controlMoveReplayComplete();
+
+   void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
+   void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
+
+   virtual bool collide(BfObject *hitObject);
+
+   // Gets location(s) where repair rays should be rendered while object is being repaired
+   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);
+
+   S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
+   virtual void damageObject(DamageInfo *damageInfo);
+
+   void onGhostAddBeforeUpdate(GhostConnection *theConnection);
+   bool onGhostAdd(GhostConnection *theConnection);
+   void disableCollision();
+   void enableCollision();
+   bool isCollisionEnabled();
+
+   bool collisionPolyPointIntersect(Point point);
+   bool collisionPolyPointIntersect(Vector<Point> points);
+   bool collisionPolyPointIntersect(Point center, F32 radius);
+
+   void setScopeAlways();
+
+   S32 getTeamIndx(lua_State *L);      // Return item team to Lua
+   virtual void push(lua_State *L);    // Lua-aware classes will implement this
+  
+   void readThisTeam(BitStream *stream);
+   void writeThisTeam(BitStream *stream);
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
 private:
    GeometryContainer mGeometry;
    S32 mSerialNumber;         // Autoincremented serial number  
@@ -206,14 +330,9 @@ protected:
    S32 mVertexLitUp;    // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
 
 public:
-   BfObject();             // Constructor
-   virtual ~BfObject();    // Provide virtual destructor
-
    BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
    virtual BfObject *clone() const;
-   //template<class T>
-   //T *T::clone() const { return new T(*this); }
 
    S32 getTeam();
    void setTeam(S32 team);
@@ -231,7 +350,6 @@ public:
    void setUserDefinedItemId(S32 itemId);
 
 
-   virtual void addToGame(Game *game, GridDatabase *database);
    virtual void removeFromGame();
    void clearGame();
 
@@ -378,133 +496,6 @@ public:
    virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
    virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
 
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class ClientInfo;
-
-class GameObject : public BfObject, public NetObject
-{
-   typedef NetObject Parent;
-
-private:
-   SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
-   SafePtr<ClientInfo> mOwner;
-   U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
-
-   U32 mCreationTime;
-
-protected:
-   Move mLastMove;      // The move for the previous update
-   Move mCurrentMove;   // The move for the current update
-   StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
-
-public:
-   GameObject();                // Constructor
-   virtual ~GameObject();       // Destructor
-
-   virtual void addToGame(Game *game, GridDatabase *database);       // BotNavMeshZone has its own addToGame
-   virtual void onAddedToGame(Game *game);
-
-   void markAsGhost();
-
-   virtual bool isMoveObject();
-   virtual Point getVel();
-
-   U32 getCreationTime();
-   void setCreationTime(U32 creationTime);
-
-   void deleteObject(U32 deleteTimeInterval = 0);
-   
-   StringTableEntry getKillString();
-
-   F32 getRating();
-   S32 getScore();
-
-   enum MaskBits {
-      //InitialMask = BIT(0),
-      FirstFreeMask = BIT(0)
-   };
-
-   GameObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
-   GameObject *findObjectLOS(TestFunc, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
-
-   bool isControlled();
-
-   SafePtr<GameConnection> getControllingClient();
-   void setControllingClient(GameConnection *c);         // This only gets run on the server
-
-   void setOwner(ClientInfo *clientInfo);
-   ClientInfo *getOwner();
-
-   F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
-
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
-   void findObjects(TestFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
-
-   virtual S32 getRenderSortValue();
-
-   Rect getBounds(U32 stateIndex) const;
-
-   const Move &getCurrentMove();
-   const Move &getLastMove();
-   void setCurrentMove(const Move &theMove);
-   void setLastMove(const Move &theMove);
-
-   // Render is called twice for every object that is in the
-   // render list.  By default GameObject will call the render()
-   // method one time (when layerIndex == 0).
-   virtual void render(S32 layerIndex);
-   virtual void render();
-
-   enum IdleCallPath {
-      ServerIdleMainLoop,              // Idle called from top-level idle loop on server
-      ServerIdleControlFromClient,
-      ClientIdleMainRemote,            // On client, when object is not our control object
-      ClientIdleControlMain,           // On client, when object is our control object
-      ClientIdleControlReplay,
-   };
-
-   virtual void idle(IdleCallPath path);
-
-   virtual void writeControlState(BitStream *stream);
-   virtual void readControlState(BitStream *stream);
-   virtual F32 getHealth();
-   virtual bool isDestroyed();
-
-   virtual void controlMoveReplayComplete();
-
-   void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
-   void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
-
-   virtual bool collide(GameObject *hitObject);
-
-   // Gets location(s) where repair rays should be rendered while object is being repaired
-   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);
-
-   S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
-   virtual void damageObject(DamageInfo *damageInfo);
-
-   void onGhostAddBeforeUpdate(GhostConnection *theConnection);
-   bool onGhostAdd(GhostConnection *theConnection);
-   void disableCollision();
-   void enableCollision();
-   bool isCollisionEnabled();
-
-   bool collisionPolyPointIntersect(Point point);
-   bool collisionPolyPointIntersect(Vector<Point> points);
-   bool collisionPolyPointIntersect(Point center, F32 radius);
-
-   void setScopeAlways();
-
-   S32 getTeamIndx(lua_State *L);      // Return item team to Lua
-   virtual void push(lua_State *L);    // Lua-aware classes will implement this
-  
-   void readThisTeam(BitStream *stream);
-   void writeThisTeam(BitStream *stream);
 
 };
 

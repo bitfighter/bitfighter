@@ -112,7 +112,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void damageObject(DamageInfo *damageInfo);
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
    F32 getHealth();
    void healObject(S32 time);
    Point mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager);
@@ -167,9 +167,9 @@ public:
 };
 
 
-class ForceField : public GameObject
+class ForceField : public BfObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    Point mStart, mEnd;
@@ -190,9 +190,9 @@ public:
    static const F32 ForceFieldHalfWidth;
 
    ForceField(S32 team = -1, Point start = Point(), Point end = Point());
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
    bool intersects(ForceField *forceField);     // Return true if forcefields intersect
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -244,7 +244,7 @@ public:
    void setEndSegment(WallSegment *endSegment);
 
    void onAddedToGame(Game *theGame);
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
    void render();
    void onEnabled();

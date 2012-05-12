@@ -445,7 +445,7 @@ void releaseFlag(Game *game, Point pos, Point startVel, S32 count = 0)
 
 
 // Runs on client and server
-void NexusGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
+void NexusGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
 
@@ -679,7 +679,7 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
 
    for(S32 i = 0; i < mNexus.size(); i++)
-      renderObjectiveArrow(dynamic_cast<GameObject *>(mNexus[i].getPointer()), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
+      renderObjectiveArrow(dynamic_cast<BfObject *>(mNexus[i].getPointer()), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
 }
 #endif
 
@@ -688,7 +688,7 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 
 
-void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
+void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject)
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
@@ -1032,7 +1032,7 @@ void NexusObject::onAddedToGame(Game *theGame)
    if(gt) gt->addNexus(this);
 }
 
-void NexusObject::idle(GameObject::IdleCallPath path)
+void NexusObject::idle(BfObject::IdleCallPath path)
 {
    //U32 deltaT = mCurrentMove.time;
 }
@@ -1077,7 +1077,7 @@ bool NexusObject::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-bool NexusObject::collide(GameObject *hitObject)
+bool NexusObject::collide(BfObject *hitObject)
 {
    if(isGhost())
       return false;

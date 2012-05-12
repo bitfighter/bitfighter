@@ -510,7 +510,7 @@ void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 
 
 
 // Render repair rays to all the repairing objects
-void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<GameObject> > &repairTargets, F32 alpha)
+void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha)
 {
    glLineWidth(gLineWidth3);
    glColor(Colors::red, alpha);

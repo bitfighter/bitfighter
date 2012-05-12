@@ -178,13 +178,13 @@ U32 Game::getCurrentTime()
 }
 
 
-const Vector<SafePtr<GameObject> > &Game::getScopeAlwaysList()
+const Vector<SafePtr<BfObject> > &Game::getScopeAlwaysList()
 {
    return mScopeAlwaysList;
 }
 
 
-void Game::setScopeAlwaysObject(GameObject *theObject)
+void Game::setScopeAlwaysObject(BfObject *theObject)
 {
    mScopeAlwaysList.push_back(theObject);
 }
@@ -549,7 +549,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
       else
          theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
 
-      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a GameObject
+      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a BfObject
 
       if(gt)
       {
@@ -601,7 +601,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
       obj[LevelLoader::MaxArgLen] = '\0';
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
 
-      SafePtr<GameObject> object  = dynamic_cast<GameObject *>(theObject);  // Force our new object to be a GameObject
+      SafePtr<BfObject> object  = dynamic_cast<BfObject *>(theObject);  // Force our new object to be a BfObject
       BfObject *eObject = dynamic_cast<BfObject *>(theObject);
 
 
@@ -854,14 +854,14 @@ void Game::checkConnectionToMaster(U32 timeDelta)
    }
 }
 
-Game::DeleteRef::DeleteRef(GameObject *o, U32 d)
+Game::DeleteRef::DeleteRef(BfObject *o, U32 d)
 {
    theObject = o;
    delay = d;
 }
 
 
-void Game::addToDeleteList(GameObject *theObject, U32 delay)
+void Game::addToDeleteList(BfObject *theObject, U32 delay)
 {
    mPendingDeleteObjects.push_back(DeleteRef(theObject, delay));
 }
@@ -873,7 +873,7 @@ void Game::processDeleteList(U32 timeDelta)
    for(S32 i = 0; i < mPendingDeleteObjects.size(); i++) 
       if(timeDelta > mPendingDeleteObjects[i].delay)
       {
-         GameObject *g = mPendingDeleteObjects[i].theObject;
+         BfObject *g = mPendingDeleteObjects[i].theObject;
          delete g;
          mPendingDeleteObjects.erase_fast(i);
          i--;
@@ -890,7 +890,7 @@ void Game::deleteObjects(U8 typeNumber)
    mGameObjDatabase->findObjects(typeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
       obj->deleteObject(0);
    }
 }
@@ -903,7 +903,7 @@ void Game::deleteObjects(TestFunc testFunc)
    mGameObjDatabase->findObjects(testFunc, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
       obj->deleteObject(0);
    }
 }

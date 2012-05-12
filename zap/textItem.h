@@ -87,8 +87,8 @@ public:
 #endif
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
-   bool collide(GameObject *hitObject);
-   void idle(GameObject::IdleCallPath path);
+   bool collide(BfObject *hitObject);
+   void idle(BfObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
@@ -128,9 +128,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class LineItem : public GameObject
+class LineItem : public BfObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
@@ -151,8 +151,8 @@ public:
    void computeExtent();                                             // Bounding box for quick collision-possibility elimination
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;           // More precise boundary for precise collision detection
-   bool collide(GameObject *hitObject);
-   void idle(GameObject::IdleCallPath path);
+   bool collide(BfObject *hitObject);
+   void idle(BfObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 

@@ -107,7 +107,7 @@ void BotNavMeshZone::render(S32 layerIndex)
 
 // Use this to help keep track of which robots are where
 // Only gets run on the server, never on client, obviously, because that's where the bots are!!!
-bool BotNavMeshZone::collide(GameObject *hitObject)
+bool BotNavMeshZone::collide(BfObject *hitObject)
 {
    // This does not get run anymore, it is in a seperate database.
    if(hitObject->getObjectTypeNumber() == RobotShipTypeNumber)     // Only care about robots...
@@ -152,7 +152,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv, Game *game)
 
 void BotNavMeshZone::addToGame(Game *game, GridDatabase *database)
 {
-   // Ordinarily, we'd call GameObject::addToGame() here, but the BotNavMeshZones don't need to be added to the game
+   // Ordinarily, we'd call BfObject::addToGame() here, but the BotNavMeshZones don't need to be added to the game
    // the way an ordinary game object would be.  So we won't.
    mGame = game;
    

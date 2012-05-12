@@ -237,7 +237,7 @@ void RetrieveGameType::majorScoringEventOcurred(S32 team)
 }
 
 // Same code as in HTF, CTF
-void RetrieveGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
+void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
 

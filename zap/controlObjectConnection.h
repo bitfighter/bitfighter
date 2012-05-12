@@ -38,7 +38,7 @@ using namespace TNL;
 namespace Zap
 {
 
-class GameObject;
+class BfObject;
 
 class ControlObjectConnection: public GhostConnection    // only child class is GameConnection...
 {
@@ -52,7 +52,7 @@ private:
    };
 
    Vector<Move> pendingMoves;
-   SafePtr<GameObject> controlObject;
+   SafePtr<BfObject> controlObject;
 
    U32 mLastClientControlCRC;
    Point mServerPosition;
@@ -72,8 +72,8 @@ private:
 public:
    ControlObjectConnection();
 
-   void setControlObject(GameObject *theObject);
-   GameObject *getControlObject();
+   void setControlObject(BfObject *theObject);
+   BfObject *getControlObject();
    U32 getControlCRC();
 
    void addPendingMove(Move *theMove);

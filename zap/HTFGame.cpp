@@ -216,11 +216,11 @@ void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
 }
 
 
-void HTFGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
+void HTFGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
 
-   if(path != GameObject::ServerIdleMainLoop)
+   if(path != BfObject::ServerIdleMainLoop)
       return;
 
    // Server only, from here on out
@@ -236,7 +236,7 @@ void HTFGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 }
 
 // Same code as in retrieveGame, CTF
-void HTFGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
+void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
 

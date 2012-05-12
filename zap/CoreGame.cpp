@@ -725,12 +725,12 @@ void CoreItem::doPanelDebris(S32 panelIndex)
 #endif
 
 
-void CoreItem::idle(GameObject::IdleCallPath path)
+void CoreItem::idle(BfObject::IdleCallPath path)
 {
    mPanelGeom.isValid = false;      // Force recalculation of panel geometry next time it's needed
 
    // Update attack timer on the server
-   if(path == GameObject::ServerIdleMainLoop)
+   if(path == BfObject::ServerIdleMainLoop)
    {
       // If timer runs out, then set this Core as having a changed state so the client
       // knows it isn't being attacked anymore
@@ -740,7 +740,7 @@ void CoreItem::idle(GameObject::IdleCallPath path)
 
    // Only run the following on the client
 #ifndef ZAP_DEDICATED
-   if(path != GameObject::ClientIdleMainRemote)
+   if(path != BfObject::ClientIdleMainRemote)
       return;
 
    // Update Explosion Timer
@@ -992,7 +992,7 @@ bool CoreItem::isBeingAttacked()
 }
 
 
-bool CoreItem::collide(GameObject *otherObject)
+bool CoreItem::collide(BfObject *otherObject)
 {
    return true;
 }

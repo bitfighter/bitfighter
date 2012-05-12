@@ -120,7 +120,7 @@ extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
 extern void renderShip(ShipShape::ShipShapeType shapeType, const Color *shipColor, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                        bool cloakActive, bool shieldActive, bool sensorActive, bool repairActive, bool hasArmor);
 
-void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<GameObject> > &repairTargets, F32 alpha);   // Render repair rays to all the repairing objects
+void renderShipRepairRays(const Point &pos, const Ship *ship, Vector<SafePtr<BfObject> > &repairTargets, F32 alpha);   // Render repair rays to all the repairing objects
 
 extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
 

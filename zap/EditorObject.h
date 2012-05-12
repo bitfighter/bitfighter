@@ -41,9 +41,9 @@ namespace Zap
 
 // Class with editor methods related to point things
 
-class PointObject : public GameObject
+class PointObject : public BfObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 public:
    PointObject();             // Constructor

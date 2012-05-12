@@ -142,7 +142,7 @@ void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
 
 
 // Identical to HTF, Retrieve
-void CTFGameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
+void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    GameConnection *connection = clientInfo->getConnection();
 

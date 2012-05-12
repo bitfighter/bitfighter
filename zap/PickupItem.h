@@ -59,7 +59,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
    bool isVisible();
 
    U32 getRepopDelay();
@@ -80,7 +80,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
    virtual bool pickup(Ship *theShip) = 0;
    virtual void onClientPickup() = 0;
 };

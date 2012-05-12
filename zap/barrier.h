@@ -40,9 +40,9 @@ namespace Zap
 /// ships cannot pass through... i.e. walls  Barrier objects, once created, never
 /// change state, simplifying the pack/unpack update methods.  Barriers are
 /// constructed as an expanded line segment.
-class Barrier : public GameObject
+class Barrier : public BfObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    Vector<Point> mBufferedObjectPointsForBotZone;
@@ -87,7 +87,7 @@ public:
    const Vector<Point> *getCollisionPolyPtr() const;
 
    /// collide always returns true for Barrier objects.
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
 
    // Takes a list of vertices and converts them into a list of lines representing the edges of an object
    static void resetEdges(const Vector<Point> &corners, Vector<Point> &edges);
@@ -116,7 +116,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// TODO: Don't need this to be a GameObject  -- perhaps merge with barrier above?
+// TODO: Don't need this to be a BfObject  -- perhaps merge with barrier above?
 class WallItem : public LineItem
 {
    typedef LineItem Parent;
@@ -163,7 +163,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PolyWall : public PolygonObject     // Don't need GameObject component of this...
+class PolyWall : public PolygonObject     // Don't need BfObject component of this...
 {
    typedef PolygonObject Parent;
 

@@ -34,9 +34,9 @@ namespace Zap
 {
 
 
-class SimpleLine : public GameObject
+class SimpleLine : public BfObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    virtual Color getEditorRenderColor() = 0;

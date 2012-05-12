@@ -65,7 +65,7 @@ MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, rad
 }
 
 
-void MoveObject::idle(GameObject::IdleCallPath path)
+void MoveObject::idle(BfObject::IdleCallPath path)
 {
    mHitLimit = 16;      // Reset hit limit
 }
@@ -274,7 +274,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
    U32 tryCount = 0;
    const U32 TRY_COUNT_MAX = 8;
-   Vector<SafePtr<GameObject> > disabledList;
+   Vector<SafePtr<BfObject> > disabledList;
    F32 moveTimeStart = moveTime;
 
    while(moveTime > moveTimeEpsilon && tryCount < TRY_COUNT_MAX)     // moveTimeEpsilon is a very short, but non-zero, bit of time
@@ -288,7 +288,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       F32 collisionTime = moveTime;
       Point collisionPoint;
 
-      GameObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
+      BfObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
          mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * moveTime;    // Move to desired destination
@@ -368,7 +368,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 }
 
 
-bool MoveObject::collide(GameObject *otherObject)
+bool MoveObject::collide(BfObject *otherObject)
 {
    return true;
 }
@@ -386,7 +386,7 @@ static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject *
 }
 
 
-GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
+BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
    // Check for collisions against other objects
    Point delta = mMoveState[stateIndex].vel * collisionTime;
@@ -402,12 +402,12 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    F32 collisionFraction;
 
-   GameObject *collisionObject = NULL;
+   BfObject *collisionObject = NULL;
    Vector<Point> poly;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
 
       if(!foundObject->isCollisionEnabled())
          continue;
@@ -906,7 +906,7 @@ Ship *MoveItem::getMount()
 }
 
 
-void MoveItem::idle(GameObject::IdleCallPath path)
+void MoveItem::idle(BfObject::IdleCallPath path)
 {
    if(!isInDatabase())
       return;
@@ -930,7 +930,7 @@ void MoveItem::idle(GameObject::IdleCallPath path)
    {
       float time = mCurrentMove.time * 0.001f;
       move(time, ActualState, false);
-      if(path == GameObject::ServerIdleMainLoop)
+      if(path == BfObject::ServerIdleMainLoop)
       {
          // Only update if it's actually moving...
          if(mMoveState[ActualState].vel.lenSquared() != 0)
@@ -1044,7 +1044,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-bool MoveItem::collide(GameObject *otherObject)
+bool MoveItem::collide(BfObject *otherObject)
 {
    return mIsCollideable && !mIsMounted;
 }
@@ -1289,7 +1289,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-bool Asteroid::collide(GameObject *otherObject)
+bool Asteroid::collide(BfObject *otherObject)
 {
    if(hasExploded)
       return false;
@@ -1481,9 +1481,9 @@ Circle *Circle::clone() const
 }
 
 
-void Circle::idle(GameObject::IdleCallPath path)
+void Circle::idle(BfObject::IdleCallPath path)
 {
-   //if(path == GameObject::ServerIdleMainLoop)
+   //if(path == BfObject::ServerIdleMainLoop)
    {
       // Find nearest ship
       fillVector.clear();
@@ -1601,7 +1601,7 @@ void Circle::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-bool Circle::collide(GameObject *otherObject)
+bool Circle::collide(BfObject *otherObject)
 {
    return true;
 }
@@ -1765,7 +1765,7 @@ bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
    return polyPoints.size() != 0;  // false with zero points
 }
 
-bool Worm::collide(GameObject *otherObject)
+bool Worm::collide(BfObject *otherObject)
 {
    // Worms don't collide with one another!
    return /*dynamic_cast<Worm *>(otherObject) ? false : */true;
@@ -1803,7 +1803,7 @@ void Worm::damageObject(DamageInfo *theInfo)
 }
 
 
-void Worm::idle(GameObject::IdleCallPath path)
+void Worm::idle(BfObject::IdleCallPath path)
 {
    if(!isInDatabase())
       return;
@@ -1908,7 +1908,7 @@ TestItem *TestItem::clone() const
 }
 
 
-void TestItem::idle(GameObject::IdleCallPath path)
+void TestItem::idle(BfObject::IdleCallPath path)
 {
    //if(path == ServerIdleMainLoop && (abs(getPos().x) > 1000 || abs(getPos().y > 1000)))
    //   deleteObject(100);
@@ -2020,7 +2020,7 @@ const char *ResourceItem::getOnDockName()       { return "Res."; }
 const char *ResourceItem::getEditorHelpString() { return "Small bouncy object; capture one to activate Engineer module"; }
 
 
-bool ResourceItem::collide(GameObject *hitObject)
+bool ResourceItem::collide(BfObject *hitObject)
 {
    if(mIsMounted)
       return false;

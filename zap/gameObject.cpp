@@ -342,13 +342,12 @@ BfObject::BfObject()
    mLitUp = false; 
    mSelected = false; 
    assignNewSerialNumber();
-}
 
+   mTeam = -1;
+   mDisableCollisionCount = 0;
+   mCreationTime = 0;
 
-// Destructor
-BfObject::~BfObject()
-{
-   // Do nothing
+   mOwner = NULL;
 }
 
 
@@ -456,12 +455,15 @@ bool BfObject::canBeHostile()
 
 void BfObject::addToGame(Game *game, GridDatabase *database)
 {   
-   TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
-   TNLAssert(game != NULL,  "Error: theGame is NULL in GameObject::addToGame.");
+   TNLAssert(mGame == NULL, "Error: Object already in a game in BfObject::addToGame.");
+   TNLAssert(game != NULL,  "Error: theGame is NULL in BfObject::addToGame.");
 
    mGame = game;
    if(database)
       addToDatabase(database);
+
+   setCreationTime(game->getCurrentTime());
+   onAddedToGame(game);
 }
 
 
@@ -894,56 +896,44 @@ void                   BfObject::doneEditingAttrs(EditorAttributeMenuUI *attribu
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-GameObject::GameObject() : BfObject()
-{
-   mGame = NULL;
-   mTeam = -1;
-   mDisableCollisionCount = 0;
-   mCreationTime = 0;
-
-   mOwner = NULL;
-}
-
-
 // Destructor
-GameObject::~GameObject()
+BfObject::~BfObject()
 {
    removeFromGame();
 }
 
 
-bool GameObject::isControlled()
+bool BfObject::isControlled()
 {
    return mControllingClient.isValid();
 }
 
 
-SafePtr<GameConnection> GameObject::getControllingClient()
+SafePtr<GameConnection> BfObject::getControllingClient()
 {
    return mControllingClient;
 }
 
 
-void GameObject::setControllingClient(GameConnection *c)         // This only gets run on the server
+void BfObject::setControllingClient(GameConnection *c)         // This only gets run on the server
 {
    mControllingClient = c;
 }
 
 
-void GameObject::setOwner(ClientInfo *clientInfo)
+void BfObject::setOwner(ClientInfo *clientInfo)
 {
    mOwner = clientInfo;
 }
 
 
-ClientInfo *GameObject::getOwner()
+ClientInfo *BfObject::getOwner()
 {
    return mOwner;
 }
 
 
-void GameObject::deleteObject(U32 deleteTimeInterval)
+void BfObject::deleteObject(U32 deleteTimeInterval)
 {
    mObjectTypeNumber = DeletedTypeNumber;
 
@@ -954,15 +944,15 @@ void GameObject::deleteObject(U32 deleteTimeInterval)
 }
 
 
-void GameObject::setScopeAlways()
+void BfObject::setScopeAlways()
 {
    getGame()->setScopeAlwaysObject(this);
 }
 
 
-F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+F32 BfObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
-   GameObject *so = dynamic_cast<GameObject *>(scopeObject);
+   BfObject *so = dynamic_cast<BfObject *>(scopeObject);
    F32 add = 0;
    if(so) // GameType is not GameObject, and GameType don't have position
    {
@@ -1007,19 +997,19 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
 }
 
 
-void GameObject::damageObject(DamageInfo *theInfo)
+void BfObject::damageObject(DamageInfo *theInfo)
 {
    // Do nothing
 }
 
 
-bool GameObject::collide(GameObject *hitObject)
+bool BfObject::collide(BfObject *hitObject)
 {
    return false;
 }
 
 
-Vector<Point> GameObject::getRepairLocations(const Point &repairOrigin)
+Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)
 {
    Vector<Point> repairLocations;
    repairLocations.push_back(getPos());
@@ -1029,7 +1019,7 @@ Vector<Point> GameObject::getRepairLocations(const Point &repairOrigin)
 
 
 // Returns number of ships hit
-S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
+S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
 {
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance
@@ -1048,7 +1038,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc obj
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
       // Check the actual distance against our outer radius.  Recall that we got a list of potential
       // collision objects based on a square area, but actual collisions will be based on true distance
       Point objPos = foundObject->getPos();
@@ -1113,7 +1103,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc obj
 }
 
 
-void GameObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fillVector, const Rect &ext)
+void BfObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fillVector, const Rect &ext)
 {
    GridDatabase *gridDB = getDatabase();
    if(!gridDB)
@@ -1123,7 +1113,7 @@ void GameObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &
 }
 
 
-void GameObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &ext)
+void BfObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &ext)
 {
    GridDatabase *gridDB = getDatabase();
    if(!gridDB)
@@ -1133,7 +1123,7 @@ void GameObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector
 }
 
 
-GameObject *GameObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd,
+BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd,
                                       float &collisionTime, Point &collisionNormal)
 {
    GridDatabase *gridDB = getDatabase();
@@ -1141,13 +1131,13 @@ GameObject *GameObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point raySt
    if(!gridDB)
       return NULL;
 
-   return dynamic_cast<GameObject *>(
+   return dynamic_cast<BfObject *>(
          gridDB->findObjectLOS(typeNumber, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
 }
 
 
-GameObject *GameObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, Point rayStart, Point rayEnd,
+BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, Point rayStart, Point rayEnd,
                                       float &collisionTime, Point &collisionNormal)
 {
    GridDatabase *gridDB = getDatabase();
@@ -1155,85 +1145,73 @@ GameObject *GameObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, P
    if(!gridDB)
       return NULL;
 
-   return dynamic_cast<GameObject *>(
+   return dynamic_cast<BfObject *>(
          gridDB->findObjectLOS(objectTypeTest, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
 }
 
 
-void GameObject::addToGame(Game *game, GridDatabase *database)
-{
-   BfObject::addToGame(game, database);
-   // constists of:
-   //    mGame = game;
-   //    addToDatabase();
-
-   setCreationTime(game->getCurrentTime());
-   onAddedToGame(game);
-}
-
-
-void GameObject::onAddedToGame(Game *)
+void BfObject::onAddedToGame(Game *)
 {
    getGame()->mObjectsLoaded++;
 }
 
 
-void GameObject::markAsGhost()
+void BfObject::markAsGhost()
 {
    mNetFlags = NetObject::IsGhost;
 }
 
 
-bool GameObject::isMoveObject()
+bool BfObject::isMoveObject()
 {
    return false;
 }
 
 
-Point GameObject::getVel()
+Point BfObject::getVel()
 {
    return Point(0,0);
 }
 
 
-U32 GameObject::getCreationTime()
+U32 BfObject::getCreationTime()
 {
    return mCreationTime;
 }
 
 
-void GameObject::setCreationTime(U32 creationTime)
+void BfObject::setCreationTime(U32 creationTime)
 {
    mCreationTime = creationTime;
 }
 
 
-StringTableEntry GameObject::getKillString()
+StringTableEntry BfObject::getKillString()
 {
    return mKillString;
 }
 
 
-F32 GameObject::getRating()
+F32 BfObject::getRating()
 {
    return 0; // TODO: Fix this
 }
 
 
-S32 GameObject::getScore()
+S32 BfObject::getScore()
 {
    return 0; // TODO: Fix this
 }
 
 
-S32 GameObject::getRenderSortValue()
+S32 BfObject::getRenderSortValue()
 {
    return 2;
 }
 
 
-Rect GameObject::getBounds(U32 stateIndex) const
+Rect BfObject::getBounds(U32 stateIndex) const
 {
    Rect ret;
    Point p;
@@ -1256,65 +1234,65 @@ Rect GameObject::getBounds(U32 stateIndex) const
 }
 
 
-const Move &GameObject::getCurrentMove()
+const Move &BfObject::getCurrentMove()
 {
    return mCurrentMove;
 }
 
 
-const Move &GameObject::getLastMove()
+const Move &BfObject::getLastMove()
 {
    return mLastMove;
 }
 
 
-void GameObject::setCurrentMove(const Move &theMove)
+void BfObject::setCurrentMove(const Move &theMove)
 {
    mCurrentMove = theMove;
 }
 
 
-void GameObject::setLastMove(const Move &theMove)
+void BfObject::setLastMove(const Move &theMove)
 {
    mLastMove = theMove;
 }
 
 
-void GameObject::render()
+void BfObject::render()
 {
    // Do nothing
 }
 
 
-void GameObject::render(S32 layerIndex)
+void BfObject::render(S32 layerIndex)
 {
    if(layerIndex == 1)
       render();
 }
 
 
-void GameObject::disableCollision()
+void BfObject::disableCollision()
 {
    TNLAssert(mDisableCollisionCount < 10, "Too many disabled collisions");
    mDisableCollisionCount++;
 }
 
 
-void GameObject::enableCollision()
+void BfObject::enableCollision()
 {
    TNLAssert(mDisableCollisionCount != 0, "Trying to enable collision, already enabled");
    mDisableCollisionCount--;
 }
 
 
-bool GameObject::isCollisionEnabled()
+bool BfObject::isCollisionEnabled()
 {
    return mDisableCollisionCount == 0;
 }
 
 
 // Find if the specified point is in theObject's collisionPoly or collisonCircle
-bool GameObject::collisionPolyPointIntersect(Point point)
+bool BfObject::collisionPolyPointIntersect(Point point)
 {
    Point center;
    F32 radius;
@@ -1336,7 +1314,7 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
-bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
+bool BfObject::collisionPolyPointIntersect(Vector<Point> points)
 {
    Point center;
    Rect rect;
@@ -1360,7 +1338,7 @@ bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
 
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
-bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
+bool BfObject::collisionPolyPointIntersect(Point center, F32 radius)
 {
    Point c, pt;
    float r;
@@ -1380,43 +1358,43 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 }
 
 
-F32 GameObject::getHealth()
+F32 BfObject::getHealth()
 {
    return 1;
 }
 
 
-bool GameObject::isDestroyed()
+bool BfObject::isDestroyed()
 {
    return false;
 }
 
 
-void GameObject::idle(IdleCallPath path)
+void BfObject::idle(IdleCallPath path)
 {
    // Do nothing
 }
 
 
-void GameObject::writeControlState(BitStream *)
+void BfObject::writeControlState(BitStream *)
 {
    // Do nothing
 }
 
 
-void GameObject::readControlState(BitStream *)
+void BfObject::readControlState(BitStream *)
 {
    // Do nothing
 }
 
 
-void GameObject::controlMoveReplayComplete()
+void BfObject::controlMoveReplayComplete()
 {
    // Do nothing
 }
 
 
-void GameObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
+void BfObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 {
    U32 len = U32(vel.len());
    if(stream->writeFlag(len == 0))
@@ -1439,7 +1417,7 @@ void GameObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 }
 
 
-void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
+void BfObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 {
    if(stream->readFlag())
    {
@@ -1462,7 +1440,7 @@ void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 }
 
 
-void GameObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
+void BfObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
    // Some unpackUpdate need getGame() available.
@@ -1472,7 +1450,7 @@ void GameObject::onGhostAddBeforeUpdate(GhostConnection *theConnection)
 #endif
 }
 
-bool GameObject::onGhostAdd(GhostConnection *theConnection)
+bool BfObject::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
    GameConnection *gc = (GameConnection *)(theConnection);  // GhostConnection is always GameConnection
@@ -1489,25 +1467,25 @@ bool GameObject::onGhostAdd(GhostConnection *theConnection)
 }
 
 
-S32 GameObject::getTeamIndx(lua_State *L)  // Return item team to Lua
+S32 BfObject::getTeamIndx(lua_State *L)  // Return item team to Lua
 {
    return LuaObject::returnInt(L, mTeam + 1);
 }
 
 
-void GameObject::push(lua_State *L)       // Lua-aware classes will implement this
+void BfObject::push(lua_State *L)       // Lua-aware classes will implement this
 {
    TNLAssert(false, "Unimplemented push function!");
 }
 
 
-void GameObject::readThisTeam(BitStream *stream)
+void BfObject::readThisTeam(BitStream *stream)
 {
    mTeam = stream->readInt(4) - 2;
 }
 
 
-void GameObject::writeThisTeam(BitStream *stream)
+void BfObject::writeThisTeam(BitStream *stream)
 {
    stream->writeInt(mTeam + 2, 4);
 }

@@ -92,13 +92,13 @@ public:
    void addNexus(NexusObject *theObject);
    void shipTouchNexus(Ship *ship, NexusObject *nexus);
    void onGhostAvailable(GhostConnection *connection);
-   void idle(GameObject::IdleCallPath path, U32 deltaT);
+   void idle(BfObject::IdleCallPath path, U32 deltaT);
 
 #ifndef ZAP_DEDICATED
    void renderInterfaceOverlay(bool scoreboardVisible);
 #endif
 
-   void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
+   void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool spawnShip(ClientInfo *clientInfo);
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
@@ -174,7 +174,7 @@ public:
 
 class NexusObject : public PolygonObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 public:
    NexusObject();      // Constructor
@@ -183,7 +183,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    void onAddedToGame(Game *theGame);
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
    void render();
    void renderDock();
@@ -191,7 +191,7 @@ public:
    S32 getRenderSortValue();
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
 
    U32 packUpdate(GhostConnection *connection, U32 mask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

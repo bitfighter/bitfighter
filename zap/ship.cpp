@@ -380,7 +380,7 @@ void Ship::findObjectsUnderShip(U8 type)
 
 // Returns the zone in question if this ship is in a zone of type zoneType
 // Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
-GameObject *Ship::isInZone(U8 zoneTypeNumber)
+BfObject *Ship::isInZone(U8 zoneTypeNumber)
 {
    findObjectsUnderShip(zoneTypeNumber);
 
@@ -393,7 +393,7 @@ GameObject *Ship::isInZone(U8 zoneTypeNumber)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *zone = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *zone = dynamic_cast<BfObject *>(fillVector[i]);
 
       // Get points that define the zone boundaries
       polyPoints.clear();
@@ -406,7 +406,7 @@ GameObject *Ship::isInZone(U8 zoneTypeNumber)
 }
 
 
-//GameObject *Ship::isInZone(GameObject *zone)
+//BfObject *Ship::isInZone(BfObject *zone)
 //{
 //   // Get points that define the zone boundaries
 //   Vector<Point> polyPoints;
@@ -436,14 +436,14 @@ DatabaseObject *Ship::isOnObject(U8 objectType)
 
    // Return first actually overlapping object on our candidate list
    for(S32 i = 0; i < fillVector.size(); i++)
-      if(isOnObject(dynamic_cast<GameObject *>(fillVector[i])))
+      if(isOnObject(dynamic_cast<BfObject *>(fillVector[i])))
          return fillVector[i];
    return NULL;
 }
 
 
 // Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.B.)
-bool Ship::isOnObject(GameObject *object)
+bool Ship::isOnObject(BfObject *object)
 {
    Point center;
    float radius;
@@ -590,18 +590,18 @@ void Ship::controlMoveReplayComplete()
 }
 
 
-void Ship::idle(GameObject::IdleCallPath path)
+void Ship::idle(BfObject::IdleCallPath path)
 {
    // Don't process exploded ships
    if(hasExploded)
       return;
 
-   if(path == GameObject::ServerIdleControlFromClient && getClientInfo())
+   if(path == BfObject::ServerIdleControlFromClient && getClientInfo())
       getClientInfo()->getStatistics()->mPlayTime += mCurrentMove.time;
 
    Parent::idle(path);
 
-   if(path == GameObject::ServerIdleMainLoop && isControlled())
+   if(path == BfObject::ServerIdleMainLoop && isControlled())
    {
       // If this is a controlled object in the server's main
       // idle loop, process the render state forward -- this
@@ -614,7 +614,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    }
    else
    {
-      if((path == GameObject::ClientIdleControlMain || path == GameObject::ClientIdleMainRemote) && 
+      if((path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote) && 
                mMoveState[ActualState].vel.lenSquared() != 0 && getControllingClient() && 
                getControllingClient()->lostContact())
          return;  // If we're out-of-touch, don't move the ship... moving won't actually hurt, but this seems somehow better
@@ -637,9 +637,9 @@ void Ship::idle(GameObject::IdleCallPath path)
       }
 
 
-      if(path == GameObject::ServerIdleControlFromClient ||
-         path == GameObject::ClientIdleControlMain ||
-         path == GameObject::ClientIdleControlReplay)
+      if(path == BfObject::ServerIdleControlFromClient ||
+         path == BfObject::ClientIdleControlMain ||
+         path == BfObject::ClientIdleControlReplay)
       {
          // For different optimizer settings and different platforms
          // the floating point calculations may come out slightly
@@ -653,8 +653,8 @@ void Ship::idle(GameObject::IdleCallPath path)
          mMoveState[ActualState].vel.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
       }
 
-      if(path == GameObject::ServerIdleMainLoop ||
-         path == GameObject::ServerIdleControlFromClient)
+      if(path == BfObject::ServerIdleMainLoop ||
+         path == BfObject::ServerIdleControlFromClient)
       {
          // Update the render state on the server to match
          // the actual updated state, and mark the object
@@ -668,7 +668,7 @@ void Ship::idle(GameObject::IdleCallPath path)
 
          mMoveState[RenderState] = mMoveState[ActualState];
       }
-      else if(path == GameObject::ClientIdleControlMain || path == GameObject::ClientIdleMainRemote)
+      else if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
       {
          // On the client, update the interpolation of this
          // object unless we are replaying control moves.
@@ -676,7 +676,7 @@ void Ship::idle(GameObject::IdleCallPath path)
          updateInterpolation();
       }
 
-      if(path != GameObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
+      if(path != BfObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
       {
          mSensorActiveZoomTimer.update(mCurrentMove.time);
          mSensorEquipZoomTimer.update(mCurrentMove.time);
@@ -702,14 +702,14 @@ void Ship::idle(GameObject::IdleCallPath path)
    // If this is a move executing on the server and it's
    // different from the last move, then mark the move to
    // be updated to the ghosts.
-   if(path == GameObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
+   if(path == BfObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
       setMaskBits(MoveMask);
 
    mLastMove = mCurrentMove;
 
-   if(path == GameObject::ServerIdleControlFromClient ||
-      path == GameObject::ClientIdleControlMain ||
-      path == GameObject::ClientIdleControlReplay)
+   if(path == BfObject::ServerIdleControlFromClient ||
+      path == BfObject::ClientIdleControlMain ||
+      path == BfObject::ClientIdleControlReplay)
    {
       // Process weapons and modules on controlled object objects
       // This handles all the energy reductions as well
@@ -717,18 +717,18 @@ void Ship::idle(GameObject::IdleCallPath path)
       processModules();
    }
      
-   if(path == GameObject::ClientIdleMainRemote)
+   if(path == BfObject::ClientIdleMainRemote)
    {
       // For ghosts, find some repair targets for rendering the repair effect
       if(isModulePrimaryActive(ModuleRepair))
          findRepairTargets();
    }
-   if(path == GameObject::ServerIdleControlFromClient && isModulePrimaryActive(ModuleRepair))
+   if(path == BfObject::ServerIdleControlFromClient && isModulePrimaryActive(ModuleRepair))
       repairTargets();
 
 #ifndef ZAP_DEDICATED
-   if(path == GameObject::ClientIdleControlMain ||
-      path == GameObject::ClientIdleMainRemote)
+   if(path == BfObject::ClientIdleControlMain ||
+      path == BfObject::ClientIdleMainRemote)
    {
       mWarpInTimer.update(mCurrentMove.time);
 
@@ -952,7 +952,7 @@ void Ship::processModules()
       // Idle = not moving or shooting
       bool isIdle = mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
 
-      GameObject *object = isInZone(LoadoutZoneTypeNumber);
+      BfObject *object = isInZone(LoadoutZoneTypeNumber);
 
       // In load-out zone
       if(object)
@@ -2339,14 +2339,14 @@ S32 LuaShip::getHealth(lua_State *L) { return thisShip ? returnFloat(L, thisShip
 S32 LuaShip::getMountedItems(lua_State *L)
 {
    bool hasArgs = lua_isnumber(L, 1);
-   Vector<GameObject *> tempVector;
+   Vector<BfObject *> tempVector;
 
    // Loop through all the mounted items
    for(S32 i = 0; i < thisShip->mMountedItems.size(); i++)
    {
       // Add every item to the list if no arguments were specified
       if(!hasArgs)
-         tempVector.push_back(dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer()));
+         tempVector.push_back(dynamic_cast<BfObject *>(thisShip->mMountedItems[i].getPointer()));
 
       // Else, compare against argument type and add to the list if matched
       else
@@ -2358,7 +2358,7 @@ S32 LuaShip::getMountedItems(lua_State *L)
 
             if(thisShip->mMountedItems[i]->getObjectTypeNumber() == objectType)
             {
-               tempVector.push_back(dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer()));
+               tempVector.push_back(dynamic_cast<BfObject *>(thisShip->mMountedItems[i].getPointer()));
                break;
             }
 
@@ -2425,7 +2425,7 @@ S32 LuaShip::getReqLoadout(lua_State *L)
 }
 
 
-GameObject *LuaShip::getGameObject()
+BfObject *LuaShip::getGameObject()
 {
    if(thisShip.isNull())    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
    {

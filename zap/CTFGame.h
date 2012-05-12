@@ -43,7 +43,7 @@ public:
    void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item);
-   void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
+   void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamId) const;
 

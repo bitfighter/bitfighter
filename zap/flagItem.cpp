@@ -238,7 +238,7 @@ void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void FlagItem::idle(GameObject::IdleCallPath path)
+void FlagItem::idle(BfObject::IdleCallPath path)
 {
    Parent::idle(path);
 
@@ -396,7 +396,7 @@ bool FlagItem::canBeNeutral()
 
 
 // Runs on both client and server
-bool FlagItem::collide(GameObject *hitObject)
+bool FlagItem::collide(BfObject *hitObject)
 {
    // Flag never collides if it is mounted or is set to be not collideable for some reason
    if(mIsMounted || !mIsCollideable)

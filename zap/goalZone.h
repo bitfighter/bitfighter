@@ -35,7 +35,7 @@ namespace Zap
 
 class GoalZone : public PolygonObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    static const S32 FlashDelay = 500;
@@ -63,7 +63,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
    void render();
 
    bool didRecentlyChangeTeam();
@@ -72,7 +72,7 @@ public:
    void setTeam(S32 team);
    void onAddedToGame(Game *theGame);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
    
    bool isFlashing();
    void setFlashCount(S32 i);

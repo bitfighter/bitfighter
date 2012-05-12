@@ -643,11 +643,11 @@ const char *GameType::validateGameType(const char *gtype)
 }
 
 
-void GameType::idle(GameObject::IdleCallPath path, U32 deltaT)
+void GameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    mTotalGamePlay += deltaT;
 
-   if(path != GameObject::ServerIdleMainLoop)    
+   if(path != BfObject::ServerIdleMainLoop)    
       idle_client(deltaT);
    else
       idle_server(deltaT);
@@ -780,13 +780,13 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-void GameType::renderObjectiveArrow(const GameObject *target, const Color *c, F32 alphaMod) const
+void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod) const
 {
    if(!target)
       return;
 
    GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
-   GameObject *ship = NULL;
+   BfObject *ship = NULL;
 
    if(gc)
       ship = gc->getControlObject();
@@ -816,7 +816,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
 
    GameConnection *gc = game->getConnectionToServer();
 
-   GameObject *co = NULL;
+   BfObject *co = NULL;
 
    if(gc)
       co = gc->getControlObject();
@@ -1411,7 +1411,7 @@ Point GameType::getSpawnPoint(S32 teamIndex)
 
 
 // This gets run when the ship hits a loadout zone -- server only
-void GameType::SRV_updateShipLoadout(GameObject *shipObject)
+void GameType::SRV_updateShipLoadout(BfObject *shipObject)
 {
    ClientInfo *clientInfo = shipObject->getOwner();
 
@@ -1470,7 +1470,7 @@ void GameType::SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8>
 
    if(ship)
    {
-      GameObject *object = ship->isInZone(LoadoutZoneTypeNumber);
+      BfObject *object = ship->isInZone(LoadoutZoneTypeNumber);
 
       if(object)
          if(object->getTeam() == ship->getTeam() || object->getTeam() == -1)
@@ -1514,12 +1514,12 @@ void GameType::performScopeQuery(GhostConnection *connection)
 {
    GameConnection *conn = (GameConnection *) connection;
    ClientInfo *clientInfo = conn->getClientInfo();
-   GameObject *co = conn->getControlObject();
+   BfObject *co = conn->getControlObject();
 
    //TNLAssert(gc, "Invalid GameConnection in gameType.cpp!");
    //TNLAssert(co, "Invalid ControlObject in gameType.cpp!");
 
-   const Vector<SafePtr<GameObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
+   const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
 
    conn->objectInScope(this);   // Put GameType in scope, always
 
@@ -1556,7 +1556,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
 
          for(S32 j = 0; j < fillVector.size(); j++)
-            connection->objectInScope(dynamic_cast<GameObject *>(fillVector[j]));
+            connection->objectInScope(dynamic_cast<BfObject *>(fillVector[j]));
       }
    }
 }
@@ -1565,7 +1565,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
 // Here is where we determine which objects are visible from player's ships.  Marks items as in-scope so they 
 // will be sent to client.
 // Only runs on server. 
-void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo)
+void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo)
 {
    // If this block proves unnecessary, then we can remove the whole itemsOfInterest thing, I think...
    //if(isTeamGame())
@@ -1634,7 +1634,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clien
 
    // Set object-in-scope for all objects found above
    for(S32 i = 0; i < fillVector.size(); i++)
-      connection->objectInScope(dynamic_cast<GameObject *>(fillVector[i]));
+      connection->objectInScope(dynamic_cast<BfObject *>(fillVector[i]));
    
    // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
@@ -1731,7 +1731,7 @@ bool GameType::makeSureTeamCountIsNotZero()
 }
 
 
-const Color *GameType::getTeamColor(GameObject *theObject)
+const Color *GameType::getTeamColor(BfObject *theObject)
 {
    return getTeamColor(theObject->getTeam());
 }
@@ -1821,7 +1821,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
 
 // Determines who can damage what.  Can be overridden by individual games.  Currently only overridden by Rabbit.
-bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
+bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 {
    if(!damager)            // Anonomyous projectiles are deadly to all!
       return true;
@@ -1858,7 +1858,7 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 
 
 // Handle scoring when ship is killed
-void GameType::controlObjectForClientKilled(ClientInfo *victim, GameObject *clientObject, GameObject *killerObject)
+void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *clientObject, BfObject *killerObject)
 {
    ClientInfo *killer = killerObject ? killerObject->getOwner() : NULL;
 
@@ -2363,7 +2363,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
-         GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+         BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
 
          if((obj->getOwner()) == ship->getOwner())
             obj->setOwner(NULL);

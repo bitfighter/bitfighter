@@ -49,7 +49,7 @@ ControlObjectConnection::ControlObjectConnection()
 
 
 // Only gets run on the server
-void ControlObjectConnection::setControlObject(GameObject *theObject)
+void ControlObjectConnection::setControlObject(BfObject *theObject)
 {
    if(controlObject.isValid())
       controlObject->setControllingClient(NULL);
@@ -72,7 +72,7 @@ void ControlObjectConnection::packetReceived(PacketNotify *notify)
 }
 
 
-GameObject *ControlObjectConnection::getControlObject()
+BfObject *ControlObjectConnection::getControlObject()
 {
    return controlObject;
 }
@@ -81,7 +81,7 @@ GameObject *ControlObjectConnection::getControlObject()
 U32 ControlObjectConnection::getControlCRC()
 {
    PacketStream stream;
-   GameObject *co = getControlObject();
+   BfObject *co = getControlObject();
 
    if(!co)
       return 0;
@@ -205,7 +205,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          {
             mMoveTimeCredit -= theMove.time;
             controlObject->setCurrentMove(theMove);
-            controlObject->idle(GameObject::ServerIdleControlFromClient);
+            controlObject->idle(BfObject::ServerIdleControlFromClient);
             onGotNewMove(theMove);
          }
          firstMoveIndex++;
@@ -226,7 +226,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          if(controlObjectValid)
          {
             U32 ghostIndex = bstream->readInt(GhostConnection::GhostIdBitSize);
-            controlObject = (GameObject *) resolveGhost(ghostIndex);
+            controlObject = (BfObject *) resolveGhost(ghostIndex);
             controlObject->readControlState(bstream);
             mServerPosition = controlObject->getPos();
             replayControlObjectMoves = true;
@@ -244,7 +244,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          Move theMove = pendingMoves[i];
          theMove.prepare();
          controlObject->setCurrentMove(theMove);
-         controlObject->idle(GameObject::ClientIdleControlReplay);
+         controlObject->idle(BfObject::ClientIdleControlReplay);
       }
       controlObject->controlMoveReplayComplete();
    }
@@ -361,7 +361,7 @@ void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
          Move move = controlObject->getCurrentMove();
          move.time = mMoveTimeCredit - MaxMoveTimeCredit;
          controlObject->setCurrentMove(move);
-         controlObject->idle(GameObject::ServerIdleControlFromClient);
+         controlObject->idle(BfObject::ServerIdleControlFromClient);
 
       }
       mMoveTimeCredit = MaxMoveTimeCredit;

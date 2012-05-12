@@ -1435,7 +1435,7 @@ void ServerGame::idle(U32 timeDelta)
       if(fillVector2[i]->isDeleted())
          continue;
 
-      GameObject *obj = dynamic_cast<GameObject *>(fillVector2[i]);
+      BfObject *obj = dynamic_cast<BfObject *>(fillVector2[i]);
       TNLAssert(obj, "Bad cast!");
 
       // Here is where the time gets set for all the various object moves
@@ -1444,11 +1444,11 @@ void ServerGame::idle(U32 timeDelta)
 
       // Give the object its move, then have it idle
       obj->setCurrentMove(thisMove);
-      obj->idle(GameObject::ServerIdleMainLoop);
+      obj->idle(BfObject::ServerIdleMainLoop);
    }
 
    if(mGameType)
-      mGameType->idle(GameObject::ServerIdleMainLoop, timeDelta);
+      mGameType->idle(BfObject::ServerIdleMainLoop, timeDelta);
 
    processDeleteList(timeDelta);
 

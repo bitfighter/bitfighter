@@ -40,7 +40,7 @@ namespace Zap
 
 class Item : public PointObject, public LuaItem
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    U16 mItemId;                  // Item ID, shared between client and server
@@ -100,7 +100,7 @@ public:
    virtual S32 getCaptureZone(lua_State *L);
    virtual S32 getShip(lua_State *L);
 
-    GameObject *getGameObject();                   // For getting the underlying object when all we have is a Lua pointer to it
+    BfObject *getGameObject();                   // For getting the underlying object when all we have is a Lua pointer to it
 };
 
 

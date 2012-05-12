@@ -35,15 +35,15 @@ using namespace TNL;
 namespace Zap
 {
 
+class BfObject;
 
-class GameObject;
 struct GameWeapon
 {
    static WeaponInfo weaponInfo[WeaponCount];
    static ProjectileInfo projectileInfo[ProjectileTypeCount];
 
    static void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos,
-         Point &shooterVel, S32 time, F32 shooterRadius, GameObject *shooter);
+         Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter);
 };
 
 

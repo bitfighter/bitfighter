@@ -99,7 +99,6 @@ class MasterServerConnection;
 class GameNetInterface;
 class GameType;
 class BfObject;
-class GameObject;
 class GameConnection;
 class Ship;
 class GameUserInterface;
@@ -192,16 +191,16 @@ protected:
 
    struct DeleteRef
    {
-      SafePtr<GameObject> theObject;
+      SafePtr<BfObject> theObject;
       U32 delay;
 
-      DeleteRef(GameObject *o = NULL, U32 d = 0);
+      DeleteRef(BfObject *o = NULL, U32 d = 0);
    };
 
    boost::shared_ptr<GridDatabase> mGameObjDatabase;                // Database for all normal objects
 
    Vector<DeleteRef> mPendingDeleteObjects;
-   Vector<SafePtr<GameObject> > mScopeAlwaysList;
+   Vector<SafePtr<BfObject> > mScopeAlwaysList;
    U32 mCurrentTime;
 
    RefPtr<GameNetInterface> mNetInterface;
@@ -286,7 +285,7 @@ public:
 
    void setGameTime(F32 time);                                          // Only used during level load process
 
-   void addToDeleteList(GameObject *theObject, U32 delay);
+   void addToDeleteList(BfObject *theObject, U32 delay);
 
    void deleteObjects(U8 typeNumber);
    void deleteObjects(TestFunc testFunc);
@@ -304,9 +303,9 @@ public:
    GameNetInterface *getNetInterface();
    virtual GridDatabase *getGameObjDatabase();
 
-   const Vector<SafePtr<GameObject> > &getScopeAlwaysList();
+   const Vector<SafePtr<BfObject> > &getScopeAlwaysList();
 
-   void setScopeAlwaysObject(GameObject *theObject);
+   void setScopeAlwaysObject(BfObject *theObject);
    GameType *getGameType() const;
 
    // Team functions

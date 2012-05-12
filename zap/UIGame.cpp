@@ -599,7 +599,7 @@ GameConnection *con = getGame()->getConnectionToServer();
 
 if(con)
 {
-   GameObject *co = con->getControlObject();
+   BfObject *co = con->getControlObject();
    if(co)
    {
       Point pos = co->getActualPos() * F32(1 / 300.0f);

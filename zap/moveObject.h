@@ -68,7 +68,7 @@ public:
    MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
 
    void onAddedToGame(Game *game);
-   void idle(GameObject::IdleCallPath path);    // Called from child object idle methods
+   void idle(BfObject::IdleCallPath path);    // Called from child object idle methods
    void updateInterpolation();
    void updateExtentInDatabase();
 
@@ -97,12 +97,12 @@ public:
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
    void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
 
    // CollideTypes is used to improve speed on findFirstCollision
    virtual TestFunc collideTypes();
 
-   GameObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
+   BfObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);
    void computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *objHit);
    void computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint);
    F32 computeMinSeperationTime(U32 stateIndex, MoveObject *contactObject, Point intendedPos);
@@ -153,7 +153,7 @@ public:
 
    LUAW_DECLARE_CLASS(MoveItem);
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
@@ -183,7 +183,7 @@ public:
    virtual void onMountDestroyed();
    virtual void onItemDropped();
 
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
 
    // LuaItem interface
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
@@ -226,7 +226,7 @@ public:
 
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
    void setPosAng(Point pos, F32 ang);
 
    // Asteroid does not collide to another asteroid
@@ -300,10 +300,10 @@ public:
 
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
    void setPosAng(Point pos, F32 ang);
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -338,7 +338,7 @@ public:
 
 class Worm : public PointObject
 {
-typedef GameObject Parent;
+typedef BfObject Parent;
 
 public:
    static const S32 WORM_RADIUS = 5;
@@ -378,12 +378,12 @@ public:
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
    void setPosAng(Point pos, F32 ang);
    void setNextAng(F32 nextAng);
 
    void damageObject(DamageInfo *theInfo);
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
@@ -405,7 +405,7 @@ public:
    TestItem *clone() const;
 
    // Test methods
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
    static const S32 TEST_ITEM_RADIUS = 60;
 
@@ -447,7 +447,7 @@ public:
    static const S32 RESOURCE_ITEM_RADIUS = 20;
 
    void renderItem(const Point &pos);
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
    void onItemDropped();
 

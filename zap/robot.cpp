@@ -259,7 +259,7 @@ S32 LuaRobot::setThrust(lua_State *L)
 }
 
 
-bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
+bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
    Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
    offset.normalize(aimRadius * 1.2f);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
@@ -305,7 +305,7 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
    target->disableCollision();
    Point delta2 = delta;
    delta2.normalize(aimLife * aimVel / 1000);
-   GameObject *hitObject = target->findObjectLOS((TestFunc)isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
+   BfObject *hitObject = target->findObjectLOS((TestFunc)isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
    target->enableCollision();
 
    if(ignoreFriendly && hitObject && hitObject->getTeam() == aimTeam)
@@ -326,7 +326,7 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
    static const char *methodName = "Robot:getFiringSolution()";
    checkArgCount(L, 2, methodName);
    U32 type = (U32)getInt(L, 1, methodName);
-   GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
+   BfObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
    WeaponInfo weap = GameWeapon::weaponInfo[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
@@ -346,7 +346,7 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
    static const char *methodName = "Robot:getInterceptCourse()";
    checkArgCount(L, 2, methodName);
    U32 type = (U32)getInt(L, 1, methodName);
-   GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
+   BfObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
 //   WeaponInfo weap = GameWeapon::weaponInfo[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
@@ -722,7 +722,7 @@ S32 LuaRobot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
             continue;
       }
 
-      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
       obj->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
@@ -971,7 +971,7 @@ S32 LuaRobot::copyMoveFromObject(lua_State *L)
    checkArgCount(L, 2, methodName);
    U32 type = (U32)getInt(L, 1, methodName);
    LuaItem *luaobj = getItem(L, 2, type, methodName);
-   GameObject *obj = luaobj->getGameObject();
+   BfObject *obj = luaobj->getGameObject();
 
    Move move = obj->getCurrentMove();
    move.time = thisRobot->getCurrentMove().time; // keep current move time
@@ -1497,7 +1497,7 @@ bool Robot::findNearestShip(Point &loc)
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      GameObject *foundObject = dynamic_cast<GameObject *>(foundObjects[i]);
+      BfObject *foundObject = dynamic_cast<BfObject *>(foundObjects[i]);
       F32 d = foundObject->getPos().distanceTo(pos);
       if(d < dist && d > 0)      // d == 0 means we're comparing to ourselves
       {
@@ -1565,14 +1565,14 @@ void Robot::render(S32 layerIndex)
 }
 
 
-void Robot::idle(GameObject::IdleCallPath path)
+void Robot::idle(BfObject::IdleCallPath path)
 {
-   TNLAssert(path != GameObject::ServerIdleControlFromClient, "Should never idle with ServerIdleControlFromClient");
+   TNLAssert(path != BfObject::ServerIdleControlFromClient, "Should never idle with ServerIdleControlFromClient");
 
    if(hasExploded)
       return;
 
-   if(path != GameObject::ServerIdleMainLoop)   
+   if(path != BfObject::ServerIdleMainLoop)   
       Parent::idle(path);                       
    else                         
    {
@@ -1582,7 +1582,7 @@ void Robot::idle(GameObject::IdleCallPath path)
 
       tickTimer(deltaT);
 
-      Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
+      Parent::idle(BfObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
    }
 }
 

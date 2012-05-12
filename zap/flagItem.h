@@ -77,7 +77,7 @@ public:
    virtual void sendHome();
 
    virtual void onMountDestroyed();
-   virtual bool collide(GameObject *hitObject);
+   virtual bool collide(BfObject *hitObject);
 
    TestFunc collideTypes();
 
@@ -87,7 +87,7 @@ public:
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   virtual void idle(GameObject::IdleCallPath path);
+   virtual void idle(BfObject::IdleCallPath path);
 
    // For tracking GoalZones where the flag might be at the moment
    void setZone(GoalZone *goalZone);

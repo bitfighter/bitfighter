@@ -69,10 +69,11 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public GameObject     // Does this really need to be a gameObject?
+class BotNavMeshZone : public BfObject     // Does this really need to be a gameObject?
 {
+   typedef BfObject Parent;
+
 private:   
-   typedef GameObject Parent;
    U16 mZoneId;                                          // Unique ID for each zone
    static Vector<BotNavMeshZone *> mAllZones;   
 
@@ -105,7 +106,7 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
    // Only gets run on the server, never on client
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
 
    // These methods will be empty later...
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

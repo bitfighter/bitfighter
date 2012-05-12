@@ -153,7 +153,7 @@ public:
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
-   bool collide(GameObject *otherObject);
+   bool collide(BfObject *otherObject);
 
    bool isBeingAttacked();
 
@@ -181,7 +181,7 @@ public:
    void doPanelDebris(S32 panelIndex);
 #endif
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;

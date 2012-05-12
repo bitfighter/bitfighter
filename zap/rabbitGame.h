@@ -65,7 +65,7 @@ public:
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
-   void idle(GameObject::IdleCallPath path, U32 deltaT);
+   void idle(BfObject::IdleCallPath path, U32 deltaT);
 
    void addFlag(FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item);
@@ -74,8 +74,8 @@ public:
    bool isFlagGame();
    S32 getFlagCount();
 
-   bool objectCanDamageObject(GameObject *damager, GameObject *victim);
-   void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
+   bool objectCanDamageObject(BfObject *damager, BfObject *victim);
+   void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool shipHasFlag(Ship *ship);
    bool teamHasFlag(S32 team) const;
 

@@ -181,7 +181,7 @@ S32 PolygonObject::getTeamIndx(lua_State *L)
 }
 
 
-GameObject *PolygonObject::getGameObject()
+BfObject *PolygonObject::getGameObject()
 {
    return this;
 }

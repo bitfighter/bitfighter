@@ -125,7 +125,7 @@ S32 LuaProjectile::getTeamIndx(lua_State *L)
 }
 
 
-GameObject *LuaProjectile::getGameObject()
+BfObject *LuaProjectile::getGameObject()
 {
    TNLAssert(false, "Unimplemented method!");
    return NULL;
@@ -148,7 +148,7 @@ void LuaProjectile::push(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
 // Constructor
-Projectile::Projectile(WeaponType type, Point pos, Point vel, GameObject *shooter)
+Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
 {
    mObjectTypeNumber = BulletTypeNumber;
    setNewGeometry(geomPoint);
@@ -261,7 +261,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
+void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
    collided = true;
    Ship *s = dynamic_cast<Ship *>(hitObject);
@@ -291,7 +291,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 }
 
 
-void Projectile::idle(GameObject::IdleCallPath path)
+void Projectile::idle(BfObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
 
@@ -313,7 +313,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          Point endPos = startPos + mVelocity * timeLeft * 0.001f;
 
          // Check for collision along projected route of movement
-         static Vector<GameObject *> disabledList;
+         static Vector<BfObject *> disabledList;
 
          Rect queryRect(startPos, endPos);     // Bounding box of our travels
 
@@ -327,7 +327,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
             mShooter->disableCollision();
          }
 
-         GameObject *hitObject;
+         BfObject *hitObject;
 
          F32 collisionTime;
          Point surfNormal;
@@ -427,7 +427,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
             //for(S32 i = 0; i < targetItems.size(); i++)
             //{
-            //   GameObject *target = dynamic_cast<GameObject *>(targetItems[i]);
+            //   BfObject *target = dynamic_cast<BfObject *>(targetItems[i]);
             //   dist.set(pos - target->getActualPos());
 
             //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
@@ -457,7 +457,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          
 
    // Kill old projectiles
-   if(alive && path == GameObject::ServerIdleMainLoop)
+   if(alive && path == BfObject::ServerIdleMainLoop)
    {
       if(mTimeRemaining <= deltaT)
       {
@@ -479,7 +479,7 @@ void Projectile::damageObject(DamageInfo *info)
 }
 
 
-void Projectile::explode(GameObject *hitObject, Point pos)
+void Projectile::explode(BfObject *hitObject, Point pos)
 {
 #ifndef ZAP_DEDICATED
    // Do some particle spew...
@@ -572,7 +572,7 @@ void Projectile::push(lua_State *L)
 
 
 // For getting the underlying object when all we have is a Lua pointer to it
-GameObject *Projectile::getGameObject()
+BfObject *Projectile::getGameObject()
 {
    return this;
 }
@@ -589,7 +589,7 @@ TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
 #endif
 
 // Constructor
-BurstProjectile::BurstProjectile(Point pos, Point vel, GameObject *shooter): MoveItem(pos, true, mRadius, mMass)
+BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, mRadius, mMass)
 {
    mObjectTypeNumber = BulletTypeNumber;
 
@@ -663,7 +663,7 @@ void BurstProjectile::idle(IdleCallPath path)
 
    // Update TTL
    S32 deltaT = mCurrentMove.time;
-   if(path == GameObject::ClientIdleMainRemote)
+   if(path == BfObject::ClientIdleMainRemote)
       mTimeRemaining += deltaT;
    else if(!exploded)
    {
@@ -754,7 +754,7 @@ void BurstProjectile::explode(Point pos, WeaponType weaponType)
 }
 
 
-bool BurstProjectile::collide(GameObject *otherObj)
+bool BurstProjectile::collide(BfObject *otherObj)
 {
    return true;
 }
@@ -817,7 +817,7 @@ void BurstProjectile::push(lua_State *L)
 
 
 // For getting the underlying object when all we have is a Lua pointer to it
-GameObject *BurstProjectile::getGameObject()
+BfObject *BurstProjectile::getGameObject()
 {
    return this;
 }
@@ -896,7 +896,7 @@ void Mine::idle(IdleCallPath path)
    // Skip the grenade timing goofiness...
    MoveItem::idle(path);
 
-   if(exploded || path != GameObject::ServerIdleMainLoop)
+   if(exploded || path != BfObject::ServerIdleMainLoop)
       return;
 
    // And check for enemies in the area...
@@ -911,7 +911,7 @@ void Mine::idle(IdleCallPath path)
    bool foundItem = false;
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
 
       F32 radius;
       Point ipos;
@@ -949,7 +949,7 @@ void Mine::idle(IdleCallPath path)
 }
 
 
-bool Mine::collide(GameObject *otherObj)
+bool Mine::collide(BfObject *otherObj)
 {
    if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos(), WeaponMine);
@@ -1244,12 +1244,12 @@ void SpyBug::idle(IdleCallPath path)
    // Skip the grenade timing goofiness...
    MoveItem::idle(path);
 
-   if(exploded || path != GameObject::ServerIdleMainLoop)
+   if(exploded || path != BfObject::ServerIdleMainLoop)
       return;
 }
 
 
-bool SpyBug::collide(GameObject *otherObj)
+bool SpyBug::collide(BfObject *otherObj)
 {
    if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos(), WeaponSpyBug);

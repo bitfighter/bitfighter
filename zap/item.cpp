@@ -272,7 +272,7 @@ REGISTER_LUA_CLASS(Item);
 
 
 // For getting the underlying object when all we have is a Lua pointer to it
-GameObject *Item::getGameObject()
+BfObject *Item::getGameObject()
 {
    return this;
 }

@@ -202,7 +202,7 @@ bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-bool GoalZone::collide(GameObject *hitObject)
+bool GoalZone::collide(BfObject *hitObject)
 {
    if( !isGhost() && (isShipType(hitObject->getObjectTypeNumber())) )
    {
@@ -282,9 +282,9 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void GoalZone::idle(GameObject::IdleCallPath path)
+void GoalZone::idle(BfObject::IdleCallPath path)
 {
-   if(path != GameObject::ClientIdleMainRemote || mFlashCount == 0)
+   if(path != BfObject::ClientIdleMainRemote || mFlashCount == 0)
       return;
 
    if(mFlashTimer.update(mCurrentMove.time))

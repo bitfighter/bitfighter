@@ -171,7 +171,7 @@ bool LoadoutZone::getCollisionPoly(Vector<Point> &polyPoints) const
 
 
 // Gets called on both client and server
-bool LoadoutZone::collide(GameObject *hitObject)
+bool LoadoutZone::collide(BfObject *hitObject)
 {
    // Anyone can use neutral loadout zones
    if(!isGhost() &&                                                           // On the server

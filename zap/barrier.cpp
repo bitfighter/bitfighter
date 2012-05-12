@@ -248,7 +248,7 @@ const Vector<Point> *Barrier::getCollisionPolyPtr() const
 }
 
 
-bool Barrier::collide(GameObject *otherObject)
+bool Barrier::collide(BfObject *otherObject)
 {
    return true;
 }

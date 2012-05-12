@@ -34,7 +34,7 @@ namespace Zap
 
 class SlipZone : public PolygonObject
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 public:
 	F32 slipAmount;   // 0.0 to 1.0 , lower = more slippy
@@ -49,7 +49,7 @@ public:
 
    void onAddedToGame(Game *theGame);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

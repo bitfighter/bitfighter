@@ -332,12 +332,12 @@ bool TextItem::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 // Handle collisions with a TextItem.  Easy, there are none.
-bool TextItem::collide(GameObject *hitObject)
+bool TextItem::collide(BfObject *hitObject)
 {
    return false;
 }
 
-void TextItem::idle(GameObject::IdleCallPath path)
+void TextItem::idle(BfObject::IdleCallPath path)
 {
    // Laze about, read a book, take a nap, whatever.
 }
@@ -590,13 +590,13 @@ bool LineItem::getCollisionPoly(Vector<Point> &polyPoints) const
 
 
 // Handle collisions with a LineItem.  Easy, there are none.
-bool LineItem::collide(GameObject *hitObject)
+bool LineItem::collide(BfObject *hitObject)
 {
    return false;
 }
 
 
-void LineItem::idle(GameObject::IdleCallPath path)
+void LineItem::idle(BfObject::IdleCallPath path)
 {
    // Do nothing
 }

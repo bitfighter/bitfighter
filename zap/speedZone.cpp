@@ -381,7 +381,7 @@ string SpeedZone::getAttributeString()
 static bool ignoreThisCollision = false;
 
 // Checks collisions with a SpeedZone
-bool SpeedZone::collide(GameObject *hitObject)
+bool SpeedZone::collide(BfObject *hitObject)
 {
    if(ignoreThisCollision)
       return false;
@@ -477,7 +477,7 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 }
 
 
-void SpeedZone::idle(GameObject::IdleCallPath path)
+void SpeedZone::idle(BfObject::IdleCallPath path)
 {
    if(mRotateSpeed != 0)
    {

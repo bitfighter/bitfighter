@@ -1951,7 +1951,7 @@ void EditorUserInterface::renderObjects(EditorObjectDatabase *database, RenderMo
 
          if(mPreviewMode)
          {
-            GameObject *gameObject = dynamic_cast<GameObject *>(obj);
+            BfObject *gameObject = dynamic_cast<BfObject *>(obj);
             if(gameObject)
                gameObject->render();
          }

@@ -62,7 +62,7 @@ public:
 
    void push(lua_State *L);
 
-   GameObject *getGameObject();
+   BfObject *getGameObject();
 };
 
 
@@ -70,9 +70,9 @@ public:
 ////////////////////////////////////
 
 // Basic bullet object
-class Projectile : public GameObject, public LuaProjectile
+class Projectile : public BfObject, public LuaProjectile
 {
-   typedef GameObject Parent;
+   typedef BfObject Parent;
 
 private:
    static const S32 COMPRESSED_VELOCITY_MAX = 2047;
@@ -95,19 +95,19 @@ public:
    bool hitShip;
    bool alive;
    bool hasBounced;
-   SafePtr<GameObject> mShooter;
+   SafePtr<BfObject> mShooter;
 
-   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);    // Constructor
+   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);    // Constructor
    ~Projectile();                                                                                                       // Destructor
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void handleCollision(GameObject *theObject, Point collisionPoint);
+   void handleCollision(BfObject *theObject, Point collisionPoint);
 
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
    void damageObject(DamageInfo *info);
-   void explode(GameObject *hitObject, Point p);
+   void explode(BfObject *hitObject, Point p);
 
    virtual Point getRenderVel() const;
    virtual Point getActualVel() const;
@@ -126,7 +126,7 @@ public:
    S32 getWeapon(lua_State *L);  // Return which type of weapon this is
 
    void push(lua_State *L);
-   GameObject *getGameObject();  // Return the underlying GameObject
+   BfObject *getGameObject();  // Return the underlying GameObject
 
 };
 
@@ -138,7 +138,7 @@ private:
    typedef MoveItem Parent;
 
 public:
-   BurstProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);     // Constructor
+   BurstProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
    ~BurstProjectile();                                                                        // Destructor
 
    enum Constants
@@ -152,7 +152,7 @@ public:
 
    S32 mTimeRemaining;
    bool exploded;
-   bool collide(GameObject *otherObj);   // Things (like bullets) can collide with grenades
+   bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
 
    WeaponType mWeaponType;
    void renderItem(const Point &pos);
@@ -179,7 +179,7 @@ public:
    S32 getWeapon(lua_State *L);    // Return which type of weapon this is
 
    void push(lua_State *L);
-   GameObject *getGameObject();  // Return the underlying GameObject
+   BfObject *getGameObject();  // Return the underlying GameObject
 };
 
 
@@ -206,7 +206,7 @@ public:
 
    bool mArmed;
    SafePtr<GameConnection> mOwnerConnection;
-   bool collide(GameObject *otherObj);
+   bool collide(BfObject *otherObj);
    void idle(IdleCallPath path);
 
    void damageObject(DamageInfo *damageInfo);
@@ -268,7 +268,7 @@ public:
 
 
    SafePtr<GameConnection> mOwnerConnection;
-   bool collide(GameObject *otherObj);
+   bool collide(BfObject *otherObj);
    void idle(IdleCallPath path);
 
    void damageObject(DamageInfo *damageInfo);

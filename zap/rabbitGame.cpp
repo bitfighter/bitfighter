@@ -197,7 +197,7 @@ S32 RabbitGameType::getFlagScore() const
 }
 
 
-bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
+bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 {
    if(getGame()->getTeamCount() != 1)
       return Parent::objectCanDamageObject(damager, victim);
@@ -268,10 +268,10 @@ bool RabbitGameType::shipHasFlag(Ship *ship)
 }
 
 
-void RabbitGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
+void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
-   if(path != GameObject::ServerIdleMainLoop)
+   if(path != BfObject::ServerIdleMainLoop)
       return;
 
    for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
@@ -308,7 +308,7 @@ void RabbitGameType::idle(GameObject::IdleCallPath path, U32 deltaT)
 }
 
 
-void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject)
+void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject)
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 

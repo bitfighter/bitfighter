@@ -71,7 +71,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    F32 collisionTime;
 
-   GameObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, startPoint, endPoint,
+   BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, startPoint, endPoint,
                                                collisionTime, deployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
@@ -709,7 +709,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
 }
 
 
-bool EngineeredItem::collide(GameObject *hitObject)
+bool EngineeredItem::collide(BfObject *hitObject)
 {
    return true;
 }
@@ -840,7 +840,7 @@ bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, Gr
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Vector<Point> foundObjectBounds;
-      dynamic_cast<GameObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
+      dynamic_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
 
       if(polygonsIntersect(thisBounds, foundObjectBounds))     // Do they intersect?
          return false;     // Bad location
@@ -1047,7 +1047,7 @@ void ForceFieldProjector::onDisabled()
 }
 
 
-void ForceFieldProjector::idle(GameObject::IdleCallPath path)
+void ForceFieldProjector::idle(BfObject::IdleCallPath path)
 {
    if(path != ServerIdleMainLoop)
       return;
@@ -1339,7 +1339,7 @@ ForceField::ForceField(S32 team, Point start, Point end)
 }
 
 
-bool ForceField::collide(GameObject *hitObject)
+bool ForceField::collide(BfObject *hitObject)
 {
    if(!mFieldUp)
       return false;
@@ -1383,7 +1383,7 @@ bool ForceField::intersects(ForceField *forceField)
 }
 
 
-void ForceField::idle(GameObject::IdleCallPath path)
+void ForceField::idle(BfObject::IdleCallPath path)
 {
    if(path != ServerIdleMainLoop)
       return;
@@ -1701,7 +1701,7 @@ void Turret::idle(IdleCallPath path)
    fillVector.clear();
    findObjects((TestFunc)isTurretTargetType, fillVector, queryRect);    // Get all potential targets
 
-   GameObject *bestTarget = NULL;
+   BfObject *bestTarget = NULL;
    F32 bestRange = F32_MAX;
    Point bestDelta;
 
@@ -1723,7 +1723,7 @@ void Turret::idle(IdleCallPath path)
       if(item && item->isMounted())
          continue;
 
-      GameObject *potential = dynamic_cast<GameObject *>(fillVector[i]);
+      BfObject *potential = dynamic_cast<BfObject *>(fillVector[i]);
       if(potential->getTeam() == mTeam)      // Is target on our team?
          continue;                           // ...if so, skip it!
 
@@ -1758,7 +1758,7 @@ void Turret::idle(IdleCallPath path)
       disableCollision();
       Point delta2 = delta;
       delta2.normalize(GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity / 1000.f);
-      GameObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
+      BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
       if(hitObject && hitObject->getTeam() == mTeam)

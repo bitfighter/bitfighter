@@ -400,7 +400,7 @@ public:
 
    void onLevelLoaded();      // Server-side function run once level is loaded from file
 
-   virtual void idle(GameObject::IdleCallPath path, U32 deltaT);
+   virtual void idle(BfObject::IdleCallPath path, U32 deltaT);
 
    void gameOverManGameOver();
    VersionedGameStats getGameStats();
@@ -414,8 +414,8 @@ public:
 
    void serverRemoveClient(ClientInfo *clientInfo);   // Remove a client from the game
 
-   virtual bool objectCanDamageObject(GameObject *damager, GameObject *victim);
-   virtual void controlObjectForClientKilled(ClientInfo *theClient, GameObject *clientObject, GameObject *killerObject);
+   virtual bool objectCanDamageObject(BfObject *damager, BfObject *victim);
+   virtual void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
 
    virtual bool spawnShip(ClientInfo *clientInfo);
    virtual void spawnRobot(Robot *robot);
@@ -424,14 +424,14 @@ public:
 
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
-   void renderObjectiveArrow(const GameObject *target, const Color *c, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod = 1.0f) const;
    void renderObjectiveArrow(const Point *p, const Color *c, F32 alphaMod = 1.0f) const;
 #endif
 
    void addTime(U32 time);          // Extend the game by time (in ms)
 
    void SRV_clientRequestLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout);
-   void SRV_updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
+   void SRV_updateShipLoadout(BfObject *shipObject); // called from LoadoutZone when a Ship touches the zone
    string validateLoadout(const Vector<U8> &loadout);
    void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent = false);
 
@@ -440,7 +440,7 @@ public:
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
    virtual const Color *getShipColor(Ship *s);        // Get the color of a ship
    virtual const Color *getTeamColor(S32 team) const; // Get the color of a team, based on index
-   const Color *getTeamColor(GameObject *theObject);  // Get the color of a team, based on object
+   const Color *getTeamColor(BfObject *theObject);  // Get the color of a team, based on object
 
    //S32 getTeam(const StringTableEntry &playerName);   // Given a player's name, return their team
 
@@ -456,7 +456,7 @@ public:
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
-   virtual void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
+   virtual void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
    virtual void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 

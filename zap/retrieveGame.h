@@ -66,7 +66,7 @@ public:
    void majorScoringEventOcurred(S32 team);
 
    // Same code as in HTF, CTF
-   void performProxyScopeQuery(GameObject *scopeObject, ClientInfo *clientInfo);
+   void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
 
 
    // Runs on client

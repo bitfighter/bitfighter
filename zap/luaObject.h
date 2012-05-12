@@ -52,7 +52,7 @@ using namespace TNL;
 namespace Zap
 {
 
-class GameObject;
+class BfObject;
 class LuaPlayerInfo;
 class Ship;
 class MenuItem;
@@ -221,7 +221,7 @@ public:
    virtual S32 getRad(lua_State *L) = 0;       // Radius of item (returns number)
    virtual S32 getVel(lua_State *L) = 0;       // Speed of item (returns point)
    virtual S32 getTeamIndx(lua_State *L) = 0;  // Team of item (returns team index)
-   virtual GameObject *getGameObject() = 0;    // Return the underlying GameObject
+   virtual BfObject *getGameObject() = 0;    // Return the underlying GameObject
 
    virtual void push(lua_State *L);            // Push item onto stack
    virtual S32 getClassID(lua_State *L);       // Object's class

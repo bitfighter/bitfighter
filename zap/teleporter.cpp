@@ -238,7 +238,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void Teleporter::idle(GameObject::IdleCallPath path)
+void Teleporter::idle(BfObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
@@ -252,7 +252,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    else
       timeout = 0;
 
-   if(path != GameObject::ServerIdleMainLoop)
+   if(path != BfObject::ServerIdleMainLoop)
       return;
 
    // Check for players within range.  If found, send them to dest.
@@ -294,7 +294,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
             ship->getClientInfo()->getStatistics()->mTeleport++;
 
          // See if we've teleported onto a loadout zone
-         GameObject *obj = ship->isInZone(LoadoutZoneTypeNumber);
+         BfObject *obj = ship->isInZone(LoadoutZoneTypeNumber);
          if(obj)
          {
             LoadoutZone *zone = static_cast<LoadoutZone *>(obj);
@@ -471,7 +471,7 @@ S32 Teleporter::getTeamIndx(lua_State *L)
 }
 
 
-GameObject *Teleporter::getGameObject()
+BfObject *Teleporter::getGameObject()
 {
    return this;
 }

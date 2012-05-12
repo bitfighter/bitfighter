@@ -106,14 +106,14 @@ public:
    void renderItem(const Point &pos);
    void sendHome();
    void damageObject(DamageInfo *theInfo);
-   void idle(GameObject::IdleCallPath path);
+   void idle(BfObject::IdleCallPath path);
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);
    void onItemDropped();
 
-   bool collide(GameObject *hitObject);
+   bool collide(BfObject *hitObject);
 
    TNL_DECLARE_CLASS(SoccerBallItem);
 
