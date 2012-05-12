@@ -601,7 +601,7 @@ void Ship::idle(BfObject::IdleCallPath path)
 
    Parent::idle(path);
 
-   if(path == BfObject::ServerIdleMainLoop && isControlled())
+   if(path == BfObject::ServerIdleMainLoop && controllingClientIsValid())
    {
       // If this is a controlled object in the server's main
       // idle loop, process the render state forward -- this

@@ -227,6 +227,16 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)
 }
 
 
+//bool isMoveItemType(U8 x)
+//{
+//   return x == 
+//}
+//
+//bool isMoveObjectType(U8 x)
+//{
+//   return isMoveItem(x) || isShipType(x); 
+//}
+
 bool isAnyObjectType(U8 x)
 {
    return true;
@@ -930,7 +940,7 @@ BfObject::~BfObject()
 }
 
 
-bool BfObject::isControlled()
+bool BfObject::controllingClientIsValid()
 {
    return mControllingClient.isValid();
 }

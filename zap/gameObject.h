@@ -297,10 +297,9 @@ public:
    BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
    BfObject *findObjectLOS(TestFunc, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
 
-   bool isControlled();
-
+   bool controllingClientIsValid();                   // Checks if controllingClient is valid
    SafePtr<GameConnection> getControllingClient();
-   void setControllingClient(GameConnection *c);         // This only gets run on the server
+   void setControllingClient(GameConnection *c);      // This only gets run on the server
 
    void setOwner(ClientInfo *clientInfo);
    ClientInfo *getOwner();
