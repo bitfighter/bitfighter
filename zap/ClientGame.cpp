@@ -1353,7 +1353,7 @@ Ship *ClientGame::findShip(const StringTableEntry &clientName)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+      Ship *ship = static_cast<Ship *>(fillVector[i]);
       if(ship->getClientInfo()->getName() == clientName)
          return ship;
    }
@@ -1563,7 +1563,7 @@ static void fillRenderZones()
 {
    renderZones.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderZones.push_back(dynamic_cast<BotNavMeshZone *>(rawRenderObjects[i]));
+      renderZones.push_back(static_cast<BotNavMeshZone *>(rawRenderObjects[i]));
 }
 
 // Fills renderZones for drawing botNavMeshZones
@@ -1639,16 +1639,15 @@ void ClientGame::renderCommander()
    renderObjects.clear();
 
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
+      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
       for(S32 i = 0; i < Robot::getBotCount(); i++)
          renderObjects.push_back(Robot::getBot(i));
 
    // If we're drawing bot zones, get them now
-   if(/*gServerGame && */isShowingDebugMeshZones())
+   if(isShowingDebugMeshZones())
       populateRenderZones();
-
 
    if(ship)
    {
@@ -1667,7 +1666,7 @@ void ClientGame::renderCommander()
             if(renderObjects[i]->getObjectTypeNumber() == PlayerShipTypeNumber ||
                   renderObjects[i]->getObjectTypeNumber() == RobotShipTypeNumber)
             {
-               Ship *otherShip = dynamic_cast<Ship *>(renderObjects[i]);
+               Ship *otherShip = static_cast<Ship *>(renderObjects[i]);
 
                // Get team of this object
                S32 otherShipTeam = otherShip->getTeam();
@@ -1688,7 +1687,7 @@ void ClientGame::renderCommander()
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < fillVector.size(); i++)
          {
-            SpyBug *sb = dynamic_cast<SpyBug *>(fillVector[i]);
+            SpyBug *sb = static_cast<SpyBug *>(fillVector[i]);
 
             if(sb->isVisibleToPlayer(playerTeam, getConnectionToServer() ? getClientInfo()->getName() : StringTableEntry(""), 
                                      getGameType()->isTeamGame()))
@@ -1757,7 +1756,7 @@ void ClientGame::renderOverlayMap()
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    BfObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *ship = dynamic_cast<Ship *>(controlObject);
+   Ship *ship = static_cast<Ship *>(controlObject);
 
    Point position = ship->getRenderPos();
 
@@ -1795,7 +1794,7 @@ void ClientGame::renderOverlayMap()
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
+      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
 
    renderObjects.sort(renderSortCompare);
@@ -1860,13 +1859,13 @@ void ClientGame::renderNormal()
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
-      renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
+      renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
 
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
-   if(/*gServerGame && */isShowingDebugMeshZones())
+   if(isShowingDebugMeshZones())
       populateRenderZones(extentRect);
 
 
