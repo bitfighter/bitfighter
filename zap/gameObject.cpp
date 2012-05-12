@@ -331,28 +331,23 @@ string GeometryContainer::geomToString(F32 gridSize) const
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// BfObject - the declerations are in BfObject.h
 
 // Constructor
-BfObject::BfObject()
+GeomObject::GeomObject()
 {
-   mGame = NULL;
-   mObjectTypeNumber = UnknownTypeNumber;
-
-   mLitUp = false; 
-   mSelected = false; 
-   assignNewSerialNumber();
-
-   mTeam = -1;
-   mDisableCollisionCount = 0;
-   mCreationTime = 0;
-
-   mOwner = NULL;
+   // Do nothing
 }
 
 
-// mGeometry will be deleted in destructor
-void BfObject::setNewGeometry(GeomType geomType)
+// Destructor
+GeomObject::~GeomObject()
+{
+   // Do nothing
+};
+
+
+   // mGeometry will be deleted in destructor
+void GeomObject::setNewGeometry(GeomType geomType)
 {
    TNLAssert(!mGeometry.getGeometry(), "This object already has a geometry!");
 
@@ -378,6 +373,153 @@ void BfObject::setNewGeometry(GeomType geomType)
          TNLAssert(false, "Unknown geometry!");
          break;
    }
+}
+
+
+// Basic definitions
+GeomType GeomObject::getGeomType()              {   return mGeometry.getGeometry()->getGeomType();   }
+Point   GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);  }
+
+bool GeomObject::deleteVert(S32 vertIndex)               
+{   
+   if(mGeometry.getGeometry()->deleteVert(vertIndex))
+   {
+      onPointsChanged();  
+      return true;
+   }
+
+   return false;
+}
+
+
+bool GeomObject::insertVert(Point vertex, S32 vertIndex) 
+{   
+   if(mGeometry.getGeometry()->insertVert(vertex, vertIndex))
+   {
+      onPointsChanged();
+      return true;
+   }
+
+   return false;
+}
+
+
+void GeomObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
+                                                                                           
+bool GeomObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
+S32 GeomObject::getVertCount() const         {   return mGeometry.getGeometry()->getVertCount();            }
+S32 GeomObject::getMinVertCount() const      {   return mGeometry.getGeometry()->getMinVertCount();         }
+
+void GeomObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
+
+
+bool GeomObject::addVertFront(Point vert)
+{
+   if(mGeometry.getGeometry()->addVertFront(vert))
+   {
+      onPointsChanged();
+      return true;
+   }
+
+   return false;
+}
+
+
+bool GeomObject::addVert(const Point &point, bool ignoreMaxPointsLimit) 
+{
+   if(mGeometry.getGeometry()->addVert(point, ignoreMaxPointsLimit))
+   {
+      onPointsChanged();
+      return true;
+   }
+
+   return false;
+}
+
+
+// Vertex selection -- only needed in editor
+void GeomObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->selectVert(vertIndex);            }
+void GeomObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
+void GeomObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
+void GeomObject::unselectVerts()             {   mGeometry.getGeometry()->unselectVerts();                  }
+     
+bool GeomObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
+
+// Geometric calculations
+Point GeomObject::getCentroid()     {   return mGeometry.getGeometry()->getCentroid();     }
+F32  GeomObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
+      
+
+// Geometry operations
+const Vector<Point> *GeomObject::getOutline() const       {   return mGeometry.getOutline();    }
+const Vector<Point> *GeomObject::getFill() const          {   return mGeometry.getFill();       }
+
+Rect GeomObject::calcExtents()                            {   return mGeometry.getGeometry()->calcExtents();   }
+
+
+// Geometric manipulations
+void GeomObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
+void GeomObject::flip(F32 center, bool isHoriz)                    {  mGeometry.getGeometry()->flip(center, isHoriz);             }
+void GeomObject::scale(const Point &center, F32 scale)             {  mGeometry.getGeometry()->scale(center, scale);              }
+
+// Move object to location, specifying (optional) vertex to be positioned at pos
+void GeomObject::moveTo(const Point &pos, S32 snapVertex)          {  mGeometry.getGeometry()->moveTo(pos, snapVertex);           }
+void GeomObject::offset(const Point &offset)                       {  mGeometry.getGeometry()->offset(offset);                    }
+
+// Geom in-out
+void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
+void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
+
+void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
+{  
+   mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
+   onPointsChanged();
+} 
+
+string GeomObject::geomToString(F32 gridSize) const {  return mGeometry.geomToString(gridSize);  }
+
+// Settings
+void GeomObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
+
+
+void GeomObject::onGeomChanging()
+{
+   if(getGeomType() == geomPolygon)
+      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
+
+   onPointsChanged();
+}
+
+
+void GeomObject::onGeomChanged() {  /* Do nothing */ }
+
+
+void GeomObject::onPointsChanged()                        
+{   
+   mGeometry.getGeometry()->onPointsChanged();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// BfObject - the declerations are in BfObject.h
+
+// Constructor
+BfObject::BfObject()
+{
+   mGame = NULL;
+   mObjectTypeNumber = UnknownTypeNumber;
+
+   mLitUp = false; 
+   mSelected = false; 
+   assignNewSerialNumber();
+
+   mTeam = -1;
+   mDisableCollisionCount = 0;
+   mCreationTime = 0;
+
+   mOwner = NULL;
 }
 
 
@@ -501,7 +643,7 @@ void BfObject::setPos(const Point &pos)
 
 void BfObject::onPointsChanged()                        
 {   
-   mGeometry.getGeometry()->onPointsChanged();
+   GeomObject::onPointsChanged();
    updateExtentInDatabase();      
 }
 
@@ -510,76 +652,6 @@ void BfObject::updateExtentInDatabase()
 {
    setExtent(calcExtents());    // Make sure the database extents are in sync with where the object actually is
 }
-
-
-// Basic definitions
-GeomType BfObject::getGeomType()              {   return mGeometry.getGeometry()->getGeomType();   }
-Point    BfObject::getVert(S32 index) const   {   return mGeometry.getVert(index);  }
-
-bool BfObject::deleteVert(S32 vertIndex)               
-{   
-   if(mGeometry.getGeometry()->deleteVert(vertIndex))
-   {
-      onPointsChanged();  
-      return true;
-   }
-
-   return false;
-}
-
-
-bool  BfObject::insertVert(Point vertex, S32 vertIndex) 
-{   
-   if(mGeometry.getGeometry()->insertVert(vertex, vertIndex))
-   {
-      onPointsChanged();
-      return true;
-   }
-
-   return false;
-}
-
-
-void  BfObject::setVert(const Point &pos, S32 index)    { mGeometry.getGeometry()->setVert(pos, index); }
-                                                                                           
-bool BfObject::anyVertsSelected()          {   return mGeometry.getGeometry()->anyVertsSelected();        }
-S32  BfObject::getVertCount() const        {   return mGeometry.getGeometry()->getVertCount();            }
-S32  BfObject::getMinVertCount() const     {   return mGeometry.getGeometry()->getMinVertCount();         }
-
-void BfObject::clearVerts()                {   mGeometry.getGeometry()->clearVerts(); onPointsChanged();  }                        
-
-
-bool BfObject::addVertFront(Point vert)
-{
-   if(mGeometry.getGeometry()->addVertFront(vert))
-   {
-      onPointsChanged();
-      return true;
-   }
-
-   return false;
-}
-
-
-bool BfObject::addVert(const Point &point, bool ignoreMaxPointsLimit) 
-{
-   if(mGeometry.getGeometry()->addVert(point, ignoreMaxPointsLimit))
-   {
-      onPointsChanged();
-      return true;
-   }
-
-   return false;
-}
-
-
-// Vertex selection -- only needed in editor
-void BfObject::selectVert(S32 vertIndex)   {   mGeometry.getGeometry()->selectVert(vertIndex);            }
-void BfObject::aselectVert(S32 vertIndex)  {   mGeometry.getGeometry()->aselectVert(vertIndex);           }
-void BfObject::unselectVert(S32 vertIndex) {   mGeometry.getGeometry()->unselectVert(vertIndex);          }
-void BfObject::unselectVerts()             {   mGeometry.getGeometry()->unselectVerts();                  }
-
-bool BfObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
 
 
 void BfObject::unselect()
@@ -630,54 +702,9 @@ void BfObject::setVertexLitUp(S32 vertexIndex)
 }
 
 
-// Geometric calculations
-Point BfObject::getCentroid()     {   return mGeometry.getGeometry()->getCentroid();     }
-F32   BfObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
-      
-
-// Geometry operations
-const Vector<Point> *BfObject::getOutline() const       {   return mGeometry.getOutline();    }
-const Vector<Point> *BfObject::getFill() const          {   return mGeometry.getFill();       }
-
-Rect BfObject::calcExtents()                            {   return mGeometry.getGeometry()->calcExtents();   }
-
-
-// Geometric manipulations
-void BfObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
-void BfObject::flip(F32 center, bool isHoriz)                    {  mGeometry.getGeometry()->flip(center, isHoriz);             }
-void BfObject::scale(const Point &center, F32 scale)             {  mGeometry.getGeometry()->scale(center, scale);              }
-
-// Move object to location, specifying (optional) vertex to be positioned at pos
-void BfObject::moveTo(const Point &pos, S32 snapVertex)          {  mGeometry.getGeometry()->moveTo(pos, snapVertex);           }
-void BfObject::offset(const Point &offset)                       {  mGeometry.getGeometry()->offset(offset);                    }
-
-// Geom in-out
-void BfObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
-void BfObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
-
-void BfObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
-{  
-   mGeometry.getGeometry()->readGeom(argc, argv, firstCoord, gridSize); 
-   onPointsChanged();
-} 
-
-string BfObject::geomToString(F32 gridSize) const {  return mGeometry.geomToString(gridSize);  }
-
-// Settings
-void BfObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
-
-
-void BfObject::onGeomChanging()
-{
-   if(getGeomType() == geomPolygon)
-      onGeomChanged();               // Allows poly fill to get reshaped as vertices move
-
-   onPointsChanged();
-}
-
-
 void BfObject::onGeomChanged()
 {
+   GeomObject::onGeomChanged();
    updateExtentInDatabase();
 }
 

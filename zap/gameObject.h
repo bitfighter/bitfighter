@@ -182,12 +182,77 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class GeomObject
+{
+private:
+   GeometryContainer mGeometry;
+
+public:
+   GeomObject();              // Constructor
+   virtual ~GeomObject();     // Destructor
+
+   void setNewGeometry(GeomType geomType);
+
+   GeomType getGeomType();
+
+   virtual Point getVert(S32 index) const;               // Overridden by MoveObject
+   virtual void setVert(const Point &pos, S32 index);    // Overridden by MoveObject
+
+   S32 getMinVertCount() const;       // Minimum  vertices geometry needs to be viable
+   S32 getVertCount() const;          // Actual number of vertices in the geometry
+
+   bool anyVertsSelected();
+   void selectVert(S32 vertIndex);
+   void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
+   void unselectVert(S32 vertIndex);
+
+   void clearVerts();
+   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
+   bool addVertFront(Point vert);
+   bool deleteVert(S32 vertIndex);
+   bool insertVert(Point vertex, S32 vertIndex);
+   void unselectVerts();
+   bool vertSelected(S32 vertIndex);
+
+   // Transforming the geometry
+   void rotateAboutPoint(const Point &center, F32 angle);
+   void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
+   void scale(const Point &center, F32 scale);
+   void moveTo(const Point &pos, S32 snapVertex = 0);     // Move object to location, specifying (optional) vertex to be positioned at pos
+   void offset(const Point &offset);                      // Offset object by a certain amount
+
+   // Getting parts of the geometry
+   Point getCentroid();
+   F32 getLabelAngle();
+   const Vector<Point> *getOutline() const;
+   const Vector<Point> *getFill()    const;
+                                                    
+   virtual Rect calcExtents();
+
+   void disableTriangulation();
+
+   // Sending/receiving
+   void packGeom(GhostConnection *connection, BitStream *stream);
+   void unpackGeom(GhostConnection *connection, BitStream *stream);
+
+   // Saving/loading
+   string geomToString(F32 gridSize) const;
+   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+
+   virtual void onPointsChanged();
+   virtual void onGeomChanging();      // Item geom is interactively changing
+   virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class ClientGame;
 class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject
+class BfObject : public DatabaseObject, public GeomObject, public NetObject
 {
    typedef NetObject Parent;
 
@@ -226,7 +291,6 @@ public:
    S32 getScore();
 
    enum MaskBits {
-      //InitialMask = BIT(0),
       FirstFreeMask = BIT(0)
    };
 
@@ -258,6 +322,7 @@ public:
    // Render is called twice for every object that is in the
    // render list.  By default BfObject will call the render()
    // method one time (when layerIndex == 0).
+   // TODO: Would be better to render once and use different z-order to create layers?
    virtual void render(S32 layerIndex);
    virtual void render();
 
@@ -315,7 +380,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////
 
 private:
-   GeometryContainer mGeometry;
    S32 mSerialNumber;         // Autoincremented serial number  
    S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
 
@@ -339,7 +403,6 @@ public:
    const Color *getColor();
 
    Game *getGame() const;
-   void setNewGeometry(GeomType geomType);
 
    // Manage serial numbers -- every object gets a unique number to help identify it
    void assignNewSerialNumber();
@@ -360,26 +423,8 @@ public:
 
    void onPointsChanged();
    void updateExtentInDatabase();
+   virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
 
-   // Geometric operations
-   void unselectVerts();
-   bool vertSelected(S32 vertIndex);
-   S32 getVertCount() const;
-
-   GeomType getGeomType();
-
-   virtual Point getVert(S32 index) const;               // Overridden by MoveObject
-   virtual void setVert(const Point &pos, S32 index);    // Overridden by MoveObject
-
-   bool anyVertsSelected();
-   void selectVert(S32 vertIndex);
-   void aselectVert(S32 vertIndex);   // Select another vertex (remember cmdline ArcInfo?)
-   void unselectVert(S32 vertIndex);
-
-   S32 getMinVertCount() const;       // Minimum number of vertices geometry needs to be viable
-   void clearVerts();
-   bool addVert(const Point &point, bool ignoreMaxPointsLimit = false);
-   bool addVertFront(Point vert);
 
    // Track some items used in the editor
    void setSelected(bool selected);
@@ -395,48 +440,15 @@ public:
    void setVertexLitUp(S32 vertexIndex);
 
 
-   ///// Some geometric manipulations
-   void moveTo(const Point &pos, S32 snapVertex = 0);    // Move object to location, specifying (optional) vertex to be positioned at pos
-   void offset(const Point &offset);                     // Offset object by a certain amount
-
-
-   const Vector<Point> *getOutline() const;
-   const Vector<Point> *getFill()    const;
-   bool deleteVert(S32 vertIndex);
-   bool insertVert(Point vertex, S32 vertIndex);
-
    // These methods used to be in EditorObject, but we'll need to know about them as we add
    // the ability to manipulate objects more using Lua
    virtual bool canBeHostile();
    virtual bool canBeNeutral();
    virtual bool hasTeam();
 
-   // These functions are declared in Geometry.cpp
-   void rotateAboutPoint(const Point &center, F32 angle);
-   void flip(F32 center, bool isHoriz);                   // Do a horizontal or vertical flip about line at center
-   void scale(const Point &center, F32 scale);
-
-
-   Point getCentroid();
-   F32 getLabelAngle();
-                                                    
-   void packGeom(GhostConnection *connection, BitStream *stream);
-   void unpackGeom(GhostConnection *connection, BitStream *stream);
-
-   string geomToString(F32 gridSize) const;
-   void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
-
-   //void newGeomCopy();
-
-   virtual Rect calcExtents();
-
-   void disableTriangulation();
-
    //////
    // Things are happening in the editor; the object must respond!
    // Actually, onGeomChanged() and onAttrsChanged() might need to do something if changed by a script in-game
-   virtual void onGeomChanging();      // Item geom is interactively changing
-   virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
 
    virtual void onItemDragging();      // Item is being dragged around the screen
 
