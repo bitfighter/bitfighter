@@ -123,8 +123,6 @@ public:
    static const S32 RANDOM_LEVEL = -4;
    static const S32 FIRST_LEVEL = 0;
 
-   GridDatabase *getBotZoneDatabase();
-
    U32 getMaxPlayers();
 
    bool isDedicated();

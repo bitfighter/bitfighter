@@ -166,8 +166,6 @@ public:
    LuaRobot(lua_State *L);     // Lua constructor
    virtual ~LuaRobot();        // Destructor
 
-   GridDatabase *getBotZoneDatabase();
-
    static const char className[];
    static Lunar<LuaRobot>::RegType methods[];
 

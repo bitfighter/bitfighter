@@ -343,6 +343,7 @@ public:
 
    virtual void controlMoveReplayComplete();
 
+   // These are only here because Projectiles are not MoveObjects -- if they were, this could go there
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
 

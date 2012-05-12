@@ -1073,12 +1073,6 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 }
 
 
-GridDatabase *ServerGame::getBotZoneDatabase()
-{
-   return &mDatabaseForBotZones;
-}
-
-
 U32 ServerGame::getMaxPlayers()
 {
    return mSettings->getMaxPlayers();

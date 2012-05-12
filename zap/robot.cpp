@@ -58,13 +58,6 @@ namespace Zap
 const bool QUIT_ON_SCRIPT_ERROR = true;
 
 
-GridDatabase *LuaRobot::getBotZoneDatabase()
-{
-   TNLAssert(dynamic_cast<ServerGame *>(thisRobot->getGame()), "Not a ServerGame");
-   return ((ServerGame *)thisRobot->getGame())->getBotZoneDatabase();
-}
-
-
 // Constructor
 LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
 {
@@ -415,7 +408,7 @@ S32 LuaRobot::getZoneCenter(lua_State *L)
    S32 z = (S32)getInt(L, 1, methodName);
 
 
-   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(z));
+   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(z));
 
    if(zone)
       return returnPoint(L, zone->getCenter());
@@ -432,7 +425,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
    S32 from = (S32)getInt(L, 1, methodName);
    S32 to = (S32)getInt(L, 2, methodName);
 
-   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(from));
+   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(from));
 
    // Is requested zone a neighbor?
    if(zone)
@@ -456,7 +449,7 @@ S32 LuaRobot::getCurrentZone(lua_State *L)
 // Get a count of how many nav zones we have
 S32 LuaRobot::getZoneCount(lua_State *L)
 {
-   return returnInt(L, getBotZoneDatabase()->getObjectCount());
+   return returnInt(L, BotNavMeshZone::getBotZoneDatabase()->getObjectCount());
 }
 
 
@@ -679,9 +672,9 @@ S32 LuaRobot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
       else
       {
          if(scope)   // Get other objects on screen-visible area only
-            getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, *scope);
+            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, *scope);
          else        // Get all objects
-            getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
+            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
       }
 
       lua_pop(L, 1);
@@ -755,7 +748,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   U16 targetZone = BotNavMeshZone::findZoneContaining(serverGame->getBotZoneDatabase(), target);       // Where we're going  ===> returns zone id
+   U16 targetZone = BotNavMeshZone::findZoneContaining(BotNavMeshZone::getBotZoneDatabase(), target); // Where we're going  ===> returns zone id
 
    if(targetZone == U16_MAX)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -828,7 +821,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
       if(!thisRobot->canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(targetZone));
+         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(targetZone));
 
          p = zone->getCenter();
          thisRobot->flightPlan.push_back(p);
@@ -879,7 +872,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
    Vector<DatabaseObject*> objects;
    Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
 
-   getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
+   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
 
    for(S32 i = 0; i < objects.size(); i++)
    {
@@ -901,7 +894,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;
 
-      DatabaseObject* object = getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+      DatabaseObject* object = BotNavMeshZone::getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
             MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
@@ -920,7 +913,7 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
 
    if(closest != U16_MAX)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(getBotZoneDatabase()->getObjectByIndex(closest));
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(closest));
       return returnPoint(L, zone->getCenter());
    }
    else
@@ -1458,7 +1451,7 @@ S32 Robot::getCurrentZone()
    TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
 
    // We're in uncharted territory -- try to get the current zone
-   mCurrentZone = BotNavMeshZone::findZoneContaining(((ServerGame *)getGame())->getBotZoneDatabase(), getActualPos());
+   mCurrentZone = BotNavMeshZone::findZoneContaining(BotNavMeshZone::getBotZoneDatabase(), getActualPos());
 
    return mCurrentZone;
 }

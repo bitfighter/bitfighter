@@ -98,7 +98,7 @@ public:
    SafePtr<BfObject> mShooter;
 
    Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);    // Constructor
-   ~Projectile();                                                                                                       // Destructor
+   ~Projectile();                                                                                                     // Destructor
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

@@ -1556,6 +1556,32 @@ void ClientGame::renderSuspended()
 
 static Vector<DatabaseObject *> rawRenderObjects;
 static Vector<BfObject *> renderObjects;
+static Vector<BotNavMeshZone *> renderZones;
+
+
+static void fillRenderZones()
+{
+   renderZones.clear();
+   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+      renderZones.push_back(dynamic_cast<BotNavMeshZone *>(rawRenderObjects[i]));
+}
+
+// Fills renderZones for drawing botNavMeshZones
+static void populateRenderZones()
+{
+   rawRenderObjects.clear();
+   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
+   fillRenderZones();
+}
+
+
+static void populateRenderZones(const Rect extentRect)
+{
+   rawRenderObjects.clear();
+   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
+   fillRenderZones();
+}
+
 
 void ClientGame::renderCommander()
 {
@@ -1610,10 +1636,6 @@ void ClientGame::renderCommander()
    else
       mGameObjDatabase->findObjects((TestFunc)isVisibleOnCmdrsMapType, rawRenderObjects);
 
-   // If we're drawing bot zones, add them to our list of render objects
-   if(gServerGame && isShowingDebugMeshZones())
-      gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects);
-
    renderObjects.clear();
 
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -1622,6 +1644,11 @@ void ClientGame::renderCommander()
    if(gServerGame && showDebugBots)
       for(S32 i = 0; i < Robot::getBotCount(); i++)
          renderObjects.push_back(Robot::getBot(i));
+
+   // If we're drawing bot zones, get them now
+   if(/*gServerGame && */isShowingDebugMeshZones())
+      populateRenderZones();
+
 
    if(ship)
    {
@@ -1677,12 +1704,18 @@ void ClientGame::renderCommander()
    // Now render the objects themselves
    renderObjects.sort(renderSortCompare);
 
+   for(S32 i = 0; i < renderZones.size(); i++)
+      renderZones[i]->render(0);
+
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
       renderObjects[i]->render(0);
 
    // Second pass
    Barrier::renderEdges(1, mSettings->getWallOutlineColor());    // Render wall edges
+
+   for(S32 i = 0; i < renderZones.size(); i++)
+      renderZones[i]->render(1);
 
    for(S32 i = 0; i < renderObjects.size(); i++)
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
@@ -1825,20 +1858,21 @@ void ClientGame::renderNormal()
    rawRenderObjects.clear();
    mGameObjDatabase->findObjects((TestFunc)isAnyObjectType, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
 
-   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
-   // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
-   // server.
-   if(gServerGame && isShowingDebugMeshZones())
-      gServerGame->getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, rawRenderObjects, extentRect);
-
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(dynamic_cast<BfObject *>(rawRenderObjects[i]));
 
+
+   // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
+   // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
+   // server.
+   if(/*gServerGame && */isShowingDebugMeshZones())
+      populateRenderZones(extentRect);
+
+
    if(gServerGame && showDebugBots)
       for(S32 i = 0; i < Robot::getBotCount(); i++)
          renderObjects.push_back(Robot::getBot(i));
-
 
    renderObjects.sort(renderSortCompare);
 
@@ -1846,6 +1880,9 @@ void ClientGame::renderNormal()
    for(S32 j = -1; j < 2; j++)
    {
       Barrier::renderEdges(j, mSettings->getWallOutlineColor());    // Render wall edges
+
+      for(S32 i = 0; i < renderZones.size(); i++)
+         renderZones[i]->render(j);
 
       for(S32 i = 0; i < renderObjects.size(); i++)
          renderObjects[i]->render(j);

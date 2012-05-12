@@ -26,7 +26,7 @@
 #ifndef _BOTNAVMESHZONES_H_
 #define _BOTNAVMESHZONES_H_
 
-#include "gameObject.h"
+#include "gameObject.h"    // For base classes
 #include "polygon.h"
 #include "ship.h"
 
@@ -48,6 +48,10 @@ public:
    Point borderEnd;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class NeighboringZone : public Border
 {
 public:
@@ -60,6 +64,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class ZoneBorder : public Border
 {
 public:
@@ -69,15 +76,15 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public BfObject     // Does this really need to be a BfObject?
+class BotNavMeshZone : public DatabaseObject, public GeomObject 
 {
-   typedef BfObject Parent;
+   typedef GeomObject Parent;
 
 private:   
-   U16 mZoneId;                                          // Unique ID for each zone
-   static Vector<BotNavMeshZone *> mAllZones;   
+   U16 mZoneId;                                    // Unique ID for each zone
 
-   static void populateZoneList(const GridDatabase *db); // Populates mAllZones
+   static Vector<BotNavMeshZone *> mAllZones;   
+   static void populateZoneList();                 // Populates mAllZones
 
 public:
    BotNavMeshZone(S32 id = -1);    // Constructor
@@ -88,7 +95,6 @@ public:
    static const S32 BufferRadius = Ship::CollisionRadius;  // Radius to buffer objects when creating the holes for zones
    static const S32 LEVEL_ZONE_BUFFER = 30;                // Extra padding around the game extents to allow outsize zones to be created
 
-
    void render(S32 layerIndex);
 
    S32 getRenderSortValue();
@@ -97,8 +103,10 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
 
    GridDatabase *getGameObjDatabase();
-   void addToGame(Game *theGame, GridDatabase *database = NULL);
+   void addToZoneDatabase();
    void onAddedToGame(Game *theGame);
+
+   static GridDatabase *getBotZoneDatabase();
 
    Point getCenter();      // Return center of zone
 
@@ -122,7 +130,6 @@ public:
 
    static const Vector<BotNavMeshZone *> *getBotZones();                // Return cached list of all zones
 
-   static void IDBotMeshZones(ServerGame *game);
    static bool buildBotMeshZones(ServerGame *game, bool triangulateZones);
    static void buildBotNavMeshZoneConnections(ServerGame *game);
    static bool buildBotNavMeshZoneConnectionsRecastStyle(ServerGame *game, rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap);
