@@ -475,7 +475,7 @@ bool BotNavMeshZone::buildBotMeshZones(ServerGame *game, bool triangulateZones)
    // Make sure level isn't too big for zone generation, which uses 16 bit ints
    if(bounds.getHeight() >= (F32)U16_MAX || bounds.getWidth() >= (F32)U16_MAX)
    {
-      logprintf(LogConsumer::LogLevelError, "Level too big for zone generation! (max dimension, after gridSize expansion, is %d)", U16_MAX);
+      logprintf(LogConsumer::LogLevelError, "Level too big for zone generation! (max allowed dimension, after gridSize expansion, is %d)", U16_MAX);
       return false;
    }
 
@@ -787,7 +787,6 @@ Vector<Point> AStar::findPath(const Vector<BotNavMeshZone *> *zones, S32 startZo
    // This block here lets us repeatedly reuse the whichList array without resetting it or recreating it
    // which, for larger numbers of zones should be a real time saver.  It's not clear if it is particularly
    // more efficient for the zone counts we typically see in Bitfighter levels.
-
    if(onClosedList > U16_MAX - 3 ) // Reset whichList when we've run out of headroom
    {
       for(S32 i = 0; i < MAX_ZONES; i++) 
