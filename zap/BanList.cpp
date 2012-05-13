@@ -80,12 +80,23 @@ string ptimeToIsoString(const ptime &ptime)
 }
 
 
-void BanList::addToBanList(const Address &address, S32 durationMinutes)
+void BanList::addToBanList(const Address &address, S32 durationMinutes, bool nonAuthenticatedOnly)
 {
    BanItem banItem;
    banItem.durationMinutes = itos(durationMinutes);
    banItem.address = addressToString(address);
-   banItem.nickname = "*";
+   banItem.nickname = nonAuthenticatedOnly ? "*NonAuthenticated" : "*";
+   banItem.startDateTime = ptimeToIsoString(second_clock::local_time());
+
+   serverBanList.push_back(banItem);
+}
+
+void BanList::addPlayerNameToBanList(const char *playerName, S32 durationMinutes)
+{
+   BanItem banItem;
+   banItem.durationMinutes = itos(durationMinutes);
+   banItem.address = "*";
+   banItem.nickname = playerName;
    banItem.startDateTime = ptimeToIsoString(second_clock::local_time());
 
    serverBanList.push_back(banItem);
@@ -106,7 +117,7 @@ bool BanList::processBanListLine(const string &line)
    parseString(line.c_str(), words, banListTokenDelimiter[0]);
 
    // Check for incorrect number of tokens => 4, which is the member count of the BanItem struct
-   if (words.size() != 4)
+   if (words.size() < 4)
       return false;
 
    // Check to make sure there is at lease one character in each token
@@ -161,7 +172,8 @@ bool BanList::processBanListLine(const string &line)
 
 string BanList::banItemToString(BanItem *banItem)
 {
-   // IP, nickname, startTime, duration <- in this order
+   // IP, nickname, startTime, duration     <- in this order
+
    return
          banItem->address + banListTokenDelimiter +
          banItem->nickname + banListTokenDelimiter +
@@ -170,7 +182,7 @@ string BanList::banItemToString(BanItem *banItem)
 }
 
 
-bool BanList::isBanned(const Address &address, const string &nickname)
+bool BanList::isBanned(const Address &address, const string &nickname, bool isAuthenticated)
 {
    string addressString = addressToString(address);
    ptime currentTime = second_clock::local_time();
@@ -181,8 +193,12 @@ bool BanList::isBanned(const Address &address, const string &nickname)
       if (addressString.compare(serverBanList[i].address) != 0 && serverBanList[i].address.compare("*") != 0)
          continue;
 
+      // Check if authenticated
+      if (serverBanList[i].nickname.compare("*NonAuthenticated") == 0 && isAuthenticated)
+         continue;
+
       // Check nickname
-      if (nickname.compare(serverBanList[i].nickname) != 0 && serverBanList[i].nickname.compare("*") != 0)
+      else if (nickname.compare(serverBanList[i].nickname) != 0 && serverBanList[i].nickname.compare("*") != 0)
          continue;
 
       // Check time

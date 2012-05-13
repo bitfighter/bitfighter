@@ -3122,7 +3122,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanPlayer, (StringTableEntry playerName, U32 durat
    S32 banDuration = duration == 0 ? settings->getBanList()->getDefaultBanDuration() : duration;
 
    // Add the ban
-   settings->getBanList()->addToBanList(ipAddress, banDuration);
+   settings->getBanList()->addToBanList(ipAddress, banDuration, !bannedClientInfo->isAuthenticated());  // non-authenticated only if player is not authenticated
    logprintf(LogConsumer::ServerFilter, "%s was banned for %d minutes", ipAddress.toString(), banDuration);
 
    // Save BanList in memory
@@ -3176,7 +3176,7 @@ GAMETYPE_RPC_C2S(GameType, c2sBanIp, (StringTableEntry ipAddressString, U32 dura
    }
 
    // banip should always add to the ban list, even if the IP isn't connected
-   settings->getBanList()->addToBanList(ipAddress, banDuration);
+   settings->getBanList()->addToBanList(ipAddress, banDuration, true);  // most problem comes from non-authenticated users
    logprintf(LogConsumer::ServerFilter, "%s - banned for %d minutes", ipAddress.toString(), banDuration);
 
    // Save BanList in memory
