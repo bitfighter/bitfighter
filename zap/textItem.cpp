@@ -504,7 +504,6 @@ void LineItem::render()
       if(getTeam() != TEAM_NEUTRAL && (!ship || (ship && ship->getTeam() != getTeam())))
          return;
    }
-   
 
    glColor(getColor());
    renderLine(getOutline());
