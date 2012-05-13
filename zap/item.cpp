@@ -246,7 +246,7 @@ static S32 doGetClassId(lua_State *L)
 { 
    MoveItem *w = luaW_check<MoveItem>(L, 1); 
    if(w) 
-      return w->getObjectTypeNumber(); 
+      return LuaObject::returnInt(L, w->getObjectTypeNumber()); 
       
    return LuaObject::returnNil(L); 
 }
