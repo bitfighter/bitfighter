@@ -173,6 +173,7 @@
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="gameStats.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="GeomObject.cpp" />
     <ClCompile Include="helperMenu.cpp" />
     <ClCompile Include="Joystick.cpp" />
     <ClCompile Include="JoystickRender.cpp" />
@@ -294,6 +295,7 @@
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="GameTypesEnum.h" />
     <ClInclude Include="Geometry_Base.h" />
+    <ClInclude Include="GeomObject.h" />
     <ClInclude Include="InputCodeEnum.h" />
     <ClInclude Include="Joystick.h" />
     <ClInclude Include="JoystickRender.h" />

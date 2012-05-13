@@ -26,6 +26,7 @@
 #ifndef _GRIDDB_H_
 #define _GRIDDB_H_
 
+#include "GeomObject.h"    // Base class
 
 #include "tnlTypes.h"
 #include "tnlDataChunker.h"
@@ -46,7 +47,7 @@ typedef bool (*TestFunc)(U8);
 class  GridDatabase;
 class EditorObjectDatabase;
 
-class DatabaseObject
+class DatabaseObject : public GeomObject
 {
 
 friend class GridDatabase;
