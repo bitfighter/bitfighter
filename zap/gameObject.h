@@ -159,9 +159,10 @@ struct DamageInfo
 class EditorObject
 {
 private:
-   bool mSelected;      // True if item is selected                                                                     
-   bool mLitUp;         // True if user is hovering over the item and it's "lit up"                                     
-   S32 mVertexLitUp;    // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
+   bool mSelected;            // True if item is selected                                                                     
+   bool mLitUp;               // True if user is hovering over the item and it's "lit up"                                     
+   S32 mVertexLitUp;          // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
+   S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
 
 public:
    EditorObject();      // Constructor
@@ -202,7 +203,9 @@ public:
    bool isVertexLitUp(S32 vertexIndex);
    void setVertexLitUp(S32 vertexIndex);
 
-
+   // Manage user-assigned IDs -- intended for use by scripts to identify user-designated items
+   S32 getUserDefinedItemId();
+   void setUserDefinedItemId(S32 itemId);
 };
 
 ////////////////////////////////////////
@@ -235,12 +238,12 @@ private:
    S32 mTeam;
 
    S32 mSerialNumber;         // Autoincremented serial number  
-   S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
 
 protected:
    Move mLastMove;      // The move for the previous update
    Move mCurrentMove;   // The move for the current update
    StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
+   Game *mGame;
 
 public:
    BfObject();                // Constructor
@@ -282,7 +285,7 @@ public:
 
    virtual S32 getRenderSortValue();
 
-   // Move related      xxx game
+   // Move related      
    const Move &getCurrentMove();
    const Move &getLastMove();
    void setCurrentMove(const Move &theMove);
@@ -295,14 +298,14 @@ public:
    virtual void render(S32 layerIndex);
    virtual void render();
 
-   virtual void idle(IdleCallPath path);              // xxx game
+   virtual void idle(IdleCallPath path);              
 
-   virtual void writeControlState(BitStream *stream); // xxx game
-   virtual void readControlState(BitStream *stream);  // xxx game
-   virtual F32 getHealth();                           // xxx game
-   virtual bool isDestroyed();                        // xxx game
+   virtual void writeControlState(BitStream *stream); 
+   virtual void readControlState(BitStream *stream);  
+   virtual F32 getHealth();                           
+   virtual bool isDestroyed();                        
 
-   virtual void controlMoveReplayComplete();          // xxx game
+   virtual void controlMoveReplayComplete();          
 
    // These are only here because Projectiles are not MoveObjects -- if they were, this could go there
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
@@ -311,7 +314,7 @@ public:
    virtual bool collide(BfObject *hitObject);
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
-   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    // xxx geom
+   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    
 
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
@@ -319,15 +322,15 @@ public:
    void onGhostAddBeforeUpdate(GhostConnection *theConnection);
    bool onGhostAdd(GhostConnection *theConnection);
 
-   void disableCollision();         // xxx game
-   void enableCollision();          // xxx game
-   bool isCollisionEnabled();       // xxx game
+   void disableCollision();        
+   void enableCollision();         
+   bool isCollisionEnabled();      
 
    //bool collisionPolyPointIntersect(Point point);
    //bool collisionPolyPointIntersect(Vector<Point> points);
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
-   void setScopeAlways();           // xxx game
+   void setScopeAlways();           
 
    /////
    // TeamObject methods?
@@ -340,26 +343,14 @@ public:
    // Team related
    S32 getTeam() const;
    void setTeam(S32 team);
-   const Color *getColor() const;      // Get object's team color
+   const Color *getColor() const;      // Get object's team's color
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add
    // the ability to manipulate objects more using Lua
-   virtual bool canBeHostile();  // xxx game, editor
-   virtual bool canBeNeutral();  // xxx game, editor
-   virtual bool hasTeam();       // xxx game, editor
+   virtual bool canBeHostile();  
+   virtual bool canBeNeutral();  
+   virtual bool hasTeam();       
 
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-
-
-protected:
-   Game *mGame;
-
-public:
    BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
    virtual BfObject *clone() const;
@@ -371,12 +362,7 @@ public:
    void assignNewSerialNumber();
    S32 getSerialNumber();
 
-   // Manage user-assigned IDs -- intended for use by scripts to identify user-designated items
-   S32 getUserDefinedItemId();
-   void setUserDefinedItemId(S32 itemId);
-
-
-   virtual void removeFromGame();
+d   virtual void removeFromGame();
    void clearGame();
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);

@@ -363,6 +363,20 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 }
 
 
+// User assigned id, if any
+S32 EditorObject::getUserDefinedItemId()
+{
+   return mUserDefinedItemId;
+}
+
+
+void EditorObject::setUserDefinedItemId(S32 itemId)
+{
+   mUserDefinedItemId = itemId;
+}
+
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -400,18 +414,6 @@ S32 BfObject::getSerialNumber()
    return mSerialNumber;
 }
 
-
-// User assigned id, if any
-S32 BfObject::getUserDefinedItemId()
-{
-   return mUserDefinedItemId;
-}
-
-
-void BfObject::setUserDefinedItemId(S32 itemId)
-{
-   mUserDefinedItemId = itemId;
-}
 
 
 S32 BfObject::getTeam() const
