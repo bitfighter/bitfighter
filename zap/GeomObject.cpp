@@ -154,8 +154,6 @@ F32  GeomObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelA
 const Vector<Point> *GeomObject::getOutline() const       {   return mGeometry.getOutline();    }
 const Vector<Point> *GeomObject::getFill() const          {   return mGeometry.getFill();       }
 
-Rect GeomObject::calcExtents()                            {   return mGeometry.getGeometry()->calcExtents();   }
-
 
 // Geometric manipulations
 void GeomObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
@@ -177,6 +175,10 @@ void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridS
 } 
 
 string GeomObject::geomToString(F32 gridSize) const {  return mGeometry.geomToString(gridSize);  }
+
+
+Rect GeomObject::calcExtents() {  return mGeometry.getGeometry()->calcExtents();  }
+
 
 // Settings
 void GeomObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }

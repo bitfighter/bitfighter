@@ -230,8 +230,7 @@ public:
 
    virtual S32 getRenderSortValue();
 
-   Rect getBounds(U32 stateIndex) const;
-
+   // Move related      game
    const Move &getCurrentMove();
    const Move &getLastMove();
    void setCurrentMove(const Move &theMove);
@@ -244,14 +243,14 @@ public:
    virtual void render(S32 layerIndex);
    virtual void render();
 
-   virtual void idle(IdleCallPath path);
+   virtual void idle(IdleCallPath path);              // game
 
-   virtual void writeControlState(BitStream *stream);
-   virtual void readControlState(BitStream *stream);
-   virtual F32 getHealth();
-   virtual bool isDestroyed();
+   virtual void writeControlState(BitStream *stream); // game
+   virtual void readControlState(BitStream *stream);  // game
+   virtual F32 getHealth();                           // game
+   virtual bool isDestroyed();                        // game
 
-   virtual void controlMoveReplayComplete();
+   virtual void controlMoveReplayComplete();          // game
 
    // These are only here because Projectiles are not MoveObjects -- if they were, this could go there
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
@@ -260,7 +259,7 @@ public:
    virtual bool collide(BfObject *hitObject);
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
-   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);
+   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    // geom
 
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
@@ -277,12 +276,13 @@ public:
 
    void setScopeAlways();
 
+   /////
+   // TeamObject methods?
    S32 getTeamIndx(lua_State *L);      // Return item team to Lua
    virtual void push(lua_State *L);    // Lua-aware classes will implement this
   
    void readThisTeam(BitStream *stream);
    void writeThisTeam(BitStream *stream);
-
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add
    // the ability to manipulate objects more using Lua

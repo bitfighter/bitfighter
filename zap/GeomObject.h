@@ -98,8 +98,11 @@ public:
    // Getting parts of the geometry
    Point getCentroid();
    F32 getLabelAngle();
+
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill()    const;
+
+   Rect getBounds(U32 stateIndex) const;
                                                     
    virtual Rect calcExtents();
 

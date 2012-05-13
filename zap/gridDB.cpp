@@ -661,6 +661,30 @@ bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, float &rad
 }
 
 
+Rect DatabaseObject::getBounds(U32 stateIndex) const
+{
+   Rect ret;
+   Point p;
+   float radius;
+   Vector<Point> bounds;
+
+   if(getCollisionPoly(bounds))
+   {
+      ret.min = ret.max = bounds[0];
+      for(S32 i = 1; i < bounds.size(); i++)
+         ret.unionPoint(bounds[i]);
+   }
+   else if(getCollisionCircle(stateIndex, p, radius))
+   {
+      ret.max = p + Point(radius, radius);
+      ret.min = p - Point(radius, radius);
+   }
+
+   return ret;
+}
+
+
+
 bool DatabaseObject::isCollisionEnabled()
 {
    return true;

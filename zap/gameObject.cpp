@@ -801,6 +801,8 @@ Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)
 // Returns number of ships hit
 S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
 {
+   GameType *gameType = getGame()->getGameType();
+
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance
    Rect queryRect(pos, pos);
@@ -812,7 +814,6 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
    // Ghosts can't do damage
    if(isGhost())
       info.damageAmount = 0;
-
 
    S32 shipsHit = 0;
 
@@ -828,8 +829,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
          continue;
 
       // Can one damage another?
-      if(getGame()->getGameType())
-         if(!getGame()->getGameType()->objectCanDamageObject(info.damagingObject, foundObject))
+      if(gameType && !gameType->objectCanDamageObject(info.damagingObject, foundObject))
             continue;
 
       //// Check if damager is an area weapon, and damagee is a projectile... if so, kill it
@@ -886,20 +886,18 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
 void BfObject::findObjects(TestFunc objectTypeTest, Vector<DatabaseObject *> &fillVector, const Rect &ext)
 {
    GridDatabase *gridDB = getDatabase();
-   if(!gridDB)
-      return;
 
-   gridDB->findObjects(objectTypeTest, fillVector, ext);
+   if(gridDB)
+      gridDB->findObjects(objectTypeTest, fillVector, ext);
 }
 
 
 void BfObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &ext)
 {
    GridDatabase *gridDB = getDatabase();
-   if(!gridDB)
-      return;
 
-   gridDB->findObjects(typeNumber, fillVector, ext);
+   if(gridDB)
+      gridDB->findObjects(typeNumber, fillVector, ext);
 }
 
 
@@ -908,12 +906,12 @@ BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart,
 {
    GridDatabase *gridDB = getDatabase();
 
-   if(!gridDB)
-      return NULL;
-
-   return dynamic_cast<BfObject *>(
+   if(gridDB)
+     return dynamic_cast<BfObject *>(
          gridDB->findObjectLOS(typeNumber, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
+
+   return NULL;
 }
 
 
@@ -922,12 +920,12 @@ BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, Point
 {
    GridDatabase *gridDB = getDatabase();
 
-   if(!gridDB)
-      return NULL;
-
-   return dynamic_cast<BfObject *>(
+   if(gridDB)
+     return static_cast<BfObject *>(
          gridDB->findObjectLOS(objectTypeTest, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
+
+   return NULL;
 }
 
 
@@ -988,29 +986,6 @@ StringTableEntry BfObject::getKillString()
 S32 BfObject::getRenderSortValue()
 {
    return 2;
-}
-
-
-Rect BfObject::getBounds(U32 stateIndex) const
-{
-   Rect ret;
-   Point p;
-   float radius;
-   Vector<Point> bounds;
-
-   if(getCollisionPoly(bounds))
-   {
-      ret.min = ret.max = bounds[0];
-      for(S32 i = 1; i < bounds.size(); i++)
-         ret.unionPoint(bounds[i]);
-   }
-   else if(getCollisionCircle(stateIndex, p, radius))
-   {
-      ret.max = p + Point(radius, radius);
-      ret.min = p - Point(radius, radius);
-   }
-
-   return ret;
 }
 
 
