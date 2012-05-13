@@ -65,6 +65,7 @@ OBJECTS_SHARED=\
    gameType.o\
    gameWeapons.o\
    Geometry.o\
+   GeomObject.o\
    GeomUtils.o\
    goalZone.o\
    gridDB.o\
