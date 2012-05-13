@@ -154,7 +154,7 @@ U16 BotNavMeshZone::findZoneContaining(GridDatabase *botZoneDatabase, const Poin
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
       // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(fillVector[i]);
+      BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(fillVector[i]);
 
       TNLAssert(zone, "NULL zone in findZoneContaining");
       if( zone->getExtent().contains(p) 
