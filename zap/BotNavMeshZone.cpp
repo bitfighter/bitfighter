@@ -156,7 +156,6 @@ U16 BotNavMeshZone::findZoneContaining(GridDatabase *botZoneDatabase, const Poin
       // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
       BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(fillVector[i]);
 
-      TNLAssert(zone, "NULL zone in findZoneContaining");
       if( zone->getExtent().contains(p) 
                         && (PolygonContains2(zone->getOutline()->address(), zone->getOutline()->size(), p)) )
          return zone->mZoneId;
