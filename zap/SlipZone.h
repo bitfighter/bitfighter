@@ -34,7 +34,7 @@ namespace Zap
 
 class SlipZone : public PolygonObject
 {
-   typedef BfObject Parent;
+   typedef PolygonObject Parent;
 
 public:
 	F32 slipAmount;   // 0.0 to 1.0 , lower = more slippy

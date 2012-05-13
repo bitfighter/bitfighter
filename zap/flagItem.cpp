@@ -74,7 +74,6 @@ FlagItem *FlagItem::clone() const
 
 void FlagItem::initialize()
 {
-   mTeam = -1;
    mIsAtHome = true;    // All flags start off at home!
 
    mNetFlags.set(Ghostable);
@@ -159,13 +158,12 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 3)         // FlagItem <team> <x> <y> {time}
       return false;
 
-   mTeam = atoi(argv[0]);
-   //if(! getGame()->getGameType()->checkTeamRange(mTeam)) mTeam = -1;
+   setTeam(atoi(argv[0]));
    
    if(!Parent::processArguments(argc-1, argv+1, game))
       return false;
 
-   S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  This time only turns out to be important in Nexus games at the moment.
+   S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  Only important in Nexus games for now.
 
    mInitialPos = mMoveState[ActualState].pos;
 
@@ -175,9 +173,9 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    {
       FlagSpawn spawn = FlagSpawn(mInitialPos, time);
 
-      if(isTeamFlagSpawn(game, mTeam))
+      if(isTeamFlagSpawn(game, getTeam()))
       {
-         Team *team = dynamic_cast<Team *>(game->getTeam(mTeam));
+         Team *team = dynamic_cast<Team *>(game->getTeam(getTeam()));
          if(team)
             team->addFlagSpawn(spawn);
       }
@@ -191,7 +189,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string FlagItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 
@@ -264,8 +262,8 @@ const Vector<FlagSpawn> *FlagItem::getSpawnPoints()
 
    TNLAssert(gt, "Invalid gameType!");
 
-   if(isTeamFlagSpawn(game, mTeam))    
-      return ((Team *)(game->getTeam(mTeam)))->getFlagSpawns();
+   if(isTeamFlagSpawn(game, getTeam()))    
+      return ((Team *)(game->getTeam(getTeam())))->getFlagSpawns();
    else             
       return gt->getFlagSpawns();
 }
@@ -289,7 +287,7 @@ void FlagItem::sendHome()
    for(S32 i = 0; i < gt->mFlags.size(); i++)
    {
       FlagItem *flag = gt->mFlags[i];
-      if(flag->isAtHome() && (flag->mTeam < 0 || flag->mTeam == mTeam || !gt->isTeamFlagGame()))
+      if(flag->isAtHome() && (flag->getTeam() < 0 || flag->getTeam() == getTeam() || !gt->isTeamFlagGame()))
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
@@ -307,7 +305,7 @@ void FlagItem::sendHome()
    {
       TNLAssert(false, "No flag spawn points!");
       logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
-         ((ServerGame *)getGame())->getCurrentLevelFileName().getString(), mTeam);
+         ((ServerGame *)getGame())->getCurrentLevelFileName().getString(), getTeam());
       //mInitialPos = Point(0,0);      --> Leave mInitialPos as it was... it will probably be better than (0,0)
    }
    else
@@ -474,7 +472,7 @@ S32 FlagItem::getClassID(lua_State *L)
 
 S32 FlagItem::getTeamIndx(lua_State *L)
 {
-   return returnInt(L, mTeam + 1);
+   return returnInt(L, getTeam() + 1);    // + 1 because Lua indices start with 1
 }
 
 

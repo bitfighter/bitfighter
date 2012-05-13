@@ -217,7 +217,7 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 string Spawn::toString(F32 gridSize) const
 {
    // Spawn <team> <x> <y> 
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 
@@ -598,7 +598,7 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 1)
       return false;
 
-   mTeam = atoi(argv[0]);                                            // Read team
+   setTeam(atoi(argv[0]));                                           // Read team
    return Parent::processArguments(argc - 1, argv + 1, game);        // then read the rest of the args
 }
 
@@ -608,7 +608,7 @@ string FlagSpawn::toString(F32 gridSize) const
    // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- squeezing in team number from AbstractSpawn::toString
    string str1 = Parent::toString(gridSize);
    size_t firstarg = str1.find(' ');
-   return str1.substr(0, firstarg) + " " + itos(mTeam) + str1.substr(firstarg);
+   return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
 }
 
 

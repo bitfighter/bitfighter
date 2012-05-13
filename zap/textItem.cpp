@@ -60,7 +60,6 @@ TextItem::TextItem()
 
    // Some default values
    mSize = 20;
-   mTeam = TEAM_NEUTRAL;
 }
 
 
@@ -118,7 +117,7 @@ void TextItem::render()
    if(game->getConnectionToServer())
    {
       Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());
-      if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
+      if( (!ship && getTeam() != TEAM_NEUTRAL) || (ship && ship->getTeam() != getTeam() && getTeam() != TEAM_NEUTRAL) )
          return;
    }
 
@@ -220,7 +219,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 7)
       return false;
 
-   mTeam = atoi(argv[0]);
+   setTeam(atoi(argv[0]));
 
    Point pos, dir;
 
@@ -253,7 +252,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string TextItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
 }
 
 
@@ -502,9 +501,10 @@ void LineItem::render()
    if(gc)      
    {
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
+      if(getTeam() != TEAM_NEUTRAL && (!ship || (ship && ship->getTeam() != getTeam())))
          return;
    }
+   
 
    glColor(getColor());
    renderLine(getOutline());
@@ -544,7 +544,7 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 6)
       return false;
 
-   mTeam = atoi(argv[0]);
+   setTeam(atoi(argv[0]));
 
    return processGeometry(argc - 0, &argv[0], game);
 }
@@ -563,7 +563,7 @@ bool LineItem::processGeometry(S32 argc, const char **argv, Game *game)
 
 string LineItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + itos(getWidth()) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + itos(getWidth()) + " " + geomToString(gridSize);
 }
 
 

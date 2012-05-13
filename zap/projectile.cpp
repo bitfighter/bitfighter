@@ -175,7 +175,7 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
          setOwner(ship->getClientInfo());
       }
 
-      mTeam = shooter->getTeam();
+      setTeam(shooter->getTeam());
       mKillString = shooter->getKillString();
    }
 
@@ -608,7 +608,7 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
    if(shooter)
    {
       setOwner(shooter->getOwner());
-      mTeam = shooter->getTeam();
+      setTeam(shooter->getTeam());
    }
    else
       setOwner(NULL);
@@ -800,7 +800,7 @@ S32 BurstProjectile::getVel(lua_State *L)
 
 S32 BurstProjectile::getTeamIndx(lua_State *L)
 {
-   return returnInt(L, mTeam + 1);
+   return returnInt(L, getTeam() + 1);    // + 1 because Lua indices start with 1
 }
 
 
@@ -856,11 +856,11 @@ Mine::Mine(Point pos, Ship *planter) : BurstProjectile(pos, Point())
    if(planter)
    {
       setOwner(planter->getOwner());
-      mTeam = planter->getTeam();
+      setTeam(planter->getTeam());
    }
    else
    {
-      mTeam = -2;    // Hostile to all, as mines generally are!
+      setTeam(TEAM_HOSTILE);    // Hostile to all, as mines generally are!
       setOwner(NULL);
    }
 
@@ -1176,12 +1176,12 @@ SpyBug::SpyBug(Point pos, Ship *planter) : BurstProjectile(pos, Point())
 
    if(planter)
    {
+      setTeam(planter->getTeam());
       setOwner(planter->getOwner());
-      mTeam = planter->getTeam();
    }
    else
    {
-      mTeam = -1;
+      setTeam(TEAM_NEUTRAL);
       setOwner(NULL);
    }
 
@@ -1208,7 +1208,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 3)
       return false;
 
-   mTeam = atoi(argv[0]);                        // Team first!
+   setTeam(atoi(argv[0]));
 
    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
    if(!Parent::processArguments(2, &argv[1], game))    
@@ -1221,7 +1221,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
 // ProcessArguments() used is the one in item
 string SpyBug::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(Object::getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 
@@ -1349,7 +1349,7 @@ void SpyBug::renderDock()
 
    glColor(Colors::gray70);
    drawCircle(pos, radius);
-   drawLetter('S', pos, Color(mTeam < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
+   drawLetter('S', pos, Color(getTeam() < 0 ? .5 : .7), 1);    // Use darker gray for neutral spybugs so S will show up clearer
 #endif
 }
 
@@ -1400,7 +1400,7 @@ bool SpyBug::canBeNeutral()
 bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame)
 {
    // On our team (in a team game) || was set by us (in any game) || is neutral (in any game)
-   return ((getTeam() == playerTeam) && isTeamGame) || playerName == mSetBy || mTeam == -1;
+   return ((getTeam() == playerTeam) && isTeamGame) || playerName == mSetBy || getTeam() == TEAM_NEUTRAL;
 }
 
 

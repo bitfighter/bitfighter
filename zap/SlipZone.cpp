@@ -39,7 +39,7 @@ namespace Zap
 
 SlipZone::SlipZone()     // Constructor
 {
-   mTeam = 0;
+   setTeam(0);
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = SlipZoneTypeNumber;
    slipAmount = 0.1f;

@@ -970,7 +970,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 4)         // CoreItem <team> <health> <x> <y>
       return false;
 
-   mTeam = atoi(argv[0]);
+   setTeam(atoi(argv[0]));
    setStartingHealth((F32)atof(argv[1]) / DamageReductionRatio);
 
    if(!Parent::processArguments(argc-2, argv+2, game))
@@ -982,7 +982,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
 }
 
 

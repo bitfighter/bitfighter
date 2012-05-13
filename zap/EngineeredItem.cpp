@@ -380,8 +380,8 @@ EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) 
 {
    setPos(anchorPoint);
    mHealth = 1.0f;
-   mTeam = team;
-   mOriginalTeam = mTeam;
+   setTeam(team);
+   mOriginalTeam = team;
    mIsDestroyed = false;
    mHealRate = 0;
    mMountSeg = NULL;
@@ -397,9 +397,9 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 3)
       return false;
 
-   mTeam = atoi(argv[0]);
-   mOriginalTeam = mTeam;
-   if(mTeam == -1)      // Neutral object starts with no health, can be repaired and claimed by anyone
+   setTeam(atoi(argv[0]));
+   mOriginalTeam = getTeam();
+   if(mOriginalTeam == TEAM_NEUTRAL)      // Neutral object starts with no health and can be repaired and claimed by anyone
       mHealth = 0;
    
    Point pos;
@@ -468,7 +468,7 @@ void EngineeredItem::onAddedToGame(Game *game)
 
 string EngineeredItem::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize) + " " + itos(mHealRate);
+   return string(Object::getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + itos(mHealRate);
 }
 
 
@@ -664,9 +664,9 @@ void EngineeredItem::damageObject(DamageInfo *di)
    if(prevHealth >= disabledLevel && mHealth < disabledLevel)        // Turret just died
    {
       // Revert team to neutral if this was a repaired turret
-      if(mTeam != mOriginalTeam)
+      if(getTeam() != mOriginalTeam)
       {
-         mTeam = mOriginalTeam;
+         setTeam(mOriginalTeam);
          setMaskBits(TeamMask);
       }
       onDisabled();
@@ -685,11 +685,11 @@ void EngineeredItem::damageObject(DamageInfo *di)
    }
    else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed
    {
-      if(mTeam == -1)                                 // Neutral objects...
+      if(getTeam() == TEAM_NEUTRAL)                   // Neutral objects...
       {
          if(di->damagingObject)
          {
-            mTeam = di->damagingObject->getTeam();    // ...join the team of their repairer
+            setTeam(di->damagingObject->getTeam());   // ...join the team of their repairer
             setMaskBits(TeamMask);                    // Broadcast new team status
          }
       }
@@ -923,7 +923,7 @@ void EngineeredItem::unpackUpdate(GhostConnection *connection, BitStream *stream
 
 void EngineeredItem::healObject(S32 time)
 {
-   if(mHealRate == 0 || mTeam == -1)      // Neutral items don't heal!
+   if(mHealRate == 0 || getTeam() == TEAM_NEUTRAL)      // Neutral items don't heal!
       return;
 
    F32 prevHealth = mHealth;
@@ -1134,7 +1134,7 @@ void ForceFieldProjector::onEnabled()
 
       ForceField::findForceFieldEnd(getDatabase(), start, mAnchorNormal, end, &collObj);
 
-      mField = new ForceField(mTeam, start, end);
+      mField = new ForceField(getTeam(), start, end);
       mField->addToGame(getGame(), getGame()->getGameObjDatabase());
    }
 }
@@ -1325,7 +1325,7 @@ TNL_IMPLEMENT_NETOBJECT(ForceField);
 
 ForceField::ForceField(S32 team, Point start, Point end)
 {
-   mTeam = team;
+   setTeam(team);
    mStart = start;
    mEnd = end;
 
@@ -1347,7 +1347,7 @@ bool ForceField::collide(BfObject *hitObject)
    // If it's a ship that collides with this forcefield, check team to allow it through
    if(isShipType(hitObject->getObjectTypeNumber()))
    {
-      if(hitObject->getTeam() == mTeam)
+      if(hitObject->getTeam() == getTeam())     // Ship and force field are same team
       {
          if(!isGhost())
          {
@@ -1361,7 +1361,7 @@ bool ForceField::collide(BfObject *hitObject)
    // If it's a flag that collides with this forcefield and we're hostile, let it through
    else if(hitObject->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(mTeam == TEAM_HOSTILE)
+      if(getTeam() == TEAM_HOSTILE)
          return false;
       else
          return true;
@@ -1724,8 +1724,8 @@ void Turret::idle(IdleCallPath path)
          continue;
 
       BfObject *potential = dynamic_cast<BfObject *>(fillVector[i]);
-      if(potential->getTeam() == mTeam)      // Is target on our team?
-         continue;                           // ...if so, skip it!
+      if(potential->getTeam() == getTeam())     // Is target on our team?
+         continue;                              // ...if so, skip it!
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getVel();
@@ -1761,7 +1761,7 @@ void Turret::idle(IdleCallPath path)
       BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
-      if(hitObject && hitObject->getTeam() == mTeam)
+      if(hitObject && hitObject->getTeam() == getTeam())
          continue;
 
       F32 dist = delta.len();
@@ -1808,7 +1808,7 @@ void Turret::idle(IdleCallPath path)
          Point velocity;
 
          // String handling in C++ is such a mess!!!
-         string killer = string("got blasted by ") + getGame()->getTeamName(mTeam).getString() + " turret";
+         string killer = string("got blasted by ") + getGame()->getTeamName(getTeam()).getString() + " turret";
          mKillString = killer.c_str();
 
          GameWeapon::createWeaponProjectiles(WeaponType(mWeaponFireType), bestDelta, aimPos, velocity, 0, mWeaponFireType == WeaponBurst ? 45.f : 35.f, this);

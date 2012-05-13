@@ -256,12 +256,22 @@ class BfObject : public DatabaseObject, public GeomObject, public NetObject
 {
    typedef NetObject Parent;
 
+public:
+   enum IdleCallPath {
+      ServerIdleMainLoop,              // Idle called from top-level idle loop on server
+      ServerIdleControlFromClient,
+      ClientIdleMainRemote,            // On client, when object is not our control object
+      ClientIdleControlMain,           // On client, when object is our control object
+      ClientIdleControlReplay,
+   };
+
 private:
    SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
    SafePtr<ClientInfo> mOwner;
    U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
 
    U32 mCreationTime;
+   S32 mTeam;
 
 protected:
    Move mLastMove;      // The move for the previous update
@@ -287,8 +297,8 @@ public:
    
    StringTableEntry getKillString();
 
-   F32 getRating();
-   S32 getScore();
+   //F32 getRating();
+   //S32 getScore();
 
    enum MaskBits {
       FirstFreeMask = BIT(0)
@@ -324,14 +334,6 @@ public:
    // TODO: Would be better to render once and use different z-order to create layers?
    virtual void render(S32 layerIndex);
    virtual void render();
-
-   enum IdleCallPath {
-      ServerIdleMainLoop,              // Idle called from top-level idle loop on server
-      ServerIdleControlFromClient,
-      ClientIdleMainRemote,            // On client, when object is not our control object
-      ClientIdleControlMain,           // On client, when object is our control object
-      ClientIdleControlReplay,
-   };
 
    virtual void idle(IdleCallPath path);
 
@@ -373,6 +375,13 @@ public:
    void writeThisTeam(BitStream *stream);
 
 
+   // These methods used to be in EditorObject, but we'll need to know about them as we add
+   // the ability to manipulate objects more using Lua
+   virtual bool canBeHostile();
+   virtual bool canBeNeutral();
+   virtual bool hasTeam();
+
+
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
@@ -382,11 +391,11 @@ public:
 private:
    S32 mSerialNumber;         // Autoincremented serial number  
    S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
+   
 
 
 protected:
    Game *mGame;
-   S32 mTeam;
 
    // Used only in the editor
    bool mSelected;      // True if item is selected
@@ -398,9 +407,10 @@ public:
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
    virtual BfObject *clone() const;
 
-   S32 getTeam();
+   // Team related
+   S32 getTeam() const;
    void setTeam(S32 team);
-   const Color *getColor();
+   const Color *getColor() const;      // Get object's team color
 
    Game *getGame() const;
 
@@ -440,12 +450,6 @@ public:
    void setVertexLitUp(S32 vertexIndex);
 
 
-   // These methods used to be in EditorObject, but we'll need to know about them as we add
-   // the ability to manipulate objects more using Lua
-   virtual bool canBeHostile();
-   virtual bool canBeNeutral();
-   virtual bool hasTeam();
-
    //////
    // Things are happening in the editor; the object must respond!
    // Actually, onGeomChanged() and onAttrsChanged() might need to do something if changed by a script in-game
@@ -454,6 +458,7 @@ public:
 
    virtual void onAttrsChanging();     // Attr is in the process of being changed (e.g. a char was typed for a textItem)
    virtual void onAttrsChanged();      // Attrs changed -- only used by TextItem
+
 
    /////
    // Messages and such for the editor
@@ -465,10 +470,19 @@ public:
    virtual string getAttributeString();            // Used for displaying object attributes in lower-left of editor
 
 
+   // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
+   // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
+   // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
+   virtual S32 getDockRadius();                    // Size of object on dock
+   virtual F32 getEditorRadius(F32 currentScale);  // Size of object in editor
 
-   ///////////////////////////  Random stuff from EditorObject
-      // Account for the fact that the apparent selection center and actual object center are not quite aligned
+   EditorObjectDatabase *getEditorObjectDatabase();
+
+   // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
+
+   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
+   virtual Point getInitialPlacementOffset(F32 gridSize);
 
 #ifndef ZAP_DEDICATED
    void renderAndLabelHighlightedVertices(F32 currentScale);      // Render selected and highlighted vertices, called from renderEditor
@@ -476,15 +490,8 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
 
-   EditorObjectDatabase *getEditorObjectDatabase();
-
    void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
 
-   // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
-   // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
-   // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
-   virtual S32 getDockRadius();                    // Size of object on dock
-   virtual F32 getEditorRadius(F32 currentScale);  // Size of object in editor
 
    virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
 
@@ -493,8 +500,6 @@ public:
    virtual void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
 #endif
    virtual void newObjectFromDock(F32 gridSize);   // Called when item dragged from dock to editor -- overridden by several objects
-   // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement seem more natural.
-   virtual Point getInitialPlacementOffset(F32 gridSize);
 
    ///// Dock item rendering methods
    virtual void renderDock();   
@@ -507,8 +512,6 @@ public:
    virtual EditorAttributeMenuUI *getAttributeMenu();                      // Override in child if it has an attribute menu
    virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
    virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
-
-
 };
 
 

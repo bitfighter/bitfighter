@@ -1394,9 +1394,9 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
    if(argc >= 1)
-      mTeam = atoi(argv[0]);
+      setTeam(atoi(argv[0]));
    else
-      mTeam = NO_TEAM;   
+      setTeam(NO_TEAM);   
    
 
    string scriptName;

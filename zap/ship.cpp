@@ -108,7 +108,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
    mClientInfo = clientInfo;
 
-   mTeam = team;
+   setTeam(team);
    mass = m;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique

@@ -563,7 +563,7 @@ void BfObject::setUserDefinedItemId(S32 itemId)
 }
 
 
-S32 BfObject::getTeam()
+S32 BfObject::getTeam() const
 {
    return mTeam;
 }
@@ -575,7 +575,7 @@ void BfObject::setTeam(S32 team)
 }
 
 
-const Color *BfObject::getColor() 
+const Color *BfObject::getColor() const
 { 
    return mGame->getTeamColor(mTeam);
 }
@@ -1230,16 +1230,16 @@ StringTableEntry BfObject::getKillString()
 }
 
 
-F32 BfObject::getRating()
-{
-   return 0; // TODO: Fix this
-}
-
-
-S32 BfObject::getScore()
-{
-   return 0; // TODO: Fix this
-}
+//F32 BfObject::getRating()
+//{
+//   return 0; // TODO: Fix this
+//}
+//
+//
+//S32 BfObject::getScore()
+//{
+//   return 0; // TODO: Fix this
+//}
 
 
 S32 BfObject::getRenderSortValue()

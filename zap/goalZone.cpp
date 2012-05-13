@@ -55,7 +55,6 @@ Lunar<GoalZone>::RegType GoalZone::methods[] =
 // Constructor
 GoalZone::GoalZone()
 {
-   mTeam = -1;
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = GoalZoneTypeNumber;
    mFlashCount = 0;
@@ -77,7 +76,7 @@ void GoalZone::render()
    F32 glow = gt->mZoneGlowTimer.getFraction();
 
    // Check if to make sure that the zone matches the glow team if we're glowing
-   if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
+   if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != getTeam())
       glow = 0;
 
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
@@ -128,7 +127,7 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 7)
       return false;
 
-   mTeam = atoi(argv[0]);  // Team is first arg
+   setTeam(atoi(argv[0]));  // Team is first arg
    readGeom(argc, argv, 1, game->getGridSize());
    updateExtentInDatabase();   
 
@@ -162,7 +161,7 @@ const char *GoalZone::getOnScreenName()
 
 string GoalZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 
@@ -174,7 +173,7 @@ bool GoalZone::didRecentlyChangeTeam()
 
 void GoalZone::setTeam(S32 team)
 {
-   mTeam = team;
+   Parent::setTeam(team);
    setMaskBits(TeamMask);
 }
 
@@ -270,8 +269,8 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())
    {
-      readThisTeam(stream);                      // Zone was captured by team mTeam
-      if(!isInitialUpdate() && mTeam != -1)      // mTeam will be -1 on touchdown, and we don't want to flash then!
+      readThisTeam(stream);                                 // Zone was captured by team mTeam
+      if(!isInitialUpdate() && getTeam() != TEAM_NEUTRAL)   // Team will be neutral on touchdown, and we don't want to flash then!
       {
          mFlashTimer.reset(FlashDelay);
          mFlashCount = FlashCount;

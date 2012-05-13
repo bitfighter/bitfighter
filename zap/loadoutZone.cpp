@@ -51,7 +51,7 @@ Lunar<LoadoutZone>::RegType LoadoutZone::methods[] =
 // C++ constructor
 LoadoutZone::LoadoutZone()
 {
-   mTeam = 0;
+   setTeam(0);
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = LoadoutZoneTypeNumber;
 }
@@ -114,7 +114,7 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 7)
       return false;
 
-   mTeam = atoi(argv[0]);     // Team is first arg
+   setTeam(atoi(argv[0]));     // Team is first arg
    readGeom(argc, argv, 1, game->getGridSize());
 
    updateExtentInDatabase();
@@ -149,7 +149,7 @@ const char *LoadoutZone::getOnScreenName()
 
 string LoadoutZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(mTeam) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 

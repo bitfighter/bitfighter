@@ -838,8 +838,8 @@ void EditorUserInterface::validateLevel()
    gridDatabase->findObjects(ShipSpawnTypeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      Spawn *spawn = dynamic_cast<Spawn *>(fillVector[i]);
-      S32 team = spawn->getTeam();
+      Spawn *spawn = static_cast<Spawn *>(fillVector[i]);
+      const S32 team = spawn->getTeam();
 
       if(team == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
