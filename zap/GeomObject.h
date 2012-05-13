@@ -119,6 +119,11 @@ public:
    virtual void onPointsChanged();
    virtual void onGeomChanging();      // Item geom is interactively changing
    virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
+
+   virtual void setExtent(const Rect &extentRect) = 0;
+
+   virtual Point getPos() const;
+   virtual void setPos(const Point &pos);
 };
 
 }

@@ -485,19 +485,6 @@ bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 }
 
 
-Point BfObject::getPos() const
-{
-   return getVert(0);
-}
-
-
-void BfObject::setPos(const Point &pos)
-{
-   setVert(pos, 0);  
-   setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
-}
-
-
 void BfObject::onPointsChanged()                        
 {   
    GeomObject::onPointsChanged();
@@ -639,9 +626,6 @@ void BfObject::newObjectFromDock(F32 gridSize)
    updateExtentInDatabase();
    mGame = NULL;
 }   
-
-
-
 
 
 Point BfObject::getEditorSelectionOffset(F32 scale)

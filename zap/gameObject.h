@@ -365,9 +365,7 @@ public:
    virtual void removeFromGame();
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
-
-   virtual Point getPos() const;
-   virtual void setPos(const Point &pos);
+   virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
 
    void onPointsChanged();
    void updateExtentInDatabase();
@@ -390,9 +388,6 @@ public:
 
 
    void setSnapped(bool snapped);                  // Overridden in EngineeredItem 
-
-
-   virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
 
    ///// Dock related
 #ifndef ZAP_DEDICATED

@@ -184,6 +184,23 @@ Rect GeomObject::calcExtents() {  return mGeometry.getGeometry()->calcExtents();
 void GeomObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
 
 
+
+Point GeomObject::getPos() const
+{
+   return getVert(0);
+}
+
+
+void GeomObject::setPos(const Point &pos)
+{
+   setVert(pos, 0);  
+   setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
+}
+
+
+
+
+
 void GeomObject::onGeomChanging()
 {
    if(getGeomType() == geomPolygon)
