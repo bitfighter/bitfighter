@@ -362,8 +362,7 @@ public:
    void assignNewSerialNumber();
    S32 getSerialNumber();
 
-d   virtual void removeFromGame();
-   void clearGame();
+   virtual void removeFromGame();
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
 

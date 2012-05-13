@@ -479,12 +479,6 @@ void BfObject::removeFromGame()
 }
 
 
-void BfObject::clearGame()
-{
-   mGame = NULL;
-}
-
-
 bool BfObject::processArguments(S32 argc, const char**argv, Game *game)
 {
    return true;
@@ -643,7 +637,7 @@ void BfObject::newObjectFromDock(F32 gridSize)
    assignNewSerialNumber();
 
    updateExtentInDatabase();
-   clearGame();
+   mGame = NULL;
 }   
 
 
