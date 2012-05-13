@@ -500,7 +500,7 @@ void WallItem::onGeomChanged()
 
    EditorObjectDatabase *db = getEditorObjectDatabase();
 
-   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, getSerialNumber());
+   db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
    Parent::onGeomChanged();
 }
 
@@ -743,7 +743,7 @@ void PolyWall::onGeomChanged()
 {
    EditorObjectDatabase *db = getEditorObjectDatabase();
 
-   db->getWallSegmentManager()->onWallGeomChanged(db, this, mSelected, getSerialNumber());
+   db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
    Parent::onGeomChanged();
 }
 

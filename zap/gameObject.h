@@ -156,12 +156,64 @@ struct DamageInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class EditorObject
+{
+private:
+   bool mSelected;      // True if item is selected                                                                     
+   bool mLitUp;         // True if user is hovering over the item and it's "lit up"                                     
+   S32 mVertexLitUp;    // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
+
+public:
+   EditorObject();      // Constructor
+
+   // Messages and such for the editor
+   virtual const char *getOnScreenName();
+   virtual const char *getPrettyNamePlural();
+   virtual const char *getOnDockName();
+   virtual const char *getEditorHelpString();
+   virtual const char *getInstructionMsg();        // Message printed below item when it is selected
+   virtual string getAttributeString();            // Used for displaying object attributes in lower-left of editor
+
+
+   // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
+   // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
+   // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
+   virtual S32 getDockRadius();                    // Size of object on dock
+   virtual F32 getEditorRadius(F32 currentScale);  // Size of object in editor
+
+
+   //////
+   // Things are happening in the editor; the object must respond!
+   // Actually, onGeomChanged() and onAttrsChanged() might need to do something if changed by a script in-game
+
+   virtual void onItemDragging();      // Item is being dragged around the screen
+
+   virtual void onAttrsChanging();     // Attr is in the process of being changed (e.g. a char was typed for a textItem)
+   virtual void onAttrsChanged();      // Attrs changed -- only used by TextItem
+
+   // Track some items used in the editor
+   void setSelected(bool selected);
+   bool isSelected();
+
+   bool isLitUp();
+   void setLitUp(bool litUp);
+
+   // Keep track which vertex, if any is lit up in the currently selected item
+   bool isVertexLitUp(S32 vertexIndex);
+   void setVertexLitUp(S32 vertexIndex);
+
+
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class ClientGame;
 class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject
+class BfObject : public DatabaseObject, public NetObject, public EditorObject
 {
    typedef NetObject Parent;
 
@@ -181,6 +233,9 @@ private:
 
    U32 mCreationTime;
    S32 mTeam;
+
+   S32 mSerialNumber;         // Autoincremented serial number  
+   S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
 
 protected:
    Move mLastMove;      // The move for the previous update
@@ -206,9 +261,6 @@ public:
    
    StringTableEntry getKillString();
 
-   //F32 getRating();
-   //S32 getScore();
-
    enum MaskBits {
       FirstFreeMask = BIT(0)
    };
@@ -230,7 +282,7 @@ public:
 
    virtual S32 getRenderSortValue();
 
-   // Move related      game
+   // Move related      xxx game
    const Move &getCurrentMove();
    const Move &getLastMove();
    void setCurrentMove(const Move &theMove);
@@ -243,14 +295,14 @@ public:
    virtual void render(S32 layerIndex);
    virtual void render();
 
-   virtual void idle(IdleCallPath path);              // game
+   virtual void idle(IdleCallPath path);              // xxx game
 
-   virtual void writeControlState(BitStream *stream); // game
-   virtual void readControlState(BitStream *stream);  // game
-   virtual F32 getHealth();                           // game
-   virtual bool isDestroyed();                        // game
+   virtual void writeControlState(BitStream *stream); // xxx game
+   virtual void readControlState(BitStream *stream);  // xxx game
+   virtual F32 getHealth();                           // xxx game
+   virtual bool isDestroyed();                        // xxx game
 
-   virtual void controlMoveReplayComplete();          // game
+   virtual void controlMoveReplayComplete();          // xxx game
 
    // These are only here because Projectiles are not MoveObjects -- if they were, this could go there
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
@@ -259,36 +311,42 @@ public:
    virtual bool collide(BfObject *hitObject);
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
-   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    // geom
+   virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    // xxx geom
 
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
 
    void onGhostAddBeforeUpdate(GhostConnection *theConnection);
    bool onGhostAdd(GhostConnection *theConnection);
-   void disableCollision();
-   void enableCollision();
-   bool isCollisionEnabled();
+
+   void disableCollision();         // xxx game
+   void enableCollision();          // xxx game
+   bool isCollisionEnabled();       // xxx game
 
    //bool collisionPolyPointIntersect(Point point);
    //bool collisionPolyPointIntersect(Vector<Point> points);
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
-   void setScopeAlways();
+   void setScopeAlways();           // xxx game
 
    /////
    // TeamObject methods?
    S32 getTeamIndx(lua_State *L);      // Return item team to Lua
    virtual void push(lua_State *L);    // Lua-aware classes will implement this
   
-   void readThisTeam(BitStream *stream);
-   void writeThisTeam(BitStream *stream);
+   void readThisTeam(BitStream *stream);     // xxx editor?
+   void writeThisTeam(BitStream *stream);    // xxx editor?
+
+   // Team related
+   S32 getTeam() const;
+   void setTeam(S32 team);
+   const Color *getColor() const;      // Get object's team color
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add
    // the ability to manipulate objects more using Lua
-   virtual bool canBeHostile();
-   virtual bool canBeNeutral();
-   virtual bool hasTeam();
+   virtual bool canBeHostile();  // xxx game, editor
+   virtual bool canBeNeutral();  // xxx game, editor
+   virtual bool hasTeam();       // xxx game, editor
 
 
 
@@ -296,30 +354,16 @@ public:
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-
-private:
-   S32 mSerialNumber;         // Autoincremented serial number  
-   S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
-   
 
 
 protected:
    Game *mGame;
-
-   // Used only in the editor
-   bool mSelected;      // True if item is selected
-   bool mLitUp;         // True if user is hovering over the item and it's "lit up"
-   S32 mVertexLitUp;    // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
 
 public:
    BfObject *copy();       // Makes a duplicate of the item (see method for explanation)
    BfObject *newCopy();    // Creates a brand new object based on the current one (see method for explanation)
    virtual BfObject *clone() const;
 
-   // Team related
-   S32 getTeam() const;
-   void setTeam(S32 team);
-   const Color *getColor() const;      // Get object's team color
 
    Game *getGame() const;
 
@@ -344,46 +388,7 @@ public:
    void updateExtentInDatabase();
    virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
 
-
-   // Track some items used in the editor
-   void setSelected(bool selected);
-   bool isSelected();
-   
    void unselect();
-
-   bool isLitUp();
-   void setLitUp(bool litUp);
-
-   // Keep track which vertex, if any is lit up in the currently selected item
-   bool isVertexLitUp(S32 vertexIndex);
-   void setVertexLitUp(S32 vertexIndex);
-
-
-   //////
-   // Things are happening in the editor; the object must respond!
-   // Actually, onGeomChanged() and onAttrsChanged() might need to do something if changed by a script in-game
-
-   virtual void onItemDragging();      // Item is being dragged around the screen
-
-   virtual void onAttrsChanging();     // Attr is in the process of being changed (e.g. a char was typed for a textItem)
-   virtual void onAttrsChanged();      // Attrs changed -- only used by TextItem
-
-
-   /////
-   // Messages and such for the editor
-   virtual const char *getOnScreenName();
-   virtual const char *getPrettyNamePlural();
-   virtual const char *getOnDockName();
-   virtual const char *getEditorHelpString();
-   virtual const char *getInstructionMsg();        // Message printed below item when it is selected
-   virtual string getAttributeString();            // Used for displaying object attributes in lower-left of editor
-
-
-   // Objects can be different sizes on the dock and in the editor.  We need to draw selection boxes in both locations,
-   // and these functions specify how big those boxes should be.  Override if implementing a non-standard sized item.
-   // (strictly speaking, only getEditorRadius needs to be public, but it make sense to keep these together organizationally.)
-   virtual S32 getDockRadius();                    // Size of object on dock
-   virtual F32 getEditorRadius(F32 currentScale);  // Size of object in editor
 
    EditorObjectDatabase *getEditorObjectDatabase();
 

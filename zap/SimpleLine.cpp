@@ -127,8 +127,8 @@ void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
          glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
 
          // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
-         if(!i && (mSelected || mLitUp))
-            glColor(mSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
+         if(!i && (isSelected() || isLitUp()))
+            glColor(isSelected() ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
 
          glVertex(pos);                 // Draw connecting line
          glVertex(dest);

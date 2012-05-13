@@ -515,7 +515,7 @@ void LineItem::render()
 void LineItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   if(!mSelected && !mLitUp)
+   if(!isSelected() && !isLitUp())
       glColor(getEditorRenderColor());
 
    renderLine(getOutline());

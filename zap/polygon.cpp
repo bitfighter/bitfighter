@@ -72,7 +72,7 @@ void PolygonObject::onGeomChanged()
 void PolygonObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
-   if(mSelected || mLitUp)
+   if(isSelected() || isLitUp())
       renderPolyHighlight();
 
    renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
@@ -96,7 +96,7 @@ void PolygonObject::renderPolyHighlight()
 {
 #ifndef ZAP_DEDICATED
    glLineWidth(gLineWidth3);
-   glColor(mSelected ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
+   glColor(isSelected() ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
    renderPolygonOutline(getOutline());
    glLineWidth(gDefaultLineWidth);
 #endif

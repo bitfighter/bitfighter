@@ -256,6 +256,116 @@ DamageInfo::DamageInfo()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Constructor
+EditorObject::EditorObject()
+{
+   mLitUp = false; 
+   mSelected = false; 
+}
+
+
+void EditorObject::onItemDragging()  { /* Do nothing */ }
+void EditorObject::onAttrsChanging() { /* Do nothing */ }
+void EditorObject::onAttrsChanged()  { /* Do nothing */ }
+
+
+const char *EditorObject::getEditorHelpString()
+{
+   TNLAssert(false, "getEditorHelpString method not implemented!");
+   return "getEditorHelpString method not implemented!";  // better then a NULL crash in non-debug mode or continuing past the Assert
+}
+
+
+const char *EditorObject::getPrettyNamePlural()
+{
+   TNLAssert(false, "getPrettyNamePlural method not implemented!");
+   return "getPrettyNamePlural method not implemented!";
+}
+
+
+const char *EditorObject::getOnDockName()
+{
+   TNLAssert(false, "getOnDockName method not implemented!");
+   return "getOnDockName method not implemented!";
+}
+
+
+const char *EditorObject::getOnScreenName()
+{
+   TNLAssert(false, "getOnScreenName method not implemented!");
+   return "getOnScreenName method not implemented!";
+}
+
+
+// Not all editor objects will implement this
+const char *EditorObject::getInstructionMsg()
+{
+   return "";
+}
+
+
+string EditorObject::getAttributeString()
+{
+   return "";
+}
+
+
+S32 EditorObject::getDockRadius()
+{
+   return 10;
+}
+
+
+
+bool EditorObject::isSelected()
+{
+   return mSelected;
+}
+
+
+void EditorObject::setSelected(bool selected)
+{
+   mSelected = selected;
+}
+
+
+bool EditorObject::isLitUp() 
+{ 
+   return mLitUp; 
+}
+
+
+void EditorObject::setLitUp(bool litUp) 
+{ 
+   mLitUp = litUp; 
+
+   if(!litUp) 
+      setVertexLitUp(NONE); 
+}
+
+
+bool EditorObject::isVertexLitUp(S32 vertexIndex)
+{
+   return mVertexLitUp == vertexIndex;
+}
+
+
+void EditorObject::setVertexLitUp(S32 vertexIndex)
+{
+   mVertexLitUp = vertexIndex;
+}
+
+
+// Size of object in editor 
+F32 EditorObject::getEditorRadius(F32 currentScale)
+{
+   return 10 * currentScale;   // 10 pixels is base size
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // BfObject - the declarations are in GameObject.h
 
 // Constructor
@@ -264,8 +374,6 @@ BfObject::BfObject()
    mGame = NULL;
    mObjectTypeNumber = UnknownTypeNumber;
 
-   mLitUp = false; 
-   mSelected = false; 
    assignNewSerialNumber();
 
    mTeam = -1;
@@ -416,90 +524,12 @@ void BfObject::unselect()
 }
 
 
-bool BfObject::isSelected()
-{
-   return mSelected;
-}
-
-
-void BfObject::setSelected(bool selected)
-{
-   mSelected = selected;
-}
-
-
-bool BfObject::isLitUp() 
-{ 
-   return mLitUp; 
-}
-
-
-void BfObject::setLitUp(bool litUp) 
-{ 
-   mLitUp = litUp; 
-
-   if(!litUp) 
-      setVertexLitUp(NONE); 
-}
-
-
-bool BfObject::isVertexLitUp(S32 vertexIndex)
-{
-   return mVertexLitUp == vertexIndex;
-}
-
-
-void BfObject::setVertexLitUp(S32 vertexIndex)
-{
-   mVertexLitUp = vertexIndex;
-}
-
-
 void BfObject::onGeomChanged()
 {
    GeomObject::onGeomChanged();
    updateExtentInDatabase();
 }
 
-
-void BfObject::onItemDragging()  { /* Do nothing */ }
-void BfObject::onAttrsChanging() { /* Do nothing */ }
-void BfObject::onAttrsChanged()  { /* Do nothing */ }
-
-
-const char *BfObject::getEditorHelpString()
-{
-   TNLAssert(false, "getEditorHelpString method not implemented!");
-   return "getEditorHelpString method not implemented!";  // better then a NULL crash in non-debug mode or continuing past the Assert
-}
-
-
-const char *BfObject::getPrettyNamePlural()
-{
-   TNLAssert(false, "getPrettyNamePlural method not implemented!");
-   return "getPrettyNamePlural method not implemented!";
-}
-
-
-const char *BfObject::getOnDockName()
-{
-   TNLAssert(false, "getOnDockName method not implemented!");
-   return "getOnDockName method not implemented!";
-}
-
-
-const char *BfObject::getOnScreenName()
-{
-   TNLAssert(false, "getOnScreenName method not implemented!");
-   return "getOnScreenName method not implemented!";
-}
-
-
-// Not all editor objects will implement this
-const char *BfObject::getInstructionMsg()
-{
-   return "";
-}
 
 
 #ifndef ZAP_DEDICATED
@@ -524,9 +554,9 @@ void BfObject::renderAndLabelHighlightedVertices(F32 currentScale)
 
    // Label and highlight any selected or lit up vertices.  This will also highlight point items.
    for(S32 i = 0; i < getVertCount(); i++)
-      if(vertSelected(i) || isVertexLitUp(i) || ((mSelected || mLitUp)  && getVertCount() == 1))
+      if(vertSelected(i) || isVertexLitUp(i) || ((isSelected() || isLitUp())  && getVertCount() == 1))
       {
-         glColor((vertSelected(i) || (mSelected && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR);
+         glColor((vertSelected(i) || (isSelected() && getGeomType() == geomPoint)) ? SELECT_COLOR : HIGHLIGHT_COLOR);
 
          Point center = getVert(i) + getEditorSelectionOffset(currentScale);
 
@@ -558,12 +588,6 @@ void BfObject::initializeEditor()
    unselectVerts();
 }
 
-
-// Size of object in editor 
-F32 BfObject::getEditorRadius(F32 currentScale)
-{
-   return 10 * currentScale;   // 10 pixels is base size
-}
 
 
 string BfObject::toString(F32) const
@@ -654,17 +678,6 @@ EditorObjectDatabase *BfObject::getEditorObjectDatabase()
    return static_cast<EditorObjectDatabase *>(getDatabase());
 }
 
-
-string BfObject::getAttributeString()
-{
-   return "";
-}
-
-
-S32 BfObject::getDockRadius()
-{
-   return 10;
-}
 
 
 // For editing attributes -- all implementation will need to be provided by the children
