@@ -57,13 +57,6 @@ public:
    
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
-   ///// Editor methods
-   virtual const char *getEditorHelpString() = 0;
-   virtual const char *getPrettyNamePlural() = 0;
-   virtual const char *getOnDockName() = 0;
-   virtual const char *getOnScreenName() = 0;
-
-
 #ifndef ZAP_DEDICATED
    // These four methods are all that's needed to add an editable attribute to a class...
    EditorAttributeMenuUI *getAttributeMenu();
