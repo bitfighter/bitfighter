@@ -591,7 +591,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    saveUndoState();
 
    // We can't call addToEditor immediately because it calls addToGame which will trigger
-   // an assert since the levelGen items are already added to the game.  We must therefor
+   // an assert since the levelGen items are already added to the game.  We must therefore
    // remove them from the game first
    for(S32 i = 0; i < tempList.size(); i++)
    {
