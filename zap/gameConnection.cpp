@@ -1421,33 +1421,38 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    name[len] = 0;    // Terminate string properly
 
-   // Now that we have the name, check if the client is banned
-   if(mServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name)))
-   {
-      reason = ReasonBanned;
-      return false;
-   }
-
-   // Was the client kicked temporarily?
-   if(mServerGame->getSettings()->getBanList()->isAddressKicked(getNetAddress()))
-   {
-      reason = ReasonKickedByAdmin;
-      return false;
-   }
-
-   // Is the server Full?
-   if(mServerGame->isFull())
-   {
-      reason = ReasonServerFull;
-      return false;
-   }
-
    // Change name to be unique - i.e. if we have multiples of 'ChumpChange'
    mClientInfo->setName(mServerGame->makeUnique(name));   // Unique name
    mClientNameNonUnique = name;              // For authentication non-unique name
 
    mClientInfo->getId()->read(stream);
-   mClientInfo->setNeedToCheckAuthenticationWithMaster(stream->readFlag());
+   bool needToCheckAuthentication = stream->readFlag();
+   mClientInfo->setNeedToCheckAuthenticationWithMaster(needToCheckAuthentication);
+
+   if(!isLocalConnection())  // don't disconnect local host making "Host game" unusable, which could be a result of ban yourself..
+   {
+      // Now that we have the name, check if the client is banned,
+      // can't use isAuthenticated() until after waiting for m2sSetAuthenticated, using needToCheckAuthentication instead.
+      if(mServerGame->getSettings()->getBanList()->isBanned(getNetAddress().toString(), string(name), needToCheckAuthentication))
+      {
+         reason = ReasonBanned;
+         return false;
+      }
+
+      // Was the client kicked temporarily?
+      if(mServerGame->getSettings()->getBanList()->isAddressKicked(getNetAddress()))
+      {
+         reason = ReasonKickedByAdmin;
+         return false;
+      }
+
+      // Is the server Full?
+      if(mServerGame->isFull())
+      {
+         reason = ReasonServerFull;
+         return false;
+      }
+   }
 
    requestAuthenticationVerificationFromMaster();    
 

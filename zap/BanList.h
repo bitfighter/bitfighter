@@ -69,10 +69,11 @@ public:
    BanList(const string &iniDir);
    virtual ~BanList();
 
-   void addToBanList(const Address &address, S32 durationMinutes);
+   void addToBanList(const Address &address, S32 durationMinutes, bool nonAuthenticatedOnly = false);
+   void addPlayerNameToBanList(const char *playerName, S32 durationMinutes);
    void removeFromBanList(const Address &address);
 
-   bool isBanned(const Address &address, const string &nickname);
+   bool isBanned(const Address &address, const string &nickname, bool isAuthenticated);
 
    string getDelimiter();
    string getWildcard();
