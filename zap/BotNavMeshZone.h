@@ -76,7 +76,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class BotNavMeshZone : public DatabaseObject, public GeomObject 
+class BotNavMeshZone : public GeomObject 
 {
    typedef GeomObject Parent;
 

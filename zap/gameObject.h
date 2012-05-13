@@ -182,7 +182,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class GeomObject
+class GeomObject : public DatabaseObject     // Should probably be the other way 'round
 {
 private:
    GeometryContainer mGeometry;
@@ -252,7 +252,7 @@ class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public GeomObject, public NetObject
+class BfObject : public GeomObject, public NetObject
 {
    typedef NetObject Parent;
 
