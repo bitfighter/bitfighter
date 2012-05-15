@@ -125,15 +125,20 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    mShapeType = ShipShape::Normal;
 #endif
 
-   // Create our proxy object for Lua access
-   luaProxy = LuaShip(this);
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 Ship::~Ship()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+Ship *Ship::clone() const
+{
+   return new Ship(*this);
 }
 
 
@@ -193,13 +198,6 @@ void Ship::setDefaultLoadout()
 ClientInfo *Ship::getClientInfo()
 {
    return mClientInfo;
-}
-
-
-// Push a LuaShip proxy onto the stack
-void Ship::push(lua_State *L)
-{
-   Lunar<LuaShip>::push(L, &luaProxy, false);     // true ==> Lua will delete it's reference to this object when it's done with it
 }
 
 
@@ -2244,109 +2242,69 @@ bool Ship::isRobot()
 }
 
 
-S32 LuaShip::id = 99;
+const char *Ship::luaClassName = "Ship";
 
-const char LuaShip::className[] = "Ship";      // Class name as it appears to Lua scripts
+const luaL_reg Ship::luaMethods[] =
+{
+   { "isAlive",         luaW_doMethod<Ship, &Ship::isAlive>         },
+   { "getPlayerInfo",   luaW_doMethod<Ship, &Ship::getPlayerInfo>   },
 
-// Note that when adding a method here, also add it to LuaRobot so that it can inherit these methods
-Lunar<LuaShip>::RegType LuaShip::methods[] = {
-   method(LuaShip, getClassID),
-   method(LuaShip, isAlive),
+   { "isModActive",     luaW_doMethod<Ship, &Ship::isModActive>     },
+   { "getEnergy",       luaW_doMethod<Ship, &Ship::getEnergy>       },
+   { "getHealth",       luaW_doMethod<Ship, &Ship::getHealth>       },
+   { "hasFlag",         luaW_doMethod<Ship, &Ship::hasFlag>         },
+   { "getFlagCount",    luaW_doMethod<Ship, &Ship::getFlagCount>    },
 
-   method(LuaShip, getLoc),
-   method(LuaShip, getRad),
-   method(LuaShip, getVel),
-   method(LuaShip, getTeamIndx),
-   method(LuaShip, getPlayerInfo),
-
-   method(LuaShip, isModActive),
-   method(LuaShip, getEnergy),
-   method(LuaShip, getHealth),
-   method(LuaShip, hasFlag),
-
-   method(LuaShip, getAngle),
-   method(LuaShip, getActiveWeapon),
-   method(LuaShip, getMountedItems),
-   method(LuaShip, getCurrLoadout),
-   method(LuaShip, getReqLoadout),
+   { "getAngle",        luaW_doMethod<Ship, &Ship::getAngle>        },
+   { "getActiveWeapon", luaW_doMethod<Ship, &Ship::getActiveWeapon> },
+   { "getMountedItems", luaW_doMethod<Ship, &Ship::getMountedItems> },
+   { "getCurrLoadout",  luaW_doMethod<Ship, &Ship::getCurrLoadout>  },
+   { "getReqLoadout",   luaW_doMethod<Ship, &Ship::getReqLoadout>   },
 
    {0,0}    // End method list
 };
 
 
-// C++ constructor -- automatically constructed when a ship is created
-// This is the only constructor that's used.
-LuaShip::LuaShip(Ship *ship): thisShip(ship)
-{
-   id++;
-   mId = id;
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "Creating luaship %d", mId);
-}
-
-
-// C++ default constructor ==> not used.  Constructor with Ship (above) used instead
-LuaShip::LuaShip()
-{
-   /* Do nothing */
-};
-
-
-// Lua constructor ==> not used.  Class only instantiated from C++.
-LuaShip::LuaShip(lua_State *L)
-{
-   /* Do nothing */
-};
-
-
-// Destructor
-LuaShip::~LuaShip()
-{
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "Killing luaShip %d", mId);
-};
-
-
-S32 LuaShip::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }
-S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid() && !thisShip->isDestroyed()); }
+REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
-S32 LuaShip::getRad(lua_State *L)  { return thisShip ? returnFloat(L, thisShip->getRadius())        : returnNil(L); }
-S32 LuaShip::getLoc(lua_State *L)  { return thisShip ? returnPoint(L, thisShip->getActualPos())     : returnNil(L); }
-S32 LuaShip::getVel(lua_State *L)  { return thisShip ? returnPoint(L, thisShip->getActualVel())     : returnNil(L); }
-S32 LuaShip::hasFlag(lua_State *L) { return thisShip ? returnBool (L, thisShip->getFlagCount() > 0) : returnNil(L); }
+
+S32 Ship::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }
+S32 Ship::isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
+S32 Ship::hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
 
 // Returns number of flags ship is carrying (most games will always be 0 or 1)
-S32 LuaShip::getFlagCount(lua_State *L) { return thisShip ? returnInt(L, thisShip->getFlagCount()) : returnNil(L); }
+S32 Ship::getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); }
 
 
-S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam() + 1); }
-
-S32 LuaShip::getPlayerInfo(lua_State *L) { return thisShip ? returnPlayerInfo(L, thisShip) : returnNil(L); }
+S32 Ship::getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
 
 
-S32 LuaShip::isModActive(lua_State *L) {
+S32 Ship::isModActive(lua_State *L) {
    static const char *methodName = "Ship:isModActive()";
    checkArgCount(L, 1, methodName);
    ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
-   return thisShip ? returnBool(L, getObj()->isModulePrimaryActive(module) || getObj()->isModuleSecondaryActive(module)) : returnNil(L);
+   return returnBool(L, isModulePrimaryActive(module) || isModuleSecondaryActive(module));
 }
 
-S32 LuaShip::getAngle(lua_State *L) { return thisShip ? returnFloat(L, getObj()->getCurrentMove().angle) : returnNil(L); }      // Get angle ship is pointing at
-S32 LuaShip::getActiveWeapon(lua_State *L) { return thisShip ?  returnInt(L, getObj()->getSelectedWeapon()) : returnNil(L); }    // Get WeaponIndex for current weapon
+S32 Ship::getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle); }  // Get angle ship is pointing at
+S32 Ship::getActiveWeapon(lua_State *L) { return returnInt  (L, getSelectedWeapon());    }  // Get WeaponIndex for current weapon
+                               
+// Ship status
+S32 Ship::getEnergy(lua_State *L)       { return returnFloat(L, getEnergyFraction()); }     // Return ship's energy as a fraction between 0 and 1
+S32 Ship::getHealth(lua_State *L)       { return returnFloat(L, getHealth()); }             // Return ship's health as a fraction between 0 and 1
 
-S32 LuaShip::getEnergy(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getEnergyFraction()) : returnNil(L); }        // Return ship's energy as a fraction between 0 and 1
-S32 LuaShip::getHealth(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getHealth()) : returnNil(L); }                // Return ship's health as a fraction between 0 and 1
-
-S32 LuaShip::getMountedItems(lua_State *L)
+S32 Ship::getMountedItems(lua_State *L)
 {
    bool hasArgs = lua_isnumber(L, 1);
    Vector<BfObject *> tempVector;
 
    // Loop through all the mounted items
-   for(S32 i = 0; i < thisShip->mMountedItems.size(); i++)
+   for(S32 i = 0; i < mMountedItems.size(); i++)
    {
       // Add every item to the list if no arguments were specified
       if(!hasArgs)
-         tempVector.push_back(dynamic_cast<BfObject *>(thisShip->mMountedItems[i].getPointer()));
+         tempVector.push_back(dynamic_cast<BfObject *>(mMountedItems[i].getPointer()));
 
       // Else, compare against argument type and add to the list if matched
       else
@@ -2356,9 +2314,9 @@ S32 LuaShip::getMountedItems(lua_State *L)
          {
             U8 objectType = (U8) lua_tointeger(L, index);
 
-            if(thisShip->mMountedItems[i]->getObjectTypeNumber() == objectType)
+            if(mMountedItems[i]->getObjectTypeNumber() == objectType)
             {
-               tempVector.push_back(dynamic_cast<BfObject *>(thisShip->mMountedItems[i].getPointer()));
+               tempVector.push_back(dynamic_cast<BfObject *>(mMountedItems[i].getPointer()));
                break;
             }
 
@@ -2369,9 +2327,7 @@ S32 LuaShip::getMountedItems(lua_State *L)
 
    clearStack(L);
 
-   if(!thisShip) return 0;  // if NULL, what to do here?
-
-   lua_createtable(L, thisShip->mMountedItems.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   lua_createtable(L, mMountedItems.size(), 0);    // Create a table, with enough slots pre-allocated for our data
 
    // Now push all found items back to LUA
    S32 pushed = 0;      // Count of items actually pushed onto the stack
@@ -2387,28 +2343,29 @@ S32 LuaShip::getMountedItems(lua_State *L)
 }
 
 // Return current loadout
-S32 LuaShip::getCurrLoadout(lua_State *L)
+S32 Ship::getCurrLoadout(lua_State *L)
 {
    U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U8)thisShip->getModule(i);
+      loadoutItems[i] = (U8)getModule(i);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U8)thisShip->getWeapon(i);
+      loadoutItems[i + ShipModuleCount] = (U8)getWeapon(i);
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
-   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
+   luaW_push<LuaLoadout>(L, loadout);
+   luaW_hold<LuaLoadout>(L, loadout);
 
    return 1;
 }
 
 
 // Return requested loadout
-S32 LuaShip::getReqLoadout(lua_State *L)
+S32 Ship::getReqLoadout(lua_State *L)
 {
    U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
-   ClientInfo *clientInfo = thisShip->getOwner();
+   ClientInfo *clientInfo = getOwner();
 
    const Vector<U8> requestedLoadout = clientInfo ? clientInfo->getLoadout() : Vector<U8>();
 
@@ -2419,48 +2376,17 @@ S32 LuaShip::getReqLoadout(lua_State *L)
       loadoutItems[i] = requestedLoadout[i];
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
-   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
+   luaW_push<LuaLoadout>(L, loadout);
+   luaW_hold<LuaLoadout>(L, loadout);
 
    return 1;
 }
 
 
-BfObject *LuaShip::getGameObject()
-{
-   if(thisShip.isNull())    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
-   {
-      logprintf(LogConsumer::LuaBotMessage, "Bad programmer!");
-      return NULL;      // Not right
-   }
-   else
-      return getObj();
-}
-
-
-const char *LuaShip::getClassName() const
-{
-   return "LuaShip";
-}
-
-
-void LuaShip::push(lua_State *L)
-{
-   Lunar<LuaShip>::push(L, this, false);
-}
-
-
-Ship *LuaShip::getObj()
-{
-   return thisShip;
-}
-
-
-Ship *Ship::clone() const
-{
-   return new Ship(*this);
-}
-
-
+//void Ship::push(lua_State *L)
+//{
+//   luaw_push<Ship>(L, this);
+//}
 
 
 };

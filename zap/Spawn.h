@@ -99,8 +99,8 @@ public:
 
    const char *getClassName() const;
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
+   bool processArguments(S32 argc, const char **argv, Game *game);
 
    S32 getDefaultRespawnTime();    // Somewhat meaningless in this context
 

@@ -42,7 +42,7 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Teleporter : public SimpleLine, public LuaItem
+class Teleporter : public SimpleLine
 {
    typedef SimpleLine Parent;
 
@@ -117,12 +117,8 @@ public:
    S32 getClassID(lua_State *L);   // Object's class
    void push(lua_State *L);        // Push item onto stack
 
-   S32 getLoc(lua_State *L);       // Center of item (returns point)
    S32 getRad(lua_State *L);       // Radius of item (returns number)
    S32 getVel(lua_State *L);       // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L);  // All teleporters are neutral
-
-   BfObject *getGameObject();
 };
 
 

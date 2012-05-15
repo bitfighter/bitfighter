@@ -159,7 +159,7 @@ Point PolygonObject::getInitialPlacementOffset(F32 gridSize)
 // Former LuaPolygon methods
 S32 PolygonObject::getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getCentroid());
+   return LuaObject::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
 }
 
 
@@ -172,18 +172,6 @@ S32 PolygonObject::getRad(lua_State *L)
 S32 PolygonObject::getVel(lua_State *L)
 {
    return LuaObject::returnPoint(L, Point(0,0));
-}
-
-
-S32 PolygonObject::getTeamIndx(lua_State *L)
-{
-   return LuaObject::returnInt(L, getTeam() + 1);
-}
-
-
-BfObject *PolygonObject::getGameObject()
-{
-   return this;
 }
 
 

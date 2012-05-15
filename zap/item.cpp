@@ -46,7 +46,7 @@ namespace Zap
 bool Item::mInitial;
 
 // Constructor
-Item::Item(const Point &pos, F32 radius)
+Item::Item(const Point &pos, F32 radius) : Parent()
 {
    mRadius = radius;
    setPos(pos);
@@ -192,13 +192,6 @@ Rect Item::calcExtents()
 }
 
 
-// LuaItem interface
-S32 Item::getLoc(lua_State *L)
-{
-   return LuaObject::returnPoint(L, getPos());
-}
-
-
 S32 Item::getRad(lua_State *L)
 {
    return LuaObject::returnFloat(L, getRadius());
@@ -208,12 +201,6 @@ S32 Item::getRad(lua_State *L)
 S32 Item::getVel(lua_State *L)
 {
    return LuaObject::returnPoint(L, Point(0,0));
-}
-
-
-S32 Item::getTeamIndx(lua_State *L)
-{
-   return returnInt(L, getTeam() + 1);
 }
 
 
@@ -244,7 +231,7 @@ S32 Item::getShip(lua_State *L)
 // ==> This one is a good candidate for moving directly into LuaW's index table rather than having a C++ method to support it
 static S32 doGetClassId(lua_State *L) 
 { 
-   MoveItem *w = luaW_check<MoveItem>(L, 1); 
+   Item *w = luaW_check<Item>(L, 1); 
    if(w) 
       return LuaObject::returnInt(L, w->getObjectTypeNumber()); 
       
@@ -252,30 +239,22 @@ static S32 doGetClassId(lua_State *L)
 }
 
 
+const char *Item::luaClassName = "Item";
+
 // Standard methods available to all Items
 const luaL_reg Item::luaMethods[] =
 {
    { "getClassID",      doGetClassId                                },
-   { "getLoc",          luaW_doMethod<Item, &Item::getLoc>          },
    { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
    { "getVel",          luaW_doMethod<Item, &Item::getVel>          },
-   { "getTeamIndx",     luaW_doMethod<Item, &Item::getTeamIndx>     },
    { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
 
    { NULL, NULL }
 };
 
 
-const char *Item::luaClassName = "Item";
+REGISTER_LUA_SUBCLASS(Item, BfObject);
 
-REGISTER_LUA_CLASS(Item);
-
-
-// For getting the underlying object when all we have is a Lua pointer to it
-BfObject *Item::getGameObject()
-{
-   return this;
-}
 
 
 };

@@ -213,29 +213,19 @@ bool isVisibleOnCmdrsMapType(U8 x)
 bool isVisibleOnCmdrsMapWithSensorType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
-         x == GoalZoneTypeNumber || x == NexusTypeNumber || x == LoadoutZoneTypeNumber || x == SlipZoneTypeNumber ||
-         x == SpeedZoneTypeNumber || x == TeleportTypeNumber ||
-         x == LineTypeNumber || x == TextItemTypeNumber ||
-         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber ||
-         x == CoreTypeNumber ||
-         x == BulletTypeNumber || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == ResourceItemTypeNumber        ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == LoadoutZoneTypeNumber         || 
+         x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
+         x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == SlipZoneTypeNumber            ||
+         x == GoalZoneTypeNumber   || x == NexusTypeNumber          ||
+         x == SpeedZoneTypeNumber  || x == TeleportTypeNumber       ||
+         x == LineTypeNumber       || x == TextItemTypeNumber       ||
+         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || 
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber     ||
+         x == CoreTypeNumber       ||
+         x == BulletTypeNumber     || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
 }
 
-
-//bool isMoveItemType(U8 x)
-//{
-//   return x == 
-//}
-//
-//bool isMoveObjectType(U8 x)
-//{
-//   return isMoveItem(x) || isShipType(x); 
-//}
 
 bool isAnyObjectType(U8 x)
 {
@@ -395,6 +385,16 @@ BfObject::BfObject()
    mCreationTime = 0;
 
    mOwner = NULL;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+BfObject::~BfObject()
+{
+   removeFromGame();
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -572,7 +572,6 @@ void BfObject::initializeEditor()
 }
 
 
-
 string BfObject::toString(F32) const
 {
    TNLAssert(false, "This object not be serialized");
@@ -652,28 +651,17 @@ void BfObject::renderDock()
 }
 
 
-EditorObjectDatabase *BfObject::getEditorObjectDatabase()
+// TODO: Delete this method
+GridDatabase *BfObject::getEditorObjectDatabase()
 {
-   TNLAssert(dynamic_cast<EditorObjectDatabase *>(getDatabase()), "This should be a EditorObjectDatabase!");
-   return static_cast<EditorObjectDatabase *>(getDatabase());
+   return getDatabase();
 }
-
 
 
 // For editing attributes -- all implementation will need to be provided by the children
 EditorAttributeMenuUI *BfObject::getAttributeMenu()                                      { return NULL; }
 void                   BfObject::startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { /* Do nothing */ }
 void                   BfObject::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)  { /* Do nothing */ }
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Destructor
-BfObject::~BfObject()
-{
-   removeFromGame();
-}
 
 
 bool BfObject::controllingClientIsValid()
@@ -964,18 +952,6 @@ StringTableEntry BfObject::getKillString()
 }
 
 
-//F32 BfObject::getRating()
-//{
-//   return 0; // TODO: Fix this
-//}
-//
-//
-//S32 BfObject::getScore()
-//{
-//   return 0; // TODO: Fix this
-//}
-
-
 S32 BfObject::getRenderSortValue()
 {
    return 2;
@@ -1215,18 +1191,6 @@ bool BfObject::onGhostAdd(GhostConnection *theConnection)
 }
 
 
-S32 BfObject::getTeamIndx(lua_State *L)  // Return item team to Lua
-{
-   return LuaObject::returnInt(L, mTeam + 1);
-}
-
-
-void BfObject::push(lua_State *L)       // Lua-aware classes will implement this
-{
-   TNLAssert(false, "Unimplemented push function!");
-}
-
-
 void BfObject::readThisTeam(BitStream *stream)
 {
    mTeam = stream->readInt(4) - 2;
@@ -1237,6 +1201,86 @@ void BfObject::writeThisTeam(BitStream *stream)
 {
    stream->writeInt(mTeam + 2, 4);
 }
+
+
+/// Lua methods
+const char *BfObject::luaClassName = "BfItem";
+
+// Standard methods available to all Items
+const luaL_reg BfObject::luaMethods[] =
+{
+   //{ "getClassID",      doGetClassId                                },
+   { "getLoc",          luaW_doMethod<BfObject, &BfObject::getLoc>    },
+   //{ "getRad",          luaW_doMethod<Item, &Item::getRad>          },
+   //{ "getVel",          luaW_doMethod<Item, &Item::getVel>          },
+   { "getTeamIndx",     luaW_doMethod<BfObject, &BfObject::getTeamIndx>     },
+   //{ "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
+
+   { NULL, NULL }
+};
+
+
+S32 BfObject::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getPos());
+}
+
+
+S32 BfObject::getTeamIndx(lua_State *L)  
+{
+   return LuaObject::returnInt(L, mTeam + 1);      // + 1 because Lua indices start at 1
+}
+
+
+BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
+{
+   switch(type)
+   {
+      case RobotShipTypeNumber:  // pass through
+      case PlayerShipTypeNumber:
+        //return  luaW_check<LuaShip>::check(L, index);
+
+      case BulletTypeNumber:  // pass through
+      case MineTypeNumber:    // pass through
+      case SpyBugTypeNumber:
+         //return luaW_check<LuaProjectile>::check(L, index);
+
+      case ResourceItemTypeNumber:
+         return luaW_check<ResourceItem>(L, index);
+      case TestItemTypeNumber:
+         return luaW_check<TestItem>(L, index);
+      case FlagTypeNumber:
+         return Lunar<FlagItem>::check(L, index);
+
+      case TeleportTypeNumber:
+         //return luaW_check<Teleporter>::check(L, index);
+      case AsteroidTypeNumber:
+         return luaW_check<Asteroid>(L, index);
+      case CircleTypeNumber:
+         return luaW_check<Circle>(L, index);
+
+      case RepairItemTypeNumber:
+         //return luaW_check<RepairItem>::check(L, index);
+      case EnergyItemTypeNumber:
+         //return Lunar<EnergyItem>::check(L, index);
+      case SoccerBallItemTypeNumber:
+         //return luaW_check<SoccerBallItem>::check(L, index);
+      case TurretTypeNumber:
+         //return luaW_check<Turret>::check(L, index);
+      case ForceFieldProjectorTypeNumber:
+         //return luaW_check<ForceFieldProjector>::check(L, index);
+      case CoreTypeNumber:
+         //return luaW_check<CoreItem>::check(L, index);
+      default:
+         char msg[256];
+         dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
+         logprintf(LogConsumer::LogError, msg);
+
+         throw LuaException(msg);
+   }
+}
+
+REGISTER_LUA_CLASS(BfObject);
 
 
 };

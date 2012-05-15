@@ -3418,7 +3418,7 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
    }
 
    // And fire an event handler...
-   // But don't add event if called by robot - it is already called in LuaRobot::globalMsg/teamMsg
+   // But don't add event if called by robot - it is already called in Robot::globalMsg/teamMsg
    if(senderClientInfo && !senderClientInfo->isRobot())
       EventManager::get()->fireEvent(NULL, EventManager::MsgReceivedEvent, message, senderClientInfo->getPlayerInfo(), global);
 }

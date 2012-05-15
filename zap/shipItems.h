@@ -26,6 +26,7 @@
 #ifndef _SHIPITEMS_H_
 #define _SHIPITEMS_H_
 
+#include "WeaponInfo.h"    // For weapon defs for DefaultLoadout list
 #include "../tnl/tnlTypes.h"
 
 using namespace TNL;
@@ -62,6 +63,12 @@ enum ModulePrimaryUseType
    ModulePrimaryUsePassive,    // Always functional
    ModulePrimaryUseHybrid      // Always functional, with an active component
 };
+
+
+static const S32 ShipModuleCount = 2;                // Modules a ship can carry
+static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
+static const U8 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
+
 
 struct ModuleInfo
 {

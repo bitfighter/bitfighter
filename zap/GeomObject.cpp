@@ -39,6 +39,13 @@ GeomObject::GeomObject()
 }
 
 
+//// Copy constructor
+//GeomObject::GeomObject(const GeomObject &g) 
+//{
+//   mGeometry = g.mGeometry;
+//}
+
+
 // Destructor
 GeomObject::~GeomObject()
 {
@@ -46,7 +53,7 @@ GeomObject::~GeomObject()
 };
 
 
-   // mGeometry will be deleted in destructor
+// mGeometry will be deleted in destructor
 void GeomObject::setNewGeometry(GeomType geomType)
 {
    TNLAssert(!mGeometry.getGeometry(), "This object already has a geometry!");
@@ -147,7 +154,7 @@ bool GeomObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()-
 
 // Geometric calculations
 Point GeomObject::getCentroid()     {   return mGeometry.getGeometry()->getCentroid();     }
-F32  GeomObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
+F32   GeomObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
       
 
 // Geometry operations
@@ -196,9 +203,6 @@ void GeomObject::setPos(const Point &pos)
    setVert(pos, 0);  
    setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
 }
-
-
-
 
 
 void GeomObject::onGeomChanging()

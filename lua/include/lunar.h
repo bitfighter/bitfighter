@@ -27,8 +27,6 @@ struct LuaException : public std::exception
 };
 
 
-
-
 template <typename T> class Lunar {
   typedef struct { T *pT; } userdataType;
 public:
@@ -78,7 +76,7 @@ public:
     lua_setmetatable(L, methods);
 
     // Fill method table with methods from class T
-    for(RegType *l = T::methods; l->name; l++)        // Example: method(LuaRobot, getZoneCenter)  ::: (name, function)
+    for(RegType *l = T::methods; l->name; l++)        // Example: method(Robot, getZoneCenter)  ::: (name, function)
     {
       lua_pushstring(L, l->name);                     // Pushes "getZoneCenter"
       lua_pushlightuserdata(L, (void*)l);             // Pushes pointer to RegType for this method

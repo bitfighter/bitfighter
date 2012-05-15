@@ -62,8 +62,9 @@ private:
    GeometryContainer mGeometry;
 
 public:
-   GeomObject();              // Constructor
-   virtual ~GeomObject();     // Destructor
+   GeomObject();                          // Constructor
+   //GeomObject(const GeomObject &geom);    // Copy constructor
+   virtual ~GeomObject();                 // Destructor
 
    void setNewGeometry(GeomType geomType);
 

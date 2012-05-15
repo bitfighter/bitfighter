@@ -37,7 +37,7 @@ namespace Zap
 
 class Ship;
 
-class LuaProjectile : public LuaItem
+class LuaProjectile : public LuaObject
 {
 public:
    LuaProjectile();                      //  C++ constructor
@@ -55,14 +55,11 @@ public:
 
    virtual S32 getClassID(lua_State *L); // Object's class
 
-   S32 getLoc(lua_State *L);             // Center of item (returns point)
+   S32 getLoc(lua_State *L);     // Center of item (returns point)
    S32 getRad(lua_State *L);             // Radius of item (returns number)
    S32 getVel(lua_State *L);             // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L);        // Team of shooter
 
    void push(lua_State *L);
-
-   BfObject *getGameObject();
 };
 
 
@@ -118,7 +115,6 @@ public:
    TNL_DECLARE_CLASS(Projectile);
 
    // Lua interface
-   S32 getLoc(lua_State *L);     // Center of item (returns point)
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
    S32 getTeamIndx(lua_State *L);   // Return team of shooter     
@@ -126,8 +122,6 @@ public:
    S32 getWeapon(lua_State *L);  // Return which type of weapon this is
 
    void push(lua_State *L);
-   BfObject *getGameObject();  // Return the underlying GameObject
-
 };
 
 
@@ -171,15 +165,12 @@ public:
 
    // Need to provide these methods to deal with the complex web of inheritence... these come from both
    // Item and LuaProjectile, and by providing these, everything works.
-   S32 getLoc(lua_State *L);       // Center of item (returns point)
    S32 getRad(lua_State *L);       // Radius of item (returns number)
    S32 getVel(lua_State *L);       // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L);  // Team of shooter
 
    S32 getWeapon(lua_State *L);    // Return which type of weapon this is
 
    void push(lua_State *L);
-   BfObject *getGameObject();  // Return the underlying GameObject
 };
 
 
@@ -241,7 +232,6 @@ public:
 
    virtual S32 getClassID(lua_State *L); // Object's class
 
-   S32 getLoc(lua_State *L);     // Center of item (returns point)
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
 
@@ -305,7 +295,6 @@ public:
 
    virtual S32 getClassID(lua_State *L); // Object's class
 
-   S32 getLoc(lua_State *L);     // Center of item (returns point)
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
 

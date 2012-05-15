@@ -60,6 +60,8 @@ public:
    Geometry();           // Constructor
    virtual ~Geometry();  // Destructor
 
+   //virtual Geometry *newCopy(const Geometry &geom);
+
    virtual GeomType getGeomType();
 
    virtual Point getVert(S32 index) const;
@@ -93,7 +95,7 @@ public:
 
    virtual void disableTriangulation();
 
-   void newGeomCopy();
+   Geometry *newCopy();
 
    virtual Rect calcExtents();
 

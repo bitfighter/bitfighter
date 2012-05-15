@@ -1001,12 +1001,6 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 // LuaItem interface
 S32 EngineeredItem::getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0, 0)); }
 
-// More Lua methods that are inherited by turrets and forcefield projectors
-S32 EngineeredItem::getTeamIndx(lua_State *L)
-{
-   return returnInt(L, getTeam() + 1);
-}
-
 
 S32 EngineeredItem::getHealth(lua_State *L)
 {
@@ -1305,10 +1299,8 @@ Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
 {
    // Standard gameItem methods
    method(ForceFieldProjector, getClassID),
-   method(ForceFieldProjector, getLoc),
    method(ForceFieldProjector, getRad),
    method(ForceFieldProjector, getVel),
-   method(ForceFieldProjector, getTeamIndx),
 
    // EngineeredItem methods
    method(ForceFieldProjector, getHealth),
@@ -1732,7 +1724,7 @@ void Turret::idle(IdleCallPath path)
       F32 S = (F32)GameWeapon::weaponInfo[mWeaponFireType].projVelocity;
       Point d = potential->getPos() - aimPos;
 
-// This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
+// This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
       if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
          continue;
@@ -1917,10 +1909,8 @@ Lunar<Turret>::RegType Turret::methods[] =
 {
    // Standard gameItem methods
    method(Turret, getClassID),
-   method(Turret, getLoc),
    method(Turret, getRad),
    method(Turret, getVel),
-   method(Turret, getTeamIndx),
 
    // EngineeredItem methods
    method(Turret, getHealth),

@@ -113,13 +113,13 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   Vector<boost::shared_ptr<EditorObjectDatabase> > mUndoItems;  // Undo/redo history 
+   Vector<boost::shared_ptr<GridDatabase> > mUndoItems;  // Undo/redo history 
    Point mMoveOrigin;                           // Point representing where items were moved "from" for figuring out how far they moved
    Point mSnapDelta;                            // For tracking how far from the snap point our cursor is
 
-   boost::shared_ptr<EditorObjectDatabase> mEditorDatabase;
+   boost::shared_ptr<GridDatabase> mEditorDatabase;
 
-   void setDatabase(boost::shared_ptr<EditorObjectDatabase> database);
+   void setDatabase(boost::shared_ptr<GridDatabase> database);
 
    Vector<boost::shared_ptr<BfObject> > mDockItems;    // Items sitting in the dock
 
@@ -161,7 +161,7 @@ private:
 
    // Helper drawing methods
    void renderGrid();                                             // Draw background snap grid
-   void renderTurretRanges(EditorObjectDatabase *editorDb);       // Draw translucent turret ranges
+   void renderTurretRanges(GridDatabase *editorDb);       // Draw translucent turret ranges
    void renderObjectsUnderConstruction();                         // Render partially constructed walls and other items that aren't yet in a db
    void renderDock();
    void renderInfoPanel();
@@ -191,8 +191,8 @@ private:
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
-   void selectAll(EditorObjectDatabase *database);          // Mark all objects and vertices in specified db as selected
-   void clearSelection(EditorObjectDatabase *database);     // Mark all objects and vertices in specified db as unselected
+   void selectAll(GridDatabase *database);          // Mark all objects and vertices in specified db as selected
+   void clearSelection(GridDatabase *database);     // Mark all objects and vertices in specified db as unselected
 
    void centerView();            // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
@@ -200,7 +200,7 @@ private:
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    //S32 countSelectedVerts();
-   bool anyItemsSelected(EditorObjectDatabase *database);   // Are any items selected?
+   bool anyItemsSelected(GridDatabase *database);   // Are any items selected?
    bool anythingSelected();                                 // Are any items/vertices selected?
 public:
    S32 getItemSelectedCount();                              // How many are objects are selected?
@@ -224,7 +224,7 @@ private:
    BfObject *mHitItem;
    BfObject *mDockItemHit;
 
-   void computeSelectionMinMax(EditorObjectDatabase *database, Point &min, Point &max);
+   void computeSelectionMinMax(GridDatabase *database, Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
    bool mNeedToSave;                  // Have we modified the level such that we need to save?
 
@@ -242,20 +242,20 @@ private:
    Point convertCanvasToLevelCoord(Point p);
    Point convertLevelToCanvasCoord(Point p, bool convert = true);
 
-   void resnapAllEngineeredItems(EditorObjectDatabase *database);
+   void resnapAllEngineeredItems(GridDatabase *database);
 
    boost::scoped_ptr<PluginMenuUI> mPluginMenu;      
    map<string, Vector<string> > mPluginMenuValues;
 
    void showCouldNotFindScriptMessage(const string &scriptName);
 
-   EditorObjectDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
-   void translateSelectedItems(EditorObjectDatabase *database, const Point &offset);
+   GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
+   void translateSelectedItems(GridDatabase *database, const Point &offset);
 
 
    void render();
-   void renderObjects(EditorObjectDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
-   void renderWalls(EditorObjectDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
+   void renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
+   void renderWalls(GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
 
 protected:
    void onActivate();
@@ -269,7 +269,7 @@ public:
    EditorUserInterface(ClientGame *game);    // Constructor
    virtual ~EditorUserInterface();           // Destructor
 
-   EditorObjectDatabase *getDatabase();      // Need external access to this in one static function
+   GridDatabase *getDatabase();      // Need external access to this in one static function
 
    void clearDatabase(GridDatabase *database);
 
@@ -295,7 +295,7 @@ public:
 
    Vector<TeamInfo> mOldTeams;     // Team list from before we run team editor, so we can see what changed
 
-   void rebuildEverything(EditorObjectDatabase *database);   // Does lots of things in undo, redo, and add items from script
+   void rebuildEverything(GridDatabase *database);   // Does lots of things in undo, redo, and add items from script
 
    static Vector<string> robots;
 
@@ -369,7 +369,7 @@ public:
    void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
 
    // Snapping related functions:
-   Point snapPoint(EditorObjectDatabase *database, Point const &p, bool snapWhileOnDock = false);
+   Point snapPoint(GridDatabase *database, Point const &p, bool snapWhileOnDock = false);
    Point snapPointToLevelGrid(Point const &p);
 
    bool getSnapToWallCorners();     // Returns true if wall corners are active snap targets
@@ -386,7 +386,7 @@ public:
    void doneDeleteing();
 
    // Run a script, and put resulting objects in database
-   void runScript(EditorObjectDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
+   void runScript(GridDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
    void runPlugin(const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);  
 
    string getPluginSignature();                 // Try to create some sort of uniqeish signature for the plugin

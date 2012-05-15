@@ -63,8 +63,10 @@ private:
    virtual void setVert(const Point &pos, S32 index);
 
 public:
-   PointGeometry();     // Constructor
-   ~PointGeometry();    // Destructor
+   PointGeometry();                             // Constructor
+   ~PointGeometry();                            // Destructor
+
+   //Geometry *newCopy(const Geometry &geom);
 
    GeomType getGeomType();
 
@@ -112,6 +114,7 @@ public:
    SimpleLineGeometry();           // Constructor
    virtual ~SimpleLineGeometry();  // Destructor
 
+   //Geometry *newCopy(const Geometry &geom);
    GeomType getGeomType();
 
    Point getVert(S32 index) const;
@@ -165,6 +168,8 @@ public:
    PolylineGeometry();    // Constructor
    ~PolylineGeometry();   // Destructor
 
+   //virtual Geometry *newCopy(const Geometry &geom);
+
    virtual GeomType getGeomType();
 
    Point getVert(S32 index) const;
@@ -216,6 +221,8 @@ private:
 
 public:
    PolygonGeometry();      // Constructor
+
+   //Geometry *newCopy(const Geometry &geom);
 
    GeomType getGeomType();
 

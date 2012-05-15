@@ -60,12 +60,12 @@ public:
    GridDatabase *getWallEdgeDatabase();
 
    static void beginBatchGeomUpdate();                                     // Suspend certain geometry operations so they can be batched when 
-   static void endBatchGeomUpdate(EditorObjectDatabase *db, bool modifiedWalls);   // this method is called
+   static void endBatchGeomUpdate(GridDatabase *db, bool modifiedWalls);   // this method is called
 
-   void onWallGeomChanged(EditorObjectDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber);
+   void onWallGeomChanged(GridDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber);
 
-   void finishedChangingWalls(EditorObjectDatabase *editorDatabase,  S32 changedWallSerialNumber);
-   void finishedChangingWalls(EditorObjectDatabase *editorDatabase);
+   void finishedChangingWalls(GridDatabase *editorDatabase,  S32 changedWallSerialNumber);
+   void finishedChangingWalls(GridDatabase *editorDatabase);
 
    Vector<WallSegment *> mWallSegments;      
    Vector<WallEdge *> mWallEdges;               // For mounting forcefields/turrets
@@ -84,7 +84,7 @@ public:
    void deleteSegments();                       // Delete all segments regardless of owner
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
-   void updateAllMountedItems(EditorObjectDatabase *database);
+   void updateAllMountedItems(GridDatabase *database);
 
 
    // Takes a wall, finds all intersecting segments, and marks them invalid

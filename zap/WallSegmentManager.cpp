@@ -85,7 +85,7 @@ void WallSegmentManager::beginBatchGeomUpdate()
 }
 
 
-void WallSegmentManager::endBatchGeomUpdate(EditorObjectDatabase *database, bool modifiedWalls)      // static method
+void WallSegmentManager::endBatchGeomUpdate(GridDatabase *database, bool modifiedWalls)      // static method
 {
    if(modifiedWalls)
       database->getWallSegmentManager()->finishedChangingWalls(database);
@@ -95,7 +95,7 @@ void WallSegmentManager::endBatchGeomUpdate(EditorObjectDatabase *database, bool
 
 
 // Find the associated segment(s) and mark them as selected (or not)
-void WallSegmentManager::onWallGeomChanged(EditorObjectDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber)
+void WallSegmentManager::onWallGeomChanged(GridDatabase *editorDatabase, BfObject *wall, bool selected, S32 serialNumber)
 {
    computeWallSegmentIntersections(editorDatabase, wall);
    setSelected(serialNumber, selected);     // Make sure newly generated segments retain selection state of parent wall
@@ -106,7 +106,7 @@ void WallSegmentManager::onWallGeomChanged(EditorObjectDatabase *editorDatabase,
 
 
 // This variant only resnaps engineered items that were attached to a segment that moved
-void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjectDatabase, S32 changedWallSerialNumber)
+void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabase, S32 changedWallSerialNumber)
 {
    rebuildEdges();         // Rebuild all edges for all walls
 
@@ -136,7 +136,7 @@ void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorObjec
 }
 
 
-void WallSegmentManager::finishedChangingWalls(EditorObjectDatabase *editorDatabase)
+void WallSegmentManager::finishedChangingWalls(GridDatabase *editorDatabase)
 {
    rebuildEdges();         // Rebuild all edges for all walls
    updateAllMountedItems(editorDatabase);
@@ -280,7 +280,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
 
 
 // Called by WallItems and PolyWalls when their geom changes
-void WallSegmentManager::updateAllMountedItems(EditorObjectDatabase *database)
+void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
 {
    // First, find any items directly mounted on our wall, and update their location.  Because we don't know where the wall _was_, we 
    // will need to search through all the engineered items, and query each to find which ones where attached to the wall that moved.

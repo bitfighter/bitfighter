@@ -55,7 +55,6 @@ Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
    method(LuaProjectile, getLoc),
    method(LuaProjectile, getRad),
    method(LuaProjectile, getVel),
-   method(LuaProjectile, getTeamIndx),
 
    method(LuaProjectile, getWeapon),
 
@@ -97,14 +96,14 @@ S32 LuaProjectile::getClassID(lua_State *L)
 }
 
 
-S32 LuaProjectile::getLoc(lua_State *L)
+S32 LuaProjectile::getRad(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
    return 0;
 }
 
 
-S32 LuaProjectile::getRad(lua_State *L)
+S32 LuaProjectile::getLoc(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
    return 0;
@@ -115,20 +114,6 @@ S32 LuaProjectile::getVel(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
    return 0;
-}
-
-
-S32 LuaProjectile::getTeamIndx(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-   return 0;
-}
-
-
-BfObject *LuaProjectile::getGameObject()
-{
-   TNLAssert(false, "Unimplemented method!");
-   return NULL;
 }
 
 
@@ -534,12 +519,6 @@ void Projectile::renderItem(const Point &pos)
 
 //// Lua methods
 
-S32 Projectile::getLoc(lua_State *L)
-{
-   return returnPoint(L, getPos());
-}
-
-
 S32 Projectile::getRad(lua_State *L)
 {
    // TODO: Wrong!!  Radius of item (returns number)
@@ -568,13 +547,6 @@ S32 Projectile::getWeapon(lua_State *L)
 void Projectile::push(lua_State *L)
 {
    Lunar<LuaProjectile>::push(L, this);
-}
-
-
-// For getting the underlying object when all we have is a Lua pointer to it
-BfObject *Projectile::getGameObject()
-{
-   return this;
 }
 
 
@@ -780,12 +752,6 @@ BurstProjectile::BurstProjectile(lua_State *L)
 }
 
 
-S32 BurstProjectile::getLoc(lua_State *L)
-{
-   return Parent::getLoc(L);
-}
-
-
 S32 BurstProjectile::getRad(lua_State *L)
 {
    return Parent::getRad(L);
@@ -798,12 +764,6 @@ S32 BurstProjectile::getVel(lua_State *L)
 }
 
 
-S32 BurstProjectile::getTeamIndx(lua_State *L)
-{
-   return returnInt(L, getTeam() + 1);    // + 1 because Lua indices start with 1
-}
-
-
 S32 BurstProjectile::getWeapon(lua_State *L)
 {
    return returnInt(L, WeaponBurst);
@@ -813,13 +773,6 @@ S32 BurstProjectile::getWeapon(lua_State *L)
 void BurstProjectile::push(lua_State *L)
 {
    Lunar<LuaProjectile>::push(L, this);
-}
-
-
-// For getting the underlying object when all we have is a Lua pointer to it
-BfObject *BurstProjectile::getGameObject()
-{
-   return this;
 }
 
 
@@ -1110,7 +1063,6 @@ Lunar<Mine>::RegType Mine::methods[] =
 {
    // Standard gameItem methods
    method(Mine, getClassID),
-   method(Mine, getLoc),
    method(Mine, getRad),
    method(Mine, getVel),
    method(Mine, getTeamIndx),
@@ -1129,12 +1081,6 @@ Mine::Mine(lua_State *L)
 S32 Mine::getClassID(lua_State *L)
 {
    return returnInt(L, MineTypeNumber);
-}
-
-
-S32 Mine::getLoc(lua_State *L)
-{
-   return Parent::getLoc(L);
 }
 
 
@@ -1412,7 +1358,6 @@ Lunar<SpyBug>::RegType SpyBug::methods[] =
 {
    // Standard gameItem methods
    method(SpyBug, getClassID),
-   method(SpyBug, getLoc),
    method(SpyBug, getRad),
    method(SpyBug, getVel),
    method(SpyBug, getTeamIndx),
@@ -1433,12 +1378,6 @@ SpyBug::SpyBug(lua_State *L)
 S32 SpyBug::getClassID(lua_State *L)
 {
    return returnInt(L, SpyBugTypeNumber);
-}
-
-
-S32 SpyBug::getLoc(lua_State *L)
-{
-   return Parent::getLoc(L);
 }
 
 

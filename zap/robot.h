@@ -37,7 +37,6 @@ namespace Zap
 {
 
 class MoveItem;
-class LuaRobot;
 class ServerGame;
 
 /**
@@ -54,12 +53,15 @@ class Robot : public Ship, public LuaScriptRunner
 
 private:
    static const S32 RobotRespawnDelay = 1500;
+   static Vector<Robot *> robots;   // Grand master list of all robots in the current game
+
+   int attribute;
+   string message;
 
    U16 mCurrentZone;                // Zone robot is currently in
 
    S32 mScore;
    S32 mTotalScore;
-
 
    LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
 
@@ -67,9 +69,12 @@ private:
 
    void tickTimer(U32 deltaT);      // Move bot's timer forward
 
-   static Vector<Robot *> robots;   // Grand master list of all robots in the current game
-
    void clearMove();                // Reset bot's move to do nothing
+
+   Point getNextWaypoint();                          // Helper function for getWaypoint()
+   U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
+   S32 findAndReturnClosestZone(lua_State *L, const Point &point);            // Wraps findClosestZone and handles returning the result to Lua
+   S32 doFindItems(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
 
 public:
    Robot();       // Constructor
@@ -106,12 +111,8 @@ public:
    bool isRobot();
    //static S32 getRobotCount() { return robots.size(); }
 
-   LuaRobot *mLuaRobot;                   // Could make private and make a public setter method...
-
    LuaPlayerInfo *getPlayerInfo();
    bool start();
-
-
 
    // Future kernel of a BotManager class
    static void startAllBots();               // Loop through all our bots and run thier main() functions
@@ -135,39 +136,14 @@ public:
 
    Robot *clone() const;
 
-private:
-   int attribute;
-   string message;
-
+   //S32 getGame(lua_State *L);  // Get a pointer to a game object, where we can run game-info oriented methods
    TNL_DECLARE_CLASS(Robot);
-};
 
+   //// Lua interface
+   LUAW_DECLARE_CLASS(Robot);
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-
-class LuaRobot : public LuaShip
-{
-   typedef LuaShip Parent;
-
-private:
-   Robot *thisRobot;                                 // Pointer to an actual C++ Robot object
-
-   Point getNextWaypoint();                          // Helper function for getWaypoint()
-   U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
-   S32 findAndReturnClosestZone(lua_State *L, const Point &point);            // Wraps findClosestZone and handles returning the result to Lua
-   S32 doFindItems(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
-
-public:
-  // Constants
-
-  // Initialize the pointer
-   LuaRobot(lua_State *L);     // Lua constructor
-   virtual ~LuaRobot();        // Destructor
-
-   static const char className[];
-   static Lunar<LuaRobot>::RegType methods[];
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    S32 getClassID(lua_State *L);
 
@@ -178,10 +154,6 @@ public:
    S32 getGatewayFromZoneToZone(lua_State *L);
    S32 getZoneCount(lua_State *L);
    S32 getCurrentZone(lua_State *L);
-
-
-   //S32 getAngle(lua_State *L);
-   //S32 getLoc(lua_State *L);
 
    S32 setAngle(lua_State *L);
    S32 setAnglePt(lua_State *L);
@@ -214,21 +186,11 @@ public:
    S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
    S32 setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
-   S32 setCurrLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
-
-   S32 subscribe(lua_State *L);
-   S32 unsubscribe(lua_State *L);
-
-
-   //// Ship info
-   //S32 getActiveWeapon(lua_State *L);
+   S32 setCurrLoadout(lua_State *L);       // Sets requested loadout to specified --> takes Loadout object
 
    S32 engineerDeployObject(lua_State *L);
    S32 dropItem(lua_State *L);
    S32 copyMoveFromObject(lua_State *L);
-
-   S32 getGame(lua_State *L);  // Get a pointer to a game object, where we can run game-info oriented methods
-   Ship *getObj();             // This handles delegation properly when we're dealing with methods inherited from LuaShip
 };
 
 
@@ -246,20 +208,20 @@ public:
 //class LuaProtectStack
 //{
 //public:
-//   LuaProtectStack(LuaRobot *lgo)
+//   LuaProtectStack(Robot *lgo)
 //   {
-//      mLuaRobot = lgo;
-//      mTop = lua_gettop(mLuaRobot->mState);
+//      mRobot = lgo;
+//      mTop = lua_gettop(mRobot->mState);
 //   }
 //
 //   virtual ~LuaProtectStack(void)
 //   {
-//      if(mLuaRobot->mState)
-//         lua_settop (mLuaRobot->mState, mTop);
+//      if(mRobot->mState)
+//         lua_settop (mRobot->mState, mTop);
 //   }
 //
 //protected:
-//   LuaRobot *mLuaRobot;
+//   Robot *mRobot;
 //   S32 mTop;
 //};
 

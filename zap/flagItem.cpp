@@ -470,11 +470,6 @@ S32 FlagItem::getClassID(lua_State *L)
 }
 
 
-S32 FlagItem::getTeamIndx(lua_State *L)
-{
-   return returnInt(L, getTeam() + 1);    // + 1 because Lua indices start with 1
-}
-
 
 S32 FlagItem::isInInitLoc(lua_State *L)
 {

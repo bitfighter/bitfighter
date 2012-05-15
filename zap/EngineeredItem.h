@@ -155,12 +155,10 @@ public:
 
    /////
    // LuaItem interface
-   // S32 getLoc(lua_State *L);   ==> Will be implemented by derived objects
    // S32 getRad(lua_State *L);   ==> Will be implemented by derived objects
    S32 getVel(lua_State *L);
 
    // More Lua methods that are inherited by turrets and forcefield projectors
-   S32 getTeamIndx(lua_State *L);
    S32 getHealth(lua_State *L);
    S32 isActive(lua_State *L);
    S32 getAngle(lua_State *L);

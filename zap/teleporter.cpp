@@ -62,6 +62,7 @@ Teleporter::Teleporter()
    timeout = 0;
    mTime = 0;
    mTeleporterDelay = TeleporterDelay;
+   setTeam(TEAM_NEUTRAL);
 }
 
 
@@ -447,12 +448,6 @@ void Teleporter::push(lua_State *L)
 }
 
 
-S32 Teleporter::getLoc(lua_State *L)
-{
-   return returnPoint(L, getVert(0));
-}
-
-
 S32 Teleporter::getRad(lua_State *L)
 {
    return returnInt(L, TeleporterTriggerRadius);
@@ -462,18 +457,6 @@ S32 Teleporter::getRad(lua_State *L)
 S32 Teleporter::getVel(lua_State *L)
 {
    return returnPoint(L, Point(0, 0));
-}
-
-
-S32 Teleporter::getTeamIndx(lua_State *L)
-{
-   return returnInt(L, TEAM_NEUTRAL + 1);
-}
-
-
-BfObject *Teleporter::getGameObject()
-{
-   return this;
 }
 
 

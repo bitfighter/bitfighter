@@ -42,70 +42,8 @@
 
 namespace Zap
 {
+
 class SpeedZone;
-
-static const S32 ShipModuleCount = 2;                // Modules a ship can carry
-static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
-static const U8 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
-
-
-//////////////////////////////////////////////
-
-class LuaShip : public LuaItem
-{
-
-private:
-   SafePtr<Ship> thisShip;    // Reference to actual C++ ship object
-
-public:
-
-   LuaShip(Ship *ship);   // C++ constructor
-   LuaShip();             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
-   LuaShip(lua_State *L); // Lua constructor ==> not used.  Class only instantiated from C++.
-
-   virtual ~LuaShip();    // Destructor
-
-   static S32 id;
-   S32 mId;
-
-   static const char className[];
-
-   static Lunar<LuaShip>::RegType methods[];
-
-   virtual S32 getClassID(lua_State *L);    // Robot will override this
-
-   S32 isAlive(lua_State *L);
-   S32 getAngle(lua_State *L);
-   S32 getLoc(lua_State *L);
-   S32 getRad(lua_State *L);
-   S32 getVel(lua_State *L);
-   S32 hasFlag(lua_State *L);
-
-   S32 getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
-   S32 getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
-
-   S32 getFlagCount(lua_State *L);
-
-   S32 getTeamIndx(lua_State *L);
-   S32 getPlayerInfo(lua_State *L);
-   S32 isModActive(lua_State *L);
-   S32 getMountedItems(lua_State *L);
-   S32 getCurrLoadout(lua_State *L);
-   S32 getReqLoadout(lua_State *L);
-
-   BfObject *getGameObject();
-   const char *getClassName() const;
-
-   void push(lua_State *L);      // Push item onto stack
-
-   S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
-
-   virtual Ship *getObj();       // Access to underlying object, robot will override
-};
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class Statistics;
 class ClientInfo;
 
@@ -241,7 +179,7 @@ public:
    F32 mass;            // Mass of ship, not used
    bool hasExploded;
 
-   Vector<SafePtr<MoveItem> > mMountedItems;
+   Vector<SafePtr<MoveItem> > mMountedItems;    // TODO: Make these private
    Vector<SafePtr<BfObject> > mRepairTargets;
 
    virtual void render(S32 layerIndex);
@@ -332,19 +270,44 @@ public:
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
-   LuaShip luaProxy;                                  // Our Lua proxy object
    bool isRobot();
-   void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 
-   BfObject *isInZone(U8 zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
+   BfObject *isInZone(U8 zoneType);           // Return whether the ship is currently in a zone of the specified type, and which one
    //BfObject *isInZone(BfObject *zone);
    DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
 
-   bool isOnObject(BfObject *object);               // Return whether or not ship is sitting on a particular item
+   bool isOnObject(BfObject *object);         // Return whether or not ship is sitting on a particular object
 
    virtual Ship *clone() const;
 
    TNL_DECLARE_CLASS(Ship);
+
+   //// Lua interface
+   LUAW_DECLARE_CLASS(Ship);
+
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+
+   virtual S32 getClassID(lua_State *L);    // Robot will override this
+
+   S32 isAlive(lua_State *L);
+   S32 getAngle(lua_State *L);
+   S32 hasFlag(lua_State *L);
+
+   S32 getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
+   S32 getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
+
+   S32 getFlagCount(lua_State *L);
+
+   S32 getPlayerInfo(lua_State *L);
+   S32 isModActive(lua_State *L);
+   S32 getMountedItems(lua_State *L);
+   S32 getCurrLoadout(lua_State *L);
+   S32 getReqLoadout(lua_State *L);
+
+   const char *getClassName() const;
+
+   S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 };
 
 

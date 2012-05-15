@@ -102,6 +102,22 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 }
 
 
+// Note: This method is a remainer from the old EditorObjectDatabase; leaving it here for 
+// compatibility reasons for the moment... we're not actually sorting anymore, but we might
+// want to bring it back.  Not yet sure.
+// Add items in bulk to avoid resorting after each of a dozen or two objects are added
+void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
+{
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      addToDatabase(objects[i], objects[i]->getExtent());
+      //mAllEditorObjects.push_back(objects[i]);
+   }
+
+   //geomSort(mAllEditorObjects);
+}
+
+
 void GridDatabase::removeEverythingFromDatabase()
 {
    for(S32 x = 0; x < BucketRowCount; x++)
@@ -389,7 +405,7 @@ DatabaseObject::DatabaseObject()
 
 
 // Copy constructor
-DatabaseObject::DatabaseObject(const DatabaseObject &t) 
+DatabaseObject::DatabaseObject(const DatabaseObject &t) : Parent(t)
 {  
    initialize();
    mObjectTypeNumber = t.mObjectTypeNumber; 
@@ -830,156 +846,154 @@ static void geomSort(Vector<BfObject *> &objects)
 
 class EditorObject;
 
-// Constructor
-EditorObjectDatabase::EditorObjectDatabase() : Parent()
-{
-   // Do nothing, just here to call Parent's constructor
+//// Constructor
+//EditorObjectDatabase::EditorObjectDatabase() : Parent()
+//{
+//   // Do nothing, just here to call Parent's constructor
+//}
+//
+//
+//// Copy constructor
+//EditorObjectDatabase::EditorObjectDatabase(const EditorObjectDatabase &database)
+//{
+//   copy(database);
+//}
+//
+//
+//EditorObjectDatabase &EditorObjectDatabase::operator= (const EditorObjectDatabase &database)
+//{
+//   copy(database);
+//   return *this;
+//}
+//
+//
+//typedef map<DatabaseObject *, BfObject *> dbMap;
+//
+//static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
+//{
+//   // Check if this object has already been found
+//   dbMap::iterator iter = dbObjectMap.find(theObject);
+//
+//   if(iter != dbObjectMap.end()) // Found an existing copy -- use that
+//      return iter->second;
+//
+//   else                          // This is a new object, copy and add to our map
+//   {
+//      BfObject *newObject = dynamic_cast<BfObject *>(theObject)->copy();
+//
+//      pair<dbMap::iterator, bool> retval;
+//      retval = dbObjectMap.insert(pair<DatabaseObject *, BfObject *>(theObject, newObject));
+//
+//      TNLAssert(retval.second, "Invalid attempt to insert object into map (duplicate insert?)");
+//
+//      return newObject;
+//   }
+//}
+// 
+//
+//// Copy contents of source into this
+//void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
+//{
+//   dbMap dbObjectMap;
+//
+//   for(U32 x = 0; x < BucketRowCount; x++)
+//      for(U32 y = 0; y < BucketRowCount; y++)
+//      {
+//         mBuckets[x][y] = NULL;
+//
+//         for(BucketEntry *walk = source.mBuckets[x][y]; walk; walk = walk->nextInBucket)
+//         {
+//            BucketEntry *be = mChunker->alloc();                           // Create a slot for our new object
+//            DatabaseObject *theObject = walk->theObject;
+//
+//            DatabaseObject *object = getObject(dbObjectMap, theObject);    // Returns a pointer to a new or existing copy of theObject
+//            object->setDatabase(this);
+//            be->theObject = object;
+//
+//            be->nextInBucket = mBuckets[x][y];
+//            mBuckets[x][y] = be;
+//         }
+//      }
+//
+//   // Copy our non-spatial databases as well
+//   mAllEditorObjects.resize(source.mAllEditorObjects.size());
+//   mAllObjects.resize(source.mAllEditorObjects.size());
+//
+//   for(S32 i = 0; i < source.mAllEditorObjects.size(); i++)
+//   {
+//      dbMap::iterator iter = dbObjectMap.find(source.mAllEditorObjects[i]);
+//      TNLAssert(iter != dbObjectMap.end(), "Could not find object in our database copy map!") ;
+//
+//      mAllEditorObjects[i] = iter->second;
+//      mAllObjects[i] = iter->second;
+//   }
+//}
+//
+//
+//void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)
+//{
+//   BfObject *eObj = dynamic_cast<BfObject *>(object);
+//   TNLAssert(eObj, "Bad cast!");
+//
+//   Vector<BfObject *> objects;
+//   objects.push_back(eObj);
+//
+//   addToDatabase(objects);
+//}
+//
+//
+//// Add items in bulk to avoid resorting after each of a dozen or two objects are added
+//void EditorObjectDatabase::addToDatabase(const Vector<BfObject *> &objects)
+//{
+//   for(S32 i = 0; i < objects.size(); i++)
+//   {
+//      Parent::addToDatabase(objects[i], objects[i]->getExtent());
+//      mAllEditorObjects.push_back(objects[i]);
+//   }
+//
+//   geomSort(mAllEditorObjects);
+//}
+//
+//
+//void EditorObjectDatabase::removeFromDatabase(DatabaseObject *object, const Rect &extents)
+// {
+//   Parent::removeFromDatabase((DatabaseObject *)object, extents);
+//
+//   // Remove the object to our list as well
+//   for(S32 i = 0; i < mAllEditorObjects.size(); i++)
+//      if(mAllEditorObjects[i] == object)
+//      {
+//         mAllEditorObjects.erase(i);      // Use erase to maintain sorted order
+//         break;
+//      }
+//}
+//
+//
+//void EditorObjectDatabase::removeEverythingFromDatabase()
+//{
+//   Vector<BfObject *> tempVector(mAllEditorObjects);  // To keep synchronization
+//
+//   for(S32 i = 0; i < tempVector.size(); i++)
+//      removeFromDatabase(tempVector[i], tempVector[i]->getExtent());
+//
+//   WallSegmentManager *wallSegmentManager = getWallSegmentManager();
+//   if(wallSegmentManager)
+//      wallSegmentManager->clear();
+//}
+//
+//
+//// Provide a read-only shortcut to a pre-cast list of editor objects
+//const Vector<BfObject *> *EditorObjectDatabase::getObjectList()
+//{
+//   return &mAllEditorObjects;
+//}
+//
+
 }
-
-
-// Copy constructor
-EditorObjectDatabase::EditorObjectDatabase(const EditorObjectDatabase &database)
-{
-   copy(database);
-}
-
-
-EditorObjectDatabase &EditorObjectDatabase::operator= (const EditorObjectDatabase &database)
-{
-   copy(database);
-   return *this;
-}
-
-
-typedef map<DatabaseObject *, BfObject *> dbMap;
-
-static DatabaseObject *getObject(dbMap &dbObjectMap, DatabaseObject *theObject)
-{
-   // Check if this object has already been found
-   dbMap::iterator iter = dbObjectMap.find(theObject);
-
-   if(iter != dbObjectMap.end()) // Found an existing copy -- use that
-      return iter->second;
-
-   else                          // This is a new object, copy and add to our map
-   {
-      BfObject *newObject = dynamic_cast<BfObject *>(theObject)->copy();
-
-      pair<dbMap::iterator, bool> retval;
-      retval = dbObjectMap.insert(pair<DatabaseObject *, BfObject *>(theObject, newObject));
-
-      TNLAssert(retval.second, "Invalid attempt to insert object into map (duplicate insert?)");
-
-      return newObject;
-   }
-}
- 
-
-// Copy contents of source into this
-void EditorObjectDatabase::copy(const EditorObjectDatabase &source)
-{
-   dbMap dbObjectMap;
-   //S32 ctr = 0;
-
-   for(U32 x = 0; x < BucketRowCount; x++)
-      for(U32 y = 0; y < BucketRowCount; y++)
-      {
-         mBuckets[x][y] = NULL;
-
-         for(BucketEntry *walk = source.mBuckets[x][y]; walk; walk = walk->nextInBucket)
-         {
-            //ctr++;
-            BucketEntry *be = mChunker->alloc();                // Create a slot for our new object
-            DatabaseObject *theObject = walk->theObject;
-
-            DatabaseObject *object = getObject(dbObjectMap, theObject);    // Returns a pointer to a new or existing copy of theObject
-            object->setDatabase(this);
-            be->theObject = object;
-
-            be->nextInBucket = mBuckets[x][y];
-            mBuckets[x][y] = be;
-         }
-      }
-
-//logprintf("found %d refs!", ctr);   
-
-   // Copy our non-spatial databases as well
-   mAllEditorObjects.resize(source.mAllEditorObjects.size());
-   mAllObjects.resize(source.mAllEditorObjects.size());
-
-   for(S32 i = 0; i < source.mAllEditorObjects.size(); i++)
-   {
-      dbMap::iterator iter = dbObjectMap.find(source.mAllEditorObjects[i]);
-      TNLAssert(iter != dbObjectMap.end(), "Could not find object in our database copy map!") ;
-
-      mAllEditorObjects[i] = iter->second;
-      mAllObjects[i] = iter->second;
-   }
-}
-
-
-void EditorObjectDatabase::addToDatabase(DatabaseObject *object, const Rect &extents)
-{
-   BfObject *eObj = dynamic_cast<BfObject *>(object);
-   TNLAssert(eObj, "Bad cast!");
-
-   Vector<BfObject *> objects;
-   objects.push_back(eObj);
-
-   addToDatabase(objects);
-}
-
-
-// Add items in bulk to avoid resorting after each of a dozen or two objects are added
-void EditorObjectDatabase::addToDatabase(const Vector<BfObject *> &objects)
-{
-   for(S32 i = 0; i < objects.size(); i++)
-   {
-      Parent::addToDatabase(objects[i], objects[i]->getExtent());
-      mAllEditorObjects.push_back(objects[i]);
-   }
-
-   geomSort(mAllEditorObjects);
-}
-
-
-void EditorObjectDatabase::removeFromDatabase(DatabaseObject *object, const Rect &extents)
- {
-   Parent::removeFromDatabase((DatabaseObject *)object, extents);
-
-   // Remove the object to our list as well
-   for(S32 i = 0; i < mAllEditorObjects.size(); i++)
-      if(mAllEditorObjects[i] == object)
-      {
-         mAllEditorObjects.erase(i);      // Use erase to maintain sorted order
-         break;
-      }
-}
-
-
-void EditorObjectDatabase::removeEverythingFromDatabase()
-{
-   Vector<BfObject *> tempVector(mAllEditorObjects);  // To keep synchronization
-
-   for(S32 i = 0; i < tempVector.size(); i++)
-      removeFromDatabase(tempVector[i], tempVector[i]->getExtent());
-
-   WallSegmentManager *wallSegmentManager = getWallSegmentManager();
-   if(wallSegmentManager)
-      wallSegmentManager->clear();
-}
-
-
-// Provide a read-only shortcut to a pre-cast list of editor objects
-const Vector<BfObject *> *EditorObjectDatabase::getObjectList()
-{
-   return &mAllEditorObjects;
-}
-
-
-};
 
 // Reusable container for searching gridDatabases
 // putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
 Vector<Zap::DatabaseObject *> fillVector;
 Vector<Zap::DatabaseObject *> fillVector2;
+
+

@@ -120,7 +120,6 @@ public:
 
    S32 getClassID(lua_State *L);
    
-   S32 getTeamIndx(lua_State *L);       // Index of owning team
    S32 isInInitLoc(lua_State *L);       // Is flag in it's initial location?
 
    S32 isInCaptureZone(lua_State *L);   // Is flag in a team's capture zone?

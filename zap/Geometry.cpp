@@ -53,6 +53,13 @@ Geometry::~Geometry()
 }
 
 
+//Geometry *Geometry::newCopy(const Geometry &geom)
+//{
+//   TNLAssert(false, "Not implemented");
+//   return NULL;
+//}
+
+
 GeomType Geometry::getGeomType()
 {
    TNLAssert(false, "Not implemented");
@@ -300,19 +307,17 @@ PointGeometry::PointGeometry()
 }
 
 
-//// Copy constructor
-//PointGeometry::PointGeometry(const PointGeometry &geom)
-//{
-//   mGeometry = new PointGeometry(geom);
-//}
-
-
-
 // Destructor
 PointGeometry::~PointGeometry()
 {
    // Do nothing
 }
+
+
+//Geometry *PointGeometry::newCopy(const Geometry &geom)
+//{
+//   return new PointGeometry(geom);
+//}
 
 
 GeomType PointGeometry::getGeomType()
@@ -488,6 +493,12 @@ SimpleLineGeometry::~SimpleLineGeometry()
 {
    // Do nothing
 }
+
+
+//Geometry *SimpleLineGeometry::newCopy(const Geometry &geom)
+//{
+//   return new SimpleLineGeometry(geom);
+//}
 
 
 GeomType SimpleLineGeometry::getGeomType()
@@ -681,6 +692,12 @@ PolylineGeometry::~PolylineGeometry()
 {
    // Do nothing
 }
+
+
+//Geometry *PolylineGeometry::newCopy(const Geometry &geom)
+//{
+//   return new PolylineGeometry(geom);
+//}
 
 
 GeomType PolylineGeometry::getGeomType()
@@ -949,6 +966,12 @@ PolygonGeometry::PolygonGeometry() : PolylineGeometry()
 }
 
 
+//Geometry *PolygonGeometry::newCopy(const Geometry &geom)
+//{
+//   return new PolygonGeometry(geom);
+//}
+
+
 GeomType PolygonGeometry::getGeomType()
 {
    return geomPolygon;
@@ -961,11 +984,13 @@ const Vector<Point> *PolygonGeometry::getFill() const
    return &mPolyFill;
 }
 
+
 Point PolygonGeometry::getCentroid()
 {
    TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
    return mCentroid;
 }
+
 
 F32 PolygonGeometry::getLabelAngle()
 {

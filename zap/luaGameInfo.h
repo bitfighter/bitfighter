@@ -30,7 +30,7 @@
 #include "luaObject.h"
 #include "gameWeapons.h"
 #include "shipItems.h"     // For module defs
-#include "move.h"         // For ShipModuleCount + ShipWeaponCount
+#include "move.h"          // For ShipModuleCount + ShipWeaponCount
 
 namespace Zap
 {
@@ -133,14 +133,15 @@ private:
    U8 mLoadout[ShipModuleCount + ShipWeaponCount];
 
 public:
-   LuaLoadout(lua_State *L);        // Lua constructor
-   LuaLoadout(U8 loadoutItems[]);   // C++ constructor
+   //LuaLoadout(lua_State *L);                              // Lua constructor
+   LuaLoadout(const U8 loadoutItems[] = DefaultLoadout);    // C++ constructor
 
-   virtual ~LuaLoadout();           // Destructor
+   virtual ~LuaLoadout();                                   // Destructor
 
-   static const char className[];
+   LUAW_DECLARE_CLASS(LuaLoadout);
 
-   static Lunar<LuaLoadout>::RegType methods[];
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    S32 setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
    S32 setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i

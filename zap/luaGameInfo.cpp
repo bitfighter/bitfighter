@@ -259,43 +259,47 @@ S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }
 ////////////////////////////////////
 ////////////////////////////////////
 
+REGISTER_LUA_CLASS(LuaLoadout);
 
-const char LuaLoadout::className[] = "Loadout";      // Class name as it appears to Lua scripts
+const char *LuaLoadout::luaClassName = "Loadout";     // Class name as it appears to Lua scripts
 
+// Will almost certainly need to be uncommented!!!
 // Lua Constructor
-LuaLoadout::LuaLoadout(lua_State *L)
-{
-   // When creating a new loadout object, load it up with the default items
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      mLoadout[i] = DefaultLoadout[i];
-}
+//LuaLoadout::LuaLoadout(lua_State *L)
+//{
+//   // When creating a new loadout object, load it up with the default items
+//   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+//      mLoadout[i] = DefaultLoadout[i];
+//}
 
 
 // C++ Constructor -- specify items
-LuaLoadout::LuaLoadout(U8 loadoutItems[])
+LuaLoadout::LuaLoadout(const U8 loadoutItems[])
 {
    // When creating a new loadout object, load it up with the
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       mLoadout[i] = loadoutItems[i];
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 LuaLoadout::~LuaLoadout()
 {
+   LUAW_DESTRUCTOR_CLEANUP;
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted LuaLoadout object (%p)\n", this);     // Never gets run...
 }
 
 
-// Define the methods we will expose to Lua
-Lunar<LuaLoadout>::RegType LuaLoadout::methods[] =
+const luaL_reg LuaLoadout::luaMethods[] =
 {
-   method(LuaLoadout, setWeapon),
-   method(LuaLoadout, setModule),
-   method(LuaLoadout, isValid),
-   method(LuaLoadout, equals),
-   method(LuaLoadout, getWeapon),
-   method(LuaLoadout, getModule),
+   { "setWeapon", luaW_doMethod<LuaLoadout, &LuaLoadout::setWeapon> },
+   { "setModule", luaW_doMethod<LuaLoadout, &LuaLoadout::setModule> },
+   { "isValid",   luaW_doMethod<LuaLoadout, &LuaLoadout::isValid>   },
+   { "equals",    luaW_doMethod<LuaLoadout, &LuaLoadout::equals>    },
+   { "getWeapon", luaW_doMethod<LuaLoadout, &LuaLoadout::getWeapon> },
+   { "getModule", luaW_doMethod<LuaLoadout, &LuaLoadout::getModule> },
 
    {0,0}    // End method list
 };
@@ -367,7 +371,7 @@ S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout th
 {
    checkArgCount(L, 1, "Loadout:equals()");
 
-   LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
+   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
 
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       if(mLoadout[i] != loadout->getLoadoutItem(i))

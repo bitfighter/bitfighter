@@ -38,9 +38,9 @@ namespace Zap
 // A note on terminology here: an "object" is any game object, whereas an "item" is a point object that the player will interact with
 // Item is now parent class of MoveItem, EngineeredItem, PickupItem
 
-class Item : public PointObject, public LuaItem
+class Item : public PointObject
 {
-   typedef BfObject Parent;
+   typedef PointObject Parent;
 
 private:
    U16 mItemId;                  // Item ID, shared between client and server
@@ -91,16 +91,12 @@ public:
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
-   virtual S32 getLoc(lua_State *L);
    virtual S32 getRad(lua_State *L);
    virtual S32 getVel(lua_State *L);
-   virtual S32 getTeamIndx(lua_State *L);
    virtual S32 isInCaptureZone(lua_State *L);      // Non-moving item is never in capture zone, even if it is!
    virtual S32 isOnShip(lua_State *L);             // Is item being carried by a ship? NO!
    virtual S32 getCaptureZone(lua_State *L);
    virtual S32 getShip(lua_State *L);
-
-    BfObject *getGameObject();                   // For getting the underlying object when all we have is a Lua pointer to it
 };
 
 

@@ -29,6 +29,8 @@
 #include "gridDB.h"           // Base class
 #include "tnlNetObject.h"
 #include "move.h"
+#include "LuaWrapper.h"
+#include "luaObject.h"        // Base class
 
 struct lua_State;  // or #include "lua.h"
 
@@ -216,7 +218,7 @@ class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject, public EditorObject
+class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaObject
 {
    typedef NetObject Parent;
 
@@ -332,11 +334,6 @@ public:
 
    void setScopeAlways();           
 
-   /////
-   // TeamObject methods?
-   S32 getTeamIndx(lua_State *L);      // Return item team to Lua
-   virtual void push(lua_State *L);    // Lua-aware classes will implement this
-  
    void readThisTeam(BitStream *stream);     // xxx editor?
    void writeThisTeam(BitStream *stream);    // xxx editor?
 
@@ -373,7 +370,7 @@ public:
 
    void unselect();
 
-   EditorObjectDatabase *getEditorObjectDatabase();
+   GridDatabase *getEditorObjectDatabase();
 
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
@@ -406,6 +403,20 @@ public:
    virtual EditorAttributeMenuUI *getAttributeMenu();                      // Override in child if it has an attribute menu
    virtual void startEditingAttrs(EditorAttributeMenuUI *attributeMenu);   // Called when we start editing to get menus populated
    virtual void doneEditingAttrs(EditorAttributeMenuUI *attributeMenu);    // Called when we're done to retrieve values set by the menu
+
+   ///// Lua interface
+   // Top level Lua methods
+   LUAW_DECLARE_CLASS(BfObject);
+
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+
+   //virtual S32 getRad(lua_State *L);
+   //virtual S32 getVel(lua_State *L);
+   virtual S32 getLoc(lua_State *L);
+   virtual S32 getTeamIndx(lua_State *L);   
+   BfObject *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
+
 };
 
 

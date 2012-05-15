@@ -1037,10 +1037,8 @@ Lunar<CoreItem>::RegType CoreItem::methods[] =
 {
    // Standard gameItem methods
    method(CoreItem, getClassID),
-   method(CoreItem, getLoc),
    method(CoreItem, getRad),
    method(CoreItem, getVel),
-   method(CoreItem, getTeamIndx),
 
    // Class specific methods
    method(CoreItem, getHealth),
