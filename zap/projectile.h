@@ -37,37 +37,11 @@ namespace Zap
 
 class Ship;
 
-class LuaProjectile : public LuaObject
-{
-public:
-   LuaProjectile();                      //  C++ constructor
-
-   LuaProjectile(lua_State *L);          //  Lua constructor
-
-   static const char className[];
-   static Lunar<LuaProjectile>::RegType methods[];
-   const char *getClassName() const;
-
-   virtual S32 getWeapon(lua_State *L);  // Return info about the weapon/projectile
-
-   //============================
-   // LuaItem interface
-
-   virtual S32 getClassID(lua_State *L); // Object's class
-
-   S32 getLoc(lua_State *L);     // Center of item (returns point)
-   S32 getRad(lua_State *L);             // Radius of item (returns number)
-   S32 getVel(lua_State *L);             // Speed of item (returns point)
-
-   void push(lua_State *L);
-};
-
-
 ////////////////////////////////////
 ////////////////////////////////////
 
 // Basic bullet object
-class Projectile : public BfObject, public LuaProjectile
+class Projectile : public BfObject
 {
    typedef BfObject Parent;
 
@@ -115,18 +89,20 @@ public:
    TNL_DECLARE_CLASS(Projectile);
 
    // Lua interface
-   S32 getRad(lua_State *L);     // Radius of item (returns number)
-   S32 getVel(lua_State *L);     // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L);   // Return team of shooter     
+   virtual S32 getClassID(lua_State *L);  // Object's class
 
-   S32 getWeapon(lua_State *L);  // Return which type of weapon this is
+   S32 getRad(lua_State *L);              // Radius of item (returns number)
+   S32 getVel(lua_State *L);              // Speed of item (returns point)
+   S32 getTeamIndx(lua_State *L);         // Return team of shooter     
+
+   S32 getWeapon(lua_State *L);           // Return which type of weapon this is
 
    void push(lua_State *L);
 };
 
 
 // Basic burst object, and the base clase used for both mines and spybugs
-class BurstProjectile : public MoveItem, public LuaProjectile
+class BurstProjectile : public MoveItem
 {
 private:
    typedef MoveItem Parent;

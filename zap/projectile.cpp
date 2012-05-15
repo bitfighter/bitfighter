@@ -45,90 +45,6 @@
 namespace Zap
 {
 
-const char LuaProjectile::className[] = "ProjectileItem";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
-{
-   // Standard gameItem methods
-   method(LuaProjectile, getClassID),
-   method(LuaProjectile, getLoc),
-   method(LuaProjectile, getRad),
-   method(LuaProjectile, getVel),
-
-   method(LuaProjectile, getWeapon),
-
-   {0,0}    // End method list
-};
-
-
-//  C++ constructor
-LuaProjectile::LuaProjectile()
-{
-   // Do not use
-}
-
-//  Lua constructor
-LuaProjectile::LuaProjectile(lua_State *L)
-{
-   // Do not use
-}
-
-
-const char *LuaProjectile::getClassName() const
-{
-   return "LuaProjectile";
-}
-
-
-S32 LuaProjectile::getWeapon(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-   return 0;
-}
-
-//============================
-// LuaItem interface
-
-S32 LuaProjectile::getClassID(lua_State *L)
-{
-   return returnInt(L, BulletTypeNumber);
-}
-
-
-S32 LuaProjectile::getRad(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-   return 0;
-}
-
-
-S32 LuaProjectile::getLoc(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-   return 0;
-}
-
-
-S32 LuaProjectile::getVel(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-   return 0;
-}
-
-
-void LuaProjectile::push(lua_State *L)
-{
-   TNLAssert(false, "Unimplemented method!");
-}
-
-
-
-/////////////////////////////////////
-/////////////////////////////////////
-
-
-//===========================================
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
@@ -172,7 +88,7 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
 // Destructor
 Projectile::~Projectile()
 {
-
+   // Do nothing
 }
 
 
@@ -519,6 +435,12 @@ void Projectile::renderItem(const Point &pos)
 
 //// Lua methods
 
+S32 Projectile::getClassID(lua_State *L)
+{
+   return returnInt(L, BulletTypeNumber);
+}
+
+
 S32 Projectile::getRad(lua_State *L)
 {
    // TODO: Wrong!!  Radius of item (returns number)
@@ -541,12 +463,6 @@ S32 Projectile::getTeamIndx(lua_State *L)
 S32 Projectile::getWeapon(lua_State *L)
 {
    return returnInt(L, mWeaponType);
-}
-
-
-void Projectile::push(lua_State *L)
-{
-   Lunar<LuaProjectile>::push(L, this);
 }
 
 
@@ -767,12 +683,6 @@ S32 BurstProjectile::getVel(lua_State *L)
 S32 BurstProjectile::getWeapon(lua_State *L)
 {
    return returnInt(L, WeaponBurst);
-}
-
-
-void BurstProjectile::push(lua_State *L)
-{
-   Lunar<LuaProjectile>::push(L, this);
 }
 
 
@@ -1102,11 +1012,6 @@ S32 Mine::getWeapon(lua_State *L)
 }
 
 
-void Mine::push(lua_State *L)
-{
-   Lunar<LuaProjectile>::push(L, this);
-}
-
 //////////////////////////////////
 //////////////////////////////////
 
@@ -1396,12 +1301,6 @@ S32 SpyBug::getVel(lua_State *L)
 S32 SpyBug::getWeapon(lua_State *L)
 {
    return returnInt(L, WeaponSpyBug);
-}
-
-
-void SpyBug::push(lua_State *L)
-{
-   Lunar<LuaProjectile>::push(L, this);
 }
 
 
