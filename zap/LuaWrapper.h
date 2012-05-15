@@ -41,6 +41,7 @@ extern "C"
 }
 
 #include <vector>
+#include <typeinfo>  // XXX remove me when removing all the logprintf's with 'typeid'
 
 
 #define LUAW_BUILDER
