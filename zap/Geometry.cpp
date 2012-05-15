@@ -53,13 +53,6 @@ Geometry::~Geometry()
 }
 
 
-//Geometry *Geometry::newCopy(const Geometry &geom)
-//{
-//   TNLAssert(false, "Not implemented");
-//   return NULL;
-//}
-
-
 GeomType Geometry::getGeomType()
 {
    TNLAssert(false, "Not implemented");
@@ -314,12 +307,6 @@ PointGeometry::~PointGeometry()
 }
 
 
-//Geometry *PointGeometry::newCopy(const Geometry &geom)
-//{
-//   return new PointGeometry(geom);
-//}
-
-
 GeomType PointGeometry::getGeomType()
 {
    return geomPoint;
@@ -493,12 +480,6 @@ SimpleLineGeometry::~SimpleLineGeometry()
 {
    // Do nothing
 }
-
-
-//Geometry *SimpleLineGeometry::newCopy(const Geometry &geom)
-//{
-//   return new SimpleLineGeometry(geom);
-//}
 
 
 GeomType SimpleLineGeometry::getGeomType()
@@ -692,12 +673,6 @@ PolylineGeometry::~PolylineGeometry()
 {
    // Do nothing
 }
-
-
-//Geometry *PolylineGeometry::newCopy(const Geometry &geom)
-//{
-//   return new PolylineGeometry(geom);
-//}
 
 
 GeomType PolylineGeometry::getGeomType()
@@ -964,12 +939,6 @@ PolygonGeometry::PolygonGeometry() : PolylineGeometry()
    mLabelAngle = 0;
    mTriangluationDisabled = false;
 }
-
-
-//Geometry *PolygonGeometry::newCopy(const Geometry &geom)
-//{
-//   return new PolygonGeometry(geom);
-//}
 
 
 GeomType PolygonGeometry::getGeomType()
