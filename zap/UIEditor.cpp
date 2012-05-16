@@ -1455,51 +1455,6 @@ bool EditorUserInterface::showMinorGridLines()
 }
 
 
-// Render background snap grid
-void EditorUserInterface::renderGrid()
-{
-   F32 snapFadeFact = (mSnapContext == FULL_SNAPPING) ? 1 : 0.5f;
-
-   // Gridlines
-   for(S32 i = 1; i >= 0; i--)
-   {
-      if((i && showMinorGridLines()) || !i)      // First minor then major
-      {
-         F32 gridScale = mCurrentScale * getGame()->getGridSize() * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
-         
-         // Use F32 to avoid cumulative rounding errors
-         F32 xStart = fmod(mCurrentOffset.x, gridScale);
-         F32 yStart = fmod(mCurrentOffset.y, gridScale);
-
-         F32 grayVal = ((i ? .2f : .4f) * snapFadeFact);
-         glColor(grayVal);
-
-         while(yStart < gScreenInfo.getGameCanvasHeight())
-         {
-            drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)yStart);
-            yStart += gridScale;
-         }
-         while(xStart < gScreenInfo.getGameCanvasWidth())
-         {
-            drawVertLine((S32)xStart, 0, gScreenInfo.getGameCanvasHeight());
-            xStart += gridScale;
-         }
-      }
-   }
-
-   // Draw axes
-   glColor(0.7f * snapFadeFact);
-   glLineWidth(gLineWidth3);
-
-   Point origin = convertLevelToCanvasCoord(Point(0,0));
-
-   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)origin.y);
-   drawVertLine((S32)origin.x, 0, gScreenInfo.getGameCanvasHeight());
-
-   glLineWidth(gDefaultLineWidth);
-}
-
-
 static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 {
    TNLAssert(dynamic_cast<BfObject *>(*a), "Not a BfObject");
@@ -1853,8 +1808,7 @@ void EditorUserInterface::render()
    if(mPreviewMode)
       renderTurretRanges(editorDb);    // Render range of all turrets in editorDb
    else
-      renderGrid();                    
-
+      renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), getGame()->getGridSize(), mSnapContext == FULL_SNAPPING, showMinorGridLines());                    
 
    glPushMatrix();
       glTranslate(getCurrentOffset());
@@ -2275,8 +2229,6 @@ void EditorUserInterface::copySelection()
 // Paste items on the clipboard
 void EditorUserInterface::pasteSelection()
 {
-   GridDatabase *database = getDatabase();
-
    if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
       return;
 
@@ -2287,13 +2239,14 @@ void EditorUserInterface::pasteSelection()
 
    saveUndoState();           // So we can undo the paste
 
+   GridDatabase *database = getDatabase();
    clearSelection(database);  // Only the pasted items should be selected when we're done
 
    Point pastePos = snapPoint(database, convertCanvasToLevelCoord(mMousePos));
 
    Point firstPoint = mClipboard[0]->getVert(0);
-   Point offsetFromFirstPoint;
 
+   Point offsetFromFirstPoint;
    Vector<DatabaseObject *> copiedObjects;
 
    for(S32 i = 0; i < objCount; i++)

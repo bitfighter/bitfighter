@@ -2286,6 +2286,49 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 }
 
 
+// Render background snap grid for the editor
+void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines)
+{
+   F32 snapFadeFact = fadeLines ? 1 : 0.5f;
+
+   // Gridlines
+   for(S32 i = 1; i >= 0; i--)
+   {
+      if((i && showMinorGridLines) || !i)      // First minor then major
+      {
+         F32 gridScale = curentScale * gridSize * (i ? 0.1f : 1);    // Major gridlines are gridSize() pixels apart   
+         
+         // Use F32 to avoid cumulative rounding errors
+         F32 xStart = fmod(offset.x, gridScale);
+         F32 yStart = fmod(offset.y, gridScale);
+
+         F32 grayVal = ((i ? .2f : .4f) * snapFadeFact);
+         glColor(grayVal);
+
+         while(yStart < gScreenInfo.getGameCanvasHeight())
+         {
+            drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)yStart);
+            yStart += gridScale;
+         }
+         while(xStart < gScreenInfo.getGameCanvasWidth())
+         {
+            drawVertLine((S32)xStart, 0, gScreenInfo.getGameCanvasHeight());
+            xStart += gridScale;
+         }
+      }
+   }
+
+   // Draw axes
+   glColor(0.7f * snapFadeFact);
+   glLineWidth(gLineWidth3);
+
+   drawHorizLine(0, gScreenInfo.getGameCanvasWidth(), (S32)origin.y);
+   drawVertLine((S32)origin.x, 0, gScreenInfo.getGameCanvasHeight());
+
+   glLineWidth(gDefaultLineWidth);
+}
+
+
 };
 
 

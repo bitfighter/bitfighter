@@ -39,6 +39,8 @@ using namespace TNL;
 namespace Zap
 {
    
+bool WallSegmentManager::mBatchUpdatingGeom = false;
+
 
 // Constructor
 WallSegmentManager::WallSegmentManager()
@@ -73,10 +75,6 @@ GridDatabase *WallSegmentManager::getWallEdgeDatabase()
 {
    return mWallEdgeDatabase;
 }
-
-
-
-bool WallSegmentManager::mBatchUpdatingGeom = false;
 
 
 void WallSegmentManager::beginBatchGeomUpdate()

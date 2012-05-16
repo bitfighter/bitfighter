@@ -241,7 +241,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 
 // Editor support items
 extern void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale);
-
+extern void renderGrid(F32 curentScale, const Point &offset, const Point &origin, F32 gridSize, bool fadeLines, bool showMinorGridLines);
 
 extern void renderForceFieldProjector(Point pos, Point normal);
 extern void renderForceFieldProjector(Point pos, Point normal, const Color *teamColor, bool enabled);
@@ -252,6 +252,7 @@ extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
 extern void renderStaticBitfighterLogo();
 
 extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
+
 
 };
 

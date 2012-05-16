@@ -154,15 +154,14 @@ private:
    Point mMousePos;                 // Where the mouse is at the moment
    Point mMouseDownPos;             // Where the mouse was pressed for a drag operation
 
-   bool mAutoScrollWithMouse;           // Make use of scrolling using middle mouse position
+   bool mAutoScrollWithMouse;       // Make use of scrolling using middle mouse position
    bool mAutoScrollWithMouseReady;
    Point mScrollWithMouseLocation;
    bool showMinorGridLines();
 
    // Helper drawing methods
-   void renderGrid();                                             // Draw background snap grid
-   void renderTurretRanges(GridDatabase *editorDb);       // Draw translucent turret ranges
-   void renderObjectsUnderConstruction();                         // Render partially constructed walls and other items that aren't yet in a db
+   void renderTurretRanges(GridDatabase *editorDb);      // Draw translucent turret ranges
+   void renderObjectsUnderConstruction();                // Render partially constructed walls and other items that aren't yet in a db
    void renderDock();
    void renderInfoPanel();
    void renderPanelInfoLine(S32 line, const char *format, ...);
