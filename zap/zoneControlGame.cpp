@@ -297,7 +297,6 @@ bool ZoneControlGameType::teamHasFlag(S32 teamId)
 }
 
 
-
 // A major scoring event has ocurred -- in this case, it's a touchdown
 void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
