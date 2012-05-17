@@ -71,7 +71,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    F32 collisionTime;
 
-   BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, MoveStateNames::ActualState, startPoint, endPoint,
+   BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, ActualState, startPoint, endPoint,
                                                collisionTime, deployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
