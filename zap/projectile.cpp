@@ -82,13 +82,15 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
 
    mType = GameWeapon::weaponInfo[type].projectileType;
    mWeaponType = type;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 Projectile::~Projectile()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -434,28 +436,23 @@ void Projectile::renderItem(const Point &pos)
 
 //// Lua methods
 
-S32 Projectile::getClassID(lua_State *L)
+const char *Projectile::luaClassName = "Projectile";
+
+const luaL_reg Projectile::luaMethods[] =
 {
-   return returnInt(L, BulletTypeNumber);
-}
+   { "getRad",    luaW_doMethod<Projectile, &Projectile::getRad>    },
+   { "getWeapon", luaW_doMethod<Projectile, &Projectile::getWeapon> },
+
+   { NULL, NULL }
+};
+
+REGISTER_LUA_SUBCLASS(Projectile, BfObject);
 
 
 S32 Projectile::getRad(lua_State *L)
 {
    // TODO: Wrong!!  Radius of item (returns number)
    return returnInt(L, 10);
-}
-
-
-S32 Projectile::getVel(lua_State *L)
-{
-   return returnPoint(L, getActualVel());
-}
-
-
-S32 Projectile::getTeamIndx(lua_State *L)
-{
-   return returnInt(L, mShooter->getTeam());
 }
 
 

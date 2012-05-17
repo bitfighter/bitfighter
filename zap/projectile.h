@@ -88,16 +88,13 @@ public:
 
    TNL_DECLARE_CLASS(Projectile);
 
-   // Lua interface
-   virtual S32 getClassID(lua_State *L);  // Object's class
+   //// Lua interface
+   LUAW_DECLARE_CLASS(Projectile);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
-   S32 getRad(lua_State *L);              // Radius of item (returns number)
-   S32 getVel(lua_State *L);              // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L);         // Return team of shooter     
-
-   S32 getWeapon(lua_State *L);           // Return which type of weapon this is
-
-   void push(lua_State *L);
+   S32 getRad(lua_State *L);      // Radius of item (returns number)
+   S32 getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 
 
