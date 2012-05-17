@@ -1146,12 +1146,6 @@ static void setVoiceEchoCallback(ClientGame *game, U32 val)
    game->getSettings()->getIniSettings()->echoVoice = (val == 1);
 }
 
-static void setConnectionSpeedCallback(ClientGame *game, U32 val)
-{
-   game->getSettings()->getIniSettings()->connectionSpeed = val - 2;
-   if(game && game->getConnectionToServer())
-      game->getConnectionToServer()->setConnectionSpeed(game->getSettings()->getIniSettings()->connectionSpeed);
-}
 
 //////////
 
