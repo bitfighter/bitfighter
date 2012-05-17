@@ -3845,7 +3845,9 @@ void EditorUserInterface::onMouseClicked_left()
    {
       clearSelection(getDatabase());
       mDraggingDockItem = mDockItemHit;
-      SDL_SetCursor(Cursor::getSpray());
+
+      if(mDraggingDockItem)
+         SDL_SetCursor(Cursor::getSpray());
    }
    else                 // Mouse is not on dock
    {
