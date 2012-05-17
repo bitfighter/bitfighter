@@ -831,14 +831,14 @@ S32 QSORT_CALLBACK geometricSort(BfObject * &a, BfObject * &b)
 }
 
 
-static void geomSort(Vector<BfObject *> &objects)
-{
-   if(objects.size() >= 2)       // No point sorting unless there are two or more objects!
-
-      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
-      //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
-      qsort(&objects[0], objects.size(), sizeof(BfObject *), (qsort_compare_func) geometricSort);
-}
+//static void geomSort(Vector<BfObject *> &objects)
+//{
+//   if(objects.size() >= 2)       // No point sorting unless there are two or more objects!
+//
+//      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
+//      //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
+//      qsort(&objects[0], objects.size(), sizeof(BfObject *), (qsort_compare_func) geometricSort);
+//}
 
 
 ////////////////////////////////////////

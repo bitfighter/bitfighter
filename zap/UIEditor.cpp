@@ -2621,7 +2621,7 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
       // This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
       // keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
 
-      GridDatabase *editorDb = getDatabase();
+//      GridDatabase *editorDb = getDatabase();
       const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
@@ -3798,7 +3798,9 @@ void EditorUserInterface::onMouseClicked_left()
    {
       clearSelection(getDatabase());
       mDraggingDockItem = mDockItemHit;
-      SDL_SetCursor(Cursor::getSpray());
+
+      if(mDraggingDockItem)
+         SDL_SetCursor(Cursor::getSpray());
    }
    else                 // Mouse is not on dock
    {
