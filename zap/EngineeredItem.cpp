@@ -71,7 +71,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    F32 collisionTime;
 
-   BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, startPoint, endPoint,
+   BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, MoveStateNames::ActualState, startPoint, endPoint,
                                                collisionTime, deployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
@@ -568,7 +568,7 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
       Point mountPos = pos - dir * 0.001f;  // Offsetting slightly prevents spazzy behavior in editor
       
       // Look for walls
-      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, MoveObject::ActualState, format, mountPos, mountPos + dir, t, n);
+      DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, ActualState, format, mountPos, mountPos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {
@@ -1385,7 +1385,7 @@ void ForceField::idle(BfObject::IdleCallPath path)
       // do an LOS test to see if anything is in the field:
       F32 t;
       Point n;
-      if(!findObjectLOS((TestFunc)isForceFieldDeactivatingType, MoveObject::ActualState, mStart, mEnd, t, n))
+      if(!findObjectLOS((TestFunc)isForceFieldDeactivatingType, ActualState, mStart, mEnd, t, n))
       {
          mFieldUp = true;
          setMaskBits(StatusMask);
@@ -1467,7 +1467,7 @@ bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const P
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH, start.y + normal.y * MAX_FORCEFIELD_LENGTH);
 
-   *collObj = db->findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, start, end, time, n);
+   *collObj = db->findObjectLOS((TestFunc)isWallType, ActualState, start, end, time, n);
 
    if(*collObj)
    {
@@ -1743,7 +1743,7 @@ void Turret::idle(IdleCallPath path)
 
       // See if we can see it...
       Point n;
-      if(findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, aimPos, potential->getPos(), t, n))
+      if(findObjectLOS((TestFunc)isWallType, ActualState, aimPos, potential->getPos(), t, n))
          continue;
 
       // See if we're gonna clobber our own stuff...

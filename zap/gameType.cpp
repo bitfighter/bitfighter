@@ -794,7 +794,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 
    if(!ship)
       return;
 
-   Rect r = target->getBounds(MoveObject::RenderState);
+   Rect r = target->getBounds(RenderState);
    Point nearestPoint = ship->getPos();
 
    if(r.max.x < nearestPoint.x)

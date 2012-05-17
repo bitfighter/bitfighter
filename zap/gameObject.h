@@ -257,7 +257,7 @@ public:
    void markAsGhost();
 
    virtual bool isMoveObject();
-   virtual Point getVel();
+   virtual Point getVel() const;
 
    U32 getCreationTime();
    void setCreationTime(U32 creationTime);

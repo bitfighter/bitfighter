@@ -367,7 +367,7 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
    if(!Parent::processArguments(argc, argv, game))
       return false;
 
-   initialPos = mMoveState[ActualState].pos;
+   initialPos = getActualPos();
 
    // Add the ball's starting point to the list of flag spawn points
    gameType->addFlagSpawn(FlagSpawn(initialPos, 0));
@@ -511,8 +511,8 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
    {
       F32 accelFraction = 1 - (0.95f * mCurrentMove.time * 0.001f);
 
-      mMoveState[ActualState].vel *= accelFraction;
-      mMoveState[RenderState].vel *= accelFraction;
+      setActualVel(getActualVel() * accelFraction);
+      setRenderVel(getActualVel() * accelFraction);
    }
 
    // The following block will add some friction to the soccer ball
@@ -520,16 +520,17 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
    {
       F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
    
-      mMoveState[ActualState].vel *= accelFraction;
-      mMoveState[RenderState].vel *= accelFraction;
+      setActualVel(getActualVel() * accelFraction);
+      setRenderVel(getActualVel() * accelFraction);
    }
+
 
    Parent::idle(path);
 
    // If crash into something, the ball will hit first, so we want to make sure it has an up-to-date velocity vector
    if(isMounted())
    if(mMount)      //client side NULL when the soccer is mounted to far away ship.
-      mMoveState[ActualState].vel.set(mMount->getActualVel());
+      setActualVel(mMount->getActualVel());
 }
 
 
@@ -582,8 +583,8 @@ void SoccerBallItem::sendHome()
    S32 spawnIndex = TNL::Random::readI() % spawnPoints->size();
    initialPos = spawnPoints->get(spawnIndex).getPos();
 
-   mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
-   mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
+   setPosVelAng(initialPos, Point(0,0), 0);
+
    setMaskBits(WarpPositionMask | PositionMask);      // By warping, we eliminate the "drifting" effect we got when we used PositionMask
 
    updateExtentInDatabase();

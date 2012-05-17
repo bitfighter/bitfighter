@@ -32,20 +32,47 @@
 namespace Zap
 {
 
+enum MoveStateNames {
+   ActualState = 0,
+   RenderState,
+   LastProcessState,
+   MoveStateCount,
+};
+
+
+class MoveStates
+{
+private:
+   struct MoveState  // need public, not protected, for SpeedZone handling...  TODO: fix this flaw
+   {
+      Point pos;        // Actual position of the ship/object
+      float angle;      // Actual angle of the ship/object
+      Point vel;        // Actual velocity of the ship/object
+   };
+
+   MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
+
+public:
+   Point getPos(S32 state) const;
+   void setPos(S32 state, const Point &pos);
+
+   Point getVel(S32 state) const;
+   void setVel(S32 state, const Point &vel);
+
+   F32 getAngle(S32 state) const;
+   void setAngle(S32 state, F32 angle);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class MoveObject : public Item
 {
    typedef Item Parent;
 
 private:
    S32 mHitLimit;    // Internal counter for processing collisions
-
-public:
-   enum {
-      ActualState = 0,
-      RenderState,
-      LastProcessState,
-      MoveStateCount,
-   };
 
 protected:
    enum {
@@ -57,13 +84,7 @@ protected:
    F32 mMass;
 
 public:
-   struct MoveState  // need public, not protected, for SpeedZone handling...  TODO: fix this flaw
-   {
-      Point pos;        // Actual position of the ship/object
-      float angle;      // Actual angle of the ship/object
-      Point vel;        // Actual velocity of the ship/object
-   };
-   MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
+   MoveStates mMoveStates;
 
    MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
 
@@ -79,17 +100,32 @@ public:
    Point getRenderVel() const;
    Point getActualVel() const;
 
+   F32 getRenderAngle() const;
+   F32 getActualAngle() const;
+   F32 getLastProcessStateAngle() const;
+
    // Because MoveObjects have multiple positions (actual, render), we need to implement the following
    // functions differently than most objects do
    Point getVert(S32 index) const;              // Maps to getActualPos
    Point getPos() const;                        // Maps to getActualPos
-   Point getVel();                              // Maps to getActualVel
+   Point getVel() const;                        // Maps to getActualVel
+
+   void copyMoveState(S32 from, S32 to);
 
    virtual void setActualPos(const Point &pos);
    virtual void setActualVel(const Point &vel);
 
+   void setRenderPos(const Point &pos);
+   void setRenderVel(const Point &vel);
+
+   void setRenderAngle(F32 angle);
+   void setActualAngle(F32 angle);
+
+
    void setVert(const Point &pos, S32 index);   // Maps to setPos
    void setPos(const Point &pos);
+
+   void setPosVelAng(const Point &pos, const Point &vel, F32 ang);
 
    F32 getMass();
    void setMass(F32 mass);
@@ -161,9 +197,8 @@ public:
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   void setActualPos(const Point &p);
-   void setActualVel(const Point &vel);
-
+   virtual void setActualPos(const Point &pos);
+   virtual void setActualVel(const Point &vel);
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();

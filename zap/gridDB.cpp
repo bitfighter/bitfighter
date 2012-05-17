@@ -585,7 +585,7 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
    F32 time;
    Point coll;
 
-   return( findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
+   return( findObjectLOS((TestFunc)isWallType, ActualState, true, point1, point2, time, coll) == NULL );
 }
 
 

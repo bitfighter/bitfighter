@@ -410,62 +410,67 @@ bool SpeedZone::collide(BfObject *hitObject)
 // Handles collisions with a SpeedZone
 void SpeedZone::collided(MoveObject *s, U32 stateIndex)
 {
-   MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
-
    Point pos = getVert(0);
    Point dir = getVert(1);
 
    Point impulse = (dir - pos);           // Gives us direction
    impulse.normalize(mSpeed);             // Gives us the magnitude of speed
-   Point shipNormal = moveState->vel;
+   Point shipNormal = s->mMoveStates.getVel(stateIndex);
    shipNormal.normalize(mSpeed);
    F32 angleSpeed = mSpeed * 0.5f;
 
    // Using mUnpackInit, as client does not know that mRotateSpeed is not zero.
    if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
       angleSpeed *= 0.01f;
-   if(shipNormal.distanceTo(impulse) < angleSpeed && moveState->vel.len() > mSpeed)
+   if(shipNormal.distanceTo(impulse) < angleSpeed && s->mMoveStates.getVel(stateIndex).len() > mSpeed)
       return;
 
    // This following line will cause ships entering the speedzone to have their location set to the same point
    // within the zone so that their path out will be very predictable.
+   Point newVel;
+
    if(mSnapLocation)
    {
-      Point diffpos = moveState->pos - pos;
+      Point diffpos = s->mMoveStates.getPos(stateIndex) - pos;
       Point thisAngle = dir - pos;
       thisAngle.normalize();
       Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001f;
 
-      Point oldVel = moveState->vel;
-      Point oldPos = moveState->pos;
+      Point oldPos = s->mMoveStates.getPos(stateIndex);
+      Point oldVel = s->mMoveStates.getVel(stateIndex);
 
       ignoreThisCollision = true;  // Seem to need it to ignore collide to SpeedZone during a findFirstCollision
-      moveState->vel = newPos - moveState->pos;
+      s->mMoveStates.setVel(stateIndex, newPos - oldPos);
 
       F32 collisionTime = 1;
       Point collisionPoint;
       s->findFirstCollision(stateIndex, collisionTime, collisionPoint);
-      s->mMoveState[stateIndex].pos += s->mMoveState[stateIndex].vel * collisionTime;
+
+      Point p = s->mMoveStates.getPos(stateIndex) + s->mMoveStates.getVel(stateIndex) * collisionTime;    // x = x + vt
+      s->mMoveStates.setPos(stateIndex, p);
 
       ignoreThisCollision = false;
 
-      if(collisionTime != 1)  // don't allow using speed zone when could not line up due to going into wall?
+      if(collisionTime != 1)     // Don't allow using speed zone when could not line up due to going into wall?
       {
-         moveState->pos = oldPos;
-         moveState->vel = oldVel;
+         s->mMoveStates.setPos(stateIndex, oldPos);
+         s->mMoveStates.setVel(stateIndex, oldVel);
          return;
       }
-      moveState->vel = impulse * 1.5;     // Why multiply by 1.5?
+      newVel = impulse * 1.5;    // Why multiply by 1.5?
    }
    else
    {
-      if(shipNormal.distanceTo(impulse) < mSpeed && moveState->vel.len() > mSpeed * 0.8)
+      if(shipNormal.distanceTo(impulse) < mSpeed && s->mMoveStates.getVel(stateIndex).len() > mSpeed * 0.8)
          return;
 
-      moveState->vel += impulse * 1.5;    // Why multiply by 1.5?
+      newVel = s->mMoveStates.getVel(stateIndex) + impulse * 1.5;    // Why multiply by 1.5?
    }
 
-   if(!s->isGhost() && stateIndex == MoveObject::ActualState)  // Only server needs to send information
+   s->mMoveStates.setVel(stateIndex, newVel);
+
+
+   if(!s->isGhost() && stateIndex == ActualState)  // Only server needs to send information
    {
       setMaskBits(HitMask);
 
@@ -473,7 +478,6 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
       if(s->getControllingClient() && s->getControllingClient().isValid())
          s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
    }
-
 }
 
 

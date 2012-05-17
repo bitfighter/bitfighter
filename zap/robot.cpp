@@ -895,7 +895,7 @@ bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimT
    if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
       testFunc = isFlagCollideableType;
 
-   if(target->findObjectLOS(testFunc, MoveObject::ActualState, aimPos, target->getPos(), t, n))
+   if(target->findObjectLOS(testFunc, ActualState, aimPos, target->getPos(), t, n))
       return false;
 
    // See if we're gonna clobber our own stuff...
@@ -1501,7 +1501,7 @@ U16 Robot::findClosestZone(const Point &point)
       Point surfaceNormalIgnore;
 
       DatabaseObject* object = BotNavMeshZone::getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
-            MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
+            ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
 

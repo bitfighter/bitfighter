@@ -237,7 +237,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
          while(true)  
          {
             hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
-                                       MoveObject::RenderState, startPos, endPos, collisionTime, surfNormal);
+                                       MoveStateNames::RenderState, startPos, endPos, collisionTime, surfNormal);
 
             if((!hitObject || hitObject->collide(this)))
                break;
@@ -483,8 +483,8 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
 
    mNetFlags.set(Ghostable);
 
-   mMoveState[ActualState].pos = pos;
-   mMoveState[ActualState].vel = vel;
+   setActualPos(pos);
+   setActualVel(vel);
    setMaskBits(PositionMask);
    mWeaponType = WeaponBurst;
 
@@ -540,7 +540,7 @@ void BurstProjectile::idle(IdleCallPath path)
       gc->getControlObject()->enableCollision();
 
    // Do some drag...  no, not that kind of drag!
-   mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (((F32)mCurrentMove.time) / 1000.f);
+   setActualVel(getActualVel() - getActualVel() * (((F32)mCurrentMove.time) / 1000.f));
 
    if(isGhost())       // Here on down is server only
       return;
@@ -778,7 +778,7 @@ void Mine::idle(IdleCallPath path)
 
       F32 radius;
       Point ipos;
-      if(foundObject->getCollisionCircle(MoveObject::RenderState, ipos, radius))
+      if(foundObject->getCollisionCircle(RenderState, ipos, radius))
       {
          if((ipos - pos).len() < (radius + SensorRadius))
          {

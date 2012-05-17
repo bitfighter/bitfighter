@@ -150,12 +150,7 @@ void Ship::initialize(Point &pos)
    if(getGame())
       mRespawnTime = getGame()->getCurrentTime();
 
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = 0;
-      mMoveState[i].vel = Point(0,0);
-   }
+   setPosVelAng(pos,Point(0,0), 0);
 
    updateExtentInDatabase();
 
@@ -269,11 +264,8 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
    Point pos;
    pos.read(argv + 1);
    pos *= game->getGridSize();
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = 0;
-   }
+
+   setPosVelAng(pos, Point(0,0), 0);
 
    updateExtentInDatabase();
 
@@ -307,8 +299,8 @@ Ship::SensorStatus Ship::getSensorStatus()
 
 void Ship::setActualPos(Point p, bool warp)
 {
-   mMoveState[ActualState].pos = p;
-   mMoveState[RenderState].pos = p;
+   Parent::setActualPos(p);
+   Parent::setRenderPos(p);
 
    if(warp)
       setMaskBits(PositionMask | WarpPositionMask | TeleportMask);
@@ -323,7 +315,7 @@ void Ship::processMove(U32 stateIndex)
    const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
    const F32 ARMOR_SPEED_PENALTY_FACT = 1;
 
-   mMoveState[LastProcessState] = mMoveState[stateIndex];
+   copyMoveState(stateIndex, LastProcessState);
 
    F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
                 (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
@@ -333,7 +325,7 @@ void Ship::processMove(U32 stateIndex)
 
    // If going above this speed, you cannot change course
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-   if(mMoveState[stateIndex].vel.lenSquared() > MAX_CONTROLLABLE_SPEED * MAX_CONTROLLABLE_SPEED)
+   if(mMoveStates.getVel(stateIndex).lenSquared() > MAX_CONTROLLABLE_SPEED * MAX_CONTROLLABLE_SPEED)
       requestVel.set(0,0);
 
 
@@ -343,7 +335,7 @@ void Ship::processMove(U32 stateIndex)
    if(len > maxVel)
       requestVel *= maxVel / len;
 
-   Point velDelta = requestVel - mMoveState[stateIndex].vel;
+   Point velDelta = requestVel - mMoveStates.getVel(stateIndex);
    F32 accRequested = velDelta.len();
 
 
@@ -355,12 +347,12 @@ void Ship::processMove(U32 stateIndex)
    if(accRequested > maxAccel)
    {
       velDelta *= maxAccel / accRequested;
-      mMoveState[stateIndex].vel += velDelta;
+      mMoveStates.setVel(stateIndex, mMoveStates.getVel(stateIndex) + velDelta);
    }
    else
-      mMoveState[stateIndex].vel = requestVel;
+      mMoveStates.setVel(stateIndex, requestVel);
 
-   mMoveState[stateIndex].angle = mCurrentMove.angle;
+   mMoveStates.setAngle(stateIndex, mCurrentMove.angle);
    move(time, stateIndex, false);
 }
 
@@ -453,7 +445,7 @@ bool Ship::isOnObject(BfObject *object)
    /*if(getCollisionPoly(polyPoints))
       return object->collisionPolyPointIntersect(polyPoints);
    else */
-   if(getCollisionCircle(MoveObject::ActualState, center, radius))
+   if(getCollisionCircle(ActualState, center, radius))
       return object->collisionPolyPointIntersect(center, radius);
    else
       return false;
@@ -475,7 +467,7 @@ F32 Ship::getSensorEquipZoomFraction()
  // Returns vector for aiming a weapon based on direction ship is facing
 Point Ship::getAimVector()
 {
-   return Point(cos(mMoveState[ActualState].angle), sin(mMoveState[ActualState].angle) );
+   return Point(cos(getActualAngle()), sin(getActualAngle()));
 }
 
 
@@ -543,8 +535,7 @@ void Ship::processWeaponFire()
             Point dir = getAimVector();
 
             // TODO: To fix skip fire effect on jittery server, need to replace the 0 with... something...
-            GameWeapon::createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, 
-                                                mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+            GameWeapon::createWeaponProjectiles(curWeapon, dir, getActualPos(), getActualVel(), 0, CollisionRadius - 2, this);
          }
 
          mFireTimer += S32(GameWeapon::weaponInfo[curWeapon].fireDelay);
@@ -565,7 +556,7 @@ void Ship::controlMoveReplayComplete()
    // Compute the delta between our current render position
    // and the server position after client-side prediction has
    // been run
-   Point delta = mMoveState[ActualState].pos - mMoveState[RenderState].pos;
+   Point delta = getActualPos() - getRenderPos();
    F32 deltaLen = delta.len();
 
    // If the delta is either very small, or greater than the
@@ -579,8 +570,7 @@ void Ship::controlMoveReplayComplete()
             mTrail[i].reset();
 #endif
 
-      mMoveState[RenderState].pos = mMoveState[ActualState].pos;
-      mMoveState[RenderState].vel = mMoveState[ActualState].vel;
+      copyMoveState(ActualState, RenderState);
       mInterpolating = false;
    }
    else
@@ -607,19 +597,19 @@ void Ship::idle(BfObject::IdleCallPath path)
       // clients to properly lead other clients, instead of
       // piecewise stepping only when packets arrive from the client.
       processMove(RenderState);
-      if(mMoveState[ActualState].vel != Point(0,0) || mMoveState[ActualState].pos != mMoveState[RenderState].pos)
+      if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
    }
    else
    {
       if((path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote) && 
-               mMoveState[ActualState].vel.lenSquared() != 0 && getControllingClient() && 
-               getControllingClient()->lostContact())
+               getActualVel().lenSquared() != 0 && 
+               getControllingClient() &&  getControllingClient()->lostContact())
          return;  // If we're out-of-touch, don't move the ship... moving won't actually hurt, but this seems somehow better
 
 
       // Apply impulse vector and reset it
-      mMoveState[ActualState].vel += mImpulseVector;
+      setActualVel(getActualVel() + mImpulseVector);
       mImpulseVector.set(0,0);
 
       // For all other cases, advance the actual state of the
@@ -627,7 +617,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       processMove(ActualState);
 
       // When not moving, Detect if on a GoFast - seems better to always detect...
-      //if(mMoveState[ActualState].vel =f= Point(0,0))
+      //if(getActualVel() =f= Point(0,0))
       {
          SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
          if(speedZone && speedZone->collide(this))
@@ -647,8 +637,15 @@ void Ship::idle(BfObject::IdleCallPath path)
          const F32 ShipVarNormalizeMultiplier = 128;
          const F32 ShipVarNormalizeFraction = 1 / ShipVarNormalizeMultiplier;
 
-         mMoveState[ActualState].pos.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
-         mMoveState[ActualState].vel.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
+         Point p;
+         
+         p = getActualPos();
+         p.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
+         Parent::setActualPos(p);
+
+         p = getActualVel();
+         p.scaleFloorDiv(ShipVarNormalizeMultiplier, ShipVarNormalizeFraction);
+         Parent::setActualVel(p);
       }
 
       if(path == BfObject::ServerIdleMainLoop ||
@@ -659,12 +656,10 @@ void Ship::idle(BfObject::IdleCallPath path)
          // as having changed Position state.  An optimization
          // here would check the before and after positions
          // so as to not update unmoving ships.
-         if(mMoveState[RenderState].angle != mMoveState[ActualState].angle ||
-            mMoveState[RenderState].pos   != mMoveState[ActualState].pos   ||
-            mMoveState[RenderState].vel   != mMoveState[ActualState].vel )
+         if(getRenderAngle() != getActualAngle() || getRenderPos() != getActualPos() || getRenderVel() != getActualVel())
             setMaskBits(PositionMask);
 
-         mMoveState[RenderState] = mMoveState[ActualState];
+         copyMoveState(ActualState, RenderState);
       }
       else if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
       {
@@ -921,14 +916,14 @@ void Ship::processModules()
             if(i == ModuleSensor && !isGhost())
             {
                Point direction = getAimVector();
-               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, mMoveState[ActualState].pos,
-                                                   mMoveState[ActualState].vel, 0, CollisionRadius - 2, this);
+               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
+                                                   getActualVel(), 0, CollisionRadius - 2, this);
             }
             // Pulse uses up all energy and applies an impulse vector
             else if(i == ModuleBoost)
             {
                // The impulse should be in the same direction you're already going
-               mImpulseVector = mMoveState[ActualState].vel;
+               mImpulseVector = getActualVel();
 
                // Change to Pulse speed based on current energy
                mImpulseVector.normalize((((F32)mEnergy/(F32)EnergyMax) * (PulseMaxVelocity - PulseMinVelocity)) + PulseMinVelocity);
@@ -1154,9 +1149,9 @@ void Ship::updateModuleSounds()
       if(mModulePrimaryActive[i] && moduleSFXs[i] != SFXNone)
       {
          if(mModuleSound[i].isValid())
-            SoundSystem::setMovementParams(mModuleSound[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);
+            SoundSystem::setMovementParams(mModuleSound[i], getRenderPos(), getRenderVel());
          else if(moduleSFXs[i] != -1)
-            mModuleSound[i] = SoundSystem::playSoundEffect(moduleSFXs[i], mMoveState[RenderState].pos, mMoveState[RenderState].vel);
+            mModuleSound[i] = SoundSystem::playSoundEffect(moduleSFXs[i], getRenderPos(),  getRenderVel());
       }
       else
       {
@@ -1188,10 +1183,11 @@ const U32 negativeFireDelay = 123;  // how far into negative we are allowed to s
 
 void Ship::writeControlState(BitStream *stream)
 {
-   stream->write(mMoveState[ActualState].pos.x);
-   stream->write(mMoveState[ActualState].pos.y);
-   stream->write(mMoveState[ActualState].vel.x);
-   stream->write(mMoveState[ActualState].vel.y);
+   stream->write(getActualPos().x);    // TODO: Should these be compressedPoint writes?
+   stream->write(getActualPos().y);
+   stream->write(getActualVel().x);
+   stream->write(getActualVel().y);
+
    stream->writeRangedU32(mEnergy, 0, EnergyMax);
    stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative.
@@ -1203,10 +1199,16 @@ void Ship::writeControlState(BitStream *stream)
 
 void Ship::readControlState(BitStream *stream)
 {
-   stream->read(&mMoveState[ActualState].pos.x);
-   stream->read(&mMoveState[ActualState].pos.y);
-   stream->read(&mMoveState[ActualState].vel.x);
-   stream->read(&mMoveState[ActualState].vel.y);
+   F32 x, y;
+
+   stream->read(&x);
+   stream->read(&y);
+   Parent::setActualPos(Point(x, y));
+
+   stream->read(&x);
+   stream->read(&y);
+   Parent::setActualVel(Point(x, y));
+
    mEnergy = stream->readRangedU32(0, EnergyMax);
    mCooldownNeeded = stream->readFlag();
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
@@ -1297,8 +1299,8 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & PositionMask))         // <=== ONE
       {
          // Send position and speed
-         gameConnection->writeCompressedPoint(mMoveState[RenderState].pos, stream);
-         writeCompressedVelocity(mMoveState[RenderState].vel, BoostMaxVelocity + 1, stream);
+         gameConnection->writeCompressedPoint(getRenderPos(), stream);
+         writeCompressedVelocity(getRenderVel(), BoostMaxVelocity + 1, stream);
       }
       if(stream->writeFlag(updateMask & MoveMask))             // <=== TWO
          mCurrentMove.pack(stream, NULL, false);               // Send current move
@@ -1391,7 +1393,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          disableCollision();
 
          if(!wasInitialUpdate)
-            emitShipExplosion(mMoveState[ActualState].pos);    // Boom!
+            emitShipExplosion(getRenderPos());    // Boom!
       }
    }
    else
@@ -1423,8 +1425,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())     // UpdateMask
    {
-      ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
-      readCompressedVelocity(mMoveState[ActualState].vel, BoostMaxVelocity + 1, stream);
+      Point p;
+      ((GameConnection *) connection)->readCompressedPoint(p, stream);
+      Parent::setActualPos(p);
+
+      readCompressedVelocity(p, BoostMaxVelocity + 1, stream);
+      Parent::setActualVel(p);
       positionChanged = true;
    }
 
@@ -1459,7 +1465,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       for(S32 i = 0; i < ModuleCount; i++)
          mModuleSecondaryActive[i] = stream->readFlag();
 
-   mMoveState[ActualState].angle = mCurrentMove.angle;
+   setActualAngle(mCurrentMove.angle);
 
 
    if(positionChanged && !isRobot() )
@@ -1471,9 +1477,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(shipwarped)
    {
       mInterpolating = false;
-      mMoveState[RenderState] = mMoveState[ActualState];
+      copyMoveState(ActualState, RenderState);
 
-      for(S32 i=0; i<TrailCount; i++)
+      for(S32 i = 0; i<TrailCount; i++)
          mTrail[i].reset();
    }
    else
@@ -1487,9 +1493,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
-      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mMoveState[ActualState].pos, 1);
+      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(getActualPos(), 1);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mMoveState[ActualState].pos);
+      SoundSystem::playSoundEffect(SFXTeleportIn, getActualPos());
    }
 
 #endif
@@ -1874,7 +1880,7 @@ void Ship::emitShipExplosion(Point pos)
    TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   game->emitExplosion(mMoveState[ActualState].pos, 0.9f, ShipExplosionColors, NumShipExplosionColors);
+   game->emitExplosion(getActualPos(), 0.9f, ShipExplosionColors, NumShipExplosionColors);
    game->emitBurst(pos, Point(a,c), Color(1,1,0.25), Colors::red);
    game->emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
 #endif
@@ -1885,8 +1891,8 @@ void Ship::emitMovementSparks()
 #ifndef ZAP_DEDICATED
    //U32 deltaT = mCurrentMove.time;
 
-   // Do nothing if we're under 0.1 vel
-   if(hasExploded || mMoveState[ActualState].vel.len() < 0.1)
+   static const F32 TOO_SLOW_FOR_SPARKS = 0.1;
+   if(hasExploded || getActualVel().len() < TOO_SLOW_FOR_SPARKS)
       return;
 
    bool boostActive = isModulePrimaryActive(ModuleBoost);
@@ -1904,7 +1910,7 @@ void Ship::emitMovementSparks()
    for(S32 i = 0; i < cornerCount; i++)
       corners[i].set(shipShapeInfo->cornerPoints[i*2], shipShapeInfo->cornerPoints[i*2 + 1]);
 
-   F32 th = FloatHalfPi - mMoveState[RenderState].angle;
+   F32 th = FloatHalfPi - getRenderAngle();
 
    F32 sinTh = sin(th);
    F32 cosTh = cos(th);
@@ -1917,8 +1923,8 @@ void Ship::emitMovementSparks()
       shipDirs[i] *= warpInScale;
    }
 
-   Point leftVec ( mMoveState[ActualState].vel.y, -mMoveState[ActualState].vel.x);
-   Point rightVec(-mMoveState[ActualState].vel.y,  mMoveState[ActualState].vel.x);
+   Point leftVec ( getActualVel().y, -getActualVel().x);
+   Point rightVec(-getActualVel().y,  getActualVel().x);
 
    leftVec.normalize();
    rightVec.normalize();
@@ -1938,7 +1944,7 @@ void Ship::emitMovementSparks()
    }
 
    leftId = bestId;
-   Point leftPt = mMoveState[RenderState].pos + shipDirs[bestId];
+   Point leftPt = getRenderPos() + shipDirs[bestId];
 
    // Find the right-wards match
    bestId = -1;
@@ -1955,7 +1961,7 @@ void Ship::emitMovementSparks()
    }
 
    rightId = bestId;
-   Point rightPt = mMoveState[RenderState].pos + shipDirs[bestId];
+   Point rightPt = getRenderPos() + shipDirs[bestId];
 
    // Stitch things up if we must...
    if(leftId == mLastTrailPoint[0] && rightId == mLastTrailPoint[1])
@@ -1993,9 +1999,9 @@ void Ship::emitMovementSparks()
          velDir *= 1 / len;
 
       Point shipDirs[4];
-      shipDirs[0].set(cos(mMoveState[RenderState].angle), sin(mMoveState[RenderState].angle) );
+      shipDirs[0].set(cos(getRenderAngle()), sin(getRenderAngle()));
       shipDirs[1].set(-shipDirs[0]);
-      shipDirs[2].set(shipDirs[0].y, -shipDirs[0].x);
+      shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
       shipDirs[3].set(-shipDirs[0].y, shipDirs[0].x);
 
       for(U32 i = 0; i < 4; i++)
@@ -2020,7 +2026,7 @@ void Ship::emitMovementSparks()
 
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
-                static_cast<ClientGame *>(getGame())->emitSpark(mMoveState[RenderState].pos - shipDirs[i] * 13,
+                static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
                                           -shipDirs[i] * 100 + chaos, thrust, 1.5f * TNL::Random::readF());
              }
           }
@@ -2059,7 +2065,7 @@ void Ship::render(S32 layerIndex)
    F32 alpha = isModulePrimaryActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
 
    glPushMatrix();
-   glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
+   glTranslate(getRenderPos());
 
    ClientInfo *clientInfo = getClientInfo();
 
@@ -2094,7 +2100,7 @@ void Ship::render(S32 layerIndex)
    if(clientGame->isShowingDebugShipCoords() && layerIndex == 1)
       renderShipCoords(getActualPos(), localShip, alpha);
 
-   glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);
+   glRotatef(radiansToDegrees(getRenderAngle()) - 90 + rotAmount, 0, 0, 1.0);
    glScale(warpInScale);
 
    if(layerIndex == -1)    // TODO: Get rid of this if we stop sending location of cloaked ship to clients
@@ -2167,7 +2173,7 @@ void Ship::render(S32 layerIndex)
       // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
       const S32 biggishNumber = 21988;
       F32 offset = F32(Platform::getRealMilliseconds() % biggishNumber) * FloatTau / biggishNumber;
-      drawDashedHollowArc(mMoveState[RenderState].pos, CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
+      drawDashedHollowArc(getRenderPos(), CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
 
       // bink fading code... don't like it
       //      S32 aaa = 300;  // blink rate
@@ -2188,12 +2194,12 @@ void Ship::render(S32 layerIndex)
    }
 
    if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
-      renderShipRepairRays(mMoveState[RenderState].pos, this, mRepairTargets, alpha);
+      renderShipRepairRays(getRenderPos(), this, mRepairTargets, alpha);
 
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid())
-         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
+         mMountedItems[i]->renderItem(getRenderPos());
 #endif
 }
 
@@ -2212,7 +2218,7 @@ void Ship::calcThrustComponents(F32 *thrusts)
          velDir *= 1 / len;
 
       Point shipDirs[4];
-      shipDirs[0].set(cos(mMoveState[RenderState].angle), sin(mMoveState[RenderState].angle) );
+      shipDirs[0].set(cos(getRenderAngle()), sin(getRenderAngle()) );
       shipDirs[1].set(-shipDirs[0]);
       shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
       shipDirs[3].set(-shipDirs[0].y,  shipDirs[0].x);
@@ -2222,7 +2228,7 @@ void Ship::calcThrustComponents(F32 *thrusts)
    }
 
    // Tweak side thrusters to show rotational force
-   F32 rotVel = getAngleDiff(mMoveState[LastProcessState].angle, mMoveState[RenderState].angle);
+   F32 rotVel = getAngleDiff(getLastProcessStateAngle(), getRenderAngle());
 
    if(rotVel > 0.001)
       thrusts[3] += 0.25;

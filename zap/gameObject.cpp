@@ -823,7 +823,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       F32 t;
       Point n;
 
-      if(findObjectLOS((TestFunc)isWallType, MoveObject::ActualState, pos, objPos, t, n))
+      if(findObjectLOS((TestFunc)isWallType, ActualState, pos, objPos, t, n))
          continue;
 
       // Figure the impulse and damage
@@ -928,7 +928,7 @@ bool BfObject::isMoveObject()
 }
 
 
-Point BfObject::getVel()
+Point BfObject::getVel() const
 {
    return Point(0,0);
 }
@@ -1074,7 +1074,7 @@ bool BfObject::collisionPolyPointIntersect(Point center, F32 radius)
    if(getCollisionPoly(polyPoints))
       return polygonCircleIntersect(&polyPoints[0], polyPoints.size(), center, radius * radius, pt);
 
-   else if(getCollisionCircle(MoveObject::ActualState, c, r))
+   else if(getCollisionCircle(ActualState, c, r))
       return ( center.distSquared(c) < (radius + r) * (radius + r) );
 
    else

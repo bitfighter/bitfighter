@@ -1,4 +1,3 @@
-
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
@@ -51,12 +50,22 @@
 namespace Zap
 {
 
+Point MoveStates::getPos(S32 state) const             { return mMoveState[state].pos; }
+void  MoveStates::setPos(S32 state, const Point &pos) { mMoveState[state].pos = pos; }
+
+Point MoveStates::getVel(S32 state) const             { return mMoveState[state].vel; }
+void  MoveStates::setVel(S32 state, const Point &vel) { mMoveState[state].vel = vel; }
+
+F32   MoveStates::getAngle(S32 state) const      { return mMoveState[state].angle; }
+void  MoveStates::setAngle(S32 state, F32 angle) { mMoveState[state].angle = angle; }
+
+
 MoveObject::MoveObject(const Point &pos, F32 radius, F32 mass) : Parent(pos, radius)    // Constructor
 {
    for(U32 i = 0; i < MoveStateCount; i++)
    {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = 0;
+      mMoveStates.setPos((MoveStateNames)i, pos);
+      mMoveStates.setAngle((MoveStateNames)i, 0);
    }
 
    mMass = mass;
@@ -87,7 +96,7 @@ static const float MoveObjectCollisionElasticity = 1.7f;
 // Update object's extents in the database
 void MoveObject::updateExtentInDatabase()
 {
-   Rect r(mMoveState[ActualState].pos, mMoveState[RenderState].pos);
+   Rect r(getActualPos(), getRenderPos());
    r.expand(Point(mRadius + 10, mRadius + 10));
    setExtent(r);
 }
@@ -99,57 +108,35 @@ bool MoveObject::isMoveObject()
 }
 
 
-Point MoveObject::getVert(S32 index) const
+Point MoveObject::getVert(S32 index) const { return getActualPos(); }
+
+Point MoveObject::getPos() const { return getActualPos(); }
+Point MoveObject::getVel() const { return getActualVel(); }
+
+Point MoveObject::getActualPos() const { return mMoveStates.getPos(ActualState); }
+Point MoveObject::getRenderPos() const { return mMoveStates.getPos(RenderState); }
+Point MoveObject::getActualVel() const { return mMoveStates.getVel(ActualState); }
+Point MoveObject::getRenderVel() const { return mMoveStates.getVel(RenderState); }
+
+F32 MoveObject::getActualAngle()           const { return mMoveStates.getAngle(ActualState);      }
+F32 MoveObject::getRenderAngle()           const { return mMoveStates.getAngle(RenderState);      }
+F32 MoveObject::getLastProcessStateAngle() const { return mMoveStates.getAngle(LastProcessState); }
+
+
+void MoveObject::setActualPos(const Point &pos) { mMoveStates.setPos(ActualState, pos); }
+void MoveObject::setActualVel(const Point &vel) { mMoveStates.setVel(ActualState, vel); }
+void MoveObject::setActualAngle(F32 angle)      { mMoveStates.setAngle(ActualState, angle); }
+
+void MoveObject::setRenderPos(const Point &pos) { mMoveStates.setPos(RenderState, pos); }
+void MoveObject::setRenderVel(const Point &vel) { mMoveStates.setVel(RenderState, vel); }
+void MoveObject::setRenderAngle(F32 angle)      { mMoveStates.setAngle(RenderState, angle); }
+
+
+void MoveObject::copyMoveState(S32 from, S32 to)
 {
-   return getActualPos();
-}
-
-
-Point MoveObject::getPos() const
-{
-   return getActualPos();
-}
-
-
-Point MoveObject::getVel()
-{
-   return getActualVel();
-}
-
-
-Point MoveObject::getRenderPos() const
-{
-   return mMoveState[RenderState].pos;
-}
-
-
-Point MoveObject::getActualPos() const
-{
-   return mMoveState[ActualState].pos;
-}
-
-
-Point MoveObject::getRenderVel() const
-{
-   return mMoveState[RenderState].vel;
-}
-
-
-Point MoveObject::getActualVel() const
-{
-   return mMoveState[ActualState].vel;
-}
-
-
-void MoveObject::setActualPos(const Point &pos)
-{
-   mMoveState[ActualState].pos = pos;
-}
-
-
-void MoveObject::setActualVel(const Point &vel)
-{
-   mMoveState[ActualState].vel = vel;
+   mMoveStates.setPos  (to, mMoveStates.getPos(from));
+   mMoveStates.setVel  (to, mMoveStates.getVel(from));
+   mMoveStates.setAngle(to, mMoveStates.getAngle(from));
 }
 
 
@@ -163,12 +150,22 @@ void MoveObject::setVert(const Point &pos, S32 index)
 // For Geometry, should set both actual and render position
 void MoveObject::setPos(const Point &pos)
 {
-   mMoveState[ActualState].pos = pos;
-   mMoveState[RenderState].pos = pos;
-   Parent::setVert(pos, 0);      // Kind of hacky... need to get this point into the geom object, need to avoid stack overflow
+   setActualPos(pos);
+   setRenderPos(pos);
+   Parent::setVert(pos, 0);      // Kind of hacky... need to get this point into the geom object, need to avoid stack overflow TODO: Can get rid of this?
    updateExtentInDatabase();
 }
 
+
+void MoveObject::setPosVelAng(const Point &pos, const Point &vel, F32 ang)
+{
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveStates.setPos(i, pos);
+      mMoveStates.setVel(i, vel);
+      mMoveStates.setAngle(i, ang);
+   }
+}
 
 F32 MoveObject::getMass()
 {
@@ -242,11 +239,7 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 
    contactShip->getCollisionCircle(stateIndex, contactShipPos, contactShipRadius);
 
-   // Find out if either of the colliding objects uses collisionPolys or not
-   //Vector<Point> dummy;
-   //F32 fixfact = (getCollisionPoly(dummy) || contactShip->getCollisionPoly(dummy)) ? 0 : 1;
-
-   Point v = contactShip->mMoveState[stateIndex].vel;
+   Point v = contactShip->mMoveStates.getVel(stateIndex);
    Point posDelta = contactShipPos - intendedPos;
 
    F32 R = myRadius + contactShipRadius;
@@ -270,8 +263,6 @@ const F32 velocityEpsilon = 0.00001f;
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
 void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
-   TNLAssert(this, "'THIS' is NULL");
-
    U32 tryCount = 0;
    const U32 TRY_COUNT_MAX = 8;
    Vector<SafePtr<BfObject> > disabledList;
@@ -282,7 +273,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       tryCount++;
 
       // Ignore tiny movements unless we're processing a collision
-      if(!isBeingDisplaced && mMoveState[stateIndex].vel.len() < velocityEpsilon)
+      if(!isBeingDisplaced && mMoveStates.getVel(stateIndex).len() < velocityEpsilon)
          break;
 
       F32 collisionTime = moveTime;
@@ -291,19 +282,21 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       BfObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
-         mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * moveTime;    // Move to desired destination
+         Point newPos = mMoveStates.getPos(stateIndex) + mMoveStates.getVel(stateIndex) * moveTime;   // Move to desired destination
+         mMoveStates.setPos(stateIndex, newPos);
          break;
       }
 
       // Collision!  Advance to the point of collision
-      mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * collisionTime;
+      Point newPos = mMoveStates.getPos(stateIndex) + mMoveStates.getVel(stateIndex) * collisionTime;    // x = x + vt
+      mMoveStates.setPos(stateIndex, newPos);
 
       if(objectHit->isMoveObject())     // Collided with a MoveObject
       {
          MoveObject *moveObjectThatWasHit = static_cast<MoveObject *>(objectHit);  
 
-         Point velDelta = moveObjectThatWasHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
-         Point posDelta = moveObjectThatWasHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
+         Point velDelta = moveObjectThatWasHit->mMoveStates.getVel(stateIndex) - mMoveStates.getVel(stateIndex);
+         Point posDelta = moveObjectThatWasHit->mMoveStates.getPos(stateIndex) - mMoveStates.getPos(stateIndex);
 
          // Prevent infinite loops with a series of objects trying to displace each other forever
          if(isBeingDisplaced)
@@ -323,7 +316,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          }
          else                            // We're moving faster than the object we hit (I think)
          {
-            Point intendedPos = mMoveState[stateIndex].pos + mMoveState[stateIndex].vel * moveTime;
+            Point intendedPos = mMoveStates.getPos(stateIndex) + mMoveStates.getVel(stateIndex) * moveTime;    // x = x + vt
 
             F32 displaceEpsilon = 0.002f;
             F32 t = computeMinSeperationTime(stateIndex, moveObjectThatWasHit, intendedPos);
@@ -364,7 +357,8 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          disabledList[i]->enableCollision();
 
    if(tryCount == TRY_COUNT_MAX && moveTime > moveTimeStart * 0.98f)
-      mMoveState[stateIndex].vel.set(0,0); // prevents some overload by not trying to move anymore
+      mMoveStates.setVel(stateIndex, Point(0,0));  // prevents some overload by not trying to move anymore
+
 }
 
 
@@ -389,9 +383,9 @@ static S32 QSORT_CALLBACK sortBarriersFirst(DatabaseObject **a, DatabaseObject *
 BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
    // Check for collisions against other objects
-   Point delta = mMoveState[stateIndex].vel * collisionTime;
+   Point delta = mMoveStates.getVel(stateIndex) * collisionTime;
 
-   Rect queryRect(mMoveState[stateIndex].pos, mMoveState[stateIndex].pos + delta);
+   Rect queryRect(mMoveStates.getPos(stateIndex), mMoveStates.getPos(stateIndex) + delta);
    queryRect.expand(Point(mRadius, mRadius));
 
    fillVector.clear();
@@ -418,10 +412,10 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
       {
          Point cp;
 
-         if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,
+         if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveStates.getPos(stateIndex),
                                         delta, mRadius, cp, collisionFraction))
          {
-            if(cp != mMoveState[stateIndex].pos)   // avoid getting stuck inside polygon wall
+            if(cp != mMoveStates.getPos(stateIndex))   // Avoid getting stuck inside polygon wall
             {
                bool collide1 = collide(foundObject);
                bool collide2 = foundObject->collide(this);
@@ -450,7 +444,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
          if(foundObject->getCollisionCircle(stateIndex, shipPos, otherRadius))
          {
 
-            Point v = mMoveState[stateIndex].vel;
+            Point v = mMoveStates.getVel(stateIndex);
             Point p = myPos - shipPos;
 
             if(v.dot(p) < 0)
@@ -487,7 +481,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
 
                      collisionTime = t;
                      collisionObject = foundObject;
-                     delta = mMoveState[stateIndex].vel * collisionTime;
+                     delta = mMoveStates.getVel(stateIndex) * collisionTime;
 
                      p.normalize(otherRadius);  // we need this calculation, just to properly show bounce sparks at right position
                      collisionPoint = shipPos + p;
@@ -505,16 +499,17 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
 void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint)
 {
    // Reflect the velocity along the collision point
-   Point normal = mMoveState[stateIndex].pos - collisionPoint;
+   Point normal = mMoveStates.getPos(stateIndex) - collisionPoint;
    normal.normalize();
 
-   mMoveState[stateIndex].vel -= normal * MoveObjectCollisionElasticity * normal.dot(mMoveState[stateIndex].vel);
+   Point newVel = mMoveStates.getVel(stateIndex) - normal * MoveObjectCollisionElasticity * normal.dot(mMoveStates.getVel(stateIndex));
+   mMoveStates.setVel(stateIndex, newVel);
 
 #ifndef ZAP_DEDICATED
    // Emit some bump particles on client
    if(isGhost())     // i.e. on client side
    {
-      F32 scale = normal.dot(mMoveState[stateIndex].vel) * 0.01f;
+      F32 scale = normal.dot(mMoveStates.getVel(stateIndex)) * 0.01f;
       if(scale > 0.5f)
       {
          // Make a noise...
@@ -532,12 +527,12 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
             if(TNL::Random::readF() > 0.5)
                static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
                                                                normal * chaos.len() + Point(normal.y, -normal.x) * scale * 5  + chaos + 
-                                                                         mMoveState[stateIndex].vel*0.05f, bumpC);
+                                                                         mMoveStates.getVel(stateIndex) * 0.05f, bumpC);
 
             if(TNL::Random::readF() > 0.5)
                static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
                                                                normal * chaos.len() + Point(normal.y, -normal.x) * scale * -5 + chaos + 
-                                                                         mMoveState[stateIndex].vel*0.05f, bumpC);
+                                                                         mMoveStates.getVel(stateIndex) * 0.05f, bumpC);
          }
       }
    }
@@ -549,15 +544,15 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *moveObjectThatWasHit)
 {
    // collisionVector is simply a line from the center of moveObjectThatWasHit to the center of this
-   Point collisionVector = moveObjectThatWasHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
+   Point collisionVector = moveObjectThatWasHit->mMoveStates.getPos(stateIndex) - mMoveStates.getPos(stateIndex);
 
    collisionVector.normalize();
 
-   bool moveObjectThatWasHitWasMovingTooSlow = (moveObjectThatWasHit->mMoveState[stateIndex].vel.lenSquared() < 0.001f);
+   bool moveObjectThatWasHitWasMovingTooSlow = (moveObjectThatWasHit->mMoveStates.getVel(stateIndex).lenSquared() < 0.001f);
 
    // Initial velocities projected onto collisionVector
-   F32 v1i = mMoveState[stateIndex].vel.dot(collisionVector);
-   F32 v2i = moveObjectThatWasHit->mMoveState[stateIndex].vel.dot(collisionVector);
+   F32 v1i = mMoveStates.getVel(stateIndex).dot(collisionVector);
+   F32 v2i = moveObjectThatWasHit->mMoveStates.getVel(stateIndex).dot(collisionVector);
 
    F32 v1f, v2f;     // Final velocities
 
@@ -566,8 +561,13 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    v1f = (e * moveObjectThatWasHit->mMass * (v2i - v1i) + mMass * v1i + moveObjectThatWasHit->mMass * v2i) / (mMass + moveObjectThatWasHit->mMass);
    v2f = (e *                       mMass * (v1i - v2i) + mMass * v1i + moveObjectThatWasHit->mMass * v2i) / (mMass + moveObjectThatWasHit->mMass);
 
-   moveObjectThatWasHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
-   mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
+   Point newVel;
+
+   newVel = moveObjectThatWasHit->mMoveStates.getVel(stateIndex) + collisionVector * (v2f - v2i);
+   moveObjectThatWasHit->mMoveStates.setVel(stateIndex, newVel);
+
+   newVel = mMoveStates.getVel(stateIndex) + collisionVector * (v1f - v1i);
+   mMoveStates.setVel(stateIndex, newVel);
 
    if(!isGhost())    // Server only
    {
@@ -585,11 +585,11 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
       {
          DamageInfo theInfo;
-         theInfo.collisionPoint = mMoveState[ActualState].pos;
+         theInfo.collisionPoint = getActualPos();
          theInfo.damageAmount = 1.0f;     // Kill ship
          theInfo.damageType = DamageTypePoint;
          theInfo.damagingObject = asteroid;
-         theInfo.impulseVector = mMoveState[ActualState].vel;
+         theInfo.impulseVector = getActualVel();
 
          ship->damageObject(&theInfo);
       }
@@ -597,7 +597,8 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 #ifndef ZAP_DEDICATED
    else     // Client only
    {
-      playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);
+      //logprintf("Collision sound! %d", stateIndex); // <== why don't we see renderstate here more often?
+      playCollisionSound(stateIndex, moveObjectThatWasHit, v1i);    
 
       MoveItem *item = dynamic_cast<MoveItem *>(moveObjectThatWasHit);
       GameType *gameType = getGame()->getGameType();
@@ -609,10 +610,11 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 }
 
 
+// Sometimes stateIndex will in fact be ActualState, which frankly makes no sense, but there you have it
 void MoveObject::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity)
 {
    if(velocity > 0.25)    // Make sound if the objects are moving fast enough
-      SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos);
+      SoundSystem::playSoundEffect(SFXBounceObject, moveObjectThatWasHit->mMoveStates.getPos(stateIndex));
 }
 
 
@@ -620,7 +622,7 @@ void MoveObject::updateInterpolation()
 {
    U32 deltaT = mCurrentMove.time;
    {
-      mMoveState[RenderState].angle = mMoveState[ActualState].angle;
+      setRenderAngle(getActualAngle());
 
       if(mInterpolating)
       {
@@ -630,15 +632,15 @@ void MoveObject::updateInterpolation()
          // we can also clamp to zero, the actual velocity, or the
          // render velocity, depending on which one is best.
 
-         Point deltaP = mMoveState[ActualState].pos - mMoveState[RenderState].pos;
+         Point deltaP = getActualPos() - getRenderPos();
          F32 distance = deltaP.len();
 
          if(!distance)
             goto interpDone;
 
          deltaP.normalize();
-         F32 rvel = deltaP.dot(mMoveState[RenderState].vel);
-         F32 avel = deltaP.dot(mMoveState[ActualState].vel);
+         F32 rvel = deltaP.dot(getRenderVel());
+         F32 avel = deltaP.dot(getActualVel());
 
          if(rvel < avel)
             rvel = avel;
@@ -652,7 +654,7 @@ void MoveObject::updateInterpolation()
 
          float requestVel = distance / time;
          float interpMaxVel = InterpMaxVelocity;
-         float currentActualVelocity = mMoveState[ActualState].vel.len();
+         float currentActualVelocity = getActualVel().len();
          if(interpMaxVel < currentActualVelocity)
             interpMaxVel = currentActualVelocity;
          if(requestVel > interpMaxVel)
@@ -671,21 +673,21 @@ void MoveObject::updateInterpolation()
             goto interpDone;
 
          rvel += a * time;
-         mMoveState[RenderState].vel = deltaP * rvel;
-         mMoveState[RenderState].pos += mMoveState[RenderState].vel * time;
+         setRenderVel(deltaP * rvel);
+         setRenderPos(getRenderPos() + getRenderVel() * time);
       }
       else
       {
    interpDone:
          mInterpolating = false;
-         mMoveState[RenderState] = mMoveState[ActualState];
+         copyMoveState(ActualState, RenderState);
       }
    }
 }
 
 bool MoveObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
-{
-   point = mMoveState[stateIndex].pos;
+{  
+   point = mMoveStates.getPos(stateIndex);
    radius = mRadius;
    return true;
 }
@@ -704,10 +706,10 @@ void MoveObject::onGeomChanged()
 void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
 {
    // Compute impulse direction
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
+   Point dv = theInfo->impulseVector - getActualVel();
+   Point iv = getActualPos() - theInfo->collisionPoint;
    iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3f / mMass;
+   setActualVel(getActualVel() + iv * dv.dot(iv) * 0.3f / mMass);
 }
 
 ////
@@ -752,8 +754,8 @@ bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
    Point pos = getActualPos();
 
    for(U32 i = 0; i < MoveStateCount; i++)
-      mMoveState[i].pos = pos;
-
+      mMoveStates.setPos(i, pos);
+      
    updateExtentInDatabase();
 
    return true;
@@ -774,7 +776,7 @@ void MoveItem::render()
    if(mIsMounted)
       return;
 
-   renderItem(mMoveState[RenderState].pos);
+   renderItem(getRenderPos());
 }
 
 
@@ -888,14 +890,14 @@ void MoveItem::dismount()
  // if wanting to use setActualPos(const Point &p), will have to change all class that have setActualPos, to allow virtual inheritance to work right.
 void MoveItem::setActualPos(const Point &pos)
 {
-   mMoveState[ActualState].pos = pos;
+   mMoveStates.setPos(ActualState, pos);
    setMaskBits(WarpPositionMask | PositionMask);
 }
 
 
 void MoveItem::setActualVel(const Point &vel)
 {
-   mMoveState[ActualState].vel = vel;
+   mMoveStates.setVel(ActualState, vel);
    setMaskBits(PositionMask);
 }
 
@@ -922,8 +924,8 @@ void MoveItem::idle(BfObject::IdleCallPath path)
       }
       else
       {
-         mMoveState[RenderState].pos = mMount->getRenderPos();
-         mMoveState[ActualState].pos = mMount->getActualPos();
+         setActualPos(mMount->getActualPos());
+         setRenderPos(mMount->getRenderPos());
       }
    }
    else              // Not mounted
@@ -933,26 +935,25 @@ void MoveItem::idle(BfObject::IdleCallPath path)
       if(path == BfObject::ServerIdleMainLoop)
       {
          // Only update if it's actually moving...
-         if(mMoveState[ActualState].vel.lenSquared() != 0)
+         if(getActualVel().lenSquared() != 0)
          {
             // Update less often on slow moving item, more often on fast moving item, and update when we change velocity.
             // Update at most every 5 seconds.
-            updateTimer -= (mMoveState[ActualState].vel.len() + 20) * time;
-            if(updateTimer < 0 || mMoveState[ActualState].vel.distSquared(prevMoveVelocity) > 100)
+            updateTimer -= (getActualVel().len() + 20) * time;
+            if(updateTimer < 0 || getActualVel().distSquared(prevMoveVelocity) > 100)
             {
                setMaskBits(PositionMask);
                updateTimer = 100;
-               prevMoveVelocity = mMoveState[ActualState].vel;
+               prevMoveVelocity = getActualVel();
             }
          }
          else if(prevMoveVelocity.lenSquared() != 0)
          {
-            setMaskBits(PositionMask);  // update to client that this item is no longer moving.
+            setMaskBits(PositionMask);  // Tell client that this item is no longer moving
             prevMoveVelocity.set(0,0);
          }
 
-         mMoveState[RenderState] = mMoveState[ActualState];
-
+         copyMoveState(ActualState, RenderState);
       }
       else
          updateInterpolation();
@@ -977,8 +978,8 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    }
    if(stream->writeFlag(updateMask & PositionMask))
    {
-      ((GameConnection *) connection)->writeCompressedPoint(mMoveState[ActualState].pos, stream);
-      writeCompressedVelocity(mMoveState[ActualState].vel, VEL_POINT_SEND_BITS, stream);      
+      ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
+      writeCompressedVelocity(getActualVel(), VEL_POINT_SEND_BITS, stream);      
       stream->writeFlag(updateMask & WarpPositionMask);
    }
    if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
@@ -1006,8 +1007,14 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())     // PositionMask
    {
-      ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
-      readCompressedVelocity(mMoveState[ActualState].vel, VEL_POINT_SEND_BITS, stream);   
+      Point pt;
+
+      ((GameConnection *) connection)->readCompressedPoint(pt, stream);
+      setActualPos(pt);
+
+      readCompressedVelocity(pt, VEL_POINT_SEND_BITS, stream);   
+      setActualVel(pt);
+
       positionChanged = true;
       interpolate = !stream->readFlag();
    }
@@ -1038,7 +1045,11 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       else
       {
          mInterpolating = false;
-         mMoveState[RenderState] = mMoveState[ActualState];
+
+         setRenderPos(getActualPos());
+         setRenderVel(getActualVel());
+         setRenderAngle(getActualAngle());
+
       }
    }
 }
@@ -1115,14 +1126,12 @@ Asteroid::Asteroid() : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITI
    mDesign = TNL::Random::readI(0, ASTEROID_DESIGNS - 1);
 
    // Give the asteroids some intial motion in a random direction
-   F32 ang = TNL::Random::readF() * Float2Pi;
-   F32 vel = asteroidVel;
+   F32 randomAng = TNL::Random::readF() * Float2Pi;
+
+   Point vel = Point(asteroidVel * cos(randomAng), asteroidVel * sin(randomAng));
 
    for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].vel.x = vel * cos(ang);
-      mMoveState[i].vel.y = vel * sin(ang);
-   }
+      mMoveStates.setVel(i, vel);
 
    mKillString = "crashed into an asteroid";
 
@@ -1234,13 +1243,8 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
 void Asteroid::setPosAng(Point pos, F32 ang)
 {
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = ang;
-      mMoveState[i].vel.x = asteroidVel * cos(ang);
-      mMoveState[i].vel.y = asteroidVel * sin(ang);
-   }
+   Point vel = Point(asteroidVel * cos(ang), asteroidVel * sin(ang));
+   setPosVelAng(pos, vel, ang);
 }
 
 
@@ -1275,7 +1279,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mDesign = stream->readEnum(ASTEROID_DESIGNS);
 
       if(!mInitial)
-         SoundSystem::playSoundEffect(SFXAsteroidExplode, mMoveState[RenderState].pos);
+         SoundSystem::playSoundEffect(SFXAsteroidExplode, getRenderPos());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -1284,7 +1288,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      onItemExploded(mMoveState[RenderState].pos);
+      onItemExploded(getRenderPos());
    }
 }
 
@@ -1455,14 +1459,12 @@ Circle::Circle() : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
    hasExploded = false;
 
    // Give the asteroids some intial motion in a random direction
-   F32 ang = TNL::Random::readF() * Float2Pi;
-   F32 vel = CIRCLE_VEL;
+   F32 randomAng = TNL::Random::readF() * Float2Pi;
+
+   Point vel = Point(CIRCLE_VEL * cos(randomAng), CIRCLE_VEL * sin(randomAng));
 
    for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].vel.x = vel * cos(ang);
-      mMoveState[i].vel.y = vel * sin(ang);
-   }
+      mMoveStates.setVel(i, vel);
 
    mKillString = "crashed into an circle";
 }
@@ -1566,13 +1568,8 @@ void Circle::damageObject(DamageInfo *theInfo)
 
 void Circle::setPosAng(Point pos, F32 ang)
 {
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = ang;
-      mMoveState[i].vel.x = asteroidVel * cos(ang);
-      mMoveState[i].vel.y = asteroidVel * sin(ang);
-   }
+   Point vel = Point(CIRCLE_VEL * cos(ang), CIRCLE_VEL * sin(ang));
+   setPosVelAng(pos, vel, ang);
 }
 
 
@@ -1596,7 +1593,7 @@ void Circle::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      onItemExploded(mMoveState[RenderState].pos);
+      onItemExploded(getRenderPos());
    }
 }
 
@@ -1873,7 +1870,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      //onItemExploded(mMoveState[RenderState].pos);
+      //onItemExploded(getRenderPos());
    }
 }
 
@@ -1952,7 +1949,7 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    //for(S32 i = 0; i < 8; i++)    // 8 so that first point gets repeated!  Needed?  Maybe not
    //{
-   //   Point p = Point(60 * cos(i * Float2Pi / 7 + FloatHalfPi) + mMoveState[ActualState].pos.x, 60 * sin(i * Float2Pi / 7 + FloatHalfPi) + mMoveState[ActualState].pos.y);
+   //   Point p = Point(60 * cos(i * Float2Pi / 7 + FloatHalfPi) + getActualPos().x, 60 * sin(i * Float2Pi / 7 + FloatHalfPi) + getActualPos().y);
    //   polyPoints.push_back(p);
    //}
 

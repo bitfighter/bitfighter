@@ -165,7 +165,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 
    S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  Only important in Nexus games for now.
 
-   mInitialPos = mMoveState[ActualState].pos;
+   mInitialPos = getActualPos();
 
    // Now add the flag starting point to the list of flag spawn points
    GameType *gt = game->getGameType();
@@ -314,8 +314,12 @@ void FlagItem::sendHome()
       mInitialPos = spawnPoints[spawnIndex]->getPos();
    }
 
-   mMoveState[ActualState].pos = mMoveState[RenderState].pos = mInitialPos;
-   mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
+   setActualPos(mInitialPos);
+   setRenderPos(mInitialPos);
+
+   setActualVel(Point(0,0));
+   setRenderVel(Point(0,0));
+
    mIsAtHome = true;
    setMaskBits(PositionMask);
    updateExtentInDatabase();
