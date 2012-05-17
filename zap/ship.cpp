@@ -325,7 +325,7 @@ void Ship::processMove(U32 stateIndex)
 
    // If going above this speed, you cannot change course
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-   if(mMoveStates.getVel(stateIndex).lenSquared() > MAX_CONTROLLABLE_SPEED * MAX_CONTROLLABLE_SPEED)
+   if(getVel(stateIndex).lenSquared() > MAX_CONTROLLABLE_SPEED * MAX_CONTROLLABLE_SPEED)
       requestVel.set(0,0);
 
 
@@ -335,7 +335,7 @@ void Ship::processMove(U32 stateIndex)
    if(len > maxVel)
       requestVel *= maxVel / len;
 
-   Point velDelta = requestVel - mMoveStates.getVel(stateIndex);
+   Point velDelta = requestVel - getVel(stateIndex);
    F32 accRequested = velDelta.len();
 
 
@@ -347,12 +347,12 @@ void Ship::processMove(U32 stateIndex)
    if(accRequested > maxAccel)
    {
       velDelta *= maxAccel / accRequested;
-      mMoveStates.setVel(stateIndex, mMoveStates.getVel(stateIndex) + velDelta);
+      setVel(stateIndex, getVel(stateIndex) + velDelta);
    }
    else
-      mMoveStates.setVel(stateIndex, requestVel);
+      setVel(stateIndex, requestVel);
 
-   mMoveStates.setAngle(stateIndex, mCurrentMove.angle);
+   setAngle(stateIndex, mCurrentMove.angle);
    move(time, stateIndex, false);
 }
 

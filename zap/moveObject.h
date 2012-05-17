@@ -72,7 +72,8 @@ class MoveObject : public Item
    typedef Item Parent;
 
 private:
-   S32 mHitLimit;    // Internal counter for processing collisions
+   S32 mHitLimit;             // Internal counter for processing collisions
+   MoveStates mMoveStates;
 
 protected:
    enum {
@@ -84,8 +85,6 @@ protected:
    F32 mMass;
 
 public:
-   MoveStates mMoveStates;
-
    MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
 
    void onAddedToGame(Game *game);
@@ -106,9 +105,17 @@ public:
 
    // Because MoveObjects have multiple positions (actual, render), we need to implement the following
    // functions differently than most objects do
-   Point getVert(S32 index) const;              // Maps to getActualPos
+   //Point getVert(S32 index) const;              // Maps to getActualPos
    Point getPos() const;                        // Maps to getActualPos
    Point getVel() const;                        // Maps to getActualVel
+
+   Point getPos(S32 stateIndex) const;
+   Point getVel(S32 stateIndex) const;
+   F32 getAngle(S32 stateIndex) const;
+
+   void setPos(S32 stateIndex, const Point &pos);
+   void setVel(S32 stateIndex, const Point &vel);
+   void setAngle(S32 stateIndex, F32 angle);
 
    void copyMoveState(S32 from, S32 to);
 
@@ -122,7 +129,7 @@ public:
    void setActualAngle(F32 angle);
 
 
-   void setVert(const Point &pos, S32 index);   // Maps to setPos
+   //void setVert(const Point &pos, S32 index);   // Maps to setPos
    void setPos(const Point &pos);
 
    void setPosVelAng(const Point &pos, const Point &vel, F32 ang);
