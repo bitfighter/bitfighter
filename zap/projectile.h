@@ -133,17 +133,15 @@ public:
 
    TNL_DECLARE_CLASS(BurstProjectile);
 
-   // Lua interface
-   BurstProjectile(lua_State *L);            //  Lua constructor
+   //// Lua interface
+   LUAW_DECLARE_CLASS(BurstProjectile);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
-   // Need to provide these methods to deal with the complex web of inheritence... these come from both
-   // Item and LuaProjectile, and by providing these, everything works.
-   S32 getRad(lua_State *L);       // Radius of item (returns number)
-   S32 getVel(lua_State *L);       // Speed of item (returns point)
+   //BurstProjectile(lua_State *L);         // Lua constructor
 
-   S32 getWeapon(lua_State *L);    // Return which type of weapon this is
-
-   void push(lua_State *L);
+   S32 getClassID(lua_State *L);
+   virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 
 
@@ -196,21 +194,10 @@ public:
 
    string toString(F32 gridSize) const;
 
-   /////
-   // Lua interface
-   Mine(lua_State *L);            //  Lua constructor
-
-   static const char className[];
-   static Lunar<Mine>::RegType methods[];
-
-   virtual S32 getClassID(lua_State *L); // Object's class
-
-   S32 getRad(lua_State *L);     // Radius of item (returns number)
-   S32 getVel(lua_State *L);     // Speed of item (returns point)
-
-   S32 getWeapon(lua_State *L);  // Return which type of weapon this is
-
-   void push(lua_State *L);
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(Mine);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 
@@ -228,7 +215,6 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *theGame);
-
 
    SafePtr<GameConnection> mOwnerConnection;
    bool collide(BfObject *otherObj);
@@ -259,21 +245,11 @@ public:
 
    string toString(F32 gridSize) const;
 
-   /////
-   // Lua interface
-   SpyBug(lua_State *L);            //  Lua constructor
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(SpyBug);
 
-   static const char className[];
-   static Lunar<SpyBug>::RegType methods[];
-
-   virtual S32 getClassID(lua_State *L); // Object's class
-
-   S32 getRad(lua_State *L);     // Radius of item (returns number)
-   S32 getVel(lua_State *L);     // Speed of item (returns point)
-
-   S32 getWeapon(lua_State *L);  // Return which type of weapon this is
-
-   void push(lua_State *L);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 

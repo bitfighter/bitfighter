@@ -68,8 +68,8 @@ const U8 SlipZoneTypeNumber = 12;
 const U8 BulletTypeNumber = 13;
 const U8 MineTypeNumber = 14;
 const U8 SpyBugTypeNumber = 15;
-const U8 NexusTypeNumber = 16;
-// 17
+const U8 BurstTypeNumber = 16;
+const U8 NexusTypeNumber = 17;
 const U8 RobotShipTypeNumber = 18;
 const U8 TeleportTypeNumber = 19;
 const U8 GoalZoneTypeNumber = 20;
@@ -411,6 +411,7 @@ public:
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
+   S32 getClassID(lua_State *L);
    //virtual S32 getRad(lua_State *L);
    //virtual S32 getVel(lua_State *L);
    virtual S32 getLoc(lua_State *L);

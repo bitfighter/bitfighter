@@ -68,13 +68,13 @@ bool isShipType(U8 x)
 bool isProjectileType(U8 x)
 {
    return
-         x == MineTypeNumber || x == SpyBugTypeNumber || x == BulletTypeNumber;
+         x == MineTypeNumber || x == SpyBugTypeNumber || x == BulletTypeNumber || x == BurstTypeNumber;
 }
 
 bool isGrenadeType(U8 x)
 {
    return
-         x == MineTypeNumber || x == SpyBugTypeNumber;
+         x == MineTypeNumber || x == SpyBugTypeNumber || x == BurstTypeNumber;
 }
 
 bool isWithHealthType(U8 x)
@@ -98,38 +98,37 @@ bool isForceFieldDeactivatingType(U8 x)
 bool isDamageableType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == BulletTypeNumber || x == MineTypeNumber || x == SpyBugTypeNumber ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber || x == CircleTypeNumber ||
-         x == CoreTypeNumber;
+         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber           || x == BurstTypeNumber    ||
+         x == BulletTypeNumber       || x == MineTypeNumber                || x == SpyBugTypeNumber   ||
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
+         x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
+         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber;
 }
 
 
 bool isMotionTriggerType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
-         x == MineTypeNumber;
+         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber ||
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber  || 
+         x == AsteroidTypeNumber     || x == MineTypeNumber;
 }
 
 
 bool isTurretTargetType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber || x == ResourceItemTypeNumber ||
-         x == TestItemTypeNumber || x == SoccerBallItemTypeNumber;
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber       || x == ResourceItemTypeNumber ||
+         x == TestItemTypeNumber   || x == SoccerBallItemTypeNumber;
 }
 
 
 bool isCollideableType(U8 x)
 {
    return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldTypeNumber ||
-         x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber;
+         x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
+         x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
+         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber;
 }
 
 
@@ -137,14 +136,14 @@ bool isForceFieldCollideableType(U8 x)
 {
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber;
+         x == TurretTypeNumber  || x == ForceFieldProjectorTypeNumber;
 }
 
 
 bool isWallType(U8 x)
 {
    return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
+         x == BarrierTypeNumber  || x == PolyWallTypeNumber ||
          x == WallItemTypeNumber || x == WallEdgeTypeNumber || x == WallSegmentTypeNumber;
 }
 
@@ -165,12 +164,12 @@ bool isLineItemType(U8 x)
 bool isWeaponCollideableType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == SpyBugTypeNumber || x == MineTypeNumber || x == BulletTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
-         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CircleTypeNumber || x == CoreTypeNumber;
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == BurstTypeNumber               ||
+         x == SpyBugTypeNumber     || x == MineTypeNumber           || x == BulletTypeNumber              ||
+         x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == ForceFieldProjectorTypeNumber ||
+         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
+         x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -222,7 +221,7 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)
          x == LineTypeNumber       || x == TextItemTypeNumber       ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || 
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber     ||
-         x == CoreTypeNumber       ||
+         x == CoreTypeNumber       || x == BurstTypeNumber          ||
          x == BulletTypeNumber     || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
 }
 
@@ -1209,8 +1208,8 @@ const char *BfObject::luaClassName = "BfItem";
 // Standard methods available to all Items
 const luaL_reg BfObject::luaMethods[] =
 {
-   //{ "getClassID",      doGetClassId                                },
-   { "getLoc",          luaW_doMethod<BfObject, &BfObject::getLoc>    },
+   { "getClassID",      luaW_doMethod<BfObject, &BfObject::getClassID> },
+   { "getLoc",          luaW_doMethod<BfObject, &BfObject::getLoc>     },
    //{ "getRad",          luaW_doMethod<Item, &Item::getRad>          },
    //{ "getVel",          luaW_doMethod<Item, &Item::getVel>          },
    { "getTeamIndx",     luaW_doMethod<BfObject, &BfObject::getTeamIndx>     },
@@ -1218,6 +1217,12 @@ const luaL_reg BfObject::luaMethods[] =
 
    { NULL, NULL }
 };
+
+
+S32 BfObject::getClassID(lua_State *L)
+{
+   return returnInt(L, mObjectTypeNumber);
+}
 
 
 S32 BfObject::getLoc(lua_State *L)
@@ -1240,10 +1245,15 @@ BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *funct
       case PlayerShipTypeNumber:
         //return  luaW_check<LuaShip>::check(L, index);
 
-      case BulletTypeNumber:  // pass through
-      case MineTypeNumber:    // pass through
+      case BulletTypeNumber:
+         return luaW_check<Projectile>(L, index);
+      case MineTypeNumber:   
+         return luaW_check<Mine>(L, index);
       case SpyBugTypeNumber:
-         //return luaW_check<LuaProjectile>::check(L, index);
+         return luaW_check<SpyBug>(L, index);
+      case BurstTypeNumber:
+         return luaW_check<BurstProjectile>(L, index);
+
 
       case ResourceItemTypeNumber:
          return luaW_check<ResourceItem>(L, index);

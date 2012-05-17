@@ -228,23 +228,11 @@ S32 Item::getShip(lua_State *L)
 }
 
 
-// ==> This one is a good candidate for moving directly into LuaW's index table rather than having a C++ method to support it
-static S32 doGetClassId(lua_State *L) 
-{ 
-   Item *w = luaW_check<Item>(L, 1); 
-   if(w) 
-      return LuaObject::returnInt(L, w->getObjectTypeNumber()); 
-      
-   return LuaObject::returnNil(L); 
-}
-
-
 const char *Item::luaClassName = "Item";
 
 // Standard methods available to all Items
 const luaL_reg Item::luaMethods[] =
 {
-   { "getClassID",      doGetClassId                                },
    { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
    { "getVel",          luaW_doMethod<Item, &Item::getVel>          },
    { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },

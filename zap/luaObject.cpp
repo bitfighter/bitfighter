@@ -906,9 +906,6 @@ void LuaScriptRunner::registerClasses()
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);
 
-   Lunar<Mine>::Register(L);
-   Lunar<SpyBug>::Register(L);
-
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
    Lunar<NexusObject>::Register(L);

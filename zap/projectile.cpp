@@ -475,7 +475,7 @@ TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
 // Constructor
 BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, mRadius, mMass)
 {
-   mObjectTypeNumber = BulletTypeNumber;
+   mObjectTypeNumber = BurstTypeNumber;
 
    mNetFlags.set(Ghostable);
 
@@ -499,13 +499,15 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
 
    mRadius = 7;
    mMass = 1;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 BurstProjectile::~BurstProjectile()
 {
-
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -658,28 +660,36 @@ void BurstProjectile::renderItem(const Point &pos)
 ///// Lua interface
 
 //  Lua constructor
-BurstProjectile::BurstProjectile(lua_State *L)
+//BurstProjectile::BurstProjectile(lua_State *L)
+//{
+//   // Do not use
+//}
+
+
+//// Lua methods
+
+const char *BurstProjectile::luaClassName = "Burst";
+
+const luaL_reg BurstProjectile::luaMethods[] =
 {
-   // Do not use
-}
+   { "getWeapon", luaW_doMethod<BurstProjectile, &BurstProjectile::getWeapon> },
+   { NULL, NULL }
+};
+
+REGISTER_LUA_SUBCLASS(BurstProjectile, MoveItem);
 
 
-S32 BurstProjectile::getRad(lua_State *L)
+S32 BurstProjectile::getClassID(lua_State *L)
 {
-   return Parent::getRad(L);
-}
-
-
-S32 BurstProjectile::getVel(lua_State *L)
-{
-   return Parent::getVel(L);
+   return returnInt(L, mObjectTypeNumber);
 }
 
 
 S32 BurstProjectile::getWeapon(lua_State *L)
 {
-   return returnInt(L, WeaponBurst);
+   return returnInt(L, mWeaponType);
 }
+
 
 
 ////////////////////////////////////////
@@ -727,13 +737,15 @@ Mine::Mine(Point pos, Ship *planter) : BurstProjectile(pos, Point())
    mKillString = "mine";      // Triggers special message when player killed
 
    setExtent(Rect(pos, pos));
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 Mine::~Mine()
 {
-
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -919,93 +931,27 @@ void Mine::renderDock()
 }
 
 
-const char *Mine::getEditorHelpString()
+const char *Mine::getOnScreenName()     { return "Mine";  }
+const char *Mine::getOnDockName()       { return "Mine";  }
+const char *Mine::getPrettyNamePlural() { return "Mines"; }
+const char *Mine::getEditorHelpString() { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }
+
+
+bool Mine::hasTeam()      { return false; }
+bool Mine::canBeHostile() { return false; }
+bool Mine::canBeNeutral() { return false; }
+
+
+//// Lua methods
+
+const char *Mine::luaClassName = "MineItem";
+
+const luaL_reg Mine::luaMethods[] =
 {
-   return "Mines can be prepositioned, and are are \"hostile to all\". [M]";
-}
-
-
-const char *Mine::getPrettyNamePlural()
-{
-   return "Mines";
-}
-
-
-const char *Mine::getOnDockName()
-{
-   return "Mine";
-}
-
-
-const char *Mine::getOnScreenName()
-{
-   return "Mine";
-}
-
-
-bool Mine::hasTeam()
-{
-   return false;
-}
-
-
-bool Mine::canBeHostile()
-{
-   return false;
-}
-
-
-bool Mine::canBeNeutral()
-{
-   return false;
-}
-
-
-// Lua methods
-const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<Mine>::RegType Mine::methods[] =
-{
-   // Standard gameItem methods
-   method(Mine, getClassID),
-   method(Mine, getRad),
-   method(Mine, getVel),
-   method(Mine, getTeamIndx),
-
-   method(Mine, getWeapon),
-
-   {0,0}    // End method list
+   { NULL, NULL }
 };
 
-//  Lua constructor
-Mine::Mine(lua_State *L)
-{
-   // Do not use
-}
-
-S32 Mine::getClassID(lua_State *L)
-{
-   return returnInt(L, MineTypeNumber);
-}
-
-
-S32 Mine::getRad(lua_State *L)
-{
-   return Parent::getRad(L);
-}
-
-
-S32 Mine::getVel(lua_State *L)
-{
-   return Parent::getVel(L);
-}
-
-
-S32 Mine::getWeapon(lua_State *L)
-{
-   return returnInt(L, WeaponMine);
-}
+REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
 
 
 //////////////////////////////////
@@ -1033,6 +979,8 @@ SpyBug::SpyBug(Point pos, Ship *planter) : BurstProjectile(pos, Point())
    }
 
    setExtent(Rect(pos, pos));
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -1041,6 +989,8 @@ SpyBug::~SpyBug()
 {
    if(getGame() && getGame()->isServer() && getGame()->getGameType())
       getGame()->getGameType()->catalogSpybugs();
+
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -1201,46 +1151,15 @@ void SpyBug::renderDock()
 }
 
 
-const char *SpyBug::getEditorHelpString()
-{
-   return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]";
-}
+const char *SpyBug::getOnScreenName()     { return "Spy Bug";  }
+const char *SpyBug::getOnDockName()       { return "Bug";      }
+const char *SpyBug::getPrettyNamePlural() { return "Spy Bugs"; }
+const char *SpyBug::getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }
 
 
-const char *SpyBug::getPrettyNamePlural()
-{
-   return "Spy Bugs";
-}
-
-
-const char *SpyBug::getOnDockName()
-{
-   return "Bug";
-}
-
-
-const char *SpyBug::getOnScreenName()
-{
-   return "Spy Bug";
-}
-
-
-bool SpyBug::hasTeam()
-{
-   return true;
-}
-
-
-bool SpyBug::canBeHostile()
-{
-   return false;
-}
-
-
-bool SpyBug::canBeNeutral()
-{
-   return true;
-}
+bool SpyBug::hasTeam()      { return true;  }
+bool SpyBug::canBeHostile() { return false; }
+bool SpyBug::canBeNeutral() { return true;  }
 
 
 // Can the player see the spybug?
@@ -1251,53 +1170,17 @@ bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool
 }
 
 
-// Lua methods
-const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
+//// Lua methods
 
-// Define the methods we will expose to Lua
-Lunar<SpyBug>::RegType SpyBug::methods[] =
+const char *SpyBug::luaClassName = "SpyBugItem";
+
+const luaL_reg SpyBug::luaMethods[] =
 {
-   // Standard gameItem methods
-   method(SpyBug, getClassID),
-   method(SpyBug, getRad),
-   method(SpyBug, getVel),
-   method(SpyBug, getTeamIndx),
-
-   method(SpyBug, getWeapon),
-
-   {0,0}    // End method list
+   { NULL, NULL }
 };
 
 
-//  Lua constructor
-SpyBug::SpyBug(lua_State *L)
-{
-   // Do not use
-}
-
-
-S32 SpyBug::getClassID(lua_State *L)
-{
-   return returnInt(L, SpyBugTypeNumber);
-}
-
-
-S32 SpyBug::getRad(lua_State *L)
-{
-   return Parent::getRad(L);
-}
-
-
-S32 SpyBug::getVel(lua_State *L)
-{
-   return Parent::getVel(L);
-}
-
-
-S32 SpyBug::getWeapon(lua_State *L)
-{
-   return returnInt(L, WeaponSpyBug);
-}
+REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
 
 
 };
