@@ -236,8 +236,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
          // Do the search
          while(true)  
          {
-            hitObject = findObjectLOS((TestFunc)isWeaponCollideableType,
-                                       MoveStateNames::RenderState, startPos, endPos, collisionTime, surfNormal);
+            hitObject = findObjectLOS((TestFunc)isWeaponCollideableType, RenderState, startPos, endPos, collisionTime, surfNormal);
 
             if((!hitObject || hitObject->collide(this)))
                break;
