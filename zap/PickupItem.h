@@ -56,7 +56,7 @@ protected:
 
 public:
    PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20);   // Constructor
-   ~PickupItem();                                                          // Destructor
+   virtual ~PickupItem();                                                  // Destructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
