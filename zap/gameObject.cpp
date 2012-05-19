@@ -1117,7 +1117,7 @@ void BfObject::controlMoveReplayComplete()
 }
 
 
-void BfObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
+void BfObject::writeCompressedVelocity(const Point &vel, U32 max, BitStream *stream)
 {
    U32 len = U32(vel.len());
    if(stream->writeFlag(len == 0))
