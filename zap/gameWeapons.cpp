@@ -58,7 +58,7 @@ WeaponInfo GameWeapon::weaponInfo[WeaponCount] =    //      Fire   Min    Drain 
 
 
 // Here we actually intantiate the various projectiles when fired
-void GameWeapon::createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter)
+void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, const Point &shooterPos, const Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter)
 {
    //BfObject *proj = NULL;
    WeaponInfo *wi = weaponInfo + weapon;

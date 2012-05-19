@@ -1034,7 +1034,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
-      writeCompressedVelocity(getActualVel(), VEL_POINT_SEND_BITS, stream);      
+      writeCompressedVelocity(getActualVel(), VEL_POINT_SEND_BITS, stream);
       stream->writeFlag(updateMask & WarpPositionMask);
    }
    if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
