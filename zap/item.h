@@ -92,7 +92,6 @@ public:
    static const char *luaClassName;
 
    virtual S32 getRad(lua_State *L);
-   virtual S32 getVel(lua_State *L);
    virtual S32 isInCaptureZone(lua_State *L);      // Non-moving item is never in capture zone, even if it is!
    virtual S32 isOnShip(lua_State *L);             // Is item being carried by a ship? NO!
    virtual S32 getCaptureZone(lua_State *L);

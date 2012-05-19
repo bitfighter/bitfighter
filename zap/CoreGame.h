@@ -46,8 +46,8 @@ private:
 public:
    static const S32 DestroyedCoreScore = 1;
 
-   CoreGameType();
-   virtual ~CoreGameType();
+   CoreGameType();            // Constructor
+   virtual ~CoreGameType();   // Destructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
@@ -146,7 +146,8 @@ protected:
    };
 
 public:
-   CoreItem();     // Constructor
+   CoreItem();                // Constructor
+   ~CoreItem();               // Destructor
    CoreItem *clone() const;
 
    static F32 getCoreAngle(U32 time);
@@ -210,17 +211,11 @@ public:
    bool canBeNeutral();
 
    ///// Lua interface
-public:
-   CoreItem(lua_State *L);    // Constructor
-
-   static const char className[];
-
-   static Lunar<CoreItem>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
+	LUAW_DECLARE_CLASS(CoreItem);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
 
    S32 getHealth(lua_State *L);   
-   void push(lua_State *L);
 };
 
 

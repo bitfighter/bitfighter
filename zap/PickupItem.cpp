@@ -49,12 +49,22 @@ namespace Zap
 #endif
 
 
+// Constructor
 PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius)
 {
    mRepopDelay = repopDelay;
    mIsVisible = true;
 
    mNetFlags.set(Ghostable);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+PickupItem::~PickupItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -170,6 +180,22 @@ bool PickupItem::collide(BfObject *otherObject)
 }
 
 
+// Implementations provided to keep class from being abstract; need non-abstract class
+// so luaW can (theoretically) instantiate this class, even though it never will.  If
+// that issue gets resolved, we can remove this code and revert the class to abstract.
+bool PickupItem::pickup(Ship *theShip) 
+{ 
+   TNLAssert(false, "Function not implemented!"); 
+   return false;
+}
+
+
+void PickupItem::onClientPickup()
+{
+   TNLAssert(false, "Function not implemented!");
+}
+
+
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *PickupItem::getAttributeMenu()
@@ -227,6 +253,25 @@ string PickupItem::getAttributeString()
 #endif
 
 
+///// Lua interface
+REGISTER_LUA_SUBCLASS(PickupItem, Item);
+
+const char *PickupItem::luaClassName = "PickupItem";
+
+
+const luaL_reg PickupItem::luaMethods[] =
+{
+   { "isVis", luaW_doMethod<PickupItem, &PickupItem::isVis> },
+   { NULL, NULL }
+};
+
+
+S32 PickupItem::isVis(lua_State *L)
+{
+   return returnBool(L, isVisible());
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -236,6 +281,15 @@ TNL_IMPLEMENT_NETOBJECT(RepairItem);
 RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
 { 
    mObjectTypeNumber = RepairItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+RepairItem::~RepairItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -277,28 +331,10 @@ void RepairItem::renderItem(const Point &pos)
 }
 
 
-const char *RepairItem::getEditorHelpString()
-{
-   return "Repairs damage to ships. [B]";
-}
-
-
-const char *RepairItem::getPrettyNamePlural()
-{
-   return "Repair Items";
-}
-
-
-const char *RepairItem::getOnDockName()
-{
-   return "Repair";
-}
-
-
-const char *RepairItem::getOnScreenName()
-{
-   return "Repair";
-}
+const char *RepairItem::getOnScreenName()     { return "Repair";       }
+const char *RepairItem::getOnDockName()       { return "Repair";       }
+const char *RepairItem::getPrettyNamePlural() { return "Repair Items"; }
+const char *RepairItem::getEditorHelpString() { return "Repairs damage to ships. [B]"; }
 
 
 S32 RepairItem::getDockRadius()
@@ -319,47 +355,16 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
 }
 
 
-const char RepairItem::className[] = "RepairItem";      // Class name as it appears to Lua scripts
+///// Lua interface
+REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 
-// Lua constructor
-RepairItem::RepairItem(lua_State *L)
+const char *RepairItem::luaClassName = "RepairItem";
+
+// Only implements inherited methods
+const luaL_reg RepairItem::luaMethods[] =
 {
-   mObjectTypeNumber = RepairItemTypeNumber;
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<RepairItem>::RegType RepairItem::methods[] =
-{
-   // Standard gameItem methods
-   method(RepairItem, getClassID),
-   method(RepairItem, getLoc),
-   method(RepairItem, getRad),
-   method(RepairItem, getVel),
-   method(RepairItem, getTeamIndx),
-
-   // Class specific methods
-   method(RepairItem, isVis),
-   {0,0}    // End method list
+   { NULL, NULL }
 };
-
-
-S32 RepairItem::getClassID(lua_State *L)
-{
-   return returnInt(L, RepairItemTypeNumber);
-}
-
-
-S32 RepairItem::isVis(lua_State *L)
-{
-   return returnBool(L, isVisible());
-}
-
-
-void RepairItem::push(lua_State *L)
-{
-   Lunar<RepairItem>::push(L, this);
-}
 
 
 ////////////////////////////////////////
@@ -371,7 +376,16 @@ TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME) 
 { 
    mObjectTypeNumber = EnergyItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 };   
+
+
+// Destructor
+EnergyItem::~EnergyItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
 
 
 EnergyItem *EnergyItem::clone() const
@@ -386,10 +400,10 @@ bool EnergyItem::pickup(Ship *theShip)
    S32 energy = theShip->getEnergy();
    S32 maxEnergy = theShip->getMaxEnergy();
 
-   if(energy >= maxEnergy)      // Don't need no stinkin' energy!!
+   if(energy >= maxEnergy)                // Energy?  We don't need no stinkin' energy!!
       return false;
 
-   theShip->changeEnergy(maxEnergy / 2);     // Bump up energy by 50%, changeEnergy() sets energy delta
+   theShip->changeEnergy(maxEnergy / 2);  // Bump up energy by 50%, changeEnergy() sets energy delta
 
    return true;
 }
@@ -411,71 +425,21 @@ void EnergyItem::renderItem(const Point &pos)
 }
 
 
-const char *EnergyItem::getEditorHelpString()
+const char *EnergyItem::getOnScreenName()     { return "Energy";       }
+const char *EnergyItem::getOnDockName()       { return "Energy";       }
+const char *EnergyItem::getPrettyNamePlural() { return "Energy Items"; }
+const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships"; }
+
+
+///// Lua interface
+REGISTER_LUA_SUBCLASS(EnergyItem, PickupItem);
+
+const char *EnergyItem::luaClassName = "EnergyItem";
+
+// Only implements inherited methods
+const luaL_reg EnergyItem::luaMethods[] =
 {
-   return "Restores energy to ships";
-}
-
-
-const char *EnergyItem::getPrettyNamePlural()
-{
-   return "Energy Items";
-}
-
-
-const char *EnergyItem::getOnDockName()
-{
-   return "Energy";
-}
-
-
-const char *EnergyItem::getOnScreenName()
-{
-   return "Energy";
-}
-
-
-const char EnergyItem::className[] = "EnergyItem";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-EnergyItem::EnergyItem(lua_State *L)
-{
-   mObjectTypeNumber = EnergyItemTypeNumber;
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<EnergyItem>::RegType EnergyItem::methods[] =
-{
-   // Standard gameItem methods
-   method(EnergyItem, getClassID),
-   method(EnergyItem, getLoc),
-   method(EnergyItem, getRad),
-   method(EnergyItem, getVel),
-   method(EnergyItem, getTeamIndx),
-
-   // Class specific methods
-   method(EnergyItem, isVis),
-   {0,0}    // End method list
+   { NULL, NULL }
 };
-
-
-S32 EnergyItem::getClassID(lua_State *L)
-{
-   return returnInt(L, EnergyItemTypeNumber);
-}
-
-
-S32 EnergyItem::isVis(lua_State *L)
-{
-   return returnBool(L, isVisible());
-}
-
-
-void EnergyItem::push(lua_State *L)
-{
-   Lunar<EnergyItem>::push(L, this);
-}
-
 
 };

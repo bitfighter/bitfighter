@@ -30,6 +30,7 @@
 #include "item.h"
 #include "moveObject.h"    // For MoveItem
 #include "barrier.h"
+#include "LuaWrapper.h"
 
 namespace Zap
 {
@@ -43,10 +44,10 @@ private:
    Vector<Point> mBufferedObjectPointsForBotZone;              // Only populated on the server
 
 #ifndef ZAP_DEDICATED
-   static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
+   static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
 #endif
 
-   virtual F32 getSelectionOffsetMagnitude() = 0;       // Provides base magnitude for getEditorSelectionOffset()
+   virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
 
 protected:
    F32 mHealth;
@@ -76,7 +77,9 @@ protected:
    };
 
 public:
-   EngineeredItem(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
+   EngineeredItem(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());    // Constructor
+   ~EngineeredItem();                                                                           // Destructor
+
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
    virtual void onAddedToGame(Game *theGame);
@@ -153,10 +156,10 @@ public:
    virtual string getAttributeString();
 #endif
 
-   /////
-   // LuaItem interface
-   // S32 getRad(lua_State *L);   ==> Will be implemented by derived objects
-   S32 getVel(lua_State *L);
+	///// Lua interface
+	LUAW_DECLARE_CLASS(EngineeredItem);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
 
    // More Lua methods that are inherited by turrets and forcefield projectors
    S32 getHealth(lua_State *L);
@@ -228,6 +231,8 @@ public:
    static const S32 defaultRespawnTime = 0;
 
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
+   ~ForceFieldProjector();                                                                         // Destructor
+
    ForceFieldProjector *clone() const;
    
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
@@ -267,19 +272,11 @@ public:
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
 
-   ///// Lua Interface
+	///// Lua interface
+	LUAW_DECLARE_CLASS(ForceFieldProjector);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
 
-   ForceFieldProjector(lua_State *L);             //  Lua constructor
-
-   static const char className[];
-
-   static Lunar<ForceFieldProjector>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-   void push(lua_State *L);
-
-   // LuaItem methods
-   //S32 getRad(lua_State *L) { return returnInt(L, radius); }
    S32 getLoc(lua_State *L);
 };
 
@@ -298,7 +295,9 @@ private:
    F32 getSelectionOffsetMagnitude();
 
 public:
-   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));     // Constructor
+   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));  // Constructor
+   ~Turret();                                                                             // Destructor
+
    Turret *clone() const;
 
    S32 mWeaponFireType;
@@ -348,15 +347,10 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
-   ///// 
-   //Lua Interface
-
-   Turret(lua_State *L);             //  Lua constructor
-   static const char className[];
-   static Lunar<Turret>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-   void push(lua_State *L);
+   ///// Lua interface
+	LUAW_DECLARE_CLASS(Turret);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
 
    // LuaItem methods
    S32 getRad(lua_State *L);

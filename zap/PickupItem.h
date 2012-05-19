@@ -32,6 +32,7 @@ namespace Zap
 {
 
 
+// Base class for things that can be picked up, such as RepairItems and EnergyItems
 class PickupItem : public Item
 {
    typedef Item Parent;
@@ -48,13 +49,14 @@ private:
 
 protected:
    enum MaskBits {
-      PickupMask    = Parent::FirstFreeMask << 0,
-      PickupSoundMask    = Parent::FirstFreeMask << 1,
-      FirstFreeMask = Parent::FirstFreeMask << 2
+      PickupMask      = Parent::FirstFreeMask << 0,
+      PickupSoundMask = Parent::FirstFreeMask << 1,
+      FirstFreeMask   = Parent::FirstFreeMask << 2
    };
 
 public:
-   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20);      // Constructor
+   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20);   // Constructor
+   ~PickupItem();                                                          // Destructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
@@ -81,8 +83,15 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    bool collide(BfObject *otherObject);
-   virtual bool pickup(Ship *theShip) = 0;
-   virtual void onClientPickup() = 0;
+   virtual bool pickup(Ship *theShip);
+   virtual void onClientPickup();
+
+	///// Lua interface
+	LUAW_DECLARE_CLASS(PickupItem);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
+
+   S32 isVis(lua_State *L);
 };
 
 
@@ -99,6 +108,8 @@ public:
    static const S32 REPAIR_ITEM_RADIUS = 20;
 
    RepairItem(Point pos = Point());   // Constructor
+   ~RepairItem();                     // Destructor
+
    RepairItem *clone() const;
 
    bool pickup(Ship *theShip);
@@ -118,18 +129,9 @@ public:
    void renderDock();
 
    ///// Lua interface
-
-   RepairItem(lua_State *L);             //  Lua constructor
-
-   static const char className[];
-
-   static Lunar<RepairItem>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-
-   S32 isVis(lua_State *L); // Is RepairItem visible? (returns boolean)
-   void push(lua_State *L);
-
+	LUAW_DECLARE_CLASS(RepairItem);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
 };
 
 
@@ -145,6 +147,8 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // In seconds
 
    EnergyItem(Point p = Point());   // Constructor
+   ~EnergyItem();                   // Destructor
+
    EnergyItem *clone() const;
 
    bool pickup(Ship *theShip);
@@ -160,18 +164,10 @@ public:
    const char *getOnScreenName();
 
 
-   ///// Lua Interface
-
-   EnergyItem(lua_State *L);             //  Lua constructor
-
-   static const char className[];
-
-   static Lunar<EnergyItem>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-
-   S32 isVis(lua_State *L); // Is EnergyItem visible? (returns boolean)
-   void push(lua_State *L);
+   ///// Lua interface
+	LUAW_DECLARE_CLASS(EnergyItem);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
 };
 
 

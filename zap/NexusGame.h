@@ -29,6 +29,7 @@
 #include "gameType.h"
 #include "item.h"
 #include "polygon.h"
+#include "LuaWrapper.h"
 
 namespace Zap
 {
@@ -134,6 +135,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class NexusFlagItem : public FlagItem
 {
    typedef FlagItem Parent;
@@ -150,7 +154,8 @@ protected:
    };
 
 public:
-   NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);     // Constructor
+   NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);    // Constructor
+   ~NexusFlagItem();                                                                         // Destructor
 
    void renderItem(const Point &pos);
 

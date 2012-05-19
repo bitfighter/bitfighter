@@ -28,6 +28,7 @@
 
 #include "gameType.h"
 #include "item.h"
+#include "LuaWrapper.h"
 
 namespace Zap
 {
@@ -67,7 +68,6 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    virtual const char *getInstructionString() const;
-   //bool isTeamGame();
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 
@@ -99,6 +99,8 @@ private:
 
 public:
    SoccerBallItem(Point pos = Point());   // C++ constructor
+   ~SoccerBallItem();                     // Destructor
+
    SoccerBallItem *clone() const;
 
    static const S32 SOCCER_BALL_RADIUS = 30;
@@ -133,14 +135,9 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Lua Interface
-
-   SoccerBallItem(lua_State *L);   //  Lua constructor
-
-   static const char className[];
-   static Lunar<SoccerBallItem>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-   void push(lua_State *L);
+   LUAW_DECLARE_CLASS(SoccerBallItem);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
 };
 

@@ -389,6 +389,15 @@ EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) 
    mEngineered = false;
 
    mRadius = 7;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+EngineeredItem::~EngineeredItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -438,6 +447,13 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
 void EngineeredItem::computeObjectGeometry()
 {
    getObjectGeometry(getPos(), mAnchorNormal, mCollisionPolyPoints);
+}
+
+
+F32 EngineeredItem::getSelectionOffsetMagnitude()
+{
+   TNLAssert(false, "Not implemented");
+   return 0;
 }
 
 
@@ -508,6 +524,7 @@ void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
    mHealRate = attributeMenu->getMenuItem(0)->getIntValue();
 }
 #endif
+
 
 void EngineeredItem::onGeomChanged()
 {
@@ -997,9 +1014,20 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 }
 
 
-/////
-// LuaItem interface
-S32 EngineeredItem::getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0, 0)); }
+///// Lua interface
+REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
+
+const char *EngineeredItem::luaClassName = "EngineeredItem";
+
+
+const luaL_reg EngineeredItem::luaMethods[] =
+{
+   { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
+   { "isActive",  luaW_doMethod<EngineeredItem, &EngineeredItem::isActive>  },
+   { "getAngle",  luaW_doMethod<EngineeredItem, &EngineeredItem::getAngle>  },
+   { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
+   { NULL, NULL }
+};
 
 
 S32 EngineeredItem::getHealth(lua_State *L)
@@ -1031,6 +1059,21 @@ ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anch
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
    onGeomChanged(); // can't be placed on parent, as parent construtor must initalized first
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+ForceFieldProjector::~ForceFieldProjector()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+ForceFieldProjector *ForceFieldProjector::clone() const
+{
+   return new ForceFieldProjector(*this);
 }
 
 
@@ -1178,44 +1221,16 @@ void ForceFieldProjector::renderEditor(F32 currentScale, bool snappingToWallCorn
 #endif
 }
 
-// Some properties about the item that will be needed in the editor
+
+const char *ForceFieldProjector::getOnScreenName()     { return "ForceFld"; }
+const char *ForceFieldProjector::getOnDockName()       { return "ForceFld"; }
+const char *ForceFieldProjector::getPrettyNamePlural() { return "Force Field Projectors"; }
 const char *ForceFieldProjector::getEditorHelpString() { return "Creates a force field that lets only team members pass. [F]"; }
 
 
-const char *ForceFieldProjector::getPrettyNamePlural()
-{
-   return "Force Field Projectors";
-}
-
-
-const char *ForceFieldProjector::getOnDockName()
-{
-   return "ForceFld";
-}
-
-
-const char *ForceFieldProjector::getOnScreenName()
-{
-   return "ForceFld";
-}
-
-
-bool ForceFieldProjector::hasTeam()
-{
-   return true;
-}
-
-
-bool ForceFieldProjector::canBeHostile()
-{
-   return true;
-}
-
-
-bool ForceFieldProjector::canBeNeutral()
-{
-   return true;
-}
+bool ForceFieldProjector::hasTeam() { return true; }
+bool ForceFieldProjector::canBeHostile() { return true; }
+bool ForceFieldProjector::canBeNeutral() { return true; }
 
 
 void ForceFieldProjector::onItemDragging()
@@ -1258,27 +1273,17 @@ void ForceFieldProjector::onGeomChanged()
 }
 
 
-// Lua methods
+///// Lua interface
+REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
 
-const char ForceFieldProjector::className[] = "ForceFieldProjector";      // Class name as it appears to Lua scripts
+const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
 
-// Lua constructor
-ForceFieldProjector::ForceFieldProjector(lua_State *L)
+
+// No custom ForceFieldProjector methods
+const luaL_reg ForceFieldProjector::luaMethods[] =
 {
-   // Do nothing
-}
-
-
-S32 ForceFieldProjector::getClassID(lua_State *L)
-{
-   return returnInt(L, ForceFieldProjectorTypeNumber);
-}
-
-
-void ForceFieldProjector::push(lua_State *L)
-{
-   Lunar<ForceFieldProjector>::push(L, this);
-}
+   { NULL, NULL }
+};
 
 
 // LuaItem methods
@@ -1287,28 +1292,6 @@ S32 ForceFieldProjector::getLoc(lua_State *L)
    return LuaObject::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
 }
 
-
-ForceFieldProjector *ForceFieldProjector::clone() const
-{
-   return new ForceFieldProjector(*this);
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
-{
-   // Standard gameItem methods
-   method(ForceFieldProjector, getClassID),
-   method(ForceFieldProjector, getRad),
-   method(ForceFieldProjector, getVel),
-
-   // EngineeredItem methods
-   method(ForceFieldProjector, getHealth),
-   method(ForceFieldProjector, isActive),
-   method(ForceFieldProjector, getAngle),
-
-   {0,0}    // End method list
-};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1519,6 +1502,15 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredItem
    mNetFlags.set(Ghostable);
 
    onGeomChanged();
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+Turret::~Turret()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -1611,7 +1603,6 @@ F32 Turret::getSelectionOffsetMagnitude()
 {
    return 20;
 }
-
 
 
 void Turret::onAddedToGame(Game *theGame)
@@ -1810,46 +1801,15 @@ void Turret::idle(IdleCallPath path)
 }
 
 
-const char *Turret::getEditorHelpString()
-{
-   return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]";
-}
+const char *Turret::getOnScreenName()     { return "Turret";  }
+const char *Turret::getOnDockName()       { return "Turret";  }
+const char *Turret::getPrettyNamePlural() { return "Turrets"; }
+const char *Turret::getEditorHelpString() { return "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]"; }
 
 
-const char *Turret::getPrettyNamePlural()
-{
-   return "Turrets";
-}
-
-
-const char *Turret::getOnDockName()
-{
-   return "Turret";
-}
-
-
-const char *Turret::getOnScreenName()
-{
-   return "Turret";
-}
-
-
-bool Turret::hasTeam()
-{
-   return true;
-}
-
-
-bool Turret::canBeHostile()
-{
-   return true;
-}
-
-
-bool Turret::canBeNeutral()
-{
-   return true;
-}
+bool Turret::hasTeam()      { return true; }
+bool Turret::canBeHostile() { return true; }
+bool Turret::canBeNeutral() { return true; }
 
 
 void Turret::onItemDragging()
@@ -1865,37 +1825,17 @@ void Turret::onGeomChanged()
 }
 
 
-const char Turret::className[] = "Turret";      // Class name as it appears to Lua scripts
+///// Lua interface
+REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
 
-// Lua constructor
-Turret::Turret(lua_State *L)
+const char *Turret::luaClassName = "Turret";
+
+// Standard methods available to all Items
+const luaL_reg Turret::luaMethods[] =
 {
-   // Do nothing
-}
-
-
-S32 Turret::getClassID(lua_State *L)
-{
-   return returnInt(L, TurretTypeNumber);
-}
-
-
-void Turret::push(lua_State *L)
-{
-   Lunar<Turret>::push(L, this);
-}
-
-// LuaItem methods
-S32 Turret::getRad(lua_State *L)
-{
-   return returnInt(L, TURRET_OFFSET);
-}
-
-
-S32 Turret::getLoc(lua_State *L)
-{
-   return LuaObject::returnPoint(L, getPos() + mAnchorNormal * (TURRET_OFFSET));
-}
+   { "getAngleAim", luaW_doMethod<Turret, &Turret::getAngleAim> },
+   { NULL, NULL }
+};
 
 
 S32 Turret::getAngleAim(lua_State *L)
@@ -1904,24 +1844,19 @@ S32 Turret::getAngleAim(lua_State *L)
 }
 
 
-// Define the methods we will expose to Lua
-Lunar<Turret>::RegType Turret::methods[] =
+// Override some methods
+S32 Turret::getRad(lua_State *L)
 {
-   // Standard gameItem methods
-   method(Turret, getClassID),
-   method(Turret, getRad),
-   method(Turret, getVel),
+   return returnInt(L, TURRET_OFFSET);
+}
 
-   // EngineeredItem methods
-   method(Turret, getHealth),
-   method(Turret, isActive),
-   method(Turret, getAngle),
 
-   // Turret Methods
-   method(Turret, getAngleAim),
+S32 Turret::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
+}
 
-   {0,0}    // End method list
-};
+
 
 };
 

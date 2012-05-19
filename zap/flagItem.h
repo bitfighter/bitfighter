@@ -26,8 +26,8 @@
 #ifndef _FLAGITEM_H_
 #define _FLAGITEM_H_
 
-//#include "Spawn.h"      // For FlagSpawn def
 #include "ship.h"
+#include "LuaWrapper.h"
 
 namespace Zap
 {
@@ -59,7 +59,8 @@ protected:
 public:
    FlagItem(Point pos = Point());                                    // C++ constructor
    FlagItem(Point pos, bool collidable, float radius, float mass);   // Alternate C++ constructor
-   FlagItem(Point pos, Point vel, bool useDropDelay = false);
+   FlagItem(Point pos, Point vel, bool useDropDelay = false);        // Alternate alternate C++ constructor
+   ~FlagItem();                                                      // Destructor
 
    FlagItem *clone() const;
    void copyAttrs(FlagItem *target);
@@ -111,21 +112,17 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
 
+
    ///// Lua Interface
-
-   FlagItem(lua_State *L);    //  Lua constructor
-
-   static const char className[];
-   static Lunar<FlagItem>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
+   LUAW_DECLARE_CLASS(FlagItem);
+	static const luaL_reg luaMethods[];
+	static const char *luaClassName;
    
-   S32 isInInitLoc(lua_State *L);       // Is flag in it's initial location?
+   S32 isInInitLoc(lua_State *L);      // Is flag in it's initial location?
 
-   S32 isInCaptureZone(lua_State *L);   // Is flag in a team's capture zone?
-   S32 getCaptureZone(lua_State *L);
-   void push(lua_State *L);
-
+   // Override some parent methods
+   S32 isInCaptureZone(lua_State *L);
+   S32 getCaptureZone(lua_State *L);   
 };
 
 

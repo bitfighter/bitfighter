@@ -898,18 +898,11 @@ void LuaScriptRunner::registerClasses()
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
 
-   Lunar<RepairItem>::Register(L);
-   Lunar<Turret>::Register(L);
    Lunar<Teleporter>::Register(L);
-
-   Lunar<ForceFieldProjector>::Register(L);
-   Lunar<FlagItem>::Register(L);
-   Lunar<SoccerBallItem>::Register(L);
 
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
    Lunar<NexusObject>::Register(L);
-   Lunar<CoreItem>::Register(L);
 }
 
 
@@ -1026,6 +1019,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEnumName(TestItemTypeNumber, "TestItemType");
    setEnumName(FlagTypeNumber, "FlagType");
    setEnumName(BulletTypeNumber, "BulletType");
+   setEnumName(BurstTypeNumber, "BurstType");
    setEnumName(MineTypeNumber, "MineType");
    setEnumName(NexusTypeNumber, "NexusType");
    setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
@@ -1119,7 +1113,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEnum(EngineeredForceField);
 
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
-   lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
+   lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
 
 }

@@ -201,19 +201,8 @@ const char *SoccerGameType::getInstructionString() const
 }
 
 
-//bool SoccerGameType::isTeamGame() { return getGame()->getTeamCount() > 1; }
-
-
-bool SoccerGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool SoccerGameType::canBeIndividualGame() const
-{
-   return true;
-}
+bool SoccerGameType::canBeTeamGame() const       { return true; }
+bool SoccerGameType::canBeIndividualGame() const { return true; }
 
 
 void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
@@ -331,7 +320,17 @@ SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallIte
    mLastPlayerTouch = NULL;
    mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
-   mDragFactor = 0.0;     // 0.0 for no drag
+
+   const F32 NO_DRAG = 0.0;
+   mDragFactor = NO_DRAG;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+SoccerBallItem::~SoccerBallItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -339,8 +338,6 @@ SoccerBallItem *SoccerBallItem::clone() const
 {
    return new SoccerBallItem(*this);
 }
-
-const char SoccerBallItem::className[] = "SoccerBallItem";      // Class name as it appears to Lua scripts
 
 
 bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
@@ -381,26 +378,6 @@ string SoccerBallItem::toString(F32 gridSize) const
 {
    return Parent::toString(gridSize);
 }
-
-
-// Define the methods we will expose to Lua
-Lunar<SoccerBallItem>::RegType SoccerBallItem::methods[] =
-{
-   // Standard gameItem methods
-   method(SoccerBallItem, getClassID),
-   method(SoccerBallItem, getLoc),
-   method(SoccerBallItem, getRad),
-   method(SoccerBallItem, getVel),
-   method(SoccerBallItem, getTeamIndx),
- 
-   // item methods
-   //method(SoccerBallItem, isInCaptureZone),
-   //method(SoccerBallItem, getCaptureZone),
-   method(SoccerBallItem, isOnShip),
-   method(SoccerBallItem, getShip),
-
-   {0,0}    // End method list
-};
 
 
 void SoccerBallItem::onAddedToGame(Game *theGame)
@@ -445,46 +422,15 @@ void SoccerBallItem::renderItem(const Point &pos)
 }
 
 
-const char *SoccerBallItem::getEditorHelpString()
-{
-   return "Soccer ball, can only be used in Soccer games.";
-}
+const char *SoccerBallItem::getOnScreenName()     { return "Soccer Ball";  }
+const char *SoccerBallItem::getOnDockName()       { return "Ball";         }
+const char *SoccerBallItem::getPrettyNamePlural() { return "Soccer Balls"; }
+const char *SoccerBallItem::getEditorHelpString() { return "Soccer ball, can only be used in Soccer games."; }
 
 
-const char *SoccerBallItem::getPrettyNamePlural()
-{
-   return "Soccer Balls";
-}
-
-
-const char *SoccerBallItem::getOnDockName()
-{
-   return "Ball";
-}
-
-
-const char *SoccerBallItem::getOnScreenName()
-{
-   return "Soccer Ball";
-}
-
-
-bool SoccerBallItem::hasTeam()
-{
-   return false;
-}
-
-
-bool SoccerBallItem::canBeHostile()
-{
-   return false;
-}
-
-
-bool SoccerBallItem::canBeNeutral()
-{
-   return false;
-}
+bool SoccerBallItem::hasTeam()      { return false; }
+bool SoccerBallItem::canBeHostile() { return false; }
+bool SoccerBallItem::canBeNeutral() { return false; }
 
 
 void SoccerBallItem::renderDock()
@@ -627,35 +573,31 @@ bool SoccerBallItem::collide(BfObject *hitObject)
    return true;
 }
 
+
 U32 SoccerBallItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    return Parent::packUpdate(connection, updateMask, stream);
 }
+
+
 void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 }
 
 
-///// Lua Interface
+///// Lua interface
+REGISTER_LUA_SUBCLASS(SoccerBallItem, MoveItem);
 
-//  Lua constructor
-SoccerBallItem::SoccerBallItem(lua_State *L)
+const char *SoccerBallItem::luaClassName = "SoccerBallItem";
+
+
+// No soccerball specific methods!
+const luaL_reg SoccerBallItem::luaMethods[] =
 {
-   // Do nothing
-}
+   { NULL, NULL }
+};
 
-
-S32 SoccerBallItem::getClassID(lua_State *L)
-{
-   return returnInt(L, SoccerBallItemTypeNumber);
-}
-
-
-void SoccerBallItem::push(lua_State *L)
-{
-   Lunar<SoccerBallItem>::push(L, this);
-}
 
 
 };

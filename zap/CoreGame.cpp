@@ -306,6 +306,15 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreRadius * 2))
    mCurrentExplosionNumber = 0;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+CoreItem::~CoreItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -399,28 +408,10 @@ string CoreItem::getAttributeString()
 #endif
 
 
-const char *CoreItem::getEditorHelpString()
-{
-   return "Core.  Destroy to score.";
-}
-
-
-const char *CoreItem::getPrettyNamePlural()
-{
-   return "Cores";
-}
-
-
-const char *CoreItem::getOnDockName()
-{
-   return "Core";
-}
-
-
-const char *CoreItem::getOnScreenName()
-{
-   return "Core";
-}
+const char *CoreItem::getOnScreenName()     { return "Core";  }
+const char *CoreItem::getOnDockName()       { return "Core";  }
+const char *CoreItem::getPrettyNamePlural() { return "Cores"; }
+const char *CoreItem::getEditorHelpString() { return "Core.  Destroy to score."; }
 
 
 F32 CoreItem::getEditorRadius(F32 currentScale)
@@ -1011,57 +1002,26 @@ void CoreItem::onItemExploded(Point pos)
 #endif
 
 
-bool CoreItem::canBeHostile()
+bool CoreItem::canBeHostile() { return false; }
+bool CoreItem::canBeNeutral() { return false; }
+
+
+///// Lua interface
+REGISTER_LUA_SUBCLASS(CoreItem, Item);
+
+const char *CoreItem::luaClassName = "CoreItem";
+
+// Standard methods available to all Items
+const luaL_reg CoreItem::luaMethods[] =
 {
-   return false;
-}
-
-
-bool CoreItem::canBeNeutral()
-{
-   return false;
-}
-
-
-const char CoreItem::className[] = "CoreItem";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-CoreItem::CoreItem(lua_State *L)
-{
-   // Do we want to construct these from Lua?  If so, do that here!
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<CoreItem>::RegType CoreItem::methods[] =
-{
-   // Standard gameItem methods
-   method(CoreItem, getClassID),
-   method(CoreItem, getRad),
-   method(CoreItem, getVel),
-
-   // Class specific methods
-   method(CoreItem, getHealth),
-
-   {0,0}    // End method list
+   { "getHealth", luaW_doMethod<CoreItem, &CoreItem::getHealth> },
+   { NULL, NULL }
 };
-
-
-S32 CoreItem::getClassID(lua_State *L)
-{
-   return returnInt(L, CoreTypeNumber);
-}
 
 
 S32 CoreItem::getHealth(lua_State *L)
 {
    return returnFloat(L, getTotalHealth());
-}
-
-
-void CoreItem::push(lua_State *L)
-{
-   Lunar<CoreItem>::push(L, this);
 }
 
 

@@ -45,6 +45,8 @@ TNL_IMPLEMENT_NETOBJECT(FlagItem);
 FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -52,6 +54,8 @@ FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) //
 FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Parent(pos, collidable, radius, mass)
 {
    initialize();
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -63,6 +67,15 @@ FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : Parent(pos, true, 
    setActualVel(vel);
    if(useDropDelay)
       mDroppedTimer.reset(DROP_DELAY);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+FlagItem::~FlagItem()      
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -80,31 +93,6 @@ void FlagItem::initialize()
    mObjectTypeNumber = FlagTypeNumber;
    setZone(NULL);
 }
-
-
-const char FlagItem::className[] = "FlagItem";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<FlagItem>::RegType FlagItem::methods[] =
-{
-   // Standard gameItem methods
-   method(FlagItem, getClassID),
-   method(FlagItem, getLoc),
-   method(FlagItem, getRad),
-   method(FlagItem, getVel),
-   method(FlagItem, getTeamIndx),
-
-   // item methods
-   method(FlagItem, isInCaptureZone),
-   method(FlagItem, getCaptureZone),
-   method(FlagItem, isOnShip),
-   method(FlagItem, getShip),
-
-   // Flag specific methods
-   method(FlagItem, isInInitLoc),
-
-   {0,0}    // End method list
-};
 
 
 void FlagItem::onAddedToGame(Game *theGame)
@@ -314,11 +302,7 @@ void FlagItem::sendHome()
       mInitialPos = spawnPoints[spawnIndex]->getPos();
    }
 
-   setActualPos(mInitialPos);
-   setRenderPos(mInitialPos);
-
-   setActualVel(Point(0,0));
-   setRenderVel(Point(0,0));
+   setPosVelAng(mInitialPos, Point(0,0), 0);
 
    mIsAtHome = true;
    setMaskBits(PositionMask);
@@ -355,46 +339,15 @@ F32 FlagItem::getEditorRadius(F32 currentScale)
 }
 
 
-const char *FlagItem::getEditorHelpString()
-{
-   return "Flag item, used by a variety of game types.";
-}
+const char *FlagItem::getOnScreenName()     { return "Flag";  }
+const char *FlagItem::getOnDockName()       { return "Flag";  }
+const char *FlagItem::getPrettyNamePlural() { return "Flags"; }
+const char *FlagItem::getEditorHelpString() { return "Flag item, used by a variety of game types."; }
 
 
-const char *FlagItem::getPrettyNamePlural()
-{
-   return "Flags";
-}
-
-
-const char *FlagItem::getOnDockName()
-{
-   return "Flag";
-}
-
-
-const char *FlagItem::getOnScreenName()
-{
-   return "Flag";
-}
-
-
-bool FlagItem::hasTeam()
-{
-   return true;
-}
-
-
-bool FlagItem::canBeHostile()
-{
-   return true;
-}
-
-
-bool FlagItem::canBeNeutral()
-{
-   return true;
-}
+bool FlagItem::hasTeam()      { return true; }
+bool FlagItem::canBeHostile() { return true; }
+bool FlagItem::canBeNeutral() { return true; }
 
 
 // Runs on both client and server
@@ -459,20 +412,17 @@ void FlagItem::onMountDestroyed()
 }
 
 
-///// Lua Interface
+///// Lua interface
+REGISTER_LUA_SUBCLASS(FlagItem, MoveItem);
 
-//  Lua constructor
-FlagItem::FlagItem(lua_State *L)
+const char *FlagItem::luaClassName = "FlagItem";
+
+// Standard methods available to all Items
+const luaL_reg FlagItem::luaMethods[] =
 {
-   // Do nothing
+   { "isInInitLoc", luaW_doMethod<FlagItem, &FlagItem::isInInitLoc> },
+   { NULL, NULL }
 };
-
-
-S32 FlagItem::getClassID(lua_State *L)
-{
-   return returnInt(L, FlagTypeNumber);
-}
-
 
 
 S32 FlagItem::isInInitLoc(lua_State *L)
@@ -481,6 +431,7 @@ S32 FlagItem::isInInitLoc(lua_State *L)
 }
 
 
+// Override parent method
 S32 FlagItem::getCaptureZone(lua_State *L)
 {
    if(mZone.isValid())
@@ -493,15 +444,10 @@ S32 FlagItem::getCaptureZone(lua_State *L)
 }
 
 
+// Override parent method
 S32 FlagItem::isInCaptureZone(lua_State *L)
 {
    return returnBool(L, mZone.isValid());
-}
-
-
-void FlagItem::push(lua_State *L)
-{
-   Lunar<FlagItem>::push(L, this);
 }
 
 };

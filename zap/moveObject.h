@@ -86,6 +86,7 @@ protected:
 
 public:
    MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
+   ~MoveObject();                                                                   // Destructor
 
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);    // Called from child object idle methods
@@ -105,9 +106,8 @@ public:
 
    // Because MoveObjects have multiple positions (actual, render), we need to implement the following
    // functions differently than most objects do
-   //Point getVert(S32 index) const;              // Maps to getActualPos
-   Point getPos() const;                        // Maps to getActualPos
-   Point getVel() const;                        // Maps to getActualVel
+   Point getPos() const;      // Maps to getActualPos
+   Point getVel() const;      // Maps to getActualVel
 
    Point getPos(S32 stateIndex) const;
    Point getVel(S32 stateIndex) const;
@@ -128,8 +128,6 @@ public:
    void setRenderAngle(F32 angle);
    void setActualAngle(F32 angle);
 
-
-   //void setVert(const Point &pos, S32 index);   // Maps to setPos
    void setPos(const Point &pos);
 
    void setPosVelAng(const Point &pos, const Point &vel, F32 ang);
@@ -156,7 +154,10 @@ public:
 
    virtual void onGeomChanged();
 
-   // LuaItem interface
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(MoveObject);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
    virtual S32 getVel(lua_State *L);
 
 };
@@ -188,13 +189,8 @@ protected:
    static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
 
 public:
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
-
    MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
    virtual ~MoveItem();                                                                          // Destructor
-
-   LUAW_DECLARE_CLASS(MoveItem);
 
    void idle(BfObject::IdleCallPath path);
 
@@ -227,7 +223,11 @@ public:
 
    bool collide(BfObject *otherObject);
 
-   // LuaItem interface
+   ///// LuaItem interface
+   LUAW_DECLARE_CLASS(MoveItem);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);
 };
@@ -298,7 +298,6 @@ public:
    static U32 getDesignCount();
 
    TNL_DECLARE_CLASS(Asteroid);
-   LUAW_DECLARE_CLASS(Asteroid);
 
 
    ///// Editor methods
@@ -312,8 +311,7 @@ public:
    void renderDock();
 
    ///// Lua interface
-
-public:
+   LUAW_DECLARE_CLASS(Asteroid);
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
@@ -357,7 +355,6 @@ public:
    static U32 getDesignCount();
 
    TNL_DECLARE_CLASS(Circle);
-   LUAW_DECLARE_CLASS(Circle);
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -369,7 +366,7 @@ public:
    void renderDock();
 
    ///// Lua interface
-public:
+   LUAW_DECLARE_CLASS(Circle);
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 };
@@ -457,10 +454,6 @@ public:
 
 
    TNL_DECLARE_CLASS(TestItem);
-   LUAW_DECLARE_CLASS(TestItem);
-
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -470,6 +463,11 @@ public:
 
    F32 getEditorRadius(F32 currentScale);
    void renderDock();
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(TestItem);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 
@@ -494,10 +492,6 @@ public:
    void onItemDropped();
 
    TNL_DECLARE_CLASS(ResourceItem);
-   LUAW_DECLARE_CLASS(ResourceItem);
-
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
 
    ///// Editor methods
    const char *getEditorHelpString();
@@ -508,15 +502,9 @@ public:
    void renderDock();
 
    ///// Lua Interface
-
-   //ResourceItem(lua_State *L);             //  Lua constructor
-
-   //static const char className[];
-
-   //static Lunar<ResourceItem>::RegType methods[];
-
-   //S32 getClassID(lua_State *L);
-   //void push(lua_State *L);
+   LUAW_DECLARE_CLASS(ResourceItem);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 

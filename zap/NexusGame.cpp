@@ -785,6 +785,13 @@ NexusFlagItem::NexusFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem
 }
 
 
+// Destructor
+NexusFlagItem::~NexusFlagItem()
+{
+   // Do nothing
+}
+
+
 //////////  Client only code:
 
 void NexusFlagItem::renderItem(const Point &pos)
@@ -798,14 +805,10 @@ void NexusFlagItem::renderItem(const Point &pos)
 
    if(mIsMounted && mFlagCount > 0)
    {
-      if(mFlagCount >= 40)
-         glColor(Colors::paleRed);
-      else if(mFlagCount >= 20)
-         glColor(Colors::yellow);
-      else if(mFlagCount >= 10)
-         glColor(Colors::green);
-      else
-         glColor(Colors::white);
+      if     (mFlagCount >= 40) glColor(Colors::paleRed);   // like, rad!
+      else if(mFlagCount >= 20) glColor(Colors::yellow);    // cool!
+      else if(mFlagCount >= 10) glColor(Colors::green);     // ok, I guess
+      else                      glColor(Colors::white);     // lame
 
       UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }

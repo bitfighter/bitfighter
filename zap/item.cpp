@@ -27,7 +27,7 @@
 #include "ship.h"
 #include "goalZone.h"
 #include "gameType.h"
-#include "flagItem.h"
+//#include "flagItem.h"
 #include "game.h"
 #include "gameConnection.h"
 
@@ -192,21 +192,26 @@ Rect Item::calcExtents()
 }
 
 
+REGISTER_LUA_SUBCLASS(Item, BfObject);
+
+const char *Item::luaClassName = "Item";
+
+// Standard methods available to all Items
+const luaL_reg Item::luaMethods[] =
+{
+   { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
+   { "isOnShip",        luaW_doMethod<Item, &Item::isOnShip>        },
+   { "getShip",         luaW_doMethod<Item, &Item::getShip>         },
+   { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
+   { "getCaptureZone",  luaW_doMethod<Item, &Item::getCaptureZone>  },
+
+   { NULL, NULL }
+};
+
+
 S32 Item::getRad(lua_State *L)
 {
    return LuaObject::returnFloat(L, getRadius());
-}
-
-
-S32 Item::getVel(lua_State *L)
-{
-   return LuaObject::returnPoint(L, Point(0,0));
-}
-
-
-S32 Item::isInCaptureZone(lua_State *L)
-{
-   return returnBool(L, false);
 }
 
 
@@ -228,21 +233,10 @@ S32 Item::getShip(lua_State *L)
 }
 
 
-const char *Item::luaClassName = "Item";
-
-// Standard methods available to all Items
-const luaL_reg Item::luaMethods[] =
+S32 Item::isInCaptureZone(lua_State *L)
 {
-   { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
-   { "getVel",          luaW_doMethod<Item, &Item::getVel>          },
-   { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
-
-   { NULL, NULL }
-};
-
-
-REGISTER_LUA_SUBCLASS(Item, BfObject);
-
+   return returnBool(L, false);
+}
 
 
 };

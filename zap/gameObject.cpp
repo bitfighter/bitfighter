@@ -39,6 +39,8 @@
 #endif
 
 #include "projectile.h"
+#include "PickupItem.h"          // For getItem function below
+#include "soccerGame.h"          // For getItem function below
 
 #include "luaObject.h"           // For LuaObject def and returnInt method
 #include "lua.h"                 // For push prototype
@@ -1243,7 +1245,7 @@ BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *funct
    {
       case RobotShipTypeNumber:  // pass through
       case PlayerShipTypeNumber:
-        //return  luaW_check<LuaShip>::check(L, index);
+        return  luaW_check<Ship>(L, index);
 
       case BulletTypeNumber:
          return luaW_check<Projectile>(L, index);
@@ -1260,7 +1262,7 @@ BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *funct
       case TestItemTypeNumber:
          return luaW_check<TestItem>(L, index);
       case FlagTypeNumber:
-         return Lunar<FlagItem>::check(L, index);
+         return luaW_check<FlagItem>(L, index);
 
       case TeleportTypeNumber:
          //return luaW_check<Teleporter>::check(L, index);
@@ -1270,11 +1272,12 @@ BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *funct
          return luaW_check<Circle>(L, index);
 
       case RepairItemTypeNumber:
-         //return luaW_check<RepairItem>::check(L, index);
+         return luaW_check<RepairItem>(L, index);
       case EnergyItemTypeNumber:
-         //return Lunar<EnergyItem>::check(L, index);
+         return luaW_check<EnergyItem>(L, index);
       case SoccerBallItemTypeNumber:
-         //return luaW_check<SoccerBallItem>::check(L, index);
+         return luaW_check<SoccerBallItem>(L, index);
+
       case TurretTypeNumber:
          //return luaW_check<Turret>::check(L, index);
       case ForceFieldProjectorTypeNumber:
