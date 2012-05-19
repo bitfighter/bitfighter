@@ -899,9 +899,12 @@ public:
 template <typename T, int (T::*methodName)(lua_State * )>
 int luaW_doMethod(lua_State *L)
 {
-   T *w = luaW_check<T>(L, 1); 
+   T *w = luaW_check<T>(L, 1);
    if(w) 
+   {
+      lua_remove(L, 1);
       return (w->*methodName)(L);
+   }
 
    lua_pushnil(L);
    return 1;

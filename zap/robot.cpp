@@ -254,32 +254,36 @@ Robot *Robot::findBot(const char *id)
 
 bool Robot::prepareEnvironment()
 {
-   // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
-   // This is the name that we'll use to refer to this robot from our Lua code.  
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   try
+   {
+      // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
+      // This is the name that we'll use to refer to this robot from our Lua code.  
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
-   lua_getglobal(L, "e");                                //                                        -- environment e   
-   luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+      luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
+      lua_getglobal(L, "e");                                //                                        -- environment e   
+      luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
+      lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
-   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY))
+      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY))
+         return false;
+
+      lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
+      lua_pushliteral(L, "bot");                            //                                        -- env_table, "__this_robot__"
+      luaW_push<Robot>(L, this);                            //                                        -- env_table, "__this_robot__", *this
+
+      lua_rawset(L, -3);                                    // env_table["__this_robot__"] = *this    -- env_table
+      lua_pop(L, 1);                                        //                                        -- <<empty stack>>
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      return true;
+   }
+   catch(LuaException &e)
+   {
+      logError(e.what());
       return false;
-
-   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
-   lua_pushliteral(L, "Robot");                          //                                        -- env_table, "Robot"
-   lua_pushlightuserdata(L, (void *)this);               //                                        -- env_table, "Robot", *this
-
-   lua_rawset(L, -3);                                    // env_table["Robot"] = *this             -- env_table
-   lua_pop(L, 1);                                        //                                        -- <<empty stack>>
-
-   luaL_loadstring(L, "bot = Robot(Robot)");             // Create our bot reference               -- <<compiled code>>
-   setEnvironment();                                     // Set the environment for the code
-   lua_pcall(L, 0, 0, 0);                                // Run it                                 -- <<empty stack>>
-
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-   return true;
+   }
 }
 
 
