@@ -463,7 +463,10 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
 
    // Now set the window position
    if (displayMode == DISPLAY_MODE_WINDOWED)
-      setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
+   {
+      if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)  // sometimes it happens to be (0,0) hiding the top title bar preventing ability to move the window, in this case we are not moving it unless it is not (0,0). Note that ini config file will default to (0,0).
+         setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);
+   }
    else
       setWindowPosition(0, 0);
 
