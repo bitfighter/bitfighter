@@ -267,6 +267,11 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
                onResize(game, event->window.data1, event->window.data2);
                break;
 
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+               // Released all keys when we lose focus so we don't have sticky modifiers
+               InputCodeManager::resetStates();
+               break;
+
             default:
                break;
             }
