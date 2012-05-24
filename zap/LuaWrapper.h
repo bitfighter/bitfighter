@@ -42,7 +42,7 @@ extern "C"
 
 #include <vector>
 #include <typeinfo>  // XXX remove me when removing all the logprintf's with 'typeid'
-
+#include "luaObject.h"     // Delete when done testing
 
 #define LUAW_BUILDER
 
@@ -154,25 +154,41 @@ template <typename T>
 bool luaW_is(lua_State *L, int index, bool strict = false)
 {
     bool equal = false;// lua_isnil(L, index);
+logprintf("luaW_is for T=%s",  LuaWrapper<T>::classname);
+// Here we have stack: userdata, 'getRad'
     if (!equal && lua_isuserdata(L, index) && lua_getmetatable(L, index))
     {
         // ... ud ... udmt
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... ud ... udmt Tmt
-        equal = lua_rawequal(L, -1, -2);
+        Zap::LuaObject::dumpStack(L, "ZYX");
+        Zap::LuaObject::dumpTable(L, -1);  // looks like udmt to me
+                Zap::LuaObject::dumpTable(L, -2);     // empty table
+
+        equal = lua_rawequal(L, -1, -2);     // Compare udmt and Tmt
         if (!equal && !strict)
         {
             lua_getfield(L, -2, LUAW_EXTENDS_KEY); // ... ud ... udmt Tmt udmt.extends
+
+       // Table @ -1 is item method table
+            //Zap::LuaObject::dumpTable(L, -3);
+
             for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1))
             {
+               //Zap::LuaObject::dumpStack(L);
+ //                          Zap::LuaObject::dumpTable(L, -1);      // empty table (v)
+ //Zap::LuaObject::dumpTable(L, -4);     // robot method table (Tmt)
+
                 // ... ud ... udmt Tmt udmt.extends k v
-                equal = lua_rawequal(L, -1, -4);
+                equal = lua_rawequal(L, -1, -4);      // Compare v and Tmt
                 if (equal)
                 {
                     lua_pop(L, 2); // ... ud ... udmt Tmt udmt.extends
                     break;
                 }
+                           Zap::LuaObject::dumpStack(L);
             }
             lua_pop(L, 1); // ... ud ... udmt Tmt
+
         }
         lua_pop(L, 2); // ... ud ...
     }
@@ -185,12 +201,16 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
 // convertable to) type T; otherwise, returns NULL.
 template <typename T>
 T* luaW_to(lua_State* L, int index, bool strict = false)
+
 {
     if (luaW_is<T>(L, index, strict))
     {
         luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
         luaW_Userdata ud;
-        while (!strict && LuaWrapper<LuaProxy<T> >::cast != pud->cast)
+
+        logprintf("luaW_to: %p, %p (T = %s)", LuaWrapper<T>::cast, pud->cast, LuaWrapper<T>::classname);
+
+        while (!strict && LuaWrapper<T>::cast != pud->cast)
         {
             ud = pud->cast(*pud);
             pud = &ud;
@@ -229,18 +249,24 @@ LuaProxy<T>* luaW_toProxy(lua_State* L, int index, bool strict = false)
 template <typename T>
 T* luaW_check(lua_State* L, int index, bool strict = false)
 {
+   if(strcmp(LuaWrapper<T>::classname, "Item") == 0)
+      int x = 1;
     T* obj = NULL;
     if (luaW_is<T>(L, index, strict))
     {
         luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
         luaW_Userdata ud;
+        logprintf("luaW_check (T=%s), %p , %p", LuaWrapper<T>::classname, LuaWrapper<T>::cast, pud->cast);
         while (!strict && LuaWrapper<T>::cast != pud->cast)
         {
             ud = pud->cast(*pud);
             pud = &ud;
-        }
+       logprintf("luaW_check (T=%s), %p , %p", LuaWrapper<T>::classname, LuaWrapper<T>::cast, pud->cast);
 
+        }
+        logprintf("Going");
         LuaProxy<T> *proxy = (LuaProxy<T>*)pud->data;
+        logprintf("Back");
         if(!proxy->isDefunct())
          obj = proxy->getProxiedObject();
     }
@@ -274,7 +300,10 @@ void luaW_push(lua_State* L, T* obj)
 
         luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // ... obj
         ud->data = proxy;
-        ud->cast = LuaWrapper<LuaProxy<T> >::cast;
+
+        ud->cast = LuaWrapper<T>::cast;
+
+        logprintf("luaW_push %p  (T=%s)", ud->cast, LuaWrapper<T>::classname); 
 
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj mt
         lua_setmetatable(L, -2); // ... obj
@@ -691,7 +720,7 @@ void luaW_extend(lua_State* L)
     if(!LuaWrapper<U>::classname)
         luaL_error(L, "attempting to extend %s by a type that has not been registered", LuaWrapper<T>::classname);
 
-    LuaWrapper<LuaProxy<T> >::cast = luaW_cast<T, U>;
+    LuaWrapper<T>::cast = luaW_cast<T, U>;
 
     luaL_getmetatable(L, LuaWrapper<T>::classname); // mt
     luaL_getmetatable(L, LuaWrapper<U>::classname); // mt emt
