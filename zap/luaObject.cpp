@@ -491,39 +491,49 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 }
 
 
+// Make a nice looking string representation of the object at the specified index
+static const char *stringify(lua_State *L, S32 index)
+{
+   int t = lua_type(L, index);
+   TNLAssert(t > -1 && t <= LUA_TTHREAD, "Invalid type number!");
+
+   switch (t) 
+   {
+      case LUA_TSTRING:   
+         return (string("string: '") + lua_tostring(L, index) + "'").c_str();
+      case LUA_TBOOLEAN:  
+         return string("boolean: " + lua_toboolean(L, index) ? "true" : "false").c_str();
+      case LUA_TNUMBER:    
+         return (string("number: ") + itos(S32(lua_tonumber(L, index)))).c_str();
+      default:             
+         return lua_typename(L, t);
+   }
+}
+
+
 // May interrupt a table traversal if this is called in the middle
 void LuaObject::dumpTable(lua_State *L, S32 tableIndex)
 {
    logprintf("Dumping table at index %d", tableIndex);
 
-   TNLAssert(strcmp(lua_typename(L, lua_type(L, tableIndex)), "table") == 0 || dumpStack(L), "No table at specified index!");
+   TNLAssert(lua_type(L, tableIndex) == LUA_TTABLE || dumpStack(L), "No table at specified index!");
 
    // Compensate for other stuff we'll be putting on the stack
    if(tableIndex < 0)
       tableIndex -= 2;
                                                             // -- ... table  <=== arrive with table and other junk (perhaps) on the stack
-   dumpStack(L);                                          
    lua_pushnil(L);      // First key                        // -- ... table nil
    while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]      
    {
-      string key, val;
-      key = lua_typename(L, lua_type(L, -2));               // key = typename(nextkey)
-      if(key == "string")
-         key = lua_tostring(L, -2);
+      const char *key = stringify(L, -2);                  
+      const char *val = stringify(L, -1);                  
 
-      val = lua_typename(L, lua_type(L, -1));               // val = table[nextkey]
-      if(val == "string")
-         val = lua_tostring(L, -1);
-
-      logprintf("%s - %s", key.c_str(), val.c_str());       
+      logprintf("%s - %s", key, val);       
       lua_pop(L, 1);                                        // -- ... table key (Pop value; keep key for next iter.)
    }
-   //logprintf("After");
-   //dumpStack(L);
 }
 
 
-// Adapted from PiL book section 24.2.3.  Always returns false so can be used in TNLAsserts easily.
 bool LuaObject::dumpStack(lua_State* L, const char *msg)
 {
     int top = lua_gettop(L);
@@ -531,24 +541,8 @@ bool LuaObject::dumpStack(lua_State* L, const char *msg)
     bool hasMsg = (strcmp(msg, "") != 0);
     logprintf("\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
-    for (S32 i = 1; i <= top; i++)
-    {  // Repeat for each level 
-        int t = lua_type(L, i);
-        switch (t) {
-            case LUA_TSTRING:   
-                logprintf("string: '%s'", lua_tostring(L, i));
-                break;
-            case LUA_TBOOLEAN:  
-                logprintf("boolean %s",lua_toboolean(L, i) ? "true" : "false");
-                break;
-            case LUA_TNUMBER:    
-                logprintf("number: %g", lua_tonumber(L, i));
-                break;
-            default:             
-                logprintf("%s", lua_typename(L, t));
-                break;
-        }
-    }
+    for(S32 i = 1; i <= top; i++)
+      logprintf("%d : %s", i, stringify(L, i));
 
     return false;
  }
