@@ -495,7 +495,7 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 static const char *stringify(lua_State *L, S32 index)
 {
    int t = lua_type(L, index);
-   TNLAssert(t > -1 && t <= LUA_TTHREAD, "Invalid type number!");
+   TNLAssert(t >= -1 && t <= LUA_TTHREAD, "Invalid type number!");
 
    switch (t) 
    {
@@ -504,7 +504,7 @@ static const char *stringify(lua_State *L, S32 index)
       case LUA_TBOOLEAN:  
          return string("boolean: " + lua_toboolean(L, index) ? "true" : "false").c_str();
       case LUA_TNUMBER:    
-         return (string("number: ") + itos(S32(lua_tonumber(L, index)))).c_str();
+         return string("number: " + itos(S32(lua_tonumber(L, index)))).c_str();
       default:             
          return lua_typename(L, t);
    }
