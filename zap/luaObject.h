@@ -114,8 +114,9 @@ public:
    static const char *getString(lua_State *L, S32 index, const char *methodName);
    static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
 
-
-   static bool dumpStack(lua_State* L);
+   // Some debugging helpers
+   static void dumpTable(lua_State *L, S32 tableIndex);
+   static bool dumpStack(lua_State* L, const char *msg = "");
 
    static bool shouldLuaGarbageCollectThisObject();     
 };

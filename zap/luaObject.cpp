@@ -491,12 +491,45 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 }
 
 
+// May interrupt a table traversal if this is called in the middle
+void LuaObject::dumpTable(lua_State *L, S32 tableIndex)
+{
+   logprintf("Dumping table at index %d", tableIndex);
+
+   TNLAssert(strcmp(lua_typename(L, lua_type(L, tableIndex)), "table") == 0 || dumpStack(L), "No table at specified index!");
+
+   // Compensate for other stuff we'll be putting on the stack
+   if(tableIndex < 0)
+      tableIndex -= 2;
+                                                            // -- ... table  <=== arrive with table and other junk (perhaps) on the stack
+   dumpStack(L);                                          
+   lua_pushnil(L);      // First key                        // -- ... table nil
+   while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]      
+   {
+      string key, val;
+      key = lua_typename(L, lua_type(L, -2));               // key = typename(nextkey)
+      if(key == "string")
+         key = lua_tostring(L, -2);
+
+      val = lua_typename(L, lua_type(L, -1));               // val = table[nextkey]
+      if(val == "string")
+         val = lua_tostring(L, -1);
+
+      logprintf("%s - %s", key.c_str(), val.c_str());       
+      lua_pop(L, 1);                                        // -- ... table key (Pop value; keep key for next iter.)
+   }
+   //logprintf("After");
+   //dumpStack(L);
+}
+
+
 // Adapted from PiL book section 24.2.3.  Always returns false so can be used in TNLAsserts easily.
-bool LuaObject::dumpStack(lua_State* L)
+bool LuaObject::dumpStack(lua_State* L, const char *msg)
 {
     int top = lua_gettop(L);
 
-    logprintf("\nTotal in stack: %d   [listed bottom to top]",top);
+    bool hasMsg = (strcmp(msg, "") != 0);
+    logprintf("\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
     for (S32 i = 1; i <= top; i++)
     {  // Repeat for each level 
