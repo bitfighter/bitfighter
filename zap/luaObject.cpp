@@ -492,19 +492,21 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 
 
 // Make a nice looking string representation of the object at the specified index
-static const char *stringify(lua_State *L, S32 index)
+static string stringify(lua_State *L, S32 index)
 {
    int t = lua_type(L, index);
-   TNLAssert(t >= -1 && t <= LUA_TTHREAD, "Invalid type number!");
+   //TNLAssert(t >= -1 && t <= LUA_TTHREAD, "Invalid type number!");
+   if(t > LUA_TTHREAD || t < -1)
+      return "Invalid object type id " + itos(t);
 
    switch (t) 
    {
       case LUA_TSTRING:   
-         return (string("string: '") + lua_tostring(L, index) + "'").c_str();
+         return "string: " + string(lua_tostring(L, index));
       case LUA_TBOOLEAN:  
-         return string("boolean: " + lua_toboolean(L, index) ? "true" : "false").c_str();
+         return "boolean: " + lua_toboolean(L, index) ? "true" : "false";
       case LUA_TNUMBER:    
-         return string("number: " + itos(S32(lua_tonumber(L, index)))).c_str();
+         return "number: " + itos(S32(lua_tonumber(L, index)));
       default:             
          return lua_typename(L, t);
    }
@@ -512,23 +514,24 @@ static const char *stringify(lua_State *L, S32 index)
 
 
 // May interrupt a table traversal if this is called in the middle
-void LuaObject::dumpTable(lua_State *L, S32 tableIndex)
+void LuaObject::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
 {
-   logprintf("Dumping table at index %d", tableIndex);
+   bool hasMsg = (strcmp(msg, "") != 0);
+   logprintf("Dumping table at index %d %s%s%s", tableIndex, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
    TNLAssert(lua_type(L, tableIndex) == LUA_TTABLE || dumpStack(L), "No table at specified index!");
 
    // Compensate for other stuff we'll be putting on the stack
    if(tableIndex < 0)
-      tableIndex -= 2;
+      tableIndex -= 1;
                                                             // -- ... table  <=== arrive with table and other junk (perhaps) on the stack
    lua_pushnil(L);      // First key                        // -- ... table nil
    while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]      
    {
-      const char *key = stringify(L, -2);                  
-      const char *val = stringify(L, -1);                  
+      string key = stringify(L, -2);                  
+      string val = stringify(L, -1);                  
 
-      logprintf("%s - %s", key, val);       
+      logprintf("%s - %s", key.c_str(), val.c_str());        
       lua_pop(L, 1);                                        // -- ... table key (Pop value; keep key for next iter.)
    }
 }
@@ -542,7 +545,10 @@ bool LuaObject::dumpStack(lua_State* L, const char *msg)
     logprintf("\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
     for(S32 i = 1; i <= top; i++)
-      logprintf("%d : %s", i, stringify(L, i));
+    {
+      string val = stringify(L, i);
+      logprintf("%d : %s", i, val.c_str());
+    }
 
     return false;
  }
@@ -905,9 +911,6 @@ void LuaScriptRunner::deleteScript(const char *name)
       lua_setfield(L, LUA_REGISTRYINDEX, name);             // REGISTRY[scriptId] = nil    -- <<empty stack>>
    }
 }
-
-   
-
 
 
 // Register classes needed by all script runners
