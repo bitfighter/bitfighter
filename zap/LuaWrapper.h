@@ -41,8 +41,9 @@ extern "C"
 }
 
 #include <vector>
+#include <map>
+#include <cstring>
 #include <typeinfo>  // XXX remove me when removing all the logprintf's with 'typeid'
-#include "luaObject.h"     // Delete when done testing
 
 #define LUAW_BUILDER
 
@@ -160,9 +161,9 @@ logprintf("luaW_is for T=%s",  LuaWrapper<T>::classname);
     {
         // ... ud ... udmt
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... ud ... udmt Tmt
-        Zap::LuaObject::dumpStack(L, "ZYX");
-        Zap::LuaObject::dumpTable(L, -1);  // looks like udmt to me
-                Zap::LuaObject::dumpTable(L, -2);     // empty table
+//        Zap::LuaObject::dumpStack(L, "ZYX");
+//        Zap::LuaObject::dumpTable(L, -1);  // looks like udmt to me
+//        Zap::LuaObject::dumpTable(L, -2);     // empty table
 
         equal = lua_rawequal(L, -1, -2);     // Compare udmt and Tmt
         if (!equal && !strict)
@@ -185,7 +186,7 @@ logprintf("luaW_is for T=%s",  LuaWrapper<T>::classname);
                     lua_pop(L, 2); // ... ud ... udmt Tmt udmt.extends
                     break;
                 }
-                           Zap::LuaObject::dumpStack(L);
+//                Zap::LuaObject::dumpStack(L);
             }
             lua_pop(L, 1); // ... ud ... udmt Tmt
 
@@ -774,16 +775,92 @@ class LuaW_Registrar
 private:
    typedef void (*luaW_regFunc)(lua_State *);
 
-   static std::vector<luaW_regFunc> &getRegistrationFunctions() 
+   // The key is a pair of <classname, parent classname>
+   typedef std::pair<const char*, const char*> compareKey;
+   typedef std::pair<const char*, luaW_regFunc> keyValue;
+
+   static std::map<const char*, luaW_regFunc> &getRegistrationFunctions()
    {
-      static std::vector<luaW_regFunc> registrationFunctions;
+      static std::map<const char*, luaW_regFunc> registrationFunctions;
       return registrationFunctions;
    }
 
-   static std::vector<luaW_regFunc> &getExtensionFunctions()
+   static std::map<const char*, luaW_regFunc> &getExtensionFunctions()
    {
-      static std::vector<luaW_regFunc> extensionFunctions; 
+      static std::map<const char*, luaW_regFunc> extensionFunctions;
       return extensionFunctions;
+   }
+
+   static std::vector<compareKey> &getPreorderedClassList()
+   {
+      static std::vector<compareKey> preorderedClassList;
+      return preorderedClassList;
+   }
+
+   static std::vector<const char*> &getOrderedClassList()
+   {
+      static std::vector<const char*> orderedClassList;
+
+      unsigned int startingSize, currentSize;
+      startingSize = currentSize = getPreorderedClassList().size();
+
+      // Pass 1: First grab all top level objects, we do this only once
+      for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
+      {
+         // If no parent, then it is a top-level object.  Add to ordered list and remove from pre-ordered one
+         if(getPreorderedClassList()[i].second == NULL)
+         {
+            orderedClassList.push_back(getPreorderedClassList()[i].first);
+
+            getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
+         }
+      }
+
+      currentSize = getPreorderedClassList().size();
+
+      // Pass 2: Go through the sub-class objects
+      unsigned int iteration = 0;
+      while(currentSize > 0)
+      {
+         iteration++;
+//         printf("##### iteration: %d; pre-ordered size: %d\n", iteration, currentSize);
+
+         for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
+         {
+            bool parentIsOrdered = false;
+            for(unsigned int j = 0; j < orderedClassList.size(); j++)
+               if(strcmp(orderedClassList[j], getPreorderedClassList()[i].second) == 0)
+                  parentIsOrdered = true;
+
+            // If parent is already found, add to ordered list and remove from pre-ordered list
+            if(parentIsOrdered)
+            {
+               orderedClassList.push_back(getPreorderedClassList()[i].first);
+
+               getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
+            }
+         }
+
+         // For safety if objects have no found parents and we've iterated too many times,
+         // just add them to the end of the list
+         TNLAssert(iteration <= startingSize, "Tried to order the classes too many times!");
+         if(iteration > startingSize)
+         {
+            for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
+            {
+               orderedClassList.push_back(getPreorderedClassList()[i].first);
+
+               getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
+            }
+         }
+
+         currentSize = getPreorderedClassList().size();
+      }
+
+      // We allow roughly
+      TNLAssert(orderedClassList.size() == startingSize, "Ordered list is different size than pre-ordered list!");
+
+      return orderedClassList;
    }
 
 protected:
@@ -797,26 +874,45 @@ protected:
    template<class T>
    void static registerClass()
    {
-      getRegistrationFunctions().push_back(&registerClass<T>);
+      compareKey key(T::luaClassName, NULL);
+      getPreorderedClassList().push_back(key);
+
+      keyValue pair1(T::luaClassName, &registerClass<T>);
+      getRegistrationFunctions().insert(pair1);
    }
 
    template<class T, class U>
    static void registerClass()
    {
-      getRegistrationFunctions().push_back(&registerClass<T>);
-      getExtensionFunctions()   .push_back(&luaW_extend<T, U>);
+      compareKey key(T::luaClassName, U::luaClassName);
+      getPreorderedClassList().push_back(key);
+
+      keyValue pair1(T::luaClassName, &registerClass<T>);
+      getRegistrationFunctions().insert(pair1);
+
+      keyValue pair2(T::luaClassName, &luaW_extend<T, U>);
+      getExtensionFunctions()   .insert(pair2);
    }
 
 public:
+
    static void registerClasses(lua_State *L)
    {
+      std::vector<const char*> orderedClassList = getOrderedClassList();
+
       // Register all our classes
-      for(unsigned int i = 0; i < getRegistrationFunctions().size(); i++)
-         getRegistrationFunctions()[i](L);
+      for(unsigned int i = 0; i < orderedClassList.size(); i++)
+         getRegistrationFunctions()[orderedClassList[i]](L);
 
       // Extend those that need extending
-      for(unsigned int i = 0; i < getExtensionFunctions().size(); i++)
-         getExtensionFunctions()[i](L);
+      for(unsigned int i = 0; i < orderedClassList.size(); i++)
+      {
+         // Non sub-classes will not be in this list
+         if(getExtensionFunctions()[orderedClassList[i]] == NULL)
+            continue;
+
+         getExtensionFunctions()[orderedClassList[i]](L);
+      }
    }
 };
 
