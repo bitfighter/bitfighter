@@ -775,25 +775,31 @@ class LuaW_Registrar
 private:
    typedef void (*luaW_regFunc)(lua_State *);
 
-   // The key is a pair of <classname, parent classname>
-   typedef std::pair<const char*, const char*> compareKey;
-   typedef std::pair<const char*, luaW_regFunc> keyValue;
+   struct classParent { 
+      const char *name;   
+      const char *parent; 
+   };
 
-   static std::map<const char*, luaW_regFunc> &getRegistrationFunctions()
+   typedef std::pair<const char*, luaW_regFunc> keyValue;
+   typedef std::map<const char*, luaW_regFunc>  functionMap;    // Map of function name and functions
+
+   // List of registration functions
+   static functionMap &getRegistrationFunctions()
    {
-      static std::map<const char*, luaW_regFunc> registrationFunctions;
+      static functionMap registrationFunctions;
       return registrationFunctions;
    }
 
-   static std::map<const char*, luaW_regFunc> &getExtensionFunctions()
+   // List of extension functions
+   static functionMap &getExtensionFunctions()
    {
-      static std::map<const char*, luaW_regFunc> extensionFunctions;
+      static functionMap extensionFunctions;
       return extensionFunctions;
    }
 
-   static std::vector<compareKey> &getPreorderedClassList()
+   static std::vector<classParent> &getPreorderedClassList()
    {
-      static std::vector<compareKey> preorderedClassList;
+      static std::vector<classParent> preorderedClassList;
       return preorderedClassList;
    }
 
@@ -804,13 +810,13 @@ private:
       unsigned int startingSize, currentSize;
       startingSize = currentSize = getPreorderedClassList().size();
 
-      // Pass 1: First grab all top level objects, we do this only once
-      for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
+      // Pass 1: First grab all top level objects, we do this only once.  Go backwards.
+      for(int i = (int)getPreorderedClassList().size() - 1; i >= 0; i--)   
       {
-         // If no parent, then it is a top-level object.  Add to ordered list and remove from pre-ordered one
-         if(getPreorderedClassList()[i].second == NULL)
+         // If no parent, then it is a top-level object.  Add to ordered list and remove from pre-ordered one.
+         if(getPreorderedClassList()[i].parent == NULL)
          {
-            orderedClassList.push_back(getPreorderedClassList()[i].first);
+            orderedClassList.push_back(getPreorderedClassList()[i].name);
 
             getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
          }
@@ -829,13 +835,13 @@ private:
          {
             bool parentIsOrdered = false;
             for(unsigned int j = 0; j < orderedClassList.size(); j++)
-               if(strcmp(orderedClassList[j], getPreorderedClassList()[i].second) == 0)
+               if(strcmp(orderedClassList[j], getPreorderedClassList()[i].parent) == 0)
                   parentIsOrdered = true;
 
             // If parent is already found, add to ordered list and remove from pre-ordered list
             if(parentIsOrdered)
             {
-               orderedClassList.push_back(getPreorderedClassList()[i].first);
+               orderedClassList.push_back(getPreorderedClassList()[i].name);
 
                getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
             }
@@ -848,7 +854,7 @@ private:
          {
             for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
             {
-               orderedClassList.push_back(getPreorderedClassList()[i].first);
+               orderedClassList.push_back(getPreorderedClassList()[i].name);
 
                getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
             }
@@ -874,7 +880,7 @@ protected:
    template<class T>
    void static registerClass()
    {
-      compareKey key(T::luaClassName, NULL);
+      classParent key = {T::luaClassName, NULL};
       getPreorderedClassList().push_back(key);
 
       keyValue pair1(T::luaClassName, &registerClass<T>);
@@ -884,7 +890,7 @@ protected:
    template<class T, class U>
    static void registerClass()
    {
-      compareKey key(T::luaClassName, U::luaClassName);
+      classParent key = {T::luaClassName, U::luaClassName};
       getPreorderedClassList().push_back(key);
 
       keyValue pair1(T::luaClassName, &registerClass<T>);
