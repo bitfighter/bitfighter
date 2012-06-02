@@ -830,7 +830,7 @@ private:
       // Pass 1: First grab all top level objects, we do this only once.  Go backwards.
       for(int i = (int)getPreorderedClassList().size() - 1; i >= 0; i--)   
       {
-         // If this is a top-level object, add to ordered list and remove from pre-ordered one
+         // If this is a top-level object, move to ordered list 
          if(getPreorderedClassList()[i].isTopLevel())
             moveTo(orderedClassList, i);
       }
@@ -852,7 +852,7 @@ private:
                if(strcmp(orderedClassList[j], getPreorderedClassList()[i].parent) == 0)
                   foundParent = true;
 
-            // If parent is already found, add to ordered list and remove from pre-ordered list, as before
+            // If parent is already found, move to ordered list, as before
             if(foundParent)
                moveTo(orderedClassList, i);
          }
