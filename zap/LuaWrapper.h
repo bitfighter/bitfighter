@@ -826,7 +826,7 @@ private:
    }
 
 
-   // Sort vector of classes where parents of each class are listed before their children.  List is built as-needed.
+   // Sort vector of classes so parents of each class are listed before their children
    static void sortClassList()
    {
       unsigned int startingSize, itemsRemainingInList;
