@@ -779,12 +779,13 @@ private:
       const char *name;   
       const char *parent; 
 
-      bool isTopLevel() { return parent == NULL; }
+      //bool isTopLevel() { return parent == NULL; }
    };
 
-   typedef const char* functionName;
-   typedef std::pair<functionName, luaW_regFunc> keyValue;
-   typedef std::map <functionName, luaW_regFunc> functionMap;    // Map of function name and functions
+   typedef const char* className;
+   typedef std::pair<className, luaW_regFunc> nameFunctionPair;
+   typedef std::map <className, luaW_regFunc> functionMap;    // Map of class name and registration functions
+
 
    // List of registration functions
    static functionMap &getRegistrationFunctions()
@@ -792,6 +793,7 @@ private:
       static functionMap registrationFunctions;
       return registrationFunctions;
    }
+
 
    // List of extension functions
    static functionMap &getExtensionFunctions()
@@ -801,78 +803,66 @@ private:
    }
 
    // Unordered list of classes
-   static std::vector<classParent> &getPreorderedClassList()
+   static std::vector<classParent> &getUnorderedClassList()
    {
-      static std::vector<classParent> preorderedClassList;
-      return preorderedClassList;
-   }
-
-   // Helper function -- move function from preorderdClassList and add it to passed list 
-   static void moveTo(std::vector<functionName> &orderedClassList, int i)
-   {
-      orderedClassList.push_back(getPreorderedClassList()[i].name);
-      getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
+      static std::vector<classParent> unorderedClassList;
+      return unorderedClassList;
    }
 
 
-   // Return vector of classes where parents of each class are listed before their children.  List is built as-needed.
-   static std::vector<functionName> &getOrderedClassList()
+   // List of classes sorted by initialization order
+   static std::vector<className> &getOrderedClassList()
    {
-      static std::vector<functionName> orderedClassList;
+      static std::vector<className> orderedClassList;
+      return orderedClassList;
+   }
 
-      // If list is already built, just return it
-      if(orderedClassList.size() > 0)
-         return orderedClassList;
 
-      unsigned int startingSize, currentSize;
-      startingSize = currentSize = getPreorderedClassList().size();
+   // Helper function -- move function from unorderdClassList to orderedClassList list 
+   static void moveToOrderedList(int i)
+   {
+      getOrderedClassList().push_back(getUnorderedClassList()[i].name);
+      getUnorderedClassList().erase(getUnorderedClassList().begin() + i);
+   }
 
-      // Pass 1: First grab all top level objects, we do this only once.  Go backwards.
-      for(int i = (int)getPreorderedClassList().size() - 1; i >= 0; i--)   
-      {
-         // If this is a top-level object, move to ordered list 
-         if(getPreorderedClassList()[i].isTopLevel())
-            moveTo(orderedClassList, i);
-      }
 
-      currentSize = getPreorderedClassList().size();     // Remaining items after all top-level items have been processed
+   // Sort vector of classes where parents of each class are listed before their children.  List is built as-needed.
+   static void sortClassList()
+   {
+      unsigned int startingSize, itemsRemainingInList;
 
-      // Pass 2: Go through the remaining objects -- these should all have parents that are in orderedClassList
+      startingSize = itemsRemainingInList = getUnorderedClassList().size();     
+
+      // Iterate through unordered objects -- these should all have parents that are already in orderedClassList
       unsigned int iteration = 0;
-      while(currentSize > 0)
+      while(itemsRemainingInList > 0)
       {
          iteration++;
 
-         for(int i = (int)getPreorderedClassList().size() - 1; i >= 0; i--)
+         for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)
          {
             bool foundParent = false;
 
             // Search ordered list to see if parent is already there
-            for(unsigned int j = 0; j < orderedClassList.size(); j++)
-               if(strcmp(orderedClassList[j], getPreorderedClassList()[i].parent) == 0)
+            for(unsigned int j = 0; j < getOrderedClassList().size(); j++)
+               if(strcmp(getOrderedClassList()[j], getUnorderedClassList()[i].parent) == 0)
                   foundParent = true;
 
             // If parent is already found, move to ordered list, as before
             if(foundParent)
-               moveTo(orderedClassList, i);
+               moveToOrderedList(i);
          }
 
          // For safety if objects have no found parents and we've iterated too many times,
          // just add them to the end of the list.  This block should nevever run.
          TNLAssert(iteration <= startingSize, "Item appears to have invalid parent!");
+
          if(iteration > startingSize)
-         {
-            for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
-               moveTo(orderedClassList, i);
-         }
+            for(int i = (int)getUnorderedClassList().size() - 1; i > -1; i--)
+               moveToOrderedList(i);
 
-         currentSize = getPreorderedClassList().size();     // Items still remaining in the list
+         itemsRemainingInList = getUnorderedClassList().size();   
       }
-
-      // We allow roughly, roughly monkey boy
-      TNLAssert(orderedClassList.size() == startingSize, "Ordered list is different size than pre-ordered list!");
-
-      return orderedClassList;
    }
 
 protected:
@@ -880,36 +870,36 @@ protected:
    static void registerClass(lua_State *L)
    {
       luaW_register<T>(L, T::luaClassName, NULL, T::luaMethods);
-      lua_pop(L, 1);                            // Remove metatable from stack
+      lua_pop(L, 1);       // Remove metatable from stack
    }
 
    template<class T>
    void static registerClass()
    {
-      classParent key = {T::luaClassName, NULL};
-      getPreorderedClassList().push_back(key);
+      getOrderedClassList().push_back(T::luaClassName);        // No parent, so add it to front of ordered list (no sorting needed)
 
-      keyValue pair1(T::luaClassName, &registerClass<T>);
-      getRegistrationFunctions().insert(pair1);
+      nameFunctionPair regPair(T::luaClassName, &registerClass<T>);
+      getRegistrationFunctions().insert(regPair);
    }
 
    template<class T, class U>
    static void registerClass()
    {
-      classParent key = {T::luaClassName, U::luaClassName};
-      getPreorderedClassList().push_back(key);
+      classParent key = {T::luaClassName, U::luaClassName};    // This class has a parent and needs to be
+      getUnorderedClassList().push_back(key);                  // registered after parent (will require sorting)
 
-      keyValue pair1(T::luaClassName, &registerClass<T>);
-      getRegistrationFunctions().insert(pair1);
+      nameFunctionPair regPair(T::luaClassName, &registerClass<T>);
+      getRegistrationFunctions().insert(regPair);
 
-      keyValue pair2(T::luaClassName, &luaW_extend<T, U>);
-      getExtensionFunctions()   .insert(pair2);
+      nameFunctionPair extPair(T::luaClassName, &luaW_extend<T, U>);
+      getExtensionFunctions()   .insert(extPair);
    }
 
 public:
    static void registerClasses(lua_State *L)
    {
-      std::vector<const char*> orderedClassList = getOrderedClassList();
+      sortClassList();
+      std::vector<className> orderedClassList = getOrderedClassList();
 
       // Register all our classes
       for(unsigned int i = 0; i < orderedClassList.size(); i++)
@@ -926,6 +916,7 @@ public:
       }
    }
 };
+
 
 // Helper classes that extend LuaW_Registrar.  These are intended for use
 // only by one of the two macro definitions below.
