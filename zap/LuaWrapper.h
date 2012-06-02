@@ -807,10 +807,22 @@ private:
       return preorderedClassList;
    }
 
+   // Helper function -- move function from preorderdClassList and add it to passed list 
+   static void moveTo(std::vector<functionName> &orderedClassList, int i)
+   {
+      orderedClassList.push_back(getPreorderedClassList()[i].name);
+      getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
+   }
+
+
    // Return vector of classes where parents of each class are listed before their children.  List is built as-needed.
    static std::vector<functionName> &getOrderedClassList()
    {
       static std::vector<functionName> orderedClassList;
+
+      // If list is already built, just return it
+      if(orderedClassList.size() > 0)
+         return orderedClassList;
 
       unsigned int startingSize, currentSize;
       startingSize = currentSize = getPreorderedClassList().size();
@@ -820,10 +832,7 @@ private:
       {
          // If this is a top-level object, add to ordered list and remove from pre-ordered one
          if(getPreorderedClassList()[i].isTopLevel())
-         {
-            orderedClassList.push_back(getPreorderedClassList()[i].name);
-            getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
-         }
+            moveTo(orderedClassList, i);
       }
 
       currentSize = getPreorderedClassList().size();     // Remaining items after all top-level items have been processed
@@ -845,10 +854,7 @@ private:
 
             // If parent is already found, add to ordered list and remove from pre-ordered list, as before
             if(foundParent)
-            {
-               orderedClassList.push_back(getPreorderedClassList()[i].name);
-               getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
-            }
+               moveTo(orderedClassList, i);
          }
 
          // For safety if objects have no found parents and we've iterated too many times,
@@ -857,10 +863,7 @@ private:
          if(iteration > startingSize)
          {
             for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
-            {
-               orderedClassList.push_back(getPreorderedClassList()[i].name);
-               getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
-            }
+               moveTo(orderedClassList, i);
          }
 
          currentSize = getPreorderedClassList().size();     // Items still remaining in the list
