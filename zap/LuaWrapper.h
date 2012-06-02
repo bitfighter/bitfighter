@@ -800,12 +800,14 @@ private:
       return extensionFunctions;
    }
 
+   // Unordered list of classes
    static std::vector<classParent> &getPreorderedClassList()
    {
       static std::vector<classParent> preorderedClassList;
       return preorderedClassList;
    }
 
+   // Return vector of classes where parents of each class are listed before their children.  List is built as-needed.
    static std::vector<functionName> &getOrderedClassList()
    {
       static std::vector<functionName> orderedClassList;
