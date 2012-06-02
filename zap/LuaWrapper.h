@@ -826,7 +826,7 @@ private:
 
       currentSize = getPreorderedClassList().size();     // Remaining items after all top-level items have been processed
 
-      // Pass 2: Go through the sub-class objects
+      // Pass 2: Go through the remaining objects -- these should all have parents that are in orderedClassList
       unsigned int iteration = 0;
       while(currentSize > 0)
       {
