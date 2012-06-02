@@ -778,10 +778,13 @@ private:
    struct classParent { 
       const char *name;   
       const char *parent; 
+
+      bool isTopLevel() { return parent == NULL; }
    };
 
-   typedef std::pair<const char*, luaW_regFunc> keyValue;
-   typedef std::map<const char*, luaW_regFunc>  functionMap;    // Map of function name and functions
+   typedef const char* functionName;
+   typedef std::pair<functionName, luaW_regFunc> keyValue;
+   typedef std::map <functionName, luaW_regFunc> functionMap;    // Map of function name and functions
 
    // List of registration functions
    static functionMap &getRegistrationFunctions()
@@ -803,9 +806,9 @@ private:
       return preorderedClassList;
    }
 
-   static std::vector<const char*> &getOrderedClassList()
+   static std::vector<functionName> &getOrderedClassList()
    {
-      static std::vector<const char*> orderedClassList;
+      static std::vector<functionName> orderedClassList;
 
       unsigned int startingSize, currentSize;
       startingSize = currentSize = getPreorderedClassList().size();
@@ -813,57 +816,55 @@ private:
       // Pass 1: First grab all top level objects, we do this only once.  Go backwards.
       for(int i = (int)getPreorderedClassList().size() - 1; i >= 0; i--)   
       {
-         // If no parent, then it is a top-level object.  Add to ordered list and remove from pre-ordered one.
-         if(getPreorderedClassList()[i].parent == NULL)
+         // If this is a top-level object, add to ordered list and remove from pre-ordered one
+         if(getPreorderedClassList()[i].isTopLevel())
          {
             orderedClassList.push_back(getPreorderedClassList()[i].name);
-
             getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
          }
       }
 
-      currentSize = getPreorderedClassList().size();
+      currentSize = getPreorderedClassList().size();     // Remaining items after all top-level items have been processed
 
       // Pass 2: Go through the sub-class objects
       unsigned int iteration = 0;
       while(currentSize > 0)
       {
          iteration++;
-//         printf("##### iteration: %d; pre-ordered size: %d\n", iteration, currentSize);
 
-         for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
+         for(int i = (int)getPreorderedClassList().size() - 1; i >= 0; i--)
          {
-            bool parentIsOrdered = false;
+            bool foundParent = false;
+
+            // Search ordered list to see if parent is already there
             for(unsigned int j = 0; j < orderedClassList.size(); j++)
                if(strcmp(orderedClassList[j], getPreorderedClassList()[i].parent) == 0)
-                  parentIsOrdered = true;
+                  foundParent = true;
 
-            // If parent is already found, add to ordered list and remove from pre-ordered list
-            if(parentIsOrdered)
+            // If parent is already found, add to ordered list and remove from pre-ordered list, as before
+            if(foundParent)
             {
                orderedClassList.push_back(getPreorderedClassList()[i].name);
-
                getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
             }
          }
 
          // For safety if objects have no found parents and we've iterated too many times,
-         // just add them to the end of the list
-         TNLAssert(iteration <= startingSize, "Tried to order the classes too many times!");
+         // just add them to the end of the list.  This block should nevever run.
+         TNLAssert(iteration <= startingSize, "Item appears to have invalid parent!");
          if(iteration > startingSize)
          {
             for(int i = (int)getPreorderedClassList().size() - 1; i > -1; i--)
             {
                orderedClassList.push_back(getPreorderedClassList()[i].name);
-
                getPreorderedClassList().erase(getPreorderedClassList().begin() + i);
             }
          }
 
-         currentSize = getPreorderedClassList().size();
+         currentSize = getPreorderedClassList().size();     // Items still remaining in the list
       }
 
-      // We allow roughly
+      // We allow roughly, roughly monkey boy
       TNLAssert(orderedClassList.size() == startingSize, "Ordered list is different size than pre-ordered list!");
 
       return orderedClassList;
@@ -901,7 +902,6 @@ protected:
    }
 
 public:
-
    static void registerClasses(lua_State *L)
    {
       std::vector<const char*> orderedClassList = getOrderedClassList();
