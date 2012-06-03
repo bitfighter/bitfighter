@@ -2267,7 +2267,7 @@ const luaL_reg Ship::luaMethods[] =
    { "getCurrLoadout",  luaW_doMethod<Ship, &Ship::getCurrLoadout>  },
    { "getReqLoadout",   luaW_doMethod<Ship, &Ship::getReqLoadout>   },
 
-   {0,0}    // End method list
+   { NULL, NULL }    // End method list
 };
 
 
