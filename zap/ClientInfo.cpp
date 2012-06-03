@@ -447,13 +447,14 @@ VoiceDecoder *FullClientInfo::getVoiceDecoder()
 #ifndef ZAP_DEDICATED
 // Constructor
 RemoteClientInfo::RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                   bool isRobot, bool isAdmin, bool isSpawnDelayed, bool isBusy) : ClientInfo()
+                                   bool isRobot, bool isAdmin, bool isLevelChanger, bool isSpawnDelayed, bool isBusy) : ClientInfo()
 {
    mGame = game;
    mName = name;
    mIsAuthenticated = isAuthenticated;
    mIsRobot = isRobot;
    mIsAdmin = isAdmin;
+   mIsLevelChanger = isLevelChanger;
    mTeamIndex = NO_TEAM;
    mRating = 0;
    mBadges = badges;

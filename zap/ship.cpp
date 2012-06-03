@@ -2152,7 +2152,7 @@ void Ship::render(S32 layerIndex)
 
    renderShip(mShapeType, gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime,
               isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), 
-              isModulePrimaryActive(ModuleRepair), hasModule(ModuleArmor));
+              isModulePrimaryActive(ModuleRepair) && mHealth < 1, hasModule(ModuleArmor));
 
    if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
       renderAimVector();

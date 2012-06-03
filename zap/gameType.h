@@ -464,7 +464,7 @@ public:
    TNL_DECLARE_RPC(s2cAddWalls, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b, U32 score, bool firstTeam));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isAuthenticated, Int<BADGE_COUNT> badges, 
-                                  bool isMyClient, bool isAdmin, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert));
+                                  bool isMyClient, bool isAdmin, bool isLevelChanger, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert));
    TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, MAX_TEAMS> teamIndex));
    TNL_DECLARE_RPC(s2cClientBecameAdmin, (StringTableEntry clientName));
    TNL_DECLARE_RPC(s2cClientBecameLevelChanger, (StringTableEntry clientName));
@@ -536,9 +536,6 @@ public:
 
    TNL_DECLARE_RPC(s2cDisplayChatPM, (StringTableEntry clientName, StringTableEntry toName, StringPtr message));
    TNL_DECLARE_RPC(s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message));
-#if CS_PROTOCOL_VERSION <= 35
-   TNL_DECLARE_RPC(s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message));
-#endif
 
    // killerName will be ignored if killer is supplied
    TNL_DECLARE_RPC(s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerName));
