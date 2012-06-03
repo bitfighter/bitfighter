@@ -296,6 +296,7 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
    }
 
 
+   GridDatabase *newDB = getDatabase();
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<GridDatabase>(new GridDatabase(*newDB));  // Make a copy
 
    mLastUndoIndex++;
