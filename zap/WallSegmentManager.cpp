@@ -241,6 +241,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       // Create a WallSegment for each sequential pair of vertices
       for(S32 i = 0; i < wallItem->extendedEndPoints.size(); i += 2)
       {
+         logprintf("Building %p", mWallSegmentDatabase);
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
                                                    (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
 

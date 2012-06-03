@@ -833,6 +833,7 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 // Regular constructor
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
 { 
+   logprintf("Constr %p", gridDatabase);
    // Calculate segment corners by expanding the extended end points into a rectangle
    Barrier::expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
    init(gridDatabase, owner);

@@ -59,7 +59,6 @@ private:
    U32 mLastQueryId;
    Rect mExtent;
    GridDatabase *mDatabase;
-   void setDatabase(GridDatabase *database);
 
 protected:
    U8 mObjectTypeNumber;

@@ -296,15 +296,7 @@ void EditorUserInterface::saveUndoState(bool forceSelectionOfTargetObject)
    }
 
 
-   GridDatabase *eod = getDatabase();
-   TNLAssert(eod, "I expected to have a valid GridDatabase here!");
-
-   GridDatabase *newDB = eod;
-   //eod->dumpObjects();     
-
    mUndoItems[mLastUndoIndex % UNDO_STATES] = boost::shared_ptr<GridDatabase>(new GridDatabase(*newDB));  // Make a copy
-
-   //mUndoItems[mLastUndoIndex % UNDO_STATES]->dumpObjects();
 
    mLastUndoIndex++;
    mLastRedoIndex = mLastUndoIndex;

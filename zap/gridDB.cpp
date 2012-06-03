@@ -82,6 +82,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    TNLAssert(!theObject->mDatabase, "Already added to database, trying to add to different database");
    if(theObject->mDatabase)
       return;
+
 	theObject->mDatabase = this;
 
 
@@ -143,6 +144,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    TNLAssert(theObject->mDatabase == this || theObject->mDatabase == NULL, "Trying to remove Object from wrong database");
    if(theObject->mDatabase != this)
       return;
+
 	theObject->mDatabase = NULL;
 
    static IntRect bins;
@@ -655,7 +657,6 @@ void DatabaseObject::removeFromDatabase()
       return;
 
    getDatabase()->removeFromDatabase(this, mExtent);
-   mDatabase = NULL;
 }
 
 
@@ -716,12 +717,6 @@ U8 DatabaseObject::getObjectTypeNumber()
 GridDatabase *DatabaseObject::getDatabase()
 {
    return mDatabase;
-}
-
-
-void DatabaseObject::setDatabase(GridDatabase *database)
-{
-   mDatabase = database;
 }
 
 
@@ -841,10 +836,11 @@ S32 QSORT_CALLBACK geometricSort(BfObject * &a, BfObject * &b)
 //}
 
 
+}
+
 // Reusable container for searching gridDatabases
 // putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
 Vector<Zap::DatabaseObject *> fillVector;
 Vector<Zap::DatabaseObject *> fillVector2;
 
 
-}
