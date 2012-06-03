@@ -1212,10 +1212,7 @@ const luaL_reg BfObject::luaMethods[] =
 {
    { "getClassID",      luaW_doMethod<BfObject, &BfObject::getClassID> },
    { "getLoc",          luaW_doMethod<BfObject, &BfObject::getLoc>     },
-   //{ "getRad",          luaW_doMethod<Item, &Item::getRad>          },
-   //{ "getVel",          luaW_doMethod<Item, &Item::getVel>          },
    { "getTeamIndx",     luaW_doMethod<BfObject, &BfObject::getTeamIndx>     },
-   //{ "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
 
    { NULL, NULL }
 };

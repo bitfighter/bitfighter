@@ -442,6 +442,7 @@ const luaL_reg Projectile::luaMethods[] =
 {
    { "getRad",    luaW_doMethod<Projectile, &Projectile::getRad>    },
    { "getWeapon", luaW_doMethod<Projectile, &Projectile::getWeapon> },
+   { "getVel",    luaW_doMethod<Projectile, &Projectile::getVel> },
 
    { NULL, NULL }
 };
@@ -453,6 +454,12 @@ S32 Projectile::getRad(lua_State *L)
 {
    // TODO: Wrong!!  Radius of item (returns number)
    return returnInt(L, 10);
+}
+
+
+S32 Projectile::getVel(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getActualVel());
 }
 
 

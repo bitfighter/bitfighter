@@ -94,6 +94,7 @@ public:
    static const char *luaClassName;
 
    S32 getRad(lua_State *L);      // Radius of item (returns number)
+   S32 getVel(lua_State *L);
    S32 getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 

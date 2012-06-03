@@ -412,8 +412,6 @@ public:
    static const char *luaClassName;
 
    S32 getClassID(lua_State *L);
-   //virtual S32 getRad(lua_State *L);
-   //virtual S32 getVel(lua_State *L);
    virtual S32 getLoc(lua_State *L);
    virtual S32 getTeamIndx(lua_State *L);   
    BfObject *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
