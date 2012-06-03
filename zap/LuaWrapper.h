@@ -760,8 +760,6 @@ private:
    struct classParent { 
       const char *name;   
       const char *parent; 
-
-      //bool isTopLevel() { return parent == NULL; }
    };
 
    typedef const char* className;
@@ -783,6 +781,7 @@ private:
       static functionMap extensionFunctions;
       return extensionFunctions;
    }
+
 
    // Unordered list of classes
    static std::vector<classParent> &getUnorderedClassList()
