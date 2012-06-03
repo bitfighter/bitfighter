@@ -681,7 +681,7 @@ bool LuaScriptRunner::loadScript()
 #ifdef ZAP_DEDICATED
    bool cacheScripts = true;
 #else
-   bool cacheScripts = gServerGame && gServerGame->isTestServer();
+   bool cacheScripts = gServerGame && !gServerGame->isTestServer();
 #endif
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
@@ -719,6 +719,11 @@ bool LuaScriptRunner::loadScript()
       lua_getfield(L, LUA_REGISTRYINDEX, mScriptName.c_str());    // Load script from cache
    }
 
+   if(lua_gettop(L) == 0)     // Script compile error?
+   {
+      logError("Error compiling script -- aborting.");
+      return false;
+   }
 
    // So, however we got here, the script we want to run is now sitting on top of the stack
    TNLAssert((lua_gettop(L) == 1 && lua_isfunction(L, 1)) || LuaObject::dumpStack(L), "Expected a single function on the stack!");
