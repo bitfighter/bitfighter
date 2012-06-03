@@ -1158,50 +1158,5 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #undef setGTEnum
 #undef setEventEnum
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-//LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
-//{
-//   switch(type)
-//   {
-//      case RobotShipTypeNumber:  // pass through
-//      case PlayerShipTypeNumber:
-//        return  Lunar<LuaShip>::check(L, index);
-//
-//      case BulletTypeNumber:  // pass through
-//      case MineTypeNumber:    // pass through
-//      case SpyBugTypeNumber:
-//         return Lunar<LuaProjectile>::check(L, index);
-//
-//
-//      case TeleportTypeNumber:
-//         return Lunar<Teleporter>::check(L, index);
-//
-//      default:
-//         char msg[256];
-//         dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
-//         logprintf(LogConsumer::LogError, msg);
-//
-//         throw LuaException(msg);
-//   }
-//}
-//
-//
-//void LuaItem::push(lua_State *L)
-//{
-//   TNLAssert(false, "Unimplemented method!");
-//}
-//
-//
-//S32 LuaItem::getClassID(lua_State *L)
-//{
-//   TNLAssert(false, "Unimplemented method!");
-//   return -1;
-//}
-
-
-
 };
 
