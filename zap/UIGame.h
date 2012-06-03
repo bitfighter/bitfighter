@@ -373,6 +373,7 @@ public:
    void voiceMuteHandler(const Vector<string> &words);
    void maxFpsHandler(const Vector<string> &words);
    void lineWidthHandler(const Vector<string> &words);
+   void idleHandler(const Vector<string> &words);
    void suspendHandler(const Vector<string> &words);
    void showPresetsHandler(const Vector<string> &words);
    void deleteCurrentLevelHandler(const Vector<string> &words);

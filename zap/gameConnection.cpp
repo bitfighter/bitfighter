@@ -247,6 +247,22 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+{
+   ClientInfo *clientInfo = getClientInfo();
+
+   clientInfo->setSpawnDelayed(true);
+
+   // If we've just died, this will keep a second copy of ourselves from appearing
+   clientInfo->respawnTimer.clear();
+
+   // Now suicide!
+   Ship *ship = clientInfo->getShip();
+   if(ship)
+      ship->kill();
+}
+
+
 // Old server side /getmap command, now unused, may be removed
 // 1. client send /getmap command
 // 2. server send map if allowed

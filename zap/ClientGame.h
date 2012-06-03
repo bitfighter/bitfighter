@@ -166,6 +166,7 @@ public:
    void setSpawnDelayed(bool spawnDelayed);
    bool isSpawnDelayed();
    void undelaySpawn();
+   void requestSpawnDelayed();
 
    // Check for permissions
    bool hasAdmin(const char *failureMessage);

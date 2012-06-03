@@ -359,6 +359,12 @@ void ClientGame::undelaySpawn()
 }
 
 
+void ClientGame::requestSpawnDelayed()
+{
+   getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
+}
+
+
 string ClientGame::getLoginPassword() const
 {
    return mLoginPassword;
