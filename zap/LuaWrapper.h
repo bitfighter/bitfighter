@@ -43,7 +43,6 @@ extern "C"
 #include <vector>
 #include <map>
 #include <cstring>
-#include <typeinfo>  // XXX remove me when removing all the logprintf's with 'typeid'
 
 #define LUAW_BUILDER
 
@@ -87,7 +86,6 @@ void luaW_defaultdeallocator(lua_State*, T* obj)
 template <typename T>
 void luaW_defaultidentifier(lua_State* L, T* obj)
 {
-    logprintf("CCCCCCCCCCCCC  %p %s", obj,  typeid(T).name());
     lua_pushlightuserdata(L, obj);
 }
 
@@ -155,7 +153,6 @@ template <typename T>
 bool luaW_is(lua_State *L, int index, bool strict = false)
 {
     bool equal = false;// lua_isnil(L, index);
-logprintf("luaW_is for T=%s",  LuaWrapper<T>::classname);
 // Here we have stack: userdata, 'getRad'
     if (!equal && lua_isuserdata(L, index) && lua_getmetatable(L, index))
     {
@@ -209,8 +206,6 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
         luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
         luaW_Userdata ud;
 
-        logprintf("luaW_to: %p, %p (T = %s)", LuaWrapper<T>::cast, pud->cast, LuaWrapper<T>::classname);
-
         while (!strict && LuaWrapper<T>::cast != pud->cast)
         {
             ud = pud->cast(*pud);
@@ -257,17 +252,14 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
     {
         luaW_Userdata* pud = (luaW_Userdata*)lua_touserdata(L, index);
         luaW_Userdata ud;
-        logprintf("luaW_check (T=%s), %p , %p", LuaWrapper<T>::classname, LuaWrapper<T>::cast, pud->cast);
         while (!strict && LuaWrapper<T>::cast != pud->cast)
         {
             ud = pud->cast(*pud);
             pud = &ud;
-       logprintf("luaW_check (T=%s), %p , %p", LuaWrapper<T>::classname, LuaWrapper<T>::cast, pud->cast);
-
         }
-        logprintf("Going");
+
         LuaProxy<T> *proxy = (LuaProxy<T>*)pud->data;
-        logprintf("Back");
+
         if(!proxy->isDefunct())
          obj = proxy->getProxiedObject();
     }
@@ -304,8 +296,6 @@ void luaW_push(lua_State* L, T* obj)
 
         ud->cast = LuaWrapper<T>::cast;
 
-        logprintf("luaW_push %p  (T=%s)", ud->cast, LuaWrapper<T>::classname); 
-
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj mt
         lua_setmetatable(L, -2); // ... obj
         luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... obj LuaWrapper
@@ -313,8 +303,6 @@ void luaW_push(lua_State* L, T* obj)
         LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts id
         lua_gettable(L, -2); // ... obj LuaWrapper LuaWrapper.counts count
         int count = (int) lua_tointeger(L, -1);
-
-           logprintf("XXXXX Pushing obj %p as %s  [[ count = %d ]]", obj, typeid(T).name(), count);
 
         LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts count id
         lua_pushinteger(L, count+1); // ... obj LuaWrapper LuaWrapper.counts count id count+1
@@ -339,7 +327,6 @@ void luaW_push(lua_State* L, T* obj)
 template <typename T>
 bool luaW_hold(lua_State* L, T* obj)
 {
-   logprintf("XXXXX Holding %s for obj %p", typeid(T).name(), obj);
     luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... LuaWrapper
 
     lua_getfield(L, -1, LUAW_HOLDS_KEY); // ... LuaWrapper LuaWrapper.holds
@@ -610,8 +597,6 @@ int luaW__gc(lua_State* L)
     lua_pushinteger(L, --count); // obj id LuaWrapper LuaWrapper.counts count id count-1
     lua_settable(L, -4); // obj id LuaWrapper LuaWrapper.counts count
 
-    logprintf("XXXXX Garbage collecting obj %p of type %s (count = %d)", obj, typeid(T).name(), count);
-
     if (obj && 0 == count)
     {
         lua_getfield(L, 3, LUAW_HOLDS_KEY); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds
@@ -650,7 +635,6 @@ int luaW__gc(lua_State* L)
 template <typename T>
 void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>)
 {
-   logprintf("XXXXX luaW_register: %s", typeid(T).name());
     LuaWrapper<T>::classname = classname;
     LuaWrapper<T>::identifier = identifier;
     LuaWrapper<T>::allocator = allocator;
@@ -964,8 +948,6 @@ public:
       mProxiedObject = obj;
       obj->setLuaProxy(this);
       mDefunct = false;
-
-      logprintf("XXXXX Creating %s proxy for %p (proxy addr: %p)", typeid(T).name(), mProxiedObject, this);
     }
 
    // Destructor
@@ -1005,9 +987,9 @@ public:
 #define  LUAW_DECLARE_CLASS(className) \
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
-   void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
+   virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    className (lua_State *L) { }  /* Unused but required constructor */ \
-   void push(lua_State *L) { luaW_push(L, this); }
+   virtual void push(lua_State *L) { luaW_push(L, this); }
 
 
 // This goes in the constructor of the "wrapped class"
