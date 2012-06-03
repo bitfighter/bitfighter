@@ -200,7 +200,7 @@ private:
 
 public:
    RemoteClientInfo(Game *game, const StringTableEntry &name, bool isAuthenticated, Int<BADGE_COUNT> badges,      // Constructor
-                    bool isRobot, bool isAdmin, bool isSpawnDelayed, bool isBusy);  
+                    bool isRobot, bool isAdmin, bool isLevelChanger, bool isSpawnDelayed, bool isBusy);
    virtual ~RemoteClientInfo();      
    // Destructor
    void initialize();
