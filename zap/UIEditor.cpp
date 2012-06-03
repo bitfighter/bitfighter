@@ -2591,8 +2591,8 @@ bool EditorUserInterface::checkForEdgeHit(const Point &point, BfObject *object)
 
 bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *object)
 {
-   WallSegment *wallSegment = dynamic_cast<WallSegment *>(object);
-   TNLAssert(wallSegment, "Expected a WallSegment!");
+   TNLAssert(dynamic_cast<WallSegment *>(object), "Expected a WallSegment!");
+   WallSegment *wallSegment = static_cast<WallSegment *>(object);
 
    if(triangulatedFillContains(wallSegment->getTriangulatedFillPoints(), point))
    {
