@@ -96,10 +96,13 @@ void LogConsumer::logString(LogConsumer::MsgType msgType, std::string message)
 }
 
 
+// Create reusable buffer for our logging functions.  Make it big because when we use datadumper 
+// in a script, some messages can get very long
+static char msg[1024 * 8];
+
+
 void LogConsumer::logprintf(const char *format, ...)
 {
-   char msg[2048]; 
-
    va_list args; 
    va_start(args, format); 
 
@@ -214,8 +217,6 @@ LogType *LogType::find(const char *name)
 // Logs to logfiles that have subscribed to specified message type
 void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
 {
-   char msg[2048]; 
-
    va_list args; 
    va_start(args, format); 
 
@@ -232,8 +233,6 @@ void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
 // Logs to general log
 void logprintf(const char *format, ...)
 {
-   char msg[2048]; 
-
    va_list args; 
    va_start(args, format); 
 
