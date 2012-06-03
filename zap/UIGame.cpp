@@ -1811,6 +1811,13 @@ void GameUserInterface::deleteCurrentLevelHandler(const Vector<string> &words)
 }
 
 
+void GameUserInterface::idleHandler(const Vector<string> &words)
+{
+   ClientGame *game = getGame();
+   game->requestSpawnDelayed();
+}
+
+
 void GameUserInterface::suspendHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
@@ -2331,7 +2338,8 @@ CommandInfo chatCmds[] = {
    { "password",&GameUserInterface::submitPassHandler,{ STR },      1,       ADV_COMMANDS,    0,     1,     {"<password>"},         "Request admin or level change permissions"  },
    { "servvol", &GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,     1,     {"<0-10>"},             "Set volume of server"  },
    { "getmap",  &GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,     1,     {"[file]"},             "Save currently playing level in [file], if allowed" },
-   { "suspend", &GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,     1,     {  },                   "Place game on hold while waiting for players" },
+   { "idle",    &GameUserInterface::idleHandler,      {  },         0,       ADV_COMMANDS,    1,     1,     {  },                   "Place client in idle mode (AFK)" },
+   { "suspend", &GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,     1,     {  },                   "Place server on hold while waiting for players" },
    { "pm",      &GameUserInterface::pmHandler,        { NAME, STR },2,       ADV_COMMANDS,    1,     1,     {"<name>","<message>"}, "Send private message to player" },
    { "mvol",    &GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set music volume"      },
    { "svol",    &GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,     1,     {"<0-10>"},             "Set SFX volume"        },

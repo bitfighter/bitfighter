@@ -213,6 +213,7 @@ public:
    // Delay/undelay spawn
    TNL_DECLARE_RPC(s2cPlayerSpawnDelayed, ());
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
+   TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, ());
 
 
    TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type));      // Player using engineer module
