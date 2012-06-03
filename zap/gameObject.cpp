@@ -652,13 +652,6 @@ void BfObject::renderDock()
 }
 
 
-// TODO: Delete this method
-GridDatabase *BfObject::getEditorObjectDatabase()
-{
-   return getDatabase();
-}
-
-
 // For editing attributes -- all implementation will need to be provided by the children
 EditorAttributeMenuUI *BfObject::getAttributeMenu()                                      { return NULL; }
 void                   BfObject::startEditingAttrs(EditorAttributeMenuUI *attributeMenu) { /* Do nothing */ }

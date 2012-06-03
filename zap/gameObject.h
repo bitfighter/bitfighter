@@ -370,8 +370,6 @@ public:
 
    void unselect();
 
-   GridDatabase *getEditorObjectDatabase();
-
    // Account for the fact that the apparent selection center and actual object center are not quite aligned
    virtual Point getEditorSelectionOffset(F32 currentScale);  
 

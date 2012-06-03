@@ -498,7 +498,7 @@ void WallItem::onGeomChanged()
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
    processEndPoints();
 
-   GridDatabase *db = getEditorObjectDatabase();
+   GridDatabase *db = getDatabase();
 
    db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
    Parent::onGeomChanged();
@@ -741,7 +741,7 @@ void PolyWall::setSelected(bool selected)
 // Only called from editor
 void PolyWall::onGeomChanged()
 {
-   GridDatabase *db = getEditorObjectDatabase();
+   GridDatabase *db = getDatabase();
 
    db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
    Parent::onGeomChanged();

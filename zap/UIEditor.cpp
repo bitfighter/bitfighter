@@ -3172,7 +3172,7 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
       }
    }
 
-   addToEditor(newObj, getGame(), object->getEditorObjectDatabase());     // Needs to happen before onGeomChanged, so mGame will not be NULL
+   addToEditor(newObj, getGame(), object->getDatabase());     // Needs to happen before onGeomChanged, so mGame will not be NULL
 
    // Tell the new segments that they have new geometry
    object->onGeomChanged();

@@ -1250,7 +1250,7 @@ void ForceFieldProjector::findForceFieldEnd()
    Point start = getForceFieldStartPoint(getPos(), mAnchorNormal);
 
    // Pass in database containing WallSegments, returns object in collObj
-   if(ForceField::findForceFieldEnd(getEditorObjectDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
+   if(ForceField::findForceFieldEnd(getDatabase()->getWallSegmentManager()->getWallEdgeDatabase(), 
                                     start, mAnchorNormal, forceFieldEnd, &collObj))
    {
       setEndSegment(dynamic_cast<WallSegment *>(collObj));
