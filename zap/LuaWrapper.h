@@ -245,8 +245,6 @@ LuaProxy<T>* luaW_toProxy(lua_State* L, int index, bool strict = false)
 template <typename T>
 T* luaW_check(lua_State* L, int index, bool strict = false)
 {
-   if(strcmp(LuaWrapper<T>::classname, "Item") == 0)
-      int x = 1;
     T* obj = NULL;
     if (luaW_is<T>(L, index, strict))
     {
