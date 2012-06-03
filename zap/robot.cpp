@@ -277,7 +277,7 @@ bool Robot::prepareEnvironment()
       lua_rawset(L, -3);                                    // env_table["bot"] = *this               -- env_table
       lua_pop(L, 1);                                        //                                        -- <<empty stack>>
 
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+      TNLAssert(lua_gettop(L) <= 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 
       return true;
    }
@@ -1317,18 +1317,19 @@ S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
-         // Ignore self (use cheaper typeNumber check first)
-         if(fillVector[i]->getObjectTypeNumber() == RobotShipTypeNumber && dynamic_cast<Robot *>(fillVector[i]) == this) 
+         // Ignore self (use cheaper typeNumber check first) 
+         // TODO: Do we need the cast here, or can we compare fillVector[i] to this directly??
+         if(fillVector[i]->getObjectTypeNumber() == RobotShipTypeNumber && static_cast<Robot *>(fillVector[i]) == this) 
             continue;
 
          // Ignore ship/robot if it's dead or cloaked
-         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+         Ship *ship = static_cast<Ship *>(fillVector[i]);
          if(!ship->isVisible() || ship->hasExploded)
             continue;
       }
 
-      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
-      obj->push(L);
+      //BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+      static_cast<BfObject *>(fillVector[i])->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
