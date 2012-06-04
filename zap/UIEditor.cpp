@@ -671,7 +671,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
-         database->removeFromDatabase(obj, obj->getExtent());
+         database->removeFromDatabase(obj);
 
       if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          dynamic_cast<WallItem *>(obj)->processEndPoints();
@@ -2193,7 +2193,7 @@ void EditorUserInterface::clearDatabase(GridDatabase *database)
    database->findObjects(fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
-      database->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
+      database->removeFromDatabase(fillVector[i]);
 }
 
 
@@ -3286,13 +3286,13 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
    {
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager->deleteSegments(obj->getSerialNumber());          // Delete the segments associated with the wall
-      database->removeFromDatabase(obj, obj->getExtent());
+      database->removeFromDatabase(obj);
 
       if(!batchMode)
          doneDeleteingWalls();
    }
    else
-      database->removeFromDatabase(obj, obj->getExtent());
+      database->removeFromDatabase(obj);
 
    if(!batchMode)
       doneDeleteing();

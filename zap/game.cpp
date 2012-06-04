@@ -1086,7 +1086,7 @@ void Game::cleanUp()
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      mGameObjDatabase->removeFromDatabase(fillVector[i], fillVector[i]->getExtent());
+      mGameObjDatabase->removeFromDatabase(fillVector[i]);
       delete dynamic_cast<Object *>(fillVector[i]); // dynamic_cast might be needed to avoid errors
    }
 

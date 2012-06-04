@@ -878,7 +878,7 @@ WallSegment::~WallSegment()
 { 
    // Make sure object is out of the database
    if(getDatabase())
-      getDatabase()->removeFromDatabase(this, getExtent()); 
+      getDatabase()->removeFromDatabase(this); 
 }
 
 
