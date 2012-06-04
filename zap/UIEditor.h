@@ -131,6 +131,8 @@ private:
    bool mJustInsertedVertex;
    bool mRedoingAnUndo;
 
+   void clearSnapEnviornment();
+
    static const U32 UNDO_STATES = 128;
    void deleteUndoState();             // Removes most recent undo state from stack
    bool undoAvailable();               // Is an undo state available?

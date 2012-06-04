@@ -42,21 +42,29 @@ U32 GridDatabase::mCountGridDatabase = 0;
 GridDatabase::GridDatabase(bool createWallSegmentManager)
 {
    if(mChunker == NULL)
-      mChunker = new ClassChunker<BucketEntry>();     // static shared by all databases, reference counted and deleted in destructor
+      mChunker = new ClassChunker<BucketEntry>();        // Static shared by all databases, reference counted and deleted in destructor
 
    mCountGridDatabase++;
-
-   mQueryId = 0;
 
    for(U32 i = 0; i < BucketRowCount; i++)
       for(U32 j = 0; j < BucketRowCount; j++)
          mBuckets[i][j] = NULL;
 
    if(createWallSegmentManager)
-      mWallSegmentManager = new WallSegmentManager();    // gets deleted in destructor
+      mWallSegmentManager = new WallSegmentManager();    // Gets deleted in destructor
    else
       mWallSegmentManager = NULL;
 }
+
+
+// Copy contents of source into this
+// GridDatabase::GridDatabase(const GridDatabase &source)
+// {
+//    mAllObjects.reserve(source.mAllObjects.size());
+// 
+//    for(S32 i = 0; i < source.mAllObjects.size(); i++)
+//       addToDatabase(source.mAllObjects[i]->clone(), source.mAllObjects[i]->getExtent());
+// }
 
 
 // Destructor
@@ -76,15 +84,25 @@ GridDatabase::~GridDatabase()
 }
 
 
+void GridDatabase::copyObjects(const GridDatabase *source)
+{
+   // Fill copy with objects from existing database
+   mAllObjects.reserve(source->mAllObjects.size());
+
+   for(S32 i = 0; i < source->mAllObjects.size(); i++)
+      addToDatabase(source->mAllObjects[i]->clone(), source->mAllObjects[i]->getExtent());
+}
+
+
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again");
    TNLAssert(!theObject->mDatabase, "Already added to database, trying to add to different database");
+   TNLAssert(theObject->mExtent == extents, "extents does not equal");
    if(theObject->mDatabase)
       return;
 
-	theObject->mDatabase = this;
-
+   theObject->mDatabase = this;
 
    static IntRect bins;
    fillBins(extents, bins);
@@ -139,13 +157,14 @@ void GridDatabase::removeEverythingFromDatabase()
 }
 
 
-void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &extents)
+void GridDatabase::removeFromDatabase(DatabaseObject *theObject)
 {
    TNLAssert(theObject->mDatabase == this || theObject->mDatabase == NULL, "Trying to remove Object from wrong database");
    if(theObject->mDatabase != this)
       return;
 
-	theObject->mDatabase = NULL;
+   const Rect &extents = theObject->mExtent;
+   theObject->mDatabase = NULL;
 
    static IntRect bins;
    fillBins(extents, bins);
@@ -403,7 +422,7 @@ WallSegmentManager *GridDatabase::getWallSegmentManager() const
 DatabaseObject::DatabaseObject() 
 {
    initialize();
-}    
+}
 
 
 // Copy constructor
@@ -656,7 +675,7 @@ void DatabaseObject::removeFromDatabase()
    if(!mDatabase)
       return;
 
-   getDatabase()->removeFromDatabase(this, mExtent);
+   getDatabase()->removeFromDatabase(this);
 }
 
 
@@ -808,6 +827,15 @@ void DatabaseObject::setExtent(const Rect &extents)
 
    mExtent.set(extents);
 }
+
+
+DatabaseObject *DatabaseObject::clone() const
+{
+   TNLAssert(false, "Clone method not implemented!");
+   return NULL;
+}
+
+
 
 
 ////////////////////////////////////////

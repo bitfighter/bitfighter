@@ -93,6 +93,8 @@ public:
    U8 getObjectTypeNumber();
 
    virtual bool isDatabasable();    // Can this item actually be inserted into a database?
+
+   virtual DatabaseObject *clone() const;
 };
 
 
@@ -136,7 +138,9 @@ public:
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
 
    GridDatabase(bool createWallSegmentManager = true);   // Constructor
+   // GridDatabase::GridDatabase(const GridDatabase &source);
    virtual ~GridDatabase();                              // Destructor
+
 
    static const S32 BucketWidthBitShift = 8;    // Width/height of each bucket in pixels, in a form of 2 ^ n, 8 is 256 pixels
 
@@ -162,6 +166,9 @@ public:
    void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector);
    void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents);
 
+   void copyObjects(const GridDatabase *source);
+
+
 
    bool testTypes(const Vector<U8> &types, U8 objectType) const;
 
@@ -178,7 +185,7 @@ public:
    void addToDatabase(const Vector<DatabaseObject *> &objects);
 
 
-   virtual void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
+   virtual void removeFromDatabase(DatabaseObject *theObject);
    virtual void removeEverythingFromDatabase();
 
    S32 getObjectCount();                          // Return the number of objects currently in the database
