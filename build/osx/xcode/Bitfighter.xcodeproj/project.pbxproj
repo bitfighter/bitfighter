@@ -104,6 +104,8 @@
 		7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */; };
 		7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */; };
 		7378E23912F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
+		737B3D9C157FD84A0096DDC2 /* GeomObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737B3D96157FD84A0096DDC2 /* GeomObject.cpp */; };
+		737B3D9D157FD84A0096DDC2 /* ShipShape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737B3D9A157FD84A0096DDC2 /* ShipShape.cpp */; };
 		737C80FA135CC67500FF5282 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F4135CC67500FF5282 /* Color.cpp */; };
 		737C80FB135CC67500FF5282 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F6135CC67500FF5282 /* Point.cpp */; };
 		737C80FC135CC67500FF5282 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F8135CC67500FF5282 /* Rect.cpp */; };
@@ -246,7 +248,6 @@
 		73D2F3F712E2D7E800EA5EBE /* luaUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2DB12E2D7E800EA5EBE /* luaUtil.cpp */; };
 		73D2F3F812E2D7E800EA5EBE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2DD12E2D7E800EA5EBE /* main.cpp */; };
 		73D2F3FA12E2D7E800EA5EBE /* masterConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */; };
-		73D2F3FB12E2D7E800EA5EBE /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E112E2D7E800EA5EBE /* md5.cpp */; };
 		73D2F3FC12E2D7E800EA5EBE /* md5wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E312E2D7E800EA5EBE /* md5wrapper.cpp */; };
 		73D2F3FD12E2D7E800EA5EBE /* move.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E512E2D7E800EA5EBE /* move.cpp */; };
 		73D2F3FE12E2D7E800EA5EBE /* moveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E712E2D7E800EA5EBE /* moveObject.cpp */; };
@@ -576,6 +577,12 @@
 		7379552E136E1C42003A660B /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		73795535136E1C60003A660B /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		7379553C136E1CCE003A660B /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
+		737B3D96157FD84A0096DDC2 /* GeomObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GeomObject.cpp; path = ../../../zap/GeomObject.cpp; sourceTree = SOURCE_ROOT; };
+		737B3D97157FD84A0096DDC2 /* GeomObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomObject.h; path = ../../../zap/GeomObject.h; sourceTree = SOURCE_ROOT; };
+		737B3D98157FD84A0096DDC2 /* LuaWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaWrapper.h; path = ../../../zap/LuaWrapper.h; sourceTree = SOURCE_ROOT; };
+		737B3D99157FD84A0096DDC2 /* LuaWrapperUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaWrapperUtils.h; path = ../../../zap/LuaWrapperUtils.h; sourceTree = SOURCE_ROOT; };
+		737B3D9A157FD84A0096DDC2 /* ShipShape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShipShape.cpp; path = ../../../zap/ShipShape.cpp; sourceTree = SOURCE_ROOT; };
+		737B3D9B157FD84A0096DDC2 /* ShipShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShipShape.h; path = ../../../zap/ShipShape.h; sourceTree = SOURCE_ROOT; };
 		737C80F4135CC67500FF5282 /* Color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Color.cpp; path = ../../../zap/Color.cpp; sourceTree = SOURCE_ROOT; };
 		737C80F5135CC67500FF5282 /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Color.h; path = ../../../zap/Color.h; sourceTree = SOURCE_ROOT; };
 		737C80F6135CC67500FF5282 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point.cpp; path = ../../../zap/Point.cpp; sourceTree = SOURCE_ROOT; };
@@ -614,8 +621,6 @@
 		73851F6D13ABF55000D88D2A /* OpenglUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenglUtils.cpp; path = ../../../zap/OpenglUtils.cpp; sourceTree = SOURCE_ROOT; };
 		73851F6E13ABF55000D88D2A /* OpenglUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenglUtils.h; path = ../../../zap/OpenglUtils.h; sourceTree = SOURCE_ROOT; };
 		73851F6F13ABF55000D88D2A /* zoneControlGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zoneControlGame.h; path = ../../../zap/zoneControlGame.h; sourceTree = SOURCE_ROOT; };
-		7385200C13ABFDDB00D88D2A /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLMain.h; path = ../../../zap/SDLMain.h; sourceTree = SOURCE_ROOT; };
-		7385200D13ABFDDB00D88D2A /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = ../../../zap/SDLMain.m; sourceTree = SOURCE_ROOT; };
 		738562B51516BBA900437B06 /* VideoSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSystem.cpp; path = ../../../zap/VideoSystem.cpp; sourceTree = SOURCE_ROOT; };
 		738562B61516BBA900437B06 /* VideoSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VideoSystem.h; path = ../../../zap/VideoSystem.h; sourceTree = SOURCE_ROOT; };
 		7385CB9F14147824008470C8 /* ClientGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientGame.cpp; path = ../../../zap/ClientGame.cpp; sourceTree = SOURCE_ROOT; };
@@ -861,8 +866,6 @@
 		73D2F2DD12E2D7E800EA5EBE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../zap/main.cpp; sourceTree = SOURCE_ROOT; tabWidth = 4; usesTabs = 0; };
 		73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterConnection.cpp; path = ../../../zap/masterConnection.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2E012E2D7E800EA5EBE /* masterConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterConnection.h; path = ../../../zap/masterConnection.h; sourceTree = SOURCE_ROOT; };
-		73D2F2E112E2D7E800EA5EBE /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5.cpp; path = ../../../zap/md5.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2E212E2D7E800EA5EBE /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md5.h; path = ../../../zap/md5.h; sourceTree = SOURCE_ROOT; };
 		73D2F2E312E2D7E800EA5EBE /* md5wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5wrapper.cpp; path = ../../../zap/md5wrapper.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2E412E2D7E800EA5EBE /* md5wrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md5wrapper.h; path = ../../../zap/md5wrapper.h; sourceTree = SOURCE_ROOT; };
 		73D2F2E512E2D7E800EA5EBE /* move.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = move.cpp; path = ../../../zap/move.cpp; sourceTree = SOURCE_ROOT; };
@@ -1781,6 +1784,12 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				737B3D96157FD84A0096DDC2 /* GeomObject.cpp */,
+				737B3D97157FD84A0096DDC2 /* GeomObject.h */,
+				737B3D98157FD84A0096DDC2 /* LuaWrapper.h */,
+				737B3D99157FD84A0096DDC2 /* LuaWrapperUtils.h */,
+				737B3D9A157FD84A0096DDC2 /* ShipShape.cpp */,
+				737B3D9B157FD84A0096DDC2 /* ShipShape.h */,
 				73872A28152A7CDC0034CD97 /* ClientInfo.cpp */,
 				73872A29152A7CDC0034CD97 /* ClientInfo.h */,
 				73872A2A152A7CDC0034CD97 /* EventManager.cpp */,
@@ -1834,8 +1843,6 @@
 				D37210E113D4E481008E86F6 /* Joystick.h */,
 				D37210E213D4E481008E86F6 /* JoystickRender.cpp */,
 				D37210E313D4E481008E86F6 /* JoystickRender.h */,
-				7385200C13ABFDDB00D88D2A /* SDLMain.h */,
-				7385200D13ABFDDB00D88D2A /* SDLMain.m */,
 				73851F6813ABF55000D88D2A /* Colors.h */,
 				73851F6913ABF55000D88D2A /* Event.cpp */,
 				73851F6A13ABF55000D88D2A /* Event.h */,
@@ -1943,8 +1950,6 @@
 				73D2F2DD12E2D7E800EA5EBE /* main.cpp */,
 				73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */,
 				73D2F2E012E2D7E800EA5EBE /* masterConnection.h */,
-				73D2F2E112E2D7E800EA5EBE /* md5.cpp */,
-				73D2F2E212E2D7E800EA5EBE /* md5.h */,
 				73D2F2E312E2D7E800EA5EBE /* md5wrapper.cpp */,
 				73D2F2E412E2D7E800EA5EBE /* md5wrapper.h */,
 				73D2F2E512E2D7E800EA5EBE /* move.cpp */,
@@ -2817,7 +2822,6 @@
 				73D2F3F712E2D7E800EA5EBE /* luaUtil.cpp in Sources */,
 				73D2F3F812E2D7E800EA5EBE /* main.cpp in Sources */,
 				73D2F3FA12E2D7E800EA5EBE /* masterConnection.cpp in Sources */,
-				73D2F3FB12E2D7E800EA5EBE /* md5.cpp in Sources */,
 				73D2F3FC12E2D7E800EA5EBE /* md5wrapper.cpp in Sources */,
 				73D2F3FD12E2D7E800EA5EBE /* move.cpp in Sources */,
 				73D2F3FE12E2D7E800EA5EBE /* moveObject.cpp in Sources */,
@@ -2906,6 +2910,8 @@
 				73872A2E152A7CDC0034CD97 /* ClientInfo.cpp in Sources */,
 				73872A2F152A7CDC0034CD97 /* EventManager.cpp in Sources */,
 				73872A30152A7CDC0034CD97 /* ServerGame.cpp in Sources */,
+				737B3D9C157FD84A0096DDC2 /* GeomObject.cpp in Sources */,
+				737B3D9D157FD84A0096DDC2 /* ShipShape.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

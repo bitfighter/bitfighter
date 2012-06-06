@@ -412,6 +412,8 @@ bool GameType::saveMenuItem(const MenuItem *menuItem, const string &key)
       setMaxRecPlayers(menuItem->getIntValue());
    else if(key == "Allow Engr")
       setEngineerEnabled(menuItem->getIntValue());
+   else if(key == "Allow Robots")
+      setBotsAllowed(menuItem->getIntValue());
    else
       return false;
 
