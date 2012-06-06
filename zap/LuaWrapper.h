@@ -289,6 +289,8 @@ void luaW_push(lua_State* L, T* obj)
         if(!proxy)
            proxy = new LuaProxy<T>(obj);
 
+        proxy->incUseCount();
+
         luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // ... obj
         ud->data = proxy;
 
@@ -307,7 +309,7 @@ void luaW_push(lua_State* L, T* obj)
         lua_settable(L, -4); // ... obj LuaWrapper LuaWrapper.counts count
         lua_pop(L, 3); // ... obj
 
-        luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
+        //luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
     }
     else
     {
@@ -374,6 +376,10 @@ bool luaW_hold(lua_State* L, T* obj)
     lua_pop(L, 3); // ...
     return false;
 }
+
+
+
+
 
 
 // Releases LuaWrapper's hold on an object. This allows the user to remove
@@ -579,12 +585,23 @@ int luaW__newindex(lua_State* L)
 template <typename T>
 int luaW__gc(lua_State* L)
 {
-    // obj
+    // See if object is a proxy, which it most likely will be
     LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
-    T* obj = proxy->getProxiedObject();
 
+    if(proxy)     // If the object is a proxy, which if always will be at the moment...
+    {
+       if(proxy->decUseCount())
+          delete proxy;
+
+       return 0;
+    }
+    
+    // Otherwise object is not a proxy -- try popping again
+
+    T* obj = luaW_to<T>(L, 1);
+
+    TNLAssert(obj, "Obj is NULL!");
     // If obj is NULL here, it may have been deleted from the C++ side already
-
     LuaWrapper<T>::identifier(L, obj); // obj id
     luaW_getregistry(L, LUAW_WRAPPER_KEY); // obj id LuaWrapper
     lua_getfield(L, -1, LUAW_COUNT_KEY); // obj id LuaWrapper LuaWrapper.counts
@@ -600,10 +617,10 @@ int luaW__gc(lua_State* L)
         lua_getfield(L, 3, LUAW_HOLDS_KEY); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds
         lua_pushvalue(L, 2); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds id
         lua_gettable(L, -2); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds hold
-        //if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator && !proxy->isDefunct())
-        //{
-        //    LuaWrapper<T>::deallocator(L, obj);
-        //}
+        if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator && !proxy->isDefunct())
+        {
+            LuaWrapper<T>::deallocator(L, obj);
+        }
         luaW_release<T>(L, 2);
         luaW_clean<T>(L, 2);
     }
@@ -931,7 +948,7 @@ template <class T>
 class LuaProxy
 {
 private:
-    S32 mId;
+    int mUseCount;
     bool mDefunct;
     T *mProxiedObject;
 
@@ -945,12 +962,12 @@ public:
       mProxiedObject = obj;
       obj->setLuaProxy(this);
       mDefunct = false;
+      mUseCount = 0;
     }
 
    // Destructor
    ~LuaProxy()
    {
-      TNLAssert(false, "");
       logprintf("XXXXX Deleting LuaProxy for %s%p (proxy addr %p)", mDefunct ? "Defunct " : "", mProxiedObject, this);
 
       if(!mDefunct)
@@ -973,6 +990,19 @@ public:
    bool isDefunct()
    {
       return mDefunct;
+   }
+
+
+   void incUseCount()
+   {
+      mUseCount++;
+   }
+
+
+   bool decUseCount()
+   {
+      mUseCount--;
+      return mUseCount == 0;
    }
 };
 
