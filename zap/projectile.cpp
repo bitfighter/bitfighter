@@ -436,26 +436,11 @@ void Projectile::renderItem(const Point &pos)
 
 const char *Projectile::luaClassName = "Projectile";
 
-
-int xxx(lua_State *L)
-{
-   Projectile *w = luaW_check<Projectile>(L, 1);
-   if(w) 
-   {
-      lua_remove(L, 1);
-      return w->getVel(L);
-   }
-
-   lua_pushnil(L);
-   return 1;
-}
-
-
 const luaL_reg Projectile::luaMethods[] =
 {
    { "getRad",    luaW_doMethod<Projectile, &Projectile::getRad>    },
    { "getWeapon", luaW_doMethod<Projectile, &Projectile::getWeapon> },
-   { "getVel",    xxx },
+   { "getVel",    luaW_doMethod<Projectile, &Projectile::getVel>    },
 
    { NULL, NULL }
 };
