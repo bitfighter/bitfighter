@@ -154,6 +154,9 @@ void GridDatabase::removeEverythingFromDatabase()
       }
    }
    mAllObjects.clear();
+
+   if(mWallSegmentManager)
+      mWallSegmentManager->clear();
 }
 
 
