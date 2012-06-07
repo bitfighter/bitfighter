@@ -539,6 +539,7 @@ void EditorUserInterface::cleanUp()
       delete game->getGameType();
 }
 
+
 extern S32 gMaxPolygonPoints;
 
 // Loads a level
