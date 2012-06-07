@@ -158,24 +158,14 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
     {
         // ... ud ... udmt
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... ud ... udmt Tmt
-//        Zap::LuaObject::dumpStack(L, "ZYX");
-//        Zap::LuaObject::dumpTable(L, -1);  // looks like udmt to me
-//        Zap::LuaObject::dumpTable(L, -2);     // empty table
 
         equal = lua_rawequal(L, -1, -2);     // Compare udmt and Tmt
         if (!equal && !strict)
         {
             lua_getfield(L, -2, LUAW_EXTENDS_KEY); // ... ud ... udmt Tmt udmt.extends
 
-       // Table @ -1 is item method table
-            //Zap::LuaObject::dumpTable(L, -3);
-
             for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1))
             {
-               //Zap::LuaObject::dumpStack(L);
- //                          Zap::LuaObject::dumpTable(L, -1);      // empty table (v)
- //Zap::LuaObject::dumpTable(L, -4);     // robot method table (Tmt)
-
                 // ... ud ... udmt Tmt udmt.extends k v
                 equal = lua_rawequal(L, -1, -4);      // Compare v and Tmt
                 if (equal)
@@ -183,7 +173,6 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
                     lua_pop(L, 2); // ... ud ... udmt Tmt udmt.extends
                     break;
                 }
-//                Zap::LuaObject::dumpStack(L);
             }
             lua_pop(L, 1); // ... ud ... udmt Tmt
 
