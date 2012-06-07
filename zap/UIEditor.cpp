@@ -558,7 +558,8 @@ void EditorUserInterface::loadLevel()
    if(!game->getGameType())  // make sure we have GameType
    {
       GameType *gameType = new GameType;
-      gameType->addToGame(game, mLoadTarget);
+      //gameType->addToGame(game, mLoadTarget);    {P{P
+
    }
 
    makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -600,7 +601,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
       return;     // Print error message?
 
    // Duplicate EditorObject pointer list to avoid unsynchronized loop removal
-   Vector<DatabaseObject *> tempList(*getDatabase()->findObjects_fast());
+   Vector<DatabaseObject *> tempList(*mLevelGenDatabase.findObjects_fast());
 
    saveUndoState();
 
@@ -625,7 +626,8 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 void EditorUserInterface::addToEditor(BfObject *obj, ClientGame *game, GridDatabase *database)
 {
-   obj->addToGame(game, database);
+   obj->addToDatabase(database);  //{P{P
+   //obj->addToGame(game, database);      {P{P
    // constists of:
    //    mGame = game;
    //    addToDatabase();
@@ -2263,7 +2265,7 @@ void EditorUserInterface::pasteSelection()
       newObject->moveTo(pastePos - offsetFromFirstPoint);
 
       // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
-      newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below
+      //newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  {P{P
 
       copiedObjects.push_back(newObject);
    }
@@ -2795,7 +2797,7 @@ void EditorUserInterface::onMouseDragged()
             {
                BfObject *newObject = obj->newCopy();   
                newObject->setSelected(true);
-               newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below
+               //newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below   {P{P
                
                copiedObjects.push_back(newObject);
 
