@@ -683,7 +683,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       chunkPos = panelGeom->getStart(panelIndex) + (panelGeom->getEnd(panelIndex) - panelGeom->getStart(panelIndex)) * Random::readF();
       chunkVel = dir * (Random::readF() * 10  - 3) * .2f + cross * (Random::readF() * 30  - 15) * .05f;
 
-      S32 ttl = S32(Random::readF() * 50)  + 250;
+      S32 ttl = Random::readI(2500, 3000);
       F32 startAngle = Random::readF() * FloatTau;
       F32 rotationRate = Random::readF() * 4 - 2;
 
@@ -702,7 +702,7 @@ void CoreItem::doPanelDebris(S32 panelIndex)
       points.push_back(Point(0, Random::readF() * 10));
 
       Point sparkVel = cross * (Random::readF() * 20  - 10) * .05f + dir * (Random::readF() * 2  - .5f) * .2f;
-      S32 ttl = S32(Random::readF() * 50)  + 250;
+      S32 ttl = Random::readI(2500, 3000);
       F32 angle = Random::readF() * FloatTau;
       F32 rotation = Random::readF() * 4 - 2;
 
@@ -780,7 +780,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
             Point cross(dir.y, -dir.x);                     // Line parallel to the panel, perpendicular to dir
 
             Point vel = dir * (Random::readF() * 3 + 2) + cross * (Random::readF() - .2f);
-            F32 ttl = Random::readF() + .5f;
+            U32 ttl = Random::readI(0, 1000) + 500;
 
             static_cast<ClientGame *>(getGame())->emitSpark(sparkEmissionPos, vel, Colors::gray20, ttl);
          }
