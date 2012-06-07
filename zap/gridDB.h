@@ -193,36 +193,8 @@ public:
    DatabaseObject *getObjectByIndex(S32 index);   // Kind of hacky, kind of useful
 };
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class BfObject;
-
-//class EditorObjectDatabase : public GridDatabase
-//{
-//   typedef GridDatabase Parent;
-//
-//private:
-//   Vector<BfObject *> mAllEditorObjects;
-//
-//public:
-//   EditorObjectDatabase();      // Constructor
-//   EditorObjectDatabase(const EditorObjectDatabase &database);    // Copy constructor
-//   EditorObjectDatabase &operator= (const EditorObjectDatabase &database);
-//
-//   void copy(const EditorObjectDatabase &database);               // Copy contents of source into this
-//
-//   const Vector<BfObject *> *getObjectList();     
-//
-//   void addToDatabase(DatabaseObject *theObject, const Rect &extents);  // Add a single object
-//   void addToDatabase(const Vector<BfObject *> &objects);               // Add a list of objects
-//
-//   void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
-//   void removeEverythingFromDatabase();
-//};
-
 };
+
 
 // Reusable container for searching gridDatabases
 // putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
