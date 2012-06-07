@@ -396,7 +396,7 @@ public:
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
-   void addToEditor(BfObject *obj, ClientGame *game, GridDatabase *database);
+   void addToEditor(BfObject *obj);
 };
 
 
