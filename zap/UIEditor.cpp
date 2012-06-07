@@ -559,8 +559,7 @@ void EditorUserInterface::loadLevel()
    if(!game->getGameType())  // make sure we have GameType
    {
       GameType *gameType = new GameType;
-      //gameType->addToGame(game, mLoadTarget);    {P{P
-
+      gameType->addToGame(game, mLoadTarget);   
    }
 
    makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
