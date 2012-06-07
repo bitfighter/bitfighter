@@ -52,8 +52,8 @@ FXManager::FXManager()
 }
 
 
-// Create a new spark.   ttl = Time to Live (secs)
-void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color, F32 ttl, SparkType sparkType)
+// Create a new spark.   ttl = Time To Live (milliseconds)
+void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, SparkType sparkType)
 {
    Spark *s;
    Spark *s2;
@@ -86,7 +86,7 @@ void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color
    s->color = color;
 
    // Use ttl if it was specified, otherwise pick something random
-   s->ttl = ttl > 0 ? ttl : 15 * TNL::Random::readF() * TNL::Random::readF();
+   s->ttl = ttl > 0 ? ttl : 15 * TNL::Random::readI(0, 1000);  // 0 - 15 seconds
 
    if(sparkType == SparkTypeLine)                  // Line sparks require two points; add the second here
    {
@@ -111,7 +111,7 @@ void FXManager::DebrisChunk::idle(U32 timeDelta)
 
    pos   += vel      * dT;
    angle += rotation * dT;
-   ttl   -= (S32)dT;
+   ttl   -= timeDelta;
 }
 
 
@@ -123,8 +123,8 @@ void FXManager::DebrisChunk::render()
    glRotatef(rd(angle), 0, 0, 1);
 
    F32 alpha = 1;
-   if(ttl < 25)
-      alpha = ttl / 25.0f;
+   if(ttl < 250)
+      alpha = ttl / 250.f;
 
    glColor(color, alpha);
 
@@ -139,21 +139,21 @@ void FXManager::DebrisChunk::render()
 
 void FXManager::TextEffect::idle(U32 timeDelta)
 {
-   F32 dT = F32(timeDelta) * 0.001f;
+   F32 dTsecs = F32(timeDelta) * 0.001f;
 
-   pos  += vel        * dT;
+   pos += vel * dTsecs;
    if(size < 10)
-      size += growthRate * dT;
+      size += growthRate * dTsecs;
 
-   ttl  -= (S32)dT;
+   ttl -= timeDelta;
 }
 
 
 void FXManager::TextEffect::render()
 {
    F32 alpha = 1;
-   if(ttl < 30)
-      alpha = F32(ttl) / 30;
+   if(ttl < 300)
+      alpha = F32(ttl) / 300.f;
    glColor(color, alpha);
    //glLineWidth(size);
    glPushMatrix();
@@ -192,7 +192,7 @@ void FXManager::emitTextEffect(string text, Color color, Point pos)
    textEffect.vel = Point(0,-130);
    textEffect.size = 0;
    textEffect.growthRate = 20;
-   textEffect.ttl = 150;
+   textEffect.ttl = 1500;
 
    mTextEffects.push_back(textEffect);
 }
@@ -220,34 +220,34 @@ void FXManager::emitTeleportInEffect(Point pos, U32 type)
 
 void FXManager::idle(U32 timeDelta)
 {
-   F32 dT = timeDelta * .001f;
+   F32 dTsecs = timeDelta * .001f;
 
    for(U32 j = 0; j < SparkTypeCount; j++)
       for(U32 i = 0; i < firstFreeIndex[j]; )
       {
          Spark *theSpark = gSparks[j] + i;
-         if(theSpark->ttl <= dT)
+         if(theSpark->ttl < (S32)timeDelta)
          {                          // Spark is dead -- remove it
             firstFreeIndex[j]--;
             *theSpark = gSparks[j][firstFreeIndex[j]];
          }
          else
          {
-            theSpark->ttl -= dT;
-            theSpark->pos += theSpark->vel * dT;
+            theSpark->ttl -= timeDelta;
+            theSpark->pos += theSpark->vel * dTsecs;
             if ((SparkType) j == SparkTypePoint)
             {
-               if(theSpark->ttl > 1)
+               if(theSpark->ttl > 1000)
                   theSpark->alpha = 1;
                else
-                  theSpark->alpha = theSpark->ttl;
+                  theSpark->alpha = F32(theSpark->ttl) / 1000.f;
             }
             else if ((SparkType) j == SparkTypeLine)
             {
-               if(theSpark->ttl > 0.25)
+               if(theSpark->ttl > 250)
                   theSpark->alpha = 1;
                else
-                  theSpark->alpha = theSpark->ttl / 0.25f;
+                  theSpark->alpha = F32(theSpark->ttl) / 250.f;
             }
 
             i++;
@@ -258,7 +258,7 @@ void FXManager::idle(U32 timeDelta)
    // Kill off any old debris chunks, advance the others
    for(S32 i = 0; i < mDebrisChunks.size(); i++)
    {
-      if(mDebrisChunks[i].ttl < dT)
+      if(mDebrisChunks[i].ttl < (S32)timeDelta)
       {
          mDebrisChunks.erase_fast(i);
          i--;
@@ -267,11 +267,11 @@ void FXManager::idle(U32 timeDelta)
          mDebrisChunks[i].idle(timeDelta);
    }
 
-   
+
    // Same for our TextEffects
    for(S32 i = 0; i < mTextEffects.size(); i++)
    {
-      if(mTextEffects[i].ttl < dT)
+      if(mTextEffects[i].ttl < (S32)timeDelta)
       {
          mTextEffects.erase_fast(i);
          i--;
@@ -284,7 +284,7 @@ void FXManager::idle(U32 timeDelta)
    for(TeleporterEffect **walk = &teleporterEffects; *walk; )
    {
       TeleporterEffect *temp = *walk;
-      temp->time += (S32)(dT * 1000);
+      temp->time += timeDelta;
       if(temp->time > Teleporter::TeleportInExpandTime)
       {
          *walk = temp->nextEffect;
@@ -309,7 +309,7 @@ void FXManager::render(S32 renderPass)
          if(radius > 0.5)
             alpha = (1 - radius) / 0.5f;
 
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(), 
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(),
                           radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
    }
@@ -353,8 +353,8 @@ void FXManager::emitBlast(const Point &pos, U32 size)
    {
       Point dir = Point(cos(dr(i)), sin(dr(i)));
       // Emit a ring of bright orange sparks, as well as a whole host of yellow ones
-      emitSpark(pos + dir * 50, dir * TNL::Random::readF() * 500, Colors::yellow, TNL::Random::readF() * 1000 / speed, SparkTypePoint );
-      emitSpark(pos + dir * 50, dir * speed, Color(1, .8, .45), (F32) (size - 50) / speed, SparkTypeLine);
+      emitSpark(pos + dir * 50, dir * TNL::Random::readF() * 500, Colors::yellow, TNL::Random::readI(0, U32(1000.f * F32(1000.f / speed))), SparkTypePoint );
+      emitSpark(pos + dir * 50, dir * speed, Color(1, .8, .45), U32(1000.f * F32(size - 50) / speed), SparkTypeLine);
    }
 }
 
@@ -367,7 +367,7 @@ void FXManager::emitExplosion(const Point &pos, F32 size, const Color *colorArra
       F32 f = (TNL::Random::readF() * 2 - 1) * 400 * size;
       U32 colorIndex = TNL::Random::readI() % numColors;
 
-      emitSpark(pos, Point(cos(th)*f, sin(th)*f), colorArray[colorIndex], TNL::Random::readF()*size + 2*size);
+      emitSpark(pos, Point(cos(th)*f, sin(th)*f), colorArray[colorIndex], TNL::Random::readI(0, 1000) * size + 2000 * size);
    }
 }
 
@@ -395,7 +395,7 @@ void FXManager::emitBurst(const Point &pos, const Point &scale, const Color &col
             pos + Point(cos(th)*scale.x, sin(th)*scale.y),        // pos
             Point(cos(th)*scale.x*f, sin(th)*scale.y*f),          // vel
             color,                                                // color
-            TNL::Random::readF() * scale.len() * 3 + scale.len()  // ttl
+            TNL::Random::readI(0, 1000) * scale.len() * 3 + S32(1000.f * scale.len())  // ttl
       );
    }
 }
@@ -453,13 +453,13 @@ void FXTrail::update(Point pos, bool boosted, bool invisible)
 }
 
 
-void FXTrail::idle(U32 dT)
+void FXTrail::idle(U32 timeDelta)
 {
    if(mNodes.size() == 0)
       return;
 
-   mNodes.last().ttl -= dT;
-   if(mNodes.last().ttl <= 0)
+   mNodes.last().ttl -= timeDelta;
+   if(mNodes.last().ttl < (S32)timeDelta)
       mNodes.pop_back();      // Delete last item
 }
 

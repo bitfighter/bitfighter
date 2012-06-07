@@ -47,7 +47,7 @@ class FXManager
       Point pos;
       Color color;
       F32 alpha;
-      F32 ttl;
+      S32 ttl;     // Milliseconds
       Point vel;
    };
 
@@ -58,7 +58,7 @@ class FXManager
 
       Point pos;
       Point vel;
-      S32 ttl;
+      S32 ttl;     // Milliseconds
       F32 angle;
       F32 rotation;
 
@@ -77,7 +77,7 @@ class FXManager
       Point vel;
       F32 size;
       F32 growthRate;
-      S32 ttl;
+      S32 ttl;    // Milliseconds
       
       void idle(U32 timeDelta);
       void render();
@@ -97,7 +97,7 @@ class FXManager
 
 public:
    FXManager();
-   void emitSpark(const Point &pos, const Point &vel, const Color &color, F32 ttl = 0, SparkType=SparkTypePoint);
+   void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl = 0, SparkType = SparkTypePoint);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2, U32 count);
@@ -118,7 +118,7 @@ private:
    struct TrailNode
    {
       Point pos;
-      S32   ttl;
+      S32   ttl;    // Milliseconds
       bool  boosted;
       bool  invisible;
    };

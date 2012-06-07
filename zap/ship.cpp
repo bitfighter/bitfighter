@@ -2027,7 +2027,7 @@ void Ship::emitMovementSparks()
                 TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
 
                 static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
-                                          -shipDirs[i] * 100 + chaos, thrust, 1.5f * TNL::Random::readF());
+                                          -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500));
              }
           }
       }
