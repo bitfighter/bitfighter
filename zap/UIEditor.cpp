@@ -626,8 +626,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 void EditorUserInterface::addToEditor(BfObject *obj, ClientGame *game, GridDatabase *database)
 {
-   obj->addToDatabase(database);  //{P{P
-   //obj->addToGame(game, database);      {P{P
+   obj->addToGame(game, database);     
    // constists of:
    //    mGame = game;
    //    addToDatabase();
@@ -2265,7 +2264,7 @@ void EditorUserInterface::pasteSelection()
       newObject->moveTo(pastePos - offsetFromFirstPoint);
 
       // addToGame is first so setSelected and onGeomChanged have mGame (at least barriers need it)
-      //newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  {P{P
+      newObject->addToGame(getGame(), NULL);    // Passing NULL keeps item out of any databases... will add in bulk below  
 
       copiedObjects.push_back(newObject);
    }
@@ -2797,7 +2796,7 @@ void EditorUserInterface::onMouseDragged()
             {
                BfObject *newObject = obj->newCopy();   
                newObject->setSelected(true);
-               //newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below   {P{P
+               newObject->addToGame(getGame(), NULL);    // NULL keeps object out of database... will be added in bulk below 
                
                copiedObjects.push_back(newObject);
 
