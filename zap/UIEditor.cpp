@@ -598,7 +598,7 @@ void EditorUserInterface::clearLevelGenItems()
 void EditorUserInterface::copyScriptItemsToEditor()
 {
    if(mLevelGenDatabase.getObjectCount() == 0)
-      return;     // Print error message?
+      return;     
 
    // Duplicate EditorObject pointer list to avoid unsynchronized loop removal
    Vector<DatabaseObject *> tempList(*mLevelGenDatabase.findObjects_fast());
@@ -613,7 +613,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
       BfObject *obj = static_cast<BfObject *>(tempList[i]);
 
       obj->removeFromGame();
-      addToEditor(obj, getGame(), getDatabase());
+      addToEditor(obj);
    }
       
    mLevelGenDatabase.removeEverythingFromDatabase();    // Don't want to delete these objects... we just handed them off to the database!
@@ -624,14 +624,10 @@ void EditorUserInterface::copyScriptItemsToEditor()
 }
 
 
-void EditorUserInterface::addToEditor(BfObject *obj, ClientGame *game, GridDatabase *database)
+void EditorUserInterface::addToEditor(BfObject *obj)
 {
-   obj->addToGame(game, database);     
-   // constists of:
-   //    mGame = game;
-   //    addToDatabase();
-
-   obj->onGeomChanged();     // Added primarily as a generic way to get PolyWalls to build themselves after being dragged from the dock
+   obj->addToGame(getGame(), getDatabase());     
+   obj->onGeomChanged();                        // Generic way to get PolyWalls to build themselves after being dragged from the dock
 }
 
 
@@ -2906,7 +2902,7 @@ void EditorUserInterface::startDraggingDockItem()
       
    GridDatabase *database = getDatabase();
 
-   addToEditor(item, getGame(), database); 
+   addToEditor(item); 
 //   database->dumpObjects();
    
    clearSelection(database);    // No items are selected...
@@ -3176,7 +3172,7 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
       }
    }
 
-   addToEditor(newObj, getGame(), object->getDatabase());     // Needs to happen before onGeomChanged, so mGame will not be NULL
+   addToEditor(newObj);     // Needs to happen before onGeomChanged, so mGame will not be NULL
 
    // Tell the new segments that they have new geometry
    object->onGeomChanged();
@@ -3357,7 +3353,7 @@ void EditorUserInterface::insertNewItem(U8 itemTypeNumber)
 
 
    newObject->moveTo(snapPoint(database, convertCanvasToLevelCoord(mMousePos)));
-   addToEditor(newObject, getGame(), database);    
+   addToEditor(newObject);    
    newObject->onGeomChanged();
 
    validateLevel();
@@ -3783,7 +3779,7 @@ void EditorUserInterface::onMouseClicked_left()
       }
       else
       {
-         addToEditor(mNewItem, getGame(), getDatabase());
+         addToEditor(mNewItem);
          mNewItem->onGeomChanged();             // Add walls BEFORE onGeomChanged() is run!
       }
 
