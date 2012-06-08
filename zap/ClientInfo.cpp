@@ -307,8 +307,13 @@ bool ClientInfo::sEngineerDeployObject(U32 type)
 
       Vector<StringTableEntry> e;
       e.push_back(getName());
-      e.push_back(type == EngineeredTurret ? "turret" : "force field");
-   
+      switch(type)
+      {
+         case EngineeredTurret: e.push_back("turret"); break;
+         case EngineeredForceField: e.push_back("force field"); break;
+         case EngineeredTeleport: e.push_back("teleport"); break;
+         default: e.push_back(""); break;
+      }
 
       gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
 

@@ -31,8 +31,8 @@
 #include "gameObject.h"
 #include "projectile.h"    // For LuaItem
 #include "Point.h"
-//#include "UIEditor.h"      // For EditorObject 
 #include "Colors.h"
+#include "Engineerable.h"
 
 #include "tnlNetObject.h"
 
@@ -42,7 +42,7 @@ namespace Zap
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Teleporter : public SimpleLine
+class Teleporter : public SimpleLine, public Engineerable
 {
    typedef SimpleLine Parent;
 
@@ -62,7 +62,8 @@ private:
    S32 mLastDest;    // Destination of last ship through
 
 public:
-   Teleporter();     // Constructor
+   Teleporter(Point pos = Point(), Point dest = Point());           // Constructor
+   virtual ~Teleporter();  // Destructor
 
    Teleporter *clone() const;
    //void copyAttrs(Teleporter *target);
@@ -97,6 +98,8 @@ public:
 
    void onAttrsChanging();
    void onGeomChanging();
+
+   void computeExtent();
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();

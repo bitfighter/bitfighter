@@ -54,7 +54,7 @@ static Vector<DatabaseObject *> foundObjects;
 
 // Constructor --> need to set the pos and dest via methods like processArguments to make sure
 // that we get the multiple destination aspect of teleporters right
-Teleporter::Teleporter()
+Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
 {
    mObjectTypeNumber = TeleportTypeNumber;
    mNetFlags.set(Ghostable);
@@ -63,6 +63,17 @@ Teleporter::Teleporter()
    mTime = 0;
    mTeleporterDelay = TeleporterDelay;
    setTeam(TEAM_NEUTRAL);
+
+   setVert(pos, 0);
+   setVert(dest, 1);
+
+   mDests.push_back(dest);
+}
+
+// Destructor
+Teleporter::~Teleporter()
+{
+   // Do nothing
 }
 
 
@@ -151,7 +162,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 
       // New teleporter origin
       mDests.push_back(dest);
-      setExtent(Rect(pos, (F32)TELEPORTER_RADIUS)); // for ServerGame extent
+      computeExtent(); // for ServerGame extent
    }
 #ifndef ZAP_DEDICATED
    else
@@ -213,7 +224,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       for(U32 i = 0; i < count; i++)
          mDests[i].read(stream);
       
-      setExtent(Rect(pos, (F32)TELEPORTER_RADIUS));
+      computeExtent();
 
       if(stream->readFlag())
          mTeleporterDelay = stream->readInt(32);
@@ -236,6 +247,12 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 #endif
       timeout = mTeleporterDelay;
    }
+}
+
+
+void Teleporter::computeExtent()
+{
+   setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS));
 }
 
 

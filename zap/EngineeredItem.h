@@ -31,11 +31,14 @@
 #include "moveObject.h"    // For MoveItem
 #include "barrier.h"
 #include "LuaWrapper.h"
+#include "Engineerable.h"
+
 
 namespace Zap
 {
 
-class EngineeredItem : public Item 
+
+class EngineeredItem : public Item, public Engineerable
 {
 private:
    typedef Item Parent;
@@ -51,11 +54,9 @@ private:
 
 protected:
    F32 mHealth;
-   SafePtr<MoveItem> mResource;
    Point mAnchorNormal;
    bool mIsDestroyed;
    S32 mOriginalTeam;
-   bool mEngineered;
 
    bool mSnapped;             // Item is snapped to a wall
 
@@ -86,7 +87,6 @@ public:
 
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
-   void setResource(MoveItem *resource);
    static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
    void computeExtent();
 
@@ -108,8 +108,6 @@ public:
 
    void explode();
    bool isDestroyed();
-   void setEngineered(bool isEngineered);
-   bool isEngineered(); // Was this engineered py a player?
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -168,6 +166,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class ForceField : public BfObject
 {
    typedef BfObject Parent;
@@ -214,6 +215,9 @@ public:
    TNL_DECLARE_CLASS(ForceField);
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class ForceFieldProjector : public EngineeredItem
 {
@@ -362,7 +366,6 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 
 class EngineerModuleDeployer
 {

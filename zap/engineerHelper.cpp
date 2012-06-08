@@ -65,6 +65,7 @@ EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
 {
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
+   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleport, "Teleport", KEY_3, BUTTON_3));
 }
 
 
@@ -209,7 +210,9 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 // Basically draws a red box where the ship is pointing
 void EngineerHelper::renderDeploymentMarker(Ship *ship)
 {
-   if(mSelectedItem != -1 && EngineerModuleDeployer::findDeployPoint(ship, deployPosition, deployNormal))
+   // Only render wall mounted items (not teleport)
+   if(mSelectedItem != -1 && mEngineerCostructionItemInfos[mSelectedItem].mObjectType != EngineeredTeleport &&
+         EngineerModuleDeployer::findDeployPoint(ship, deployPosition, deployNormal))
    {
       // Check deployment, so square will be green if allowed, red if not allowed, helps engineering
       EngineerModuleDeployer deployer;
