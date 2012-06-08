@@ -687,7 +687,6 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
    }
 
    readGeom(argc, argv, 1 + offset, game->getGridSize());
-   //computeExtent();
 
    return true;
 }

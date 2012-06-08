@@ -167,9 +167,6 @@ class PolyWall : public PolygonObject     // Don't need BfObject component of th
 {
    typedef PolygonObject Parent;
 
-private:
-   //void computeExtent();
-
 public:
    PolyWall();      // Constructor
    PolyWall *clone() const;
