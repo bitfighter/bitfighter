@@ -1050,7 +1050,6 @@ const char *EngineeredItem::luaClassName = "EngineeredItem";
 
 const luaL_reg EngineeredItem::luaMethods[] =
 {
-   { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
    { "isActive",  luaW_doMethod<EngineeredItem, &EngineeredItem::isActive>  },
    { "getAngle",  luaW_doMethod<EngineeredItem, &EngineeredItem::getAngle>  },
    { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
