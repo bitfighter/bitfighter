@@ -61,6 +61,8 @@ public:
 private:
    S32 mLastDest;    // Destination of last ship through
 
+   void computeExtent();
+
 public:
    Teleporter(Point pos = Point(), Point dest = Point());           // Constructor
    virtual ~Teleporter();  // Destructor
@@ -99,7 +101,6 @@ public:
    void onAttrsChanging();
    void onGeomChanging();
 
-   void computeExtent();
    void onConstructed();
 
    // Some properties about the item that will be needed in the editor

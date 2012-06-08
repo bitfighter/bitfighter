@@ -49,6 +49,8 @@ private:
    // vector (the three points of our triangle graphic), and compute its extent
    void preparePoints();
 
+   void computeExtent();                                            // Bounding box for quick collision-possibility elimination
+
    // How are things labeled in the editor? 
    const char *getInstructionMsg();
 
@@ -93,7 +95,6 @@ public:
    string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);
-   void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);

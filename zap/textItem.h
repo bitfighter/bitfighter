@@ -43,8 +43,10 @@ class TextItem : public SimpleLine
    typedef SimpleLine Parent;
 
 private:
-   F32 mSize;            // Text size
-   string mText;         // Text itself
+   F32 mSize;              // Text size
+   string mText;           // Text itself
+
+   void computeExtent();   // Bounding box for quick collision-possibility elimination
 
    // How are this item's vertices labeled in the editor? -- these can be private
    const char *getInstructionMsg();
@@ -73,7 +75,6 @@ public:
    string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);  
-   void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
 #ifndef ZAP_DEDICATED
 

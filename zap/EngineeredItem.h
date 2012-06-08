@@ -48,7 +48,9 @@ private:
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;    // Menu for text editing; since it's static, don't bother with smart pointer
-#endif
+#endif   
+   
+   void computeExtent();
 
    virtual F32 getSelectionOffsetMagnitude();         // Provides base magnitude for getEditorSelectionOffset()
 
@@ -88,7 +90,6 @@ public:
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
    static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
-   void computeExtent();
    void onConstructed();
 
    virtual void onDestroyed();
