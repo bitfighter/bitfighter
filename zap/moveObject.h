@@ -158,8 +158,10 @@ public:
    LUAW_DECLARE_CLASS(MoveObject);
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
-   virtual S32 getVel(lua_State *L);
 
+   // Get/set object's velocity vector
+   virtual S32 getVel(lua_State *L);
+   virtual S32 setVel(lua_State *L);
 };
 
 

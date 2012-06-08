@@ -766,6 +766,8 @@ const char *MoveObject::luaClassName = "MoveObject";
 const luaL_reg MoveObject::luaMethods[] =
 {
    { "getVel",        luaW_doMethod<MoveObject, &MoveObject::getVel> },
+   { "setVel",        luaW_doMethod<MoveObject, &MoveObject::setVel> },
+
    { NULL, NULL }
 };
 
@@ -775,6 +777,12 @@ S32 MoveObject::getVel(lua_State *L)
    return LuaObject::returnPoint(L, getActualVel());
 }
 
+
+S32 MoveObject::setVel(lua_State *L)
+{
+   setActualVel(getPointOrXY(L, 1, "setVel()"));
+   return returnNil(L);
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

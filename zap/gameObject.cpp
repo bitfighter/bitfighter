@@ -1203,9 +1203,11 @@ const char *BfObject::luaClassName = "BfItem";
 // Standard methods available to all Items
 const luaL_reg BfObject::luaMethods[] =
 {
-   { "getClassID",      luaW_doMethod<BfObject, &BfObject::getClassID> },
-   { "getLoc",          luaW_doMethod<BfObject, &BfObject::getLoc>     },
-   { "getTeamIndx",     luaW_doMethod<BfObject, &BfObject::getTeamIndx>     },
+   { "getClassID",  luaW_doMethod<BfObject, &BfObject::getClassID>  },
+   { "getLoc",      luaW_doMethod<BfObject, &BfObject::getLoc>      },
+   { "setLoc",      luaW_doMethod<BfObject, &BfObject::setLoc>      },
+   { "getTeamIndx", luaW_doMethod<BfObject, &BfObject::getTeamIndx> },
+   { "addToGame",   luaW_doMethod<BfObject, &BfObject::addToGame>   },
 
    { NULL, NULL }
 };
@@ -1219,13 +1221,27 @@ S32 BfObject::getClassID(lua_State *L)
 
 S32 BfObject::getLoc(lua_State *L)
 {
-   return LuaObject::returnPoint(L, getPos());
+   return returnPoint(L, getPos());
+}
+
+
+S32 BfObject::setLoc(lua_State *L)
+{
+   setPos(getPointOrXY(L, 1, "setLoc()"));
+   return returnNil(L);
 }
 
 
 S32 BfObject::getTeamIndx(lua_State *L)  
 {
-   return LuaObject::returnInt(L, mTeam + 1);      // + 1 because Lua indices start at 1
+   return returnInt(L, mTeam + 1);      // + 1 because Lua indices start at 1
+}
+
+
+S32 BfObject::addToGame(lua_State *L)
+{
+   addToGame(gServerGame, gServerGame->getGameObjDatabase());
+   return returnNil(L);
 }
 
 
