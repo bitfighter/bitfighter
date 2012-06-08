@@ -408,7 +408,6 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
       {
          char msg[1024];
          dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
-         //logprintf(LogConsumer::LogError, msg);     <== error should be logged by catcher, methinks
 
          throw LuaException(msg);
       }
@@ -758,33 +757,37 @@ bool LuaScriptRunner::runMain()
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-   // Retrieve the bot's getName function, and put it on top of the stack
-   bool ok = retrieveFunction("_main");     
-
-   TNLAssert(ok, "_main function not found -- is lua_helper_functions corrupt?");
-
-   if(!ok)
-   {      
-      const char *msg = "Function _main() could not be found! Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.";
-      logError(msg);
-      throw LuaException(msg);
-   }
-
-   setLuaArgs(args);
-
-   S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
-
-   if(error == 0)
+   try 
    {
+      // Retrieve the bot's getName function, and put it on top of the stack
+      bool ok = retrieveFunction("_main");     
+
+      TNLAssert(ok, "_main function not found -- is lua_helper_functions corrupt?");
+
+      if(!ok)
+      {      
+         const char *msg = "Function _main() could not be found! Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.";
+         logError(msg);
+         throw LuaException(msg);
+      }
+
+      setLuaArgs(args);
+
+      S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
+
+      if(error != 0)
+         throw LuaException(lua_tostring(L, -1));
+
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return true;
    }
 
-   logError("Error encountered while attempting to run script's main() function: %s.  Aborting script.", lua_tostring(L, -1));
-   lua_pop(L, 1);    // Remove error message from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-   return false;
+   catch(LuaException &e)
+   {
+      logError("Error encountered while attempting to run script's main() function: %s.  Aborting script.", e.what());
+      LuaObject::clearStack(L);
+      return false;
+   }
 }
 
 
