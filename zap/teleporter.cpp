@@ -66,8 +66,6 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
 
    setVert(pos, 0);
    setVert(dest, 1);
-
-   mDests.push_back(dest);
 }
 
 // Destructor
@@ -253,6 +251,13 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void Teleporter::computeExtent()
 {
    setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS));
+}
+
+
+void Teleporter::onConstructed()
+{
+   // Make destination the entry point so we have at least one destination
+   mDests.push_back(getVert(0));
 }
 
 

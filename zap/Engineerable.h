@@ -46,11 +46,12 @@ public:
    virtual ~Engineerable();  // Destructor
 
    void setEngineered(bool isEngineered);
-   bool isEngineered(); // Was this engineered py a player?
+   bool isEngineered(); // Was this engineered by a player?
 
    void setResource(MoveItem *resource);
 
-   virtual void computeExtent() = 0;
+   virtual void computeExtent() = 0;  // The object must have extents recomputed before being added
+   virtual void onConstructed() = 0;  // Call this once the object has been added to the game
 };
 
 

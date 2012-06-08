@@ -386,7 +386,6 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
 
    Engineerable *engineerable = dynamic_cast<Engineerable *>(deployedObject);
-   EngineeredItem *engineeredItem = dynamic_cast<EngineeredItem*>(deployedObject);
 
    if((!deployedObject || !engineerable) && !clientInfo->isRobot())              // Something went wrong
    {
@@ -403,8 +402,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
 
-   if(engineeredItem)
-      engineeredItem->onEnabled();
+   engineerable->onConstructed();
 
    MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
@@ -785,6 +783,12 @@ void EngineeredItem::computeExtent()
    getCollisionPoly(v);
 
    setExtent(Rect(v));
+}
+
+
+void EngineeredItem::onConstructed()
+{
+   onEnabled();
 }
 
 

@@ -89,6 +89,7 @@ public:
 
    static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
    void computeExtent();
+   void onConstructed();
 
    virtual void onDestroyed();
    virtual void onDisabled();

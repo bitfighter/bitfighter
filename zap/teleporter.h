@@ -100,6 +100,7 @@ public:
    void onGeomChanging();
 
    void computeExtent();
+   void onConstructed();
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();
