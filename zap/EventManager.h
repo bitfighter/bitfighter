@@ -43,7 +43,7 @@ class LuaPlayerInfo;
 class EventManager
 {
 public:
-   // Need to keep synced with eventFunctions!
+   // Note: Need to keep synced with eventDefs in .cpp!
    enum EventType {
       TickEvent = 0,          // (time) --> Standard game tick event
       ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
