@@ -28,11 +28,12 @@
 #include "tnlAssert.h"
 #include "tnlLog.h"
 
-#include "gameObjectRender.h"
-#include "ScreenInfo.h"
+//#include "gameObjectRender.h"
+//#include "ScreenInfo.h"
 
 #include "SDL_opengl.h"
 #include "SDL_mouse.h"
+#include "SDL_version.h"
 
 namespace Zap
 {
