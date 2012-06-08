@@ -421,10 +421,7 @@ void EventManager::handleEventFiringError(const char *subscriber, EventType even
       delete robot;
    }
    else
-   {
       logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
-      LuaObject::clearStack(L);
-   }
 }
 
 
