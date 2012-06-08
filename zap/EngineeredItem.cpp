@@ -34,6 +34,7 @@
 #include "gameConnection.h"
 #include "WallSegmentManager.h"
 #include "ClientInfo.h"
+#include "teleporter.h"
 
 
 #ifndef ZAP_DEDICATED
@@ -60,6 +61,39 @@ static bool forceFieldEdgesIntersectPoints(const Vector<Point> &points, const Ve
    return polygonIntersectsSegment(points, forceField[0], forceField[1]) || polygonIntersectsSegment(points, forceField[2], forceField[3]);
 }
 
+
+// Constructor
+Engineerable::Engineerable()
+{
+   mEngineered = false;
+}
+
+// Destructor
+Engineerable::~Engineerable()
+{
+   // Do nothing
+}
+
+
+void Engineerable::setEngineered(bool isEngineered)
+{
+   mEngineered = isEngineered;
+}
+
+
+bool Engineerable::isEngineered()
+{
+   // If the engineered item has a resource attached, then it was engineered by a player
+   return mEngineered;
+}
+
+
+void Engineerable::setResource(MoveItem *resource)
+{
+   TNLAssert(resource->isMounted() == false, "Doh!");
+   mResource = resource;
+   mResource->removeFromDatabase();
+}
 
 
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
@@ -111,6 +145,10 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    mErrorMessage = checkResourcesAndEnergy(ship);
    if(mErrorMessage != "")
       return false;
+
+   // We can deploy a teleport anywhere for now
+   if(objectType == EngineeredTeleport)
+      return true;
 
    if(!findDeployPoint(ship, mDeployPosition, mDeployNormal))
    {
@@ -325,8 +363,9 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    if(!ship)
       return false;
 
-   EngineeredItem *deployedObject = NULL;
+   BfObject *deployedObject = NULL;
 
+   Point firePosition = ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS));
    switch(objectType)
    {
       case EngineeredTurret:
@@ -337,14 +376,18 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
          break;
 
+      case EngineeredTeleport:
+         deployedObject = new Teleporter(firePosition, firePosition);
+         break;
+
       default:
          return false;
    }
 
-   deployedObject->setOwner(clientInfo);
-   deployedObject->computeExtent();
 
-   if(!deployedObject && !clientInfo->isRobot())              // Something went wrong
+   Engineerable *engineerable = dynamic_cast<Engineerable *>(deployedObject);
+
+   if((!deployedObject || !engineerable) && !clientInfo->isRobot())              // Something went wrong
    {
       clientInfo->getConnection()->s2cDisplayErrorMessage("Error deploying object.");
       delete deployedObject;
@@ -353,13 +396,18 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    ship->engineerBuildObject();     // Deducts energy
 
+   deployedObject->setOwner(clientInfo);
+
+   engineerable->computeExtent();   // Recomputes extents
+
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
-   deployedObject->onEnabled();
+
+   engineerable->onConstructed();
 
    MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
-   deployedObject->setResource(resource);
-   deployedObject->setEngineered(true);
+   engineerable->setResource(resource);
+   engineerable->setEngineered(true);
 
    return true;
 }
@@ -376,7 +424,7 @@ string EngineerModuleDeployer::getErrorMessage()
 
 
 // Constructor
-EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) : mAnchorNormal(anchorNormal)
+EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) : Engineerable(), mAnchorNormal(anchorNormal)
 {
    setPos(anchorPoint);
    mHealth = 1.0f;
@@ -386,7 +434,6 @@ EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) 
    mHealRate = 0;
    mMountSeg = NULL;
    mSnapped = false;
-   mEngineered = false;
 
    mRadius = 7;
 
@@ -639,14 +686,6 @@ void EngineeredItem::setSnapped(bool snapped)
 }
 
 
-void EngineeredItem::setResource(MoveItem *resource)
-{
-   TNLAssert(resource->isMounted() == false, "Doh!");
-   mResource = resource;
-   mResource->removeFromDatabase();
-}
-
-
 static const F32 disabledLevel = 0.25;
 
 bool EngineeredItem::isEnabled()
@@ -747,6 +786,12 @@ void EngineeredItem::computeExtent()
 }
 
 
+void EngineeredItem::onConstructed()
+{
+   onEnabled();
+}
+
+
 void EngineeredItem::onDestroyed()
 {
    // Do nothing
@@ -829,19 +874,6 @@ void EngineeredItem::explode()
 bool EngineeredItem::isDestroyed()
 {
    return mIsDestroyed;
-}
-
-
-void EngineeredItem::setEngineered(bool isEngineered)
-{
-   mEngineered = isEngineered;
-}
-
-
-bool EngineeredItem::isEngineered()
-{
-   // If the engineered item has a resource attached, then it was engineered by a player
-   return mEngineered;
 }
 
 
@@ -1022,7 +1054,6 @@ const char *EngineeredItem::luaClassName = "EngineeredItem";
 
 const luaL_reg EngineeredItem::luaMethods[] =
 {
-   { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
    { "isActive",  luaW_doMethod<EngineeredItem, &EngineeredItem::isActive>  },
    { "getAngle",  luaW_doMethod<EngineeredItem, &EngineeredItem::getAngle>  },
    { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
