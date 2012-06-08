@@ -83,6 +83,7 @@ const U8 ForceFieldProjectorTypeNumber = 27;
 const U8 PolyWallTypeNumber = 28;
 const U8 CircleTypeNumber = 29;
 const U8 CoreTypeNumber = 30;
+const U8 TeleportExitTypeNumber = 31;
 
 const U8 BotNavMeshZoneTypeNumber = 64;  // separate database
 

@@ -50,6 +50,7 @@ public:
       enum {
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
+      ExitPointChangedMask = BIT(2),
 
       TeleporterTriggerRadius = 50,
       TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used
@@ -60,6 +61,7 @@ public:
 
 private:
    S32 mLastDest;    // Destination of last ship through
+   bool mNeedsEndpoint;
 
    void computeExtent();
 
@@ -102,6 +104,8 @@ public:
    void onGeomChanging();
 
    void onConstructed();
+
+   bool needsEndpoint();
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();

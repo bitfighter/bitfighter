@@ -96,6 +96,9 @@ void Engineerable::setResource(MoveItem *resource)
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
 bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal)
 {
