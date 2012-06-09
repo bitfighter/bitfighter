@@ -749,6 +749,9 @@ void luaW_extend(lua_State* L)
 //    REGISTER_LUA_CLASS(className);
 // or
 //    REGISTER_LUA_SUBCLASS(className, parentClass);
+// or
+//    REGISTER_LUA_SUBCLASS_TWO_PARENTS(className, firstParentClass, secondParentClass);
+//
 // When you actually create your Lua instance (L), call LuaW_Registrar::registerClasses(L)
 // to make your methods available.
 // And with that, your class will be registered with LuaWrapper.
@@ -828,15 +831,14 @@ private:
    // Sort vector of classes so parents of each class are listed before their children
    static void sortClassList()
    {
-      unsigned int startingSize, itemsRemainingInList;
+      unsigned int itemsRemainingInList;
 
-      startingSize = itemsRemainingInList = getUnorderedClassList().size();     
+      itemsRemainingInList = getUnorderedClassList().size();     
 
       // Iterate through unordered objects -- these should all have parents that are already in orderedClassList
-      unsigned int iteration = 0;
       while(itemsRemainingInList > 0)
       {
-         iteration++;
+         bool foundAtLeastOneThisIteration = false;      // For detecting and preventing endless loops due to hiearchy problems
 
          for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)    // Descending order for greater efficiency
          {
@@ -855,21 +857,22 @@ private:
 
             // If parent is already found, move to ordered list, as before
             if(foundAllParents)
+            {
                moveToOrderedList(i);
+               foundAtLeastOneThisIteration = true;
+            }
          }
 
          // For safety if objects have no found parents and we've iterated too many times,
          // just add them to the end of the list.  This block should nevever run.
-         TNLAssert(iteration <= startingSize, "Item appears to have invalid parent!");
-         for(int i = 0; i < getUnorderedClassList().size(); i++)
-            logprintf("%d, %s - %s", i, getUnorderedClassList()[i].name, getUnorderedClassList()[i].parents[0]);
+         TNLAssert(foundAtLeastOneThisIteration, "Registering items appears to have hit a deadlock -- check luaW class/subclass declarations!");
 
-         if(iteration > startingSize)
+         if(!foundAtLeastOneThisIteration)
             for(int i = (int)getUnorderedClassList().size() - 1; i > -1; i--)
                moveToOrderedList(i);
 
          itemsRemainingInList = getUnorderedClassList().size();   
-      }
+      }  // end while
    }
 
 protected:
@@ -892,8 +895,8 @@ protected:
    template<class T, class U>
    static void registerClass()
    {
-      static ParentList parentList(1);
-      parentList[0] = U::luaClassName;
+      ParentList parentList;
+      parentList.push_back(U::luaClassName);
 
       classParent key = {T::luaClassName, parentList};      // This class has a parent and needs to be
       getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
@@ -909,9 +912,9 @@ protected:
    template<class T, class U, class V>
    static void registerClass()
    {
-      static ParentList parentList(2);
-      parentList[0] = U::luaClassName;
-      parentList[1] = V::luaClassName;
+      ParentList parentList;
+      parentList.push_back(U::luaClassName);
+      parentList.push_back(V::luaClassName);
 
       classParent key = {T::luaClassName, parentList};      // This class has a parent and needs to be
       getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
