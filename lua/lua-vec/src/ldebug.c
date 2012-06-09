@@ -571,8 +571,14 @@ void luaG_typeerror (lua_State *L, const TValue *o, const char *op) {
                          getobjname(L, L->ci, cast_int(o - L->base), &name) :
                          NULL;
   if (kind)
-    luaG_runerror(L, "attempt to %s %s " LUA_QS " (a %s value)",
-                op, kind, name, t);
+  {
+    if(strcmp(op, "call") == 0 && strcmp(kind, "method") == 0)
+      luaG_runerror(L, "attempt to call missing or unknown method " LUA_QS " (a %s value)",     // Bitfighter BF CE
+                  name, t);
+    else
+      luaG_runerror(L, "attempt to %s %s " LUA_QS " (a %s value)",
+                  op, kind, name, t);
+  }
   else
     luaG_runerror(L, "attempt to %s a %s value", op, t);
 }
