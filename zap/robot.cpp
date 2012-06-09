@@ -751,9 +751,6 @@ const luaL_reg Robot::luaMethods[] =
    { "setReqLoadout",            luaW_doMethod<Robot, &Robot::setReqLoadout>            },
    { "setCurrLoadout",           luaW_doMethod<Robot, &Robot::setCurrLoadout>           },
 
-   //{ "subscribe",                luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>      },
-   //{ "unsubscribe",              luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe>    },
-
    { "globalMsg",                luaW_doMethod<Robot, &Robot::globalMsg>                },
    { "teamMsg",                  luaW_doMethod<Robot, &Robot::teamMsg>                  },
     
