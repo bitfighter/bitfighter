@@ -770,6 +770,15 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 }
 
 
+void renderTeleporterOutline(const Point &center, F32 radius)
+{
+   glColor(Colors::richGreen);
+   glLineWidth(gLineWidth3);
+   drawPolygon(center, 12, radius, 0);
+   glLineWidth(gDefaultLineWidth);
+}
+
+
 // Render vertices of polyline; only used in the editor
 void renderPolyLineVertices(BfObject *obj, bool snapping, F32 currentScale)
 {

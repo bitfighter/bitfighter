@@ -278,14 +278,14 @@ bool Robot::prepareEnvironment()
       lua_pop(L, 1);                                        //                                        -- <<empty stack>>
 
       TNLAssert(lua_gettop(L) <= 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return true;
    }
    catch(LuaException &e)
    {
       logError(e.what());
       return false;
    }
+
+   return true;
 }
 
 

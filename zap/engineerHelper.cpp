@@ -89,6 +89,7 @@ bool EngineerHelper::isEngineerHelper()
 
 
 static Point deployPosition, deployNormal;
+static EngineerModuleDeployer deployer;
 
 void EngineerHelper::render()
 {
@@ -211,17 +212,24 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 void EngineerHelper::renderDeploymentMarker(Ship *ship)
 {
    // Only render wall mounted items (not teleport)
-   if(mSelectedItem != -1 && mEngineerCostructionItemInfos[mSelectedItem].mObjectType != EngineeredTeleport &&
-         EngineerModuleDeployer::findDeployPoint(ship, deployPosition, deployNormal))
+   if(mSelectedItem != -1 &&
+         EngineerModuleDeployer::findDeployPoint(ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType, deployPosition, deployNormal))
    {
-      // Check deployment, so square will be green if allowed, red if not allowed, helps engineering
-      EngineerModuleDeployer deployer;
-      if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
-         glColor(Colors::green);
-      else
-         glColor(Colors::red);
+      if(mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTurret ||
+            mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredForceField)
+      {
+         // Check deployment, so square will be green if allowed, red if not allowed, helps engineering
+         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
+            glColor(Colors::green);
+         else
+            glColor(Colors::red);
 
-      drawSquare(deployPosition, 5);
+         drawSquare(deployPosition, 5);
+      }
+      else if(mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleport)
+      {
+         renderTeleporterOutline(deployPosition, 75.f);
+      }
    }
 }
 

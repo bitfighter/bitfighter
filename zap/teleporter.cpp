@@ -64,6 +64,8 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
    mTeleporterDelay = TeleporterDelay;
    setTeam(TEAM_NEUTRAL);
 
+   mNeedsEndpoint = false;
+
    setVert(pos, 0);
    setVert(dest, 1);
 }
@@ -189,6 +191,8 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    {
       getVert(0).write(stream);
 
+      stream->writeFlag(mEngineered);
+
       stream->writeInt(mDests.size(), 16);
 
       for(S32 i = 0; i < mDests.size(); i++)
@@ -203,6 +207,10 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
       stream->write(mLastDest);     // Where ship is going
 
+   // If we've adjusted the exit point, needed with engineering teleports
+   if(stream->writeFlag(updateMask & ExitPointChangedMask))
+      getVert(1).write(stream);
+
    return 0;
 }
 
@@ -215,6 +223,8 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pos;
       pos.read(stream);
       setVert(pos, 0);
+
+      mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
       mDests.resize(count);
@@ -245,6 +255,14 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 #endif
       timeout = mTeleporterDelay;
    }
+
+   // ExitPointChangedMask
+   if(stream->readFlag())
+   {
+      Point dest;
+      dest.read(stream);
+      setVert(dest, 1);
+   }
 }
 
 
@@ -258,6 +276,14 @@ void Teleporter::onConstructed()
 {
    // Make destination the entry point so we have at least one destination
    mDests.push_back(getVert(0));
+   mNeedsEndpoint = true;
+   setMaskBits(ExitPointChangedMask);
+}
+
+
+bool Teleporter::needsEndpoint()
+{
+   return mNeedsEndpoint;
 }
 
 
@@ -328,15 +354,6 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 }
 
 
-inline Point polarToRect(Point p)
-{
-   F32 &r  = p.x;
-   F32 &th = p.y;
-
-   return Point(cos(th) * r, sin(th) * r);
-}
-
-
 void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
@@ -356,6 +373,12 @@ void Teleporter::render()
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       renderTeleporter(getVert(0), 0, true, mTime, zoomFraction, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
+   }
+
+   if(mEngineered)
+   {
+      // We render the exit point of engineered teleports with an outline
+      renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS);
    }
 #endif
 }
