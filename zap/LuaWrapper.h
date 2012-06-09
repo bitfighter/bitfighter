@@ -188,7 +188,6 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
 // convertable to) type T; otherwise, returns NULL.
 template <typename T>
 T* luaW_to(lua_State* L, int index, bool strict = false)
-
 {
     if (luaW_is<T>(L, index, strict))
     {
@@ -767,36 +766,40 @@ private:
    typedef void (*luaW_regFunc)(lua_State *);
    typedef std::vector<const char*> ParentList;
 
-   struct classParent { 
+   struct ClassParent { 
       const char *name;      // Name of the class in question
       ParentList parents;    // Parent class(es)
    };
 
+   // These containers sure involve some real ugliness... try to hide some of it!
    typedef const char* ClassName;
    typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
-   typedef std::map <ClassName, luaW_regFunc> FunctionMap;    // Map of class name and registration functions
+   typedef std::map      <ClassName, luaW_regFunc> RegFunctionMap;    // Map of class name and registration functions (one reg function per class)
+   typedef std::multimap <ClassName, luaW_regFunc> ExtFunctionMap;    // Multimap of class name and extension functions (multiple ext functions per class)
+   typedef ExtFunctionMap::iterator ExtFunctionMapIterator;
+   typedef std::pair<ExtFunctionMapIterator, ExtFunctionMapIterator> ExtensionFunctionIterator;
 
 
    // List of registration functions
-   static FunctionMap &getRegistrationFunctions()
+   static RegFunctionMap &getRegistrationFunctions()
    {
-      static FunctionMap registrationFunctions;
+      static RegFunctionMap registrationFunctions;
       return registrationFunctions;
    }
 
 
    // List of extension functions
-   static FunctionMap &getExtensionFunctions()
+   static ExtFunctionMap &getExtensionFunctions()
    {
-      static FunctionMap extensionFunctions;
+      static ExtFunctionMap extensionFunctions;
       return extensionFunctions;
    }
 
 
    // Unordered list of classes
-   static std::vector<classParent> &getUnorderedClassList()
+   static std::vector<ClassParent> &getUnorderedClassList()
    {
-      static std::vector<classParent> unorderedClassList;
+      static std::vector<ClassParent> unorderedClassList;
       return unorderedClassList;
    }
 
@@ -898,7 +901,7 @@ protected:
       ParentList parentList;
       parentList.push_back(U::luaClassName);
 
-      classParent key = {T::luaClassName, parentList};      // This class has a parent and needs to be
+      ClassParent key = { T::luaClassName, parentList };    // This class has a parent and needs to be
       getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
 
       NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
@@ -916,7 +919,7 @@ protected:
       parentList.push_back(U::luaClassName);
       parentList.push_back(V::luaClassName);
 
-      classParent key = {T::luaClassName, parentList};      // This class has a parent and needs to be
+      ClassParent key = { T::luaClassName, parentList };    // This class has a parent and needs to be
       getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
 
       NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
@@ -929,8 +932,6 @@ protected:
       NameFunctionPair extPair2(T::luaClassName, &luaW_extend<T, V>);
       getExtensionFunctions()   .insert(extPair2);
    }
-
-
 
 public:
    static void registerClasses(lua_State *L)
@@ -945,11 +946,14 @@ public:
       // Extend those that need extending
       for(unsigned int i = 0; i < orderedClassList.size(); i++)
       {
-         // Non sub-classes will not be in this list
-         if(getExtensionFunctions()[orderedClassList[i]] == NULL)
-            continue;
+         // Get an iterator valid for all extension functions matching orderedClassList[i]... i.e. all functions that extend that class
+         ExtensionFunctionIterator iterator = getExtensionFunctions().equal_range(orderedClassList[i]);    
 
-         getExtensionFunctions()[orderedClassList[i]](L);
+         // Iterate through those extension functions, calling each in turn
+         // iterator.first = first extension fn, iterator.second = last extension fn
+         // it.first = className, it.second = extensionFunction
+         for(ExtFunctionMapIterator it = iterator.first; it != iterator.second; it++)
+            it->second(L);
       }
    }
 };
@@ -990,7 +994,6 @@ public:
 
 #define REGISTER_LUA_SUBCLASS_TWO_PARENTS(cls, parent1, parent2) \
    static LuaW_Registrar3Args<cls, parent1, parent2> luaclass_##cls
-
 
 
 
@@ -1058,8 +1061,6 @@ public:
 
 
 
-
-
 // This goes in the header of a "wrapped class"
 #define  LUAW_DECLARE_CLASS(className) \
    LuaProxy<className> *mLuaProxy; \
@@ -1077,7 +1078,6 @@ public:
 // And this in the destructor of the "wrapped class"
 #define LUAW_DESTRUCTOR_CLEANUP \
    if(mLuaProxy) mLuaProxy->setDefunct(true)
-
 
 
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
