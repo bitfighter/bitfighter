@@ -1013,7 +1013,7 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 int LuaScriptRunner::subscribe(lua_State *L)
 {
    // Get the event off the stack
-   static const char *methodName = "LuaUtil:subscribe()";
+   static const char *methodName = "subscribe()";
    LuaObject::checkArgCount(L, 1, methodName);
 
    lua_Integer eventType = LuaObject::getInt(L, 0, methodName);
