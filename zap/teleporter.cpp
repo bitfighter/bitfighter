@@ -378,10 +378,7 @@ void Teleporter::render()
    if(mEngineered)
    {
       // We render the exit point of engineered teleports with an outline
-      glColor(Colors::richGreen);
-      glLineWidth(gLineWidth3);
-      drawPolygon(getVert(1), 12, (F32)Teleporter::TELEPORTER_RADIUS, 0);
-      glLineWidth(gDefaultLineWidth);
+      renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS);
    }
 #endif
 }

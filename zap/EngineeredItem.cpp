@@ -100,27 +100,32 @@ void Engineerable::setResource(MoveItem *resource)
 ////////////////////////////////////////
 
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
-bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal)
+bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal)
 {
-   // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
-   Point startPoint = ship->getActualPos();
-   Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;     
+   if(objectType == EngineeredTurret ||
+         objectType == EngineeredForceField)
+   {
+         // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
+         Point startPoint = ship->getActualPos();
+         Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;
 
-   F32 collisionTime;
+         F32 collisionTime;
 
-   BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, ActualState, startPoint, endPoint,
-                                               collisionTime, deployNormal);
+         BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, ActualState, startPoint, endPoint,
+                                                     collisionTime, deployNormal);
 
-   if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
-      return false;
-
-
-   if(deployNormal.dot(ship->getAimVector()) > 0)
-      deployNormal = -deployNormal;      // This is to fix deploy at wrong side of barrier.
+         if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
+            return false;
 
 
-   // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
-   deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
+         if(deployNormal.dot(ship->getAimVector()) > 0)
+            deployNormal = -deployNormal;      // This is to fix deploy at wrong side of barrier.
+
+         // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
+         deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
+   }
+   else if(objectType == EngineeredTeleport)
+      deployPosition.set(ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS)));
 
    return true;
 }
@@ -153,7 +158,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    if(objectType == EngineeredTeleport)
       return true;
 
-   if(!findDeployPoint(ship, mDeployPosition, mDeployNormal))
+   if(!findDeployPoint(ship, objectType, mDeployPosition, mDeployNormal))
    {
       mErrorMessage = "!!! Could not find a suitable wall for mounting the item";
       return false;
