@@ -762,29 +762,30 @@ class LuaW_Registrar
 {
 private:
    typedef void (*luaW_regFunc)(lua_State *);
+   typedef std::vector<const char*> ParentList;
 
    struct classParent { 
-      const char *name;   
-      const char *parent; 
+      const char *name;      // Name of the class in question
+      ParentList parents;    // Parent class(es)
    };
 
-   typedef const char* className;
-   typedef std::pair<className, luaW_regFunc> nameFunctionPair;
-   typedef std::map <className, luaW_regFunc> functionMap;    // Map of class name and registration functions
+   typedef const char* ClassName;
+   typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
+   typedef std::map <ClassName, luaW_regFunc> FunctionMap;    // Map of class name and registration functions
 
 
    // List of registration functions
-   static functionMap &getRegistrationFunctions()
+   static FunctionMap &getRegistrationFunctions()
    {
-      static functionMap registrationFunctions;
+      static FunctionMap registrationFunctions;
       return registrationFunctions;
    }
 
 
    // List of extension functions
-   static functionMap &getExtensionFunctions()
+   static FunctionMap &getExtensionFunctions()
    {
-      static functionMap extensionFunctions;
+      static FunctionMap extensionFunctions;
       return extensionFunctions;
    }
 
@@ -798,10 +799,21 @@ private:
 
 
    // List of classes sorted by initialization order
-   static std::vector<className> &getOrderedClassList()
+   static std::vector<ClassName> &getOrderedClassList()
    {
-      static std::vector<className> orderedClassList;
+      static std::vector<ClassName> orderedClassList;
       return orderedClassList;
+   }
+
+
+   // Helper function -- return true if name is found in orderedClassList
+   static bool findInOrderedClassList(const char *name)
+   {
+      for(int i = 0; i < (int)getOrderedClassList().size(); i++)
+         if(strcmp(name, getOrderedClassList()[i]) == 0)
+            return true;
+
+      return false;
    }
 
 
@@ -826,23 +838,31 @@ private:
       {
          iteration++;
 
-         for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)
+         for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)    // Descending order for greater efficiency
          {
-            bool foundParent = false;
+            // For each item in unorderedClassList, check to see if all parents have already been added to orderedClassList.
+            // If so, we can move the item to the orderedClassList.
+            bool foundAllParents = true;    
 
-            // Search ordered list to see if parent is already there
-            for(unsigned int j = 0; j < getOrderedClassList().size(); j++)
-               if(strcmp(getOrderedClassList()[j], getUnorderedClassList()[i].parent) == 0)
-                  foundParent = true;
+            for(int j = 0; j < (int)getUnorderedClassList()[i].parents.size(); j++)
+            {
+               if(!findInOrderedClassList(getUnorderedClassList()[i].parents[j]))
+               {
+                  foundAllParents = false;
+                  break;
+               }
+            }
 
             // If parent is already found, move to ordered list, as before
-            if(foundParent)
+            if(foundAllParents)
                moveToOrderedList(i);
          }
 
          // For safety if objects have no found parents and we've iterated too many times,
          // just add them to the end of the list.  This block should nevever run.
          TNLAssert(iteration <= startingSize, "Item appears to have invalid parent!");
+         for(int i = 0; i < getUnorderedClassList().size(); i++)
+            logprintf("%d, %s - %s", i, getUnorderedClassList()[i].name, getUnorderedClassList()[i].parents[0]);
 
          if(iteration > startingSize)
             for(int i = (int)getUnorderedClassList().size() - 1; i > -1; i--)
@@ -865,28 +885,55 @@ protected:
    {
       getOrderedClassList().push_back(T::luaClassName);        // No parent, so add it to front of ordered list (no sorting needed)
 
-      nameFunctionPair regPair(T::luaClassName, &registerClass<T>);
+      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
       getRegistrationFunctions().insert(regPair);
    }
 
    template<class T, class U>
    static void registerClass()
    {
-      classParent key = {T::luaClassName, U::luaClassName};    // This class has a parent and needs to be
-      getUnorderedClassList().push_back(key);                  // registered after parent (will require sorting)
+      static ParentList parentList(1);
+      parentList[0] = U::luaClassName;
 
-      nameFunctionPair regPair(T::luaClassName, &registerClass<T>);
+      classParent key = {T::luaClassName, parentList};      // This class has a parent and needs to be
+      getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
+
+      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
       getRegistrationFunctions().insert(regPair);
 
-      nameFunctionPair extPair(T::luaClassName, &luaW_extend<T, U>);
+      // T extends U
+      NameFunctionPair extPair(T::luaClassName, &luaW_extend<T, U>);
       getExtensionFunctions()   .insert(extPair);
    }
+
+   template<class T, class U, class V>
+   static void registerClass()
+   {
+      static ParentList parentList(2);
+      parentList[0] = U::luaClassName;
+      parentList[1] = V::luaClassName;
+
+      classParent key = {T::luaClassName, parentList};      // This class has a parent and needs to be
+      getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
+
+      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
+      getRegistrationFunctions().insert(regPair);
+
+      // T extends both U and V
+      NameFunctionPair extPair1(T::luaClassName, &luaW_extend<T, U>);
+      getExtensionFunctions()   .insert(extPair1);
+
+      NameFunctionPair extPair2(T::luaClassName, &luaW_extend<T, V>);
+      getExtensionFunctions()   .insert(extPair2);
+   }
+
+
 
 public:
    static void registerClasses(lua_State *L)
    {
       sortClassList();
-      std::vector<className> orderedClassList = getOrderedClassList();
+      std::vector<ClassName> orderedClassList = getOrderedClassList();
 
       // Register all our classes
       for(unsigned int i = 0; i < orderedClassList.size(); i++)
@@ -923,12 +970,23 @@ public:
 };
 
 
+template<class T, class U, class V>
+class LuaW_Registrar3Args : public LuaW_Registrar
+{
+public:
+   LuaW_Registrar3Args() { registerClass<T, U, V>(); }
+};
+
+
+
 #define REGISTER_LUA_CLASS(cls) \
    static LuaW_Registrar1Arg<cls> luaclass_##cls
 
 #define REGISTER_LUA_SUBCLASS(cls, parent) \
    static LuaW_Registrar2Args<cls, parent> luaclass_##cls
 
+#define REGISTER_LUA_SUBCLASS_TWO_PARENTS(cls, parent1, parent2) \
+   static LuaW_Registrar3Args<cls, parent1, parent2> luaclass_##cls
 
 
 

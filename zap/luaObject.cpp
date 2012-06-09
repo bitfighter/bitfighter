@@ -921,6 +921,11 @@ void LuaScriptRunner::deleteScript(const char *name)
 }
 
 
+// Methods that should be abstract but can't be because luaW requires this class to be instantiable
+bool LuaScriptRunner::prepareEnvironment()              { TNLAssert(false, "Unimplemented method!"); }
+void LuaScriptRunner::logError(const char *format, ...) { TNLAssert(false, "Unimplemented method!"); }
+
+
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
@@ -1153,8 +1158,16 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
-
 }
+
+const char *LuaScriptRunner::luaClassName = "LuaScriptRunner";
+const luaL_reg LuaScriptRunner::luaMethods[] =
+{
+   { "subscribe",   luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>   },
+   { "unsubscribe", luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe> },
+};
+
+REGISTER_LUA_CLASS(LuaScriptRunner);
 
 #undef setEnumName
 #undef setEnum

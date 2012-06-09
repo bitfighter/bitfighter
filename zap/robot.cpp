@@ -751,8 +751,8 @@ const luaL_reg Robot::luaMethods[] =
    { "setReqLoadout",            luaW_doMethod<Robot, &Robot::setReqLoadout>            },
    { "setCurrLoadout",           luaW_doMethod<Robot, &Robot::setCurrLoadout>           },
 
-   { "subscribe",                luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>      },
-   { "unsubscribe",              luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe>    },
+   //{ "subscribe",                luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>      },
+   //{ "unsubscribe",              luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe>    },
 
    { "globalMsg",                luaW_doMethod<Robot, &Robot::globalMsg>                },
    { "teamMsg",                  luaW_doMethod<Robot, &Robot::teamMsg>                  },
@@ -770,7 +770,7 @@ const luaL_reg Robot::luaMethods[] =
 };
 
 
-REGISTER_LUA_SUBCLASS(Robot, Ship);
+REGISTER_LUA_SUBCLASS_TWO_PARENTS(Robot, Ship, LuaScriptRunner);
 
 S32 Robot::getClassID(lua_State *L)
 {
@@ -783,6 +783,7 @@ S32 Robot::getCPUTime(lua_State *L)
 {
    return returnInt(L, getGame()->getCurrentTime());
 }
+
 
 S32 Robot::getTime(lua_State *L)
 {

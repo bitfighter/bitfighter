@@ -194,36 +194,6 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Class to restore Lua stack to the state it was in when we found it.
-// Concept based on code from http://www.codeproject.com/KB/cpp/luaincpp.aspx
-// ---------------------------------------------------------------------------
-// VERSION              : 1.00
-// DATE                 : 1-Sep-2005
-// AUTHOR               : Richard Shephard
-// ---------------------------------------------------------------------------
-
-//class LuaProtectStack
-//{
-//public:
-//   LuaProtectStack(Robot *lgo)
-//   {
-//      mRobot = lgo;
-//      mTop = lua_gettop(mRobot->mState);
-//   }
-//
-//   virtual ~LuaProtectStack(void)
-//   {
-//      if(mRobot->mState)
-//         lua_settop (mRobot->mState, mTop);
-//   }
-//
-//protected:
-//   Robot *mRobot;
-//   S32 mTop;
-//};
 
 };
 

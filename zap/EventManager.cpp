@@ -56,7 +56,6 @@ struct EventDef {
 };
 
 
-// Note: Need to keep these synced with EventType enum in header!
 static const EventDef eventDefs[] = {
    // Name           // Lua function
    { "Tick",         "onTick" },
@@ -113,41 +112,32 @@ EventManager *EventManager::get()
 
 void EventManager::subscribe(const char *subscriber, EventType eventType)
 {
+   // First, see if we're already subscribed
+   if(isSubscribed(subscriber, eventType) || isPendingSubscribed(subscriber, eventType))
+      return;
+
    lua_State *L = LuaScriptRunner::getL();
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   try
+   // Make sure the script has the proper event listener
+   LuaScriptRunner::loadFunction(L, subscriber, eventDefs[eventType].function);     // -- function
+
+   if(!lua_isfunction(L, -1))
    {
-      // First, see if we're already subscribed
-      if(isSubscribed(subscriber, eventType) || isPendingSubscribed(subscriber, eventType))
-         return;
+      logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
 
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-      // Make sure the script has the proper event listener
-      LuaScriptRunner::loadFunction(L, subscriber, eventDefs[eventType].function);     // -- function
-
-      if(!lua_isfunction(L, -1))
-      {
-         logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
-
-         lua_pop(L, 1);    // Remove offending item from the stack
-         TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-         return;
-      }
-
-      removeFromPendingUnsubscribeList(subscriber, eventType);
-      pendingSubscriptions[eventType].push_back(subscriber);
-      anyPending = true;
-
-      lua_pop(L, 1);    // Remove function from stack                                  -- <<empty stack>>
-
+      lua_pop(L, 1);    // Remove offending item from the stack
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+      return;
    }
-   catch(LuaException &e)
-   {
-      logprintf("Level Error: Can't subscribe to %s event: %s", eventDefs[eventType].name, e.what());  
-      LuaObject::clearStack(L);
-   }
+
+   removeFromPendingUnsubscribeList(subscriber, eventType);
+   pendingSubscriptions[eventType].push_back(subscriber);
+   anyPending = true;
+
+   lua_pop(L, 1);    // Remove function from stack                                  -- <<empty stack>>
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
 
 
@@ -343,7 +333,6 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
 
 // Note that player can be NULL, in which case we'll pass nil to the listeners
-// callerId will be NULL when triggered by a player
 void EventManager::fireEvent(const char *callerId, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
 {
    if(suppressEvents(eventType))   
@@ -353,7 +342,7 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, const ch
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      if(callerId && strcmp(callerId, subscriptions[eventType][i]) == 0)    // Don't alert bot about own message!
+      if(strcmp(callerId, subscriptions[eventType][i]) == 0)    // Don't alert bot about own message!
          continue;
 
       try

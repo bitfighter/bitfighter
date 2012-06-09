@@ -172,12 +172,13 @@ protected:
    bool startLua(ScriptType scriptType);
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
-   virtual void logError(const char *format, ...) = 0;
+   // These two methods should be abstract, but luaW requires us to be able to instantiate this class
+   virtual void logError(const char *format, ...);
+   virtual bool prepareEnvironment();
 
    static int luaPanicked(lua_State *L);
 
    virtual void registerClasses();
-   virtual bool prepareEnvironment() = 0;
    
    void setEnvironment();
 
@@ -208,25 +209,13 @@ public:
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
    bool loadAndRunGlobalFunction(lua_State *L, const char *key);
+
+   // Lua interface
+   LUAW_DECLARE_CLASS(LuaScriptRunner);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-//class LuaItem : public LuaObject
-//{
-//public:
-//   // "= 0" ==> make these methods "pure virtual" functions, and must be implemented in child classes!
-//   virtual S32 getRad(lua_State *L) = 0;       // Radius of item (returns number)
-//   virtual S32 getVel(lua_State *L) = 0;       // Speed of item (returns point)
-//   virtual BfObject *getGameObject() = 0;    // Return the underlying GameObject
-//
-//   virtual void push(lua_State *L);            // Push item onto stack
-//   virtual S32 getClassID(lua_State *L);       // Object's class
-//
-//   static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
-//};
 
 };
 
