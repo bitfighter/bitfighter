@@ -779,7 +779,6 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
          throw LuaException(lua_tostring(L, -1));
 
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-      return true;
    }
 
    catch(LuaException &e)
@@ -788,6 +787,8 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
       LuaObject::clearStack(L);
       return false;
    }
+
+   return true;
 }
 
 
@@ -922,7 +923,7 @@ void LuaScriptRunner::deleteScript(const char *name)
 
 
 // Methods that should be abstract but can't be because luaW requires this class to be instantiable
-bool LuaScriptRunner::prepareEnvironment()              { TNLAssert(false, "Unimplemented method!"); }
+bool LuaScriptRunner::prepareEnvironment()              { TNLAssert(false, "Unimplemented method!"); return false; }
 void LuaScriptRunner::logError(const char *format, ...) { TNLAssert(false, "Unimplemented method!"); }
 
 
