@@ -141,44 +141,6 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
    }
    catch(LuaException &e)
    {
-
-      // stack trace from naev
-      
-//      #if DEBUGGING
-//   lua_pushcfunction(L, nlua_errTrace);
-//   errf = -3;
-//#else /* DEBUGGING */
-//   errf = 0;
-//#endif /* DEBUGGING */
-//
-//   /* Run the function. */
-//   lua_getglobal(L, "news"); /* f */
-//   lua_pushnumber(L, n); /* f, n */
-//   if (lua_pcall(L, 1, 2, errf)) { /* error has occurred */
-//      WARN("News: '%s' : %s", "news", lua_tostring(L,-1));
-//#if DEBUGGING
-//      lua_pop(L,2);
-//#else /* DEBUGGING */
-//      lua_pop(L,1);
-//#endif /* DEBUGGING */
-//      return NULL;
-
-      // nlua-errTrace:
-      //lua_getglobal(L, "debug");
-      //if (!lua_istable(L, -1)) {
-      //   lua_pop(L, 1);
-      //   return 1;
-      //}
-      //lua_getfield(L, -1, "traceback");
-      //if (!lua_isfunction(L, -1)) {
-      //   lua_pop(L, 2);
-      //   return 1;
-      //}
-      //lua_pushvalue(L, 1);
-      //lua_pushinteger(L, 2);
-      //lua_call(L, 2, 1);
-      //return 1;
-
       logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
       error = true;
       return true;
