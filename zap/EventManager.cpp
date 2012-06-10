@@ -125,9 +125,8 @@ void EventManager::subscribe(const char *subscriber, EventType eventType)
    if(!lua_isfunction(L, -1))
    {
       logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
+      LuaObject::clearStack(L);
 
-      lua_pop(L, 1);    // Remove offending item from the stack
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return;
    }
 
@@ -333,6 +332,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
 
 // Note that player can be NULL, in which case we'll pass nil to the listeners
+// callerId will be NULL when player sends message
 void EventManager::fireEvent(const char *callerId, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
 {
    if(suppressEvents(eventType))   
@@ -342,7 +342,7 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, const ch
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      if(strcmp(callerId, subscriptions[eventType][i]) == 0)    // Don't alert bot about own message!
+      if(callerId && strcmp(callerId, subscriptions[eventType][i]) == 0)    // Don't alert bot about own message!
          continue;
 
       try
