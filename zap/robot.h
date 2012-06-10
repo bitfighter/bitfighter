@@ -150,11 +150,6 @@ public:
    S32 getCPUTime(lua_State *L);
    S32 getTime(lua_State *L);
 
-   S32 getZoneCenter(lua_State *L);
-   S32 getGatewayFromZoneToZone(lua_State *L);
-   S32 getZoneCount(lua_State *L);
-   S32 getCurrentZone(lua_State *L);
-
    S32 setAngle(lua_State *L);
    S32 setAnglePt(lua_State *L);
    S32 getAnglePt(lua_State *L);

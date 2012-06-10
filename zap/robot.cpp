@@ -727,11 +727,6 @@ const luaL_reg Robot::luaMethods[] =
    { "getCPUTime",               luaW_doMethod<Robot, &Robot::getCPUTime>               },
    { "getTime",                  luaW_doMethod<Robot, &Robot::getTime>                  },
 
-   { "getZoneCenter",            luaW_doMethod<Robot, &Robot::getZoneCenter>            },
-   { "getGatewayFromZoneToZone", luaW_doMethod<Robot, &Robot::getGatewayFromZoneToZone> },
-   { "getZoneCount",             luaW_doMethod<Robot, &Robot::getZoneCount>             },
-   { "getCurrentZone",           luaW_doMethod<Robot, &Robot::getCurrentZone>           },
-
    { "setAngle",                 luaW_doMethod<Robot, &Robot::setAngle>                 },
    { "setAnglePt",               luaW_doMethod<Robot, &Robot::setAnglePt>               },
    { "getAnglePt",               luaW_doMethod<Robot, &Robot::getAnglePt>               },
@@ -1007,59 +1002,6 @@ S32 Robot::setThrustToPt(lua_State *L)
    setCurrentMove(move);
 
   return 0;
-}
-
-
-// Get the coords of the center of mesh zone z
-S32 Robot::getZoneCenter(lua_State *L)
-{
-   static const char *methodName = "Robot:getZoneCenter()";
-   checkArgCount(L, 1, methodName);
-   S32 z = (S32)getInt(L, 1, methodName);
-
-
-   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(z));
-
-   if(zone)
-      return returnPoint(L, zone->getCenter());
-   // else
-   return returnNil(L);
-}
-
-
-// Get the coords of the gateway to the specified zone.  Returns point, nil if requested zone doesn't border current zone.
-S32 Robot::getGatewayFromZoneToZone(lua_State *L)
-{
-   static const char *methodName = "Robot:getGatewayFromZoneToZone()";
-   checkArgCount(L, 2, methodName);
-   S32 from = (S32)getInt(L, 1, methodName);
-   S32 to = (S32)getInt(L, 2, methodName);
-
-   BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(from));
-
-   // Is requested zone a neighbor?
-   if(zone)
-      for(S32 i = 0; i < zone->mNeighbors.size(); i++)
-         if(zone->mNeighbors[i].zoneID == to)
-            return returnPoint(L, Rect(zone->mNeighbors[i].borderStart, zone->mNeighbors[i].borderEnd).getCenter());
-
-   // Did not find requested neighbor, or zone index was invalid... returning nil
-   return returnNil(L);
-}
-
-
-// Get the zone this robot is currently in.  If not in a zone, return nil
-S32 Robot::getCurrentZone(lua_State *L)
-{
-   S32 zone = getCurrentZone();
-   return (zone == U16_MAX) ? returnNil(L) : returnInt(L, zone);
-}
-
-
-// Get a count of how many nav zones we have
-S32 Robot::getZoneCount(lua_State *L)
-{
-   return returnInt(L, BotNavMeshZone::getBotZoneDatabase()->getObjectCount());
 }
 
 
