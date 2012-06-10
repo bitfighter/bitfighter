@@ -945,7 +945,7 @@ static string getStackTraceLine(lua_State *L, S32 level)
 		return "";
 
 	char str[512];
-	dSprintf(str, sizeof(str), "at %s(%s:%i)", ar.name, ar.source, ar.currentline);
+	dSprintf(str, sizeof(str), "%s(%s:%i)", ar.name, ar.source, ar.currentline);
 
    return str;    // Implicitly converted to string to avoid passing pointer to deleted buffer
 }
@@ -964,7 +964,7 @@ void LuaScriptRunner::printStackTrace(lua_State *L)
 	   if(level == 0)
 		   logprintf("Stack trace:");
 
-	   logprintf("   %s", str.c_str());
+	   logprintf("  %s", str.c_str());
    }
 }
 
