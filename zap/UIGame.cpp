@@ -204,13 +204,13 @@ TeamShuffleHelper *GameUserInterface::getTeamShuffleHelper(ClientGame *game)
 
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
-   if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
+   if(strncmp(cmd, "quit", 4) == 0 || strncmp(cmd, "exit", 4) == 0) 
       OGLCONSOLE_HideConsole();
 
-   else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
-      OGLCONSOLE_Output(console, "Commands: help; quit\n");
+   else if(strncmp(cmd, "help", 4) == 0 || strncmp(cmd, "?", 1) == 0)
+      OGLCONSOLE_Output(console, "Commands: help; add; logprint; quit\n");
 
-   else if(!strncmp(cmd, "add", 3))
+   else if(strncmp(cmd, "add", 3) == 0)
    {
       int a, b;
       if(sscanf(cmd, "add %i %i", &a, &b) == 2)
@@ -220,8 +220,17 @@ void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
       }
 
       OGLCONSOLE_Output(console, "usage: add INT INT\n");
-    }
+   }
 
+   else if(strncmp(cmd, "logprint", 8) == 0)
+   {
+      const char *cstr = strstr(cmd, " ");
+
+      if(cstr)
+         logprintf("%s", trim_left(cstr).c_str());
+      else
+         logprintf("");
+   }
     else
       OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd);
 }

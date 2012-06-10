@@ -88,6 +88,7 @@ static const char *pageHeaders[] = {
 
 static ControlStringsEditor consoleCommands1[] = {
    { "add <a> <b>", "Print a + b -- test command" },
+   { "logprint <str>", "Print a message to the logfile" },
    { "exit, quit", "Close the console" },
    { "", "" },      // End of list
 };
