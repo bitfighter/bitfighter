@@ -452,7 +452,7 @@ end
  
 function onTick(deltaTime)
 	botLoc = bot:getLoc()
-	pathTimer=pathTimer-deltaTime
+	pathTimer = pathTimer - deltaTime
 	assert(bot:getLoc() ~= nil)
 	
 	if not attackNearbyEnemies(1-agression) then

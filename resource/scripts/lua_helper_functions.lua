@@ -136,7 +136,7 @@ mt.__newindex = function (t, n, v)
 end
 
 mt.__index = function (t, n)
-  if not mt.__declared[n] and debug.getinfo(2, "S").what ~= "C" then
+  if not mt.__declared[n] and debug.getinfo(2, "S") and debug.getinfo(2, "S").what ~= "C" then
     error("Variable '"..n.."' cannot be used if it is not first declared.", 2)
   end
   return rawget(t, n)

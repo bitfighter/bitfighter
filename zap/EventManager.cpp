@@ -110,7 +110,7 @@ EventManager *EventManager::get()
 }
 
 
-void EventManager::subscribe(const char *subscriber, EventType eventType)
+void EventManager::subscribe(const char *subscriber, EventType eventType, bool failSilently)
 {
    // First, see if we're already subscribed
    if(isSubscribed(subscriber, eventType) || isPendingSubscribed(subscriber, eventType))
@@ -124,7 +124,9 @@ void EventManager::subscribe(const char *subscriber, EventType eventType)
 
    if(!lua_isfunction(L, -1))
    {
-      logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", eventDefs[eventType].name);
+      if(!failSilently)
+         logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", 
+                                          eventDefs[eventType].name);
       LuaObject::clearStack(L);
 
       return;

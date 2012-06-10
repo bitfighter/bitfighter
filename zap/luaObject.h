@@ -176,6 +176,9 @@ protected:
    virtual void logError(const char *format, ...);
    virtual bool prepareEnvironment();
 
+   static void printStackTrace(lua_State *L);
+
+
    static int luaPanicked(lua_State *L);
 
    virtual void registerClasses();
@@ -202,7 +205,7 @@ public:
 
    bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
 
-   // Event handling
+   // Event subscriptions
    int subscribe(lua_State *L);
    int unsubscribe(lua_State *L);
 
@@ -211,9 +214,9 @@ public:
    bool loadAndRunGlobalFunction(lua_State *L, const char *key);
 
    // Lua interface
-   LUAW_DECLARE_CLASS(LuaScriptRunner);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+   //LUAW_DECLARE_CLASS(LuaScriptRunner);
+   //static const luaL_reg luaMethods[];
+   //static const char *luaClassName;
 };
 
 

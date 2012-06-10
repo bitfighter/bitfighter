@@ -223,6 +223,8 @@ void LuaLevelGenerator::logError(const char *format, ...)
    logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** %s",buffer);
 
    va_end(args);
+
+   printStackTrace(L);
 }
 
 

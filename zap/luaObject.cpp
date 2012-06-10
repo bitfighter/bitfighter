@@ -162,10 +162,9 @@ S32 LuaObject::returnNil(lua_State *L)
 }
 
 
-
 void LuaObject::clearStack(lua_State *L)
 {
-   lua_pop(L, lua_gettop(L));
+   lua_settop(L, 0);
 }
 
 
@@ -643,10 +642,20 @@ void LuaScriptRunner::setEnvironment()
 // Retrieve the environment from the registry, and put the requested function from that environment onto the stack
 void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
-   lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
+   try
+   {
+      lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
+      lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
 
-   lua_remove(L, -2);                              // Remove table                                          -- function
+      lua_remove(L, -2);                              // Remove table                                          -- function
+   }
+
+   catch(LuaException &e)
+   {
+      // TODO: Should be logError()!
+      logprintf(LogConsumer::LogError, "Error accessing %s function: %s.  Aborting script.", functionName, e.what());
+      LuaObject::clearStack(L);
+   }
 }
 
 
@@ -926,6 +935,41 @@ bool LuaScriptRunner::prepareEnvironment()              { TNLAssert(false, "Unim
 void LuaScriptRunner::logError(const char *format, ...) { TNLAssert(false, "Unimplemented method!"); }
 
 
+static string getStackTraceLine(lua_State *L, S32 level)
+{
+	lua_Debug ar;
+
+	memset(&ar, 0, sizeof(ar));
+	if(!lua_getstack(L, 1+level, &ar))
+		return "";
+	if(!lua_getinfo(L, "Snl", &ar))
+		return "";
+
+	char str[512];
+	dSprintf(str, sizeof(str), "at %s(%s:%i)", ar.name, ar.source, ar.currentline);
+
+   return str;    // Implicitly converted to string to avoid passing pointer to deleted buffer
+}
+
+
+void LuaScriptRunner::printStackTrace(lua_State *L)
+{
+   const int MAX_TRACE_LEN = 20;
+
+   for(S32 level = 0; level < MAX_TRACE_LEN; level++)
+   {
+	   string str = getStackTraceLine(L, level);
+	   if(str == "" )
+		   break;
+
+	   if(level == 0)
+		   logprintf("Stack trace:");
+
+	   logprintf("\t%s", str.c_str());
+   }
+}
+
+
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
@@ -1012,15 +1056,17 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 
 int LuaScriptRunner::subscribe(lua_State *L)
 {
+   // Stack will have a bot or levelgen object at position 1, and the event at position 2
    // Get the event off the stack
    static const char *methodName = "subscribe()";
-   LuaObject::checkArgCount(L, 1, methodName);
+   LuaObject::checkArgCount(L, 2, methodName);
 
-   lua_Integer eventType = LuaObject::getInt(L, 0, methodName);
-   lua_pop(L, 1);    // Remove event from the stack
+   lua_Integer eventType = LuaObject::getInt(L, -1, methodName);
 
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
+
+   LuaObject::clearStack(L);
 
    EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType);
    mSubscriptions[eventType] = true;
@@ -1031,16 +1077,35 @@ int LuaScriptRunner::subscribe(lua_State *L)
 
 int LuaScriptRunner::unsubscribe(lua_State *L)
 {
+   // Stack will have a bot or levelgen object at position 1, and the event at position 2
    // Get the event off the stack
    static const char *methodName = "LuaUtil:unsubscribe()";
-   LuaObject::checkArgCount(L, 1, methodName);
+   LuaObject::checkArgCount(L, 2, methodName);
 
-   lua_Integer eventType = LuaObject::getInt(L, 0, methodName);
+   lua_Integer eventType = LuaObject::getInt(L, -1, methodName);
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 
+   LuaObject::clearStack(L);
+
    EventManager::get()->unsubscribe(getScriptId(), (EventManager::EventType)eventType);
    mSubscriptions[eventType] = false;
+   return 0;
+}
+
+
+static int subscribe_bot(lua_State *L)
+{
+   Robot *robot = luaW_check<Robot>(L, 1);
+   robot->subscribe(L);
+   return 0;
+}
+
+
+static int unsubscribe_bot(lua_State *L)
+{
+   Robot *robot = luaW_check<Robot>(L, 1);
+   robot->unsubscribe(L);
    return 0;
 }
 
@@ -1158,16 +1223,22 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
+
+   // Some generic functions that we can put here rather than binding them to an object
+   lua_register(L, "subscribe_bot",   subscribe_bot);
+   lua_register(L, "unsubscribe_bot", unsubscribe_bot);
+
+
 }
 
-const char *LuaScriptRunner::luaClassName = "LuaScriptRunner";
-const luaL_reg LuaScriptRunner::luaMethods[] =
-{
-   { "subscribe",   luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>   },
-   { "unsubscribe", luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe> },
-};
+//const char *LuaScriptRunner::luaClassName = "LuaScriptRunner";
+//const luaL_reg LuaScriptRunner::luaMethods[] =
+//{
+//   { "subscribe",   luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>   },
+//   { "unsubscribe", luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe> },
+//};
 
-REGISTER_LUA_CLASS(LuaScriptRunner);
+//REGISTER_LUA_CLASS(LuaScriptRunner);
 
 #undef setEnumName
 #undef setEnum

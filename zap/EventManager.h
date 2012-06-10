@@ -86,7 +86,7 @@ public:
    static Vector<const char *> pendingUnsubscriptions[EventTypes];
    static bool anyPending;
 
-   void subscribe(const char *subscriber, EventType eventType);
+   void subscribe(const char *subscriber, EventType eventType, bool failSilently = false);
    void unsubscribe(const char *subscriber, EventType eventType);
    void unsubscribeImmediate(const char *, EventType eventType);     // Used when bot dies, and we know there won't be subscription conflicts
    void update();                                                    // Act on events sitting in the pending lists

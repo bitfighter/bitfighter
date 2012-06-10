@@ -295,8 +295,8 @@ bool Robot::startLua()
    if(!LuaScriptRunner::startLua(ROBOT) || !loadScript() || !runMain())
       return false;
 
-   
-   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent);
+   // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
+   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent, true);
 
    mSubscriptions[EventManager::TickEvent] = true;
 
@@ -527,6 +527,8 @@ void Robot::logError(const char *format, ...)
    logprintf(LogConsumer::LogError, "***ROBOT ERROR*** %s", buffer);
 
    va_end(args);
+
+   printStackTrace(L);
 }
 
 
@@ -767,7 +769,7 @@ const luaL_reg Robot::luaMethods[] =
 };
 
 
-REGISTER_LUA_SUBCLASS_TWO_PARENTS(Robot, Ship, LuaScriptRunner);
+REGISTER_LUA_SUBCLASS(Robot, Ship);
 
 S32 Robot::getClassID(lua_State *L)
 {
