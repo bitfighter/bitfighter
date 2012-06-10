@@ -941,9 +941,7 @@ static string getStackTraceLine(lua_State *L, S32 level)
 	lua_Debug ar;
 
 	memset(&ar, 0, sizeof(ar));
-	if(!lua_getstack(L, 1+level, &ar))
-		return "";
-	if(!lua_getinfo(L, "Snl", &ar))
+	if(!lua_getstack(L, level + 1, &ar) || !lua_getinfo(L, "Snl", &ar))
 		return "";
 
 	char str[512];
@@ -960,13 +958,13 @@ void LuaScriptRunner::printStackTrace(lua_State *L)
    for(S32 level = 0; level < MAX_TRACE_LEN; level++)
    {
 	   string str = getStackTraceLine(L, level);
-	   if(str == "" )
+	   if(str == "")
 		   break;
 
 	   if(level == 0)
 		   logprintf("Stack trace:");
 
-	   logprintf("\t%s", str.c_str());
+	   logprintf("   %s", str.c_str());
    }
 }
 
