@@ -188,6 +188,7 @@ bool luaW_is(lua_State *L, int index, bool strict = false)
 // convertable to) type T; otherwise, returns NULL.
 template <typename T>
 T* luaW_to(lua_State* L, int index, bool strict = false)
+
 {
     if (luaW_is<T>(L, index, strict))
     {
@@ -748,9 +749,6 @@ void luaW_extend(lua_State* L)
 //    REGISTER_LUA_CLASS(className);
 // or
 //    REGISTER_LUA_SUBCLASS(className, parentClass);
-// or
-//    REGISTER_LUA_SUBCLASS_TWO_PARENTS(className, firstParentClass, secondParentClass);
-//
 // When you actually create your Lua instance (L), call LuaW_Registrar::registerClasses(L)
 // to make your methods available.
 // And with that, your class will be registered with LuaWrapper.
@@ -764,34 +762,29 @@ class LuaW_Registrar
 {
 private:
    typedef void (*luaW_regFunc)(lua_State *);
-   typedef std::vector<const char*> ParentList;
 
    struct ClassParent { 
-      const char *name;      // Name of the class in question
-      ParentList parents;    // Parent class(es)
+      const char *name;   
+      const char *parent; 
    };
 
-   // These containers sure involve some real ugliness... try to hide some of it!
    typedef const char* ClassName;
    typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
-   typedef std::map      <ClassName, luaW_regFunc> RegFunctionMap;    // Map of class name and registration functions (one reg function per class)
-   typedef std::multimap <ClassName, luaW_regFunc> ExtFunctionMap;    // Multimap of class name and extension functions (multiple ext functions per class)
-   typedef ExtFunctionMap::iterator ExtFunctionMapIterator;
-   typedef std::pair<ExtFunctionMapIterator, ExtFunctionMapIterator> ExtensionFunctionIterator;
+   typedef std::map <ClassName, luaW_regFunc> FunctionMap;    // Map of class name and registration functions
 
 
    // List of registration functions
-   static RegFunctionMap &getRegistrationFunctions()
+   static FunctionMap &getRegistrationFunctions()
    {
-      static RegFunctionMap registrationFunctions;
+      static FunctionMap registrationFunctions;
       return registrationFunctions;
    }
 
 
    // List of extension functions
-   static ExtFunctionMap &getExtensionFunctions()
+   static FunctionMap &getExtensionFunctions()
    {
-      static ExtFunctionMap extensionFunctions;
+      static FunctionMap extensionFunctions;
       return extensionFunctions;
    }
 
@@ -844,31 +837,15 @@ private:
          bool foundAtLeastOneThisIteration = false;      // For detecting and preventing endless loops due to hiearchy problems
 
          for(int i = (int)getUnorderedClassList().size() - 1; i >= 0; i--)    // Descending order for greater efficiency
-         {
-            // For each item in unorderedClassList, check to see if all parents have already been added to orderedClassList.
-            // If so, we can move the item to the orderedClassList.
-            bool foundAllParents = true;    
-
-            for(int j = 0; j < (int)getUnorderedClassList()[i].parents.size(); j++)
-            {
-               if(!findInOrderedClassList(getUnorderedClassList()[i].parents[j]))
-               {
-                  foundAllParents = false;
-                  break;
-               }
-            }
-
-            // If parent is already found, move to ordered list, as before
-            if(foundAllParents)
+            // If parent is in orderedClassList, we can move the item to the orderedClassList
+            if(findInOrderedClassList(getUnorderedClassList()[i].parent))
             {
                moveToOrderedList(i);
                foundAtLeastOneThisIteration = true;
             }
-         }
 
-         // For safety if objects have no found parents and we've iterated too many times,
-         // just add them to the end of the list.  This block should nevever run.
-         TNLAssert(foundAtLeastOneThisIteration, "Registering items appears to have hit a deadlock -- check luaW class/subclass declarations!");
+         // Make sure we move at least one item per iteration; if we don't, we're stuck.  This block should nevever run.
+         TNLAssert(foundAtLeastOneThisIteration, "Registering items is stuck -- check luaW class/subclass declarations!");
 
          if(!foundAtLeastOneThisIteration)
             for(int i = (int)getUnorderedClassList().size() - 1; i > -1; i--)
@@ -898,11 +875,8 @@ protected:
    template<class T, class U>
    static void registerClass()
    {
-      ParentList parentList;
-      parentList.push_back(U::luaClassName);
-
-      ClassParent key = { T::luaClassName, parentList };    // This class has a parent and needs to be
-      getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
+      ClassParent key = {T::luaClassName, U::luaClassName};    // This class has a parent and needs to be
+      getUnorderedClassList().push_back(key);                  // registered after parent (will require sorting)
 
       NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
       getRegistrationFunctions().insert(regPair);
@@ -910,27 +884,6 @@ protected:
       // T extends U
       NameFunctionPair extPair(T::luaClassName, &luaW_extend<T, U>);
       getExtensionFunctions()   .insert(extPair);
-   }
-
-   template<class T, class U, class V>
-   static void registerClass()
-   {
-      ParentList parentList;
-      parentList.push_back(U::luaClassName);
-      parentList.push_back(V::luaClassName);
-
-      ClassParent key = { T::luaClassName, parentList };    // This class has a parent and needs to be
-      getUnorderedClassList().push_back(key);               // registered after parent (will require sorting)
-
-      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
-      getRegistrationFunctions().insert(regPair);
-
-      // T extends both U and V
-      NameFunctionPair extPair1(T::luaClassName, &luaW_extend<T, U>);
-      getExtensionFunctions()   .insert(extPair1);
-
-      NameFunctionPair extPair2(T::luaClassName, &luaW_extend<T, V>);
-      getExtensionFunctions()   .insert(extPair2);
    }
 
 public:
@@ -946,14 +899,11 @@ public:
       // Extend those that need extending
       for(unsigned int i = 0; i < orderedClassList.size(); i++)
       {
-         // Get an iterator valid for all extension functions matching orderedClassList[i]... i.e. all functions that extend that class
-         ExtensionFunctionIterator iterator = getExtensionFunctions().equal_range(orderedClassList[i]);    
+         // Skip base classes
+         if(getExtensionFunctions()[orderedClassList[i]] == NULL)
+            continue;
 
-         // Iterate through those extension functions, calling each in turn
-         // iterator.first = first extension fn, iterator.second = last extension fn
-         // it.first = className, it.second = extensionFunction
-         for(ExtFunctionMapIterator it = iterator.first; it != iterator.second; it++)
-            it->second(L);
+         getExtensionFunctions()[orderedClassList[i]](L);
       }
    }
 };
@@ -977,23 +927,13 @@ public:
 };
 
 
-template<class T, class U, class V>
-class LuaW_Registrar3Args : public LuaW_Registrar
-{
-public:
-   LuaW_Registrar3Args() { registerClass<T, U, V>(); }
-};
-
-
-
 #define REGISTER_LUA_CLASS(cls) \
    static LuaW_Registrar1Arg<cls> luaclass_##cls
 
 #define REGISTER_LUA_SUBCLASS(cls, parent) \
    static LuaW_Registrar2Args<cls, parent> luaclass_##cls
 
-#define REGISTER_LUA_SUBCLASS_TWO_PARENTS(cls, parent1, parent2) \
-   static LuaW_Registrar3Args<cls, parent1, parent2> luaclass_##cls
+
 
 
 
@@ -1061,6 +1001,8 @@ public:
 
 
 
+
+
 // This goes in the header of a "wrapped class"
 #define  LUAW_DECLARE_CLASS(className) \
    LuaProxy<className> *mLuaProxy; \
@@ -1078,6 +1020,7 @@ public:
 // And this in the destructor of the "wrapped class"
 #define LUAW_DESTRUCTOR_CLEANUP \
    if(mLuaProxy) mLuaProxy->setDefunct(true)
+
 
 
 // Runs a method on a proxied object.  Returns nil if the proxied object no longer exists, so Lua scripts may need to check for this.
