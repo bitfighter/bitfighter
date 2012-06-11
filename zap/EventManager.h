@@ -66,7 +66,7 @@ private:
    void removeFromPendingSubscribeList(const char *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(const char *subscriber, EventType eventType);
 
-   void handleEventFiringError(const char *subscriber, EventType eventType, const char *errorMsg);
+   void handleEventFiringError(lua_State *L, const char *subscriber, EventType eventType, const char *errorMsg);
 
    bool mIsPaused;
    S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true

@@ -52,7 +52,7 @@ inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
 
 
 // Can represent a move by a human player or a robot
-class Move /*: public Point*/
+class Move 
 {
 public:
    Move();                          // Constructor

@@ -185,29 +185,9 @@ void LuaLevelGenerator::logError(const char *format, ...)
    va_end(args);
 
    printStackTrace(L);
+
+   LuaObject::clearStack(L);
 }
-
-
-// Define the methods we will expose to Lua... basically everything we want to use in lua code
-// like levelgen:blah needs to be defined here.
-Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
-{
-   method(LuaLevelGenerator, addWall),
-   method(LuaLevelGenerator, addItem),
-   method(LuaLevelGenerator, addLevelLine),
-
-   method(LuaLevelGenerator, getGridSize),
-   method(LuaLevelGenerator, getPlayerCount),
-   method(LuaLevelGenerator, setGameTime),
-   method(LuaLevelGenerator, pointCanSeePoint),
-
-   method(LuaLevelGenerator, subscribe),
-   method(LuaLevelGenerator, unsubscribe),
-
-   method(LuaLevelGenerator, globalMsg),
-
-   {0,0}    // End method list
-};
 
 
 // Note that this uses rawgeti and therefore bypasses any metamethods set on the table
@@ -393,7 +373,7 @@ bool LuaLevelGenerator::prepareEnvironment()
    lua_rawset(L, -3);                                    // env_table["_GRID_SIZE"] = *this        -- env_table
                                                          
    lua_pushliteral(L, "levelgen");                       //                                        -- env_table, "levelgen"
-   Lunar<LuaLevelGenerator>::push(L, this);              //                                        -- env_table, "levelgen", *this
+   luaW_push(L, this);                                   //                                        -- env_table, "levelgen", *this
    lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
 
    lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
@@ -432,7 +412,7 @@ void LuaLevelGenerator::registerClasses()
    LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
 
    // Specific classes needed for LevelGen scripts
-   Lunar<LuaLevelGenerator>::Register(L);
+   //Lunar<LuaLevelGenerator>::Register(L);
 
 #ifndef ZAP_DEDICATED
    // These are for creating editor plugins
@@ -447,7 +427,21 @@ void LuaLevelGenerator::registerClasses()
 //// Lua methods
 const char *LuaLevelGenerator::luaClassName = "LuaLevelGenerator";
 
-const luaL_reg LuaLevelGenerator::luaMethods[] = { { NULL, NULL } };
+const luaL_reg LuaLevelGenerator::luaMethods[] =
+{
+   { "addWall",          luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addWall>          },
+   { "addItem",          luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addItem>          },
+   { "addLevelLine",     luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addLevelLine>     },
+                                                                                                
+   { "getGridSize",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getGridSize>      },
+   { "getPlayerCount",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getPlayerCount>   },
+   { "setGameTime",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::setGameTime>      },
+   { "pointCanSeePoint", luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::pointCanSeePoint> },
+
+   { "globalMsg",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::globalMsg>        },
+
+   { NULL, NULL }   
+};
 
 REGISTER_LUA_CLASS(LuaLevelGenerator);
 

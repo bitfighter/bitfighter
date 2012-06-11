@@ -861,7 +861,10 @@ bool LuaScriptRunner::configureNewLuaInstance()
 
    // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
    // These will be copied into the script's environment when we run createEnvironment.
-   setEnums(L);                  
+   setEnums(L);    
+
+   // Register some functions not associated with a particular class
+   registerLooseFunctions(L);
 
 #ifdef USE_PROFILER
    init_profiler(L);
@@ -1096,35 +1099,31 @@ int LuaScriptRunner::unsubscribe(lua_State *L)
 }
 
 
-static int subscribe_bot(lua_State *L)
+template <typename T>
+static int handleSubscribe(lua_State *L)
 {
-   Robot *robot = luaW_check<Robot>(L, 1);
-   robot->subscribe(L);
+   T *o = luaW_check<T>(L, 1);
+   o->subscribe(L);
    return 0;
 }
 
 
-static int unsubscribe_bot(lua_State *L)
+template <typename T>
+static int handleUnsubscribe(lua_State *L)
 {
-   Robot *robot = luaW_check<Robot>(L, 1);
-   robot->unsubscribe(L);
+   T *o = luaW_check<T>(L, 1);
+   o->unsubscribe(L);
    return 0;
 }
 
 
-static int subscribe_levelgen(lua_State *L)
+// Register some functions not associated with a particular class
+void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 {
-   LuaLevelGenerator *levelgen = luaW_check<LuaLevelGenerator>(L, 1);
-   levelgen->subscribe(L);
-   return 0;
-}
-
-
-static int unsubscribe_levelgen(lua_State *L)
-{
-   LuaLevelGenerator *levelgen = luaW_check<LuaLevelGenerator>(L, 1);
-   levelgen->unsubscribe(L);
-   return 0;
+   lua_register(L, "subscribe_bot",        handleSubscribe<Robot>);
+   lua_register(L, "unsubscribe_bot",      handleUnsubscribe<Robot>);
+   lua_register(L, "subscribe_levelgen",   handleSubscribe<LuaLevelGenerator>);
+   lua_register(L, "unsubscribe_levelgen", handleUnsubscribe<LuaLevelGenerator>);
 }
 
 
@@ -1241,12 +1240,6 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
-
-   // Some generic functions that we can put here rather than binding them to an object
-   lua_register(L, "subscribe_bot",        subscribe_bot);
-   lua_register(L, "unsubscribe_bot",      unsubscribe_bot);
-   lua_register(L, "subscribe_levelgen",   subscribe_levelgen);
-   lua_register(L, "unsubscribe_levelgen", unsubscribe_levelgen);
 }
 
 #undef setEnumName

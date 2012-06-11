@@ -35,6 +35,7 @@ namespace Zap
 
 
 class LuaLevelGenerator;
+class Robot;
 
 class ServerGame : public Game
 {
@@ -88,6 +89,8 @@ private:
 
    Vector<LuaLevelGenerator *> mLevelGens;
 
+   void clearBotMoves();
+
    Timer botControlTickTimer;
 
 public:
@@ -132,7 +135,6 @@ public:
 
    void addClient(ClientInfo *clientInfo);
    void removeClient(ClientInfo *clientInfo);
-   
 
    void setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason);  
 
@@ -152,9 +154,11 @@ public:
 
    void onConnectedToMaster();
 
+   void startAllBots();                         // Loop through all our bots and run thier main() functions
+
 
    StringTableEntry getLevelNameFromIndex(S32 indx);
-   S32 getAbsoluteLevelIndex(S32 indx);      // Figures out the level index if the input is a relative index
+   S32 getAbsoluteLevelIndex(S32 indx);         // Figures out the level index if the input is a relative index
    string getLevelFileNameFromIndex(S32 indx);
 
    StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  

@@ -104,6 +104,7 @@ class Ship;
 class GameUserInterface;
 struct UserInterfaceData;
 class WallSegmentManager;
+class Robot;
 
 class AbstractTeam;
 class Team;
@@ -184,6 +185,8 @@ protected:
    virtual void cleanUp();
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
+
+   Vector<Robot *> mRobots;                   // Grand master list of all robots in the current game
 
    Rect mWorldExtents;     // Extents of everything
 
@@ -276,6 +279,17 @@ public:
    void onConnectedToMaster();
 
    void resetLevelInfo();
+
+   // Manage bot lists
+   Robot *getBot(S32 index);
+   S32 getBotCount();
+   Robot *findBot(const char *id);                // Find bot with specified script id
+   void addBot(Robot *robot);
+   void removeBot(Robot *robot);
+   void deleteBot(const StringTableEntry &name);  // Delete by name 
+   void deleteBot(S32 i);                         // Delete by index
+   void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
+
 
    virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);

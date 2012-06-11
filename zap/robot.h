@@ -53,7 +53,6 @@ class Robot : public Ship, public LuaScriptRunner
 
 private:
    static const S32 RobotRespawnDelay = 1500;
-   static Vector<Robot *> robots;   // Grand master list of all robots in the current game
 
    int attribute;
    string message;
@@ -68,8 +67,6 @@ private:
    bool mHasSpawned;
 
    void tickTimer(U32 deltaT);      // Move bot's timer forward
-
-   void clearMove();                // Reset bot's move to do nothing
 
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
@@ -99,36 +96,27 @@ public:
    void setCurrentZone(S32 zone);
    bool canSeePoint(Point point, bool wallOnly = false);         // Is point within robot's LOS?
 
-   Vector<Point> flightPlan;              // List of points to get from one point to another
-   U16 flightPlanTo;                      // Zone our flightplan was calculated to
+   Vector<Point> flightPlan;           // List of points to get from one point to another
+   U16 flightPlanTo;                   // Zone our flightplan was calculated to
 
    // Some informational functions
    F32 getAnglePt(Point point);
 
    // External robot functions
-   bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
+   bool findNearestShip(Point &loc);   // Return location of nearest known ship within a given area
 
    bool isRobot();
-   //static S32 getRobotCount() { return robots.size(); }
 
    LuaPlayerInfo *getPlayerInfo();
    bool start();
 
-   // Future kernel of a BotManager class
-   static void startAllBots();               // Loop through all our bots and run thier main() functions
-   static Robot *getBot(S32 index);
-   static void clearBotMoves();
-   static S32 getBotCount();
-   static void deleteBot(S32 i);                         // Delete bot by index
-   static void deleteBot(const StringTableEntry &name);  // Delete bot by name
-   static void deleteAllBots();
-
-   static Robot *findBot(const char *id); // Find the bot with specified script id
-
-   bool startLua();                       // Fire up bot's Lua processor
+   bool startLua();                    // Fire up bot's Lua processor
    bool prepareEnvironment();
    void registerClasses();
-   string runGetName();                   // Run bot's getName() function
+   string runGetName();                // Run bot's getName() function
+
+   void clearMove();                   // Reset bot's move to do nothing
+
 
    S32 getScore();    // Return robot's score
    F32 getRating();   // Return robot's rating

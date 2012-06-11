@@ -1023,7 +1023,7 @@ void ServerGame::runLevelGenScript(const string &scriptName)
       return;
    }
 
-   // The script file will be the first argument, subsequent args will be passed on to the script -- will be deleted when level ends
+   // The script file will be the first argument, subsequent args will be passed on to the script -- will be deleted when level ends in ServerGame::cleanUp()
    LuaLevelGenerator *levelgen = new LuaLevelGenerator(fullname, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
                                                        getGameObjDatabase(), this);
 
@@ -1070,6 +1070,19 @@ void ServerGame::removeClient(ClientInfo *clientInfo)
 
    if(mDedicated)
       SoundSystem::playSoundEffect(SFXPlayerLeft, 1);
+}
+
+
+// Loop through all our bots and start their interpreters, delete those that sqawk
+// Only called from GameType::onLevelLoaded()
+void ServerGame::startAllBots()
+{   
+   for(S32 i = 0; i < mRobots.size(); i++)
+      if(!mRobots[i]->start())
+      {
+         mRobots.erase_fast(i);
+         i--;
+      }
 }
 
 
@@ -1411,7 +1424,7 @@ void ServerGame::idle(U32 timeDelta)
    if(botControlTickTimer.update(timeDelta))
    {
       // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
-      Robot::clearBotMoves();
+      clearBotMoves();
 
       // Fire TickEvent, in case anyone is listening
       EventManager::get()->fireEvent(EventManager::TickEvent, botControlTickelapsed + timeDelta);
@@ -1460,6 +1473,13 @@ void ServerGame::idle(U32 timeDelta)
    // Lastly, play any sounds server might have made...
    if(isDedicated())   // non-dedicated will process sound in client side.
       SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
+}
+
+
+void ServerGame::clearBotMoves()
+{
+   for(S32 i = 0; i < mRobots.size(); i++)
+      mRobots[i]->clearMove();
 }
 
 

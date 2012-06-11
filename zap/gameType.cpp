@@ -1303,7 +1303,8 @@ void GameType::onLevelLoaded()
    mLevelHasPredeployedFlags = gridDatabase->hasObjectOfType(FlagTypeNumber);
    mLevelHasFlagSpawns       = mFlagSpawnPoints.size();
 
-   Robot::startAllBots();           // Cycle through all our bots and start them up
+   TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
+   static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up
 }
 
 
@@ -1640,8 +1641,8 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    
    // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
-      for(S32 i = 0; i < Robot::getBotCount(); i++)
-         connection->objectInScope(Robot::getBot(i));  
+      for(S32 i = 0; i < mGame->getBotCount(); i++)
+         connection->objectInScope(mGame->getBot(i));  
 }
 
 
@@ -2828,7 +2829,7 @@ void GameType::addBot(Vector<StringTableEntry> args)
 
    GameConnection *conn = clientInfo->getConnection();
 
-   static const S32 ABSOLUTE_MAX_BOTS = 256;
+   static const S32 ABSOLUTE_MAX_BOTS = 255;    // Hard limit on number of bots on the server
 
    if(mBotZoneCreationFailed)
       conn->s2cDisplayErrorMessage("!!! Zone creation failed for this level -- bots disabled");
@@ -2844,8 +2845,8 @@ void GameType::addBot(Vector<StringTableEntry> args)
    else if(!clientInfo->isLevelChanger())
       return;  // Error message handled client-side
 
-   else if((Robot::getBotCount() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
-         Robot::getBotCount() >= ABSOLUTE_MAX_BOTS)
+   else if((getGame()->getBotCount() >= settings->getIniSettings()->maxBots && !clientInfo->isAdmin()) ||
+           (getGame()->getBotCount() >= ABSOLUTE_MAX_BOTS))
       conn->s2cDisplayErrorMessage("!!! Can't add more bots -- this server is full");
 
    else if(args.size() >= 2 && !safeFilename(args[1].getString()))
@@ -2917,10 +2918,10 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
 
    S32 prevRobotSize = -1;
 
-   while(count > 0 && prevRobotSize != Robot::getBotCount()) // loop may end when cannot add anymore bots
+   while(count > 0 && prevRobotSize != getGame()->getBotCount()) // loop may end when cannot add anymore bots
    {
       count--;
-      prevRobotSize = Robot::getBotCount();
+      prevRobotSize = getGame()->getBotCount();
       addBot(args);
    }
 }
@@ -3004,14 +3005,16 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   if(Robot::getBotCount() == 0)
+   S32 botCount = getGame()->getBotCount();
+
+   if(botCount == 0)
    {
       conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
    // Only delete one robot - the most recently added
-   Robot::deleteBot(Robot::getBotCount() - 1);
+   getGame()->deleteBot(botCount - 1);
 
    StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
    Vector<StringTableEntry> e;
@@ -3032,14 +3035,14 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   if(Robot::getBotCount() == 0)
+   if(getGame()->getBotCount() == 0)
    {
       conn->s2cDisplayErrorMessage("!!! There are no robots to kick");
       return;
    }
 
    // Delete all bots
-   Robot::deleteAllBots();
+   getGame()->deleteAllBots();
 
    StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
    Vector<StringTableEntry> e;
@@ -3060,7 +3063,7 @@ GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
    GameConnection *conn = clientInfo->getConnection();
    TNLAssert(conn == source, "If this never fires, we can get rid of conn!");
 
-   if(Robot::getBotCount() == 0)
+   if(getGame()->getBotCount() == 0)
       conn->s2cDisplayErrorMessage("!!! There are no robots to show");
    else
    {
@@ -3307,7 +3310,7 @@ GAMETYPE_RPC_C2S(GameType, c2sKickPlayer, (StringTableEntry kickeeName), (kickee
    }
    
    // Get rid of robots that have the to-be-kicked name
-   Robot::deleteBot(kickeeName);
+   getGame()->deleteBot(kickeeName);
 
    Vector<StringTableEntry> e;
    e.push_back(kickeeName);                     

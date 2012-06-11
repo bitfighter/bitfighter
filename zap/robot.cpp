@@ -63,10 +63,6 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
-// Initialize our statics
-Vector<Robot *> Robot::robots;
-
-
 // Constructor, runs on client and server
 Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),   
                  LuaScriptRunner() 
@@ -109,14 +105,7 @@ Robot::~Robot()
    if(getGame() && getGame()->getGameType())
       getGame()->getGameType()->serverRemoveClient(mClientInfo);
 
-
-   // Remove this robot from the list of all robots
-   for(S32 i = 0; i < robots.size(); i++)
-      if(robots[i] == this)
-      {
-         robots.erase_fast(i);
-         break;
-      }
+   getGame()->removeBot(this);
 
    mPlayerInfo->setDefunct();
    EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerLeftEvent, getPlayerInfo());
@@ -125,7 +114,7 @@ Robot::~Robot()
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
 
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mScriptName.c_str(), robots.size());
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
@@ -168,61 +157,6 @@ bool Robot::initialize(Point &pos)
 } 
 
 
-Robot *Robot::getBot(S32 index)
-{
-   return robots[index];
-}
-
-
-// static
-void Robot::clearBotMoves()
-{
-   for(S32 i = 0; i < robots.size(); i++)
-      robots[i]->clearMove();
-}
-
-
-S32 Robot::getBotCount()
-{
-   return robots.size();
-}
-
-
-void Robot::deleteBot(S32 i)
-{
-   delete robots[i];
-}
-
-
-// Delete bot by name
-void Robot::deleteBot(const StringTableEntry &name)
-{
-   for(S32 i = 0; i < robots.size(); i++)
-      if(robots[i]->getClientInfo()->getName() == name)
-         deleteBot(i);
-}
-
-
-void Robot::deleteAllBots()
-{
-   for(S32 i = robots.size() - 1; i >= 0; i--)
-      deleteBot(i);
-}
-
-
-// Loop through all our bots and start their interpreters, delete those that sqawk
-// static, only called from GameType::onLevelLoaded()
-void Robot::startAllBots()
-{   
-   for(S32 i = 0; i < robots.size(); i++)
-      if(!robots[i]->start())
-      {
-         robots.erase_fast(i);
-         i--;
-      }
-}
-
-
 // Server only
 bool Robot::start()
 {
@@ -237,17 +171,6 @@ bool Robot::start()
    mGame->addToClientList(mClientInfo);
 
    return true;
-}
-
-
-// Find the bot that owns this L (static)
-Robot *Robot::findBot(const char *id)
-{
-   for(S32 i = 0; i < robots.size(); i++)
-      if(strcmp(robots[i]->getScriptId(), id) == 0)
-         return robots[i];
-
-   return NULL;
 }
 
 
@@ -442,7 +365,8 @@ void Robot::onAddedToGame(Game *game)
    hasExploded = true;        // Becase we start off "dead", but will respawn real soon now...
    disableCollision();
 
-   robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
+   game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
+  
    EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerJoinedEvent, getPlayerInfo());
 }
 
@@ -528,6 +452,8 @@ void Robot::logError(const char *format, ...)
    va_end(args);
 
    printStackTrace(L);
+
+   LuaObject::clearStack(L);
 }
 
 

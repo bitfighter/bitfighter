@@ -145,7 +145,7 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 
    mNameToAddressThread = NULL;
 
-   mTeamManager = new TeamManager;                    // gets deleted in destructor 
+   mTeamManager = new TeamManager;                    // Gets deleted in destructor 
    mActiveTeamManager = mTeamManager;
 }
 
@@ -199,6 +199,71 @@ GameSettings *Game::getSettings()
 bool Game::isSuspended()
 {
    return mGameSuspended;
+}
+
+
+Robot *Game::getBot(S32 index)
+{
+   return mRobots[index];
+}
+
+
+S32 Game::getBotCount()
+{
+   return mRobots.size();
+}
+
+
+// Find bot from its id (static)
+Robot *Game::findBot(const char *id)
+{
+   for(S32 i = 0; i < mRobots.size(); i++)
+      if(strcmp(mRobots[i]->getScriptId(), id) == 0)
+         return mRobots[i];
+
+   return NULL;
+}
+
+
+void Game::addBot(Robot *robot)
+{
+   mRobots.push_back(robot);  
+}
+
+
+// Remove this robot from the list of bots; does not delete it (only called from Robot desctructor)
+void Game::removeBot(Robot *robot)
+{
+   for(S32 i = 0; i < mRobots.size(); i++)
+      if(mRobots[i] == robot)
+      {
+         mRobots.erase_fast(i);
+         return;
+      }
+}
+
+
+// Delete bot by index
+void Game::deleteBot(const StringTableEntry &name)
+{
+   for(S32 i = 0; i < mRobots.size(); i++)
+      if(mRobots[i]->getClientInfo()->getName() == name)
+         deleteBot(i);
+}
+
+
+// Delete bot by index
+void Game::deleteBot(S32 i)
+{
+   delete mRobots[i];
+}
+
+
+// Delete 'em all, let got sort 'em out!
+void Game::deleteAllBots()
+{
+   for(S32 i = mRobots.size() - 1; i >= 0; i--)
+      deleteBot(i);
 }
 
 

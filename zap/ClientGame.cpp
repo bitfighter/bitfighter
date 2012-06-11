@@ -1648,8 +1648,8 @@ void ClientGame::renderCommander()
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
-      for(S32 i = 0; i < Robot::getBotCount(); i++)
-         renderObjects.push_back(Robot::getBot(i));
+      for(S32 i = 0; i < getBotCount(); i++)
+         renderObjects.push_back(getBot(i));
 
    // If we're drawing bot zones, get them now
    if(isShowingDebugMeshZones())
@@ -1876,8 +1876,8 @@ void ClientGame::renderNormal()
 
 
    if(gServerGame && showDebugBots)
-      for(S32 i = 0; i < Robot::getBotCount(); i++)
-         renderObjects.push_back(Robot::getBot(i));
+      for(S32 i = 0; i < getBotCount(); i++)
+         renderObjects.push_back(getBot(i));
 
    renderObjects.sort(renderSortCompare);
 

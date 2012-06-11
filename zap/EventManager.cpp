@@ -104,7 +104,7 @@ void EventManager::shutdown()
 EventManager *EventManager::get()
 {
    if(!eventManager)
-      eventManager = new EventManager();      // Deleted in cleanup, which is called from Game destuctor
+      eventManager = new EventManager();      // Deleted in shutdown(), which is called from Game destuctor
 
    return eventManager;
 }
@@ -268,7 +268,7 @@ void EventManager::fireEvent(EventType eventType)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -298,8 +298,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       }
       catch(LuaException &e)
       {
-         LuaObject::clearStack(L);
-         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -326,7 +325,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -364,7 +363,7 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, const ch
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
@@ -394,25 +393,28 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, LuaPlaye
       }
       catch(LuaException &e)
       {
-         handleEventFiringError(subscriptions[eventType][i], eventType, e.what());
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
          return;
       }
    }
 }
 
 
-void EventManager::handleEventFiringError(const char *subscriber, EventType eventType, const char *errorMsg)
+void EventManager::handleEventFiringError(lua_State *L, const char *subscriber, EventType eventType, const char *errorMsg)
 {
    // Figure out which, if any, bot caused the error
-   Robot *robot = Robot::findBot(subscriber);
+   Robot *robot = gServerGame->findBot(subscriber);
 
    if(robot)
    {
-      robot->logError("Robot error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
+      robot->logError("Error handling event %s: %s. Shutting bot down.", eventDefs[eventType].name, errorMsg);
       delete robot;
+      return;
    }
-   else
-      logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
+
+   // It was a levelgen?
+   logprintf(LogConsumer::LogError, "Error firing event %s: %s", eventDefs[eventType].name, errorMsg);
+   LuaObject::clearStack(L);
 }
 
 

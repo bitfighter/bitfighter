@@ -159,7 +159,8 @@ private:
    bool loadCompileSaveScript(const char *filename, const char *registryKey);
    bool loadCompileScript(const char *filename);
 
-   void setEnums(lua_State *L);  // Set a whole slew of enum values that we want the scripts to have access to
+   void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
+   void setEnums(lua_State *L);                 // Set a whole slew of enum values that we want the scripts to have access to
 
    string mScriptId;             // Unique id for this script
 
