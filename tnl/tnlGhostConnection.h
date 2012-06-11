@@ -28,11 +28,11 @@
 #define _TNL_GHOSTCONNECTION_H_
 
 #ifndef _TNL_EVENTCONNECTION_H_
-#include "tnlEventConnection.h"
+#  include "tnlEventConnection.h"
 #endif
 
 #ifndef _TNL_RPC_H_
-#include "tnlRPC.h"
+#  include "tnlRPC.h"
 #endif
 
 namespace TNL {
