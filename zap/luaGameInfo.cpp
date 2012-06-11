@@ -128,13 +128,15 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 // Return a table listing all players on this team
 S32 LuaGameInfo::getPlayers(lua_State *L) 
 {
+   ServerGame *game = gServerGame;
+
    S32 pushed = 0;     // Count of pushed objects
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); i++)
    {
-      ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+      ClientInfo *clientInfo = game->getClientInfo(i);
 
       if(clientInfo->getPlayerInfo()->isDefunct() || clientInfo->isRobot())     // Skip defunct players and bots
          continue;
@@ -144,9 +146,9 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
       lua_rawseti(L, 1, pushed);
    }
 
-   for(S32 i = 0; i < gServerGame->getRobotCount(); i ++)
+   for(S32 i = 0; i < game->getRobotCount(); i ++)
    {
-      Robot::getBot(i)->getPlayerInfo()->push(L);
+      game->getBot(i)->getPlayerInfo()->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
