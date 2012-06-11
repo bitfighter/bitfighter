@@ -59,6 +59,11 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+
+   bool hasTeam();      
+   bool canBeHostile(); 
+   bool canBeNeutral(); 
+
    string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);

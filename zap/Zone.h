@@ -57,6 +57,11 @@ public:
    virtual const char *getPrettyNamePlural();
    virtual const char *getOnDockName();
    virtual const char *getOnScreenName();
+
+   bool hasTeam();      
+   bool canBeHostile(); 
+   bool canBeNeutral(); 
+
    virtual string toString(F32 gridSize) const;
 
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);

@@ -112,6 +112,10 @@ const char *LoadoutZone::getPrettyNamePlural() { return "Loadout Zones"; }
 const char *LoadoutZone::getOnDockName()       { return "Loadout";       }
 const char *LoadoutZone::getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
 
+bool LoadoutZone::hasTeam()      { return true; }
+bool LoadoutZone::canBeHostile() { return true; }
+bool LoadoutZone::canBeNeutral() { return true; }
+
 
 string LoadoutZone::toString(F32 gridSize) const
 {

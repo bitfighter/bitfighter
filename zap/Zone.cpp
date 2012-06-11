@@ -118,6 +118,10 @@ const char *Zone::getOnDockName()       { return "Zone";  }
 const char *Zone::getPrettyNamePlural() { return "Zones"; }
 const char *Zone::getEditorHelpString() { return "Generic area, does not appear in-game, possibly useful to scripts."; }
 
+bool Zone::hasTeam()      { return false; }
+bool Zone::canBeHostile() { return false; }
+bool Zone::canBeNeutral() { return false; }
+
 
 string Zone::toString(F32 gridSize) const
 {
