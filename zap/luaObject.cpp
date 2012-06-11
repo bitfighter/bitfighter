@@ -26,27 +26,30 @@
 #include "luaObject.h"
 #include "luaUtil.h"
 #include "luaGameInfo.h"
-#include "tnlLog.h"           // For logprintf
-
-#include "item.h"             // For getItem()
-#include "flagItem.h"         // For getItem()
-#include "robot.h"            // For getItem()
-#include "NexusGame.h"        // For getItem()
-#include "soccerGame.h"       // For getItem()
-#include "projectile.h"       // For getItem()
-#include "loadoutZone.h"
-#include "goalZone.h"
-#include "teleporter.h"
-#include "speedZone.h"
-#include "EngineeredItem.h"   // For getItem()
-#include "PickupItem.h"       // For getItem()
-#include "playerInfo.h"       // For playerInfo def
-#include "UIMenuItems.h"      // For MenuItem def
-#include "config.h"
-#include "CoreGame.h"         // For getItem()
+#include "tnlLog.h"            // For logprintf
+                               
+#include "item.h"              // For getItem()
+#include "flagItem.h"          // For getItem()
+#include "robot.h"             // For getItem()
+#include "NexusGame.h"         // For getItem()
+#include "soccerGame.h"        // For getItem()
+#include "projectile.h"        // For getItem()
+#include "loadoutZone.h"       
+#include "goalZone.h"          
+#include "teleporter.h"        
+#include "speedZone.h"         
+#include "EngineeredItem.h"    // For getItem()
+#include "PickupItem.h"        // For getItem()
+#include "playerInfo.h"        // For playerInfo def
+#include "UIMenuItems.h"       // For MenuItem def
+#include "config.h"            
+#include "CoreGame.h"          // For getItem()
 #include "ClientInfo.h"
 
-#include "stringUtils.h"      // For joindir  
+#include "luaLevelGenerator.h" // For managing event subscriptions
+
+
+#include "stringUtils.h"       // For joindir  
 #include "lua.h"
 
 
@@ -939,8 +942,8 @@ void LuaScriptRunner::logError(const char *format, ...) { TNLAssert(false, "Unim
 static string getStackTraceLine(lua_State *L, S32 level)
 {
 	lua_Debug ar;
-
 	memset(&ar, 0, sizeof(ar));
+
 	if(!lua_getstack(L, level + 1, &ar) || !lua_getinfo(L, "Snl", &ar))
 		return "";
 
@@ -1109,6 +1112,22 @@ static int unsubscribe_bot(lua_State *L)
 }
 
 
+static int subscribe_levelgen(lua_State *L)
+{
+   LuaLevelGenerator *levelgen = luaW_check<LuaLevelGenerator>(L, 1);
+   levelgen->subscribe(L);
+   return 0;
+}
+
+
+static int unsubscribe_levelgen(lua_State *L)
+{
+   LuaLevelGenerator *levelgen = luaW_check<LuaLevelGenerator>(L, 1);
+   levelgen->unsubscribe(L);
+   return 0;
+}
+
+
 #define setEnumName(number, name) { lua_pushinteger(L, number);             lua_setglobal(L, name); }
 #define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
 #define setGTEnum(name)           { lua_pushinteger(L, GameType::name);     lua_setglobal(L, #name); }
@@ -1224,20 +1243,11 @@ void LuaScriptRunner::setEnums(lua_State *L)
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
 
    // Some generic functions that we can put here rather than binding them to an object
-   lua_register(L, "subscribe_bot",   subscribe_bot);
-   lua_register(L, "unsubscribe_bot", unsubscribe_bot);
-
-
+   lua_register(L, "subscribe_bot",        subscribe_bot);
+   lua_register(L, "unsubscribe_bot",      unsubscribe_bot);
+   lua_register(L, "subscribe_levelgen",   subscribe_levelgen);
+   lua_register(L, "unsubscribe_levelgen", unsubscribe_levelgen);
 }
-
-//const char *LuaScriptRunner::luaClassName = "LuaScriptRunner";
-//const luaL_reg LuaScriptRunner::luaMethods[] =
-//{
-//   { "subscribe",   luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::subscribe>   },
-//   { "unsubscribe", luaW_doMethod<LuaScriptRunner, &LuaScriptRunner::unsubscribe> },
-//};
-
-//REGISTER_LUA_CLASS(LuaScriptRunner);
 
 #undef setEnumName
 #undef setEnum

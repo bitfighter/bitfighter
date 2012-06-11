@@ -45,11 +45,11 @@ end
 -- And two more
 --
 function subscribe(event)
-   levelgen:subscribe(event)
+   subscribe_levelgen(levelgen, event)
 end   
 
 function unsubscribe(event)
-   levelgen:unsubscribe(event)
+   unsubscribe_levelgen(levelgen, event)
 end  
 
 

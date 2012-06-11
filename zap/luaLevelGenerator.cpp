@@ -38,8 +38,10 @@
 namespace Zap
 {
 
+// Default constructor
+LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constructor!"); }
 
-// C++ Constructor
+// Standard constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
                                      GridDatabase *gridDatabase, LevelLoader *caller, bool inEditor)
 {
@@ -54,6 +56,8 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
    mGridSize = gridSize;
    mCaller = caller;
    mInEditor = inEditor;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -157,18 +161,12 @@ const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class n
 static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 
 
-// Lua Constructor -- required by Lunar
-LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
-{
-   TNLAssert(false, "Why use this constructor?");
-   throw LuaException("LuaLevelGenerator should never be constructed by a lua script!");
-}
-
 
 // Destructor
 LuaLevelGenerator::~LuaLevelGenerator()
 {
    logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaLevelGenerator (%p)\n", this);
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 // TODO: Provide mechanism to modify basic level parameters like game length and teams.
@@ -444,6 +442,14 @@ void LuaLevelGenerator::registerClasses()
    Lunar<TextEntryMenuItem>::Register(L);
 #endif
 }
+
+
+//// Lua methods
+const char *LuaLevelGenerator::luaClassName = "LuaLevelGenerator";
+
+const luaL_reg LuaLevelGenerator::luaMethods[] = { { NULL, NULL } };
+
+REGISTER_LUA_CLASS(LuaLevelGenerator);
 
 
 };

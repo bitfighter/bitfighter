@@ -52,11 +52,10 @@ private:
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);
 
 public:
+   LuaLevelGenerator();                                              // Default constructor
    LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
-                     LevelLoader *caller, bool inEditor = false);   // C++ constructor
-
-   LuaLevelGenerator(lua_State *L);      // Lua constructor
-   virtual ~LuaLevelGenerator();         // Destructor
+                     LevelLoader *caller, bool inEditor = false);    // C++ constructor
+   virtual ~LuaLevelGenerator();                                     // Destructor
 
    bool prepareEnvironment();
    
@@ -92,6 +91,12 @@ public:
 
    // Implement LevelLoader abstract method
    void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);
+
+   //// Lua interface
+   LUAW_DECLARE_CLASS(LuaLevelGenerator);
+
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 

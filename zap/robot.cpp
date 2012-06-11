@@ -125,9 +125,8 @@ Robot::~Robot()
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
 
-   LUAW_DESTRUCTOR_CLEANUP;
-
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mScriptName.c_str(), robots.size());
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -718,9 +717,7 @@ Robot *Robot::clone() const
 
 
 //// Lua methods
-
 const char *Robot::luaClassName = "Robot";
-
 
 const luaL_reg Robot::luaMethods[] =
 {
