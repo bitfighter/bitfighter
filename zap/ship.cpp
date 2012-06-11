@@ -2389,11 +2389,5 @@ S32 Ship::getReqLoadout(lua_State *L)
 }
 
 
-//void Ship::push(lua_State *L)
-//{
-//   luaw_push<Ship>(L, this);
-//}
-
-
 };
 

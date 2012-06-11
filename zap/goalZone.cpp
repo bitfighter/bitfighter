@@ -35,23 +35,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(GoalZone);
 
-const char GoalZone::className[] = "GoalZone";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<GoalZone>::RegType GoalZone::methods[] =
-{
-   // Standard gameItem methods
-   method(GoalZone, getClassID),       // { getClassID, &GoalZone::getClassID }
-   method(GoalZone, getLoc),       
-   method(GoalZone, getRad),
-   method(GoalZone, getVel),
-   method(GoalZone, getTeamIndx),
-
-   method(GoalZone, hasFlag),
-   {0,0}    // End method list
-};
-
-
 // Constructor
 GoalZone::GoalZone()
 {
@@ -80,7 +63,8 @@ void GoalZone::render()
       glow = 0;
 
    bool useOldStyle = getGame()->getSettings()->getIniSettings()->oldGoalFlash;
-   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
+   renderGoalZone(*getColor(), getOutline(), getFill(), getCentroid(), getLabelAngle(), isFlashing(), glow, mScore, 
+                  mFlashCount ? F32(mFlashTimer.getCurrent()) / FlashDelay : 0, useOldStyle);
 }
 
 
@@ -96,12 +80,6 @@ void GoalZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 void GoalZone::renderDock()
 {
   renderGoalZone(*getColor(), getOutline(), getFill());
-}
-
-
-S32 GoalZone::getRenderSortValue()
-{
-   return -1;     // Renders beneath everything else
 }
 
 
@@ -127,36 +105,19 @@ bool GoalZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 7)
       return false;
 
-   setTeam(atoi(argv[0]));  // Team is first arg
-   readGeom(argc, argv, 1, game->getGridSize());
-   updateExtentInDatabase();   
-
-   return true;
+   setTeam(atoi(argv[0]));     // Team is first arg
+   return Parent::processArguments(argc - 1, argv + 1, game);
 }
 
 
-const char *GoalZone::getEditorHelpString()
-{
-   return "Target area used in a variety of games.";
-}
+const char *GoalZone::getOnScreenName()     { return "Goal";       }
+const char *GoalZone::getOnDockName()       { return "Goal";       }
+const char *GoalZone::getPrettyNamePlural() { return "Goal Zones"; }
+const char *GoalZone::getEditorHelpString() { return "Target area used in a variety of games."; }
 
-
-const char *GoalZone::getPrettyNamePlural()
-{
-   return "Goal Zones";
-}
-
-
-const char *GoalZone::getOnDockName()
-{
-   return "Goal";
-}
-
-
-const char *GoalZone::getOnScreenName()
-{
-   return "Goal";
-}
+bool GoalZone::hasTeam()      { return true; }
+bool GoalZone::canBeHostile() { return true; }
+bool GoalZone::canBeNeutral() { return true; }
 
 
 string GoalZone::toString(F32 gridSize) const
@@ -276,8 +237,6 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mFlashCount = FlashCount;
       }
    }
-
-   
 }
 
 
@@ -295,13 +254,17 @@ void GoalZone::idle(BfObject::IdleCallPath path)
 
 
 /////
-// Lua Interface
+// Lua interface
+const char *GoalZone::luaClassName = "GoalZone";
 
-//  Lua constructor
-GoalZone::GoalZone(lua_State *L)
-{
-   // Do nothing
-}
+const luaL_reg GoalZone::luaMethods[] = 
+{ 
+   { "hasFlag", luaW_doMethod<GoalZone, &GoalZone::hasFlag> },
+   { NULL, NULL } 
+};
+
+
+REGISTER_LUA_SUBCLASS(GoalZone, Zone);
 
 
 S32 GoalZone::hasFlag(lua_State *L)
@@ -314,13 +277,6 @@ S32 GoalZone::getClassID(lua_State *L)
 {
    return returnInt(L, GoalZoneTypeNumber);
 }
-
-
-void GoalZone::push(lua_State *L)
-{
-   Lunar<GoalZone>::push(L, this);
-}
-
 
 };
 

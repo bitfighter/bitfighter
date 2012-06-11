@@ -26,6 +26,7 @@
 #ifndef _GOALZONE_H_
 #define _GOALZONE_H_
 
+#include "Zone.h"          // Parent class
 #include "gameObject.h"
 #include "polygon.h"
 #include "Timer.h"
@@ -33,9 +34,9 @@
 namespace Zap
 {
 
-class GoalZone : public PolygonObject
+class GoalZone : public Zone
 {
-   typedef BfObject Parent;
+   typedef Zone Parent;
 
 private:
    static const S32 FlashDelay = 500;
@@ -67,7 +68,6 @@ public:
    void render();
 
    bool didRecentlyChangeTeam();
-   S32 getRenderSortValue();
 
    void setTeam(S32 team);
    void onAddedToGame(Game *theGame);
@@ -89,22 +89,25 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+
+   bool hasTeam();      
+   bool canBeHostile(); 
+   bool canBeNeutral(); 
+
+
    string toString(F32 gridSize) const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
-   /////
-   // Lua Interface
-   GoalZone(lua_State *L);   //  Lua constructor
+   //// Lua interface
+   LUAW_DECLARE_CLASS(GoalZone);
 
-   static const char className[];                 // Class name as it appears to Lua scripts
-   static Lunar<GoalZone>::RegType methods[];
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
    S32 hasFlag(lua_State *L);
    S32 getClassID(lua_State *L);
-
-  void push(lua_State *L);
 };
 
 
