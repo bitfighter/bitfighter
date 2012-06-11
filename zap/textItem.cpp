@@ -668,7 +668,6 @@ const char *LineItem::getPrettyNamePlural() { return "Line Items"; }
 const char *LineItem::getOnDockName()       { return "LineItem";   }
 const char *LineItem::getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }
 
-
 bool LineItem::hasTeam()      { return true; }
 bool LineItem::canBeHostile() { return true; }
 bool LineItem::canBeNeutral() { return true; }
