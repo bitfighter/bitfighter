@@ -48,7 +48,6 @@ Zone::~Zone()
 }
 
 
-
 Zone *Zone::clone() const
 {
    return new Zone(*this);
@@ -57,7 +56,7 @@ Zone *Zone::clone() const
 
 void Zone::render()
 {
-   renderZone(getColor(), getOutline(), getFill());
+   renderZone(&Colors::white, getOutline(), getFill());
 }
 
 
