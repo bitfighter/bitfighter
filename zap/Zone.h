@@ -23,51 +23,47 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LOADOUTZONE_H_6742_
-#define _LOADOUTZONE_H_6742_
+#ifndef _ZONE_H_
+#define _ZONE_H_
 
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
-#include "Zone.h"
+#include "polygon.h"
 
 namespace Zap
 {
 
-class LoadoutZone : public Zone
+class Zone : public PolygonObject
 {
-   typedef Zone Parent;
+   typedef PolygonObject Parent;
 
 public:
-   LoadoutZone();             // C++ constructor
-   virtual ~LoadoutZone();    // Destructor
-   LoadoutZone *clone() const;
+   Zone();              // C++ constructor
+   virtual ~Zone();     // Destructor
+   Zone *clone() const;
 
-   void render();
-   bool processArguments(S32 argc, const char **argv, Game *game);
-   void onAddedToGame(Game *theGame);
+   virtual void render();
+   S32 getRenderSortValue();
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;     // More precise boundary for precise collision detection
-   bool collide(BfObject *hitObject);
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) const;     // More precise boundary for precise collision detection
+   virtual bool collide(BfObject *hitObject);
 
    /////
    // Editor methods
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
-   string toString(F32 gridSize) const;
+   virtual const char *getEditorHelpString();
+   virtual const char *getPrettyNamePlural();
+   virtual const char *getOnDockName();
+   virtual const char *getOnScreenName();
+   virtual string toString(F32 gridSize) const;
 
-   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
-   void renderDock();
-
-   TNL_DECLARE_CLASS(LoadoutZone);
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderDock();
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(LoadoutZone);
+   LUAW_DECLARE_CLASS(Zone);
 
    static const luaL_reg luaMethods[];
    static const char *luaClassName;

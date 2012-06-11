@@ -143,6 +143,7 @@
     <ClCompile Include="src\print.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\master\master.h" />
     <ClInclude Include="src\lapi.h" />
     <ClInclude Include="src\lauxlib.h" />
     <ClInclude Include="src\lcode.h" />

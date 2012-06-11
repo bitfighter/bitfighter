@@ -993,7 +993,6 @@ void LuaScriptRunner::registerClasses()
    Lunar<Teleporter>::Register(L);
 
    Lunar<GoalZone>::Register(L);
-   Lunar<LoadoutZone>::Register(L);
    Lunar<NexusObject>::Register(L);
 }
 

@@ -1059,7 +1059,7 @@ void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius)
 }
 
 
-void renderLoadoutZone(const Color *outlineColor, const Vector<Point> *outline, const Vector<Point> *fill)
+void renderZone(const Color *outlineColor, const Vector<Point> *outline, const Vector<Point> *fill)
 {
    Color fillColor = *outlineColor;
    fillColor *= 0.5;
@@ -1071,7 +1071,7 @@ void renderLoadoutZone(const Color *outlineColor, const Vector<Point> *outline, 
 void renderLoadoutZone(const Color *color, const Vector<Point> *outline, const Vector<Point> *fill, 
                        const Point &centroid, F32 angle, F32 scaleFact)
 {
-   renderLoadoutZone(color, outline, fill);
+   renderZone(color, outline, fill);
    renderPolygonLabel(centroid, angle, 25, "LOADOUT ZONE", scaleFact);
 }
 

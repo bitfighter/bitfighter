@@ -32,21 +32,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 
-const char LoadoutZone::className[] = "LoadoutZone";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<LoadoutZone>::RegType LoadoutZone::methods[] =
-{
-   // Standard gameItem methods
-   method(LoadoutZone, getClassID),
-   method(LoadoutZone, getLoc),
-   method(LoadoutZone, getRad),
-   method(LoadoutZone, getVel),
-   method(LoadoutZone, getTeamIndx),
-
-   {0,0}    // End method list
-};
-
 
 // C++ constructor
 LoadoutZone::LoadoutZone()
@@ -54,6 +39,15 @@ LoadoutZone::LoadoutZone()
    setTeam(0);
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = LoadoutZoneTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+LoadoutZone::~LoadoutZone()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -78,13 +72,7 @@ void LoadoutZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabl
 
 void LoadoutZone::renderDock()
 {
-  renderLoadoutZone(getColor(), getOutline(), getFill());
-}
-
-
-S32 LoadoutZone::getRenderSortValue()
-{
-   return -1;
+  renderZone(getColor(), getOutline(), getFill());
 }
 
 
@@ -115,36 +103,14 @@ bool LoadoutZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    setTeam(atoi(argv[0]));     // Team is first arg
-   readGeom(argc, argv, 1, game->getGridSize());
-
-   updateExtentInDatabase();
-
-   return true;
+   return Parent::processArguments(argc - 1, argv + 1, game);
 }
 
 
-const char *LoadoutZone::getEditorHelpString()
-{
-   return "Area to finalize ship modifications.  Each team should have at least one.";
-}
-
-
-const char *LoadoutZone::getPrettyNamePlural()
-{
-   return "Loadout Zones";
-}
-
-
-const char *LoadoutZone::getOnDockName()
-{
-   return "Loadout";
-}
-
-
-const char *LoadoutZone::getOnScreenName()
-{
-   return "Loadout";
-}
+const char *LoadoutZone::getOnScreenName()     { return "Loadout";       }
+const char *LoadoutZone::getPrettyNamePlural() { return "Loadout Zones"; }
+const char *LoadoutZone::getOnDockName()       { return "Loadout";       }
+const char *LoadoutZone::getEditorHelpString() { return "Area to finalize ship modifications.  Each team should have at least one."; }
 
 
 string LoadoutZone::toString(F32 gridSize) const
@@ -198,27 +164,18 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-
 /////
 // Lua interface
+const char *LoadoutZone::luaClassName = "LoadoutZone";
 
+const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
 
-//  Lua constructor
-LoadoutZone::LoadoutZone(lua_State *L)
-{
-   // Do nothing
-}
+REGISTER_LUA_SUBCLASS(LoadoutZone, Zone);
 
 
 S32 LoadoutZone::getClassID(lua_State *L)
 {
    return returnInt(L, LoadoutZoneTypeNumber);
-}
-
-
-void LoadoutZone::push(lua_State *L)
-{
-   Lunar<LoadoutZone>::push(L, this);
 }
 
 

@@ -92,7 +92,6 @@
     <ClInclude Include="..\boost\boost\tokenizer.hpp" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="database.h" />
-    <ClInclude Include="master.h" />
     <ClInclude Include="masterInterface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

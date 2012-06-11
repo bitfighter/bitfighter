@@ -153,7 +153,7 @@ extern void setDefaultBlendFunction();
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 
-extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);      // No label version
+extern void renderZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill);   
 
 extern void renderLoadoutZone(const Color *c, const Vector<Point> *outline, const Vector<Point> *fill, 
                               const Point &centroid, F32 angle, F32 scaleFact = 1);
@@ -271,6 +271,7 @@ extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);
 #define renderMine
 #define renderSpyBug
 #define renderLoadoutZone
+#define renderZone
 #define renderGoalZone
 #define renderForceFieldProjector
 #define renderForceField
