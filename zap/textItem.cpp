@@ -663,46 +663,14 @@ void LineItem::changeWidth(S32 amt)
 }
 
 
-const char *LineItem::getEditorHelpString()
-{
-   return "Draws a line on the map.  Visible only to team, or to all if neutral.";
-}
+const char *LineItem::getOnScreenName()     { return "Line";       }
+const char *LineItem::getPrettyNamePlural() { return "Line Items"; }
+const char *LineItem::getOnDockName()       { return "LineItem";   }
+const char *LineItem::getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }
 
 
-const char *LineItem::getPrettyNamePlural()
-{
-   return "Line Items";
-}
-
-
-const char *LineItem::getOnDockName()
-{
-   return "LineItem";
-}
-
-
-const char *LineItem::getOnScreenName()
-{
-   return "Line";
-}
-
-
-bool LineItem::hasTeam()
-{
-   return true;
-}
-
-
-bool LineItem::canBeHostile()
-{
-   return true;
-}
-
-
-bool LineItem::canBeNeutral()
-{
-   return true;
-}
-
+bool LineItem::hasTeam()      { return true; }
+bool LineItem::canBeHostile() { return true; }
+bool LineItem::canBeNeutral() { return true; }
 
 };
