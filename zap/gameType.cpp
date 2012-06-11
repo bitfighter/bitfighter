@@ -3756,6 +3756,12 @@ Game *GameType::getGame() const
 }
 
 
+void GameType::addZone(Zone *zone)
+{
+   // Do nothing... for the moment
+}
+
+
 // static
 StringTableEntry GameType::getGameTypeName(GameTypeId gameType)
 {

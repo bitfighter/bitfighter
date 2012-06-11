@@ -122,7 +122,7 @@ const char *Zone::getEditorHelpString() { return "Generic area, does not appear 
 
 string Zone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(gridSize);
+   return string("Zone " + geomToString(gridSize));
 }
 
 

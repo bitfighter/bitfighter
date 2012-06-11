@@ -56,6 +56,7 @@ class AsteroidSpawn;
 class Team;
 class SpyBug;
 class MenuUserInterface;
+class Zone;
 
 struct WallRec;
 
@@ -206,6 +207,7 @@ public:
    void broadcastTimeSyncSignal();                     // Send remaining time to all clients
    void broadcastNewRemainingTime();                   // Send remaining time to all clients after time has been updated
 
+   void addZone(Zone *zone);
 
    static StringTableEntry getGameTypeName(GameTypeId gameType);
 

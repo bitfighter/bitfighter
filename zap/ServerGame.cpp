@@ -47,6 +47,7 @@
 #include "NexusGame.h"           // For creating new NexusFlagItem
 #include "teamInfo.h"            // For TeamManager def
 #include "playerInfo.h"
+#include "Zone.h"                // For instantiating zones
 
 #include "ClientInfo.h"
 
@@ -544,6 +545,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(spawn->processArguments(argc - 1, argv + 1, this))   // processArguments don't like "AsteroidSpawn" as argv[0]
          getGameType()->addItemSpawn(spawn);
+      else
+         delete spawn;
    }
    else if(!stricmp(argv[0], "CircleSpawn"))      // CircleSpawn <x> <y> [timer]      // TODO: Move this to CircleSpawn class?
    {
@@ -551,6 +554,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(spawn->processArguments(argc - 1, argv + 1, this))
          getGameType()->addItemSpawn(spawn);
+      else
+         delete spawn;
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {
@@ -563,8 +568,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
          // is convenient to transmit to the clients
          WallRec wallRec(wallItem);
          getGameType()->addWall(wallRec, this);
-         }
       }
+   }
    else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
       PolyWall polyWall;
@@ -576,6 +581,14 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
          getGameType()->addWall(wallRec, this);
       }
    }
+   else if(!stricmp(argv[0], "Zone")) 
+   {
+      Zone *zone = new Zone();
+
+      if(zone->processArguments(argc - 1, argv + 1, this))
+         getGameType()->addZone(zone);
+   }
+
    else 
       return false;
 

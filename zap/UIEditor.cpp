@@ -253,6 +253,10 @@ void EditorUserInterface::populateDock()
 
    addDockObject(new PolyWall(), xPos, yPos);
    yPos += spacer;
+
+   addDockObject(new Zone(), xPos, yPos);
+   yPos += spacer;
+
 }
 
 

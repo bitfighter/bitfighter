@@ -46,6 +46,7 @@
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos
 #include "NexusGame.h"
+#include "Zone.h"                // For instantiation
 
 #include "UI.h"                  // For renderRect
 
@@ -2023,6 +2024,21 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       EditorUserInterface::robots.push_back(robot);
    }
+   else if(!stricmp(argv[0], "Zone")) 
+   {
+      Zone *zone = new Zone();
+
+      bool validArgs = zone->processArguments(argc - 1, argv + 1, this);
+
+      if(validArgs)
+         zone->addToGame(this, database);
+      else
+      {
+         logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
+         delete zone;
+      }
+   }
+      
    else 
       return false;
 
