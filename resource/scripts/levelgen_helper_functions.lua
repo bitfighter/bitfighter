@@ -61,7 +61,7 @@ end
 -- Override the default print() method to print to the oglconsole instead of stdout
 --
 function print(msg)
-    LuaUtil:printToOglConsole(msg)
+    LuaUtil:printToConsole(msg)
 end
 
 --
