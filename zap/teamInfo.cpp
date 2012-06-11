@@ -375,15 +375,17 @@ S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount()
 // Return a table listing all players on this team
 S32 LuaTeamInfo::getPlayers(lua_State *L)
 {
-   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getClientCount(), "Mismatched player counts!");
+   ServerGame *game = gServerGame;
+
+   TNLAssert(game->getPlayerCount() == game->getClientCount(), "Mismatched player counts!");
 
    S32 pushed = 0;
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
-   for(S32 i = 0; i < gServerGame->getClientCount(); i++)
+   for(S32 i = 0; i < game->getClientCount(); i++)
    {
-      ClientInfo *clientInfo = gServerGame->getClientInfo(i);
+      ClientInfo *clientInfo = game->getClientInfo(i);
 
       if(clientInfo->getTeamIndex() == mTeamIndex)
       {
@@ -393,11 +395,11 @@ S32 LuaTeamInfo::getPlayers(lua_State *L)
       }
    }
 
-   for(S32 i = 0; i < gServerGame->getRobotCount(); i ++)
+   for(S32 i = 0; i < game->getRobotCount(); i ++)
    {
-      if(Robot::getBot(i)->getTeam() == mTeamIndex)
+      if(game->getBot(i)->getTeam() == mTeamIndex)
       {
-         Robot::getBot(i)->getPlayerInfo()->push(L);
+         game->getBot(i)->getPlayerInfo()->push(L);
          pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
          lua_rawseti(L, 1, pushed);
       }
