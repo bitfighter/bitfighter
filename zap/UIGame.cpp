@@ -1633,15 +1633,7 @@ void GameUserInterface::restartLevelHandler(const Vector<string> &words)
 void GameUserInterface::randomLevelHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!game->hasLevelChange("!!! You don't have permission to change levels"))
-      ;
-   else if(game->getConnectionToServer()->mConnectionVersion < 3) // outdated server will ack like REPLAY_LEVEL
-   {  // this code is only good for old 017 servers, until moving to a different CS 
-      U32 newLevel;  // we do our own client side randomizer (but we won't know each level's min  and max players because those info not sent in GameConnection::s2cAddLevel)
-      newLevel = TNL::Random::readI(0, max(getGame()->getConnectionToServer()->mLevelInfos.size() - 1, 0));  // MAX(-1,0) prevents Random::readI(0, -1) divide by zero error just in case the level size is zero
-      game->getConnectionToServer()->c2sRequestLevelChange(newLevel, false);
-   }
-   else
+   if(game->hasLevelChange("!!! You don't have permission to change levels"))
       game->getConnectionToServer()->c2sRequestLevelChange(ServerGame::RANDOM_LEVEL, false);
 }
 
