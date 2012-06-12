@@ -113,6 +113,7 @@ OBJECTS_SHARED=\
    Timer.o\
    WallSegmentManager.o\
    WeaponInfo.o\
+   Zone.o\
    zoneControlGame.o\
    ../clipper/clipper.o\
    ../master/masterInterface.o\
