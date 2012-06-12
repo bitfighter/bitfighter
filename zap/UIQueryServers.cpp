@@ -1079,31 +1079,31 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       mLineEditor.handleBackspace(inputCode);
 
    // The following keys only make sense if there are some servers to browse through
-   else if(servers.size() == 0)
-      return true;
-
-   else if(inputCode == KEY_UP)
+   else if(servers.size() != 0)
    {
-      currentIndex = getSelectedIndex() - 1;
-      if(currentIndex < 0)
-         currentIndex = servers.size() - 1;
-      mPage = currentIndex / getServersPerPage(); 
+      if(inputCode == KEY_UP)
+      {
+         currentIndex = getSelectedIndex() - 1;
+         if(currentIndex < 0)
+            currentIndex = servers.size() - 1;
+         mPage = currentIndex / getServersPerPage();
 
-      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
-      mItemSelectedWithMouse = false;
-      selectedId = servers[currentIndex].id;
-   }
-   else if(inputCode == KEY_DOWN)
-   {
-      currentIndex = getSelectedIndex() + 1;
-      if(currentIndex >= servers.size())
-         currentIndex = 0;
+         Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
+         mItemSelectedWithMouse = false;
+         selectedId = servers[currentIndex].id;
+      }
+      else if(inputCode == KEY_DOWN)
+      {
+         currentIndex = getSelectedIndex() + 1;
+         if(currentIndex >= servers.size())
+            currentIndex = 0;
 
-      mPage = currentIndex / getServersPerPage();
+         mPage = currentIndex / getServersPerPage();
 
-      Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
-      mItemSelectedWithMouse = false;
-      selectedId = servers[currentIndex].id;
+         Cursor::disableCursor();        // Hide cursor when navigating with keyboard or joystick
+         mItemSelectedWithMouse = false;
+         selectedId = servers[currentIndex].id;
+      }
    }
    // If no key is handled
    else
