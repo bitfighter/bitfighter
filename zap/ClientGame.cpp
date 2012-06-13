@@ -352,7 +352,7 @@ bool ClientGame::isSpawnDelayed()
 
 void ClientGame::undelaySpawn()
 {
-   if(isSpawnDelayed())
+   if(isSpawnDelayed() && mSpawnDelayTimer.getCurrent() == 0)
    {
       getConnectionToServer()->c2sPlayerSpawnUndelayed();
       setSpawnDelayed(false);
@@ -363,6 +363,13 @@ void ClientGame::undelaySpawn()
 void ClientGame::requestSpawnDelayed()
 {
    getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
+   mSpawnDelayTimer.reset(SPAWN_DELAY_TIMER_DELAY);
+}
+
+
+Timer ClientGame::getSpawnDelayTimer()
+{
+   return mSpawnDelayTimer;
 }
 
 
@@ -609,6 +616,8 @@ void ClientGame::idle(U32 timeDelta)
       supressScreensaver();
       mScreenSaverTimer.reset();
    }
+
+   mSpawnDelayTimer.update(timeDelta);
 }
 
 

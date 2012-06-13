@@ -67,6 +67,9 @@ private:
    Timer mScreenSaverTimer;
    void supressScreensaver();
 
+   Timer mSpawnDelayTimer;
+   static const U32 SPAWN_DELAY_TIMER_DELAY = 5000;
+
    UIManager *mUIManager;
 
    string mRemoteLevelDownloadFilename;
@@ -167,6 +170,7 @@ public:
    bool isSpawnDelayed();
    void undelaySpawn();
    void requestSpawnDelayed();
+   Timer getSpawnDelayTimer();
 
    // Check for permissions
    bool hasAdmin(const char *failureMessage);

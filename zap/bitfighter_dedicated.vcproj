@@ -755,6 +755,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\GeomObject.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\gridDB.cpp"
 			>
 		</File>
