@@ -632,7 +632,7 @@ void GameUserInterface::renderSuspendedMessage()
 
    renderMessageBox("", "", msg, 5, -30, 2);
 
-   drawCenteredString(350, 20, itos(getGame()->getSpawnDelayTimer().getCurrent()).c_str());
+   drawCenteredString(350, 20, itos(getGame()->getSpawnUndelayTimer().getCurrent()).c_str());
 }
 
 
@@ -1818,6 +1818,7 @@ void GameUserInterface::idleHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
    game->requestSpawnDelayed();
+   game->getSpawnUndelayTimer().reset();
 }
 
 

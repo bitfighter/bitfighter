@@ -144,6 +144,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    //}
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
+   mSpawnUndelayTimer.setPeriod(SPAWN_UNDELAY_TIMER_DELAY);
 
    mDebugShowShipCoords = false;
    mDebugShowMeshZones = false;
@@ -352,7 +353,7 @@ bool ClientGame::isSpawnDelayed()
 
 void ClientGame::undelaySpawn()
 {
-   if(isSpawnDelayed() && mSpawnDelayTimer.getCurrent() == 0)
+   if(isSpawnDelayed() && mSpawnUndelayTimer.getCurrent() == 0)
    {
       getConnectionToServer()->c2sPlayerSpawnUndelayed();
       setSpawnDelayed(false);
@@ -363,13 +364,12 @@ void ClientGame::undelaySpawn()
 void ClientGame::requestSpawnDelayed()
 {
    getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
-   mSpawnDelayTimer.reset(SPAWN_DELAY_TIMER_DELAY);
 }
 
 
-Timer ClientGame::getSpawnDelayTimer()
+Timer &ClientGame::getSpawnUndelayTimer()
 {
-   return mSpawnDelayTimer;
+   return mSpawnUndelayTimer;
 }
 
 
@@ -617,7 +617,7 @@ void ClientGame::idle(U32 timeDelta)
       mScreenSaverTimer.reset();
    }
 
-   mSpawnDelayTimer.update(timeDelta);
+   mSpawnUndelayTimer.update(timeDelta);
 }
 
 

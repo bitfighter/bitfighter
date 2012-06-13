@@ -67,8 +67,8 @@ private:
    Timer mScreenSaverTimer;
    void supressScreensaver();
 
-   Timer mSpawnDelayTimer;
-   static const U32 SPAWN_DELAY_TIMER_DELAY = 5000;
+   Timer mSpawnUndelayTimer;
+   static const U32 SPAWN_UNDELAY_TIMER_DELAY = 5000;
 
    UIManager *mUIManager;
 
@@ -170,7 +170,7 @@ public:
    bool isSpawnDelayed();
    void undelaySpawn();
    void requestSpawnDelayed();
-   Timer getSpawnDelayTimer();
+   Timer &getSpawnUndelayTimer();
 
    // Check for permissions
    bool hasAdmin(const char *failureMessage);
