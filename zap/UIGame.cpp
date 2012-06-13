@@ -1809,6 +1809,7 @@ void GameUserInterface::setLevelDirHandler(const Vector<string> &words)
 void GameUserInterface::deleteCurrentLevelHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to delete the current level"))
       game->changeServerParam(GameConnection::DeleteLevel, words);    // handles deletes too
 }
@@ -1816,14 +1817,14 @@ void GameUserInterface::deleteCurrentLevelHandler(const Vector<string> &words)
 
 void GameUserInterface::idleHandler(const Vector<string> &words)
 {
-   ClientGame *game = getGame();
-   game->requestSpawnDelayed();
+   getGame()->requestSpawnDelayed();
 }
 
 
 void GameUserInterface::suspendHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->getPlayerCount() > 1)
       game->displayErrorMessage("!!! Can't suspend when others are playing");
    else
