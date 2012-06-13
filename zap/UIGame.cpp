@@ -631,6 +631,8 @@ void GameUserInterface::renderSuspendedMessage()
                            "" };
 
    renderMessageBox("", "", msg, 5, -30, 2);
+
+   drawCenteredString(350, 20, itos(getGame()->getSpawnDelayTimer().getCurrent()).c_str());
 }
 
 
