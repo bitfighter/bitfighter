@@ -991,8 +991,6 @@ void LuaScriptRunner::registerClasses()
    Lunar<LuaModuleInfo>::Register(L);
 
    Lunar<Teleporter>::Register(L);
-
-   Lunar<NexusObject>::Register(L);
 }
 
 

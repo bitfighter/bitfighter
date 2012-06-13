@@ -8,7 +8,7 @@
 // Other code copyright as noted
 //
 // This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// irendereditt under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 //
@@ -30,6 +30,7 @@
 #include "item.h"
 #include "polygon.h"
 #include "LuaWrapper.h"
+#include "Zone.h"
 
 namespace Zap
 {
@@ -177,12 +178,17 @@ public:
 };
 
 
-class NexusObject : public PolygonObject
+////////////////////////////////////////
+////////////////////////////////////////
+
+class NexusObject : public Zone
 {
-   typedef BfObject Parent;
+   typedef Zone Parent;
 
 public:
-   NexusObject();      // Constructor
+   NexusObject();       // Constructor
+   ~NexusObject();      // Destructor
+
    NexusObject *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -192,8 +198,6 @@ public:
 
    void render();
    void renderDock();
-
-   S32 getRenderSortValue();
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(BfObject *hitObject);
@@ -212,18 +216,22 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+
    string toString(F32 gridSiz) const;
+
+   bool hasTeam();     
+   bool canBeHostile();
+   bool canBeNeutral();
    
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
+   //// Lua interface
+   LUAW_DECLARE_CLASS(NexusObject);
 
-   NexusObject(lua_State *L);      //  Lua constructor
-   static const char className[];  // Class name as it appears to Lua scripts
-   static Lunar<NexusObject>::RegType methods[];
-   S32 getClassID(lua_State *L);
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 
-private:
-   void push(lua_State *L);
+   virtual S32 getClassID(lua_State *L);
 };
 
 };

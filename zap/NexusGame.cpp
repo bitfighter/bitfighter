@@ -932,6 +932,15 @@ NexusObject::NexusObject()
 {
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+NexusObject::~NexusObject()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -970,7 +979,7 @@ bool NexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 2)
       return false;
 
-   if(argc <= 4)     // Zap! format
+   if(argc <= 4)     // Archaic Zap! format
    {
       Point pos;
       pos.read(argv);
@@ -984,38 +993,25 @@ bool NexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
       addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
       addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
       addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
-   }
-   else              // Bitfighter format
-      readGeom(argc, argv, 0, game->getGridSize());
 
-   updateExtentInDatabase();   
+      updateExtentInDatabase();  
+   }
+   else              // Sleek, modern Bitfighter format
+      Parent::processArguments(argc, argv, game);
 
    return true;
 }
 
 
-const char *NexusObject::getEditorHelpString()
-{
-   return "Area to bring flags in Hunter game.  Cannot be used in other games.";
-}
+const char *NexusObject::getOnScreenName()     { return "Nexus"; }
+const char *NexusObject::getOnDockName()       { return "Nexus"; }
+const char *NexusObject::getPrettyNamePlural() { return "Nexii"; }
+const char *NexusObject::getEditorHelpString() { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
 
 
-const char *NexusObject::getPrettyNamePlural()
-{
-   return "Nexii";
-}
-
-
-const char *NexusObject::getOnDockName()
-{
-   return "Nexus";
-}
-
-
-const char *NexusObject::getOnScreenName()
-{
-   return "Nexus";
-}
+bool NexusObject::hasTeam()      { return false; }
+bool NexusObject::canBeHostile() { return false; }
+bool NexusObject::canBeNeutral() { return false; }
 
 
 string NexusObject::toString(F32 gridSize) const
@@ -1032,12 +1028,14 @@ void NexusObject::onAddedToGame(Game *theGame)
       setScopeAlways();    // Always visible!
 
    NexusGameType *gt = dynamic_cast<NexusGameType *>( getGame()->getGameType() );
-   if(gt) gt->addNexus(this);
+   if(gt) 
+      gt->addNexus(this);
 }
+
 
 void NexusObject::idle(BfObject::IdleCallPath path)
 {
-   //U32 deltaT = mCurrentMove.time;
+   // Do nothing
 }
 
 
@@ -1057,12 +1055,6 @@ void NexusObject::renderDock()
 #ifndef ZAP_DEDICATED
   renderNexus(getOutline(), getFill(), false, 0);
 #endif
-}
-
-
-S32 NexusObject::getRenderSortValue()
-{
-   return -1;
 }
 
 
@@ -1119,38 +1111,18 @@ void NexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-const char NexusObject::className[] = "NexusObject";      // Class name as it appears to Lua scripts
+/////
+// Lua interface
+const char *NexusObject::luaClassName = "NexusObject";
 
-// Define the methods we will expose to Lua
-Lunar<NexusObject>::RegType NexusObject::methods[] =
-{
-   // Standard gameItem methods
-   method(NexusObject, getClassID),
-   method(NexusObject, getLoc),
-   method(NexusObject, getRad),
-   method(NexusObject, getVel),
-   method(NexusObject, getTeamIndx),
+const luaL_reg NexusObject::luaMethods[] = { { NULL, NULL } };
 
-   {0,0}    // End method list
-};
-
-
-//  Lua constructor
-NexusObject::NexusObject(lua_State *L)
-{
-   // Do nothing
-}
+REGISTER_LUA_SUBCLASS(NexusObject, Zone);
 
 
 S32 NexusObject::getClassID(lua_State *L)
 {
    return returnInt(L, NexusTypeNumber);
-}
-
-
-void NexusObject::push(lua_State *L)
-{
-   Lunar<NexusObject>::push(L, this);
 }
 
 
