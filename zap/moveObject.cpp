@@ -402,7 +402,6 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
    if(tryCount == TRY_COUNT_MAX && moveTime > moveTimeStart * 0.98f)
       setVel(stateIndex, Point(0,0));  // prevents some overload by not trying to move anymore
-
 }
 
 
