@@ -4170,31 +4170,31 @@ void GameType::addFlag(FlagItem *flag)
 
 void GameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
 void GameType::addZone(GoalZone *zone)
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone)
 {
-   /* Do nothing */
+   // Do nothing
 }
 
 
 void GameType::majorScoringEventOcurred(S32 team)
 {
-   /* empty */
+  // Do nothing
 }
 
 };
