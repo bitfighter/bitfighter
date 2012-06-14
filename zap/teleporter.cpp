@@ -343,9 +343,9 @@ void Teleporter::idle(BfObject::IdleCallPath path)
             ship->getClientInfo()->getStatistics()->mTeleport++;
 
          // See if we've teleported onto a loadout zone
-         BfObject *obj = ship->isInZone(LoadoutZoneTypeNumber);
-         if(obj)
-            obj->collide(ship);
+         BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
+         if(zone)
+            zone->collide(ship);
       }
    }
 }
