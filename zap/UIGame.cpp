@@ -624,26 +624,16 @@ if(mGotControlUpdate)
 
 void GameUserInterface::renderSuspendedMessage()
 {
-   static string waitMsg[] = { "", 
-                           "CAN",
-                           "RESPAWN",
-			   "IN",
-                           "" };
-
-   static string readyMsg[] = { "", 
+   static string msg[] = { "", 
                            "PRESS ANY",
                            "KEY TO",
                            "RESPAWN",
                            "" };
 
+   renderMessageBox("", "", msg, 5, -30, 2);
 
    if(getGame()->getSpawnUndelayTimer().getCurrent() != 0)
-   {
-      renderMessageBox("", "", waitMsg, 5, -30, 2);
       drawCenteredString(350, 20, ftos(ceil(F32(getGame()->getSpawnUndelayTimer().getCurrent())/1000.f)).c_str());
-   } else {
-      renderMessageBox("", "", readyMsg, 5, -30, 2);
-   }
 }
 
 
