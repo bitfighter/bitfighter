@@ -795,6 +795,7 @@ void Ship::processModules()
    // Save the previous module primary/secondary component states; reset them - to be set later
    bool wasModulePrimaryActive[ModuleCount];
    bool wasModuleSecondaryActive[ModuleCount];
+
    for(S32 i = 0; i < ModuleCount; i++)
    {
       wasModulePrimaryActive[i] = mModulePrimaryActive[i];
@@ -873,7 +874,7 @@ void Ship::processModules()
 
    // This will make the module primary active component use the proper
    // amount of energy per second since the game idle methods are run on milliseconds
-   F32 scaleFactor = mCurrentMove.time * 0.001f;
+   F32 timeInSeconds = mCurrentMove.time * 0.001f;
 
    // Update things based on available energy...
    bool anyActive = false;
@@ -881,9 +882,9 @@ void Ship::processModules()
    {
       if(mModulePrimaryActive[i])
       {
-         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * scaleFactor);
-         mEnergy -= EnergyUsed;
-         anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge
+         S32 energyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * timeInSeconds);
+         mEnergy -= energyUsed;
+         anyActive = anyActive || (energyUsed != 0);   // To prevent armor and engineer stop energy recharge
 
          if(getClientInfo())
             getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
@@ -934,51 +935,50 @@ void Ship::processModules()
 
       BfObject *object = isInZone(LoadoutZoneTypeNumber);
 
-      // In load-out zone
-      if(object)
+      if(object)     // In load-out zone
       {
          /// IN HOSTILE ZONE
          if(object->getTeam() == TEAM_HOSTILE)
          {
             if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenIdle * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenIdle * timeInSeconds);
             else
-               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenActive * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenActive * timeInSeconds);
          }
 
          /// IN FRIENDLY ZONE
          else if(object->getTeam() == getTeam())
          {
             if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle * timeInSeconds);
             else
-               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenActive * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenActive * timeInSeconds);
          }
          /// IN NEUTRAL ZONE
          else if(object->getTeam() == TEAM_NEUTRAL)
          {
             if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenIdle * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenIdle * timeInSeconds);
             else
-               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenActive * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenActive * timeInSeconds);
          }
-         // In a zone that is neither hostile nor neutral nor one of your own -- must be an enemy 
+         // In a zone that is neither hostile nor neutral nor one of your own -- must be an enemy zone
          /// IN ENEMY ZONE
          else
          {
             if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenIdle * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenIdle * timeInSeconds);
             else
-               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenActive * scaleFactor);
+               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenActive * timeInSeconds);
          }
       }
       /// IN NO ZONE
       else 
       {
          if(isIdle)
-            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenIdle * scaleFactor);
+            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenIdle * timeInSeconds);
          else
-            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenActive * scaleFactor);
+            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenActive * timeInSeconds);
       }
    }
 
@@ -995,7 +995,7 @@ void Ship::processModules()
    }
 
    // If energy is greater than maximum, set to max
-   if(mEnergy >= EnergyMax)
+   else if(mEnergy >= EnergyMax)
       mEnergy = EnergyMax;
 
    // Do logic triggered when module primary component state changes

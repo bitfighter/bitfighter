@@ -238,6 +238,7 @@ public:
 
    void processWeaponFire();
    void processModules();
+
    void updateModuleSounds();
    void emitMovementSparks();
    bool findRepairTargets();
