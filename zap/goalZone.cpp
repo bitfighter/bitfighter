@@ -166,7 +166,7 @@ bool GoalZone::collide(BfObject *hitObject)
 {
    if( !isGhost() && (isShipType(hitObject->getObjectTypeNumber())) )
    {
-      Ship *s = dynamic_cast<Ship *>(hitObject); 
+      Ship *s = static_cast<Ship *>(hitObject); 
       getGame()->getGameType()->shipTouchZone(s, this);
    }
 

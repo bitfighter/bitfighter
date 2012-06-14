@@ -396,19 +396,6 @@ BfObject *Ship::isInZone(U8 zoneTypeNumber)
 }
 
 
-//BfObject *Ship::isInZone(BfObject *zone)
-//{
-//   // Get points that define the zone boundaries
-//   Vector<Point> polyPoints;
-//   polyPoints.clear();
-//   zone->getCollisionPoly(polyPoints);
-//
-//   if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
-//      return zone;
-//   return NULL;
-//}
-
-
 F32 Ship::getSlipzoneSpeedMoficationFactor()
 {
    SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneTypeNumber));
