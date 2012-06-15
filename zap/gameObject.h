@@ -120,6 +120,7 @@ bool isFlagCollideableType(U8 x);
 bool isFlagOrShipCollideableType(U8 x);
 bool isVisibleOnCmdrsMapType(U8 x);
 bool isVisibleOnCmdrsMapWithSensorType(U8 x);
+bool isZoneType(U8 x);
 
 bool isAnyObjectType(U8 x);
 // END GAME OBJECT TYPES
@@ -225,8 +226,8 @@ class BfObject : public DatabaseObject, public NetObject, public EditorObject, p
 
 public:
    enum IdleCallPath {
-      ServerIdleMainLoop,              // Idle called from top-level idle loop on server
-      ServerIdleControlFromClient,
+      ServerIdleMainLoop,              // On server, when called from top-level idle loop
+      ServerIdleControlFromClient,     // On server, when processing moves from the client
       ClientIdleMainRemote,            // On client, when object is not our control object
       ClientIdleControlMain,           // On client, when object is our control object
       ClientIdleControlReplay,

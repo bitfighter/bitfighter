@@ -79,10 +79,11 @@ bool isGrenadeType(U8 x)
          x == MineTypeNumber || x == SpyBugTypeNumber || x == BurstTypeNumber;
 }
 
-bool isWithHealthType(U8 x)
+// If we add something here that is not an Item, need to check where this is used to make sure everything is ok
+bool isWithHealthType(U8 x)      
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber           ||
          x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
          x == CoreTypeNumber;
 }
@@ -90,11 +91,12 @@ bool isWithHealthType(U8 x)
 bool isForceFieldDeactivatingType(U8 x)
 {
    return
-         x == MineTypeNumber         || x == SpyBugTypeNumber ||
+         x == MineTypeNumber         || x == SpyBugTypeNumber         ||
          x == FlagTypeNumber         || x == SoccerBallItemTypeNumber ||
-         x == ResourceItemTypeNumber || x == TestItemTypeNumber || x == AsteroidTypeNumber ||
-         x == EnergyItemTypeNumber   || x == RepairItemTypeNumber ||
-         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber;
+         x == ResourceItemTypeNumber || x == TestItemTypeNumber       ||
+         x == EnergyItemTypeNumber   || x == RepairItemTypeNumber     ||
+         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber      || 
+         x == AsteroidTypeNumber;
 }
 
 bool isDamageableType(U8 x)
@@ -211,7 +213,7 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber || x == CoreTypeNumber;
 }
 
-bool isVisibleOnCmdrsMapWithSensorType(U8 x)
+bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander's map for sensor
 {
    return
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == ResourceItemTypeNumber        ||
@@ -224,7 +226,15 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || 
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber     ||
          x == CoreTypeNumber       || x == BurstTypeNumber          ||
-         x == BulletTypeNumber     || x == MineTypeNumber;  // Weapons visible on commander's map for sensor
+         x == BulletTypeNumber     || x == MineTypeNumber; 
+}
+
+
+bool isZoneType(U8 x)      // Zones a ship could be in
+{
+   return 
+         x == NexusTypeNumber || x == GoalZoneTypeNumber || x == LoadoutZoneTypeNumber ||
+         x == ZoneTypeNumber  || x == SlipZoneTypeNumber; 
 }
 
 
