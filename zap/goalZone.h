@@ -57,6 +57,7 @@ protected:
 
 public:
    GoalZone();        // Constructor
+   ~GoalZone();
    GoalZone *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);

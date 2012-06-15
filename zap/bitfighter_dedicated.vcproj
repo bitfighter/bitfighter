@@ -966,6 +966,10 @@
 			RelativePath=".\zapjournal.h"
 			>
 		</File>
+		<File
+			RelativePath=".\Zone.cpp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

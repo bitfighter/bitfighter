@@ -79,6 +79,9 @@ public:
    U32 mTeleporterDelay;
 
    static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
+
+   static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
+
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
