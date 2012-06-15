@@ -216,20 +216,28 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
    if(mSelectedItem != -1 &&
          EngineerModuleDeployer::findDeployPoint(ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType, deployPosition, deployNormal))
    {
-      if(mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTurret ||
-            mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredForceField)
-      {
-         // Check deployment, so square will be green if allowed, red if not allowed, helps engineering
-         if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
-            glColor(Colors::green);
-         else
-            glColor(Colors::red);
+      bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
 
-         drawSquare(deployPosition, 5);
-      }
-      else if(mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleportEntrance)
+      switch(mEngineerCostructionItemInfos[mSelectedItem].mObjectType)
       {
-         renderTeleporterOutline(deployPosition, 75.f);
+         case EngineeredTurret:
+         case EngineeredForceField:
+            if(canDeploy)
+               glColor(Colors::green);
+            else
+               glColor(Colors::red);
+
+            drawSquare(deployPosition, 5);
+            break;
+
+         case EngineeredTeleportEntrance:
+         case EngineeredTeleportExit:
+            if(canDeploy)
+               renderTeleporterOutline(deployPosition, 75.f);
+            break;
+
+         default:
+            break;
       }
    }
 }
