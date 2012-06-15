@@ -46,6 +46,7 @@ namespace Zap
 class SpeedZone;
 class Statistics;
 class ClientInfo;
+class Teleporter;
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -225,6 +226,8 @@ public:
    bool isCarryingItem(U8 objectType);
    MoveItem *unmountItem(U8 objectType);
 
+   void setEngineeredTeleport(Teleporter *teleport);
+   Teleporter *getEngineeredTeleport();
    F32 getSensorActiveZoomFraction();
    F32 getSensorEquipZoomFraction();
    Point getAimVector();

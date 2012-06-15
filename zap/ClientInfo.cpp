@@ -281,38 +281,45 @@ LuaPlayerInfo *ClientInfo::getPlayerInfo()
 }
 
 
-// Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed. // TODO: Move this elsewhere
-bool ClientInfo::sEngineerDeployObject(U32 type)
+// Server only, robots can run this, bypassing the net interface. Return true if successfuly deployed.
+// TODO: Move this elsewhere   <--  where?...  anybody?
+bool ClientInfo::sEngineerDeployObject(U32 objectType)
 {
-   Ship *ship = dynamic_cast<Ship *>(getShip());
+   Ship *ship = getShip();
    if(!ship)                                          // Not a good sign...
       return false;                                   // ...bail
 
    GameType *gameType = ship->getGame()->getGameType();
 
    if(!gameType->isEngineerEnabled())          // Something fishy going on here...
-      return false;                                   // ...bail
+      return false;                            // ...bail
 
    EngineerModuleDeployer deployer;
 
-   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, type))
+   // Check if we can create the engineer object; if not, return false
+   if(!deployer.canCreateObjectAtLocation(ship->getGame()->getGameObjDatabase(), ship, objectType))
    {
       if(!isRobot())
          getConnection()->s2cDisplayErrorMessage(deployer.getErrorMessage().c_str());
+
+      return false;
    }
-   else if(deployer.deployEngineeredItem(ship->getClientInfo(), type))
+
+   // Now deploy the object
+   if(deployer.deployEngineeredItem(ship->getClientInfo(), objectType))
    {
       // Announce the build
       StringTableEntry msg( "%e0 has engineered a %e1." );
 
       Vector<StringTableEntry> e;
       e.push_back(getName());
-      switch(type)
+      switch(objectType)
       {
          case EngineeredTurret: e.push_back("turret"); break;
          case EngineeredForceField: e.push_back("force field"); break;
-         case EngineeredTeleport: e.push_back("teleport"); break;
-         default: e.push_back(""); break;
+         case EngineeredTeleportEntrance: e.push_back("teleport entrance"); break;
+         case EngineeredTeleportExit: e.push_back("teleport exit"); break;
+         default: e.push_back(""); break;   // Shouldn't occur
       }
 
       gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
@@ -320,7 +327,7 @@ bool ClientInfo::sEngineerDeployObject(U32 type)
       return true;
    }
 
-   // else... fail silently?
+   // Else... fail silently?
    return false;
 }
 

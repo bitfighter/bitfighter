@@ -45,6 +45,7 @@
 //#include "game.h"
 #include "shipItems.h"
 #include "ClientInfo.h"
+#include "teleporter.h"
 
 #ifdef TNL_OS_WIN32
 #include <windows.h>   // For ARRAYSIZE
@@ -195,6 +196,18 @@ void Ship::setDefaultLoadout()
 ClientInfo *Ship::getClientInfo()
 {
    return mClientInfo;
+}
+
+
+void Ship::setEngineeredTeleport(Teleporter *teleport)
+{
+   mEngineeredTeleport = teleport;
+}
+
+
+Teleporter *Ship::getEngineeredTeleport()
+{
+   return mEngineeredTeleport;
 }
 
 

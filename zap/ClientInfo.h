@@ -141,8 +141,8 @@ public:
 
    LuaPlayerInfo *getPlayerInfo();
 
-   bool sEngineerDeployObject(U32 type);      // Player using engineer module, robots use this, bypassing the net interface. True if successful.
-
+   // Player using engineer module, robots use this, bypassing the net interface. True if successful.
+   bool sEngineerDeployObject(U32 objectType);
 
    Nonce *getId();
 

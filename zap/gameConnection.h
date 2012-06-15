@@ -40,7 +40,7 @@
 
 #include "GameTypesEnum.h"
 #include "ServerGame.h"
-
+#include "Engineerable.h"
 
 
 using namespace TNL;
@@ -215,8 +215,8 @@ public:
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
    TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, ());
 
-
-   TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type));      // Player using engineer module
+   // Player using engineer module
+   TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> objectType));
 
    // Chage passwords on the server
    void changeParam(const char *param, ParamType type);

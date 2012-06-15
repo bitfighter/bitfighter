@@ -305,6 +305,8 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreRadius * 2))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
 
+   mPanelGeom.isValid = false;
+
    mKillString = "crashed into a core";    // TODO: Really needed?
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -998,6 +1000,11 @@ void CoreItem::onItemExploded(Point pos)
 
    // Start with an explosion at the center.  See idle() for other called explosions
    doExplosion(pos);
+}
+
+void CoreItem::onItemDragging()
+{
+      fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs() + getGame()->getGameType()->getRenderingOffset(), mPanelGeom);
 }
 #endif
 

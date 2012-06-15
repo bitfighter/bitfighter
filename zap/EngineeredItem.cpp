@@ -102,8 +102,7 @@ void Engineerable::setResource(MoveItem *resource)
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
 bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal)
 {
-   if(objectType == EngineeredTurret ||
-         objectType == EngineeredForceField)
+   if(objectType == EngineeredTurret || objectType == EngineeredForceField)
    {
          // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
          Point startPoint = ship->getActualPos();
@@ -124,7 +123,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &
          // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
          deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
    }
-   else if(objectType == EngineeredTeleport)
+   else if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
       deployPosition.set(ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS)));
 
    return true;
@@ -154,15 +153,16 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    if(mErrorMessage != "")
       return false;
 
-   // We can deploy a teleport anywhere for now
-   if(objectType == EngineeredTeleport)
-      return true;
-
    if(!findDeployPoint(ship, objectType, mDeployPosition, mDeployNormal))
    {
       mErrorMessage = "!!! Could not find a suitable wall for mounting the item";
       return false;
    }
+
+   // We can deploy a teleport entrance or exit anywhere for now...
+   // TODO:  limit exit to stay off walls?
+   if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
+      return true;
 
    Vector<Point> bounds;
 
@@ -373,7 +373,6 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    BfObject *deployedObject = NULL;
 
-   Point firePosition = ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS));
    switch(objectType)
    {
       case EngineeredTurret:
@@ -384,8 +383,18 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
          break;
 
-      case EngineeredTeleport:
-         deployedObject = new Teleporter(firePosition, firePosition);
+      case EngineeredTeleportEntrance:
+         deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
+         ship->setEngineeredTeleport(static_cast<Teleporter*>(deployedObject));
+         break;
+
+      case EngineeredTeleportExit:
+         if(ship->getEngineeredTeleport() && ship->getEngineeredTeleport()->needsEndpoint())
+            ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
+         else   // Something went wrong
+            return false;
+
+         return true;
          break;
 
       default:

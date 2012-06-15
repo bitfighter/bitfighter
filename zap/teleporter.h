@@ -106,6 +106,7 @@ public:
    void onConstructed();
 
    bool needsEndpoint();
+   void setEndpoint(const Point &point);
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();

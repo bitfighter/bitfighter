@@ -287,6 +287,21 @@ bool Teleporter::needsEndpoint()
 }
 
 
+void Teleporter::setEndpoint(const Point &point)
+{
+   if(mNeedsEndpoint)
+   {
+      mDests.clear();
+      mDests.push_back(point);
+      setVert(point, 1);
+
+      setMaskBits(ExitPointChangedMask);
+
+      mNeedsEndpoint = false;
+   }
+}
+
+
 void Teleporter::idle(BfObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
