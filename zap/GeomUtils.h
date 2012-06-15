@@ -111,6 +111,8 @@ Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthR
 
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
+Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle = 0);
+
 // TODO: Should we create a MathUtils class for this and other useful purely mathematic functions?
 bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 

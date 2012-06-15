@@ -91,6 +91,15 @@ bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &in
 #define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
 
+Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
+{
+   Vector<Point> outputPoly(sideCount);
+   for(F32 theta = 0; theta < FloatTau; theta += FloatTau / sideCount)
+      outputPoly.push_back(Point(center.x + cos(theta + angle) * radius, center.y + sin(theta + angle) * radius));
+
+   return outputPoly;
+}
+
 
 // From http://local.wasp.uwa.edu.au/~pbourke/geometry/insidepoly/
 // Should work on all polygons, convex and concave alike
