@@ -170,6 +170,7 @@ public:
 
 
    void onAddedToGame(Game *theGame);
+   void onItemDragging();
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

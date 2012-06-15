@@ -999,6 +999,11 @@ void CoreItem::onItemExploded(Point pos)
    // Start with an explosion at the center.  See idle() for other called explosions
    doExplosion(pos);
 }
+
+void CoreItem::onItemDragging()
+{
+      fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs() + getGame()->getGameType()->getRenderingOffset(), mPanelGeom);
+}
 #endif
 
 
