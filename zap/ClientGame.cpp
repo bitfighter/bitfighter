@@ -581,7 +581,6 @@ void ClientGame::idle(U32 timeDelta)
          if(fillVector2[i]->isDeleted())
             continue;
 
-         TNLAssert(dynamic_cast<BfObject *>(fillVector2[i]), "static_cast will fail here!");
          BfObject *obj = static_cast<BfObject *>(fillVector2[i]);
 
          if(obj == controlObject)
