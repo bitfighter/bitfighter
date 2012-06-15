@@ -153,16 +153,16 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    if(mErrorMessage != "")
       return false;
 
-   // We can deploy a teleport entrance or exit anywhere for now...
-   // TODO:  limit exit to stay off walls?
-   if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
-      return true;
-
    if(!findDeployPoint(ship, objectType, mDeployPosition, mDeployNormal))
    {
       mErrorMessage = "!!! Could not find a suitable wall for mounting the item";
       return false;
    }
+
+   // We can deploy a teleport entrance or exit anywhere for now...
+   // TODO:  limit exit to stay off walls?
+   if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
+      return true;
 
    Vector<Point> bounds;
 
@@ -373,7 +373,6 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    BfObject *deployedObject = NULL;
 
-   Point firePosition = ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS));
    switch(objectType)
    {
       case EngineeredTurret:
@@ -385,7 +384,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          break;
 
       case EngineeredTeleportEntrance:
-         deployedObject = new Teleporter(firePosition, firePosition);
+         deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
          break;
 
       case EngineeredTeleportExit:
