@@ -400,6 +400,13 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, LuaPlaye
 }
 
 
+// onShipEnteredZone, onShipLeftZone
+void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
+{
+
+}
+
+
 void EventManager::handleEventFiringError(lua_State *L, const char *subscriber, EventType eventType, const char *errorMsg)
 {
    // Figure out which, if any, bot caused the error

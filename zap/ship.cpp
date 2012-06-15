@@ -770,11 +770,11 @@ void Ship::checkForZones()
    // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
    for(S32 i = 0; i < currZoneList->size(); i++)
       if(!prevZoneList->contains(currZoneList->get(i)))
-         logprintf("Entered zone!");
+         EventManager::get()->fireEvent(EventManager::ShipEnteredZoneEvent, this, static_cast<Zone *>(currZoneList->get(i)));
 
    for(S32 i = 0; i < prevZoneList->size(); i++)
-     if(!currZoneList->contains(prevZoneList->get(i)))
-         logprintf("Left zone!");
+      if(!currZoneList->contains(prevZoneList->get(i)))
+         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(prevZoneList->get(i)));
 }
 
 

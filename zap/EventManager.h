@@ -38,7 +38,7 @@ namespace Zap
 class Robot;
 class Ship;
 class LuaPlayerInfo;
-
+class Zone;
 
 class EventManager
 {
@@ -53,6 +53,8 @@ public:
       MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
       NexusOpenedEvent,       // () --> Nexus opened (nexus games only)
       NexusClosedEvent,       // () --> Nexus closed (nexus games only)
+      ShipEnteredZoneEvent,   // (ship, zone)
+      ShipLeftZoneEvent,      // (ship, zone)
       EventTypes
    };
 
@@ -97,6 +99,7 @@ public:
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
    void fireEvent(const char *callerId, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
    void fireEvent(const char *callerId, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
+   void fireEvent(EventType eventType, Ship *ship, Zone *zone);      // ShipEnteredZoneEvent, ShipLeftZoneEvent
 
    // Allow the pausing of event firing for debugging purposes
    void setPaused(bool isPaused);

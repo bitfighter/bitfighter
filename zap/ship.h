@@ -61,6 +61,8 @@ private:
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
 
+   SafePtr<Teleporter> mEngineeredTeleport;
+
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(U8 typeNumber);
 
