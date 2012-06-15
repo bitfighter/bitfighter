@@ -1018,7 +1018,6 @@ REGISTER_LUA_SUBCLASS(CoreItem, Item);
 
 const char *CoreItem::luaClassName = "CoreItem";
 
-// Standard methods available to all Items
 const luaL_reg CoreItem::luaMethods[] =
 {
    { "getHealth", luaW_doMethod<CoreItem, &CoreItem::getHealth> },
