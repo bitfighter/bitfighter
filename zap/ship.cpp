@@ -120,6 +120,8 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    else
       hasExploded = false;    // Client needs this false for unpackUpdate
 
+   mZones1IsCurrent = true;
+
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
@@ -372,26 +374,12 @@ void Ship::findObjectsUnderShip(U8 type)
 // Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
 BfObject *Ship::isInZone(U8 zoneTypeNumber)
 {
-   findObjectsUnderShip(zoneTypeNumber);
+   Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
 
-   if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
-      return NULL;
+   for(S32 i = 0; i < currZoneList->size(); i++)
+      if(currZoneList->get(i)->getObjectTypeNumber() == zoneTypeNumber)
+         return static_cast<BfObject *>(currZoneList->get(i));
 
-   // Extents overlap...  now check for actual overlap
-
-   Vector<Point> polyPoints;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      BfObject *zone = dynamic_cast<BfObject *>(fillVector[i]);
-
-      // Get points that define the zone boundaries
-      polyPoints.clear();
-      zone->getCollisionPoly(polyPoints);
-
-      if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
-         return zone;
-   }
    return NULL;
 }
 
@@ -415,6 +403,7 @@ DatabaseObject *Ship::isOnObject(U8 objectType)
    for(S32 i = 0; i < fillVector.size(); i++)
       if(isOnObject(dynamic_cast<BfObject *>(fillVector[i])))
          return fillVector[i];
+
    return NULL;
 }
 
@@ -603,13 +592,10 @@ void Ship::idle(BfObject::IdleCallPath path)
       // object with the current move.
       processMove(ActualState);
 
-      // When not moving, Detect if on a GoFast - seems better to always detect...
-      //if(getActualVel() =f= Point(0,0))
-      {
-         SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
-         if(speedZone && speedZone->collide(this))
-            speedZone->collided(this, ActualState);
-      }
+      checkForSpeedzones();
+
+      if(path == BfObject::ServerIdleControlFromClient)
+         checkForZones();
 
 
       if(path == BfObject::ServerIdleControlFromClient ||
@@ -679,13 +665,15 @@ void Ship::idle(BfObject::IdleCallPath path)
    // Update the object in the game's extents database
    updateExtentInDatabase();
 
-   // If this is a move executing on the server and it's
-   // different from the last move, then mark the move to
-   // be updated to the ghosts.
+   // If this is a move executing on the server and it's different from the last move,
+   // then mark the move to be updated to the ghosts
    if(path == BfObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
       setMaskBits(MoveMask);
 
    mLastMove = mCurrentMove;
+
+   if(isModulePrimaryActive(ModuleRepair))
+      findRepairTargets();
 
    if(path == BfObject::ServerIdleControlFromClient ||
       path == BfObject::ClientIdleControlMain ||
@@ -696,19 +684,12 @@ void Ship::idle(BfObject::IdleCallPath path)
       processWeaponFire();
       processModules();
    }
-     
-   if(path == BfObject::ClientIdleMainRemote)
-   {
-      // For ghosts, find some repair targets for rendering the repair effect
-      if(isModulePrimaryActive(ModuleRepair))
-         findRepairTargets();
-   }
+    
    if(path == BfObject::ServerIdleControlFromClient && isModulePrimaryActive(ModuleRepair))
       repairTargets();
 
 #ifndef ZAP_DEDICATED
-   if(path == BfObject::ClientIdleControlMain ||
-      path == BfObject::ClientIdleMainRemote)
+   if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
    {
       mWarpInTimer.update(mCurrentMove.time);
 
@@ -716,17 +697,81 @@ void Ship::idle(BfObject::IdleCallPath path)
       emitMovementSparks();
       for(U32 i = 0; i < TrailCount; i++)
          mTrail[i].idle(mCurrentMove.time);
+
       updateModuleSounds();
    }
 #endif
 }
 
 
+void Ship::checkForSpeedzones()
+{
+   SpeedZone *speedZone = static_cast<SpeedZone *>(isOnObject(SpeedZoneTypeNumber));
+
+   if(speedZone && speedZone->collide(this))
+      speedZone->collided(this, ActualState);
+}
+
+
+// Get list of zones ship is currently in
+ Vector<DatabaseObject *> *Ship::getCurrZoneList()
+ {
+    return mZones1IsCurrent ? &mZones1 : &mZones2;
+ }
+
+
+ // Get list of zones ship was in last tick
+ Vector<DatabaseObject *> *Ship::getPrevZoneList()
+ {
+    return mZones1IsCurrent ? &mZones2 : &mZones1;
+ }
+ 
+
+void Ship::checkForZones()
+{
+   Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
+   Vector<DatabaseObject *> *prevZoneList = getPrevZoneList();
+
+   // Use this boolean as a cheap way of making the current zone list be the previous out without copying
+   mZones1IsCurrent = !mZones1IsCurrent;     
+
+   currZoneList->clear();
+
+   Rect rect(getActualPos(), getActualPos());            // Center of ship
+
+   fillVector.clear();                             
+   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
+
+   // Extents overlap...  now check for actual overlap
+   Vector<Point> polyPoints;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Get points that define the zone boundaries
+      fillVector[i]->getCollisionPoly(polyPoints);
+
+      if(PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()))
+         currZoneList->push_back(fillVector[i]);
+   }
+
+   // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
+   for(S32 i = 0; i < currZoneList->size(); i++)
+      if(!prevZoneList->contains(currZoneList->get(i)))
+         logprintf("Entered zone!");
+
+   for(S32 i = 0; i < prevZoneList->size(); i++)
+     if(!currZoneList->contains(prevZoneList->get(i)))
+         logprintf("Left zone!");
+}
+
+
 static Vector<DatabaseObject *> foundObjects;
 
 // Returns true if we found a suitable target
-bool Ship::findRepairTargets()
+void Ship::findRepairTargets()
 {
+   mRepairTargets.clear();
+
    // We use the render position in findRepairTargets so that
    // ships that are moving can repair each other (server) and
    // so that ships don't render funny repair lines to interpolating
@@ -736,16 +781,13 @@ bool Ship::findRepairTargets()
    Rect r(pos, 2 * (RepairRadius + CollisionRadius));
    
    foundObjects.clear();
-   findObjects((TestFunc)isWithHealthType, foundObjects, r);
+   findObjects((TestFunc)isWithHealthType, foundObjects, r);   // All isWithHealthType objects are items
 
-   mRepairTargets.clear();
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Item *item = dynamic_cast<Item*>(foundObjects[i]);
+      TNLAssert(dynamic_cast<Item *>(foundObjects[i]), "Expected to find an item!");      
 
-      // Have to have an item to get a radius
-      if(!item)
-         continue;
+      Item *item = static_cast<Item *>(foundObjects[i]);
 
       // Don't repair dead or fully healed objects...
       if(item->isDestroyed() || item->getHealth() >= 1)
@@ -765,7 +807,6 @@ bool Ship::findRepairTargets()
 
       mRepairTargets.push_back(item);
    }
-   return mRepairTargets.size() != 0;
 }
 
 
@@ -774,7 +815,7 @@ void Ship::repairTargets()
 {
    F32 totalRepair = RepairHundredthsPerSecond * 0.01f * mCurrentMove.time * 0.001f;
 
-//   totalRepair /= mRepairTargets.size();
+//   totalRepair /= mRepairTargets.size();      // Divide repair amongst repair targets... makes repair too weak
 
    DamageInfo di;
    di.damageAmount = -totalRepair;
@@ -837,8 +878,8 @@ void Ship::processModules()
       mModuleSecondaryActive[ModuleBoost] = false;
    }
 
-   // No repair with no targets
-   if(mModulePrimaryActive[ModuleRepair] && !findRepairTargets())
+   // If there are no repair targets, turn off repair
+   if(mRepairTargets.size() == 0)
       mModulePrimaryActive[ModuleRepair] = false;
 
    // No cloak with nearby sensored people
@@ -1165,6 +1206,7 @@ void Ship::computeMaxFireDelay()
    }
 }
 
+
 const U32 negativeFireDelay = 123;  // how far into negative we are allowed to send.
 // MaxFireDelay + negativeFireDelay, 900 + 123 = 1023, so writeRangedU32 are sending full range of 10 bits of information.
 
@@ -1183,6 +1225,7 @@ void Ship::writeControlState(BitStream *stream)
       stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
    stream->writeRangedU32(mActiveWeaponIndx, 0, WeaponCount);
 }
+
 
 void Ship::readControlState(BitStream *stream)
 {
@@ -1500,6 +1543,7 @@ F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSk
 
    return value;
 }
+
 
 static F32 getAngleDiff(F32 a, F32 b)
 {
