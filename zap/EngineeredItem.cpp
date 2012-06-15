@@ -160,34 +160,40 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    }
 
    // We can deploy a teleport entrance or exit anywhere for now...
-   // TODO:  limit exit to stay off walls?
-   if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
+   if(objectType == EngineeredTeleportEntrance)
       return true;
 
    Vector<Point> bounds;
+   bool goodDeploymentPosition = false;
 
    // Seems inefficient to construct these just for the purpose of bounds checking...
    switch(objectType)
    {
       case EngineeredTurret:
          Turret::getTurretGeometry(mDeployPosition, mDeployNormal, bounds);   
+         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
       case EngineeredForceField:
          ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal, bounds);
+         goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
+         break;
+      case EngineeredTeleportExit:
+         bounds = createPolygon(mDeployPosition, Teleporter::TELEPORTER_RADIUS, 14);
+         goodDeploymentPosition = Teleporter::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
       default:    // will never happen
          TNLAssert(false, "Bad objectType");
          return false;
    }
 
-   if(!EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase))
+   if(!goodDeploymentPosition)
    {
       mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
    }
 
-   // If this is a turret, then this location is good; we're done
-   if(objectType == EngineeredTurret)
+   // If this is anything but a forcefield, then we're good to go!
+   if(objectType != EngineeredForceField)
       return true;
 
 

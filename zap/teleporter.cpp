@@ -185,6 +185,27 @@ string Teleporter::toString(F32 gridSize) const
 }
 
 
+bool Teleporter::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
+{
+   Rect queryRect(thisBounds);
+
+   gb->findObjects((TestFunc) isWallType, foundObjects, queryRect);
+
+   Vector<Point> foundObjectBounds;
+   for(S32 i = 0; i < foundObjects.size(); i++)
+   {
+      foundObjectBounds.clear();
+      static_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
+
+      // If they intersect, then bad deployment position
+      if(polygonsIntersect(thisBounds, foundObjectBounds))
+         return false;
+   }
+
+   return true;
+}
+
+
 U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitMask))
