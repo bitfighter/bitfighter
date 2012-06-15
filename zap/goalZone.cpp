@@ -43,8 +43,13 @@ GoalZone::GoalZone()
    mFlashCount = 0;
    mHasFlag = false;
    mScore = 1;    // For now...
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
  
+GoalZone::~GoalZone()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
 
 GoalZone *GoalZone::clone() const
 {
