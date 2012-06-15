@@ -295,7 +295,7 @@ void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fill
             DatabaseObject *theObject = walk->theObject;
 
             if(theObject->mLastQueryId != mQueryId &&                      // Object hasn't been queried; and
-               (testFunc(theObject->getObjectTypeNumber())) &&         // is of the right type; and
+               (testFunc(theObject->getObjectTypeNumber())) &&             // is of the right type; and
                (!extents || theObject->mExtent.intersects(*extents)) )     // overlaps our extents (if passed)
             {
                walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
