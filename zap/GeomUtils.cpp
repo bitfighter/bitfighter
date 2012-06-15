@@ -179,7 +179,6 @@ bool pointInTriangle(const Point &p, const Point &a, const Point &b, const Point
 }
 
 
-
 // Return true out if point is in polygon given a triangulated fill
 bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const Point &point)
 {
