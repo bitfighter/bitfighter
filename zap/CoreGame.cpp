@@ -729,8 +729,8 @@ void CoreItem::idle(BfObject::IdleCallPath path)
          setMaskBits(ItemChangedMask);
    }
 
-   // Only run the following on the client
 #ifndef ZAP_DEDICATED
+   // Only run the following on the client
    if(path != BfObject::ClientIdleMainRemote)
       return;
 
