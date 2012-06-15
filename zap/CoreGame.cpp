@@ -305,6 +305,8 @@ CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreRadius * 2))
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
 
+   mPanelGeom.isValid = false;
+
    mKillString = "crashed into a core";    // TODO: Really needed?
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
