@@ -583,7 +583,7 @@ void Robot::idle(BfObject::IdleCallPath path)
    {
       U32 deltaT = mCurrentMove.time;
 
-      TNLAssert(deltaT != 0, "Time should never be zero!")     
+      TNLAssert(deltaT != 0, "Time should never be zero!");    
 
       tickTimer(deltaT);
 
