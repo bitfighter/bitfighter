@@ -96,6 +96,8 @@ public:
    void deleteAndErase_fast(U32 index);
    void clear();
    void deleteAndClear();
+   bool contains(const T&);
+
 
    T& first();
    T& last();
@@ -252,6 +254,16 @@ template<class T> inline void Vector<T>::deleteAndClear()
 
    innerVector.clear();
 }
+
+template<class T> inline bool Vector<T>::contains(const T &object)
+{
+   for(U32 i = 0; i < innerVector.size(); i++)
+      if(object == innerVector[i])
+         return true;
+
+   return false;
+}
+
 
 template<class T> inline Vector<T>& Vector<T>::operator=(const Vector<T>& p)
 {
