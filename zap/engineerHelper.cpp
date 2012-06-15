@@ -66,6 +66,7 @@ EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleportEntrance, "Teleport", KEY_3, BUTTON_3));
+   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleportExit, "TeleportExit", KEY_4, BUTTON_4));  // TODO:  remove after testing
 }
 
 

@@ -385,10 +385,15 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
       case EngineeredTeleportEntrance:
          deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
+         ship->setEngineeredTeleport(static_cast<Teleporter*>(deployedObject));
          break;
 
       case EngineeredTeleportExit:
-         // TODO: grab previously made teleport entrance and set the exit elsewhere
+         if(ship->getEngineeredTeleport() && ship->getEngineeredTeleport()->needsEndpoint())
+            ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
+         else   // Something went wrong
+            return false;
+
          return true;
          break;
 

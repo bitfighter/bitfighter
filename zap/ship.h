@@ -46,6 +46,7 @@ namespace Zap
 class SpeedZone;
 class Statistics;
 class ClientInfo;
+class Teleporter;
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -59,6 +60,8 @@ private:
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(U8 typeNumber);
+
+   SafePtr<Teleporter> mEngineeredTeleport;
 
 protected:
    SafePtr <ClientInfo> mClientInfo;
@@ -214,6 +217,9 @@ public:
 
    bool isCarryingItem(U8 objectType);
    MoveItem *unmountItem(U8 objectType);
+
+   void setEngineeredTeleport(Teleporter *teleport);
+   Teleporter *getEngineeredTeleport();
 
    F32 getSensorActiveZoomFraction();
    F32 getSensorEquipZoomFraction();

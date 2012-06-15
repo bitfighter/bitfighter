@@ -293,7 +293,11 @@ void Teleporter::setEndpoint(const Point &point)
    {
       mDests.clear();
       mDests.push_back(point);
+      setVert(point, 1);
+
       setMaskBits(ExitPointChangedMask);
+
+      mNeedsEndpoint = false;
    }
 }
 
