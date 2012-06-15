@@ -102,8 +102,7 @@ void Engineerable::setResource(MoveItem *resource)
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
 bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &deployPosition, Point &deployNormal)
 {
-   if(objectType == EngineeredTurret ||
-         objectType == EngineeredForceField)
+   if(objectType == EngineeredTurret || objectType == EngineeredForceField)
    {
          // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
          Point startPoint = ship->getActualPos();
@@ -124,7 +123,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &
          // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
          deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
    }
-   else if(objectType == EngineeredTeleport)
+   else if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
       deployPosition.set(ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS)));
 
    return true;
@@ -154,8 +153,9 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    if(mErrorMessage != "")
       return false;
 
-   // We can deploy a teleport anywhere for now
-   if(objectType == EngineeredTeleport)
+   // We can deploy a teleport entrance or exit anywhere for now...
+   // TODO:  limit exit to stay off walls?
+   if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
       return true;
 
    if(!findDeployPoint(ship, objectType, mDeployPosition, mDeployNormal))
@@ -384,8 +384,13 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
          break;
 
-      case EngineeredTeleport:
+      case EngineeredTeleportEntrance:
          deployedObject = new Teleporter(firePosition, firePosition);
+         break;
+
+      case EngineeredTeleportExit:
+         // TODO: grab previously made teleport entrance and set the exit elsewhere
+         return true;
          break;
 
       default:

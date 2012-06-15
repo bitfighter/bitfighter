@@ -48,16 +48,6 @@ enum ShipModule
 };
 
 
-// Things you can build with Engineer 
-enum EngineerBuildObjects
-{
-   EngineeredTurret,
-   EngineeredForceField,
-   EngineeredTeleport,
-   EngineeredItemCount
-};
-
-
 enum ModulePrimaryUseType
 {
    ModulePrimaryUseActive,     // Only functional when active

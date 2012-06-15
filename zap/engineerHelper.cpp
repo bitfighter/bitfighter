@@ -65,7 +65,7 @@ EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
 {
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
-   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleport, "Teleport", KEY_3, BUTTON_3));
+   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleportEntrance, "Teleport", KEY_3, BUTTON_3));
 }
 
 
@@ -226,7 +226,7 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
 
          drawSquare(deployPosition, 5);
       }
-      else if(mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleport)
+      else if(mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleportEntrance)
       {
          renderTeleporterOutline(deployPosition, 75.f);
       }

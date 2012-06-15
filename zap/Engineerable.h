@@ -34,6 +34,25 @@ namespace Zap
 // Forward declaraions
 class MoveItem;
 
+// Things you can build with Engineer
+enum EngineerBuildObjects
+{
+   EngineeredTurret,
+   EngineeredForceField,
+   EngineeredTeleportEntrance,
+   EngineeredTeleportExit,
+   EngineeredItemCount
+};
+
+// These are events used with engineering an object over the client/server protocols
+enum EngineerResponseEvents {
+   EngineerEventTurretBuilt,
+   EngineerEventForceFieldBuilt,
+   EngineerEventTeleportEntranceBuilt,
+   EngineerEventTeleportExitBuilt,
+   EngineerEventCount
+};
+
 // This class is sort of an interface for engineer-specific members and methods
 class Engineerable
 {

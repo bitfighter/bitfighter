@@ -446,10 +446,10 @@ void GameConnection::changeParam(const char *param, ParamType type)
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> type), (type), 
+TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> objectType), (objectType),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   getClientInfo()->sEngineerDeployObject(type);
+   mClientInfo->sEngineerDeployObject(objectType);
 }
 
 
