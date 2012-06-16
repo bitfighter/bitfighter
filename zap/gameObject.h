@@ -49,55 +49,64 @@ class Game;
 class ClientInfo;
 
 
-// START GAME OBJECT TYPES
-// Can have 256 types designated from 0-255
+// We're limited to 255 values in this table, as type number is commonly passed as a U8.
+// We don't need to make all these values available to scripts; set the 2nd value to false for
+// those values that we don't want to share.
+//
+//                                         Make available      
+//                   Enum                   to scripts?        Available to scripts as:  
+#define TYPE_NUMBER_TABLE \
+   TYPE_NUMBER( BarrierTypeNumber,             true,              "BarrierType"             ) \
+   TYPE_NUMBER( PlayerShipTypeNumber,          true,              "ShipType"                ) \
+   TYPE_NUMBER( LineTypeNumber,                true,              "LineType"                ) \
+   TYPE_NUMBER( ResourceItemTypeNumber,        true,              "ResourceItemType"        ) \
+   TYPE_NUMBER( TextItemTypeNumber,            true,              "TextItemType"            ) \
+   TYPE_NUMBER( LoadoutZoneTypeNumber,         true,              "LoadoutZoneType"         ) \
+   TYPE_NUMBER( TestItemTypeNumber,            true,              "TestItemType"            ) \
+   TYPE_NUMBER( FlagTypeNumber,                true,              "FlagType"                ) \
+   TYPE_NUMBER( BulletTypeNumber,              true,              "BulletType"              ) \
+   TYPE_NUMBER( BurstTypeNumber,               true,              "BurstType"               ) \
+   TYPE_NUMBER( MineTypeNumber,                true,              "MineType"                ) \
+   TYPE_NUMBER( NexusTypeNumber,               true,              "NexusType"               ) \
+   TYPE_NUMBER( BotNavMeshZoneTypeNumber,      true,              "BotNavMeshZoneType"      ) \
+   TYPE_NUMBER( RobotShipTypeNumber,           true,              "RobotType"               ) \
+   TYPE_NUMBER( TeleportTypeNumber,            true,              "TeleportType"            ) \
+   TYPE_NUMBER( GoalZoneTypeNumber,            true,              "GoalZoneType"            ) \
+   TYPE_NUMBER( AsteroidTypeNumber,            true,              "AsteroidType"            ) \
+   TYPE_NUMBER( RepairItemTypeNumber,          true,              "RepairItemType"          ) \
+   TYPE_NUMBER( EnergyItemTypeNumber,          true,              "EnergyItemType"          ) \
+   TYPE_NUMBER( SoccerBallItemTypeNumber,      true,              "SoccerBallItemType"      ) \
+   TYPE_NUMBER( WormTypeNumber,                true,              "WormType"                ) \
+   TYPE_NUMBER( TurretTypeNumber,              true,              "TurretType"              ) \
+   TYPE_NUMBER( ForceFieldTypeNumber,          true,              "ForceFieldType"          ) \
+   TYPE_NUMBER( ForceFieldProjectorTypeNumber, true,              "ForceFieldProjectorType" ) \
+   TYPE_NUMBER( SpeedZoneTypeNumber,           true,              "SpeedZoneType"           ) \
+   TYPE_NUMBER( PolyWallTypeNumber,            true,              "PolyWallType"            ) \
+   TYPE_NUMBER( ShipSpawnTypeNumber,           true,              "ShipSpawnType"           ) \
+   TYPE_NUMBER( FlagSpawnTypeNumber,           true,              "FlagSpawnType"           ) \
+   TYPE_NUMBER( AsteroidSpawnTypeNumber,       true,              "AsteroidSpawnType"       ) \
+   TYPE_NUMBER( CircleSpawnTypeNumber,         true,              "CircleSpawnType"         ) \
+   TYPE_NUMBER( WallItemTypeNumber,            true,              "WallItemType"            ) \
+   TYPE_NUMBER( WallEdgeTypeNumber,            true,              "WallEdgeType"            ) \
+   TYPE_NUMBER( WallSegmentTypeNumber,         true,              "WallSegmentType"         ) \
+   TYPE_NUMBER( SlipZoneTypeNumber,            true,              "SlipZoneType"            ) \
+   TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBugType"              ) \
+   TYPE_NUMBER( CoreTypeNumber,                true,              "CoreType"                ) \
+   TYPE_NUMBER( ZoneTypeNumber,                true,              "ZoneType"                ) \
+   TYPE_NUMBER( CircleTypeNumber,              true,              "CircleType"              ) \
+   TYPE_NUMBER( TeleportExitTypeNumber,        true,              "TeleportExitType"        ) \
+   TYPE_NUMBER( DeletedTypeNumber,             false,             "DeletedType"             ) \
+   TYPE_NUMBER( UnknownTypeNumber,             false,             "UnknownType"             ) \
 
-const U8 UnknownTypeNumber = 0;
-const U8 PlayerShipTypeNumber = 1;
-const U8 BarrierTypeNumber = 2;  // Barrier is different than PolyWall!!
-const U8 ZoneTypeNumber = 3;
-const U8 LineTypeNumber = 4;
-const U8 ResourceItemTypeNumber = 5;
-const U8 TextItemTypeNumber = 6;
-const U8 ForceFieldTypeNumber = 7;
-const U8 LoadoutZoneTypeNumber = 8;
-const U8 TestItemTypeNumber = 9;
-const U8 FlagTypeNumber = 10;
-const U8 SpeedZoneTypeNumber = 11;
-const U8 SlipZoneTypeNumber = 12;
-const U8 BulletTypeNumber = 13;
-const U8 MineTypeNumber = 14;
-const U8 SpyBugTypeNumber = 15;
-const U8 BurstTypeNumber = 16;
-const U8 NexusTypeNumber = 17;
-const U8 RobotShipTypeNumber = 18;
-const U8 TeleportTypeNumber = 19;
-const U8 GoalZoneTypeNumber = 20;
-const U8 AsteroidTypeNumber = 21;
-const U8 RepairItemTypeNumber = 22;
-const U8 EnergyItemTypeNumber = 23;
-const U8 SoccerBallItemTypeNumber = 24;
-const U8 WormTypeNumber = 25;
-const U8 TurretTypeNumber = 26;
-const U8 ForceFieldProjectorTypeNumber = 27;
-const U8 PolyWallTypeNumber = 28;
-const U8 CircleTypeNumber = 29;
-const U8 CoreTypeNumber = 30;
-const U8 TeleportExitTypeNumber = 31;
 
-const U8 BotNavMeshZoneTypeNumber = 64;  // separate database
+// Define an enum from the first values in TYPE_NUMBER_TABLE
+enum TypeNumber {
+#define TYPE_NUMBER(a, b, c) a,
+    TYPE_NUMBER_TABLE
+#undef TYPE_NUMBER
+    TypesNumbers
+};
 
-// These are probably used only in editor...
-const U8 WallItemTypeNumber = 66;
-const U8 WallEdgeTypeNumber = 67;
-const U8 WallSegmentTypeNumber = 68;
-const U8 ShipSpawnTypeNumber = 69;
-const U8 FlagSpawnTypeNumber = 70;
-const U8 AsteroidSpawnTypeNumber = 71;
-const U8 CircleSpawnTypeNumber = 72;
-
-const U8 DeletedTypeNumber = 252;
-// 255
 
 // Derived Types are determined by function
 bool isEngineeredType(U8 x);

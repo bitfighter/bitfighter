@@ -1123,48 +1123,20 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 }
 
 
-#define setEnumName(number, name) { lua_pushinteger(L, number);             lua_setglobal(L, name); }
 #define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
 #define setGTEnum(name)           { lua_pushinteger(L, GameType::name);     lua_setglobal(L, #name); }
 
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
 {
-   setEnumName(BarrierTypeNumber, "BarrierType");
-   setEnumName(PlayerShipTypeNumber, "ShipType");
-   setEnumName(LineTypeNumber, "LineType");
-   setEnumName(ResourceItemTypeNumber, "ResourceItemType");
-   setEnumName(TextItemTypeNumber, "TextItemType");
-   setEnumName(LoadoutZoneTypeNumber, "LoadoutZoneType");
-   setEnumName(TestItemTypeNumber, "TestItemType");
-   setEnumName(FlagTypeNumber, "FlagType");
-   setEnumName(BulletTypeNumber, "BulletType");
-   setEnumName(BurstTypeNumber, "BurstType");
-   setEnumName(MineTypeNumber, "MineType");
-   setEnumName(NexusTypeNumber, "NexusType");
-   setEnumName(BotNavMeshZoneTypeNumber, "BotNavMeshZoneType");
-   setEnumName(RobotShipTypeNumber, "RobotType");
-   setEnumName(TeleportTypeNumber, "TeleportType");
-   setEnumName(GoalZoneTypeNumber, "GoalZoneType");
-   setEnumName(AsteroidTypeNumber, "AsteroidType");
-   setEnumName(RepairItemTypeNumber, "RepairItemType");
-   setEnumName(EnergyItemTypeNumber, "EnergyItemType");
-   setEnumName(SoccerBallItemTypeNumber, "SoccerBallItemType");
-   setEnumName(WormTypeNumber, "WormType");
-   setEnumName(TurretTypeNumber, "TurretType");
-   setEnumName(ForceFieldTypeNumber, "ForceFieldType");
-   setEnumName(ForceFieldProjectorTypeNumber, "ForceFieldProjectorType");
-   setEnumName(SpeedZoneTypeNumber, "SpeedZoneType");
-   setEnumName(PolyWallTypeNumber, "PolyWallType");            // a little unsure about this one         
-   setEnumName(ShipSpawnTypeNumber, "ShipSpawnType");
-   setEnumName(FlagSpawnTypeNumber, "FlagSpawnType");
-   setEnumName(AsteroidSpawnTypeNumber, "AsteroidSpawnType");
-   setEnumName(WallItemTypeNumber, "WallItemType");            // a little unsure about this one
-   setEnumName(WallEdgeTypeNumber, "WallEdgeType");            // not at all sure about this one
-   setEnumName(WallSegmentTypeNumber, "WallSegmentType");      // not at all sure about this one
-   setEnumName(SlipZoneTypeNumber, "SlipZoneType");
-   setEnumName(SpyBugTypeNumber, "SpyBugType");
-   setEnumName(CoreTypeNumber, "CoreType");
+#define TYPE_NUMBER(a, b, c) \
+   if(b)  {                  \
+      lua_pushinteger(L, a); \
+      lua_setglobal(L, c);   \
+   }
+    TYPE_NUMBER_TABLE
+#undef TYPE_NUMBER
+
 
    // Modules
    setEnum(ModuleShield);
