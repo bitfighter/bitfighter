@@ -26,6 +26,8 @@
 #ifndef _EVENT_MANAGER_H_
 #define _EVENT_MANAGER_H_
 
+#pragma warning (disable: 4003)     // Suppress annoying macro expansion warning
+
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "lua.h"
@@ -59,7 +61,7 @@ public:
    //};
 
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
-
+//          Enum                 Name               Lua event handler 
 #define EVENT_TABLE \
    EVENT(TickEvent,             "Tick",            "onTick"            ) \
    EVENT(ShipSpawnedEvent,      "ShipSpawned",     "onShipSpawned"     ) \
