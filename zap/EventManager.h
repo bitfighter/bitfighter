@@ -70,7 +70,7 @@ public:
    EVENT(PlayerLeftEvent,       "PlayerLeft",      "onPlayerLeft"      ) \
    EVENT(MsgReceivedEvent,      "MsgReceived",     "onMsgReceived"     ) \
    EVENT(NexusOpenedEvent,      "NexusOpened",     "onNexusOpened"     ) \
-   EVENT(NexusClosedEvent,      "NexusClosed"      "onNexusClosed"     ) \
+   EVENT(NexusClosedEvent,      "NexusClosed",     "onNexusClosed"     ) \
    EVENT(ShipEnteredZoneEvent,  "ShipEnteredZone", "onShipEnteredZone" ) \
    EVENT(ShipLeftZoneEvent,     "ShipLeftZone",    "onShipLeftZone"    ) \
 
