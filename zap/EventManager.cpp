@@ -56,23 +56,10 @@ struct EventDef {
    const char *function;
 };
 
-// Need to keep synced with EventTypes in header
-//static const EventDef eventDefs[] = {
-//   // Name              // Lua event handler
-//   { "Tick",            "onTick"            },
-//   { "ShipSpawned",     "onShipSpawned"     },
-//   { "ShipKilled",      "onShipKilled"      },
-//   { "PlayerJoined",    "onPlayerJoined"    },
-//   { "PlayerLeft",      "onPlayerLeft"      },
-//   { "MsgReceived",     "onMsgReceived"     },
-//   { "NexusOpened",     "onNexusOpened"     },
-//   { "NexusClosed"      "onNexusClosed"     },
-//   { "ShipEnteredZone", "onShipEnteredZone" },
-//   { "ShipLeftZone",    "onShipLeftZone"    },
-//};
-//
 
 static const EventDef eventDefs[] = {
+   // The following expands to a series of lines like this, based on values in EVENT_TABLE
+   //   { "Tick",  "onTick"  },
 #define EVENT(a, b, c) { b, c },
    EVENT_TABLE
 #undef EVENT

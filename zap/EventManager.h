@@ -26,8 +26,6 @@
 #ifndef _EVENT_MANAGER_H_
 #define _EVENT_MANAGER_H_
 
-#pragma warning (disable: 4003)     // Suppress annoying macro expansion warning
-
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "lua.h"
@@ -44,22 +42,6 @@ class Zone;
 
 class EventManager
 {
-public:
-   // Note: Need to keep synced with eventDefs in .cpp!
-   //enum EventType {
-   //   TickEvent = 0,          // (time) --> Standard game tick event
-   //   ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
-   //   ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
-   //   PlayerJoinedEvent,      // (playerInfo) --> Player joined game
-   //   PlayerLeftEvent,        // (playerInfo) --> Player left game
-   //   MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
-   //   NexusOpenedEvent,       // () --> Nexus opened (nexus games only)
-   //   NexusClosedEvent,       // () --> Nexus closed (nexus games only)
-   //   ShipEnteredZoneEvent,   // (ship, zone)
-   //   ShipLeftZoneEvent,      // (ship, zone)
-   //   EventTypes
-   //};
-
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
 //          Enum                 Name               Lua event handler 
 #define EVENT_TABLE \
@@ -74,6 +56,9 @@ public:
    EVENT(ShipEnteredZoneEvent,  "ShipEnteredZone", "onShipEnteredZone" ) \
    EVENT(ShipLeftZoneEvent,     "ShipLeftZone",    "onShipLeftZone"    ) \
 
+public:
+
+// Define an enum from the first values in EVENT_TABLE
 enum EventType {
 #define EVENT(a, b, c) a,
     EVENT_TABLE
