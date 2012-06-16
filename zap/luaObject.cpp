@@ -1227,8 +1227,11 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEventEnum(MsgReceivedEvent);
    setEventEnum(PlayerJoinedEvent);
    setEventEnum(PlayerLeftEvent);
+   setEventEnum(ShipEnteredZoneEvent);
+   setEventEnum(ShipLeftZoneEvent);
    setEventEnum(NexusOpenedEvent);
    setEventEnum(NexusClosedEvent);
+
 
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);

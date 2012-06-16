@@ -632,11 +632,11 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
    if(getGameType() && processLevelParam(argc, argv)) 
    {
-      // Do nothing here
+      // Do nothing here -- all the action is in the if statement
    }
    else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database))
    {
-      // Do nothing here
+      // Do nothing here -- all the action is in the if statement
    }
    
    else
@@ -688,8 +688,11 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
          if(validArgs)
          {
-            if(object.isValid())  // processArguments might delete this object (teleporter)
+            if(object.isValid())  // processArguments might delete this object (teleporter) (Wat thinks this will always be true if validArgs is true)
+            {
+               object->setUserAssignedId(id);
                object->addToGame(this, database);
+            }
          }
          else
          {

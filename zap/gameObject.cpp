@@ -709,6 +709,18 @@ void BfObject::deleteObject(U32 deleteTimeInterval)
 }
 
 
+void BfObject::setUserAssignedId(U32 id)
+{
+   mUserAssignedId = id;
+}
+
+
+U32 BfObject::getUserAssignedId()
+{
+   return mUserAssignedId;
+}
+
+
 void BfObject::setScopeAlways()
 {
    getGame()->setScopeAlwaysObject(this);

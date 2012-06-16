@@ -26,6 +26,7 @@
 #include "EventManager.h"
 #include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "robot.h"
+#include "Zone.h"
 
 //#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "oglconsole.h"
@@ -57,15 +58,18 @@ struct EventDef {
 
 
 static const EventDef eventDefs[] = {
-   // Name           // Lua function
-   { "Tick",         "onTick" },
-   { "ShipSpawned",  "onShipSpawned" },
-   { "ShipKilled",   "onShipKilled" },
-   { "PlayerJoined", "onPlayerJoined" },
-   { "PlayerLeft",   "onPlayerLeft" },
-   { "MsgReceived",  "onMsgReceived" },
-   { "NexusOpened",  "onNexusOpened" },
-   { "NexusClosed"   "onNexusClosed" }
+   // Name              // Lua event handler
+   { "Tick",            "onTick"            },
+   { "ShipSpawned",     "onShipSpawned"     },
+   { "ShipKilled",      "onShipKilled"      },
+   { "PlayerJoined",    "onPlayerJoined"    },
+   { "PlayerLeft",      "onPlayerLeft"      },
+   { "MsgReceived",     "onMsgReceived"     },
+   { "NexusOpened",     "onNexusOpened"     },
+   { "NexusClosed"      "onNexusClosed"     },
+   { "ShipEnteredZone", "onShipEnteredZone" },
+   { "ShipLeftZone",    "onShipLeftZone"    },
+
 };
 
 
@@ -403,7 +407,31 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, LuaPlaye
 // onShipEnteredZone, onShipLeftZone
 void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 {
+   if(suppressEvents(eventType))   
+      return;
 
+   lua_State *L = LuaScriptRunner::getL();
+
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      try   
+      {
+         // Passing ship, zone, zoneType, zoneId
+         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i], eventDefs[eventType].function);
+         ship->push(L);
+         zone->push(L);
+         lua_pushinteger(L, zone->getObjectTypeNumber());
+         lua_pushinteger(L, zone->getUserAssignedId());
+
+         if(lua_pcall(L, 4, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
+      {
+         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         return;
+      }
+   }
 }
 
 
