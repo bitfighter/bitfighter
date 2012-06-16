@@ -68,6 +68,8 @@ public:
    EngineerHelper(ClientGame *clientGame);          // Constructor
    virtual ~EngineerHelper();
 
+   void setSelectedEngineeredObject(U32 objectType);
+
    void onMenuShow();
    bool processInputCode(InputCode inputCode);   
    void render();                

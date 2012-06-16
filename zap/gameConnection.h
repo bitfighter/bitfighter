@@ -217,6 +217,7 @@ public:
 
    // Player using engineer module
    TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> objectType));
+   TNL_DECLARE_RPC(s2cEngineerResponseEvent, (RangedU32<0,EngineerEventCount> event));
 
    // Chage passwords on the server
    void changeParam(const char *param, ParamType type);

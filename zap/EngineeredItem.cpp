@@ -149,7 +149,10 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 {
    string msg;
 
-   mErrorMessage = checkResourcesAndEnergy(ship);
+   // Everything needs energy and a resource, except the teleport exit
+   if(objectType != EngineeredTeleportExit)
+      mErrorMessage = checkResourcesAndEnergy(ship);
+
    if(mErrorMessage != "")
       return false;
 

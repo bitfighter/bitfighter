@@ -233,7 +233,10 @@ public:
    void suspendGame(bool gameIsRunning);
    void unsuspendGame();
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);        // For loading levels in editor
+   // For loading levels in editor
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);
+
+   void setSelectedEngineeredObject(U32 objectType);
 };
 
 ////////////////////////////////////////

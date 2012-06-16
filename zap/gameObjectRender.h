@@ -129,7 +129,7 @@ extern void drawFourArrows(const Point &pos);
 
 extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
                              const Vector<Point> &dests, bool showDestOverride);
-extern void renderTeleporterOutline(const Point &center, F32 radius);
+extern void renderTeleporterOutline(const Point &center, F32 radius, const Color &color);
 extern void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentScale = 1);
 extern void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentScale);
 extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);

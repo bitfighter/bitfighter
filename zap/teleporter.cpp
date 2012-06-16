@@ -411,7 +411,7 @@ void Teleporter::render()
    if(mEngineered)
    {
       // We render the exit point of engineered teleports with an outline
-      renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS);
+      renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS, Colors::richGreen);
    }
 #endif
 }

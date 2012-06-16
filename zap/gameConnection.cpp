@@ -453,6 +453,30 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,EngineerEventCount> event), (event),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+   switch(event)
+   {
+      case EngineerEventTurretBuilt:
+      case EngineerEventForceFieldBuilt:
+         mClientGame->enterMode(PlayMode);  // Equivalent to HelperMenu::exitHelper();
+         break;
+
+      case EngineerEventTeleportEntranceBuilt:
+         mClientGame->setSelectedEngineeredObject(EngineeredTeleportExit);
+         break;
+
+      case EngineerEventTeleportExitBuilt:
+         mClientGame->enterMode(PlayMode);  // Finally exit helper menu
+         break;
+
+      default:
+         break;
+   }
+}
+
+
 // Client tells the server that they claim to be authenticated.  Of course, we need to verify this ourselves.
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)

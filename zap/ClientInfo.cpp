@@ -311,16 +311,39 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
       // Announce the build
       StringTableEntry msg( "%e0 has engineered a %e1." );
 
+      U32 responseEvent;
+
       Vector<StringTableEntry> e;
       e.push_back(getName());
+
       switch(objectType)
       {
-         case EngineeredTurret: e.push_back("turret"); break;
-         case EngineeredForceField: e.push_back("force field"); break;
-         case EngineeredTeleportEntrance: e.push_back("teleport entrance"); break;
-         case EngineeredTeleportExit: e.push_back("teleport exit"); break;
-         default: e.push_back(""); break;   // Shouldn't occur
+         case EngineeredTurret:
+            e.push_back("turret");
+            responseEvent = EngineerEventTurretBuilt;
+            break;
+
+         case EngineeredForceField:
+            e.push_back("force field");
+            responseEvent = EngineerEventForceFieldBuilt;
+            break;
+
+         case EngineeredTeleportEntrance:
+            e.push_back("teleport entrance");
+            responseEvent = EngineerEventTeleportEntranceBuilt;
+            break;
+
+         case EngineeredTeleportExit:
+            e.push_back("teleport exit");
+            responseEvent = EngineerEventTeleportExitBuilt;
+            break;
+
+         default:    // Shouldn't occur
+            return false;
       }
+
+      if(!isRobot())
+         getConnection()->s2cEngineerResponseEvent(responseEvent);
 
       gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
 
