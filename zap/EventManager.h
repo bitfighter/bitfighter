@@ -44,19 +44,41 @@ class EventManager
 {
 public:
    // Note: Need to keep synced with eventDefs in .cpp!
-   enum EventType {
-      TickEvent = 0,          // (time) --> Standard game tick event
-      ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
-      ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
-      PlayerJoinedEvent,      // (playerInfo) --> Player joined game
-      PlayerLeftEvent,        // (playerInfo) --> Player left game
-      MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
-      NexusOpenedEvent,       // () --> Nexus opened (nexus games only)
-      NexusClosedEvent,       // () --> Nexus closed (nexus games only)
-      ShipEnteredZoneEvent,   // (ship, zone)
-      ShipLeftZoneEvent,      // (ship, zone)
-      EventTypes
-   };
+   //enum EventType {
+   //   TickEvent = 0,          // (time) --> Standard game tick event
+   //   ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
+   //   ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
+   //   PlayerJoinedEvent,      // (playerInfo) --> Player joined game
+   //   PlayerLeftEvent,        // (playerInfo) --> Player left game
+   //   MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
+   //   NexusOpenedEvent,       // () --> Nexus opened (nexus games only)
+   //   NexusClosedEvent,       // () --> Nexus closed (nexus games only)
+   //   ShipEnteredZoneEvent,   // (ship, zone)
+   //   ShipLeftZoneEvent,      // (ship, zone)
+   //   EventTypes
+   //};
+
+// See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
+
+#define EVENT_TABLE \
+   EVENT(TickEvent,             "Tick",            "onTick"            ) \
+   EVENT(ShipSpawnedEvent,      "ShipSpawned",     "onShipSpawned"     ) \
+   EVENT(ShipKilledEvent,       "ShipKilled",      "onShipKilled"      ) \
+   EVENT(PlayerJoinedEvent,     "PlayerJoined",    "onPlayerJoined"    ) \
+   EVENT(PlayerLeftEvent,       "PlayerLeft",      "onPlayerLeft"      ) \
+   EVENT(MsgReceivedEvent,      "MsgReceived",     "onMsgReceived"     ) \
+   EVENT(NexusOpenedEvent,      "NexusOpened",     "onNexusOpened"     ) \
+   EVENT(NexusClosedEvent,      "NexusClosed"      "onNexusClosed"     ) \
+   EVENT(ShipEnteredZoneEvent,  "ShipEnteredZone", "onShipEnteredZone" ) \
+   EVENT(ShipLeftZoneEvent,     "ShipLeftZone",    "onShipLeftZone"    ) \
+
+enum EventType {
+#define EVENT(a, b, c) a,
+    EVENT_TABLE
+#undef EVENT
+    EventTypes
+};
+
 
 private:
    // Some helper functions

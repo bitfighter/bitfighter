@@ -56,22 +56,27 @@ struct EventDef {
    const char *function;
 };
 
+// Need to keep synced with EventTypes in header
+//static const EventDef eventDefs[] = {
+//   // Name              // Lua event handler
+//   { "Tick",            "onTick"            },
+//   { "ShipSpawned",     "onShipSpawned"     },
+//   { "ShipKilled",      "onShipKilled"      },
+//   { "PlayerJoined",    "onPlayerJoined"    },
+//   { "PlayerLeft",      "onPlayerLeft"      },
+//   { "MsgReceived",     "onMsgReceived"     },
+//   { "NexusOpened",     "onNexusOpened"     },
+//   { "NexusClosed"      "onNexusClosed"     },
+//   { "ShipEnteredZone", "onShipEnteredZone" },
+//   { "ShipLeftZone",    "onShipLeftZone"    },
+//};
+//
 
 static const EventDef eventDefs[] = {
-   // Name              // Lua event handler
-   { "Tick",            "onTick"            },
-   { "ShipSpawned",     "onShipSpawned"     },
-   { "ShipKilled",      "onShipKilled"      },
-   { "PlayerJoined",    "onPlayerJoined"    },
-   { "PlayerLeft",      "onPlayerLeft"      },
-   { "MsgReceived",     "onMsgReceived"     },
-   { "NexusOpened",     "onNexusOpened"     },
-   { "NexusClosed"      "onNexusClosed"     },
-   { "ShipEnteredZone", "onShipEnteredZone" },
-   { "ShipLeftZone",    "onShipLeftZone"    },
-
+#define EVENT(a, b, c) { b, c },
+   EVENT_TABLE
+#undef EVENT
 };
-
 
 static EventManager *eventManager = NULL;   // Singleton event manager, one copy is used by all listeners
 
