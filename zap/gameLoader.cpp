@@ -223,7 +223,7 @@ stateEatingComment:
 stateLineParseDone:
    if(argc)
    {
-      id[idLen] = 0;
+      id[idLen] = 0;    // Make sure our id string is null terminated
       try
       {
          processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv, database, inEditor, levelFileName);
