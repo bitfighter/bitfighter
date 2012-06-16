@@ -1126,7 +1126,6 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 #define setEnumName(number, name) { lua_pushinteger(L, number);             lua_setglobal(L, name); }
 #define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
 #define setGTEnum(name)           { lua_pushinteger(L, GameType::name);     lua_setglobal(L, #name); }
-#define setEventEnum(name)        { lua_pushinteger(L, EventManager::name); lua_setglobal(L, #name); }
 
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
@@ -1221,17 +1220,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setGTEnum(ScoreGoalOwnTeam);
 
    // Event handler events
-   setEventEnum(TickEvent);
-   setEventEnum(ShipSpawnedEvent);
-   setEventEnum(ShipKilledEvent);
-   setEventEnum(MsgReceivedEvent);
-   setEventEnum(PlayerJoinedEvent);
-   setEventEnum(PlayerLeftEvent);
-   setEventEnum(ShipEnteredZoneEvent);
-   setEventEnum(ShipLeftZoneEvent);
-   setEventEnum(NexusOpenedEvent);
-   setEventEnum(NexusClosedEvent);
-
+#define EVENT(a, b, c) lua_pushinteger(L, EventManager::a); \
+                       lua_setglobal(L, #a);
+   EVENT_TABLE
+#undef EVENT
 
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);
