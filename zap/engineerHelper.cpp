@@ -97,7 +97,6 @@ bool EngineerHelper::isEngineerHelper()
 
 
 static Point deployPosition, deployNormal;
-static EngineerModuleDeployer deployer;
 
 void EngineerHelper::render()
 {
@@ -228,6 +227,7 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
    if(mSelectedItem != -1 &&
          EngineerModuleDeployer::findDeployPoint(ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType, deployPosition, deployNormal))
    {
+      EngineerModuleDeployer deployer;
       bool canDeploy = deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
 
       switch(mEngineerCostructionItemInfos[mSelectedItem].mObjectType)
@@ -245,7 +245,9 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
          case EngineeredTeleportEntrance:
          case EngineeredTeleportExit:
             if(canDeploy)
-               renderTeleporterOutline(deployPosition, 75.f);
+               renderTeleporterOutline(deployPosition, 75.f, Colors::green);
+            else
+               renderTeleporterOutline(deployPosition, 75.f, Colors::red);
             break;
 
          default:
