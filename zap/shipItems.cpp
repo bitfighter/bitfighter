@@ -29,16 +29,11 @@ using namespace TNL;
 namespace Zap
 {
 
-const ModuleInfo gModuleInfo[ModuleCount] =
-{
-   // name,     drain,  cost,          type,           has2,   2cost,    menu name,            menu help text (renders in cyan)
-	{"Shield",   27000,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                                },
-	{"Turbo",    15000,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                                },
-	{"Sensor",    8000,     0, ModulePrimaryUseHybrid,  true,  35000, "Enhanced Sensor",       ""                                },
-	{"Repair",   15000,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                                },
-	{"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0, "Engineer",              ""                                },
-	{"Cloak",     8000,     0, ModulePrimaryUseActive,  false,     0, "Cloak Field Modulator", ""                                },
-	{"Armor",        0,     0, ModulePrimaryUsePassive, false,     0, "Armor",                 "(makes ship harder to control)"  }
+// Fill gModuleInfo with data from MODULE_ITEM_TABLE
+const ModuleInfo gModuleInfo[ModuleCount] = {
+#define MODULE_ITEM(a, b, c, d, e, f, g, h, i) { b, c, d, e, f, g, h, i },
+   MODULE_ITEM_TABLE
+#undef MODULE_ITEM
 };
 
 

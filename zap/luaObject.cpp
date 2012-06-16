@@ -1129,23 +1129,19 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
 {
-#define TYPE_NUMBER(value, shareWithLua, name) \
-   if(shareWithLua)  {                         \
-      lua_pushinteger(L, value);               \
-      lua_setglobal(L, name);                  \
-   }
-    TYPE_NUMBER_TABLE
-#undef TYPE_NUMBER
+   // Object types
+#  define TYPE_NUMBER(value, shareWithLua, name)   if(shareWithLua)  {           \
+                                                      lua_pushinteger(L, value); \
+                                                      lua_setglobal  (L, name);  \
+                                                   }
+       TYPE_NUMBER_TABLE
+#  undef TYPE_NUMBER
 
-
-   // Modules
-   setEnum(ModuleShield);
-   setEnum(ModuleBoost);
-   setEnum(ModuleSensor);
-   setEnum(ModuleRepair);
-   setEnum(ModuleEngineer);
-   setEnum(ModuleCloak);
-   setEnum(ModuleArmor);
+   // Module enums
+#  define MODULE_ITEM(value, b, c, d, e, f, g, h, i)  lua_pushinteger(L, value);  \
+                                                      lua_setglobal  (L, #value); 
+      MODULE_ITEM_TABLE
+#  undef EVENT
 
    // Weapons
    setEnum(WeaponPhaser);
@@ -1192,10 +1188,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setGTEnum(ScoreGoalOwnTeam);
 
    // Event handler events
-#define EVENT(a, b, c) lua_pushinteger(L, EventManager::a); \
-                       lua_setglobal(L, #a);
-   EVENT_TABLE
-#undef EVENT
+#  define EVENT(a, b, c) lua_pushinteger(L, EventManager::a); \
+                         lua_setglobal(L, #a);
+      EVENT_TABLE
+#  undef EVENT
 
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);
