@@ -76,6 +76,13 @@ EngineerHelper::~EngineerHelper()
    // Do nothing
 }
 
+void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
+{
+   for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
+      if(mEngineerCostructionItemInfos[i].mObjectType == objectType)
+         mSelectedItem = i;
+}
+
 
 void EngineerHelper::onMenuShow()
 {
@@ -189,18 +196,23 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
       if(ship && ((inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
                   (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer)))
       {
-         // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          EngineerModuleDeployer deployer;
 
+         // Check deployment status on client; will be checked again on server,
+         // but server will only handle likely valid placements
          if(deployer.canCreateObjectAtLocation(getGame()->getGameObjDatabase(), ship, mEngineerCostructionItemInfos[mSelectedItem].mObjectType))
          {
+            // Send command to server to deploy
             if(gc)
                gc->c2sEngineerDeployObject(mEngineerCostructionItemInfos[mSelectedItem].mObjectType);
          }
+         // If location is bad, show error message
          else
             getGame()->displayErrorMessage(deployer.getErrorMessage().c_str());
-            
-         exitHelper();
+
+         // Normally we'd exit the helper menu here, but we don't since teleport has two parts.
+         // We therefore let a server command dictate what we do (see GameConnection::s2cEngineerResponseEvent)
+
          return true;
       }
    }

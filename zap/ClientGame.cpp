@@ -30,6 +30,7 @@
 #include "barrier.h"
 #include "config.h"
 #include "EngineeredItem.h"      // For EngineerModuleDeployer
+#include "engineerHelper.h"
 #include "GameSettings.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
@@ -2057,6 +2058,12 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 AbstractTeam *ClientGame::getNewTeam()
 {
    return new EditorTeam;
+}
+
+
+void ClientGame::setSelectedEngineeredObject(U32 objectType)
+{
+   getUIManager()->getGameUserInterface()->getEngineerHelper(this)->setSelectedEngineeredObject(objectType);
 }
 
 };
