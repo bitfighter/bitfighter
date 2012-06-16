@@ -181,8 +181,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
          goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
       case EngineeredTeleportExit:
-         bounds = createPolygon(mDeployPosition, Teleporter::TELEPORTER_RADIUS, 14);
-         goodDeploymentPosition = Teleporter::checkDeploymentPosition(bounds, gameObjectDatabase);
+         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase);
          break;
       default:    // will never happen
          TNLAssert(false, "Bad objectType");

@@ -185,10 +185,12 @@ string Teleporter::toString(F32 gridSize) const
 }
 
 
-bool Teleporter::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
+bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb)
 {
-   Rect queryRect(thisBounds);
+   Rect queryRect(position, TELEPORTER_RADIUS * 2);
+	Point outPoint;  // only used as a return value in polygonCircleIntersect
 
+   foundObjects.clear();
    gb->findObjects((TestFunc) isWallType, foundObjects, queryRect);
 
    Vector<Point> foundObjectBounds;
@@ -198,7 +200,7 @@ bool Teleporter::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDa
       static_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
 
       // If they intersect, then bad deployment position
-      if(polygonsIntersect(thisBounds, foundObjectBounds))
+      if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, TELEPORTER_RADIUS * TELEPORTER_RADIUS, outPoint))
          return false;
    }
 
