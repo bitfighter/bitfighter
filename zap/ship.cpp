@@ -453,7 +453,7 @@ F32 Ship::getSensorEquipZoomFraction()
 }
 
 
- // Returns vector for aiming a weapon based on direction ship is facing
+// Returns vector for aiming a weapon based on direction ship is facing
 Point Ship::getAimVector()
 {
    return Point(cos(getActualAngle()), sin(getActualAngle()));
