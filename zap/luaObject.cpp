@@ -1129,10 +1129,10 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
 {
-#define TYPE_NUMBER(a, b, c) \
-   if(b)  {                  \
-      lua_pushinteger(L, a); \
-      lua_setglobal(L, c);   \
+#define TYPE_NUMBER(value, shareWithLua, name) \
+   if(shareWithLua)  {                         \
+      lua_pushinteger(L, value);               \
+      lua_setglobal(L, name);                  \
    }
     TYPE_NUMBER_TABLE
 #undef TYPE_NUMBER
