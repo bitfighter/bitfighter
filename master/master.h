@@ -120,7 +120,7 @@ protected:
    U32              mMaxPlayers;        ///< Maximum number of players on this server.
    U32              mNumBots;           ///< Current number of bots on this server.
 
-   StringTableEntry mLevelName;
+   StringTableEntry mLevelName;        ///<<=== TODO: Change to const char *
    StringTableEntry mLevelType;
    StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
    Nonce mPlayerId;                            ///< (Hopefully) unique ID of this player
