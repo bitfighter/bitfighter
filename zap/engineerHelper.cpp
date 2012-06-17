@@ -40,21 +40,13 @@
 namespace Zap
 {
 
-// Constructor
-EngineerConstructionItemInfo::EngineerConstructionItemInfo()
-{
-   // Do nothing
-}
 
-// Constructor
-EngineerConstructionItemInfo::EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, InputCode key, InputCode button, const char *help)
-{
-   mObjectType = objectType;
-   mKey = key;
-   mButton = button;
-   mName = name;
-   mHelp = help;
-}
+EngineerConstructionItemInfo engineerItemInfo[] = {
+      { EngineeredTurret,           KEY_1, BUTTON_1, true,  "Turret",        "" },
+      { EngineeredForceField,       KEY_2, BUTTON_2, true,  "Force Field",   "" },
+      { EngineeredTeleportEntrance, KEY_3, BUTTON_3, true,  "Teleport",      "" },
+      { EngineeredTeleportExit,     KEY_4, BUTTON_4, false, "Teleport Exit", "" },
+};
 
 
 ////////////////////////////////////////
@@ -63,10 +55,7 @@ EngineerConstructionItemInfo::EngineerConstructionItemInfo(EngineerBuildObjects 
 // Constructor
 EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
 {
-   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));
-   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
-   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleportEntrance, "Teleport", KEY_3, BUTTON_3));
-   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTeleportExit, "TeleportExit", KEY_4, BUTTON_4));  // TODO:  remove after testing
+   mEngineerCostructionItemInfos = Vector<EngineerConstructionItemInfo>(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
 }
 
 
@@ -75,6 +64,7 @@ EngineerHelper::~EngineerHelper()
 {
    // Do nothing
 }
+
 
 void EngineerHelper::setSelectedEngineeredObject(U32 objectType)
 {
@@ -121,6 +111,10 @@ void EngineerHelper::render()
 
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
+         // Don't show an option that shouldn't be shown!
+         if(!mEngineerCostructionItemInfos[i].showOnMenu)
+            continue;
+
          // Draw key controls for selecting the object to be created
          U32 joystickIndex = Joystick::SelectedPresetIndex;
 
