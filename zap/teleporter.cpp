@@ -428,6 +428,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    else
       timeout = 0;
 
+   // Server only from here on down
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
@@ -481,24 +482,25 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
-   // TODO:  Document me!
-   F32 r;
+   // Render at a different radius depending on if a ship has just gone into the teleport
+   // and we are waiting for the teleport timeout to expire
+   F32 radiusFraction;
    if(timeout == 0)
-      r = 1;
+      radiusFraction = 1;
    else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
-      r = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
+      radiusFraction = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
    else if(mTeleporterDelay < TeleporterExpandTime)
-      r = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
+      radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
    else if(timeout < TeleporterExpandTime)
-      r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+      radiusFraction = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
    else
-      r = 0;
+      radiusFraction = 0;
 
-   if(r != 0)
+   if(radiusFraction != 0)
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
-      U32 type = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), type, true, mTime, zoomFraction, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
+      U32 renderStyle = mEngineered ? 2 : 0;
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
    }
 
    if(mEngineered)
