@@ -68,6 +68,9 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
 
    setVert(pos, 0);
    setVert(dest, 1);
+
+   mHasExploded = false;
+   mStartingHealth = 1.0f;
 }
 
 // Destructor
@@ -225,6 +228,16 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    if(stream->writeFlag(updateMask & ExitPointChangedMask))
       getVert(1).write(stream);
 
+   // If we're not destroyed and health has changed
+   stream->writeFlag(mHasExploded);
+
+   // Health has changed
+   if(!mHasExploded)
+   {
+      if(stream->writeFlag(updateMask & HealthMask))
+         stream->writeFloat(mStartingHealth, 6);
+   }
+
    return 0;
 }
 
@@ -283,6 +296,85 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
       setExtent(rect);
    }
+
+   // mHasExploded
+   if(stream->readFlag())
+   {
+      mStartingHealth = 0;
+      if(!mHasExploded)
+      {
+         mHasExploded = true;
+         disableCollision();
+         explode();
+      }
+   }
+
+   // HealthMask
+   else if(stream->readFlag())
+      mStartingHealth = stream->readFloat(6);
+}
+
+
+void Teleporter::explode()
+{
+#ifndef ZAP_DEDICATED
+
+#endif
+}
+
+
+void Teleporter::damageObject(DamageInfo *theInfo)
+{
+   // Only engineered teleports can be damaged
+   if(!mEngineered)
+      return;
+
+   if(mHasExploded)
+      return;
+
+   mStartingHealth -= theInfo->damageAmount;
+   setMaskBits(HealthMask);
+
+   // Destroyed!
+   if(mStartingHealth <= 0 && mResource.isValid())
+   {
+      mHasExploded = true;
+
+      mResource->addToDatabase(getGame()->getGameObjDatabase());
+      mResource->setPos(getVert(0));
+
+      deleteObject(500);         // TODO: adjust for destruction effect, whatever that may be
+      setMaskBits(DestroyedMask);
+   }
+
+}
+
+
+bool Teleporter::collide(BfObject *otherObject)
+{
+   // Only engineered teleports have collision
+   if(!mEngineered)
+      return false;
+
+   // Only projectiles should collide
+   if(isProjectileType(otherObject->getObjectTypeNumber()))
+      return true;
+
+   return false;
+}
+
+
+bool Teleporter::getCollisionCircle(U32 state, Point &center, F32 &radius) const
+{
+   center = getVert(0);
+   radius = TELEPORTER_RADIUS / 2;
+   return true;
+}
+
+
+bool Teleporter::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   return false;
 }
 
 

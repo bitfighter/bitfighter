@@ -51,6 +51,8 @@ public:
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
       ExitPointChangedMask = BIT(2),
+      HealthMask = BIT(3),
+      DestroyedMask = BIT(4),
 
       TeleporterTriggerRadius = 50,
       TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used
@@ -62,6 +64,9 @@ public:
 private:
    S32 mLastDest;    // Destination of last ship through
    bool mNeedsEndpoint;
+
+   bool mHasExploded;
+   F32 mStartingHealth;
 
    void computeExtent();
 
@@ -88,8 +93,16 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   void damageObject(DamageInfo *theInfo);
+   bool collide(BfObject *otherObject);
+
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+
    void idle(BfObject::IdleCallPath path);
    void render();
+
+   void explode();
 
    void onAddedToGame(Game *theGame);
 
