@@ -306,6 +306,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mHasExploded = true;
          disableCollision();
          mExplosionTimer.reset(TeleporterExplosionTime);
+         mFinalExplosionTriggered = false;
       }
    }
 
@@ -335,7 +336,7 @@ void Teleporter::damageObject(DamageInfo *theInfo)
       mResource->addToDatabase(getGame()->getGameObjDatabase());
       mResource->setPos(getVert(0));
 
-      deleteObject(TeleporterExplosionTime);
+      deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
       setMaskBits(DestroyedMask);
    }
 }
@@ -508,6 +509,12 @@ void Teleporter::render()
          radiusFraction = 2.f - (F32(mExplosionTimer.getCurrent() - halfPeriod) / F32(halfPeriod));
       else
          radiusFraction = 2 * (F32(mExplosionTimer.getCurrent()) / F32(halfPeriod));
+
+      // Add ending explosion
+      if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
+      {
+         doExplosion();
+      }
    }
 
    if(radiusFraction != 0)
@@ -525,6 +532,43 @@ void Teleporter::render()
 #endif
 }
 
+#ifndef ZAP_DEDICATED
+void Teleporter::doExplosion()
+{
+   mFinalExplosionTriggered = true;
+   const S32 EXPLOSION_COLOR_COUNT = 12;
+
+   static Color ExplosionColors[EXPLOSION_COLOR_COUNT] = {
+         Colors::green,
+         Color(0, 1, 0.5),
+         Colors::white,
+         Colors::yellow,
+         Colors::green,
+         Color(0, 0.8, 1.0),
+         Color(0, 1, 0.5),
+         Colors::white,
+         Colors::green,
+         Color(0, 1, 0.5),
+         Colors::white,
+         Colors::yellow,
+   };
+
+   SoundSystem::playSoundEffect(SFXShipExplode, getPos());
+
+   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 c = TNL::Random::readF() * 0.15f + 0.125f;
+   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
+
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   Point pos = getPos();
+
+   game->emitExplosion(pos, 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
+   game->emitBurst(pos, Point(a,c) * 0.6f, Colors::yellow, Colors::green);
+   game->emitBurst(pos, Point(b,d) * 0.6f, Colors::yellow, Colors::green);
+}
+#endif
 
 void Teleporter::renderEditorItem()
 {

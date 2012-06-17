@@ -71,6 +71,7 @@ private:
    void computeExtent();
 
    Timer mExplosionTimer;
+   bool mFinalExplosionTriggered;
 
 public:
    Teleporter(Point pos = Point(), Point dest = Point());  // Constructor
@@ -102,6 +103,10 @@ public:
 
    void idle(BfObject::IdleCallPath path);
    void render();
+
+#ifndef ZAP_DEDICATED
+   void doExplosion();
+#endif
 
    void onAddedToGame(Game *theGame);
 
