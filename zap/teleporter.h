@@ -39,8 +39,6 @@
 namespace Zap
 {
 
-////////////////////////////////////////
-////////////////////////////////////////
 
 class Teleporter : public SimpleLine, public Engineerable
 {
@@ -51,26 +49,35 @@ public:
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
       ExitPointChangedMask = BIT(2),
+      HealthMask = BIT(3),
+      DestroyedMask = BIT(4),
 
       TeleporterTriggerRadius = 50,
       TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used
       TeleporterExpandTime = 1350,
       TeleportInExpandTime = 750,
       TeleportInRadius = 120,
+
+      TeleporterExplosionTime = 1000,
    };
 
 private:
    S32 mLastDest;    // Destination of last ship through
    bool mNeedsEndpoint;
 
+   bool mHasExploded;
+   F32 mStartingHealth;
+
    void computeExtent();
 
+   Timer mExplosionTimer;
+   bool mFinalExplosionTriggered;
+
 public:
-   Teleporter(Point pos = Point(), Point dest = Point());           // Constructor
-   virtual ~Teleporter();  // Destructor
+   Teleporter(Point pos = Point(), Point dest = Point());  // Constructor
+   virtual ~Teleporter();                                  // Destructor
 
    Teleporter *clone() const;
-   //void copyAttrs(Teleporter *target);
 
    bool doSplash;
    U32 timeout;
@@ -80,7 +87,7 @@ public:
 
    static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
 
-   static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
+   static bool checkDeploymentPosition(const Point &position, GridDatabase *gb);
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
@@ -88,8 +95,18 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   void damageObject(DamageInfo *theInfo);
+   bool collide(BfObject *otherObject);
+
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
+   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+
    void idle(BfObject::IdleCallPath path);
    void render();
+
+#ifndef ZAP_DEDICATED
+   void doExplosion();
+#endif
 
    void onAddedToGame(Game *theGame);
 

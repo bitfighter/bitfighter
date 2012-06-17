@@ -173,7 +173,8 @@ bool isWeaponCollideableType(U8 x)
          x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == ForceFieldProjectorTypeNumber ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber;
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber          ||
+         x == TeleportTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)

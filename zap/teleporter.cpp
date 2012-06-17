@@ -68,6 +68,9 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
 
    setVert(pos, 0);
    setVert(dest, 1);
+
+   mHasExploded = false;
+   mStartingHealth = 1.0f;
 }
 
 // Destructor
@@ -80,16 +83,7 @@ Teleporter::~Teleporter()
 Teleporter *Teleporter::clone() const
 {
    return new Teleporter(*this);
-   //copyAttrs(clone.get());
-
-   //return clone;
 }
-
-
-//void Teleporter::copyAttrs(Teleporter *target)
-//{
-//   SimpleLine::copyAttrs(target);
-//}
 
 
 
@@ -185,10 +179,12 @@ string Teleporter::toString(F32 gridSize) const
 }
 
 
-bool Teleporter::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
+bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb)
 {
-   Rect queryRect(thisBounds);
+   Rect queryRect(position, TELEPORTER_RADIUS * 2);
+	Point outPoint;  // only used as a return value in polygonCircleIntersect
 
+   foundObjects.clear();
    gb->findObjects((TestFunc) isWallType, foundObjects, queryRect);
 
    Vector<Point> foundObjectBounds;
@@ -198,7 +194,7 @@ bool Teleporter::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDa
       static_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
 
       // If they intersect, then bad deployment position
-      if(polygonsIntersect(thisBounds, foundObjectBounds))
+      if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, TELEPORTER_RADIUS * TELEPORTER_RADIUS, outPoint))
          return false;
    }
 
@@ -231,6 +227,16 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    // If we've adjusted the exit point, needed with engineering teleports
    if(stream->writeFlag(updateMask & ExitPointChangedMask))
       getVert(1).write(stream);
+
+   // If we're not destroyed and health has changed
+   stream->writeFlag(mHasExploded);
+
+   // Health has changed
+   if(!mHasExploded)
+   {
+      if(stream->writeFlag(updateMask & HealthMask))
+         stream->writeFloat(mStartingHealth, 6);
+   }
 
    return 0;
 }
@@ -280,10 +286,87 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    // ExitPointChangedMask
    if(stream->readFlag())
    {
+      // Set the destination point
       Point dest;
       dest.read(stream);
       setVert(dest, 1);
+
+      // Update the object extents
+      Rect rect(getVert(0), getVert(1));
+      rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+      setExtent(rect);
    }
+
+   // mHasExploded
+   if(stream->readFlag())
+   {
+      mStartingHealth = 0;
+      if(!mHasExploded)
+      {
+         mHasExploded = true;
+         disableCollision();
+         mExplosionTimer.reset(TeleporterExplosionTime);
+         mFinalExplosionTriggered = false;
+      }
+   }
+
+   // HealthMask
+   else if(stream->readFlag())
+      mStartingHealth = stream->readFloat(6);
+}
+
+
+void Teleporter::damageObject(DamageInfo *theInfo)
+{
+   // Only engineered teleports can be damaged
+   if(!mEngineered)
+      return;
+
+   if(mHasExploded)
+      return;
+
+   mStartingHealth -= theInfo->damageAmount;
+   setMaskBits(HealthMask);
+
+   // Destroyed!
+   if(mStartingHealth <= 0 && mResource.isValid())
+   {
+      mHasExploded = true;
+
+      mResource->addToDatabase(getGame()->getGameObjDatabase());
+      mResource->setPos(getVert(0));
+
+      deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
+      setMaskBits(DestroyedMask);
+   }
+}
+
+
+bool Teleporter::collide(BfObject *otherObject)
+{
+   // Only engineered teleports have collision
+   if(!mEngineered)
+      return false;
+
+   // Only projectiles should collide
+   if(isProjectileType(otherObject->getObjectTypeNumber()))
+      return true;
+
+   return false;
+}
+
+
+bool Teleporter::getCollisionCircle(U32 state, Point &center, F32 &radius) const
+{
+   center = getVert(0);
+   radius = TELEPORTER_RADIUS / 2;
+   return true;
+}
+
+
+bool Teleporter::getCollisionPoly(Vector<Point> &polyPoints) const
+{
+   return false;
 }
 
 
@@ -337,6 +420,18 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    else
       timeout = 0;
 
+   // Client only
+   if(path == BfObject::ClientIdleMainRemote)
+   {
+      // Update Explosion Timer
+      if(mHasExploded)
+      {
+         if(mExplosionTimer.getCurrent() != 0)
+            mExplosionTimer.update(deltaT);
+      }
+   }
+
+   // Server only from here on down
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
@@ -390,22 +485,43 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
-   F32 r;
-   if(timeout == 0)
-      r = 1;
-   else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
-      r = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
-   else if(mTeleporterDelay < TeleporterExpandTime)
-      r = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
-   else if(timeout < TeleporterExpandTime)
-      r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+   // Render at a different radius depending on if a ship has just gone into the teleport
+   // and we are waiting for the teleport timeout to expire
+   F32 radiusFraction;
+   if(!mHasExploded)
+   {
+      if(timeout == 0)
+         radiusFraction = 1;
+      else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
+         radiusFraction = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
+      else if(mTeleporterDelay < TeleporterExpandTime)
+         radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
+      else if(timeout < TeleporterExpandTime)
+         radiusFraction = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+      else
+         radiusFraction = 0;
+   }
    else
-      r = 0;
+   {
+      // If the teleport has been destroyed, adjust the radius larger/smaller for a neat effect
+      U32 halfPeriod = mExplosionTimer.getPeriod() / 2;
+      if(mExplosionTimer.getCurrent() > halfPeriod)
+         radiusFraction = 2.f - (F32(mExplosionTimer.getCurrent() - halfPeriod) / F32(halfPeriod));
+      else
+         radiusFraction = 2 * (F32(mExplosionTimer.getCurrent()) / F32(halfPeriod));
 
-   if(r != 0)
+      // Add ending explosion
+      if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
+      {
+         doExplosion();
+      }
+   }
+
+   if(radiusFraction != 0)
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
-      renderTeleporter(getVert(0), 0, true, mTime, zoomFraction, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
+      U32 renderStyle = mEngineered ? 2 : 0;
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
    }
 
    if(mEngineered)
@@ -416,6 +532,43 @@ void Teleporter::render()
 #endif
 }
 
+#ifndef ZAP_DEDICATED
+void Teleporter::doExplosion()
+{
+   mFinalExplosionTriggered = true;
+   const S32 EXPLOSION_COLOR_COUNT = 12;
+
+   static Color ExplosionColors[EXPLOSION_COLOR_COUNT] = {
+         Colors::green,
+         Color(0, 1, 0.5),
+         Colors::white,
+         Colors::yellow,
+         Colors::green,
+         Color(0, 0.8, 1.0),
+         Color(0, 1, 0.5),
+         Colors::white,
+         Colors::green,
+         Color(0, 1, 0.5),
+         Colors::white,
+         Colors::yellow,
+   };
+
+   SoundSystem::playSoundEffect(SFXShipExplode, getPos());
+
+   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 c = TNL::Random::readF() * 0.15f + 0.125f;
+   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
+
+   ClientGame *game = static_cast<ClientGame *>(getGame());
+
+   Point pos = getPos();
+
+   game->emitExplosion(pos, 0.65f, ExplosionColors, EXPLOSION_COLOR_COUNT);
+   game->emitBurst(pos, Point(a,c) * 0.6f, Colors::yellow, Colors::green);
+   game->emitBurst(pos, Point(b,d) * 0.6f, Colors::yellow, Colors::green);
+}
+#endif
 
 void Teleporter::renderEditorItem()
 {
