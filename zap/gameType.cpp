@@ -506,8 +506,7 @@ void GameType::printRules()
    printf("\n\n");
    printf("Game Types:\n\n");
 
-   S32 i = 0;
-   while(gGameTypeNames[i] != NULL)    
+   for(S32 i = 0; gGameTypeNames[i]; i++)
    {
       TNL::Object *theObject = TNL::Object::create(gGameTypeNames[i]);  // Instantiate a gameType object
       GameType *gameType = dynamic_cast<GameType*>(theObject);          // and cast it
@@ -543,8 +542,6 @@ void GameType::printRules()
       }
 
       printf("\n\n");
-
-      i++;
    }
 }
 
