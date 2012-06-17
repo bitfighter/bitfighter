@@ -639,14 +639,12 @@ void GameUserInterface::renderSuspendedMessage()
    if(getGame()->getSpawnUndelayTimer().getCurrent() != 0)
    {
       waitMsg[2] = "IN " +
-                   ftos(ceil(F32(getGame()->getSpawnUndelayTimer().getCurrent())/1000.f)) +
+                   ftos(ceil(F32(getGame()->getSpawnUndelayTimer().getCurrent()) / 1000.f)) +
                    " SECONDS";
       renderMessageBox("", "", waitMsg, 5, -30, 2);
    }
    else
-   {
       renderMessageBox("", "", readyMsg, 5, -30, 2);
-   }
 }
 
 
@@ -661,6 +659,7 @@ void GameUserInterface::renderLostConnectionMessage()
                               "",
                               " You can't play until the connection has been re-established ", 
                               "" };
+
       renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 5, -30);
    }
 }
