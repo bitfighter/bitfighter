@@ -169,11 +169,17 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
+      {
+         // Disallow selecting unselectable items
+         if(!mEngineerCostructionItemInfos[i].showOnMenu)
+            continue;
+
          if(inputCode == mEngineerCostructionItemInfos[i].mKey || inputCode == mEngineerCostructionItemInfos[i].mButton)
          {
             mSelectedItem = i;
             return true;
          }
+      }
 
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
       if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
