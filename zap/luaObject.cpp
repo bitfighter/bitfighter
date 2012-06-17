@@ -1124,12 +1124,11 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 
 #define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
-#define setGTEnum(name)           { lua_pushinteger(L, GameType::name);     lua_setglobal(L, #name); }
 
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
 {
-   // Object types
+   // Object types -- only push those with shareWithLua set to true
 #  define TYPE_NUMBER(value, shareWithLua, name)   if(shareWithLua)  {           \
                                                       lua_pushinteger(L, value); \
                                                       lua_setglobal  (L, name);  \
@@ -1137,7 +1136,8 @@ void LuaScriptRunner::setEnums(lua_State *L)
        TYPE_NUMBER_TABLE
 #  undef TYPE_NUMBER
 
-   // Module enums
+
+   // Module enums -- push all, using enum name as the Lua name
 #  define MODULE_ITEM(value, b, c, d, e, f, g, h, i)  lua_pushinteger(L, value);  \
                                                       lua_setglobal  (L, #value); 
       MODULE_ITEM_TABLE
@@ -1164,32 +1164,15 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEnum(ZoneControlGame);
 
    // Scoring Events
-   setGTEnum(KillEnemy);
-   setGTEnum(KillSelf);
-   setGTEnum(KillTeammate);
-   setGTEnum(KillEnemyTurret);
-   setGTEnum(KillOwnTurret);
-   setGTEnum(KilledByAsteroid);
-   setGTEnum(KilledByTurret);
-   setGTEnum(CaptureFlag);
-   setGTEnum(CaptureZone);
-   setGTEnum(UncaptureZone);
-   setGTEnum(HoldFlagInZone);
-   setGTEnum(RemoveFlagFromEnemyZone);
-   setGTEnum(RabbitHoldsFlag);
-   setGTEnum(RabbitKilled);
-   setGTEnum(RabbitKills);
-   setGTEnum(ReturnFlagsToNexus);
-   setGTEnum(ReturnFlagToZone);
-   setGTEnum(LostFlag);
-   setGTEnum(ReturnTeamFlag);
-   setGTEnum(ScoreGoalEnemyTeam);
-   setGTEnum(ScoreGoalHostileTeam);
-   setGTEnum(ScoreGoalOwnTeam);
+#  define SCORING_EVENT_ITEM(name)  lua_pushinteger(L, GameType::name); \
+                                    lua_setglobal  (L, #name);
+      SCORING_EVENT_TABLE
+#  undef SCORING_EVENT_ITEM
+
 
    // Event handler events
-#  define EVENT(a, b, c) lua_pushinteger(L, EventManager::a); \
-                         lua_setglobal(L, #a);
+#  define EVENT(name, b, c) lua_pushinteger(L, EventManager::name); \
+                            lua_setglobal  (L, #name);
       EVENT_TABLE
 #  undef EVENT
 

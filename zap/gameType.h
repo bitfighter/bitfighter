@@ -93,6 +93,35 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+#define SCORING_EVENT_TABLE \
+   SCORING_EVENT_ITEM(KillEnemy)               /* all games                                 */ \
+   SCORING_EVENT_ITEM(KillSelf)                /* all games                                 */ \
+   SCORING_EVENT_ITEM(KillTeammate)            /* all games                                 */ \
+   SCORING_EVENT_ITEM(KillEnemyTurret)         /* all games                                 */ \
+   SCORING_EVENT_ITEM(KillOwnTurret)           /* all games                                 */ \
+                                                                                               \
+   SCORING_EVENT_ITEM(KilledByAsteroid)        /* all games                                 */ \
+   SCORING_EVENT_ITEM(KilledByTurret)          /* all games                                 */ \
+                                                                                               \
+   SCORING_EVENT_ITEM(CaptureFlag)             /*                                           */ \
+   SCORING_EVENT_ITEM(CaptureZone)             /* zone control -> gain zone                 */ \
+   SCORING_EVENT_ITEM(UncaptureZone)           /* zone control -> lose zone                 */ \
+   SCORING_EVENT_ITEM(HoldFlagInZone)          /* htf                                       */ \
+   SCORING_EVENT_ITEM(RemoveFlagFromEnemyZone) /* htf                                       */ \
+   SCORING_EVENT_ITEM(RabbitHoldsFlag)         /* rabbit, called every second               */ \
+   SCORING_EVENT_ITEM(RabbitKilled)            /* rabbit                                    */ \
+   SCORING_EVENT_ITEM(RabbitKills)             /* rabbit                                    */ \
+   SCORING_EVENT_ITEM(ReturnFlagsToNexus)      /* nexus game                                */ \
+   SCORING_EVENT_ITEM(ReturnFlagToZone)        /* retrieve -> flag returned to zone         */ \
+   SCORING_EVENT_ITEM(LostFlag)                /* retrieve -> enemy took flag               */ \
+   SCORING_EVENT_ITEM(ReturnTeamFlag)          /* ctf -> holds enemy flag, touches own flag */ \
+   SCORING_EVENT_ITEM(ScoreGoalEnemyTeam)      /* soccer                                    */ \
+   SCORING_EVENT_ITEM(ScoreGoalHostileTeam)    /* soccer                                    */ \
+   SCORING_EVENT_ITEM(ScoreGoalOwnTeam)        /* soccer -> score on self                   */ \
+   SCORING_EVENT_ITEM(EnemyCoreDestroyed)      /* core -> enemy core is destroyed           */ \
+   SCORING_EVENT_ITEM(OwnCoreDestroyed)        /* core -> own core is destroyed             */ \
+
+
 class GameType : public NetObject
 {
    typedef NetObject Parent;
@@ -162,36 +191,12 @@ protected:
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset);    // Runs on client
 
 public:
-   // Potentially scoring events
-   enum ScoringEvent
-   {
-      KillEnemy,              // all games
-      KillSelf,               // all games
-      KillTeammate,           // all games
-      KillEnemyTurret,        // all games
-      KillOwnTurret,          // all games
-
-      KilledByAsteroid,       // all games
-      KilledByTurret,         // all games
-
-      CaptureFlag,
-      CaptureZone,            // zone control -> gain zone
-      UncaptureZone,          // zone control -> lose zone
-      HoldFlagInZone,         // htf
-      RemoveFlagFromEnemyZone,// htf
-      RabbitHoldsFlag,        // rabbit, called every second
-      RabbitKilled,           // rabbit
-      RabbitKills,            // rabbit
-      ReturnFlagsToNexus,     // nexus game
-      ReturnFlagToZone,       // retrieve -> flag returned to zone
-      LostFlag,               // retrieve -> enemy took flag
-      ReturnTeamFlag,         // ctf -> holds enemy flag, touches own flag
-      ScoreGoalEnemyTeam,     // soccer
-      ScoreGoalHostileTeam,   // soccer
-      ScoreGoalOwnTeam,       // soccer -> score on self
-      EnemyCoreDestroyed,     // core -> enemy core is destroyed
-      OwnCoreDestroyed,       // core -> own core is destroyed
-      ScoringEventsCount
+   // Define an enum of scoring events from the values in SCORING_EVENT_TABLE
+   enum ScoringEvent {
+      #define SCORING_EVENT_ITEM(a) a,
+         SCORING_EVENT_TABLE
+      #undef SCORING_EVENT_ITEM
+         ScoringEventsCount
    };
 
    static const S32 MAX_GAME_TIME = S32_MAX;
