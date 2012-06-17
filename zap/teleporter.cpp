@@ -80,16 +80,7 @@ Teleporter::~Teleporter()
 Teleporter *Teleporter::clone() const
 {
    return new Teleporter(*this);
-   //copyAttrs(clone.get());
-
-   //return clone;
 }
-
-
-//void Teleporter::copyAttrs(Teleporter *target)
-//{
-//   SimpleLine::copyAttrs(target);
-//}
 
 
 
@@ -398,6 +389,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
+   // TODO:  Document me!
    F32 r;
    if(timeout == 0)
       r = 1;
