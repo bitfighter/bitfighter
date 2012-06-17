@@ -750,9 +750,14 @@ void ServerGame::sendLevelStatsToMaster()
    bool hasLevelGen = getGameType()->getScriptName() != "";
 
    // construct the info now, to be later sent, sending later avoids overloading the master with too much data
-   mSendLevelInfoDelayNetInfo = masterConn->s2mSendLevelInfo_construct(mLevelFileHash, mGameType->getLevelName()->getString(), mGameType->getLevelCredits()->getString(), 
-                                GameType::getGameTypeName(mGameType->getGameTypeId()), hasLevelGen, (U8)teamCountU8, 
-                                mGameType->getWinningScore(), mGameType->getRemainingGameTime());
+   mSendLevelInfoDelayNetInfo = masterConn->s2mSendLevelInfo_construct(mLevelFileHash, mGameType->getLevelName()->getString(), 
+                                mGameType->getLevelCredits()->getString(), 
+                                GameType::getGameTypeName(mGameType->getGameTypeId()), 
+                                hasLevelGen, 
+                                (U8)teamCountU8, 
+                                mGameType->getWinningScore(), 
+                                mGameType->getRemainingGameTime());
+
    mSendLevelInfoDelayCount.reset(6000);  // set time left to send
 
    mSentHashes.push_back(mLevelFileHash);
