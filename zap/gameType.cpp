@@ -494,22 +494,21 @@ void GameType::printRules()
    printf("Projectiles:\n\n");
    for(S32 i = 0; i < WeaponCount; i++)
    {
-      printf("Name: %s \n", GameWeapon::weaponInfo[i].name.getString());
-      printf("\tEnergy Drain: %d\n", GameWeapon::weaponInfo[i].drainEnergy);
-      printf("\tVelocity: %d\n", GameWeapon::weaponInfo[i].projVelocity);
-      printf("\tLifespan (ms): %d\n", GameWeapon::weaponInfo[i].projLiveTime);
-      printf("\tDamage: %2.2f\n", GameWeapon::weaponInfo[i].damageAmount);
+      printf("Name: %s \n",                          GameWeapon::weaponInfo[i].name.getString());
+      printf("\tEnergy Drain: %d\n",                 GameWeapon::weaponInfo[i].drainEnergy);
+      printf("\tVelocity: %d\n",                     GameWeapon::weaponInfo[i].projVelocity);
+      printf("\tLifespan (ms): %d\n",                GameWeapon::weaponInfo[i].projLiveTime);
+      printf("\tDamage: %2.2f\n",                    GameWeapon::weaponInfo[i].damageAmount);
       printf("\tDamage To Self Multiplier: %2.2f\n", GameWeapon::weaponInfo[i].damageSelfMultiplier);
-      printf("\tCan Damage Teammate: %s\n", GameWeapon::weaponInfo[i].canDamageTeammate ? "Yes" : "No");
+      printf("\tCan Damage Teammate: %s\n",          GameWeapon::weaponInfo[i].canDamageTeammate ? "Yes" : "No");
    }
 
    printf("\n\n");
    printf("Game Types:\n\n");
-   for(S32 i = 0; ; i++)     // second arg intentionally blank!
-   {
-      if(gGameTypeNames[i] == NULL)
-         break;
 
+   S32 i = 0;
+   while(gGameTypeNames[i] != NULL)    
+   {
       TNL::Object *theObject = TNL::Object::create(gGameTypeNames[i]);  // Instantiate a gameType object
       GameType *gameType = dynamic_cast<GameType*>(theObject);          // and cast it
 
@@ -526,13 +525,13 @@ void GameType::printRules()
 
 
       printf("Game type: %s [%s]\n", gameType->getGameTypeString(), indTeam.c_str());
-      printf("Configure ship: %s", gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
+      printf("Configure ship: %s",   gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
       printf("\nEvent: Individual Score / Team Score\n");
       printf(  "====================================\n");
       for(S32 j = 0; j < ScoringEventsCount; j++)
       {
-         S32 teamScore = gameType->getEventScore(GameType::TeamScore, (ScoringEvent) j, 0);
-         S32 indScore = gameType->getEventScore(GameType::IndividualScore, (ScoringEvent) j, 0);
+         S32 teamScore = gameType->getEventScore(GameType::TeamScore,       (ScoringEvent) j, 0);
+         S32 indScore =  gameType->getEventScore(GameType::IndividualScore, (ScoringEvent) j, 0);
 
          if(teamScore == naScore && indScore == naScore)    // Skip non-scoring events
             continue;
@@ -544,6 +543,8 @@ void GameType::printRules()
       }
 
       printf("\n\n");
+
+      i++;
    }
 }
 
