@@ -1375,8 +1375,13 @@ void ServerGame::idle(U32 timeDelta)
             prevRobotCount = getRobotCount();
             prevPlayerCount = getPlayerCount();
 
-            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelTypeName(), getRobotCount(), 
-                                           getPlayerCount(), mSettings->getMaxPlayers(), mInfoFlags);
+            masterConn->updateServerStatus(getCurrentLevelName(), 
+                                           getCurrentLevelTypeName(), 
+                                           getRobotCount(), 
+                                           getPlayerCount(), 
+                                           mSettings->getMaxPlayers(), 
+                                           mInfoFlags);
+
             mMasterUpdateTimer.reset(UpdateServerStatusTime);
          }
          else
