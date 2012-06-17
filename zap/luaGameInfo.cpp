@@ -86,19 +86,19 @@ S32 LuaGameInfo::getGameType(lua_State *L)
 }
 
 
-S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gGameTypeNames[gServerGame->getGameType()->getGameTypeId()]); }
-S32 LuaGameInfo::getFlagCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->getFlagCount()); }
-S32 LuaGameInfo::getWinningScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getWinningScore()); }
-S32 LuaGameInfo::getGameTimeTotal(lua_State *L)     { return returnInt(L, gServerGame->getGameType()->getTotalGameTime()); }
-S32 LuaGameInfo::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServerGame->getGameType()->getRemainingGameTime()); }
-S32 LuaGameInfo::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
-S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam() + 1); }
-
-S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServerGame->getTeamCount()); }
+S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gServerGame->getGameType()->getGameTypeString()); }
+S32 LuaGameInfo::getFlagCount(lua_State *L)         { return returnInt   (L, gServerGame->getGameType()->getFlagCount()); }
+S32 LuaGameInfo::getWinningScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getWinningScore()); }
+S32 LuaGameInfo::getGameTimeTotal(lua_State *L)     { return returnInt   (L, gServerGame->getGameType()->getTotalGameTime()); }
+S32 LuaGameInfo::getGameTimeRemaining(lua_State *L) { return returnInt   (L, gServerGame->getGameType()->getRemainingGameTime()); }
+S32 LuaGameInfo::getLeadingScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getLeadingScore()); }
+S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt   (L, gServerGame->getGameType()->getLeadingTeam() + 1); }
+                                                                         
+S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt   (L, gServerGame->getTeamCount()); }
 
 S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->getLevelName()->getString()); }
-S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
-S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
+S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat (L, gServerGame->getGridSize()); }
+S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool  (L, gServerGame->getGameType()->isTeamGame()); }
 
 
 S32 LuaGameInfo::isNexusOpen(lua_State *L)

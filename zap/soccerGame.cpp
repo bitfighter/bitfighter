@@ -183,25 +183,12 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-GameTypeId SoccerGameType::getGameTypeId() const
-{
-   return SoccerGame;
-}
+GameTypeId SoccerGameType::getGameTypeId() const { return SoccerGame; }
 
+const char *SoccerGameType::getShortName()      const { return "S"; }
+const char *SoccerGameType::getInstructionString() const { return "Push the ball into the opposing team's goal!"; } 
 
-const char *SoccerGameType::getShortName() const
-{
-   return "S";
-}
-
-
-const char *SoccerGameType::getInstructionString() const
-{
-   return "Push the ball into the opposing team's goal!";
-}
-
-
-bool SoccerGameType::canBeTeamGame() const       { return true; }
+bool SoccerGameType::canBeTeamGame()       const { return true; }
 bool SoccerGameType::canBeIndividualGame() const { return true; }
 
 

@@ -48,7 +48,7 @@ public:
    void addZone(GoalZone *zone);
 
 
-   bool isFlagGame();
+   bool isFlagGame() const;
 
 
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!
@@ -81,7 +81,8 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
-   bool isTeamGame();
+   bool isTeamFlagGame() const;
+   bool isTeamGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 

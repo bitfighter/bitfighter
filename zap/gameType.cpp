@@ -919,6 +919,12 @@ void GameType::gameOverManGameOver()
 }
 
 
+const char *GameType::getGameTypeString() const
+{
+   return getGameTypeName(getGameTypeId());
+}
+
+
 // Server only
 VersionedGameStats GameType::getGameStats()
 {
@@ -3745,7 +3751,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry na
 }
 
 
-
 Game *GameType::getGame() const
 {
    return mGame;
@@ -3758,70 +3763,16 @@ void GameType::addZone(Zone *zone)
 }
 
 
-// static
-StringTableEntry GameType::getGameTypeName(GameTypeId gameType)
-{
-   switch(gameType)
-   {
-      case BitmatchGame:
-         return "Bitmatch";
-      case CTFGame:
-         return "Capture the Flag";
-      case HTFGame:
-         return "Hold the Flag";
-      case NexusGame:
-         return "Nexus";
-      case RabbitGame:
-         return "Rabbit";
-      case RetrieveGame:
-         return "Retrieve";
-      case SoccerGame:
-         return "Soccer";
-      case ZoneControlGame:
-         return "Zone Control";
-      case CoreGame:
-         return "Core";
-      default:
-         TNLAssert(false, "Bad GameType value");
-         return "";
-   }
-}
+GameTypeId GameType::getGameTypeId() const { return BitmatchGame; }
+
+const char *GameType::getShortName()         const { return "BM";       }
+const char *GameType::getInstructionString() const { return "Blast as many ships as you can!"; }
 
 
-GameTypeId GameType::getGameTypeId() const
-{
-   return BitmatchGame;
-}
-
-
-const char *GameType::getGameTypeString() const
-{
-   return getGameTypeName(getGameTypeId()).getString();
-}
-
-
-const char *GameType::getShortName() const
-{
-   return "BM";
-}
-
-
-const char *GameType::getInstructionString() const
-{
-   return "Blast as many ships as you can!";
-}
-
-
-bool GameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool GameType::canBeIndividualGame() const
-{
-   return true;
-}
+bool GameType::isFlagGame()          const { return false; }
+bool GameType::isTeamFlagGame()      const { return true;  }
+bool GameType::canBeTeamGame()       const { return true;  }
+bool GameType::canBeIndividualGame() const { return true;  }
 
 
 bool GameType::teamHasFlag(S32 teamId) const
@@ -3922,18 +3873,6 @@ S32 GameType::getSecondLeadingPlayerScore() const
 S32 GameType::getSecondLeadingPlayer() const
 {
    return mSecondLeadingPlayer;
-}
-
-
-bool GameType::isFlagGame()
-{
-   return false;
-}
-
-
-bool GameType::isTeamFlagGame()
-{
-   return true;
 }
 
 
@@ -4045,6 +3984,23 @@ bool GameType::isGameOver() const
 {
    return mGameOver;
 }
+
+
+// Expand GAME_TYPE_TABLE into an array of names
+const char *GameTypeNames[] = {
+#  define GAME_TYPE_ITEM(a, name) name,
+       GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
+};
+
+
+// static
+const char *GameType::getGameTypeName(GameTypeId gameType)
+{
+   TNLAssert(gameType < ARRAYSIZE(GameTypeNames), "Array index out of bounds!");
+   return GameTypeNames[gameType];
+}
+
 
 const StringTableEntry *GameType::getLevelName() const
 {

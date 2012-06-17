@@ -27,21 +27,29 @@
 #define _GAMETYPESENUM_H_
 
 namespace Zap
-{
-   enum GameTypeId
-   {
-      BitmatchGame,
-      CTFGame,
-      HTFGame,
-      NexusGame,
-      RabbitGame,
-      RetrieveGame,
-      SoccerGame,
-      ZoneControlGame,
-      CoreGame,
-      NoGameType,
-      GameTypesCount
+{     
+//                 Enum              GameType Name                      
+#define GAME_TYPE_TABLE \
+   GAME_TYPE_ITEM( BitmatchGame,    "Bitmatch"         ) \
+   GAME_TYPE_ITEM( CTFGame,         "Capture the Flag" ) \
+   GAME_TYPE_ITEM( HTFGame,         "Hold the Flag"    ) \
+   GAME_TYPE_ITEM( NexusGame,       "Nexus"            ) \
+   GAME_TYPE_ITEM( RabbitGame,      "Rabbit"           ) \
+   GAME_TYPE_ITEM( RetrieveGame,    "Retrieve"         ) \
+   GAME_TYPE_ITEM( SoccerGame,      "Soccer"           ) \
+   GAME_TYPE_ITEM( ZoneControlGame, "Zone Control"     ) \
+   GAME_TYPE_ITEM( CoreGame,        "Core"             ) \
+
+   // Define an enum from the first column of GAME_TYPE_TABLE
+   enum GameTypeId {
+#  define GAME_TYPE_ITEM(enumValue, b) enumValue,
+       GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
+       NoGameType,
+       GameTypesCount
    };
+
+
 };
 
 

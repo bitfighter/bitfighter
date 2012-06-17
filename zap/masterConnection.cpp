@@ -408,10 +408,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
-   if(bstream->writeFlag(mGame->isServer()))     // We're a server, tell the master a little about us
+   if(bstream->writeFlag(mGame->isServer())) // We're a server, tell the master a little about us
    {
-      ServerGame *serverGame = (ServerGame *)mGame;
-      const char *gameTypeName = GameType::getGameTypeName(serverGame->getCurrentLevelType()).getString();
+      ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
       bstream->write((U32) serverGame->getRobotCount());      // number of bots
       bstream->write((U32) serverGame->getPlayerCount());     // num players       --> will always be 0 or 1?
@@ -419,7 +418,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) serverGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
       bstream->writeString(serverGame->getCurrentLevelName().getString());          // Level name
-      bstream->writeString(gameTypeName);                                           // Level type
+      bstream->writeString(serverGame->getCurrentLevelTypeName().getString());      // Level type
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description

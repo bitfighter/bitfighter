@@ -1750,7 +1750,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
       if(!gc || gc->mLevelInfos.size() < (S32(level) - 1))
          return;
 
-      ui->category = GameType::getGameTypeName(gc->mLevelInfos[level - 1].levelType).getString();
+      ui->category = gc->mLevelInfos[level - 1].getLevelTypeName();
    }
 
   ui->activate();
@@ -1778,8 +1778,8 @@ void LevelMenuUserInterface::onActivate()
       bool found = false;
 
       for(S32 j = 0; j < getMenuItemCount(); j++)
-         if(gc->mLevelInfos[i].levelName == "" || 
-            GameType::getGameTypeName(gc->mLevelInfos[i].levelType) == getMenuItem(j)->getPrompt())     
+         if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), "") == 0 || 
+            strcmp(gc->mLevelInfos[i].getLevelTypeName(), getMenuItem(j)->getPrompt().c_str()) == 0)     
          {
             found = true;
             break;            // Skip over levels with blank names or duplicate entries
@@ -1787,11 +1787,11 @@ void LevelMenuUserInterface::onActivate()
 
       if(!found)              // Not found above, must be a new type
       {
-         string name = GameType::getGameTypeName(gc->mLevelInfos[i].levelType).getString();
-         c[0] = name[0];
+         const char *gameTypeName = gc->mLevelInfos[i].getLevelTypeName();
+         c[0] = gameTypeName[0];
          c[1] = '\0';
 //         logprintf("LEVEL - %s", name.c_str());
-         addMenuItem(new MenuItem(i + 1, name.c_str(), selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
+         addMenuItem(new MenuItem(i + 1, gameTypeName, selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
 
@@ -1881,12 +1881,12 @@ void LevelMenuSelectUserInterface::onActivate()
    {
       if(gc->mLevelInfos[i].levelName == "")   // Skip levels with blank names --> but all should have names now!
          continue;
-      if(!strcmp(GameType::getGameTypeName(gc->mLevelInfos[i].levelType).getString(), category.c_str()) || 
-         !strcmp(category.c_str(), ALL_LEVELS))
+
+      if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), category.c_str()) == 0 || category == ALL_LEVELS)
       {
-         c[0] = gc->mLevelInfos[i].levelName.getString()[0];
-         addMenuItem(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), 
-                     processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
+         const char *levelName = gc->mLevelInfos[i].levelName.getString();
+         c[0] = levelName[0];
+         addMenuItem(new MenuItem(i, levelName, processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
       }
    }
 

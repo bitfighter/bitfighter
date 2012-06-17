@@ -214,10 +214,9 @@ public:
 
    void addZone(Zone *zone);
 
-   static StringTableEntry getGameTypeName(GameTypeId gameType);
+   const char *getGameTypeString() const;   
 
    virtual GameTypeId getGameTypeId() const;
-   const char *getGameTypeString() const;       
    virtual const char *getShortName() const;            // Will be overridden by other games
    virtual const char *getInstructionString() const;    //          -- ditto --
    virtual bool isTeamGame() const;                     // Team game if we have teams.  Otherwise it's every man for himself.
@@ -252,8 +251,8 @@ public:
 
    void addWall(const WallRec &barrier, Game *game);
 
-   virtual bool isFlagGame();      // Does game use flags?
-   virtual bool isTeamFlagGame();  // Does flag-team orientation matter?  Only false in HunterGame.
+   virtual bool isFlagGame() const;      // Does game use flags?
+   virtual bool isTeamFlagGame() const;  // Does flag-team orientation matter?  Only false in HunterGame.
    virtual S32 getFlagCount();     // Return the number of game-significant flags
 
    virtual bool isCarryingItems(Ship *ship);     // Nexus game will override this
@@ -318,6 +317,8 @@ public:
                          const StringTableEntry &formatString, const Vector<StringTableEntry> &e);
 
    bool isGameOver() const;
+
+   static const char *GameType::getGameTypeName(GameTypeId gameType);
 
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 

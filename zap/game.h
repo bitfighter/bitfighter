@@ -363,10 +363,14 @@ public:
 ////////////////////////////////////////
 
 struct LevelInfo
-{
+{   
+private:
+   void initialize();      // Called by constructors
+
 public:
    StringTableEntry levelFileName;  // File level is stored in
    StringTableEntry levelName;      // Level "in-game" names
+
    GameTypeId levelType;      
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
@@ -379,9 +383,7 @@ public:
    // Constructor, used on server side, augmented with setInfo method below
    LevelInfo(const string &levelFile);
 
-   void initialize();      // Called by constructors
-
-   string getLevelTypeName();
+   const char *getLevelTypeName();
 };
 
 

@@ -71,7 +71,6 @@ public:
    void itemDropped(Ship *ship, MoveItem *item);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
-   bool isFlagGame();
    S32 getFlagCount();
 
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
@@ -93,9 +92,12 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
-   //bool isTeamGame();
+
+   bool isFlagGame() const;
+   bool isTeamFlagGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
+
 
    bool isSpawnWithLoadoutGame();
 

@@ -53,12 +53,6 @@ ZoneControlGameType::ZoneControlGameType()
 }
 
 
-bool ZoneControlGameType::isFlagGame()
-{
-   return true;
-}
-
-
 void ZoneControlGameType::onGhostAvailable(GhostConnection *theConnection)
 {
    Parent::onGhostAvailable(theConnection);
@@ -371,41 +365,15 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
 }
 
 
-GameTypeId ZoneControlGameType::getGameTypeId() const
-{
-   return ZoneControlGame;
-}
+GameTypeId ZoneControlGameType::getGameTypeId() const { return ZoneControlGame; }
 
+const char *ZoneControlGameType::getShortName()         const { return "ZC"; }
+const char *ZoneControlGameType::getInstructionString() const { return "Capture all the zones by carrying the flag into them! "; }
 
-const char *ZoneControlGameType::getShortName() const
-{
-   return "ZC";
-}
-
-
-const char *ZoneControlGameType::getInstructionString() const
-{
-   return "Capture all the zones by carrying the flag into them! ";
-}
-
-
-bool ZoneControlGameType::isTeamGame()
-{
-   return true;
-}
-
-
-bool ZoneControlGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool ZoneControlGameType::canBeIndividualGame() const
-{
-   return false;
-}
-
+bool ZoneControlGameType::isFlagGame()          const { return true;  }
+bool ZoneControlGameType::isTeamGame()          const { return true;  }
+bool ZoneControlGameType::canBeTeamGame()       const { return true;  }
+bool ZoneControlGameType::canBeIndividualGame() const { return false; }
 
 };
 

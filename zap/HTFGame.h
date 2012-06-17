@@ -45,7 +45,7 @@ class HTFGameType : public GameType
 public:
    HTFGameType();    // Constructor
 
-   bool isFlagGame();
+   bool isFlagGame() const;
 
    // Server only
    void addFlag(FlagItem *flag);
@@ -74,7 +74,7 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
-   bool isTeamGame();
+   bool isTeamGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 

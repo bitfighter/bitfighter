@@ -44,10 +44,7 @@ HTFGameType::HTFGameType()
 }
 
 
-bool HTFGameType::isFlagGame()
-{
-   return true;
-}
+bool HTFGameType::isFlagGame() const { return true; }
 
 
 // Server only
@@ -378,40 +375,14 @@ S32 HTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 }
 
 
-GameTypeId HTFGameType::getGameTypeId() const
-{
-   return HTFGame;
-}
+GameTypeId HTFGameType::getGameTypeId() const { return HTFGame; }
 
+const char *HTFGameType::getShortName()         const { return "HTF"; }
+const char *HTFGameType::getInstructionString() const { return "Hold the flags at your capture zones!"; }
 
-const char *HTFGameType::getShortName() const
-{
-   return "HTF";
-}
-
-
-const char *HTFGameType::getInstructionString() const
-{
-   return "Hold the flags at your capture zones!";
-}
-
-
-bool HTFGameType::isTeamGame()
-{
-   return true;
-}
-
-
-bool HTFGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool HTFGameType::canBeIndividualGame() const
-{
-   return false;
-}
+bool HTFGameType::isTeamGame()          const { return true;  }
+bool HTFGameType::canBeTeamGame()       const { return true;  }
+bool HTFGameType::canBeIndividualGame() const { return false; }
 
 
 StringTableEntry HTFGameType::aString("a");

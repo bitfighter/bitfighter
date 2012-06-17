@@ -1141,6 +1141,15 @@ void LevelInfo::initialize()
 }
 
 
+const char *LevelInfo::getLevelTypeName()
+{
+   return GameType::getGameTypeName(levelType);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Called when ClientGame and ServerGame are destructed, and new levels are loaded on the server
 void Game::cleanUp()
 {

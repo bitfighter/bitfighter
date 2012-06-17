@@ -40,10 +40,8 @@ namespace Zap
 {
 
 
-bool RetrieveGameType::isFlagGame()
-{
-   return true;
-}
+bool RetrieveGameType::isFlagGame() const { return true; }
+
 
 // Server only
 void RetrieveGameType::addFlag(FlagItem *flag)
@@ -386,46 +384,15 @@ S32 RetrieveGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreE
 }
 
 
-bool RetrieveGameType::isTeamFlagGame()
-{
-   return true;
-}
+GameTypeId RetrieveGameType::getGameTypeId() const { return RetrieveGame; }
 
+const char *RetrieveGameType::getShortName()         const { return "Ret"; }
+const char *RetrieveGameType::getInstructionString() const { return "Find all the flags, and bring them to your capture zones!"; }
 
-GameTypeId RetrieveGameType::getGameTypeId() const
-{
-   return RetrieveGame;
-}
-
-
-const char *RetrieveGameType::getShortName() const
-{
-   return "Ret";
-}
-
-
-const char *RetrieveGameType::getInstructionString() const
-{
-   return "Find all the flags, and bring them to your capture zones!";
-}
-
-
-bool RetrieveGameType::isTeamGame()
-{
-   return true;
-}
-
-
-bool RetrieveGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool RetrieveGameType::canBeIndividualGame() const
-{
-   return false;
-}
+bool RetrieveGameType::isTeamFlagGame()      const { return true;  }
+bool RetrieveGameType::isTeamGame()          const { return true;  }
+bool RetrieveGameType::canBeTeamGame()       const { return true;  }
+bool RetrieveGameType::canBeIndividualGame() const { return false; }
 
 
 TNL_IMPLEMENT_NETOBJECT(RetrieveGameType);

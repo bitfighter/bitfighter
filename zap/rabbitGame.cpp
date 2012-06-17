@@ -104,11 +104,6 @@ RabbitGameType::RabbitGameType()
 }
 
 
-bool RabbitGameType::isFlagGame()
-{
-   return true;
-}
-
 
 S32 RabbitGameType::getFlagCount()
 {
@@ -476,40 +471,15 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 }
 
 
-GameTypeId RabbitGameType::getGameTypeId() const
-{
-   return RabbitGame;
-}
+GameTypeId RabbitGameType::getGameTypeId() const { return RabbitGame; }
 
+const char *RabbitGameType::getShortName()         const { return "Rab"; }
+const char *RabbitGameType::getInstructionString() const { return "Grab the flag and hold it for as long as you can!"; }
 
-const char *RabbitGameType::getShortName() const
-{
-   return "Rab";
-}
-
-
-const char *RabbitGameType::getInstructionString() const
-{
-   return "Grab the flag and hold it for as long as you can!";
-}
-
-
-//bool RabbitGameType::isTeamGame()
-//{
-//   return getGame()->getTeamCount() != 1;
-//}
-
-
-bool RabbitGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool RabbitGameType::canBeIndividualGame() const
-{
-   return true;
-}
+bool RabbitGameType::isFlagGame()          const { return true; }
+bool RabbitGameType::isTeamFlagGame()      const { return true;  }
+bool RabbitGameType::canBeTeamGame()       const { return true;  }
+bool RabbitGameType::canBeIndividualGame() const { return true;  }
 
 
 bool RabbitGameType::isSpawnWithLoadoutGame()

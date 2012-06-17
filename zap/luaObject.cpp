@@ -1153,15 +1153,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEnum(WeaponTurret);
 
    // Game Types
-   setEnum(BitmatchGame);
-   setEnum(CoreGame);
-   setEnum(CTFGame);
-   setEnum(HTFGame);
-   setEnum(NexusGame);
-   setEnum(RabbitGame);
-   setEnum(RetrieveGame);
-   setEnum(SoccerGame);
-   setEnum(ZoneControlGame);
+#  define GAME_TYPE_ITEM(name, b)  lua_pushinteger(L, name); \
+                                   lua_setglobal  (L, #name);
+       GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
 
    // Scoring Events
 #  define SCORING_EVENT_ITEM(name)  lua_pushinteger(L, GameType::name); \

@@ -51,11 +51,11 @@ public:
    const char *getShortName() const;
    const char *getInstructionString() const;
    
-   bool isFlagGame();
-   bool isTeamGame();
+   bool isFlagGame() const; 
+   bool isTeamFlagGame() const;    // Teams matter with our flags in this game
+   bool isTeamGame() const;
    bool canBeTeamGame()  const;
    bool canBeIndividualGame() const;
-   bool isTeamFlagGame();    // Teams matter with our flags in this game
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

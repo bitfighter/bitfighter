@@ -43,7 +43,6 @@ private:
 public:
    ZoneControlGameType();  // Constructor
 
-   bool isFlagGame();
 
    void onGhostAvailable(GhostConnection *theConnection);
 
@@ -58,7 +57,9 @@ public:
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
-   bool isTeamGame();
+
+   bool isFlagGame() const;
+   bool isTeamGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 

@@ -242,22 +242,10 @@ void CoreGameType::score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score)
 }
 
 
-GameTypeId CoreGameType::getGameTypeId() const
-{
-   return CoreGame;
-}
+GameTypeId CoreGameType::getGameTypeId() const { return CoreGame; }
 
-
-const char *CoreGameType::getShortName() const
-{
-   return "Core";
-}
-
-
-const char *CoreGameType::getInstructionString() const
-{
-   return "Destroy all the opposing team's Cores";
-}
+const char *CoreGameType::getShortName()         const { return "Core"; }
+const char *CoreGameType::getInstructionString() const { return "Destroy all the opposing team's Cores"; }
 
 
 bool CoreGameType::canBeTeamGame() const

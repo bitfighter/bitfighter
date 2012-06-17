@@ -74,10 +74,6 @@ public:
    bool mNexusIsOpen;         // Is the nexus open?
    S32 getNexusTimeLeft();    // Get time until the nexus changes state
 
-   // Info about this game type:
-   bool isFlagGame();
-   bool isTeamFlagGame();
-
    bool isSpawnWithLoadoutGame();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
@@ -102,11 +98,17 @@ public:
 
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool spawnShip(ClientInfo *clientInfo);
+
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
+
+   // Info about this game type:
+   bool isFlagGame() const;
+   bool isTeamFlagGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
+
 
    U32 getLowerRightCornerScoreboardOffsetFromBottom() const;
 

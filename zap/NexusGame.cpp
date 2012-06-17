@@ -214,18 +214,6 @@ bool NexusGameType::nexusShouldChange()
 }
 
 
-bool NexusGameType::isFlagGame()
-{
-   return true;  // Well, technically not, but we'll morph flags to our own uses as we load the level
-}
-
-
-bool NexusGameType::isTeamFlagGame()
-{
-   return false;  // Ditto... team info will be ignored... no need to show warning in editor
-}
-
-
 bool NexusGameType::isSpawnWithLoadoutGame()
 {
    return true;
@@ -604,34 +592,15 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
 }
 
 
-GameTypeId NexusGameType::getGameTypeId() const
-{
-   return NexusGame;
-}
+GameTypeId NexusGameType::getGameTypeId() const { return NexusGame; }
 
+const char *NexusGameType::getShortName()         const { return "N"; }
+const char *NexusGameType::getInstructionString() const { return "Collect flags from opposing players and bring them to the Nexus!"; }
 
-const char *NexusGameType::getShortName() const
-{
-   return "N";
-}
-
-
-const char *NexusGameType::getInstructionString() const
-{
-   return "Collect flags from opposing players and bring them to the Nexus!";
-}
-
-
-bool NexusGameType::canBeTeamGame() const
-{
-   return true;
-}
-
-
-bool NexusGameType::canBeIndividualGame() const
-{
-   return true;
-}
+bool NexusGameType::isFlagGame()          const { return true;  } // Well, technically not, but we'll pervert flags as we load the level
+bool NexusGameType::isTeamFlagGame()      const { return false; } // Ditto... team info will be ignored... no need to show warning in editor
+bool NexusGameType::canBeTeamGame()       const { return true;  }
+bool NexusGameType::canBeIndividualGame() const { return true;  }
 
 
 U32 NexusGameType::getLowerRightCornerScoreboardOffsetFromBottom() const
