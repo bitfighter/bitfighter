@@ -603,7 +603,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 {
    enum {
       NumColors = 6,
-      NumTypes = 2,
+      NumTypes = 3,
       NumParticles = 100,
    };
 
@@ -635,6 +635,14 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          { 0.5, 0, 1 },
          { 0, 0, 0.5 },
          { 1, 0, 0 },
+      },
+      {
+         { 0, 0.8, 0.25f },
+         { 0, 1.0, 0.5 },
+         { 0, 1, 0 },
+         { 0, 1, 1 },
+         { 0, 0.5, 0.5 },
+         { 0, 1, 0 },
       }
    };
    if(!trackerInit)

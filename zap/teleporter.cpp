@@ -405,7 +405,8 @@ void Teleporter::render()
    if(r != 0)
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
-      renderTeleporter(getVert(0), 0, true, mTime, zoomFraction, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
+      U32 type = mEngineered ? 2 : 0;
+      renderTeleporter(getVert(0), type, true, mTime, zoomFraction, r, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
    }
 
    if(mEngineered)
