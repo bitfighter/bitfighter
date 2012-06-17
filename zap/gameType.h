@@ -318,7 +318,7 @@ public:
 
    bool isGameOver() const;
 
-   static const char *GameType::getGameTypeName(GameTypeId gameType);
+   static const char *getGameTypeName(GameTypeId gameType);
 
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
