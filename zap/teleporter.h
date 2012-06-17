@@ -58,7 +58,7 @@ public:
       TeleportInExpandTime = 750,
       TeleportInRadius = 120,
 
-      TeleporterExplosionTime = 2000,
+      TeleporterExplosionTime = 1000,
    };
 
 private:
