@@ -3986,6 +3986,10 @@ bool GameType::isGameOver() const
 }
 
 
+// Could possibly get rid of this, and put names into gameType subclasses where they really belong, except that we
+// currently use gameTypeId when we send lists of levels to the clients, and we need a way to transform those into
+// gameType strings.  This is ugly but practical.  To get rid of it, we might be able to send the gameType strings
+// themselves as StringTableEntries, which would be almost as efficient.
 // Expand GAME_TYPE_TABLE into an array of names
 const char *GameTypeNames[] = {
 #  define GAME_TYPE_ITEM(a, name) name,
