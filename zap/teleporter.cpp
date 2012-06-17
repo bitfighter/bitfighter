@@ -282,9 +282,15 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    // ExitPointChangedMask
    if(stream->readFlag())
    {
+      // Set the destination point
       Point dest;
       dest.read(stream);
       setVert(dest, 1);
+
+      // Update the object extents
+      Rect rect(getVert(0), getVert(1));
+      rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+      setExtent(rect);
    }
 }
 
