@@ -305,21 +305,13 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       {
          mHasExploded = true;
          disableCollision();
-         explode();
+         mExplosionTimer.reset(TeleporterExplosionTime);
       }
    }
 
    // HealthMask
    else if(stream->readFlag())
       mStartingHealth = stream->readFloat(6);
-}
-
-
-void Teleporter::explode()
-{
-#ifndef ZAP_DEDICATED
-
-#endif
 }
 
 
@@ -343,10 +335,9 @@ void Teleporter::damageObject(DamageInfo *theInfo)
       mResource->addToDatabase(getGame()->getGameObjDatabase());
       mResource->setPos(getVert(0));
 
-      deleteObject(500);         // TODO: adjust for destruction effect, whatever that may be
+      deleteObject(TeleporterExplosionTime);
       setMaskBits(DestroyedMask);
    }
-
 }
 
 
@@ -428,6 +419,17 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    else
       timeout = 0;
 
+   // Client only
+   if(path == BfObject::ClientIdleMainRemote)
+   {
+      // Update Explosion Timer
+      if(mHasExploded)
+      {
+         if(mExplosionTimer.getCurrent() != 0)
+            mExplosionTimer.update(deltaT);
+      }
+   }
+
    // Server only from here on down
    if(path != BfObject::ServerIdleMainLoop)
       return;
@@ -485,16 +487,28 @@ void Teleporter::render()
    // Render at a different radius depending on if a ship has just gone into the teleport
    // and we are waiting for the teleport timeout to expire
    F32 radiusFraction;
-   if(timeout == 0)
-      radiusFraction = 1;
-   else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
-      radiusFraction = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
-   else if(mTeleporterDelay < TeleporterExpandTime)
-      radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
-   else if(timeout < TeleporterExpandTime)
-      radiusFraction = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+   if(!mHasExploded)
+   {
+      if(timeout == 0)
+         radiusFraction = 1;
+      else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
+         radiusFraction = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
+      else if(mTeleporterDelay < TeleporterExpandTime)
+         radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
+      else if(timeout < TeleporterExpandTime)
+         radiusFraction = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+      else
+         radiusFraction = 0;
+   }
    else
-      radiusFraction = 0;
+   {
+      // If the teleport has been destroyed, adjust the radius larger/smaller for a neat effect
+      U32 halfPeriod = mExplosionTimer.getPeriod() / 2;
+      if(mExplosionTimer.getCurrent() > halfPeriod)
+         radiusFraction = 2.f - (F32(mExplosionTimer.getCurrent() - halfPeriod) / F32(halfPeriod));
+      else
+         radiusFraction = 2 * (F32(mExplosionTimer.getCurrent()) / F32(halfPeriod));
+   }
 
    if(radiusFraction != 0)
    {

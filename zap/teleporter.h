@@ -39,8 +39,6 @@
 namespace Zap
 {
 
-////////////////////////////////////////
-////////////////////////////////////////
 
 class Teleporter : public SimpleLine, public Engineerable
 {
@@ -59,6 +57,8 @@ public:
       TeleporterExpandTime = 1350,
       TeleportInExpandTime = 750,
       TeleportInRadius = 120,
+
+      TeleporterExplosionTime = 2000,
    };
 
 private:
@@ -70,12 +70,13 @@ private:
 
    void computeExtent();
 
+   Timer mExplosionTimer;
+
 public:
-   Teleporter(Point pos = Point(), Point dest = Point());           // Constructor
-   virtual ~Teleporter();  // Destructor
+   Teleporter(Point pos = Point(), Point dest = Point());  // Constructor
+   virtual ~Teleporter();                                  // Destructor
 
    Teleporter *clone() const;
-   //void copyAttrs(Teleporter *target);
 
    bool doSplash;
    U32 timeout;
@@ -101,8 +102,6 @@ public:
 
    void idle(BfObject::IdleCallPath path);
    void render();
-
-   void explode();
 
    void onAddedToGame(Game *theGame);
 
