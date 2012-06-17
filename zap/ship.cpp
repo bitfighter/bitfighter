@@ -685,9 +685,6 @@ void Ship::idle(BfObject::IdleCallPath path)
 
    mLastMove = mCurrentMove;
 
-   if(isModulePrimaryActive(ModuleRepair))
-      findRepairTargets();
-
    if(path == BfObject::ServerIdleControlFromClient ||
       path == BfObject::ClientIdleControlMain ||
       path == BfObject::ClientIdleControlReplay)
@@ -891,6 +888,8 @@ void Ship::processModules()
       mModuleSecondaryActive[ModuleBoost] = false;
    }
 
+   if(isModulePrimaryActive(ModuleRepair))
+      findRepairTargets();
    // If there are no repair targets, turn off repair
    if(mRepairTargets.size() == 0)
       mModulePrimaryActive[ModuleRepair] = false;
