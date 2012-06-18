@@ -166,16 +166,6 @@ extern const S32 Game::MAX_GRID_SIZE;
 #endif
 
 
-static S32 getGameTypeIndex(const char *gt)
-{
-   for(S32 i = 0; gGameTypeNames[i]; i++)
-      if(!strcmp(gt, gGameTypeNames[i]))
-         return i;
-
-   return -1;
-}
-
-
 void GameParamUserInterface::updateMenuItems()
 {
    GameType *gameType = getGame()->getGameType();
@@ -188,7 +178,7 @@ void GameParamUserInterface::updateMenuItems()
 
    addMenuItem(new ToggleMenuItem("Game Type:",       
                                   gameTypes,
-                                  getGameTypeIndex(gameType->getClassName()),
+                                  gameTypes.getIndex(gameType->getClassName()),
                                   true,
                                   changeGameTypeCallback,
                                   gameType->getInstructionString()));
