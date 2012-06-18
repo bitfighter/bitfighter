@@ -201,7 +201,7 @@ private:
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    BfObject *doMergeLines(BfObject *firstItem, S32 firstItemIndex);   
-
+   BfObject *doMergePolygons(BfObject *firstItem, S32 firstItemIndex);
 
    //S32 countSelectedVerts();
    bool anyItemsSelected(GridDatabase *database);   // Are any items selected?
