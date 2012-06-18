@@ -36,12 +36,12 @@ namespace Zap
 
 //               enum           name,     drain, cost,       type,               has2,   2cost,  menu name,             menu help text (renders in cyan)
 #define MODULE_ITEM_TABLE \
-   MODULE_ITEM(ModuleShield,  "Shield",   27000,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \
-   MODULE_ITEM(ModuleBoost,   "Turbo",    15000,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                              ) \
-   MODULE_ITEM(ModuleSensor,  "Sensor",    8000,     0, ModulePrimaryUseHybrid,  true,  35000, "Enhanced Sensor",       ""                              ) \
-   MODULE_ITEM(ModuleRepair,  "Repair",   15000,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                              ) \
+   MODULE_ITEM(ModuleShield,  "Shield",   33000,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \
+   MODULE_ITEM(ModuleBoost,   "Turbo",    21000,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                              ) \
+   MODULE_ITEM(ModuleSensor,  "Sensor",   14000,     0, ModulePrimaryUseHybrid,  true,  35000, "Enhanced Sensor",       ""                              ) \
+   MODULE_ITEM(ModuleRepair,  "Repair",   21000,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                              ) \
    MODULE_ITEM(ModuleEngineer,"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0, "Engineer",              ""                              ) \
-   MODULE_ITEM(ModuleCloak,   "Cloak",     8000,     0, ModulePrimaryUseActive,  false,     0, "Cloak Field Modulator", ""                              ) \
+   MODULE_ITEM(ModuleCloak,   "Cloak",    14000,     0, ModulePrimaryUseActive,  false,     0, "Cloak Field Modulator", ""                              ) \
    MODULE_ITEM(ModuleArmor,   "Armor",        0,     0, ModulePrimaryUsePassive, false,     0, "Armor",                 "(makes ship harder to control)") \
 
 

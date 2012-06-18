@@ -77,7 +77,6 @@ static const bool showCloakedTeammates = true;    // Set to true to allow player
 namespace Zap
 {
 
-
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
 #ifdef _MSC_VER
@@ -693,6 +692,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       // This handles all the energy reductions as well
       processWeaponFire();
       processModules();
+      rechargeEnergy();
    }
     
    if(path == BfObject::ServerIdleControlFromClient && isModulePrimaryActive(ModuleRepair))
@@ -851,13 +851,10 @@ void Ship::processModules()
    {
       wasModulePrimaryActive[i] = mModulePrimaryActive[i];
       wasModuleSecondaryActive[i] = mModuleSecondaryActive[i];
+
       mModulePrimaryActive[i] = false;
       mModuleSecondaryActive[i] = false;
    }
-
-   // Only turn off cooldown if energy has risen above threshold, not if it falls below
-   if(mEnergy > EnergyCooldownThreshold)
-      mCooldownNeeded = false;
 
    // Make sure we're allowed to use modules
    bool allowed = getGame()->getGameType() && getGame()->getGameType()->okToUseModules(this);
@@ -929,15 +926,20 @@ void Ship::processModules()
    // amount of energy per second since the game idle methods are run on milliseconds
    F32 timeInSeconds = mCurrentMove.time * 0.001f;
 
+   // Modules with active primary components
+   S32 primaryActivationCount = 0;
+
    // Update things based on available energy...
-   bool anyActive = false;
    for(S32 i = 0; i < ModuleCount; i++)
    {
       if(mModulePrimaryActive[i])
       {
          S32 energyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * timeInSeconds);
          mEnergy -= energyUsed;
-         anyActive = anyActive || (energyUsed != 0);   // To prevent armor and engineer stop energy recharge
+
+         // Exclude passive modules
+         if (energyUsed != 0)
+            primaryActivationCount += 1;
 
          if(getClientInfo())
             getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
@@ -975,81 +977,23 @@ void Ship::processModules()
       }
    }
 
-   // Set cool-down needed if energy is below threshold
-   if(!anyActive && mEnergy <= EnergyCooldownThreshold)
-      mCooldownNeeded = true;
+   // Only toggle cooldown if no primary components are active
+   if (primaryActivationCount == 0)
+      mCooldownNeeded = mEnergy <= EnergyCooldownThreshold;
 
-   // Energy will recharge with special rules
-   // It will not recharge if you have an activated module or spawn shield is up
-   if(!anyActive && mSpawnShield.getCurrent() == 0)
+   // Offset recharge bonus when using modules in a friendly zone
+   if (primaryActivationCount > 0)
    {
-      // Idle = not moving or shooting
-      bool isIdle = mCurrentMove.x == 0 && mCurrentMove.y == 0 && !mCurrentMove.fire;
-
+      // This assumes the neutral and friendly bonuses are equal
       BfObject *object = isInZone(LoadoutZoneTypeNumber);
-
-      if(object)     // In load-out zone
-      {
-         /// IN HOSTILE ZONE
-         if(object->getTeam() == TEAM_HOSTILE)
-         {
-            if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenIdle * timeInSeconds);
-            else
-               mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneWhenActive * timeInSeconds);
-         }
-
-         /// IN FRIENDLY ZONE
-         else if(object->getTeam() == getTeam())
-         {
-            if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle * timeInSeconds);
-            else
-               mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneWhenActive * timeInSeconds);
-         }
-         /// IN NEUTRAL ZONE
-         else if(object->getTeam() == TEAM_NEUTRAL)
-         {
-            if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenIdle * timeInSeconds);
-            else
-               mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneWhenActive * timeInSeconds);
-         }
-         // In a zone that is neither hostile nor neutral nor one of your own -- must be an enemy zone
-         /// IN ENEMY ZONE
-         else
-         {
-            if(isIdle)
-               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenIdle * timeInSeconds);
-            else
-               mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneWhenActive * timeInSeconds);
-         }
-      }
-      /// IN NO ZONE
-      else 
-      {
-         if(isIdle)
-            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenIdle * timeInSeconds);
-         else
-            mEnergy += S32(EnergyRechargeRateWhenInNoZoneWhenActive * timeInSeconds);
-      }
+      S32 currentZoneTeam = object ? object->getTeam() : NO_TEAM;
+      if (currentZoneTeam == TEAM_NEUTRAL || currentZoneTeam == getTeam())
+         mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInSeconds;            
    }
 
-   // What to do if our most current energy reduction put us below zero
-   if(mEnergy <= 0)
-   {
-      mEnergy = 0;
-      for(S32 i = 0; i < ModuleCount; i++)
-      {
-         mModulePrimaryActive[i] = false;
-         mModuleSecondaryActive[i] = false;
-      }
-      mCooldownNeeded = true;
-   }
-
-   // If energy is greater than maximum, set to max
-   else if(mEnergy >= EnergyMax)
-      mEnergy = EnergyMax;
+   // Reduce total energy consumption when more than one module is used
+   if (primaryActivationCount > 1)
+      mEnergy += EnergyRechargeRate * timeInSeconds;
 
    // Do logic triggered when module primary component state changes
    for(S32 i = 0; i < ModuleCount;i++)
@@ -1083,6 +1027,54 @@ void Ship::processModules()
          setMaskBits(ModuleSecondaryMask);
       }
    }
+}
+
+void Ship::rechargeEnergy()
+{
+   F32 timeInSeconds = mCurrentMove.time * .001f;
+
+   // Energy will not recharge if spawn shield is up
+   if(mSpawnShield.getCurrent() == 0)
+   {
+      // Base recharge rate
+      mEnergy += S32(EnergyRechargeRate * timeInSeconds);
+
+      // Apply energy recharge modifier for the zone the player is in
+      BfObject *object = isInZone(LoadoutZoneTypeNumber);
+      S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
+
+      if(currentLoadoutZoneTeam == TEAM_HOSTILE)
+         mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneModifier * timeInSeconds);
+
+      else if(currentLoadoutZoneTeam == TEAM_NEUTRAL)
+         mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneModifier * timeInSeconds);
+
+      else if(currentLoadoutZoneTeam == getTeam())
+         mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInSeconds);
+
+      else if(currentLoadoutZoneTeam != NO_TEAM)
+         mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInSeconds);
+   }
+
+   // Movement penalty
+   if (mCurrentMove.x != 0 || mCurrentMove.y != 0)
+      mEnergy += S32(EnergyRechargeRateMovementModifier * timeInSeconds);
+
+   // Handle energy falling below 0
+   if(mEnergy <= 0)
+   {
+      mEnergy = 0;
+      for(S32 i = 0; i < ModuleCount; i++)
+      {
+         mModulePrimaryActive[i] = false;
+         mModuleSecondaryActive[i] = false;
+      }
+      mCooldownNeeded = true;
+   }
+
+   // Cap energy at max
+   else if(mEnergy >= EnergyMax)
+      mEnergy = EnergyMax;
 }
 
 

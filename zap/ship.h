@@ -107,17 +107,12 @@ public:
       EnergyMax = 100000,
 
       // The following are all measured in units of energy/second
-      EnergyRechargeRateWhenInNoZoneWhenIdle = 8000,
-      EnergyRechargeRateWhenInNoZoneWhenActive = 6000,
-      EnergyRechargeRateInFriendlyLoadoutZoneWhenIdle = 12000,
-      EnergyRechargeRateInFriendlyLoadoutZoneWhenActive = 6000,
-      EnergyRechargeRateInEnemyLoadoutZoneWhenIdle = 5400,        // Enemy zone recharge at 90% normal
-      EnergyRechargeRateInEnemyLoadoutZoneWhenActive = 5400,
-      EnergyRechargeRateInNeutralLoadoutZoneWhenIdle = 12000,
-      EnergyRechargeRateInNeutralLoadoutZoneWhenActive = 6000,
-      EnergyRechargeRateInHostileLoadoutZoneWhenIdle = -12000,
-      EnergyRechargeRateInHostileLoadoutZoneWhenActive = -12000,
-
+      EnergyRechargeRate = 8000,
+      EnergyRechargeRateMovementModifier = -2000,
+      EnergyRechargeRateInHostileLoadoutZoneModifier = -20000,
+      EnergyRechargeRateInNeutralLoadoutZoneModifier = 4000,
+      EnergyRechargeRateInFriendlyLoadoutZoneModifier = 4000,
+      EnergyRechargeRateInEnemyLoadoutZoneModifier = -2600,
 
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
@@ -253,6 +248,7 @@ public:
 
    void processWeaponFire();
    void processModules();
+   void rechargeEnergy();
 
    void updateModuleSounds();
    void emitMovementSparks();
