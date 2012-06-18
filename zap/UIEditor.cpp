@@ -1203,7 +1203,7 @@ void EditorUserInterface::onActivate()
 
 void EditorUserInterface::renderMasterStatus()
 {
-   /* Do nothing, don't render this in editor */
+   // Do nothing, don't render this in editor 
 }
 
 
