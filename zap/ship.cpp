@@ -1885,8 +1885,13 @@ void Ship::kill()
    setMaskBits(ExplosionMask);
    disableCollision();
 
+   // Handle any mounted items
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       mMountedItems[i]->onMountDestroyed();
+
+   // Handle if in the middle of building a teleport
+   if(mEngineeredTeleport.isValid())
+      mEngineeredTeleport->onDestroyed();
 }
 
 

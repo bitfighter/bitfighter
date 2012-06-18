@@ -395,7 +395,10 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
       case EngineeredTeleportExit:
          if(ship->getEngineeredTeleport() && ship->getEngineeredTeleport()->needsEndpoint())
+         {
             ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
+            ship->setEngineeredTeleport(NULL);   // Clear out the attached teleporter
+         }
          else   // Something went wrong
             return false;
 

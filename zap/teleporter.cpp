@@ -337,14 +337,20 @@ void Teleporter::damageObject(DamageInfo *theInfo)
    // Destroyed!
    if(mStartingHealth <= 0 && mResource.isValid())
    {
-      mHasExploded = true;
-
-      mResource->addToDatabase(getGame()->getGameObjDatabase());
-      mResource->setPos(getVert(0));
-
-      deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
-      setMaskBits(DestroyedMask);
+      onDestroyed();
    }
+}
+
+
+void Teleporter::onDestroyed()
+{
+   mHasExploded = true;
+
+   mResource->addToDatabase(getGame()->getGameObjDatabase());
+   mResource->setPos(getVert(0));
+
+   deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
+   setMaskBits(DestroyedMask);
 }
 
 
