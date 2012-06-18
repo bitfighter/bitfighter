@@ -417,15 +417,6 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
 
-   // Deal with our timeout...  could rewrite with a timer!
-   if(timeout > deltaT)
-   {
-      timeout -= deltaT;
-      return;
-   }
-   else
-      timeout = 0;
-
    // Client only
    if(path == BfObject::ClientIdleMainRemote)
    {
@@ -436,6 +427,15 @@ void Teleporter::idle(BfObject::IdleCallPath path)
             mExplosionTimer.update(deltaT);
       }
    }
+
+   // Deal with our timeout...  could rewrite with a timer!
+   if(timeout > deltaT)
+   {
+      timeout -= deltaT;
+      return;
+   }
+   else
+      timeout = 0;
 
    // Server only from here on down
    if(path != BfObject::ServerIdleMainLoop)
@@ -518,9 +518,7 @@ void Teleporter::render()
 
       // Add ending explosion
       if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
-      {
          doExplosion();
-      }
    }
 
    if(radiusFraction != 0)
