@@ -69,7 +69,7 @@ public:
 #endif
 
    GameTypeId getGameTypeId() const;
-   const char *getGameTypeString() const;
+   const char *getGameTypeName() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
    bool canBeTeamGame() const;

@@ -167,7 +167,7 @@ void GameParamUserInterface::updateMenuItems()
 
    addMenuItem(new ToggleMenuItem("Game Type:",       
                                   gameTypes,
-                                  gameTypes.getIndex(gameType->getGameTypeString()),
+                                  gameTypes.getIndex(gameType->getGameTypeName()),
                                   true,
                                   changeGameTypeCallback,
                                   gameType->getInstructionString()));

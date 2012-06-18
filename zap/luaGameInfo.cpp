@@ -85,7 +85,7 @@ S32 LuaGameInfo::getGameType(lua_State *L)
 }
 
 
-S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gServerGame->getGameType()->getGameTypeString()); }
+S32 LuaGameInfo::getGameTypeName(lua_State *L)      { return returnString(L, gServerGame->getGameType()->getGameTypeName()); }
 S32 LuaGameInfo::getFlagCount(lua_State *L)         { return returnInt   (L, gServerGame->getGameType()->getFlagCount()); }
 S32 LuaGameInfo::getWinningScore(lua_State *L)      { return returnInt   (L, gServerGame->getGameType()->getWinningScore()); }
 S32 LuaGameInfo::getGameTimeTotal(lua_State *L)     { return returnInt   (L, gServerGame->getGameType()->getTotalGameTime()); }

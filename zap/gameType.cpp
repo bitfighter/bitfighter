@@ -73,7 +73,7 @@ const S32 GameType::MAX_TEAMS;
 #endif
 
 
-// List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
+// List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeName
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
 static const char *gameTypeClassNames[] = {
 #  define GAME_TYPE_ITEM(a, type, c) type,
@@ -516,7 +516,7 @@ void GameType::printRules()
          indTeam = "Configuration Error!";
 
 
-      printf("Game type: %s [%s]\n", gameType->getGameTypeString(), indTeam.c_str());
+      printf("Game type: %s [%s]\n", gameType->getGameTypeName(), indTeam.c_str());
       printf("Configure ship: %s",   gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
       printf("\nEvent: Individual Score / Team Score\n");
       printf(  "====================================\n");
@@ -915,7 +915,7 @@ void GameType::gameOverManGameOver()
 }
 
 
-const char *GameType::getGameTypeString() const
+const char *GameType::getGameTypeName() const
 {
    return getGameTypeName(getGameTypeId());
 }
@@ -935,7 +935,7 @@ VersionedGameStats GameType::getGameStats()
    gameStats->duration = mTotalGamePlay / 1000;
    gameStats->isTeamGame = isTeamGame();
    gameStats->levelName = mLevelName.getString();
-   gameStats->gameType = getGameTypeString();
+   gameStats->gameType = getGameTypeName();
    gameStats->cs_protocol_version = CS_PROTOCOL_VERSION;
    gameStats->build_version = BUILD_VERSION;
 

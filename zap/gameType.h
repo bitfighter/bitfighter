@@ -214,7 +214,7 @@ public:
 
    void addZone(Zone *zone);
 
-   const char *getGameTypeString() const;   
+   const char *getGameTypeName() const;   
 
    virtual GameTypeId getGameTypeId() const;
    virtual const char *getShortName() const;            // Will be overridden by other games

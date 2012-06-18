@@ -3397,7 +3397,7 @@ void GameUserInterface::renderMissionOverlay(const GameType *gameType)
    const char *gtPrefix = (gameType->canBeIndividualGame() && gameType->getGameTypeId() != SoccerGame && 
                            getGame()->getTeamCount() > 1) ? "Team " : "";
 
-   drawCenteredStringf(yCenter - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeString());
+   drawCenteredStringf(yCenter - 140, 30, "Game Type: %s%s", gtPrefix, gameType->getGameTypeName());
 
    glColor(Colors::cyan, alpha);
    drawCenteredString(yCenter - 100, 20, gameType->getInstructionString());
