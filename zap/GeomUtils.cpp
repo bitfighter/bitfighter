@@ -936,7 +936,7 @@ Vector<Vector<Point> > downscaleClipperPoints(const Polygons& inputPolygons)
 }
 
 
-// Use Clipper to merge inputPolygons, placing the result in solution
+// Use Clipper to merge inputPolygons, placing the result in outputPolygons
 bool mergePolys(const Vector<const Vector<Point> *> &inputPolygons, Vector<Vector<Point> > &outputPolygons)
 {
    Polygons input = upscaleClipperPoints(inputPolygons);
