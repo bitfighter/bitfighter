@@ -606,8 +606,8 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       checkForSpeedzones();
 
-      if(path == BfObject::ServerIdleControlFromClient)
-         checkForZones();
+      if(path == BfObject::ServerIdleControlFromClient || (path == BfObject::ClientIdleControlMain))
+         checkForZones();  // for energy drain checks
 
 
       if(path == BfObject::ServerIdleControlFromClient ||
@@ -922,9 +922,7 @@ void Ship::processModules()
       //}
    }
 
-   // This will make the module primary active component use the proper
-   // amount of energy per second since the game idle methods are run on milliseconds
-   F32 timeInSeconds = mCurrentMove.time * 0.001f;
+   U32 timeInMilliSeconds = mCurrentMove.time;
 
    // Modules with active primary components
    S32 primaryActivationCount = 0;
@@ -934,7 +932,7 @@ void Ship::processModules()
    {
       if(mModulePrimaryActive[i])
       {
-         S32 energyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * timeInSeconds);
+         S32 energyUsed = getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * timeInMilliSeconds;
          mEnergy -= energyUsed;
 
          // Exclude passive modules
@@ -988,12 +986,12 @@ void Ship::processModules()
       BfObject *object = isInZone(LoadoutZoneTypeNumber);
       S32 currentZoneTeam = object ? object->getTeam() : NO_TEAM;
       if (currentZoneTeam == TEAM_NEUTRAL || currentZoneTeam == getTeam())
-         mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInSeconds;            
+         mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;            
    }
 
    // Reduce total energy consumption when more than one module is used
    if (primaryActivationCount > 1)
-      mEnergy += EnergyRechargeRate * timeInSeconds;
+      mEnergy += EnergyRechargeRate * timeInMilliSeconds;
 
    // Do logic triggered when module primary component state changes
    for(S32 i = 0; i < ModuleCount;i++)
@@ -1031,34 +1029,34 @@ void Ship::processModules()
 
 void Ship::rechargeEnergy()
 {
-   F32 timeInSeconds = mCurrentMove.time * .001f;
+   U32 timeInMilliSeconds = mCurrentMove.time;
 
    // Energy will not recharge if spawn shield is up
    if(mSpawnShield.getCurrent() == 0)
    {
       // Base recharge rate
-      mEnergy += S32(EnergyRechargeRate * timeInSeconds);
+      mEnergy += EnergyRechargeRate * timeInMilliSeconds;
 
       // Apply energy recharge modifier for the zone the player is in
       BfObject *object = isInZone(LoadoutZoneTypeNumber);
       S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
 
       if(currentLoadoutZoneTeam == TEAM_HOSTILE)
-         mEnergy += S32(EnergyRechargeRateInHostileLoadoutZoneModifier * timeInSeconds);
+         mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
 
       else if(currentLoadoutZoneTeam == TEAM_NEUTRAL)
-         mEnergy += S32(EnergyRechargeRateInNeutralLoadoutZoneModifier * timeInSeconds);
+         mEnergy += EnergyRechargeRateInNeutralLoadoutZoneModifier * timeInMilliSeconds;
 
       else if(currentLoadoutZoneTeam == getTeam())
-         mEnergy += S32(EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInSeconds);
+         mEnergy += EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;
 
       else if(currentLoadoutZoneTeam != NO_TEAM)
-         mEnergy += S32(EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInSeconds);
+         mEnergy += EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInMilliSeconds;
    }
 
    // Movement penalty
    if (mCurrentMove.x != 0 || mCurrentMove.y != 0)
-      mEnergy += S32(EnergyRechargeRateMovementModifier * timeInSeconds);
+      mEnergy += EnergyRechargeRateMovementModifier * timeInMilliSeconds;
 
    // Handle energy falling below 0
    if(mEnergy <= 0)

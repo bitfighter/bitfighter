@@ -106,13 +106,13 @@ public:
       TrailCount = 2,
       EnergyMax = 100000,
 
-      // The following are all measured in units of energy/second
-      EnergyRechargeRate = 8000,
-      EnergyRechargeRateMovementModifier = -2000,
-      EnergyRechargeRateInHostileLoadoutZoneModifier = -20000,
-      EnergyRechargeRateInNeutralLoadoutZoneModifier = 4000,
-      EnergyRechargeRateInFriendlyLoadoutZoneModifier = 4000,
-      EnergyRechargeRateInEnemyLoadoutZoneModifier = -2600,
+      // The following are all measured in units of energy/millisecond
+      EnergyRechargeRate = 8,
+      EnergyRechargeRateMovementModifier = -2,
+      EnergyRechargeRateInHostileLoadoutZoneModifier = -20,
+      EnergyRechargeRateInNeutralLoadoutZoneModifier = 4,
+      EnergyRechargeRateInFriendlyLoadoutZoneModifier = 4,
+      EnergyRechargeRateInEnemyLoadoutZoneModifier = -2,
 
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
