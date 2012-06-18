@@ -274,9 +274,12 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
+      if(U32(dest) < U32(mDests.size()))
+      {
+         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
+         SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
+      }
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
