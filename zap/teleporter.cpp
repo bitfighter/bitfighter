@@ -224,18 +224,19 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
       stream->write(mLastDest);     // Where ship is going
 
-   // If we've adjusted the exit point, needed with engineering teleports
-   if(stream->writeFlag(updateMask & ExitPointChangedMask))
-      getVert(1).write(stream);
-
-   // If we're not destroyed and health has changed
-   stream->writeFlag(mHasExploded);
-
-   // Health has changed
-   if(!mHasExploded)
+   // The following is only sent if the teleport was engineered
+   if(mEngineered)
    {
-      if(stream->writeFlag(updateMask & HealthMask))
-         stream->writeFloat(mStartingHealth, 6);
+      // If we've adjusted the exit point, needed with engineering teleports
+      if(stream->writeFlag(updateMask & ExitPointChangedMask))
+         getVert(1).write(stream);
+
+      // If we're not destroyed and health has changed
+      if(!stream->writeFlag(mHasExploded))
+      {
+         if(stream->writeFlag(updateMask & HealthMask))
+            stream->writeFloat(mStartingHealth, 6);
+      }
    }
 
    return 0;
@@ -274,50 +275,50 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
 
-      if(U32(dest) < U32(mDests.size()))
-      {
-         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
-         SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
-      }
+      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
       timeout = mTeleporterDelay;
    }
 
-   // ExitPointChangedMask
-   if(stream->readFlag())
+   if(mEngineered)
    {
-      // Set the destination point properly on the client
-      Point dest;
-      dest.read(stream);
-      setVert(dest, 1);
-      mDests.clear();
-      mDests.push_back(dest);
-
-      // Update the object extents
-      Rect rect(getVert(0), getVert(1));
-      rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
-      setExtent(rect);
-   }
-
-   // mHasExploded
-   if(stream->readFlag())
-   {
-      mStartingHealth = 0;
-      if(!mHasExploded)
+      // ExitPointChangedMask
+      if(stream->readFlag())
       {
-         mHasExploded = true;
-         disableCollision();
-         mExplosionTimer.reset(TeleporterExplosionTime);
-         mFinalExplosionTriggered = false;
-      }
-   }
+         // Set the destination point properly on the client
+         Point dest;
+         dest.read(stream);
+         setVert(dest, 1);
+         mDests.clear();
+         mDests.push_back(dest);
 
-   // HealthMask
-   else if(stream->readFlag())
-      mStartingHealth = stream->readFloat(6);
+         // Update the object extents
+         Rect rect(getVert(0), getVert(1));
+         rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+         setExtent(rect);
+      }
+
+      // mHasExploded
+      if(stream->readFlag())
+      {
+         mStartingHealth = 0;
+         if(!mHasExploded)
+         {
+            mHasExploded = true;
+            disableCollision();
+            mExplosionTimer.reset(TeleporterExplosionTime);
+            mFinalExplosionTriggered = false;
+         }
+      }
+
+      // HealthMask
+      else if(stream->readFlag())
+         mStartingHealth = stream->readFloat(6);
+   }
 }
 
 
