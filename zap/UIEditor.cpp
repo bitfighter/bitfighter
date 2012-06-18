@@ -3185,6 +3185,7 @@ void EditorUserInterface::doSplit(BfObject *object, S32 vertex)
 
 
 // Join two or more sections of wall that have coincident end points.  Will ignore invalid join attempts.
+// Will also merge two or more overlapping polygons.
 void EditorUserInterface::joinBarrier()
 {
    BfObject *joinedObj = NULL;
@@ -3197,79 +3198,9 @@ void EditorUserInterface::joinBarrier()
    {
       BfObject *obj_i = static_cast<BfObject *>(objList->get(i));
 
-      if(obj_i->getGeomType() == geomPolyLine && obj_i->isSelected())      // Will work for both lines and walls, or any future polylines
-      {
-         for(S32 j = i + 1; j < objList->size(); j++)                      // Compare against remaining objects
-         {
-            BfObject *obj_j = static_cast<BfObject *>(objList->get(j));
-
-            if(obj_j->getObjectTypeNumber() == obj_i->getObjectTypeNumber() && obj_j->isSelected())
-            {
-               // Don't join if resulting object would be too big!
-               if(obj_i->getVertCount() + obj_j->getVertCount() > gMaxPolygonPoints)
-                  continue;
-
-               if(obj_i->getVert(0).distanceTo(obj_j->getVert(0)) < .01)   // First vertices are the same  1 2 3 | 1 4 5
-               {
-                  if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state
-                     saveUndoState();
-               
-                  joinedObj = obj_i;
-
-                  for(S32 a = 1; a < obj_j->getVertCount(); a++)           // Skip first vertex, because it would be a dupe
-                     obj_i->addVertFront(obj_j->getVert(a));
-
-                  deleteItem(j);
-                  i--;  j--;
-               }
-
-               // First vertex conincides with final vertex 3 2 1 | 5 4 3
-               else if(obj_i->getVert(0).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     
-               {
-                  if(!joinedObj)
-                     saveUndoState();
-
-                  joinedObj = obj_i;
-                  
-                  for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
-                     obj_i->addVertFront(obj_j->getVert(a));
-
-                  deleteItem(j);    // j has been merged into i; don't need j anymore!
-                  i--;  j--;
-               }
-
-               // Last vertex conincides with first 1 2 3 | 3 4 5
-               else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(0)) < .01)     
-               {
-                  if(!joinedObj)
-                     saveUndoState();
-
-                  joinedObj = obj_i;
-
-                  for(S32 a = 1; a < obj_j->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
-                     obj_i->addVert(obj_j->getVert(a));
-
-                  deleteItem(j);
-                  i--;  j--;
-               }
-
-               // Last vertices coincide  1 2 3 | 5 4 3
-               else if(obj_i->getVert(obj_i->getVertCount()-1).distanceTo(obj_j->getVert(obj_j->getVertCount()-1)) < .01)     
-               {
-                  if(!joinedObj)
-                     saveUndoState();
-
-                  joinedObj = obj_i;
-
-                  for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
-                     obj_i->addVert(obj_j->getVert(a));
-
-                  deleteItem(j);
-                  i--;  j--;
-               }
-            }
-         }
-      }
+      // Will work for both lines and walls, or any future polylines
+      if((obj_i->getGeomType() == geomPolyLine || obj_i->getGeomType() == geomPolygon) && obj_i->isSelected())  
+         joinedObj = doMergeLines(obj_i, i);
    }
 
    if(joinedObj)     // We had a successful merger
@@ -3283,6 +3214,86 @@ void EditorUserInterface::joinBarrier()
 
       onSelectionChanged();
    }
+}
+
+
+BfObject *EditorUserInterface::doMergeLines(BfObject *firstItem, S32 firstItemIndex)
+{
+   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   BfObject *joinedObj = NULL;
+
+   for(S32 j = firstItemIndex + 1; j < objList->size(); j++)                      // Compare against remaining objects
+   {
+      BfObject *obj_j = static_cast<BfObject *>(objList->get(j));
+
+      if(obj_j->getObjectTypeNumber() == firstItem->getObjectTypeNumber() && obj_j->isSelected())
+      {
+         // Don't join if resulting object would be too big!
+         if(firstItem->getVertCount() + obj_j->getVertCount() > gMaxPolygonPoints)
+            continue;
+
+         if(firstItem->getVert(0).distSquared(obj_j->getVert(0)) < .0001)   // First vertices are the same  1 2 3 | 1 4 5
+         {
+            if(!joinedObj)          // This is first join candidate found; something's going to merge, so save an undo state
+               saveUndoState();
+               
+            joinedObj = firstItem;
+
+            for(S32 a = 1; a < obj_j->getVertCount(); a++)           // Skip first vertex, because it would be a dupe
+               firstItem->addVertFront(obj_j->getVert(a));
+
+            deleteItem(j);
+            j--;
+         }
+
+         // First vertex conincides with final vertex 3 2 1 | 5 4 3
+         else if(firstItem->getVert(0).distSquared(obj_j->getVert(obj_j->getVertCount() - 1)) < .0001)     
+         {
+            if(!joinedObj)
+               saveUndoState();
+
+            joinedObj = firstItem;
+                  
+            for(S32 a = obj_j->getVertCount()-2; a >= 0; a--)
+               firstItem->addVertFront(obj_j->getVert(a));
+
+            deleteItem(j);    // j has been merged into i; don't need j anymore!
+            j--;
+         }
+
+         // Last vertex conincides with first 1 2 3 | 3 4 5
+         else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj_j->getVert(0)) < .0001)     
+         {
+            if(!joinedObj)
+               saveUndoState();
+
+            joinedObj = firstItem;
+
+            for(S32 a = 1; a < obj_j->getVertCount(); a++)  // Skip first vertex, because it would be a dupe         
+               firstItem->addVert(obj_j->getVert(a));
+
+            deleteItem(j);
+            j--;
+         }
+
+         // Last vertices coincide  1 2 3 | 5 4 3
+         else if(firstItem->getVert(firstItem->getVertCount() - 1).distSquared(obj_j->getVert(obj_j->getVertCount() - 1)) < .0001)     
+         {
+            if(!joinedObj)
+               saveUndoState();
+
+            joinedObj = firstItem;
+
+            for(S32 a = obj_j->getVertCount() - 2; a >= 0; a--)
+               firstItem->addVert(obj_j->getVert(a));
+
+            deleteItem(j);
+            j--;
+         }
+      }
+   }
+
+   return joinedObj;
 }
 
 
@@ -3688,7 +3699,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mIn = true;
    else if(inputString == "\\")           // Split barrier on selected vertex
       splitBarrier();
-   else if(inputString == "J")            // Join selected barrier segments
+   else if(inputString == "J")            // Join selected barrier segments or polygons
       joinBarrier();
    else if(inputString == "Ctrl+A")       // Select everything
       selectAll(getDatabase());

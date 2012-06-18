@@ -200,6 +200,9 @@ private:
    void doSplit(BfObject *object, S32 vertex);
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
+   BfObject *doMergeLines(BfObject *firstItem, S32 firstItemIndex);   
+
+
    //S32 countSelectedVerts();
    bool anyItemsSelected(GridDatabase *database);   // Are any items selected?
    bool anythingSelected();                                 // Are any items/vertices selected?
