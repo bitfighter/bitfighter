@@ -148,12 +148,13 @@ extern const S32 Game::MAX_GRID_SIZE;
 #endif
 
 
-static Vector<string> gameTypes;
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 
 void GameParamUserInterface::updateMenuItems()
 {
+   static Vector<string> gameTypes;
+
    GameType *gameType = getGame()->getGameType();
    TNLAssert(gameType, "Missing game type!");
 
