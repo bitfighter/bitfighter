@@ -29,6 +29,8 @@
 #include "EditorObject.h"  // For def of EditorObject
 #include "WallSegmentManager.h"
 
+#include "boost/shared_ptr.hpp"
+
 #include <map>
 
 namespace Zap
@@ -84,6 +86,29 @@ GridDatabase::~GridDatabase()
 }
 
 
+// This sort will put points on top of lines on top of polygons...  as they should be
+// We'll also put walls on the bottom, as this seems to work best in practice
+S32 QSORT_CALLBACK geometricSort(DatabaseObject * &a, DatabaseObject * &b)
+{
+   if(isWallType(a->getObjectTypeNumber()))
+      return 1;
+   if(isWallType(b->getObjectTypeNumber()))
+      return -1;
+
+   return( b->getGeomType() - a->getGeomType() );
+}
+
+
+static void sortObjects(Vector<DatabaseObject *> &objects)
+{
+   if(objects.size() >= 2)       // No point sorting unless there are two or more objects!
+
+      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
+      //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
+      qsort(&objects[0], objects.size(), sizeof(BfObject *), (qsort_compare_func) geometricSort);
+}
+
+
 void GridDatabase::copyObjects(const GridDatabase *source)
 {
    // Fill copy with objects from existing database
@@ -91,6 +116,8 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
       addToDatabase(source->mAllObjects[i]->clone(), source->mAllObjects[i]->getExtent());
+
+   sortObjects(mAllObjects);
 }
 
 
@@ -118,6 +145,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 
    // Add the object to our non-spatial "database" as well
    mAllObjects.push_back(theObject);
+   sortObjects(mAllObjects);
 }
 
 
@@ -194,7 +222,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject)
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == theObject)
       {
-         mAllObjects.erase_fast(i);
+         mAllObjects.erase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
          break;
       }
 }
@@ -786,7 +814,7 @@ void DatabaseObject::setExtent(const Rect &extents)
       // To save CPU, check if there is anything different
       if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
       {
-         // it is different, remove and add to database, but don't touch gridDB->mAllObjects
+         // It is different, remove and add to database, but don't touch gridDB->mAllObjects
 
          //printf("new  %i %i %i %i old %i %i %i %i\n", minx, miny, maxx, maxy, minxold, minyold, maxxold, maxyold);
 
@@ -839,35 +867,10 @@ DatabaseObject *DatabaseObject::clone() const
 }
 
 
-
+};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-// This sort will put points on top of lines on top of polygons...  as they should be
-// We'll also put walls on the bottom, as this seems to work best in practice
-S32 QSORT_CALLBACK geometricSort(BfObject * &a, BfObject * &b)
-{
-   if(isWallType(a->getObjectTypeNumber()))
-      return 1;
-   if(isWallType(b->getObjectTypeNumber()))
-      return -1;
-
-   return( b->getGeomType() - a->getGeomType() );
-}
-
-
-//static void geomSort(Vector<BfObject *> &objects)
-//{
-//   if(objects.size() >= 2)       // No point sorting unless there are two or more objects!
-//
-//      // Cannot use Vector.sort() here because I couldn't figure out how to cast shared_ptr as pointer (*)
-//      //sort(objects.getStlVector().begin(), objects.getStlVector().begin() + objects.size(), geometricSort);
-//      qsort(&objects[0], objects.size(), sizeof(BfObject *), (qsort_compare_func) geometricSort);
-//}
-
-
-}
 
 // Reusable container for searching gridDatabases
 // putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
