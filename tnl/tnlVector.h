@@ -97,6 +97,7 @@ public:
    void clear();
    void deleteAndClear();
    bool contains(const T&);
+   S32 getIndex(const T&);
 
 
    T& first();
@@ -257,11 +258,16 @@ template<class T> inline void Vector<T>::deleteAndClear()
 
 template<class T> inline bool Vector<T>::contains(const T &object)
 {
+   return getIndex(object) != -1;
+}
+
+template<class T> inline S32 Vector<T>::getIndex(const T &object)
+{
    for(U32 i = 0; i < innerVector.size(); i++)
       if(object == innerVector[i])
-         return true;
+         return i;
 
-   return false;
+   return -1;
 }
 
 
