@@ -1153,8 +1153,8 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEnum(WeaponTurret);
 
    // Game Types
-#  define GAME_TYPE_ITEM(name, b)  lua_pushinteger(L, name); \
-                                   lua_setglobal  (L, #name);
+#  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \
+                                      lua_setglobal  (L, #name);
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
 
