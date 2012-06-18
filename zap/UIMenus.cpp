@@ -1747,7 +1747,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
    {
       // Replace the following with a getLevelCount() function on game??
       GameConnection *gc = game->getConnectionToServer();
-      if(!gc || gc->mLevelInfos.size() < (S32(level) - 1))
+      if(!gc || U32(gc->mLevelInfos.size()) < level)
          return;
 
       ui->category = gc->mLevelInfos[level - 1].getLevelTypeName();
