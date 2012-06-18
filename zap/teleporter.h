@@ -96,6 +96,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void damageObject(DamageInfo *theInfo);
+   void onDestroyed();
    bool collide(BfObject *otherObject);
 
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;

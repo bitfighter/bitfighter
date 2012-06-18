@@ -224,18 +224,19 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
       stream->write(mLastDest);     // Where ship is going
 
-   // If we've adjusted the exit point, needed with engineering teleports
-   if(stream->writeFlag(updateMask & ExitPointChangedMask))
-      getVert(1).write(stream);
-
-   // If we're not destroyed and health has changed
-   stream->writeFlag(mHasExploded);
-
-   // Health has changed
-   if(!mHasExploded)
+   // The following is only sent if the teleport was engineered
+   if(mEngineered)
    {
-      if(stream->writeFlag(updateMask & HealthMask))
-         stream->writeFloat(mStartingHealth, 6);
+      // If we've adjusted the exit point, needed with engineering teleports
+      if(stream->writeFlag(updateMask & ExitPointChangedMask))
+         getVert(1).write(stream);
+
+      // If we're not destroyed and health has changed
+      if(!stream->writeFlag(mHasExploded))
+      {
+         if(stream->writeFlag(updateMask & HealthMask))
+            stream->writeFloat(mStartingHealth, 6);
+      }
    }
 
    return 0;
@@ -283,38 +284,41 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       timeout = mTeleporterDelay;
    }
 
-   // ExitPointChangedMask
-   if(stream->readFlag())
+   if(mEngineered)
    {
-      // Set the destination point properly on the client
-      Point dest;
-      dest.read(stream);
-      setVert(dest, 1);
-      mDests.clear();
-      mDests.push_back(dest);
-
-      // Update the object extents
-      Rect rect(getVert(0), getVert(1));
-      rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
-      setExtent(rect);
-   }
-
-   // mHasExploded
-   if(stream->readFlag())
-   {
-      mStartingHealth = 0;
-      if(!mHasExploded)
+      // ExitPointChangedMask
+      if(stream->readFlag())
       {
-         mHasExploded = true;
-         disableCollision();
-         mExplosionTimer.reset(TeleporterExplosionTime);
-         mFinalExplosionTriggered = false;
-      }
-   }
+         // Set the destination point properly on the client
+         Point dest;
+         dest.read(stream);
+         setVert(dest, 1);
+         mDests.clear();
+         mDests.push_back(dest);
 
-   // HealthMask
-   else if(stream->readFlag())
-      mStartingHealth = stream->readFloat(6);
+         // Update the object extents
+         Rect rect(getVert(0), getVert(1));
+         rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+         setExtent(rect);
+      }
+
+      // mHasExploded
+      if(stream->readFlag())
+      {
+         mStartingHealth = 0;
+         if(!mHasExploded)
+         {
+            mHasExploded = true;
+            disableCollision();
+            mExplosionTimer.reset(TeleporterExplosionTime);
+            mFinalExplosionTriggered = false;
+         }
+      }
+
+      // HealthMask
+      else if(stream->readFlag())
+         mStartingHealth = stream->readFloat(6);
+   }
 }
 
 
@@ -333,14 +337,20 @@ void Teleporter::damageObject(DamageInfo *theInfo)
    // Destroyed!
    if(mStartingHealth <= 0 && mResource.isValid())
    {
-      mHasExploded = true;
-
-      mResource->addToDatabase(getGame()->getGameObjDatabase());
-      mResource->setPos(getVert(0));
-
-      deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
-      setMaskBits(DestroyedMask);
+      onDestroyed();
    }
+}
+
+
+void Teleporter::onDestroyed()
+{
+   mHasExploded = true;
+
+   mResource->addToDatabase(getGame()->getGameObjDatabase());
+   mResource->setPos(getVert(0));
+
+   deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
+   setMaskBits(DestroyedMask);
 }
 
 
@@ -413,15 +423,6 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
 
-   // Deal with our timeout...  could rewrite with a timer!
-   if(timeout > deltaT)
-   {
-      timeout -= deltaT;
-      return;
-   }
-   else
-      timeout = 0;
-
    // Client only
    if(path == BfObject::ClientIdleMainRemote)
    {
@@ -432,6 +433,15 @@ void Teleporter::idle(BfObject::IdleCallPath path)
             mExplosionTimer.update(deltaT);
       }
    }
+
+   // Deal with our timeout...  could rewrite with a timer!
+   if(timeout > deltaT)
+   {
+      timeout -= deltaT;
+      return;
+   }
+   else
+      timeout = 0;
 
    // Server only from here on down
    if(path != BfObject::ServerIdleMainLoop)
@@ -514,9 +524,7 @@ void Teleporter::render()
 
       // Add ending explosion
       if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
-      {
          doExplosion();
-      }
    }
 
    if(radiusFraction != 0)

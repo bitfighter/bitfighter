@@ -170,6 +170,9 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
    setActiveTeamManager(mTeamManager);
 
+   mClientInfo->setIsAdmin(false); // Always start out with no permission
+   mClientInfo->setIsLevelChanger(false);
+
    mSpawnDelayed = false;
 
    MasterServerConnection *connToMaster = getConnectionToMaster();
@@ -216,8 +219,6 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
       }
       else        // Connect to a remote server, but not via the master server
       {
-         mClientInfo->setIsAdmin(false);
-         mClientInfo->setIsLevelChanger(false);
          gameConnection->connect(getNetInterface(), remoteAddress);  
       }
 

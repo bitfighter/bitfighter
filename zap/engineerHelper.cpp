@@ -42,10 +42,10 @@ namespace Zap
 
 
 EngineerConstructionItemInfo engineerItemInfo[] = {
-      { EngineeredTurret,           KEY_1, BUTTON_1, true,  "Turret",        "" },
-      { EngineeredForceField,       KEY_2, BUTTON_2, true,  "Force Field",   "" },
-      { EngineeredTeleportEntrance, KEY_3, BUTTON_3, true,  "Teleport",      "" },
-      { EngineeredTeleportExit,     KEY_4, BUTTON_4, false, "Teleport Exit", "" },
+      { EngineeredTurret,           KEY_1, BUTTON_1, true,  "Turret",        "", "Aim at a spot on a wall, and activate the module again." },
+      { EngineeredForceField,       KEY_2, BUTTON_2, true,  "Force Field",   "", "Aim at a spot on a wall, and activate the module again." },
+      { EngineeredTeleportEntrance, KEY_3, BUTTON_3, true,  "Teleport",      "", "Aim at a spot in open space, and activate the module again." },
+      { EngineeredTeleportExit,     KEY_4, BUTTON_4, false, "Teleport Exit", "", "Aim at a spot in open space, and activate the module again." },
 };
 
 
@@ -151,7 +151,7 @@ void EngineerHelper::render()
       glColor(Colors::green);
       UserInterface::drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
       yPos += fontSize + 7;
-      UserInterface::drawString(xPos, yPos, fontSize, "Aim at a spot on the wall, and activate the module again.");
+      UserInterface::drawString(xPos, yPos, fontSize, mEngineerCostructionItemInfos[mSelectedItem].mInstruction);
    }
 }
 

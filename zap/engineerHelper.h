@@ -42,6 +42,7 @@ struct EngineerConstructionItemInfo
    bool showOnMenu;         // Should this item actually be added to the menu?
    const char *mName;       // Name used on menu
    const char *mHelp;       // An additional bit of help text, also displayed on menu
+   const char *mInstruction;// Instructions displayed when module is selected
 };
 
 
