@@ -143,15 +143,20 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 
 
 static Vector<string> gameTypes;
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 static void buildGameTypeList()
 {
-   for(S32 i = 0; gGameTypeNames[i]; i++)
-   {
-      // The following seems rather wasteful, but this is hardly a performance sensitive area...
-      GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
-      gameTypes.push_back(gameType->getGameTypeString());
-   }
+   gameTypes = GameType::getGameTypeNames();
+
+   gameTypes.sort(alphaSort);
+
+   //for(S32 i = 0; gGameTypeNames[i]; i++)
+   //{
+   //   // The following seems rather wasteful, but this is hardly a performance sensitive area...
+   //   GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
+   //   gameTypes.push_back(gameType->getGameTypeString());
+   //}
 }
 
 

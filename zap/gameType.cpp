@@ -4006,6 +4006,18 @@ const char *GameType::getGameTypeName(GameTypeId gameType)
 }
 
 
+// static
+Vector<string> GameType::getGameTypeNames()
+{
+   Vector<string> gameTypes;
+
+   for(S32 i = 0; i < ARRAYSIZE(GameTypeNames); i++)
+      gameTypes.push_back(GameTypeNames[i]);
+
+   return gameTypes;
+}
+
+
 const StringTableEntry *GameType::getLevelName() const
 {
    return &mLevelName;
