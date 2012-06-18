@@ -637,7 +637,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          { 1, 0, 0 },
       },
       {
-         { 0, 0.8, 0.25f },
+         { 0, 0.8f, 0.25f },
          { 0.5, 1.0, 0 },
          { 0, 1, 0 },
          { 1, 1, 0 },

@@ -387,7 +387,7 @@ void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char 
    bool inside = false;
    bool replacedAny = false;
 
-   S32 startPos, endPos;
+   size_t startPos, endPos;
 
    inside = false;
 

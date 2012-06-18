@@ -1931,7 +1931,7 @@ void Ship::emitMovementSparks()
 #ifndef ZAP_DEDICATED
    //U32 deltaT = mCurrentMove.time;
 
-   static const F32 TOO_SLOW_FOR_SPARKS = 0.1;
+   static const F32 TOO_SLOW_FOR_SPARKS = 0.1f;
    if(hasExploded || getActualVel().len() < TOO_SLOW_FOR_SPARKS)
       return;
 

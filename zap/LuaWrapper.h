@@ -596,12 +596,12 @@ int luaW__gc(lua_State* L)
     lua_getfield(L, -1, LUAW_COUNT_KEY); // obj id LuaWrapper LuaWrapper.counts
     LuaWrapper<T>::identifier(L, obj); // obj id LuaWrapper LuaWrapper.counts id
     lua_gettable(L, -2); // obj id LuaWrapper LuaWrapper.counts count
-    int count = lua_tointeger(L, -1);
+    int count = (int) lua_tointeger(L, -1);
     lua_pushvalue(L, 2); // obj id LuaWrapper LuaWrapper.counts count id
     lua_pushinteger(L, --count); // obj id LuaWrapper LuaWrapper.counts count id count-1
     lua_settable(L, -4); // obj id LuaWrapper LuaWrapper.counts count
 
-    if (obj && 0 == count)
+    if (obj && count == 0)
     {
         lua_getfield(L, 3, LUAW_HOLDS_KEY); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds
         lua_pushvalue(L, 2); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds id
@@ -827,7 +827,7 @@ private:
    // Sort vector of classes so parents of each class are listed before their children
    static void sortClassList()
    {
-      unsigned int itemsRemainingInList;
+      size_t itemsRemainingInList;
 
       itemsRemainingInList = getUnorderedClassList().size();     
 
