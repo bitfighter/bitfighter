@@ -286,10 +286,12 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    // ExitPointChangedMask
    if(stream->readFlag())
    {
-      // Set the destination point
+      // Set the destination point properly on the client
       Point dest;
       dest.read(stream);
       setVert(dest, 1);
+      mDests.clear();
+      mDests.push_back(dest);
 
       // Update the object extents
       Rect rect(getVert(0), getVert(1));
@@ -390,7 +392,7 @@ bool Teleporter::needsEndpoint()
    return mNeedsEndpoint;
 }
 
-
+// Server only
 void Teleporter::setEndpoint(const Point &point)
 {
    if(mNeedsEndpoint)

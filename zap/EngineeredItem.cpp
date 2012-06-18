@@ -162,10 +162,6 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
       return false;
    }
 
-   // We can deploy a teleport entrance or exit anywhere for now...
-   if(objectType == EngineeredTeleportEntrance)
-      return true;
-
    Vector<Point> bounds;
    bool goodDeploymentPosition = false;
 
@@ -180,6 +176,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
          ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal, bounds);
          goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
+      case EngineeredTeleportEntrance:
       case EngineeredTeleportExit:
          goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase);
          break;
