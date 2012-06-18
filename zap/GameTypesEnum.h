@@ -28,21 +28,22 @@
 
 namespace Zap
 {     
-//                 Enum              GameType Name                      
+//                 Enum               GameType              GameType Name                      
 #define GAME_TYPE_TABLE \
-   GAME_TYPE_ITEM( BitmatchGame,    "Bitmatch"         ) \
-   GAME_TYPE_ITEM( CTFGame,         "Capture the Flag" ) \
-   GAME_TYPE_ITEM( HTFGame,         "Hold the Flag"    ) \
-   GAME_TYPE_ITEM( NexusGame,       "Nexus"            ) \
-   GAME_TYPE_ITEM( RabbitGame,      "Rabbit"           ) \
-   GAME_TYPE_ITEM( RetrieveGame,    "Retrieve"         ) \
-   GAME_TYPE_ITEM( SoccerGame,      "Soccer"           ) \
-   GAME_TYPE_ITEM( ZoneControlGame, "Zone Control"     ) \
-   GAME_TYPE_ITEM( CoreGame,        "Core"             ) \
+   GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch"         ) \
+   GAME_TYPE_ITEM( CTFGame,         "CTFGameType",         "Capture the Flag" ) \
+   GAME_TYPE_ITEM( HTFGame,         "CoreGameType",        "Hold the Flag"    ) \
+   GAME_TYPE_ITEM( NexusGame,       "HTFGameType",         "Nexus"            ) \
+   GAME_TYPE_ITEM( RabbitGame,      "NexusGameType",       "Rabbit"           ) \
+   GAME_TYPE_ITEM( RetrieveGame,    "RabbitGameType",      "Retrieve"         ) \
+   GAME_TYPE_ITEM( SoccerGame,      "RetrieveGameType",    "Soccer"           ) \
+   GAME_TYPE_ITEM( ZoneControlGame, "SoccerGameType",      "Zone Control"     ) \
+   GAME_TYPE_ITEM( CoreGame,        "ZoneControlGameType", "Core"             ) \
+
 
    // Define an enum from the first column of GAME_TYPE_TABLE
    enum GameTypeId {
-#  define GAME_TYPE_ITEM(enumValue, b) enumValue,
+#  define GAME_TYPE_ITEM(enumValue, b, c) enumValue,
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
        NoGameType,

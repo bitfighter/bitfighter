@@ -77,7 +77,6 @@ Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
 
 
 extern ServerGame *gServerGame;
-extern const char *gGameTypeNames[];
 
 S32 LuaGameInfo::getGameType(lua_State *L)
 {

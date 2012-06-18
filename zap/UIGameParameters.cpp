@@ -128,12 +128,11 @@ void GameParamUserInterface::clearCurrentGameTypeParams()
 }
 
 
-extern const char *gGameTypeNames[];
-
 static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 {
-   TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);   // Instantiate our gameType object
-   GameType *gt = dynamic_cast<GameType *>(theObject);                      // and cast it to GameType
+   // Instantiate our gameType object and cast it to GameType
+   TNL::Object *theObject = TNL::Object::create(GameType::getGameTypeClassName((GameTypeId)gtIndex));  
+   GameType *gt = dynamic_cast<GameType *>(theObject);   
 
    gt->addToGame(game, NULL);    // GameType::addToGame() ignores database (and what would it do with one, anyway?), so we can pass NULL
 
@@ -142,23 +141,6 @@ static void changeGameTypeCallback(ClientGame *game, U32 gtIndex)
 }
 
 
-static Vector<string> gameTypes;
-extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
-
-static void buildGameTypeList()
-{
-   gameTypes = GameType::getGameTypeNames();
-
-   gameTypes.sort(alphaSort);
-
-   //for(S32 i = 0; gGameTypeNames[i]; i++)
-   //{
-   //   // The following seems rather wasteful, but this is hardly a performance sensitive area...
-   //   GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
-   //   gameTypes.push_back(gameType->getGameTypeString());
-   //}
-}
-
 
 #ifndef WIN32
 extern const S32 Game::MIN_GRID_SIZE;     // Needed by gcc, cause errors in VC++... and for Mac?
@@ -166,19 +148,26 @@ extern const S32 Game::MAX_GRID_SIZE;
 #endif
 
 
+static Vector<string> gameTypes;
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
+
+
 void GameParamUserInterface::updateMenuItems()
 {
    GameType *gameType = getGame()->getGameType();
-   TNLAssert(gameType, "Invalid game type!");
+   TNLAssert(gameType, "Missing game type!");
 
    if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
-      buildGameTypeList();
+   {
+      gameTypes = GameType::getGameTypeNames();
+      gameTypes.sort(alphaSort);
+   }
 
    clearMenuItems();
 
    addMenuItem(new ToggleMenuItem("Game Type:",       
                                   gameTypes,
-                                  gameTypes.getIndex(gameType->getClassName()),
+                                  gameTypes.getIndex(gameType->getGameTypeString()),
                                   true,
                                   changeGameTypeCallback,
                                   gameType->getInstructionString()));

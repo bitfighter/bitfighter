@@ -204,7 +204,7 @@ public:
    static const S32 MAX_TEAMS = 9;                                   // Max teams allowed -- careful changing this; used for RPC ranges
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = MAX_TEAMS - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
-   static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
+   static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to base class if needed
 
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
@@ -318,7 +318,9 @@ public:
 
    bool isGameOver() const;
 
-   static const char *getGameTypeName(GameTypeId gameType);
+   static const char *getGameTypeName(GameTypeId gameType);       // Return string like "Capture The Flag"
+   static const char *getGameTypeClassName(GameTypeId gameType);  // Return string like "CTFGameType"
+
    static Vector<string> getGameTypeNames();
 
    bool mHaveSoccer;                // Does level have soccer balls? used to determine weather or not to send s2cSoccerCollide

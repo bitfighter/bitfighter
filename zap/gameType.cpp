@@ -75,21 +75,14 @@ const S32 GameType::MAX_TEAMS;
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
-const char *gGameTypeNames[] = {
-   "GameType",                // Generic game type --> Bitmatch
-   "CTFGameType",
-   "CoreGameType",
-   "HTFGameType",
-   "NexusGameType",
-   "RabbitGameType",
-   "RetrieveGameType",
-   "SoccerGameType",
-   "ZoneControlGameType",
-   NULL  // Last item must be NULL
+static const char *gameTypeClassNames[] = {
+#  define GAME_TYPE_ITEM(a, type, c) type,
+       GAME_TYPE_TABLE
+#  undef GAME_TYPE_ITEM
+
+       NULL  // Last item must be NULL
 };
 
-
-S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
 
 ////////////////////////////////////////               
 ////////////////////////////////////////
@@ -506,10 +499,10 @@ void GameType::printRules()
    printf("\n\n");
    printf("Game Types:\n\n");
 
-   for(S32 i = 0; gGameTypeNames[i]; i++)
+   for(S32 i = 0; gameTypeClassNames[i]; i++)
    {
-      TNL::Object *theObject = TNL::Object::create(gGameTypeNames[i]);  // Instantiate a gameType object
-      GameType *gameType = dynamic_cast<GameType*>(theObject);          // and cast it
+      TNL::Object *theObject = TNL::Object::create(gameTypeClassNames[i]);  // Instantiate a gameType object
+      GameType *gameType = dynamic_cast<GameType*>(theObject);              // and cast it
 
       string indTeam;
 
@@ -632,14 +625,17 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 
 
 // Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified  (static)
-const char *GameType::validateGameType(const char *gtype)
+const char *GameType::validateGameType(const char *gameTypeName)
 {
-   for(S32 i = 0; gGameTypeNames[i]; i++)    // Repeat until we hit NULL
-      if(!strcmp(gGameTypeNames[i], gtype))
-         return gGameTypeNames[i];
+   for(S32 i = 0; gameTypeClassNames[i]; i++)    // Repeat until we hit NULL
+      if(strcmp(gameTypeClassNames[i], gameTypeName) == 0)
+         return gameTypeClassNames[i];
+
+
+   const S32 DEFAULT_GAME_TYPE_INDEX = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
 
    // If we get to here, no valid game type was specified, so we'll return the default
-   return gGameTypeNames[gDefaultGameTypeIndex];
+   return gameTypeClassNames[DEFAULT_GAME_TYPE_INDEX];
 }
 
 
@@ -3992,17 +3988,25 @@ bool GameType::isGameOver() const
 // themselves as StringTableEntries, which would be almost as efficient.
 // Expand GAME_TYPE_TABLE into an array of names
 const char *GameTypeNames[] = {
-#  define GAME_TYPE_ITEM(a, name) name,
+#  define GAME_TYPE_ITEM(a, b, name) name,
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
 };
 
 
-// static
+// Return string like "Capture The Flag" -- static
 const char *GameType::getGameTypeName(GameTypeId gameType)
 {
    TNLAssert(gameType < ARRAYSIZE(GameTypeNames), "Array index out of bounds!");
    return GameTypeNames[gameType];
+}
+
+
+// Return string like "CTFGameType" -- static
+const char *GameType::getGameTypeClassName(GameTypeId gameType)
+{
+   TNLAssert(gameType < ARRAYSIZE(GameTypeNames), "Array index out of bounds!");
+   return gameTypeClassNames[gameType];
 }
 
 
