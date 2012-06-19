@@ -107,7 +107,8 @@ bool isDamageableType(U8 x)
          x == BulletTypeNumber       || x == MineTypeNumber                || x == SpyBugTypeNumber   ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
          x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
-         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber;
+         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber   ||
+         x == TeleportTypeNumber;
 }
 
 
