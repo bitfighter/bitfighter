@@ -259,7 +259,6 @@ public:
 
    // Some games may place restrictions on when players can fire or use modules
    virtual bool onFire(Ship *ship);
-   virtual bool okToUseModules(Ship *ship);
 
    virtual bool isSpawnWithLoadoutGame();  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 

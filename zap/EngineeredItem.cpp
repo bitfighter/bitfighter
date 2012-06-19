@@ -391,6 +391,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
       case EngineeredTeleportEntrance:
          deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
          ship->setEngineeredTeleport(static_cast<Teleporter*>(deployedObject));
+         ship->disableWeaponsAndModules(true);
          break;
 
       case EngineeredTeleportExit:
@@ -398,6 +399,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          {
             ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
             ship->setEngineeredTeleport(NULL);   // Clear out the attached teleporter
+            ship->disableWeaponsAndModules(false);
          }
          else   // Something went wrong
             return false;

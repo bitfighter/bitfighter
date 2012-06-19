@@ -61,6 +61,8 @@ private:
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
 
+   bool mWeaponsAndModulesDisabled;
+
    SafePtr<Teleporter> mEngineeredTeleport;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
@@ -137,9 +139,9 @@ public:
       ModuleSecondaryMask = BIT(7), // Is module secondary component active
       LoadoutMask = BIT(8),
       RespawnMask = BIT(9),         // For when robots respawn
-      TeleportMask = BIT(10),        // Ship has just teleported
+      TeleportMask = BIT(10),       // Ship has just teleported
       ChangeTeamMask = BIT(11),     // Used for when robots change teams
-      SpawnShieldMask = BIT(12),    // Used for when robots change teams
+      SpawnShieldMask = BIT(12),    // Used for the spawn shield
    };
 
    enum SensorStatus {
@@ -212,6 +214,8 @@ public:
    void engineerBuildObject();
 
    bool hasModule(ShipModule mod);
+
+   void disableWeaponsAndModules(bool disable);
 
    bool isDestroyed();
    bool isItemMounted();    // <== unused

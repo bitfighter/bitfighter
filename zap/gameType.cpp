@@ -3890,12 +3890,6 @@ bool GameType::onFire(Ship *ship)
 }
 
 
-bool GameType::okToUseModules(Ship *ship)
-{
-   return true;
-}
-
-
 bool GameType::isSpawnWithLoadoutGame()
 {
    return false;

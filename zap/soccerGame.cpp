@@ -214,12 +214,6 @@ bool SoccerGameType::onFire(Ship *ship)
 }
 
 
-bool SoccerGameType::okToUseModules(Ship *ship)
-{
-   return Parent::okToUseModules(ship) && !ship->isCarryingItem(SoccerBallItemTypeNumber);
-}
-
-
 // Runs on server only, and only when player deliberately drops ball... gets run when dropping resurce item
 void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
 {
