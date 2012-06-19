@@ -456,6 +456,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,EngineerEventCount> event), (event),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    switch(event)
    {
       case EngineerEventTurretBuilt:
@@ -474,6 +475,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,Enginee
       default:
          break;
    }
+#endif
 }
 
 

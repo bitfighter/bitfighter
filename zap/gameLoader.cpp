@@ -38,6 +38,13 @@
 
 #include <stdio.h>
 
+#  ifdef TNL_OS_WIN32
+#     include "dirent.h"        // Need local copy for Windows builds
+#  else
+#     include <dirent.h>        // Need standard copy for *NIXes
+#  endif
+
+
 
 using namespace TNL;
 
@@ -320,11 +327,6 @@ bool LevelLoader::loadLevelFromFile(const string &filename, bool inEditor, GridD
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-#  ifdef TNL_OS_WIN32
-#     include "dirent.h"        // Need local copy for Windows builds
-#  else
-#     include <dirent.h>        // Need standard copy for *NIXes
-#  endif
 
 using namespace std;
 
