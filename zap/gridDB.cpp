@@ -145,7 +145,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 
    // Add the object to our non-spatial "database" as well
    mAllObjects.push_back(theObject);
-   sortObjects(mAllObjects);
+   //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
 

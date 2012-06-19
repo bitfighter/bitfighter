@@ -1432,8 +1432,3 @@ Triangulate::TriangleData::~TriangleData()
 
 
 };
-
-
-#undef MIN
-#undef MAX
-
