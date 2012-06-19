@@ -102,19 +102,24 @@ Robot::~Robot()
    }
 
    // Server only from here on down
-   if(getGame() && getGame()->getGameType())
-      getGame()->getGameType()->serverRemoveClient(mClientInfo);
+   if(getGame())  // can be NULL if this robot was never added to game (bad / missing robot file)
+   {
+      EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerLeftEvent, getPlayerInfo());
 
-   getGame()->removeBot(this);
+      if(getGame()->getGameType())
+         getGame()->getGameType()->serverRemoveClient(mClientInfo);
+
+      getGame()->removeBot(this);
+      logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
+
+   }
 
    mPlayerInfo->setDefunct();
-   EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerLeftEvent, getPlayerInfo());
 
    delete mPlayerInfo;
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
 
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
