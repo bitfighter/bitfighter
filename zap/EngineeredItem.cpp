@@ -1804,7 +1804,7 @@ void Turret::idle(IdleCallPath path)
 
       // Skip this target if there's a friendly object in the way
       if(hitObject && hitObject->getTeam() == getTeam() &&
-        (hitObject->getPos() - aimPos).len() < delta.len())         
+        (hitObject->getPos() - aimPos).lenSquared() < delta.lenSquared())         
          continue;
 
       F32 dist = delta.len();
