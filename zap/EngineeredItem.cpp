@@ -1802,7 +1802,9 @@ void Turret::idle(IdleCallPath path)
       BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
-      if(hitObject && hitObject->getTeam() == getTeam())
+      // Skip this target if there's a friendly object in the way
+      if(hitObject && hitObject->getTeam() == getTeam() &&
+        (hitObject->getPos() - aimPos).len() < delta.len())         
          continue;
 
       F32 dist = delta.len();
