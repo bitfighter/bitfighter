@@ -29,7 +29,7 @@
 #include "Colors.h"
 
 #ifndef ZAP_DEDICATED
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 #include "UI.h"
 #endif
 

@@ -31,7 +31,7 @@
 #include "Colors.h"
 #include "ScreenInfo.h"
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <stdio.h>
 

@@ -30,6 +30,7 @@
 #include "ScreenInfo.h"    // For canvasHeight
 #include "ClientGame.h"    // For UIManager and callback
 #include "game.h"
+#include "OpenglUtils.h"
 
 namespace Zap
 {

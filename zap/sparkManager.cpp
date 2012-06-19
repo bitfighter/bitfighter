@@ -30,7 +30,7 @@
 #include "config.h"
 #include "ClientGame.h"    // For getCommanderZoomFraction()
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 #include "UI.h"
 
 #include <math.h>

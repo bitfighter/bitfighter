@@ -44,7 +44,7 @@
 #include "oglconsole.h"
 
 #ifndef ZAP_DEDICATED
-#  include "UI.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include <math.h>

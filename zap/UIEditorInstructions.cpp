@@ -39,7 +39,7 @@
 #include "GeomUtils.h"      // For polygon triangulation
 #include "ScreenInfo.h"
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <math.h>
 

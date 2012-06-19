@@ -29,7 +29,7 @@
 #include "config.h"
 #include "Colors.h"
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 namespace Zap
 {

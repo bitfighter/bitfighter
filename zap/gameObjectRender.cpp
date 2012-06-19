@@ -41,7 +41,7 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 //#include "pictureloader.h"
 
@@ -2106,18 +2106,6 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
       glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
    glPopMatrix();
-}
-
-
-void glColor(const Color &c, float alpha)
-{
-    glColor4f(c.r, c.g, c.b, alpha);
-}
-
-
-void glColor(const Color *c, float alpha)
-{
-    glColor4f(c->r, c->g, c->b, alpha);
 }
 
 

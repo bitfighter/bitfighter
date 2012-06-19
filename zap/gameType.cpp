@@ -46,7 +46,7 @@
 #   include "UIGame.h"
 #   include "UIMenus.h"
 #   include "UIErrorMessage.h"   
-#   include "SDL_opengl.h"
+#   include "OpenglUtils.h"
 #endif
 
 

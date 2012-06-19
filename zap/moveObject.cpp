@@ -39,8 +39,8 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "sparkManager.h"
-#  include "UI.h" // for extern void glColor
 #  include "UIEditorMenus.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include "LuaWrapper.h"

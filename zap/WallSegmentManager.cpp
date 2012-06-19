@@ -29,8 +29,8 @@
 #include "game.h"
 
 #ifndef ZAP_DEDICATED 
-#   include "UI.h"  // for glColor(Color)
-#   include "SDL_opengl.h"
+#   include "UI.h"
+#   include "OpenglUtils.h"
 #endif
 
 

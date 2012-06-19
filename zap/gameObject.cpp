@@ -36,6 +36,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include "projectile.h"
@@ -538,8 +539,6 @@ void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamInde
 
 #endif
 
-
-extern void glColor(const Color &c, float alpha = 1.0);
 
 #ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor
