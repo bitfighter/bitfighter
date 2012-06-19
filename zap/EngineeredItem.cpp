@@ -391,6 +391,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
       case EngineeredTeleportEntrance:
          deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
          ship->setEngineeredTeleport(static_cast<Teleporter*>(deployedObject));
+         ship->disableWeaponsAndModules(true);
          break;
 
       case EngineeredTeleportExit:
@@ -398,6 +399,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          {
             ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
             ship->setEngineeredTeleport(NULL);   // Clear out the attached teleporter
+            ship->disableWeaponsAndModules(false);
          }
          else   // Something went wrong
             return false;
@@ -1800,7 +1802,9 @@ void Turret::idle(IdleCallPath path)
       BfObject *hitObject = findObjectLOS((TestFunc) isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
-      if(hitObject && hitObject->getTeam() == getTeam())
+      // Skip this target if there's a friendly object in the way
+      if(hitObject && hitObject->getTeam() == getTeam() &&
+        (hitObject->getPos() - aimPos).lenSquared() < delta.lenSquared())         
          continue;
 
       F32 dist = delta.len();

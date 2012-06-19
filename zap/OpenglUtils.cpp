@@ -35,6 +35,8 @@
 #include "freeglut_stroke.h"
 #include "freeglut_stroke_roman.h"
 
+#include "Color.h"
+
 namespace Zap {
 
 void OpenglUtils::drawCharacter(S32 character)
@@ -110,6 +112,17 @@ int OpenglUtils::getStringLength(const unsigned char* string )
    if( length < this_line_length )
       length = this_line_length;
    return( S32 )( length + 0.5 );
+}
+
+
+void glColor(const Color &c, float alpha)
+{
+    glColor4f(c.r, c.g, c.b, alpha);
+}
+
+void glColor(const Color *c, float alpha)
+{
+    glColor4f(c->r, c->g, c->b, alpha);
 }
 
 }

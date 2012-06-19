@@ -42,7 +42,7 @@
 #include "tnlRandom.h"
 
 #include "SDL.h"
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <math.h>
 

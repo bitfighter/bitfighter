@@ -33,7 +33,7 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED 
-#   include "SDL_opengl.h"
+#   include "OpenglUtils.h"
 #endif
 
 #include <cmath>
@@ -427,11 +427,6 @@ void Barrier::prepareRenderingGeometry(Game *game)
 
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
-
-
-#ifndef ZAP_DEDICATED
-extern void glColor(const Color *c, float alpha = 1.0);
-#endif
 
 
 // Render wall fill only for this wall; all edges rendered in a single pass later

@@ -31,7 +31,7 @@
 #include "gameType.h"
 #include "ClientInfo.h"
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <algorithm>
 #include <math.h> 

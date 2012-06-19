@@ -36,7 +36,7 @@
 #include "ClientGame.h"
 #include "ClientInfo.h"
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <stdarg.h>
 #include <utility>

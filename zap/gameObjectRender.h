@@ -86,7 +86,6 @@ extern void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerR
 extern void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle, F32 offset);
 extern void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 spaceAngle, F32 offset);
 
-//extern void glColor(const Color &c, float alpha = 1.0);
 extern void drawSquare(const Point &pos, F32 size, bool filled = false);
 extern void drawSquare(const Point &pos, S32 size, bool filled = false);
 extern void drawFilledSquare(const Point &pos, F32 size);

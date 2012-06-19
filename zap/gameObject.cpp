@@ -36,6 +36,7 @@
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include "projectile.h"
@@ -106,7 +107,8 @@ bool isDamageableType(U8 x)
          x == BulletTypeNumber       || x == MineTypeNumber                || x == SpyBugTypeNumber   ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
          x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
-         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber;
+         x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber   ||
+         x == TeleportTypeNumber;
 }
 
 
@@ -538,8 +540,6 @@ void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamInde
 
 #endif
 
-
-extern void glColor(const Color &c, float alpha = 1.0);
 
 #ifndef ZAP_DEDICATED
 // Render selected and highlighted vertices, called from renderEditor

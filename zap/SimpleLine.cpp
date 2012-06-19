@@ -31,7 +31,7 @@
 #include <math.h>
 
 #ifndef ZAP_DEDICATED
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 #include "UI.h"
 #include "UIEditor.h"
 #endif

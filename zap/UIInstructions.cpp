@@ -42,7 +42,7 @@
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 namespace Zap
 {

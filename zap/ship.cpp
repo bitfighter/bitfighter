@@ -53,7 +53,7 @@
 
 #ifndef ZAP_DEDICATED
 #include "ClientGame.h"
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 #include "sparkManager.h"
 #include "UI.h"
 #include "UIMenus.h"
@@ -121,6 +121,8 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
       hasExploded = false;    // Client needs this false for unpackUpdate
 
    mZones1IsCurrent = true;
+
+   mWeaponsAndModulesDisabled = false;
 
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
@@ -507,7 +509,7 @@ void Ship::processWeaponFire()
 
    GameType *gameType = getGame()->getGameType();
 
-   if(mCurrentMove.fire && gameType)
+   if(mCurrentMove.fire && gameType && !mWeaponsAndModulesDisabled)
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
@@ -856,9 +858,6 @@ void Ship::processModules()
       mModuleSecondaryActive[i] = false;
    }
 
-   // Make sure we're allowed to use modules
-   bool allowed = getGame()->getGameType() && getGame()->getGameType()->okToUseModules(this);
-
    // Go through our loaded modules and see if they are currently turned on
    // Are these checked on the server side?
    for(S32 i = 0; i < ShipModuleCount; i++)   
@@ -868,8 +867,8 @@ void Ship::processModules()
          mModulePrimaryActive[mModule[i]] = true;         // needs to be true to allow stats counting
 
       // Set loaded module states to 'on' if detected as so,
-      // unless modules are disallowed or we need to cooldown
-      if (!mCooldownNeeded && allowed)
+      // unless modules are disabled or we need to cooldown
+      if (!mCooldownNeeded && !mWeaponsAndModulesDisabled)
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
@@ -1316,6 +1315,9 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
    stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
+   // Write if our weapons and modules are disabled
+   stream->writeFlag(mWeaponsAndModulesDisabled);
+
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
 
    if(!shouldWritePosition)
@@ -1455,6 +1457,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny (sfx, spiral bg are done by the teleporter itself)
    }
 
+   mWeaponsAndModulesDisabled = stream->readFlag(); // mWeaponsAndModulesDisabled
+
    if(stream->readFlag())     // UpdateMask
    {
       Point p;
@@ -1567,6 +1571,12 @@ bool Ship::hasModule(ShipModule mod)
       if(mModule[i] == mod)
          return true;
    return false;
+}
+
+
+void Ship::disableWeaponsAndModules(bool disable)
+{
+   mWeaponsAndModulesDisabled = disable;
 }
 
 

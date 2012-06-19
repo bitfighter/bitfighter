@@ -39,7 +39,7 @@
 #include "Cursor.h"
 
 #include "SDL.h"
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <string>
 #include <math.h>

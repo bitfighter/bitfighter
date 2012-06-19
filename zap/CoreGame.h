@@ -171,7 +171,9 @@ public:
 
 
    void onAddedToGame(Game *theGame);
+#ifndef ZAP_DEDICATED
    void onItemDragging();
+#endif
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

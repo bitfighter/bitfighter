@@ -75,8 +75,6 @@ public:
    void shipTouchZone(Ship *s, GoalZone *z);
 
    bool onFire(Ship *ship);             
-   // No modules while carrying the ball!
-   bool okToUseModules(Ship *ship);
 
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
    TNL_DECLARE_CLASS(SoccerGameType);

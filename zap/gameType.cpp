@@ -46,7 +46,7 @@
 #   include "UIGame.h"
 #   include "UIMenus.h"
 #   include "UIErrorMessage.h"   
-#   include "SDL_opengl.h"
+#   include "OpenglUtils.h"
 #endif
 
 
@@ -3885,12 +3885,6 @@ bool GameType::isCarryingItems(Ship *ship)
 
 
 bool GameType::onFire(Ship *ship)
-{
-   return true;
-}
-
-
-bool GameType::okToUseModules(Ship *ship)
 {
    return true;
 }
