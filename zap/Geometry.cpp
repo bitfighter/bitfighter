@@ -264,6 +264,20 @@ void Geometry::flip(F32 center, bool isHoriz)
 }
 
 
+// Could probably be more clever about this, but only used when merging polygons in the editor, so speed not critical
+void Geometry::reverseWinding()
+{
+   S32 count = getVertCount();
+   Vector<Point> temp(count);
+
+   for(S32 i = 0; i < count; i++)
+      temp.push_back(getVert(i));
+
+   for(S32 i = 0; i < count; i++)
+      setVert(temp[i], count - i - 1);
+}
+
+
 // Make object bigger or smaller
 void Geometry::scale(const Point &center, F32 scale) 
 {

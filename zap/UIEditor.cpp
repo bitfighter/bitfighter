@@ -65,7 +65,7 @@
 #include "VideoSystem.h"
 
 #include "SDL.h"
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -3217,7 +3217,6 @@ void EditorUserInterface::joinBarrier()
       setNeedToSave(true);
       autoSave();
       joinedObj->onGeomChanged();
-
       joinedObj->setSelected(true);
 
       onSelectionChanged();
@@ -3231,15 +3230,24 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
    Vector<Vector<Point> > outputPolygons;
    Vector<S32> deleteList;
 
+   saveUndoState();
+
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
    inputPolygons.push_back(firstItem->getOutline());
 
-   for(S32 i = firstItemIndex + 1; i < objList->size(); i++)               // Compare against remaining objects
+   bool cw = isWoundClockwise(*firstItem->getOutline());       // Make sure all our polys are wound the same direction as the first
+                                                               
+   for(S32 i = firstItemIndex + 1; i < objList->size(); i++)   // Compare against remaining objects
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
       if(obj->getObjectTypeNumber() == firstItem->getObjectTypeNumber() && obj->isSelected())
       {
+         // We can just reverse the winding in place -- if merge succeeds, the poly will be deleted,
+         // and if it fails we'll just undo and revert everything to the way it was
+         if(isWoundClockwise(*obj->getOutline()) != cw)
+            obj->reverseWinding();
+
          inputPolygons.push_back(obj->getOutline());
          deleteList.push_back(i);
       }
@@ -3255,15 +3263,19 @@ BfObject *EditorUserInterface::doMergePolygons(BfObject *firstItem, S32 firstIte
 
       // Add the new points
       for(S32 i = 0; i < outputPolygons[0].size(); i++)
-         firstItem->addVert(outputPolygons[0][i]);
+         ok &= firstItem->addVert(outputPolygons[0][i]);    // Will return false if polygon overflows
 
-      // And delete the constituent parts; work backwards to avoid queering the deleteList indices
-      for(S32 i = deleteList.size() - 1; i >= 0; i--)
-         deleteItem(deleteList[i]);
+      if(ok)
+      {
+         // Delete the constituent parts; work backwards to avoid queering the deleteList indices
+         for(S32 i = deleteList.size() - 1; i >= 0; i--)
+            deleteItem(deleteList[i]);
 
-      return firstItem;
+         return firstItem;
+      }
    }
 
+   undo(false);   // Merge failed for some reason.  Revert everything to undo state saved at the top of method.
    return NULL;
 }
 

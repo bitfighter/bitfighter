@@ -39,7 +39,7 @@
 #include "GeomUtils.h"      // For polygon triangulation
 #include "ScreenInfo.h"
 
-#include "SDL_opengl.h"
+#include "OpenglUtils.h"
 
 #include <math.h>
 
@@ -344,9 +344,8 @@ static const char *wallInstructions[] =
    "Finish wall by left-clicking",
    "Drag and drop individual vertices or an entire wall",
    "Split wall at selected vertex with [\\]",
-   "Join contiguous wall segments with [J]",
+   "Join contiguous wall segments, polywalls, or zones with [J]",
    "Change wall thickness with [+] & [-] (use [Shift] for smaller changes)",
-   ""    // Last item must be ""
 };
 
 
@@ -441,19 +440,14 @@ void EditorInstructionsUserInterface::renderPageWalls()
    S32 y = 300;
    bool done = false;
 
-   for(S32 i = 0; !done; i++)
+   for(S32 i = 0; i < ARRAYSIZE(wallInstructions); i++)
    {
-      if(!strcmp(wallInstructions[i], ""))
-         done = true;
-      else
-      {
-         glColor(Colors::red);  
-         drawString(50, y, textSize, "*");
+      glColor(Colors::red);  
+      drawString(50, y, textSize, "*");
 
-         glColor(Colors::white); 
-         drawString(x, y, textSize, wallInstructions[i]);
-         y += 26;
-      }
+      glColor(Colors::white); 
+      drawString(x, y, textSize, wallInstructions[i]);
+      y += 26;
    }
 }
 

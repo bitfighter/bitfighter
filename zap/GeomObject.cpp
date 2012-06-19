@@ -161,6 +161,8 @@ F32   GeomObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabel
 const Vector<Point> *GeomObject::getOutline() const       {   return mGeometry.getOutline();    }
 const Vector<Point> *GeomObject::getFill() const          {   return mGeometry.getFill();       }
 
+void GeomObject::reverseWinding() { mGeometry.reverseWinding(); }
+
 
 // Geometric manipulations
 void GeomObject::rotateAboutPoint(const Point &center, F32 angle)  {  mGeometry.getGeometry()->rotateAboutPoint(center, angle);   }
@@ -283,6 +285,12 @@ void GeometryContainer::setGeometry(Geometry *geometry)
 }
 
 
+void GeometryContainer::reverseWinding()    
+{
+   mGeometry->reverseWinding();
+}
+
+
 const Vector<Point> *GeometryContainer::getOutline() const
 {
    return mGeometry->getOutline();
@@ -293,6 +301,11 @@ const Vector<Point> *GeometryContainer::getFill() const
 {
    return mGeometry->getFill();
 }
+
+
+
+
+
 
 
 Point GeometryContainer::getVert(S32 index) const   

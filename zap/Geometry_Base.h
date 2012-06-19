@@ -73,6 +73,7 @@ public:
    virtual bool addVertFront(Point vert);
    virtual bool deleteVert(S32 vertIndex);
    virtual bool insertVert(Point vertex, S32 vertIndex);
+   virtual void reverseWinding();
 
    virtual bool anyVertsSelected();
 

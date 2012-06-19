@@ -45,9 +45,11 @@ public:
    Geometry *getGeometry() const;
    const Geometry *getConstGeometry() const;
    void setGeometry(Geometry *geometry);
+   void reverseWinding();
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill() const;
+   
    Point getVert(S32 index) const;
    string geomToString(F32 gridSize) const; 
 };
@@ -102,6 +104,8 @@ public:
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill()    const;
+
+   void reverseWinding();     
 
    Rect getBounds(U32 stateIndex) const;
                                                     
