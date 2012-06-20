@@ -887,10 +887,74 @@ protected:
    }
 
 public:
+   // Only works if sortClassList() has not yet been run
+   // This will (probably) only be run in diagnostic mode, where performance is completely unimportant
+   static std::string getClassAndMethodList()
+   {
+      std::vector<std::vector<ClassName> > classLists;
+      std::vector<ClassName> &orderedClassList = getOrderedClassList();
+
+      // Items in orderedClassList at this point are those with no parents, and are therefore independent from one another
+      for(unsigned int i = 0; i < orderedClassList.size(); i++)
+      {
+         std::vector<ClassName> newList;
+         newList.push_back(orderedClassList[i]);
+         classLists.push_back(newList);
+      }
+
+      // Make a copy of unorderedClassList, which will be destroyed by sortClassList
+      std::vector<ClassParent> unorderedList = getUnorderedClassList();    // Makes copy
+
+      std::map<ClassName, ClassName> classParentMap;
+      for(unsigned int i = 0; i < getUnorderedClassList().size(); i++)
+         classParentMap.insert(std::pair<ClassName, ClassName>(getUnorderedClassList()[i].name, getUnorderedClassList()[i].parent));
+
+      sortClassList();
+
+      // Figure out which list each ordered class belongs in
+      for(unsigned int i = 0; i < orderedClassList.size(); i++)
+      {
+         ClassName parent = classParentMap[orderedClassList[i]];
+         if(!parent)
+            continue;
+
+         for(unsigned int j = 0; j < classLists.size(); j++)
+         {
+            for(unsigned int k = 0; k < classLists[j].size(); k++)
+            {
+               if(strcmp(classLists[j][k], orderedClassList[i]) == 0)      // Already on a list (from pre-sort phase)
+                  goto doubleBreak;
+               
+               if(strcmp(classLists[j][k], parent) == 0)
+               {
+                  logprintf("[ %s ] -> [ %s]", orderedClassList[i], parent);
+
+                  classLists[j].push_back(orderedClassList[i]);
+                  goto doubleBreak;
+               }
+            }
+         }
+
+doubleBreak:  
+         int doNothing = 0;
+      }
+
+      for(unsigned int i = 0; i < classLists.size(); i++)
+      {
+         logprintf("=====================================");
+         for(unsigned int j = 0; j < classLists[i].size(); j++)
+            logprintf("%s", classLists[i][j]);
+      }
+
+      return "";
+   }
+
    static void registerClasses(lua_State *L)
    {
+      //getClassAndMethodList();
+
       sortClassList();
-      std::vector<ClassName> orderedClassList = getOrderedClassList();
+      std::vector<ClassName> &orderedClassList = getOrderedClassList();
 
       // Register all our classes
       for(unsigned int i = 0; i < orderedClassList.size(); i++)
@@ -906,6 +970,8 @@ public:
          getExtensionFunctions()[orderedClassList[i]](L);
       }
    }
+
+
 };
 
 
