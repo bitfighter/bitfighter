@@ -438,9 +438,8 @@ void EditorInstructionsUserInterface::renderPageWalls()
    // And now some written instructions
    S32 x = 50 + getStringWidth(textSize, "* ");
    S32 y = 300;
-   bool done = false;
 
-   for(S32 i = 0; i < ARRAYSIZE(wallInstructions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(wallInstructions); i++)
    {
       glColor(Colors::red);  
       drawString(50, y, textSize, "*");
