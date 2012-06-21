@@ -770,8 +770,11 @@ private:
 
    typedef const char* ClassName;
    typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
-   typedef std::map <ClassName, luaW_regFunc> FunctionMap;    // Map of class name and registration functions
+   typedef std::map <ClassName, luaW_regFunc> FunctionMap;     // Map of class name and registration functions
 
+   typedef std::pair<ClassName, const luaL_reg *> NameMethodListPair;
+   typedef std::map<ClassName, const luaL_reg *> MethodMap;   // Map of class name and Lua method list, for documentation
+      
 
    // List of registration functions
    static FunctionMap &getRegistrationFunctions()
@@ -786,6 +789,14 @@ private:
    {
       static FunctionMap extensionFunctions;
       return extensionFunctions;
+   }
+
+
+   // Mapping of function name to Lua methods it registers
+   static MethodMap &getMethodMap()
+   {
+      static MethodMap methodMap;
+      return methodMap;
    }
 
 
@@ -855,6 +866,18 @@ private:
       }  // end while
    }
 
+
+   // registerClass() helper
+   template<class T>
+   void static saveRegistration()
+   {
+      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
+      getRegistrationFunctions().insert(regPair);
+
+      NameMethodListPair methodPair(T::luaClassName, T::luaMethods);
+      getMethodMap().insert(methodPair);
+   }
+
 protected:
    template<class T>
    static void registerClass(lua_State *L)
@@ -867,9 +890,7 @@ protected:
    void static registerClass()
    {
       getOrderedClassList().push_back(T::luaClassName);        // No parent, so add it to front of ordered list (no sorting needed)
-
-      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
-      getRegistrationFunctions().insert(regPair);
+      saveRegistration<T>();
    }
 
    template<class T, class U>
@@ -878,8 +899,7 @@ protected:
       ClassParent key = {T::luaClassName, U::luaClassName};    // This class has a parent and needs to be
       getUnorderedClassList().push_back(key);                  // registered after parent (will require sorting)
 
-      NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
-      getRegistrationFunctions().insert(regPair);
+      saveRegistration<T>();
 
       // T extends U
       NameFunctionPair extPair(T::luaClassName, &luaW_extend<T, U>);
@@ -908,7 +928,6 @@ public:
    }
 
 
-
    typedef std::pair<ClassName, std::vector<ClassName> > Node;
 
    // Helper for printDocs()
@@ -921,9 +940,18 @@ public:
          printf(" +----- ");  
 
       printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
+      
+      // Print method list
+      TNLAssert(getMethodMap().count(nodeList[nodeIndex].first) == 1, "Missing method list!");
 
+      const luaL_reg *luaMethods = getMethodMap().find(nodeList[nodeIndex].first)->second;
+      unsigned int i = 0;
+      while(luaMethods[i].name)
+      {
+         printf("%s |>> %s()\n", prefix.c_str(), luaMethods[i].name);
+         i++;
+      }
 
-      //const luaL_reg methods[] = T::luaMethods;
 
       if(nodeList[nodeIndex].second.size() == 0)
          return;
@@ -995,6 +1023,7 @@ public:
          printf("=====================\n");
          output(nodeMap, nodeList, "", i);
       }
+      printf("=====================\n");
    }
 };
 
