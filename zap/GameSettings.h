@@ -81,6 +81,7 @@ enum ParamId {
    SEND_RESOURCE,
    GET_RESOURCE,
    SHOW_RULES,
+   SHOW_LUA_CLASSES,
    HELP,
 
    PARAM_COUNT
@@ -253,6 +254,7 @@ public:
    static void getRes(GameSettings *settings, const Vector<string> &words);
    static void sendRes(GameSettings *settings, const Vector<string> &words);
    static void showRules(GameSettings *settings, const Vector<string> &words);
+   static void showLuaClasses(GameSettings *settings, const Vector<string> &words);
    static void showHelp(GameSettings *settings, const Vector<string> &words);
 };
 

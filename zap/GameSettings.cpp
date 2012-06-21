@@ -29,12 +29,13 @@
 #include "BanList.h"
 #include "ScreenInfo.h"
 #include "stringUtils.h"      // For itos
+#include "LuaWrapper.h"       // For printing Lua class hiearchy
 
 #include "tnlTypes.h"         // For TNL_OS_WIN32 def
 #include "tnlLog.h"           // For logprintf
 
 #ifdef TNL_OS_WIN32 
-#include <Windows.h>          // For ARRAYSIZE def
+#  include <Windows.h>          // For ARRAYSIZE def
 #endif
 
 #include "IniFile.h"
@@ -143,8 +144,9 @@ DirectiveInfo directiveDefs[] = {
 { "sendres",               FOUR_REQUIRED,  GET_RESOURCE,  5, GameSettings::sendRes,   "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
 
 // Other commands
-{ "rules",                 NO_PARAMETERS,  SHOW_RULES,    6, GameSettings::showRules, "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
-{ "help",                  NO_PARAMETERS,  HELP,          6, GameSettings::showHelp,  "",  "Display this message", "" },
+{ "rules",                 NO_PARAMETERS,  SHOW_RULES,        6, GameSettings::showRules,      "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
+{ "luaclasses",            NO_PARAMETERS,  SHOW_LUA_CLASSES,  6, GameSettings::showLuaClasses, "",  "Print a list of classes available to Lua scripts", "" },
+{ "help",                  NO_PARAMETERS,  HELP,              6, GameSettings::showHelp,       "",  "Display this message", "" },
 
 };
 
@@ -876,6 +878,14 @@ void GameSettings::showRules(GameSettings *settings, const Vector<string> &words
 {
    writeToConsole();
    printRules();
+   exitToOs(0);
+}
+
+
+void GameSettings::showLuaClasses(GameSettings *settings, const Vector<string> &words)
+{
+   writeToConsole();
+   LuaW_Registrar::printDocs();
    exitToOs(0);
 }
 

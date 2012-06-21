@@ -887,72 +887,8 @@ protected:
    }
 
 public:
-   // Only works if sortClassList() has not yet been run
-   // This will (probably) only be run in diagnostic mode, where performance is completely unimportant
-   static std::string getClassAndMethodList()
-   {
-      std::vector<std::vector<ClassName> > classLists;
-      std::vector<ClassName> &orderedClassList = getOrderedClassList();
-
-      // Items in orderedClassList at this point are those with no parents, and are therefore independent from one another
-      for(unsigned int i = 0; i < orderedClassList.size(); i++)
-      {
-         std::vector<ClassName> newList;
-         newList.push_back(orderedClassList[i]);
-         classLists.push_back(newList);
-      }
-
-      // Make a copy of unorderedClassList, which will be destroyed by sortClassList
-      std::vector<ClassParent> unorderedList = getUnorderedClassList();    // Makes copy
-
-      std::map<ClassName, ClassName> classParentMap;
-      for(unsigned int i = 0; i < getUnorderedClassList().size(); i++)
-         classParentMap.insert(std::pair<ClassName, ClassName>(getUnorderedClassList()[i].name, getUnorderedClassList()[i].parent));
-
-      sortClassList();
-
-      // Figure out which list each ordered class belongs in
-      for(unsigned int i = 0; i < orderedClassList.size(); i++)
-      {
-         ClassName parent = classParentMap[orderedClassList[i]];
-         if(!parent)
-            continue;
-
-         for(unsigned int j = 0; j < classLists.size(); j++)
-         {
-            for(unsigned int k = 0; k < classLists[j].size(); k++)
-            {
-               if(strcmp(classLists[j][k], orderedClassList[i]) == 0)      // Already on a list (from pre-sort phase)
-                  goto doubleBreak;
-               
-               if(strcmp(classLists[j][k], parent) == 0)
-               {
-                  logprintf("[ %s ] -> [ %s]", orderedClassList[i], parent);
-
-                  classLists[j].push_back(orderedClassList[i]);
-                  goto doubleBreak;
-               }
-            }
-         }
-
-doubleBreak:  
-         int doNothing = 0;
-      }
-
-      for(unsigned int i = 0; i < classLists.size(); i++)
-      {
-         logprintf("=====================================");
-         for(unsigned int j = 0; j < classLists[i].size(); j++)
-            logprintf("%s", classLists[i][j]);
-      }
-
-      return "";
-   }
-
    static void registerClasses(lua_State *L)
    {
-      //getClassAndMethodList();
-
       sortClassList();
       std::vector<ClassName> &orderedClassList = getOrderedClassList();
 
@@ -972,6 +908,94 @@ doubleBreak:
    }
 
 
+
+   typedef std::pair<ClassName, std::vector<ClassName> > Node;
+
+   // Helper for printDocs()
+   static void output(std::map<ClassName, unsigned int> &nodeMap, const std::vector<Node> &nodeList, std::string prefix, unsigned int nodeIndex)
+   {
+      if(prefix.length() > 8)
+         printf(prefix.substr(0, prefix.length() - 8).c_str());
+
+      if(prefix != "")
+         printf(" +----- ");  
+
+      printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
+
+
+      //const luaL_reg methods[] = T::luaMethods;
+
+      if(nodeList[nodeIndex].second.size() == 0)
+         return;
+
+      // Output the children
+      for(unsigned int i = 0; i < nodeList[nodeIndex].second.size(); i++)
+      {
+         std::string tmpPrefix = prefix;
+         if(i < nodeList[nodeIndex].second.size() - 1)
+            tmpPrefix += " |      ";
+         else
+            tmpPrefix += "        ";
+         unsigned int index = nodeMap.find(nodeList[nodeIndex].second[i])->second;
+         output(nodeMap, nodeList, tmpPrefix, index);
+      }
+   }
+
+
+   // Has to be run BEFORE sortClassList()!
+   static void printDocs()
+   {
+      std::vector<ClassName> &orderedClassList = getOrderedClassList();
+      std::map<ClassName, unsigned int> nodeMap;    // For access to the nodes
+      std::map<ClassName, ClassParent> classParentMap;
+
+      std::vector<Node> nodeList;
+
+      // Put our unordered class list into a more accessible form
+      for(unsigned int i = 0; i < getUnorderedClassList().size(); i++)
+      {
+         std::pair<ClassName, ClassParent> p;
+         p.first = getUnorderedClassList()[i].name;
+         p.second = getUnorderedClassList()[i];
+
+         classParentMap.insert(p);
+      }
+
+      // Until sortClassList is run, orderedClassList containes all our root nodes, and nothing else
+      // Here we create our list of root nodes, under which other nodes will be added
+      unsigned int rootClassCount = orderedClassList.size();
+      for(unsigned int i = 0; i < rootClassCount; i++)
+      {
+         Node node;
+         node.first = orderedClassList[i];
+
+         nodeList.push_back(node);
+         nodeMap.insert(std::pair<ClassName, unsigned int>(orderedClassList[i], i));
+      }
+
+      sortClassList();
+
+      // Now orderedClassList contains all our classes; skip over initial group by starting at rootClassCount
+      for(unsigned int i = rootClassCount; i < orderedClassList.size(); i++)
+      {
+         // Find the parent node
+         ClassParent parent = classParentMap.find(orderedClassList[i])->second;
+         nodeList[nodeMap.find(parent.parent)->second].second.push_back(orderedClassList[i]);
+
+         Node node;
+         node.first = orderedClassList[i];
+
+         nodeList.push_back(node);
+         nodeMap.insert(std::pair<ClassName, unsigned int>(orderedClassList[i], nodeList.size() - 1));
+      }
+
+      // Output the map; only call on root nodes
+      for(unsigned int i = 0; i < rootClassCount; i++)
+      {
+         printf("=====================\n");
+         output(nodeMap, nodeList, "", i);
+      }
+   }
 };
 
 
