@@ -992,7 +992,8 @@ void CoreItem::onItemExploded(Point pos)
 
 void CoreItem::onItemDragging()
 {
-   fillPanelGeom(getPos(), getGame()->getGameType()->getRemainingGameTimeInMs() + getGame()->getGameType()->getRenderingOffset(), mPanelGeom);
+   GameType *gameType = getGame()->getGameType();
+   fillPanelGeom(getPos(), gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset(), mPanelGeom);
 }
 #endif
 
