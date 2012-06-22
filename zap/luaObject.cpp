@@ -52,6 +52,9 @@
 #include "stringUtils.h"       // For joindir  
 #include "lua.h"
 
+#include <iostream>            // For enum code
+#include <sstream>             // For enum code
+
 
 namespace Zap
 {
@@ -859,10 +862,6 @@ bool LuaScriptRunner::configureNewLuaInstance()
 
    lua_atpanic(L, luaPanicked);  // Register our panic function 
 
-   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
-   // These will be copied into the script's environment when we run createEnvironment.
-   setEnums(L);    
-
    // Register some functions not associated with a particular class
    registerLooseFunctions(L);
 
@@ -872,6 +871,11 @@ bool LuaScriptRunner::configureNewLuaInstance()
 
    luaL_openlibs(L);    // Load the standard libraries
    luaopen_vec(L);      // For vector math (lua-vec)
+
+   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+   // These will be copied into the script's environment when we run createEnvironment.
+   setEnums(L);    
+
 
    setModulePath();
 
@@ -1123,6 +1127,84 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 }
 
 
+
+// Borrowed from http://tdistler.com/2010/09/13/c-enums-in-lua
+// Adds an enumerated type into Lua.
+//
+// L - Lua state.
+// tname - The name of the enum type.
+// <name:string><value:int> pairs, terminated by a null (0).
+//
+// EX: Assume the following enum in C-code:
+//
+//  typedef enum _TYPE { TYPE_FOO=0, TYPE_BAR, TYPE_BAZ, TYPE_MAX } TYPE;
+//
+// To map this to Lua, do the following:
+//
+//  add_enum_to_lua( L, "type",
+//    "foo", TYPE_FOO,
+//    "bar", TYPE_BAR,
+//    "baz", TYPE_BAZ,
+//    0);
+//
+// In Lua, you can access the enum as:
+//  type.foo
+//  type.bar
+//  type.baz
+//
+// You can print the actual value in Lua by:
+//  > print(type.foo.value)
+//
+bool add_enum_to_lua(lua_State* L, const char* tname, ...)
+{
+    // NOTE: Here's the Lua code we're building and executing to define the
+    //       enum.
+    //
+    // <tname> = setmetatable( {}, { 
+    //      __index = { 
+    //          <name1> = <value1>, 
+    //          }, 
+    //          ... 
+    //      },
+    //      __newindex = function(table, key, value)
+    //          error(\"Attempt to modify read-only table\")
+    //      end,
+    //      __metatable = false
+    // });
+
+    va_list args;
+    stringstream code;
+    char* ename;
+    int evalue;
+    
+    code << tname << " = setmetatable({}, {";
+    code << "__index = {";
+
+    // Iterate over the variadic arguments adding the enum values.
+    va_start(args, tname);
+    while((ename = va_arg(args, char*)) != 0)
+    {
+        evalue = va_arg(args, int);
+        code << ename << "=" << evalue << ",";
+    } 
+    va_end(args);
+
+    code << "},";
+    code << "__newindex = function(table, key, value) error(\"Attempt to modify read-only table\") end,";
+    code << "__metatable = false} )";
+
+    // Execute lua code
+    if ( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
+    {
+        fprintf(stderr, "%s\n\n%s\n", code.str().c_str(),lua_tostring(L, -1));
+        lua_pop(L, 1);
+        return false;
+    }
+    return true;
+}
+
+
+
 #define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
 
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
@@ -1151,6 +1233,17 @@ void LuaScriptRunner::setEnums(lua_State *L)
    setEnum(WeaponMine);
    setEnum(WeaponSpyBug);
    setEnum(WeaponTurret);
+
+
+   add_enum_to_lua( L, "Weapons",
+     "Phaser", WeaponPhaser,
+     "Bounce", WeaponBounce,
+     "Triple", WeaponTriple,
+     "Burst",  WeaponBurst,
+     "Mine",   WeaponMine,
+     "SpyBug", WeaponSpyBug,
+     "Turret", WeaponTurret,
+     0);
 
    // Game Types
 #  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \
