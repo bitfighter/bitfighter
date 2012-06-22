@@ -3747,6 +3747,21 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry na
 }
 
 
+// Server tells clients that a player is engineering a teleport
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetEngineeringTeleport, (StringTableEntry name, bool isEngineeringTeleport),
+      (name, isEngineeringTeleport), NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
+{
+#ifndef ZAP_DEDICATED
+   ClientInfo *clientInfo = getGame()->findClientInfo(name);
+
+   if(!clientInfo)
+      return;
+
+   clientInfo->setIsEngineeringTeleport(isEngineeringTeleport);
+#endif
+}
+
+
 Game *GameType::getGame() const
 {
    return mGame;

@@ -56,6 +56,7 @@ ClientInfo::ClientInfo()
    mNeedToCheckAuthenticationWithMaster = false;     // Does client report that they are verified
    mSpawnDelayed = false;
    mIsBusy = false;
+   mIsEngineeringTeleport = false;
 }
 
 
@@ -342,6 +343,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
             return false;
       }
 
+      // Send response to client that is doing the engineering
       if(!isRobot())
          getConnection()->s2cEngineerResponseEvent(responseEvent);
 
@@ -352,6 +354,19 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
 
    // Else... fail silently?
    return false;
+}
+
+
+void ClientInfo::setEngineeringTeleport(bool isEngineeringTeleport)
+{
+   // Tell everyone that a particular client is engineering a teleport
+   for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+      GameType *gameType = mGame->getGameType();
+
+      if(gameType)
+         gameType->s2cSetEngineeringTeleport(mName, isEngineeringTeleport);
+   }
 }
 
 
@@ -475,6 +490,18 @@ VoiceDecoder *FullClientInfo::getVoiceDecoder()
 }
 
 
+bool FullClientInfo::isEngineeringTeleport()
+{
+   return getShip()->getEngineeredTeleport() != NULL;
+}
+
+
+void FullClientInfo::setIsEngineeringTeleport(bool isEngineeringTeleport)
+{
+   TNLAssert(false, "isEngineeringTeleport shouldn't be set for this class!");
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -551,6 +578,18 @@ SoundEffect *RemoteClientInfo::getVoiceSFX()
 VoiceDecoder *RemoteClientInfo::getVoiceDecoder()
 {
    return mDecoder;
+}
+
+
+bool RemoteClientInfo::isEngineeringTeleport()
+{
+   return mIsEngineeringTeleport;
+}
+
+
+void RemoteClientInfo::setIsEngineeringTeleport(bool isEngineeringTeleport)
+{
+   mIsEngineeringTeleport = isEngineeringTeleport;
 }
 
 #endif

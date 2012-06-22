@@ -2123,10 +2123,17 @@ void Ship::render(S32 layerIndex)
       UserInterface::drawStringc(0, 30 + textSize, textSize, str.c_str());
 
       // Underline name if player is authenticated
-      if(getClientInfo() && getClientInfo()->isAuthenticated())
+      if(clientInfo->isAuthenticated())
       {
          S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
          drawHorizLine(-xoff, xoff, 33 + textSize);
+      }
+
+      // Show if that player is engineering a teleport
+      if(clientInfo->isEngineeringTeleport())
+      {
+         // XXX change to something better
+         drawCircle(0, 0, 75);
       }
 
       glLineWidth(gDefaultLineWidth);
