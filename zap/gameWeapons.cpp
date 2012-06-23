@@ -85,10 +85,10 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
          (new BurstProjectile(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponMine:
-         (new Mine(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
+         (new Mine(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
          break;
      case WeaponSpyBug:
-         (new SpyBug(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
+         (new SpyBug(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
          break;
      default:
          break;
