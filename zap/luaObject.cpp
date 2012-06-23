@@ -1225,25 +1225,18 @@ void LuaScriptRunner::setEnums(lua_State *L)
       MODULE_ITEM_TABLE
 #  undef EVENT
 
-   // Weapons
-   setEnum(WeaponPhaser);
-   setEnum(WeaponBounce);
-   setEnum(WeaponTriple);
-   setEnum(WeaponBurst);
-   setEnum(WeaponMine);
-   setEnum(WeaponSpyBug);
-   setEnum(WeaponTurret);
 
+   // Weapon enums -- push all, using enum name as the Lua name
+#  define WEAPON_ITEM(value, b, c, d, e, f, g, h, i, j, k, l)  lua_pushinteger(L, value);  \
+                                                               lua_setglobal  (L, #value); 
+      WEAPON_ITEM_TABLE
+#  undef WEAPON_ITEM
 
    add_enum_to_lua( L, "Weapons",
-     "Phaser", WeaponPhaser,
-     "Bounce", WeaponBounce,
-     "Triple", WeaponTriple,
-     "Burst",  WeaponBurst,
-     "Mine",   WeaponMine,
-     "SpyBug", WeaponSpyBug,
-     "Turret", WeaponTurret,
-     0);
+#  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, value,
+      WEAPON_ITEM_TABLE
+#  undef WEAPON_ITEM
+   0);
 
    // Game Types
 #  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \

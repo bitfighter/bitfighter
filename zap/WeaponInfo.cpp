@@ -45,29 +45,16 @@ WeaponInfo::WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U
    projectileType = _projectileType;
 }
 
+// Get the name of a weapon given its enum value -- only used for writing to the database
 const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 {
-   switch((S32)weaponType)
-   {
-      case WeaponPhaser:
-         return "Phaser";
-      case WeaponBounce:
-         return "Bouncer";
-      case WeaponTriple:
-         return "Triple";
-      case WeaponBurst:
-         return "Burst";
-      case WeaponHeatSeeker:
-         return "Heat Seeker";
-      case WeaponMine:
-         return "Mine";
-      case WeaponTurret:
-         return "Turret";
-      case WeaponSpyBug:
-         return "Spy Bug";
-   }
+   static const char *weaponName[] = {
+#  define WEAPON_ITEM(a, name, c, d, e, f, g, h, i, j, k, l)  "name",
+      WEAPON_ITEM_TABLE
+#  undef WEAPON_ITEM
+   };
 
-   return "INVALID WEAPON!";
+   return weaponName[(S32)weaponType];
 }
 
 
@@ -79,15 +66,15 @@ ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sp
       Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor,
       SFXProfiles _projectileSound, SFXProfiles _impactSound )
 {
-   sparkColors[0] = _sparkColor1;
-   sparkColors[1] = _sparkColor2;
-   sparkColors[2] = _sparkColor3;
-   sparkColors[3] = _sparkColor4;
-   projColors[0] = _projColor1;
-   projColors[1] = _projColor2;
-   scaleFactor = _scaleFactor;
+   sparkColors[0]  = _sparkColor1;
+   sparkColors[1]  = _sparkColor2;
+   sparkColors[2]  = _sparkColor3;
+   sparkColors[3]  = _sparkColor4;
+   projColors[0]   = _projColor1;
+   projColors[1]   = _projColor2;
+   scaleFactor     = _scaleFactor;
    projectileSound = _projectileSound;
-   impactSound = _impactSound;
+   impactSound     = _impactSound;
 }
 
 

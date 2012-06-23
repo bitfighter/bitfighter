@@ -36,26 +36,21 @@ namespace Zap
 
 ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
 {
-   //               SparkColor1    SparkColor2   SparkColor3    SparkColor4     ProjectileColor1  ProjectileColor2 Scale  Fire sound          Impact sound
-   ProjectileInfo( Colors::magenta, Colors::white, Colors::blue,   Colors::red,   Color(1, 0, 0.5), Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
-   ProjectileInfo( Colors::yellow, Colors::red, Colors::orange50, Colors::white,   Colors::yellow,   Colors::red,   1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
-   ProjectileInfo( Colors::blue, Colors::green, Color(0,0.5,1), Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
-   ProjectileInfo( Colors::cyan, Colors::yellow, Color(0,1,0.5), Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
+   //               SparkColor1     SparkColor2     SparkColor3    SparkColor4      ProjectileColor1   ProjectileColor2  Scale  Fire sound          Impact sound
+   ProjectileInfo( Colors::magenta, Colors::white,  Colors::blue,     Colors::red,   Color(1, 0, 0.5),  Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
+   ProjectileInfo( Colors::yellow,  Colors::red,    Colors::orange50, Colors::white,  Colors::yellow,   Colors::red,      1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
+   ProjectileInfo( Colors::blue,    Colors::green,  Color(0,0.5,1),   Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
+   ProjectileInfo( Colors::cyan,    Colors::yellow, Color(0,1,0.5),   Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
 };
 
 
-WeaponInfo GameWeapon::weaponInfo[WeaponCount] =    //      Fire   Min    Drain Proj  Proj  Dam-   Damage to Can damage Projectile
-{                          //    Name         Delay  Energy Energy Vel. Life  age   self mult.   teammate  Type
-   WeaponInfo( StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   0,       false,   ProjectilePhaser ),
-   WeaponInfo( StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   0.5f,    false,   ProjectileBounce ),
-   WeaponInfo( StringTableEntry("Triple"),      200,  1700,  1700,  550,  850, 0.14f,   0,       false,   ProjectileTriple ),
-   WeaponInfo( StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   1.0f,    false,   NotAProjectile ),
-   WeaponInfo( StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   1.0f,    false,   NotAProjectile ),
-   WeaponInfo( StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   1.0f,    true,    NotAProjectile ),
-   WeaponInfo( StringTableEntry("Turret"),      150,     0,     0,  800,  800, 0.11f,   1.0f,    true,    ProjectileTurret ),
-   WeaponInfo( StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       0,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
+// Define a list of WeaponInfos
+WeaponInfo GameWeapon::weaponInfo[] = {
+#  define WEAPON_ITEM(a, name, c, delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType) \
+               WeaponInfo(StringTableEntry(name), delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType),
+      WEAPON_ITEM_TABLE
+#  undef WEAPON_ITEM
 };
-
 
 // Here we actually intantiate the various projectiles when fired
 void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, const Point &shooterPos, const Point &shooterVel, S32 time, F32 shooterRadius, BfObject *shooter)
