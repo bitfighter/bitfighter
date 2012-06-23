@@ -36,8 +36,8 @@ namespace Zap
 
 ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
 {
-   //               SparkColor1     SparkColor2     SparkColor3    SparkColor4      ProjectileColor1   ProjectileColor2  Scale  Fire sound          Impact sound
-   ProjectileInfo( Colors::magenta, Colors::white,  Colors::blue,     Colors::red,   Color(1, 0, 0.5),  Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
+   //               SparkColor1     SparkColor2     SparkColor3       SparkColor4     ProjectileColor1  ProjectileColor2  Scale  Fire sound          Impact sound
+   ProjectileInfo( Colors::magenta, Colors::white,  Colors::blue,     Colors::red,    Color(1, 0, 0.5), Color(0.5, 0, 1), 1.0f, SFXPhaserProjectile, SFXPhaserImpact ), // Phaser
    ProjectileInfo( Colors::yellow,  Colors::red,    Colors::orange50, Colors::white,  Colors::yellow,   Colors::red,      1.3f, SFXBounceProjectile, SFXBounceImpact ), // Bounce
    ProjectileInfo( Colors::blue,    Colors::green,  Color(0,0.5,1),   Color(0,1,0.5), Color(0, 0.5, 1), Color(0, 1, 0.5), 0.7f, SFXTripleProjectile, SFXTripleImpact ), // Triple
    ProjectileInfo( Colors::cyan,    Colors::yellow, Color(0,1,0.5),   Color(0.5,1,0), Color(0.5, 1, 0), Color(0, 1, 0.5), 0.6f, SFXTurretProjectile, SFXTurretImpact ), // Turret
@@ -70,8 +70,8 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
       case WeaponTriple:      // Add three bullets!
          {
             Point velPerp(projVel.y, -projVel.x);
-            velPerp.normalize(40.0f);
-            (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
+            velPerp.normalize(40.0f); // <== spread factor
+            (new Projectile(weapon, firePos, projVel,           shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
          }

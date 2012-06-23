@@ -926,6 +926,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U8> loadout), (load
 }
 
 
+// TODO: make this an xmacro
 Color colors[] =
 {
    Colors::white,          // ColorWhite
