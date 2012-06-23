@@ -264,8 +264,8 @@ void Projectile::idle(BfObject::IdleCallPath path)
                bounce = true;
             else if(isShipType(hitObject->getObjectTypeNumber()))
             {
-               Ship *s = dynamic_cast<Ship *>(hitObject);
-               if(s->isModulePrimaryActive(ModuleShield))
+               Ship *ship = static_cast<Ship *>(hitObject);
+               if(ship->isModulePrimaryActive(ModuleShield))
                   bounce = true;
             }
 
