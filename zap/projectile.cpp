@@ -201,18 +201,18 @@ void Projectile::idle(BfObject::IdleCallPath path)
    {
       U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
       F32 timeLeft = (F32)deltaT;
-      S32 loopcount1 = 32;
+      S32 loopcount = 32;
 
       Point startPos, collisionPoint;
 
-      while(timeLeft > 0.01f && loopcount1 != 0)    // This loop is to prevent slow bounce on low frame rate / high time left.
+      while(timeLeft > 0.01f && loopcount != 0)    // This loop is to prevent slow bounce on low frame rate / high time left
       {
-         loopcount1--;
+         loopcount--;
          
          startPos = getPos();
 
          // Calculate where projectile will be at the end of the current interval
-         Point endPos = startPos + mVelocity * timeLeft * 0.001f;
+         Point endPos = startPos + (mVelocity * .001f) * timeLeft;    // mVelocity in units/sec, timeLeft in ms
 
          // Check for collision along projected route of movement
          static Vector<BfObject *> disabledList;
