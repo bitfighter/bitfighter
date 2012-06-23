@@ -76,6 +76,7 @@ bool Move::isEqualMove(Move *prev)
             modsUnchanged;
 }
 
+
 const U8 BIGMOVETIMEBITS = 16;
 
 void Move::pack(BitStream *stream, Move *prev, bool packTime)
@@ -113,6 +114,7 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
    }
 }
 
+
 void Move::unpack(BitStream *stream, bool unpackTime)
 {
    if(!stream->readFlag())
@@ -142,6 +144,7 @@ void Move::unpack(BitStream *stream, bool unpackTime)
          time = stream->readInt(BIGMOVETIMEBITS) + MaxMoveTime;
    }
 }
+
 
 void Move::prepare()    // Packs and unpacks move to ensure effects of rounding are same on client and server
 {
