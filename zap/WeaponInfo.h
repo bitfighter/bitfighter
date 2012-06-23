@@ -74,14 +74,14 @@ struct WeaponInfo
 {
    static const char *getWeaponName(WeaponType weaponType);
 
-   StringTableEntry name;     // Display name of the weapon.
-   U32 fireDelay;             // Delay between shots.
-   S32 minEnergy;             // Minimum energy to fire.  (Use S32 to avoid compiler warnings when comparing with other S32s)
-   U32 drainEnergy;           // Amount of energy to drain per shot.
-   U32 projVelocity;          // How fast shot travels (dist/second)
-   S32 projLiveTime;          // How long shot lives (millisecs)
-   F32 damageAmount;          // Damage shot does
-   F32 damageSelfMultiplier;  // Adjust damage if you shoot yourself
+   StringTableEntry name;           // Display name of the weapon.
+   U32 fireDelay;                   // Delay between shots.
+   S32 minEnergy;                   // Minimum energy to fire.  (Use S32 to avoid compiler warnings when comparing with other S32s)
+   U32 drainEnergy;                 // Amount of energy to drain per shot.
+   U32 projVelocity;                // How fast shot travels (dist/second)
+   S32 projLiveTime;                // How long shot lives (millisecs)
+   F32 damageAmount;                // Damage shot does
+   F32 damageSelfMultiplier;        // Adjust damage if you shoot yourself
    bool canDamageTeammate;
    ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
 };
