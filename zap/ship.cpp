@@ -608,10 +608,6 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       checkForSpeedzones();
 
-      if(path == BfObject::ServerIdleControlFromClient || (path == BfObject::ClientIdleControlMain))
-         checkForZones();  // for energy drain checks
-
-
       if(path == BfObject::ServerIdleControlFromClient ||
          path == BfObject::ClientIdleControlMain ||
          path == BfObject::ClientIdleControlReplay)
@@ -675,6 +671,9 @@ void Ship::idle(BfObject::IdleCallPath path)
          }
       }
    }
+
+   if(path == BfObject::ServerIdleMainLoop)
+      checkForZones();  // for energy drain checks
 
    // Update the object in the game's extents database
    updateExtentInDatabase();
