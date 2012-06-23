@@ -26,6 +26,10 @@
 #include "move.h"
 #include <math.h>
 
+#ifdef TNL_OS_WIN32
+#  include <windows.h>   // For ARRAYSIZE
+#endif
+
 namespace Zap
 {
 
@@ -37,7 +41,7 @@ Move::Move()
    x = 0;
    y = 0;
 
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(S32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
       modulePrimary[i] = false;
       moduleSecondary[i] = false;
@@ -47,7 +51,7 @@ Move::Move()
 
 bool Move::isAnyModActive() const
 {
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(S32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       if(modulePrimary[i] || moduleSecondary[i])
          return true;
 
@@ -59,7 +63,7 @@ bool Move::isEqualMove(Move *prev)
 {
    bool modsUnchanged = true;
 
-   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
       modsUnchanged = modsUnchanged && (prev->modulePrimary[i] == modulePrimary[i]);
       modsUnchanged = modsUnchanged && (prev->moduleSecondary[i] == moduleSecondary[i]);
