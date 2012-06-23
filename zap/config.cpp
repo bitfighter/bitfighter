@@ -48,16 +48,16 @@
 #include "dataConnection.h"   // For defs of stuff used by transferResource() function below
 
 #ifdef _MSC_VER
-#pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
+#  include <windows.h>   // For ARRAYSIZE when using ZAP_DEDICATED
 #endif
 
 #ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
-#define max(a,b) ((a) >= (b) ? (a) : (b))
+#  define min(a,b) ((a) <= (b) ? (a) : (b))
+#  define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
 
