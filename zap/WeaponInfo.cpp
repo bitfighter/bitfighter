@@ -29,22 +29,6 @@
 namespace Zap
 {
 
-
-WeaponInfo::WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime,
-           F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType)
-{
-   name = _name;
-   fireDelay = _fireDelay;
-   minEnergy = _minEnergy;
-   drainEnergy = _drainEnergy;
-   projVelocity = _projVelocity;
-   projLiveTime = _projLiveTime;
-   damageAmount = _damageAmount;
-   damageSelfMultiplier = _damageSelfMultiplier;
-   canDamageTeammate = _canDamageTeammate;
-   projectileType = _projectileType;
-}
-
 // Get the name of a weapon given its enum value -- only used for writing to the database
 const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 {
@@ -60,7 +44,6 @@ const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 
 /////////////////////////////////////
 /////////////////////////////////////
-
 
 ProjectileInfo::ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3,
       Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor,

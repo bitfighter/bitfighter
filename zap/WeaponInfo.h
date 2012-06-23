@@ -72,9 +72,6 @@ enum ProjectileType
 
 struct WeaponInfo
 {
-   WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime,
-              F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType);
-
    static const char *getWeaponName(WeaponType weaponType);
 
    StringTableEntry name;     // Display name of the weapon.

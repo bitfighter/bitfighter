@@ -47,7 +47,7 @@ ProjectileInfo GameWeapon::projectileInfo[ProjectileTypeCount] =
 // Define a list of WeaponInfos
 WeaponInfo GameWeapon::weaponInfo[] = {
 #  define WEAPON_ITEM(a, name, c, delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType) \
-               WeaponInfo(StringTableEntry(name), delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType),
+   { StringTableEntry(name), delay, minEn, drainEn, projVel, projTTL, damage, selfDamage, canDamTMs, projType },
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
 };
