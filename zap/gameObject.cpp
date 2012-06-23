@@ -1226,12 +1226,12 @@ const char *BfObject::luaClassName = "BfItem";
 // Standard methods available to all Items
 const luaL_reg BfObject::luaMethods[] =
 {
-   { "getClassID",  luaW_doMethod<BfObject, &BfObject::getClassID>  },
-   { "getLoc",      luaW_doMethod<BfObject, &BfObject::getLoc>      },
-   { "setLoc",      luaW_doMethod<BfObject, &BfObject::setLoc>      },
-   { "getTeamIndx", luaW_doMethod<BfObject, &BfObject::getTeamIndx> },
-   { "addToGame",   luaW_doMethod<BfObject, &BfObject::addToGame>   },
-
+   { "getClassID",     luaW_doMethod<BfObject, &BfObject::getClassID>     },
+   { "getLoc",         luaW_doMethod<BfObject, &BfObject::getLoc>         },
+   { "setLoc",         luaW_doMethod<BfObject, &BfObject::setLoc>         },
+   { "getTeamIndx",    luaW_doMethod<BfObject, &BfObject::getTeamIndx>    },
+   { "addToGame",      luaW_doMethod<BfObject, &BfObject::addToGame>      },
+   { "removeFromGame", luaW_doMethod<BfObject, &BfObject::removeFromGame> },
    { NULL, NULL }
 };
 
@@ -1264,6 +1264,13 @@ S32 BfObject::getTeamIndx(lua_State *L)
 S32 BfObject::addToGame(lua_State *L)
 {
    addToGame(gServerGame, gServerGame->getGameObjDatabase());
+   return returnNil(L);
+}
+
+
+S32 BfObject::removeFromGame(lua_State *L)
+{
+   deleteObject();
    return returnNil(L);
 }
 
