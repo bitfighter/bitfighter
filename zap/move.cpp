@@ -41,7 +41,7 @@ Move::Move()
    x = 0;
    y = 0;
 
-   for(S32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
       modulePrimary[i] = false;
       moduleSecondary[i] = false;
@@ -51,7 +51,7 @@ Move::Move()
 
 bool Move::isAnyModActive() const
 {
-   for(S32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
       if(modulePrimary[i] || moduleSecondary[i])
          return true;
 
