@@ -130,10 +130,11 @@ public:
    void setEndpoint(const Point &point);
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
    const char *getOnScreenName();
+   const char *getOnDockName();
+   const char *getPrettyNamePlural();
+   const char *getEditorHelpString();
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
@@ -141,15 +142,10 @@ public:
 
    ///// Lua Interface
 
-   Teleporter(lua_State *L);       //  Lua constructor
-   static const char className[];
-   static Lunar<Teleporter>::RegType methods[];
+   LUAW_DECLARE_CLASS(Teleporter);
 
-   S32 getClassID(lua_State *L);   // Object's class
-   void push(lua_State *L);        // Push item onto stack
-
-   S32 getRad(lua_State *L);       // Radius of item (returns number)
-   S32 getVel(lua_State *L);       // Speed of item (returns point)
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 

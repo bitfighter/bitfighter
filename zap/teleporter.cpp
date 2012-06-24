@@ -71,12 +71,14 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
 
    mHasExploded = false;
    mStartingHealth = 1.0f;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 // Destructor
 Teleporter::~Teleporter()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -565,10 +567,10 @@ void Teleporter::doExplosion()
 
    SoundSystem::playSoundEffect(SFXShipExplode, getPos());
 
-   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
-   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 a = TNL::Random::readF() * 0.4f  + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f  + 0.9f;
    F32 c = TNL::Random::readF() * 0.15f + 0.125f;
-   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 d = TNL::Random::readF() * 0.2f  + 0.9f;
 
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
@@ -610,95 +612,27 @@ void Teleporter::onGeomChanging()
 }
 
 
-const char *Teleporter::getEditorHelpString()
+const char *Teleporter::getOnScreenName()     { return "Teleport";    }
+const char *Teleporter::getPrettyNamePlural() { return "Teleporters"; }
+const char *Teleporter::getOnDockName()       { return "Teleport";    }
+const char *Teleporter::getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }
+
+
+bool Teleporter::hasTeam()      { return false; }
+bool Teleporter::canBeHostile() { return false; }
+bool Teleporter::canBeNeutral() { return false; }
+
+
+//// Lua methods
+
+const char *Teleporter::luaClassName = "Teleporter";
+
+const luaL_reg Teleporter::luaMethods[] =
 {
-   return "Teleports ships from one place to another. [T]";
-}
-
-
-const char *Teleporter::getPrettyNamePlural()
-{
-   return "Teleporters";
-}
-
-
-const char *Teleporter::getOnDockName()
-{
-   return "Teleport";
-}
-
-
-const char *Teleporter::getOnScreenName()
-{
-   return "Teleport";
-}
-
-
-bool Teleporter::hasTeam()
-{
-   return false;
-}
-
-
-bool Teleporter::canBeHostile()
-{
-   return false;
-}
-
-
-bool Teleporter::canBeNeutral()
-{
-   return false;
-}
-
-
-// Lua methods
-
-const char Teleporter::className[] = "Teleporter";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-Teleporter::Teleporter(lua_State *L)
-{
-   // Do nothing
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<Teleporter>::RegType Teleporter::methods[] =
-{
-   // Standard gameItem methods
-   method(Teleporter, getClassID),
-   method(Teleporter, getLoc),
-   method(Teleporter, getRad),
-   method(Teleporter, getVel),
-   method(Teleporter, getTeamIndx),
-
-   {0,0}    // End method list
+   { NULL, NULL }
 };
 
-
-S32 Teleporter::getClassID(lua_State *L)
-{
-   return returnInt(L, TeleportTypeNumber);
-}
-
-
-void Teleporter::push(lua_State *L)
-{
-   Lunar<Teleporter>::push(L, this);
-}
-
-
-S32 Teleporter::getRad(lua_State *L)
-{
-   return returnInt(L, TeleporterTriggerRadius);
-}
-
-
-S32 Teleporter::getVel(lua_State *L)
-{
-   return returnPoint(L, Point(0, 0));
-}
+REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 
 };

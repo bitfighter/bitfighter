@@ -993,8 +993,6 @@ void LuaScriptRunner::registerClasses()
 
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
-
-   Lunar<Teleporter>::Register(L);
 }
 
 
