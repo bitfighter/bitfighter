@@ -61,6 +61,8 @@ private:
 
    S32 mSelectedItem;
 
+   void exitHelper();
+
 public:
    EngineerHelper(ClientGame *clientGame);          // Constructor
    virtual ~EngineerHelper();

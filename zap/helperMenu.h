@@ -51,7 +51,7 @@ protected:
    static const S32 MENU_TOP = 180;     // Location of top of overlay menu
 
    // Shortcut helper function
-   void exitHelper();
+   virtual void exitHelper();
 
    void drawMenuBorderLine(S32 yPos, const Color &color);
    void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);

@@ -1876,6 +1876,16 @@ void Ship::kill()
       mMountedItems[i]->onMountDestroyed();
 
    // Handle if in the middle of building a teleport
+   if(!isGhost())   // Server only
+   {
+      destroyTeleport();
+      getClientInfo()->sTeleportCleanup();
+   }
+}
+
+// Server only
+void Ship::destroyTeleport()
+{
    if(mEngineeredTeleport.isValid())
       mEngineeredTeleport->onDestroyed();
 }

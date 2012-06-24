@@ -365,8 +365,26 @@ void ClientInfo::setEngineeringTeleport(bool isEngineeringTeleport)
       GameType *gameType = mGame->getGameType();
 
       if(gameType)
-         gameType->s2cSetEngineeringTeleport(mName, isEngineeringTeleport);
+         gameType->s2cSetPlayerEngineeringTeleport(mName, isEngineeringTeleport);
    }
+}
+
+
+void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
+{
+   if(objectType == EngineeredTeleportExit)
+   {
+      getShip()->destroyTeleport();
+      sTeleportCleanup();
+   }
+}
+
+
+void ClientInfo::sTeleportCleanup()
+{
+   getShip()->setEngineeredTeleport(NULL);   // Clear out the attached teleporter
+   getShip()->disableWeaponsAndModules(false);
+   setEngineeringTeleport(false);
 }
 
 

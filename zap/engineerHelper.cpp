@@ -220,6 +220,20 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 }
 
 
+void EngineerHelper::exitHelper()
+{
+   if(mSelectedItem != -1 && mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleportExit)
+   {
+      GameConnection *gameConnection = getGame()->getConnectionToServer();
+
+      if(gameConnection)
+         gameConnection->c2sEngineerInterrupted(EngineeredTeleportExit);
+   }
+
+   Parent::exitHelper();
+}
+
+
 // Basically draws a red box where the ship is pointing
 void EngineerHelper::renderDeploymentMarker(Ship *ship)
 {

@@ -145,6 +145,8 @@ public:
    // Player using engineer module, robots use this, bypassing the net interface. True if successful.
    bool sEngineerDeployObject(U32 objectType);
    void setEngineeringTeleport(bool isEngineeringTeleport);
+   void sEngineerDeploymentInterrupted(U32 objectType);
+   void sTeleportCleanup();
 
    Nonce *getId();
 

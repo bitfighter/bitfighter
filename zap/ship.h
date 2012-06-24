@@ -273,6 +273,8 @@ public:
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();
 
+   void destroyTeleport();
+
    virtual void damageObject(DamageInfo *theInfo);
 
    static void computeMaxFireDelay();

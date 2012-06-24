@@ -453,6 +453,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerInterrupted, (RangedU32<0,EngineeredItemCount> objectType), (objectType),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+{
+   mClientInfo->sEngineerDeploymentInterrupted(objectType);
+}
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,EngineerEventCount> event), (event),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
