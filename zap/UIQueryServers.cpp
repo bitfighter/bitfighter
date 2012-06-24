@@ -1104,6 +1104,8 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
          mItemSelectedWithMouse = false;
          selectedId = servers[currentIndex].id;
       }
+      else
+         return false;
    }
    // If no key is handled
    else
