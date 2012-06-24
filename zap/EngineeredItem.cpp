@@ -399,8 +399,8 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
       case EngineeredTeleportExit:
          if(ship->getEngineeredTeleport() && ship->getEngineeredTeleport()->needsEndpoint())
          {
-            ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
-            ship->setEngineeredTeleport(NULL);   // Clear out the attached teleporter
+            ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);   // Clears any existing dests and sets mDeployPosition as only dest
+            ship->setEngineeredTeleport(NULL);                             // Clear out the attached teleporter
 
             ship->disableWeaponsAndModules(false);
             clientInfo->setEngineeringTeleport(false);
