@@ -331,14 +331,15 @@ void Teleporter::damageObject(DamageInfo *theInfo)
    if(mHasExploded)
       return;
 
-   mStartingHealth -= theInfo->damageAmount;
+   // Reduce damage to 1/4 to match other engineered items
+   if(theInfo->damageAmount > 0)
+      mStartingHealth -= theInfo->damageAmount * .25f;
+
    setMaskBits(HealthMask);
 
    // Destroyed!
    if(mStartingHealth <= 0 && mResource.isValid())
-   {
       onDestroyed();
-   }
 }
 
 
