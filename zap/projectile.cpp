@@ -660,15 +660,6 @@ void BurstProjectile::renderItem(const Point &pos)
 
 ///// Lua interface
 
-//  Lua constructor
-//BurstProjectile::BurstProjectile(lua_State *L)
-//{
-//   // Do not use
-//}
-
-
-//// Lua methods
-
 const char *BurstProjectile::luaClassName = "Burst";
 
 const luaL_reg BurstProjectile::luaMethods[] =
@@ -678,12 +669,6 @@ const luaL_reg BurstProjectile::luaMethods[] =
 };
 
 REGISTER_LUA_SUBCLASS(BurstProjectile, MoveItem);
-
-
-S32 BurstProjectile::getClassID(lua_State *L)
-{
-   return returnInt(L, mObjectTypeNumber);
-}
 
 
 S32 BurstProjectile::getWeapon(lua_State *L)

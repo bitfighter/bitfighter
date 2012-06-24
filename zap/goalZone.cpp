@@ -277,12 +277,6 @@ S32 GoalZone::hasFlag(lua_State *L)
    return returnBool(L, mHasFlag);
 }
 
-
-S32 GoalZone::getClassID(lua_State *L)
-{
-   return returnInt(L, GoalZoneTypeNumber);
-}
-
 };
 
 

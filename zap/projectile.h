@@ -139,9 +139,6 @@ public:
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
-   //BurstProjectile(lua_State *L);         // Lua constructor
-
-   S32 getClassID(lua_State *L);
    virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 

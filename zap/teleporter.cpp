@@ -45,8 +45,76 @@ using namespace TNL;
 
 #include <math.h>
 
+#ifndef sq
+#  define sq(a) ((a) * (a))
+#endif
+
+
 namespace Zap
 {
+
+S32 DestManager::getDestCount() const
+{
+   return mDests.size();
+}
+
+
+Point DestManager::getDest(S32 index) const
+{
+   // If we have no desitnations, return the orgin for a kind of bizarre loopback effect
+   if(mDests.size() == 0)
+      return mOwner->getPos();
+
+   return mDests[index];
+}
+
+
+S32 DestManager::getRandomDest() const
+{
+   if(mDests.size() == 0)
+      return 0;
+   else
+      return (S32)TNL::Random::readI(0, mDests.size() - 1);
+}
+
+
+void DestManager::addDest(const Point &dest)
+{
+   mDests.push_back(dest);
+}
+
+
+void DestManager::resize(S32 count)
+{
+   mDests.resize(count);
+}
+
+
+void DestManager::read(S32 index, BitStream *stream)
+{
+   mDests[index].read(stream);
+}
+
+
+void DestManager::clear()
+{
+   mDests.clear();
+}
+
+
+const Vector<Point> *DestManager::getDestList() const
+{
+   return &mDests;
+}
+
+
+void DestManager::setOwner(Teleporter *owner)
+{
+   mOwner = owner;
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
@@ -64,19 +132,22 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
    mTeleporterDelay = TeleporterDelay;
    setTeam(TEAM_NEUTRAL);
 
-   mNeedsEndpoint = false;
-
    setVert(pos, 0);
    setVert(dest, 1);
 
    mHasExploded = false;
    mStartingHealth = 1.0f;
+
+   mDestManager.setOwner(this);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
+
 
 // Destructor
 Teleporter::~Teleporter()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -148,20 +219,20 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
          Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
          if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
          {
-            tel->mDests.push_back(dest);
+            tel->addDest(dest);
             destroySelf();    // Since this is really part of a different teleporter, delete this one
             return true;      // There will only be one!
          }
       }
 
       // New teleporter origin
-      mDests.push_back(dest);
+      addDest(dest);
       computeExtent(); // for ServerGame extent
    }
 #ifndef ZAP_DEDICATED
    else
    {
-      mDests.push_back(dest);
+      addDest(dest);
       setExtent(calcExtents()); // for editor
    }
 #endif
@@ -210,10 +281,12 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
       stream->writeFlag(mEngineered);
 
-      stream->writeInt(mDests.size(), 16);
+      S32 dests = mDestManager.getDestCount();
 
-      for(S32 i = 0; i < mDests.size(); i++)
-         mDests[i].write(stream);
+      stream->writeInt(dests, 16);
+
+      for(S32 i = 0; i < dests; i++)
+         getDest(i).write(stream);
 
       if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))  // most teleporter will be at a default timing
          stream->writeInt(mTeleporterDelay, 32);
@@ -255,10 +328,10 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
-      mDests.resize(count);
+      mDestManager.resize(count);      // Prepare the list for multiple additions
 
       for(U32 i = 0; i < count; i++)
-         mDests[i].read(stream);
+         mDestManager.read(i, stream);
       
       computeExtent();
 
@@ -275,9 +348,9 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
+      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
+      SoundSystem::playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
@@ -293,8 +366,8 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          Point dest;
          dest.read(stream);
          setVert(dest, 1);
-         mDests.clear();
-         mDests.push_back(dest);
+         mDestManager.clear();
+         mDestManager.addDest(dest);
 
          // Update the object extents
          Rect rect(getVert(0), getVert(1));
@@ -389,33 +462,43 @@ void Teleporter::computeExtent()
 }
 
 
+S32 Teleporter::getDestCount()
+{
+   return mDestManager.getDestCount();
+}
+
+
+Point Teleporter::getDest(S32 index)
+{
+   return mDestManager.getDest(index);
+}
+
+
+void Teleporter::addDest(const Point &dest)
+{
+   mDestManager.addDest(dest);
+}
+
+
 void Teleporter::onConstructed()
 {
-   // Make destination the entry point so we have at least one destination
-   mDests.push_back(getVert(0));
-   mNeedsEndpoint = true;
-   setMaskBits(ExitPointChangedMask);
+   //setMaskBits(ExitPointChangedMask);
 }
 
 
-bool Teleporter::needsEndpoint()
+bool Teleporter::hasAnyDests()
 {
-   return mNeedsEndpoint;
+   return mDestManager.getDestCount() > 0;
 }
 
-// Server only
+
+// Server only, only called when there are no destinations
 void Teleporter::setEndpoint(const Point &point)
 {
-   if(mNeedsEndpoint)
-   {
-      mDests.clear();
-      mDests.push_back(point);
-      setVert(point, 1);
+   mDestManager.addDest(point);
+   setVert(point, 1);
 
-      setMaskBits(ExitPointChangedMask);
-
-      mNeedsEndpoint = false;
-   }
+   setMaskBits(ExitPointChangedMask);
 }
 
 
@@ -475,11 +558,11 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    // We've triggered the teleporter.  Relocate ship.
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Ship *ship = dynamic_cast<Ship *>(foundObjects[i]);
-      if((pos - ship->getRenderPos()).len() < TELEPORTER_RADIUS + ship->getRadius())
+      Ship *ship = static_cast<Ship *>(foundObjects[i]);
+      if((pos - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))
       {
-         mLastDest = TNL::Random::readI(0, mDests.size() - 1);
-         Point newPos = ship->getActualPos() - pos + mDests[mLastDest];    
+         mLastDest = mDestManager.getRandomDest();
+         Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
          ship->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
 
@@ -532,7 +615,7 @@ void Teleporter::render()
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), false);
    }
 
    if(mEngineered)
@@ -566,10 +649,10 @@ void Teleporter::doExplosion()
 
    SoundSystem::playSoundEffect(SFXShipExplode, getPos());
 
-   F32 a = TNL::Random::readF() * 0.4f + 0.5f;
-   F32 b = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 a = TNL::Random::readF() * 0.4f  + 0.5f;
+   F32 b = TNL::Random::readF() * 0.2f  + 0.9f;
    F32 c = TNL::Random::readF() * 0.15f + 0.125f;
-   F32 d = TNL::Random::readF() * 0.2f + 0.9f;
+   F32 d = TNL::Random::readF() * 0.2f  + 0.9f;
 
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
@@ -611,95 +694,27 @@ void Teleporter::onGeomChanging()
 }
 
 
-const char *Teleporter::getEditorHelpString()
+const char *Teleporter::getOnScreenName()     { return "Teleport";    }
+const char *Teleporter::getPrettyNamePlural() { return "Teleporters"; }
+const char *Teleporter::getOnDockName()       { return "Teleport";    }
+const char *Teleporter::getEditorHelpString() { return "Teleports ships from one place to another. [T]"; }
+
+
+bool Teleporter::hasTeam()      { return false; }
+bool Teleporter::canBeHostile() { return false; }
+bool Teleporter::canBeNeutral() { return false; }
+
+
+//// Lua methods
+
+const char *Teleporter::luaClassName = "Teleporter";
+
+const luaL_reg Teleporter::luaMethods[] =
 {
-   return "Teleports ships from one place to another. [T]";
-}
-
-
-const char *Teleporter::getPrettyNamePlural()
-{
-   return "Teleporters";
-}
-
-
-const char *Teleporter::getOnDockName()
-{
-   return "Teleport";
-}
-
-
-const char *Teleporter::getOnScreenName()
-{
-   return "Teleport";
-}
-
-
-bool Teleporter::hasTeam()
-{
-   return false;
-}
-
-
-bool Teleporter::canBeHostile()
-{
-   return false;
-}
-
-
-bool Teleporter::canBeNeutral()
-{
-   return false;
-}
-
-
-// Lua methods
-
-const char Teleporter::className[] = "Teleporter";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-Teleporter::Teleporter(lua_State *L)
-{
-   // Do nothing
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<Teleporter>::RegType Teleporter::methods[] =
-{
-   // Standard gameItem methods
-   method(Teleporter, getClassID),
-   method(Teleporter, getLoc),
-   method(Teleporter, getRad),
-   method(Teleporter, getVel),
-   method(Teleporter, getTeamIndx),
-
-   {0,0}    // End method list
+   { NULL, NULL }
 };
 
-
-S32 Teleporter::getClassID(lua_State *L)
-{
-   return returnInt(L, TeleportTypeNumber);
-}
-
-
-void Teleporter::push(lua_State *L)
-{
-   Lunar<Teleporter>::push(L, this);
-}
-
-
-S32 Teleporter::getRad(lua_State *L)
-{
-   return returnInt(L, TeleporterTriggerRadius);
-}
-
-
-S32 Teleporter::getVel(lua_State *L)
-{
-   return returnPoint(L, Point(0, 0));
-}
+REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 
 };

@@ -694,11 +694,6 @@ const luaL_reg Robot::luaMethods[] =
 
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
-S32 Robot::getClassID(lua_State *L)
-{
-   return returnInt(L, RobotShipTypeNumber);
-}
-
 
 // Return CPU time... use for timing things
 S32 Robot::getCPUTime(lua_State *L)

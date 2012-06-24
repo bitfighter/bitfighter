@@ -66,8 +66,8 @@
 #define hypot _hypot    // Kill some warnings
 
 #ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
-#define max(a,b) ((a) >= (b) ? (a) : (b))
+#  define min(a,b) ((a) <= (b) ? (a) : (b))
+#  define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
 #define sq(a) ((a) * (a))
@@ -2326,7 +2326,6 @@ REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
 
-S32 Ship::getClassID(lua_State *L) { return returnInt(L, PlayerShipTypeNumber); }
 S32 Ship::isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
 S32 Ship::hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
 

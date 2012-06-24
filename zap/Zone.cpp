@@ -152,13 +152,6 @@ const luaL_reg Zone::luaMethods[] = { { NULL, NULL } };
 
 REGISTER_LUA_SUBCLASS(Zone, BfObject);
 
-
-S32 Zone::getClassID(lua_State *L)
-{
-   return returnInt(L, ZoneTypeNumber);
-}
-
-
 };
 
 

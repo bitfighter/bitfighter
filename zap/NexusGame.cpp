@@ -1088,12 +1088,4 @@ const luaL_reg NexusObject::luaMethods[] = { { NULL, NULL } };
 
 REGISTER_LUA_SUBCLASS(NexusObject, Zone);
 
-
-S32 NexusObject::getClassID(lua_State *L)
-{
-   return returnInt(L, NexusTypeNumber);
-}
-
-
 };
-

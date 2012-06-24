@@ -39,13 +39,38 @@
 namespace Zap
 {
 
+class Teleporter;
+
+// Manage destinations for a teleporter
+struct DestManager 
+{
+   private:
+      Vector<Point> mDests;
+      Teleporter *mOwner;
+
+   public:
+      void setOwner(Teleporter *owner);
+
+      S32 getDestCount() const;
+      Point getDest(S32 index) const;
+      S32 getRandomDest() const;
+      void addDest(const Point &dest);
+      void resize(S32 count);
+      void read(S32 index, BitStream *stream);
+      void clear();
+      const Vector<Point> *getDestList() const;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class Teleporter : public SimpleLine, public Engineerable
 {
    typedef SimpleLine Parent;
 
 public:
-      enum {
+   enum {
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
       ExitPointChangedMask = BIT(2),
@@ -61,9 +86,10 @@ public:
       TeleporterExplosionTime = 1000,
    };
 
+   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
+
 private:
    S32 mLastDest;    // Destination of last ship through
-   bool mNeedsEndpoint;
 
    bool mHasExploded;
    F32 mStartingHealth;
@@ -72,6 +98,8 @@ private:
 
    Timer mExplosionTimer;
    bool mFinalExplosionTriggered;
+
+   DestManager mDestManager;
 
 public:
    Teleporter(Point pos = Point(), Point dest = Point());  // Constructor
@@ -85,7 +113,10 @@ public:
 
    U32 mTeleporterDelay;
 
-   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
+   S32 getDestCount();
+   Point getDest(S32 index);
+   void addDest(const Point &dest);
+
 
    static bool checkDeploymentPosition(const Point &position, GridDatabase *gb);
 
@@ -111,8 +142,6 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   Vector<Point> mDests;   // need public for BotNavMeshZones
-
    TNL_DECLARE_CLASS(Teleporter);
 
 
@@ -126,14 +155,15 @@ public:
 
    void onConstructed();
 
-   bool needsEndpoint();
+   bool hasAnyDests();
    void setEndpoint(const Point &point);
 
    // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
    const char *getOnScreenName();
+   const char *getOnDockName();
+   const char *getPrettyNamePlural();
+   const char *getEditorHelpString();
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
@@ -141,15 +171,10 @@ public:
 
    ///// Lua Interface
 
-   Teleporter(lua_State *L);       //  Lua constructor
-   static const char className[];
-   static Lunar<Teleporter>::RegType methods[];
+   LUAW_DECLARE_CLASS(Teleporter);
 
-   S32 getClassID(lua_State *L);   // Object's class
-   void push(lua_State *L);        // Push item onto stack
-
-   S32 getRad(lua_State *L);       // Radius of item (returns number)
-   S32 getVel(lua_State *L);       // Speed of item (returns point)
+   static const luaL_reg luaMethods[];
+   static const char *luaClassName;
 };
 
 

@@ -133,8 +133,6 @@ public:
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
-   S32 getClassID(lua_State *L);
-
    S32 getCPUTime(lua_State *L);
    S32 getTime(lua_State *L);
 

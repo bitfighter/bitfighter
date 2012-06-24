@@ -842,7 +842,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderForceField(Point(-35, 0), Point(50, 0), &Colors::red, true);
             break;
          case 18:
-            renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
+            renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &Vector<Point>(), false);
             break;
          case 19:
             renderFlag(0, 0, &Colors::red);
