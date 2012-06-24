@@ -304,8 +304,6 @@ public:
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
 
-   virtual S32 getClassID(lua_State *L);    // Robot will override this
-
    S32 isAlive(lua_State *L);
    S32 getAngle(lua_State *L);
    S32 hasFlag(lua_State *L);

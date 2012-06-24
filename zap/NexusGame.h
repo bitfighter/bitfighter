@@ -232,8 +232,6 @@ public:
 
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
-
-   virtual S32 getClassID(lua_State *L);
 };
 
 };

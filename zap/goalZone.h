@@ -108,7 +108,6 @@ public:
    static const char *luaClassName;
 
    S32 hasFlag(lua_State *L);
-   S32 getClassID(lua_State *L);
 };
 
 

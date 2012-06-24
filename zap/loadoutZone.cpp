@@ -176,13 +176,6 @@ const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
 
 REGISTER_LUA_SUBCLASS(LoadoutZone, Zone);
 
-
-S32 LoadoutZone::getClassID(lua_State *L)
-{
-   return returnInt(L, LoadoutZoneTypeNumber);
-}
-
-
 };
 
 
