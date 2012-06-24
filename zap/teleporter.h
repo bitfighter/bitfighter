@@ -39,13 +39,21 @@
 namespace Zap
 {
 
-struct DestManager {
+class Teleporter;
+
+// Manage destinations for a teleporter
+struct DestManager 
+{
    private:
       Vector<Point> mDests;
+      Teleporter *mOwner;
 
    public:
+      void setOwner(Teleporter *owner);
+
       S32 getDestCount() const;
       Point getDest(S32 index) const;
+      S32 getRandomDest() const;
       void addDest(const Point &dest);
       void resize(S32 count);
       void read(S32 index, BitStream *stream);
@@ -82,7 +90,6 @@ public:
 
 private:
    S32 mLastDest;    // Destination of last ship through
-   bool mNeedsEndpoint;
 
    bool mHasExploded;
    F32 mStartingHealth;
@@ -148,7 +155,7 @@ public:
 
    void onConstructed();
 
-   bool needsEndpoint();
+   bool hasAnyDests();
    void setEndpoint(const Point &point);
 
    // Some properties about the item that will be needed in the editor

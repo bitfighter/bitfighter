@@ -197,7 +197,7 @@ void EditorUserInterface::populateDock()
    addDockObject(new Turret(), xPos, yPos);
    yPos += spacer;
 
-   addDockObject(new Teleporter(), xPos, yPos);
+   //addDockObject(new Teleporter(), xPos, yPos);
    yPos += spacer;
 
    addDockObject(new SpeedZone(), xPos, yPos);

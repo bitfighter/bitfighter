@@ -61,7 +61,20 @@ S32 DestManager::getDestCount() const
 
 Point DestManager::getDest(S32 index) const
 {
+   // If we have no desitnations, return the orgin for a kind of bizarre loopback effect
+   if(mDests.size() == 0)
+      return mOwner->getPos();
+
    return mDests[index];
+}
+
+
+S32 DestManager::getRandomDest() const
+{
+   if(mDests.size() == 0)
+      return 0;
+   else
+      return (S32)TNL::Random::readI(0, mDests.size() - 1);
 }
 
 
@@ -95,6 +108,11 @@ const Vector<Point> *DestManager::getDestList() const
 }
 
 
+void DestManager::setOwner(Teleporter *owner)
+{
+   mOwner = owner;
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -114,13 +132,13 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
    mTeleporterDelay = TeleporterDelay;
    setTeam(TEAM_NEUTRAL);
 
-   mNeedsEndpoint = false;
-
    setVert(pos, 0);
    setVert(dest, 1);
 
    mHasExploded = false;
    mStartingHealth = 1.0f;
+
+   mDestManager.setOwner(this);
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -462,32 +480,23 @@ void Teleporter::addDest(const Point &dest)
 
 void Teleporter::onConstructed()
 {
-   // Make destination the entry point so we have at least one destination.  This will be replaced with a real destination when
-   // placement is complete.
-   mDestManager.addDest(getVert(0));
-   mNeedsEndpoint = true;
-   setMaskBits(ExitPointChangedMask);
+   //setMaskBits(ExitPointChangedMask);
 }
 
 
-bool Teleporter::needsEndpoint()
+bool Teleporter::hasAnyDests()
 {
-   return mNeedsEndpoint;
+   return mDestManager.getDestCount() > 0;
 }
 
-// Server only
+
+// Server only, only called when there are no destinations
 void Teleporter::setEndpoint(const Point &point)
 {
-   if(mNeedsEndpoint)
-   {
-      mDestManager.clear();         // Remove existing dest -- there should only be one, and it should be on top of the entrance.
-      mDestManager.addDest(point);
-      setVert(point, 1);
+   mDestManager.addDest(point);
+   setVert(point, 1);
 
-      setMaskBits(ExitPointChangedMask);
-
-      mNeedsEndpoint = false;
-   }
+   setMaskBits(ExitPointChangedMask);
 }
 
 
@@ -547,10 +556,10 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    // We've triggered the teleporter.  Relocate ship.
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Ship *ship = dynamic_cast<Ship *>(foundObjects[i]);
+      Ship *ship = static_cast<Ship *>(foundObjects[i]);
       if((pos - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))
       {
-         mLastDest = TNL::Random::readI(0, mDestManager.getDestCount() - 1);
+         mLastDest = mDestManager.getRandomDest();
          Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
          ship->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
