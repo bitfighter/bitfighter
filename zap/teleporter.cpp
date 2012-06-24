@@ -45,8 +45,58 @@ using namespace TNL;
 
 #include <math.h>
 
+#ifndef sq
+#  define sq(a) ((a) * (a))
+#endif
+
+
 namespace Zap
 {
+
+S32 DestManager::getDestCount() const
+{
+   return mDests.size();
+}
+
+
+Point DestManager::getDest(S32 index) const
+{
+   return mDests[index];
+}
+
+
+void DestManager::addDest(const Point &dest)
+{
+   mDests.push_back(dest);
+}
+
+
+void DestManager::resize(S32 count)
+{
+   mDests.resize(count);
+}
+
+
+void DestManager::read(S32 index, BitStream *stream)
+{
+   mDests[index].read(stream);
+}
+
+
+void DestManager::clear()
+{
+   mDests.clear();
+}
+
+
+const Vector<Point> *DestManager::getDestList() const
+{
+   return &mDests;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
@@ -150,20 +200,20 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
          Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
          if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
          {
-            tel->mDests.push_back(dest);
+            tel->addDest(dest);
             destroySelf();    // Since this is really part of a different teleporter, delete this one
             return true;      // There will only be one!
          }
       }
 
       // New teleporter origin
-      mDests.push_back(dest);
+      addDest(dest);
       computeExtent(); // for ServerGame extent
    }
 #ifndef ZAP_DEDICATED
    else
    {
-      mDests.push_back(dest);
+      addDest(dest);
       setExtent(calcExtents()); // for editor
    }
 #endif
@@ -212,10 +262,12 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
       stream->writeFlag(mEngineered);
 
-      stream->writeInt(mDests.size(), 16);
+      S32 dests = mDestManager.getDestCount();
 
-      for(S32 i = 0; i < mDests.size(); i++)
-         mDests[i].write(stream);
+      stream->writeInt(dests, 16);
+
+      for(S32 i = 0; i < dests; i++)
+         getDest(i).write(stream);
 
       if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))  // most teleporter will be at a default timing
          stream->writeInt(mTeleporterDelay, 32);
@@ -257,10 +309,10 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
-      mDests.resize(count);
+      mDestManager.resize(count);      // Prepare the list for multiple additions
 
       for(U32 i = 0; i < count; i++)
-         mDests[i].read(stream);
+         mDestManager.read(i, stream);
       
       computeExtent();
 
@@ -277,9 +329,9 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 #ifndef ZAP_DEDICATED
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDests[dest], 0);
+      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mDests[dest]);
+      SoundSystem::playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
@@ -295,8 +347,8 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          Point dest;
          dest.read(stream);
          setVert(dest, 1);
-         mDests.clear();
-         mDests.push_back(dest);
+         mDestManager.clear();
+         mDestManager.addDest(dest);
 
          // Update the object extents
          Rect rect(getVert(0), getVert(1));
@@ -390,10 +442,29 @@ void Teleporter::computeExtent()
 }
 
 
+S32 Teleporter::getDestCount()
+{
+   return mDestManager.getDestCount();
+}
+
+
+Point Teleporter::getDest(S32 index)
+{
+   return mDestManager.getDest(index);
+}
+
+
+void Teleporter::addDest(const Point &dest)
+{
+   mDestManager.addDest(dest);
+}
+
+
 void Teleporter::onConstructed()
 {
-   // Make destination the entry point so we have at least one destination
-   mDests.push_back(getVert(0));
+   // Make destination the entry point so we have at least one destination.  This will be replaced with a real destination when
+   // placement is complete.
+   mDestManager.addDest(getVert(0));
    mNeedsEndpoint = true;
    setMaskBits(ExitPointChangedMask);
 }
@@ -409,8 +480,8 @@ void Teleporter::setEndpoint(const Point &point)
 {
    if(mNeedsEndpoint)
    {
-      mDests.clear();
-      mDests.push_back(point);
+      mDestManager.clear();         // Remove existing dest -- there should only be one, and it should be on top of the entrance.
+      mDestManager.addDest(point);
       setVert(point, 1);
 
       setMaskBits(ExitPointChangedMask);
@@ -477,10 +548,10 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Ship *ship = dynamic_cast<Ship *>(foundObjects[i]);
-      if((pos - ship->getRenderPos()).len() < TELEPORTER_RADIUS + ship->getRadius())
+      if((pos - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))
       {
-         mLastDest = TNL::Random::readI(0, mDests.size() - 1);
-         Point newPos = ship->getActualPos() - pos + mDests[mLastDest];    
+         mLastDest = TNL::Random::readI(0, mDestManager.getDestCount() - 1);
+         Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
          ship->setActualPos(newPos, true);
          setMaskBits(TeleportMask);
 
@@ -533,7 +604,7 @@ void Teleporter::render()
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDests, false);
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), false);
    }
 
    if(mEngineered)

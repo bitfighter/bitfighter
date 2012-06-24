@@ -708,27 +708,27 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
       BotNavMeshZone *origZone = findZoneContainingPoint(mBotZoneDatabase, teleporter->getPos());
 
       if(origZone != NULL)
-      for(S32 j = 0; j < teleporter->mDests.size(); j++)     // Review each teleporter destination
-      {
-         BotNavMeshZone *destZone = findZoneContainingPoint(mBotZoneDatabase, teleporter->mDests[j]);
-
-         if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+         for(S32 j = 0; j < teleporter->getDestCount(); j++)     // Review each teleporter destination
          {
-            // Teleporter is one way path
-            neighbor.zoneID = destZone->mZoneId;
-            neighbor.borderStart.set(teleporter->getPos());
-            neighbor.borderEnd.set(teleporter->mDests[j]);
-            neighbor.borderCenter.set(teleporter->getPos());
+            BotNavMeshZone *destZone = findZoneContainingPoint(mBotZoneDatabase, teleporter->getDest(j));
 
-            // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
-            // This should be the average of the costs of traveling from each dest zone to the target zone
-            neighbor.distTo = 0;                                    
-            neighbor.center.set(teleporter->getPos());
+            if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+            {
+               // Teleporter is one way path
+               neighbor.zoneID = destZone->mZoneId;
+               neighbor.borderStart.set(teleporter->getPos());
+               neighbor.borderEnd.set(teleporter->getDest(j));
+               neighbor.borderCenter.set(teleporter->getPos());
 
-            origZone->mNeighbors.push_back(neighbor);
-         }
-      }
-   }
+               // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
+               // This should be the average of the costs of traveling from each dest zone to the target zone
+               neighbor.distTo = 0;                                    
+               neighbor.center.set(teleporter->getPos());
+
+               origZone->mNeighbors.push_back(neighbor);
+            }
+         }  // for loop iterating over teleporter dests
+   } // for loop iterating over teleporters
 }
 
 

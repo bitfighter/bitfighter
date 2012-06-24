@@ -310,7 +310,7 @@ void FXManager::render(S32 renderPass)
             alpha = (1 - radius) / 0.5f;
 
          renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(),
-                          radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
+                          radius, Teleporter::TeleportInRadius, alpha, &Vector<Point>(), false);
       }
    }
    else if(renderPass == 1)      // Time for sparks!!

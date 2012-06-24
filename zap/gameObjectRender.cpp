@@ -595,11 +595,11 @@ void renderAimVector()
 
 
 #ifndef ABS
-#define ABS(x) (((x) > 0) ? (x) : -(x))
+#  define ABS(x) (((x) > 0) ? (x) : -(x))
 #endif
 
 void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
-                      const Vector<Point> &dests, bool showDestOverride)
+                      const Vector<Point> *dests, bool showDestOverride)
 {
    enum {
       NumColors = 6,
@@ -676,15 +676,15 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       setDefaultBlendFunction();
       glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
-      for(S32 i = 0; i < dests.size(); i++)
+      for(S32 i = 0; i < dests->size(); i++)
       {
-         F32 ang = pos.angleTo(dests[i]);
+         F32 ang = pos.angleTo(dests->get(i));
          F32 sina = sin(ang);
          F32 cosa = cos(ang);
          F32 asina = (sina * cosa < 0) ? ABS(sina) : -ABS(sina);
          F32 acosa = ABS(cosa);
 
-         F32 dist = pos.distanceTo(dests[i]);
+         F32 dist = pos.distanceTo(dests->get(i));
 
          F32 midx = pos.x + .75f * cosa * dist;
          F32 midy = pos.y + .75f * sina * dist;
@@ -698,10 +698,13 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          glEnd();
 
          glBegin(GL_POLYGON);
+            F32 x = dests->get(i).x;
+            F32 y = dests->get(i).y;
+
             glVertex2f(midx + asina * wid, midy + acosa * wid);
             glColor(Colors::white, 0);
-            glVertex2f(dests[i].x + asina * wid, dests[i].y + acosa * wid);
-            glVertex2f(dests[i].x - asina * wid, dests[i].y - acosa * wid);
+            glVertex2f(x + asina * wid, y + acosa * wid);
+            glVertex2f(x - asina * wid, y - acosa * wid);
             glColor(Colors::white, .25f * alpha);
             glVertex2f(midx - asina * wid, midy - acosa * wid);
          glEnd();
