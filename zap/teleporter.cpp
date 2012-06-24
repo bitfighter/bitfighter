@@ -143,6 +143,7 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
+
 // Destructor
 Teleporter::~Teleporter()
 {
