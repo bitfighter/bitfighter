@@ -492,7 +492,7 @@ bool Teleporter::hasAnyDests()
 }
 
 
-// Server only, only called when there are no destinations
+// Server only
 void Teleporter::setEndpoint(const Point &point)
 {
    mDestManager.addDest(point);
