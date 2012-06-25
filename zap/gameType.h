@@ -571,7 +571,7 @@ public:
    TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
 
    TNL_DECLARE_RPC(s2cSetIsSpawnDelayed, (StringTableEntry name, bool idle));
-   TNL_DECLARE_RPC(s2cSetPlayerEngineeringTeleport, (StringTableEntry name, bool isEngineeringTeleport));
+   TNL_DECLARE_RPC(s2cSetPlayerEngineeringTeleporter, (StringTableEntry name, bool isEngineeringTeleporter));
 
    TNL_DECLARE_CLASS(GameType);
 

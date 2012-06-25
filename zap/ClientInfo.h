@@ -73,7 +73,7 @@ protected:
    bool mIsAuthenticated;
    bool mSpawnDelayed;
    bool mIsBusy;
-   bool mIsEngineeringTeleport;
+   bool mIsEngineeringTeleporter;
    Int<BADGE_COUNT> mBadges;
    Game *mGame;
 
@@ -144,17 +144,17 @@ public:
 
    // Player using engineer module, robots use this, bypassing the net interface. True if successful.
    bool sEngineerDeployObject(U32 objectType);
-   void setEngineeringTeleport(bool isEngineeringTeleport);
+   void setEngineeringTeleporter(bool isEngineeringTeleport);
    void sEngineerDeploymentInterrupted(U32 objectType);
-   void sTeleportCleanup();
+   void sTeleporterCleanup();
 
    Nonce *getId();
 
    virtual SoundEffect *getVoiceSFX() = 0;
    virtual VoiceDecoder *getVoiceDecoder() = 0;
 
-   virtual bool isEngineeringTeleport() = 0;
-   virtual void setIsEngineeringTeleport(bool isEngineeringTeleport) = 0;
+   virtual bool isEngineeringTeleporter() = 0;
+   virtual void setIsEngineeringTeleporter(bool isEngineeringTeleporter) = 0;
 };
 
 ////////////////////////////////////////
@@ -187,8 +187,8 @@ public:
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
 
-   bool isEngineeringTeleport();
-   void setIsEngineeringTeleport(bool isEngineeringTeleport);
+   bool isEngineeringTeleporter();
+   void setIsEngineeringTeleporter(bool isEngineeringTeleporter);
 };
 
 
@@ -227,8 +227,8 @@ public:
    SoundEffect *getVoiceSFX();
    VoiceDecoder *getVoiceDecoder();
 
-   bool isEngineeringTeleport();
-   void setIsEngineeringTeleport(bool isEngineeringTeleport);
+   bool isEngineeringTeleporter();
+   void setIsEngineeringTeleporter(bool isEngineeringTeleporter);
 };
 #endif
 

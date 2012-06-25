@@ -1257,8 +1257,8 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);
-   setEnum(EngineeredTeleportEntrance);
-   setEnum(EngineeredTeleportExit);
+   setEnum(EngineeredTeleporterEntrance);
+   setEnum(EngineeredTeleporterExit);
 
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");

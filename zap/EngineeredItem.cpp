@@ -123,7 +123,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &
          // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
          deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
    }
-   else if(objectType == EngineeredTeleportEntrance || objectType == EngineeredTeleportExit)
+   else if(objectType == EngineeredTeleporterEntrance || objectType == EngineeredTeleporterExit)
       deployPosition.set(ship->getActualPos() + (ship->getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS)));
 
    return true;
@@ -150,7 +150,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    string msg;
 
    // Everything needs energy and a resource, except the teleport exit
-   if(objectType != EngineeredTeleportExit)
+   if(objectType != EngineeredTeleporterExit)
       mErrorMessage = checkResourcesAndEnergy(ship);
 
    if(mErrorMessage != "")
@@ -176,8 +176,8 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
          ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal, bounds);
          goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
-      case EngineeredTeleportEntrance:
-      case EngineeredTeleportExit:
+      case EngineeredTeleporterEntrance:
+      case EngineeredTeleporterExit:
          goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase, ship);
          break;
       default:    // will never happen
@@ -391,22 +391,22 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
          break;
 
-      case EngineeredTeleportEntrance:
+      case EngineeredTeleporterEntrance:
          deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
-         ship->setEngineeredTeleport(static_cast<Teleporter*>(deployedObject));
+         ship->setEngineeredTeleporter(static_cast<Teleporter*>(deployedObject));
 
          ship->disableWeaponsAndModules(true);
-         clientInfo->setEngineeringTeleport(true);
+         clientInfo->setEngineeringTeleporter(true);
          break;
 
-      case EngineeredTeleportExit:
-         if(ship->getEngineeredTeleport() && !ship->getEngineeredTeleport()->hasAnyDests())
+      case EngineeredTeleporterExit:
+         if(ship->getEngineeredTeleporter() && !ship->getEngineeredTeleporter()->hasAnyDests())
          {
             // Set the telport endpoint
-            ship->getEngineeredTeleport()->setEndpoint(mDeployPosition);
+            ship->getEngineeredTeleporter()->setEndpoint(mDeployPosition);
 
             // Clean-up
-            clientInfo->sTeleportCleanup();
+            clientInfo->sTeleporterCleanup();
          }
          else   // Something went wrong
             return false;

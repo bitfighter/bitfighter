@@ -39,8 +39,8 @@ enum EngineerBuildObjects
 {
    EngineeredTurret,
    EngineeredForceField,
-   EngineeredTeleportEntrance,
-   EngineeredTeleportExit,
+   EngineeredTeleporterEntrance,
+   EngineeredTeleporterExit,
    EngineeredItemCount
 };
 
@@ -48,8 +48,8 @@ enum EngineerBuildObjects
 enum EngineerResponseEvents {
    EngineerEventTurretBuilt,
    EngineerEventForceFieldBuilt,
-   EngineerEventTeleportEntranceBuilt,
-   EngineerEventTeleportExitBuilt,
+   EngineerEventTeleporterEntranceBuilt,
+   EngineerEventTeleporterExitBuilt,
    EngineerEventCount
 };
 

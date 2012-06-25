@@ -3794,7 +3794,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
    }
    else if(inputString == "T")                // Teleporter
-      insertNewItem(TeleportTypeNumber);
+      insertNewItem(TeleporterTypeNumber);
    else if(inputString == "P")                // Speed Zone
       insertNewItem(SpeedZoneTypeNumber);
    else if(inputString == "G")                // Spawn

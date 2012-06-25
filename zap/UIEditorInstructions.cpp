@@ -207,7 +207,7 @@ static ControlStringsEditor gControls1[] = {
          { "Redo", "Ctrl-Shift-Z" },
          { "", "" },       // End of col1
    { "Object Shortcuts", "HEADER" },
-         { "Insert Teleport", "T" },
+         { "Insert Teleporter", "T" },
          { "Insert Spawn Point", "G" },
          { "Insert Repair", "B" },
          { "Insert Turret", "Y" },

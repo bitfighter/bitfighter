@@ -108,7 +108,7 @@ bool isDamageableType(U8 x)
          x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
          x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
          x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber   ||
-         x == TeleportTypeNumber;
+         x == TeleporterTypeNumber;
 }
 
 
@@ -176,7 +176,7 @@ bool isWeaponCollideableType(U8 x)
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
          x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber          ||
-         x == TeleportTypeNumber;
+         x == TeleporterTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -210,7 +210,7 @@ bool isVisibleOnCmdrsMapType(U8 x)
          x == TurretTypeNumber || x == ForceFieldTypeNumber || x == ForceFieldProjectorTypeNumber ||
          x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
          x == GoalZoneTypeNumber || x == NexusTypeNumber || x == LoadoutZoneTypeNumber || x == SlipZoneTypeNumber ||
-         x == SpeedZoneTypeNumber || x == TeleportTypeNumber ||
+         x == SpeedZoneTypeNumber || x == TeleporterTypeNumber ||
          x == LineTypeNumber || x == TextItemTypeNumber ||
          x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber || x == CoreTypeNumber;
@@ -224,7 +224,7 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander
          x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
          x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == SlipZoneTypeNumber            ||
          x == GoalZoneTypeNumber   || x == NexusTypeNumber          ||
-         x == SpeedZoneTypeNumber  || x == TeleportTypeNumber       ||
+         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber       ||
          x == LineTypeNumber       || x == TextItemTypeNumber       ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || 
          x == EnergyItemTypeNumber || x == RepairItemTypeNumber     ||
@@ -1300,7 +1300,7 @@ BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *funct
       case FlagTypeNumber:
          return luaW_check<FlagItem>(L, index);
 
-      case TeleportTypeNumber:
+      case TeleporterTypeNumber:
          //return luaW_check<Teleporter>::check(L, index);
       case AsteroidTypeNumber:
          return luaW_check<Asteroid>(L, index);

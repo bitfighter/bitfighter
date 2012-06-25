@@ -70,7 +70,7 @@ class ClientInfo;
    TYPE_NUMBER( NexusTypeNumber,               true,              "NexusType"               ) \
    TYPE_NUMBER( BotNavMeshZoneTypeNumber,      true,              "BotNavMeshZoneType"      ) \
    TYPE_NUMBER( RobotShipTypeNumber,           true,              "RobotType"               ) \
-   TYPE_NUMBER( TeleportTypeNumber,            true,              "TeleportType"            ) \
+   TYPE_NUMBER( TeleporterTypeNumber,          true,              "TeleporterType"          ) \
    TYPE_NUMBER( GoalZoneTypeNumber,            true,              "GoalZoneType"            ) \
    TYPE_NUMBER( AsteroidTypeNumber,            true,              "AsteroidType"            ) \
    TYPE_NUMBER( RepairItemTypeNumber,          true,              "RepairItemType"          ) \

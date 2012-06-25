@@ -63,7 +63,7 @@ private:
 
    bool mWeaponsAndModulesDisabled;
 
-   SafePtr<Teleporter> mEngineeredTeleport;
+   SafePtr<Teleporter> mEngineeredTeleporter;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(U8 typeNumber);
@@ -227,8 +227,8 @@ public:
    bool isCarryingItem(U8 objectType);
    MoveItem *unmountItem(U8 objectType);
 
-   void setEngineeredTeleport(Teleporter *teleport);
-   Teleporter *getEngineeredTeleport();
+   void setEngineeredTeleporter(Teleporter *teleporter);
+   Teleporter *getEngineeredTeleporter();
    F32 getSensorActiveZoomFraction();
    F32 getSensorEquipZoomFraction();
    Point getAimVector();
@@ -273,7 +273,7 @@ public:
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();
 
-   void destroyTeleport();
+   void destroyTeleporter();
 
    virtual void damageObject(DamageInfo *theInfo);
 

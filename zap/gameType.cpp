@@ -3748,8 +3748,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry na
 
 
 // Server tells clients that a player is engineering a teleport
-TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetPlayerEngineeringTeleport, (StringTableEntry name, bool isEngineeringTeleport),
-      (name, isEngineeringTeleport), NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetPlayerEngineeringTeleporter, (StringTableEntry name, bool isEngineeringTeleporter),
+      (name, isEngineeringTeleporter), NetClassGroupGameMask, RPCGuaranteed, RPCToGhost, 0)
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *clientInfo = getGame()->findClientInfo(name);
@@ -3757,7 +3757,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetPlayerEngineeringTeleport, (StringTa
    if(!clientInfo)
       return;
 
-   clientInfo->setIsEngineeringTeleport(isEngineeringTeleport);
+   clientInfo->setIsEngineeringTeleporter(isEngineeringTeleporter);
 #endif
 }
 

@@ -56,7 +56,7 @@ ClientInfo::ClientInfo()
    mNeedToCheckAuthenticationWithMaster = false;     // Does client report that they are verified
    mSpawnDelayed = false;
    mIsBusy = false;
-   mIsEngineeringTeleport = false;
+   mIsEngineeringTeleporter = false;
 }
 
 
@@ -329,14 +329,14 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
             responseEvent = EngineerEventForceFieldBuilt;
             break;
 
-         case EngineeredTeleportEntrance:
+         case EngineeredTeleporterEntrance:
             e.push_back("teleport entrance");
-            responseEvent = EngineerEventTeleportEntranceBuilt;
+            responseEvent = EngineerEventTeleporterEntranceBuilt;
             break;
 
-         case EngineeredTeleportExit:
+         case EngineeredTeleporterExit:
             e.push_back("teleport exit");
-            responseEvent = EngineerEventTeleportExitBuilt;
+            responseEvent = EngineerEventTeleporterExitBuilt;
             break;
 
          default:    // Shouldn't occur
@@ -357,7 +357,7 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
 }
 
 
-void ClientInfo::setEngineeringTeleport(bool isEngineeringTeleport)
+void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter)
 {
    // Tell everyone that a particular client is engineering a teleport
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -365,26 +365,26 @@ void ClientInfo::setEngineeringTeleport(bool isEngineeringTeleport)
       GameType *gameType = mGame->getGameType();
 
       if(gameType)
-         gameType->s2cSetPlayerEngineeringTeleport(mName, isEngineeringTeleport);
+         gameType->s2cSetPlayerEngineeringTeleporter(mName, isEngineeringTeleporter);
    }
 }
 
 
 void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
 {
-   if(objectType == EngineeredTeleportExit)
+   if(objectType == EngineeredTeleporterExit)
    {
-      getShip()->destroyTeleport();
-      sTeleportCleanup();
+      getShip()->destroyTeleporter();
+      sTeleporterCleanup();
    }
 }
 
 
-void ClientInfo::sTeleportCleanup()
+void ClientInfo::sTeleporterCleanup()
 {
-   getShip()->setEngineeredTeleport(NULL);   // Clear out the attached teleporter
+   getShip()->setEngineeredTeleporter(NULL);   // Clear out the attached teleporter
    getShip()->disableWeaponsAndModules(false);
-   setEngineeringTeleport(false);
+   setEngineeringTeleporter(false);
 }
 
 
@@ -508,15 +508,15 @@ VoiceDecoder *FullClientInfo::getVoiceDecoder()
 }
 
 
-bool FullClientInfo::isEngineeringTeleport()
+bool FullClientInfo::isEngineeringTeleporter()
 {
-   return getShip()->getEngineeredTeleport() != NULL;
+   return getShip()->getEngineeredTeleporter() != NULL;
 }
 
 
-void FullClientInfo::setIsEngineeringTeleport(bool isEngineeringTeleport)
+void FullClientInfo::setIsEngineeringTeleporter(bool isEngineeringTeleporter)
 {
-   TNLAssert(false, "isEngineeringTeleport shouldn't be set for this class!");
+   TNLAssert(false, "isEngineeringTeleporter shouldn't be set for this class!");
 }
 
 
@@ -599,15 +599,15 @@ VoiceDecoder *RemoteClientInfo::getVoiceDecoder()
 }
 
 
-bool RemoteClientInfo::isEngineeringTeleport()
+bool RemoteClientInfo::isEngineeringTeleporter()
 {
-   return mIsEngineeringTeleport;
+   return mIsEngineeringTeleporter;
 }
 
 
-void RemoteClientInfo::setIsEngineeringTeleport(bool isEngineeringTeleport)
+void RemoteClientInfo::setIsEngineeringTeleporter(bool isEngineeringTeleporter)
 {
-   mIsEngineeringTeleport = isEngineeringTeleport;
+   mIsEngineeringTeleporter = isEngineeringTeleporter;
 }
 
 #endif

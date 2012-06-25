@@ -42,10 +42,10 @@ namespace Zap
 
 
 EngineerConstructionItemInfo engineerItemInfo[] = {
-      { EngineeredTurret,           KEY_1, BUTTON_1, true,  "Turret",        "", "Aim at a spot on a wall, and activate the module again." },
-      { EngineeredForceField,       KEY_2, BUTTON_2, true,  "Force Field",   "", "Aim at a spot on a wall, and activate the module again." },
-      { EngineeredTeleportEntrance, KEY_3, BUTTON_3, true,  "Teleport",      "", "Aim at a spot in open space, and activate the module again." },
-      { EngineeredTeleportExit,     KEY_4, BUTTON_4, false, "Teleport Exit", "", "Aim at a spot in open space, and activate the module again." },
+      { EngineeredTurret,             KEY_1, BUTTON_1, true,  "Turret",          "", "Aim at a spot on a wall, and activate the module again." },
+      { EngineeredForceField,         KEY_2, BUTTON_2, true,  "Force Field",     "", "Aim at a spot on a wall, and activate the module again." },
+      { EngineeredTeleporterEntrance, KEY_3, BUTTON_3, true,  "Teleporter",      "", "Aim at a spot in open space, and activate the module again." },
+      { EngineeredTeleporterExit,     KEY_4, BUTTON_4, false, "Teleporter Exit", "", "Aim at a spot in open space, and activate the module again." },
 };
 
 
@@ -222,12 +222,12 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
 
 void EngineerHelper::exitHelper()
 {
-   if(mSelectedItem != -1 && mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleportExit)
+   if(mSelectedItem != -1 && mEngineerCostructionItemInfos[mSelectedItem].mObjectType == EngineeredTeleporterExit)
    {
       GameConnection *gameConnection = getGame()->getConnectionToServer();
 
       if(gameConnection)
-         gameConnection->c2sEngineerInterrupted(EngineeredTeleportExit);
+         gameConnection->c2sEngineerInterrupted(EngineeredTeleporterExit);
    }
 
    Parent::exitHelper();
@@ -256,8 +256,8 @@ void EngineerHelper::renderDeploymentMarker(Ship *ship)
             drawSquare(deployPosition, 5);
             break;
 
-         case EngineeredTeleportEntrance:
-         case EngineeredTeleportExit:
+         case EngineeredTeleporterEntrance:
+         case EngineeredTeleporterExit:
             if(canDeploy)
                renderTeleporterOutline(deployPosition, 75.f, Colors::green);
             else

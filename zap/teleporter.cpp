@@ -124,7 +124,7 @@ static Vector<DatabaseObject *> foundObjects;
 // that we get the multiple destination aspect of teleporters right
 Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
 {
-   mObjectTypeNumber = TeleportTypeNumber;
+   mObjectTypeNumber = TeleporterTypeNumber;
    mNetFlags.set(Ghostable);
 
    timeout = 0;
@@ -212,7 +212,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 #endif
    {
       foundObjects.clear();
-      game->getGameObjDatabase()->findObjects(TeleportTypeNumber, foundObjects, Rect(pos, 1));
+      game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {

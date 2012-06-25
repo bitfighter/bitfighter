@@ -200,15 +200,15 @@ ClientInfo *Ship::getClientInfo()
 }
 
 
-void Ship::setEngineeredTeleport(Teleporter *teleport)
+void Ship::setEngineeredTeleporter(Teleporter *teleporter)
 {
-   mEngineeredTeleport = teleport;
+   mEngineeredTeleporter = teleporter;
 }
 
 
-Teleporter *Ship::getEngineeredTeleport()
+Teleporter *Ship::getEngineeredTeleporter()
 {
-   return mEngineeredTeleport;
+   return mEngineeredTeleporter;
 }
 
 
@@ -1880,16 +1880,16 @@ void Ship::kill()
    // Handle if in the middle of building a teleport
    if(!isGhost())   // Server only
    {
-      destroyTeleport();
-      getClientInfo()->sTeleportCleanup();
+      destroyTeleporter();
+      getClientInfo()->sTeleporterCleanup();
    }
 }
 
 // Server only
-void Ship::destroyTeleport()
+void Ship::destroyTeleporter()
 {
-   if(mEngineeredTeleport.isValid())
-      mEngineeredTeleport->onDestroyed();
+   if(mEngineeredTeleporter.isValid())
+      mEngineeredTeleporter->onDestroyed();
 }
 
 
@@ -2141,7 +2141,7 @@ void Ship::render(S32 layerIndex)
       }
 
       // Show if that player is engineering a teleport
-      if(clientInfo->isEngineeringTeleport())
+      if(clientInfo->isEngineeringTeleporter())
       {
          // XXX change to something better
          drawCircle(0, 0, 75);

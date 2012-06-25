@@ -471,11 +471,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,Enginee
          mClientGame->enterMode(PlayMode);  // Equivalent to HelperMenu::exitHelper();
          break;
 
-      case EngineerEventTeleportEntranceBuilt:
-         mClientGame->setSelectedEngineeredObject(EngineeredTeleportExit);
+      case EngineerEventTeleporterEntranceBuilt:
+         mClientGame->setSelectedEngineeredObject(EngineeredTeleporterExit);
          break;
 
-      case EngineerEventTeleportExitBuilt:
+      case EngineerEventTeleporterExitBuilt:
          mClientGame->enterMode(PlayMode);  // Finally exit helper menu
          break;
 

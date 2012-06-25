@@ -696,7 +696,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-   game->getGameObjDatabase()->findObjects(TeleportTypeNumber, teleporters);
+   game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, teleporters);
 
    for(S32 i = 0; i < teleporters.size(); i++)
    {
