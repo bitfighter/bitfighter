@@ -5,7 +5,12 @@
 # == CHANGE THE SETTINGS BELOW TO SUIT YOUR ENVIRONMENT =======================
 
 # Your platform. See PLATS for possible values.
+
+ifeq ($(findstring Windows, $(OS)), Windows)
+PLAT= mingw
+else
 PLAT= linux
+endif
 
 CC= gcc
 CFLAGS= -O2 -Wall $(MYCFLAGS)

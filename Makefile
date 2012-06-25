@@ -16,7 +16,7 @@ default: release
 release:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
-	#@$(MAKE) -C master
+#	@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
 	@$(MAKE) -C alure
 	@$(MAKE) -C zap	
@@ -24,7 +24,7 @@ release:
 debug:
 	@$(MAKE) -C tnl debug
 	@$(MAKE) -C libtomcrypt
-	#@$(MAKE) -C master
+#	@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
 	@$(MAKE) -C alure debug
 	@$(MAKE) -C zap	debug
@@ -32,14 +32,14 @@ debug:
 dedicated:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
-	#@$(MAKE) -C master
+#	@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src 
 	@$(MAKE) -C zap	dedicated
 
 dedicated_debug:
 	@$(MAKE) -C tnl debug 
 	@$(MAKE) -C libtomcrypt
-	#@$(MAKE) -C master
+#	@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src 
 	@$(MAKE) -C zap	dedicated_debug
 

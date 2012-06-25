@@ -694,14 +694,16 @@ void Ship::idle(BfObject::IdleCallPath path)
       processWeaponFire();
       processModules();
       rechargeEnergy();
+      if(path == BfObject::ServerIdleControlFromClient)
+         repairTargets();
    }
-    
-   if(path == BfObject::ServerIdleControlFromClient && isModulePrimaryActive(ModuleRepair))
-      repairTargets();
 
 #ifndef ZAP_DEDICATED
    if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
    {
+      if(path == BfObject::ClientIdleMainRemote && isModulePrimaryActive(ModuleRepair))
+         findRepairTargets(); // for rendering found targets
+
       mWarpInTimer.update(mCurrentMove.time);
 
       // Emit some particles, trail sections and update the turbo noise
@@ -1171,7 +1173,7 @@ void Ship::updateModuleSounds()
       SFXCloakActive,
       SFXNone, // armor
    };
-
+	
    for(U32 i = 0; i < ModuleCount; i++)
    {
       if(mModulePrimaryActive[i] && moduleSFXs[i] != SFXNone)
