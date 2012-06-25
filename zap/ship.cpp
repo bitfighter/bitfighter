@@ -2143,8 +2143,8 @@ void Ship::render(S32 layerIndex)
       // Show if that player is engineering a teleport
       if(clientInfo->isEngineeringTeleporter())
       {
-         // XXX change to something better
-         drawCircle(0, 0, 75);
+         renderTeleporterOutline(getAimVector() * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
+               Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
       }
 
       glLineWidth(gDefaultLineWidth);
