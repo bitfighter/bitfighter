@@ -250,19 +250,26 @@ string Teleporter::toString(F32 gridSize) const
 }
 
 
-bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb)
+bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship)
 {
    Rect queryRect(position, TELEPORTER_RADIUS * 2);
 	Point outPoint;  // only used as a return value in polygonCircleIntersect
 
    foundObjects.clear();
-   gb->findObjects((TestFunc) isWallType, foundObjects, queryRect);
+   gb->findObjects((TestFunc) isCollideableType, foundObjects, queryRect);
 
    Vector<Point> foundObjectBounds;
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
+      BfObject *bfObject = static_cast<BfObject *>(foundObjects[i]);
+
+      // Skip if found objects are same team as the ship that is deploying the teleporter
+      if(bfObject->getTeam() == ship->getTeam())
+         continue;
+
+      // Now calculate bounds
       foundObjectBounds.clear();
-      static_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
+      bfObject->getCollisionPoly(foundObjectBounds);
 
       // If they intersect, then bad deployment position
       if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, TELEPORTER_RADIUS * TELEPORTER_RADIUS, outPoint))

@@ -118,7 +118,7 @@ public:
    void addDest(const Point &dest);
 
 
-   static bool checkDeploymentPosition(const Point &position, GridDatabase *gb);
+   static bool checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship);
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;

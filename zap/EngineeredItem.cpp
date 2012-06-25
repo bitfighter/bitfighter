@@ -178,7 +178,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
          break;
       case EngineeredTeleportEntrance:
       case EngineeredTeleportExit:
-         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase);
+         goodDeploymentPosition = Teleporter::checkDeploymentPosition(mDeployPosition, gameObjectDatabase, ship);
          break;
       default:    // will never happen
          TNLAssert(false, "Bad objectType");
