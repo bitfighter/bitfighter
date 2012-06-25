@@ -598,6 +598,7 @@ void renderAimVector()
 #  define ABS(x) (((x) > 0) ? (x) : -(x))
 #endif
 
+// TODO: Document me better
 void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
                       const Vector<Point> *dests, bool showDestOverride)
 {

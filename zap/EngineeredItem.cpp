@@ -378,6 +378,9 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    BfObject *deployedObject = NULL;
 
+   // Create the new engineered item here
+   // These will be deleted when destroyed using deleteObject(); or, if not destroyed by end
+   // of game, Game::cleanUp() will get rid of them
    switch(objectType)
    {
       case EngineeredTurret:
@@ -389,7 +392,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          break;
 
       case EngineeredTeleportEntrance:
-         deployedObject = new Teleporter(mDeployPosition, mDeployPosition);   // Deleted... where?
+         deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
          ship->setEngineeredTeleport(static_cast<Teleporter*>(deployedObject));
 
          ship->disableWeaponsAndModules(true);
