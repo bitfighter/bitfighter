@@ -622,7 +622,7 @@ void Teleporter::render()
    {
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), false);
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList());
    }
 
    if(mEngineered)

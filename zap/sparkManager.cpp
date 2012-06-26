@@ -311,7 +311,7 @@ void FXManager::render(S32 renderPass)
 
          Vector<Point> dummy;
          renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(),
-                          radius, Teleporter::TeleportInRadius, alpha, &dummy, false);
+                          radius, Teleporter::TeleportInRadius, alpha, &dummy);
       }
    }
    else if(renderPass == 1)      // Time for sparks!!

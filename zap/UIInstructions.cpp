@@ -844,7 +844,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 18:
             {
                Vector<Point> dummy;
-               renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &dummy, false);
+               renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &dummy);
             }
             break;
          case 19:
