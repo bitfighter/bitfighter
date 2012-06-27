@@ -600,12 +600,12 @@ void renderAimVector()
 
 // TODO: Document me better!  Especially the nerdy math stuff
 void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
-                      const Vector<Point> *dests)
+                      const Vector<Point> *dests, U32 trackerCount)
 {
    enum {
       NumColors = 6,
       NumTypes = 3,
-      NumParticles = 100,
+      MaxParticles = 100,
    };
 
    // Object to hold data on each swirling particle+trail
@@ -619,7 +619,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    };
 
    // Our Tracker array.  This is global so each teleporter uses the same values
-   static Tracker particles[NumParticles];
+   static Tracker particles[MaxParticles];
 
    // Different teleport color styles
    // 0 -> Our standard blue-styled teleporter
@@ -659,7 +659,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    if(!trackerInit)
    {
       trackerInit = true;
-      for(S32 i = 0; i < NumParticles; i++)
+      for(S32 i = 0; i < MaxParticles; i++)
       {
          Tracker &t = particles[i];
 
@@ -750,7 +750,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    F32 beamWidth = 4;
 
    // Draw the Trackers
-   for(S32 i = 0; i < NumParticles; i++)
+   for(U32 i = 0; i < trackerCount; i++)
    {
       Tracker &t = particles[i];
       F32 d = (t.dP - fmod(t.dI + F32(time) * 0.001f, t.dP)) / t.dP;

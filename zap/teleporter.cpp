@@ -638,9 +638,13 @@ void Teleporter::render()
 
    if(radiusFraction != 0)
    {
+      U32 trackerCount = 100;
+      if(mStartingHealth < 1.f)
+         trackerCount = U32(mStartingHealth * 75.f) + 25;
+
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList());
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
    if(mEngineered)
