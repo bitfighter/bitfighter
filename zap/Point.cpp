@@ -184,7 +184,7 @@ void Point::read(BitStream *stream)
 }
 
 
-void Point::write(BitStream *stream)
+void Point::write(BitStream *stream) const
 {
    stream->write(x);
    stream->write(y);

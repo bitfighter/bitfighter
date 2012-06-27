@@ -86,7 +86,7 @@ public:
    F32 dot(const Point &p) const;
    void read(const char **argv);
    void read(BitStream *stream);
-   void write(BitStream *stream);
+   void write(BitStream *stream) const;
 
    string toString() const;
    
