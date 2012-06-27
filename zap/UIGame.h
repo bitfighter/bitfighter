@@ -306,6 +306,8 @@ public:
    EngineerHelper    *getEngineerHelper(ClientGame *game);
    TeamShuffleHelper *getTeamShuffleHelper(ClientGame *game);
 
+   void quitEngineerHelper();
+
    //ofstream mOutputFile;            // For saving downloaded levels
    //FILE *mOutputFile;               // For saving downloaded levels
 
