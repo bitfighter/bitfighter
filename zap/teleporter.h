@@ -36,6 +36,8 @@
 
 #include "tnlNetObject.h"
 
+class ship;
+
 namespace Zap
 {
 
@@ -101,8 +103,10 @@ private:
 
    DestManager mDestManager;
 
+   SafePtr<Ship> mEngineeringShip;
+
 public:
-   Teleporter(Point pos = Point(), Point dest = Point());  // Constructor
+   Teleporter(Point pos = Point(), Point dest = Point(), Ship *engineeringShip = NULL);  // Constructor
    virtual ~Teleporter();                                  // Destructor
 
    Teleporter *clone() const;

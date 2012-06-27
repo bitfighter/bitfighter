@@ -36,6 +36,8 @@ using namespace TNL;
 
 #include "stringUtils.h"
 
+#include "ship.h"
+
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
 #   include "sparkManager.h"
@@ -122,7 +124,7 @@ static Vector<DatabaseObject *> foundObjects;
 
 // Constructor --> need to set the pos and dest via methods like processArguments to make sure
 // that we get the multiple destination aspect of teleporters right
-Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
+Teleporter::Teleporter(Point pos, Point dest, Ship *engineeringShip) : Engineerable()
 {
    mObjectTypeNumber = TeleporterTypeNumber;
    mNetFlags.set(Ghostable);
@@ -139,6 +141,8 @@ Teleporter::Teleporter(Point pos, Point dest) : Engineerable()
    mStartingHealth = 1.0f;
 
    mDestManager.setOwner(this);
+
+   mEngineeringShip = engineeringShip;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -253,7 +257,7 @@ string Teleporter::toString(F32 gridSize) const
 bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship)
 {
    Rect queryRect(position, TELEPORTER_RADIUS * 2);
-	Point outPoint;  // only used as a return value in polygonCircleIntersect
+   Point outPoint;  // only used as a return value in polygonCircleIntersect
 
    foundObjects.clear();
    gb->findObjects((TestFunc) isCollideableType, foundObjects, queryRect);
@@ -432,6 +436,18 @@ void Teleporter::onDestroyed()
 
    deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
    setMaskBits(DestroyedMask);
+
+   if(mEngineeringShip && mEngineeringShip->getClientInfo())
+   {
+      mEngineeringShip->getClientInfo()->sTeleporterCleanup();
+      if(!mEngineeringShip->getClientInfo()->isRobot())   // tell client to hide engineer menu.
+      {
+         static const StringTableEntry Your_Teleporter_Got_Destroyed("Your teleporter got destroyed");
+         mEngineeringShip->getClientInfo()->getConnection()->s2cDisplayErrorMessage(Your_Teleporter_Got_Destroyed);
+         mEngineeringShip->getClientInfo()->getConnection()->s2cEngineerResponseEvent(EngineeredTeleporterExit);
+      }
+
+   }
 }
 
 
@@ -506,6 +522,8 @@ void Teleporter::setEndpoint(const Point &point)
    setVert(point, 1);
 
    setMaskBits(ExitPointChangedMask);
+
+   mEngineeringShip = NULL; // Done engineering, don't need to track the ship anymore (for when the teleporter get destroyed)
 }
 
 
