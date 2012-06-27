@@ -486,6 +486,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,Enginee
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisableWeaponsAndModules, (bool disable), (disable),
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   mClientInfo->setShipSystemsDisabled(disable);
+}
+
+
 // Client tells the server that they claim to be authenticated.  Of course, we need to verify this ourselves.
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)

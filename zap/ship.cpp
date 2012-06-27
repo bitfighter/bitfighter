@@ -122,8 +122,6 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
    mZones1IsCurrent = true;
 
-   mWeaponsAndModulesDisabled = false;
-
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
@@ -509,7 +507,7 @@ void Ship::processWeaponFire()
 
    GameType *gameType = getGame()->getGameType();
 
-   if(mCurrentMove.fire && gameType && !mWeaponsAndModulesDisabled)
+   if(mCurrentMove.fire && gameType && !mClientInfo->isShipSystemsDisabled())
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
@@ -869,7 +867,7 @@ void Ship::processModules()
 
       // Set loaded module states to 'on' if detected as so,
       // unless modules are disabled or we need to cooldown
-      if (!mCooldownNeeded && !mWeaponsAndModulesDisabled)
+      if (!mCooldownNeeded && !mClientInfo->isShipSystemsDisabled())
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
@@ -1316,9 +1314,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
    stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
-   // Write if our weapons and modules are disabled
-   stream->writeFlag(mWeaponsAndModulesDisabled);
-
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
 
    if(!shouldWritePosition)
@@ -1458,8 +1453,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny (sfx, spiral bg are done by the teleporter itself)
    }
 
-   mWeaponsAndModulesDisabled = stream->readFlag(); // mWeaponsAndModulesDisabled
-
    if(stream->readFlag())     // UpdateMask
    {
       Point p;
@@ -1572,12 +1565,6 @@ bool Ship::hasModule(ShipModule mod)
       if(mModule[i] == mod)
          return true;
    return false;
-}
-
-
-void Ship::disableWeaponsAndModules(bool disable)
-{
-   mWeaponsAndModulesDisabled = disable;
 }
 
 

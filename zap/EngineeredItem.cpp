@@ -395,7 +395,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
          ship->setEngineeredTeleporter(static_cast<Teleporter*>(deployedObject));
 
-         ship->disableWeaponsAndModules(true);
+         clientInfo->sDisableWeaponsAndModules(true);
          clientInfo->setEngineeringTeleporter(true);
          break;
 
