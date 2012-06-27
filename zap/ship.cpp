@@ -122,8 +122,6 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
    mZones1IsCurrent = true;
 
-   mWeaponsAndModulesDisabled = false;
-
 #ifndef ZAP_DEDICATED
    mSparkElapsed = 0;
    mShapeType = ShipShape::Normal;
@@ -509,7 +507,7 @@ void Ship::processWeaponFire()
 
    GameType *gameType = getGame()->getGameType();
 
-   if(mCurrentMove.fire && gameType && !mWeaponsAndModulesDisabled)
+   if(mCurrentMove.fire && gameType && !mClientInfo->isShipSystemsDisabled())
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
@@ -869,7 +867,7 @@ void Ship::processModules()
 
       // Set loaded module states to 'on' if detected as so,
       // unless modules are disabled or we need to cooldown
-      if (!mCooldownNeeded && !mWeaponsAndModulesDisabled)
+      if (!mCooldownNeeded && !mClientInfo->isShipSystemsDisabled())
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
@@ -1316,9 +1314,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
    stream->writeFlag((updateMask & TeleportMask) && !(updateMask & InitialMask));
 
-   // Write if our weapons and modules are disabled
-   stream->writeFlag(mWeaponsAndModulesDisabled);
-
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
 
    if(!shouldWritePosition)
@@ -1396,6 +1391,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       bool hadSensorThen = false;
       bool hasSensorNow = false;
+      bool hasEngineerModule = false;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
       {
@@ -1409,6 +1405,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Check new loadout for sensor
          if(mModule[i] == ModuleSensor)
             hasSensorNow = true;
+         if(mModule[i] == ModuleEngineer)
+            hasEngineerModule = true;
       }
 
       // Set sensor zoom timer if sensor carrying status has switched
@@ -1417,6 +1415,14 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       for(S32 i = 0; i < ShipWeaponCount; i++)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
+
+      if(!hasEngineerModule)  // can't engineer without this module
+      {
+         TNLAssert(dynamic_cast<ClientGame*>(getGame()), "ClientGame NULL");
+         ClientGame *game = static_cast<ClientGame*>(getGame());
+         if(getClientInfo() == game->getLocalRemoteClientInfo())  // If this ship is ours, quit engineer menu.
+            game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
+      }
    }
 
    if(stream->readFlag())  // hasExploded
@@ -1430,6 +1436,11 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          if(!wasInitialUpdate)
             emitShipExplosion(getRenderPos());    // Boom!
       }
+
+      TNLAssert(dynamic_cast<ClientGame*>(getGame()), "ClientGame NULL");
+      ClientGame *game = static_cast<ClientGame*>(getGame());
+      if(getClientInfo() == game->getLocalRemoteClientInfo())  // If this ship is ours, quit engineer menu.
+         game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
    }
    else
    {
@@ -1457,8 +1468,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       shipwarped = true;
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny (sfx, spiral bg are done by the teleporter itself)
    }
-
-   mWeaponsAndModulesDisabled = stream->readFlag(); // mWeaponsAndModulesDisabled
 
    if(stream->readFlag())     // UpdateMask
    {
@@ -1572,12 +1581,6 @@ bool Ship::hasModule(ShipModule mod)
       if(mModule[i] == mod)
          return true;
    return false;
-}
-
-
-void Ship::disableWeaponsAndModules(bool disable)
-{
-   mWeaponsAndModulesDisabled = disable;
 }
 
 
@@ -1735,6 +1738,12 @@ bool Ship::setLoadout(const Vector<U8> &loadout, bool silent)
       for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
          if(mMountedItems[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
             mMountedItems[i]->dismount();
+
+      if(getClientInfo())
+      {
+         destroyTeleporter();
+         getClientInfo()->sTeleporterCleanup();
+      }
    }
 
    // And notifiy user
@@ -1889,7 +1898,11 @@ void Ship::kill()
 void Ship::destroyTeleporter()
 {
    if(mEngineeredTeleporter.isValid())
-      mEngineeredTeleporter->onDestroyed();
+   {
+      Teleporter *t = mEngineeredTeleporter;
+      mEngineeredTeleporter = NULL;
+      t->onDestroyed();  // setting NULL first to avoid "Your teleporter got destroyed" message.
+   }
 }
 
 

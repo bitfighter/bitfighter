@@ -392,10 +392,10 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
          break;
 
       case EngineeredTeleporterEntrance:
-         deployedObject = new Teleporter(mDeployPosition, mDeployPosition);
+         deployedObject = new Teleporter(mDeployPosition, mDeployPosition, ship);
          ship->setEngineeredTeleporter(static_cast<Teleporter*>(deployedObject));
 
-         ship->disableWeaponsAndModules(true);
+         clientInfo->sDisableWeaponsAndModules(true);
          clientInfo->setEngineeringTeleporter(true);
          break;
 

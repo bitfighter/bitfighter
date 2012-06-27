@@ -57,6 +57,7 @@ ClientInfo::ClientInfo()
    mSpawnDelayed = false;
    mIsBusy = false;
    mIsEngineeringTeleporter = false;
+   mShipSystemsDisabled = false;
 }
 
 
@@ -152,6 +153,18 @@ bool ClientInfo::shouldDelaySpawn()
 bool ClientInfo::isSpawnDelayed()
 {
    return mSpawnDelayed;
+}
+
+
+void ClientInfo::setShipSystemsDisabled(bool disabled)
+{
+   mShipSystemsDisabled = disabled;
+}
+
+
+bool ClientInfo::isShipSystemsDisabled()
+{
+   return mShipSystemsDisabled;
 }
 
 
@@ -370,6 +383,16 @@ void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter)
 }
 
 
+void ClientInfo::sDisableWeaponsAndModules(bool disable)
+{
+   // Server's ClientInfo
+   setShipSystemsDisabled(disable);
+
+   // We only need to tell the one client
+   getConnection()->s2cDisableWeaponsAndModules(disable);
+}
+
+
 void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
 {
    if(objectType == EngineeredTeleporterExit)
@@ -383,7 +406,7 @@ void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
 void ClientInfo::sTeleporterCleanup()
 {
    getShip()->setEngineeredTeleporter(NULL);   // Clear out the attached teleporter
-   getShip()->disableWeaponsAndModules(false);
+   sDisableWeaponsAndModules(false);
    setEngineeringTeleporter(false);
 }
 

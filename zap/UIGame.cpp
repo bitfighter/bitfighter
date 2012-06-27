@@ -202,6 +202,13 @@ TeamShuffleHelper *GameUserInterface::getTeamShuffleHelper(ClientGame *game)
    return mTeamShuffleHelper;
 }
 
+// Used when ship dies while engineering
+void GameUserInterface::quitEngineerHelper()
+{
+   if(mHelper == mEngineerHelper)
+      mHelper = NULL;
+}
+
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
    if(strncmp(cmd, "quit", 4) == 0 || strncmp(cmd, "exit", 4) == 0) 

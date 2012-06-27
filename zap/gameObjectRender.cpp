@@ -598,18 +598,17 @@ void renderAimVector()
 #  define ABS(x) (((x) > 0) ? (x) : -(x))
 #endif
 
-// TODO: Document me better
-void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha, 
-                      const Vector<Point> *dests, bool showDestOverride)
+// TODO: Document me better!  Especially the nerdy math stuff
+void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
+                      const Vector<Point> *dests, U32 trackerCount)
 {
    enum {
       NumColors = 6,
       NumTypes = 3,
-      NumParticles = 100,
+      MaxParticles = 100,
    };
 
-   static bool trackerInit = false;
-
+   // Object to hold data on each swirling particle+trail
    struct Tracker
    {
       F32 thetaI;
@@ -618,8 +617,14 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       F32 dP;
       U32 ci;
    };
-   static Tracker particles[NumParticles];
 
+   // Our Tracker array.  This is global so each teleporter uses the same values
+   static Tracker particles[MaxParticles];
+
+   // Different teleport color styles
+   // 0 -> Our standard blue-styled teleporter
+   // 1 -> Unused red/blue/purpley style
+   // 2 -> Our green engineered teleporter
    static float colors[NumTypes][NumColors][3] = {
       {
          { 0, 0.25, 0.8f },
@@ -646,10 +651,15 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          { 0, 1, 0 },
       }
    };
+
+   // Loads some random values for each Tracker, only once.  These values determine the
+   // variation in Tracker arc steepness, etc.
+   static bool trackerInit = false;
+
    if(!trackerInit)
    {
       trackerInit = true;
-      for(S32 i = 0; i < NumParticles; i++)
+      for(S32 i = 0; i < MaxParticles; i++)
       {
          Tracker &t = particles[i];
 
@@ -661,22 +671,23 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       }
    }
 
+   // Now the drawing!
    glPushMatrix();
 
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
-   if(zoomFraction > 0 || showDestOverride)
+   // This piece draws the destination lines in the commander's map
+   // It knows it's in the commander's map if the zoomFraction is greater than zero
+   if(zoomFraction > 0)
    {
-      const F32 wid = 6.0;
-      const F32 alpha = showDestOverride ? 1.f : zoomFraction;
+      const F32 width = 6.0;
+      const F32 alpha = zoomFraction;
 
-      // Show teleport destinations on commander's map only
       glColor(Colors::white, .25f * alpha );
 
       glEnable(GL_POLYGON_SMOOTH);
       setDefaultBlendFunction();
       glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
+      // Draw a different line for each destination
       for(S32 i = 0; i < dests->size(); i++)
       {
          F32 ang = pos.angleTo(dests->get(i));
@@ -692,22 +703,22 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 
          glBegin(GL_POLYGON);
             glColor(Colors::white, .25f * alpha);
-            glVertex2f(pos.x + asina * wid, pos.y + acosa * wid);
-            glVertex2f(midx + asina * wid, midy + acosa * wid);
-            glVertex2f(midx - asina * wid, midy - acosa * wid);
-            glVertex2f(pos.x - asina * wid, pos.y - acosa * wid);
+            glVertex2f(pos.x + asina * width, pos.y + acosa * width);
+            glVertex2f(midx + asina * width, midy + acosa * width);
+            glVertex2f(midx - asina * width, midy - acosa * width);
+            glVertex2f(pos.x - asina * width, pos.y - acosa * width);
          glEnd();
 
          glBegin(GL_POLYGON);
             F32 x = dests->get(i).x;
             F32 y = dests->get(i).y;
 
-            glVertex2f(midx + asina * wid, midy + acosa * wid);
+            glVertex2f(midx + asina * width, midy + acosa * width);
             glColor(Colors::white, 0);
-            glVertex2f(x + asina * wid, y + acosa * wid);
-            glVertex2f(x - asina * wid, y - acosa * wid);
+            glVertex2f(x + asina * width, y + acosa * width);
+            glVertex2f(x - asina * width, y - acosa * width);
             glColor(Colors::white, .25f * alpha);
-            glVertex2f(midx - asina * wid, midy - acosa * wid);
+            glVertex2f(midx - asina * width, midy - acosa * width);
          glEnd();
       }
 
@@ -718,22 +729,30 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
 
    glTranslate(pos);
 
-   F32 arcTime = 0.5f + (1 - radiusFraction) * 0.5f;
-   if(!in)
-      arcTime = -arcTime;
-
+   // This adjusts the starting color of each particle to white depending on the radius
+   // of the teleporter.  This makes the whole teleport look white when you move a
+   // ship into it and it shrinks; then it expands and slowly fades back the colors
    Color tpColors[NumColors];
    for(S32 i = 0; i < NumColors; i++)
    {
       Color c(colors[type][i][0], colors[type][i][1], colors[type][i][2]);
       tpColors[i].interp(radiusFraction, c, Colors::white);
    }
+
+
+   F32 arcTime = 0.5f + (1 - radiusFraction) * 0.5f;
+
+   // Invert arcTime if we want to spiral outwards
+   if(!spiralInwards)
+      arcTime = -arcTime;
+
+   // Width of the particle 'head'
    F32 beamWidth = 4;
 
-   for(S32 i = 0; i < NumParticles; i++)
+   // Draw the Trackers
+   for(U32 i = 0; i < trackerCount; i++)
    {
       Tracker &t = particles[i];
-      //glColor3f(t.c.r, t.c.g, t.c.b);
       F32 d = (t.dP - fmod(t.dI + F32(time) * 0.001f, t.dP)) / t.dP;
       F32 alphaMod = 1;
       if(d > 0.9)
@@ -743,7 +762,7 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
       F32 startRadius = radiusFraction * radius * d;
 
       Point start(cos(theta), sin(theta));
-      Point n(-start.y, start.x);
+      Point normal(-start.y, start.x);
 
       theta -= arcTime * t.thetaP * (alphaMod + 0.05f);
       d += arcTime / t.dP;
@@ -759,8 +778,8 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
          F32 arcLength = (end * endRadius - start * startRadius).len();
          U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
 
-         glVertex(start * (startRadius + beamWidth * 0.3f) + n * 2);
-         glVertex(start * (startRadius - beamWidth * 0.3f) + n * 2);
+         glVertex(start * (startRadius + beamWidth * 0.3f) + normal * 2);
+         glVertex(start * (startRadius - beamWidth * 0.3f) + normal * 2);
 
          for(U32 j = 0; j <= vertexCount; j++)
          {
@@ -770,7 +789,6 @@ void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 zoomFra
             p.normalize();
             F32 rad = startRadius * (1 - frac) + endRadius * frac;
 
-            p.normalize();
             glColor(tpColors[t.ci], alpha * alphaMod * (1 - frac));
             glVertex(p * (rad + width));
             glVertex(p * (rad - width));

@@ -61,8 +61,6 @@ private:
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
 
-   bool mWeaponsAndModulesDisabled;
-
    SafePtr<Teleporter> mEngineeredTeleporter;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
@@ -214,8 +212,6 @@ public:
    void engineerBuildObject();
 
    bool hasModule(ShipModule mod);
-
-   void disableWeaponsAndModules(bool disable);
 
    bool isDestroyed();
    bool isItemMounted();    // <== unused
