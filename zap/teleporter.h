@@ -56,9 +56,11 @@ struct DestManager
       S32 getRandomDest() const;
       void addDest(const Point &dest);
       void resize(S32 count);
-      void read(S32 index, BitStream *stream);
+      void read(S32 index, BitStream *stream);     // Read a single dest
+      void read(BitStream *stream);                // Read a whole list of dests
+
       void clear();
-      const Vector<Point> *getDestList() const;
+      /*const*/ Vector<Point> *getDestList() /*const*/;
 };
 
 
@@ -175,6 +177,8 @@ public:
 
    static const luaL_reg luaMethods[];
    static const char *luaClassName;
+
+   S32 addDest(lua_State *L);
 };
 
 

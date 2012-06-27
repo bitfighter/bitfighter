@@ -35,6 +35,7 @@ using namespace TNL;
 #include "SoundSystem.h"
 
 #include "stringUtils.h"
+#include "tnlMethodDispatch.h"      // For writing vectors
 
 #ifndef ZAP_DEDICATED
 #   include "ClientGame.h"
@@ -90,9 +91,17 @@ void DestManager::resize(S32 count)
 }
 
 
+// Read a single dest
 void DestManager::read(S32 index, BitStream *stream)
 {
    mDests[index].read(stream);
+}
+
+
+// Read a whole list of dests
+void DestManager::read(BitStream *stream)
+{
+   Types::read(*stream, &mDests);
 }
 
 
@@ -102,7 +111,7 @@ void DestManager::clear()
 }
 
 
-const Vector<Point> *DestManager::getDestList() const
+/*const*/ Vector<Point> *DestManager::getDestList() /*const*/
 {
    return &mDests;
 }
@@ -304,19 +313,15 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
       stream->write(mLastDest);     // Where ship is going
 
-   // The following is only sent if the teleport was engineered
-   if(mEngineered)
-   {
-      // If we've adjusted the exit point, needed with engineering teleports
-      if(stream->writeFlag(updateMask & ExitPointChangedMask))
-         getVert(1).write(stream);
+   // If we've adjusted the exit point, needed with engineering teleports
+   if(stream->writeFlag(updateMask & ExitPointChangedMask))
+      Types::write(*stream, *mDestManager.getDestList());
 
-      // If we're not destroyed and health has changed
-      if(!stream->writeFlag(mHasExploded))
-      {
-         if(stream->writeFlag(updateMask & HealthMask))
-            stream->writeFloat(mStartingHealth, 6);
-      }
+   // If we're not destroyed and health has changed
+   if(!stream->writeFlag(mHasExploded))
+   {
+      if(stream->writeFlag(updateMask & HealthMask))
+         stream->writeFloat(mStartingHealth, 6);
    }
 
    return 0;
@@ -364,41 +369,32 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       timeout = mTeleporterDelay;
    }
 
-   if(mEngineered)
+   if(stream->readFlag())        // ExitPointChangedMask
    {
-      // ExitPointChangedMask
-      if(stream->readFlag())
-      {
-         // Set the destination point properly on the client
-         Point dest;
-         dest.read(stream);
-         setVert(dest, 1);
-         mDestManager.clear();
-         mDestManager.addDest(dest);
+      mDestManager.read(stream);
 
-         // Update the object extents
-         Rect rect(getVert(0), getVert(1));
-         rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
-         setExtent(rect);
-      }
-
-      // mHasExploded
-      if(stream->readFlag())
-      {
-         mStartingHealth = 0;
-         if(!mHasExploded)
-         {
-            mHasExploded = true;
-            disableCollision();
-            mExplosionTimer.reset(TeleporterExplosionTime);
-            mFinalExplosionTriggered = false;
-         }
-      }
-
-      // HealthMask
-      else if(stream->readFlag())
-         mStartingHealth = stream->readFloat(6);
+      // Update the object extents  --> methinks location won't need to be updated
+      //Rect rect(getVert(0), getVert(1));
+      //rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+      //setExtent(rect);
    }
+
+   // mHasExploded
+   if(stream->readFlag())
+   {
+      mStartingHealth = 0;
+      if(!mHasExploded)
+      {
+         mHasExploded = true;
+         disableCollision();
+         mExplosionTimer.reset(TeleporterExplosionTime);
+         mFinalExplosionTriggered = false;
+      }
+   }
+
+   // HealthMask
+   else if(stream->readFlag())
+      mStartingHealth = stream->readFloat(6);
 }
 
 
@@ -484,6 +480,7 @@ Point Teleporter::getDest(S32 index)
 void Teleporter::addDest(const Point &dest)
 {
    mDestManager.addDest(dest);
+   setMaskBits(ExitPointChangedMask);
 }
 
 
@@ -503,7 +500,7 @@ bool Teleporter::hasAnyDests()
 void Teleporter::setEndpoint(const Point &point)
 {
    mDestManager.addDest(point);
-   setVert(point, 1);
+   //setVert(point, 1);
 
    setMaskBits(ExitPointChangedMask);
 }
@@ -718,11 +715,22 @@ const char *Teleporter::luaClassName = "Teleporter";
 
 const luaL_reg Teleporter::luaMethods[] =
 {
+   { "addDest", luaW_doMethod<Teleporter, &Teleporter::addDest> },
    { NULL, NULL }
 };
 
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
+
+S32 Teleporter::addDest(lua_State *L)
+{
+   static const char *methodName = "Teleporter:addDest()";
+   Point point = getPointOrXY(L, 1, methodName);
+
+   addDest(point);
+
+   return returnNil(L);
+}
 
 };
 
