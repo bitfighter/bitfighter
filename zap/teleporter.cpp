@@ -637,7 +637,7 @@ void Teleporter::render()
    if(radiusFraction != 0)
    {
       U32 trackerCount = 100;
-      if(mStartingHealth < 1.f)
+      if(mStartingHealth < 1.f && !mHasExploded)
          trackerCount = U32(mStartingHealth * 75.f) + 25;
 
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
