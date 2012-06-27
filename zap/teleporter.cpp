@@ -437,7 +437,7 @@ void Teleporter::onDestroyed()
    deleteObject(TeleporterExplosionTime + 500);  // Guarantee our explosion effect will complete
    setMaskBits(DestroyedMask);
 
-   if(mEngineeringShip && mEngineeringShip->getClientInfo())
+   if(mEngineeringShip && mEngineeringShip->getEngineeredTeleporter() == this && mEngineeringShip->getClientInfo())
    {
       mEngineeringShip->getClientInfo()->sTeleporterCleanup();
       if(!mEngineeringShip->getClientInfo()->isRobot())   // tell client to hide engineer menu.
@@ -522,8 +522,6 @@ void Teleporter::setEndpoint(const Point &point)
    setVert(point, 1);
 
    setMaskBits(ExitPointChangedMask);
-
-   mEngineeringShip = NULL; // Done engineering, don't need to track the ship anymore (for when the teleporter get destroyed)
 }
 
 

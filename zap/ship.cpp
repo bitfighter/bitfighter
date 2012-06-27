@@ -1898,7 +1898,11 @@ void Ship::kill()
 void Ship::destroyTeleporter()
 {
    if(mEngineeredTeleporter.isValid())
-      mEngineeredTeleporter->onDestroyed();
+   {
+      Teleporter *t = mEngineeredTeleporter;
+      mEngineeredTeleporter = NULL;
+      t->onDestroyed();  // setting NULL first to avoid "Your teleporter got destroyed" message.
+   }
 }
 
 
