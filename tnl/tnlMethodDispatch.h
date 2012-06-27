@@ -34,6 +34,8 @@
 #include "tnlNetStringTable.h"
 #include "tnlString.h"
 
+#include "../zap/Point.h"     // Needed for Point specialization with read and functions below
+
 #include <string>
 
 namespace Types
@@ -64,6 +66,9 @@ namespace Types
    extern void read(TNL::BitStream &s, TNL::IPAddress *val);
    /// Writes an IP address into a BitStream.
    extern void write(TNL::BitStream &s, TNL::IPAddress &val);
+
+   extern void read(TNL::BitStream &s, Zap::Point *val);
+   extern void write(TNL::BitStream &s, const Zap::Point &val);
 
    /// Reads a StringTableEntry from a BitStream.
    inline void read(TNL::BitStream &s, TNL::StringTableEntry *val)
@@ -198,7 +203,8 @@ namespace Types
    const TNL::U32 VectorSizeNumberSize = (1 << VectorSizeBitSize8) - 1;       // 255
 
    /// Reads a Vector of objects from a BitStream.
-   template <typename T> inline void read(TNL::BitStream &s, TNL::Vector<T> *val)
+   template <typename T> 
+   inline void read(TNL::BitStream &s, TNL::Vector<T> *val)
    {
       TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
@@ -215,8 +221,10 @@ namespace Types
       }
    }
 
+
    /// Writes a Vector of objects into a BitStream.
-   template <typename T> void write(TNL::BitStream &s, TNL::Vector<T> &val)
+   template <typename T> 
+   inline void write(TNL::BitStream &s, TNL::Vector<T> &val)
    {
       if(val.size() >= (TNL::S32)VectorSizeNumberSize)  // Large vector, more than 255 elements
       {
@@ -233,9 +241,11 @@ namespace Types
          write(s, val[i]);
    }
 
+
    /// Writes a Vector of objects into a BitStream.
    /// allows passing an argument through a vector
-   template <typename T, typename A> inline void read(TNL::BitStream &s, TNL::Vector<T> *val, A arg1)
+   template <typename T, typename A> 
+   inline void read(TNL::BitStream &s, TNL::Vector<T> *val, A arg1)
    {
       TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
       if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
@@ -253,7 +263,8 @@ namespace Types
    }
 
    /// Writes a Vector of objects into a BitStream.
-   template <typename T, typename A> void write(TNL::BitStream &s, TNL::Vector<T> &val, A arg1)
+   template <typename T, typename A> 
+   inline void write(TNL::BitStream &s, TNL::Vector<T> &val, A arg1)
    {
       if(val.size() >= (TNL::S32)VectorSizeNumberSize)  // Large vector, more than 255 elements
       {
