@@ -377,10 +377,12 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       mDestManager.read(stream);
 
+      setVert(mDestManager.getDest(0), 1);
+
       // Update the object extents  --> methinks location won't need to be updated
-      //Rect rect(getVert(0), getVert(1));
-      //rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
-      //setExtent(rect);
+      Rect rect(getVert(0), getVert(1));
+      rect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
+      setExtent(rect);
    }
 
    // mHasExploded
@@ -516,7 +518,7 @@ bool Teleporter::hasAnyDests()
 void Teleporter::setEndpoint(const Point &point)
 {
    mDestManager.addDest(point);
-   //setVert(point, 1);
+   setVert(point, 1);
 
    setMaskBits(ExitPointChangedMask);
 }
