@@ -507,7 +507,7 @@ void Ship::processWeaponFire()
 
    GameType *gameType = getGame()->getGameType();
 
-   if(mCurrentMove.fire && gameType && !mClientInfo->isShipSystemsDisabled())
+   if(mCurrentMove.fire && gameType && !getClientInfo()->isShipSystemsDisabled())
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
@@ -867,7 +867,7 @@ void Ship::processModules()
 
       // Set loaded module states to 'on' if detected as so,
       // unless modules are disabled or we need to cooldown
-      if (!mCooldownNeeded && !mClientInfo->isShipSystemsDisabled())
+      if (!mCooldownNeeded && !getClientInfo()->isShipSystemsDisabled())
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;

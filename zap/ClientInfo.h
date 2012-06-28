@@ -149,7 +149,7 @@ public:
    void sEngineerDeploymentInterrupted(U32 objectType);
    void sTeleporterCleanup();
 
-   void sDisableWeaponsAndModules(bool disable);
+   void sDisableShipSystems(bool disable);
 
    void setShipSystemsDisabled(bool disabled);
    bool isShipSystemsDisabled();

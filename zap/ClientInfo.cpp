@@ -383,13 +383,14 @@ void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter)
 }
 
 
-void ClientInfo::sDisableWeaponsAndModules(bool disable)
+void ClientInfo::sDisableShipSystems(bool disable)
 {
    // Server's ClientInfo
    setShipSystemsDisabled(disable);
 
    // We only need to tell the one client
-   getConnection()->s2cDisableWeaponsAndModules(disable);
+   if(!isRobot())
+      getConnection()->s2cDisableWeaponsAndModules(disable);
 }
 
 
@@ -406,7 +407,7 @@ void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
 void ClientInfo::sTeleporterCleanup()
 {
    getShip()->setEngineeredTeleporter(NULL);   // Clear out the attached teleporter
-   sDisableWeaponsAndModules(false);
+   sDisableShipSystems(false);
    setEngineeringTeleporter(false);
 }
 
