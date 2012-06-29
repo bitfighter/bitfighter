@@ -61,19 +61,6 @@ void read(TNL::BitStream &s, TNL::ByteBufferPtr *val)
    *val = new TNL::ByteBuffer(size);
    s.read(size, (*val)->getBuffer());
 }
-
-
-void read(TNL::BitStream &s, Zap::Point *val)
-{
-   val->read(&s);
-}
-
-void write(TNL::BitStream &s, const Zap::Point &val)
-{
-   val.write(&s);
-}
-
-
 void write(TNL::BitStream &s, TNL::ByteBufferPtr &val)
 {
    s.writeInt(val->getBufferSize(), ByteBufferSizeBitSize);

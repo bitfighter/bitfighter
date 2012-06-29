@@ -198,3 +198,16 @@ string Point::toString() const
 
 };	// namespace
 
+
+namespace Types
+{
+void read(TNL::BitStream &s, Zap::Point *val)
+{
+   val->read(&s);
+}
+
+void write(TNL::BitStream &s, const Zap::Point &val)
+{
+   val.write(&s);
+}
+};

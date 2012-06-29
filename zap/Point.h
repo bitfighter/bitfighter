@@ -26,12 +26,12 @@
 #ifndef _POINT_H_
 #define _POINT_H_
 
-namespace TNL{ class BitStream; } // or #include "tnlBitStream.h"
 #include <string>
 
 // forward declarations
 namespace TNL {
    typedef float F32;
+   class BitStream;
 };
 
 
@@ -175,6 +175,13 @@ public:
 
 
 };	// namespace
+
+namespace Types
+{
+   extern void read(TNL::BitStream &s, Zap::Point *val);
+   extern void write(TNL::BitStream &s, const Zap::Point &val);
+}
+
 
 #endif
 

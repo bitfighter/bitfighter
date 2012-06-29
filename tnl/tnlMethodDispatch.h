@@ -67,9 +67,6 @@ namespace Types
    /// Writes an IP address into a BitStream.
    extern void write(TNL::BitStream &s, TNL::IPAddress &val);
 
-   extern void read(TNL::BitStream &s, Zap::Point *val);
-   extern void write(TNL::BitStream &s, const Zap::Point &val);
-
    /// Reads a StringTableEntry from a BitStream.
    inline void read(TNL::BitStream &s, TNL::StringTableEntry *val)
    {
