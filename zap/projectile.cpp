@@ -389,7 +389,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
       static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
 
-      Ship *ship = static_cast<Ship *>(hitObject);
+      Ship *ship = dynamic_cast<Ship *>(hitObject);
 
       SFXProfiles sound; 
       if(ship && ship->isModulePrimaryActive(ModuleShield))  // We hit a ship with shields up
