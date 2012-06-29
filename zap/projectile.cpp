@@ -389,17 +389,23 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
       static_cast<ClientGame *>(getGame())->emitExplosion(pos, 0.3f, GameWeapon::projectileInfo[mType].sparkColors, NumSparkColors);
 
-      Ship *ship = dynamic_cast<Ship *>(hitObject);
+      SFXProfiles sound;
 
-      SFXProfiles sound; 
-      if(ship && ship->isModulePrimaryActive(ModuleShield))  // We hit a ship with shields up
-         sound = SFXBounceShield;
-      else if((hitShip || ship))                             // We hit a ship with shields down
+      bool isShip = isShipType(hitObject->getObjectTypeNumber());
+
+      if(isShip)
+      {
+         Ship *ship = static_cast<Ship *>(hitObject);
+
+         if(ship->isModulePrimaryActive(ModuleShield))
+            sound = SFXBounceShield;
+      }
+      else if((hitShip || isShip))                           // We hit a ship with shields down
          sound = SFXShipHit;
       else                                                   // We hit something else
          sound = GameWeapon::projectileInfo[mType].impactSound;
 
-      SoundSystem::playSoundEffect(sound, pos, mVelocity);       // Play the sound
+      SoundSystem::playSoundEffect(sound, pos, mVelocity);   // Play the sound
    }
 #endif
 }
