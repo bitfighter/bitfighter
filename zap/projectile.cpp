@@ -391,16 +391,15 @@ void Projectile::explode(BfObject *hitObject, Point pos)
 
       SFXProfiles sound;
 
-      bool isShip = isShipType(hitObject->getObjectTypeNumber());
+      bool isShip = hitObject && isShipType(hitObject->getObjectTypeNumber());
 
+      Ship *ship = NULL;
       if(isShip)
-      {
-         Ship *ship = static_cast<Ship *>(hitObject);
+         ship = static_cast<Ship *>(hitObject);
 
-         if(ship->isModulePrimaryActive(ModuleShield))
-            sound = SFXBounceShield;
-      }
-      else if((hitShip || isShip))                           // We hit a ship with shields down
+      if(ship && ship->isModulePrimaryActive(ModuleShield))
+         sound = SFXBounceShield;
+      else if((hitShip || ship))                           // We hit a ship with shields down
          sound = SFXShipHit;
       else                                                   // We hit something else
          sound = GameWeapon::projectileInfo[mType].impactSound;
