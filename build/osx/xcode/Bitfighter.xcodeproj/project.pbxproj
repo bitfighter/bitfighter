@@ -145,6 +145,7 @@
 		738B57721446185700F25FDF /* GameSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576B1446185700F25FDF /* GameSettings.cpp */; };
 		738B57731446185700F25FDF /* InputCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B576D1446185700F25FDF /* InputCode.cpp */; };
 		738B57741446185700F25FDF /* shipItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57701446185700F25FDF /* shipItems.cpp */; };
+		738B9D0D15A1E0C700D1F76C /* Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B9D0B15A1E0C700D1F76C /* Zone.cpp */; };
 		73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */ = {isa = PBXBuildFile; fileRef = 73946E6014D50F0F00B95333 /* joystick_presets.ini */; };
 		739746A014B373980053CCF4 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397469F14B373980053CCF4 /* libpng.framework */; };
 		739746F114B374E30053CCF4 /* WeaponInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739746EF14B374E30053CCF4 /* WeaponInfo.cpp */; };
@@ -635,7 +636,7 @@
 		7385CBA814147824008470C8 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = ../../../zap/Timer.cpp; sourceTree = SOURCE_ROOT; };
 		7385CBA914147824008470C8 /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Timer.h; path = ../../../zap/Timer.h; sourceTree = SOURCE_ROOT; };
 		7386B9F7136FE3000094A660 /* ALURE.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ALURE.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		738729DA152A770C0034CD97 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = /Users/geeko/temp/hg/bitfighter/lib/SDL2.framework; sourceTree = "<absolute>"; };
+		738729DA152A770C0034CD97 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../lib/SDL2.framework; sourceTree = SOURCE_ROOT; };
 		73872A28152A7CDC0034CD97 /* ClientInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ClientInfo.cpp; path = ../../../zap/ClientInfo.cpp; sourceTree = SOURCE_ROOT; };
 		73872A29152A7CDC0034CD97 /* ClientInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClientInfo.h; path = ../../../zap/ClientInfo.h; sourceTree = SOURCE_ROOT; };
 		73872A2A152A7CDC0034CD97 /* EventManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EventManager.cpp; path = ../../../zap/EventManager.cpp; sourceTree = SOURCE_ROOT; };
@@ -727,14 +728,17 @@
 		738B576E1446185700F25FDF /* InputCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCode.h; path = ../../../zap/InputCode.h; sourceTree = SOURCE_ROOT; };
 		738B576F1446185700F25FDF /* InputCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputCodeEnum.h; path = ../../../zap/InputCodeEnum.h; sourceTree = SOURCE_ROOT; };
 		738B57701446185700F25FDF /* shipItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shipItems.cpp; path = ../../../zap/shipItems.cpp; sourceTree = SOURCE_ROOT; };
+		738B9D0A15A1E0C700D1F76C /* Engineerable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Engineerable.h; path = ../../../zap/Engineerable.h; sourceTree = SOURCE_ROOT; };
+		738B9D0B15A1E0C700D1F76C /* Zone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Zone.cpp; path = ../../../zap/Zone.cpp; sourceTree = SOURCE_ROOT; };
+		738B9D0C15A1E0C700D1F76C /* Zone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Zone.h; path = ../../../zap/Zone.h; sourceTree = SOURCE_ROOT; };
 		73946E6014D50F0F00B95333 /* joystick_presets.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = joystick_presets.ini; path = ../../../exe/joystick_presets.ini; sourceTree = SOURCE_ROOT; };
 		7397469F14B373980053CCF4 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = ../../../lib/libpng.framework; sourceTree = SOURCE_ROOT; };
 		739746EE14B374E30053CCF4 /* GameTypesEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GameTypesEnum.h; path = ../../../zap/GameTypesEnum.h; sourceTree = SOURCE_ROOT; };
 		739746EF14B374E30053CCF4 /* WeaponInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WeaponInfo.cpp; path = ../../../zap/WeaponInfo.cpp; sourceTree = SOURCE_ROOT; };
 		739746F014B374E30053CCF4 /* WeaponInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WeaponInfo.h; path = ../../../zap/WeaponInfo.h; sourceTree = SOURCE_ROOT; };
-		7397499B14B4EDC60053CCF4 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Ogg.framework; sourceTree = "<absolute>"; };
-		7397499D14B4EDC60053CCF4 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Speex.framework; sourceTree = "<absolute>"; };
-		7397499F14B4EDC60053CCF4 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = /Users/geeko/temp/hg/bitfighter/lib/Vorbis.framework; sourceTree = "<absolute>"; };
+		7397499B14B4EDC60053CCF4 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = ../../../lib/Ogg.framework; sourceTree = SOURCE_ROOT; };
+		7397499D14B4EDC60053CCF4 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = ../../../lib/Speex.framework; sourceTree = SOURCE_ROOT; };
+		7397499F14B4EDC60053CCF4 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = ../../../lib/Vorbis.framework; sourceTree = SOURCE_ROOT; };
 		73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libpng-Info.plist"; sourceTree = "<group>"; };
 		73A2B1FF13DE57C40002EF92 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		73A2B22413DE58630002EF92 /* png.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = png.h; sourceTree = "<group>"; };
@@ -1784,6 +1788,9 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738B9D0A15A1E0C700D1F76C /* Engineerable.h */,
+				738B9D0B15A1E0C700D1F76C /* Zone.cpp */,
+				738B9D0C15A1E0C700D1F76C /* Zone.h */,
 				737B3D96157FD84A0096DDC2 /* GeomObject.cpp */,
 				737B3D97157FD84A0096DDC2 /* GeomObject.h */,
 				737B3D98157FD84A0096DDC2 /* LuaWrapper.h */,
@@ -2912,6 +2919,7 @@
 				73872A30152A7CDC0034CD97 /* ServerGame.cpp in Sources */,
 				737B3D9C157FD84A0096DDC2 /* GeomObject.cpp in Sources */,
 				737B3D9D157FD84A0096DDC2 /* ShipShape.cpp in Sources */,
+				738B9D0D15A1E0C700D1F76C /* Zone.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
