@@ -222,6 +222,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
    mEngineerEnabled = false;
    mEngineerUnrestrictedEnabled = false;
    mBotsAllowed = true;
+   mBotBalancingDisabled = false;
 
    mGameTimer.reset(DefaultGameTime);
 
@@ -706,7 +707,8 @@ void GameType::idle_server(U32 deltaT)
    }
 
    // Analyze if we need to re-balance teams with bots
-   if(getGame()->getSettings()->getIniSettings()->botsBalanceTeams &&
+   if(!mBotBalancingDisabled &&
+         getGame()->getSettings()->getIniSettings()->botsBalanceTeams &&
          mBotBalanceAnalysisTimer.update(deltaT))
    {
       balanceTeams();
@@ -2960,6 +2962,9 @@ void GameType::addBotFromClient(Vector<StringTableEntry> args)
          conn->s2cDisplayErrorMessage(errorMessage);
       else
       {
+         // Disable bot balancing
+         mBotBalancingDisabled = true;
+
          StringTableEntry msg = StringTableEntry("Robot added by %e0");
          Vector<StringTableEntry> e;
          e.push_back(clientInfo->getName());
@@ -3092,6 +3097,9 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBot, (), ())
    // Only delete one robot - the most recently added
    getGame()->deleteBot(botCount - 1);
 
+   // Disable bot balancing
+   mBotBalancingDisabled = true;
+
    StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
    Vector<StringTableEntry> e;
    e.push_back(clientInfo->getName());
@@ -3119,6 +3127,9 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
 
    // Delete all bots
    getGame()->deleteAllBots();
+
+   // Disable bot balancing
+   mBotBalancingDisabled = true;
 
    StringTableEntry msg = StringTableEntry("All robots kicked by %e0");
    Vector<StringTableEntry> e;

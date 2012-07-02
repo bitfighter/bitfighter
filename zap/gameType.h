@@ -160,6 +160,7 @@ private:
    bool mEngineerEnabled;
    bool mEngineerUnrestrictedEnabled;
    bool mBotsAllowed;
+   bool mBotBalancingDisabled;
 
    // Info about current level
    StringTableEntry mLevelName;
