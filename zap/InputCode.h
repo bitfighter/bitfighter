@@ -69,6 +69,8 @@ public:
       BINDING_SELWEAP2,
       BINDING_SELWEAP3,
       BINDING_ADVWEAP,
+      BINDING_ADVWEAP2,
+      BINDING_PREVWEAP,
       BINDING_CMDRMAP,
       BINDING_TEAMCHAT,
       BINDING_GLOBCHAT,
@@ -175,6 +177,8 @@ struct BindingSet
    InputCode inputSELWEAP2;
    InputCode inputSELWEAP3;
    InputCode inputADVWEAP;
+   InputCode inputADVWEAP2;
+   InputCode inputPREVWEAP;
    InputCode inputCMDRMAP;
    InputCode inputTEAMCHAT;
    InputCode inputGLOBCHAT;

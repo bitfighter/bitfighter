@@ -616,6 +616,8 @@ static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
    LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   KEY_E);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,  MOUSE_WHEEL_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,  MOUSE_WHEEL_DOWN);
    LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   KEY_C);
    LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
    LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
@@ -641,6 +643,8 @@ static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
    LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   BUTTON_1);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,  MOUSE_WHEEL_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,  MOUSE_WHEEL_DOWN);
    LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   BUTTON_2);
    LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
    LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
@@ -681,6 +685,8 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP2);
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP3);
    SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP);
+   SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP2);
+   SAVE_BINDING(InputCodeManager::BINDING_PREVWEAP);
    SAVE_BINDING(InputCodeManager::BINDING_CMDRMAP);
    SAVE_BINDING(InputCodeManager::BINDING_TEAMCHAT);
    SAVE_BINDING(InputCodeManager::BINDING_GLOBCHAT);
