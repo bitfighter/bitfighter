@@ -2426,8 +2426,7 @@ S32 Ship::getCurrLoadout(lua_State *L)
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    luaW_push<LuaLoadout>(L, loadout);
-   while(luaW_hold<LuaLoadout>(L, loadout))
-		;
+   luaW_hold<LuaLoadout>(L, loadout);
 
    return 1;
 }
@@ -2449,8 +2448,7 @@ S32 Ship::getReqLoadout(lua_State *L)
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    luaW_push<LuaLoadout>(L, loadout);
-   while(luaW_hold<LuaLoadout>(L, loadout))
-		;
+   luaW_hold<LuaLoadout>(L, loadout);
 
    return 1;
 }
