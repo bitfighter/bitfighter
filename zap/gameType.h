@@ -184,7 +184,8 @@ protected:
    Timer mScoreboardUpdateTimer;
 
    GameTimer mGameTimer;              // Track when current game will end
-   Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
+   Timer mGameTimeUpdateTimer;        // Timer for when to send clients a game clock update
+   Timer mBotBalanceAnalysisTimer;    // Analyze if we need to add/remove bots to balance team
                        
    virtual void syncTimeRemaining(U32 timeLeft);
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);                         // Runs on server
@@ -586,7 +587,10 @@ public:
    virtual void majorScoringEventOcurred(S32 team);    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientInfo *clientInfo, const char *cmd, Vector<StringPtr> args);
-   void addBot(Vector<StringTableEntry> args);
+   void addBotFromClient(Vector<StringTableEntry> args);
+
+   string addBot(Vector<StringTableEntry> args);
+   void balanceTeams();
 
    map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 

@@ -195,7 +195,7 @@ void GameTimer::setGameIsOver()
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 // Constructor
-GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUpdateTimer(30000)
+GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUpdateTimer(30000), mBotBalanceAnalysisTimer(10000)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
@@ -703,6 +703,14 @@ void GameType::idle_server(U32 deltaT)
    {
       broadcastTimeSyncSignal();
       mGameTimeUpdateTimer.reset();
+   }
+
+   // Analyze if we need to re-balance teams with bots
+   if(getGame()->getSettings()->getIniSettings()->botsBalanceTeams &&
+         mBotBalanceAnalysisTimer.update(deltaT))
+   {
+      balanceTeams();
+      mBotBalanceAnalysisTimer.reset();
    }
 
 
@@ -2818,8 +2826,74 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Invalid Command");
 }
 
+// Server only
+void GameType::balanceTeams()
+{
+   S32 currentPlayerCount = getGame()->getPlayerCount();
+   S32 currentBotCount = getGame()->getBotCount();
 
-void GameType::addBot(Vector<StringTableEntry> args)
+   S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
+
+   // Not enough players!  Add bots until we're balanced
+   if(currentPlayerCount + currentBotCount < minimumPlayersNeeded)
+   {
+      Vector<StringTableEntry> dummy;
+      for(S32 i = 0; i < minimumPlayersNeeded - (currentPlayerCount + currentBotCount); i++)
+         addBot(dummy);
+   }
+
+   // We have more than enough players, kick bots to keep balance
+   if(currentPlayerCount + currentBotCount > minimumPlayersNeeded && currentBotCount > 0)
+   {
+      // TODO: Intelligently kick bots to keep teams balanced
+      for(S32 i = 0; i < currentBotCount; i++)
+      {
+         getGame()->deleteBot(currentBotCount - (1 + i));
+
+         // Re-evaluate client count; don't kick any more bots than we need to
+         if(currentPlayerCount + getGame()->getBotCount() <= minimumPlayersNeeded)
+            break;
+      }
+   }
+}
+
+// Server only
+string GameType::addBot(Vector<StringTableEntry> args)
+{
+   Robot *robot = new Robot();
+
+   S32 args_count = 0;
+   const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
+
+   // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
+   for(S32 i = 0; i < args.size() && i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+   {
+      args_char[i] = args[i].getString();
+      args_count++;
+   }
+
+   string errorMessage;
+   if(!robot->processArguments(args_count, args_char, mGame, errorMessage))
+   {
+      delete robot;
+      return "!!! " + errorMessage;
+   }
+
+   robot->addToGame(mGame, mGame->getGameObjDatabase());
+
+   if(!robot->start())
+   {
+      delete robot;
+      return "!!! Could not start robot; please see server logs";
+   }
+
+   serverAddClient(robot->getClientInfo());
+
+   return "";
+}
+
+
+void GameType::addBotFromClient(Vector<StringTableEntry> args)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
@@ -2852,42 +2926,18 @@ void GameType::addBot(Vector<StringTableEntry> args)
 
    else
    {
-      Robot *robot = new Robot();
+      string errorMessage = addBot(args);
 
-      S32 args_count = 0;
-      const char *args_char[LevelLoader::MAX_LEVEL_LINE_ARGS];  // Convert to a format processArgs will allow
-
-      // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-      for(S32 i = 0; i < args.size() && i < LevelLoader::MAX_LEVEL_LINE_ARGS; i++)
+      if(errorMessage != "")
+         conn->s2cDisplayErrorMessage(errorMessage);
+      else
       {
-         args_char[i] = args[i].getString();
-         args_count++;
+         StringTableEntry msg = StringTableEntry("Robot added by %e0");
+         Vector<StringTableEntry> e;
+         e.push_back(clientInfo->getName());
+
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
-
-      string errorMessage;
-      if(!robot->processArguments(args_count, args_char, mGame, errorMessage))
-      {
-         delete robot;
-         conn->s2cDisplayErrorMessage("!!! " + errorMessage);
-         return;
-      }
-
-      robot->addToGame(mGame, mGame->getGameObjDatabase());
-
-      if(!robot->start())
-      {
-         delete robot;
-         conn->s2cDisplayErrorMessage("!!! Could not start robot; please see server logs");
-         return;
-      }
-
-      serverAddClient(robot->getClientInfo());
-
-      StringTableEntry msg = StringTableEntry("Robot added by %e0");
-      Vector<StringTableEntry> e;
-      e.push_back(clientInfo->getName());
-
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
    }
 }
 
@@ -2896,7 +2946,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBot,
       (Vector<StringTableEntry> args),
       (args))
 {
-   addBot(args);
+   addBotFromClient(args);
 }
 
 
@@ -2920,7 +2970,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddBots,
    {
       count--;
       prevRobotSize = getGame()->getBotCount();
-      addBot(args);
+      addBotFromClient(args);
    }
 }
 
