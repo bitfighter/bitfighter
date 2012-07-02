@@ -2829,29 +2829,57 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
 // Server only
 void GameType::balanceTeams()
 {
-   S32 currentPlayerCount = getGame()->getPlayerCount();
+   // All clients, players + bots
+   S32 currentClientCount = getGame()->getClientCount();
    S32 currentBotCount = getGame()->getBotCount();
 
    S32 minimumPlayersNeeded = getGame()->getSettings()->getIniSettings()->minBalancedPlayers;
 
    // Not enough players!  Add bots until we're balanced
-   if(currentPlayerCount + currentBotCount < minimumPlayersNeeded)
+   if(currentClientCount < minimumPlayersNeeded)
    {
       Vector<StringTableEntry> dummy;
-      for(S32 i = 0; i < minimumPlayersNeeded - (currentPlayerCount + currentBotCount); i++)
+      for(S32 i = 0; i < minimumPlayersNeeded - currentClientCount; i++)
          addBot(dummy);
    }
 
    // We have more than enough players, kick bots to keep balance
-   if(currentPlayerCount + currentBotCount > minimumPlayersNeeded && currentBotCount > 0)
+   if(currentClientCount > minimumPlayersNeeded && currentBotCount > 0)
    {
-      // TODO: Intelligently kick bots to keep teams balanced
+      // Re-evaluate teams.  For some reason getPlayerBotCount() isn't correct unless this is done
+      getGame()->countTeamPlayers();
+
       for(S32 i = 0; i < currentBotCount; i++)
       {
-         getGame()->deleteBot(currentBotCount - (1 + i));
+         // Find the team with the most players on it
+         S32 mostPlayersTeamIndex = 0;
+         S32 mostPlayers = 0;
+
+         for(S32 i = 0; i < mGame->getTeamCount(); i++)
+         {
+            TNLAssert(dynamic_cast<Team *>(mGame->getTeam(i)), "Invalid team");
+            S32 currentCount = static_cast<Team *>(mGame->getTeam(i))->getPlayerBotCount();
+
+            if(currentCount > mostPlayers)
+            {
+               mostPlayers = currentCount;
+               mostPlayersTeamIndex = i;
+            }
+         }
+
+         // Now kick a bot from that team.  Is there a better / more efficent way to do this?
+         for(S32 i = 0; i < mGame->getClientCount(); i++)
+         {
+            ClientInfo *clientInfo = mGame->getClientInfo(i);
+            if(clientInfo->isRobot() && clientInfo->getTeamIndex() == mostPlayersTeamIndex)
+            {
+               getGame()->deleteBot(clientInfo->getName());
+               break;  // Just one!
+            }
+         }
 
          // Re-evaluate client count; don't kick any more bots than we need to
-         if(currentPlayerCount + getGame()->getBotCount() <= minimumPlayersNeeded)
+         if(getGame()->getClientCount() <= minimumPlayersNeeded)
             break;
       }
    }
