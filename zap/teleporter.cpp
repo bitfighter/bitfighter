@@ -285,8 +285,9 @@ bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb
       bfObject->getCollisionPoly(foundObjectBounds);
 
       // If they intersect, then bad deployment position
-      if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, TELEPORTER_RADIUS * TELEPORTER_RADIUS, outPoint))
-         return false;
+      if(foundObjectBounds.size() != 0)
+         if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, TELEPORTER_RADIUS * TELEPORTER_RADIUS, outPoint))
+            return false;
    }
 
    return true;
