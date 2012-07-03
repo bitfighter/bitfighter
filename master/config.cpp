@@ -60,6 +60,8 @@ extern string gStatsDatabaseUsername;
 extern string gStatsDatabasePassword;
 extern bool gWriteStatsToMySql;
 
+extern Vector<string> master_admins;
+
 namespace Zap {
    extern string gSqlite;
 }
@@ -101,7 +103,8 @@ void loadSettingsFromINI(CIniFile *ini)
    gLatestReleasedCSProtocol = (U32) ini->GetValueI("host", "latest_released_cs_protocol", gLatestReleasedCSProtocol);
    gLatestReleasedBuildVersion = (U32) ini->GetValueI("host", "latest_released_client_build_version", gLatestReleasedBuildVersion);
    gJasonOutFile = ini->GetValue("host", "json_file", gJasonOutFile);
-
+   string str1 = ini->GetValue("host", "master_admin", gJasonOutFile);
+   parseString(str1.c_str(), master_admins, ',');
 
    // [phpbb] section
    gMySqlAddress = ini->GetValue("phpbb", "phpbb_database_address", gMySqlAddress);

@@ -129,6 +129,10 @@ protected:
    StringTableEntry mServerDescr;              ///< Server description
    bool isInGlobalChat;
 
+   bool mIsMasterAdmin;
+
+   bool mIsServerIgnoredFromList;
+
    StringTableEntry mAutoDetectStr;             // Player's joystick autodetect string, for research purposes
 
    /// @}

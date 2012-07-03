@@ -77,6 +77,8 @@ string gStatsDatabaseName;
 string gStatsDatabaseUsername;
 string gStatsDatabasePassword;
 
+Vector<string> master_admins;
+
 bool gWriteStatsToMySql;
 
 CIniFile gMasterINI("dummy");
@@ -184,6 +186,8 @@ static const char *sanitizeForJson(const char *value)
       setIsAdaptive();
       isInGlobalChat = false;
       mAuthenticated = false;
+      mIsServerIgnoredFromList = false;
+      mIsMasterAdmin = false;
    }
 
    /// Destructor removes the connection from the doubly linked list of server connections
@@ -291,6 +295,9 @@ static const char *sanitizeForJson(const char *value)
 
       for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
       {
+         if(mIsServerIgnoredFromList)  // hide hidden servers...
+            continue;
+
          // First check the version -- we only want to match potential players that agree on which protocol to use
          if(walk->mCSProtocolVersion != mCSProtocolVersion)     // Incomptible protocols
             continue;
@@ -428,6 +435,9 @@ static const char *sanitizeForJson(const char *value)
 
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
             {
+               if(walk->mIsServerIgnoredFromList)
+                  continue;
+
                fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
                           first ? "" : ", ", sanitizeForJson(walk->mPlayerOrServerName.getString()), 
                           walk->mCSProtocolVersion, walk->mLevelName.getString(), walk->mLevelType.getString(), walk->mPlayerCount);
@@ -926,6 +936,14 @@ static const char *sanitizeForJson(const char *value)
 
          mPlayerOrServerName.set(name.c_str());
 
+         if(isAuthenticated())
+            for(S32 i=0; i < master_admins.size(); i++)
+               if(name == master_admins[i])
+               {
+                  mIsMasterAdmin = true;
+                  break;
+               }
+
          if(stat == WrongPassword)
          {
             logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
@@ -1063,34 +1081,65 @@ static const char *sanitizeForJson(const char *value)
       // Check if the message is private.  If so, we need to parse it.
       if(message.getString()[0] == '/')      // Format: /ToNick Message goes here
       {
-         isPrivate = true;
-
-         bool buildingTo = true;
-         S32 j = 0, k = 0;
-
-         for(S32 i = 1; message.getString()[i]; i++)    // Start at 1 to lose the leading '/'
+         if(!strnicmp(message.getString(), "/dropserver ", 12) && mIsMasterAdmin)
          {
-            char c = message.getString()[i];
+            bool droppedServer = false;
+            Address addr(&message.getString()[12]);
+            for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
+               if(walk->getNetAddress().isEqualAddress(addr))
+               {
+                  walk->mIsServerIgnoredFromList = true;
+                  m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
+                  droppedServer = true;
+               }
+            if(!droppedServer)
+               m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
+         }
+         else if(!stricmp(message.getString(), "/bringbackservers") && mIsMasterAdmin)
+         {
+            bool broughtBackServer = false;
+            for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
+               if(walk->mIsServerIgnoredFromList)
+               {
+                  broughtBackServer = true;
+                  walk->mIsServerIgnoredFromList = false;
+                  m2cSendChat(walk->mPlayerOrServerName, true, "brought back");
+               }
+            if(!broughtBackServer)
+               m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
 
-            if(buildingTo)
-            {     // (braces required)
-               if (c == ' ' || c == '\t')
-                  buildingTo = false;
+         }
+         else
+         {
+            isPrivate = true;
+
+            bool buildingTo = true;
+            S32 j = 0, k = 0;
+
+            for(S32 i = 1; message.getString()[i]; i++)    // Start at 1 to lose the leading '/'
+            {
+               char c = message.getString()[i];
+
+               if(buildingTo)
+               {     // (braces required)
+                  if (c == ' ' || c == '\t')
+                     buildingTo = false;
+                  else
+                     if (j < MAX_PLAYER_NAME_LENGTH) privateTo[j++] = c;
+               }
                else
-                  if (j < MAX_PLAYER_NAME_LENGTH) privateTo[j++] = c;
+                  if (k < MAX_CHAT_MSG_LENGTH) strippedMessage[k++] = c;
             }
-            else
-               if (k < MAX_CHAT_MSG_LENGTH) strippedMessage[k++] = c;
-         }
 
-         if(buildingTo)       // If we're still in buildingTo mode by the time we get here, it means...
-         {
-            logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
-            return;           // ...that there was no body of the message.  In which case, we're done.
-         }
+            if(buildingTo)       // If we're still in buildingTo mode by the time we get here, it means...
+            {
+               logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
+               return;           // ...that there was no body of the message.  In which case, we're done.
+            }
 
-         privateTo[j] = 0;          // Make sure our strings are
-         strippedMessage[k] = 0;    // properly terminated
+            privateTo[j] = 0;          // Make sure our strings are
+            strippedMessage[k] = 0;    // properly terminated
+         }
       }
 
 
@@ -1310,7 +1359,7 @@ int main(int argc, const char **argv)
 
 
     // And until infinity, process whatever comes our way.
-  for(;;)     // To infinity and beyond!!
+   for(;;)     // To infinity and beyond!!
    {
       U32 currentTime = Platform::getRealMilliseconds();
       gNetInterface->checkIncomingPackets();
