@@ -867,7 +867,7 @@ void Ship::processModules()
 
       // Set loaded module states to 'on' if detected as so,
       // unless modules are disabled or we need to cooldown
-      if (!mCooldownNeeded && !getClientInfo()->isShipSystemsDisabled())
+      if (!mCooldownNeeded && getClientInfo() && !getClientInfo()->isShipSystemsDisabled())
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
