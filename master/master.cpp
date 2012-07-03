@@ -936,13 +936,6 @@ static const char *sanitizeForJson(const char *value)
 
          mPlayerOrServerName.set(name.c_str());
 
-         if(isAuthenticated())
-            for(S32 i=0; i < master_admins.size(); i++)
-               if(name == master_admins[i])
-               {
-                  mIsMasterAdmin = true;
-                  break;
-               }
 
          if(stat == WrongPassword)
          {
@@ -966,6 +959,13 @@ static const char *sanitizeForJson(const char *value)
             mAuthenticated = true;
 
             m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, getBadges(mPlayerOrServerName), name.c_str());
+
+            for(S32 i=0; i < master_admins.size(); i++)  // check for master admin
+               if(name == master_admins[i])
+               {
+                  mIsMasterAdmin = true;
+                  break;
+               }
          }
 
          else if(stat == UnknownUser || stat == Unsupported)
