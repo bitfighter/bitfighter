@@ -295,7 +295,7 @@ static const char *sanitizeForJson(const char *value)
 
       for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
       {
-         if(mIsServerIgnoredFromList)  // hide hidden servers...
+         if(walk->mIsServerIgnoredFromList)  // hide hidden servers...
             continue;
 
          // First check the version -- we only want to match potential players that agree on which protocol to use
@@ -1086,7 +1086,7 @@ static const char *sanitizeForJson(const char *value)
             bool droppedServer = false;
             Address addr(&message.getString()[12]);
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
-               if(walk->getNetAddress().isEqualAddress(addr))
+               if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 | addr.port == walk->getNetAddress().port))
                {
                   walk->mIsServerIgnoredFromList = true;
                   m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
@@ -1094,6 +1094,7 @@ static const char *sanitizeForJson(const char *value)
                }
             if(!droppedServer)
                m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
+            return;
          }
          else if(!stricmp(message.getString(), "/bringbackservers") && mIsMasterAdmin)
          {
@@ -1107,7 +1108,7 @@ static const char *sanitizeForJson(const char *value)
                }
             if(!broughtBackServer)
                m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
-
+            return;
          }
          else
          {
