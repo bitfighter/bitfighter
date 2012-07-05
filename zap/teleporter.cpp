@@ -357,10 +357,6 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
       stream->write(mLastDest);     // Where ship is going
 
-   //// If we've adjusted the exit point, needed with engineering teleports
-   //if(stream->writeFlag(updateMask & ExitPointChangedMask))
-   //   Types::write(*stream, *mDestManager.getDestList());
-
    // If we're not destroyed and health has changed
    if(!stream->writeFlag(mHasExploded))
    {
@@ -380,7 +376,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pos;
       pos.read(stream);
       setVert(pos, 0);
-      setVert(pos, 1);                    // Simulate a point geometry -- will be changed later
+      setVert(pos, 1);              // Simulate a point geometry -- will be changed later
 
       mEngineered = stream->readFlag();
 
