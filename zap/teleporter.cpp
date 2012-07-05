@@ -374,7 +374,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
 void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(stream->readFlag())
+   if(stream->readFlag())                 // InitMask
    {
       U32 count;
       Point pos;
@@ -384,7 +384,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
-      mDestManager.resize(count);      // Prepare the list for multiple additions
+      mDestManager.resize(count);         // Prepare the list for multiple additions
 
       for(U32 i = 0; i < count; i++)
          mDestManager.read(i, stream);
