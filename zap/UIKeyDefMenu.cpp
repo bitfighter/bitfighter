@@ -110,29 +110,33 @@ void KeyDefMenuUserInterface::onActivate()
       // Col 1
       menuItems.push_back(KeyDefMenuItem("Advance Weapon",        0, 1, InputCodeManager::BINDING_ADVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 1",     1, 1, InputCodeManager::BINDING_MOD1, 
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon",        1, 1, InputCodeManager::BINDING_ADVWEAP2, 
+                                         "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Previous Weapon",       2, 1, InputCodeManager::BINDING_PREVWEAP, 
+                                         "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Activate Module 1",     3, 1, InputCodeManager::BINDING_MOD1, 
                                          "Module 1 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Activate Module 2",     2, 1, InputCodeManager::BINDING_MOD2, 
+      menuItems.push_back(KeyDefMenuItem("Activate Module 2",     4, 1, InputCodeManager::BINDING_MOD2, 
                                          "Module 2 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Drop Flag",             2, 1, InputCodeManager::BINDING_DROPITEM, ""));
+      menuItems.push_back(KeyDefMenuItem("Drop Flag",             5, 1, InputCodeManager::BINDING_DROPITEM, ""));
 
-      menuItems.push_back(KeyDefMenuItem("Config. Ship Loadouts", 3, 1, InputCodeManager::BINDING_LOADOUT, ""));
-      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode",       4, 1, InputCodeManager::BINDING_CMDRMAP, ""));
-      menuItems.push_back(KeyDefMenuItem("Show Scoreboard",       5, 1, InputCodeManager::BINDING_SCRBRD,  
+      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 6, 1, InputCodeManager::BINDING_LOADOUT, ""));
+      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode",       7, 1, InputCodeManager::BINDING_CMDRMAP, ""));
+      menuItems.push_back(KeyDefMenuItem("Show Scoreboard",       8, 1, InputCodeManager::BINDING_SCRBRD,  
                                          "Scoreboard will be visible while this key/button is held down"));
       // Col 2
-      firstItemInCol2 = 7;
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 1",       6, 2, InputCodeManager::BINDING_SELWEAP1, 
+      firstItemInCol2 = 9;
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 1",       9, 2, InputCodeManager::BINDING_SELWEAP1, 
                                          "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 2",       7, 2, InputCodeManager::BINDING_SELWEAP2, 
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 2",      10, 2, InputCodeManager::BINDING_SELWEAP2, 
                                          "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 3",       8, 2, InputCodeManager::BINDING_SELWEAP3, 
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 3",      11, 2, InputCodeManager::BINDING_SELWEAP3, 
                                          "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Quick Chat",            9, 2, InputCodeManager::BINDING_QUICKCHAT, ""));
-      menuItems.push_back(KeyDefMenuItem("Team Chat",            10, 2, InputCodeManager::BINDING_TEAMCHAT,  ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat",          11, 2, InputCodeManager::BINDING_GLOBCHAT,  ""));
-      menuItems.push_back(KeyDefMenuItem("Enter Command",        12, 2, InputCodeManager::BINDING_CMDCHAT,   ""));
-      menuItems.push_back(KeyDefMenuItem("Record Voice Msg",     13, 2, InputCodeManager::BINDING_TOGVOICE,  ""));
+      menuItems.push_back(KeyDefMenuItem("Quick Chat",           12, 2, InputCodeManager::BINDING_QUICKCHAT, ""));
+      menuItems.push_back(KeyDefMenuItem("Team Chat",            13, 2, InputCodeManager::BINDING_TEAMCHAT,  ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat",          14, 2, InputCodeManager::BINDING_GLOBCHAT,  ""));
+      menuItems.push_back(KeyDefMenuItem("Enter Command",        15, 2, InputCodeManager::BINDING_CMDCHAT,   ""));
+      menuItems.push_back(KeyDefMenuItem("Record Voice Msg",     16, 2, InputCodeManager::BINDING_TOGVOICE,  ""));
    }
    else     // Keyboard mode
    {
@@ -149,29 +153,33 @@ void KeyDefMenuUserInterface::onActivate()
                                          "Module 1 will be active while this key/button is held down"));
       menuItems.push_back(KeyDefMenuItem("Activate Module 2", 6, 1, InputCodeManager::BINDING_MOD2, 
                                          "Module 2 will be active while this key/button is held down"));
-      menuItems.push_back(KeyDefMenuItem("Drop Flag",         2, 1, InputCodeManager::BINDING_DROPITEM, 
+      menuItems.push_back(KeyDefMenuItem("Drop Flag",         7, 1, InputCodeManager::BINDING_DROPITEM, 
                                          "Drop flag when this key is pressed"));
-      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode",   7, 1, InputCodeManager::BINDING_CMDRMAP, ""));
-      menuItems.push_back(KeyDefMenuItem("Show Scoreboard",   8, 1, InputCodeManager::BINDING_SCRBRD, 
+      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 8, 1, InputCodeManager::BINDING_LOADOUT,   ""));
+      menuItems.push_back(KeyDefMenuItem("Toggle Map Mode",   9, 1, InputCodeManager::BINDING_CMDRMAP, ""));
+      menuItems.push_back(KeyDefMenuItem("Show Scoreboard",   10, 1, InputCodeManager::BINDING_SCRBRD, 
                                          "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
-      firstItemInCol2 = 10;
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 1",          9, 2, InputCodeManager::BINDING_SELWEAP1, 
+      firstItemInCol2 = 11;
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 1",         11, 2, InputCodeManager::BINDING_SELWEAP1, 
                                          "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 2",         10, 2, InputCodeManager::BINDING_SELWEAP2, 
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 2",         12, 2, InputCodeManager::BINDING_SELWEAP2, 
                                          "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Select Weapon 3",         11, 2, InputCodeManager::BINDING_SELWEAP3, 
+      menuItems.push_back(KeyDefMenuItem("Select Weapon 3",         13, 2, InputCodeManager::BINDING_SELWEAP3, 
                                          "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(KeyDefMenuItem("Advance Weapon",          12, 2, InputCodeManager::BINDING_ADVWEAP, 
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon",          14, 2, InputCodeManager::BINDING_ADVWEAP, 
                                          "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(KeyDefMenuItem("Configure Ship Loadouts", 13, 2, InputCodeManager::BINDING_LOADOUT,   ""));
-      menuItems.push_back(KeyDefMenuItem("Quick Chat",              14, 2, InputCodeManager::BINDING_QUICKCHAT, ""));
-      menuItems.push_back(KeyDefMenuItem("Team Chat",               15, 2, InputCodeManager::BINDING_TEAMCHAT,  ""));
-      menuItems.push_back(KeyDefMenuItem("Global Chat",             16, 2, InputCodeManager::BINDING_GLOBCHAT,  ""));
-      menuItems.push_back(KeyDefMenuItem("Enter Command",           17, 2, InputCodeManager::BINDING_CMDCHAT,   ""));
+      menuItems.push_back(KeyDefMenuItem("Advance Weapon",          15, 2, InputCodeManager::BINDING_ADVWEAP2, 
+                                         "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Previous Weapon",         16, 2, InputCodeManager::BINDING_PREVWEAP, 
+                                         "Toggles your weapons, use as an alternative to Select Weapon commands"));
+      menuItems.push_back(KeyDefMenuItem("Quick Chat",              17, 2, InputCodeManager::BINDING_QUICKCHAT, ""));
+      menuItems.push_back(KeyDefMenuItem("Team Chat",               18, 2, InputCodeManager::BINDING_TEAMCHAT,  ""));
+      menuItems.push_back(KeyDefMenuItem("Global Chat",             19, 2, InputCodeManager::BINDING_GLOBCHAT,  ""));
+      menuItems.push_back(KeyDefMenuItem("Enter Command",           20, 2, InputCodeManager::BINDING_CMDCHAT,   ""));
 
-      menuItems.push_back(KeyDefMenuItem("Record Voice Msg",        18, 2, InputCodeManager::BINDING_TOGVOICE,  ""));
+      menuItems.push_back(KeyDefMenuItem("Record Voice Msg",        21, 2, InputCodeManager::BINDING_TOGVOICE,  ""));
    }
 }
 
@@ -232,26 +240,31 @@ void KeyDefMenuUserInterface::render()
    {
       S32 y = yStart + (i - ((i < firstItemInCol2) ? 0 : firstItemInCol2)) * height;
 
+		S32 Column_Width = canvasWidth / 2 - horizMargin;
+		S32 xPos = (menuItems[i].mColumn - 1) * Column_Width + horizMargin * 2;
+
       if(selectedIndex == i)       // Highlight selected item
-         drawFilledRect((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y, 
-                        (menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y + height + 1, 
+         drawFilledRect(xPos - horizMargin, y, 
+                        xPos + Column_Width - horizMargin, y + height + 1, 
                         Colors::blue40, Colors::blue);
 
       // Draw item text
       glColor(Colors::cyan);
-      drawString((menuItems[i].mColumn == 1 ? 2 * horizMargin : canvasWidth / 2 + horizMargin), y + offset, 15, menuItems[i].mText);
+      drawString(xPos, y + offset, 15, menuItems[i].mText);
+
+		xPos += Column_Width * 11 / 20;
 
       if(changingItem == i)
       {
          glColor(Colors::red);
-         drawString((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset + 1, 13, "Press Key or Button");
+         drawString(xPos, y + offset + 1, 13, "Press Key or Button");
       }
       else
       {
          bool dupe = isDuplicate(i, menuItems); 
          glColor(dupe ? Colors::red : Colors::white);
 
-         JoystickRender::renderControllerButton((canvasWidth * (menuItems[i].mColumn == 1 ? 0.25f : 0.75f)) + horizMargin, F32(y + offset), 
+         JoystickRender::renderControllerButton(xPos, F32(y + offset), 
                                Joystick::SelectedPresetIndex, getInputCode(getGame()->getSettings(), menuItems[i].primaryControl), dupe);
       }
    }

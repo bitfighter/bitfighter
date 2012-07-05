@@ -1422,10 +1422,10 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
    else if(checkInputCode(settings, InputCodeManager::BINDING_ADVWEAP, inputCode))
       chooseNextWeapon();
 
-   // Handle mouse wheel
-   else if(inputCode == MOUSE_WHEEL_UP && InputCodeManager::checkModifier(KEY_NONE)) 
+   // By default, Handle mouse wheel. Users can change it in "Define Keys" option
+   else if(checkInputCode(settings, InputCodeManager::BINDING_ADVWEAP2, inputCode))
       chooseNextWeapon();
-   else if(inputCode == MOUSE_WHEEL_DOWN && InputCodeManager::checkModifier(KEY_NONE)) 
+   else if(checkInputCode(settings, InputCodeManager::BINDING_PREVWEAP, inputCode))
       choosePrevWeapon();
 
    else if(inputCode == KEY_ESCAPE || inputCode == BUTTON_BACK)

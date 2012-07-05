@@ -74,6 +74,10 @@ InputCode BindingSet::getBinding(InputCodeManager::BindingName bindingName)
 	      return inputSELWEAP3;
       case InputCodeManager::BINDING_ADVWEAP:
 	      return inputADVWEAP;
+      case InputCodeManager::BINDING_ADVWEAP2:
+	      return inputADVWEAP2;
+      case InputCodeManager::BINDING_PREVWEAP:
+	      return inputPREVWEAP;
       case InputCodeManager::BINDING_CMDRMAP:
 	      return inputCMDRMAP;
       case InputCodeManager::BINDING_TEAMCHAT:
@@ -158,6 +162,12 @@ void BindingSet::setBinding(InputCodeManager::BindingName bindingName, InputCode
          break;
       case InputCodeManager::BINDING_ADVWEAP:
 	      inputADVWEAP = key;
+         break;
+      case InputCodeManager::BINDING_ADVWEAP2:
+	      inputADVWEAP2 = key;
+         break;
+      case InputCodeManager::BINDING_PREVWEAP:
+	      inputPREVWEAP = key;
          break;
       case InputCodeManager::BINDING_CMDRMAP:
 	      inputCMDRMAP = key;
@@ -252,6 +262,8 @@ static const string BINDING_STRINGS[] =
    "SelWeapon2",		   // BINDING_SELWEAP2 
    "SelWeapon3",		   // BINDING_SELWEAP3 
    "SelNextWeapon",	   // BINDING_ADVWEAP 
+   "SelNextWeapon2",	   // BINDING_ADVWEAP2 
+   "SelPrevWeapon",	   // BINDING_PREVWEAP 
    "ShowCmdrMap",		   // BINDING_CMDRMAP 
    "TeamChat",		      // BINDING_TEAMCHAT 
    "GlobalChat",		   // BINDING_GLOBCHAT 

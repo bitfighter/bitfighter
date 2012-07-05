@@ -109,6 +109,8 @@ IniSettings::IniSettings()
    hostdescr = "";
    maxPlayers = 127;
    maxBots = 10;
+   botsBalanceTeams = false;
+   minBalancedPlayers = 6;
    serverPassword = "";               // Passwords empty by default
    adminPassword = "";
    levelChangePassword = "";
@@ -539,6 +541,8 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->levelDir            = ini->GetValue (section, "LevelDir", iniSettings->levelDir);
    iniSettings->maxPlayers          = ini->GetValueI(section, "MaxPlayers", iniSettings->maxPlayers);
    iniSettings->maxBots             = ini->GetValueI(section, "MaxBots", iniSettings->maxBots);
+   iniSettings->botsBalanceTeams    = ini->GetValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
+   iniSettings->minBalancedPlayers  = ini->GetValueI(section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
 
    iniSettings->alertsVolLevel = (float) ini->GetValueI(section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10)) / 10.0f;
    iniSettings->allowGetMap          = ini->GetValueYN (section, "AllowGetMap", iniSettings->allowGetMap);
@@ -616,6 +620,8 @@ static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
    LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   KEY_E);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,  MOUSE_WHEEL_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,  MOUSE_WHEEL_DOWN);
    LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   KEY_C);
    LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
    LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
@@ -641,6 +647,8 @@ static void loadKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager)
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP2,  KEY_2);
    LOAD_BINDING(InputCodeManager::BINDING_SELWEAP3,  KEY_3);
    LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP,   BUTTON_1);
+   LOAD_BINDING(InputCodeManager::BINDING_ADVWEAP2,  MOUSE_WHEEL_UP);
+   LOAD_BINDING(InputCodeManager::BINDING_PREVWEAP,  MOUSE_WHEEL_DOWN);
    LOAD_BINDING(InputCodeManager::BINDING_CMDRMAP,   BUTTON_2);
    LOAD_BINDING(InputCodeManager::BINDING_TEAMCHAT,  KEY_T);
    LOAD_BINDING(InputCodeManager::BINDING_GLOBCHAT,  KEY_G);
@@ -681,6 +689,8 @@ static void writeKeyBindings(CIniFile *ini, InputCodeManager *inputCodeManager, 
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP2);
    SAVE_BINDING(InputCodeManager::BINDING_SELWEAP3);
    SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP);
+   SAVE_BINDING(InputCodeManager::BINDING_ADVWEAP2);
+   SAVE_BINDING(InputCodeManager::BINDING_PREVWEAP);
    SAVE_BINDING(InputCodeManager::BINDING_CMDRMAP);
    SAVE_BINDING(InputCodeManager::BINDING_TEAMCHAT);
    SAVE_BINDING(InputCodeManager::BINDING_GLOBCHAT);
@@ -1568,6 +1578,8 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
       addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       addComment(" MaxPlayers - The max number of players that can play on your server.");
       addComment(" MaxBots - The max number of bots allowed on this server.");
+      addComment(" BotsBalanceTeams - Enable bot auto-balancing in each level.");
+      addComment(" MinBalancedPlayers - The minimum number of players ensured in each map.  Bots will be added up to this number.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
       addComment(" RandomLevels - When current level ends, this can enable randomly switching to any available levels.");
@@ -1595,6 +1607,8 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->SetValue  (section, "LevelDir", iniSettings->levelDir);
    ini->SetValueI (section, "MaxPlayers", iniSettings->maxPlayers);
    ini->SetValueI (section, "MaxBots", iniSettings->maxBots);
+   ini->setValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
+   ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
    ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
    ini->setValueYN(section, "AllowDataConnections", iniSettings->allowDataConnections);

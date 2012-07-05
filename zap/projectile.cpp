@@ -813,6 +813,8 @@ void Mine::idle(IdleCallPath path)
 
 bool Mine::collide(BfObject *otherObj)
 {
+   if(isGhost())
+      return false;  // avoid client side explode, server side don't explode
    if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos(), WeaponMine);
    return false;
@@ -1039,6 +1041,8 @@ void SpyBug::idle(IdleCallPath path)
 
 bool SpyBug::collide(BfObject *otherObj)
 {
+   if(isGhost())
+      return false;  // avoid client side explode, server side don't explode
    if(isProjectileType(otherObj->getObjectTypeNumber()))
       explode(getActualPos(), WeaponSpyBug);
    return false;
