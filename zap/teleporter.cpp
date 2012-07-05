@@ -376,7 +376,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pos;
       pos.read(stream);
       setVert(pos, 0);
-      setVert(pos, 1);              // Simulate a point geometry -- will be changed later
+      setVert(pos, 1);                    // Simulate a point geometry -- will be changed later when we add our first dest
 
       mEngineered = stream->readFlag();
 
@@ -544,11 +544,6 @@ void Teleporter::setEndpoint(const Point &point)
 {
    mDestManager.addDest(point);
    setVert(point, 1);
-
-   //setMaskBits(ExitPointChangedMask);
-   //Vector<Point> dests(1);
-   //dests[0] = dest;
-   //s2cAddDestinations(dests);
 }
 
 
