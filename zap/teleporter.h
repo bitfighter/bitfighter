@@ -128,6 +128,7 @@ public:
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
+   Rect calcExtents();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -149,6 +150,10 @@ public:
    void onAddedToGame(Game *theGame);
 
    TNL_DECLARE_CLASS(Teleporter);
+
+   TNL_DECLARE_RPC(s2cAddDestination, (Point));   
+   TNL_DECLARE_RPC(s2cClearDestinations, ());   
+
 
 
    ///// Editor Methods
