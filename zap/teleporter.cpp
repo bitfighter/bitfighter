@@ -380,6 +380,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       Point pos;
       pos.read(stream);
       setVert(pos, 0);
+      setVert(pos, 1);                    // Simulate a point geometry -- will be changed later
 
       mEngineered = stream->readFlag();
 
