@@ -2360,7 +2360,7 @@ void GameUserInterface::serverCommandHandler(const Vector<string> &words)
 
 
 CommandInfo chatCmds[] = {   
-   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory  helpGroup lines,  helpArgString            helpTextString
+   //  cmdName          cmdCallback                 cmdArgInfo cmdArgCount   helpCategory  helpGroup lines,  helpArgString            helpTextString
    { "password",&GameUserInterface::submitPassHandler,{ STR },      1,       ADV_COMMANDS,    0,     1,     {"<password>"},         "Request admin or level change permissions"  },
    { "servvol", &GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,     1,     {"<0-10>"},             "Set volume of server"  },
    { "getmap",  &GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,     1,     {"[file]"},             "Save currently playing level in [file], if allowed" },
