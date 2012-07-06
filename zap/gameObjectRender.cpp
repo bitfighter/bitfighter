@@ -788,7 +788,11 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          if(i < trackerCount)
             glColor(liveColors[t.ci], alpha * alphaMod);
          else
-            glColor(deadColors[t.ci], alpha * alphaMod);
+         {
+            Color c;
+            c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), Colors::black, deadColors[t.ci]);
+            glColor(c, alpha * alphaMod);
+         }
 
          F32 arcLength = (end * endRadius - start * startRadius).len();
          U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
@@ -807,7 +811,11 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
             if(i < trackerCount)
                glColor(liveColors[t.ci], alpha * alphaMod * (1 - frac));
             else
-               glColor(deadColors[t.ci], alpha * alphaMod * (1 - frac));
+            {
+               Color c;
+               c.interp(0.75f * F32(MaxParticles - i) / F32(MaxParticles - trackerCount), Colors::black, deadColors[t.ci]);
+               glColor(c, alpha * alphaMod * (1 - frac));
+            }
                
 
             glVertex(p * (rad + width));
