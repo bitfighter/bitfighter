@@ -799,8 +799,9 @@ const char *Teleporter::luaClassName = "Teleporter";
 
 const luaL_reg Teleporter::luaMethods[] =
 {
-   { "addDest", luaW_doMethod<Teleporter, &Teleporter::addDest> },
-   { "delDest", luaW_doMethod<Teleporter, &Teleporter::delDest> },
+   { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest>    },
+   { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest>    },
+   { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests> },
    { NULL, NULL }
 };
 
@@ -830,6 +831,14 @@ S32 Teleporter::delDest(lua_State *L)
 
    return returnNil(L);
 }
+
+
+S32 Teleporter::clearDests(lua_State *L)
+{
+   mDestManager.clear();
+   return returnNil(L);
+}
+
 
 };
 

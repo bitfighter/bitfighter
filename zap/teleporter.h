@@ -190,6 +190,7 @@ public:
 
    S32 addDest(lua_State *L);
    S32 delDest(lua_State *L);
+   S32 clearDests(lua_State *L);
 };
 
 
