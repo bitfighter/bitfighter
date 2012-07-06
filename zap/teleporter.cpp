@@ -165,7 +165,9 @@ Teleporter::Teleporter(Point pos, Point dest, Ship *engineeringShip) : Engineera
 
    mHasExploded = false;
    mStartingHealth = 1.0f;
+   mFinalExplosionTriggered = false;
 
+   mLastDest = 0;
    mDestManager.setOwner(this);
 
    mEngineeringShip = engineeringShip;
@@ -413,7 +415,6 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
    // mHasExploded
    if(stream->readFlag())
    {
-      mStartingHealth = 0;
       if(!mHasExploded)
       {
          mHasExploded = true;
@@ -659,7 +660,7 @@ void Teleporter::render()
    if(radiusFraction != 0)
    {
       U32 trackerCount = 100;
-      if(mStartingHealth < 1.f && !mHasExploded)
+      if(mStartingHealth < 1.f)
          trackerCount = U32(mStartingHealth * 75.f) + 25;
 
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();

@@ -113,7 +113,6 @@ public:
 
    Teleporter *clone() const;
 
-   bool doSplash;
    U32 timeout;
    U32 mTime;
 
