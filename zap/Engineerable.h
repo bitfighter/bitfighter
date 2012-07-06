@@ -26,6 +26,7 @@
 #ifndef ENGINEERABLE_H_
 #define ENGINEERABLE_H_
 
+#include "Point.h"
 #include "tnlNetBase.h"
 
 namespace Zap
@@ -33,6 +34,7 @@ namespace Zap
 
 // Forward declaraions
 class MoveItem;
+class GridDatabase;
 
 // Things you can build with Engineer
 enum EngineerBuildObjects
@@ -68,6 +70,7 @@ public:
    bool isEngineered(); // Was this engineered by a player?
 
    void setResource(MoveItem *resource);
+   void releaseResource(const Point &releasePos, GridDatabase *database);
 
    virtual void computeExtent() = 0;  // The object must have extents recomputed before being added
    virtual void onConstructed() = 0;  // Call this once the object has been added to the game

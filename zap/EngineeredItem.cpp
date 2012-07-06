@@ -96,6 +96,13 @@ void Engineerable::setResource(MoveItem *resource)
 }
 
 
+void Engineerable::releaseResource(const Point &releasePos, GridDatabase *database)
+{
+   mResource->addToDatabase(database);
+   mResource->setPosVelAng(releasePos, Point(), 0);               // Reset velocity of resource item to 0,0
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -791,8 +798,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
       mIsDestroyed = true;
       onDestroyed();
 
-      mResource->addToDatabase(getGame()->getGameObjDatabase());
-      mResource->setPos(getPos() + mAnchorNormal * mResource->getRadius());
+      releaseResource(getPos() + mAnchorNormal * mResource->getRadius(), getGame()->getGameObjDatabase());
 
       deleteObject(500);
    }
