@@ -747,7 +747,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    F32 beamWidth = 4;
 
    // Draw the Trackers
-   for(U32 i = 0; i < trackerCount; i++)
+   for(U32 i = 0; i < MaxParticles; i++)
    {
       Tracker &t = particles[i];
       F32 d = (t.dP - fmod(t.dI + F32(time) * 0.001f, t.dP)) / t.dP;
@@ -770,7 +770,10 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
       F32 endRadius = radiusFraction * radius * d;
 
       glBegin(GL_TRIANGLE_STRIP);
-         glColor(tpColors[t.ci], alpha * alphaMod);
+         if(i > trackerCount)    // Desaturate "missing" particles
+            glColor(Colors::gray50, alpha * alphaMod);
+         else
+            glColor(tpColors[t.ci], alpha * alphaMod);
 
          F32 arcLength = (end * endRadius - start * startRadius).len();
          U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
@@ -786,7 +789,11 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
             p.normalize();
             F32 rad = startRadius * (1 - frac) + endRadius * frac;
 
-            glColor(tpColors[t.ci], alpha * alphaMod * (1 - frac));
+           if(i > trackerCount)    // Desaturate "missing" particles
+               glColor(Colors::gray20, alpha * alphaMod);
+            else
+               glColor(tpColors[t.ci], alpha * alphaMod * (1 - frac));
+
             glVertex(p * (rad + width));
             glVertex(p * (rad - width));
          }
