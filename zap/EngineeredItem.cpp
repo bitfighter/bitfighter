@@ -828,7 +828,7 @@ void EngineeredItem::computeExtent()
 
 void EngineeredItem::onConstructed()
 {
-   onEnabled();
+   onEnabled();      // Does something useful with ForceFieldProjectors!
 }
 
 
