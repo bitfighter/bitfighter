@@ -77,9 +77,8 @@ public:
    enum {
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
-      ExitPointChangedMask = BIT(2),
-      HealthMask = BIT(3),
-      DestroyedMask = BIT(4),
+      HealthMask = BIT(2),
+      DestroyedMask = BIT(3),
 
       TeleporterTriggerRadius = 50,
       TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used

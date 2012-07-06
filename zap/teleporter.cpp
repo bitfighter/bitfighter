@@ -525,13 +525,12 @@ Point Teleporter::getDest(S32 index)
 void Teleporter::addDest(const Point &dest)
 {
    mDestManager.addDest(dest);
-   //setMaskBits(ExitPointChangedMask);
 }
 
 
 void Teleporter::onConstructed()
 {
-   //setMaskBits(ExitPointChangedMask);
+   // Do nothing
 }
 
 
