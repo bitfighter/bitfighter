@@ -622,11 +622,8 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    static Tracker particles[MaxParticles];
 
    // Different teleport color styles
-   // 0 -> Our standard blue-styled teleporter
-   // 1 -> Unused red/blue/purpley style
-   // 2 -> Our green engineered teleporter
    static float colors[NumTypes][NumColors][3] = {
-      {
+      {  // 0 -> Our standard blue-styled teleporter                                               
          { 0, 0.25, 0.8f },
          { 0, 0.5, 1 },
          { 0, 0, 1 },
@@ -634,7 +631,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          { 0, 0.5, 0.5 },
          { 0, 0, 1 },
       },
-      {
+      {  // 1 -> Unused red/blue/purpley style
          { 1, 0, 0.5 },
          { 1, 0, 1 },
          { 0, 0, 1 },
@@ -642,7 +639,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          { 0, 0, 0.5 },
          { 1, 0, 0 },
       },
-      {
+      {  // 2 -> Our green engineered teleporter
          { 0, 0.8f, 0.25f },
          { 0.5, 1.0, 0 },
          { 0, 1, 0 },
