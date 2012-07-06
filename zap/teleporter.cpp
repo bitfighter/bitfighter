@@ -472,7 +472,6 @@ void Teleporter::onDestroyed()
          mEngineeringShip->getClientInfo()->getConnection()->s2cDisplayErrorMessage(Your_Teleporter_Got_Destroyed);
          mEngineeringShip->getClientInfo()->getConnection()->s2cEngineerResponseEvent(EngineeredTeleporterExit);
       }
-
    }
 }
 
