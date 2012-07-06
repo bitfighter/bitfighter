@@ -668,13 +668,14 @@ void Teleporter::render()
       renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
-   if(mEngineered && mDestManager.getDestCount() > 0)
+   if(mEngineered && !mHasExploded && mDestManager.getDestCount() > 0)
    {
       // We render the exit point of engineered teleports with an outline
       renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS, Colors::richGreen);
    }
 #endif
 }
+
 
 #ifndef ZAP_DEDICATED
 void Teleporter::doExplosion()
