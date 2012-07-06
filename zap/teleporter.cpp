@@ -446,13 +446,16 @@ void Teleporter::damageObject(DamageInfo *theInfo)
    setMaskBits(HealthMask);
 
    // Destroyed!
-   if(mStartingHealth <= 0 && mResource.isValid())
+   if(mStartingHealth <= 0)
       onDestroyed();
 }
 
 
 void Teleporter::onDestroyed()
 {
+   if(!mResource.isValid())
+      return;
+
    mHasExploded = true;
 
    mResource->addToDatabase(getGame()->getGameObjDatabase());
