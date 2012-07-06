@@ -653,10 +653,14 @@ void Teleporter::render()
    {
       // If the teleport has been destroyed, adjust the radius larger/smaller for a neat effect
       U32 halfPeriod = mExplosionTimer.getPeriod() / 2;
+
       if(mExplosionTimer.getCurrent() > halfPeriod)
-         radiusFraction = 2.f - (F32(mExplosionTimer.getCurrent() - halfPeriod) / F32(halfPeriod));
+         radiusFraction = 2.f - F32(mExplosionTimer.getCurrent() - halfPeriod) / 
+                                F32(halfPeriod);
+
       else
-         radiusFraction = 2 * (F32(mExplosionTimer.getCurrent()) / F32(halfPeriod));
+         radiusFraction = 2 * F32(mExplosionTimer.getCurrent()) / 
+                              F32(halfPeriod);
 
       // Add ending explosion
       if(mExplosionTimer.getCurrent() == 0 && !mFinalExplosionTriggered)
