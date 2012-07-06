@@ -665,13 +665,23 @@ void Teleporter::render()
 
       F32 zoomFraction = static_cast<ClientGame *>(getGame())->getCommanderZoomFraction();
       U32 renderStyle = mEngineered ? 2 : 0;
-      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
+      renderTeleporter(getVert(0), renderStyle, true, mTime, zoomFraction, radiusFraction, 
+                       (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
-   if(mEngineered && !mHasExploded && mDestManager.getDestCount() > 0)
+   if(mEngineered && mDestManager.getDestCount() > 0)
    {
-      // We render the exit point of engineered teleports with an outline
-      renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS, Colors::richGreen);
+      // Render the exit of engineered teleports with an outline.  If teleporter has exploded, implode the exit.
+      // The implosion calculations were an attempt to avoid using another timer, but perhaps that would be clearer than this mess
+      const F32 IMPLOSION_FACTOR = .2;     // Smaller numbers = faster implosion
+
+      F32 implosionOffset  = mExplosionTimer.getPeriod() * (1 - IMPLOSION_FACTOR);
+      F32 implosionTime    = mExplosionTimer.getPeriod() * IMPLOSION_FACTOR;
+
+      F32 sizeFraction = mHasExploded ? F32(mExplosionTimer.getCurrent() - implosionOffset) / implosionTime : 1;
+
+      if(sizeFraction > 0)
+         renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
    }
 #endif
 }
