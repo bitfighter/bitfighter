@@ -659,7 +659,7 @@ void Teleporter::render()
 
    if(radiusFraction != 0)
    {
-      U32 trackerCount = 100;
+      U32 trackerCount = 100;    // Trackers are the swirling bits in a teleporter.  100 gives the "classic" appearance.
       if(mStartingHealth < 1.f)
          trackerCount = U32(mStartingHealth * 75.f) + 25;
 
