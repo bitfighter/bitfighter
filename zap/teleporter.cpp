@@ -634,12 +634,18 @@ void Teleporter::render()
    {
       if(timeout == 0)
          radiusFraction = 1;
+
       else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
-         radiusFraction = (timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / F32(TeleporterDelay - TeleporterExpandTime);
+         radiusFraction = F32(timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / 
+                          F32(TeleporterDelay - TeleporterExpandTime);
+
       else if(mTeleporterDelay < TeleporterExpandTime)
-         radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
+         radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / 
+                          F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
+
       else if(timeout < TeleporterExpandTime)
-         radiusFraction = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
+         radiusFraction = F32(TeleporterExpandTime - timeout) / 
+                          F32(TeleporterExpandTime);
       else
          radiusFraction = 0;
    }
