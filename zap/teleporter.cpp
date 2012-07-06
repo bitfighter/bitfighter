@@ -97,6 +97,23 @@ void DestManager::addDest(const Point &dest)
 }
 
 
+void DestManager::delDest(S32 index)
+{
+   if(mDests.size() == 1)
+      clear();
+   else
+      mDests.erase(index);
+
+   // If we're the server, update the clients -- this will likely be used rarely; not worth a new RPC, I think
+   if(mOwner->getGame() && mOwner->getGame()->isServer())
+   {
+      mOwner->s2cClearDestinations();
+      for(S32 i = 0; i < mDests.size(); i++)
+         mOwner->s2cAddDestination(mDests[i]);
+   }
+}
+
+
 void DestManager::clear()
 {
    mDests.clear();
@@ -783,6 +800,7 @@ const char *Teleporter::luaClassName = "Teleporter";
 const luaL_reg Teleporter::luaMethods[] =
 {
    { "addDest", luaW_doMethod<Teleporter, &Teleporter::addDest> },
+   { "delDest", luaW_doMethod<Teleporter, &Teleporter::delDest> },
    { NULL, NULL }
 };
 
@@ -795,6 +813,20 @@ S32 Teleporter::addDest(lua_State *L)
    Point point = getPointOrXY(L, 1, methodName);
 
    addDest(point);
+
+   return returnNil(L);
+}
+
+
+S32 Teleporter::delDest(lua_State *L)
+{
+   static const char *methodName = "Teleporter:delDest()";
+   checkArgCount(L, 1, methodName);
+   S32 index = getInt(L, 1, methodName, 1, mDestManager.getDestCount());
+
+   index--;    // Adjust for Lua's 1-based index
+
+   mDestManager.delDest(index);
 
    return returnNil(L);
 }
