@@ -604,7 +604,6 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
 {
    enum {
       NumColors = 6,
-      NumTypes = 3,
       MaxParticles = 100,
    };
 
@@ -622,7 +621,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    static Tracker particles[MaxParticles];
 
    // Different teleport color styles
-   static float colors[NumTypes][NumColors][3] = {
+   static float colors[][NumColors][3] = {
       {  // 0 -> Our standard blue-styled teleporter                                               
          { 0, 0.25, 0.8f },
          { 0, 0.5, 1 },
@@ -646,6 +645,14 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          { 1, 1, 0 },
          { 0.5, 0.5, 0 },
          { 0, 1, 0 },
+      },
+      {  // 3 -> "Dead" tracker gray
+         { 0.20, 0.20, 0.20 },
+         { 0.50, 0.50, 0.50 },
+         { 0.75, 0.75, 0.75 },
+         { 0.30, 0.30, 0.30 },
+         { 0.50, 0.50, 0.50 },
+         { 0.15, 0.15, 0.15 },
       }
    };
 
@@ -729,12 +736,20 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    // This adjusts the starting color of each particle to white depending on the radius
    // of the teleporter.  This makes the whole teleport look white when you move a
    // ship into it and it shrinks; then it expands and slowly fades back the colors
-   Color tpColors[NumColors];
+   Color liveColors[NumColors];
    for(S32 i = 0; i < NumColors; i++)
    {
       Color c(colors[type][i][0], colors[type][i][1], colors[type][i][2]);
-      tpColors[i].interp(radiusFraction, c, Colors::white);
+      liveColors[i].interp(radiusFraction, c, Colors::white);
    }
+
+   Color deadColors[NumColors];
+   for(S32 i = 0; i < NumColors; i++)
+   {
+      Color c(colors[3][i][0], colors[3][i][1], colors[3][i][2]);
+      deadColors[i].interp(radiusFraction, c, Colors::white);
+   }
+
 
 
    F32 arcTime = 0.5f + (1 - radiusFraction) * 0.5f;
@@ -770,10 +785,10 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
       F32 endRadius = radiusFraction * radius * d;
 
       glBegin(GL_TRIANGLE_STRIP);
-         if(i > trackerCount)    // Desaturate "missing" particles
-            glColor(Colors::gray50, alpha * alphaMod);
+         if(i < trackerCount)
+            glColor(liveColors[t.ci], alpha * alphaMod);
          else
-            glColor(tpColors[t.ci], alpha * alphaMod);
+            glColor(deadColors[t.ci], alpha * alphaMod);
 
          F32 arcLength = (end * endRadius - start * startRadius).len();
          U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
@@ -789,10 +804,11 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
             p.normalize();
             F32 rad = startRadius * (1 - frac) + endRadius * frac;
 
-           if(i > trackerCount)    // Desaturate "missing" particles
-               glColor(Colors::gray20, alpha * alphaMod);
+            if(i < trackerCount)
+               glColor(liveColors[t.ci], alpha * alphaMod * (1 - frac));
             else
-               glColor(tpColors[t.ci], alpha * alphaMod * (1 - frac));
+               glColor(deadColors[t.ci], alpha * alphaMod * (1 - frac));
+               
 
             glVertex(p * (rad + width));
             glVertex(p * (rad - width));
