@@ -899,15 +899,10 @@ void WallSegment::resetEdges()
 void WallSegment::renderFill(const Point &offset)
 {
 #ifndef ZAP_DEDICATED
-
-   //glDisable(GL_BLEND);
-   
    if(mSelected)
       renderWallFill(&mTriangulatedFillPoints, offset, true);       // Use true because all segment fills are triangulated
    else
       renderWallFill(&mTriangulatedFillPoints, true);
-
-   //glEnable(GL_BLEND);
 #endif
 }
 
