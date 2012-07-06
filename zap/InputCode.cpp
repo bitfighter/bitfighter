@@ -1096,7 +1096,7 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 
 // Some misc. keys were renamed in SDL2
 #if SDL_VERSION_ATLEAST(2,0,0)
-#define SDLK_PRINT SDLK_PRINTSCREEN
+#  define SDLK_PRINT SDLK_PRINTSCREEN
 #endif
 	   // Miscellaneous function keys
 	   case SDLK_HELP:
