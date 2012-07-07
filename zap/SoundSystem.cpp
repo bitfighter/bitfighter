@@ -29,8 +29,7 @@
 #include "tnlLog.h"
 #include "tnlByteBuffer.h"
 
-#if !defined (ZAP_DEDICATED)
-
+#if !defined (NO_AUDIO)
 
 #include "SFXProfile.h"
 #include "config.h"
@@ -962,7 +961,7 @@ void SoundSystem::playPrevTrack()
 
 };
 
-#elif defined (ZAP_DEDICATED)
+#elif defined (NO_AUDIO)
 
 using namespace TNL;
 
@@ -1049,13 +1048,23 @@ void SoundSystem::shutdown()
    // Do nothing
 }
 
+void SoundSystem::playNextTrack()
+{
+   // Do nothing
+}
+
+void SoundSystem::playPrevTrack()
+{
+   // Do nothing
+}
+
 
 };
 
-#endif      // #ifdef defined ZAP_DEDICATED
+#endif      // #ifdef defined NO_AUDIO
 
 
-#if defined(ZAP_DEDICATED)
+#if defined(NO_AUDIO)
 namespace Zap
 {
 bool SoundSystem::startRecording()

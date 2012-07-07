@@ -25,7 +25,11 @@
 
 #include "SoundEffect.h"
 
-#if !defined (ZAP_DEDICATED) && !defined (TNL_OS_XBOX)
+#ifdef ZAP_DEDICATED
+#  define NO_AUDIO
+#endif
+
+#if !defined (NO_AUDIO)
 
 namespace Zap {
 
@@ -58,18 +62,26 @@ bool SoundEffect::isPlaying()
 
 }
 
-#elif defined (ZAP_DEDICATED)
+#elif defined (NO_AUDIO)
 
 using namespace TNL;
 
 namespace Zap
 {
+
 SoundEffect::SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity)
 {
+   // Do nothing
 }
 
 SoundEffect::~SoundEffect()
 {
+   // Do nothing
+}
+
+bool SoundEffect::isPlaying()
+{
+   return false;
 }
 
 };
