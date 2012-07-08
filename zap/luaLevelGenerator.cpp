@@ -134,7 +134,7 @@ bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &me
          return false;
       }
 
-      menuTitle = getString(L, 1, "getArgsMenu");
+      menuTitle = getCheckedString(L, 1, "getArgsMenu");
       getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
 
       lua_pop(L, 2);
@@ -270,7 +270,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
    }
 
    for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
-      argv[i] = getString(L, i + 1, methodName);
+      argv[i] = getCheckedString(L, i + 1, methodName);
 
    processLevelLoadLine(argc, 0, argv, mGridDatabase, "Levelgen script: " + mScriptName);      // For now, all ids are 0!
 
@@ -291,7 +291,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    static const char *methodName = "LevelGenerator:addLevelLine()";
 
    checkArgCount(L, 1, methodName);
-   const char *line = getString(L, 1, methodName);
+   const char *line = getCheckedString(L, 1, methodName);
 
    mCaller->parseLevelLine(line, mGridDatabase, mInEditor, "Levelgen script: " + mScriptName);
 
@@ -334,7 +334,7 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
    static const char *methodName = "LuaLevelGenerator:logprint()";
    checkArgCount(L, 1, methodName);
 
-   logprintf(LogConsumer::LuaLevelGenerator, "LuaLevelGenerator: %s", getString(L, 1, methodName));
+   logprintf(LogConsumer::LuaLevelGenerator, "LuaLevelGenerator: %s", getCheckedString(L, 1, methodName));
    return 0;
 }
 
@@ -390,7 +390,7 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
    static const char *methodName = "LuaLevelGenerator:globalMsg()";
    checkArgCount(L, 1, methodName);
 
-   const char *message = getString(L, 1, methodName);
+   const char *message = getCheckedString(L, 1, methodName);
 
    GameType *gt = gServerGame->getGameType();
    if(gt)

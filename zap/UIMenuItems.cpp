@@ -499,13 +499,13 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
    const char *methodName = "ToggleMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
-   mDisplayVal = getString(L, 1, methodName);
+   mDisplayVal = getCheckedString(L, 1, methodName);
    getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
 
    // Optional (but recommended) items
    mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
    mWrap = getBool(L, 4, methodName, false);
-   mHelp = getString(L, 4, methodName, "");
+   mHelp = getString(L, 4, "");
 }
 
 
@@ -638,11 +638,11 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L)
    const char *methodName = "YesNoMenuItem constructor";
 
    // Required items -- will throw if they are missing or misspecified
-   mDisplayVal = getString(L, 1, methodName);
+   mDisplayVal = getCheckedString(L, 1, methodName);
 
    // Optional (but recommended) items
    setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
-   mHelp = getString(L, 3, methodName, "");
+   mHelp = getString(L, 3, "");
 }
 
 
@@ -832,16 +832,16 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
    try
    {
       // Required items -- will throw if they are missing or misspecified
-      mDisplayVal = getString(L, 1, methodName);
+      mDisplayVal = getCheckedString(L, 1, methodName);
       // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
       // Optional (but recommended) items
       mStep =     getInt(L, 3, 1);   
       mMinValue = getInt(L, 4, 0);   
       mMaxValue = getInt(L, 5, 100);   
-      mUnits =    getString(L, 6, methodName, "");
-      mMinMsg =   getString(L, 7, methodName, "");
-      mHelp =     getString(L, 8, methodName, "");
+      mUnits =    getString(L, 6, "");
+      mMinMsg =   getString(L, 7, "");
+      mHelp =     getString(L, 8, "");
 
       // Second required item
       setIntValue(getCheckedInt(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
@@ -1216,10 +1216,10 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
    mDisplayVal = getString(L, 1, methodName);
 
    // Optional (but recommended) items
-   mLineEditor.setString(getString(L, 2, methodName, ""));
-   mEmptyVal = getString(L, 3, methodName, "");
+   mLineEditor.setString(getString(L, 2, ""));
+   mEmptyVal = getString(L, 3, "");
    mLineEditor.mMaxLen = getInt(L, 4, 32);
-   mHelp = getString(L, 5, methodName, "");
+   mHelp = getString(L, 5, "");
 }
 
 

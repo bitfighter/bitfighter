@@ -61,7 +61,7 @@ S32 LuaUtil::logprint(lua_State *L)
    static const char *methodName = "LuaUtil:logprint()";
    checkArgCount(L, 2, methodName);
 
-   logprintf(LogConsumer::LuaBotMessage, "%s: %s", getString(L, 1, methodName), getString(L, 2, methodName));
+   logprintf(LogConsumer::LuaBotMessage, "%s: %s", getCheckedString(L, 1, methodName), getCheckedString(L, 2, methodName));
 
    return 0;
 }
@@ -74,7 +74,7 @@ S32 LuaUtil::printToConsole(lua_State *L)
    static const char *methodName = "LuaUtil:printToConsole()";
    checkArgCount(L, 1, methodName);
 
-   string message = getString(L, 1, methodName);
+   string message = getCheckedString(L, 1, methodName);
 
    OGLCONSOLE_Output(gConsole, "%s\n", message.c_str());    // Print message to the console
 
@@ -94,7 +94,7 @@ S32 LuaUtil::findFile(lua_State *L)
    static const char *methodName = "LuaUtil:findFile()";
    checkArgCount(L, 1, methodName);
 
-   string filename = getString(L, 1, methodName, "");
+   string filename = getString(L, 1, "");
 
    FolderManager *folderManager = GameSettings::getFolderManager();
 

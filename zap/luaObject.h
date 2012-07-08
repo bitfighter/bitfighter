@@ -64,14 +64,17 @@ class LuaObject
 {
 public:
 
-   //                 Enum       Name                          
+   //                 Enum       Name
 #define LUA_ARG_TYPE_TABLE \
-   LUA_ARG_TYPE_ITEM( BOOL,    "Boolean"               ) \
-   LUA_ARG_TYPE_ITEM( INT,     "Integer"               ) \
-   LUA_ARG_TYPE_ITEM( NUM,     "Number"                ) \
-   LUA_ARG_TYPE_ITEM( STR,     "String"                ) \
-   LUA_ARG_TYPE_ITEM( PT,      "Point (or two numbers)") \
-   LUA_ARG_TYPE_ITEM( LOADOUT, "Loadout Object"        ) \
+   LUA_ARG_TYPE_ITEM( BOOL,    "Boolean"                ) \
+   LUA_ARG_TYPE_ITEM( INT,     "Integer"                ) \
+   LUA_ARG_TYPE_ITEM( INTS,    "One or more integers"   ) \
+   LUA_ARG_TYPE_ITEM( NUM,     "Number"                 ) \
+   LUA_ARG_TYPE_ITEM( STR,     "String"                 ) \
+   LUA_ARG_TYPE_ITEM( PT,      "Point (or two numbers)" ) \
+   LUA_ARG_TYPE_ITEM( TABLE,   "Lua table"              ) \
+   LUA_ARG_TYPE_ITEM( LOADOUT, "Loadout Object"         ) \
+   LUA_ARG_TYPE_ITEM( ITEM,    "Item Object"            ) \
    
 
    // Create the enum declaration
@@ -148,8 +151,10 @@ public:
 
    static lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName);
 
-   static const char *getString(lua_State *L, S32 index, const char *methodName);
-   static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);
+   static const char *getString(lua_State *L, S32 index);
+   static const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
+
+   static const char *getString(lua_State *L, S32 index, const char *defaultVal);
 
    // Some debugging helpers
    static void dumpTable(lua_State *L, S32 tableIndex, const char *msg = "");

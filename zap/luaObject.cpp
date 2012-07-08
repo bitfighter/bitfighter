@@ -258,11 +258,22 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
          if(j + stackOffset <= stackItems)
          {
             S32 stackPos = j + stackOffset + 1;
+
             switch(candidateArgList[j])
             {
                case INT:
                case NUM:
                   ok = lua_isnumber(L, stackPos);
+                  break;
+
+               case INTS:
+                  ok = lua_isnumber(L, stackPos);
+                  
+                  while(j + stackOffset <= stackItems && lua_isnumber(L, stackPos))
+                  {
+                     stackOffset++;
+                     stackPos++;
+                  }
                   break;
 
                case STR:               
@@ -286,7 +297,15 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                   break;
 
                case LOADOUT:
-                  ok = luaW_is<LuaLoadout>(L, 1);
+                  ok = luaW_is<LuaLoadout>(L, stackPos);
+                  break;
+
+               case ITEM:
+                  ok = luaW_is<Item>(L, stackPos);
+                  break;
+
+               case TABLE:
+                  ok = lua_istable(L, stackPos);
                   break;
 
                default:
@@ -420,7 +439,7 @@ bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName, bool de
 
 
 // Pop a string or string-like object off stack, check its type, and return it
-const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal)
+const char *LuaObject::getString(lua_State *L, S32 index, const char *defaultVal)
 {
    if(!lua_isstring(L, index))
       return defaultVal;
@@ -429,8 +448,15 @@ const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName
 }
 
 
+// Pop a string or string-like object off stack and return it
+const char *LuaObject::getString(lua_State *L, S32 index)
+{
+   return lua_tostring(L, index);
+}
+
+
 // Pop a string or string-like object off stack, check its type, and return it
-const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName)
+const char *LuaObject::getCheckedString(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isstring(L, index))
    {

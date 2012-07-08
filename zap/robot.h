@@ -70,7 +70,6 @@ private:
 
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
-   S32 findAndReturnClosestZone(lua_State *L, const Point &point);            // Wraps findClosestZone and handles returning the result to Lua
    S32 doFindItems(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
 
 public:
@@ -128,14 +127,14 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS(Robot);
 
-   static const luaL_reg luaMethods[];
    static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 getCPUTime(lua_State *L);
    S32 getTime(lua_State *L);
 
    S32 setAngle(lua_State *L);
-   S32 setAnglePt(lua_State *L);
    S32 getAnglePt(lua_State *L);
    S32 hasLosPt(lua_State *L);
 
@@ -147,7 +146,6 @@ public:
 
    // Ship control
    S32 setThrust(lua_State *L);
-   S32 setThrustPt(lua_State *L);
    S32 setThrustToPt(lua_State *L);
 
    S32 getFiringSolution(lua_State *L);

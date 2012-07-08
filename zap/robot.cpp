@@ -635,55 +635,102 @@ const char *Robot::getScriptName()
    return mScriptName.c_str();
 }
 
+
 Robot *Robot::clone() const
 {
    return new Robot(*this);
 }
 
 
-#define ROBOT_LUA_METHOD_TABLE \
-   ROBOT_LUA_METHOD_ITEM( getCPUTime,           ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( getTime,              ARRAYDEF({{ INT, END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( setAnglePt,           ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( getAnglePt,           ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( hasLosPt,             ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( getWaypoint,          ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( setThrust,            ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( setThrustPt,          ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( setThrustToPt,        ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( fire,                 ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( setWeapon,            ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( setWeaponIndex,       ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( hasWeapon,            ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( activateModule,       ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( activateModuleIndex,  ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( setReqLoadout,        ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( setCurrLoadout,       ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( globalMsg,            ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( teamMsg,              ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( findItems,            ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( findGlobalItems,      ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ PT,  END }}), 1 ) \
-                                                                              \
-   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{ PT,  END }}), 1 ) \
-   ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ PT,  END }}), 1 ) \
+// Another helper function: returns id of closest zone to a given point
+U16 Robot::findClosestZone(const Point &point)
+{
+   U16 closestZone = U16_MAX;
+
+   // First, do a quick search for zone based on the buffer; should be 99% of the cases
+
+   // Search radius is just slightly larger than twice the zone buffers added to objects like barriers
+   S32 searchRadius = 2 * BotNavMeshZone::BufferRadius + 1;
+
+   Vector<DatabaseObject*> objects;
+   Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
+
+   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
+
+   for(S32 i = 0; i < objects.size(); i++)
+   {
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
+      Point center = zone->getCenter();
+
+      if(getGame()->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
+      {
+         closestZone = zone->getZoneId();
+         break;
+      }
+   }
+
+   // Target must be outside extents of the map, find nearest zone if a straight line was drawn
+   if(closestZone == U16_MAX)
+   {
+      Point extentsCenter = getGame()->getWorldExtents().getCenter();
+
+      F32 collisionTimeIgnore;
+      Point surfaceNormalIgnore;
+
+      DatabaseObject* object = BotNavMeshZone::getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
+            ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
+
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
+
+      if (zone != NULL)
+         closestZone = zone->getZoneId();
+   }
+
+   return closestZone;
+}
 
 
-
-
+   //                     Function name         Arg Profiles                        
+#  define ROBOT_LUA_METHOD_TABLE \
+   ROBOT_LUA_METHOD_ITEM( getCPUTime,           ARRAYDEF({{ }}), 0 )                                 \
+   ROBOT_LUA_METHOD_ITEM( getTime,              ARRAYDEF({{ }}), 0 )                                 \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
+   ROBOT_LUA_METHOD_ITEM( getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
+   ROBOT_LUA_METHOD_ITEM( hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( getWaypoint,          ARRAYDEF({{ PT, END }}), 1 )                         \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( setThrust,            ARRAYDEF({{ NUM, NUM, END }, { NUM, PT, END}}), 2 )  \
+   ROBOT_LUA_METHOD_ITEM( setThrustToPt,        ARRAYDEF({{ PT,       END }                 }), 1 )  \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( fire,                 ARRAYDEF({{          }}), 0 )                        \
+   ROBOT_LUA_METHOD_ITEM( setWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
+   ROBOT_LUA_METHOD_ITEM( setWeaponIndex,       ARRAYDEF({{ INT, END }}), 1 )                        \
+   ROBOT_LUA_METHOD_ITEM( hasWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( activateModule,       ARRAYDEF({{ INT,     END }}), 1 )                    \
+   ROBOT_LUA_METHOD_ITEM( activateModuleIndex,  ARRAYDEF({{ INT,     END }}), 1 )                    \
+   ROBOT_LUA_METHOD_ITEM( setReqLoadout,        ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
+   ROBOT_LUA_METHOD_ITEM( setCurrLoadout,       ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
+   ROBOT_LUA_METHOD_ITEM( teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   ROBOT_LUA_METHOD_ITEM( findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ INT, ITEM, END }}), 1 )                  \
+   ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ INT, ITEM, END }}), 1 )                  \
+                                                                                                     \
+   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT, END       }}), 1 )                  \
+   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{                }}), 1 )                  \
+   ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ INT, ITEM, END }}), 1 )                  \
 
 
 //// Lua methods
 const char *Robot::luaClassName = "Robot";
+
 
 const luaL_reg Robot::luaMethods[] =
 {
@@ -692,6 +739,16 @@ const luaL_reg Robot::luaMethods[] =
 #  undef ROBOT_LUA_METHOD_ITEM
    { NULL, NULL }
 };
+
+
+const LuaObject::LuaFunctionProfile Robot::functionArgs[] =
+{
+#  define ROBOT_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
+      ROBOT_LUA_METHOD_TABLE
+#  undef ROBOT_LUA_METHOD_ITEM
+   { NULL, { }, 0 }
+};
+
 
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
@@ -712,508 +769,58 @@ S32 Robot::getTime(lua_State *L)
 // Turn to angle a (in radians, or toward a point)
 S32 Robot::setAngle(lua_State *L)
 {
-   static const char *methodName = "Robot:setAngle()";
-
-   if(lua_isnumber(L, 1))
-   {
-      checkArgCount(L, 1, methodName);
-
-      Move move = getCurrentMove();
-      move.angle = getFloat(L, 1);
-      setCurrentMove(move);
-   }
-   else  // Could be a point?
-   {
-      //checkArgCount(L, 1, methodName);
-      Point point = getPointOrXY(L, 1);
-
-      Move move = getCurrentMove();
-      move.angle = getAnglePt(point);
-      setCurrentMove(move);
-   }
-
-   return 0;
-}
-
-
-// Turn towards point XY
-S32 Robot::setAnglePt(lua_State *L)
-{
-   static const char *methodName = "Robot:setAnglePt()";
-   //checkArgCount(L, 1, methodName);
-   Point point = getPointOrXY(L, 1);
+   S32 profile = checkArgList(L, functionArgs, "Robot", "setAngle");
 
    Move move = getCurrentMove();
-   move.angle = getAnglePt(point);
-   setCurrentMove(move);
 
+   if(profile == 0)        // Args: PT
+   {
+      Point point = getPointOrXY(L, 1);
+      move.angle = getAnglePt(point);
+   }
+
+   else if(profile == 1)   // Args: NUM
+   {
+      Move move = getCurrentMove();
+      move.angle = getFloat(L, 1);
+   }
+
+   setCurrentMove(move);
    return 0;
 }
+
 
 // Get angle toward point
 S32 Robot::getAnglePt(lua_State *L)
 {
-   static const char *methodName = "Robot:getAnglePt()";
-   //checkArgCount(L, 1, methodName);
+   checkArgList(L, functionArgs, "Robot", "getAnglePt");
+
    Point point = getPointOrXY(L, 1);
 
-   lua_pushnumber(L, getAnglePt(point));
-   return 1;
-}
-
-
-// Thrust at velocity v toward angle a
-S32 Robot::setThrust(lua_State *L)
-{
-   static const char *methodName = "Robot:setThrust()";
-   checkArgCount(L, 2, methodName);
-   F32 vel = getFloat(L, 1);
-   F32 ang = getFloat(L, 2);
-
-   Move move = getCurrentMove();
-
-   move.x = vel * cos(ang);
-   move.y = vel * sin(ang);
-
-   setCurrentMove(move);
-
-   return 0;
-}
-
-
-bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
-{
-   Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
-   offset.normalize(aimRadius * 1.2f);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
-   aimPos += offset;
-
-   if(isShipType(target->getObjectTypeNumber()))
-   {
-      Ship *potential = (Ship*)target;
-
-      // Is it dead or cloaked?  If so, ignore
-      if(!potential->isVisible() || potential->hasExploded)
-         return false;
-   }
-
-   if(ignoreFriendly && target->getTeam() == aimTeam)      // Is target on our team?
-      return false;                                        // ...if so, skip it!
-
-   // Calculate where we have to shoot to hit this...
-   Point Vs = target->getVel();
-
-   Point d = target->getPos() - aimPos;
-
-   F32 t;      // t is set in next statement
-   if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
-      return false;
-
-   Point leadPos = target->getPos() + Vs * t;
-
-   // Calculate distance
-   Point delta = (leadPos - aimPos);
-
-   // Make sure we can see it...
-   Point n;
-   TestFunc testFunc = isWallType;
-
-   if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
-      testFunc = isFlagCollideableType;
-
-   if(target->findObjectLOS(testFunc, ActualState, aimPos, target->getPos(), t, n))
-      return false;
-
-   // See if we're gonna clobber our own stuff...
-   target->disableCollision();
-   Point delta2 = delta;
-   delta2.normalize(aimLife * aimVel / 1000);
-   BfObject *hitObject = target->findObjectLOS((TestFunc)isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
-   target->enableCollision();
-
-   if(ignoreFriendly && hitObject && hitObject->getTeam() == aimTeam)
-      return false;
-
-   interceptAngle = delta.ATAN2();
-
-   return true;
-}
-
-
-// Given an object, which angle do we need to be at to fire to hit it?
-// Returns nil if a workable solution can't be found
-// Logic adapted from turret aiming algorithm
-// Note that bot WILL fire at teammates if you ask it to!
-S32 Robot::getFiringSolution(lua_State *L)
-{
-   static const char *methodName = "Robot:getFiringSolution()";
-   checkArgCount(L, 2, methodName);
-   U32 type = (U32)lua_tointeger(L, 1);
-   BfObject *target = getItem(L, 2, type, methodName);
-
-   WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
-
-   F32 interceptAngle;
-
-   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), (F32)weap.projVelocity, (F32)weap.projLiveTime, false, interceptAngle))
-      return returnFloat(L, interceptAngle);
-
-   return returnNil(L);
-}
-
-
-// Given an object, what angle do we need to fly toward in order to collide with an object?  This
-// works a lot like getFiringSolution().
-S32 Robot::getInterceptCourse(lua_State *L)
-{
-   static const char *methodName = "Robot:getInterceptCourse()";
-   checkArgCount(L, 2, methodName);
-   U32 type = (U32)lua_tointeger(L, 1);
-   BfObject *target = getItem(L, 2, type, methodName);
-
-//   WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
-
-   F32 interceptAngle;
-   bool ok = calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), 256, 3000, false, interceptAngle);
-   if(!ok)
-      return returnNil(L);
-
-   return returnFloat(L, interceptAngle);
-}
-
-
-// Thrust at velocity v toward point x,y
-S32 Robot::setThrustPt(lua_State *L)      // (number, point)
-{
-   static const char *methodName = "Robot:setThrustPt()";
-   //checkArgCount(L, 2, methodName);
-   F32 vel = getFloat(L, 1);
-   Point point = getPointOrXY(L, 2);
-
-   F32 ang = getAnglePt(point) - 0 * FloatHalfPi;
-
-   Move move = getCurrentMove();
-
-   move.x = vel * cos(ang);
-   move.y = vel * sin(ang);
-
-   setCurrentMove(move);
-
-  return 0;
-}
-
-
-// Thrust toward specified point, but slow speed so that we land directly on that point if it is within range
-S32 Robot::setThrustToPt(lua_State *L)
-{
-   static const char *methodName = "Robot:setThrustToPt()";
-   //checkArgCount(L, 1, methodName);
-   Point point = getPointOrXY(L, 1);
-
-   F32 ang = getAnglePt(point) - 0 * FloatHalfPi;
-
-   Move move = getCurrentMove();
-
-   F32 dist = getActualPos().distanceTo(point);
-
-   F32 vel = dist / ((F32) move.time);      // v = d / t, t is in ms
-
-   if(vel > 1.f)
-      vel = 1.f;
-
-   move.x = vel * cos(ang);
-   move.y = vel * sin(ang);
-
-   setCurrentMove(move);
-
-  return 0;
-}
-
-
-// Fire current weapon if possible
-S32 Robot::fire(lua_State *L)
-{
-   Move move = getCurrentMove();
-   move.fire = true;
-   setCurrentMove(move);
-
-   return 0;
+   return returnFloat(L, getAnglePt(point));
 }
 
 
 // Can robot see point P?
-S32 Robot::hasLosPt(lua_State *L)      // Now takes a point or an x,y
+S32 Robot::hasLosPt(lua_State *L)
 {
-   static const char *methodName = "Robot:hasLosPt()";
-   //checkArgCount(L, 1, methodName);
+   checkArgList(L, functionArgs, "Robot", "hasLosPt");
+
    Point point = getPointOrXY(L, 1);
 
    return returnBool(L, canSeePoint(point));
 }
 
 
-// Set weapon to index
-S32 Robot::setWeaponIndex(lua_State *L)
-{
-   static const char *methodName = "Robot:setWeaponIndex()";
-   checkArgCount(L, 1, methodName);
-   U32 weap = (U32)getInt(L, 1, methodName, 1, ShipWeaponCount);    // Acceptable range = (1, ShipWeaponCount)
-   selectWeapon(weap - 1);     // Correct for the fact that index in C++ is 0 based
-
-   return 0;
-}
-
-
-// Set weapon to specified weapon, if we have it
-S32 Robot::setWeapon(lua_State *L)
-{
-   static const char *methodName = "Robot:setWeapon()";
-   checkArgCount(L, 1, methodName);
-   U32 weap = (U32)getInt(L, 1, methodName, 0, WeaponCount - 1);
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      if((U32)getWeapon(i) == weap)
-      {
-         selectWeapon(i);
-         break;
-      }
-
-   // If we get here without having found our weapon, then nothing happens.  Better luck next time!
-   return 0;
-}
-
-
-// Do we have a given weapon in our current loadout?
-S32 Robot::hasWeapon(lua_State *L)
-{
-   static const char *methodName = "Robot:hasWeapon()";
-   checkArgCount(L, 1, methodName);
-   U32 weap = (U32)getInt(L, 1, methodName, 0, WeaponCount - 1);
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      if((U32)getWeapon(i) == weap)
-         return returnBool(L, true);      // We have it!
-
-   return returnBool(L, false);           // We don't!
-}
-
-
-// Activate module this cycle --> takes module index
-S32 Robot::activateModuleIndex(lua_State *L)
-{
-   static const char *methodName = "Robot:activateModuleIndex()";
-
-   checkArgCount(L, 1, methodName);
-   U32 indx = (U32)getInt(L, 1, methodName, 0, ShipModuleCount);
-
-   activateModulePrimary(indx);
-
-   return 0;
-}
-
-
-// Activate module this cycle --> takes module enum.
-// If specified module is not part of the loadout, does nothing.
-S32 Robot::activateModule(lua_State *L)
-{
-   static const char *methodName = "Robot:activateModule()";
-
-   checkArgCount(L, 1, methodName);
-   ShipModule mod = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      if(getModule(i) == mod)
-      {
-         activateModulePrimary(i);
-         break;
-      }
-
-   return 0;
-}
-
-
-// Sets loadout to specified --> takes 2 modules, 3 weapons
-S32 Robot::setReqLoadout(lua_State *L)
-{
-   Vector<U8> vec;
-
-   checkArgCount(L, 1, "Robot:setReqLoadout()");
-   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
-
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      vec.push_back(loadout->getLoadoutItem(i));
-
-   getOwner()->sRequestLoadout(vec);
-
-   return 0;
-}
-
-// Sets loadout to specified --> takes 2 modules, 3 weapons
-S32 Robot::setCurrLoadout(lua_State *L)
-{
-   Vector<U8> vec;
-
-   checkArgCount(L, 1, "Robot:setCurrLoadout()");
-
-   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
-   
-
-   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      vec.push_back(loadout->getLoadoutItem(i));
-
-   if(getGame()->getGameType()->validateLoadout(vec) == "")
-      setLoadout(vec);
-
-   return 0;
-}
-
-
-// Send message to all players
-S32 Robot::globalMsg(lua_State *L)
-{
-   static const char *methodName = "Robot:globalMsg()";
-   checkArgCount(L, 1, methodName);
-
-   const char *message = getString(L, 1, methodName);
-
-   GameType *gt = getGame()->getGameType();
-   if(gt)
-   {
-      gt->sendChatFromRobot(true, message, getClientInfo());
-
-      // Fire our event handler
-      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, getPlayerInfo(), true);
-   }
-
-   return 0;
-}
-
-
-// Send message to team (what happens when neutral/hostile robot does this???)
-S32 Robot::teamMsg(lua_State *L)
-{
-   static const char *methodName = "Robot:teamMsg()";
-   checkArgCount(L, 1, methodName);
-
-   const char *message = getString(L, 1, methodName);
-
-   GameType *gt = getGame()->getGameType();
-   if(gt)
-   {
-      gt->sendChatFromRobot(false, message, getClientInfo());
-
-      // Fire our event handler
-      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, getPlayerInfo(), false);
-   }
-
-   return 0;
-}
-
-
-// Return list of all items of specified type within normal visible range... does no screening at this point
-S32 Robot::findItems(lua_State *L)
-{
-   Point pos = getActualPos();
-   Rect queryRect(pos, pos);
-   queryRect.expand(getGame()->computePlayerVisArea(this));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
-
-   return doFindItems(L, "Robot:findItems", &queryRect);
-}
-
-
-// Same but gets all visible items from whole game... out-of-scope items will be ignored
-S32 Robot::findGlobalItems(lua_State *L)
-{
-   return doFindItems(L, "Robot:findGlobalItems");
-}
-
-
-// If scope is NULL, we find all items
-S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
-{
-   fillVector.clear();
-   static Vector<U8> types;
-
-   types.clear();
-
-   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
-   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
-   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
-   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
-   while(lua_isnumber(L, -1))
-   {
-      U8 typenum = (U8)lua_tointeger(L, -1);
-
-      // Requests for botzones have to be handled separately; not a problem, we'll just do the search here, and add them to
-      // fillVector, where they'll be merged with the rest of our search results.
-      if(typenum != BotNavMeshZoneTypeNumber)
-         types.push_back(typenum);
-      else
-      {
-         if(scope)   // Get other objects on screen-visible area only
-            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, *scope);
-         else        // Get all objects
-            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
-      }
-
-      lua_pop(L, 1);
-   }
-   
-   if(scope)      // Get other objects on screen-visible area only
-      getGame()->getGameObjDatabase()->findObjects(types, fillVector, *scope);
-   else           // Get all objects
-      getGame()->getGameObjDatabase()->findObjects(types, fillVector);
-
-
-   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
-   if(!lua_istable(L, -1))
-   {
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      logprintf(LogConsumer::LogWarning, 
-                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
-      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
-   }
-
-   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaObject::dumpStack(L), "Should only have table!");
-
-
-   S32 pushed = 0;      // Count of items we put into our table
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      if(isShipType(fillVector[i]->getObjectTypeNumber()))
-      {
-         // Ignore self (use cheaper typeNumber check first) 
-         // TODO: Do we need the cast here, or can we compare fillVector[i] to this directly??
-         if(fillVector[i]->getObjectTypeNumber() == RobotShipTypeNumber && static_cast<Robot *>(fillVector[i]) == this) 
-            continue;
-
-         // Ignore ship/robot if it's dead or cloaked
-         Ship *ship = static_cast<Ship *>(fillVector[i]);
-         if(!ship->isVisible() || ship->hasExploded)
-            continue;
-      }
-
-      //BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
-      static_cast<BfObject *>(fillVector[i])->push(L);
-      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
-      lua_rawseti(L, 1, pushed);
-   }
-
-   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack has unexpected items on it!");
-
-   return 1;
-}
-
-
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
-S32 Robot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
+S32 Robot::getWaypoint(lua_State *L)  
 {
-   static const char *methodName = "Robot:getWaypoint()";
-
    TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
+
+   checkArgList(L, functionArgs, "Robot", "getWaypoint");
+
    ServerGame *serverGame = (ServerGame *) getGame();
 
    Point target = getPointOrXY(L, 1);
@@ -1338,72 +945,430 @@ S32 Robot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 }
 
 
-// Another helper function: returns id of closest zone to a given point
-U16 Robot::findClosestZone(const Point &point)
+// Thrust at velocity v toward angle a
+S32 Robot::setThrust(lua_State *L)
 {
-   U16 closestZone = U16_MAX;
+   S32 profile = checkArgList(L, functionArgs, "Robot", "setThrust");
 
-   // First, do a quick search for zone based on the buffer; should be 99% of the cases
+   F32 ang;
+   F32 vel = getFloat(L, 1);
 
-   // Search radius is just slightly larger than twice the zone buffers added to objects like barriers
-   S32 searchRadius = 2 * BotNavMeshZone::BufferRadius + 1;
+   if(profile == 0)           // Args: NUM, NUM  (speed, angle)
+      ang = getFloat(L, 2);
 
-   Vector<DatabaseObject*> objects;
-   Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
-
-   BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, objects, rect);
-
-   for(S32 i = 0; i < objects.size(); i++)
+   else if(profile == 1)      // Args: NUM, PT   (speed, destination)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
-      Point center = zone->getCenter();
+      Point point = getPointOrXY(L, 2);
 
-      if(getGame()->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
-      {
-         closestZone = zone->getZoneId();
-         break;
-      }
+      ang = getAnglePt(point) - 0 * FloatHalfPi;
    }
 
-   // Target must be outside extents of the map, find nearest zone if a straight line was drawn
-   if(closestZone == U16_MAX)
-   {
-      Point extentsCenter = getGame()->getWorldExtents().getCenter();
+   Move move = getCurrentMove();
 
-      F32 collisionTimeIgnore;
-      Point surfaceNormalIgnore;
+   move.x = vel * cos(ang);
+   move.y = vel * sin(ang);
 
-      DatabaseObject* object = BotNavMeshZone::getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
-            ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
+   setCurrentMove(move);
 
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
-
-      if (zone != NULL)
-         closestZone = zone->getZoneId();
-   }
-
-   return closestZone;
+   return 0;
 }
 
 
-S32 Robot::findAndReturnClosestZone(lua_State *L, const Point &point)
+// Thrust toward specified point, but slow speed so that we land directly on that point if it is within range
+S32 Robot::setThrustToPt(lua_State *L)
 {
-   U16 closest = findClosestZone(point);
+   checkArgList(L, functionArgs, "Robot", "setThrustToPt");
 
-   if(closest != U16_MAX)
+   Point point = getPointOrXY(L, 1);
+
+   F32 ang = getAnglePt(point) - 0 * FloatHalfPi;
+
+   Move move = getCurrentMove();
+
+   F32 dist = getActualPos().distanceTo(point);
+
+   F32 vel = dist / ((F32) move.time);      // v = d / t, t is in ms
+
+   if(vel > 1.f)
+      vel = 1.f;
+
+   move.x = vel * cos(ang);
+   move.y = vel * sin(ang);
+
+   setCurrentMove(move);
+
+  return 0;
+}
+
+
+// Fire current weapon if possible
+S32 Robot::fire(lua_State *L)
+{
+   Move move = getCurrentMove();
+   move.fire = true;
+   setCurrentMove(move);
+
+   return 0;
+}
+
+
+// Set weapon to specified weapon, if we have it
+S32 Robot::setWeapon(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "setWeapon");
+
+   U32 weap = (U32)getInt(L, 1, "Robot:setWeapon()", 0, WeaponCount - 1);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if((U32)getWeapon(i) == weap)
+      {
+         selectWeapon(i);
+         break;
+      }
+
+   // If we get here without having found our weapon, then nothing happens.  Better luck next time!
+   return 0;
+}
+
+
+// Set weapon to index
+S32 Robot::setWeaponIndex(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "setWeaponIndex");
+
+   U32 weap = (U32)getInt(L, 1, "Robot:setWeaponIndex()", 1, ShipWeaponCount); // Acceptable range = (1, ShipWeaponCount)
+   selectWeapon(weap - 1);                                                     // Correct for the fact that index in C++ is 0 based
+
+   return 0;
+}
+
+
+// Do we have a given weapon in our current loadout?
+S32 Robot::hasWeapon(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "hasWeapon");
+   U32 weap = (U32)getInt(L, 1, "Robot:hasWeapon()", 0, WeaponCount - 1);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if((U32)getWeapon(i) == weap)
+         return returnBool(L, true);      // We have it!
+
+   return returnBool(L, false);           // We don't!
+}
+
+
+// Activate module this cycle --> takes module enum.
+// If specified module is not part of the loadout, does nothing.
+S32 Robot::activateModule(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "activateModule");
+
+   ShipModule mod = (ShipModule) getInt(L, 1, "Robot:activateModule()", 0, ModuleCount - 1);
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(getModule(i) == mod)
+      {
+         activateModulePrimary(i);
+         break;
+      }
+
+   return 0;
+}
+
+
+// Activate module this cycle --> takes module index
+S32 Robot::activateModuleIndex(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "activateModuleIndex");
+
+   U32 indx = (U32)getInt(L, 1, "Robot:activateModuleIndex()", 0, ShipModuleCount);
+
+   activateModulePrimary(indx);
+
+   return 0;
+}
+
+
+// Sets requested loadout to specified
+S32 Robot::setReqLoadout(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "setReqLoadout");
+
+   Vector<U8> vec;
+
+   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(loadout->getLoadoutItem(i));
+
+   getOwner()->sRequestLoadout(vec);
+
+   return 0;
+}
+
+
+// Sets loadout to specified 
+S32 Robot::setCurrLoadout(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "setCurrLoadout");
+
+   Vector<U8> vec;
+
+   LuaLoadout *loadout = luaW_check<LuaLoadout>(L, 1);
+   
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(loadout->getLoadoutItem(i));
+
+   if(getGame()->getGameType()->validateLoadout(vec) == "")
+      setLoadout(vec);
+
+   return 0;
+}
+
+
+// Send message to all players
+S32 Robot::globalMsg(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "globalMsg");
+
+   const char *message = getString(L, 1);
+
+   GameType *gt = getGame()->getGameType();
+   if(gt)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(closest));
-      return returnPoint(L, zone->getCenter());
+      gt->sendChatFromRobot(true, message, getClientInfo());
+
+      // Fire our event handler
+      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, getPlayerInfo(), true);
    }
-   else
-      return returnNil(L);    // Really stuck
+
+   return 0;
+}
+
+
+// Send message to team (what happens when neutral/hostile robot does this???)
+S32 Robot::teamMsg(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "teamMsg");
+
+   const char *message = getString(L, 1);
+
+   GameType *gt = getGame()->getGameType();
+   if(gt)
+   {
+      gt->sendChatFromRobot(false, message, getClientInfo());
+
+      // Fire our event handler
+      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, getPlayerInfo(), false);
+   }
+
+   return 0;
+}
+
+
+// Return list of all items of specified type within normal visible range... does no screening at this point
+S32 Robot::findItems(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "findItems");
+
+   Point pos = getActualPos();
+   Rect queryRect(pos, pos);
+   queryRect.expand(getGame()->computePlayerVisArea(this));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
+
+   return doFindItems(L, "Robot:findItems", &queryRect);
+}
+
+
+// Same but gets all visible items from whole game... out-of-scope items will be ignored
+S32 Robot::findGlobalItems(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "findGlobalItems");
+
+   return doFindItems(L, "Robot:findGlobalItems");
+}
+
+
+// If scope is NULL, we find all items
+S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
+{
+   fillVector.clear();
+   static Vector<U8> types;
+
+   types.clear();
+
+   // We expect the stack to look like this: -- [fillTable], objType1, objType2, ...
+   // We'll work our way down from the top of the stack (element -1) until we find something that is not a number.
+   // We expect that when we find something that is not a number, the stack will only contain our fillTable.  If the stack
+   // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
+   while(lua_isnumber(L, -1))
+   {
+      U8 typenum = (U8)lua_tointeger(L, -1);
+
+      // Requests for botzones have to be handled separately; not a problem, we'll just do the search here, and add them to
+      // fillVector, where they'll be merged with the rest of our search results.
+      if(typenum != BotNavMeshZoneTypeNumber)
+         types.push_back(typenum);
+      else
+      {
+         if(scope)   // Get other objects on screen-visible area only
+            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector, *scope);
+         else        // Get all objects
+            BotNavMeshZone::getBotZoneDatabase()->findObjects(BotNavMeshZoneTypeNumber, fillVector);
+      }
+
+      lua_pop(L, 1);
+   }
+   
+   if(scope)      // Get other objects on screen-visible area only
+      getGame()->getGameObjDatabase()->findObjects(types, fillVector, *scope);
+   else           // Get all objects
+      getGame()->getGameObjDatabase()->findObjects(types, fillVector);
+
+
+   // We are expecting a table to be on top of the stack when we get here.  If not, we can add one.
+   if(!lua_istable(L, -1))
+   {
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      logprintf(LogConsumer::LogWarning, 
+                  "Finding objects will be far more efficient if your script provides a table -- see scripting docs for details!");
+      lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   }
+
+   TNLAssert((lua_gettop(L) == 1 && lua_istable(L, -1)) || LuaObject::dumpStack(L), "Should only have table!");
+
+
+   S32 pushed = 0;      // Count of items we put into our table
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))
+      {
+         // Ignore self (use cheaper typeNumber check first) 
+         // TODO: Do we need the cast here, or can we compare fillVector[i] to this directly??
+         if(fillVector[i]->getObjectTypeNumber() == RobotShipTypeNumber && static_cast<Robot *>(fillVector[i]) == this) 
+            continue;
+
+         // Ignore ship/robot if it's dead or cloaked
+         Ship *ship = static_cast<Ship *>(fillVector[i]);
+         if(!ship->isVisible() || ship->hasExploded)
+            continue;
+      }
+
+      static_cast<BfObject *>(fillVector[i])->push(L);
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
+   }
+
+   TNLAssert(lua_gettop(L) == 1 || LuaObject::dumpStack(L), "Stack has unexpected items on it!");
+
+   return 1;
+}
+
+
+static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, 
+                                F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
+{
+   Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
+   offset.normalize(aimRadius * 1.2f);          // 1.2 ==> fudge factor to prevent robot from not shooting because it thinks it will hit itself
+   aimPos += offset;
+
+   if(isShipType(target->getObjectTypeNumber()))
+   {
+      Ship *potential = (Ship*)target;
+
+      // Is it dead or cloaked?  If so, ignore
+      if(!potential->isVisible() || potential->hasExploded)
+         return false;
+   }
+
+   if(ignoreFriendly && target->getTeam() == aimTeam)      // Is target on our team?
+      return false;                                        // ...if so, skip it!
+
+   // Calculate where we have to shoot to hit this...
+   Point Vs = target->getVel();
+
+   Point d = target->getPos() - aimPos;
+
+   F32 t;      // t is set in next statement
+   if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
+      return false;
+
+   Point leadPos = target->getPos() + Vs * t;
+
+   // Calculate distance
+   Point delta = (leadPos - aimPos);
+
+   // Make sure we can see it...
+   Point n;
+   TestFunc testFunc = isWallType;
+
+   if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
+      testFunc = isFlagCollideableType;
+
+   if(target->findObjectLOS(testFunc, ActualState, aimPos, target->getPos(), t, n))
+      return false;
+
+   // See if we're gonna clobber our own stuff...
+   target->disableCollision();
+   Point delta2 = delta;
+   delta2.normalize(aimLife * aimVel / 1000);
+   BfObject *hitObject = target->findObjectLOS((TestFunc)isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
+   target->enableCollision();
+
+   if(ignoreFriendly && hitObject && hitObject->getTeam() == aimTeam)
+      return false;
+
+   interceptAngle = delta.ATAN2();
+
+   return true;
+}
+
+
+// Given an object, which angle do we need to be at to fire to hit it?
+// Returns nil if a workable solution can't be found
+// Logic adapted from turret aiming algorithm
+// Note that bot WILL fire at teammates if you ask it to!
+S32 Robot::getFiringSolution(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "getFiringSolution");
+
+   U32 type = (U32)lua_tointeger(L, 1);
+   Item *target = luaW_check<Item>(L, 2);
+
+   WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
+
+   F32 interceptAngle;
+
+   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), (F32)weap.projVelocity, (F32)weap.projLiveTime, false, interceptAngle))
+      return returnFloat(L, interceptAngle);
+
+   return returnNil(L);
+}
+
+
+// Given an object, what angle do we need to fly toward in order to collide with an object?  This
+// works a lot like getFiringSolution().
+S32 Robot::getInterceptCourse(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "getInterceptCourse");
+
+   U32 type = (U32)lua_tointeger(L, 1);
+   Item *target = luaW_check<Item>(L, 2);
+
+   F32 interceptAngle;
+
+   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), 256, 3000, false, interceptAngle))
+      return returnFloat(L, interceptAngle);
+      
+   return returnNil(L);
 }
 
 
 S32 Robot::engineerDeployObject(lua_State *L)
 {
-   static const char *methodName = "Robot:engineerDeployObject()";
-   checkArgCount(L, 1, methodName);
+   checkArgList(L, functionArgs, "Robot", "engineerDeployObject");
+
    S32 type = (S32)lua_tointeger(L, 0);
 
    return returnBool(L, getOwner()->sEngineerDeployObject(type));
@@ -1412,7 +1377,7 @@ S32 Robot::engineerDeployObject(lua_State *L)
 
 S32 Robot::dropItem(lua_State *L)
 {
-//   static const char *methodName = "Robot:dropItem()";
+   checkArgList(L, functionArgs, "Robot", "dropItem");
 
    S32 count = mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
@@ -1424,14 +1389,13 @@ S32 Robot::dropItem(lua_State *L)
 
 S32 Robot::copyMoveFromObject(lua_State *L)
 {
-   static const char *methodName = "Robot:copyMoveFromObject()";
+   checkArgList(L, functionArgs, "Robot", "copyMoveFromObject");
 
-   checkArgCount(L, 2, methodName);
    U32 type = (U32)lua_tointeger(L, 1);
-   BfObject *obj = getItem(L, 2, type, methodName);
+   Item *obj = luaW_check<Item>(L, 2);
 
    Move move = obj->getCurrentMove();
-   move.time = getCurrentMove().time; // keep current move time
+   move.time = getCurrentMove().time;     // Keep current move time
    setCurrentMove(move);
 
    return 0;
@@ -1439,4 +1403,3 @@ S32 Robot::copyMoveFromObject(lua_State *L)
 
 
 };
-
