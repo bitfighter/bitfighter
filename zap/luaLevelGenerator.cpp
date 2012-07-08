@@ -215,7 +215,7 @@ Point LuaLevelGenerator::getPointFromTable(lua_State *L, int tableIndex, int key
       return Point(0,0);
    }
 
-   Point point = getVec(L, -1, methodName);
+   Point point = getCheckedVec(L, -1, methodName);
    lua_pop(L, 1);    // Clear value from stack
 
    return point;
@@ -230,7 +230,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 
    try
    {
-      F32 width = getFloat(L, 1, methodName);      // Width is first arg
+      F32 width = getCheckedFloat(L, 1, methodName);      // Width is first arg
       line += " " + ftos(width, 1);
 
       // Third arg is a table of coordinate values in "editor space" (i.e. these will be multiplied by gridsize before being used)
@@ -305,7 +305,7 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
    static const char *methodName = "LevelGenerator:setGameTime()";
 
    checkArgCount(L, 1, methodName);
-   F32 time = getFloat(L, 1, methodName);
+   F32 time = getCheckedFloat(L, 1, methodName);
 
    mCaller->setGameTime(time);
 
@@ -321,8 +321,8 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 
    // Still need mGridSize because we deal with the coordinates used in the level file, which have to be multiplied by
    // GridSize to get in-game coordinates
-   Point p1 = getVec(L, 1, methodName) *= mGridSize;    
-   Point p2 = getVec(L, 2, methodName) *= mGridSize;
+   Point p1 = getCheckedVec(L, 1, methodName) *= mGridSize;    
+   Point p2 = getCheckedVec(L, 2, methodName) *= mGridSize;
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
 }

@@ -47,7 +47,9 @@ using namespace std;
 using namespace TNL;
 
 
-#define method(class, name) {#name, &class::name}
+#define method(class, name)  { #name, &class::name }
+#define ARRAYDEF(...) __VA_ARGS__                  // Wrap inline array definitions so they don't confuse the preprocessor   
+
 
 namespace Zap
 {
@@ -60,6 +62,25 @@ class MenuItem;
 
 class LuaObject
 {
+public:
+   enum LuaArgType {
+      BOOL,    // Boolean
+      INT,     // Integer argument
+      FLT,     // Float argument
+      STR,     // String argument
+      PT,      // Point argument (only used by Lua scripts)
+      END      // End of list sentinel value
+   };
+
+   static const S32 MAX_ARGS = 6;
+   static const S32 MAX_PROFILES = 4;
+
+   struct LuaFunctionProfile {
+      const char *functionName;
+      LuaArgType argList[MAX_PROFILES][MAX_ARGS];
+      const S32 profileCount;
+   };
+
 protected:
    static MenuItem *pushMenuItem (lua_State *L, MenuItem *menuItem);
 
@@ -68,8 +89,9 @@ protected:
    virtual void getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings);
    static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
 
-   static Point getPointOrXY(lua_State *L, S32 index, const char *functionName);
-   static Point getVec(lua_State *L, S32 index, const char *methodName);
+   static Point getPointOrXY(lua_State *L, S32 index);
+   static Point getCheckedVec(lua_State *L, S32 index, const char *methodName);
+
 
    static void setfield (lua_State *L, const char *key, F32 value);
 
@@ -84,13 +106,15 @@ public:
 
    // The basics:
    static S32 returnInt(lua_State *L, S32 num);
-   static S32 returnVec(lua_State *L, F32 x, F32 y);
    static S32 returnFloat(lua_State *L, F32 num);
    static S32 returnString(lua_State *L, const char *str);
    static S32 returnBool(lua_State *L, bool boolean);
    static S32 returnNil(lua_State *L);
 
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
+   static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName);
+   static string LuaObject::prettyPrintParamList(const LuaFunctionProfile *functionInfo);
+
 
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
@@ -102,14 +126,17 @@ public:
 
 
    static void clearStack(lua_State *L);
-   static F32 getFloat(lua_State *L, S32 index, const char *methodName);
+   static F32 getFloat(lua_State *L, S32 index);
+   static F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
 
    static bool getBool(lua_State *L, S32 index, const char *methodName);
    static bool getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
 
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 defaultVal);
+   static lua_Integer getInt(lua_State *L, S32 index);
+   static lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
    static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
+
+   static lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName);
 
    static const char *getString(lua_State *L, S32 index, const char *methodName);
    static const char *getString(lua_State *L, S32 index, const char *methodName, const char *defaultVal);

@@ -42,7 +42,8 @@ enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
    TEAM,    // Team name (can be tab-completed)
    INT,     // Integer argument
-   STR,      // String argument
+   STR,     // String argument
+   PT,      // Point argument (only used by Lua scripts)
    ARG_TYPES
 };
 
@@ -56,16 +57,18 @@ enum HelpCategories {
 
 class GameUserInterface;
 
+const S32 MAX_CMDS = 9;
+
 struct CommandInfo 
 {
    string cmdName;
    void (GameUserInterface::*cmdCallback)(const Vector<string> &args);
-   ArgTypes cmdArgInfo[9];
+   ArgTypes cmdArgInfo[MAX_CMDS];
    S32 cmdArgCount;
    HelpCategories helpCategory;
    S32 helpGroup;
    S32 lines;                    // # lines required to display help (usually 1, occasionally 2)
-   string helpArgString[9];
+   string helpArgString[MAX_CMDS];
    string helpTextString;
 };
 

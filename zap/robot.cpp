@@ -718,13 +718,13 @@ S32 Robot::setAngle(lua_State *L)
       checkArgCount(L, 1, methodName);
 
       Move move = getCurrentMove();
-      move.angle = getFloat(L, 1, methodName);
+      move.angle = getFloat(L, 1);
       setCurrentMove(move);
    }
    else  // Could be a point?
    {
-      checkArgCount(L, 1, methodName);
-      Point point = getVec(L, 1, methodName);
+      //checkArgCount(L, 1, methodName);
+      Point point = getPointOrXY(L, 1);
 
       Move move = getCurrentMove();
       move.angle = getAnglePt(point);
@@ -739,8 +739,8 @@ S32 Robot::setAngle(lua_State *L)
 S32 Robot::setAnglePt(lua_State *L)
 {
    static const char *methodName = "Robot:setAnglePt()";
-   checkArgCount(L, 1, methodName);
-   Point point = getVec(L, 1, methodName);
+   //checkArgCount(L, 1, methodName);
+   Point point = getPointOrXY(L, 1);
 
    Move move = getCurrentMove();
    move.angle = getAnglePt(point);
@@ -753,8 +753,8 @@ S32 Robot::setAnglePt(lua_State *L)
 S32 Robot::getAnglePt(lua_State *L)
 {
    static const char *methodName = "Robot:getAnglePt()";
-   checkArgCount(L, 1, methodName);
-   Point point = getVec(L, 1, methodName);
+   //checkArgCount(L, 1, methodName);
+   Point point = getPointOrXY(L, 1);
 
    lua_pushnumber(L, getAnglePt(point));
    return 1;
@@ -766,8 +766,8 @@ S32 Robot::setThrust(lua_State *L)
 {
    static const char *methodName = "Robot:setThrust()";
    checkArgCount(L, 2, methodName);
-   F32 vel = getFloat(L, 1, methodName);
-   F32 ang = getFloat(L, 2, methodName);
+   F32 vel = getFloat(L, 1);
+   F32 ang = getFloat(L, 2);
 
    Move move = getCurrentMove();
 
@@ -846,7 +846,7 @@ S32 Robot::getFiringSolution(lua_State *L)
 {
    static const char *methodName = "Robot:getFiringSolution()";
    checkArgCount(L, 2, methodName);
-   U32 type = (U32)getInt(L, 1, methodName);
+   U32 type = (U32)lua_tointeger(L, 1);
    BfObject *target = getItem(L, 2, type, methodName);
 
    WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
@@ -866,7 +866,7 @@ S32 Robot::getInterceptCourse(lua_State *L)
 {
    static const char *methodName = "Robot:getInterceptCourse()";
    checkArgCount(L, 2, methodName);
-   U32 type = (U32)getInt(L, 1, methodName);
+   U32 type = (U32)lua_tointeger(L, 1);
    BfObject *target = getItem(L, 2, type, methodName);
 
 //   WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
@@ -884,9 +884,9 @@ S32 Robot::getInterceptCourse(lua_State *L)
 S32 Robot::setThrustPt(lua_State *L)      // (number, point)
 {
    static const char *methodName = "Robot:setThrustPt()";
-   checkArgCount(L, 2, methodName);
-   F32 vel = getFloat(L, 1, methodName);
-   Point point = getVec(L, 2, methodName);
+   //checkArgCount(L, 2, methodName);
+   F32 vel = getFloat(L, 1);
+   Point point = getPointOrXY(L, 2);
 
    F32 ang = getAnglePt(point) - 0 * FloatHalfPi;
 
@@ -905,8 +905,8 @@ S32 Robot::setThrustPt(lua_State *L)      // (number, point)
 S32 Robot::setThrustToPt(lua_State *L)
 {
    static const char *methodName = "Robot:setThrustToPt()";
-   checkArgCount(L, 1, methodName);
-   Point point = getVec(L, 1, methodName);
+   //checkArgCount(L, 1, methodName);
+   Point point = getPointOrXY(L, 1);
 
    F32 ang = getAnglePt(point) - 0 * FloatHalfPi;
 
@@ -944,7 +944,7 @@ S32 Robot::hasLosPt(lua_State *L)      // Now takes a point or an x,y
 {
    static const char *methodName = "Robot:hasLosPt()";
    //checkArgCount(L, 1, methodName);
-   Point point = getPointOrXY(L, 1, methodName);
+   Point point = getPointOrXY(L, 1);
 
    return returnBool(L, canSeePoint(point));
 }
@@ -1140,7 +1140,7 @@ S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
    // is empty at that point, we'll add a table, and warn the user that they are using a less efficient method.
    while(lua_isnumber(L, -1))
    {
-      U8 typenum = (U8)LuaObject::getInt(L, -1, methodName);
+      U8 typenum = (U8)lua_tointeger(L, -1);
 
       // Requests for botzones have to be handled separately; not a problem, we'll just do the search here, and add them to
       // fillVector, where they'll be merged with the rest of our search results.
@@ -1215,7 +1215,7 @@ S32 Robot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
    ServerGame *serverGame = (ServerGame *) getGame();
 
-   Point target = getPointOrXY(L, 1, methodName);
+   Point target = getPointOrXY(L, 1);
 
    // If we can see the target, go there directly
    if(canSeePoint(target, true))
@@ -1403,7 +1403,7 @@ S32 Robot::engineerDeployObject(lua_State *L)
 {
    static const char *methodName = "Robot:engineerDeployObject()";
    checkArgCount(L, 1, methodName);
-   S32 type = (S32)getInt(L, 0, methodName);
+   S32 type = (S32)lua_tointeger(L, 0);
 
    return returnBool(L, getOwner()->sEngineerDeployObject(type));
 }
@@ -1426,7 +1426,7 @@ S32 Robot::copyMoveFromObject(lua_State *L)
    static const char *methodName = "Robot:copyMoveFromObject()";
 
    checkArgCount(L, 2, methodName);
-   U32 type = (U32)getInt(L, 1, methodName);
+   U32 type = (U32)lua_tointeger(L, 1);
    BfObject *obj = getItem(L, 2, type, methodName);
 
    Move move = obj->getCurrentMove();

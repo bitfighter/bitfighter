@@ -779,7 +779,7 @@ S32 MoveObject::getVel(lua_State *L)
 
 S32 MoveObject::setVel(lua_State *L)
 {
-   setActualVel(getPointOrXY(L, 1, "setVel()"));
+   setActualVel(getPointOrXY(L, 1));
    return returnNil(L);
 }
 
