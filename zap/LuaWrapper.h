@@ -952,7 +952,6 @@ public:
          i++;
       }
 
-
       if(nodeList[nodeIndex].second.size() == 0)
          return;
 
