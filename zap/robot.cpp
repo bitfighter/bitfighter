@@ -1313,8 +1313,10 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
 
    // See if we're gonna clobber our own stuff...
    target->disableCollision();
+
    Point delta2 = delta;
    delta2.normalize(aimLife * aimVel / 1000);
+
    BfObject *hitObject = target->findObjectLOS((TestFunc)isWithHealthType, 0, aimPos, aimPos + delta2, t, n);
    target->enableCollision();
 
