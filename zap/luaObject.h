@@ -65,7 +65,7 @@ class LuaObject
 public:
 
    //                 Enum       Name
-#define LUA_ARG_TYPE_TABLE \
+#  define LUA_ARG_TYPE_TABLE \
    LUA_ARG_TYPE_ITEM( BOOL,    "Boolean"                ) \
    LUA_ARG_TYPE_ITEM( INT,     "Integer"                ) \
    LUA_ARG_TYPE_ITEM( INTS,    "One or more integers"   ) \
