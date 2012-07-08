@@ -46,7 +46,7 @@ end
 -- we're handing it
 --
 function getFiringSolution(item)
-    return bot:getFiringSolution(itemtype, item)
+    return bot:getFiringSolution(item)
 end
 
 
