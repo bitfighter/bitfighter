@@ -283,10 +283,11 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
 
                default:
                   TNLAssert(false, "Unknown arg type!");
+                  break;
             }
          }
 
-         if(!ok || ok && j + stackOffset + 1 != stackItems)
+         if(!ok || (ok && j + stackOffset + 1 != stackItems))
          {
             validProfile = false;       // This profile is not the one we want... proceed to next i
             break;

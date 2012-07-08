@@ -113,7 +113,7 @@ public:
 
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
    static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName);
-   static string LuaObject::prettyPrintParamList(const LuaFunctionProfile *functionInfo);
+   static string prettyPrintParamList(const LuaFunctionProfile *functionInfo);
 
 
    // More complex objects:
