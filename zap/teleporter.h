@@ -180,13 +180,6 @@ public:
 
 
    ///// Lua Interface
-
-   //                            Fn name     Valid param profiles  Profile count                           
-#  define TELEPORTER_LUA_METHOD_TABLE \
-      TELEPORTER_LUA_METHOD_ITEM(addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
-      TELEPORTER_LUA_METHOD_ITEM(delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
-      TELEPORTER_LUA_METHOD_ITEM(clearDests, ARRAYDEF({{          }}), 0 ) \
-
    LUAW_DECLARE_CLASS(Teleporter);
 
    static const char *luaClassName;

@@ -797,6 +797,12 @@ bool Teleporter::canBeNeutral() { return false; }
 
 const char *Teleporter::luaClassName = "Teleporter";
 
+   //                            Fn name     Valid param profiles  Profile count                           
+#  define TELEPORTER_LUA_METHOD_TABLE \
+      TELEPORTER_LUA_METHOD_ITEM(addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
+      TELEPORTER_LUA_METHOD_ITEM(delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
+      TELEPORTER_LUA_METHOD_ITEM(clearDests, ARRAYDEF({{          }}), 0 ) \
+
 
 const luaL_reg Teleporter::luaMethods[] =
 {
