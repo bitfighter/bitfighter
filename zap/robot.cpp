@@ -641,50 +641,57 @@ Robot *Robot::clone() const
 }
 
 
+#define ROBOT_LUA_METHOD_TABLE \
+   ROBOT_LUA_METHOD_ITEM( getCPUTime,           ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( getTime,              ARRAYDEF({{ INT, END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( setAnglePt,           ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( getAnglePt,           ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( hasLosPt,             ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( getWaypoint,          ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( setThrust,            ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( setThrustPt,          ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( setThrustToPt,        ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( fire,                 ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( setWeapon,            ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( setWeaponIndex,       ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( hasWeapon,            ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( activateModule,       ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( activateModuleIndex,  ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( setReqLoadout,        ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( setCurrLoadout,       ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( globalMsg,            ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( teamMsg,              ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( findItems,            ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( findGlobalItems,      ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ PT,  END }}), 1 ) \
+                                                                              \
+   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{ PT,  END }}), 1 ) \
+   ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ PT,  END }}), 1 ) \
+
+
+
+
+
+
 //// Lua methods
 const char *Robot::luaClassName = "Robot";
 
 const luaL_reg Robot::luaMethods[] =
 {
-   { "getCPUTime",               luaW_doMethod<Robot, &Robot::getCPUTime>               },
-   { "getTime",                  luaW_doMethod<Robot, &Robot::getTime>                  },
-
-   { "setAngle",                 luaW_doMethod<Robot, &Robot::setAngle>                 },
-   { "setAnglePt",               luaW_doMethod<Robot, &Robot::setAnglePt>               },
-   { "getAnglePt",               luaW_doMethod<Robot, &Robot::getAnglePt>               },
-   { "hasLosPt",                 luaW_doMethod<Robot, &Robot::hasLosPt>                 },
-                                                                                      
-   { "getWaypoint",              luaW_doMethod<Robot, &Robot::getWaypoint>              },
-
-   { "setThrust",                luaW_doMethod<Robot, &Robot::setThrust>                },
-   { "setThrustPt",              luaW_doMethod<Robot, &Robot::setThrustPt>              },
-   { "setThrustToPt",            luaW_doMethod<Robot, &Robot::setThrustToPt>            },
-
-   { "fire",                     luaW_doMethod<Robot, &Robot::fire>                     },
-   { "setWeapon",                luaW_doMethod<Robot, &Robot::setWeapon>                },
-   { "setWeaponIndex",           luaW_doMethod<Robot, &Robot::setWeaponIndex>           },
-   { "hasWeapon",                luaW_doMethod<Robot, &Robot::hasWeapon>                },
-                                
-   { "activateModule",           luaW_doMethod<Robot, &Robot::activateModule>           },
-   { "activateModuleIndex",      luaW_doMethod<Robot, &Robot::activateModuleIndex>      },
-   { "setReqLoadout",            luaW_doMethod<Robot, &Robot::setReqLoadout>            },
-   { "setCurrLoadout",           luaW_doMethod<Robot, &Robot::setCurrLoadout>           },
-
-   { "globalMsg",                luaW_doMethod<Robot, &Robot::globalMsg>                },
-   { "teamMsg",                  luaW_doMethod<Robot, &Robot::teamMsg>                  },
-    
-   { "findItems",                luaW_doMethod<Robot, &Robot::findItems>                },
-   { "findGlobalItems",          luaW_doMethod<Robot, &Robot::findGlobalItems>          },
-   { "getFiringSolution",        luaW_doMethod<Robot, &Robot::getFiringSolution>        },
-   { "getInterceptCourse",       luaW_doMethod<Robot, &Robot::getInterceptCourse>       },
-
-   { "engineerDeployObject",     luaW_doMethod<Robot, &Robot::engineerDeployObject>     },
-   { "dropItem",                 luaW_doMethod<Robot, &Robot::dropItem>                 },
-   { "copyMoveFromObject",       luaW_doMethod<Robot, &Robot::copyMoveFromObject>       },
-
+#  define ROBOT_LUA_METHOD_ITEM(name, b, c) { #name, luaW_doMethod<Robot, &Robot::name > },
+      ROBOT_LUA_METHOD_TABLE
+#  undef ROBOT_LUA_METHOD_ITEM
    { NULL, NULL }
 };
-
 
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
