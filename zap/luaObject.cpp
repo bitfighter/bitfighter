@@ -249,15 +249,15 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
    {
       const LuaArgType *candidateArgList = functionInfo->argList[i];
       bool validProfile = true;
-      S32 stackOffset = 0;       // Track the fact that some items, such as a point represented by two floats, can occupy multiple stack slots
+      S32 stackPos = 0;
 
       for(S32 j = 0; candidateArgList[j] != END; j++)
       {
          bool ok = false;
 
-         if(j + stackOffset <= stackItems)
+         if(stackPos < stackItems)
          {
-            S32 stackPos = j + stackOffset + 1;
+            stackPos++;
 
             switch(candidateArgList[j])
             {
@@ -268,12 +268,10 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
 
                case INTS:
                   ok = lua_isnumber(L, stackPos);
-                  
-                  while(j + stackOffset <= stackItems && lua_isnumber(L, stackPos))
-                  {
-                     stackOffset++;
+
+                  while(stackPos < stackItems && lua_isnumber(L, stackPos))
                      stackPos++;
-                  }
+
                   break;
 
                case STR:               
@@ -292,7 +290,7 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                   else if(j + 2 <= stackItems && lua_isnumber(L, stackPos) && lua_isnumber(L, stackPos + 1))
                   {
                      ok = true;
-                     stackOffset++;    // This item occupies two stack slots
+                     stackPos++;
                   }
                   break;
 
@@ -314,23 +312,25 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
             }
          }
 
-         if(!ok || (ok && j + stackOffset + 1 != stackItems))
+         if(!ok)
          {
             validProfile = false;       // This profile is not the one we want... proceed to next i
             break;
          }
       }
 
-      if(validProfile)
+      if(validProfile && (stackPos == stackItems))
          return i;
    }
-
+   
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
    char msg[2048];
    string params = prettyPrintParamList(functionInfo);
    dSprintf(msg, sizeof(msg), "Could not find valid params for function %s::%s(). Expected%s: %s", 
                               className, functionName, functionInfo->profileCount > 1 ? " one of the following" : "", params.c_str());
    logprintf(LogConsumer::LogError, msg);
+
+   LuaObject::dumpStack(L, "Current stack state");
 
    throw LuaException(msg);
 
