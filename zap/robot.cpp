@@ -124,12 +124,6 @@ Robot::~Robot()
 }
 
 
-lua_State *Robot::getL()
-{
-   return L;
-}
-
-
 // Reset everything on the robot back to the factory settings -- runs only when bot is spawning in GameType::spawnRobot()
 // Only runs on server!
 bool Robot::initialize(Point &pos)

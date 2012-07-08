@@ -81,8 +81,6 @@ public:
 
    void kill();
 
-   lua_State *getL();
-
    void logError(const char *format, ...);   // In case of error...
 
    void render(S32 layerIndex);
