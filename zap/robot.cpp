@@ -780,10 +780,7 @@ S32 Robot::setAngle(lua_State *L)
    }
 
    else if(profile == 1)   // Args: NUM   ==> Aim at this angle (radians)
-   {
-      Move move = getCurrentMove();
       move.angle = getFloat(L, 1);
-   }
 
    setCurrentMove(move);
    return 0;
