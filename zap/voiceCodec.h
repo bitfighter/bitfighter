@@ -28,7 +28,11 @@
 
 #include "../tnl/tnlByteBuffer.h"
 
-#include "speex/speex.h"
+#ifndef NO_AUDIO
+#  include "speex/speex.h"
+#else
+   typedef struct SpeexBits {} SpeexBits;
+#endif
 
 using namespace TNL;
 
