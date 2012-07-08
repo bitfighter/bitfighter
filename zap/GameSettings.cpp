@@ -121,6 +121,8 @@ ParamInfo paramDefs[] = {
 { "stutter",               ONE_REQUIRED,   SIMULATED_STUTTER,     4, "<int>",     "Simulate VPS CPU stutter (in milliseconds/second)",                                      "You must specify a value (in ms) with the -stutter option.  Values clamped to 0-1000" },
 { "forceupdate",           NO_PARAMETERS,  FORCE_UPDATE,          4, "",          "Trick game into thinking it needs to update",                                            "" },
 
+// Also, see the directives section below!
+
 };
 
 
