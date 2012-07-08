@@ -598,8 +598,8 @@ Point LuaObject::getCheckedVec(lua_State *L, S32 index, const char *methodName)
       throw LuaException(msg);
    }
 
-   const F32 *fff = lua_tovec(L, index);
-   return Point(fff[0], fff[1]);
+   const F32 *vec = lua_tovec(L, index);
+   return Point(vec[0], vec[1]);
 }
 
 
