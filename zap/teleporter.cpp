@@ -800,18 +800,18 @@ const char *Teleporter::luaClassName = "Teleporter";
 
 const luaL_reg Teleporter::luaMethods[] =
 {
-#define TELEPORTER_LUA_METHOD_ITEM(name, b, c) { #name, luaW_doMethod<Teleporter, &Teleporter::name > },
-   TELEPORTER_LUA_METHOD_TABLE
-#undef TELEPORTER_LUA_METHOD_ITEM
+#  define TELEPORTER_LUA_METHOD_ITEM(name, b, c) { #name, luaW_doMethod<Teleporter, &Teleporter::name > },
+      TELEPORTER_LUA_METHOD_TABLE
+#  undef TELEPORTER_LUA_METHOD_ITEM
    { NULL, NULL }
 };
 
-
+ 
 const LuaObject::LuaFunctionProfile Teleporter::functionArgs[] =
 {
-#define TELEPORTER_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
-   TELEPORTER_LUA_METHOD_TABLE
-#undef TELEPORTER_LUA_METHOD_ITEM
+#  define TELEPORTER_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
+      TELEPORTER_LUA_METHOD_TABLE
+#  undef TELEPORTER_LUA_METHOD_ITEM
    { NULL, { }, 0 }
 };
 
