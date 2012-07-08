@@ -63,12 +63,20 @@ class MenuItem;
 class LuaObject
 {
 public:
+
+   //                Enum    Name                          
+#define LUA_ARG_TYPE_TABLE \
+   LUA_ARG_TYPE_ITEM( BOOL, "Boolean"               ) \
+   LUA_ARG_TYPE_ITEM( INT,  "Integer"               ) \
+   LUA_ARG_TYPE_ITEM( FLT,  "Number"                ) \
+   LUA_ARG_TYPE_ITEM( STR,  "String"                ) \
+   LUA_ARG_TYPE_ITEM( PT,   "Point (or two numbers)") \
+
+   // Create the enum declaration
    enum LuaArgType {
-      BOOL,    // Boolean
-      INT,     // Integer argument
-      FLT,     // Float argument
-      STR,     // String argument
-      PT,      // Point argument (only used by Lua scripts)
+#     define LUA_ARG_TYPE_ITEM(value, b) value,
+         LUA_ARG_TYPE_TABLE
+#     undef LUA_ARG_TYPE_ITEM
       END      // End of list sentinel value
    };
 

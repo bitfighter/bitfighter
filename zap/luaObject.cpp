@@ -191,8 +191,13 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *methodNa
 }
 
 
-const char *argTypeNames[] = {"Boolean", "Integer", "Number", "String", "Point (or two numbers)"};
 
+// Create a list of type names for displaying function signatures
+static const char *argTypeNames[] = {
+#  define LUA_ARG_TYPE_ITEM(a, name) name,
+      LUA_ARG_TYPE_TABLE
+#  undef LUA_ARG_TYPE_ITEM
+};
 
 
 // Return a nicely formatted list of acceptable parameter types.  Use a string to avoid dangling pointer.
