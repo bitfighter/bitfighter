@@ -46,15 +46,6 @@ end
 -- we're handing it
 --
 function getFiringSolution(item)
-    if(item == nil) then
-        return nil
-    end
-
-    local itemtype = item:getClassID()
-    if(itemtype == nil) then
-        return nil
-    end
-
     return bot:getFiringSolution(itemtype, item)
 end
 

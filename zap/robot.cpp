@@ -720,12 +720,12 @@ U16 Robot::findClosestZone(const Point &point)
    ROBOT_LUA_METHOD_ITEM( findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    ROBOT_LUA_METHOD_ITEM( findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
                                                                                                      \
-   ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ INT, ITEM, END }}), 1 )                  \
-   ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ INT, ITEM, END }}), 1 )                  \
+   ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ ITEM, END }}), 1 )                       \
+   ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
                                                                                                      \
-   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT, END       }}), 1 )                  \
-   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{                }}), 1 )                  \
-   ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ INT, ITEM, END }}), 1 )                  \
+   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT, END  }}), 1 )                       \
+   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{           }}), 1 )                       \
+   ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
 
 
 //// Lua methods
@@ -1333,8 +1333,7 @@ S32 Robot::getFiringSolution(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getFiringSolution");
 
-   U32 type = (U32)lua_tointeger(L, 1);
-   Item *target = luaW_check<Item>(L, 2);
+   Item *target = luaW_check<Item>(L, 1);
 
    WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
 
@@ -1353,10 +1352,9 @@ S32 Robot::getInterceptCourse(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getInterceptCourse");
 
-   U32 type = (U32)lua_tointeger(L, 1);
-   Item *target = luaW_check<Item>(L, 2);
+   Item *target = luaW_check<Item>(L, 1);
 
-   F32 interceptAngle;
+   F32 interceptAngle;     // <== will be set by calcInterceptCourse() below
 
    if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), 256, 3000, false, interceptAngle))
       return returnFloat(L, interceptAngle);
@@ -1391,8 +1389,7 @@ S32 Robot::copyMoveFromObject(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "copyMoveFromObject");
 
-   U32 type = (U32)lua_tointeger(L, 1);
-   Item *obj = luaW_check<Item>(L, 2);
+   Item *obj = luaW_check<Item>(L, 1);
 
    Move move = obj->getCurrentMove();
    move.time = getCurrentMove().time;     // Keep current move time
