@@ -723,7 +723,7 @@ U16 Robot::findClosestZone(const Point &point)
    ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ ITEM, END }}), 1 )                       \
    ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
                                                                                                      \
-   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT, END  }}), 1 )                       \
+   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT,  END }}), 1 )                       \
    ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{           }}), 1 )                       \
    ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
 
