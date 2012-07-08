@@ -189,9 +189,9 @@ public:
 
    LUAW_DECLARE_CLASS(Teleporter);
 
+   static const char *luaClassName;
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
-   static const char *luaClassName;
 
    S32 addDest(lua_State *L);
    S32 delDest(lua_State *L);
