@@ -142,13 +142,13 @@ struct DirectiveInfo {
 DirectiveInfo directiveDefs[] = {   
 
 // Advanced server management options
-{ "getres",                FOUR_REQUIRED,  SEND_RESOURCE, 5, GameSettings::getRes,    "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
-{ "sendres",               FOUR_REQUIRED,  GET_RESOURCE,  5, GameSettings::sendRes,   "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
+{ "getres",  FOUR_REQUIRED,  SEND_RESOURCE, 5, GameSettings::getRes,    "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Send a resource to a remote server. Address must be specified in the form IP:nnn.nnn.nnn.nnn:port. The server must be running, have an admin password set, and have resource management enabled ([Host] section in the bitfighter.ini file).", "Usage: bitfighter getres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
+{ "sendres", FOUR_REQUIRED,  GET_RESOURCE,  5, GameSettings::sendRes,   "<server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>", "Retrieve a resource from a remote server, with same requirements as -sendres.",                                                                                                                                                                "Usage: bitfighter sendres <server address> <admin password> <resource name> <LEVEL|LEVELGEN|BOT>" },
 
 // Other commands
-{ "rules",                 NO_PARAMETERS,  SHOW_RULES,        6, GameSettings::showRules,      "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
-{ "luaclasses",            NO_PARAMETERS,  SHOW_LUA_CLASSES,  6, GameSettings::showLuaClasses, "",  "Print a list of classes available to Lua scripts", "" },
-{ "help",                  NO_PARAMETERS,  HELP,              6, GameSettings::showHelp,       "",  "Display this message", "" },
+{ "rules",   NO_PARAMETERS,  SHOW_RULES,        6, GameSettings::showRules,      "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
+{ "luadocs", NO_PARAMETERS,  SHOW_LUA_CLASSES,  6, GameSettings::showLuaClasses, "",  "Print a list of classes available to Lua scripts", "" },
+{ "help",    NO_PARAMETERS,  HELP,              6, GameSettings::showHelp,       "",  "Display this message", "" },
 
 };
 
