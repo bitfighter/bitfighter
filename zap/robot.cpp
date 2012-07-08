@@ -1275,7 +1275,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
 
    if(isShipType(target->getObjectTypeNumber()))
    {
-      Ship *potential = (Ship*)target;
+      Ship *potential = static_cast<Ship *>(target);
 
       // Is it dead or cloaked?  If so, ignore
       if(!potential->isVisible() || potential->hasExploded)
