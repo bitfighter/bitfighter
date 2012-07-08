@@ -261,7 +261,7 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
             switch(candidateArgList[j])
             {
                case INT:
-               case FLT:
+               case NUM:
                   ok = lua_isnumber(L, stackPos);
                   break;
 
@@ -283,7 +283,10 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                      ok = true;
                      stackOffset++;    // This item occupies two stack slots
                   }
+                  break;
 
+               case LOADOUT:
+                  ok = luaW_is<LuaLoadout>(L, 1);
                   break;
 
                default:
@@ -541,7 +544,7 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
    {
       UserData *ud = static_cast<UserData *>(lua_touserdata(L, -1));
 
-      if(!ud)                // Weeds out simple values, wrong userdata types still pass here
+      if(!ud)                 // Weeds out simple values, wrong userdata types still pass here
       {
          char msg[1024];
          dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
