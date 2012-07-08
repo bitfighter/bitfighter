@@ -1273,7 +1273,9 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
    offset.normalize(aimRadius * 1.2f);          // 1.2 ==> fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
 
-   if(isShipType(target->getObjectTypeNumber()))
+   bool targetIsShip = isShipType(target->getObjectTypeNumber());
+
+   if(targetIsShip)
    {
       Ship *potential = static_cast<Ship *>(target);
 
@@ -1303,7 +1305,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
    Point n;
    TestFunc testFunc = isWallType;
 
-   if( !(isShipType(target->getObjectTypeNumber())) )  // If the target isn't a ship, take forcefields into account
+   if(!targetIsShip)    // If the target isn't a ship, take forcefields into account
       testFunc = isFlagCollideableType;
 
    if(target->findObjectLOS(testFunc, ActualState, aimPos, target->getPos(), t, n))
