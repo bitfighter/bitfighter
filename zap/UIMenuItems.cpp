@@ -503,7 +503,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
    getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
 
    // Optional (but recommended) items
-   mIndex = clamp(getInt(L, 3, methodName, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
+   mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
    mWrap = getBool(L, 4, methodName, false);
    mHelp = getString(L, 4, methodName, "");
 }
@@ -641,7 +641,7 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L)
    mDisplayVal = getString(L, 1, methodName);
 
    // Optional (but recommended) items
-   setIndex(getInt(L, 2, methodName, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
+   setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
    mHelp = getString(L, 3, methodName, "");
 }
 
@@ -836,15 +836,15 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
       // mValue =  getInt(L, 2, methodName);  ==> set this later, after we've determined mMinValue and mMaxValue
 
       // Optional (but recommended) items
-      mStep =     getInt(L, 3, methodName, 1);   
-      mMinValue = getInt(L, 4, methodName, 0);   
-      mMaxValue = getInt(L, 5, methodName, 100);   
+      mStep =     getInt(L, 3, 1);   
+      mMinValue = getInt(L, 4, 0);   
+      mMaxValue = getInt(L, 5, 100);   
       mUnits =    getString(L, 6, methodName, "");
       mMinMsg =   getString(L, 7, methodName, "");
       mHelp =     getString(L, 8, methodName, "");
 
       // Second required item
-      setIntValue(getInt(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
+      setIntValue(getCheckedInt(L, 2, methodName));    // Set this one last so we'll know mMinValue and mMaxValue
    }
    catch(LuaException &e)
    {
@@ -1218,7 +1218,7 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
    // Optional (but recommended) items
    mLineEditor.setString(getString(L, 2, methodName, ""));
    mEmptyVal = getString(L, 3, methodName, "");
-   mLineEditor.mMaxLen = getInt(L, 4, methodName, 32);
+   mLineEditor.mMaxLen = getInt(L, 4, 32);
    mHelp = getString(L, 5, methodName, "");
 }
 

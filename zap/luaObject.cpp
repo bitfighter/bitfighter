@@ -81,7 +81,8 @@ bool LuaObject::shouldLuaGarbageCollectThisObject()
 // Returns a point to calling Lua function
 S32 LuaObject::returnPoint(lua_State *L, const Point &point)
 {
-   return returnVec(L, point.x, point.y);
+   lua_pushvec(L,  point.x, point.y);
+   return 1;
 }
 
 
@@ -124,14 +125,6 @@ S32 LuaObject::returnPlayerInfo(lua_State *L, Ship *ship)
 S32 LuaObject::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
 {
    playerInfo->push(L);
-   return 1;
-}
-
-
-// Returns a vector to a calling Lua function
-S32 LuaObject::returnVec(lua_State *L, F32 x, F32 y)
-{
-   lua_pushvec(L, x, y);
    return 1;
 }
 
@@ -198,10 +191,130 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *methodNa
 }
 
 
+const char *argTypeNames[] = {"Boolean", "Integer", "Number", "String", "Point (or two numbers)"};
+
+
+
+// Return a nicely formatted list of acceptable parameter types.  Use a string to avoid dangling pointer.
+string LuaObject::prettyPrintParamList(const LuaFunctionProfile *functionInfo)
+{
+   string msg;
+
+   for(S32 i = 0; i < functionInfo->profileCount; i++)
+   {
+      //if(i > 0)
+      msg += "\n\t";
+
+      for(S32 j = 0; functionInfo->argList[i][j] != END; j++)
+      {
+         if(j > 0)
+            msg += ", ";
+
+         msg += argTypeNames[functionInfo->argList[i][j]];
+      }
+   }
+
+   return msg;
+}
+
+
+// === Centralized Parameter Checking ===
+// Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
+// you can blindly convert the stack items with the confidence you'll get what you want; no further type checking is required.
+// In writing this function, I tried to be extra clear, perhaps at the expense of slight redundancy
+S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName)
+{
+   const LuaFunctionProfile *functionInfo = NULL;
+
+   // First, find the correct profile for this function
+   for(S32 i = 0; functionInfos[i].functionName != NULL; i++)
+      if(strcmp(functionInfos[i].functionName, functionName) == 0)
+      {
+         functionInfo = &functionInfos[i];
+         break;
+      }
+
+   if(!functionInfo)
+      return -1;
+
+   S32 stackItems = lua_gettop(L);
+   S32 profileCount = functionInfo->profileCount;
+
+   for(S32 i = 0; i < profileCount; i++)
+   {
+      const LuaArgType *candidateArgList = functionInfo->argList[i];
+      bool validProfile = true;
+      S32 stackOffset = 0;       // Track the fact that some items, such as a point represented by two floats, can occupy multiple stack slots
+
+      for(S32 j = 0; candidateArgList[j] != END; j++)
+      {
+         bool ok = false;
+
+         if(j + stackOffset <= stackItems)
+         {
+            S32 stackPos = j + stackOffset + 1;
+            switch(candidateArgList[j])
+            {
+               case INT:
+               case FLT:
+                  ok = lua_isnumber(L, stackPos);
+                  break;
+
+               case STR:               
+                  ok = lua_isstring(L, stackPos);
+                  break;
+
+               case BOOL:               
+                  ok = lua_isboolean(L, stackPos);
+                  break;
+
+               case PT:
+                  if(lua_isvec(L, stackPos))
+                  {
+                     ok = true;
+                  }
+                  else if(j + 2 <= stackItems && lua_isnumber(L, stackPos) && lua_isnumber(L, stackPos + 1))
+                  {
+                     ok = true;
+                     stackOffset++;    // This item occupies two stack slots
+                  }
+
+                  break;
+
+               default:
+                  TNLAssert(false, "Unknown arg type!");
+            }
+         }
+
+         if(!ok || ok && j + stackOffset + 1 != stackItems)
+         {
+            validProfile = false;       // This profile is not the one we want... proceed to next i
+            break;
+         }
+      }
+
+      if(validProfile)
+         return i;
+   }
+
+   // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
+   char msg[2048];
+   string params = prettyPrintParamList(functionInfo);
+   dSprintf(msg, sizeof(msg), "Could not find valid params for function %s::%s(). Expected%s: %s", 
+                              className, functionName, functionInfo->profileCount > 1 ? " one of the following" : "", params.c_str());
+   logprintf(LogConsumer::LogError, msg);
+
+   throw LuaException(msg);
+
+   return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
+}
+
+
+
 // Pop integer off stack, check its type, do bounds checking, and return it
 lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
 {
-   lua_Integer val = getInt(L, index, methodName);
+   lua_Integer val = getInt(L, index);
 
    if(val < minVal || val > maxVal)
    {
@@ -217,7 +330,7 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S
 
 
 // Returns defaultVal if there is an invalid or missing value on the stack
-lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S32 defaultVal)
+lua_Integer LuaObject::getInt(lua_State *L, S32 index, S32 defaultVal)
 {
    if(!lua_isnumber(L, index))
       return defaultVal;
@@ -226,8 +339,14 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S
 }
 
 
+lua_Integer LuaObject::getInt(lua_State *L, S32 index)
+{
+   return lua_tointeger(L, index);
+}
+
+
 // Pop integer off stack, check its type, and return it (no bounds check)
-lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName)
+lua_Integer LuaObject::getCheckedInt(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
@@ -243,7 +362,14 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName)
 
 
 // Pop a number off stack, convert to float, and return it (no bounds check)
-F32 LuaObject::getFloat(lua_State *L, S32 index, const char *methodName)
+F32 LuaObject::getFloat(lua_State *L, S32 index)
+{
+   return (F32)lua_tonumber(L, index);
+}
+
+
+// Pop a number off stack, convert to float, and return it (no bounds check)
+F32 LuaObject::getCheckedFloat(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
@@ -455,7 +581,7 @@ bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *
 
 
 // Pop a vec object off stack, check its type, and return it
-Point LuaObject::getVec(lua_State *L, S32 index, const char *methodName)
+Point LuaObject::getCheckedVec(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isvec(L, index))
    {
@@ -471,27 +597,20 @@ Point LuaObject::getVec(lua_State *L, S32 index, const char *methodName)
 }
 
 
-// Pop a point object off stack, or grab two numbers and create a point from that
-Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
+// Pop a point object off stack, or grab two numbers and create a point from them
+Point LuaObject::getPointOrXY(lua_State *L, S32 index)
 {
-   S32 args = lua_gettop(L);
-   if(args == 1)
+   if(lua_isvec(L, index))
    {
-      return getVec(L, index, methodName);
+      const F32 *vec = lua_tovec(L, index);
+      return Point(vec[0], vec[1]);
    }
-   else if(args == 2)
+   else
    {
-      F32 x = getFloat(L, index, methodName);
-      F32 y = getFloat(L, index + 1, methodName);
+      F32 x = getFloat(L, index);
+      F32 y = getFloat(L, index + 1);
       return Point(x, y);
    }
-
-   // Uh oh...
-   char msg[256];
-   dSprintf(msg, sizeof(msg), "%s expected either a point or a pair of numbers at position %d", methodName, index);
-   logprintf(LogConsumer::LogError, msg);
-
-   throw LuaException(msg);
 }
 
 
@@ -1064,7 +1183,7 @@ int LuaScriptRunner::subscribe(lua_State *L)
    static const char *methodName = "subscribe()";
    LuaObject::checkArgCount(L, 2, methodName);
 
-   lua_Integer eventType = LuaObject::getInt(L, -1, methodName);
+   lua_Integer eventType = LuaObject::getCheckedInt(L, -1, methodName);
 
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
@@ -1085,7 +1204,7 @@ int LuaScriptRunner::unsubscribe(lua_State *L)
    static const char *methodName = "LuaUtil:unsubscribe()";
    LuaObject::checkArgCount(L, 2, methodName);
 
-   lua_Integer eventType = LuaObject::getInt(L, -1, methodName);
+   lua_Integer eventType = LuaObject::getCheckedInt(L, -1, methodName);
    if(eventType < 0 || eventType >= EventManager::EventTypes)
       return 0;
 

@@ -797,12 +797,22 @@ bool Teleporter::canBeNeutral() { return false; }
 
 const char *Teleporter::luaClassName = "Teleporter";
 
+
 const luaL_reg Teleporter::luaMethods[] =
 {
-   { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest>    },
-   { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest>    },
-   { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests> },
+#define TELEPORTER_LUA_METHOD_ITEM(name, b, c) { #name, luaW_doMethod<Teleporter, &Teleporter::name > },
+   TELEPORTER_LUA_METHOD_TABLE
+#undef TELEPORTER_LUA_METHOD_ITEM
    { NULL, NULL }
+};
+
+
+const LuaObject::LuaFunctionProfile Teleporter::functionArgs[] =
+{
+#define TELEPORTER_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
+   TELEPORTER_LUA_METHOD_TABLE
+#undef TELEPORTER_LUA_METHOD_ITEM
+   { NULL, { }, 0 }
 };
 
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
@@ -810,9 +820,9 @@ REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 S32 Teleporter::addDest(lua_State *L)
 {
-   static const char *methodName = "Teleporter:addDest()";
-   Point point = getPointOrXY(L, 1, methodName);
+   checkArgList(L, functionArgs, "Teleporter", "addDest");
 
+   Point point = getPointOrXY(L, 1);
    addDest(point);
 
    return returnNil(L);
@@ -821,9 +831,9 @@ S32 Teleporter::addDest(lua_State *L)
 
 S32 Teleporter::delDest(lua_State *L)
 {
-   static const char *methodName = "Teleporter:delDest()";
-   checkArgCount(L, 1, methodName);
-   S32 index = getInt(L, 1, methodName, 1, mDestManager.getDestCount());
+   checkArgList(L, functionArgs, "Teleporter", "delDest");
+
+   S32 index = getInt(L, 1, "Teleporter:delDest()", 1, mDestManager.getDestCount());
 
    index--;    // Adjust for Lua's 1-based index
 
@@ -835,10 +845,12 @@ S32 Teleporter::delDest(lua_State *L)
 
 S32 Teleporter::clearDests(lua_State *L)
 {
+   checkArgList(L, functionArgs, "Teleporter", "clearDests");
+
    mDestManager.clear();
    return returnNil(L);
 }
 
-
+   
 };
 

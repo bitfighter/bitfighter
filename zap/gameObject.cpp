@@ -1250,7 +1250,7 @@ S32 BfObject::getLoc(lua_State *L)
 
 S32 BfObject::setLoc(lua_State *L)
 {
-   setPos(getPointOrXY(L, 1, "setLoc()"));
+   setPos(getPointOrXY(L, 1));
    return returnNil(L);
 }
 

@@ -78,9 +78,9 @@ class Teleporter : public SimpleLine, public Engineerable
 
 public:
    enum {
-      InitMask     = BIT(0),
-      TeleportMask = BIT(1),
-      HealthMask = BIT(2),
+      InitMask      = BIT(0),
+      TeleportMask  = BIT(1),
+      HealthMask    = BIT(2),
       DestroyedMask = BIT(3),
 
       TeleporterTriggerRadius = 50,
@@ -111,7 +111,7 @@ private:
 
 public:
    Teleporter(Point pos = Point(), Point dest = Point(), Ship *engineeringShip = NULL);  // Constructor
-   virtual ~Teleporter();                                  // Destructor
+   virtual ~Teleporter();                                                                // Destructor
 
    Teleporter *clone() const;
 
@@ -123,7 +123,6 @@ public:
    S32 getDestCount();
    Point getDest(S32 index);
    void addDest(const Point &dest);
-
 
    static bool checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship);
 
@@ -156,7 +155,6 @@ public:
    TNL_DECLARE_RPC(s2cClearDestinations, ());   
 
 
-
    ///// Editor Methods
    Color getEditorRenderColor();
 
@@ -183,6 +181,14 @@ public:
 
    ///// Lua Interface
 
+   static const LuaFunctionProfile functionArgs[];
+
+   //                         Fn name     Valid param profiles  Profile count                           
+#define TELEPORTER_LUA_METHOD_TABLE \
+   TELEPORTER_LUA_METHOD_ITEM(addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
+   TELEPORTER_LUA_METHOD_ITEM(delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
+   TELEPORTER_LUA_METHOD_ITEM(clearDests, ARRAYDEF({{      END }}), 1 ) \
+
    LUAW_DECLARE_CLASS(Teleporter);
 
    static const luaL_reg luaMethods[];
@@ -192,7 +198,6 @@ public:
    S32 delDest(lua_State *L);
    S32 clearDests(lua_State *L);
 };
-
 
 
 };
