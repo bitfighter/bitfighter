@@ -181,17 +181,16 @@ public:
 
    ///// Lua Interface
 
-   static const LuaFunctionProfile functionArgs[];
-
-   //                         Fn name     Valid param profiles  Profile count                           
-#define TELEPORTER_LUA_METHOD_TABLE \
-   TELEPORTER_LUA_METHOD_ITEM(addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
-   TELEPORTER_LUA_METHOD_ITEM(delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
-   TELEPORTER_LUA_METHOD_ITEM(clearDests, ARRAYDEF({{      END }}), 1 ) \
+   //                            Fn name     Valid param profiles  Profile count                           
+#  define TELEPORTER_LUA_METHOD_TABLE \
+      TELEPORTER_LUA_METHOD_ITEM(addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
+      TELEPORTER_LUA_METHOD_ITEM(delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
+      TELEPORTER_LUA_METHOD_ITEM(clearDests, ARRAYDEF({{          }}), 0 ) \
 
    LUAW_DECLARE_CLASS(Teleporter);
 
    static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
    static const char *luaClassName;
 
    S32 addDest(lua_State *L);
