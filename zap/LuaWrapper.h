@@ -948,7 +948,7 @@ public:
       unsigned int i = 0;
       while(luaMethods[i].name)
       {
-         printf("%s |>> %s()\n", prefix.c_str(), luaMethods[i].name);
+         printf("%s | > %s()\n", prefix.c_str(), luaMethods[i].name);
          i++;
       }
 
