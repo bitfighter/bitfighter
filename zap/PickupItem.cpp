@@ -265,6 +265,8 @@ const luaL_reg PickupItem::luaMethods[] =
    { NULL, NULL }
 };
 
+const LuaFunctionProfile PickupItem::functionArgs[] = { { NULL, { }, 0 } };
+
 
 S32 PickupItem::isVis(lua_State *L)
 {
@@ -361,10 +363,9 @@ REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 const char *RepairItem::luaClassName = "RepairItem";
 
 // Only implements inherited methods
-const luaL_reg RepairItem::luaMethods[] =
-{
-   { NULL, NULL }
-};
+const luaL_reg RepairItem::luaMethods[] = { { NULL, NULL } };
+
+const LuaFunctionProfile RepairItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
 ////////////////////////////////////////
@@ -437,9 +438,8 @@ REGISTER_LUA_SUBCLASS(EnergyItem, PickupItem);
 const char *EnergyItem::luaClassName = "EnergyItem";
 
 // Only implements inherited methods
-const luaL_reg EnergyItem::luaMethods[] =
-{
-   { NULL, NULL }
-};
+const luaL_reg EnergyItem::luaMethods[] = { { NULL, NULL } };
+
+const LuaFunctionProfile EnergyItem::functionArgs[] = { { NULL, { }, 0 } };
 
 };

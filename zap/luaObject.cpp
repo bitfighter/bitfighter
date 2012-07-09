@@ -247,7 +247,7 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
 
    for(S32 i = 0; i < profileCount; i++)
    {
-      const LuaArgType *candidateArgList = functionInfo->argList[i];
+      const /*LuaArgType*/int *candidateArgList = functionInfo->argList[i];
       bool validProfile = true;
       S32 stackPos = 0;
 

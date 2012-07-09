@@ -384,6 +384,7 @@ void Ship::findObjectsUnderShip(U8 type)
 
 // Returns the zone in question if this ship is in a zone of type zoneType
 // Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
+/* //// BUG: always returns NULL on client side, needed to avoid jumpy energy drain on hostile loadout, and slip zone, when lagging in someone server.
 BfObject *Ship::isInZone(U8 zoneTypeNumber)
 {
    Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
@@ -394,12 +395,46 @@ BfObject *Ship::isInZone(U8 zoneTypeNumber)
 
    return NULL;
 }
+*/
+
+// Returns the zone in question if this ship is in a zone of type zoneType
+// Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
+BfObject *Ship::isInZone(U8 zoneTypeNumber)
+{
+   findObjectsUnderShip(zoneTypeNumber);
+
+   if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
+      return NULL;
+
+   // Extents overlap...  now check for actual overlap
+
+   Vector<Point> polyPoints;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      BfObject *zone = static_cast<BfObject *>(fillVector[i]);
+
+      // Get points that define the zone boundaries
+      polyPoints.clear();
+      zone->getCollisionPoly(polyPoints);
+
+      if( polyPoints.size() != 0 && PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
+         return zone;
+   }
+   return NULL;
+}
 
 
 F32 Ship::getSlipzoneSpeedMoficationFactor()
 {
-   SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneTypeNumber));
-   return slipzone ? slipzone->slipAmount : 1.0f;
+   BfObject *obj = isInZone(SlipZoneTypeNumber);
+   if(obj)
+   {
+      TNLAssert(dynamic_cast<SlipZone *>(obj), "SlipZoneTypeNumber must be SlipZone only")
+      SlipZone *slipzone = static_cast<SlipZone *>(obj);
+      return slipzone->slipAmount;
+   }
+   return 1.0f;
 }
 
 
@@ -1171,7 +1206,7 @@ void Ship::updateModuleSounds()
       SFXCloakActive,
       SFXNone, // armor
    };
-	
+   
    for(U32 i = 0; i < ModuleCount; i++)
    {
       if(mModulePrimaryActive[i] && moduleSFXs[i] != SFXNone)
@@ -2335,6 +2370,9 @@ const luaL_reg Ship::luaMethods[] =
 
    { NULL, NULL }    // End method list
 };
+
+
+const LuaFunctionProfile Ship::functionArgs[] = { { NULL, { }, 0 } };
 
 
 REGISTER_LUA_SUBCLASS(Ship, MoveObject);

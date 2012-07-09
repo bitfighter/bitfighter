@@ -741,6 +741,18 @@ void luaW_extend(lua_State* L)
 
 
 
+static const S32 MAX_PROFILE_ARGS = 6;          // Max used so far = 3
+static const S32 MAX_PROFILES = 4;              // Max used so far = 2
+
+struct LuaFunctionProfile {
+   const char *functionName;
+   /*LuaArgType*/int argList[MAX_PROFILES][MAX_PROFILE_ARGS];
+   const S32 profileCount;
+};
+
+
+
+
 // Class to facilitate the semi-autonomous self-registration of LuaW classes.
 // To use this system, classes must implement the following:
 //    class name:  const char *luaClassName
@@ -772,9 +784,9 @@ private:
    typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
    typedef std::map <ClassName, luaW_regFunc> FunctionMap;     // Map of class name and registration functions
 
-   typedef std::pair<ClassName, const luaL_reg *> NameMethodListPair;
-   typedef std::map<ClassName, const luaL_reg *> MethodMap;   // Map of class name and Lua method list, for documentation
-      
+   typedef std::pair<ClassName, const LuaFunctionProfile *> NameArgumentListPair;
+   typedef std::map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
+
 
    // List of registration functions
    static FunctionMap &getRegistrationFunctions()
@@ -792,11 +804,11 @@ private:
    }
 
 
-   // Mapping of function name to Lua methods it registers
-   static MethodMap &getMethodMap()
+   // Mapping of function name to arguments to various defined functions
+   static ArgMap &getArgMap()
    {
-      static MethodMap methodMap;
-      return methodMap;
+      static ArgMap argMap;
+      return argMap;
    }
 
 
@@ -874,8 +886,9 @@ private:
       NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
       getRegistrationFunctions().insert(regPair);
 
-      NameMethodListPair methodPair(T::luaClassName, T::luaMethods);
-      getMethodMap().insert(methodPair);
+      // The following are only used when dumping the lua documentation with -luadoc
+      NameArgumentListPair argPair(T::luaClassName, T::functionArgs);
+      getArgMap().insert(argPair);
    }
 
 protected:
@@ -928,7 +941,44 @@ public:
    }
 
 
+   template<class T>
+   static std::string getArgList(const char *functionName)
+   {
+      for(S32 i = 0; T::functionArgs[i].name != NULL; i++)
+         if(strcmp(functionName, T::functionArgs[i].name) == 0)
+            return prettyPrintParamList(T::functionArgs[i]);
+
+      return "Arguments unknown";
+   }
+
+
    typedef std::pair<ClassName, std::vector<ClassName> > Node;
+
+
+   static std::string lookup(int x)
+   {
+      switch(x) {
+         case 0:
+            return "Boolean"               ;
+         case 1:
+            return "Integer"              ; 
+         case 2:
+            return "One or more integers"  ;
+         case 3:
+            return "Number"                ;
+         case 4:
+            return "String"                ;
+         case 5:
+            return "Point (or two numbers)";
+         case 6:
+            return "Lua table"            ; 
+         case 7:
+            return "Loadout Object"        ;
+         case 8:
+            return "Item Object"         ;
+      }
+            return "LLL";
+   }
 
    // Helper for printDocs()
    static void output(std::map<ClassName, unsigned int> &nodeMap, const std::vector<Node> &nodeList, std::string prefix, unsigned int nodeIndex)
@@ -942,14 +992,23 @@ public:
       printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
       
       // Print method list
-      TNLAssert(getMethodMap().count(nodeList[nodeIndex].first) == 1, "Missing method list!");
+      //TNLAssert(getMethodMap().count(nodeList[nodeIndex].first) == 1, "Missing method list!");
 
-      const luaL_reg *luaMethods = getMethodMap().find(nodeList[nodeIndex].first)->second;
-      unsigned int i = 0;
-      while(luaMethods[i].name)
+      const LuaFunctionProfile *funProfile = getArgMap().find(nodeList[nodeIndex].first)->second;
+
+      for(int i = 0; funProfile[i].functionName != NULL; i++)
       {
-         printf("%s | > %s()\n", prefix.c_str(), luaMethods[i].name);
-         i++;
+         for(int j = 0; j < funProfile[i].profileCount; j++)
+         {
+            std::string line = prefix + "  -> " + funProfile[i].functionName + "(";
+         
+            for(int k = 0; funProfile[i].argList[j][k] != 9 /*XXXXX*/; k++)
+               line += lookup(funProfile[i].argList[j][k]);
+
+            line += ")";
+
+            printf("%s\n", line.c_str());
+         }
       }
 
       if(nodeList[nodeIndex].second.size() == 0)

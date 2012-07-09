@@ -451,6 +451,9 @@ const luaL_reg Projectile::luaMethods[] =
    { NULL, NULL }
 };
 
+const LuaFunctionProfile Projectile::functionArgs[] = { { NULL, { }, 0 } };
+
+
 REGISTER_LUA_SUBCLASS(Projectile, BfObject);
 
 
@@ -672,6 +675,10 @@ const luaL_reg BurstProjectile::luaMethods[] =
    { "getWeapon", luaW_doMethod<BurstProjectile, &BurstProjectile::getWeapon> },
    { NULL, NULL }
 };
+
+
+const LuaFunctionProfile BurstProjectile::functionArgs[] = { { NULL, { }, 0 } };
+
 
 REGISTER_LUA_SUBCLASS(BurstProjectile, MoveItem);
 
@@ -939,10 +946,9 @@ bool Mine::canBeNeutral() { return false; }
 
 const char *Mine::luaClassName = "MineItem";
 
-const luaL_reg Mine::luaMethods[] =
-{
-   { NULL, NULL }
-};
+const luaL_reg Mine::luaMethods[] = { { NULL, NULL } };
+
+const LuaFunctionProfile Mine::functionArgs[] = { { NULL, { }, 0 } };
 
 REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
 
@@ -1169,10 +1175,8 @@ bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool
 
 const char *SpyBug::luaClassName = "SpyBugItem";
 
-const luaL_reg SpyBug::luaMethods[] =
-{
-   { NULL, NULL }
-};
+const luaL_reg SpyBug::luaMethods[] = { { NULL, NULL } };
+const LuaFunctionProfile SpyBug::functionArgs[] = { { NULL, { }, 0 } };
 
 
 REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);

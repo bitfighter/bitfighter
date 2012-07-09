@@ -692,8 +692,8 @@ U16 Robot::findClosestZone(const Point &point)
 
    //                     Function name         Arg Profiles                        
 #  define ROBOT_LUA_METHOD_TABLE \
-   ROBOT_LUA_METHOD_ITEM( getCPUTime,           ARRAYDEF({{ }}), 0 )                                 \
-   ROBOT_LUA_METHOD_ITEM( getTime,              ARRAYDEF({{ }}), 0 )                                 \
+   ROBOT_LUA_METHOD_ITEM( getCPUTime,           ARRAYDEF({{ END }}), 0 )                             \
+   ROBOT_LUA_METHOD_ITEM( getTime,              ARRAYDEF({{ END }}), 0 )                             \
                                                                                                      \
    ROBOT_LUA_METHOD_ITEM( setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
    ROBOT_LUA_METHOD_ITEM( getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
@@ -724,7 +724,7 @@ U16 Robot::findClosestZone(const Point &point)
    ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
                                                                                                      \
    ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT,  END }}), 1 )                       \
-   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{           }}), 1 )                       \
+   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{       END }}), 1 )                       \
    ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
 
 
@@ -741,7 +741,7 @@ const luaL_reg Robot::luaMethods[] =
 };
 
 
-const LuaObject::LuaFunctionProfile Robot::functionArgs[] =
+const LuaFunctionProfile Robot::functionArgs[] =
 {
 #  define ROBOT_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
       ROBOT_LUA_METHOD_TABLE

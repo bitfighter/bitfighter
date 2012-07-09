@@ -85,15 +85,6 @@ public:
       END      // End of list sentinel value
    };
 
-   static const S32 MAX_ARGS = 6;         // Max used so far = 1
-   static const S32 MAX_PROFILES = 4;     // Max used so far = 1
-
-   struct LuaFunctionProfile {
-      const char *functionName;
-      LuaArgType argList[MAX_PROFILES][MAX_ARGS];
-      const S32 profileCount;
-   };
-
 protected:
    static MenuItem *pushMenuItem (lua_State *L, MenuItem *menuItem);
 

@@ -74,8 +74,9 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS(LoadoutZone);
 
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 };

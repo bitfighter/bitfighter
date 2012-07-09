@@ -306,6 +306,13 @@ const luaL_reg LuaLoadout::luaMethods[] =
 };
 
 
+const LuaFunctionProfile LuaLoadout::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 S32 LuaLoadout::setWeapon(lua_State *L)     // setWeapon(i, mod) ==> Set weapon at index i
 {
    static const char *methodName = "Loadout:setWeapon()";

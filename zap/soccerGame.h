@@ -135,8 +135,10 @@ public:
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS(SoccerBallItem);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
 };
 

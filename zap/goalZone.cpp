@@ -269,6 +269,13 @@ const luaL_reg GoalZone::luaMethods[] =
 };
 
 
+const LuaFunctionProfile GoalZone::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 REGISTER_LUA_SUBCLASS(GoalZone, Zone);
 
 

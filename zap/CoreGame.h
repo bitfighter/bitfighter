@@ -216,8 +216,10 @@ public:
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS(CoreItem);
-	static const luaL_reg luaMethods[];
+
 	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 getHealth(lua_State *L);   
 };

@@ -158,8 +158,10 @@ public:
 
 	///// Lua interface
 	LUAW_DECLARE_CLASS(EngineeredItem);
-	static const luaL_reg luaMethods[];
+
 	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    // More Lua methods that are inherited by turrets and forcefield projectors
    S32 getHealth(lua_State *L);
@@ -280,8 +282,10 @@ public:
 
 	///// Lua interface
 	LUAW_DECLARE_CLASS(ForceFieldProjector);
-	static const luaL_reg luaMethods[];
+
 	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 getLoc(lua_State *L);
 };
@@ -355,8 +359,10 @@ public:
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS(Turret);
-	static const luaL_reg luaMethods[];
+
 	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    // LuaItem methods
    S32 getRad(lua_State *L);

@@ -115,8 +115,10 @@ public:
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS(FlagItem);
-	static const luaL_reg luaMethods[];
+
 	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
    
    S32 isInInitLoc(lua_State *L);      // Is flag in it's initial location?
 

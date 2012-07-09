@@ -443,6 +443,13 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
    { NULL, NULL }   
 };
 
+
+const LuaFunctionProfile LuaLevelGenerator::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
 REGISTER_LUA_CLASS(LuaLevelGenerator);
 
 

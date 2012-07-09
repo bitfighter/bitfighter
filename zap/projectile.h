@@ -90,8 +90,10 @@ public:
 
    //// Lua interface
    LUAW_DECLARE_CLASS(Projectile);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 getRad(lua_State *L);      // Radius of item (returns number)
    S32 getVel(lua_State *L);
@@ -136,8 +138,10 @@ public:
 
    //// Lua interface
    LUAW_DECLARE_CLASS(BurstProjectile);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
 };
@@ -194,8 +198,10 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(Mine);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
@@ -246,8 +252,9 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(SpyBug);
 
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 

@@ -209,6 +209,13 @@ const luaL_reg Item::luaMethods[] =
 };
 
 
+const LuaFunctionProfile Item::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 S32 Item::getRad(lua_State *L)
 {
    return LuaObject::returnFloat(L, getRadius());

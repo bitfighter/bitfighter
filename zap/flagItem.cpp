@@ -425,6 +425,13 @@ const luaL_reg FlagItem::luaMethods[] =
 };
 
 
+const LuaFunctionProfile FlagItem::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 S32 FlagItem::isInInitLoc(lua_State *L)
 {
    return returnBool(L, isAtHome());

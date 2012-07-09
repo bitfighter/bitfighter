@@ -813,7 +813,7 @@ const luaL_reg Teleporter::luaMethods[] =
 };
 
  
-const LuaObject::LuaFunctionProfile Teleporter::functionArgs[] =
+const LuaFunctionProfile Teleporter::functionArgs[] =
 {
 #  define TELEPORTER_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
       TELEPORTER_LUA_METHOD_TABLE

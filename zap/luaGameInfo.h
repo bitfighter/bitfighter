@@ -140,8 +140,9 @@ public:
 
    LUAW_DECLARE_CLASS(LuaLoadout);
 
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
    S32 setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i

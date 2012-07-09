@@ -1101,6 +1101,13 @@ const luaL_reg EngineeredItem::luaMethods[] =
 };
 
 
+const LuaFunctionProfile EngineeredItem::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 S32 EngineeredItem::getHealth(lua_State *L)
 {
    return returnFloat(L, mHealth);
@@ -1351,10 +1358,14 @@ const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
 
 
 // No custom ForceFieldProjector methods
-const luaL_reg ForceFieldProjector::luaMethods[] =
+const luaL_reg ForceFieldProjector::luaMethods[] = { { NULL, NULL } };
+
+
+const LuaFunctionProfile ForceFieldProjector::functionArgs[] =
 {
-   { NULL, NULL }
+   { NULL, { }, 0 }
 };
+
 
 
 // LuaItem methods
@@ -1909,6 +1920,13 @@ const luaL_reg Turret::luaMethods[] =
    { "getAngleAim", luaW_doMethod<Turret, &Turret::getAngleAim> },
    { NULL, NULL }
 };
+
+
+const LuaFunctionProfile Turret::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
 
 
 S32 Turret::getAngleAim(lua_State *L)

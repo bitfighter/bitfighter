@@ -88,8 +88,10 @@ public:
 
    // LuaItem interface
    LUAW_DECLARE_CLASS(Item);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    virtual S32 getRad(lua_State *L);
    virtual S32 isInCaptureZone(lua_State *L);      // Non-moving item is never in capture zone, even if it is!

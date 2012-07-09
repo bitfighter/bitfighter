@@ -156,8 +156,10 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(MoveObject);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    // Get/set object's velocity vector
    virtual S32 getVel(lua_State *L);
@@ -227,8 +229,10 @@ public:
 
    ///// LuaItem interface
    LUAW_DECLARE_CLASS(MoveItem);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);
@@ -314,8 +318,10 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(Asteroid);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
@@ -369,8 +375,10 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(Circle);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
@@ -468,8 +476,10 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(TestItem);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
@@ -505,8 +515,10 @@ public:
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS(ResourceItem);
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 

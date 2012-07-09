@@ -36,8 +36,8 @@
 #include "gameWeapons.h"
 
 #ifndef ZAP_DEDICATED
-#include "sparkManager.h"
-#include "ShipShape.h"
+#  include "sparkManager.h"
+#  include "ShipShape.h"
 #endif
 
 namespace Zap
@@ -299,8 +299,9 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS(Ship);
 
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 isAlive(lua_State *L);
    S32 getAngle(lua_State *L);

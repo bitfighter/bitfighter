@@ -574,10 +574,8 @@ const char *SoccerBallItem::luaClassName = "SoccerBallItem";
 
 
 // No soccerball specific methods!
-const luaL_reg SoccerBallItem::luaMethods[] =
-{
-   { NULL, NULL }
-};
+const luaL_reg SoccerBallItem::luaMethods[] = { { NULL, NULL } };
+const LuaFunctionProfile SoccerBallItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
 

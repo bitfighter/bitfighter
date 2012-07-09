@@ -1236,6 +1236,13 @@ const luaL_reg BfObject::luaMethods[] =
 };
 
 
+const LuaFunctionProfile BfObject::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 S32 BfObject::getClassID(lua_State *L)
 {
    return returnInt(L, mObjectTypeNumber);

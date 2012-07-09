@@ -1086,6 +1086,9 @@ const char *NexusObject::luaClassName = "NexusObject";
 
 const luaL_reg NexusObject::luaMethods[] = { { NULL, NULL } };
 
+const LuaFunctionProfile NexusObject::functionArgs[] = { { NULL, { }, 0 } };
+
+
 REGISTER_LUA_SUBCLASS(NexusObject, Zone);
 
 };

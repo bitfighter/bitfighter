@@ -1014,6 +1014,9 @@ const luaL_reg CoreItem::luaMethods[] =
 };
 
 
+const LuaFunctionProfile CoreItem::functionArgs[] = { { NULL, { }, 0 } };
+
+
 S32 CoreItem::getHealth(lua_State *L)
 {
    return returnFloat(L, getTotalHealth());

@@ -104,8 +104,9 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS(GoalZone);
 
-   static const luaL_reg luaMethods[];
-   static const char *luaClassName;
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    S32 hasFlag(lua_State *L);
 };

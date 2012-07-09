@@ -771,6 +771,12 @@ const luaL_reg MoveObject::luaMethods[] =
 };
 
 
+const LuaFunctionProfile MoveObject::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
 S32 MoveObject::getVel(lua_State *L)
 {
    return LuaObject::returnPoint(L, getActualVel());
@@ -1148,10 +1154,14 @@ const char *MoveItem::luaClassName = "MoveItem";
 
 
 // Standard methods available to all MoveItems
-const luaL_reg MoveItem::luaMethods[] =
+const luaL_reg MoveItem::luaMethods[] = { { NULL, NULL } };
+
+
+const LuaFunctionProfile MoveItem::functionArgs[] =
 {
-   { NULL, NULL }
+   { NULL, { }, 0 }
 };
+
 
 
 ////////////////////////////////////////
@@ -1492,6 +1502,13 @@ const luaL_reg Asteroid::luaMethods[] =
 };
 
 
+const LuaFunctionProfile Asteroid::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
+
+
+
 S32 Asteroid::getSize(lua_State *L)
 {
    return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft);
@@ -1694,11 +1711,13 @@ REGISTER_LUA_SUBCLASS(Circle, MoveItem);
 const char *Circle::luaClassName = "Circle";
 
 
-const luaL_reg Circle::luaMethods[] =
-{
-   {NULL, NULL}   
-};
+const luaL_reg Circle::luaMethods[] = { { NULL, NULL } };
 
+
+const LuaFunctionProfile Circle::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
 
 
 ////////////////////////////////////////
@@ -2031,10 +2050,14 @@ const char *TestItem::luaClassName = "TestItem";
 
 
 // Inherits all MoveItem methods, has no custom methods
-const luaL_reg TestItem::luaMethods[] =
+const luaL_reg TestItem::luaMethods[] = { { NULL, NULL } };
+
+
+const LuaFunctionProfile TestItem::functionArgs[] =
 {
-   { NULL, NULL }
+   { NULL, { }, 0 }
 };
+
 
 
 ////////////////////////////////////////
@@ -2135,11 +2158,13 @@ REGISTER_LUA_SUBCLASS(ResourceItem, MoveItem);
 const char *ResourceItem::luaClassName = "ResourceItem";
 
 // Inherits all MoveItem methods, and has a few of its own
-const luaL_reg ResourceItem::luaMethods[] =
-{
-   { NULL, NULL }
-};
+const luaL_reg ResourceItem::luaMethods[] = { { NULL, NULL } };
 
+
+const LuaFunctionProfile ResourceItem::functionArgs[] =
+{
+   { NULL, { }, 0 }
+};
 
 
 };
