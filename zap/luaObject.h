@@ -254,71 +254,68 @@ public:
 };
 
 
-    ////////////////////////////////////////
-    ////////////////////////////////////////
-    //
-    // Some ugly macro defs that will make our Lua classes sleek and beautiful
-    //
-    ////////////////////////////////////////
-    ////////////////////////////////////////
-    //
-    // See discussion of this code here:
-    // http://stackoverflow.com/questions/11413663/reducing-code-repetition-in-c
-    //
-    // Start with a definition like the following:
-    // #define LUA_METHODS(CLASS, METHOD) \
-    //    METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
-    //    METHOD(CLASS, delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
-    //    METHOD(CLASS, clearDests, ARRAYDEF({{      END }}), 1 ) \
-    //
+////////////////////////////////////////
+////////////////////////////////////////
+//
+// Some ugly macro defs that will make our Lua classes sleek and beautiful
+//
+////////////////////////////////////////
+////////////////////////////////////////
+//
+// See discussion of this code here:
+// http://stackoverflow.com/questions/11413663/reducing-code-repetition-in-c
+//
+// Start with a definition like the following:
+// #define LUA_METHODS(CLASS, METHOD) \
+//    METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
+//    METHOD(CLASS, delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
+//    METHOD(CLASS, clearDests, ARRAYDEF({{      END }}), 1 ) \
+//
 
-    #define LUA_METHOD_ITEM(class_, name, b, c) \
-      { #name, luaW_doMethod<class_, &class_::name > },
+#define LUA_METHOD_ITEM(class_, name, b, c) \
+{ #name, luaW_doMethod<class_, &class_::name > },
 
-    #define GENERATE_LUA_METHODS_TABLE(class_, table_) \
-      const luaL_reg class_::luaMethods[] =            \
-      {                                                \
-        table_(class_, LUA_METHOD_ITEM)                \
-        { NULL, NULL }                                 \
-      }
+#define GENERATE_LUA_METHODS_TABLE(class_, table_) \
+const luaL_reg class_::luaMethods[] =              \
+{                                                  \
+   table_(class_, LUA_METHOD_ITEM)                 \
+   { NULL, NULL }                                  \
+}
 
-    // Generates something like the following:
-    // const luaL_reg Teleporter::luaMethods[] =
-    // {
-    //       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest >    }
-    //       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest >    }
-    //       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests > }
-    //       { NULL, NULL }
-    // };
+// Generates something like the following:
+// const luaL_reg Teleporter::luaMethods[] =
+// {
+//       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest >    }
+//       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest >    }
+//       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests > }
+//       { NULL, NULL }
+// };
 
-    ////////////////////////////////////////
+////////////////////////////////////////
 
-    #define LUA_FUNARGS_ITEM(class_, name, profiles, profileCount) \
-      { #name, profiles, profileCount },
+#define LUA_FUNARGS_ITEM(class_, name, profiles, profileCount) \
+{ #name, profiles, profileCount },
 
-    #define GENERATE_LUA_FUNARGS_TABLE(class_, table_)  \
-      const LuaFunctionProfile class_::functionArgs[] = \
-      {                                                 \
-        table_(class_, LUA_FUNARGS_ITEM)                \
-        { NULL, { }, 0 }                                \
-      }
+#define GENERATE_LUA_FUNARGS_TABLE(class_, table_)  \
+const LuaFunctionProfile class_::functionArgs[] =   \
+{                                                   \
+   table_(class_, LUA_FUNARGS_ITEM)                 \
+   { NULL, { }, 0 }                                 \
+}
 
-    // Generates something like the following:
-    // const LuaFunctionProfile Teleporter::functionArgs[] =
-    // {
-    //    { "addDest",    {{ PT,  END }}, 1 }
-    //    { "delDest",    {{ INT, END }}, 1 }
-    //    { "clearDests", {{      END }}, 1 }
-    //    { NULL, { }, 0 }
-    // };
+// Generates something like the following:
+// const LuaFunctionProfile Teleporter::functionArgs[] =
+// {
+//    { "addDest",    {{ PT,  END }}, 1 }
+//    { "delDest",    {{ INT, END }}, 1 }
+//    { "clearDests", {{      END }}, 1 }
+//    { NULL, { }, 0 }
+// };
 
-    ////////////////////////////////////////
-    ////////////////////////////////////////
-
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 };
 
 #endif
-
