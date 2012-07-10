@@ -1087,43 +1087,25 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 
 
 ///// Lua interface
-REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
+
+//               Fn name    Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, isActive,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getAngle,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getHealth, ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(EngineeredItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(EngineeredItem, LUA_METHODS);
+
+#undef LUA_METHODS
 
 const char *EngineeredItem::luaClassName = "EngineeredItem";
+REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 
-const luaL_reg EngineeredItem::luaMethods[] =
-{
-   { "isActive",  luaW_doMethod<EngineeredItem, &EngineeredItem::isActive>  },
-   { "getAngle",  luaW_doMethod<EngineeredItem, &EngineeredItem::getAngle>  },
-   { "getHealth", luaW_doMethod<EngineeredItem, &EngineeredItem::getHealth> },
-   { NULL, NULL }
-};
-
-
-const LuaFunctionProfile EngineeredItem::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
-S32 EngineeredItem::getHealth(lua_State *L)
-{
-   return returnFloat(L, mHealth);
-}
-
-
-S32 EngineeredItem::isActive(lua_State *L)
-{
-   return returnInt(L, isEnabled());
-}
-
-
-S32 EngineeredItem::getAngle(lua_State *L)
-{
-   return returnFloat(L, mAnchorNormal.ATAN2());
-}
+S32 EngineeredItem::getHealth(lua_State *L) { return returnFloat(L, mHealth);     }
+S32 EngineeredItem::isActive(lua_State *L)  { return returnInt  (L, isEnabled()); }
+S32 EngineeredItem::getAngle(lua_State *L)  { return returnFloat(L, mAnchorNormal.ATAN2()); }
 
 
 ////////////////////////////////////////
@@ -1352,23 +1334,15 @@ void ForceFieldProjector::onGeomChanged()
 
 
 ///// Lua interface
-REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
-
-const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
-
 
 // No custom ForceFieldProjector methods
-const luaL_reg ForceFieldProjector::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           ForceFieldProjector::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile ForceFieldProjector::functionArgs[] = { { NULL, { }, 0 } };
 
+const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
+REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
 
-const LuaFunctionProfile ForceFieldProjector::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
-// LuaItem methods
+// LuaItem methods -- override method in parent class
 S32 ForceFieldProjector::getLoc(lua_State *L)
 {
    return LuaObject::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
@@ -1910,22 +1884,19 @@ void Turret::onGeomChanged()
 
 
 ///// Lua interface
-REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
+
+//               Fn name     Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getAngleAim,  ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(Turret, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Turret, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *Turret::luaClassName = "Turret";
-
-// Standard methods available to all Items
-const luaL_reg Turret::luaMethods[] =
-{
-   { "getAngleAim", luaW_doMethod<Turret, &Turret::getAngleAim> },
-   { NULL, NULL }
-};
-
-
-const LuaFunctionProfile Turret::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
+REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
 
 
 

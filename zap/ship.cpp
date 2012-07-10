@@ -2213,12 +2213,11 @@ void Ship::render(S32 layerIndex)
 
       glDisable(GL_BLEND);
 
-      F32 vertices[] = {
-            -20, -15,
-            0, 25,
-            20, -15
-      };
-      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+      glBegin(GL_POLYGON);
+         glVertex2f(-20, -15);
+         glVertex2f(0, 25);
+         glVertex2f(20, -15);
+      glEnd();
 
       glEnable(GL_BLEND);
 

@@ -30,15 +30,10 @@
 #include "stringUtils.h"      // For itos
 #include "gameConnection.h"
 #include "gameObjectRender.h"
-#include "OpenglUtils.h"
 #include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#  ifdef TNL_OS_MOBILE
-#     include "SDL_opengles.h"
-#  else
-#     include "SDL_opengl.h"
-#  endif
+#include "SDL_opengl.h"
 #endif
 
 namespace Zap
@@ -418,29 +413,22 @@ void FlagItem::onMountDestroyed()
 
 
 ///// Lua interface
-REGISTER_LUA_SUBCLASS(FlagItem, MoveItem);
+
+//               Fn name       Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, isInInitLoc,  ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(FlagItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(FlagItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *FlagItem::luaClassName = "FlagItem";
-
-// Standard methods available to all Items
-const luaL_reg FlagItem::luaMethods[] =
-{
-   { "isInInitLoc", luaW_doMethod<FlagItem, &FlagItem::isInInitLoc> },
-   { NULL, NULL }
-};
+REGISTER_LUA_SUBCLASS(FlagItem, MoveItem);
 
 
-const LuaFunctionProfile FlagItem::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
-S32 FlagItem::isInInitLoc(lua_State *L)
-{
-   return returnBool(L, isAtHome());
-}
+S32 FlagItem::isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }
 
 
 // Override parent method

@@ -558,15 +558,12 @@ void Robot::render(S32 layerIndex)
    else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
    {
       glColor(Colors::yellow);      
-
-      // Render from ship to start of flight plan
-      Vector<Point> line(2);
-      line.push_back(getActualPos());
-      line.push_back(flightPlan[0]);
-      renderLine(&line);
-
-      // Render the flight plan
-      renderPointVector(&flightPlan, GL_LINE_STRIP);
+      glBegin(GL_LINE_STRIP);
+         glVertex(getActualPos());
+         for(S32 i = flightPlan.size() - 1; i >= 0; i--)
+            glVertex(flightPlan[i]);
+         
+      glEnd();
    }
 #endif
 }
@@ -692,67 +689,52 @@ U16 Robot::findClosestZone(const Point &point)
    return closestZone;
 }
 
-
-   //                     Function name         Arg Profiles                        
-#  define ROBOT_LUA_METHOD_TABLE \
-   ROBOT_LUA_METHOD_ITEM( getCPUTime,           ARRAYDEF({{ END }}), 0 )                             \
-   ROBOT_LUA_METHOD_ITEM( getTime,              ARRAYDEF({{ END }}), 0 )                             \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
-   ROBOT_LUA_METHOD_ITEM( getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
-   ROBOT_LUA_METHOD_ITEM( hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( getWaypoint,          ARRAYDEF({{ PT, END }}), 1 )                         \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( setThrust,            ARRAYDEF({{ NUM, NUM, END }, { NUM, PT, END}}), 2 )  \
-   ROBOT_LUA_METHOD_ITEM( setThrustToPt,        ARRAYDEF({{ PT,       END }                 }), 1 )  \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( fire,                 ARRAYDEF({{          }}), 0 )                        \
-   ROBOT_LUA_METHOD_ITEM( setWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
-   ROBOT_LUA_METHOD_ITEM( setWeaponIndex,       ARRAYDEF({{ INT, END }}), 1 )                        \
-   ROBOT_LUA_METHOD_ITEM( hasWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( activateModule,       ARRAYDEF({{ INT,     END }}), 1 )                    \
-   ROBOT_LUA_METHOD_ITEM( activateModuleIndex,  ARRAYDEF({{ INT,     END }}), 1 )                    \
-   ROBOT_LUA_METHOD_ITEM( setReqLoadout,        ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
-   ROBOT_LUA_METHOD_ITEM( setCurrLoadout,       ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
-   ROBOT_LUA_METHOD_ITEM( teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-   ROBOT_LUA_METHOD_ITEM( findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( getFiringSolution,    ARRAYDEF({{ ITEM, END }}), 1 )                       \
-   ROBOT_LUA_METHOD_ITEM( getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
-                                                                                                     \
-   ROBOT_LUA_METHOD_ITEM( engineerDeployObject, ARRAYDEF({{ INT,  END }}), 1 )                       \
-   ROBOT_LUA_METHOD_ITEM( dropItem,             ARRAYDEF({{       END }}), 1 )                       \
-   ROBOT_LUA_METHOD_ITEM( copyMoveFromObject,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
-
-
 //// Lua methods
+
+//                Fn name               Param profiles                  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS,  getCPUTime,           ARRAYDEF({{ END }}), 1 )                             \
+   METHOD(CLASS,  getTime,              ARRAYDEF({{ END }}), 1 )                             \
+                                                                                             \
+   METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
+   METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
+   METHOD(CLASS,  hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
+                                                                                             \
+   METHOD(CLASS,  getWaypoint,          ARRAYDEF({{ PT, END }}), 1 )                         \
+                                                                                             \
+   METHOD(CLASS,  setThrust,            ARRAYDEF({{ NUM, NUM, END }, { NUM, PT, END}}), 2 )  \
+   METHOD(CLASS,  setThrustToPt,        ARRAYDEF({{ PT,       END }                 }), 1 )  \
+                                                                                             \
+   METHOD(CLASS,  fire,                 ARRAYDEF({{      END }}), 1 )                        \
+   METHOD(CLASS,  setWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
+   METHOD(CLASS,  setWeaponIndex,       ARRAYDEF({{ INT, END }}), 1 )                        \
+   METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
+                                                                                             \
+   METHOD(CLASS,  activateModule,       ARRAYDEF({{ INT,     END }}), 1 )                    \
+   METHOD(CLASS,  activateModuleIndex,  ARRAYDEF({{ INT,     END }}), 1 )                    \
+   METHOD(CLASS,  setReqLoadout,        ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
+   METHOD(CLASS,  setCurrLoadout,       ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
+                                                                                             \
+   METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
+   METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
+                                                                                             \
+   METHOD(CLASS,  findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS,  findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+                                                                                             \
+   METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ ITEM, END }}), 1 )                       \
+   METHOD(CLASS,  getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
+                                                                                             \
+   METHOD(CLASS,  engineerDeployObject, ARRAYDEF({{ INT,  END }}), 1 )                       \
+   METHOD(CLASS,  dropItem,             ARRAYDEF({{       END }}), 1 )                       \
+   METHOD(CLASS,  copyMoveFromObject,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
+
+GENERATE_LUA_METHODS_TABLE(Robot, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Robot, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
 const char *Robot::luaClassName = "Robot";
-
-
-const luaL_reg Robot::luaMethods[] =
-{
-#  define ROBOT_LUA_METHOD_ITEM(name, b, c) { #name, luaW_doMethod<Robot, &Robot::name > },
-      ROBOT_LUA_METHOD_TABLE
-#  undef ROBOT_LUA_METHOD_ITEM
-   { NULL, NULL }
-};
-
-
-const LuaFunctionProfile Robot::functionArgs[] =
-{
-#  define ROBOT_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
-      ROBOT_LUA_METHOD_TABLE
-#  undef ROBOT_LUA_METHOD_ITEM
-   { NULL, { }, 0 }
-};
-
-
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
 

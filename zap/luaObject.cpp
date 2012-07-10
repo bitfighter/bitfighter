@@ -23,34 +23,22 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "luaObject.h"
+#include "luaObject.h"         // Header
+
 #include "luaUtil.h"
 #include "luaGameInfo.h"
-#include "tnlLog.h"            // For logprintf
-                               
-#include "item.h"              // For getItem()
-#include "flagItem.h"          // For getItem()
-#include "robot.h"             // For getItem()
-#include "NexusGame.h"         // For getItem()
-#include "soccerGame.h"        // For getItem()
-#include "projectile.h"        // For getItem()
-#include "loadoutZone.h"       
-#include "goalZone.h"          
-#include "teleporter.h"        
-#include "speedZone.h"         
-#include "EngineeredItem.h"    // For getItem()
-#include "PickupItem.h"        // For getItem()
+#include "robot.h"             // For subscribing
 #include "playerInfo.h"        // For playerInfo def
 #include "UIMenuItems.h"       // For MenuItem def
 #include "config.h"            
-#include "CoreGame.h"          // For getItem()
 #include "ClientInfo.h"
 
 #include "luaLevelGenerator.h" // For managing event subscriptions
 
-
 #include "stringUtils.h"       // For joindir  
 #include "lua.h"
+
+#include "tnlLog.h"            // For logprintf
 
 #include <iostream>            // For enum code
 #include <sstream>             // For enum code

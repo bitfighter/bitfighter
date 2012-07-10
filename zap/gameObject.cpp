@@ -1220,51 +1220,37 @@ void BfObject::writeThisTeam(BitStream *stream)
 }
 
 
-/// Lua methods
+///// Lua interface
+
+//               Fn name         Param profiles     Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getClassID,     ARRAYDEF({{     END }}), 1 ) \
+   METHOD(CLASS, getLoc,         ARRAYDEF({{     END }}), 1 ) \
+   METHOD(CLASS, setLoc,         ARRAYDEF({{ PT, END }}), 1 ) \
+   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{     END }}), 1 ) \
+   METHOD(CLASS, addToGame,      ARRAYDEF({{     END }}), 1 ) \
+   METHOD(CLASS, removeFromGame, ARRAYDEF({{     END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
 const char *BfObject::luaClassName = "BfItem";
-
-// Standard methods available to all Items
-const luaL_reg BfObject::luaMethods[] =
-{
-   { "getClassID",     luaW_doMethod<BfObject, &BfObject::getClassID>     },
-   { "getLoc",         luaW_doMethod<BfObject, &BfObject::getLoc>         },
-   { "setLoc",         luaW_doMethod<BfObject, &BfObject::setLoc>         },
-   { "getTeamIndx",    luaW_doMethod<BfObject, &BfObject::getTeamIndx>    },
-   { "addToGame",      luaW_doMethod<BfObject, &BfObject::addToGame>      },
-   { "removeFromGame", luaW_doMethod<BfObject, &BfObject::removeFromGame> },
-   { NULL, NULL }
-};
+REGISTER_LUA_CLASS(BfObject);
 
 
-const LuaFunctionProfile BfObject::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
-S32 BfObject::getClassID(lua_State *L)
-{
-   return returnInt(L, mObjectTypeNumber);
-}
-
-
-S32 BfObject::getLoc(lua_State *L)
-{
-   return returnPoint(L, getPos());
-}
+S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
+S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos());          }
+S32 BfObject::getTeamIndx(lua_State *L) { return returnInt  (L, mTeam + 1);         }  // + 1 because Lua indices start at 1
 
 
 S32 BfObject::setLoc(lua_State *L)
 {
+   checkArgList(L, functionArgs, "BfObject", "setLoc");
    setPos(getPointOrXY(L, 1));
    return returnNil(L);
-}
-
-
-S32 BfObject::getTeamIndx(lua_State *L)  
-{
-   return returnInt(L, mTeam + 1);      // + 1 because Lua indices start at 1
 }
 
 
@@ -1280,64 +1266,6 @@ S32 BfObject::removeFromGame(lua_State *L)
    deleteObject();
    return returnNil(L);
 }
-
-
-BfObject *BfObject::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
-{
-   switch(type)
-   {
-      case RobotShipTypeNumber:  // pass through
-      case PlayerShipTypeNumber:
-        return  luaW_check<Ship>(L, index);
-
-      case BulletTypeNumber:
-         return luaW_check<Projectile>(L, index);
-      case MineTypeNumber:   
-         return luaW_check<Mine>(L, index);
-      case SpyBugTypeNumber:
-         return luaW_check<SpyBug>(L, index);
-      case BurstTypeNumber:
-         return luaW_check<BurstProjectile>(L, index);
-
-
-      case ResourceItemTypeNumber:
-         return luaW_check<ResourceItem>(L, index);
-      case TestItemTypeNumber:
-         return luaW_check<TestItem>(L, index);
-      case FlagTypeNumber:
-         return luaW_check<FlagItem>(L, index);
-
-      case TeleporterTypeNumber:
-         //return luaW_check<Teleporter>::check(L, index);
-      case AsteroidTypeNumber:
-         return luaW_check<Asteroid>(L, index);
-      case CircleTypeNumber:
-         return luaW_check<Circle>(L, index);
-
-      case RepairItemTypeNumber:
-         return luaW_check<RepairItem>(L, index);
-      case EnergyItemTypeNumber:
-         return luaW_check<EnergyItem>(L, index);
-      case SoccerBallItemTypeNumber:
-         return luaW_check<SoccerBallItem>(L, index);
-
-      case TurretTypeNumber:
-         //return luaW_check<Turret>::check(L, index);
-      case ForceFieldProjectorTypeNumber:
-         //return luaW_check<ForceFieldProjector>::check(L, index);
-      case CoreTypeNumber:
-         //return luaW_check<CoreItem>::check(L, index);
-      default:
-         char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
-         logprintf(LogConsumer::LogError, msg);
-
-         throw LuaException(msg);
-   }
-}
-
-REGISTER_LUA_CLASS(BfObject);
-
 
 };
 

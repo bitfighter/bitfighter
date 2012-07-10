@@ -795,32 +795,19 @@ bool Teleporter::canBeNeutral() { return false; }
 
 //// Lua methods
 
+//               Fn name     Param profiles       Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
+   METHOD(CLASS, delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
+   METHOD(CLASS, clearDests, ARRAYDEF({{      END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(Teleporter, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
 const char *Teleporter::luaClassName = "Teleporter";
-
-   //                            Fn name     Valid param profiles  Profile count                           
-#  define TELEPORTER_LUA_METHOD_TABLE \
-      TELEPORTER_LUA_METHOD_ITEM(addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
-      TELEPORTER_LUA_METHOD_ITEM(delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
-      TELEPORTER_LUA_METHOD_ITEM(clearDests, ARRAYDEF({{          }}), 0 ) \
-
-
-const luaL_reg Teleporter::luaMethods[] =
-{
-#  define TELEPORTER_LUA_METHOD_ITEM(name, b, c) { #name, luaW_doMethod<Teleporter, &Teleporter::name > },
-      TELEPORTER_LUA_METHOD_TABLE
-#  undef TELEPORTER_LUA_METHOD_ITEM
-   { NULL, NULL }
-};
-
- 
-const LuaFunctionProfile Teleporter::functionArgs[] =
-{
-#  define TELEPORTER_LUA_METHOD_ITEM(name, profiles, profileCount) { #name, profiles, profileCount },
-      TELEPORTER_LUA_METHOD_TABLE
-#  undef TELEPORTER_LUA_METHOD_ITEM
-   { NULL, { }, 0 }
-};
-
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 

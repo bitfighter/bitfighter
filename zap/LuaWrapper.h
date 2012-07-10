@@ -954,34 +954,8 @@ public:
 
    typedef std::pair<ClassName, std::vector<ClassName> > Node;
 
-
-   static std::string lookup(int x)
-   {
-      switch(x) {
-         case 0:
-            return "Boolean"               ;
-         case 1:
-            return "Integer"              ; 
-         case 2:
-            return "One or more integers"  ;
-         case 3:
-            return "Number"                ;
-         case 4:
-            return "String"                ;
-         case 5:
-            return "Point (or two numbers)";
-         case 6:
-            return "Lua table"            ; 
-         case 7:
-            return "Loadout Object"        ;
-         case 8:
-            return "Item Object"         ;
-      }
-            return "LLL";
-   }
-
    // Helper for printDocs()
-   static void output(std::map<ClassName, unsigned int> &nodeMap, const std::vector<Node> &nodeList, std::string prefix, unsigned int nodeIndex)
+   static void output(const std::map<ClassName, unsigned int> &nodeMap, const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
    {
       if(prefix.length() > 8)
          printf(prefix.substr(0, prefix.length() - 8).c_str());
@@ -992,24 +966,26 @@ public:
       printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
       
       // Print method list
-      //TNLAssert(getMethodMap().count(nodeList[nodeIndex].first) == 1, "Missing method list!");
 
       const LuaFunctionProfile *funProfile = getArgMap().find(nodeList[nodeIndex].first)->second;
 
-      for(int i = 0; funProfile[i].functionName != NULL; i++)
-      {
-         for(int j = 0; j < funProfile[i].profileCount; j++)
+      for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
+         for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
          {
-            std::string line = prefix + "  -> " + funProfile[i].functionName + "(";
-         
-            for(int k = 0; funProfile[i].argList[j][k] != 9 /*XXXXX*/; k++)
-               line += lookup(funProfile[i].argList[j][k]);
+            std::string line = prefix + "  --> " + funProfile[i].functionName + "(";
+            
+            for(int k = 0; funProfile[i].argList[j][k] != 9; k++)    // Iterate over args within a given profile, appending each to the output line
+            {
+               if(k != 0)
+                  line += ", ";
+               line += "XXX";    // {P{P
+            }
 
             line += ")";
 
-            printf("%s\n", line.c_str());
+            printf("%s\n", line.c_str());    // Print the line
          }
-      }
+
 
       if(nodeList[nodeIndex].second.size() == 0)
          return;
