@@ -36,8 +36,8 @@
 
 extern "C"
 {
-#include "../lua/lua-vec/src/lua.h"
-#include "../lua/lua-vec/src/lauxlib.h"
+#  include "../lua/lua-vec/src/lua.h"
+#  include "../lua/lua-vec/src/lauxlib.h"
 }
 
 #include <vector>
