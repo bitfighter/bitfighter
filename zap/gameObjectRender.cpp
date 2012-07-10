@@ -59,22 +59,14 @@ const float gShapeLineWidth = 2.0f;
 
 void drawHorizLine(S32 x1, S32 x2, S32 y)
 {
-   F32 vertices[] = {
-         x1, y,
-         x2, y,
-   };
-
+   F32 vertices[] = { x1, y,   x2, y };
    renderVertexArray(vertices, 2, GL_LINES);
 }
 
 
 void drawVertLine(S32 x, S32 y1, S32 y2)
 {
-   F32 vertices[] = {
-         x, y1,
-         x, y2,
-   };
-
+   F32 vertices[] = { x, y1,   x, y2 };
    renderVertexArray(vertices, 2, GL_LINES);
 }
 
@@ -150,32 +142,36 @@ void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
    Point p;
 
    // First the main body of the rect, start in UL, proceed CW
+   F32 width2 = width / 2;
+   F32 height2 = height / 2;
+
    F32 vertices[] = {
-         pos.x - width/2 + rad, pos.y - height/2,
-         pos.x + width/2 - rad, pos.y - height/2,
+         pos.x - width2 + rad, pos.y - height2,
+         pos.x + width2 - rad, pos.y - height2,
 
-         pos.x + width/2, pos.y - height/2 + rad,
-         pos.x + width/2, pos.y + height/2 - rad,
+         pos.x + width2, pos.y - height2 + rad,
+         pos.x + width2, pos.y + height2 - rad,
 
-         pos.x + width/2 - rad, pos.y + height/2,
-         pos.x - width/2 + rad, pos.y + height/2,
+         pos.x + width2 - rad, pos.y + height2,
+         pos.x - width2 + rad, pos.y + height2,
 
-         pos.x - width/2, pos.y + height/2 - rad,
-         pos.x - width/2, pos.y - height/2 + rad
+         pos.x - width2, pos.y + height2 - rad,
+         pos.x - width2, pos.y - height2 + rad
    };
+
    renderVertexArray(vertices, 8, GL_LINES);
 
    // Now add some quarter-rounds in the corners, start in UL, proceed CW
-   p.set(pos.x - width/2 + rad, pos.y - height/2 + rad);
+   p.set(pos.x - width2 + rad, pos.y - height2 + rad);
    drawArc(p, rad, -FloatPi, -FloatHalfPi);
 
-   p.set(pos.x + width/2 - rad, pos.y - height/2 + rad);
+   p.set(pos.x + width2 - rad, pos.y - height2 + rad);
    drawArc(p, rad, -FloatHalfPi, 0);
 
-   p.set(pos.x + width/2 - rad, pos.y + height/2 - rad);
+   p.set(pos.x + width2 - rad, pos.y + height2 - rad);
    drawArc(p, rad, 0, FloatHalfPi);
 
-   p.set(pos.x - width/2 + rad, pos.y + height/2 - rad);
+   p.set(pos.x - width2 + rad, pos.y + height2 - rad);
    drawArc(p, rad, FloatHalfPi, FloatPi);
 }
 
@@ -252,16 +248,17 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 // Draw an n-sided polygon
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
-   F32 vertexArray[2 * sides];
+   Vector<F32> vertexComponents(2 * sides);
    U32 count = 0;
    for(F32 theta = 0; theta < FloatTau; theta += FloatTau / sides)
    {
-      vertexArray[2*count]     = pos.x + cos(theta + angle) * radius;
-      vertexArray[(2*count)+1] = pos.y + sin(theta + angle) * radius;
+      vertexComponents.push_back(pos.x + cos(theta + angle) * radius);
+      vertexComponents.push_back(pos.y + sin(theta + angle) * radius);
       count++;
    }
 
-   renderVertexArray(vertexArray, ARRAYSIZE(vertexArray)/2, GL_LINE_LOOP);
+   TNLAssert(count == sides, "Delete this assert!");     // TODO: delete count unless this assert trips
+   renderVertexArray(vertexComponents.address(), count, GL_LINE_LOOP);
 }
 
 
@@ -709,7 +706,6 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    }
 
 
-
    F32 arcTime = 0.5f + (1 - radiusFraction) * 0.5f;
 
    // Invert arcTime if we want to spiral outwards
@@ -745,20 +741,18 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
 
       F32 arcLength = (end * endRadius - start * startRadius).len();
       U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
-      U32 arrayCount = 2 * (vertexCount+1);
+      U32 arrayCount = 2 * (vertexCount + 1);
 
-      // Set up arrays and fill them with the needed colors and vertices
-      F32 colorArray[4 * arrayCount];
-      F32 vertexArray[2 * arrayCount];
+      // Set up some vectors with the proper amount of preallocated memory
+      Vector<F32> colorArray (4 * arrayCount);     // 4 color components per item
+      Vector<F32> vertexArray(2 * arrayCount);     // 2 coordinate components per item
 
       // Fill starting vertices
       Point p1 = start * (startRadius + beamWidth * 0.3f) + normal * 2;
       Point p2 = start * (startRadius - beamWidth * 0.3f) + normal * 2;
 
-      vertexArray[0] = p1.x;
-      vertexArray[1] = p1.y;
-      vertexArray[2] = p2.x;
-      vertexArray[3] = p2.y;
+      vertexArray.push_back(p1.x);   vertexArray.push_back(p1.y);
+      vertexArray.push_back(p2.x);   vertexArray.push_back(p2.y);
 
       // Fill starting colors
       Color *currentColor = NULL;  // dummy default
@@ -771,14 +765,15 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          currentColor = &c;
       }
 
-      colorArray[0] = currentColor->r;
-      colorArray[1] = currentColor->g;
-      colorArray[2] = currentColor->b;
-      colorArray[3] = alpha * alphaMod;
-      colorArray[4] = currentColor->r;
-      colorArray[5] = currentColor->g;
-      colorArray[6] = currentColor->b;
-      colorArray[7] = alpha * alphaMod;
+      colorArray.push_back(currentColor->r);
+      colorArray.push_back(currentColor->g);
+      colorArray.push_back(currentColor->b);
+      colorArray.push_back(alpha * alphaMod);
+
+      colorArray.push_back(currentColor->r);
+      colorArray.push_back(currentColor->g);
+      colorArray.push_back(currentColor->b);
+      colorArray.push_back(alpha * alphaMod);
 
       for(U32 j = 0; j <= vertexCount; j++)
       {
@@ -792,10 +787,10 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          p1 = p * (rad + width);
          p2 = p * (rad - width);
 
-         vertexArray[4*j]     = p1.x;
-         vertexArray[(4*j)+1] = p1.y;
-         vertexArray[(4*j)+2] = p2.x;
-         vertexArray[(4*j)+3] = p2.y;
+         vertexArray.push_back(p1.x);
+         vertexArray.push_back(p1.y);
+         vertexArray.push_back(p2.x);
+         vertexArray.push_back(p2.y);
 
          // Fill colors
          if(i < trackerCount)
@@ -807,17 +802,18 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
             currentColor = &c;
          }
 
-         colorArray[8*j]     = currentColor->r;
-         colorArray[(8*j)+1] = currentColor->g;
-         colorArray[(8*j)+2] = currentColor->b;
-         colorArray[(8*j)+3] = alpha * alphaMod * (1 - frac);
-         colorArray[(8*j)+4] = currentColor->r;
-         colorArray[(8*j)+5] = currentColor->g;
-         colorArray[(8*j)+6] = currentColor->b;
-         colorArray[(8*j)+7] = alpha * alphaMod * (1 - frac);
+         colorArray.push_back(currentColor->r);
+         colorArray.push_back(currentColor->g);
+         colorArray.push_back(currentColor->b);
+         colorArray.push_back(alpha * alphaMod * (1 - frac));
+
+         colorArray.push_back(currentColor->r);
+         colorArray.push_back(currentColor->g);
+         colorArray.push_back(currentColor->b);
+         colorArray.push_back(alpha * alphaMod * (1 - frac));
       }
 
-      renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GL_TRIANGLE_STRIP);
+      renderColorVertexArray(vertexArray.address(), colorArray.address(), arrayCount, GL_TRIANGLE_STRIP);
    }
 
    glPopMatrix();

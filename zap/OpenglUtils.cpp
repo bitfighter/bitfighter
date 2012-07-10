@@ -67,15 +67,15 @@ void OpenglUtils::drawCharacter(S32 character)
 
    strip = schar->Strips;
 
-   for( i = 0; i < schar->Number; i++, strip++ )
+   for(i = 0; i < schar->Number; i++, strip++)
    {
-      F32 vertexArray[2 * strip->Number];
-      for( j = 0; j < strip->Number; j++ )
+      Vector<F32> vertexComponents(2 * strip->Number);
+      for(j = 0; j < strip->Number; j++)
       {
-         vertexArray[2*j]     = strip->Vertices[ j ].X;
-         vertexArray[(2*j)+1] = strip->Vertices[ j ].Y;
+        vertexComponents.push_back(strip->Vertices[j].X);
+        vertexComponents.push_back(strip->Vertices[j].Y);
       }
-      renderVertexArray(vertexArray, ARRAYSIZE(vertexArray) / 2, GL_LINE_STRIP);
+      renderVertexArray(vertexComponents.address(), strip->Number, GL_LINE_STRIP);
    }
    glTranslatef( schar->Right, 0.0, 0.0 );
 }
@@ -203,16 +203,16 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 // Use slower method here because we need to visit each point to add offset
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
-   F32 vertexArray[2 * points->size()];
+   Vector<F32> vertexComponents(2 * points->size());
    for(S32 i = 0; i < points->size(); i++)
    {
-      vertexArray[2*i]     = points->get(i).x + offset.x;
-      vertexArray[(2*i)+1] = points->get(i).y + offset.y;
+      vertexComponents.push_back(points->get(i).x + offset.x);
+      vertexComponents.push_back(points->get(i).y + offset.y);
    }
 
    glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, GL_FLOAT, 0, vertexArray);
-   glDrawArrays(geomType, 0, points->size());
+      glVertexPointer(2, GL_FLOAT, 0, vertexComponents.address());
+      glDrawArrays(geomType, 0, points->size());
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 

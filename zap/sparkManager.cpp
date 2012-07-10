@@ -464,39 +464,40 @@ void FXTrail::idle(U32 timeDelta)
 
 void FXTrail::render()
 {
-   F32 vertexArray[2 * mNodes.size()];
-   F32 colorArray[4 * mNodes.size()];
+   Vector<F32> vertexComponents(2 * mNodes.size());     // 2 coordinates per node
+   Vector<F32> colorComponents (4 * mNodes.size());     // 4 colors components per node
+
    for(S32 i = 0; i < mNodes.size(); i++)
    {
       F32 t = ((F32)i/(F32)mNodes.size());
 
       if(mNodes[i].invisible)
       {
-         colorArray[4*i]     = 0.f;
-         colorArray[(4*i)+1] = 0.f;
-         colorArray[(4*i)+2] = 0.f;
-         colorArray[(4*i)+3] = 0.f;
+         colorComponents.push_back(0);
+         colorComponents.push_back(0);
+         colorComponents.push_back(0);
+         colorComponents.push_back(0);
       }
       else if(mNodes[i].boosted)
       {
-         colorArray[4*i]     = 1.f - t;
-         colorArray[(4*i)+1] = 1.f - t;
-         colorArray[(4*i)+2] = 0.f;
-         colorArray[(4*i)+3] = 1.f - t;
+         colorComponents.push_back(1.f - t);
+         colorComponents.push_back(1.f - t);
+         colorComponents.push_back(0.f);
+         colorComponents.push_back(1.f - t);
       }
       else
       {
-         colorArray[4*i]     = 1.f - 2 * t;
-         colorArray[(4*i)+1] = 1.f - 2 * t;
-         colorArray[(4*i)+2] = 1.f;
-         colorArray[(4*i)+3] = 0.7f - 0.7f * t;
+         colorComponents.push_back(1.f - 2 * t);
+         colorComponents.push_back(1.f - 2 * t);
+         colorComponents.push_back(1.f);
+         colorComponents.push_back(0.7f - 0.7f * t);
       }
 
-      vertexArray[2*i]     = mNodes[i].pos.x;
-      vertexArray[(2*i)+1] = mNodes[i].pos.y;
+      vertexComponents.push_back(mNodes[i].pos.x);
+      vertexComponents.push_back(mNodes[i].pos.y);
    }
 
-   renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GL_LINE_STRIP);
+   renderColorVertexArray(vertexComponents.address(), colorComponents.address(), mNodes.size(), GL_LINE_STRIP);
 }
 
 

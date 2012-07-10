@@ -559,9 +559,9 @@ void Robot::render(S32 layerIndex)
    {
       glColor(Colors::yellow);      
       glBegin(GL_LINE_STRIP);
-         glVertex(getActualPos());
+         glVertex2f(getActualPos().x, getActualPos().y);
          for(S32 i = flightPlan.size() - 1; i >= 0; i--)
-            glVertex(flightPlan[i]);
+            glVertex2f(flightPlan[i].x, flightPlan[i].y);
          
       glEnd();
    }

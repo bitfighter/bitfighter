@@ -894,12 +894,7 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 
 void UserInterface::drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
 {
-   F32 vertices[] = {
-         x1, y1,
-         x2, y1,
-         x2, y2,
-         x1, y2
-   };
+   F32 vertices[] = { x1, y1,   x2, y1,   x2, y2,   x1, y2 };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
 }
 
@@ -907,12 +902,7 @@ void UserInterface::drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
 // Some functions (renderSpyBugVisibleRange) use this F32 version, this function has better accuracy
 void UserInterface::drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
 {
-   F32 vertices[] = {
-         x1, y1,
-         x2, y1,
-         x2, y2,
-         x1, y2
-   };
+   F32 vertices[] = { x1, y1,   x2, y1,   x2, y2,   x1, y2 };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
 }
 
@@ -927,6 +917,7 @@ void UserInterface::drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2)
 {
    drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
 }
+
 
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
 {

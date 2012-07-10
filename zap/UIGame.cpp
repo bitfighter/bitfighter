@@ -3006,40 +3006,42 @@ void GameUserInterface::VoiceRecorder::render()
       F32 full = amt * totalLineCount;
 
       // Render recording volume
-      F32 colorArray[8 * U32(full)];
-      F32 vertexArray[4 * U32(full)];
+      U32 items =  U32(full) * 2;
+      Vector<F32> colorComponents (items * 2);
+      Vector<F32> vertexComponents(items * 4);
+
       for(U32 i = 1; i < full; i++)  // start at 1 to not show
       {
          if(i < halfway)
          {
-            colorArray[8*(i-1)]     = i / halfway;
-            colorArray[(8*(i-1))+1] = 1;
-            colorArray[(8*(i-1))+2] = 0;
-            colorArray[(8*(i-1))+3] = 1;
-            colorArray[(8*(i-1))+4] = i / halfway;
-            colorArray[(8*(i-1))+5] = 1;
-            colorArray[(8*(i-1))+6] = 0;
-            colorArray[(8*(i-1))+7] = 1;
+            colorComponents.push_back(i / halfway);
+            colorComponents.push_back(1);
+            colorComponents.push_back(0);
+            colorComponents.push_back(1);
+            colorComponents.push_back(i / halfway);
+            colorComponents.push_back(1);
+            colorComponents.push_back(0);
+            colorComponents.push_back(1);
          }
          else
          {
-            colorArray[8*(i-1)]     = 1;
-            colorArray[(8*(i-1))+1] = 1 - (i - halfway) / halfway;
-            colorArray[(8*(i-1))+2] = 0;
-            colorArray[(8*(i-1))+3] = 1;
-            colorArray[(8*(i-1))+4] = 1;
-            colorArray[(8*(i-1))+5] = 1 - (i - halfway) / halfway;
-            colorArray[(8*(i-1))+6] = 0;
-            colorArray[(8*(i-1))+7] = 1;
+            colorComponents.push_back(1);
+            colorComponents.push_back(1 - (i - halfway) / halfway);
+            colorComponents.push_back(0);
+            colorComponents.push_back(1);
+            colorComponents.push_back(1);
+            colorComponents.push_back(1 - (i - halfway) / halfway);
+            colorComponents.push_back(0);
+            colorComponents.push_back(1);
          }
 
-         vertexArray[4*(i-1)]     = 10 + i * 2;
-         vertexArray[(4*(i-1))+1] = 130;
-         vertexArray[(4*(i-1))+2] = 10 + i * 2;
-         vertexArray[(4*(i-1))+3] = 145;
+         vertexComponents.push_back(10 + i * 2);
+         vertexComponents.push_back(130);
+         vertexComponents.push_back(10 + i * 2);
+         vertexComponents.push_back(145);
       }
 
-      renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GL_LINES);
+      renderColorVertexArray(vertexComponents.address(), colorComponents.address(), items, GL_LINES);
    }
 }
 
