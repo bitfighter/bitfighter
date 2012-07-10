@@ -3,7 +3,7 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
-#if defined(ZAP_DEDICATED) || defined(TNL_OS_ANDROID)
+#if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
 
 struct OGLCONSOLE_Console
 {

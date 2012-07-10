@@ -11,7 +11,7 @@
 
 #include "tnlTypes.h"
 
-#ifdef TNL_OS_ANDROID
+#ifdef TNL_OS_MOBILE
 #include "SDL_opengles.h"
 #else
 #include "SDL_opengl.h"

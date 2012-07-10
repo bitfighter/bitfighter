@@ -165,8 +165,6 @@ FileLogConsumer::~FileLogConsumer()
 
 void FileLogConsumer::init(std::string logFile, const char *mode)
 {
-#ifdef TNL_OS_ANDROID
-#endif
    if(f)
       fclose(f);
 

@@ -34,7 +34,7 @@
 #include "tnlLog.h"
 
 #include "SDL.h"
-#ifdef TNL_OS_ANDROID
+#ifdef TNL_OS_MOBILE
 #include "SDL_opengles.h"
 // Needed for GLES compatibility
 #define glOrtho glOrthof
@@ -460,7 +460,7 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
    //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    glEnable(GL_BLEND);
 
-#ifndef TNL_OS_ANDROID
+#ifndef TNL_OS_MOBILE
    // If OGLconsole has been created, recreate font texture and handle resize event
    if (gConsole != NULL)
    {

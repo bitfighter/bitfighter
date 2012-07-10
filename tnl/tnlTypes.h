@@ -257,6 +257,7 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #if defined (__ANDROID__)
 #  define TNL_OS_STRING "Android"
 #  define TNL_OS_ANDROID
+#  define TNL_OS_MOBILE
 #  define TNL_OS_LINUX
 #  define FN_CDECL
 
@@ -286,8 +287,16 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #  define FN_CDECL
 
 #elif defined(__APPLE__)
-#  define TNL_OS_STRING "MacOSX"
-#  define TNL_OS_MAC_OSX
+#include "TargetConditionals.h"
+#  if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+#    define TNL_OS_STRING "iOS"
+#    define TNL_OS_IPHONE
+#    define TNL_OS_MOBILE
+#    define TNL_OS_MAC_OSX
+#  else
+#    define TNL_OS_STRING "MacOSX"
+#    define TNL_OS_MAC_OSX
+#  endif
 #  define FN_CDECL
 
 #else
@@ -336,10 +345,8 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #elif defined(__arm__)
 #  define TNL_CPU_STRING "ARM"
 #  define TNL_CPU_ARM
-#  if defined(__ANDROID__)  // Android ARM is guaranteed to be little endian
-#    define TNL_LITTLE_ENDIAN
-#    define TNL_GCC_4
-#  endif
+#  define TNL_LITTLE_ENDIAN
+#  define TNL_GCC_4
 #else
 #  error "TNL: Unsupported Target CPU"
 #endif
