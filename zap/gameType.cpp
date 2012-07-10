@@ -870,15 +870,16 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
+   F32 vertices[] = {
+         rp.x, rp.y,
+         p2.x, p2.y,
+         p3.x, p3.y
+   };
    // This loops twice: once to render the objective arrow, once to render the outline
    for(S32 i = 0; i < 2; i++)
    {
       glColor(i == 1 ? &fillColor : outlineColor, alpha);
-      glBegin(i == 1 ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex(rp);
-         glVertex(p2);
-         glVertex(p3);
-      glEnd();
+      renderVertexArray(vertices, 3, i == 1 ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
    }
 
 //   Point cen = rp - arrowDir * 12;

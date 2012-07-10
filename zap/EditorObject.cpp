@@ -42,9 +42,13 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED
-#   include "ClientGame.h"       // For ClientGame and getUIManager()
-#   include "UIEditorMenus.h"    // For EditorAttributeMenuUI def
-#   include "SDL_opengl.h"
+#  include "ClientGame.h"       // For ClientGame and getUIManager()
+#  include "UIEditorMenus.h"    // For EditorAttributeMenuUI def
+#  ifdef TNL_OS_MOBILE
+#     include "SDL_opengles.h"
+#  else
+#     include "SDL_opengl.h"
+#  endif
 #endif
 
 using namespace boost;

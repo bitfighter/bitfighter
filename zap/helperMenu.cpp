@@ -101,12 +101,15 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 {
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   glBegin(GL_LINES);
-      glColor(color);
-      glVertex2i(UserInterface::horizMargin, yPos + 20);
-      glColor(color, 0);    // Fade to transparent...
-      glVertex2i(400, yPos + 20);
-   glEnd();
+   F32 vertices[] = {
+         UserInterface::horizMargin, yPos + 20,
+         400, yPos + 20
+   };
+   F32 colors[] = {
+         color.r, color.g, color.b, 1,
+         color.r, color.g, color.b, 0,
+   };
+   renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
 }
 
 

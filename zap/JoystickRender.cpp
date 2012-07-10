@@ -57,56 +57,97 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
 {
    radius = radius * 0.143f;   // = 1/7  Correct for the fact that when radius = 1, graphic has 7 px radius
 
+   // Reusable
+   Point point1;
+   Point point2;
+   Point point3;
+   Point point4;
+   Point point5;
+   Point point6;
+   Point point7;
+
    // Up arrow
    setButtonColor(upActivated);
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(-1, -2) * radius);
-      glVertex(center + Point(-1, -4) * radius);
-      glVertex(center + Point(-3, -4) * radius);
-      glVertex(center + Point(0, -7) * radius);
-      glVertex(center + Point(3, -4) * radius);
-      glVertex(center + Point(1, -4) * radius);
-      glVertex(center + Point(1, -2) * radius);
-   glEnd();
+   point1 = (center + Point(-1, -2) * radius);
+   point2 = (center + Point(-1, -4) * radius);
+   point3 = (center + Point(-3, -4) * radius);
+   point4 = (center + Point(0, -7) * radius);
+   point5 = (center + Point(3, -4) * radius);
+   point6 = (center + Point(1, -4) * radius);
+   point7 = (center + Point(1, -2) * radius);
+   F32 vertices[] = {
+         point1.x, point1.y,
+         point2.x, point2.y,
+         point3.x, point3.y,
+         point4.x, point4.y,
+         point5.x, point5.y,
+         point6.x, point6.y,
+         point7.x, point7.y
+   };
+   renderVertexArray(vertices, 7, GL_LINE_LOOP);
 
    // Down arrow
    setButtonColor(downActivated);
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(-1, 2) * radius);
-      glVertex(center + Point(-1, 4) * radius);
-      glVertex(center + Point(-3, 4) * radius);
-      glVertex(center + Point(0, 7) * radius);
-      glVertex(center + Point(3, 4) * radius);
-      glVertex(center + Point(1, 4) * radius);
-      glVertex(center + Point(1, 2) * radius);
-   glEnd();
+   point1 = (center + Point(-1, 2) * radius);
+   point2 = (center + Point(-1, 4) * radius);
+   point3 = (center + Point(-3, 4) * radius);
+   point4 = (center + Point(0, 7) * radius);
+   point5 = (center + Point(3, 4) * radius);
+   point6 = (center + Point(1, 4) * radius);
+   point7 = (center + Point(1, 2) * radius);
+   F32 vertices2[] = {
+         point1.x, point1.y,
+         point2.x, point2.y,
+         point3.x, point3.y,
+         point4.x, point4.y,
+         point5.x, point5.y,
+         point6.x, point6.y,
+         point7.x, point7.y
+   };
+   renderVertexArray(vertices2, 7, GL_LINE_LOOP);
 
    // Left arrow
    setButtonColor(leftActivated);
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(-2, -1) * radius);
-      glVertex(center + Point(-4, -1) * radius);
-      glVertex(center + Point(-4, -3) * radius);
-      glVertex(center + Point(-7, 0) * radius);
-      glVertex(center + Point(-4, 3) * radius);
-      glVertex(center + Point(-4, 1) * radius);
-      glVertex(center + Point(-2, 1) * radius);
-   glEnd();
+   point1 = (center + Point(-2, -1) * radius);
+   point2 = (center + Point(-4, -1) * radius);
+   point3 = (center + Point(-4, -3) * radius);
+   point4 = (center + Point(-7, 0) * radius);
+   point5 = (center + Point(-4, 3) * radius);
+   point6 = (center + Point(-4, 1) * radius);
+   point7 = (center + Point(-2, 1) * radius);
+   F32 vertices3[] = {
+         point1.x, point1.y,
+         point2.x, point2.y,
+         point3.x, point3.y,
+         point4.x, point4.y,
+         point5.x, point5.y,
+         point6.x, point6.y,
+         point7.x, point7.y
+   };
+   renderVertexArray(vertices3, 7, GL_LINE_LOOP);
 
    // Right arrow
    setButtonColor(rightActivated);
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(2, -1) * radius);
-      glVertex(center + Point(4, -1) * radius);
-      glVertex(center + Point(4, -3) * radius);
-      glVertex(center + Point(7, 0) * radius);
-      glVertex(center + Point(4, 3) * radius);
-      glVertex(center + Point(4, 1) * radius);
-      glVertex(center + Point(2, 1) * radius);
-   glEnd();
+   point1 = (center + Point(2, -1) * radius);
+   point2 = (center + Point(4, -1) * radius);
+   point3 = (center + Point(4, -3) * radius);
+   point4 = (center + Point(7, 0) * radius);
+   point5 = (center + Point(4, 3) * radius);
+   point6 = (center + Point(4, 1) * radius);
+   point7 = (center + Point(2, 1) * radius);
+   F32 vertices4[] = {
+         point1.x, point1.y,
+         point2.x, point2.y,
+         point3.x, point3.y,
+         point4.x, point4.y,
+         point5.x, point5.y,
+         point6.x, point6.y,
+         point7.x, point7.y
+   };
+   renderVertexArray(vertices4, 7, GL_LINE_LOOP);
 
    // Label the graphic
-   glColor3f(1, 1, 1);
+   glColor(1, 1, 1);
    if(strcmp(msg1, ""))    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
       S32 size = 12;
@@ -224,11 +265,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          break;
       case Joystick::ButtonShapeRightTriangle:
          location = location + Point(-rightTriangleWidth/4, 0);  // Need to off-center the label slightly for this button
-         glBegin(GL_LINE_LOOP);
-            glVertex(center + Point(-15, -9));
-            glVertex(center + Point(-15, 10));
-            glVertex(center + Point(12, 0));
-         glEnd();
+         drawButtonRightTriangle(center);
          break;
       case Joystick::ButtonShapeRound:
       default:
@@ -274,12 +311,18 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
 void JoystickRender::drawPlaystationCross(const Point &center)
 {
    glColor(Colors::paleBlue);
-   glBegin(GL_LINES);
-      glVertex(center + Point(-5, -5));
-      glVertex(center + Point(5, 5));
-      glVertex(center + Point(-5, 5));
-      glVertex(center + Point(5, -5));
-   glEnd();
+   Point p1(center + Point(-5, -5));
+   Point p2(center + Point(5, 5));
+   Point p3(center + Point(-5, 5));
+   Point p4(center + Point(5, -5));
+
+   F32 vertices[] = {
+         p1.x, p1.y,
+         p2.x, p2.y,
+         p3.x, p3.y,
+         p4.x, p4.y
+   };
+   renderVertexArray(vertices, 4, GL_LINES);
 }
 
 
@@ -293,43 +336,78 @@ void JoystickRender::drawPlaystationCircle(const Point &center)
 void JoystickRender::drawPlaystationSquare(const Point &center)
 {
    glColor(Colors::palePurple);
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(-5, -5));
-      glVertex(center + Point(-5, 5));
-      glVertex(center + Point(5, 5));
-      glVertex(center + Point(5, -5));
-   glEnd();
+   Point p1(center + Point(-5, -5));
+   Point p2(center + Point(-5, 5));
+   Point p3(center + Point(5, 5));
+   Point p4(center + Point(5, -5));
+
+   F32 vertices[] = {
+         p1.x, p1.y,
+         p2.x, p2.y,
+         p3.x, p3.y,
+         p4.x, p4.y
+   };
+   renderVertexArray(vertices, 4, GL_LINE_LOOP);
 }
 
 
 void JoystickRender::drawPlaystationTriangle(const Point &center)
 {
-   glColor(Colors::paleGreen);
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(0, -7));
-      glVertex(center + Point(6, 5));
-      glVertex(center + Point(-6, 5));
-   glEnd();
+   Point p1(center + Point(0, -7));
+   Point p2(center + Point(6, 5));
+   Point p3(center + Point(-6, 5));
+
+   F32 vertices[] = {
+         p1.x, p1.y,
+         p2.x, p2.y,
+         p3.x, p3.y
+   };
+   renderVertexArray(vertices, 3, GL_LINE_LOOP);
 }
 
 
 void JoystickRender::drawSmallLeftTriangle(const Point & center)
 {
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(4, 0));
-      glVertex(center + Point(-3, 5));
-      glVertex(center + Point(-3, -5));
-   glEnd();
+   Point p1(center + Point(4, 0));
+   Point p2(center + Point(-3, 5));
+   Point p3(center + Point(-3, -5));
+
+   F32 vertices[] = {
+         p1.x, p1.y,
+         p2.x, p2.y,
+         p3.x, p3.y
+   };
+   renderVertexArray(vertices, 3, GL_LINE_LOOP);
 }
 
 
 void JoystickRender::drawSmallRightTriangle(const Point & center)
 {
-   glBegin(GL_LINE_LOOP);
-      glVertex(center + Point(-4, 0));
-      glVertex(center + Point(3, 5));
-      glVertex(center + Point(3, -5));
-   glEnd();
+   Point p1(center + Point(-4, 0));
+   Point p2(center + Point(3, 5));
+   Point p3(center + Point(3, -5));
+
+   F32 vertices[] = {
+         p1.x, p1.y,
+         p2.x, p2.y,
+         p3.x, p3.y
+   };
+   renderVertexArray(vertices, 3, GL_LINE_LOOP);
+}
+
+
+void JoystickRender::drawButtonRightTriangle(const Point & center)
+{
+   Point p1(center + Point(-15, -9));
+   Point p2(center + Point(-15, 10));
+   Point p3(center + Point(12, 0));
+
+   F32 vertices[] = {
+         p1.x, p1.y,
+         p2.x, p2.y,
+         p3.x, p3.y
+   };
+   renderVertexArray(vertices, 3, GL_LINE_LOOP);
 }
 
 ////////// End rendering functions

@@ -48,7 +48,6 @@ using namespace TNL;
 
 #include <math.h>
 
-#include "SDL_opengl.h"
 
 using namespace std;
 namespace Zap
@@ -895,36 +894,38 @@ void UserInterface::drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool d
 
 void UserInterface::drawRect(S32 x1, S32 y1, S32 x2, S32 y2, S32 mode)
 {
-   glBegin(mode);
-      glVertex2i(x1, y1);
-      glVertex2i(x2, y1);
-      glVertex2i(x2, y2);
-      glVertex2i(x1, y2);
-   glEnd();
+   F32 vertices[] = {
+         x1, y1,
+         x2, y1,
+         x2, y2,
+         x1, y2
+   };
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
 }
 
 
 // Some functions (renderSpyBugVisibleRange) use this F32 version, this function has better accuracy
 void UserInterface::drawRect(F32 x1, F32 y1, F32 x2, F32 y2, S32 mode)
 {
-   glBegin(mode);
-      glVertex2f(x1, y1);
-      glVertex2f(x2, y1);
-      glVertex2f(x2, y2);
-      glVertex2f(x1, y2);
-   glEnd();
+   F32 vertices[] = {
+         x1, y1,
+         x2, y1,
+         x2, y2,
+         x1, y2
+   };
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, mode);
 }
 
 
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2)
 {
-   drawRect(x1, y1, x2, y2, GL_QUADS);
+   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
 }
 
 
 void UserInterface::drawFilledRect(F32 x1, F32 y1, F32 x2, F32 y2)
 {
-   drawRect(x1, y1, x2, y2, GL_QUADS);
+   drawRect(x1, y1, x2, y2, GL_TRIANGLE_FAN);
 }
 
 void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &fillColor, const Color &outlineColor)
@@ -938,7 +939,7 @@ void UserInterface::drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2, const Color &
    for(S32 i = 1; i >= 0; i--)
    {
       glColor(i ? fillColor : outlineColor, i ? fillAlpha : 1);
-      drawRect(x1, y1, x2, y2, i ? GL_QUADS : GL_LINE_LOOP);
+      drawRect(x1, y1, x2, y2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
    }
 }
 

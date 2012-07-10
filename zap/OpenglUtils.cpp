@@ -31,11 +31,12 @@
 
 #include "OpenglUtils.h"
 
-#include "SDL_opengl.h"
 #include "freeglut_stroke.h"
 #include "freeglut_stroke_roman.h"
 
 #include "Color.h"
+#include "Point.h"
+#include "tnlVector.h"
 
 namespace Zap {
 
@@ -68,14 +69,13 @@ void OpenglUtils::drawCharacter(S32 character)
 
    for( i = 0; i < schar->Number; i++, strip++ )
    {
-      glBegin( GL_LINE_STRIP );
+      F32 vertexArray[2 * strip->Number];
       for( j = 0; j < strip->Number; j++ )
-         glVertex2f( strip->Vertices[ j ].X, strip->Vertices[ j ].Y );
-      glEnd( );
-      //glBegin( GL_POINTS );  // points only cause problems with smoothing and semi-transparent
-      //for( j = 0; j < strip->Number; j++ )
-      //   glVertex2f( strip->Vertices[ j ].X, strip->Vertices[ j ].Y );
-      //glEnd( );
+      {
+         vertexArray[2*j]     = strip->Vertices[ j ].X;
+         vertexArray[(2*j)+1] = strip->Vertices[ j ].Y;
+      }
+      renderVertexArray(vertexArray, ARRAYSIZE(vertexArray) / 2, GL_LINE_STRIP);
    }
    glTranslatef( schar->Right, 0.0, 0.0 );
 }
@@ -123,6 +123,103 @@ void glColor(const Color &c, float alpha)
 void glColor(const Color *c, float alpha)
 {
     glColor4f(c->r, c->g, c->b, alpha);
+}
+
+void glScale(F32 scaleFactor)
+{
+    glScalef(scaleFactor, scaleFactor, 1);
+}
+
+
+void glTranslate(const Point &pos)
+{
+   glTranslatef(pos.x, pos.y, 0);
+}
+
+
+void setDefaultBlendFunction()
+{
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+
+void renderVertexArray(const S8 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_BYTE, 0, verts);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void renderVertexArray(const S16 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_SHORT, 0, verts);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void renderVertexArray(const F32 verts[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, verts);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void renderColorVertexArray(const F32 vertices[], const F32 colors[], S32 vertCount, S32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_COLOR_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, 0, vertices);
+   glColorPointer(4, GL_FLOAT, 0, colors);
+   glDrawArrays(geomType, 0, vertCount);
+
+   glDisableClientState(GL_COLOR_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void renderPointVector(const Vector<Point> *points, U32 geomType)
+{
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, sizeof(Point), points->address());
+   glDrawArrays(geomType, 0, points->size());
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+// Use slower method here because we need to visit each point to add offset
+void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
+{
+   F32 vertexArray[2 * points->size()];
+   for(S32 i = 0; i < points->size(); i++)
+   {
+      vertexArray[2*i]     = points->get(i).x + offset.x;
+      vertexArray[(2*i)+1] = points->get(i).y + offset.y;
+   }
+
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glVertexPointer(2, GL_FLOAT, 0, vertexArray);
+   glDrawArrays(geomType, 0, points->size());
+   glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void renderLine(const Vector<Point> *points)
+{
+   renderPointVector(points, GL_LINE_STRIP);
 }
 
 }

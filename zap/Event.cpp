@@ -12,13 +12,17 @@
 #include "UIMenus.h"
 #include "UIDiagnostics.h"
 #include "IniFile.h"
-#include "ScreenShooter.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
 
+#ifdef TNL_OS_MOBILE
+#include "SDL_opengles.h"
+#else
+#include "ScreenShooter.h" // No screenshots on Android
 #include "SDL_opengl.h"
+#endif
 
 #include <cmath>
 
@@ -315,11 +319,11 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
 #endif
    }
-
+#ifndef TNL_OS_MOBILE
    // CTRL+Q --> screenshot!
    else if(key == SDLK_q && InputCodeManager::getState(KEY_CTRL))
       ScreenShooter::saveScreenshot(game->getSettings()->getFolderManager()->screenshotDir);
-
+#endif
    // The rest
    else
    {

@@ -275,12 +275,13 @@ void CreditsScroller::render()
          UserInterface::drawCenteredString(S32(credits[i].pos) + CreditSpace * (j), 25, credits[i].creditsLine[j]);
 
    glColor(Colors::black);
-   glBegin(GL_POLYGON);
-      glVertex2i(0, 0);
-      glVertex2i(0, 150);
-      glVertex2i(gScreenInfo.getGameCanvasWidth(), 150);
-      glVertex2i(gScreenInfo.getGameCanvasWidth(), 0);
-   glEnd();
+   F32 vertices[] = {
+         0, 0,
+         0, 150,
+         gScreenInfo.getGameCanvasWidth(), 150,
+         gScreenInfo.getGameCanvasWidth(), 0
+   };
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
    renderStaticBitfighterLogo();    // And add our logo at the top of the page
 }
@@ -340,7 +341,7 @@ void SplashUserInterface::render()
 {
    if(mPhase == 1)            // Main animation phase
    {
-      glColor3f(0, mSplashTimer.getFraction(), 1);
+      glColor(0, mSplashTimer.getFraction(), 1);
 
       if(mType == 1)          // Twirl - unused?   arguments might be wrong..
          renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
@@ -373,7 +374,7 @@ void SplashUserInterface::render()
    }
    else if(mPhase == 3)           // Rising phase
    {
-      glColor3f(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
+      glColor(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
       renderBitfighterLogo((S32)(73.0f + ((F32) gScreenInfo.getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1);
    }
 }

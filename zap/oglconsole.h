@@ -3,16 +3,28 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
-#ifdef ZAP_DEDICATED
+#if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
 
 struct OGLCONSOLE_Console
 {
-	// nothing for dedicated
+	// Do nothing
 };
 
 // define some empty function that will do nothing
 #define OGLCONSOLE_Output
 #define OGLCONSOLE_Print
+#define OGLCONSOLE_HideConsole()
+#define OGLCONSOLE_ShowConsole()
+#define OGLCONSOLE_EnterKey
+#define OGLCONSOLE_setCursor
+#define OGLCONSOLE_Draw()
+#define OGLCONSOLE_Reshape()
+#define OGLCONSOLE_ProcessBitfighterTextInputEvent
+#define OGLCONSOLE_ProcessBitfighterKeyEvent
+#define OGLCONSOLE_GetVisibility() false
+#define OGLCONSOLE_CreateFont()
+#define OGLCONSOLE_Quit()
+#define OGLCONSOLE_Create() OGLCONSOLE_Console()
 
 #else
 

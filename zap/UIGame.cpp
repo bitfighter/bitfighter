@@ -748,12 +748,13 @@ void GameUserInterface::renderProgressBar()
       {
          S32 w = i ? width : barWidth;
 
-         glBegin(i ? GL_LINE_LOOP : GL_POLYGON);
-            glVertex2i(left,     gScreenInfo.getGameCanvasHeight() - vertMargin);
-            glVertex2i(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin);
-            glVertex2i(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin - height);
-            glVertex2i(left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height);
-         glEnd();
+         F32 vertices[] = {
+               left,     gScreenInfo.getGameCanvasHeight() - vertMargin,
+               left + w, gScreenInfo.getGameCanvasHeight() - vertMargin,
+               left + w, gScreenInfo.getGameCanvasHeight() - vertMargin - height,
+               left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height
+         };
+         renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_LINE_LOOP : GL_TRIANGLE_FAN);
       }
    }
 }
@@ -780,43 +781,45 @@ void GameUserInterface::renderReticle()
 #endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
-      glColor(Colors::green, 0.7f);
-      glBegin(GL_LINES);
-         glVertex2f(offsetMouse.x - 15, offsetMouse.y);
-         glVertex2f(offsetMouse.x + 15, offsetMouse.y);
-         glVertex2f(offsetMouse.x, offsetMouse.y - 15);
-         glVertex2f(offsetMouse.x, offsetMouse.y + 15);
+      F32 vertices[] = {
+            // Center cross-hairs
+            offsetMouse.x - 15, offsetMouse.y,
+            offsetMouse.x + 15, offsetMouse.y,
+            offsetMouse.x, offsetMouse.y - 15,
+            offsetMouse.x, offsetMouse.y + 15,
 
-         if(offsetMouse.x > 30)
-         {
-            glColor(Colors::green, 0);
-            glVertex2f(0, offsetMouse.y);
-            glColor(Colors::green, 0.7f);
-            glVertex2f(offsetMouse.x - 30, offsetMouse.y);
-         }
-         if(offsetMouse.x < gScreenInfo.getGameCanvasWidth() - 30)
-         {
-            glColor(Colors::green, 0.7f);
-            glVertex2f(offsetMouse.x + 30, offsetMouse.y);
-            glColor(Colors::green, 0);
-            glVertex2f((F32)gScreenInfo.getGameCanvasWidth(), offsetMouse.y);
-         }
-         if(offsetMouse.y > 30)
-         {
-            glColor(Colors::green, 0);
-            glVertex2f(offsetMouse.x, 0);
-            glColor(Colors::green, 0.7f);
-            glVertex2f(offsetMouse.x, offsetMouse.y - 30);
-         }
-         if(offsetMouse.y < gScreenInfo.getGameCanvasHeight() - 30)
-         {
-            glColor(Colors::green, 0.7f);
-            glVertex2f(offsetMouse.x, offsetMouse.y + 30);
-            glColor(Colors::green, 0);
-            glVertex2f(offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight());
-         }
+            // Large axes lines
+            0, offsetMouse.y,
+            offsetMouse.x - 30, offsetMouse.y,
 
-      glEnd();
+            offsetMouse.x + 30, offsetMouse.y,
+            (F32)gScreenInfo.getGameCanvasWidth(), offsetMouse.y,
+
+            offsetMouse.x, 0,
+            offsetMouse.x, offsetMouse.y - 30,
+
+            offsetMouse.x, offsetMouse.y + 30,
+            offsetMouse.x, (F32)gScreenInfo.getGameCanvasHeight(),
+      };
+      F32 colors[] = {
+            0, 1, 0, 0.7,  //Colors::green
+            0, 1, 0, 0.7,
+            0, 1, 0, 0.7,
+            0, 1, 0, 0.7,
+
+            0, 1, 0, 0,
+            0, 1, 0, 0.7,
+
+            0, 1, 0, 0.7,
+            0, 1, 0, 0,
+
+            0, 1, 0, 0,
+            0, 1, 0, 0.7,
+
+            0, 1, 0, 0.7,
+            0, 1, 0, 0,
+      };
+      renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
    }
 
    if(mWrongModeMsgDisplay.getCurrent())
@@ -2460,16 +2463,16 @@ void GameUserInterface::renderCurrentChat()
    // Render text entry box like thingy
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
+   F32 vertices[] = {
+         horizMargin, ypos - 3,
+         horizMargin + boxWidth, ypos - 3,
+         horizMargin + boxWidth, ypos + CHAT_FONT_SIZE + 7,
+         horizMargin, ypos + CHAT_FONT_SIZE + 7
+   };
    for(S32 i = 1; i >= 0; i--)
    {
       glColor(baseColor, i ? .25f : .4f);
-
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i(horizMargin, ypos - 3);
-         glVertex2i(horizMargin + boxWidth, ypos - 3);
-         glVertex2i(horizMargin + boxWidth, ypos + CHAT_FONT_SIZE + 7);
-         glVertex2i(horizMargin, ypos + CHAT_FONT_SIZE + 7);
-      glEnd();
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
    }
 
    glColor(baseColor);
@@ -2989,26 +2992,54 @@ void GameUserInterface::VoiceRecorder::render()
       F32 amt = mMaxAudioSample / F32(0x7FFF);
       U32 totalLineCount = 50;
 
-      glColor3f(1, 1 ,1);
-      glBegin(GL_LINES);
-      glVertex2i(10, 130);
-      glVertex2i(10, 145);
-      glVertex2i(10 + totalLineCount * 2, 130);
-      glVertex2i(10 + totalLineCount * 2, 145);
+      // Render low/high volume lines
+      glColor(1, 1 ,1);
+      F32 vertices[] = {
+            10, 130,
+            10, 145,
+            10 + totalLineCount * 2, 130,
+            10 + totalLineCount * 2, 145
+      };
+      renderVertexArray(vertices, ARRAYSIZE(vertices)/2, GL_LINES);
 
       F32 halfway = totalLineCount * 0.5f;
       F32 full = amt * totalLineCount;
-      for(U32 i = 1; i < full; i++)
+
+      // Render recording volume
+      F32 colorArray[8 * U32(full)];
+      F32 vertexArray[4 * U32(full)];
+      for(U32 i = 1; i < full; i++)  // start at 1 to not show
       {
          if(i < halfway)
-            glColor3f(i / halfway, 1, 0);
+         {
+            colorArray[8*(i-1)]     = i / halfway;
+            colorArray[(8*(i-1))+1] = 1;
+            colorArray[(8*(i-1))+2] = 0;
+            colorArray[(8*(i-1))+3] = 1;
+            colorArray[(8*(i-1))+4] = i / halfway;
+            colorArray[(8*(i-1))+5] = 1;
+            colorArray[(8*(i-1))+6] = 0;
+            colorArray[(8*(i-1))+7] = 1;
+         }
          else
-            glColor3f(1, 1 - (i - halfway) / halfway, 0);
+         {
+            colorArray[8*(i-1)]     = 1;
+            colorArray[(8*(i-1))+1] = 1 - (i - halfway) / halfway;
+            colorArray[(8*(i-1))+2] = 0;
+            colorArray[(8*(i-1))+3] = 1;
+            colorArray[(8*(i-1))+4] = 1;
+            colorArray[(8*(i-1))+5] = 1 - (i - halfway) / halfway;
+            colorArray[(8*(i-1))+6] = 0;
+            colorArray[(8*(i-1))+7] = 1;
+         }
 
-         glVertex2i(10 + i * 2, 130);
-         glVertex2i(10 + i * 2, 145);
+         vertexArray[4*(i-1)]     = 10 + i * 2;
+         vertexArray[(4*(i-1))+1] = 130;
+         vertexArray[(4*(i-1))+2] = 10 + i * 2;
+         vertexArray[(4*(i-1))+3] = 145;
       }
-      glEnd();
+
+      renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GL_LINES);
    }
 }
 
@@ -3229,7 +3260,7 @@ void GameUserInterface::renderScoreboard()
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       glColor(teamColor, 0.6f);
-      drawRect(xl, yt, xr, yb, GL_POLYGON);
+      drawRect(xl, yt, xr, yb, GL_TRIANGLE_FAN);
 
       //// Render team scores
       glColor(Colors::white);

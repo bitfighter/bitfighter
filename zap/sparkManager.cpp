@@ -128,10 +128,7 @@ void FXManager::DebrisChunk::render()
 
    glColor(color, alpha);
 
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < points.size(); i++)
-         glVertex(points[i]);
-   glEnd();
+   renderPointVector(&points, GL_LINE_LOOP);
 
    glPopMatrix();
 }
@@ -467,23 +464,39 @@ void FXTrail::idle(U32 timeDelta)
 
 void FXTrail::render()
 {
-   glBegin(GL_LINE_STRIP);
-
+   F32 vertexArray[2 * mNodes.size()];
+   F32 colorArray[4 * mNodes.size()];
    for(S32 i = 0; i < mNodes.size(); i++)
    {
       F32 t = ((F32)i/(F32)mNodes.size());
 
       if(mNodes[i].invisible)
-         glColor4f(0.f,0.f,0.f,0.f);
+      {
+         colorArray[4*i]     = 0.f;
+         colorArray[(4*i)+1] = 0.f;
+         colorArray[(4*i)+2] = 0.f;
+         colorArray[(4*i)+3] = 0.f;
+      }
       else if(mNodes[i].boosted)
-         glColor4f(1.f - t, 1.f - t, 0.f, 1.f-t);
+      {
+         colorArray[4*i]     = 1.f - t;
+         colorArray[(4*i)+1] = 1.f - t;
+         colorArray[(4*i)+2] = 0.f;
+         colorArray[(4*i)+3] = 1.f - t;
+      }
       else
-         glColor4f(1.f - 2 * t, 1.f - 2 * t, 1.f, 0.7f - 0.7f * t);
+      {
+         colorArray[4*i]     = 1.f - 2 * t;
+         colorArray[(4*i)+1] = 1.f - 2 * t;
+         colorArray[(4*i)+2] = 1.f;
+         colorArray[(4*i)+3] = 0.7f - 0.7f * t;
+      }
 
-      glVertex2f(mNodes[i].pos.x, mNodes[i].pos.y);
+      vertexArray[2*i]     = mNodes[i].pos.x;
+      vertexArray[(2*i)+1] = mNodes[i].pos.y;
    }
 
-   glEnd();
+   renderColorVertexArray(vertexArray, colorArray, ARRAYSIZE(vertexArray)/2, GL_LINE_STRIP);
 }
 
 

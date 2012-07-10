@@ -659,17 +659,23 @@ void InstructionsUserInterface::renderModulesPage()
       switch(i)
       {
          case 0:     // Boost
+
             renderShip(ShipShape::Normal, &Colors::blue, 1, thrustsBoost, 1, (F32)Ship::CollisionRadius, 0, false, false, false, false, false);
-            glBegin(GL_LINES);
-               glColor(Colors::yellow);
-               glVertex2f(-20, -17);
-               glColor(Colors::black);
-               glVertex2f(-20, -50);
-               glColor(Colors::yellow);
-               glVertex2f(20, -17);
-               glColor(Colors::black);
-               glVertex2f(20, -50);
-            glEnd();
+            {
+               F32 vertices[] = {
+                     -20, -17,
+                     -20, -50,
+                     20, -17,
+                     20, -50
+               };
+               F32 colors[] = {
+                     1, 1, 0, 1,  // Colors::yellow
+                     0, 0, 0, 1,  // Colors::black
+                     1, 1, 0, 1,  // Colors::yellow
+                     0, 0, 0, 1,  // Colors::black
+               };
+               renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_LINES);
+            }
             break;
 
          case 1:     // Shield
@@ -971,12 +977,14 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    drawString(cmdCol, ypos, headerSize, "Command");
    drawString(descrCol, ypos, headerSize, "Description");
 
-   //glColor3f(0,1,0);
+   //glColor(0,1,0);
    ypos += cmdSize + cmdGap;
-   glBegin(GL_LINES);
-      glVertex2i(cmdCol, ypos);
-      glVertex2i(750, ypos);
-   glEnd();
+
+   F32 vertices[] = {
+         cmdCol, ypos,
+         750, ypos
+   };
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
    ypos += 5;     // Small gap before cmds start
 
