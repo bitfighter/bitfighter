@@ -1086,7 +1086,8 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 }
 
 
-///// Lua interface
+/////
+// Lua interface
 
 //               Fn name    Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -1333,7 +1334,8 @@ void ForceFieldProjector::onGeomChanged()
 }
 
 
-///// Lua interface
+/////
+// Lua interface
 
 // No custom ForceFieldProjector methods
 const luaL_reg           ForceFieldProjector::luaMethods[]   = { { NULL, NULL } };
@@ -1883,7 +1885,8 @@ void Turret::onGeomChanged()
 }
 
 
-///// Lua interface
+/////
+// Lua interface
 
 //               Fn name     Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \

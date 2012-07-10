@@ -1082,13 +1082,12 @@ void NexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 /////
 // Lua interface
-const char *NexusObject::luaClassName = "NexusObject";
 
-const luaL_reg NexusObject::luaMethods[] = { { NULL, NULL } };
-
+const luaL_reg           NexusObject::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile NexusObject::functionArgs[] = { { NULL, { }, 0 } };
 
 
+const char *NexusObject::luaClassName = "NexusObject";
 REGISTER_LUA_SUBCLASS(NexusObject, Zone);
 
 };

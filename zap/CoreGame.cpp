@@ -1002,25 +1002,24 @@ bool CoreItem::canBeHostile() { return false; }
 bool CoreItem::canBeNeutral() { return false; }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(CoreItem, Item);
+/////
+// Lua interface
+
+//               Fn name    Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getHealth, ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(CoreItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(CoreItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *CoreItem::luaClassName = "CoreItem";
-
-const luaL_reg CoreItem::luaMethods[] =
-{
-   { "getHealth", luaW_doMethod<CoreItem, &CoreItem::getHealth> },
-   { NULL, NULL }
-};
+REGISTER_LUA_SUBCLASS(CoreItem, Item);
 
 
-const LuaFunctionProfile CoreItem::functionArgs[] = { { NULL, { }, 0 } };
+S32 CoreItem::getHealth(lua_State *L) { return returnFloat(L, getTotalHealth()); }
 
 
-S32 CoreItem::getHealth(lua_State *L)
-{
-   return returnFloat(L, getTotalHealth());
-}
-
-
-} /* namespace Zap */
+}; /* namespace Zap */

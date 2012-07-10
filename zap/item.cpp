@@ -192,58 +192,33 @@ Rect Item::calcExtents()
 }
 
 
-REGISTER_LUA_SUBCLASS(Item, BfObject);
+/////
+// Lua interface
+
+// Standard methods available to all Items:
+//               Fn name           Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getRad,           ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isOnShip,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getShip,          ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isInCaptureZone,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getCaptureZone,   ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(Item, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Item, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *Item::luaClassName = "Item";
-
-// Standard methods available to all Items
-const luaL_reg Item::luaMethods[] =
-{
-   { "getRad",          luaW_doMethod<Item, &Item::getRad>          },
-   { "isOnShip",        luaW_doMethod<Item, &Item::isOnShip>        },
-   { "getShip",         luaW_doMethod<Item, &Item::getShip>         },
-   { "isInCaptureZone", luaW_doMethod<Item, &Item::isInCaptureZone> },
-   { "getCaptureZone",  luaW_doMethod<Item, &Item::getCaptureZone>  },
-
-   { NULL, NULL }
-};
+REGISTER_LUA_SUBCLASS(Item, BfObject);
 
 
-const LuaFunctionProfile Item::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
-S32 Item::getRad(lua_State *L)
-{
-   return LuaObject::returnFloat(L, getRadius());
-}
-
-
-S32 Item::isOnShip(lua_State *L)
-{
-   return returnBool(L, false);
-}
-
-
-S32 Item::getCaptureZone(lua_State *L)
-{
-   return returnNil(L);
-}
-
-
-S32 Item::getShip(lua_State *L)
-{
-   return returnNil(L);
-}
-
-
-S32 Item::isInCaptureZone(lua_State *L)
-{
-   return returnBool(L, false);
-}
+S32 Item::getRad         (lua_State *L) { return returnFloat(L, getRadius()); }
+S32 Item::isOnShip       (lua_State *L) { return returnBool(L, false);        }
+S32 Item::getCaptureZone (lua_State *L) { return returnNil(L);                }
+S32 Item::getShip        (lua_State *L) { return returnNil(L);                }
+S32 Item::isInCaptureZone(lua_State *L) { return returnBool(L, false);        }
 
 
 };

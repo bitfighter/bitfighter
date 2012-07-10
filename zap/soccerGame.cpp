@@ -567,16 +567,16 @@ void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream
 }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(SoccerBallItem, MoveItem);
-
-const char *SoccerBallItem::luaClassName = "SoccerBallItem";
-
+/////
+// Lua interface
 
 // No soccerball specific methods!
-const luaL_reg SoccerBallItem::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           SoccerBallItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile SoccerBallItem::functionArgs[] = { { NULL, { }, 0 } };
 
+
+const char *SoccerBallItem::luaClassName = "SoccerBallItem";
+REGISTER_LUA_SUBCLASS(SoccerBallItem, MoveItem);
 
 
 };

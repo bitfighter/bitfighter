@@ -2349,32 +2349,33 @@ bool Ship::isRobot()
 }
 
 
+//// Lua methods
+
+//               Fn name           Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, isAlive,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getPlayerInfo,   ARRAYDEF({{ END }}), 1 ) \
+                                                           \
+   METHOD(CLASS, isModActive,     ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getEnergy,       ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getHealth,       ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, hasFlag,         ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getFlagCount,    ARRAYDEF({{ END }}), 1 ) \
+                                                           \
+   METHOD(CLASS, getAngle,        ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getActiveWeapon, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getMountedItems, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getCurrLoadout,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getReqLoadout,   ARRAYDEF({{ END }}), 1 ) \
+
+
+GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Ship, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
 const char *Ship::luaClassName = "Ship";
-
-const luaL_reg Ship::luaMethods[] =
-{
-   { "isAlive",         luaW_doMethod<Ship, &Ship::isAlive>         },
-   { "getPlayerInfo",   luaW_doMethod<Ship, &Ship::getPlayerInfo>   },
-
-   { "isModActive",     luaW_doMethod<Ship, &Ship::isModActive>     },
-   { "getEnergy",       luaW_doMethod<Ship, &Ship::getEnergy>       },
-   { "getHealth",       luaW_doMethod<Ship, &Ship::getHealth>       },
-   { "hasFlag",         luaW_doMethod<Ship, &Ship::hasFlag>         },
-   { "getFlagCount",    luaW_doMethod<Ship, &Ship::getFlagCount>    },
-
-   { "getAngle",        luaW_doMethod<Ship, &Ship::getAngle>        },
-   { "getActiveWeapon", luaW_doMethod<Ship, &Ship::getActiveWeapon> },
-   { "getMountedItems", luaW_doMethod<Ship, &Ship::getMountedItems> },
-   { "getCurrLoadout",  luaW_doMethod<Ship, &Ship::getCurrLoadout>  },
-   { "getReqLoadout",   luaW_doMethod<Ship, &Ship::getReqLoadout>   },
-
-   { NULL, NULL }    // End method list
-};
-
-
-const LuaFunctionProfile Ship::functionArgs[] = { { NULL, { }, 0 } };
-
-
 REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
 // Note: All of these methods will return nil if the ship in question has been deleted.

@@ -170,17 +170,10 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 /////
 // Lua interface
+const luaL_reg LoadoutZone::luaMethods[]             = { { NULL, NULL } };
+const LuaFunctionProfile LoadoutZone::functionArgs[] = { { NULL, { }, 0 } };
+
 const char *LoadoutZone::luaClassName = "LoadoutZone";
-
-const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
-
-
-const LuaFunctionProfile LoadoutZone::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
 REGISTER_LUA_SUBCLASS(LoadoutZone, Zone);
 
 };

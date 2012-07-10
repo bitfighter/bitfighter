@@ -253,25 +253,24 @@ string PickupItem::getAttributeString()
 #endif
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(PickupItem, Item);
+/////
+// Lua interface
+
+//               Fn name  Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, isVis,  ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(PickupItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(PickupItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *PickupItem::luaClassName = "PickupItem";
+REGISTER_LUA_SUBCLASS(PickupItem, Item);
 
 
-const luaL_reg PickupItem::luaMethods[] =
-{
-   { "isVis", luaW_doMethod<PickupItem, &PickupItem::isVis> },
-   { NULL, NULL }
-};
-
-const LuaFunctionProfile PickupItem::functionArgs[] = { { NULL, { }, 0 } };
-
-
-S32 PickupItem::isVis(lua_State *L)
-{
-   return returnBool(L, isVisible());
-}
+S32 PickupItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }
 
 
 ////////////////////////////////////////
@@ -357,15 +356,16 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
 }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
-
-const char *RepairItem::luaClassName = "RepairItem";
+/////
+// Lua interface
 
 // Only implements inherited methods
-const luaL_reg RepairItem::luaMethods[] = { { NULL, NULL } };
-
+const luaL_reg           RepairItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile RepairItem::functionArgs[] = { { NULL, { }, 0 } };
+
+
+const char *RepairItem::luaClassName = "RepairItem";
+REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 
 
 ////////////////////////////////////////
@@ -432,14 +432,16 @@ const char *EnergyItem::getPrettyNamePlural() { return "Energy Items"; }
 const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships"; }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(EnergyItem, PickupItem);
-
-const char *EnergyItem::luaClassName = "EnergyItem";
+/////
+// Lua interface
 
 // Only implements inherited methods
-const luaL_reg EnergyItem::luaMethods[] = { { NULL, NULL } };
-
+const luaL_reg           EnergyItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile EnergyItem::functionArgs[] = { { NULL, { }, 0 } };
+
+
+const char *EnergyItem::luaClassName = "EnergyItem";
+REGISTER_LUA_SUBCLASS(EnergyItem, PickupItem);
+
 
 };

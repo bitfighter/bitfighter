@@ -440,40 +440,25 @@ void Projectile::renderItem(const Point &pos)
 
 //// Lua methods
 
+//               Fn name    Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getRad,    ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getVel,    ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(Projectile, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Projectile, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
 const char *Projectile::luaClassName = "Projectile";
-
-const luaL_reg Projectile::luaMethods[] =
-{
-   { "getRad",    luaW_doMethod<Projectile, &Projectile::getRad>    },
-   { "getWeapon", luaW_doMethod<Projectile, &Projectile::getWeapon> },
-   { "getVel",    luaW_doMethod<Projectile, &Projectile::getVel>    },
-
-   { NULL, NULL }
-};
-
-const LuaFunctionProfile Projectile::functionArgs[] = { { NULL, { }, 0 } };
-
-
 REGISTER_LUA_SUBCLASS(Projectile, BfObject);
 
 
-S32 Projectile::getRad(lua_State *L)
-{
-   // TODO: Wrong!!  Radius of item (returns number)
-   return returnInt(L, 10);
-}
-
-
-S32 Projectile::getVel(lua_State *L)
-{
-   return LuaObject::returnPoint(L, getActualVel());
-}
-
-
-S32 Projectile::getWeapon(lua_State *L)
-{
-   return returnInt(L, mWeaponType);
-}
+S32 Projectile::getRad(lua_State *L)    { return returnInt(L, 10);               } // TODO: Wrong!!  Radius of item (returns number)
+S32 Projectile::getVel(lua_State *L)    { return returnPoint(L, getActualVel()); }
+S32 Projectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType);      }
 
 
 ////////////////////////////////////////
@@ -666,28 +651,24 @@ void BurstProjectile::renderItem(const Point &pos)
 }
 
 
-///// Lua interface
+/////
+// Lua interface
+
+//               Fn name    Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(BurstProjectile, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(BurstProjectile, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *BurstProjectile::luaClassName = "Burst";
-
-const luaL_reg BurstProjectile::luaMethods[] =
-{
-   { "getWeapon", luaW_doMethod<BurstProjectile, &BurstProjectile::getWeapon> },
-   { NULL, NULL }
-};
-
-
-const LuaFunctionProfile BurstProjectile::functionArgs[] = { { NULL, { }, 0 } };
-
-
 REGISTER_LUA_SUBCLASS(BurstProjectile, MoveItem);
 
 
-S32 BurstProjectile::getWeapon(lua_State *L)
-{
-   return returnInt(L, mWeaponType);
-}
-
+S32 BurstProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 
 ////////////////////////////////////////
@@ -942,14 +923,14 @@ bool Mine::canBeHostile() { return false; }
 bool Mine::canBeNeutral() { return false; }
 
 
-//// Lua methods
+/////
+// Lua interface
 
-const char *Mine::luaClassName = "MineItem";
-
-const luaL_reg Mine::luaMethods[] = { { NULL, NULL } };
-
+const luaL_reg           Mine::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile Mine::functionArgs[] = { { NULL, { }, 0 } };
 
+
+const char *Mine::luaClassName = "MineItem";
 REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
 
 
@@ -1171,14 +1152,14 @@ bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool
 }
 
 
-//// Lua methods
+/////
+// Lua interface
 
-const char *SpyBug::luaClassName = "SpyBugItem";
-
-const luaL_reg SpyBug::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           SpyBug::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile SpyBug::functionArgs[] = { { NULL, { }, 0 } };
 
 
+const char *SpyBug::luaClassName = "SpyBugItem";
 REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
 
 

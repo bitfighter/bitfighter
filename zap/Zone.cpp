@@ -146,11 +146,11 @@ bool Zone::collide(BfObject *hitObject)
 
 /////
 // Lua interface
-const char *Zone::luaClassName = "Zone";
 
-const luaL_reg Zone::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           Zone::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile Zone::functionArgs[] = { { NULL, { }, 0 } };
 
+const char *Zone::luaClassName = "Zone";
 REGISTER_LUA_SUBCLASS(Zone, BfObject);
 
 };

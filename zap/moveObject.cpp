@@ -756,36 +756,31 @@ void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
 }
 
 
-///// LuaItem interface
-REGISTER_LUA_SUBCLASS(MoveObject, Item);
+/////
+// Lua interface
+
+//               Fn name Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getVel, ARRAYDEF({{     END }}), 1 ) \
+   METHOD(CLASS, setVel, ARRAYDEF({{ PT, END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(MoveObject, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(MoveObject, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *MoveObject::luaClassName = "MoveObject";
-
-// Standard methods available to all MoveItems
-const luaL_reg MoveObject::luaMethods[] =
-{
-   { "getVel",        luaW_doMethod<MoveObject, &MoveObject::getVel> },
-   { "setVel",        luaW_doMethod<MoveObject, &MoveObject::setVel> },
-
-   { NULL, NULL }
-};
+REGISTER_LUA_SUBCLASS(MoveObject, Item);
 
 
-const LuaFunctionProfile MoveObject::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-S32 MoveObject::getVel(lua_State *L)
-{
-   return LuaObject::returnPoint(L, getActualVel());
-}
-
+S32 MoveObject::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
 
 S32 MoveObject::setVel(lua_State *L)
 {
+   checkArgList(L, functionArgs, "MoveObject", "setVel");
    setActualVel(getPointOrXY(L, 1));
+
    return returnNil(L);
 }
 
@@ -1147,21 +1142,16 @@ S32 MoveItem::getShip(lua_State *L)
 }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(MoveItem, MoveObject);
-
-const char *MoveItem::luaClassName = "MoveItem";
-
+/////
+// Lua interface
 
 // Standard methods available to all MoveItems
-const luaL_reg MoveItem::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           MoveItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile MoveItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
-const LuaFunctionProfile MoveItem::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
+const char *MoveItem::luaClassName = "MoveItem";
+REGISTER_LUA_SUBCLASS(MoveItem, MoveObject);
 
 
 ////////////////////////////////////////
@@ -1486,41 +1476,26 @@ string Asteroid::getAttributeString()
 #endif
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(Asteroid, MoveItem);
+/////
+// Lua interface
+
+//               Fn name       Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getSize,      ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getSizeCount, ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(Asteroid, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Asteroid, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *Asteroid::luaClassName = "Asteroid";
+REGISTER_LUA_SUBCLASS(Asteroid, MoveItem);
 
 
-const luaL_reg Asteroid::luaMethods[] =
-{
-   // Class specific methods
-   { "getSize",       luaW_doMethod<Asteroid, &Asteroid::getSize> },
-   { "getSizeCount",  luaW_doMethod<Asteroid, &Asteroid::getSizeCount> },    // <=== could be static
-
-   {0,0}    // End method list
-};
-
-
-const LuaFunctionProfile Asteroid::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
-S32 Asteroid::getSize(lua_State *L)
-{
-   return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft);
-}
-
-
-S32 Asteroid::getSizeCount(lua_State *L)
-{
-   return returnInt(L, ASTEROID_INITIAL_SIZELEFT);
-}
-
-
+S32 Asteroid::getSize(lua_State *L)      { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }
+S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT);             }
 
 
 ////////////////////////////////////////
@@ -1705,19 +1680,15 @@ U32 Circle::getDesignCount()
 }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(Circle, MoveItem);
+/////
+// Lua interface
+
+const luaL_reg           Circle::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile Circle::functionArgs[] = { { NULL, { }, 0 } };
+
 
 const char *Circle::luaClassName = "Circle";
-
-
-const luaL_reg Circle::luaMethods[] = { { NULL, NULL } };
-
-
-const LuaFunctionProfile Circle::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
+REGISTER_LUA_SUBCLASS(Circle, MoveItem);
 
 
 ////////////////////////////////////////
@@ -2043,21 +2014,16 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
    return false;
 }
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(TestItem, MoveItem);
-
-const char *TestItem::luaClassName = "TestItem";
-
+/////
+// Lua interface
 
 // Inherits all MoveItem methods, has no custom methods
-const luaL_reg TestItem::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile TestItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
-const LuaFunctionProfile TestItem::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
+const char *TestItem::luaClassName = "TestItem";
+REGISTER_LUA_SUBCLASS(TestItem, MoveItem);
 
 
 ////////////////////////////////////////
@@ -2152,19 +2118,16 @@ void ResourceItem::onItemDropped()
 }
 
 
-///// Lua interface
-REGISTER_LUA_SUBCLASS(ResourceItem, MoveItem);
-
-const char *ResourceItem::luaClassName = "ResourceItem";
+/////
+// Lua interface
 
 // Inherits all MoveItem methods, and has a few of its own
-const luaL_reg ResourceItem::luaMethods[] = { { NULL, NULL } };
+const luaL_reg           ResourceItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile ResourceItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
-const LuaFunctionProfile ResourceItem::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
+const char *ResourceItem::luaClassName = "ResourceItem";
+REGISTER_LUA_SUBCLASS(ResourceItem, MoveItem);
 
 
 };

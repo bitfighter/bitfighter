@@ -260,29 +260,22 @@ void GoalZone::idle(BfObject::IdleCallPath path)
 
 /////
 // Lua interface
+
+//               Fn name       Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, hasFlag,  ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(GoalZone, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(GoalZone, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
 const char *GoalZone::luaClassName = "GoalZone";
-
-const luaL_reg GoalZone::luaMethods[] = 
-{ 
-   { "hasFlag", luaW_doMethod<GoalZone, &GoalZone::hasFlag> },
-   { NULL, NULL } 
-};
-
-
-const LuaFunctionProfile GoalZone::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
-
-
 REGISTER_LUA_SUBCLASS(GoalZone, Zone);
 
 
-S32 GoalZone::hasFlag(lua_State *L)
-{
-   return returnBool(L, mHasFlag);
-}
+S32 GoalZone::hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
 
 };
 

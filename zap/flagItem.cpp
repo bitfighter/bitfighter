@@ -413,7 +413,8 @@ void FlagItem::onMountDestroyed()
 }
 
 
-///// Lua interface
+/////
+// Lua interface
 
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \

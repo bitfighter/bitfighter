@@ -1220,7 +1220,8 @@ void BfObject::writeThisTeam(BitStream *stream)
 }
 
 
-///// Lua interface
+/////
+// Lua interface
 
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
