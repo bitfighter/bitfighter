@@ -972,7 +972,7 @@ public:
       for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
          for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
          {
-            std::string line = prefix + "  --> " + funProfile[i].functionName + "(";
+            std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
             
             for(int k = 0; funProfile[i].argList[j][k] != 9; k++)    // Iterate over args within a given profile, appending each to the output line
             {
