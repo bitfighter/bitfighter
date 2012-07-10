@@ -53,11 +53,11 @@ extern "C"
      lua_setfield(L, LUA_REGISTRYINDEX, s)
 
 #define LUAW_POSTCTOR_KEY "__postctor"
-#define LUAW_EXTENDS_KEY "__extends"
-#define LUAW_STORAGE_KEY "__storage"
-#define LUAW_COUNT_KEY "__counts"
-#define LUAW_HOLDS_KEY "__holds"
-#define LUAW_WRAPPER_KEY "LuaWrapper"
+#define LUAW_EXTENDS_KEY  "__extends"
+#define LUAW_STORAGE_KEY  "__storage"
+#define LUAW_COUNT_KEY    "__counts"
+#define LUAW_HOLDS_KEY    "__holds"
+#define LUAW_WRAPPER_KEY  "LuaWrapper"
 
 
 // Forward declaration
