@@ -186,7 +186,7 @@ private:
    void setLuaArgs(const Vector<string> &args);
    void setModulePath();
 
-   bool configureNewLuaInstance();           // Prepare a new Lua environment for use
+   bool configureNewLuaInstance();              // Prepare a new Lua environment for use
 
    bool loadCompileSaveHelper(const string &scriptName, const char *registryKey);
    bool loadCompileSaveScript(const char *filename, const char *registryKey);
@@ -219,9 +219,9 @@ protected:
    
    void setEnvironment();
 
-   static void deleteScript(const char *name);      // Remove saved script from the Lua registry
+   static void deleteScript(const char *name);     // Remove saved script from the Lua registry
 
-   virtual void tickTimer(U32 deltaT);       // Advance script timers
+   virtual void tickTimer(U32 deltaT);             // Advance script timers
 
 public:
    LuaScriptRunner();               // Constructor
