@@ -70,6 +70,7 @@ public:
    static void drawPlaystationTriangle(const Point &center);
    static void drawSmallLeftTriangle(const Point & center);
    static void drawSmallRightTriangle(const Point & center);
+   static void drawButtonRightTriangle(const Point & center);
 
    static inline void setButtonColor(bool activated);
 };

@@ -32,6 +32,10 @@
 #include <stdio.h>               // For newer versions of gcc?
 #include <stdarg.h>              // For va_list
 
+#ifdef TNL_OS_ANDROID
+#include <android/log.h>
+#endif
+
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
@@ -126,8 +130,11 @@ void LogConsumer::prepareAndLogString(std::string message)
       message.erase(message.length() - 1, 1);
    else
       message.append("\n");
-
+#ifdef TNL_OS_ANDROID
+   __android_log_print(ANDROID_LOG_DEBUG, "Bitfighter", message.c_str());
+#else
    writeString(message.c_str());    // <== each log class will have it's own way of doing this
+#endif
 }
 
 #else
@@ -158,6 +165,8 @@ FileLogConsumer::~FileLogConsumer()
 
 void FileLogConsumer::init(std::string logFile, const char *mode)
 {
+#ifdef TNL_OS_ANDROID
+#endif
    if(f)
       fclose(f);
 

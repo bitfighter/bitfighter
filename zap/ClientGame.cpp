@@ -1428,7 +1428,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 
    // Render some stars
    glPointSize( gLineWidth1 );
-   glColor3f(0.8f * alphaFrac, 0.8f * alphaFrac, alphaFrac);
+   glColor(0.8f * alphaFrac, 0.8f * alphaFrac, alphaFrac);
 
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
@@ -1463,7 +1463,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
 
          glDrawArrays(GL_POINTS, 0, NumStars);
          
-         //glColor3f(.1,.1,.1);
+         //glColor(.1,.1,.1);
          // for(S32 i = 0; i < 50; i++)
          //   glDrawArrays(GL_LINE_LOOP, i * 6, 6);
 
@@ -1783,12 +1783,14 @@ void ClientGame::renderOverlayMap()
    S32 mapY = canvasHeight - UserInterface::vertMargin - mapHeight;
    F32 mapScale = 0.1f;
 
-   glBegin(GL_LINE_LOOP);
-      glVertex2i(mapX, mapY);
-      glVertex2i(mapX, mapY + mapHeight);
-      glVertex2i(mapX + mapWidth, mapY + mapHeight);
-      glVertex2i(mapX + mapWidth, mapY);
-   glEnd();
+   F32 vertices[] = {
+         mapX, mapY,
+         mapX, mapY + mapHeight,
+         mapX + mapWidth, mapY + mapHeight,
+         mapX + mapWidth, mapY
+   };
+   renderVertexArray(vertices, 4, GL_LINE_LOOP);
+
 
    glEnable(GL_SCISSOR_BOX);                    // Crop to overlay map display area
    glScissor(mapX, mapY + mapHeight, mapWidth, mapHeight);  // Set cropping window

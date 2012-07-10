@@ -145,28 +145,22 @@ void MessageUserInterface::render()
    else
       fadeFactor = 1;
 
-
    getUIManager()->renderPrevUI(this);
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
    if(mBox)
    {
-      glColor4f(.3f, 0, 0, fadeFactor * 0.95f);    // Draw a box
-      glBegin(GL_POLYGON);
-         glVertex(wInset + mVertOffset, hInset);
-         glVertex(canvasWidth - wInset + mVertOffset, hInset);
-         glVertex(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
-         glVertex(wInset + mVertOffset, canvasHeight - hInset);
-      glEnd();
+      F32 vertices[] = {
+            wInset + mVertOffset, hInset,
+            canvasWidth - wInset + mVertOffset, hInset,
+            canvasWidth - wInset + mVertOffset, canvasHeight - hInset,
+            wInset + mVertOffset, canvasHeight - hInset
+      };
 
-      glColor4f(1, 1, 1, fadeFactor); // Add a border
-      glBegin(GL_LINE_LOOP);
-         glVertex(wInset + mVertOffset, hInset);
-         glVertex(canvasWidth - wInset + mVertOffset, hInset);
-         glVertex(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
-         glVertex(wInset + mVertOffset, canvasHeight - hInset);
-      glEnd();
+      glColor4f(.3f, 0, 0, fadeFactor * 0.95f);    // Draw a box
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
+
+      glColor4f(1, 1, 1, fadeFactor);              // Add a border
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
    }
 
    // Draw title, message, and footer

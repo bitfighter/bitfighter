@@ -66,7 +66,7 @@ void TextEntryUserInterface::onActivate()
 
 void TextEntryUserInterface::render()
 {
-   glColor3f(1,1,1);
+   glColor(1,1,1);
 
    const S32 fontSize = 20;
    const S32 fontSizeBig = 30;
@@ -76,11 +76,11 @@ void TextEntryUserInterface::render()
 
    drawCenteredString(y, fontSize, title);
    y += 45;
-   glColor3f(0, 1, 0);
+   glColor(0, 1, 0);
    drawCenteredString(canvasHeight - vertMargin - 2 * fontSize - 5, fontSize, instr1);
    drawCenteredString(canvasHeight - vertMargin - fontSize, fontSize, instr2);
 
-   glColor3f(1,1,1);
+   glColor(1,1,1);
 
    // this will have an effect of shrinking the text to fit on-screen when text get very long
    S32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
@@ -320,12 +320,13 @@ void PasswordEntryUserInterface::render()
 
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-      glBegin(GL_POLYGON);
-         glVertex2i(0,           0);
-         glVertex2i(canvasWidth, 0);
-         glVertex2i(canvasWidth, canvasHeight);
-         glVertex2i(0,           canvasHeight);
-      glEnd();
+      F32 vertices[] = {
+            0, 0,
+            canvasWidth, 0,
+            canvasWidth, canvasHeight,
+            0, canvasHeight
+      };
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
    }
 
    Parent::render();

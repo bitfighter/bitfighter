@@ -30,10 +30,15 @@
 #include "stringUtils.h"      // For itos
 #include "gameConnection.h"
 #include "gameObjectRender.h"
+#include "OpenglUtils.h"
 #include "ClientInfo.h"
 
 #ifndef ZAP_DEDICATED
-#include "SDL_opengl.h"
+#  ifdef TNL_OS_ANDROID
+#     include "SDL_opengles.h"
+#  else
+#     include "SDL_opengl.h"
+#  endif
 #endif
 
 namespace Zap

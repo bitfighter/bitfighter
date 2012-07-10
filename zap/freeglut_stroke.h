@@ -32,7 +32,11 @@
 #ifndef FREEGLUT_STROKE_H_
 #define FREEGLUT_STROKE_H_
 
+#ifdef TNL_OS_ANDROID
+#include "SDL_opengles.h"
+#else
 #include "SDL_opengl.h"
+#endif
 
 typedef struct tagSFG_StrokeVertex SFG_StrokeVertex;
 struct tagSFG_StrokeVertex

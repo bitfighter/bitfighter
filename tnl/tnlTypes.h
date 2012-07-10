@@ -254,10 +254,11 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 // Identify the target Operating System
 //----------------------------------------------------------------------------------
 
-#if defined (_XBOX) || defined(__XBOX__)
-#  define TNL_OS_STRING "XBox"
-#  define TNL_OS_XBOX
-#  define FN_CDECL __cdecl
+#if defined (__ANDROID__)
+#  define TNL_OS_STRING "Android"
+#  define TNL_OS_ANDROID
+#  define TNL_OS_LINUX
+#  define FN_CDECL
 
 #elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN__)
 #  define TNL_OS_STRING "Win32"
@@ -331,6 +332,13 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #  define TNL_BIG_ENDIAN
 #  ifdef __GNUC__
 #    define TNL_SUPPORTS_GCC_INLINE_PPC_ASM
+#  endif
+#elif defined(__arm__)
+#  define TNL_CPU_STRING "ARM"
+#  define TNL_CPU_ARM
+#  if defined(__ANDROID__)  // Android ARM is guaranteed to be little endian
+#    define TNL_LITTLE_ENDIAN
+#    define TNL_GCC_4
 #  endif
 #else
 #  error "TNL: Unsupported Target CPU"

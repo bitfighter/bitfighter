@@ -417,10 +417,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
 
    glLineWidth(WALL_SPINE_WIDTH);
 
-   glBegin(GL_LINE_STRIP);
-      for(S32 i = 0; i < points.size(); i++)
-         glVertex(points[i]);
-   glEnd();
+   renderPointVector(&points, WALL_SPINE_WIDTH);
 
    glLineWidth(gDefaultLineWidth);
 

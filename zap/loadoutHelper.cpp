@@ -180,14 +180,14 @@ void LoadoutHelper::render()
          }
 
          if(selected)
-            glColor3f(1.0, 0.1f, 0.1f);      // Color of already selected item
+            glColor(1.0, 0.1f, 0.1f);      // Color of already selected item
          else
-            glColor3f(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
+            glColor(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
 
          S32 xPos = UserInterface::horizMargin + 50;
          xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
          if(!selected)
-            glColor3f(.2f, .8f, .8f);        // Color of help message
+            glColor(.2f, .8f, .8f);        // Color of help message
 
          UserInterface::drawString(xPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
 

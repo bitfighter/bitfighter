@@ -297,20 +297,22 @@ static void renderArrow(S32 pos, bool pointingUp)
 
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
 
+   F32 y = 0;
+   if(pointingUp)    // Up arrow
+      y = pos - (ARROW_HEIGHT + ARROW_MARGIN) - 7;
+   else              // Down arrow
+      y = pos + (ARROW_HEIGHT + ARROW_MARGIN) - 7;
+
+   F32 vertices[] = {
+         (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7,
+         (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7,
+         canvasWidth / 2, y
+   };
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
       glColor(i ? Colors::black : Colors::blue);
-      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2i( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         glVertex2i( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         
-         if(pointingUp)    // Up arrow
-            glVertex2i(canvasWidth / 2, pos - (ARROW_HEIGHT + ARROW_MARGIN) - 7);
-         else              // Down arrow
-            glVertex2i(canvasWidth / 2, pos + (ARROW_HEIGHT + ARROW_MARGIN) - 7);
-
-      glEnd();
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, i ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
    }
 }
 
@@ -913,13 +915,14 @@ void MainMenuUserInterface::render()
    {
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
        
-      glBegin(GL_POLYGON);
-         glColor(Colors::black, (F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
-         glVertex2i(0, 0);
-         glVertex2i(canvasWidth, 0);
-         glVertex2i(canvasWidth, canvasHeight);
-         glVertex2i(0, canvasHeight);
-      glEnd();
+      glColor(Colors::black, (F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
+      F32 vertices[] = {
+            0, 0,
+            canvasWidth, 0,
+            canvasWidth, canvasHeight,
+            0, canvasHeight
+      };
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
    }
 
    // Render logo at top, never faded

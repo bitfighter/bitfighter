@@ -55,7 +55,6 @@ class Ship;
 
 //////////
 // Primitives
-extern void glVertex(const Point &p);
 extern void drawFilledCircle(const Point &pos, F32 radius);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
 extern void drawCentroidMark(const Point &pos, F32 radius);
@@ -137,16 +136,6 @@ extern void renderFlag(const Point &pos, const Color *flagColor);
 extern void renderFlag(F32 x, F32 y, const Color *flagColor);
 extern void renderFlag(const Point &pos, const Color *flagColor, const Color *mastColor, F32 alpha);
 extern void renderFlag(F32 x, F32 y, const Color *flagColor, const Color *mastColor, F32 alpha);
-
-extern void renderPointVector(const Vector<Point> *points, U32 geomType);
-extern void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance
-
-extern void renderLine(const Vector<Point> *points);
-
-extern void glScale(F32 scaleFactor);
-extern void glTranslate(const Point &pos);
-extern void setDefaultBlendFunction();
-
 
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);

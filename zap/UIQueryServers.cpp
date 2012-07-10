@@ -615,23 +615,25 @@ static void renderTestIcon()
 
 static void renderLockIcon()
 {
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(0,2);
-      glVertex2f(0,4);
-      glVertex2f(3,4);
-      glVertex2f(3,2);
-   glEnd();
+   F32 vertices[] = {
+         0,2,
+         0,4,
+         3,4,
+         3,2
+   };
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINE_LOOP);
 
-   glBegin(GL_LINE_STRIP);
-      glVertex2f(2.6f, 2);
-      glVertex2f(2.6f, 1.3f);
-      glVertex2f(2.4f, 0.9f);
-      glVertex2f(1.9f, 0.6f);
-      glVertex2f(1.1f, 0.6f);
-      glVertex2f(0.6f, 0.9f);
-      glVertex2f(0.4f, 1.3f);
-      glVertex2f(0.4f, 2);
-   glEnd();
+   F32 vertices2[] = {
+         2.6f, 2,
+         2.6f, 1.3f,
+         2.4f, 0.9f,
+         1.9f, 0.6f,
+         1.1f, 0.6f,
+         0.6f, 0.9f,
+         0.4f, 1.3f,
+         0.4f, 2
+   };
+   renderVertexArray(vertices2, ARRAYSIZE(vertices2) / 2, GL_LINE_STRIP);
 }
 
 
@@ -684,10 +686,11 @@ void QueryServersUserInterface::render()
 
       // Horizontal divider between game list and chat window
       glColor(Colors::white);
-      glBegin(GL_LINES);
-         glVertex2i(horizMargin, dividerPos);
-         glVertex2i(canvasWidth - horizMargin, dividerPos);
-      glEnd();
+      F32 vertices[] = {
+            horizMargin, dividerPos,
+            canvasWidth - horizMargin, dividerPos
+      };
+      renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
 
       S32 ypos = dividerPos + 3;      // 3 = gap after divider
@@ -830,12 +833,13 @@ void QueryServersUserInterface::renderTopBanner()
 
    // Top banner
    glColor(Colors::richGreen);
-   glBegin(GL_POLYGON);
-      glVertex2i(0, 0);
-      glVertex2i(canvasWidth, 0);
-      glVertex2i(canvasWidth, BANNER_HEIGHT);
-      glVertex2i(0, BANNER_HEIGHT);
-   glEnd();
+   F32 vertices[] = {
+         0, 0,
+         canvasWidth, 0,
+         canvasWidth, BANNER_HEIGHT,
+         0, BANNER_HEIGHT
+   };
+   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
    glColor(Colors::white);
    drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");

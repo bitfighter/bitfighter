@@ -38,7 +38,11 @@
 #include "Cursor.h"
 
 #include "SDL.h"
+#ifdef TNL_OS_ANDROID
+#include "SDL_opengles.h"
+#else
 #include "SDL_opengl.h"
+#endif
 
 #include <string>
 

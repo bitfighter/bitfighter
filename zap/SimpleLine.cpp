@@ -96,12 +96,6 @@ Point SimpleLine::getInitialPlacementOffset(F32 gridSize)
 }
 
 
-// TODO: Put in editor ??
-static const Color INSTRUCTION_TEXTCOLOR(Colors::white);
-static const S32 INSTRUCTION_TEXTSIZE = 9;      
-static const S32 INSTRUCTION_TEXTGAP = 3;
-
-
 // Draw arrow that serves as the core of SimpleLine items in the editor
 // Subclasses will fill in the rest
 void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
@@ -120,19 +114,24 @@ void SimpleLine::renderEditor(F32 currentScale, bool snappingToWallCornersEnable
       const F32 al = 15;                // Length of arrow-head, in editor units (15 pixels)
       const F32 angoff = .5;            // Pitch of arrow-head prongs
 
-      glBegin(GL_LINES);
-         glVertex2f(dest.x, dest.y);    // Draw arrowhead
-         glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
-         glVertex2f(dest.x, dest.y);
-         glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
+      // Draw arrowhead
+      F32 vertices[] = {
+            dest.x, dest.y,
+            dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al,
+            dest.x, dest.y,
+            dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al
+      };
+      renderVertexArray(vertices, 4, GL_LINES);
 
-         // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
-         if(!i && (isSelected() || isLitUp()))
-            glColor(isSelected() ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
+      // Draw highlighted core on 2nd pass if item is selected, but not while it's being edited
+      if(!i && (isSelected() || isLitUp()))
+         glColor(isSelected() ? *SELECT_COLOR : *HIGHLIGHT_COLOR);
 
-         glVertex(pos);                 // Draw connecting line
-         glVertex(dest);
-      glEnd();
+      F32 vertices2[] = {
+            pos.x, pos.y,
+            dest.x, dest.y
+      };
+      renderVertexArray(vertices2, 2, GL_LINES);
    }
 
    renderEditorItem();

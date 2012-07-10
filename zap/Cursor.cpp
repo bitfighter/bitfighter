@@ -31,7 +31,12 @@
 //#include "gameObjectRender.h"
 //#include "ScreenInfo.h"
 
+#ifdef TNL_OS_ANDROID
+#include "SDL_opengles.h"
+#else
 #include "SDL_opengl.h"
+#endif
+
 #include "SDL_mouse.h"
 #include "SDL_version.h"
 

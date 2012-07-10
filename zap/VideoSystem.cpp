@@ -34,7 +34,13 @@
 #include "tnlLog.h"
 
 #include "SDL.h"
+#ifdef TNL_OS_ANDROID
+#include "SDL_opengles.h"
+// Needed for GLES compatibility
+#define glOrtho glOrthof
+#else
 #include "SDL_opengl.h"
+#endif
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
 #include "SDL_syswm.h"
@@ -42,7 +48,7 @@
 
 #include <cmath>
 
-#ifdef TNL_OS_LINUX
+#if defined(TNL_OS_LINUX) && !SDL_VERSION_ATLEAST(2,0,0)
 #include <X11/Xlib.h>
 #endif
 
@@ -454,12 +460,14 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
    //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    glEnable(GL_BLEND);
 
+#ifndef TNL_OS_ANDROID
    // If OGLconsole has been created, recreate font texture and handle resize event
-   if (gConsole)
+   if (gConsole != NULL)
    {
       OGLCONSOLE_CreateFont();
       OGLCONSOLE_Reshape();
    }
+#endif
 
    // Now set the window position
    if (displayMode == DISPLAY_MODE_WINDOWED)
