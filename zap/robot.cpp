@@ -557,13 +557,14 @@ void Robot::render(S32 layerIndex)
 
    else if(layerIndex == 1 && flightPlan.size() != 0)    // Client hosting is rendering server objects
    {
-      glColor(Colors::yellow);      
-      glBegin(GL_LINE_STRIP);
-         glVertex2f(getActualPos().x, getActualPos().y);
-         for(S32 i = flightPlan.size() - 1; i >= 0; i--)
-            glVertex2f(flightPlan[i].x, flightPlan[i].y);
-         
-      glEnd();
+      // Render from ship to start of flight plan
+      Vector<Point> line(2);
+      line.push_back(getActualPos());
+      line.push_back(flightPlan[0]);
+      renderLine(&line);
+
+      // Render the flight plan
+      renderPointVector(&flightPlan, GL_LINE_STRIP);
    }
 #endif
 }

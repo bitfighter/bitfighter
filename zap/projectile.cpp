@@ -35,7 +35,6 @@
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
 #  include "sparkManager.h"
-#  include "SDL_opengl.h"
 #  include "UI.h"
 #  include "OpenglUtils.h"
 #endif

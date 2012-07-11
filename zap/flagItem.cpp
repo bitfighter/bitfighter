@@ -34,7 +34,6 @@
 
 #ifndef ZAP_DEDICATED
 #  include "OpenglUtils.h"
-#  include "SDL_opengl.h"
 #endif
 
 namespace Zap
