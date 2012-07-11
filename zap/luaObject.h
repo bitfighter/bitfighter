@@ -266,11 +266,12 @@ public:
 // http://stackoverflow.com/questions/11413663/reducing-code-repetition-in-c
 //
 // Start with a definition like the following:
-// #define LUA_METHODS(CLASS, METHOD) \
-//    METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
-//    METHOD(CLASS, delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
-//    METHOD(CLASS, clearDests, ARRAYDEF({{      END }}), 1 ) \
-//
+/*
+ #define LUA_METHODS(CLASS, METHOD) \
+    METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
+    METHOD(CLASS, delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
+    METHOD(CLASS, clearDests, ARRAYDEF({{      END }}), 1 ) \
+*/
 
 #define LUA_METHOD_ITEM(class_, name, b, c) \
 { #name, luaW_doMethod<class_, &class_::name > },
