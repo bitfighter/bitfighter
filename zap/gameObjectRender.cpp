@@ -249,16 +249,16 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
    Vector<F32> vertexComponents(2 * sides);
-   U32 count = 0;
-   for(F32 theta = 0; theta < FloatTau; theta += FloatTau / sides)
+   F32 theta = 0;
+   F32 dTheta = FloatTau / sides;
+   for(S32 i = 0; i < sides; i++)
    {
       vertexComponents.push_back(pos.x + cos(theta + angle) * radius);
       vertexComponents.push_back(pos.y + sin(theta + angle) * radius);
-      count++;
+      theta += dTheta;
    }
 
-   TNLAssert(count == sides, "Delete this assert!");     // TODO: delete count unless this assert trips
-   renderVertexArray(vertexComponents.address(), count, GL_LINE_LOOP);
+   renderVertexArray(vertexComponents.address(), sides, GL_LINE_LOOP);
 }
 
 
