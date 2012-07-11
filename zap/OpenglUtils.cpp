@@ -69,13 +69,15 @@ void OpenglUtils::drawCharacter(S32 character)
 
    for(i = 0; i < schar->Number; i++, strip++)
    {
-      Vector<F32> vertexComponents(2 * strip->Number);
+      // I didn't find any strip->Number larger than 34, so I chose a buffer of 64
+      // This may change if we go crazy with i18n some day...
+      static F32 characterVertexArray[128];
       for(j = 0; j < strip->Number; j++)
       {
-        vertexComponents.push_back(strip->Vertices[j].X);
-        vertexComponents.push_back(strip->Vertices[j].Y);
+        characterVertexArray[2*j]     = strip->Vertices[j].X;
+        characterVertexArray[(2*j)+1] = strip->Vertices[j].Y;
       }
-      renderVertexArray(vertexComponents.address(), strip->Number, GL_LINE_STRIP);
+      renderVertexArray(characterVertexArray, strip->Number, GL_LINE_STRIP);
    }
    glTranslatef( schar->Right, 0.0, 0.0 );
 }
@@ -203,15 +205,20 @@ void renderPointVector(const Vector<Point> *points, U32 geomType)
 // Use slower method here because we need to visit each point to add offset
 void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType)
 {
-   Vector<F32> vertexComponents(2 * points->size());
+   // I chose 32768 as a buffer because that was enough for the editor to handle at least
+   // 10 ctf3-sized levels with points in the editor.  I added the assert just in case,
+   // it may need to be increased for some crazy levels out there
+   static F32 pointVectorVertexArray[32768];
+   TNLAssert(points->size() <= 32768, "static array for this render function is too small");
+
    for(S32 i = 0; i < points->size(); i++)
    {
-      vertexComponents.push_back(points->get(i).x + offset.x);
-      vertexComponents.push_back(points->get(i).y + offset.y);
+      pointVectorVertexArray[2*i]     = points->get(i).x + offset.x;
+      pointVectorVertexArray[(2*i)+1] = points->get(i).y + offset.y;
    }
 
    glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_FLOAT, 0, vertexComponents.address());
+      glVertexPointer(2, GL_FLOAT, 0, pointVectorVertexArray);
       glDrawArrays(geomType, 0, points->size());
    glDisableClientState(GL_VERTEX_ARRAY);
 }

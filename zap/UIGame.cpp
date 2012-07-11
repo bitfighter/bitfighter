@@ -3005,43 +3005,43 @@ void GameUserInterface::VoiceRecorder::render()
       F32 halfway = totalLineCount * 0.5f;
       F32 full = amt * totalLineCount;
 
-      // Render recording volume
-      U32 items =  U32(full) * 2;
-      Vector<F32> colorComponents (items * 2);
-      Vector<F32> vertexComponents(items * 4);
+      // Total items possible is totalLineCount (50)
+      static F32 colorArray[400];   // 2 * 4 color components per item
+      static F32 vertexArray[200];  // 2 * 2 vertex components per item
 
+      // Render recording volume
       for(U32 i = 1; i < full; i++)  // start at 1 to not show
       {
          if(i < halfway)
          {
-            colorComponents.push_back(i / halfway);
-            colorComponents.push_back(1);
-            colorComponents.push_back(0);
-            colorComponents.push_back(1);
-            colorComponents.push_back(i / halfway);
-            colorComponents.push_back(1);
-            colorComponents.push_back(0);
-            colorComponents.push_back(1);
+            colorArray[8*(i-1)]     = i / halfway;
+            colorArray[(8*(i-1))+1] = 1;
+            colorArray[(8*(i-1))+2] = 0;
+            colorArray[(8*(i-1))+3] = 1;
+            colorArray[(8*(i-1))+4] = i / halfway;
+            colorArray[(8*(i-1))+5] = 1;
+            colorArray[(8*(i-1))+6] = 0;
+            colorArray[(8*(i-1))+7] = 1;
          }
          else
          {
-            colorComponents.push_back(1);
-            colorComponents.push_back(1 - (i - halfway) / halfway);
-            colorComponents.push_back(0);
-            colorComponents.push_back(1);
-            colorComponents.push_back(1);
-            colorComponents.push_back(1 - (i - halfway) / halfway);
-            colorComponents.push_back(0);
-            colorComponents.push_back(1);
+            colorArray[8*(i-1)]     = 1;
+            colorArray[(8*(i-1))+1] = 1 - (i - halfway) / halfway;
+            colorArray[(8*(i-1))+2] = 0;
+            colorArray[(8*(i-1))+3] = 1;
+            colorArray[(8*(i-1))+4] = 1;
+            colorArray[(8*(i-1))+5] = 1 - (i - halfway) / halfway;
+            colorArray[(8*(i-1))+6] = 0;
+            colorArray[(8*(i-1))+7] = 1;
          }
 
-         vertexComponents.push_back(10 + i * 2);
-         vertexComponents.push_back(130);
-         vertexComponents.push_back(10 + i * 2);
-         vertexComponents.push_back(145);
+         vertexArray[4*(i-1)]     = 10 + i * 2;
+         vertexArray[(4*(i-1))+1] = 130;
+         vertexArray[(4*(i-1))+2] = 10 + i * 2;
+         vertexArray[(4*(i-1))+3] = 145;
       }
 
-      renderColorVertexArray(vertexComponents.address(), colorComponents.address(), items, GL_LINES);
+      renderColorVertexArray(vertexArray, colorArray, S32(full*2), GL_LINES);
    }
 }
 

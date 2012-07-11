@@ -464,8 +464,9 @@ void FXTrail::idle(U32 timeDelta)
 
 void FXTrail::render()
 {
-   Vector<F32> vertexComponents(2 * mNodes.size());     // 2 coordinates per node
-   Vector<F32> colorComponents (4 * mNodes.size());     // 4 colors components per node
+   // Largest node size found was 15; I chose buffer of 32
+   static F32 fxtrailVertexArray[64];     // 2 coordinates per node
+   static F32 fxtrailColorArray[128];     // 4 colors components per node
 
    for(S32 i = 0; i < mNodes.size(); i++)
    {
@@ -473,31 +474,31 @@ void FXTrail::render()
 
       if(mNodes[i].invisible)
       {
-         colorComponents.push_back(0);
-         colorComponents.push_back(0);
-         colorComponents.push_back(0);
-         colorComponents.push_back(0);
+         fxtrailColorArray[4*i]     = 0.f;
+         fxtrailColorArray[(4*i)+1] = 0.f;
+         fxtrailColorArray[(4*i)+2] = 0.f;
+         fxtrailColorArray[(4*i)+3] = 0.f;
       }
       else if(mNodes[i].boosted)
       {
-         colorComponents.push_back(1.f - t);
-         colorComponents.push_back(1.f - t);
-         colorComponents.push_back(0.f);
-         colorComponents.push_back(1.f - t);
+         fxtrailColorArray[4*i]     = 1.f - t;
+         fxtrailColorArray[(4*i)+1] = 1.f - t;
+         fxtrailColorArray[(4*i)+2] = 0.f;
+         fxtrailColorArray[(4*i)+3] = 1.f - t;
       }
       else
       {
-         colorComponents.push_back(1.f - 2 * t);
-         colorComponents.push_back(1.f - 2 * t);
-         colorComponents.push_back(1.f);
-         colorComponents.push_back(0.7f - 0.7f * t);
+         fxtrailColorArray[4*i]     = 1.f - 2 * t;
+         fxtrailColorArray[(4*i)+1] = 1.f - 2 * t;
+         fxtrailColorArray[(4*i)+2] = 1.f;
+         fxtrailColorArray[(4*i)+3] = 0.7f - 0.7f * t;
       }
 
-      vertexComponents.push_back(mNodes[i].pos.x);
-      vertexComponents.push_back(mNodes[i].pos.y);
+      fxtrailVertexArray[2*i]     = mNodes[i].pos.x;
+      fxtrailVertexArray[(2*i)+1] = mNodes[i].pos.y;
    }
 
-   renderColorVertexArray(vertexComponents.address(), colorComponents.address(), mNodes.size(), GL_LINE_STRIP);
+   renderColorVertexArray(fxtrailVertexArray, fxtrailColorArray, mNodes.size(), GL_LINE_STRIP);
 }
 
 

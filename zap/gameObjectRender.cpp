@@ -74,18 +74,22 @@ void drawVertLine(S32 x, S32 y1, S32 y2)
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
-   Vector<F32> vertexArray;
+   // With theta delta of 0.2, that means maximum 32 points + 1 at the end
+   static F32 arcVertexArray[66];
+   U32 count = 0;
    for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
    {
-      vertexArray.push_back(pos.x + cos(theta) * radius);
-      vertexArray.push_back(pos.y + sin(theta) * radius);
+      arcVertexArray[2*count]     = pos.x + cos(theta) * radius;
+      arcVertexArray[(2*count)+1] = pos.y + sin(theta) * radius;
+      count++;
    }
 
    // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   vertexArray.push_back(pos.x + cos(endAngle) * radius);
-   vertexArray.push_back(pos.y + sin(endAngle) * radius);
+   arcVertexArray[2*count]     = pos.x + cos(endAngle) * radius;
+   arcVertexArray[(2*count)+1] = pos.y + sin(endAngle) * radius;
+   count++;
 
-   renderVertexArray(vertexArray.address(), vertexArray.size()/2, GL_LINE_STRIP);
+   renderVertexArray(arcVertexArray, count, GL_LINE_STRIP);
 }
 
 
@@ -178,21 +182,26 @@ void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
 
 void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
-   Vector<F32> vertexArray;
+   // With theta delta of 0.2, that means maximum 32 points + 2 at the end
+   static F32 filledArcVertexArray[68];
+   U32 count = 0;
    for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
    {
-      vertexArray.push_back(pos.x + cos(theta) * radius);
-      vertexArray.push_back(pos.y + sin(theta) * radius);
+      filledArcVertexArray[2*count]     = pos.x + cos(theta) * radius;
+      filledArcVertexArray[(2*count)+1] = pos.y + sin(theta) * radius;
+      count++;
    }
 
    // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   vertexArray.push_back(pos.x + cos(endAngle) * radius);
-   vertexArray.push_back(pos.y + sin(endAngle) * radius);
+   filledArcVertexArray[2*count]     = pos.x + cos(endAngle) * radius;
+   filledArcVertexArray[(2*count)+1] = pos.y + sin(endAngle) * radius;
+   count++;
 
-   vertexArray.push_back(pos.x);
-   vertexArray.push_back(pos.y);
+   filledArcVertexArray[2*count]     = pos.x;
+   filledArcVertexArray[(2*count)+1] = pos.y;
+   count++;
 
-   renderVertexArray(vertexArray.address(), vertexArray.size()/2, GL_TRIANGLE_FAN);
+   renderVertexArray(filledArcVertexArray, count, GL_TRIANGLE_FAN);
 }
 
 
@@ -248,17 +257,19 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 // Draw an n-sided polygon
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
-   Vector<F32> vertexComponents(2 * sides);
+   // There is no polygon greater than 12 (I think) so I choose 32 sides to be safe
+   static F32 polygonVertexArray[64];  // 2 data points per vertex (x,y)
+
    F32 theta = 0;
    F32 dTheta = FloatTau / sides;
    for(S32 i = 0; i < sides; i++)
    {
-      vertexComponents.push_back(pos.x + cos(theta + angle) * radius);
-      vertexComponents.push_back(pos.y + sin(theta + angle) * radius);
+      polygonVertexArray[2*i]     = pos.x + cos(theta + angle) * radius;
+      polygonVertexArray[(2*i)+1] = pos.y + sin(theta + angle) * radius;
       theta += dTheta;
    }
 
-   renderVertexArray(vertexComponents.address(), sides, GL_LINE_LOOP);
+   renderVertexArray(polygonVertexArray, sides, GL_LINE_LOOP);
 }
 
 
@@ -297,15 +308,17 @@ void drawFilledCircle(const Point &pos, F32 radius)
 
 void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 {
-   Vector<F32> vertexArray;
-
+   // With theta delta of 0.2, that means maximum 32 points
+   static F32 filledSectorVertexArray[64];
+   U32 count = 0;
    for(F32 theta = start; theta < end; theta += 0.2f)
    {
-      vertexArray.push_back(pos.x + cos(theta) * radius);
-      vertexArray.push_back(pos.y + sin(theta) * radius);
+      filledSectorVertexArray[2*count]     = pos.x + cos(theta) * radius;
+      filledSectorVertexArray[(2*count)+1] = pos.y + sin(theta) * radius;
+      count++;
    }
 
-   renderVertexArray(vertexArray.address(), vertexArray.size()/2, GL_TRIANGLE_FAN);
+   renderVertexArray(filledSectorVertexArray, count, GL_TRIANGLE_FAN);
 }
 
 
@@ -743,16 +756,19 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
       U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
       U32 arrayCount = 2 * (vertexCount + 1);
 
-      // Set up some vectors with the proper amount of preallocated memory
-      Vector<F32> colorArray (4 * arrayCount);     // 4 color components per item
-      Vector<F32> vertexArray(2 * arrayCount);     // 2 coordinate components per item
+      // Static arrays to hold rendering data.  arrayCount is usually 8 - 20, so I chose
+      // a buffer of 32 just in case
+      static F32 teleporterVertexArray[64];  // 2 coordinate components per item
+      static F32 teleporterColorArray[128];  // 4 color components per item
 
       // Fill starting vertices
       Point p1 = start * (startRadius + beamWidth * 0.3f) + normal * 2;
       Point p2 = start * (startRadius - beamWidth * 0.3f) + normal * 2;
 
-      vertexArray.push_back(p1.x);   vertexArray.push_back(p1.y);
-      vertexArray.push_back(p2.x);   vertexArray.push_back(p2.y);
+      teleporterVertexArray[0] = p1.x;
+      teleporterVertexArray[1] = p1.y;
+      teleporterVertexArray[2] = p2.x;
+      teleporterVertexArray[3] = p2.y;
 
       // Fill starting colors
       Color *currentColor = NULL;  // dummy default
@@ -765,15 +781,14 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          currentColor = &c;
       }
 
-      colorArray.push_back(currentColor->r);
-      colorArray.push_back(currentColor->g);
-      colorArray.push_back(currentColor->b);
-      colorArray.push_back(alpha * alphaMod);
-
-      colorArray.push_back(currentColor->r);
-      colorArray.push_back(currentColor->g);
-      colorArray.push_back(currentColor->b);
-      colorArray.push_back(alpha * alphaMod);
+      teleporterColorArray[0] = currentColor->r;
+      teleporterColorArray[1] = currentColor->g;
+      teleporterColorArray[2] = currentColor->b;
+      teleporterColorArray[3] = alpha * alphaMod;
+      teleporterColorArray[4] = currentColor->r;
+      teleporterColorArray[5] = currentColor->g;
+      teleporterColorArray[6] = currentColor->b;
+      teleporterColorArray[7] = alpha * alphaMod;
 
       for(U32 j = 0; j <= vertexCount; j++)
       {
@@ -787,10 +802,10 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          p1 = p * (rad + width);
          p2 = p * (rad - width);
 
-         vertexArray.push_back(p1.x);
-         vertexArray.push_back(p1.y);
-         vertexArray.push_back(p2.x);
-         vertexArray.push_back(p2.y);
+         teleporterVertexArray[4*j]     = p1.x;
+         teleporterVertexArray[(4*j)+1] = p1.y;
+         teleporterVertexArray[(4*j)+2] = p2.x;
+         teleporterVertexArray[(4*j)+3] = p2.y;
 
          // Fill colors
          if(i < trackerCount)
@@ -802,18 +817,17 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
             currentColor = &c;
          }
 
-         colorArray.push_back(currentColor->r);
-         colorArray.push_back(currentColor->g);
-         colorArray.push_back(currentColor->b);
-         colorArray.push_back(alpha * alphaMod * (1 - frac));
-
-         colorArray.push_back(currentColor->r);
-         colorArray.push_back(currentColor->g);
-         colorArray.push_back(currentColor->b);
-         colorArray.push_back(alpha * alphaMod * (1 - frac));
+         teleporterColorArray[8*j]     = currentColor->r;
+         teleporterColorArray[(8*j)+1] = currentColor->g;
+         teleporterColorArray[(8*j)+2] = currentColor->b;
+         teleporterColorArray[(8*j)+3] = alpha * alphaMod * (1 - frac);
+         teleporterColorArray[(8*j)+4] = currentColor->r;
+         teleporterColorArray[(8*j)+5] = currentColor->g;
+         teleporterColorArray[(8*j)+6] = currentColor->b;
+         teleporterColorArray[(8*j)+7] = alpha * alphaMod * (1 - frac);
       }
 
-      renderColorVertexArray(vertexArray.address(), colorArray.address(), arrayCount, GL_TRIANGLE_STRIP);
+      renderColorVertexArray(teleporterVertexArray, teleporterColorArray, arrayCount, GL_TRIANGLE_STRIP);
    }
 
    glPopMatrix();
