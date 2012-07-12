@@ -314,12 +314,15 @@ void drawFilledCircle(const Point &pos, F32 radius)
 void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 {
    // With theta delta of 0.2, that means maximum 32 points
-   static F32 filledSectorVertexArray[64];
+   static const S32 MAX_POINTS = 32;
+   static F32 filledSectorVertexArray[MAX_POINTS * 2];      // 2 components per point
+
    U32 count = 0;
+
    for(F32 theta = start; theta < end; theta += 0.2f)
    {
-      filledSectorVertexArray[2*count]     = pos.x + cos(theta) * radius;
-      filledSectorVertexArray[(2*count)+1] = pos.y + sin(theta) * radius;
+      filledSectorVertexArray[2*count]       = pos.x + cos(theta) * radius;
+      filledSectorVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
       count++;
    }
 
