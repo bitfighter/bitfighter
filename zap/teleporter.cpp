@@ -818,7 +818,7 @@ S32 Teleporter::addDest(lua_State *L)
    Point point = getPointOrXY(L, 1);
    addDest(point);
 
-   return returnNil(L);
+   return 0;
 }
 
 
@@ -832,7 +832,7 @@ S32 Teleporter::delDest(lua_State *L)
 
    mDestManager.delDest(index);
 
-   return returnNil(L);
+   return 0;
 }
 
 
@@ -841,7 +841,7 @@ S32 Teleporter::clearDests(lua_State *L)
    checkArgList(L, functionArgs, "Teleporter", "clearDests");
 
    mDestManager.clear();
-   return returnNil(L);
+   return 0;
 }
 
    
