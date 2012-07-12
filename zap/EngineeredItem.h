@@ -115,6 +115,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    void damageObject(DamageInfo *damageInfo);
+   void checkHealthBounds();
    bool collide(BfObject *hitObject);
    F32 getHealth();
    void healObject(S32 time);
@@ -165,6 +166,7 @@ public:
 
    // More Lua methods that are inherited by turrets and forcefield projectors
    S32 getHealth(lua_State *L);
+   S32 setHealth(lua_State *L);
    S32 isActive(lua_State *L);
    S32 getAngle(lua_State *L);
 };

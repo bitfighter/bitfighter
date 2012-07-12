@@ -70,6 +70,7 @@ public:
    LUA_ARG_TYPE_ITEM( INT,       "Integer"                ) \
    LUA_ARG_TYPE_ITEM( INTS,      "One or more integers"   ) \
    LUA_ARG_TYPE_ITEM( NUM,       "Number"                 ) \
+   LUA_ARG_TYPE_ITEM( NUM_GE0,   "Number >= 0"            ) \
    LUA_ARG_TYPE_ITEM( STR,       "String"                 ) \
    LUA_ARG_TYPE_ITEM( PT,        "Point (or two numbers)" ) \
    LUA_ARG_TYPE_ITEM( TABLE,     "Lua table"              ) \
@@ -79,7 +80,8 @@ public:
    LUA_ARG_TYPE_ITEM( WEAP_SLOT, "Weapon slot #"          ) \
    LUA_ARG_TYPE_ITEM( MOD_ENUM,  "ModuleEnum"             ) \
    LUA_ARG_TYPE_ITEM( MOD_SLOT,  "Module slot #"          ) \
-   
+   LUA_ARG_TYPE_ITEM( TEAM_INDX, "Team index"             ) \
+      
 
    // Create the enum declaration
    enum LuaArgType {

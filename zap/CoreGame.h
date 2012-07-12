@@ -130,6 +130,7 @@ private:
    bool mBeingAttacked;
    F32 mStartingHealth;          // Health stored in the level file, will be divided amongst panels
    F32 mStartingPanelHealth;     // Health divided up amongst panels
+   void setHealth();             // Sets startingHealth value, panels will be scaled up or down as needed
 
    F32 mPanelHealth[CORE_PANELS];
    Timer mHeartbeatTimer;        // Client-side timer
@@ -222,6 +223,7 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    S32 getHealth(lua_State *L);   
+   S32 setHealth(lua_State *L);   
 };
 
 

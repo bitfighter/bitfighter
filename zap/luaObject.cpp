@@ -392,6 +392,13 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                      ok = (i >= 1 && i <= ShipModuleCount);       // Slot 1 or 2
                   }
 
+               case TEAM_INDX:
+                  if(lua_isnumber(L, stackPos))
+                  {
+                     lua_Integer i = lua_tointeger(L, stackPos);
+                     ok = (i >= 0 && i < gServerGame->getTeamCount());       
+                  }
+
                default:
                   TNLAssert(false, "Unknown arg type!");
                   break;

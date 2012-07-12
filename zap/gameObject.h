@@ -431,6 +431,7 @@ public:
    virtual S32 setLoc(lua_State *L);
 
    virtual S32 getTeamIndx(lua_State *L);   
+   virtual S32 setTeam(lua_State *L);   
 
    virtual S32 addToGame(lua_State *L);
    virtual S32 removeFromGame(lua_State *L);
