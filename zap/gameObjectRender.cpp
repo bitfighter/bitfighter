@@ -185,7 +185,8 @@ void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
 void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    // With theta delta of 0.2, that means maximum 32 points + 2 at the end
-   static F32 filledArcVertexArray[68];
+   const S32 MAX_POINTS = 32 + 2;
+   static F32 filledArcVertexArray[MAX_POINTS * 2];      // 2 components per point
    U32 count = 0;
    for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
    {
