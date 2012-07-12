@@ -190,8 +190,8 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
    U32 count = 0;
    for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
    {
-      filledArcVertexArray[2*count]     = pos.x + cos(theta) * radius;
-      filledArcVertexArray[(2*count)+1] = pos.y + sin(theta) * radius;
+      filledArcVertexArray[2*count]       = pos.x + cos(theta) * radius;
+      filledArcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
       count++;
    }
 
