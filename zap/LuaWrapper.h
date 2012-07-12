@@ -751,6 +751,12 @@ struct LuaFunctionProfile {
 };
 
 
+typedef const char* ClassName;
+typedef std::map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
+typedef std::pair<ClassName, std::vector<ClassName> > Node;
+
+extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
+                           const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
 
 
 // Class to facilitate the semi-autonomous self-registration of LuaW classes.
@@ -780,12 +786,10 @@ private:
       const char *parent; 
    };
 
-   typedef const char* ClassName;
    typedef std::pair<ClassName, luaW_regFunc> NameFunctionPair;
    typedef std::map <ClassName, luaW_regFunc> FunctionMap;     // Map of class name and registration functions
 
    typedef std::pair<ClassName, const LuaFunctionProfile *> NameArgumentListPair;
-   typedef std::map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
 
 
    // List of registration functions
@@ -952,58 +956,6 @@ public:
    }
 
 
-   typedef std::pair<ClassName, std::vector<ClassName> > Node;
-
-   // Helper for printDocs()
-   static void output(const std::map<ClassName, unsigned int> &nodeMap, const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
-   {
-      if(prefix.length() > 8)
-         printf(prefix.substr(0, prefix.length() - 8).c_str());
-
-      if(prefix != "")
-         printf(" +----- ");  
-
-      printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
-      
-      // Print method list
-
-      const LuaFunctionProfile *funProfile = getArgMap().find(nodeList[nodeIndex].first)->second;
-
-      for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
-         for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
-         {
-            std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
-            
-            for(int k = 0; funProfile[i].argList[j][k] != 9; k++)    // Iterate over args within a given profile, appending each to the output line
-            {
-               if(k != 0)
-                  line += ", ";
-               line += "XXX";    // {P{P
-            }
-
-            line += ")";
-
-            printf("%s\n", line.c_str());    // Print the line
-         }
-
-
-      if(nodeList[nodeIndex].second.size() == 0)
-         return;
-
-      // Output the children
-      for(unsigned int i = 0; i < nodeList[nodeIndex].second.size(); i++)
-      {
-         std::string tmpPrefix = prefix;
-         if(i < nodeList[nodeIndex].second.size() - 1)
-            tmpPrefix += " |      ";
-         else
-            tmpPrefix += "        ";
-         unsigned int index = nodeMap.find(nodeList[nodeIndex].second[i])->second;
-         output(nodeMap, nodeList, tmpPrefix, index);
-      }
-   }
-
-
    // Has to be run BEFORE sortClassList()!
    static void printDocs()
    {
@@ -1055,11 +1007,12 @@ public:
       for(unsigned int i = 0; i < rootClassCount; i++)
       {
          printf("=====================\n");
-         output(nodeMap, nodeList, "", i);
+         printFunctions(getArgMap(), nodeMap, nodeList, "", i);
       }
       printf("=====================\n");
    }
 };
+
 
 
 // Helper classes that extend LuaW_Registrar.  These are intended for use
