@@ -263,14 +263,14 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
    // There is no polygon greater than 12 (I think) so I choose 32 sides to be safe
-   static F32 polygonVertexArray[64];  // 2 data points per vertex (x,y)
+   static F32 polygonVertexArray[32 * 2];  // 2 data points per vertex (x,y)
 
    F32 theta = 0;
    F32 dTheta = FloatTau / sides;
    for(S32 i = 0; i < sides; i++)
    {
-      polygonVertexArray[2*i]     = pos.x + cos(theta + angle) * radius;
-      polygonVertexArray[(2*i)+1] = pos.y + sin(theta + angle) * radius;
+      polygonVertexArray[2*i]       = pos.x + cos(theta + angle) * radius;
+      polygonVertexArray[(2*i) + 1] = pos.y + sin(theta + angle) * radius;
       theta += dTheta;
    }
 
