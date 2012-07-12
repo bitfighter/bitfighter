@@ -196,12 +196,12 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
    }
 
    // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   filledArcVertexArray[2*count]     = pos.x + cos(endAngle) * radius;
-   filledArcVertexArray[(2*count)+1] = pos.y + sin(endAngle) * radius;
+   filledArcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
+   filledArcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
    count++;
 
-   filledArcVertexArray[2*count]     = pos.x;
-   filledArcVertexArray[(2*count)+1] = pos.y;
+   filledArcVertexArray[2*count]       = pos.x;
+   filledArcVertexArray[(2*count) + 1] = pos.y;
    count++;
 
    renderVertexArray(filledArcVertexArray, count, GL_TRIANGLE_FAN);
