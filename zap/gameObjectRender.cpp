@@ -75,18 +75,20 @@ void drawVertLine(S32 x, S32 y1, S32 y2)
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    // With theta delta of 0.2, that means maximum 32 points + 1 at the end
-   static F32 arcVertexArray[66];
+   static const S32 MAX_POINTS = 32 + 1;
+   static F32 arcVertexArray[MAX_POINTS * 2];      // 2 components per point
+
    U32 count = 0;
    for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
    {
-      arcVertexArray[2*count]     = pos.x + cos(theta) * radius;
-      arcVertexArray[(2*count)+1] = pos.y + sin(theta) * radius;
+      arcVertexArray[2*count]       = pos.x + cos(theta) * radius;
+      arcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
       count++;
    }
 
    // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
-   arcVertexArray[2*count]     = pos.x + cos(endAngle) * radius;
-   arcVertexArray[(2*count)+1] = pos.y + sin(endAngle) * radius;
+   arcVertexArray[2*count]       = pos.x + cos(endAngle) * radius;
+   arcVertexArray[(2*count) + 1] = pos.y + sin(endAngle) * radius;
    count++;
 
    renderVertexArray(arcVertexArray, count, GL_LINE_STRIP);
