@@ -210,6 +210,69 @@ string LuaObject::prettyPrintParamList(const LuaFunctionProfile *functionInfo)
    return msg;
 }
 
+//string generateArgListString()
+//{
+//   string argList = "";
+//   for(int k = 0; funProfile[i].argList[j][k] != END; k++)  // Iterate over args within a given profile, appending each to the output line
+//   {
+//      if(k != 0)
+//         argList += ", ";
+//      argList += argTypeNames[funProfile[i].argList[j][k]];   
+//   }
+//}
+
+
+// Helper for printDocs(), called from luaW with -luadocs option
+// We put this here for easier access to LuaArgType enum
+void LuaObject::printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
+                               const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
+{
+   if(prefix.length() > 8)
+      printf(prefix.substr(0, prefix.length() - 8).c_str());
+
+   if(prefix != "")
+      printf(" +----- ");  
+
+   printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
+      
+   // Print method list
+
+   const LuaFunctionProfile *funProfile = argMap.find(nodeList[nodeIndex].first)->second;
+
+   for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
+      for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
+      {
+         std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
+            
+         //generateArgListString();
+         for(int k = 0; funProfile[i].argList[j][k] != END; k++)  // Iterate over args within a given profile, appending each to the output line
+         {
+            if(k != 0)
+               line += ", ";
+            line += argTypeNames[funProfile[i].argList[j][k]];   
+         }
+         line += ")";
+
+         printf("%s\n", line.c_str());    // Print the line
+      }
+
+
+   if(nodeList[nodeIndex].second.size() == 0)
+      return;
+
+   // Output the children
+   for(unsigned int i = 0; i < nodeList[nodeIndex].second.size(); i++)
+   {
+      std::string tmpPrefix = prefix;
+      if(i < nodeList[nodeIndex].second.size() - 1)
+         tmpPrefix += " |      ";
+      else
+         tmpPrefix += "        ";
+      unsigned int index = nodeMap.find(nodeList[nodeIndex].second[i])->second;
+      printFunctions(argMap, nodeMap, nodeList, tmpPrefix, index);
+   }
+}
+
 
 // === Centralized Parameter Checking ===
 // Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
@@ -1414,3 +1477,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
 };
 
+
+// This is deliberately outside the zap namespace -- it provides a bridge to the printFunctions function above from luaW
+void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
+                           const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
+{
+   Zap::LuaObject::printFunctions(argMap, nodeMap, nodeList, prefix, nodeIndex);
+}

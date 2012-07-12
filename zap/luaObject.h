@@ -119,6 +119,9 @@ public:
    static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName);
    static string prettyPrintParamList(const LuaFunctionProfile *functionInfo);
 
+   static void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
+                              const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
+
 
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
@@ -153,6 +156,11 @@ public:
 
    static bool shouldLuaGarbageCollectThisObject();     
 };
+
+
+extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
+                              const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
+
 
 
 ////////////////////////////////////////
