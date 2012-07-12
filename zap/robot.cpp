@@ -706,15 +706,15 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  setThrust,            ARRAYDEF({{ NUM, NUM, END }, { NUM, PT, END}}), 2 )  \
    METHOD(CLASS,  setThrustToPt,        ARRAYDEF({{ PT,       END }                 }), 1 )  \
                                                                                              \
-   METHOD(CLASS,  fire,                 ARRAYDEF({{      END }}), 1 )                        \
-   METHOD(CLASS,  setWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
-   METHOD(CLASS,  setWeaponIndex,       ARRAYDEF({{ INT, END }}), 1 )                        \
-   METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ INT, END }}), 1 )                        \
+   METHOD(CLASS,  fire,                 ARRAYDEF({{            END }}), 1 )                  \
+   METHOD(CLASS,  setWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
+   METHOD(CLASS,  setWeaponIndex,       ARRAYDEF({{ WEAP_SLOT, END }}), 1 )                  \
+   METHOD(CLASS,  hasWeapon,            ARRAYDEF({{ WEAP_ENUM, END }}), 1 )                  \
                                                                                              \
-   METHOD(CLASS,  activateModule,       ARRAYDEF({{ INT,     END }}), 1 )                    \
-   METHOD(CLASS,  activateModuleIndex,  ARRAYDEF({{ INT,     END }}), 1 )                    \
-   METHOD(CLASS,  setReqLoadout,        ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
-   METHOD(CLASS,  setCurrLoadout,       ARRAYDEF({{ LOADOUT, END }}), 1 )                    \
+   METHOD(CLASS,  activateModule,       ARRAYDEF({{ MOD_ENUM, END }}), 1 )                   \
+   METHOD(CLASS,  activateModuleIndex,  ARRAYDEF({{ MOD_SLOT, END }}), 1 )                   \
+   METHOD(CLASS,  setReqLoadout,        ARRAYDEF({{ LOADOUT,  END }}), 1 )                   \
+   METHOD(CLASS,  setCurrLoadout,       ARRAYDEF({{ LOADOUT,  END }}), 1 )                   \
                                                                                              \
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
@@ -1000,8 +1000,9 @@ S32 Robot::setWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setWeapon");
 
-   U32 weap = (U32)getInt(L, 1, "Robot:setWeapon()", 0, WeaponCount - 1);
+   U32 weap = (U32)getInt(L, 1);
 
+   // Check the weapons we have on board -- if any match the requested weapon, activate it
    for(S32 i = 0; i < ShipWeaponCount; i++)
       if((U32)getWeapon(i) == weap)
       {
@@ -1014,13 +1015,13 @@ S32 Robot::setWeapon(lua_State *L)
 }
 
 
-// Set weapon to index
+// Set weapon to index of slot (i.e. 1, 2, or 3)
 S32 Robot::setWeaponIndex(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setWeaponIndex");
 
-   U32 weap = (U32)getInt(L, 1, "Robot:setWeaponIndex()", 1, ShipWeaponCount); // Acceptable range = (1, ShipWeaponCount)
-   selectWeapon(weap - 1);                                                     // Correct for the fact that index in C++ is 0 based
+   U32 weap = (U32)getInt(L, 1); // Acceptable range = (1, ShipWeaponCount) -- has already been verified by checkArgList()
+   selectWeapon(weap - 1);       // Correct for the fact that index in C++ is 0 based
 
    return 0;
 }
@@ -1030,7 +1031,7 @@ S32 Robot::setWeaponIndex(lua_State *L)
 S32 Robot::hasWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "hasWeapon");
-   U32 weap = (U32)getInt(L, 1, "Robot:hasWeapon()", 0, WeaponCount - 1);
+   U32 weap = (U32)getInt(L, 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
       if((U32)getWeapon(i) == weap)
@@ -1046,7 +1047,7 @@ S32 Robot::activateModule(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "activateModule");
 
-   ShipModule mod = (ShipModule) getInt(L, 1, "Robot:activateModule()", 0, ModuleCount - 1);
+   ShipModule mod = (ShipModule) getInt(L, 1);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(getModule(i) == mod)
@@ -1064,7 +1065,7 @@ S32 Robot::activateModuleIndex(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "activateModuleIndex");
 
-   U32 indx = (U32)getInt(L, 1, "Robot:activateModuleIndex()", 0, ShipModuleCount);
+   U32 indx = (U32)getInt(L, 1);
 
    activateModulePrimary(indx);
 

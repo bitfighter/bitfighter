@@ -66,15 +66,19 @@ public:
 
    //                 Enum       Name
 #  define LUA_ARG_TYPE_TABLE \
-   LUA_ARG_TYPE_ITEM( BOOL,    "Boolean"                ) \
-   LUA_ARG_TYPE_ITEM( INT,     "Integer"                ) \
-   LUA_ARG_TYPE_ITEM( INTS,    "One or more integers"   ) \
-   LUA_ARG_TYPE_ITEM( NUM,     "Number"                 ) \
-   LUA_ARG_TYPE_ITEM( STR,     "String"                 ) \
-   LUA_ARG_TYPE_ITEM( PT,      "Point (or two numbers)" ) \
-   LUA_ARG_TYPE_ITEM( TABLE,   "Lua table"              ) \
-   LUA_ARG_TYPE_ITEM( LOADOUT, "Loadout Object"         ) \
-   LUA_ARG_TYPE_ITEM( ITEM,    "Item Object"            ) \
+   LUA_ARG_TYPE_ITEM( BOOL,      "Boolean"                ) \
+   LUA_ARG_TYPE_ITEM( INT,       "Integer"                ) \
+   LUA_ARG_TYPE_ITEM( INTS,      "One or more integers"   ) \
+   LUA_ARG_TYPE_ITEM( NUM,       "Number"                 ) \
+   LUA_ARG_TYPE_ITEM( STR,       "String"                 ) \
+   LUA_ARG_TYPE_ITEM( PT,        "Point (or two numbers)" ) \
+   LUA_ARG_TYPE_ITEM( TABLE,     "Lua table"              ) \
+   LUA_ARG_TYPE_ITEM( LOADOUT,   "Loadout Object"         ) \
+   LUA_ARG_TYPE_ITEM( ITEM,      "Item Object"            ) \
+   LUA_ARG_TYPE_ITEM( WEAP_ENUM, "WeaponEnum"             ) \
+   LUA_ARG_TYPE_ITEM( WEAP_SLOT, "Weapon slot #"          ) \
+   LUA_ARG_TYPE_ITEM( MOD_ENUM,  "ModuleEnum"             ) \
+   LUA_ARG_TYPE_ITEM( MOD_SLOT,  "Module slot #"          ) \
    
 
    // Create the enum declaration

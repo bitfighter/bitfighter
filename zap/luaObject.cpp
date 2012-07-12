@@ -357,6 +357,37 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                   ok = lua_istable(L, stackPos);
                   break;
 
+               case WEAP_ENUM:
+                  if(lua_isnumber(L, stackPos))
+                  {
+                     lua_Integer i = lua_tointeger(L, stackPos);
+                     ok = (i >= 0 && i < WeaponCount);
+                  }
+                  break;
+
+               case WEAP_SLOT:
+                  if(lua_isnumber(L, stackPos))
+                  {
+                     lua_Integer i = lua_tointeger(L, stackPos);
+                     ok = (i >= 1 && i <= ShipWeaponCount);       // Slot 1, 2, or 3
+                  }
+                  break;
+
+               case MOD_ENUM:
+                  if(lua_isnumber(L, stackPos))
+                  {
+                     lua_Integer i = lua_tointeger(L, stackPos);
+                     ok = (i >= 0 && i < ModuleCount);
+                  }
+                  break;
+
+               case MOD_SLOT:
+                  if(lua_isnumber(L, stackPos))
+                  {
+                     lua_Integer i = lua_tointeger(L, stackPos);
+                     ok = (i >= 1 && i <= ShipModuleCount);       // Slot 1 or 2
+                  }
+
                default:
                   TNLAssert(false, "Unknown arg type!");
                   break;
