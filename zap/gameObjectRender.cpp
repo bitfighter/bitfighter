@@ -758,8 +758,9 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
 
       // Static arrays to hold rendering data.  arrayCount is usually 8 - 20, so I chose
       // a buffer of 32 just in case
-      static F32 teleporterVertexArray[64];  // 2 coordinate components per item
-      static F32 teleporterColorArray[128];  // 4 color components per item
+      static const S32 MAX_POINTS = 32;
+      static F32 teleporterVertexArray[MAX_POINTS * 2];  // 2 coordinate components per item
+      static F32 teleporterColorArray[MAX_POINTS * 4];  // 4 color components per item
 
       // Fill starting vertices
       Point p1 = start * (startRadius + beamWidth * 0.3f) + normal * 2;
