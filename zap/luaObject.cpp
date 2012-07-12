@@ -317,6 +317,10 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                   ok = lua_isnumber(L, stackPos);
                   break;
 
+               case NUM_GE0:
+                  if(lua_isnumber(L, stackPos))
+                     ok = (lua_tonumber(L, stackPos) >= 0);
+
                case INTS:
                   ok = lua_isnumber(L, stackPos);
 
@@ -408,7 +412,7 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
    char msg[2048];
    string params = prettyPrintParamList(functionInfo);
-   dSprintf(msg, sizeof(msg), "Could not find valid params for function %s::%s(). Expected%s: %s", 
+   dSprintf(msg, sizeof(msg), "Could not validate params for function %s::%s(). Expected%s: %s", 
                               className, functionName, functionInfo->profileCount > 1 ? " one of the following" : "", params.c_str());
    logprintf(LogConsumer::LogError, msg);
 

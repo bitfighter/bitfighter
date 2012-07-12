@@ -744,10 +744,7 @@ void EngineeredItem::damageObject(DamageInfo *di)
    else
       mHealth -= di->damageAmount;
 
-   if(mHealth < 0)
-      mHealth = 0;
-   else if(mHealth > 1)
-      mHealth = 1;
+   checkHealthBounds();
 
    mHealTimer.reset();     // Restart healing timer...
 
@@ -802,6 +799,15 @@ void EngineeredItem::damageObject(DamageInfo *di)
 
       deleteObject(500);
    }
+}
+
+
+void EngineeredItem::checkHealthBounds()
+{
+   if(mHealth < 0)
+      mHealth = 0;
+   else if(mHealth > 1)
+      mHealth = 1;
 }
 
 
@@ -1094,6 +1100,8 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    METHOD(CLASS, isActive,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getAngle,  ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getHealth, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, setHealth, ARRAYDEF({{ NUM }}), 1 ) \
+
 
 GENERATE_LUA_METHODS_TABLE(EngineeredItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EngineeredItem, LUA_METHODS);
@@ -1104,9 +1112,18 @@ const char *EngineeredItem::luaClassName = "EngineeredItem";
 REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 
-S32 EngineeredItem::getHealth(lua_State *L) { return returnFloat(L, mHealth);     }
 S32 EngineeredItem::isActive(lua_State *L)  { return returnInt  (L, isEnabled()); }
 S32 EngineeredItem::getAngle(lua_State *L)  { return returnFloat(L, mAnchorNormal.ATAN2()); }
+S32 EngineeredItem::getHealth(lua_State *L) { return returnFloat(L, mHealth);     }
+
+
+S32 EngineeredItem::setHealth(lua_State *L) 
+{ 
+   S32 profile = checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
+   mHealth = getFloat(L, 1);
+   checkHealthBounds();
+   return 0;     
+}
 
 
 ////////////////////////////////////////
