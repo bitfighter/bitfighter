@@ -78,10 +78,11 @@ class Teleporter : public SimpleLine, public Engineerable
 
 public:
    enum {
-      InitMask      = BIT(0),
-      TeleportMask  = BIT(1),
-      HealthMask    = BIT(2),
-      DestroyedMask = BIT(3),
+      InitMask      = Parent::FirstFreeMask << 0,
+      TeleportMask  = Parent::FirstFreeMask << 1,
+      HealthMask    = Parent::FirstFreeMask << 2,
+      DestroyedMask = Parent::FirstFreeMask << 3,
+      FirstFreeMask = Parent::FirstFreeMask << 4,
 
       TeleporterTriggerRadius = 50,
       TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used
