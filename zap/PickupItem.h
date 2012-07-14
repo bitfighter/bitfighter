@@ -49,9 +49,9 @@ private:
 
 protected:
    enum MaskBits {
-      PickupMask      = Parent::FirstFreeMask << 0,
-      PickupSoundMask = Parent::FirstFreeMask << 1,
-      FirstFreeMask   = Parent::FirstFreeMask << 2
+      PickupMask    = Parent::FirstFreeMask << 0,
+      SoundMask     = Parent::FirstFreeMask << 1,
+      FirstFreeMask = Parent::FirstFreeMask << 2
    };
 
 public:
@@ -83,6 +83,8 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    bool collide(BfObject *otherObject);
+   void hide();
+   void show();
    virtual bool pickup(Ship *theShip);
    virtual void onClientPickup();
 
@@ -94,6 +96,8 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    S32 isVis(lua_State *L);
+   S32 setVis(lua_State *L);
+   S32 setRegenTime(lua_State *L);
 };
 
 

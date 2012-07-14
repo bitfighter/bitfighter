@@ -52,9 +52,9 @@ namespace Zap
 // Constructor
 PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius)
 {
-   mRepopDelay = repopDelay;
-   mIsVisible = true;
+   show();
 
+   mRepopDelay = repopDelay;
    mNetFlags.set(Ghostable);
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -74,10 +74,9 @@ void PickupItem::idle(BfObject::IdleCallPath path)
    {
       if(mRepopTimer.update(mCurrentMove.time))
       {
-         setMaskBits(PickupMask);
-         mIsVisible = true;
+         show();
 
-         // Check if there is a ship sitting on this item... it so, ship gets the repair!
+         // Check if there is a ship sitting on this item... it so, ship gets the pickup!
          for(S32 i = 0; i < getGame()->getClientCount(); i++)
          {
             Ship *ship = getGame()->getClientInfo(i)->getShip();
@@ -147,7 +146,7 @@ U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);       // Writes id and pos
 
    stream->writeFlag(mIsVisible);
-   stream->writeFlag((updateMask & PickupSoundMask) && (updateMask != 0xFFFFFFFF));
+   stream->writeFlag((updateMask & SoundMask) && (updateMask != 0xFFFFFFFF));
 
    return retMask;
 }
@@ -171,13 +170,29 @@ bool PickupItem::collide(BfObject *otherObject)
    {
       if(pickup(dynamic_cast<Ship *>(otherObject)))
       {
-         setMaskBits(PickupSoundMask);
-         mRepopTimer.reset(mRepopDelay * 1000);
-         mIsVisible = false;
+         hide();
+         setMaskBits(SoundMask);       // Trigger SFX on client
       }
    }
    return false;
 }
+
+
+void PickupItem::hide()
+{
+   mRepopTimer.reset(mRepopDelay * 1000);
+
+   mIsVisible = false;
+   setMaskBits(PickupMask);      // Triggers update
+}
+
+
+void PickupItem::show()
+{
+   mIsVisible = true;
+   setMaskBits(PickupMask);   // Triggers update
+}
+
 
 
 // Implementations provided to keep class from being abstract; need non-abstract class
@@ -190,6 +205,7 @@ bool PickupItem::pickup(Ship *theShip)
 }
 
 
+// Plays a sound on the client
 void PickupItem::onClientPickup()
 {
    TNLAssert(false, "Function not implemented!");
@@ -258,7 +274,10 @@ string PickupItem::getAttributeString()
 
 //               Fn name  Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, isVis,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isVis,        ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setVis,       ARRAYDEF({{ BOOL,    END }}), 1 ) \
+   METHOD(CLASS, setRegenTime, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+
 
 GENERATE_LUA_METHODS_TABLE(PickupItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(PickupItem, LUA_METHODS);
@@ -271,6 +290,29 @@ REGISTER_LUA_SUBCLASS(PickupItem, Item);
 
 
 S32 PickupItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }
+
+
+S32 PickupItem::setVis(lua_State *L) 
+{
+   checkArgList(L, functionArgs, "PickupItem", "setVis");
+
+   if(getBool(L, 1, "delete this msg"))
+      show();
+   else
+      hide();
+
+   return 0;
+}
+
+
+S32 PickupItem::setRegenTime(lua_State *L) 
+{ 
+   checkArgList(L, functionArgs, "PickupItem", "setRegenTime");
+
+   mRepopDelay = getFloat(L, 1);
+
+   return 0;
+}
 
 
 ////////////////////////////////////////
