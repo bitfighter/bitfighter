@@ -1973,8 +1973,8 @@ void EditorUserInterface::renderObjectsUnderConstruction()
 
    if(mCreatingPoly) // Wall
       glColor(*SELECT_COLOR);
-   else              // LineItem
-      glColor(getTeam(mNewItem->getTeam())->getColor());
+   else              // LineItem --> Caution! we're rendering an object that doesn't exist yet; its game is NULL
+      glColor(getGame()->getTeamColor(mCurrentTeam));
 
    renderLine(mNewItem->getOutline());
 
