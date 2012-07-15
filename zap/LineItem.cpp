@@ -27,7 +27,7 @@
 #include "gameObjectRender.h"    // For renderPolyLineVertices()
 #include "stringUtils.h"         // For itos
 #include "teamInfo.h"            // For TEAM_NEUTRAL
-#include "ClientInfo.h"          // To check local player
+#include "ship.h"                // To check player's team
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -73,12 +73,17 @@ LineItem *LineItem::clone() const
 void LineItem::render()
 {
 #ifndef ZAP_DEDICATED
-   ClientInfo *clientInfo = static_cast<ClientGame *>(getGame())->getClientInfo();     // ClientInfo for local player
-
-   if(getTeam() == TEAM_NEUTRAL|| getTeam() == clientInfo->getTeamIndex())
-   {
-      glColor(getColor());
-      renderLine(getOutline());
+   GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
+ 
+   // Don't render opposing team's text items... gc will only exist in game.  This block will be skipped when rendering preview in the editor.
+   if(gc)      
+    {
+      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+      if(getTeam() == TEAM_NEUTRAL || (ship && ship->getTeam() != getTeam()))
+      {
+         glColor(getColor());
+         renderLine(getOutline());
+      }
    }
 #endif
 }

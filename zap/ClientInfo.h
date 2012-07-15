@@ -65,7 +65,7 @@ protected:
    S32 mScore;
    S32 mTotalScore;
    Nonce mId;
-   S32 mTeamIndex;
+   S32 mTeamIndex;               // <=== Does not get set on the client's LocalClientInfo!!!
    S32 mPing;
    bool mIsLevelChanger;
    bool mIsAdmin;
