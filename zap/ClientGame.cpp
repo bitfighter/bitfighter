@@ -168,7 +168,7 @@ ClientGame::~ClientGame()
 // Also get here when hosting a game
 void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
-   setActiveTeamManager(mTeamManager);
+   //setActiveTeamManager(mTeamManager);     <== pointless!!
 
    mClientInfo->setIsAdmin(false); // Always start out with no permission
    mClientInfo->setIsLevelChanger(false);
