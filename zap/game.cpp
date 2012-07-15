@@ -501,15 +501,11 @@ S32 Game::getTeamIndex(const StringTableEntry &playerName)
 
 
 // The following just delegate their work to the TeamManager
-void Game::removeTeam(S32 teamIndex) { mActiveTeamManager->removeTeam(teamIndex); }
-
-void Game::addTeam(AbstractTeam *team) { mActiveTeamManager->addTeam(team); }
-
-void Game::addTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->addTeam(team, index); }
-
+void Game::removeTeam(S32 teamIndex)                  { mActiveTeamManager->removeTeam(teamIndex);    }
+void Game::addTeam(AbstractTeam *team)                { mActiveTeamManager->addTeam(team);            }
+void Game::addTeam(AbstractTeam *team, S32 index)     { mActiveTeamManager->addTeam(team, index);     }
 void Game::replaceTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->replaceTeam(team, index); }
-
-void Game::clearTeams() { mActiveTeamManager->clearTeams(); }
+void Game::clearTeams()                               { mActiveTeamManager->clearTeams();             }
 
 
 // Makes sure that the mTeams[] structure has the proper player counts
