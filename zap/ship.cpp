@@ -986,12 +986,15 @@ void Ship::processModules()
             // Reduce energy
             mEnergy -= energyCost;
 
-            // Sensor module needs to play a spybug (done server-side only)
+            // Sensor module needs to place a spybug (done server-side only)
             if(i == ModuleSensor && !isGhost())
             {
                Point direction = getAimVector();
                GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
                                                    getActualVel(), 0, CollisionRadius - 2, this);
+
+               if(getClientInfo())
+                  getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
             }
             // Pulse uses up all energy and applies an impulse vector
             else if(i == ModuleBoost)
