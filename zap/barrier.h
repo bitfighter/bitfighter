@@ -27,7 +27,7 @@
 #define _BARRIER_H_
 
 #include "gameObject.h"
-#include "textItem.h"      // for LineItem def  TODO: get rid of this
+#include "LineItem.h"   
 
 #include "Point.h"
 #include "tnlVector.h"

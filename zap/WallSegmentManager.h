@@ -27,7 +27,7 @@
 #define _WALL_SEGMENT_MANAGER_H_
 
 #include "gameObject.h"
-#include "textItem.h"      // for LineItem def  TODO: get rid of this
+//#include "LineItem.h"      // for LineItem def  TODO: get rid of this
 
 #include "Point.h"
 #include "tnlVector.h"

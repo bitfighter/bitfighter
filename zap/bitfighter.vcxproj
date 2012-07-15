@@ -177,6 +177,7 @@
     <ClCompile Include="helperMenu.cpp" />
     <ClCompile Include="Joystick.cpp" />
     <ClCompile Include="JoystickRender.cpp" />
+    <ClCompile Include="LineItem.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
     <ClCompile Include="..\zap\luaGameInfo.cpp" />
@@ -310,6 +311,7 @@
     <ClInclude Include="gameStats.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="HTFGame.h" />
+    <ClInclude Include="LineItem.h" />
     <ClInclude Include="loadoutHelper.h" />
     <ClInclude Include="..\zap\loadoutZone.h" />
     <ClInclude Include="..\zap\lua.h" />

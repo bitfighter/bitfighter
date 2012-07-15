@@ -126,68 +126,6 @@ public:
 };
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LineItem : public BfObject
-{
-   typedef BfObject Parent;
-
-private:
-   Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework
-
-   S32 mWidth;    
-
-public:
-   LineItem();                   // Constructor
-   virtual ~LineItem();          // Destructor
-   LineItem *clone() const;
-
-   virtual void render();
-   S32 getRenderSortValue();
-
-   bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
-   bool processGeometry(S32 argc, const char **argv, Game *game);    // Processes the geometry for this and child objects
-   void onAddedToGame(Game *theGame);
-   void computeExtent();                                             // Bounding box for quick collision-possibility elimination
-
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;           // More precise boundary for precise collision detection
-   bool collide(BfObject *hitObject);
-   void idle(BfObject::IdleCallPath path);
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
-
- 
-   /////
-   // Editor methods
-   string toString(F32 gridSize) const;
-   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
-   virtual const Color *getEditorRenderColor();
-
-
-   // Thickness-related
-   virtual void setWidth(S32 width);
-   void setWidth(S32 width, S32 min, S32 max);
-   S32 getWidth() const;
-   void changeWidth(S32 amt);  
-
-
-   // Some properties about the item that will be needed in the editor
-   const char *getEditorHelpString();
-   const char *getPrettyNamePlural();
-   const char *getOnDockName();
-   const char *getOnScreenName();
-   bool hasTeam();
-   bool canBeHostile();
-   bool canBeNeutral();
-
-   static const S32 MIN_LINE_WIDTH = 1;
-   static const S32 MAX_LINE_WIDTH = 255;
-
-   TNL_DECLARE_CLASS(LineItem);
-};
-
-
 };
 
 #endif
