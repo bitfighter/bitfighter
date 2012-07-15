@@ -26,8 +26,8 @@
 #ifndef _TEXTITEM_H_
 #define _TEXTITEM_H_
 
-#include "SimpleLine.h"       // For SimpleLine def
-#include "polygon.h"          // For def of Polyline, for lineItem
+#include "SimpleLine.h"       // For base class def
+//#include "polygon.h"          // For def of Polyline, for lineItem
 #include "Colors.h"
 
 using namespace std;

@@ -27,15 +27,11 @@
 #define _LINEITEM_H_
 
 #include "SimpleLine.h"       // For SimpleLine def
-#include "polygon.h"          // For def of Polyline, for lineItem
-#include "Colors.h"
 
 using namespace std;
 
 namespace Zap
 {
-
-//class ClientGame;
 
 class LineItem : public BfObject
 {

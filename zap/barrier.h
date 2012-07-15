@@ -27,6 +27,7 @@
 #define _BARRIER_H_
 
 #include "gameObject.h"
+#include "polygon.h"       // For PolygonObject def
 #include "LineItem.h"   
 
 #include "Point.h"

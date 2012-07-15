@@ -24,17 +24,14 @@
 //------------------------------------------------------------------------------------
 
 #include "LineItem.h"
-#include "gameNetInterface.h"
-#include "gameObjectRender.h"    // For renderPointVector()
-#include "game.h"
-#include "item.h"
-#include "stringUtils.h"
-#include "teamInfo.h"            // for TEAM_NEUTRAL
+#include "gameObjectRender.h"    // For renderPolyLineVertices()
+#include "stringUtils.h"         // For itos
+#include "teamInfo.h"            // For TEAM_NEUTRAL
+#include "ClientInfo.h"          // To check local player
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
-#  include "UIEditorMenus.h"       // For TextItemEditorAttributeMenuUI def
-#  include "OpenglUtils.h"
+#  include "OpenglUtils.h"       // For glColor, et al
 #endif
 
 
@@ -76,18 +73,13 @@ LineItem *LineItem::clone() const
 void LineItem::render()
 {
 #ifndef ZAP_DEDICATED
-   GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
+   ClientInfo *clientInfo = static_cast<ClientGame *>(getGame())->getClientInfo();     // ClientInfo for local player
 
-   // Don't render opposing team's text items... gc will only exist in game.  This block will be skipped when rendering preview in the editor.
-   if(gc)      
+   if(getTeam() == TEAM_NEUTRAL|| getTeam() == clientInfo->getTeamIndex())
    {
-      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(getTeam() != TEAM_NEUTRAL && (!ship || (ship && ship->getTeam() != getTeam())))
-         return;
+      glColor(getColor());
+      renderLine(getOutline());
    }
-
-   glColor(getColor());
-   renderLine(getOutline());
 #endif
 }
 
