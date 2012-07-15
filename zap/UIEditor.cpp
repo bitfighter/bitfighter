@@ -1974,7 +1974,7 @@ void EditorUserInterface::renderObjectsUnderConstruction()
    if(mCreatingPoly) // Wall
       glColor(*SELECT_COLOR);
    else              // LineItem
-      glColor(mNewItem->getColor());
+      glColor(getTeam(mNewItem->getTeam())->getColor());
 
    renderLine(mNewItem->getOutline());
 
