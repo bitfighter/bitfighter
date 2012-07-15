@@ -33,7 +33,7 @@ namespace Zap
 const char *WeaponInfo::getWeaponName(WeaponType weaponType)
 {
    static const char *weaponName[] = {
-#  define WEAPON_ITEM(a, name, c, d, e, f, g, h, i, j, k, l)  "name",
+#  define WEAPON_ITEM(a, name, c, d, e, f, g, h, i, j, k, l) name,
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
    };
