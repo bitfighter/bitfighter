@@ -571,7 +571,8 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
       return;
 
    // Adjust music volume only if changed
-   if(S32(newMusicVolLevel * 10) != S32(musicVolume * 10)) {
+   if(S32(newMusicVolLevel * 10) != S32(musicVolume * 10)) 
+   {
       musicVolume = newMusicVolLevel;
 
       for(S32 i = 0; i < MaxMusicTypes; i++)
