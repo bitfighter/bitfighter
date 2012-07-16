@@ -332,7 +332,7 @@ void Ship::processMove(U32 stateIndex)
    copyMoveState(stateIndex, LastProcessState);
    setAngle(stateIndex, mCurrentMove.angle);
 
-   if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == (const Point(0,0)))
+   if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
       return;  // saves small amount of CPU processing to not processing any of below when ship is not moving.
 
    F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
