@@ -174,13 +174,13 @@ OBJECTS_DEDICATED=\
 
 
 .c.o:
-    $(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
+	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 .cc.o: 
-    $(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
+	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 .cpp.o: 
-    $(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
+	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 
 default: release
@@ -206,14 +206,14 @@ dedicated_debug: dedicated_server
 ## dedicated_server: CFLAGS += -DUSE_EXCEPTION_BACKTRACE
 
 bitfighter: $(OBJECTS_CLIENT) 
-    $(CC) -o ../exe/$(EXEFILE) $(OBJECTS_CLIENT) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_CLIENT) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a ../alure/libalure.a $(SFX_LFLAGS) $(GFX_LFLAGS) $(THREADLIB) $(LFLAGS)
 
 dedicated_server: $(OBJECTS_DEDICATED) 
-    $(CC) -o ../exe/$(EXEFILE) $(OBJECTS_DEDICATED) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(THREADLIB) $(LFLAGS)
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_DEDICATED) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(THREADLIB) $(LFLAGS)
 
 clean: 
-    rm -f $(OBJECTS_CLIENT) $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED) ../exe/bitfighter ../exe/bitfightered
+	rm -f $(OBJECTS_CLIENT) $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED) ../exe/bitfighter ../exe/bitfightered
 
 cleano:
-    rm -f $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED)
+	rm -f $(OBJECTS_CLIENT) $(OBJECTS_DEDICATED) $(OBJECTS_SHARED)
 
