@@ -274,6 +274,9 @@ void LuaObject::printFunctions(const ArgMap &argMap, const std::map<ClassName, u
 }
 
 
+#define lua_isnumberpair(L, pos) \
+   (lua_isnumber(L, (pos)) && lua_isnumber(L, (pos) + 1))
+
 // === Centralized Parameter Checking ===
 // Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
 // you can blindly convert the stack items with the confidence you'll get what you want; no further type checking is required.
@@ -342,10 +345,33 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                   {
                      ok = true;
                   }
-                  else if(j + 2 <= stackItems && lua_isnumber(L, stackPos) && lua_isnumber(L, stackPos + 1))
+                  else if(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))
                   {
                      ok = true;
                      stackPos++;
+                  }
+                  break;
+
+               // PTS: A series of points, numbers, or a table containing a series of points or numbers
+               case PTS:
+                  if(lua_isvec(L, stackPos))             // Series of Points
+                  {
+                     stackPos++;
+                     while(stackPos < stackItems && lua_isvec(L, stackPos))
+                        stackPos++;
+                     ok = true;
+                  }
+                  else if(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))     // Series of numbers -- look for x,y pairs
+                  {
+                     stackPos += 2;
+                     while(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))
+                        stackPos += 2;
+                     ok = true;
+                     stackPos--;
+                  }
+                  else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
+                  {
+                     ok = false;     // for now...
                   }
                   break;
 
@@ -740,6 +766,41 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index)
       return Point(x, y);
    }
 }
+
+
+// Will retrieve a list of points in one of several formats: points, F32s, or a table of points or F32s
+Vector<Point> LuaObject::getPointsOrXYs(lua_State *L, S32 index)
+{
+   Vector<Point> points;
+   S32 stackItems = lua_gettop(L);
+
+   if(lua_isvec(L, index))          // List of points
+   {
+      S32 offset = 0;
+      while(index + offset <= stackItems && lua_isvec(L, index + offset))
+      {
+         const F32 *vec = lua_tovec(L, index + offset);
+         points.push_back(Point(vec[0], vec[1]));
+         offset++;
+      }
+   }
+   else if(lua_isnumber(L, index))  // List of coords
+   {
+      S32 offset = 0;
+      while(index + offset + 1 <= stackItems && lua_isnumberpair(L, index + offset))
+      {
+         F32 x = getFloat(L, index + offset);
+         F32 y = getFloat(L, index + offset + 1);
+
+         points.push_back(Point(x, y));
+         offset += 2;
+      }
+   }
+
+   // TODO: Add table support?
+
+   return points;
+ }
 
 
 // Make a nice looking string representation of the object at the specified index

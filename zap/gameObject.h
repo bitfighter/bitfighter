@@ -435,6 +435,9 @@ public:
 
    virtual S32 addToGame(lua_State *L);
    virtual S32 removeFromGame(lua_State *L);
+
+   virtual S32 setGeom(lua_State *L);
+   virtual S32 getGeom(lua_State *L);
 };
 
 

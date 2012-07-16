@@ -66,21 +66,22 @@ public:
 
    //                 Enum       Name
 #  define LUA_ARG_TYPE_TABLE \
-   LUA_ARG_TYPE_ITEM( BOOL,      "Boolean"                ) \
-   LUA_ARG_TYPE_ITEM( INT,       "Integer"                ) \
-   LUA_ARG_TYPE_ITEM( INTS,      "One or more integers"   ) \
-   LUA_ARG_TYPE_ITEM( NUM,       "Number"                 ) \
-   LUA_ARG_TYPE_ITEM( NUM_GE0,   "Number >= 0"            ) \
-   LUA_ARG_TYPE_ITEM( STR,       "String"                 ) \
-   LUA_ARG_TYPE_ITEM( PT,        "Point (or two numbers)" ) \
-   LUA_ARG_TYPE_ITEM( TABLE,     "Lua table"              ) \
-   LUA_ARG_TYPE_ITEM( LOADOUT,   "Loadout Object"         ) \
-   LUA_ARG_TYPE_ITEM( ITEM,      "Item Object"            ) \
-   LUA_ARG_TYPE_ITEM( WEAP_ENUM, "WeaponEnum"             ) \
-   LUA_ARG_TYPE_ITEM( WEAP_SLOT, "Weapon slot #"          ) \
-   LUA_ARG_TYPE_ITEM( MOD_ENUM,  "ModuleEnum"             ) \
-   LUA_ARG_TYPE_ITEM( MOD_SLOT,  "Module slot #"          ) \
-   LUA_ARG_TYPE_ITEM( TEAM_INDX, "Team index"             ) \
+   LUA_ARG_TYPE_ITEM( BOOL,      "Boolean"                                     ) \
+   LUA_ARG_TYPE_ITEM( INT,       "Integer"                                     ) \
+   LUA_ARG_TYPE_ITEM( INTS,      "One or more integers"                        ) \
+   LUA_ARG_TYPE_ITEM( NUM,       "Number"                                      ) \
+   LUA_ARG_TYPE_ITEM( NUM_GE0,   "Number >= 0"                                 ) \
+   LUA_ARG_TYPE_ITEM( STR,       "String"                                      ) \
+   LUA_ARG_TYPE_ITEM( PT,        "Point (or two numbers)"                      ) \
+   LUA_ARG_TYPE_ITEM( TABLE,     "Lua table"                                   ) \
+   LUA_ARG_TYPE_ITEM( LOADOUT,   "Loadout Object"                              ) \
+   LUA_ARG_TYPE_ITEM( ITEM,      "Item Object"                                 ) \
+   LUA_ARG_TYPE_ITEM( WEAP_ENUM, "WeaponEnum"                                  ) \
+   LUA_ARG_TYPE_ITEM( WEAP_SLOT, "Weapon slot #"                               ) \
+   LUA_ARG_TYPE_ITEM( MOD_ENUM,  "ModuleEnum"                                  ) \
+   LUA_ARG_TYPE_ITEM( MOD_SLOT,  "Module slot #"                               ) \
+   LUA_ARG_TYPE_ITEM( TEAM_INDX, "Team index"                                  ) \
+   LUA_ARG_TYPE_ITEM( PTS,       "One or more points (or a series of numbers)" ) \
       
 
    // Create the enum declaration
@@ -100,6 +101,7 @@ protected:
    static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
 
    static Point getPointOrXY(lua_State *L, S32 index);
+   static Vector<Point> getPointsOrXYs(lua_State *L, S32 index);
    static Point getCheckedVec(lua_State *L, S32 index, const char *methodName);
 
 

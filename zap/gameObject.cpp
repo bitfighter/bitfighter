@@ -182,38 +182,37 @@ bool isWeaponCollideableType(U8 x)
 bool isAsteroidCollideableType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || x == ForceFieldTypeNumber || x == CoreTypeNumber;
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber           ||
+         x == TestItemTypeNumber   || x == ResourceItemTypeNumber        ||
+         x == TurretTypeNumber     || x == ForceFieldProjectorTypeNumber ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber            ||
+         x == ForceFieldTypeNumber || x == CoreTypeNumber;
 }
 
 bool isFlagCollideableType(U8 x)
 {
    return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
-         x == ForceFieldTypeNumber;
+         x == BarrierTypeNumber   || x == ForceFieldTypeNumber || x == PolyWallTypeNumber;
 }
 
 bool isFlagOrShipCollideableType(U8 x)
 {
    return
-         x == BarrierTypeNumber || x == PolyWallTypeNumber || ForceFieldTypeNumber ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber    || ForceFieldTypeNumber ||
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
 }
 
 bool isVisibleOnCmdrsMapType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber || x == RobotShipTypeNumber ||
-         x == BarrierTypeNumber || x == PolyWallTypeNumber ||
-         x == TurretTypeNumber || x == ForceFieldTypeNumber || x == ForceFieldProjectorTypeNumber ||
-         x == FlagTypeNumber || x == SoccerBallItemTypeNumber ||
-         x == GoalZoneTypeNumber || x == NexusTypeNumber || x == LoadoutZoneTypeNumber || x == SlipZoneTypeNumber ||
-         x == SpeedZoneTypeNumber || x == TeleporterTypeNumber ||
-         x == LineTypeNumber || x == TextItemTypeNumber ||
-         x == AsteroidTypeNumber || x == TestItemTypeNumber || x == ResourceItemTypeNumber ||
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber || x == CoreTypeNumber;
+         x == PlayerShipTypeNumber || x == RobotShipTypeNumber      || x == CoreTypeNumber                ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == TextItemTypeNumber            ||
+         x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
+         x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == LineTypeNumber                ||
+         x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == LoadoutZoneTypeNumber         || 
+         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == SlipZoneTypeNumber            ||
+         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
+         x == EnergyItemTypeNumber || x == RepairItemTypeNumber; 
 }
 
 bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander's map for sensor
@@ -223,12 +222,10 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander
          x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == LoadoutZoneTypeNumber         || 
          x == TurretTypeNumber     || x == ForceFieldTypeNumber     || x == ForceFieldProjectorTypeNumber ||
          x == FlagTypeNumber       || x == SoccerBallItemTypeNumber || x == SlipZoneTypeNumber            ||
-         x == GoalZoneTypeNumber   || x == NexusTypeNumber          ||
-         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber       ||
-         x == LineTypeNumber       || x == TextItemTypeNumber       ||
-         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || 
-         x == EnergyItemTypeNumber || x == RepairItemTypeNumber     ||
-         x == CoreTypeNumber       || x == BurstTypeNumber          ||
+         x == GoalZoneTypeNumber   || x == NexusTypeNumber          || x == CoreTypeNumber                ||
+         x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == BurstTypeNumber               ||
+         x == LineTypeNumber       || x == TextItemTypeNumber       || x == RepairItemTypeNumber          ||
+         x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == EnergyItemTypeNumber          ||
          x == BulletTypeNumber     || x == MineTypeNumber; 
 }
 
@@ -1232,6 +1229,8 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }}), 1 ) \
    METHOD(CLASS, addToGame,      ARRAYDEF({{            END }}), 1 ) \
    METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }}), 1 ) \
+   METHOD(CLASS, setGeom,        ARRAYDEF({{ PTS,       END }}), 1 ) \
+   METHOD(CLASS, getGeom,        ARRAYDEF({{            END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
@@ -1277,6 +1276,26 @@ S32 BfObject::removeFromGame(lua_State *L)
 {
    deleteObject();
    return returnNil(L);
+}
+
+
+S32 BfObject::setGeom(lua_State *L)
+{
+   checkArgList(L, functionArgs, "BfObject", "setGeom");
+
+   Vector<Point> points = getPointsOrXYs(L, 1);
+
+   for(S32 i = 0; i < points.size(); i++)
+      logprintf("%d --> %s", i, points[i].toString().c_str());
+
+   return 0;
+}
+
+
+S32 BfObject::getGeom(lua_State *L)
+{
+
+   return 0;
 }
 
 };
