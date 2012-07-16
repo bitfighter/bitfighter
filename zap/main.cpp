@@ -1006,7 +1006,7 @@ int main(int argc, char **argv)
    settings->runCmdLineDirectives();            // If we specified a directive on the cmd line, like -help, attend to that now
 
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
-                     folderManager->musicDir, settings->getIniSettings()->musicVolLevel);  // Even dedicated server needs sound these days
+                     folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
    checkIfThisIsAnUpdate(settings);             // Make any adjustments needed when we run for the first time after an upgrade
 

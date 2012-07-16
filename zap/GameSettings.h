@@ -47,6 +47,7 @@ enum ParamId {
    WINDOW_POS,
    WINDOW_WIDTH,
    USE_STICK,
+   NO_MUSIC,
    MASTER_ADDRESS,
 
    DEDICATED,

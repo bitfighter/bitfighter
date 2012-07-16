@@ -181,6 +181,20 @@ IniSettings::IniSettings()
 }
 
 
+
+F32 IniSettings::getMusicVolLevel()
+{
+   return musicVolLevel;
+}
+
+
+void  IniSettings::setMusicVolLevel(F32 vol)
+{
+   musicVolLevel = vol;
+}
+
+
+
 extern string lcase(string strToConvert);
 
 // Sorts alphanumerically
@@ -513,16 +527,16 @@ static F32 checkVol(F32 vol)
 
 static void loadSoundSettings(CIniFile *ini, IniSettings *iniSettings)
 {
-   iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel       * 10)) / 10.0f;
-   iniSettings->musicVolLevel     = (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->musicVolLevel     * 10)) / 10.0f;
-   iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel * 10)) / 10.0f;
+   iniSettings->sfxVolLevel       = (F32) ini->GetValueI("Sounds", "EffectsVolume",   (S32) (iniSettings->sfxVolLevel        * 10)) / 10.0f;
+   iniSettings->setMusicVolLevel(   (F32) ini->GetValueI("Sounds", "MusicVolume",     (S32) (iniSettings->getMusicVolLevel() * 10)) / 10.0f);
+   iniSettings->voiceChatVolLevel = (F32) ini->GetValueI("Sounds", "VoiceChatVolume", (S32) (iniSettings->voiceChatVolLevel  * 10)) / 10.0f;
 
    string sfxSet = ini->GetValue("Sounds", "SFXSet", "Modern");
    iniSettings->sfxSet = stringToSFXSet(sfxSet);
 
    // Bounds checking
    iniSettings->sfxVolLevel       = checkVol(iniSettings->sfxVolLevel);
-   iniSettings->musicVolLevel     = checkVol(iniSettings->musicVolLevel);
+   iniSettings->setMusicVolLevel(checkVol(iniSettings->getMusicVolLevel()));
    iniSettings->voiceChatVolLevel = checkVol(iniSettings->voiceChatVolLevel);
 }
 
@@ -1451,7 +1465,7 @@ static void writeSounds(CIniFile *ini, IniSettings *iniSettings)
    }
 
    ini->SetValueI("Sounds", "EffectsVolume", (S32) (iniSettings->sfxVolLevel * 10));
-   ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->musicVolLevel * 10));
+   ini->SetValueI("Sounds", "MusicVolume",   (S32) (iniSettings->getMusicVolLevel() * 10));
    ini->SetValueI("Sounds", "VoiceChatVolume",   (S32) (iniSettings->voiceChatVolLevel * 10));
 
    ini->SetValue("Sounds", "SFXSet", iniSettings->sfxSet == sfxClassicSet ? "Classic" : "Modern");

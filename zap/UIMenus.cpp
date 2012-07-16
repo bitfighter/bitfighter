@@ -1047,7 +1047,7 @@ static void setSFXVolumeCallback(ClientGame *game, U32 vol)
 
 static void setMusicVolumeCallback(ClientGame *game, U32 vol)
 {
-   game->getSettings()->getIniSettings()->musicVolLevel = F32(vol) / 10;
+   game->getSettings()->getIniSettings()->setMusicVolLevel(F32(vol) / 10);
 }
 
 static void setVoiceVolumeCallback(ClientGame *game, U32 vol)
@@ -1216,7 +1216,7 @@ void OptionsMenuUserInterface::setupMenus()
    addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
                                   setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
-   addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->musicVolLevel + 0.05) * 10.0), false,
+   addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
                                   setMusicVolumeCallback, "Set music volume", KEY_M));
 
    addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 

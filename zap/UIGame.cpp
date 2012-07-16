@@ -2922,7 +2922,7 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
       return;
 
    case MusicVolumeType:
-      getGame()->getSettings()->getIniSettings()->musicVolLevel = (F32) vol / 10.f;
+      getGame()->getSettings()->getIniSettings()->setMusicVolLevel((F32) vol / 10.f);
       displayMessagef(gCmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
 

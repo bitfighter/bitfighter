@@ -157,6 +157,9 @@ struct PluginBinding
 
 struct IniSettings      // With defaults specified
 {
+private:
+   F32 musicVolLevel;   // Use getter/setter!
+
 public:
    IniSettings();       // Constructor
 
@@ -169,9 +172,11 @@ public:
    bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)
-   F32 musicVolLevel;               // As above
    F32 voiceChatVolLevel;           // Ditto
    F32 alertsVolLevel;              // And again
+
+   F32 getMusicVolLevel();
+   void setMusicVolLevel(F32 vol);
 
    sfxSets sfxSet;                  // Which set of SFX does the user want?
 
@@ -190,10 +195,7 @@ public:
    U32 maxDedicatedFPS;
    U32 maxFPS;
 
-//private:
-   //InputMode inputMode;             // Joystick or Keyboard
 
-public:
    string masterAddress;            // Default address of our master server
    string name;                     // Player name (none by default)    ==> will only be present if the user added it manually
    string password;                 // Player pasword (none by default) ==> will only be present if the user added it manually

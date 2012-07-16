@@ -506,7 +506,7 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
-      SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
+      SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->getMusicVolLevel(),
                                 mSettings->getIniSettings()->voiceChatVolLevel);     // Process sound effects (SFX)
 
       // Need to update the game clock to keep it in sync with the clients
@@ -607,7 +607,7 @@ void ClientGame::idle(U32 timeDelta)
 
    processDeleteList(timeDelta);                         // Delete any objects marked for deletion
    FXManager::idle(timeDelta);                           // Processes sparks and teleporter effects
-   SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->musicVolLevel,
+   SoundSystem::processAudio(mSettings->getIniSettings()->sfxVolLevel, mSettings->getIniSettings()->getMusicVolLevel(),
                              mSettings->getIniSettings()->voiceChatVolLevel);  // Process sound effects (SFX)
 
    mNetInterface->processConnections();                  // Pass updated ship info to the server
