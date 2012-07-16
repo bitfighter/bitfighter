@@ -805,6 +805,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ClassDiagram21.cd"
+			>
+		</File>
+		<File
 			RelativePath=".\ClientGame.cpp"
 			>
 		</File>
@@ -966,6 +970,10 @@
 		</File>
 		<File
 			RelativePath=".\JoystickRender.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\LineItem.cpp"
 			>
 		</File>
 		<File
