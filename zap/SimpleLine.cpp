@@ -53,6 +53,17 @@ SimpleLine::~SimpleLine()
 }
 
 
+void SimpleLine::setGeom(const Vector<Point> &points)
+{
+   if(points.size() >= 2)
+   {
+      setVert(points[0], 0);
+      setVert(points[1], 1);
+   }
+}
+
+
+
 S32 SimpleLine::getDockRadius()
 {
    return 8;

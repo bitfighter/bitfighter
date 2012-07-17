@@ -227,9 +227,6 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    dir.read(argv + 3);
    dir *= game->getGridSize();
 
-   setVert(pos, 0);
-   setVert(dir, 1);
-
    mSize = (F32)atof(argv[5]);
    mSize = max(min(mSize, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
 
@@ -242,9 +239,25 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
          mText += " ";
    }
 
-   computeExtent();
+   setGeom(pos, dir);
 
    return true;
+}
+
+
+void TextItem::setGeom(const Vector<Point> &points)
+{
+   if(points.size() >= 2)
+      setGeom(points[0], points[1]);
+}
+
+
+void TextItem::setGeom(const Point &pos, const Point &dest)
+{
+   setVert(pos, 0);
+   setVert(dest, 1);
+
+   computeExtent();
 }
 
 

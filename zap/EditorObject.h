@@ -50,6 +50,7 @@ public:
    virtual ~PointObject();    // Destructor
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+   virtual void setGeom(const Vector<Point> &points);
 };
 
 

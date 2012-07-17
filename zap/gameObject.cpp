@@ -1285,8 +1285,7 @@ S32 BfObject::setGeom(lua_State *L)
 
    Vector<Point> points = getPointsOrXYs(L, 1);
 
-   for(S32 i = 0; i < points.size(); i++)
-      logprintf("%d --> %s", i, points[i].toString().c_str());
+   /*Parent::setGeom(points);*/
 
    return 0;
 }

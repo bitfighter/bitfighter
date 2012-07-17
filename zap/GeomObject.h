@@ -129,6 +129,8 @@ public:
 
    virtual Point getPos() const;
    virtual void setPos(const Point &pos);
+
+   //virtual void setGeom(const Vector<Point> &points);
 };
 
 }
