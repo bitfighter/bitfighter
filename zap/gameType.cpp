@@ -1468,8 +1468,8 @@ string GameType::validateLoadout(const Vector<U8> &loadout)
       if(loadout[i] == WeaponTurret)      // Reject WeaponTurret
          return "Illegal weapon in loadout";
 
-      if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, not supported yet
-         return "Illegal weapon in loadout";
+//      if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, not supported yet
+//         return "Illegal weapon in loadout";
    }
 
    return "";     // Passed validation
@@ -1852,10 +1852,13 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 
    WeaponType weaponType;
 
+   // TODO: optimize with object type numbers instead of slow dynamic casts
    if( Projectile *proj = dynamic_cast<Projectile *>(damager) )
       weaponType = proj->mWeaponType;
    else if( BurstProjectile *grenproj = dynamic_cast<BurstProjectile*>(damager) )
       weaponType = grenproj->mWeaponType;
+   else if( HeatSeekerProjectile *heatSeeker = dynamic_cast<HeatSeekerProjectile*>(damager) )
+      weaponType = heatSeeker->mWeaponType;
    else
       return false;
 

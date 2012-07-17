@@ -1410,6 +1410,15 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 }
 
 
+void renderHeatSeeker(const Point &pos, U32 timeRemaining)
+{
+   // TODO:  make this more interesting
+   glColor(Colors::red);
+   drawPolygon(pos, 3, 7, 0);
+}
+
+
+
 void renderMine(const Point &pos, bool armed, bool visible)
 {
    F32 mod = 0.8f;

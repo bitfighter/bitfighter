@@ -113,8 +113,7 @@ public:
 
    enum Constants
    {
-      ExplodeMask = MoveItem::FirstFreeMask,
-      FirstFreeMask = ExplodeMask << 1,
+      FirstFreeMask = MoveItem::FirstFreeMask,
    };
 
    static const S32 InnerBlastRadius = 100;
@@ -255,6 +254,56 @@ public:
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
+};
+
+
+// Basic burst object, and the base clase used for both mines and spybugs
+class HeatSeekerProjectile : public MoveItem
+{
+private:
+   typedef MoveItem Parent;
+
+   enum Constants
+   {
+      FirstFreeMask = MoveItem::FirstFreeMask,
+   };
+
+   static U32 TargetAcquisitionRadius;
+   static F32 AccelerationConstant;
+
+   SafePtr<BfObject> mShooter;
+   BfObject *mAcquiredTarget;
+
+   S32 mTimeRemaining;
+   bool exploded;
+
+public:
+   HeatSeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
+   ~HeatSeekerProjectile();                                                                      // Destructor
+
+   WeaponType mWeaponType;
+
+   bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
+
+   void renderItem(const Point &pos);
+   void idle(IdleCallPath path);
+   void damageObject(DamageInfo *damageInfo);
+   void doExplosion(Point pos);
+   void handleCollision(BfObject *hitObject, Point collisionPoint);
+
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   TNL_DECLARE_CLASS(HeatSeekerProjectile);
+
+   //// Lua interface
+   LUAW_DECLARE_CLASS(HeatSeekerProjectile);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 
 
