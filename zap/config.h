@@ -176,6 +176,8 @@ public:
    F32 alertsVolLevel;              // And again
 
    F32 getMusicVolLevel();
+   F32 getRawMusicVolLevel();
+
    void setMusicVolLevel(F32 vol);
 
    sfxSets sfxSet;                  // Which set of SFX does the user want?
@@ -241,6 +243,8 @@ public:
    S32 winXPos;
    S32 winYPos;
    F32 winSizeFact;
+
+   bool musicMutedOnCmdLine;
 
    // Use 'fake fullscreen' vs real fullscreen
    bool useFakeFullscreen;

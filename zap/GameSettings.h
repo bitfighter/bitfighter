@@ -150,8 +150,6 @@ private:
    U32 getU32(ParamId paramId);
    F32 getF32(ParamId paramId);
 
-   bool getSpecified(ParamId paramId);                // Returns true if parameter was present, false if not
-
    DisplayMode resolveCmdLineSpecifiedDisplayMode();  // Tries to figure out what display mode was specified on the cmd line, if any
 
    Vector<Vector<U8> > mLoadoutPresets;
@@ -184,6 +182,8 @@ public:
 
    Vector<string> *getLevelSkipList();
    Vector<string> *getSpecifiedLevels();
+
+   bool getSpecified(ParamId paramId);                      // Returns true if parameter was present, false if not
 
    // Variations on generating a list of levels
    Vector<string> getLevelList();                            // Generic, grab a list of levels based on current settings
