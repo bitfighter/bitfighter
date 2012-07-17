@@ -27,7 +27,6 @@
 #define _TEXTITEM_H_
 
 #include "SimpleLine.h"       // For base class def
-//#include "polygon.h"          // For def of Polyline, for lineItem
 #include "Colors.h"
 
 using namespace std;
@@ -59,15 +58,11 @@ public:
    static const S32 MAX_TEXT_SIZE = 255;
    static const S32 MIN_TEXT_SIZE = 10;
 
-   //S32 mTeam;            // Team text is visible to (-1 for visible to all)
-   
    TextItem();            // Constructor
    virtual ~TextItem();   // Destructor
 
    TextItem *clone() const;
-   //void copyAttrs(TextItem *target);
 
-   //static Vector<Point> generatePoints(Point pos, Point dir);
    void render();
    S32 getRenderSortValue();
 
