@@ -1185,7 +1185,9 @@ void OptionsMenuUserInterface::setupMenus()
 
    addStickOptions(&opts);
 
-   InputMode inputMode = settings->getInputCodeManager()->getInputMode();
+   U32 inputMode = (U32)settings->getInputCodeManager()->getInputMode();   // 0 = keyboard, 1 = joystick
+   if(inputMode == InputModeJoystick)
+      inputMode += Joystick::UseJoystickNumber;
 
    addMenuItem(new ToggleMenuItem("PRIMARY INPUT:", 
                                   opts, 
