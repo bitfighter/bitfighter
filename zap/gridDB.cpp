@@ -669,9 +669,6 @@ DatabaseObject *GridDatabase::getObjectByIndex(S32 index)
 } 
 
 
-////////////////////////////////////////
-////////////////////////////////////////
-
 void DatabaseObject::addToDatabase(GridDatabase *database, const Rect &extent)
 {
    if(mDatabase)
@@ -806,26 +803,20 @@ void DatabaseObject::setExtent(const Rect &extents)
       minyold = S32(mExtent.min.y) >> GridDatabase::BucketWidthBitShift;
       maxxold = S32(mExtent.max.x) >> GridDatabase::BucketWidthBitShift;
       maxyold = S32(mExtent.max.y) >> GridDatabase::BucketWidthBitShift;
-      minx = S32(extents.min.x) >> GridDatabase::BucketWidthBitShift;
-      miny = S32(extents.min.y) >> GridDatabase::BucketWidthBitShift;
-      maxx = S32(extents.max.x) >> GridDatabase::BucketWidthBitShift;
-      maxy = S32(extents.max.y) >> GridDatabase::BucketWidthBitShift;
 
-      // To save CPU, check if there is anything different
+      minx    = S32(extents.min.x) >> GridDatabase::BucketWidthBitShift;
+      miny    = S32(extents.min.y) >> GridDatabase::BucketWidthBitShift;
+      maxx    = S32(extents.max.x) >> GridDatabase::BucketWidthBitShift;
+      maxy    = S32(extents.max.y) >> GridDatabase::BucketWidthBitShift;
+
+      // Don't do anything if the buckets haven't changed...
       if((minxold - minx) | (minyold - miny) | (maxxold - maxx) | (maxyold - maxy))
       {
-         // It is different, remove and add to database, but don't touch gridDB->mAllObjects
-
-         //printf("new  %i %i %i %i old %i %i %i %i\n", minx, miny, maxx, maxy, minxold, minyold, maxxold, maxyold);
-
-         if(U32(maxx - minx) >= gridDB->BucketRowCount)
-            maxx = minx + gridDB->BucketRowCount - 1;
-         if(U32(maxy - miny) >= gridDB->BucketRowCount)
-            maxy = miny + gridDB->BucketRowCount - 1;
-         if(U32(maxxold >= minxold) + gridDB->BucketRowCount)
-            maxxold = minxold + gridDB->BucketRowCount - 1;
-         if(U32(maxyold >= minyold) + gridDB->BucketRowCount)
-            maxyold = minyold + gridDB->BucketRowCount - 1;
+         // They are different... remove and readd to database, but don't touch gridDB->mAllObjects
+         if(U32(maxx - minx) >= gridDB->BucketRowCount)        maxx    = minx    + gridDB->BucketRowCount - 1;
+         if(U32(maxy - miny) >= gridDB->BucketRowCount)        maxy    = miny    + gridDB->BucketRowCount - 1;
+         if(U32(maxxold >= minxold) + gridDB->BucketRowCount)  maxxold = minxold + gridDB->BucketRowCount - 1;
+         if(U32(maxyold >= minyold) + gridDB->BucketRowCount)  maxyold = minyold + gridDB->BucketRowCount - 1;
 
 
          // Don't use x <= maxx, it will endless loop if maxx = S32_MAX and x overflows
@@ -873,7 +864,7 @@ DatabaseObject *DatabaseObject::clone() const
 ////////////////////////////////////////
 
 // Reusable container for searching gridDatabases
-// putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
+// Has to be outside of Zap namespace seems to help with debugging showing what's inside fillVector  (debugger forgets to add Zap::)
 Vector<Zap::DatabaseObject *> fillVector;
 Vector<Zap::DatabaseObject *> fillVector2;
 

@@ -65,7 +65,6 @@ private:
 
 public:
    GeomObject();                          // Constructor
-   //GeomObject(const GeomObject &geom);    // Copy constructor
    virtual ~GeomObject();                 // Destructor
 
    void setNewGeometry(GeomType geomType);
@@ -130,7 +129,7 @@ public:
    virtual Point getPos() const;
    virtual void setPos(const Point &pos);
 
-   //virtual void setGeom(const Vector<Point> &points);
+   virtual void setGeom(const Vector<Point> &points);
 };
 
 }

@@ -112,12 +112,14 @@ void MoveObject::onAddedToGame(Game *game)
 static const float MoveObjectCollisionElasticity = 1.7f;
 
 
-// Update object's extents in the database
-void MoveObject::updateExtentInDatabase()
+Rect MoveObject::calcExtents()
 {
+   const F32 buffer = 10.0f;
+
    Rect r(getActualPos(), getRenderPos());
-   r.expand(Point(mRadius + 10, mRadius + 10));
-   setExtent(r);
+   r.expand(Point(mRadius + buffer, mRadius + buffer));
+
+   return r;
 }
 
 
@@ -126,8 +128,6 @@ bool MoveObject::isMoveObject()
    return true;
 }
 
-
-//Point MoveObject::getVert(S32 index) const { return getActualPos(); }
 
 Point MoveObject::getPos() const { return getActualPos(); }
 Point MoveObject::getVel() const { return getActualVel(); }
@@ -158,6 +158,7 @@ void MoveObject::copyMoveState(S32 from, S32 to)
    setAngle(to, getAngle(from));
 }
 
+
 ///// The following 6 functions should be the ONLY ones to directly access mMoveStates members
 Point MoveObject::getPos(S32 stateIndex) const
 {
@@ -184,13 +185,6 @@ void MoveObject::setVel  (S32 stateIndex, const Point &vel) { mMoveStates.setVel
 void MoveObject::setAngle(S32 stateIndex, F32 angle)        { mMoveStates.setAngle(stateIndex, angle); }
 
 
-//void MoveObject::setVert(const Point &pos, S32 index)
-//{
-//   Parent::setVert(pos, index);
-//   setPos(pos);
-//}
-
-
 // For Geometry, should set both actual and render position
 void MoveObject::setPos(const Point &pos)
 {
@@ -210,6 +204,7 @@ void MoveObject::setPosVelAng(const Point &pos, const Point &vel, F32 ang)
       setAngle(i, ang);
    }
 }
+
 
 F32 MoveObject::getMass()
 {

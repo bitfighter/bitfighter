@@ -97,6 +97,7 @@ protected:
 
    // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
    // this one pretty much arbitrarily...  it won't be overridden.
+   static void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points);
    virtual void getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings);
    static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
 

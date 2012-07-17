@@ -185,9 +185,10 @@ F32 TextItem::getSize()
 }
 
 
-void TextItem::setSize(F32 size)
+// Set text size subject to min and max defined in TextItem
+void TextItem::setSize(F32 desiredSize)
 {
-   mSize = size;
+   mSize = max(min(desiredSize, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);
 }
 
 
@@ -227,8 +228,7 @@ bool TextItem::processArguments(S32 argc, const char **argv, Game *game)
    dir.read(argv + 3);
    dir *= game->getGridSize();
 
-   mSize = (F32)atof(argv[5]);
-   mSize = max(min(mSize, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);      // Note that same line exists below, in recalcXXX()... combine?
+   setSize((F32)atof(argv[5]));
 
    // Assemble any remainin args into a string
    mText = "";
@@ -257,7 +257,7 @@ void TextItem::setGeom(const Point &pos, const Point &dest)
    setVert(pos, 0);
    setVert(dest, 1);
 
-   computeExtent();
+   updateExtentInDatabase();
 }
 
 
@@ -277,8 +277,7 @@ void TextItem::recalcTextSize()
    F32 strWidth = F32(UserInterface::getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize; 
    F32 size = lineLen / strWidth;
 
-   // Compute text size subject to min and max defined in TextItem
-   mSize = max(min(size, (F32)MAX_TEXT_SIZE), (F32)MIN_TEXT_SIZE);
+  setSize(size);
 #endif
 }
 
@@ -292,12 +291,12 @@ void TextItem::onAddedToGame(Game *theGame)
 }
 
 
-// Bounding box for quick collision-possibility elimination, and display scoping purposes
-void TextItem::computeExtent()
+// Bounding box for display scoping purposes
+Rect TextItem::calcExtent()
 {
 #ifdef ZAP_DEDICATED
    // Don't care much about it on the server, as server won't render, and nothing collides with TextItems
-	setExtent(Rect(getVert(0), getVert(1)));
+	return(Rect(getVert(0), getVert(1)));
 #else
    F32 len = UserInterface::getStringWidth(mSize, mText.c_str());
    //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
@@ -331,7 +330,7 @@ void TextItem::computeExtent()
 
    Rect extent(Point(minx, miny), Point(maxx, maxy));
 
-   setExtent(extent);
+   return extent;
 #endif
 }
 
@@ -341,16 +340,19 @@ bool TextItem::getCollisionPoly(Vector<Point> &polyPoints) const
    return false;
 }
 
+
 // Handle collisions with a TextItem.  Easy, there are none.
 bool TextItem::collide(BfObject *hitObject)
 {
    return false;
 }
 
+
 void TextItem::idle(BfObject::IdleCallPath path)
 {
-   // Laze about, read a book, take a nap, whatever.
+   // Laze about, read a book, take a nap, whatever
 }
+
 
 U32 TextItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -387,7 +389,7 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    stream->readString(txt);
 
    mText = txt;
-   computeExtent();
+   updateExtentInDatabase();
 }
 
 

@@ -1097,10 +1097,10 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 
 //               Fn name    Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, isActive,  ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getAngle,  ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, getHealth, ARRAYDEF({{ END }}), 1 ) \
-   METHOD(CLASS, setHealth, ARRAYDEF({{ NUM }}), 1 ) \
+   METHOD(CLASS, isActive,  ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getAngle,  ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getHealth, ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setHealth, ARRAYDEF({{ NUM, END }}), 1 ) \
 
 
 GENERATE_LUA_METHODS_TABLE(EngineeredItem, LUA_METHODS);

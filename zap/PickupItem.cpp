@@ -31,13 +31,11 @@
 
 
 #ifndef ZAP_DEDICATED
-#  include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
+#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
 #endif
 
-
 #include "gameObjectRender.h"
-#include "stringUtils.h"      // for itos()
-
+#include "stringUtils.h"         // For itos()
 
 
 namespace Zap
@@ -183,7 +181,7 @@ void PickupItem::hide()
    mRepopTimer.reset(mRepopDelay * 1000);
 
    mIsVisible = false;
-   setMaskBits(PickupMask);      // Triggers update
+   setMaskBits(PickupMask);   // Triggers update
 }
 
 

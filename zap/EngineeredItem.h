@@ -73,9 +73,9 @@ protected:
 
    enum MaskBits
    {
-      InitialMask = Parent::FirstFreeMask << 0,
-      HealthMask = Parent::FirstFreeMask << 1,
-      TeamMask = Parent::FirstFreeMask << 2,
+      InitialMask   = Parent::FirstFreeMask << 0,
+      HealthMask    = Parent::FirstFreeMask << 1,
+      TeamMask      = Parent::FirstFreeMask << 2,
       FirstFreeMask = Parent::FirstFreeMask << 3,
    };
 

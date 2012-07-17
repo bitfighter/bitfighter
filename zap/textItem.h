@@ -45,8 +45,6 @@ private:
    F32 mSize;              // Text size
    string mText;           // Text itself
 
-   void computeExtent();   // Bounding box for quick collision-possibility elimination
-
    // How are this item's vertices labeled in the editor? -- these can be private
    const char *getInstructionMsg();
 
@@ -70,6 +68,8 @@ public:
    string toString(F32 gridSize) const;
    void setGeom(const Vector<Point> &points);
    void setGeom(const Point &pos, const Point &dest);
+   Rect calcExtent();      // Bounding box for display scoping purposes
+
 
    void onAddedToGame(Game *theGame);  
 
@@ -96,7 +96,6 @@ public:
 
    void renderEditorItem();
    F32 getSize();
-   void setSize(F32 size);
 
    string getText();
    void setText(string text);
@@ -107,6 +106,8 @@ public:
    void onGeomChanged();
 
    void recalcTextSize();
+   void setSize(F32 desiredSize);
+
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();

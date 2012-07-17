@@ -120,11 +120,10 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    //U32 retMask = Parent::packUpdate(connection, updateMask, stream);  // Goes to empty function NetObject::packUpdate
 
    if(stream->writeFlag(updateMask & InitialMask))
-   {
-      // Send id in inital packet
-      stream->writeRangedU32(mItemId, 0, U16_MAX);
+      stream->writeRangedU32(mItemId, 0, U16_MAX);    // Send id in inital packet
+
+   if(stream->writeFlag(updateMask & (InitialMask | GeomMask)))
       ((GameConnection *) connection)->writeCompressedPoint(getPos(), stream);
-   }
 
    return 0; //retMask;
 }
@@ -134,11 +133,12 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    //Parent::unpackUpdate(connection, stream);  // Goes to empty function NetObject::unpackUpdate
 
-   mInitial = stream->readFlag();
-   if(mInitial)     // InitialMask
-   {
+   mInitial = stream->readFlag();      // InitialMask
+   if(mInitial)     
       mItemId = stream->readRangedU32(0, U16_MAX);
 
+   if(stream->readFlag())              // GeomMask
+   {
       Point pos;
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
 

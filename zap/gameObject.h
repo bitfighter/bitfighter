@@ -94,6 +94,7 @@ class ClientInfo;
    TYPE_NUMBER( CoreTypeNumber,                true,              "CoreType"                ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "ZoneType"                ) \
    TYPE_NUMBER( CircleTypeNumber,              true,              "CircleType"              ) \
+   TYPE_NUMBER( HeatSeekerTypeNumber,          true,              "HeatSeekerType"          ) \
    TYPE_NUMBER( DeletedTypeNumber,             false,             "DeletedType"             ) \
    TYPE_NUMBER( UnknownTypeNumber,             false,             "UnknownType"             ) \
 
@@ -281,7 +282,8 @@ public:
    StringTableEntry getKillString();
 
    enum MaskBits {
-      FirstFreeMask = BIT(0)
+      GeomMask      = BIT(0),
+      FirstFreeMask = BIT(1)
    };
 
    BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
@@ -380,7 +382,7 @@ public:
 
    void onPointsChanged();
    void updateExtentInDatabase();
-   virtual void onGeomChanged();       // Item changed geometry (or moved), do any internal updating that might be required
+   virtual void onGeomChanged();                   // Item changed geometry (or moved), do any internal updating that might be required
 
    void unselect();
 

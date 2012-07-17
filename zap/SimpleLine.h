@@ -49,8 +49,6 @@ public:
    SimpleLine();           // Constructor
    virtual ~SimpleLine();  // Destructor
 
-   virtual void setGeom(const Vector<Point> &points);
-
    // Some properties about the item that will be needed in the editor
    virtual const char *getOnDockName() = 0;
 

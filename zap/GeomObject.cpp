@@ -176,6 +176,7 @@ void GeomObject::offset(const Point &offset)                       {  mGeometry.
 // Geom in-out
 void GeomObject::packGeom(GhostConnection *connection, BitStream *stream)    {   mGeometry.getGeometry()->packGeom(connection, stream);     }
 void GeomObject::unpackGeom(GhostConnection *connection, BitStream *stream)  {   mGeometry.getGeometry()->unpackGeom(connection, stream); onPointsChanged();  }
+void GeomObject::setGeom(const Vector<Point> &points)                         {   mGeometry.getGeometry()->setGeom(points); }
 
 void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize) 
 {  

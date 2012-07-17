@@ -211,6 +211,12 @@ void Geometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 }
 
 
+void Geometry::setGeom(const Vector<Point> &points)
+{
+   TNLAssert(false, "Not implemented");
+}
+
+
 string Geometry::geomToString(F32 gridSize) const
 {
    TNLAssert(false, "Not implemented");
@@ -457,6 +463,14 @@ void PointGeometry::unpackGeom(GhostConnection *connection, BitStream *stream)
 }
 
 
+void PointGeometry::setGeom(const Vector<Point> &points)
+{
+   if(points.size() >= 1)
+      mPoint = points[0];
+}
+
+
+
 Rect PointGeometry::calcExtents()
 {
    return Rect(mPoint, 1);
@@ -646,6 +660,16 @@ void SimpleLineGeometry::unpackGeom(GhostConnection *connection, BitStream *stre
 {
    mFromPos.read(stream);
    mToPos.read(stream);
+}
+
+
+void SimpleLineGeometry::setGeom(const Vector<Point> &points)
+{
+   if(points.size() >= 2)
+   {
+      mFromPos = points[0];
+      mFromPos = points[1];
+   }
 }
 
 
@@ -881,6 +905,17 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
    
    for(U32 i = 0; i < size; i++)
       mPolyBounds[i].read(stream);
+}
+
+
+void PolylineGeometry::setGeom(const Vector<Point> &points)
+{
+   S32 size = points.size();
+
+   mPolyBounds.resize(size);
+
+   for(S32 i = 0; i < size; i++)
+      mPolyBounds[i] = points[i];
 }
 
 

@@ -49,7 +49,7 @@ protected:
    F32 mRadius;
 
    enum MaskBits {
-      InitialMask = Parent::FirstFreeMask << 0,
+      InitialMask     = Parent::FirstFreeMask << 0,
       ItemChangedMask = Parent::FirstFreeMask << 1,
       ExplodedMask    = Parent::FirstFreeMask << 2,
       FirstFreeMask   = Parent::FirstFreeMask << 3

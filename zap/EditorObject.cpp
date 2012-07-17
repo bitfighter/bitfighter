@@ -76,13 +76,6 @@ PointObject::~PointObject()
 }
 
 
-void PointObject::setGeom(const Vector<Point> &points)
-{
-   if(points.size() > 0)
-      setPos(points[0]);
-}
-
-
 void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)
 {
 #ifndef ZAP_DEDICATED

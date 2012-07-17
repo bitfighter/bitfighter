@@ -91,7 +91,7 @@ public:
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);    // Called from child object idle methods
    void updateInterpolation();
-   void updateExtentInDatabase();
+   virtual Rect calcExtents();
 
    bool isMoveObject();
 

@@ -371,7 +371,7 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                   }
                   else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
                   {
-                     ok = false;     // for now...
+                     ok = true;     // for now...
                   }
                   break;
 
@@ -603,6 +603,28 @@ MenuItem *LuaObject::pushMenuItem (lua_State *L, MenuItem *menuItem)
 
 
 // Pulls values out of the table at specified index as strings, and puts them all into strings vector
+void LuaObject::getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points)
+{
+   // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
+
+   lua_pushvalue(L, index);	// Push our table onto the top of the stack
+   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops
+
+   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
+   // The lua_pushnil then pushed the table to -2, where it is currently located
+   while(lua_next(L, -2))     // -2 is our table
+   {
+      // Grab the value at the top of the stack
+      const F32 *vec = lua_tovec(L, -1);
+      Point p(vec[0], vec[1]);
+      points.push_back(p);
+
+      lua_pop(L, 1);    // We extracted that value, pop it off so we can push the next element
+   }
+}
+
+
+// Pulls values out of the table at specified index as strings, and puts them all into strings vector
 void LuaObject::getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings)
 {
    strings.clear();
@@ -796,8 +818,8 @@ Vector<Point> LuaObject::getPointsOrXYs(lua_State *L, S32 index)
          offset += 2;
       }
    }
-
-   // TODO: Add table support?
+   else if(lua_istable(L, index))
+      getPointVectorFromTable(L, index, points);
 
    return points;
  }
