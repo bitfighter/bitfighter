@@ -314,41 +314,6 @@ void Projectile::idle(BfObject::IdleCallPath path)
          else        // Hit nothing, advance projectile to endPos
          {
             timeLeft = 0;
-            //// Steer towards a nearby testitem
-            //static Vector<DatabaseObject *> targetItems;
-            //targetItems.clear();
-            //Rect searchArea(pos, 2000);
-            //S32 HeatSeekerTargetType = TestItemType | ResourceItemType;
-            //findObjects(HeatSeekerTargetType, targetItems, searchArea);
-
-            //F32 maxPull = 0;
-            //Point dist;
-            //Point maxDist;
-
-            //for(S32 i = 0; i < targetItems.size(); i++)
-            //{
-            //   BfObject *target = dynamic_cast<BfObject *>(targetItems[i]);
-            //   dist.set(pos - target->getActualPos());
-
-            //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
-            //   
-            //   pull *= (target->getObjectTypeMask() & ResourceItemType) ? .5 : 1;
-
-            //   if(pull > maxPull)
-            //   {
-            //      maxPull = pull;
-            //      maxDist.set(dist);
-            //   }
-            //   
-            //}
-
-            //if(maxPull > 0)
-            //{
-            //   F32 speed = velocity.len();
-            //   velocity += (velocity - maxDist) * maxPull;
-            //   velocity.normalize(speed);
-            //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
-            //}
 
             setPos(endPos);
          }
@@ -613,7 +578,7 @@ void BurstProjectile::explode(Point pos, WeaponType weaponType)
 
    if(!isGhost())
    {
-      setMaskBits(PositionMask);
+      setMaskBits(ExplodedMask);
       deleteObject(100);
 
       DamageInfo info;
@@ -1160,6 +1125,297 @@ const LuaFunctionProfile SpyBug::functionArgs[] = { { NULL, { }, 0 } };
 
 const char *SpyBug::luaClassName = "SpyBugItem";
 REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(HeatSeekerProjectile);
+
+// Constructor
+HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, mRadius, mMass)
+{
+   mObjectTypeNumber = HeatSeekerTypeNumber;
+
+   mNetFlags.set(Ghostable);
+
+   setActualPos(pos);
+   setActualVel(vel);
+   setMaskBits(PositionMask);
+   mWeaponType = WeaponHeatSeeker;
+
+   updateExtentInDatabase();
+
+   mTimeRemaining = GameWeapon::weaponInfo[WeaponHeatSeeker].projLiveTime;
+   exploded = false;
+
+   if(shooter)
+   {
+      setOwner(shooter->getOwner());
+      setTeam(shooter->getTeam());
+      mShooter = shooter;
+   }
+   else
+      setOwner(NULL);
+
+   mAcquiredTarget = NULL;
+
+   mRadius = 7;
+   mMass = 1;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+HeatSeekerProjectile::~HeatSeekerProjectile()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+F32 HeatSeekerProjectile::AccelerationConstant = 1.02;
+U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
+
+// Runs on client and server
+void HeatSeekerProjectile::idle(IdleCallPath path)
+{
+   Parent::idle(path);
+
+   if(path != BfObject::ServerIdleMainLoop)      // Server only from now on
+      return;
+
+   // Update time-to-live server-side
+   S32 deltaT = mCurrentMove.time;
+   if(!exploded)
+   {
+      if(mTimeRemaining <= deltaT)
+         handleCollision(NULL, getActualPos());
+      else
+         mTimeRemaining -= deltaT;
+   }
+
+   // Do we already have a target?
+   if(mAcquiredTarget)
+   {
+      // First, remove target if it is too far away.  Next tick will search for a new one
+      Point delta = mAcquiredTarget->getPos() - getActualPos();
+      if(delta.lenSquared() > TargetAcquisitionRadius * TargetAcquisitionRadius)
+         mAcquiredTarget = NULL;
+
+      // Else accelerate!
+      else
+      {
+         // Create an velocity vector towards the target.  Average the old velocity vector and
+         // a vector towards the target with the same magnitude.  Then add acceleration
+         // TODO:  put a maximum on the speed?
+         // TODO:  put a limit on angle changed per tick?  i.e. don't just split the angle in half
+         //        with the averaging of the velocities
+         Point targetVector = delta;
+         targetVector.normalize(getActualVel().len());
+         Point newVelocity = (targetVector + getActualVel()) / 2;
+
+         newVelocity *= AccelerationConstant;
+//         logprintf("speed: %f", newVelocity.len());
+         setActualVel(newVelocity);
+
+         // If we're right on top of the target, collide!
+         // FIXME:  need a better way to tell when we hit the target from this class
+         //         This fails miserably when the heat-seeker is going too fast
+         F32 hitDistance = mRadius + Ship::CollisionRadius + 2;
+         if(delta.lenSquared() < hitDistance * hitDistance)
+            handleCollision(mAcquiredTarget, getActualPos());
+      }
+   }
+
+   // No target acquired yet; time to search
+   else
+   {
+      Rect queryRect(getActualPos(), TargetAcquisitionRadius);
+      fillVector.clear();
+      findObjects(isShipType, fillVector, queryRect);
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
+
+         // TODO: determine nearest target?
+
+         // Don't target self
+         if(mShooter == foundObject)
+            continue;
+
+         Point delta = foundObject->getPos() - getActualPos();
+
+         // Only acquire an object within a circle radius instead of query rect
+         if(delta.lenSquared() > TargetAcquisitionRadius * TargetAcquisitionRadius)
+            continue;
+
+         // We found a target!
+         mAcquiredTarget = foundObject;
+         break;
+      }
+   }
+
+   // XXX:  really old code from watusimoto on first run with heat-seeker.  still useful??
+   //// Steer towards a nearby testitem
+   //static Vector<DatabaseObject *> targetItems;
+   //targetItems.clear();
+   //Rect searchArea(pos, 2000);
+   //S32 HeatSeekerTargetType = TestItemType | ResourceItemType;
+   //findObjects(HeatSeekerTargetType, targetItems, searchArea);
+
+   //F32 maxPull = 0;
+   //Point dist;
+   //Point maxDist;
+
+   //for(S32 i = 0; i < targetItems.size(); i++)
+   //{
+   //   BfObject *target = dynamic_cast<BfObject *>(targetItems[i]);
+   //   dist.set(pos - target->getActualPos());
+
+   //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
+   //
+   //   pull *= (target->getObjectTypeMask() & ResourceItemType) ? .5 : 1;
+
+   //   if(pull > maxPull)
+   //   {
+   //      maxPull = pull;
+   //      maxDist.set(dist);
+   //   }
+   //
+   //}
+
+   //if(maxPull > 0)
+   //{
+   //   F32 speed = velocity.len();
+   //   velocity += (velocity - maxDist) * maxPull;
+   //   velocity.normalize(speed);
+   //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
+   //}
+}
+
+
+U32 HeatSeekerProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 ret = Parent::packUpdate(connection, updateMask, stream);
+
+   stream->writeFlag(exploded);
+   stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+   return ret;
+}
+
+
+void HeatSeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+
+   TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
+
+   if(stream->readFlag())
+   {
+      disableCollision();
+      doExplosion(getActualPos());
+   }
+
+   if(stream->readFlag())
+      SoundSystem::playSoundEffect(SFXBurstProjectile, getActualPos(), getActualVel());
+}
+
+
+void HeatSeekerProjectile::damageObject(DamageInfo *theInfo)
+{
+   // If we're being damaged by a burst, explode...
+   if(theInfo->damageType == DamageTypeArea)
+   {
+      handleCollision(theInfo->damagingObject, getActualPos());
+      return;
+   }
+
+   computeImpulseDirection(theInfo);
+
+   setMaskBits(PositionMask);
+}
+
+
+void HeatSeekerProjectile::doExplosion(Point pos)
+{
+#ifndef ZAP_DEDICATED
+   if(isGhost())
+   {
+      TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+      static_cast<ClientGame *>(getGame())->emitBlast(pos, 100);          // New, manly explosion
+
+      SoundSystem::playSoundEffect(SFXMineExplode, getActualPos());
+   }
+#endif
+}
+
+
+// Server-side only
+void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionPoint)
+{
+   // Damage the object we hit
+   if(hitObject)
+   {
+      DamageInfo theInfo;
+
+      theInfo.collisionPoint = collisionPoint;
+      theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+      theInfo.damageType = DamageTypePoint;
+      theInfo.damagingObject = this;
+//      theInfo.impulseVector = mVelocity;
+      theInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+
+      hitObject->damageObject(&theInfo);
+
+      if(getOwner())
+         getOwner()->getStatistics()->countHit(mWeaponType);
+   }
+
+   mTimeRemaining = 0;
+   exploded = true;
+   setMaskBits(ExplodedMask);
+
+   disableCollision();
+   deleteObject(100);
+}
+
+
+bool HeatSeekerProjectile::collide(BfObject *otherObj)
+{
+   return true;
+}
+
+
+void HeatSeekerProjectile::renderItem(const Point &pos)
+{
+   if(exploded)
+      return;
+
+   F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
+   renderHeatSeeker(pos, (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())) / startLiveTime);
+}
+
+
+/////
+// Lua interface
+
+//               Fn name    Param profiles  Profile count
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(HeatSeekerProjectile, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(HeatSeekerProjectile, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *HeatSeekerProjectile::luaClassName = "HeatSeeker";
+REGISTER_LUA_SUBCLASS(HeatSeekerProjectile, MoveItem);
+
+S32 HeatSeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+
 
 
 };

@@ -105,7 +105,7 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone));
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
    gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
-// { KEY_6, 5, WeaponHeatSeeker, "Heat Seeker"},      // Need to make changes below to support this
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponHeatSeeker,"Heat Seeker",   "", ModuleNone));
 };
 
 

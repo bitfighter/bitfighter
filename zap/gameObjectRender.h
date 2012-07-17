@@ -182,9 +182,10 @@ extern void renderSlipZone(const Vector<Point> *bounds, const Vector<Point> *bou
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 
 extern void renderProjectile(const Point &pos, U32 type, U32 time);
+extern void renderHeatSeeker(const Point &pos, U32 timeRemaining);
 
 extern void renderMine(const Point &pos, bool armed, bool visible);
-extern void renderGrenade(const Point &pos, F32 vel);
+extern void renderGrenade(const Point &pos, F32 lifeLeft);
 extern void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool drawOutline);
 
 extern void renderRepairItem(const Point &pos);
