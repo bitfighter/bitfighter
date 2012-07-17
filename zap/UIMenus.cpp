@@ -1093,7 +1093,7 @@ static void addStickOptions(Vector<string> *opts)
    opts->push_back("KEYBOARD");
    
    for(S32 i = 0; i < Joystick::DetectedJoystickNameList.size(); i++)
-      opts->push_back(string("JOYSTICK ") + itos(i+1));
+      opts->push_back(string("JOYSTICK ") + itos(i + 1));
 }
 
 
