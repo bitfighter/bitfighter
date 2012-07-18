@@ -26,7 +26,7 @@
 #include "masterConnection.h"
 #include "gameConnection.h"
 #include "gameNetInterface.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "version.h"
 #include "config.h"
 #include "ClientInfo.h"

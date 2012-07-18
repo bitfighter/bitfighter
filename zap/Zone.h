@@ -26,7 +26,7 @@
 #ifndef _ZONE_H_
 #define _ZONE_H_
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"

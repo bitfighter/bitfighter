@@ -27,7 +27,7 @@
 #define _PROJECTILE_H_
 
 #include "gameType.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "item.h"
 #include "gameWeapons.h"
 #include "SoundSystem.h" // for enum SFXProfiles

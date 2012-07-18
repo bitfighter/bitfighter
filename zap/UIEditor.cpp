@@ -1938,9 +1938,9 @@ void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes rend
 
          if(mPreviewMode)
          {
-            BfObject *gameObject = dynamic_cast<BfObject *>(obj);
-            if(gameObject)
-               gameObject->render();
+            BfObject *bfObj = dynamic_cast<BfObject *>(obj);
+            if(bfObj)
+               bfObj->render();
          }
          else
          {

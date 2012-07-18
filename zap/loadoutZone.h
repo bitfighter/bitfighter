@@ -26,7 +26,7 @@
 #ifndef _LOADOUTZONE_H_6742_
 #define _LOADOUTZONE_H_6742_
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"

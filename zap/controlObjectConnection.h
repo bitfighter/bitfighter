@@ -31,7 +31,7 @@
 
 #include "move.h"
 #include "Point.h"
-#include "gameObject.h" 
+#include "BfObject.h" 
 
 using namespace TNL;
 

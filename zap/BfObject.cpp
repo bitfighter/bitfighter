@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "moveObject.h"          // For ActualState definition
 #include "gameType.h"
 #include "ship.h"

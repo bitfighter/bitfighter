@@ -27,7 +27,7 @@
 #define _SHIP_H_
 
 #include "item.h"    // for Item and LuaItem
-#include "gameObject.h"
+#include "BfObject.h"
 #include "moveObject.h"
 #include "luaObject.h"
 #include "SoundEffect.h"

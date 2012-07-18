@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gridDB.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "moveObject.h"    // For def of ActualState
 #include "EditorObject.h"  // For def of EditorObject
 #include "WallSegmentManager.h"

@@ -26,7 +26,7 @@
 #include "projectile.h"
 #include "gameWeapons.h"
 #include "SoundSystem.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameObjectRender.h"
 #include "gameConnection.h"
 #include "stringUtils.h"

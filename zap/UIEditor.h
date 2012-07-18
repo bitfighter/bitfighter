@@ -31,7 +31,7 @@
 #include "UIEditorMenus.h"       // For PluginMenuUI
 
 #include "gameLoader.h"
-#include "gameObject.h"          // For BfObject definition
+#include "BfObject.h"          // For BfObject definition
 #include "gridDB.h"              // For DatabaseObject definition
 #include "Timer.h"
 #include "Point.h"

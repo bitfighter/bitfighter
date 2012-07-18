@@ -29,7 +29,7 @@
 #include "game.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameObjectRender.h"
 #include "gameType.h"
 #include "masterConnection.h"

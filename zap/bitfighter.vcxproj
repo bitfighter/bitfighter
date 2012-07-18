@@ -155,7 +155,7 @@
     <ClCompile Include="..\zap\gameConnection.cpp" />
     <ClCompile Include="..\zap\gameLoader.cpp" />
     <ClCompile Include="..\zap\gameNetInterface.cpp" />
-    <ClCompile Include="..\zap\gameObject.cpp" />
+    <ClCompile Include="BfObject.cpp" />
     <ClCompile Include="..\zap\gameObjectRender.cpp" />
     <ClCompile Include="..\zap\gameType.cpp" />
     <ClCompile Include="..\zap\gameWeapons.cpp" />
@@ -284,7 +284,7 @@
     <ClInclude Include="..\zap\gameConnection.h" />
     <ClInclude Include="..\zap\gameLoader.h" />
     <ClInclude Include="..\zap\gameNetInterface.h" />
-    <ClInclude Include="..\zap\gameObject.h" />
+    <ClInclude Include="BfObject.h" />
     <ClInclude Include="..\zap\gameObjectRender.h" />
     <ClInclude Include="..\zap\gameType.h" />
     <ClInclude Include="..\zap\gameWeapons.h" />

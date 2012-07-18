@@ -27,7 +27,7 @@
 #ifndef _EDITOROBJECT_H_
 #define _EDITOROBJECT_H_
 
-#include "gameObject.h"          // We inherit from this -- for BfObject, for now
+#include "BfObject.h"          // We inherit from this -- for BfObject, for now
 
 #include "Point.h"
 #include "tnlVector.h"

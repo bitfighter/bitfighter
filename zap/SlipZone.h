@@ -26,7 +26,7 @@
 #ifndef _SLIPZONE_H_
 #define _SLIPZONE_H_
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "polygon.h"
 
 namespace Zap

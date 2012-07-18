@@ -28,7 +28,7 @@
 
 #include "SimpleLine.h"    // For SimpleLine def
 #include "gameConnection.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "projectile.h"    // For LuaItem
 #include "Point.h"
 #include "Colors.h"

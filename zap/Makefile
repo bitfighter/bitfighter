@@ -59,7 +59,7 @@ OBJECTS_SHARED=\
    gameConnection.o\
    gameLoader.o\
    gameNetInterface.o\
-   gameObject.o\
+   BfObject.o\
    GameSettings.o\
    gameStats.o\
    gameType.o\

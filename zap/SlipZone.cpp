@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "stringUtils.h"

@@ -23,8 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _GAMEOBJECT_H_
-#define _GAMEOBJECT_H_
+#ifndef _BFOBJECT_H_
+#define _BFOBJECT_H_
 
 #include "gridDB.h"           // Base class
 #include "tnlNetObject.h"
@@ -138,7 +138,6 @@ typedef bool (*TestFunc)(U8);
 
 const S32 gSpyBugRange = 300;                // How far can a spy bug see?
 
-class GameObject;
 class Game;
 class GameConnection;
 class Color;

@@ -26,7 +26,7 @@
 #ifndef _BOTNAVMESHZONES_H_
 #define _BOTNAVMESHZONES_H_
 
-#include "gameObject.h"    // For base classes
+#include "BfObject.h"    // For base classes
 #include "polygon.h"
 #include "ship.h"
 

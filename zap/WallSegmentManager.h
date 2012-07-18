@@ -26,7 +26,7 @@
 #ifndef _WALL_SEGMENT_MANAGER_H_
 #define _WALL_SEGMENT_MANAGER_H_
 
-#include "gameObject.h"
+#include "BfObject.h"
 //#include "LineItem.h"      // for LineItem def  TODO: get rid of this
 
 #include "Point.h"

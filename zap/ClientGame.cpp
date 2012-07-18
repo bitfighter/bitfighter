@@ -34,7 +34,7 @@
 #include "GameSettings.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameObjectRender.h"
 #include "masterConnection.h"
 #include "move.h"

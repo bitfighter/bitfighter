@@ -30,7 +30,7 @@
 #include "Point.h"
 #include "Rect.h"
 #include "tnlVector.h"
-#include "gameObject.h" // for BfObject
+#include "BfObject.h" 
 
 namespace TNL
 {
@@ -48,7 +48,7 @@ namespace Zap
 {
 
 // Geometry is in Geometry_Base.h
-// The split .h files was due to gameObject trying to include us, and we need BfObject
+// The split .h files was due to BfObject trying to include us, and we need BfObject
 
 ////////////////////////////////////////
 ////////////////////////////////////////

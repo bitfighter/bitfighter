@@ -26,7 +26,7 @@
 #ifndef _POLYGON_H_
 #define _POLYGON_H_
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "EditorObject.h"     // For PolygonObject parentage
 #include "luaObject.h"
 #include "Geometry.h"

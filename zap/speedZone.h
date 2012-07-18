@@ -27,7 +27,7 @@
 #define _GO_FAST_H_
 
 #include "SimpleLine.h"    // For SimpleLine def
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"

@@ -26,7 +26,7 @@
 #ifndef _ENGINEEREDITEM_H_
 #define _ENGINEEREDITEM_H_
 
-#include "gameObject.h"
+#include "BfObject.h"
 #include "item.h"
 #include "moveObject.h"    // For MoveItem
 #include "barrier.h"

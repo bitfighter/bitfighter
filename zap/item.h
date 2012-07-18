@@ -26,7 +26,7 @@
 #ifndef _ITEM_H_
 #define _ITEM_H_
 
-#include "gameObject.h"       // Parent class
+#include "BfObject.h"         // Parent class
 #include "EditorObject.h"     // Parent class
 #include "luaObject.h"        // Parent class
 

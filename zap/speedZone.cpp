@@ -25,7 +25,7 @@
 
 #include "speedZone.h"
 #include "game.h"
-#include "gameObject.h"
+#include "BfObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
