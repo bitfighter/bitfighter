@@ -163,14 +163,20 @@ U32 GameZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    if(stream->writeFlag(updateMask & GeomMask))
       packGeom(connection, stream);
 
+   if(hasTeam() && stream->writeFlag(updateMask & TeamMask))
+      writeThisTeam(stream);
+
    return 0;
 }
 
 
 void GameZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(stream->readFlag())     // GeomMask
+   if(stream->readFlag())                 // GeomMask
       unpackGeom(connection, stream);
+
+   if(hasTeam() && stream->readFlag())    // TeamMask
+      readThisTeam(stream);
 }
 
 

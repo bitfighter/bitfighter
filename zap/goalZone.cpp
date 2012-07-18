@@ -211,13 +211,10 @@ void GoalZone::setHasFlag(bool hasFlag)
 
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   Parent::packUpdate(connection, updateMask, stream);
+   Parent::packUpdate(connection, updateMask, stream);      // Handles Geomand Team
    
    if(stream->writeFlag(updateMask & InitialMask))
       stream->write(mScore);
-
-   if(stream->writeFlag(updateMask & TeamMask))
-      writeThisTeam(stream);
 
    return 0;
 }
@@ -225,19 +222,18 @@ U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
+   S32 oldTeam = getTeam();
+
    Parent::unpackUpdate(connection, stream);
 
    if(stream->readFlag()) 
       stream->read(&mScore);
 
-   if(stream->readFlag())
+   // Some special handling if we've changed teams
+   if(getTeam() != oldTeam && !isInitialUpdate() && getTeam() != TEAM_NEUTRAL)   // Team will be neutral on touchdown, and we don't want to flash then!
    {
-      readThisTeam(stream);                                 // Zone was captured by team mTeam
-      if(!isInitialUpdate() && getTeam() != TEAM_NEUTRAL)   // Team will be neutral on touchdown, and we don't want to flash then!
-      {
-         mFlashTimer.reset(FlashDelay);
-         mFlashCount = FlashCount;
-      }
+      mFlashTimer.reset(FlashDelay);
+      mFlashCount = FlashCount;
    }
 }
 
