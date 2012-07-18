@@ -211,11 +211,10 @@ void GoalZone::setHasFlag(bool hasFlag)
 
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
+   Parent::packUpdate(connection, updateMask, stream);
+   
    if(stream->writeFlag(updateMask & InitialMask))
-   {
-      packGeom(connection, stream);
       stream->write(mScore);
-   }
 
    if(stream->writeFlag(updateMask & TeamMask))
       writeThisTeam(stream);
@@ -226,12 +225,10 @@ U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(stream->readFlag()) 
-   {
-      unpackGeom(connection, stream);
+   Parent::unpackUpdate(connection, stream);
 
+   if(stream->readFlag()) 
       stream->read(&mScore);
-   }
 
    if(stream->readFlag())
    {

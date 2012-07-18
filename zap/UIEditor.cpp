@@ -40,7 +40,7 @@
 #include "ClientGame.h"  
 #include "gameType.h"
 #include "soccerGame.h"          // For Soccer ball radius
-#include "NexusGame.h"           // For NexusObject def
+#include "NexusGame.h"           // For NexusZone def
 #include "CoreGame.h"            // For CoreItem def
 #include "EngineeredItem.h"      // For Turret properties
 #include "PickupItem.h"          // For RepairItem
@@ -242,7 +242,7 @@ void EditorUserInterface::populateDock()
 
    if(getGame()->getGameType()->getGameTypeId() == NexusGame)
    {
-      addDockObject(new NexusObject(), xPos, yPos);
+      addDockObject(new NexusZone(), xPos, yPos);
       yPos += 25;
    }
    else

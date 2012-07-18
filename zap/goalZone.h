@@ -34,9 +34,9 @@
 namespace Zap
 {
 
-class GoalZone : public Zone
+class GoalZone : public GameZone
 {
-   typedef Zone Parent;
+   typedef GameZone Parent;
 
 private:
    static const S32 FlashDelay = 500;
@@ -51,8 +51,7 @@ private:
 protected:
    enum MaskBits {
       InitialMask   = Parent::FirstFreeMask << 0,
-      TeamMask      = Parent::FirstFreeMask << 1,
-      FirstFreeMask = Parent::FirstFreeMask << 2
+      FirstFreeMask = Parent::FirstFreeMask << 1
    };
 
 public:

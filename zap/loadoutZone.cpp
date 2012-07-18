@@ -155,16 +155,17 @@ bool LoadoutZone::collide(BfObject *hitObject)
 
 U32 LoadoutZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
+   Parent::packUpdate(connection, updateMask, stream);
    writeThisTeam(stream);
-   packGeom(connection, stream);
+
    return 0;
 }
 
 
 void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
+   Parent::unpackUpdate(connection, stream);
    readThisTeam(stream);
-   unpackGeom(connection, stream);
 }
 
 

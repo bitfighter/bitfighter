@@ -153,6 +153,27 @@ const LuaFunctionProfile Zone::functionArgs[] = { { NULL, { }, 0 } };
 const char *Zone::luaClassName = "Zone";
 REGISTER_LUA_SUBCLASS(Zone, BfObject);
 
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+U32 GameZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   if(stream->writeFlag(updateMask & GeomMask))
+      packGeom(connection, stream);
+
+   return 0;
+}
+
+
+void GameZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   if(stream->readFlag())     // GeomMask
+      unpackGeom(connection, stream);
+}
+
+
 };
 
 

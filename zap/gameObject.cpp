@@ -437,6 +437,7 @@ S32 BfObject::getTeam() const
 void BfObject::setTeam(S32 team)
 {
    mTeam = team;
+   setMaskBits(TeamMask);
 }
 
 
@@ -1250,7 +1251,7 @@ S32 BfObject::getTeamIndx(lua_State *L) { return returnInt  (L, mTeam + 1);     
 
 S32 BfObject::setTeam(lua_State *L) 
 { 
-   checkArgList(L, functionArgs, "BfObject", "getTeamIndx");
+   checkArgList(L, functionArgs, "BfObject", "setTeam");
 
    setTeam(getInt(L, 1) - 1);    // - 1 because Lua indices start at 1  
    

@@ -220,7 +220,7 @@ bool NexusGameType::isSpawnWithLoadoutGame()
 }
 
 
-void NexusGameType::addNexus(NexusObject *nexus)
+void NexusGameType::addNexus(NexusZone *nexus)
 {
    mNexus.push_back(nexus);
 }
@@ -345,10 +345,10 @@ bool NexusGameType::saveMenuItem(const MenuItem *menuItem, const string &key)
 #endif
 
 
-TNL_IMPLEMENT_NETOBJECT(NexusObject);
+TNL_IMPLEMENT_NETOBJECT(NexusZone);
 
 
-TNL_IMPLEMENT_NETOBJECT_RPC(NexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+TNL_IMPLEMENT_NETOBJECT_RPC(NexusZone, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    getGame()->getGameType()->mZoneGlowTimer.reset();
 }
@@ -356,7 +356,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusObject, s2cFlagsReturned, (), (), NetClassGroup
 
 // The nexus is open.  A ship has entered it.  Now what?
 // Runs on server only
-void NexusGameType::shipTouchNexus(Ship *theShip, NexusObject *theNexus)
+void NexusGameType::shipTouchNexus(Ship *theShip, NexusZone *theNexus)
 {
    NexusFlagItem *theFlag = findFirstNexusFlag(theShip);
 
@@ -506,7 +506,7 @@ void NexusGameType::idle_server(U32 deltaT)
          if(!client_ship)
             continue;
 
-         NexusObject *nexus = dynamic_cast<NexusObject *>(client_ship->isInZone(NexusTypeNumber));
+         NexusZone *nexus = dynamic_cast<NexusZone *>(client_ship->isInZone(NexusTypeNumber));
 
          if(nexus)
             shipTouchNexus(client_ship, nexus);
@@ -706,7 +706,7 @@ void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theOtherFlag)
          if(mNexusIsOpen)
          {
             // Check if ship is sitting on an open Nexus (can use static_cast because we already know the type, even though it could be NULL)
-            NexusObject *nexus = static_cast<NexusObject *>(theShip->isInZone(NexusTypeNumber));
+            NexusZone *nexus = static_cast<NexusZone *>(theShip->isInZone(NexusTypeNumber));
 
             if(nexus)         
                shipTouchNexus(theShip, nexus);
@@ -897,7 +897,7 @@ void NexusFlagItem::sendHome()
 
 
 // Constructor
-NexusObject::NexusObject()
+NexusZone::NexusZone()
 {
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
@@ -907,15 +907,15 @@ NexusObject::NexusObject()
 
 
 // Destructor
-NexusObject::~NexusObject()
+NexusZone::~NexusZone()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
-NexusObject *NexusObject::clone() const
+NexusZone *NexusZone::clone() const
 {
-   return new NexusObject(*this);
+   return new NexusZone(*this);
 }
 
 
@@ -923,7 +923,7 @@ NexusObject *NexusObject::clone() const
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
-bool NexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
+bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
 {
    // Need to handle or ignore arguments that starts with letters,
    // so a possible future version can add parameters without compatibility problem.
@@ -972,24 +972,24 @@ bool NexusObject::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-const char *NexusObject::getOnScreenName()     { return "Nexus"; }
-const char *NexusObject::getOnDockName()       { return "Nexus"; }
-const char *NexusObject::getPrettyNamePlural() { return "Nexii"; }
-const char *NexusObject::getEditorHelpString() { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
+const char *NexusZone::getOnScreenName()     { return "Nexus"; }
+const char *NexusZone::getOnDockName()       { return "Nexus"; }
+const char *NexusZone::getPrettyNamePlural() { return "Nexii"; }
+const char *NexusZone::getEditorHelpString() { return "Area to bring flags in Hunter game.  Cannot be used in other games."; }
 
 
-bool NexusObject::hasTeam()      { return false; }
-bool NexusObject::canBeHostile() { return false; }
-bool NexusObject::canBeNeutral() { return false; }
+bool NexusZone::hasTeam()      { return false; }
+bool NexusZone::canBeHostile() { return false; }
+bool NexusZone::canBeNeutral() { return false; }
 
 
-string NexusObject::toString(F32 gridSize) const
+string NexusZone::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 
-void NexusObject::onAddedToGame(Game *theGame)
+void NexusZone::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
 
@@ -1002,13 +1002,13 @@ void NexusObject::onAddedToGame(Game *theGame)
 }
 
 
-void NexusObject::idle(BfObject::IdleCallPath path)
+void NexusZone::idle(BfObject::IdleCallPath path)
 {
    // Do nothing
 }
 
 
-void NexusObject::render()
+void NexusZone::render()
 {
 #ifndef ZAP_DEDICATED
    GameType *gt = getGame()->getGameType();
@@ -1019,7 +1019,7 @@ void NexusObject::render()
 }
 
 
-void NexusObject::renderDock()
+void NexusZone::renderDock()
 {
 #ifndef ZAP_DEDICATED
   renderNexus(getOutline(), getFill(), false, 0);
@@ -1027,21 +1027,21 @@ void NexusObject::renderDock()
 }
 
 
-void NexusObject::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+void NexusZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
    render();
    PolygonObject::renderEditor(currentScale, snappingToWallCornersEnabled);
 }
 
 
-bool NexusObject::getCollisionPoly(Vector<Point> &polyPoints) const
+bool NexusZone::getCollisionPoly(Vector<Point> &polyPoints) const
 {
    polyPoints = *getOutline();
    return true;
 }
 
 
-bool NexusObject::collide(BfObject *hitObject)
+bool NexusZone::collide(BfObject *hitObject)
 {
    if(isGhost())
       return false;
@@ -1066,28 +1066,14 @@ bool NexusObject::collide(BfObject *hitObject)
 }
 
 
-U32 NexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
-{
-   packGeom(connection, stream);
-
-   return 0;
-}
-
-
-void NexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
-{
-   unpackGeom(connection, stream);      
-}
-
-
 /////
 // Lua interface
 
-const luaL_reg           NexusObject::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile NexusObject::functionArgs[] = { { NULL, { }, 0 } };
+const luaL_reg           NexusZone::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile NexusZone::functionArgs[] = { { NULL, { }, 0 } };
 
 
-const char *NexusObject::luaClassName = "NexusObject";
-REGISTER_LUA_SUBCLASS(NexusObject, Zone);
+const char *NexusZone::luaClassName = "NexusZone";
+REGISTER_LUA_SUBCLASS(NexusZone, Zone);
 
 };

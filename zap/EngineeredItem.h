@@ -75,8 +75,7 @@ protected:
    {
       InitialMask   = Parent::FirstFreeMask << 0,
       HealthMask    = Parent::FirstFreeMask << 1,
-      TeamMask      = Parent::FirstFreeMask << 2,
-      FirstFreeMask = Parent::FirstFreeMask << 3,
+      FirstFreeMask = Parent::FirstFreeMask << 2
    };
 
 public:

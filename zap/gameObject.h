@@ -283,7 +283,8 @@ public:
 
    enum MaskBits {
       GeomMask      = BIT(0),
-      FirstFreeMask = BIT(1)
+      TeamMask      = BIT(1),
+      FirstFreeMask = BIT(2)
    };
 
    BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);

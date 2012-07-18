@@ -35,9 +35,9 @@
 namespace Zap
 {
 
-class LoadoutZone : public Zone
+class LoadoutZone : public GameZone
 {
-   typedef Zone Parent;
+   typedef GameZone Parent;
 
 public:
    LoadoutZone();             // C++ constructor

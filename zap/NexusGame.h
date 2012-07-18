@@ -37,7 +37,7 @@ namespace Zap
 
 class Ship;
 class NexusFlagItem;
-class NexusObject;
+class NexusZone;
 
 class NexusGameType : public GameType
 {
@@ -57,7 +57,7 @@ private:
    bool nexusShouldChange();  // Is Nexus overdue for a change?
 
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
-   Vector<SafePtr<NexusObject> > mNexus;
+   Vector<SafePtr<NexusZone> > mNexus;
 
    void idle_client(U32 deltaT);     // Idle for clients
    void idle_server(U32 deltaT);     // Idle for server
@@ -87,8 +87,8 @@ public:
    bool saveMenuItem(const MenuItem *menuItem, const string &key);
 #endif
 
-   void addNexus(NexusObject *theObject);
-   void shipTouchNexus(Ship *ship, NexusObject *nexus);
+   void addNexus(NexusZone *theObject);
+   void shipTouchNexus(Ship *ship, NexusZone *nexus);
    void onGhostAvailable(GhostConnection *connection);
    void idle(BfObject::IdleCallPath path, U32 deltaT);
 
@@ -183,15 +183,15 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class NexusObject : public Zone
+class NexusZone : public GameZone
 {
-   typedef Zone Parent;
+   typedef GameZone Parent;
 
 public:
-   NexusObject();       // Constructor
-   ~NexusObject();      // Destructor
+   NexusZone();       // Constructor
+   ~NexusZone();      // Destructor
 
-   NexusObject *clone() const;
+   NexusZone *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -204,12 +204,13 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(BfObject *hitObject);
 
-   U32 packUpdate(GhostConnection *connection, U32 mask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   // These services are used, but provided solely by parent
+   //U32 packUpdate(GhostConnection *connection, U32 mask, BitStream *stream);
+   //void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_RPC(s2cFlagsReturned, ());    // Alert the Nexus object that flags have been returned to it
 
-   TNL_DECLARE_CLASS(NexusObject);
+   TNL_DECLARE_CLASS(NexusZone);
 
 
    /////
@@ -228,7 +229,7 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(NexusObject);
+   LUAW_DECLARE_CLASS(NexusZone);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

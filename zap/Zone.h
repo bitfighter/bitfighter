@@ -75,6 +75,21 @@ public:
    static const LuaFunctionProfile functionArgs[];
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Extends above with some methods related to client/server interaction; Zone itself is server-only
+class GameZone : public Zone
+{
+   typedef Zone Parent;
+
+public:
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
+};
+
+
 };
 
 

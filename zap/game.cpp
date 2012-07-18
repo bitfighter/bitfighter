@@ -644,8 +644,8 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          strcpy(obj, "FlagItem");
 
       // Convert legacy Hunters* objects
-      else if(!stricmp(argv[0], "HuntersNexusObject"))
-         strcpy(obj, "NexusObject");
+      else if(stricmp(argv[0], "HuntersNexusObject") == 0 || stricmp(argv[0], "NexusObject") == 0)
+         strcpy(obj, "NexusZone");
 
       else
          strncpy(obj, argv[0], LevelLoader::MaxArgLen);
