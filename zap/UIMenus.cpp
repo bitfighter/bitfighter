@@ -1218,11 +1218,14 @@ void OptionsMenuUserInterface::setupMenus()
    addMenuItem(new ToggleMenuItem("SFX VOLUME:",        opts, U32((settings->getIniSettings()->sfxVolLevel + 0.05) * 10.0), false, 
                                   setSFXVolumeCallback,   "Set sound effects volume", KEY_S));
 
-   addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
-                                  setMusicVolumeCallback, "Set music volume", KEY_M));
+   if(settings->getSpecified(NO_MUSIC))
+         addMenuItem(new MessageMenuItem("MUSIC MUTED FROM COMMAND LINE", Colors::red));
+   else
+      addMenuItem(new ToggleMenuItem("MUSIC VOLUME:",      opts, U32((settings->getIniSettings()->getMusicVolLevel() + 0.05) * 10.0), false,
+                                     setMusicVolumeCallback, "Set music volume", KEY_M));
 
    addMenuItem(new ToggleMenuItem("VOICE CHAT VOLUME:", opts, U32((settings->getIniSettings()->voiceChatVolLevel + 0.05) * 10.0), false, 
-                                  setVoiceVolumeCallback, "Set voice chat volume",    KEY_V));
+                                  setVoiceVolumeCallback, "Set voice chat volume", KEY_V));
 
    // No music yet, so keep this out to keep menus from getting too long.  Uncomment when we have music.
    //menuItems.push_back(new MenuItem("MUSIC VOLUME:", getVolMsg(settings->getIniSettings()->musicVolLevel), 6, KEY_M, KEY_UNKNOWN));

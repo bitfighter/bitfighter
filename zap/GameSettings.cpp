@@ -86,7 +86,7 @@ ParamInfo paramDefs[] = {
 { "winpos",                TWO_REQUIRED,   WINDOW_POS,            0, "<int> <int>", "Specify x,y location of game window (note that this is the position of the UL corner of the game canvas, and does not account for the window frame)", "You must specify the x and y position of the window with the -winpos option" },
 { "winwidth",              ONE_REQUIRED,   WINDOW_WIDTH,          0, "<int>",       "Specify width of game window. Height will be set automatically. Note that the specified width is the width of the game canvas itself, and does not take account of window borders. Therefore, the entire window width will exceed the size specified slightly.", "You must specify the width of the game window with the -winwidth option" },
 { "usestick",              ONE_REQUIRED,   USE_STICK,             0, "<int>",       "Specify which joystick or other input device to use. Default is 1.", "You must specify the joystick you want to use with the -usestick option" },
-{ "nomusic",               NO_PARAMETERS,  NO_MUSIC,              0, "",            "Start up with music disabled", "" },
+{ "nomusic",               NO_PARAMETERS,  NO_MUSIC,              0, "",            "Disable music for this session only", "" },
 { "master",                ONE_REQUIRED,   MASTER_ADDRESS,        0, "<address>",   "Use master server (game finder) at specified address",                                   "You must specify a master server address with -master option" },
 
 // Options for hosting
