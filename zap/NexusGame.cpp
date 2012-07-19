@@ -498,6 +498,7 @@ void NexusGameType::idle_server(U32 deltaT)
    {
       mNexusIsOpen = true;
       mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusOpenTime);
+
       // Check if anyone is already in the Nexus, examining each client's ship in turn...
       for(S32 i = 0; i < getGame()->getClientCount(); i++)
       {
@@ -1068,12 +1069,43 @@ bool NexusZone::collide(BfObject *hitObject)
 
 /////
 // Lua interface
+//               Fn name         Param profiles     Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, setOpen, ARRAYDEF({{ BOOL, END }}), 1 ) \
+   METHOD(CLASS, isOpen,  ARRAYDEF({{       END }}), 1 ) \
 
-const luaL_reg           NexusZone::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile NexusZone::functionArgs[] = { { NULL, { }, 0 } };
+GENERATE_LUA_METHODS_TABLE(NexusZone, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(NexusZone, LUA_METHODS);
+
+#undef LUA_METHODS
 
 
 const char *NexusZone::luaClassName = "NexusZone";
 REGISTER_LUA_SUBCLASS(NexusZone, Zone);
+
+S32 NexusZone::isOpen(lua_State *L) 
+{ 
+   GameType *gameType = mGame->getGameType();
+
+   if(gameType->getGameTypeId() == NexusGame)
+      return returnBool(L, static_cast<NexusGameType *>(gameType)->mNexusIsOpen);
+   else
+      return returnBool(L, false);     // If not a Nexus game, Nexus will never be open
+}  
+
+
+S32 NexusZone::setOpen(lua_State *L) 
+{ 
+   checkArgList(L, functionArgs, "NexusZone", "setOpen");
+
+   GameType *gameType = mGame->getGameType();
+
+   if(gameType->getGameTypeId() != NexusGame)       // Only do something if this is a Nexus game
+      return 0;
+  
+   static_cast<NexusGameType *>(gameType)->mNexusIsOpen = getBool(L, 1, "blah");
+   mNexusChangeAtTime = 999; //???
+}  
+
 
 };
