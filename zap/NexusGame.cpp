@@ -1104,7 +1104,7 @@ S32 NexusZone::setOpen(lua_State *L)
       return 0;
   
    static_cast<NexusGameType *>(gameType)->mNexusIsOpen = getBool(L, 1, "blah");
-   mNexusChangeAtTime = 999; //???
+   //mNexusChangeAtTime = 999; //???
 }  
 
 

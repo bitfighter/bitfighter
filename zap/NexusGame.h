@@ -234,6 +234,9 @@ public:
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
+
+   S32 isOpen(lua_State *L);
+   S32 setOpen(lua_State *L);
 };
 
 };
