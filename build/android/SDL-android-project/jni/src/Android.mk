@@ -59,6 +59,7 @@ $(ZAP_PATH)/VideoSystem.cpp \
 $(ZAP_PATH)/voiceCodec.cpp \
 $(ZAP_PATH)/BanList.cpp \
 $(ZAP_PATH)/barrier.cpp \
+$(ZAP_PATH)/BfObject.cpp \
 $(ZAP_PATH)/BotNavMeshZone.cpp \
 $(ZAP_PATH)/ClientInfo.cpp \
 $(ZAP_PATH)/Color.cpp \
@@ -75,7 +76,6 @@ $(ZAP_PATH)/game.cpp \
 $(ZAP_PATH)/gameConnection.cpp \
 $(ZAP_PATH)/gameLoader.cpp \
 $(ZAP_PATH)/gameNetInterface.cpp \
-$(ZAP_PATH)/gameObject.cpp \
 $(ZAP_PATH)/GameSettings.cpp \
 $(ZAP_PATH)/gameStats.cpp \
 $(ZAP_PATH)/gameType.cpp \
@@ -90,6 +90,7 @@ $(ZAP_PATH)/IniFile.cpp \
 $(ZAP_PATH)/InputCode.cpp \
 $(ZAP_PATH)/item.cpp \
 $(ZAP_PATH)/lineEditor.cpp \
+$(ZAP_PATH)/LineItem.cpp \
 $(ZAP_PATH)/loadoutZone.cpp \
 $(ZAP_PATH)/luaGameInfo.cpp \
 $(ZAP_PATH)/luaLevelGenerator.cpp \
