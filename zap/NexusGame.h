@@ -74,12 +74,20 @@ public:
    bool mNexusIsOpen;         // Is the nexus open?
    S32 getNexusTimeLeft();    // Get time until the nexus changes state
 
+
    bool isSpawnWithLoadoutGame();
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isCarryingItems(Ship *ship);
    void itemDropped(Ship *ship, MoveItem *item);
+
+   void openNexus(S32 timeNexusOpened);
+   void closeNexus(S32 timeNexusClosed);
+   void setNexusState(bool open);
+
+   void setNewOpenTime(S32 timeInSeconds);
+   void setNewClosedTime(S32 timeInSeconds);
 
 #ifndef ZAP_DEDICATED
    Vector<string> getGameParameterMenuKeys();
@@ -237,6 +245,8 @@ public:
 
    S32 isOpen(lua_State *L);
    S32 setOpen(lua_State *L);
+   S32 setOpenTime(lua_State *L);
+   S32 setClosedTime(lua_State *L);
 };
 
 };

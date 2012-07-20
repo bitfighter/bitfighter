@@ -121,7 +121,6 @@ NexusGameType::NexusGameType() : GameType(100)
 {
    mNexusClosedTime = 60;
    mNexusOpenTime = 15;
-   //mNexusTimer.reset(mNexusClosedTime * 1000);
    mNexusIsOpen = false;
    mNexusChangeAtTime = -1;
 }
@@ -150,8 +149,7 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
    if(mGameTimer.isUnlimited())
       mNexusChangeAtTime = S32_MAX / 1000 - mNexusClosedTime;
    else
-      mNexusChangeAtTime = mGameTimer.getTotalGameTime() / 1000 - mNexusClosedTime;
-
+      mNexusChangeAtTime = mGameTimer.getTotalGameTime() / 1000 - mNexusClosedTime + 1;      // + 1 fixes quirk when setting times initially
    return true;
 }
 
@@ -159,12 +157,13 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 string NexusGameType::toString() const
 {
    return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
-                                         ftos(F32(mNexusOpenTime), 3) + " " + itos(getWinningScore());
+                                         ftos(F32(mNexusOpenTime), 3)  + " " + itos(getWinningScore());
 }
 
 
 // Returns time left in current Nexus cycle -- if we're open, this will be the time until Nexus closes; if we're closed,
 // it will return the time until Nexus opens
+// Client only
 S32 NexusGameType::getNexusTimeLeft()
 {
    return mGameTimer.getCurrent() / 1000 - mNexusChangeAtTime;
@@ -207,7 +206,7 @@ void NexusGameType::setTimeRemaining(U32 timeLeft, bool isUnlimited)
 
 bool NexusGameType::nexusShouldChange()
 {
-   if(mNexusChangeAtTime == -1)
+   if(mNexusChangeAtTime == -1)     
       return false;
 
    return mNexusChangeAtTime * 1000 > (S32)mGameTimer.getCurrent();
@@ -302,7 +301,7 @@ Vector<string> NexusGameType::getGameParameterMenuKeys()
          items.erase(i);      // Delete "Win Score"
 
          // Create slots for 3 new items, and fill them with our Nexus specific items
-         items.insert(i, "Nexus Time to Open");
+         items.insert(i,     "Nexus Time to Open");
          items.insert(i + 1, "Nexus Time Remain Open");
          items.insert(i + 2, "Nexus Win Score");
 
@@ -446,6 +445,9 @@ void NexusGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 
 static U32 getNextChangeTime(U32 changeTime, S32 duration)
 {
+   if(duration == 0)    // Handle special case of never opening/closing nexus
+      return -1;
+
    return changeTime - duration;
 }
 
@@ -453,9 +455,6 @@ static U32 getNextChangeTime(U32 changeTime, S32 duration)
 void NexusGameType::idle_client(U32 deltaT)
 {
 #ifndef ZAP_DEDICATED
-   //mNexusTimer.update(deltaT);
-
-
    if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
    {
       if(!isGameOver())
@@ -494,35 +493,12 @@ void NexusGameType::idle_client(U32 deltaT)
 
 void NexusGameType::idle_server(U32 deltaT)
 {
-   if(!mNexusIsOpen && nexusShouldChange())         // Nexus has just opened
+   if(nexusShouldChange())
    {
-      mNexusIsOpen = true;
-      mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusOpenTime);
-
-      // Check if anyone is already in the Nexus, examining each client's ship in turn...
-      for(S32 i = 0; i < getGame()->getClientCount(); i++)
-      {
-         Ship *client_ship = getGame()->getClientInfo(i)->getShip();
-
-         if(!client_ship)
-            continue;
-
-         NexusZone *nexus = dynamic_cast<NexusZone *>(client_ship->isInZone(NexusTypeNumber));
-
-         if(nexus)
-            shipTouchNexus(client_ship, nexus);
-      }
-
-      // Fire an event
-      EventManager::get()->fireEvent(EventManager::NexusOpenedEvent);
-   }
-   else if(mNexusIsOpen && nexusShouldChange())       // Nexus has just closed
-   {
-      mNexusIsOpen = false;
-      mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusClosedTime);
-
-      // Fire an event
-      EventManager::get()->fireEvent(EventManager::NexusClosedEvent);
+      if(mNexusIsOpen) 
+         closeNexus(mNexusChangeAtTime);
+      else
+         openNexus(mNexusChangeAtTime);
    }
 
    // Advance all flagSpawn timers and see if it's time for a new flag
@@ -536,6 +512,78 @@ void NexusGameType::idle_server(U32 deltaT)
          flagSpawn->resetTimer();                                         // Reset the timer
       }
    }
+}
+
+
+// Server only
+void NexusGameType::openNexus(S32 timeNexusOpened)
+{
+   mNexusIsOpen = true;
+   mNexusChangeAtTime = getNextChangeTime(timeNexusOpened, mNexusOpenTime);
+
+   // Check if anyone is already in the Nexus, examining each client's ship in turn...
+   for(S32 i = 0; i < getGame()->getClientCount(); i++)
+   {
+      Ship *client_ship = getGame()->getClientInfo(i)->getShip();
+
+      if(!client_ship)
+         continue;
+
+      NexusZone *nexus = dynamic_cast<NexusZone *>(client_ship->isInZone(NexusTypeNumber));
+
+      if(nexus)
+         shipTouchNexus(client_ship, nexus);
+   }
+
+   // Fire an event
+   EventManager::get()->fireEvent(EventManager::NexusOpenedEvent);
+}
+
+
+// Server only
+void NexusGameType::closeNexus(S32 timeNexusClosed)
+{
+   mNexusIsOpen = false;
+   mNexusChangeAtTime = getNextChangeTime(timeNexusClosed, mNexusClosedTime);
+
+   // Fire an event
+   EventManager::get()->fireEvent(EventManager::NexusClosedEvent);
+}
+
+
+// Server only -- only called by scripts
+void NexusGameType::setNexusState(bool open)
+{
+   if(open)
+      openNexus(getRemainingGameTime());
+   else
+      closeNexus(getRemainingGameTime());
+
+   s2cSetNexusTimer(mNexusChangeAtTime, open);      // Broacast new Nexus opening hours
+}
+
+
+// Server only -- only called by scripts
+void NexusGameType::setNewOpenTime(S32 timeInSeconds)
+{
+   mNexusOpenTime = timeInSeconds;
+   s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);
+
+   // Trigger update of new opening time if we are currently open
+   if(mNexusIsOpen)
+      setNexusState(true);
+}
+
+
+// Server only -- only called by scripts
+void NexusGameType::setNewClosedTime(S32 timeInSeconds)
+{
+   mNexusClosedTime = timeInSeconds;
+   s2cSendNexusTimes(mNexusClosedTime, mNexusOpenTime);
+
+   // Trigger update of new closing time if we are currently closed
+   if(!mNexusIsOpen)
+      setNexusState(false);
 }
 
 
@@ -1071,8 +1119,10 @@ bool NexusZone::collide(BfObject *hitObject)
 // Lua interface
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, setOpen, ARRAYDEF({{ BOOL, END }}), 1 ) \
-   METHOD(CLASS, isOpen,  ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, setOpen,       ARRAYDEF({{ BOOL, END }}), 1 ) \
+   METHOD(CLASS, isOpen,        ARRAYDEF({{       END }}), 1 ) \
+   METHOD(CLASS, setOpenTime,   ARRAYDEF({{ NUM,  END }}), 1 ) \
+   METHOD(CLASS, setClosedTime, ARRAYDEF({{ NUM,  END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(NexusZone, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(NexusZone, LUA_METHODS);
@@ -1083,8 +1133,14 @@ GENERATE_LUA_FUNARGS_TABLE(NexusZone, LUA_METHODS);
 const char *NexusZone::luaClassName = "NexusZone";
 REGISTER_LUA_SUBCLASS(NexusZone, Zone);
 
+
+// All these methods are really just passthroughs to the underlying game object.  They will have no effect if the
+// NexusZone has not been added to the game.  Perhaps this is bad design...
 S32 NexusZone::isOpen(lua_State *L) 
 { 
+   if(!mGame)
+      return returnBool(L, false);
+
    GameType *gameType = mGame->getGameType();
 
    if(gameType->getGameTypeId() == NexusGame)
@@ -1098,14 +1154,57 @@ S32 NexusZone::setOpen(lua_State *L)
 { 
    checkArgList(L, functionArgs, "NexusZone", "setOpen");
 
+   if(!mGame)
+      return 0;
+
    GameType *gameType = mGame->getGameType();
 
-   if(gameType->getGameTypeId() != NexusGame)       // Only do something if this is a Nexus game
+   if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
   
-   static_cast<NexusGameType *>(gameType)->mNexusIsOpen = getBool(L, 1, "blah");
-   //mNexusChangeAtTime = 999; //???
+   static_cast<NexusGameType *>(gameType)->setNexusState(getBool(L, 1, "blah"));
+
+   return 0;
 }  
+
+
+// 0 means never changes
+S32 NexusZone::setOpenTime(lua_State *L)
+{
+   checkArgList(L, functionArgs, "NexusZone", "setOpenTime");
+
+   if(!mGame)
+      return 0;
+
+   GameType *gameType = mGame->getGameType();
+
+   if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
+      return 0;
+  
+   static_cast<NexusGameType *>(gameType)->setNewOpenTime(getInt(L, 1));
+
+
+   return 0;
+}
+
+
+// 0 means never changes
+S32 NexusZone::setClosedTime(lua_State *L)
+{
+   checkArgList(L, functionArgs, "NexusZone", "setCloseTime");
+
+   if(!mGame)
+      return 0;
+
+   GameType *gameType = mGame->getGameType();
+
+   if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
+      return 0;
+  
+   static_cast<NexusGameType *>(gameType)->setNewClosedTime(getInt(L, 1));
+
+   return 0;
+}
 
 
 };
