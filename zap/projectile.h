@@ -127,7 +127,8 @@ public:
    void renderItem(const Point &pos);
    void idle(IdleCallPath path);
    void damageObject(DamageInfo *damageInfo);
-   void explode(Point p, WeaponType weaponType);
+   void doExplosion(const Point &pos);
+   void explode(const Point &pos);
    StringTableEntry mSetBy;      // Who laid the mine/spy bug?
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -288,7 +289,7 @@ public:
    void renderItem(const Point &pos);
    void idle(IdleCallPath path);
    void damageObject(DamageInfo *damageInfo);
-   void doExplosion(Point pos);
+   void doExplosion(const Point &pos);
    void handleCollision(BfObject *hitObject, Point collisionPoint);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

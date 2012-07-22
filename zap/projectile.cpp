@@ -503,7 +503,7 @@ void BurstProjectile::idle(IdleCallPath path)
 
    if(!exploded)
       if(getActualVel().len() < 4.0)
-         explode(getActualPos(), WeaponBurst);
+         explode(getActualPos());
 
    // Update TTL
    S32 deltaT = mCurrentMove.time;
@@ -512,7 +512,7 @@ void BurstProjectile::idle(IdleCallPath path)
    else if(!exploded)
    {
       if(mTimeRemaining <= deltaT)
-        explode(getActualPos(), WeaponBurst);
+        explode(getActualPos());
       else
          mTimeRemaining -= deltaT;
    }
@@ -536,7 +536,7 @@ void BurstProjectile::unpackUpdate(GhostConnection *connection, BitStream *strea
    TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
 
    if(stream->readFlag())
-      explode(getActualPos(), WeaponBurst);
+      doExplosion(getActualPos());
 
    if(stream->readFlag())
       SoundSystem::playSoundEffect(SFXBurstProjectile, getActualPos(), getActualVel());
@@ -548,7 +548,7 @@ void BurstProjectile::damageObject(DamageInfo *theInfo)
    // If we're being damaged by another burst, explode...
    if(theInfo->damageType == DamageTypeArea)
    {
-      explode(getActualPos(), WeaponBurst);
+      explode(getActualPos());
       return;
    }
 
@@ -558,12 +558,8 @@ void BurstProjectile::damageObject(DamageInfo *theInfo)
 }
 
 
-// Also used for mines and spybugs  --> not sure if we really need to pass weaponType
-void BurstProjectile::explode(Point pos, WeaponType weaponType)
+void BurstProjectile::doExplosion(const Point &pos)
 {
-   if(exploded) return;
-   exploded = true;
-
 #ifndef ZAP_DEDICATED
    if(isGhost())
    {
@@ -574,28 +570,35 @@ void BurstProjectile::explode(Point pos, WeaponType weaponType)
       SoundSystem::playSoundEffect(SFXMineExplode, getActualPos());
    }
 #endif
+}
+
+
+// Also used for mines and spybugs
+// Server only
+void BurstProjectile::explode(const Point &pos)
+{
+   if(exploded) return;
+
+   // Must set exploded to true immediately here or we risk a stack overflow when two
+   // bursts hit each other and call radiusDamage on each other over and over
+   exploded = true;
+   setMaskBits(ExplodedMask);
+
+   DamageInfo info;
+   info.collisionPoint       = pos;
+   info.damagingObject       = this;
+   info.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+   info.damageType           = DamageTypeArea;
+   info.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+
+   S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, info);
+
+   if(getOwner())
+      for(S32 i = 0; i < hits; i++)
+         getOwner()->getStatistics()->countHit(mWeaponType);
 
    disableCollision();
-
-   if(!isGhost())
-   {
-
-      DamageInfo info;
-      info.collisionPoint       = pos;
-      info.damagingObject       = this;
-      info.damageAmount         = GameWeapon::weaponInfo[weaponType].damageAmount;
-      info.damageType           = DamageTypeArea;
-      info.damageSelfMultiplier = GameWeapon::weaponInfo[weaponType].damageSelfMultiplier;
-
-      S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, info);
-
-      if(getOwner())
-         for(S32 i = 0; i < hits; i++)
-            getOwner()->getStatistics()->countHit(mWeaponType);
-
-      setMaskBits(ExplodedMask);
-      deleteObject(100);
-   }
+   deleteObject(100);
 }
 
 
@@ -751,7 +754,7 @@ void Mine::idle(IdleCallPath path)
    if(foundItem)
    {     // braces needed
       if(mArmed)
-         explode(getActualPos(), WeaponMine);
+         explode(getActualPos());
    }
    else
    {
@@ -769,7 +772,7 @@ bool Mine::collide(BfObject *otherObj)
    if(isGhost())
       return false;  // avoid client side explode, server side don't explode
    if(isProjectileType(otherObj->getObjectTypeNumber()))
-      explode(getActualPos(), WeaponMine);
+      explode(getActualPos());
    return false;
 }
 
@@ -777,7 +780,7 @@ bool Mine::collide(BfObject *otherObj)
 void Mine::damageObject(DamageInfo *info)
 {
    if(info->damageAmount > 0.f && !exploded)
-      explode(getActualPos(), WeaponMine);
+      explode(getActualPos());
 }
 
 
@@ -996,7 +999,7 @@ bool SpyBug::collide(BfObject *otherObj)
    if(isGhost())
       return false;  // avoid client side explode, server side don't explode
    if(isProjectileType(otherObj->getObjectTypeNumber()))
-      explode(getActualPos(), WeaponSpyBug);
+      explode(getActualPos());
    return false;
 }
 
@@ -1004,7 +1007,7 @@ bool SpyBug::collide(BfObject *otherObj)
 void SpyBug::damageObject(DamageInfo *info)
 {
    if(info->damageAmount > 0.f && !exploded)    // Any damage will kill the SpyBug
-      explode(getActualPos(), WeaponSpyBug);
+      explode(getActualPos());
 }
 
 
@@ -1339,7 +1342,7 @@ void HeatSeekerProjectile::damageObject(DamageInfo *theInfo)
 }
 
 
-void HeatSeekerProjectile::doExplosion(Point pos)
+void HeatSeekerProjectile::doExplosion(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(isGhost())
