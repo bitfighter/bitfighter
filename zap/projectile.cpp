@@ -1296,6 +1296,10 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          if(mShooter == foundObject)
             continue;
 
+         // Don't target teammates in team games
+         if(getGame()->getGameType()->isTeamGame() && mShooter->getTeam() == foundObject->getTeam())
+            continue;
+
          Point delta = foundObject->getPos() - getActualPos();
          F32 distanceSq = delta.lenSquared();
 
