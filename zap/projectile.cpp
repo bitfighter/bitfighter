@@ -1239,25 +1239,27 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
       fillVector.clear();
       findObjects(isShipType, fillVector, queryRect);
 
+      F32 closest = F32_MAX;
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
-
-         // TODO: determine nearest target?
 
          // Don't target self
          if(mShooter == foundObject)
             continue;
 
          Point delta = foundObject->getPos() - getActualPos();
+         F32 distanceSq = delta.lenSquared();
 
          // Only acquire an object within a circle radius instead of query rect
-         if(delta.lenSquared() > TargetAcquisitionRadius * TargetAcquisitionRadius)
+         if(distanceSq > TargetAcquisitionRadius * TargetAcquisitionRadius)
             continue;
 
-         // We found a target!
+         if(distanceSq > closest)
+            continue;
+
+         closest = distanceSq;
          mAcquiredTarget = foundObject;
-         break;
       }
    }
 
