@@ -1846,19 +1846,20 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(!victimOwner)     // Perhaps the victim is dead?!?
       return true;
 
-   // Asteroids do damage
-   if( dynamic_cast<Asteroid *>(damager) )
+   U8 typeNumber = damager->getObjectTypeNumber();
+
+   // Asteroids always do damage
+   if(typeNumber == AsteroidTypeNumber)
       return true;
 
    WeaponType weaponType;
 
-   // TODO: optimize with object type numbers instead of slow dynamic casts
-   if( Projectile *proj = dynamic_cast<Projectile *>(damager) )
-      weaponType = proj->mWeaponType;
-   else if( BurstProjectile *grenproj = dynamic_cast<BurstProjectile*>(damager) )
-      weaponType = grenproj->mWeaponType;
-   else if( HeatSeekerProjectile *heatSeeker = dynamic_cast<HeatSeekerProjectile*>(damager) )
-      weaponType = heatSeeker->mWeaponType;
+   if(typeNumber == BulletTypeNumber)
+      weaponType = static_cast<Projectile*>(damager)->mWeaponType;
+   else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
+      weaponType = static_cast<BurstProjectile*>(damager)->mWeaponType;
+   else if(typeNumber == HeatSeekerTypeNumber)
+      weaponType = static_cast<HeatSeekerProjectile*>(damager)->mWeaponType;
    else
       return false;
 
