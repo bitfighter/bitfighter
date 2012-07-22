@@ -817,6 +817,11 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
+
+      // No object damages itself
+      if(foundObject == info.damagingObject)
+         continue;
+
       // Check the actual distance against our outer radius.  Recall that we got a list of potential
       // collision objects based on a square area, but actual collisions will be based on true distance
       Point objPos = foundObject->getPos();
@@ -827,7 +832,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
 
       // Can one damage another?
       if(gameType && !gameType->objectCanDamageObject(info.damagingObject, foundObject))
-            continue;
+         continue;
 
       //// Check if damager is an area weapon, and damagee is a projectile... if so, kill it
       //if(Projectile *proj = dynamic_cast<Projectile*>(foundObject))
