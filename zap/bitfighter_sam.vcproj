@@ -584,14 +584,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gameObject.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\gameObject.h"
-				>
-			</File>
-			<File
 				RelativePath=".\gameObjectRender.cpp"
 				>
 			</File>
@@ -802,6 +794,10 @@
 		</File>
 		<File
 			RelativePath=".\BanList.h"
+			>
+		</File>
+		<File
+			RelativePath=".\BfObject.cpp"
 			>
 		</File>
 		<File

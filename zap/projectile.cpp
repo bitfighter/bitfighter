@@ -562,6 +562,7 @@ void BurstProjectile::damageObject(DamageInfo *theInfo)
 void BurstProjectile::explode(Point pos, WeaponType weaponType)
 {
    if(exploded) return;
+   exploded = true;
 
 #ifndef ZAP_DEDICATED
    if(isGhost())
@@ -578,8 +579,6 @@ void BurstProjectile::explode(Point pos, WeaponType weaponType)
 
    if(!isGhost())
    {
-      setMaskBits(ExplodedMask);
-      deleteObject(100);
 
       DamageInfo info;
       info.collisionPoint       = pos;
@@ -593,8 +592,10 @@ void BurstProjectile::explode(Point pos, WeaponType weaponType)
       if(getOwner())
          for(S32 i = 0; i < hits; i++)
             getOwner()->getStatistics()->countHit(mWeaponType);
+
+      setMaskBits(ExplodedMask);
+      deleteObject(100);
    }
-   exploded = true;
 }
 
 
