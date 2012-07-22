@@ -273,7 +273,7 @@ private:
    static F32 AccelerationConstant;
 
    SafePtr<BfObject> mShooter;
-   BfObject *mAcquiredTarget;
+   SafePtr<BfObject> mAcquiredTarget;
 
    S32 mTimeRemaining;
    bool exploded;
