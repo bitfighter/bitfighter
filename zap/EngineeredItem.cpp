@@ -1635,7 +1635,7 @@ string Turret::toString(F32 gridSize) const
 {
    string out = EngineeredItem::toString(gridSize);
    if(mWeaponFireType != WeaponTurret)
-      out = out + " W=" + GameWeapon::weaponInfo[mWeaponFireType].name.getString();
+      out = out + " " + writeLevelString((string("W=") + GameWeapon::weaponInfo[mWeaponFireType].name.getString()).c_str());
    return out;
 }
 

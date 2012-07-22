@@ -254,7 +254,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
    }
    else                                   // We're working with weapons
       for(S32 i = ShipModuleCount; i < mCurrentIndex && !alreadyUsed; i++)
-         if(mModule[i] == index)
+         if(mWeapon[i - ShipModuleCount] == index)
             alreadyUsed = true;
 
    if(!alreadyUsed)
