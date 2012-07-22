@@ -39,6 +39,7 @@
 #  include "OpenglUtils.h"
 #endif
 
+#include <cmath>
 
 namespace Zap
 {
@@ -1178,8 +1179,18 @@ HeatSeekerProjectile::~HeatSeekerProjectile()
 }
 
 
+static F32 normalizeAngle(F32 angle)
+{
+   F32 newAngle = angle;
+   while (newAngle <= -FloatPi) newAngle += FloatTau;
+   while (newAngle > FloatPi) newAngle -= FloatTau;
+   return newAngle;
+}
+
+
 F32 HeatSeekerProjectile::AccelerationConstant = 1.02;
 U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
+F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau;
 
 // Runs on client and server
 void HeatSeekerProjectile::idle(IdleCallPath path)
@@ -1210,18 +1221,53 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
       // Else accelerate!
       else
       {
-         // Create an velocity vector towards the target.  Average the old velocity vector and
-         // a vector towards the target with the same magnitude.  Then add acceleration
+         // Create a new velocity vector for the heat seeker to slowly go towards the target.
+         // Adjust the vector to always:
+         //  - keep a minimum velocity (projectile default)
+         //  - only change angle to a maxium amount from the original direction
+         //  - increase speed each tick
          // TODO:  put a maximum on the speed?
-         // TODO:  put a limit on angle changed per tick?  i.e. don't just split the angle in half
-         //        with the averaging of the velocities
-         Point targetVector = delta;
-         targetVector.normalize(getActualVel().len());
-         Point newVelocity = (targetVector + getActualVel()) / 2;
 
-         newVelocity *= AccelerationConstant;
-//         logprintf("speed: %f", newVelocity.len());
+         // Set velocity vector towards the target for now
+         Point newVelocity = delta;
+
+         // Find the angle to the target as well as the current velocity angle
+         // atan2 already normalizes these to be between -pi and pi
+         F32 angleToTarget = delta.ATAN2();
+         F32 currentAngle = getActualVel().ATAN2();
+
+         // Find the difference between the target angle and the angle of current travel
+         // Normalize it to be between -pi and pi
+         F32 difference = normalizeAngle(angleToTarget - currentAngle);
+
+         // This is the maximum change in angle we will allow
+         F32 maxTickAngle = MaximumAngleChangePerSecond * F32(deltaT) / 1000.f;
+
+         // We will reduce speed if we have to turn a lot
+         bool reduceSpeed = false;
+
+         // If our difference in angles are greater than maximum allowed, reduce to the maximum
+         if(fabs(difference) > maxTickAngle)
+         {
+            reduceSpeed = true;
+
+            if(difference > 0)
+               newVelocity.setAngle(currentAngle + maxTickAngle);
+            else
+               newVelocity.setAngle(currentAngle - maxTickAngle);
+         }
+
+         // Now set the minimum speed to always be the velocity of the projectile
+         F32 speed = getActualVel().len();
+
+         if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity || reduceSpeed)
+            speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         else
+            speed *= AccelerationConstant;
+
+         newVelocity.normalize(speed);
          setActualVel(newVelocity);
+
 
          // If we're right on top of the target, collide!
          // FIXME:  need a better way to tell when we hit the target from this class

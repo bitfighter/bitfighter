@@ -269,8 +269,9 @@ private:
       FirstFreeMask = MoveItem::FirstFreeMask,
    };
 
-   static U32 TargetAcquisitionRadius;
    static F32 AccelerationConstant;
+   static U32 TargetAcquisitionRadius;
+   static F32 MaximumAngleChangePerSecond;
 
    SafePtr<BfObject> mShooter;
    SafePtr<BfObject> mAcquiredTarget;
