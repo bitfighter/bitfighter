@@ -1260,8 +1260,10 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          // Now set the minimum speed to always be the velocity of the projectile
          F32 speed = getActualVel().len();
 
-         if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity || reduceSpeed)
+         if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
             speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         else if(reduceSpeed)
+            speed /= AccelerationConstant;
          else
             speed *= AccelerationConstant;
 
