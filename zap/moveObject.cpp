@@ -1716,7 +1716,7 @@ bool Worm::processArguments(S32 argc, const char **argv, Game *game)
    pos *= game->getGridSize();
 
    setPos(pos);
-   setPosAng(pos, 0);
+   mPoints[mHeadIndex] = pos;  // needed to give Worm a proper position
 
    mHeadIndex = 0;
    mTailLength = 0;
@@ -1874,7 +1874,7 @@ void Worm::idle(BfObject::IdleCallPath path)
 
       findObjectLOS((TestFunc)isWallType, ActualState, mPoints[mHeadIndex], p + mPoints[mHeadIndex], collisionTime, surfNormal);
 
-      setPosAng(p * collisionTime * 0.008 + mPoints[mHeadIndex], mAngle);
+      setPosAng(p * collisionTime * 0.8 + mPoints[mHeadIndex], mAngle);
       mDirTimer.reset(200);
    }
 

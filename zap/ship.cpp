@@ -730,7 +730,7 @@ void Ship::idle(BfObject::IdleCallPath path)
       processWeaponFire();
       processModules();
       rechargeEnergy();
-      if(path == BfObject::ServerIdleControlFromClient)
+      if(path == BfObject::ServerIdleControlFromClient && mModulePrimaryActive[ModuleRepair])
          repairTargets();
    }
 
@@ -922,10 +922,12 @@ void Ship::processModules()
    }
 
    if(isModulePrimaryActive(ModuleRepair))
+   {
       findRepairTargets();
-   // If there are no repair targets, turn off repair
-   if(mRepairTargets.size() == 0)
-      mModulePrimaryActive[ModuleRepair] = false;
+      // If there are no repair targets, turn off repair
+      if(mRepairTargets.size() == 0)
+         mModulePrimaryActive[ModuleRepair] = false;
+   }
 
    // No cloak with nearby sensored people
    if(mModulePrimaryActive[ModuleCloak])
@@ -1101,11 +1103,6 @@ void Ship::rechargeEnergy()
    if(mEnergy <= 0)
    {
       mEnergy = 0;
-      for(S32 i = 0; i < ModuleCount; i++)
-      {
-         mModulePrimaryActive[i] = false;
-         mModuleSecondaryActive[i] = false;
-      }
       mCooldownNeeded = true;
    }
 

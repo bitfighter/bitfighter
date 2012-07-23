@@ -135,7 +135,8 @@ bool isCollideableType(U8 x)
    return
          x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
          x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
-         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber;
+         x == CoreTypeNumber    || x == ForceFieldProjectorTypeNumber ||
+         x == WormTypeNumber;
 }
 
 

@@ -506,7 +506,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
 
    Point collisionPoint;
 
-   collisionTime = 100;
+   collisionTime = 1;
    DatabaseObject *retObject = NULL;
 
    Point center;
@@ -569,7 +569,7 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
 
    Point collisionPoint;
 
-   collisionTime = 100;
+   collisionTime = 1;
    DatabaseObject *retObject = NULL;
 
    Point center;
