@@ -1188,7 +1188,7 @@ static F32 normalizeAngle(F32 angle)
 }
 
 
-F32 HeatSeekerProjectile::AccelerationConstant = 1.02;
+U32 HeatSeekerProjectile::SpeedIncreasePerSecond = 300;
 U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
 F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau;
 
@@ -1257,15 +1257,21 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
                newVelocity.setAngle(currentAngle - maxTickAngle);
          }
 
-         // Now set the minimum speed to always be the velocity of the projectile
+         // Get current speed
          F32 speed = getActualVel().len();
 
+         // Set minimum speed to the default
          if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
             speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
-         else if(reduceSpeed)
-            speed /= AccelerationConstant;
+         // Else, increase or decrease depending on our trajectory to the target
          else
-            speed *= AccelerationConstant;
+         {
+            F32 tickSpeedIncrease = SpeedIncreasePerSecond * F32(deltaT) / 1000.f;
+            if(reduceSpeed)
+               speed -= tickSpeedIncrease;
+            else
+               speed += tickSpeedIncrease;
+         }
 
          newVelocity.normalize(speed);
          setActualVel(newVelocity);
