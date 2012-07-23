@@ -1314,43 +1314,6 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          mAcquiredTarget = foundObject;
       }
    }
-
-   // XXX:  really old code from watusimoto on first run with heat-seeker.  still useful??
-   //// Steer towards a nearby testitem
-   //static Vector<DatabaseObject *> targetItems;
-   //targetItems.clear();
-   //Rect searchArea(pos, 2000);
-   //S32 HeatSeekerTargetType = TestItemType | ResourceItemType;
-   //findObjects(HeatSeekerTargetType, targetItems, searchArea);
-
-   //F32 maxPull = 0;
-   //Point dist;
-   //Point maxDist;
-
-   //for(S32 i = 0; i < targetItems.size(); i++)
-   //{
-   //   BfObject *target = dynamic_cast<BfObject *>(targetItems[i]);
-   //   dist.set(pos - target->getActualPos());
-
-   //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
-   //
-   //   pull *= (target->getObjectTypeMask() & ResourceItemType) ? .5 : 1;
-
-   //   if(pull > maxPull)
-   //   {
-   //      maxPull = pull;
-   //      maxDist.set(dist);
-   //   }
-   //
-   //}
-
-   //if(maxPull > 0)
-   //{
-   //   F32 speed = velocity.len();
-   //   velocity += (velocity - maxDist) * maxPull;
-   //   velocity.normalize(speed);
-   //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
-   //}
 }
 
 
