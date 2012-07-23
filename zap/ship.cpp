@@ -545,7 +545,7 @@ void Ship::processWeaponFire()
 
    GameType *gameType = getGame()->getGameType();
 
-   if(mCurrentMove.fire && gameType && !getClientInfo()->isShipSystemsDisabled())
+   if(mCurrentMove.fire && gameType && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)

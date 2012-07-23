@@ -1716,6 +1716,7 @@ bool Worm::processArguments(S32 argc, const char **argv, Game *game)
    pos *= game->getGridSize();
 
    setPos(pos);
+   setPosAng(pos, 0);
 
    mHeadIndex = 0;
    mTailLength = 0;

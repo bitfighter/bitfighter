@@ -484,13 +484,16 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
       else if(isProjectileType(theInfo->damagingObject->getObjectTypeNumber()))
       {
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
-         Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
-         mLastPlayerTouch = ship;             // If shooter was a turret, say, we'd expect s to be NULL.
-         mLastPlayerTouchTeam = p->getTeam(); // Projectile always have a team from what fired it, can be used to credit a team.
-         if(ship && ship->getClientInfo())
-            mLastPlayerTouchName = ship->getClientInfo()->getName();
-         else
-            mLastPlayerTouchName = NULL;
+         if(p)
+         {
+            Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
+            mLastPlayerTouch = ship;             // If shooter was a turret, say, we'd expect s to be NULL.
+            mLastPlayerTouchTeam = p->getTeam(); // Projectile always have a team from what fired it, can be used to credit a team.
+            if(ship && ship->getClientInfo())
+               mLastPlayerTouchName = ship->getClientInfo()->getName();
+            else
+               mLastPlayerTouchName = NULL;
+         }
       }
       else
          mLastPlayerTouch = NULL;
