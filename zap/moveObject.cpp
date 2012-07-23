@@ -1866,15 +1866,14 @@ void Worm::idle(BfObject::IdleCallPath path)
       if(mAngle > FloatPi * 4.f)
          mAngle -= FloatPi * 8.f;
 
-      p.setPolar(20, mAngle);
-      p += mPoints[mHeadIndex];
+      p.setPolar(40, mAngle);
 
       F32 collisionTime;
       Point surfNormal;
 
-      findObjectLOS((TestFunc)isWallType, ActualState, mPoints[mHeadIndex], p, collisionTime, surfNormal);
+      findObjectLOS((TestFunc)isWallType, ActualState, mPoints[mHeadIndex], p + mPoints[mHeadIndex], collisionTime, surfNormal);
 
-      setPosAng(surfNormal, mAngle);
+      setPosAng(p * collisionTime * 0.008 + mPoints[mHeadIndex], mAngle);
       mDirTimer.reset(200);
    }
 
