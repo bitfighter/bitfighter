@@ -610,14 +610,24 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    if(!isGhost())    // Server only
    {
       // Check for asteroids hitting a ship
-      Ship *ship = dynamic_cast<Ship *>(moveObjectThatWasHit);
-      Asteroid *asteroid = dynamic_cast<Asteroid *>(this);
- 
+      Ship *ship = NULL;
+      Asteroid *asteroid = NULL;
+
+      if(this->getObjectTypeNumber() == AsteroidTypeNumber)
+         asteroid = static_cast<Asteroid*>(this);
+
+      if(moveObjectThatWasHit->getObjectTypeNumber() == PlayerShipTypeNumber ||
+            moveObjectThatWasHit->getObjectTypeNumber() == RobotShipTypeNumber)
+         ship = static_cast<Ship*>(moveObjectThatWasHit);
+
+      // Since asteroids and ships are both MoveObjects, we'll also check to see if ship hit an asteroid
       if(!ship)
       {
-         // Since asteroids and ships are both MoveObjects, we'll also check to see if ship hit an asteroid
-         ship = dynamic_cast<Ship *>(this);
-         asteroid = dynamic_cast<Asteroid *>(moveObjectThatWasHit);
+         if(moveObjectThatWasHit->getObjectTypeNumber() == AsteroidTypeNumber)
+            asteroid = static_cast<Asteroid*>(moveObjectThatWasHit);
+         if(this->getObjectTypeNumber() == PlayerShipTypeNumber ||
+               this->getObjectTypeNumber() == RobotShipTypeNumber)
+            ship = static_cast<Ship*>(this);
       }
 
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
