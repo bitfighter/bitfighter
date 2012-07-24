@@ -817,7 +817,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
       // No object damages itself
       if(foundObject == info.damagingObject)
@@ -834,12 +834,6 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       // Can one damage another?
       if(gameType && !gameType->objectCanDamageObject(info.damagingObject, foundObject))
          continue;
-
-      //// Check if damager is an area weapon, and damagee is a projectile... if so, kill it
-      //if(Projectile *proj = dynamic_cast<Projectile*>(foundObject))
-      //{
-      //   proj->explode(proj, proj->getActualPos());
-      //}
 
       // Do an LOS check...
       F32 t;
@@ -910,7 +904,7 @@ BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart,
    GridDatabase *gridDB = getDatabase();
 
    if(gridDB)
-     return dynamic_cast<BfObject *>(
+     return static_cast<BfObject *>(
          gridDB->findObjectLOS(typeNumber, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal)
          );
 
