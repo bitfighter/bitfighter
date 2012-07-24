@@ -431,8 +431,10 @@ S32 Projectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType);     
 
 TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
 
+const F32 BurstProjectile_Radius = 7;
+const F32 BurstProjectile_Mass = 1;
 // Constructor
-BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, mRadius, mMass)
+BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, BurstProjectile_Radius, BurstProjectile_Mass)
 {
    mObjectTypeNumber = BurstTypeNumber;
 
@@ -455,9 +457,6 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
    }
    else
       setOwner(NULL);
-
-   mRadius = 7;
-   mMass = 1;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1138,7 +1137,9 @@ REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
 TNL_IMPLEMENT_NETOBJECT(HeatSeekerProjectile);
 
 // Constructor
-HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, mRadius, mMass)
+const F32 HeatSeeker_Radius = 7;
+const F32 HeatSeeker_Mass = 1;
+HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, HeatSeeker_Radius, HeatSeeker_Mass)
 {
    mObjectTypeNumber = HeatSeekerTypeNumber;
 
@@ -1164,9 +1165,6 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
       setOwner(NULL);
 
    mAcquiredTarget = NULL;
-
-   mRadius = 7;
-   mMass = 1;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
