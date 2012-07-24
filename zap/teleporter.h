@@ -36,8 +36,6 @@
 
 #include "tnlNetObject.h"
 
-class ship;
-
 namespace Zap
 {
 
