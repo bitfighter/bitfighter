@@ -109,7 +109,7 @@ bool isDamageableType(U8 x)
          x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
          x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
          x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber   ||
-         x == TeleporterTypeNumber   || x == HeatSeekerTypeNumber;
+         x == TeleporterTypeNumber   || x == HeatSeekerTypeNumber          || x == WormTypeNumber;
 }
 
 
@@ -178,7 +178,7 @@ bool isWeaponCollideableType(U8 x)
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
          x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber          ||
-         x == TeleporterTypeNumber || x == HeatSeekerTypeNumber;
+         x == TeleporterTypeNumber || x == HeatSeekerTypeNumber     || x == WormTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)

@@ -1797,7 +1797,7 @@ void renderWorm(const Point &pos)
 
    F32 size = (F32)Worm::WORM_RADIUS * .5f;
 
-   glColor(Color(1, .1, .1));
+   glColor(Color(.80f, .60f, .33f));
    F32 vertices[] = {
          0, -size,
          size, 0,

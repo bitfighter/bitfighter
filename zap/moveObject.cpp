@@ -1750,6 +1750,9 @@ string Worm::toString(F32 gridSize) const
 void Worm::render()
 {
 #ifndef ZAP_DEDICATED
+
+
+
    if(!hasExploded)
    {
       if(mTailLength <= 1)
@@ -1757,17 +1760,49 @@ void Worm::render()
          renderWorm(mPoints[mHeadIndex]);
          return;
       }
-      Vector<Point> p;
+      F32 p[maxTailLength * 2];
       S32 i = mHeadIndex;
       for(S32 count = 0; count <= mTailLength; count++)
       {
-         p.push_back(mPoints[i]);
+         p[count * 2] = mPoints[i].x;
+         p[count * 2 + 1] = mPoints[i].y;
          i--;
          if(i < 0)
             i = maxTailLength - 1;
       }
       glColor(Colors::white);
-      renderLine(&p);
+
+      static const F32 WormColors[maxTailLength * 4] = {
+         1,   1,   1,  1,
+      .90f,.80f,.66f,  1,
+      .80f,.60f,.33f,  1,
+      .70f,.40f,   0,  1,
+      .80f,.60f,.33f,  1,
+      .90f,.80f,.66f,  1,
+         1,   1,   1,  1,
+      .90f,.80f,.66f,  1,
+      .80f,.60f,.33f,  1,
+      .70f,.40f,   0,  1,
+      .80f,.60f,.33f,  1,
+      .90f,.80f,.66f,  1,
+         1,   1,   1,  1,
+      .90f,.80f,.66f,  1,
+      .80f,.60f,.33f,  1,
+      .70f,.40f,   0,  1,
+      .80f,.60f,.33f,  1,
+      .90f,.80f,.66f,  1,
+         1,   1,   1,  1,
+      .90f,.80f,.66f,  1,
+      .80f,.60f,.33f,  1,
+      .70f,.40f,   0,  1,
+      .80f,.60f,.33f,  1,
+      .90f,.80f,.66f,  1,
+         1,   1,   1,  1,
+      .90f,.80f,.66f,  1,
+      .80f,.60f,.33f,  1,
+      .70f,.40f,   0,  1,
+      };
+      renderColorVertexArray(p, WormColors, mTailLength + 1, GL_LINE_STRIP);
    }
 #endif
 }
@@ -1827,22 +1862,26 @@ bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
 
 bool Worm::collide(BfObject *otherObject)
 {
-   // Worms don't collide with one another!
-   return /*dynamic_cast<Worm *>(otherObject) ? false : */true;
+   // Worms don't collide with one another!  (look at isCollideableTypeWorm for what Worm collide to)
+   return true;
 }
 
 
 void Worm::setPosAng(Point pos, F32 ang)
 {
-   if(mTailLength < maxTailLength - 1)
-      mTailLength++;
-
    mHeadIndex++;
    if(mHeadIndex >= maxTailLength)
       mHeadIndex = 0;
 
    mPoints[mHeadIndex] = pos;
-   setMaskBits(TailPointParts << mHeadIndex);
+
+   if(mTailLength < maxTailLength - 1)
+   {
+      mTailLength++;
+      setMaskBits(TailPointPartsMask << mHeadIndex | ExplodeOrTailLengthMask);
+   }
+   else
+      setMaskBits(TailPointPartsMask << mHeadIndex);
 
    Vector<Point> p;
    getCollisionPoly(p);
@@ -1850,18 +1889,29 @@ void Worm::setPosAng(Point pos, F32 ang)
 }
 
 
-void Worm::setNextAng(F32 nextAng)
-{
-   //mNextAng = nextAng;
-}
-
-
 void Worm::damageObject(DamageInfo *theInfo)
 {
-   hasExploded = true;
-   deleteObject(500);
+   mTailLength -= S32(theInfo->damageAmount * 8.f + .9f);
+   if(mTailLength >= maxTailLength - 1)
+      mTailLength = maxTailLength - 1;
+
+
+   if(mTailLength < 2)
+   {
+      hasExploded = true;
+      deleteObject(500);
+   }
+   setMaskBits(ExplodeOrTailLengthMask);
 }
 
+
+static bool isCollideableTypeWorm(U8 x)
+{
+   return
+         x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
+         x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
+         x == ForceFieldProjectorTypeNumber;
+}
 
 void Worm::idle(BfObject::IdleCallPath path)
 {
@@ -1870,22 +1920,64 @@ void Worm::idle(BfObject::IdleCallPath path)
 
    if(path == ServerIdleMainLoop && mDirTimer.update(mCurrentMove.time))
    {
-      Point p;
-      mAngle = (mAngle + (TNL::Random::readF() - 0.5f) * 173); // * FloatPi * 4.f;
-      if(mAngle < -FloatPi * 4.f)
-         mAngle += FloatPi * 8.f;
-      if(mAngle > FloatPi * 4.f)
-         mAngle -= FloatPi * 8.f;
-
-      p.setPolar(40, mAngle);
-
+      Point p, pos1;
       F32 collisionTime;
-      Point surfNormal;
+      mAngle = (mAngle + (TNL::Random::readF() - 0.5f) * 173); // * FloatPi * 4.f;
+      U32 retryCount = 0;
+      do
+      {
+         if(retryCount)
+            mAngle += FloatPi * 2 / 5;
+         retryCount++;
 
-      findObjectLOS((TestFunc)isWallType, ActualState, mPoints[mHeadIndex], p + mPoints[mHeadIndex], collisionTime, surfNormal);
+         if(mAngle < -FloatPi * 4.f)
+            mAngle += FloatPi * 8.f;
+         if(mAngle > FloatPi * 4.f)
+            mAngle -= FloatPi * 8.f;
 
-      setPosAng(p * collisionTime * 0.8 + mPoints[mHeadIndex], mAngle);
-      mDirTimer.reset(200);
+         p.setPolar(TNL::Random::readF() * 32 + 40, mAngle);
+
+         Rect queryRect(mPoints[mHeadIndex], mPoints[mHeadIndex] + p);
+         static const F32 radius = 2;
+         queryRect.expand(Point(radius, radius));
+         fillVector.clear();
+         findObjects((TestFunc) isCollideableTypeWorm, fillVector, queryRect);
+         Vector<Point> poly;
+         collisionTime = 1;
+
+         pos1 = mPoints[mHeadIndex] - p * 0.01f;
+
+         for(S32 i = 0; i < fillVector.size(); i++)
+         {
+            BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
+
+            if(!foundObject->isCollisionEnabled())
+               continue;
+
+            poly.clear();
+            if(foundObject->getCollisionPoly(poly))
+            {
+               Point cp;
+               F32 collisionFraction;
+               if(PolygonSweptCircleIntersect(&poly[0], poly.size(), pos1,
+                  p, radius, cp, collisionFraction))
+               {
+                  if(cp != pos1 && collisionTime > collisionFraction)   // Avoid getting stuck inside polygon wall
+                  {
+                     collisionTime = collisionFraction;
+                     if(collisionTime <= 0)
+                     {
+                        collisionTime = 0;
+                        break;
+                     }
+                  }
+               }
+            }
+         }
+      } while(retryCount < 5 && collisionTime < 0.25f);
+
+      setPosAng(p * collisionTime + pos1, mAngle);
+      mDirTimer.reset(TNL::Random::readI(300,400));
    }
 
    Parent::idle(path);
@@ -1896,18 +1988,26 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
-   for(S32 i = 0; i < maxTailLength; i++)
-   {
-      if(stream->writeFlag(TailPointParts << i))
+   stream->writeInt(mHeadIndex, 5);
+
+   // Most of time, we only update the Point at mHeadIndex, which can save 28 bits.
+   if(stream->writeFlag((TailPointPartsMask << mHeadIndex) == (updateMask & TailPointPartsFullMask)))
+      mPoints[mHeadIndex].write(stream);
+   else
+      for(S32 i = 0; i < maxTailLength; i++)
       {
-         mPoints[i].write(stream);
+         if(stream->writeFlag(TailPointPartsMask << i))
+         {
+            mPoints[i].write(stream);
+         }
       }
+
+   if(stream->writeFlag(updateMask & ExplodeOrTailLengthMask))
+   {
+      if(!stream->writeFlag(hasExploded))
+         stream->writeInt(mTailLength, 5);
    }
 
-   stream->writeInt(mHeadIndex, 5);
-   stream->writeInt(mTailLength, 5);
-
-   stream->writeFlag(hasExploded);
 
    return retMask;
 }
@@ -1917,30 +2017,41 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
-   for(S32 i=0; i < maxTailLength; i++)
-   {
-      if(stream->readFlag())
+   mHeadIndex = stream->readInt(5);
+
+   if(stream->readFlag())
+      mPoints[mHeadIndex].read(stream);
+   else
+      for(S32 i=0; i < maxTailLength; i++)
       {
-         mPoints[i].read(stream);
+         if(stream->readFlag())
+         {
+            mPoints[i].read(stream);
+         }
+      }
+
+   if(stream->readFlag())
+   {
+      bool explode = (stream->readFlag());     // Exploding!  Take cover!!
+      if(!explode)
+         mTailLength = stream->readInt(5);
+
+      if(explode && !hasExploded)
+      {
+         hasExploded = true;
+         disableCollision();
+         TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+         ClientGame *game = static_cast<ClientGame *>(getGame());
+
+         static const S32 WormExplodeColorsTotal = 2;
+         static const Color WormExplodeColors[WormExplodeColorsTotal] = {Colors::orange50, Colors::orange67};
+         game->emitExplosion(mPoints[mHeadIndex], 0.4f, WormExplodeColors, WormExplodeColorsTotal);
       }
    }
-
-   mHeadIndex = stream->readInt(5);
-   mTailLength = stream->readInt(5);
 
    Vector<Point> p;
    getCollisionPoly(p);
    setExtent(p);
-
-
-   bool explode = (stream->readFlag());     // Exploding!  Take cover!!
-
-   if(explode && !hasExploded)
-   {
-      hasExploded = true;
-      disableCollision();
-      //onItemExploded(getRenderPos());
-   }
 }
 
 

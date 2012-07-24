@@ -401,10 +401,10 @@ private:
 
 protected:
    enum MaskBits {
-      InitialMask = Parent::FirstFreeMask << 0,
-      ExplosionMask = Parent::FirstFreeMask << 1,
-      TailPointParts = Parent::FirstFreeMask << 2,  // there are multiple tail parts
-      FirstFreeMask = TailPointParts << maxTailLength,
+      ExplodeOrTailLengthMask = Parent::FirstFreeMask << 0,
+      TailPointPartsMask = Parent::FirstFreeMask << 1,  // there are multiple tail parts
+      TailPointPartsFullMask = ((1 << maxTailLength) - 1) * TailPointPartsMask,
+      FirstFreeMask = TailPointPartsMask << maxTailLength,
    };
 
    Point mPoints[maxTailLength];
@@ -429,7 +429,6 @@ public:
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);
    void setPosAng(Point pos, F32 ang);
-   void setNextAng(F32 nextAng);
 
    void damageObject(DamageInfo *theInfo);
    void idle(BfObject::IdleCallPath path);
