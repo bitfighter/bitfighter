@@ -1361,7 +1361,8 @@ void HeatSeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *
 
    TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
 
-   if(stream->readFlag())
+   exploded = stream->readFlag();
+   if(exploded)
    {
       disableCollision();
       doExplosion(getPos());
