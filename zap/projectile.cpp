@@ -1229,6 +1229,10 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
       if(foundObject == this)
          continue;
 
+      // Don't collide with objects that have collision disabled (like flags and teleporters)
+      if(!foundObject->collide(this))
+         continue;
+
       // Don't collide with shooter withing first 500 ms of shooting
       if(mShooter.isValid() && mShooter == foundObject && aliveTime < 500)
          continue;
