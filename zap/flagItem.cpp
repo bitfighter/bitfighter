@@ -365,9 +365,13 @@ bool FlagItem::collide(BfObject *hitObject)
    if(isGhost())
       return false;
 
+   bool isShip = isShipType(hitObject->getObjectTypeNumber());
+
    // The only things we'll collide with (aside from walls and forcefields above) is ships and robots
-   if( !(isShipType(hitObject->getObjectTypeNumber())) )
+   if(!isShip)
       return false;
+
+   Ship *ship = static_cast<Ship*>(hitObject);
 
    // Ignore collisions that occur to recently dropped flags.  Make sure flag is ready to be picked up! 
    if(mDroppedTimer.getCurrent())    
@@ -375,8 +379,7 @@ bool FlagItem::collide(BfObject *hitObject)
 
    // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
    // We'll need to make sure the ship is a valid entity and that it hasn't exploded
-   Ship *ship = dynamic_cast<Ship *>(hitObject);
-   if(!ship || (ship->hasExploded))
+   if(ship->hasExploded)
       return false;
 
    GameType *gt = getGame()->getGameType();
