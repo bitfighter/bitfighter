@@ -421,7 +421,7 @@ LevelChangeOrAdminPasswordEntryUserInterface::LevelChangeOrAdminPasswordEntryUse
    setMenuID(LevelChangePasswordEntryUI);
    title = "ENTER PASSWORD:";
    instr1 = "";
-   instr2 = "Enter the level change or admin password to change levels on this server";
+   instr2 = "Enter level change or admin password to change levels on this server";
 }
 
 LevelChangeOrAdminPasswordEntryUserInterface::~LevelChangeOrAdminPasswordEntryUserInterface()
