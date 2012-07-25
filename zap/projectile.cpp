@@ -1208,6 +1208,39 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          mTimeRemaining -= deltaT;
    }
 
+   // Test if we are close enough to collide with anything this tick
+   Point startPos = getPos();
+   Point endPos = startPos + (getVel() * (F32(deltaT) / 1000.f));
+   endPos.normalize(endPos.len() + mRadius + 1);
+
+   F32 outCollisionTime;
+   U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();
+
+   Rect searchRect(startPos, endPos);
+   fillVector.clear();
+
+   findObjects((TestFunc)isWeaponCollideableType, fillVector, searchRect);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
+
+      // No colliding with self
+      if(foundObject == this)
+         continue;
+
+      // Don't collide with shooter withing first 500 ms of shooting
+      if(mShooter.isValid() && mShooter == foundObject && aliveTime < 500)
+         continue;
+
+      if(objectIntersectsSegment(foundObject, startPos, endPos, outCollisionTime))
+      {
+         Point collisionPoint = startPos + (endPos - startPos) * outCollisionTime;
+         handleCollision(foundObject, collisionPoint);
+         return;  // Ka-boom!
+      }
+   }
+
    // Do we already have a target?
    if(mAcquiredTarget)
    {
@@ -1216,7 +1249,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
       if(delta.lenSquared() > TargetAcquisitionRadius * TargetAcquisitionRadius)
          mAcquiredTarget = NULL;
 
-      // Else accelerate!
+      // Else accelerate towards target
       else
       {
          // Create a new velocity vector for the heat seeker to slowly go towards the target.
@@ -1224,7 +1257,6 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          //  - keep a minimum velocity (projectile default)
          //  - only change angle to a maxium amount from the original direction
          //  - increase speed each tick
-         // TODO:  put a maximum on the speed?
 
          // Set velocity vector towards the target for now
          Point newVelocity = delta;
@@ -1232,7 +1264,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          // Find the angle to the target as well as the current velocity angle
          // atan2 already normalizes these to be between -pi and pi
          F32 angleToTarget = delta.ATAN2();
-         F32 currentAngle = getActualVel().ATAN2();
+         F32 currentAngle = getVel().ATAN2();
 
          // Find the difference between the target angle and the angle of current travel
          // Normalize it to be between -pi and pi
@@ -1256,7 +1288,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          }
 
          // Get current speed
-         F32 speed = getActualVel().len();
+         F32 speed = getVel().len();
 
          // Set minimum speed to the default
          if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
@@ -1273,21 +1305,13 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 
          newVelocity.normalize(speed);
          setActualVel(newVelocity);
-
-
-         // If we're right on top of the target, collide!
-         // FIXME:  need a better way to tell when we hit the target from this class
-         //         This fails miserably when the heat-seeker is going too fast
-         F32 hitDistance = mRadius + Ship::CollisionRadius + 2;
-         if(delta.lenSquared() < hitDistance * hitDistance)
-            handleCollision(mAcquiredTarget, getActualPos());
       }
    }
 
    // No target acquired yet; time to search
    else
    {
-      Rect queryRect(getActualPos(), TargetAcquisitionRadius);
+      Rect queryRect(getPos(), TargetAcquisitionRadius);
       fillVector.clear();
       findObjects(isShipType, fillVector, queryRect);
 
@@ -1304,7 +1328,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          if(getGame()->getGameType()->isTeamGame() && mShooter->getTeam() == foundObject->getTeam())
             continue;
 
-         Point delta = foundObject->getPos() - getActualPos();
+         Point delta = foundObject->getPos() - getPos();
          F32 distanceSq = delta.lenSquared();
 
          // Only acquire an object within a circle radius instead of query rect
@@ -1340,11 +1364,11 @@ void HeatSeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *
    if(stream->readFlag())
    {
       disableCollision();
-      doExplosion(getActualPos());
+      doExplosion(getPos());
    }
 
    if(stream->readFlag())
-      SoundSystem::playSoundEffect(SFXBurstProjectile, getActualPos(), getActualVel());
+      SoundSystem::playSoundEffect(SFXBurstProjectile, getPos(), getVel());
 }
 
 
@@ -1353,7 +1377,7 @@ void HeatSeekerProjectile::damageObject(DamageInfo *theInfo)
    // If we're being damaged by a burst, explode...
    if(theInfo->damageType == DamageTypeArea)
    {
-      handleCollision(theInfo->damagingObject, getActualPos());
+      handleCollision(theInfo->damagingObject, getPos());
       return;
    }
 
@@ -1371,7 +1395,7 @@ void HeatSeekerProjectile::doExplosion(const Point &pos)
       TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
       static_cast<ClientGame *>(getGame())->emitBlast(pos, 100);          // New, manly explosion
 
-      SoundSystem::playSoundEffect(SFXMineExplode, getActualPos());
+      SoundSystem::playSoundEffect(SFXMineExplode, getPos());
    }
 #endif
 }
@@ -1389,7 +1413,7 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
       theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
       theInfo.damageType = DamageTypePoint;
       theInfo.damagingObject = this;
-//      theInfo.impulseVector = mVelocity;
+      theInfo.impulseVector = getVel();
       theInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
 
       hitObject->damageObject(&theInfo);
@@ -1409,7 +1433,7 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
 
 bool HeatSeekerProjectile::collide(BfObject *otherObj)
 {
-   return true;
+   return false;
 }
 
 

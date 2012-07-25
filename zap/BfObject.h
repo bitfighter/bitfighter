@@ -333,7 +333,7 @@ public:
 
    // Gets location(s) where repair rays should be rendered while object is being repaired
    virtual Vector<Point> getRepairLocations(const Point &repairOrigin);    
-
+   bool objectIntersectsSegment(BfObject *object, const Point &rayStart, const Point &rayEnd, F32 &fillCollisionTime);
    S32 radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force = 2000);
    virtual void damageObject(DamageInfo *damageInfo);
 

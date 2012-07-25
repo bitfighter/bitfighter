@@ -796,6 +796,46 @@ Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)
 }
 
 
+// This method returns true if the specified object collides with the given ray designated by
+// rayStart and rayEnd
+bool BfObject::objectIntersectsSegment(BfObject *object, const Point &rayStart, const Point &rayEnd,
+      F32 &fillCollisionTime)
+{
+   F32 collisionTime = 1.f;
+
+   Point targetLocation;
+   F32 targetRadius;
+   static Vector<Point> fillPolygon;
+   fillPolygon.clear();
+
+   // If our target has a collision circle
+   if(object->getCollisionCircle(ActualState, targetLocation, targetRadius))
+   {
+      if(circleIntersectsSegment(targetLocation, targetRadius, rayStart, rayEnd, fillCollisionTime))
+      {
+         // If we're super close, we've hit!
+         if(fillCollisionTime < collisionTime)
+            return true;
+      }
+   }
+   // Our target has a collision polygon
+   else if(object->getCollisionPoly(fillPolygon))
+   {
+      if(fillPolygon.size() == 0)
+        return false;
+
+      Point normal;
+      if(polygonIntersectsSegmentDetailed(&fillPolygon[0], fillPolygon.size(), true, rayStart, rayEnd, fillCollisionTime, normal))
+      {
+         if(fillCollisionTime < collisionTime)
+            return true;
+      }
+   }
+
+   return false;
+}
+
+
 // Returns number of ships hit
 S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objectTypeTest, DamageInfo &info, F32 force)
 {
