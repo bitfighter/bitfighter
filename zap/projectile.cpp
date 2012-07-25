@@ -1208,7 +1208,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          mTimeRemaining -= deltaT;
    }
 
-   // Test if we are close enough to collide with anything this tick
+   // Test for collision
    Point startPos = getPos();
    Point endPos = startPos + (getVel() * (F32(deltaT) / 1000.f));
    endPos.normalize(endPos.len() + mRadius + 1);
@@ -1325,7 +1325,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
             continue;
 
          // Don't target teammates in team games
-         if(getGame()->getGameType()->isTeamGame() && mShooter->getTeam() == foundObject->getTeam())
+         if(getGame()->getGameType()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam())
             continue;
 
          Point delta = foundObject->getPos() - getPos();
