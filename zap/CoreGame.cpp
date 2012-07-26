@@ -72,12 +72,13 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
 #ifndef ZAP_DEDICATED
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-   Ship *ship = clientGame && clientGame->getConnectionToServer() ? dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject()) : NULL;
 
-   if(!ship)
+   BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
+
+   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
       return;
+
+   Ship *ship = static_cast<Ship *>(object);
 
    for(S32 i = 0; i < mCores.size(); i++)
    {
@@ -555,7 +556,6 @@ void CoreItem::damageObject(DamageInfo *theInfo)
 #ifndef ZAP_DEDICATED
 void CoreItem::doExplosion(const Point &pos)
 {
-   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
    Color teamColor = getColor();
@@ -642,7 +642,6 @@ void CoreItem::fillPanelGeom(const Point &pos, S32 time, PanelGeom &panelGeom)
 
 void CoreItem::doPanelDebris(S32 panelIndex)
 {
-   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
    Point pos = getPos();               // Center of core

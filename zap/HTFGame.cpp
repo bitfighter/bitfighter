@@ -262,10 +262,15 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
 void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
 #ifndef ZAP_DEDICATED
+
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *ship = dynamic_cast<Ship *>(dynamic_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject());
-   if(!ship)
+
+   BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
+
+   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
       return;
+
+   Ship *ship = static_cast<Ship *>(object);
 
    bool uFlag = false;
    S32 team = ship->getTeam();

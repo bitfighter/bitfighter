@@ -233,7 +233,11 @@ const Color *RabbitGameType::getShipColor(Ship *ship)
    if(!gc)
       return &Colors::white;     // Something's gone wrong!
 
-   Ship *localShip = dynamic_cast<Ship *>(gc->getControlObject());
+   BfObject *object = gc->getControlObject();
+   if(!object || !isShipType(object->getObjectTypeNumber()))
+      return  &Colors::white;    // Something's gone wrong!
+
+   Ship *localShip = static_cast<Ship *>(gc->getControlObject());
 
    return (ship == localShip || (!shipHasFlag(ship) && !shipHasFlag(localShip))) ? &Colors::green : &Colors::red;
 #endif

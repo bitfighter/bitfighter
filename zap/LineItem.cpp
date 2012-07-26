@@ -77,9 +77,15 @@ void LineItem::render()
  
    // Don't render opposing team's text items... gc will only exist in game.  This block will be skipped when rendering preview in the editor.
    if(gc)      
-    {
-      Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
-      if(getTeam() == TEAM_NEUTRAL || (ship && ship->getTeam() != getTeam()))
+   {
+      BfObject *object = gc->getControlObject();
+
+      if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+         return;
+
+      Ship *ship = static_cast<Ship *>(object);
+
+      if(getTeam() == TEAM_NEUTRAL || ship->getTeam() == getTeam())
       {
          glColor(getColor());
          renderLine(getOutline());

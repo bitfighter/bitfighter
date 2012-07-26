@@ -164,11 +164,13 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 #ifndef ZAP_DEDICATED
 
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-   Ship *ship = dynamic_cast<Ship *>(clientGame && clientGame->getConnectionToServer() ? clientGame->getConnectionToServer()->getControlObject() : NULL);
 
-   if(!ship)
+   BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
+
+   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
       return;
+
+   Ship *ship = static_cast<Ship *>(object);
 
    S32 team = ship->getTeam();
 
