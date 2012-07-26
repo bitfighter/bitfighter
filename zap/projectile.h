@@ -274,7 +274,6 @@ private:
    static U32 TargetAcquisitionRadius;
    static F32 MaximumAngleChangePerSecond;
 
-   SafePtr<BfObject> mShooter;
    SafePtr<BfObject> mAcquiredTarget;
 
    S32 mTimeRemaining;
@@ -284,6 +283,7 @@ public:
    HeatSeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
    ~HeatSeekerProjectile();                                                                      // Destructor
 
+   SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;
 
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades

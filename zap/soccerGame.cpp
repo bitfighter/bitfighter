@@ -365,8 +365,8 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
    GameType *gt = theGame->getGameType();
    if(gt)
    {
-      SoccerGameType * sgt = dynamic_cast<SoccerGameType *>(gt);
-      if(sgt) sgt->setBall(this);
+      if(gt->getGameTypeId() == SoccerGame)
+         static_cast<SoccerGameType *>(gt)->setBall(this);
    }
 }
 
@@ -458,9 +458,10 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
 
    if(theInfo->damagingObject)
    {
-      if(isShipType(theInfo->damagingObject->getObjectTypeNumber()))
+      U8 typeNumber = theInfo->damagingObject->getObjectTypeNumber();
+
+      if(isShipType(typeNumber))
       {
-         TNLAssert(dynamic_cast<Ship *>(theInfo->damagingObject), "Not a Ship");
          mLastPlayerTouch = static_cast<Ship *>(theInfo->damagingObject);
          mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();
          if(mLastPlayerTouch->getClientInfo())
@@ -469,23 +470,39 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
             mLastPlayerTouchName = NULL;
       }
 
-      else if(isProjectileType(theInfo->damagingObject->getObjectTypeNumber()))
+      else if(isProjectileType(typeNumber))
       {
-         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
-         if(p)
+         BfObject *shooter;
+
+         if(typeNumber == BulletTypeNumber)
+            shooter = static_cast<Projectile*>(theInfo->damagingObject)->mShooter;
+         else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
+            shooter = static_cast<BurstProjectile*>(theInfo->damagingObject)->mShooter;
+         else if(typeNumber == HeatSeekerTypeNumber)
+            shooter = static_cast<HeatSeekerProjectile*>(theInfo->damagingObject)->mShooter;
+
+         if(isShipType(shooter->getObjectTypeNumber()))
          {
-            Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
+            Ship *ship = static_cast<Ship *>(shooter);
             mLastPlayerTouch = ship;             // If shooter was a turret, say, we'd expect s to be NULL.
-            mLastPlayerTouchTeam = p->getTeam(); // Projectile always have a team from what fired it, can be used to credit a team.
-            if(ship && ship->getClientInfo())
+            mLastPlayerTouchTeam = theInfo->damagingObject->getTeam(); // Projectile always have a team from what fired it, can be used to credit a team.
+            if(ship->getClientInfo())
                mLastPlayerTouchName = ship->getClientInfo()->getName();
             else
                mLastPlayerTouchName = NULL;
          }
       }
       else
-         mLastPlayerTouch = NULL;
+         resetPlayerTouch();
    }
+}
+
+
+void SoccerBallItem::resetPlayerTouch()
+{
+   mLastPlayerTouch = NULL;
+   mLastPlayerTouchTeam = NO_TEAM;
+   mLastPlayerTouchName = StringTableEntry(NULL);
 }
 
 
@@ -506,6 +523,8 @@ void SoccerBallItem::sendHome()
    setMaskBits(WarpPositionMask | PositionMask);      // By warping, we eliminate the "drifting" effect we got when we used PositionMask
 
    updateExtentInDatabase();
+
+   resetPlayerTouch();
 }
 
 
@@ -518,7 +537,6 @@ bool SoccerBallItem::collide(BfObject *hitObject)
    {
       if(!isGhost())    //Server side
       {
-         TNLAssert(dynamic_cast<Ship *>(hitObject), "Not a Ship");
          Ship *ship = static_cast<Ship *>(hitObject);
          mLastPlayerTouch = ship;
          mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();                  // Used to credit team if ship quits game before goal is scored
@@ -530,12 +548,13 @@ bool SoccerBallItem::collide(BfObject *hitObject)
    }
    else if(hitObject->getObjectTypeNumber() == GoalZoneTypeNumber)      // SCORE!!!!
    {
-      GoalZone *goal = dynamic_cast<GoalZone *>(hitObject);
+      GoalZone *goal = static_cast<GoalZone *>(hitObject);
 
-      if(goal && !isGhost())
+      if(!isGhost())
       {
-         SoccerGameType *g = dynamic_cast<SoccerGameType *>(getGame()->getGameType());
-         if(g) g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->getScore());
+         GameType *gameType = getGame()->getGameType();
+         if(gameType && gameType->getGameTypeId() == SoccerGame)
+            static_cast<SoccerGameType *>(gameType)->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->getScore());
 
          static const S32 POST_SCORE_HIATUS = 1500;
          mSendHomeTimer.reset(POST_SCORE_HIATUS);
