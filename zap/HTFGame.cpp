@@ -141,9 +141,10 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   FlagItem *flag = dynamic_cast<FlagItem *>(item);
+   if(item->getObjectTypeNumber() != FlagTypeNumber)
+      return;
 
-   if(flag && ship->getClientInfo())
+   if(ship->getClientInfo())
    {
       static StringTableEntry dropString("%e0 dropped %e1 flag!");
 
@@ -178,10 +179,11 @@ void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    // Ok, the ship has a flag and it's on the ship...
    MoveItem *item = s->mMountedItems[flagIndex];
-   FlagItem *mountedFlag = dynamic_cast<FlagItem *>(item);
 
-   if(mountedFlag)
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
+      FlagItem *mountedFlag = static_cast<FlagItem *>(item);
+
       static StringTableEntry capString("%e0 retrieved %e1 flag.  Team %e2 holds %e1 flag!");
 
       Vector<StringTableEntry> e;

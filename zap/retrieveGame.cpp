@@ -133,9 +133,10 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   FlagItem *flag = dynamic_cast<FlagItem *>(item);
+   if(item->getObjectTypeNumber() != FlagTypeNumber)
+      return;
 
-   if(flag && ship->getClientInfo())
+   if(ship->getClientInfo())
    {
       static StringTableEntry dropString("%e0 dropped a flag!");
       Vector<StringTableEntry> e;
@@ -167,10 +168,11 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    // Ok, the ship has a flag and it's on the ship and we're in an empty zone
    MoveItem *item = s->mMountedItems[flagIndex];
-   FlagItem *mountedFlag = dynamic_cast<FlagItem *>(item);
 
-   if(mountedFlag)
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
+      FlagItem *mountedFlag = static_cast<FlagItem *>(item);
+
       static StringTableEntry capString("%e0 retrieved a flag!");
       static StringTableEntry oneFlagCapString("%e0 retrieved the flag!");
 

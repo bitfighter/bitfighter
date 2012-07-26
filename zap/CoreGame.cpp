@@ -72,7 +72,8 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
 #ifndef ZAP_DEDICATED
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    Ship *ship = clientGame && clientGame->getConnectionToServer() ? dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject()) : NULL;
 
    if(!ship)
@@ -533,10 +534,8 @@ void CoreItem::damageObject(DamageInfo *theInfo)
       if(gameType)
       {
          ClientInfo *destroyer = theInfo->damagingObject->getOwner();
-
-         CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
-         if(coreGameType)
-            coreGameType->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
+         if(gameType->getGameTypeId() == CoreGame)
+            static_cast<CoreGameType*>(gameType)->score(destroyer, getTeam(), CoreGameType::DestroyedCoreScore);
       }
 
       mHasExploded = true;
@@ -840,9 +839,8 @@ void CoreItem::onAddedToGame(Game *theGame)
       return;
 
    // Now add to game
-   CoreGameType *coreGameType = dynamic_cast<CoreGameType*>(gameType);
-   if(coreGameType)
-      coreGameType->addCore(this, getTeam());
+   if(gameType->getGameTypeId() == CoreGame)
+      static_cast<CoreGameType*>(gameType)->addCore(this, getTeam());
 }
 
 

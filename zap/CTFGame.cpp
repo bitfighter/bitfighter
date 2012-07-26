@@ -79,9 +79,9 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          // Check if this client has an enemy flag mounted
          for(S32 i = 0; i < theShip->mMountedItems.size(); i++)
          {
-            FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theShip->mMountedItems[i].getPointer());
-            if(mountedFlag)
+            if(theShip->mMountedItems[i].getPointer()->getObjectTypeNumber() == FlagTypeNumber)
             {
+               FlagItem *mountedFlag = static_cast<FlagItem *>(theShip->mMountedItems[i].getPointer());
                static StringTableEntry capString("%e0 captured the %e1 flag!");
 
                Vector<StringTableEntry> e;
@@ -126,10 +126,9 @@ class FlagItem;
 
 void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   FlagItem *flag = dynamic_cast<FlagItem *>(item);
-
-   if(flag)
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
+      FlagItem *flag = static_cast<FlagItem *>(item);
       static StringTableEntry dropString("%e0 dropped the %e1 flag!");
 
       Vector<StringTableEntry> e;

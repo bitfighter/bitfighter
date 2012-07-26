@@ -256,7 +256,7 @@ bool RabbitGameType::shipHasFlag(Ship *ship)
 
    for (S32 k = 0; k < ship->mMountedItems.size(); k++)
    {
-      if(dynamic_cast<FlagItem *>(ship->mMountedItems[k].getPointer()))
+      if(ship->mMountedItems[k].getPointer()->getObjectTypeNumber() == FlagTypeNumber)
          return true;
    }
    return false;
@@ -313,7 +313,9 @@ void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObjec
    if(ko)
       killerShip = ko->getShip();
 
-   Ship *victimShip = dynamic_cast<Ship *>(clientObject);
+   Ship *victimShip = NULL;
+   if(isShipType(clientObject->getObjectTypeNumber()))
+      victimShip = static_cast<Ship *>(clientObject);
 
    if(killerShip)
    {
@@ -364,9 +366,13 @@ bool RabbitGameType::teamHasFlag(S32 teamId) const
 
 void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-   if(flag && ship->getClientInfo())
+   if(item->getObjectTypeNumber() != FlagTypeNumber)
+      return;
+
+   FlagItem *flag = static_cast<FlagItem *>(item);
+
+   if(ship->getClientInfo())
    {
       flag->mTimer.reset(mFlagReturnTimer);
       s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
