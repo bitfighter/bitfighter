@@ -72,8 +72,6 @@ public:
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 
-   void shipTouchZone(Ship *s, GoalZone *z);
-
    bool onFire(Ship *ship);             
 
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));

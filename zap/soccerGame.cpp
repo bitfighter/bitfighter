@@ -192,18 +192,6 @@ bool SoccerGameType::canBeTeamGame()       const { return true; }
 bool SoccerGameType::canBeIndividualGame() const { return true; }
 
 
-void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
-{
-   // See if this ship is carrying a ball
-   if(!ship->isCarryingItem(SoccerBallItemTypeNumber))
-      return;
-
-   // The ship has a ball
-   SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->unmountItem(SoccerBallItemTypeNumber));
-   ball->collide(zone);
-}
-
-
 // Runs when ship fires, return true or false on whether firing should proceed
 bool SoccerGameType::onFire(Ship *ship) 
 { 
