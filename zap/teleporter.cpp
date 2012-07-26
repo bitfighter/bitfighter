@@ -264,7 +264,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
-         Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
+         Teleporter *tel = static_cast<Teleporter *>(foundObjects[i]);
          if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
          {
             tel->addDest(dest);
@@ -606,7 +606,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
+      Ship *s = static_cast<Ship *>(foundObjects[i]);
       if((pos - s->getActualPos()).len() < TeleporterTriggerRadius)
       {
          isTriggered = true;

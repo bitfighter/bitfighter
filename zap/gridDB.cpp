@@ -389,7 +389,7 @@ void GridDatabase::dumpObjects()
          {
             DatabaseObject *theObject = walk->theObject;
             logprintf("Found object in (%d,%d) with extents %s", x, y, theObject->getExtent().toString().c_str());
-            logprintf("Obj coords: %s", dynamic_cast<BfObject *>(theObject)->getPos().toString().c_str());
+            logprintf("Obj coords: %s", static_cast<BfObject *>(theObject)->getPos().toString().c_str());
          }
 }
 

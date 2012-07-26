@@ -455,7 +455,7 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
    {
       TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
 
-      ((ClientGame *)mGame)->onConnectionToMasterTerminated(reason, reasonStr);
+      static_cast<ClientGame *>(mGame)->onConnectionToMasterTerminated(reason, reasonStr);
    }
 #endif
 }

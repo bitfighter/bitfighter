@@ -166,7 +166,7 @@ bool PickupItem::collide(BfObject *otherObject)
 {
    if(mIsVisible && !isGhost() && isShipType(otherObject->getObjectTypeNumber()))
    {
-      if(pickup(dynamic_cast<Ship *>(otherObject)))
+      if(pickup(static_cast<Ship *>(otherObject)))
       {
          hide();
          setMaskBits(SoundMask);       // Trigger SFX on client
