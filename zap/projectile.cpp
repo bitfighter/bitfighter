@@ -454,6 +454,7 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
    {
       setOwner(shooter->getOwner());
       setTeam(shooter->getTeam());
+      mShooter = shooter;
    }
    else
       setOwner(NULL);

@@ -119,6 +119,7 @@ public:
    static const S32 InnerBlastRadius = 100;
    static const S32 OuterBlastRadius = 250;
 
+   SafePtr<BfObject> mShooter;
    S32 mTimeRemaining;
    bool exploded;
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
