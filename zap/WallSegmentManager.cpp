@@ -116,7 +116,7 @@ void WallSegmentManager::finishedChangingWalls(GridDatabase *editorObjectDatabas
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
+      EngineeredItem *engrItem = static_cast<EngineeredItem *>(fillVector[i]);
 
       // Remount any engr items that were either not attached to any wall, or were attached to any segments on the modified wall
       if(engrItem->getMountSegment() == NULL || engrItem->getMountSegment()->getOwner() == changedWallSerialNumber)
@@ -202,9 +202,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
    Vector<EngineeredItem *> toBeRemounted;    // A list of engr objects terminating on the wall segment that we'll be deleting
 
-   BfObject *wall = dynamic_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
-   TNLAssert(wall, "Bad cast -- expected an EditorObject!");
-   
+   BfObject *wall = static_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
 
    S32 count = mWallSegments.size(); 
 
@@ -213,7 +211,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       if(mWallSegments[i]->getOwner() == wall->getSerialNumber())       // Segment belongs to wall
          for(S32 j = 0; j < engrObjects.size(); j++)                    // Loop through all engineered objects checking the mount seg
          {
-            EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(engrObjects[j]);
+            EngineeredItem *engrObj = static_cast<EngineeredItem *>(engrObjects[j]);
 
             // Does FF start or end on this segment?
             if(engrObj->getMountSegment() == mWallSegments[i] || engrObj->getEndSegment() == mWallSegments[i])
@@ -287,7 +285,7 @@ void WallSegmentManager::updateAllMountedItems(GridDatabase *database)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      EngineeredItem *engrItem = dynamic_cast<EngineeredItem *>(fillVector[i]);     // static_cast doesn't seem to work
+      EngineeredItem *engrItem = static_cast<EngineeredItem *>(fillVector[i]);
       engrItem->mountToWall(engrItem->getVert(0), database->getWallSegmentManager());
    }
 }

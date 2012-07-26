@@ -215,12 +215,10 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
 
    for(S32 i = 0; i < barriers.size(); i++)
    {
-      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
-
-      if(!barrier)
+      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
          continue;
 
-      inputPolygons.push_back(barrier->getCollisionPolyPtr());
+      inputPolygons.push_back(static_cast<Barrier*>(barriers[i])->getCollisionPolyPtr());
    }
 
    return mergePolys(inputPolygons, solution);
