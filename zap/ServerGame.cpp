@@ -1407,8 +1407,8 @@ void ServerGame::idle(U32 timeDelta)
       dataSender.sendNextLine();
 
 
-   if(mGameSuspended)     // If game is suspended, we need do nothing more
-      return;
+   if(!mGameSuspended)     // If game is suspended, we need do nothing more
+   {
 
    mCurrentTime += timeDelta;
 
@@ -1493,6 +1493,7 @@ void ServerGame::idle(U32 timeDelta)
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
 
+   }  // end of  if(!mGameSuspended)
 
    // Lastly, play any sounds server might have made...
    if(isDedicated())   // non-dedicated will process sound in client side.
