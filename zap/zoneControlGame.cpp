@@ -100,17 +100,20 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    mFlagTeam = theShip->getTeam();
    s2cSetFlagTeam(mFlagTeam);
 
-   GoalZone *theZone = dynamic_cast<GoalZone *>(theShip->isInZone(GoalZoneTypeNumber));
-   if(theZone)
-      shipTouchZone(theShip, theZone);
+   BfObject *theZone = theShip->isInZone(GoalZoneTypeNumber);
+
+   if(theZone && theZone->getObjectTypeNumber() == GoalZoneTypeNumber)
+      shipTouchZone(theShip, static_cast<GoalZone *>(theZone));
 }
 
 
 void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   FlagItem *flag = dynamic_cast<FlagItem *>(item);
+   // Only continue if we're dropping a flag
+   if(item->getObjectTypeNumber() != FlagTypeNumber)
+      return;
 
-   if(flag && ship->getClientInfo())
+   if(ship->getClientInfo())
    {
       s2cSetFlagTeam(-1);
       static StringTableEntry dropString("%e0 dropped the flag!");
@@ -191,13 +194,13 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    for(S32 i = 0; i < s->mMountedItems.size(); i++)
    {
       MoveItem *theItem = s->mMountedItems[i];
-      FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
+      if(theItem->getObjectTypeNumber() != FlagTypeNumber)
+         continue;
 
-      if(mountedFlag)
-      {
-         mountedFlag->dismount();
-         mountedFlag->sendHome();
-      }
+      FlagItem *mountedFlag = static_cast<FlagItem *>(theItem);
+
+      mountedFlag->dismount();
+      mountedFlag->sendHome();
    }
 
    mFlagTeam = -1;
@@ -301,7 +304,7 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
    // ...and make sure they're not flashing...
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GoalZone *goalZone = dynamic_cast<GoalZone *>(fillVector[i]);
+      GoalZone *goalZone = static_cast<GoalZone *>(fillVector[i]);
       if(goalZone)
          goalZone->setFlashCount(0);
    }
