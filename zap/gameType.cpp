@@ -1570,7 +1570,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
 
          for(S32 j = 0; j < fillVector.size(); j++)
-            connection->objectInScope(dynamic_cast<BfObject *>(fillVector[j]));
+            connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
       }
    }
 }
@@ -1636,8 +1636,8 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
       Point pos = scopeObject->getPos();
-      Ship *co = dynamic_cast<Ship *>(scopeObject);
-      TNLAssert(co, "Null control object!");
+      TNLAssert(dynamic_cast<Ship *>(scopeObject), "Control object not a ship!");
+      Ship *co = static_cast<Ship *>(scopeObject);
 
       Rect queryRect(pos, pos);
       queryRect.expand( mGame->getScopeRange(co->getSensorStatus()) );
@@ -1648,7 +1648,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
 
    // Set object-in-scope for all objects found above
    for(S32 i = 0; i < fillVector.size(); i++)
-      connection->objectInScope(dynamic_cast<BfObject *>(fillVector[i]));
+      connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
    
    // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
@@ -1699,7 +1699,7 @@ void GameType::queryItemsOfInterest()
 
       for(S32 j = 0; j < fillVector.size(); j++)
       {
-         Ship *theShip = dynamic_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
+         Ship *theShip = static_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
          Point delta = theShip->getActualPos() - pos;
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
@@ -1912,13 +1912,15 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
    }
    else              // Unknown killer... not a scorable event.  Unless killer was an asteroid!
    {
-      if( dynamic_cast<Asteroid *>(killerObject) )       // Asteroid
+      if(killerObject->getObjectTypeNumber() == AsteroidTypeNumber)       // Asteroid
          updateScore(victim, KilledByAsteroid, 0);
       else                                               // Check for turret shot
       {
-         Projectile *projectile = dynamic_cast<Projectile *>(killerObject);
+         Projectile *projectile = NULL;
+         if(killerObject->getObjectTypeNumber() == BulletTypeNumber)
+            projectile = static_cast<Projectile *>(killerObject);
 
-         if( projectile && projectile->mShooter.isValid() && dynamic_cast<Turret *>(projectile->mShooter.getPointer()) )
+         if(projectile && projectile->mShooter.isValid() && projectile->mShooter.getPointer()->getObjectTypeNumber() == TurretTypeNumber)
             updateScore(victim, KilledByTurret, 0);
       }
 
@@ -2167,9 +2169,11 @@ static void switchTeamsCallback(ClientGame *game, U32 unused)
    // If there are only two teams, just switch teams and skip the rigamarole
    if(game->getTeamCount() == 2)
    {
-      Ship *ship = dynamic_cast<Ship *>(game->getConnectionToServer()->getControlObject());  // Returns player's ship...
-      if(!ship)
+      BfObject *controlObject = game->getConnectionToServer()->getControlObject();
+      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
          return;
+
+      Ship *ship = static_cast<Ship *>(controlObject);  // Returns player's ship...
 
       gt->c2sChangeTeams(1 - ship->getTeam());                                            // If two teams, team will either be 0 or 1, so "1 - " will toggle
       game->getUIManager()->reactivateMenu(game->getUIManager()->getGameUserInterface()); // Jump back into the game (this option takes place immediately)
@@ -2381,7 +2385,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
-         BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+         BfObject *obj = static_cast<BfObject *>(fillVector[i]);
 
          if((obj->getOwner()) == ship->getOwner())
             obj->setOwner(NULL);
@@ -2646,7 +2650,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BurstProjectile *gp = dynamic_cast<BurstProjectile *>(fillVector[i]);
+      BurstProjectile *gp = static_cast<BurstProjectile *>(fillVector[i]);
 
       if(gp->mSetBy == name)
          gp->mSetBy = "";                                    // No longer set-by-self
@@ -3583,10 +3587,10 @@ GAMETYPE_RPC_C2S(GameType, c2sRequestScoreboardUpdates, (bool updates), (updates
 GAMETYPE_RPC_C2S(GameType, c2sChooseNextWeapon, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+   BfObject *controlObject = source->getControlObject();
 
-   if(ship)
-      ship->selectNextWeapon();
+   if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
+      static_cast<Ship *>(controlObject)->selectNextWeapon();
 }
 
 
@@ -3594,10 +3598,10 @@ GAMETYPE_RPC_C2S(GameType, c2sChooseNextWeapon, (), ())
 GAMETYPE_RPC_C2S(GameType, c2sChoosePrevWeapon, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+   BfObject *controlObject = source->getControlObject();
 
-   if(ship)
-      ship->selectPrevWeapon();
+   if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
+      static_cast<Ship *>(controlObject)->selectPrevWeapon();
 }
 
 
@@ -3607,9 +3611,12 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
    //logprintf("%s GameType->c2sDropItem", isGhost()? "Client:" : "Server:");
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
-   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
-   if(!ship)
+   BfObject *controlObject = source->getControlObject();
+
+   if(!isShipType(controlObject->getObjectTypeNumber()))
       return;
+
+   Ship *ship = static_cast<Ship *>(controlObject);
 
    S32 count = ship->mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
@@ -3683,10 +3690,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+   BfObject *controlObject = source->getControlObject();
 
-   if(ship)
-      ship->selectWeapon(indx);
+   if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
+      dynamic_cast<Ship *>(controlObject)->selectWeapon(indx);
 }
 
 
