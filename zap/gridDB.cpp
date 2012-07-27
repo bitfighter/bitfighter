@@ -74,7 +74,7 @@ GridDatabase::~GridDatabase()
 {
    removeEverythingFromDatabase();
 
-   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "running GridDatabase Destructor without initalizing?")
+   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "running GridDatabase Destructor without initalizing?");
 
    if(mWallSegmentManager)
       delete mWallSegmentManager;

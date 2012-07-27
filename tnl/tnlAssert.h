@@ -88,8 +88,11 @@ public:
    #define TNLAssertV(x, y) { if (!bool(x)) { TNL::Assert::processAssert(__FILE__, __LINE__,  avar y); TNL_DEBUGBREAK(); } }
 
 #else
-   #define TNLAssert(x, y)    { }
-   #define TNLAssertV(x, y)   { }
+   // Tricky way of making sure asserts are completely compiled out
+   #define TNLAssert(x, y) \
+      do { (void) sizeof ((x)); } while (0)
+   #define TNLAssertV(x, y) \
+      do { (void) sizeof ((x)); } while (0)
 #endif
 
 };

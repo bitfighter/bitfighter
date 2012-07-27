@@ -433,7 +433,7 @@ F32 Ship::getSlipzoneSpeedMoficationFactor()
    BfObject *obj = isInZone(SlipZoneTypeNumber);
    if(obj)
    {
-      TNLAssert(dynamic_cast<SlipZone *>(obj), "SlipZoneTypeNumber must be SlipZone only")
+      TNLAssert(dynamic_cast<SlipZone *>(obj), "SlipZoneTypeNumber must be SlipZone only");
       SlipZone *slipzone = static_cast<SlipZone *>(obj);
       return slipzone->slipAmount;
    }
