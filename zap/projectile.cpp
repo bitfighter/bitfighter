@@ -166,8 +166,9 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
    collided = true;
-   Ship *s = dynamic_cast<Ship *>(hitObject);
-   hitShip = (s != NULL);
+
+   if(isShipType(hitObject->getObjectTypeNumber()))
+      hitShip = static_cast<Ship *>(hitObject);
 
    if(!isGhost())    // If we're on the server, that is
    {
@@ -182,7 +183,9 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 
       hitObject->damageObject(&theInfo);
 
-      Ship *shooter = dynamic_cast<Ship *>(mShooter.getPointer());
+      Ship *shooter = NULL;
+      if(isShipType(mShooter.getPointer()->getObjectTypeNumber()))
+         shooter = static_cast<Ship *>(mShooter.getPointer());
 
       if(hitShip && shooter && shooter->getClientInfo())
          shooter->getClientInfo()->getStatistics()->countHit(mWeaponType);
@@ -285,7 +288,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
                setPos(collisionPoint + surfNormal);
                timeLeft = timeLeft * (1 - collisionTime);
 
-               MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
+               MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);  // TODO somehow get rid of this dynamic_cast
                if(obj)
                {
                   startPos = getPos();
@@ -730,7 +733,7 @@ void Mine::idle(IdleCallPath path)
    bool foundItem = false;
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
       F32 radius;
       Point ipos;
@@ -836,16 +839,18 @@ void Mine::renderItem(const Point &pos)
 
    if(clientGame && clientGame->getConnectionToServer())
    {
-      Ship *ship = dynamic_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
+      GameConnection *localClient = clientGame->getConnectionToServer();
+      BfObject *controlObject = localClient->getControlObject();
 
-      if(!ship)
+      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
          return;
+
+      Ship *ship = static_cast<Ship *>(controlObject);
 
       armed = mArmed;
 
       GameType *gameType = clientGame->getGameType();
 
-      GameConnection *localClient = clientGame->getConnectionToServer();
 
       // Can see mine if laid by teammate in team game || sensor is active ||
       // you laid it yourself
@@ -1059,10 +1064,13 @@ void SpyBug::renderItem(const Point &pos)
    if(clientGame->getConnectionToServer())
    {
       GameConnection *conn = clientGame->getConnectionToServer();   
-      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
 
-      if(!ship)
+      BfObject *controlObject = conn->getControlObject();
+
+      if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
          return;
+
+      Ship *ship = static_cast<Ship *>(controlObject);
 
       GameType *gameType = clientGame->getGameType();
 

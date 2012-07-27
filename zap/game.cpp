@@ -954,7 +954,7 @@ void Game::deleteObjects(U8 typeNumber)
    mGameObjDatabase->findObjects(typeNumber, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *obj = static_cast<BfObject *>(fillVector[i]);
       obj->deleteObject(0);
    }
 }
@@ -967,7 +967,7 @@ void Game::deleteObjects(TestFunc testFunc)
    mGameObjDatabase->findObjects(testFunc, fillVector);
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *obj = static_cast<BfObject *>(fillVector[i]);
       obj->deleteObject(0);
    }
 }

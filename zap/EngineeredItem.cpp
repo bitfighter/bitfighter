@@ -231,16 +231,14 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-      if(ffp)
+      ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(fillVector[i]);
+
+      ffpGeom.clear();
+      ffp->getCollisionPoly(ffpGeom);
+      if(forceFieldEdgesIntersectPoints(ffpGeom, candidateForceFieldGeom))
       {
-         ffpGeom.clear();
-         ffp->getCollisionPoly(ffpGeom);
-         if(forceFieldEdgesIntersectPoints(ffpGeom, candidateForceFieldGeom))
-         {
-            collision = true;
-            break;
-         }
+         collision = true;
+         break;
       }
    }
    
@@ -259,19 +257,17 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
-         ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-         if(proj)
+         ForceFieldProjector *proj = static_cast<ForceFieldProjector *>(fillVector[i]);
+
+         proj->getForceFieldStartAndEndPoints(start, end);
+
+         ffGeom.clear();
+         ForceField::getGeom(start, end, ffGeom);
+
+         if(forceFieldEdgesIntersectPoints(candidateForceFieldGeom, ffGeom))
          {
-            proj->getForceFieldStartAndEndPoints(start, end);
-
-            ffGeom.clear();
-            ForceField::getGeom(start, end, ffGeom);
-
-            if(forceFieldEdgesIntersectPoints(candidateForceFieldGeom, ffGeom))
-            {
-               collision = true;
-               break;
-            }
+            collision = true;
+            break;
          }
       }
    }
@@ -345,10 +341,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      Turret *turret = dynamic_cast<Turret *>(fillVector[i]);
-
-      if(!turret)
-         continue;
+      Turret *turret = static_cast<Turret *>(fillVector[i]);
 
       // We don't care about engineered turrets because they can be destroyed
       if(turret->isEngineered())
@@ -379,7 +372,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 objectType)
 {
    // Do some basic crash-proofing sanity checks first
-   Ship *ship = dynamic_cast<Ship *>(clientInfo->getShip());
+   Ship *ship = clientInfo->getShip();
    if(!ship)
       return false;
 
@@ -902,8 +895,6 @@ void EngineeredItem::explode()
    F32 c = TNL::Random::readF() * 0.15f + 0.125f;
    F32 d = TNL::Random::readF() * 0.2f + 0.9f;
 
-   TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
    Point pos = getPos();
@@ -935,7 +926,7 @@ bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, Gr
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Vector<Point> foundObjectBounds;
-      dynamic_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
+      static_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
 
       if(polygonsIntersect(thisBounds, foundObjectBounds))     // Do they intersect?
          return false;     // Bad location
@@ -1769,7 +1760,7 @@ void Turret::idle(IdleCallPath path)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
-         Ship *potential = dynamic_cast<Ship *>(fillVector[i]);
+         Ship *potential = static_cast<Ship *>(fillVector[i]);
 
          // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
          if(!potential->isVisible() || potential->hasExploded)
@@ -1777,11 +1768,11 @@ void Turret::idle(IdleCallPath path)
       }
 
       // Don't target mounted items (like resourceItems and flagItems)
-      MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);
+      MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);  // TODO get rid of dynamic_cast somehow
       if(item && item->isMounted())
          continue;
 
-      BfObject *potential = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *potential = static_cast<BfObject *>(fillVector[i]);
       if(potential->getTeam() == getTeam())     // Is target on our team?
          continue;                              // ...if so, skip it!
 

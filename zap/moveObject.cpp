@@ -382,8 +382,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       }
       else if(objectHit->getObjectTypeNumber() == SpeedZoneTypeNumber)
       {
-         TNLAssert(dynamic_cast<SpeedZone *>(objectHit), "Not a SpeedZone error, but Object Type is SpeedZoneTypeNumber should always be SpeedZone");
-         SpeedZone *speedZone = (SpeedZone *)objectHit;
+         SpeedZone *speedZone = static_cast<SpeedZone *>(objectHit);
          speedZone->collided(this, stateIndex);
          disabledList.push_back(objectHit);
          objectHit->disableCollision();
@@ -439,7 +438,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      BfObject *foundObject = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
       if(!foundObject->isCollisionEnabled())
          continue;
@@ -560,8 +559,6 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
             Point chaos(TNL::Random::readF(), TNL::Random::readF());
             chaos *= scale + 1;
 
-            TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-
             if(TNL::Random::readF() > 0.5)
                static_cast<ClientGame *>(getGame())->emitSpark(collisionPoint, 
                                                                normal * chaos.len() + Point(normal.y, -normal.x) * scale * 5  + chaos + 
@@ -616,8 +613,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       if(this->getObjectTypeNumber() == AsteroidTypeNumber)
          asteroid = static_cast<Asteroid*>(this);
 
-      if(moveObjectThatWasHit->getObjectTypeNumber() == PlayerShipTypeNumber ||
-            moveObjectThatWasHit->getObjectTypeNumber() == RobotShipTypeNumber)
+      if(isShipType(moveObjectThatWasHit->getObjectTypeNumber()))
          ship = static_cast<Ship*>(moveObjectThatWasHit);
 
       // Since asteroids and ships are both MoveObjects, we'll also check to see if ship hit an asteroid
@@ -625,8 +621,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       {
          if(moveObjectThatWasHit->getObjectTypeNumber() == AsteroidTypeNumber)
             asteroid = static_cast<Asteroid*>(moveObjectThatWasHit);
-         if(this->getObjectTypeNumber() == PlayerShipTypeNumber ||
-               this->getObjectTypeNumber() == RobotShipTypeNumber)
+         if(isShipType(this->getObjectTypeNumber()))
             ship = static_cast<Ship*>(this);
       }
 
@@ -1367,17 +1362,20 @@ bool Asteroid::collide(BfObject *otherObject)
 
    if(isGhost())   //client only, to try to prevent asteroids desync...
    {
-      Ship *ship = dynamic_cast<Ship *>(otherObject);
-      if(ship)
+      if(isShipType(otherObject->getObjectTypeNumber()))
       {
          // Client does not know if we actually get destroyed from asteroids
          // prevents bouncing off asteroids, then LAG puts back to position.
-         if(! ship->isModulePrimaryActive(ModuleShield)) return false;
+         if(!static_cast<Ship *>(otherObject)->isModulePrimaryActive(ModuleShield))
+            return false;
       }
    }
 
    // Asteroids don't collide with one another!
-   return dynamic_cast<Asteroid *>(otherObject) ? false : true;
+   if(otherObject->getObjectTypeNumber() == AsteroidTypeNumber)
+      return false;
+
+   return true;
 }
 
 
@@ -1558,7 +1556,7 @@ void Circle::idle(BfObject::IdleCallPath path)
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
-         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+         Ship *ship = static_cast<Ship *>(fillVector[i]);
          F32 d = getActualPos().distSquared(ship->getActualPos());
          if(d < dist)
          {
@@ -2040,7 +2038,6 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
       {
          hasExploded = true;
          disableCollision();
-         TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
          ClientGame *game = static_cast<ClientGame *>(getGame());
 
          static const S32 WormExplodeColorsTotal = 2;
@@ -2209,8 +2206,12 @@ bool ResourceItem::collide(BfObject *hitObject)
    if(mDroppedTimer.getCurrent())    
       return false;
 
-   Ship *ship = dynamic_cast<Ship *>(hitObject);
-   if(!ship || ship->hasExploded)
+   if(!isShipType(hitObject->getObjectTypeNumber()))
+      return false;
+
+   Ship *ship = static_cast<Ship *>(hitObject);
+
+   if(ship->hasExploded)
       return false;
 
    if(ship->hasModule(ModuleEngineer) && !ship->isCarryingItem(ResourceItemTypeNumber))

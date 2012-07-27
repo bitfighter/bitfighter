@@ -791,7 +791,7 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 
    if(!target)
       return;
 
-   GameConnection *gc = dynamic_cast<ClientGame *>(mGame)->getConnectionToServer();
+   GameConnection *gc = static_cast<ClientGame *>(mGame)->getConnectionToServer();
    BfObject *ship = NULL;
 
    if(gc)

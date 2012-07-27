@@ -102,15 +102,21 @@ S32 LuaGameInfo::isTeamGame(lua_State *L)           { return returnBool  (L, gSe
 
 S32 LuaGameInfo::isNexusOpen(lua_State *L)
 {
-   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gServerGame->getGameType());
-   return theGameType ? returnBool(L, theGameType->mNexusIsOpen) : returnNil(L);
+   GameType *gameType = gServerGame->getGameType();
+   if(!gameType || gameType->getGameTypeId() != NexusGame)
+      return returnNil(L);
+
+   return returnBool(L, static_cast<NexusGameType *>(gameType)->mNexusIsOpen);
 }
 
 
 S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
 {
-   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gServerGame->getGameType());
-   return theGameType ? returnInt(L, theGameType->getNexusTimeLeft()) : returnNil(L);
+   GameType *gameType = gServerGame->getGameType();
+   if(!gameType || gameType->getGameTypeId() != NexusGame)
+      return returnNil(L);
+
+   return returnInt(L, static_cast<NexusGameType *>(gameType)->getNexusTimeLeft());
 }
 
 
