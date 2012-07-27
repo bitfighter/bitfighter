@@ -529,10 +529,10 @@ void NexusGameType::openNexus(S32 timeNexusOpened)
       if(!client_ship)
          continue;
 
-      NexusZone *nexus = dynamic_cast<NexusZone *>(client_ship->isInZone(NexusTypeNumber));
+      BfObject *zone = client_ship->isInZone(NexusTypeNumber);
 
-      if(nexus)
-         shipTouchNexus(client_ship, nexus);
+      if(zone)
+         shipTouchNexus(client_ship, static_cast<NexusZone *>(zone));
    }
 
    // Fire an event
@@ -697,7 +697,7 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
       renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
 
    for(S32 i = 0; i < mNexus.size(); i++)
-      renderObjectiveArrow(dynamic_cast<BfObject *>(mNexus[i].getPointer()), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
+      renderObjectiveArrow(mNexus[i].getPointer(), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);
 }
 #endif
 
@@ -710,9 +710,10 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject
 {
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
-   Ship *theShip = dynamic_cast<Ship *>(clientObject);
-   if(!theShip)
+   if(!clientObject || !isShipType(clientObject->getObjectTypeNumber()))
       return;
+
+   Ship *theShip = static_cast<Ship *>(clientObject);
 
    // Check for yard sale  (is this when the flags a player is carrying go drifting about??)
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
@@ -1045,9 +1046,10 @@ void NexusZone::onAddedToGame(Game *theGame)
    if(!isGhost())
       setScopeAlways();    // Always visible!
 
-   NexusGameType *gt = dynamic_cast<NexusGameType *>( getGame()->getGameType() );
-   if(gt) 
-      gt->addNexus(this);
+   GameType *gameType = getGame()->getGameType();
+
+   if(gameType && gameType->getGameTypeId() == NexusGame)
+      static_cast<NexusGameType *>(gameType)->addNexus(this);
 }
 
 
@@ -1060,10 +1062,16 @@ void NexusZone::idle(BfObject::IdleCallPath path)
 void NexusZone::render()
 {
 #ifndef ZAP_DEDICATED
-   GameType *gt = getGame()->getGameType();
-   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(gt);
-   renderNexus(getOutline(), getFill(), getCentroid(), getLabelAngle(), 
-              (theGameType && theGameType->mNexusIsOpen), gt ? gt->mZoneGlowTimer.getFraction() : 0);
+   GameType *gameType = getGame()->getGameType();
+   NexusGameType *nexusGameType = NULL;
+
+   if(gameType && gameType->getGameTypeId() == NexusGame)
+      nexusGameType = static_cast<NexusGameType *>(gameType);
+
+   bool isOpen = nexusGameType && nexusGameType->mNexusIsOpen;
+   F32 glowFraction = gameType ? gameType->mZoneGlowTimer.getFraction() : 0;
+
+   renderNexus(getOutline(), getFill(), getCentroid(), getLabelAngle(), isOpen, glowFraction);
 #endif
 }
 
@@ -1100,16 +1108,19 @@ bool NexusZone::collide(BfObject *hitObject)
    if( ! (isShipType(hitObject->getObjectTypeNumber())) )
       return false;
 
-   Ship *theShip = dynamic_cast<Ship *>(hitObject);
-   if(!theShip)
-      return false;
+   Ship *theShip = static_cast<Ship *>(hitObject);
 
    if(theShip->hasExploded)                              // Ignore collisions with exploded ships
       return false;
 
-   NexusGameType *theGameType = dynamic_cast<NexusGameType *>(getGame()->getGameType());
-   if(theGameType && theGameType->mNexusIsOpen)          // Is the nexus open?
-      theGameType->shipTouchNexus(theShip, this);
+   GameType *gameType = getGame()->getGameType();
+   NexusGameType *nexusGameType = NULL;
+
+   if(gameType && gameType->getGameTypeId() == NexusGame)
+      nexusGameType = static_cast<NexusGameType *>(getGame()->getGameType());
+
+   if(nexusGameType && nexusGameType->mNexusIsOpen)      // Is the nexus open?
+      nexusGameType->shipTouchNexus(theShip, this);
 
    return false;
 }

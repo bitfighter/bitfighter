@@ -319,14 +319,14 @@ static BotNavMeshZone *findZoneContainingPoint(GridDatabase &botZoneDatabase, co
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);  
+      BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(zones[i]);
 
       if(zone && PolygonContains2(zone->getOutline()->address(), zone->getOutline()->size(), point))
          return zone;   
    }
 
    if(zones.size() != 0)  // In case of point was close to polygon, but not inside the zone?
-      return dynamic_cast<BotNavMeshZone *>(zones[0]);
+      return static_cast<BotNavMeshZone *>(zones[0]);
 
    return NULL;
 }
@@ -346,10 +346,10 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers,
    // Build holes list for barriers
    for(S32 i = 0; i < barriers.size(); i++)
    {
-      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
-
-      if(!barrier)
+      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
          continue;
+
+      Barrier *barrier = static_cast<Barrier *>(barriers[i]);
 
       // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have:
       if(barrier->mSolid && barrier->mRenderFillGeometry.size() >= 3)     // Could be concave, centroid of first triangle of fill geom will be interior
@@ -367,10 +367,10 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers,
    // Build holes list for turrets
    for(S32 i = 0; i < turrets.size(); i++)
    {
-      Turret *turret = dynamic_cast<Turret *>(turrets[i]);
-
-      if(!turret)
+      if(turrets[i]->getObjectTypeNumber() != TurretTypeNumber)
          continue;
+
+      Turret *turret = static_cast<Turret *>(turrets[i]);
 
       ctr = turret->getExtent().getCenter();
 
@@ -381,10 +381,10 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers,
    // Build holes list for forcefields
    for(S32 i = 0; i < forceFieldProjectors.size(); i++)
    {
-      ForceFieldProjector *forceField = dynamic_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
-
-      if(!forceField)
+      if(forceFieldProjectors[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
          continue;
+
+      ForceFieldProjector *forceField = static_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
 
       ctr = forceField->getExtent().getCenter();
 
@@ -405,10 +405,10 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
    // Add barriers
    for(S32 i = 0; i < barriers.size(); i++)
    {
-      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
-
-      if(!barrier)
+      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
          continue;
+
+      Barrier *barrier = static_cast<Barrier *>(barriers[i]);
 
       inputPolygons.push_back(barrier->getBufferForBotZone());
    }
@@ -416,10 +416,10 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
    // Add turrets
    for (S32 i = 0; i < turrets.size(); i++)
    {
-      Turret* turret = dynamic_cast<Turret *>(turrets[i]);
-
-      if(!turret)
+      if(turrets[i]->getObjectTypeNumber() != TurretTypeNumber)
          continue;
+
+      Turret* turret = static_cast<Turret *>(turrets[i]);
 
       inputPolygons.push_back(turret->getBufferForBotZone());
    }
@@ -427,10 +427,10 @@ static bool mergeBotZoneBuffers(const Vector<DatabaseObject *> &barriers,
    // Add forcefield projectors
    for (S32 i = 0; i < forceFieldProjectors.size(); i++)
    {
-      ForceFieldProjector* forceFieldProjector = dynamic_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
-
-      if(!forceFieldProjector)
+      if(forceFieldProjectors[i]->getObjectTypeNumber() != ForceFieldProjectorTypeNumber)
          continue;
+
+      ForceFieldProjector* forceFieldProjector = static_cast<ForceFieldProjector *>(forceFieldProjectors[i]);
 
       inputPolygons.push_back(forceFieldProjector->getBufferForBotZone());
    }
@@ -700,10 +700,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(ServerGame *game)
 
    for(S32 i = 0; i < teleporters.size(); i++)
    {
-      Teleporter *teleporter = dynamic_cast<Teleporter *>(teleporters[i]);
-
-      if(!teleporter)
-         continue;
+      Teleporter *teleporter = static_cast<Teleporter *>(teleporters[i]);
 
       BotNavMeshZone *origZone = findZoneContainingPoint(mBotZoneDatabase, teleporter->getPos());
 
