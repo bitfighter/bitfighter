@@ -501,12 +501,12 @@ bool Robot::findNearestShip(Point &loc)
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      BfObject *foundObject = dynamic_cast<BfObject *>(foundObjects[i]);
-      F32 d = foundObject->getPos().distanceTo(pos);
+      Ship *ship = static_cast<Ship *>(foundObjects[i]);
+      F32 d = ship->getPos().distanceTo(pos);
       if(d < dist && d > 0)      // d == 0 means we're comparing to ourselves
       {
          dist = d;
-         loc = foundObject->getPos();     
+         loc = ship->getPos();
          found = true;
       }
    }
@@ -660,7 +660,7 @@ U16 Robot::findClosestZone(const Point &point)
 
    for(S32 i = 0; i < objects.size(); i++)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
+      BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
 
       if(getGame()->getGameObjDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
@@ -681,7 +681,7 @@ U16 Robot::findClosestZone(const Point &point)
       DatabaseObject* object = BotNavMeshZone::getBotZoneDatabase()->findObjectLOS(BotNavMeshZoneTypeNumber,
             ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
 
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
+      BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(object);
 
       if (zone != NULL)
          closestZone = zone->getZoneId();
@@ -890,7 +890,7 @@ S32 Robot::getWaypoint(lua_State *L)
 
       if(!canSeePoint(target, true))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
-         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(targetZone));
+         BotNavMeshZone *zone = static_cast<BotNavMeshZone *>(BotNavMeshZone::getBotZoneDatabase()->getObjectByIndex(targetZone));
 
          p = zone->getCenter();
          flightPlan.push_back(p);

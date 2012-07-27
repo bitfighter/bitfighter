@@ -408,11 +408,15 @@ void ClientGame::displayShipDesignChangedMessage(const Vector<U8> &loadout, cons
    if(!getConnectionToServer())
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(getConnectionToServer()->getControlObject());
+   BfObject *object = getConnectionToServer()->getControlObject();
+   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+      return;
+
+   Ship *ship = static_cast<Ship *>(object);
 
    // If we're in a loadout zone, don't show any message -- new loadout will become active immediately, 
    // and we'll get a different msg from the server.  Avoids unnecessary messages.
-   if(!ship || ship->isInZone(LoadoutZoneTypeNumber))
+   if(ship->isInZone(LoadoutZoneTypeNumber))
       return;
 
    if(getSettings()->getIniSettings()->verboseHelpMessages)
@@ -1514,9 +1518,10 @@ Point ClientGame::worldToScreenPoint(const Point *point) const
 
    BfObject *controlObject = mConnectionToServer->getControlObject();
 
-   Ship *ship = dynamic_cast<Ship *>(controlObject);
-   if(!ship)
+   if(!controlObject || controlObject->getObjectTypeNumber() != PlayerShipTypeNumber)
       return Point(0,0);
+
+   Ship *ship = static_cast<Ship *>(controlObject);
 
    Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
    
@@ -1624,7 +1629,9 @@ void ClientGame::renderCommander()
    glPushMatrix();
 
    BfObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *ship = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+   Ship *ship = NULL;
+   if(controlObject->getObjectTypeNumber() == PlayerShipTypeNumber)
+      ship = static_cast<Ship *>(controlObject);      // This is the local player's ship
    
    Point position = ship ? ship->getRenderPos() : Point(0,0);
 
@@ -1680,8 +1687,7 @@ void ClientGame::renderCommander()
          for(S32 i = 0; i < renderObjects.size(); i++)
          {
             // Render ship visibility range, and that of our teammates
-            if(renderObjects[i]->getObjectTypeNumber() == PlayerShipTypeNumber ||
-                  renderObjects[i]->getObjectTypeNumber() == RobotShipTypeNumber)
+            if(isShipType(renderObjects[i]->getObjectTypeNumber()))
             {
                Ship *otherShip = static_cast<Ship *>(renderObjects[i]);
 
@@ -1850,9 +1856,11 @@ void ClientGame::renderNormal()
    if(!hasValidControlObject())
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());  // This is the local player's ship
-   if(!ship)
+   BfObject *object = mConnectionToServer->getControlObject();
+   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
       return;
+
+   Ship *ship = static_cast<Ship *>(object);  // This is the local player's ship
 
    position.set(ship->getRenderPos());
 
