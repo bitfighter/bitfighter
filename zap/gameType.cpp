@@ -1285,13 +1285,13 @@ void GameType::catalogSpybugs()
 
    mSpyBugs.resize(spyBugs.size());
    for(S32 i = 0; i < spyBugs.size(); i++)
-      mSpyBugs[i] = dynamic_cast<Object *>(spyBugs[i]); // convert to SafePtr
+      mSpyBugs[i] = static_cast<SpyBug *>(spyBugs[i]); // convert to SafePtr
 }
 
 
 void GameType::addSpyBug(SpyBug *spybug)
 {
-   mSpyBugs.push_back(dynamic_cast<Object *>(spybug)); // convert to SafePtr 
+   mSpyBugs.push_back(spybug); // convert to SafePtr
 }
 
 
@@ -1553,7 +1553,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    // What does the spy bug see?
    for(S32 i = mSpyBugs.size()-1; i >= 0; i--)
    {
-      SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i].getPointer());
+      SpyBug *sb = mSpyBugs[i].getPointer();
       if(!sb)  // SpyBug is destroyed?
          mSpyBugs.erase_fast(i);
       else
@@ -3693,7 +3693,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
    BfObject *controlObject = source->getControlObject();
 
    if(controlObject && isShipType(controlObject->getObjectTypeNumber()))
-      dynamic_cast<Ship *>(controlObject)->selectWeapon(indx);
+      static_cast<Ship *>(controlObject)->selectWeapon(indx);
 }
 
 

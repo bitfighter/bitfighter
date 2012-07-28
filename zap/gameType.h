@@ -130,7 +130,7 @@ private:
    Game *mGame;
    Point getSpawnPoint(S32 team);        // Picks a spawn point for ship or robot
 
-   Vector<SafePtr<Object> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
+   Vector<SafePtr<SpyBug> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
