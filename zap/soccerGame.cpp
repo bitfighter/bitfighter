@@ -482,8 +482,13 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
             shooter = static_cast<BurstProjectile*>(theInfo->damagingObject)->mShooter;
          else if(typeNumber == HeatSeekerTypeNumber)
             shooter = static_cast<HeatSeekerProjectile*>(theInfo->damagingObject)->mShooter;
+         else
+         {
+            TNLAssert(false, "Undefined projectile type?");
+            shooter = NULL;
+         }
 
-         if(isShipType(shooter->getObjectTypeNumber()))
+         if(shooter && isShipType(shooter->getObjectTypeNumber()))
          {
             Ship *ship = static_cast<Ship *>(shooter);
             mLastPlayerTouch = ship;             // If shooter was a turret, say, we'd expect s to be NULL.
