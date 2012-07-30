@@ -26,7 +26,7 @@
 
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
-#include "../Zap/ChatCheck.h"
+#include "../zap/ChatCheck.h"
 
 
 class GameConnectRequest;  // at the botton of master.h
