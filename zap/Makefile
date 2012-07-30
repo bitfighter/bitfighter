@@ -44,6 +44,7 @@ OBJECTS_SHARED=\
    BanList.o\
    barrier.o\
    BotNavMeshZone.o\
+   ChatCheck.o\
    ClientInfo.o\
    Color.o\
    config.o\

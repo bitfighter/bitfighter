@@ -254,6 +254,7 @@
     <ClCompile Include="UIMenuItems.cpp" />
     <ClCompile Include="WallSegmentManager.cpp" />
     <ClCompile Include="Zone.cpp" />
+    <ClCompile Include="ChatCheck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\clipper\clipper.h" />
@@ -397,6 +398,7 @@
     <ClInclude Include="WallSegmentManager.h" />
     <ClInclude Include="Zone.h" />
     <ClInclude Include="zoneControlGame.h" />
+    <ClInclude Include="ChatCheck.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\zap\ZAP.rc" />

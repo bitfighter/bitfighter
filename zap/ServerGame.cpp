@@ -1420,22 +1420,10 @@ void ServerGame::idle(U32 timeDelta)
       if(!clientInfo->isRobot())
       {
          GameConnection *conn = clientInfo->getConnection();
+         TNLAssert(conn, "clientInfo->getConnection() shouldn't be NULL");
 
-         if(conn->mChatTimer > timeDelta)
-            conn->mChatTimer -= timeDelta;
-         else
-         {
-            conn->mChatTimer = 0;
-            conn->mChatTimerBlocked = false;
-         }
+         conn->updateTimers(timeDelta);
 
-         conn->addToTimeCredit(timeDelta);
-         conn->updateAuthenticationTimer(timeDelta);
-
-         if(conn->mVoteTime <= timeDelta)
-            conn->mVoteTime = 0;
-         else
-            conn->mVoteTime -= timeDelta;
       }
    }
 

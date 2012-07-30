@@ -343,6 +343,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\zap\ChatCheck.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\zap\Color.cpp"
 				>
 			</File>

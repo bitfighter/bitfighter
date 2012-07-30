@@ -1039,6 +1039,7 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
    {
+      mLeaveGlobalChatTimer = 0; // don't continue with delayed chat leave.
       if(isInGlobalChat)  // Already in Global Chat
          return;
 
@@ -1063,11 +1064,15 @@ static const char *sanitizeForJson(const char *value)
       if(!isInGlobalChat)  // was not in Global Chat
          return;
 
-      isInGlobalChat = false;
+      // using delayed leave, to avoid quickly join / leave problem.
+      mLeaveGlobalChatTimer = Platform::getRealMilliseconds() - 20; // "-20" make up for inaccurate getRealMilliseconds going backwards by 1 or 2 milliseconds.
+      if(mLeaveGlobalChatTimer == 0) mLeaveGlobalChatTimer == 1;
+      gLeaveChatTimerList.push_back(this);
 
-      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-         if (walk != this && walk->isInGlobalChat)
-            walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
+      //isInGlobalChat = false;
+      //for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+      //   if (walk != this && walk->isInGlobalChat)
+      //      walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
    }
 
 
@@ -1086,7 +1091,7 @@ static const char *sanitizeForJson(const char *value)
             bool droppedServer = false;
             Address addr(&message.getString()[12]);
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
-               if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 | addr.port == walk->getNetAddress().port))
+               if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 || addr.port == walk->getNetAddress().port))
                {
                   walk->mIsServerIgnoredFromList = true;
                   m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
@@ -1143,6 +1148,16 @@ static const char *sanitizeForJson(const char *value)
          }
       }
 
+      if(!checkMessage(message, isPrivate ? 2 : 0)) // prevent problems with chatting too fast that no one can read.
+      {
+         if(!mChatTooFast)
+            logprintf(LogConsumer::LogChat, "This player may be chatting to fast: %s ", mPlayerOrServerName.getString());
+         mChatTooFast = true;
+         static const StringTableEntry msg("< You are chatting too fast, your message didn't make it through. ");
+         m2cSendChat(msg, false, StringPtr(" "));
+         return;
+      }
+      mChatTooFast = false;
 
       for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
       {
@@ -1179,6 +1194,7 @@ static const char *sanitizeForJson(const char *value)
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, true);
 
 Vector< GameConnectRequest* > MasterServerConnection::gConnectList;
+Vector<SafePtr<MasterServerConnection> > MasterServerConnection::gLeaveChatTimerList;
 
 MasterServerConnection MasterServerConnection::gServerList;
 MasterServerConnection MasterServerConnection::gClientList;
@@ -1398,7 +1414,27 @@ int main(int argc, const char **argv)
          }
       }
 
-      Platform::sleep(1);
+      // using delayed leave, to avoid repeating and flooding join / leave messages.
+      for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
+      {
+         MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];
+         if(!c || c->mLeaveGlobalChatTimer == 0)
+            MasterServerConnection::gLeaveChatTimerList.erase(i);
+         else
+         {
+            if(currentTime - c->mLeaveGlobalChatTimer > 1000)
+            {
+               c->isInGlobalChat = false;
+               for(MasterServerConnection *walk = MasterServerConnection::gClientList.mNext; walk != &MasterServerConnection::gClientList; walk = walk->mNext)
+                  if (walk != c && walk->isInGlobalChat)
+                     walk->m2cPlayerLeftGlobalChat(c->mPlayerOrServerName);
+               MasterServerConnection::gLeaveChatTimerList.erase(i);
+            }
+         }
+
+      }
+
+      Platform::sleep(5);
    }
    return 0;
 }

@@ -41,7 +41,7 @@
 #include "GameTypesEnum.h"
 #include "ServerGame.h"
 #include "Engineerable.h"
-
+#include "ChatCheck.h"
 
 using namespace TNL;
 using namespace std;
@@ -60,7 +60,7 @@ class ClientInfo;
 class FullClientInfo;
 
 
-class GameConnection: public ControlObjectConnection, public DataSendable
+class GameConnection: public ControlObjectConnection, public DataSendable, public ChatCheck
 {
 private:
    typedef ControlObjectConnection Parent;
@@ -103,13 +103,6 @@ public:
 
    U8 mVote;                     // 0 = not voted,  1 = vote yes,  2 = vote no    TODO: Make 
    U32 mVoteTime;
-   bool mChatMute;
-
-   U32 mChatTimer;
-   bool mChatTimerBlocked;
-   string mChatPrevMessage;
-   U32 mChatPrevMessageMode;
-   bool checkMessage(const char *message, U32 mode);
 
    U32 mWrongPasswordCount;
    static const U32 MAX_WRONG_PASSWORD = 20;  // too many wrong password, and client get disconnect
@@ -292,7 +285,7 @@ public:
    S32 getAuthenticationCounter();
 
    void requestAuthenticationVerificationFromMaster();
-   void updateAuthenticationTimer(U32 timeDelta);
+   void updateTimers(U32 timeDelta);
 
    void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 

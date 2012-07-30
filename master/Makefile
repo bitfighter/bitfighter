@@ -23,6 +23,7 @@ OBJECTS_MASTER=\
    master.o\
    masterInterface.o\
    config.o\
+   ../zap/ChatCheck.o\
    ../zap/Color.o\
    ../zap/gameStats.o\
    ../zap/IniFile.o\

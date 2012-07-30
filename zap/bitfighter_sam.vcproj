@@ -801,6 +801,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\ChatCheck.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\ClassDiagram21.cd"
 			>
 		</File>

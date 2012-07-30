@@ -26,7 +26,7 @@
 
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
-
+#include "../Zap/ChatCheck.h"
 
 
 class GameConnectRequest;  // at the botton of master.h
@@ -50,7 +50,7 @@ struct HighScores
 };
 
 
-class MasterServerConnection : public MasterServerInterface
+class MasterServerConnection : public MasterServerInterface, public Zap::ChatCheck
 {
 private:
    typedef MasterServerInterface Parent;
@@ -60,6 +60,7 @@ private:
    Int<BADGE_COUNT> getBadges(StringTableEntry name);
 
 protected:
+public:
 
    /// @name Linked List
    ///
@@ -77,11 +78,10 @@ protected:
    /// @{
 
    ///
+public:
    static MasterServerConnection             gServerList;      // List of servers we know about
    static MasterServerConnection             gClientList;      // List of clients who are connected
-public:
    static Vector<GameConnectRequest *>       gConnectList;
-protected:
 
    /// @}
 
@@ -129,6 +129,7 @@ protected:
    StringTableEntry mServerDescr;              ///< Server description
    bool isInGlobalChat;
 
+
    bool mIsMasterAdmin;
 
    bool mIsServerIgnoredFromList;
@@ -138,6 +139,9 @@ protected:
    /// @}
 
 public:
+   static Vector<SafePtr<MasterServerConnection> >       gLeaveChatTimerList;
+   U32 mLeaveGlobalChatTimer;
+   bool mChatTooFast;
 
    /// Constructor initializes the linked list info with "safe" values
    /// so we don't explode if we destruct right away.

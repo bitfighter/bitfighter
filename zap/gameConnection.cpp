@@ -63,9 +63,6 @@ GameConnection::GameConnection()
 
    mVote = 0;
    mVoteTime = 0;
-   mChatMute = false;
-   mChatTimer = 0;
-   mChatTimerBlocked = false;
 
    // Might be a tad more efficient to put this in the initializer, but the (legitimate, in this case) use of this
    // in the arguments makes VC++ nervous, which in turn makes me nervous.
@@ -116,9 +113,6 @@ void GameConnection::initialize()
    mSendableFlags = 0;
    mDataBuffer = NULL;
 
-   mChatTimer = 0;
-   mChatTimerBlocked = false;
-
    mWrongPasswordCount = 0;
 
    mVoiceChatEnabled = true;
@@ -154,31 +148,6 @@ GameConnection::~GameConnection()
 
    delete mDataBuffer;
 
-}
-
-
-bool GameConnection::checkMessage(const char *message, U32 mode)
-{
-   if(mChatMute)
-      return false;
-
-   if(mChatTimerBlocked)
-      return false;
-
-   if(mChatPrevMessage == message && mChatPrevMessageMode >= mode && mode <= 1 && mChatTimer != 0)
-      return false;
-
-   mChatPrevMessageMode = mode;
-   mChatPrevMessage = message;
-
-   mChatTimer += 2000;
-   if(mChatTimer > 6000)
-   {
-      mChatTimer += 5000;
-      mChatTimerBlocked = true;
-      return false;
-   }
-   return true;
 }
 
 
@@ -1550,10 +1519,18 @@ S32 GameConnection::getAuthenticationCounter()
 }
 
 
-void GameConnection::updateAuthenticationTimer(U32 timeDelta)
+void GameConnection::updateTimers(U32 timeDelta)
 {
    if(mAuthenticationTimer.update(timeDelta))
       requestAuthenticationVerificationFromMaster();
+
+   if(!isInitiator())
+      addToTimeCredit(timeDelta);
+
+   if(mVoteTime <= timeDelta)
+      mVoteTime = 0;
+   else
+      mVoteTime -= timeDelta;
 }
 
 
