@@ -118,6 +118,9 @@
 		737CE637129055BF00D732B7 /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		737CE639129055C500D732B7 /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		737E800814CDDDF900CBBA54 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499F14B4EDC60053CCF4 /* Vorbis.framework */; };
+		738100EA15C768B3001AD1D8 /* BfObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738100E415C768B3001AD1D8 /* BfObject.cpp */; };
+		738100EB15C768B3001AD1D8 /* ChatCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738100E615C768B3001AD1D8 /* ChatCheck.cpp */; };
+		738100EC15C768B3001AD1D8 /* LineItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738100E815C768B3001AD1D8 /* LineItem.cpp */; };
 		7382225C1479FE5900930942 /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738222581479FE5900930942 /* Cursor.cpp */; };
 		7382225D1479FE5900930942 /* TeamShuffleHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7382225A1479FE5900930942 /* TeamShuffleHelper.cpp */; };
 		73844F3713500C2F00033B85 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73844F2613500C2F00033B85 /* clipper.cpp */; };
@@ -227,7 +230,6 @@
 		73D2F3D412E2D7E800EA5EBE /* gameConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29E12E2D7E700EA5EBE /* gameConnection.cpp */; };
 		73D2F3D712E2D7E800EA5EBE /* gameLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A312E2D7E700EA5EBE /* gameLoader.cpp */; };
 		73D2F3D812E2D7E800EA5EBE /* gameNetInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */; };
-		73D2F3D912E2D7E800EA5EBE /* gameObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A712E2D7E700EA5EBE /* gameObject.cpp */; };
 		73D2F3DA12E2D7E800EA5EBE /* gameObjectRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2A912E2D7E700EA5EBE /* gameObjectRender.cpp */; };
 		73D2F3DB12E2D7E800EA5EBE /* gameType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2AB12E2D7E700EA5EBE /* gameType.cpp */; };
 		73D2F3DD12E2D7E800EA5EBE /* gameWeapons.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2AE12E2D7E700EA5EBE /* gameWeapons.cpp */; };
@@ -599,6 +601,12 @@
 		737CE46C12904E9E00D732B7 /* libtomcrypt.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libtomcrypt.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61D1290553D00D732B7 /* tnl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tnl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE61E1290553D00D732B7 /* tnl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "tnl-Info.plist"; sourceTree = "<group>"; };
+		738100E415C768B3001AD1D8 /* BfObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BfObject.cpp; path = ../../../zap/BfObject.cpp; sourceTree = SOURCE_ROOT; };
+		738100E515C768B3001AD1D8 /* BfObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BfObject.h; path = ../../../zap/BfObject.h; sourceTree = SOURCE_ROOT; };
+		738100E615C768B3001AD1D8 /* ChatCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChatCheck.cpp; path = ../../../zap/ChatCheck.cpp; sourceTree = SOURCE_ROOT; };
+		738100E715C768B3001AD1D8 /* ChatCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChatCheck.h; path = ../../../zap/ChatCheck.h; sourceTree = SOURCE_ROOT; };
+		738100E815C768B3001AD1D8 /* LineItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LineItem.cpp; path = ../../../zap/LineItem.cpp; sourceTree = SOURCE_ROOT; };
+		738100E915C768B3001AD1D8 /* LineItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LineItem.h; path = ../../../zap/LineItem.h; sourceTree = SOURCE_ROOT; };
 		738222581479FE5900930942 /* Cursor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Cursor.cpp; path = ../../../zap/Cursor.cpp; sourceTree = SOURCE_ROOT; };
 		738222591479FE5900930942 /* Cursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Cursor.h; path = ../../../zap/Cursor.h; sourceTree = SOURCE_ROOT; };
 		7382225A1479FE5900930942 /* TeamShuffleHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TeamShuffleHelper.cpp; path = ../../../zap/TeamShuffleHelper.cpp; sourceTree = SOURCE_ROOT; };
@@ -828,8 +836,6 @@
 		73D2F2A412E2D7E700EA5EBE /* gameLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameLoader.h; path = ../../../zap/gameLoader.h; sourceTree = SOURCE_ROOT; };
 		73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameNetInterface.cpp; path = ../../../zap/gameNetInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2A612E2D7E700EA5EBE /* gameNetInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameNetInterface.h; path = ../../../zap/gameNetInterface.h; sourceTree = SOURCE_ROOT; };
-		73D2F2A712E2D7E700EA5EBE /* gameObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameObject.cpp; path = ../../../zap/gameObject.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2A812E2D7E700EA5EBE /* gameObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameObject.h; path = ../../../zap/gameObject.h; sourceTree = SOURCE_ROOT; };
 		73D2F2A912E2D7E700EA5EBE /* gameObjectRender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameObjectRender.cpp; path = ../../../zap/gameObjectRender.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2AA12E2D7E700EA5EBE /* gameObjectRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameObjectRender.h; path = ../../../zap/gameObjectRender.h; sourceTree = SOURCE_ROOT; };
 		73D2F2AB12E2D7E700EA5EBE /* gameType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameType.cpp; path = ../../../zap/gameType.cpp; sourceTree = SOURCE_ROOT; };
@@ -1788,6 +1794,12 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				738100E415C768B3001AD1D8 /* BfObject.cpp */,
+				738100E515C768B3001AD1D8 /* BfObject.h */,
+				738100E615C768B3001AD1D8 /* ChatCheck.cpp */,
+				738100E715C768B3001AD1D8 /* ChatCheck.h */,
+				738100E815C768B3001AD1D8 /* LineItem.cpp */,
+				738100E915C768B3001AD1D8 /* LineItem.h */,
 				738B9D0A15A1E0C700D1F76C /* Engineerable.h */,
 				738B9D0B15A1E0C700D1F76C /* Zone.cpp */,
 				738B9D0C15A1E0C700D1F76C /* Zone.h */,
@@ -1915,8 +1927,6 @@
 				73D2F2A412E2D7E700EA5EBE /* gameLoader.h */,
 				73D2F2A512E2D7E700EA5EBE /* gameNetInterface.cpp */,
 				73D2F2A612E2D7E700EA5EBE /* gameNetInterface.h */,
-				73D2F2A712E2D7E700EA5EBE /* gameObject.cpp */,
-				73D2F2A812E2D7E700EA5EBE /* gameObject.h */,
 				73D2F2A912E2D7E700EA5EBE /* gameObjectRender.cpp */,
 				73D2F2AA12E2D7E700EA5EBE /* gameObjectRender.h */,
 				73D2F2AB12E2D7E700EA5EBE /* gameType.cpp */,
@@ -2809,7 +2819,6 @@
 				73D2F3D412E2D7E800EA5EBE /* gameConnection.cpp in Sources */,
 				73D2F3D712E2D7E800EA5EBE /* gameLoader.cpp in Sources */,
 				73D2F3D812E2D7E800EA5EBE /* gameNetInterface.cpp in Sources */,
-				73D2F3D912E2D7E800EA5EBE /* gameObject.cpp in Sources */,
 				73D2F3DA12E2D7E800EA5EBE /* gameObjectRender.cpp in Sources */,
 				73D2F3DB12E2D7E800EA5EBE /* gameType.cpp in Sources */,
 				73D2F3DD12E2D7E800EA5EBE /* gameWeapons.cpp in Sources */,
@@ -2920,6 +2929,9 @@
 				737B3D9C157FD84A0096DDC2 /* GeomObject.cpp in Sources */,
 				737B3D9D157FD84A0096DDC2 /* ShipShape.cpp in Sources */,
 				738B9D0D15A1E0C700D1F76C /* Zone.cpp in Sources */,
+				738100EA15C768B3001AD1D8 /* BfObject.cpp in Sources */,
+				738100EB15C768B3001AD1D8 /* ChatCheck.cpp in Sources */,
+				738100EC15C768B3001AD1D8 /* LineItem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
