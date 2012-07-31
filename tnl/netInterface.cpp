@@ -237,7 +237,7 @@ void NetInterface::removeConnection(NetConnection *conn)
       index++;
       if(index >= (U32) mConnectionHashTable.size())
          index = 0;
-      TNLAssert(index != startIndex, "Attempting to remove a connection that is not in the table.") // not in the table
+      TNLAssert(index != startIndex, "Attempting to remove a connection that is not in the table."); // not in the table
       if(index == startIndex)
          return;
    }
