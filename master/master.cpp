@@ -1066,7 +1066,6 @@ static const char *sanitizeForJson(const char *value)
 
       // using delayed leave, to avoid quickly join / leave problem.
       mLeaveGlobalChatTimer = Platform::getRealMilliseconds() - 20; // "-20" make up for inaccurate getRealMilliseconds going backwards by 1 or 2 milliseconds.
-      if(mLeaveGlobalChatTimer == 0) mLeaveGlobalChatTimer == 1;
       gLeaveChatTimerList.push_back(this);
 
       //isInGlobalChat = false;

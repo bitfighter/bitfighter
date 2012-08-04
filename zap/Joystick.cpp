@@ -86,6 +86,7 @@ Joystick::~Joystick()
 
 bool Joystick::initJoystick()
 {
+   // Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
 #ifdef TNL_OS_LINUX
 #if !SDL_VERSION_ATLEAST(2,0,0)
    // Hackety hack hack for some joysticks that seem calibrated horribly wrong.

@@ -73,8 +73,7 @@ static const char *WINDOW_TITLE = "Bitfighter";
 
 void VideoSystem::init()
 {
-   // Init!
-   SDL_Init(0);
+   // Make sure "SDL_Init(0)" was done before calling this function
 
    // First, initialize SDL's video subsystem
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)

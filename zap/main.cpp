@@ -1021,6 +1021,7 @@ int main(int argc, char **argv)
       InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
       Joystick::loadJoystickPresets();    // Load joystick presets from INI first
+      SDL_Init(0);                        // Allows Joystick and VideoSystem to work.
       Joystick::initJoystick();           // Initialize joystick system
 
 #ifdef TNL_OS_MAC_OSX
@@ -1028,6 +1029,7 @@ int main(int argc, char **argv)
 #endif
 
       VideoSystem::init();                // Initialize video and window system
+
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       SDL_StartTextInput();
