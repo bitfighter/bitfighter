@@ -1148,6 +1148,7 @@ TNL_IMPLEMENT_NETOBJECT(HeatSeekerProjectile);
 // Constructor
 const F32 HeatSeeker_Radius = 7;
 const F32 HeatSeeker_Mass = 1;
+
 HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, HeatSeeker_Radius, HeatSeeker_Mass)
 {
    mObjectTypeNumber = HeatSeekerTypeNumber;
@@ -1189,8 +1190,10 @@ HeatSeekerProjectile::~HeatSeekerProjectile()
 static F32 normalizeAngle(F32 angle)
 {
    F32 newAngle = angle;
+
    while (newAngle <= -FloatPi) newAngle += FloatTau;
-   while (newAngle > FloatPi) newAngle -= FloatTau;
+   while (newAngle > FloatPi)   newAngle -= FloatTau;
+
    return newAngle;
 }
 
