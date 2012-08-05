@@ -28,6 +28,7 @@
 #include "stringUtils.h"         // For itos
 #include "teamInfo.h"            // For TEAM_NEUTRAL
 #include "ship.h"                // To check player's team
+#include "game.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

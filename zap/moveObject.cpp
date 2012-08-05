@@ -2013,6 +2013,7 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
 void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
+#ifndef ZAP_DEDICATED
    Parent::unpackUpdate(connection, stream);
 
    mHeadIndex = stream->readInt(5);
@@ -2049,6 +2050,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
    Vector<Point> p;
    getCollisionPoly(p);
    setExtent(p);
+#endif
 }
 
 

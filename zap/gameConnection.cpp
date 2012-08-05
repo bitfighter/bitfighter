@@ -458,8 +458,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cEngineerResponseEvent, (RangedU32<0,Enginee
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisableWeaponsAndModules, (bool disable), (disable),
                   NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
 {
+#ifndef ZAP_DEDICATED
    // For whatever reason mClientInfo here isn't what is grabbed in the Ship:: class
    mClientGame->findClientInfo(mClientInfo->getName())->setShipSystemsDisabled(disable);
+#endif
 }
 
 

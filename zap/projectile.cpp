@@ -1453,11 +1453,13 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
 
 void HeatSeekerProjectile::renderItem(const Point &pos)
 {
+#ifndef ZAP_DEDICATED
    if(exploded)
       return;
 
    F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
    renderHeatSeeker(pos, (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())) / startLiveTime);
+#endif
 }
 
 

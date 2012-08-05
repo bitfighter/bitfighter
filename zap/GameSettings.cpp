@@ -810,9 +810,11 @@ void GameSettings::onFinishedLoading()
    if(winWidth > 0)
       getIniSettings()->winSizeFact = max((F32) winWidth / (F32) gScreenInfo.getGameCanvasWidth(), gScreenInfo.getMinScalingFactor());
 
+#ifndef ZAP_DEDICATED
    U32 stick = getU32(USE_STICK);
    if(stick > 0)
       Joystick::UseJoystickNumber = stick - 1;
+#endif
 }
 
 
