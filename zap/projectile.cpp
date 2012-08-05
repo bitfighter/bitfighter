@@ -1222,7 +1222,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 
    // Test for collision
    Point startPos = getPos();
-   Point endPos = startPos + (getVel() * (F32(deltaT) / 1000.f));
+   Point endPos = startPos + (getVel() * (F32(deltaT) / 1000.f));    // getVel() returns dist/sec; deltaT is in ms
    endPos.normalize(endPos.len() + mRadius + 1);
 
    F32 outCollisionTime;
