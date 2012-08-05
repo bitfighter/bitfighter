@@ -220,7 +220,8 @@ public:
    void dismount();
    void render();
 
-   virtual void renderItem(const Point &pos);         // Does actual rendering, allowing render() to be generic for all Items
+   virtual void renderItem(const Point &pos);             // Does actual rendering, allowing render() to be generic for all Items
+   virtual void renderItemAlpha(const Point &pos, F32 alpha);  // Used for mounted items when cloaked
 
    virtual void onMountDestroyed();
    virtual void onItemDropped();
@@ -498,6 +499,7 @@ public:
    static const S32 RESOURCE_ITEM_RADIUS = 20;
 
    void renderItem(const Point &pos);
+   void renderItemAlpha(const Point &pos, F32 alpha);
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
    void onItemDropped();

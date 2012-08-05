@@ -815,19 +815,26 @@ NexusFlagItem::~NexusFlagItem()
 
 void NexusFlagItem::renderItem(const Point &pos)
 {
-#ifndef ZAP_DEDICATED
-   // Don't render flags on cloaked ships
-   if(mMount.isValid() && mMount->isModulePrimaryActive(ModuleCloak))
-      return;
+   renderItemAlpha(pos, 1.0f);
+}
 
-   Parent::renderItem(pos);
+
+void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
+{
+#ifndef ZAP_DEDICATED
+   Point offset;
+
+   if(mIsMounted)
+      offset.set(15, -15);
+
+   renderFlag(pos + offset, getColor(), NULL, alpha);
 
    if(mIsMounted && mFlagCount > 0)
    {
-      if     (mFlagCount >= 40) glColor(Colors::paleRed);   // like, rad!
-      else if(mFlagCount >= 20) glColor(Colors::yellow);    // cool!
-      else if(mFlagCount >= 10) glColor(Colors::green);     // ok, I guess
-      else                      glColor(Colors::white);     // lame
+      if     (mFlagCount >= 40) glColor(Colors::paleRed, alpha);   // like, rad!
+      else if(mFlagCount >= 20) glColor(Colors::yellow, alpha);    // cool!
+      else if(mFlagCount >= 10) glColor(Colors::green, alpha);     // ok, I guess
+      else                      glColor(Colors::white, alpha);     // lame
 
       UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }

@@ -72,6 +72,7 @@ public:
 
    virtual void onAddedToGame(Game *theGame);
    virtual void renderItem(const Point &pos);
+   virtual void renderItemAlpha(const Point &pos, F32 alpha);
 
    void mountToShip(Ship *theShip);
 

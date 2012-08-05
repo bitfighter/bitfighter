@@ -902,6 +902,12 @@ void MoveItem::renderItem(const Point &pos)
 }
 
 
+void MoveItem::renderItemAlpha(const Point &pos, F32 alpha)
+{
+   TNLAssert(false, "Unimplemented function!");
+}
+
+
 void MoveItem::onMountDestroyed()
 {
    dismount();
@@ -2181,6 +2187,12 @@ ResourceItem *ResourceItem::clone() const
 void ResourceItem::renderItem(const Point &pos)
 {
    renderResourceItem(pos);
+}
+
+
+void ResourceItem::renderItemAlpha(const Point &pos, F32 alpha)
+{
+   renderResourceItem(pos, alpha);
 }
 
 

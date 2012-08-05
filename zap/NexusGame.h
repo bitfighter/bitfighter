@@ -169,6 +169,7 @@ public:
    ~NexusFlagItem();                                                                         // Destructor
 
    void renderItem(const Point &pos);
+   void renderItemAlpha(const Point &pos, F32 alpha);
 
    void onMountDestroyed();
    void onItemDropped();

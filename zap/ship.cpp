@@ -2304,7 +2304,7 @@ void Ship::render(S32 layerIndex)
    // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid())
-         mMountedItems[i]->renderItem(getRenderPos());
+         mMountedItems[i]->renderItemAlpha(getRenderPos(), alpha);
 #endif
 }
 

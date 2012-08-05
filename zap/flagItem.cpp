@@ -321,6 +321,13 @@ void FlagItem::renderItem(const Point &pos)
 }
 
 
+void FlagItem::renderItemAlpha(const Point &pos, F32 alpha)
+{
+   // No cloaking for normal flags!
+   renderItem(pos);
+}
+
+
 void FlagItem::renderDock()
 {
 #ifndef ZAP_DEDICATED
