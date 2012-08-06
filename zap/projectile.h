@@ -279,6 +279,9 @@ private:
    S32 mTimeRemaining;
    bool exploded;
 
+   void acquireTarget();
+
+
 public:
    HeatSeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
    ~HeatSeekerProjectile();                                                                      // Destructor

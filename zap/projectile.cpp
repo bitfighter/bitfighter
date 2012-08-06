@@ -1155,8 +1155,7 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
 
    mNetFlags.set(Ghostable);
 
-   setActualPos(pos);
-   setActualVel(vel);
+   setPosVelAng(pos, vel, vel.ATAN2());
    setMaskBits(PositionMask);
    mWeaponType = WeaponHeatSeeker;
 
@@ -1200,7 +1199,7 @@ static F32 normalizeAngle(F32 angle)
 
 U32 HeatSeekerProjectile::SpeedIncreasePerSecond = 300;
 U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
-F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau;
+F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 3;
 
 // Runs on client and server
 void HeatSeekerProjectile::idle(IdleCallPath path)
@@ -1257,15 +1256,19 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
       }
    }
 
-   // Do we already have a target?
+   // Do we need a target?
+   if(!mAcquiredTarget)
+      acquireTarget();
+
+   // Do we have a target?
    if(mAcquiredTarget)
    {
-      // First, remove target if it is too far away.  Next tick will search for a new one
+      // First, remove target if it is too far away.  Next tick we'll search for a new one.
       Point delta = mAcquiredTarget->getPos() - getActualPos();
       if(delta.lenSquared() > TargetAcquisitionRadius * TargetAcquisitionRadius)
          mAcquiredTarget = NULL;
 
-      // Else accelerate towards target
+      // Else turn towards target
       else
       {
          // Create a new velocity vector for the heat seeker to slowly go towards the target.
@@ -1305,58 +1308,69 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 
          // Get current speed
          F32 speed = getVel().len();
+         speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
 
          // Set minimum speed to the default
-         if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
-            speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         //if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
+         //   speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
          // Else, increase or decrease depending on our trajectory to the target
-         else
-         {
-            F32 tickSpeedIncrease = SpeedIncreasePerSecond * F32(deltaT) / 1000.f;
-            if(reduceSpeed)
-               speed -= tickSpeedIncrease;
-            else
-               speed += tickSpeedIncrease;
-         }
+         //else
+         //{
+         //   F32 tickSpeedIncrease = SpeedIncreasePerSecond * F32(deltaT) / 1000.f;
+         //   if(reduceSpeed)
+         //      speed -= tickSpeedIncrease;
+         //   else
+         //      speed += tickSpeedIncrease;
+         //}
 
          newVelocity.normalize(speed);
          setActualVel(newVelocity);
+         setActualAngle(newVelocity.ATAN2());
       }
    }
 
-   // No target acquired yet; time to search
-   else
+   mAcquiredTarget = NULL;
+}
+
+
+// Here we find a suitable target for the heatSeeker to home in on
+void HeatSeekerProjectile::acquireTarget()
+{
+   Rect queryRect(getPos(), TargetAcquisitionRadius);
+   fillVector.clear();
+   findObjects(isHeatSeekerTarget, fillVector, queryRect);
+
+   F32 closest = F32_MAX;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
    {
-      Rect queryRect(getPos(), TargetAcquisitionRadius);
-      fillVector.clear();
-      findObjects(isShipType, fillVector, queryRect);
+      BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
 
-      F32 closest = F32_MAX;
-      for(S32 i = 0; i < fillVector.size(); i++)
-      {
-         BfObject *foundObject = static_cast<BfObject *>(fillVector[i]);
+      // Don't target self
+      if(mShooter == foundObject)
+         continue;
 
-         // Don't target self
-         if(mShooter == foundObject)
-            continue;
+      // Don't target teammates in team games
+      if(getGame()->getGameType()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam())
+         continue;
 
-         // Don't target teammates in team games
-         if(getGame()->getGameType()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam())
-            continue;
+      Point delta = foundObject->getPos() - getPos();
+      F32 distanceSq = delta.lenSquared();
 
-         Point delta = foundObject->getPos() - getPos();
-         F32 distanceSq = delta.lenSquared();
+      //// Only acquire an object within a circle radius instead of query rect
+      //if(distanceSq > TargetAcquisitionRadius * TargetAcquisitionRadius)
+      //   continue;
 
-         // Only acquire an object within a circle radius instead of query rect
-         if(distanceSq > TargetAcquisitionRadius * TargetAcquisitionRadius)
-            continue;
+      //if(distanceSq > closest)
+      //   continue;
 
-         if(distanceSq > closest)
-            continue;
+      // See if object is within our "cone of vision"
+      F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - getActualAngle());
+      if(ang > FloatPi / 4 || ang < -FloatPi / 4)
+         continue;
 
-         closest = distanceSq;
-         mAcquiredTarget = foundObject;
-      }
+      closest = distanceSq;
+      mAcquiredTarget = foundObject;
    }
 }
 
