@@ -240,6 +240,12 @@ bool isZoneType(U8 x)      // Zones a ship could be in
 }
 
 
+bool isHeatSeekerTarget(U8 x)
+{
+   return isShipType(x);
+}
+
+
 bool isAnyObjectType(U8 x)
 {
    return true;

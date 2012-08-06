@@ -97,8 +97,8 @@ public:
 
    Point getRenderPos() const;
    Point getActualPos() const;
-   Point getRenderVel() const;
-   Point getActualVel() const;
+   Point getRenderVel() const;      // Distance/sec
+   Point getActualVel() const;      // Distance/sec
 
    F32 getRenderAngle() const;
    F32 getActualAngle() const;
@@ -114,7 +114,7 @@ public:
    F32 getAngle(S32 stateIndex) const;
 
    void setPos(S32 stateIndex, const Point &pos);
-   void setVel(S32 stateIndex, const Point &vel);
+   void setVel(S32 stateIndex, const Point &vel);     // Distance/sec
    void setAngle(S32 stateIndex, F32 angle);
 
    void copyMoveState(S32 from, S32 to);

@@ -130,6 +130,7 @@ bool isFlagOrShipCollideableType(U8 x);
 bool isVisibleOnCmdrsMapType(U8 x);
 bool isVisibleOnCmdrsMapWithSensorType(U8 x);
 bool isZoneType(U8 x);
+bool isHeatSeekerTarget(U8 x);
 
 bool isAnyObjectType(U8 x);
 // END GAME OBJECT TYPES
