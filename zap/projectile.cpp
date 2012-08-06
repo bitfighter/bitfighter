@@ -184,7 +184,7 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
       hitObject->damageObject(&theInfo);
 
       Ship *shooter = NULL;
-      if(isShipType(mShooter.getPointer()->getObjectTypeNumber()))
+      if(mShooter.getPointer() != NULL && isShipType(mShooter.getPointer()->getObjectTypeNumber()))
          shooter = static_cast<Ship *>(mShooter.getPointer());
 
       if(hitShip && shooter && shooter->getClientInfo())

@@ -1039,23 +1039,25 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mJoinGlobalChat, ())
    {
+      Vector<StringTableEntry> names;
+
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         if (walk != this && walk->isInGlobalChat)
+            names.push_back(walk->mPlayerOrServerName);
+
+      if(names.size() > 0)
+         m2cPlayersInGlobalChat(names); // Send to this client, to avoid blank name list of quickly leave/join.
+
       mLeaveGlobalChatTimer = 0; // don't continue with delayed chat leave.
       if(isInGlobalChat)  // Already in Global Chat
          return;
 
       isInGlobalChat = true;
       
-      Vector<StringTableEntry> names;
-
       for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if (walk != this && walk->isInGlobalChat)
-         {
             walk->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);
-            names.push_back(walk->mPlayerOrServerName);
-         }
 
-      if(names.size() > 0)
-         m2cPlayersInGlobalChat(names);
    }
 
 
