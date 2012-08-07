@@ -1199,7 +1199,8 @@ static F32 normalizeAngle(F32 angle)
 
 U32 HeatSeekerProjectile::SpeedIncreasePerSecond = 300;
 U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
-F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 3;
+F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 1.5;
+F32 HeatSeekerProjectile::TargetSearchAngle = FloatPi;     // Anglular spread in front of ship to search for targets -- SHOULD BE NO LARGER THAN FLOATPI!
 
 // Runs on client and server
 void HeatSeekerProjectile::idle(IdleCallPath path)
@@ -1334,6 +1335,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 
 
 // Here we find a suitable target for the heatSeeker to home in on
+// Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
 void HeatSeekerProjectile::acquireTarget()
 {
    Rect queryRect(getPos(), TargetAcquisitionRadius);
@@ -1366,7 +1368,7 @@ void HeatSeekerProjectile::acquireTarget()
 
       // See if object is within our "cone of vision"
       F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - getActualAngle());
-      if(ang > FloatPi / 4 || ang < -FloatPi / 4)
+      if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
          continue;
 
       closest = distanceSq;
