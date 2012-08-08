@@ -2029,19 +2029,19 @@ struct pixLoc
    S16 y;
 };
 
-const S32 LetterLoc1 = 25;   // I
-const S32 LetterLoc2 = 25;   // I
+const S32 LetterLoc1 = 25;   // I (1st)
+const S32 LetterLoc2 = 25;   // I (2nd)
 const S32 LetterLoc3 = 71;   // G
-const S32 LetterLoc4 = 40;
-const S32 LetterLoc5 = 62;
-const S32 LetterLoc6 = 39;
-const S32 LetterLoc7 = 54;
-const S32 LetterLoc8 = 60;
-const S32 LetterLoc9 = 30;
-const S32 LetterLoc10 = 21;
-const S32 LetterLoc11 = 21;
-const S32 LetterLoc12 = 46;
-const S32 LetterLoc13 = 22;
+const S32 LetterLoc4 = 40;   // T (1st)
+const S32 LetterLoc5 = 62;   // H
+const S32 LetterLoc6 = 39;   // T (2nd)
+const S32 LetterLoc7 = 54;   // F
+const S32 LetterLoc8 = 60;   // E
+const S32 LetterLoc9 = 30;   // B outline
+const S32 LetterLoc10 = 21;  // B top hole
+const S32 LetterLoc11 = 21;  // B bottom hole
+const S32 LetterLoc12 = 46;  // R outline
+const S32 LetterLoc13 = 22;  // R hole
 
 pixLoc gLogoPoints[LetterLoc1 + LetterLoc2 + LetterLoc3 + LetterLoc4 + LetterLoc5 + LetterLoc6 +
                    LetterLoc7 + LetterLoc8 + LetterLoc9 + LetterLoc10 + LetterLoc11 + LetterLoc12 + LetterLoc13] =
@@ -2132,6 +2132,18 @@ void renderStaticBitfighterLogo()
 
 
 // Render logo at 0,0
+//
+// mask
+//  1   = I (1st)
+//  2   = I (2nd)
+//  4   = G
+//  8   = T (1st)
+//  16  = H
+//  32  = T (2nd)
+//  64  = F
+//  128 = E
+//  256 = B
+//  512 = R
 void renderBitfighterLogo(U32 mask)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
@@ -2164,19 +2176,21 @@ void renderBitfighterLogo(U32 mask)
    if(mask & 1 << 7)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc8);
    pos += LetterLoc8;
+
    if(mask & 1 << 8)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc9);
    pos += LetterLoc9;
-   if(mask & 1 << 9)
+   if(mask & 1 << 8)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc10);
    pos += LetterLoc10;
-   if(mask & 1 << 2)
+   if(mask & 1 << 8)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc11);
    pos += LetterLoc11;
-   if(mask & 1 << 1)
+
+   if(mask & 1 << 9)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc12);
    pos += LetterLoc12;
-   if(mask & 1 << 1)
+   if(mask & 1 << 9)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc13);
 
    glDisableClientState(GL_VERTEX_ARRAY);
