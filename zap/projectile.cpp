@@ -1199,7 +1199,7 @@ static F32 normalizeAngle(F32 angle)
 
 U32 HeatSeekerProjectile::SpeedIncreasePerSecond = 300;
 U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
-F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 1.5;
+F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 3;
 F32 HeatSeekerProjectile::TargetSearchAngle = FloatPi;     // Anglular spread in front of ship to search for targets -- SHOULD BE NO LARGER THAN FLOATPI!
 
 // Runs on client and server
