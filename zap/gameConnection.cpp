@@ -51,8 +51,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 
-const U8 GameConnection::CONNECT_VERSION = 3;  // GameConnection's version, for possible future use with changes on compatible versions
-// CONNECT_VERSION <= 1 is probably different, older CS protocol... CONNECT_VERSION == 3 adds "/random"
+const U8 GameConnection::CONNECT_VERSION = 0;  // GameConnection's version, for possible future use with changes on compatible versions
 
 // Constructor -- used on Server by TNL, not called directly, used when a new client connects to the server
 GameConnection::GameConnection()
@@ -1494,6 +1493,8 @@ void GameConnection::writeConnectAccept(BitStream *stream)
 {
    Parent::writeConnectAccept(stream);
    stream->write(CONNECT_VERSION);
+
+	stream->writeFlag(!mServerGame->getSettings()->getIniSettings()->disableServerVoiceChat);
 }
 
 
@@ -1502,8 +1503,9 @@ bool GameConnection::readConnectAccept(BitStream *stream, NetConnection::Termina
 {
    if(!Parent::readConnectAccept(stream, reason))
       return false;
-
    stream->read(&mConnectionVersion);
+
+	mVoiceChatEnabled = stream->readFlag();
    return true;
 }
 

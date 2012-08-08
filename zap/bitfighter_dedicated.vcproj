@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="bitfighter"
-	ProjectGUID="{F1A0916C-3232-4C2E-B52B-368955AA4C62}"
+	ProjectGUID="{86822788-7C6F-4DB7-AD45-400F53F186B3}"
 	RootNamespace="bitfighter"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -442,14 +442,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gameObject.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\gameObject.h"
-				>
-			</File>
-			<File
 				RelativePath=".\gameWeapons.cpp"
 				>
 			</File>
@@ -651,6 +643,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\BfObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\ChatCheck.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\ClientInfo.cpp"
 			>
 		</File>
@@ -780,6 +780,10 @@
 		</File>
 		<File
 			RelativePath=".\InputCode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\LineItem.cpp"
 			>
 		</File>
 		<File

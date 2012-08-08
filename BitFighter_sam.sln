@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZAP", "zap\BitFighter_sam.vcproj", "{F1A0916C-3232-4C2E-B52B-368955AA4C62}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter", "zap\BitFighter_sam.vcproj", "{F1A0916C-3232-4C2E-B52B-368955AA4C62}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947} = {59304CAA-A3FD-43B2-8EC6-EB08A5841947}
@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZAP", "zap\BitFighter_sam.v
 		{5AAE89B5-1F53-4539-9899-071E68FD9A29} = {5AAE89B5-1F53-4539-9899-071E68FD9A29}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfight_master", "master\bitfighter_master.vcproj", "{82F4814F-D7AC-4D62-BEBE-A7BD1159831F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter_master", "master\bitfighter_master.vcproj", "{82F4814F-D7AC-4D62-BEBE-A7BD1159831F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947} = {59304CAA-A3FD-43B2-8EC6-EB08A5841947}
@@ -23,6 +23,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-vec.vcproj", "{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mysql++", "mysql++\mysql++.vcproj", "{59304CAA-A3FD-43B2-8EC6-EB08A5841947}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter", "zap\bitfighter_dedicated.vcproj", "{86822788-7C6F-4DB7-AD45-400F53F186B3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
+		{59304CAA-A3FD-43B2-8EC6-EB08A5841947} = {59304CAA-A3FD-43B2-8EC6-EB08A5841947}
+		{9D7B0AAD-B135-449D-8E12-1ED548AC1048} = {9D7B0AAD-B135-449D-8E12-1ED548AC1048}
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29} = {5AAE89B5-1F53-4539-9899-071E68FD9A29}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +86,14 @@ Global
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Release_mysql|Win32.ActiveCfg = Release|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Release_mysql|Win32.Build.0 = Release|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Release|Win32.ActiveCfg = Release|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug_mysql|Win32.ActiveCfg = Debug_mysql|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug_mysql|Win32.Build.0 = Debug_mysql|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug|Win32.Build.0 = Debug|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release_mysql|Win32.ActiveCfg = Release_mysql|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release_mysql|Win32.Build.0 = Release_mysql|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release|Win32.ActiveCfg = Release|Win32
+		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

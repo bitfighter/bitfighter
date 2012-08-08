@@ -2833,6 +2833,24 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       serverGame->voteClient(clientInfo, false);
    else if(!stricmp(cmd, "clearcache"))
       LuaScriptRunner::clearScriptCache();
+   else if(!stricmp(cmd, "loadini") || !stricmp(cmd, "loadsetting"))
+   {
+      if(clientInfo->isAdmin())
+      {
+         bool prev_disableServerVoiceChat = serverGame->getSettings()->getIniSettings()->disableServerVoiceChat;
+         loadSettingsFromINI(&gINI, serverGame->getSettings());;
+         if(prev_disableServerVoiceChat != serverGame->getSettings()->getIniSettings()->disableServerVoiceChat)
+            for(S32 i = 0; i < mGame->getClientCount(); i++)
+               if(!mGame->getClientInfo(i)->isRobot())
+               {
+                  GameConnection *gc = mGame->getClientInfo(i)->getConnection();
+                  gc->s2rVoiceChatEnable(!serverGame->getSettings()->getIniSettings()->disableServerVoiceChat && !gc->mChatMute);
+               }
+         clientInfo->getConnection()->s2cDisplayMessage(0, 0, "Configuration settings loaded");
+      }
+      else
+         clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Need admin");
+   }
    else
       clientInfo->getConnection()->s2cDisplayErrorMessage("!!! Invalid Command");
 }
@@ -3344,6 +3362,9 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    // Toggle
    gc->mChatMute = !gc->mChatMute;
 
+   if(!getGame()->getSettings()->getIniSettings()->disableServerVoiceChat)  // if server voice chat is allowed, send voice chat status.
+      gc->s2rVoiceChatEnable(!gc->mChatMute);
+
    conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is unmuted");
 }
 
@@ -3792,8 +3813,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *sourceClientInfo = source->getClientInfo();
 
-   // If globally muted, don't send to anyone
-   if(source->mChatMute)
+   // If globally muted or server dont allow it, don't send to anyone
+   if(source->mChatMute || getGame()->getSettings()->getIniSettings()->disableServerVoiceChat)
       return;
 
    if(source)

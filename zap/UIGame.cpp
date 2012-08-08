@@ -3049,7 +3049,10 @@ void GameUserInterface::VoiceRecorder::render()
 void GameUserInterface::VoiceRecorder::start()
 {
    if(!(mGame->getConnectionToServer() && mGame->getConnectionToServer()->mVoiceChatEnabled))
+   {
       mGame->displayErrorMessage("!!! Voice chat not allowed on this server");
+      return;
+   }
 
    mWantToStopRecordingAudio = 0; // linux repeadedly sends key-up / key-down when only holding key down (that was in GLUT, may )
    if(!mRecordingAudio)
