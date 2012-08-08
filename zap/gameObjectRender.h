@@ -239,6 +239,7 @@ extern void renderForceFieldProjector(const Vector<Point> *geom, const Color *te
 extern void renderForceField(Point start, Point end, const Color *c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask = 1023);
+extern void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask = 1023);
 extern void renderStaticBitfighterLogo();
 
 extern void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge);

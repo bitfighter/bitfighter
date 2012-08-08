@@ -710,6 +710,18 @@ void DiagnosticUserInterface::render()
          x += 3*rad;
          renderBadge(x, y, rad, DEVELOPER_BADGE);
 
+         x += 3*rad;
+         glColor(Colors::gold, 1.0);
+         renderBitfighterLogo(Point(x - rad, y - rm2), 2 * rad, 256);
+
+         x += 3*rad;
+         glColor(Colors::silver, 1.0);
+         renderBitfighterLogo(Point(x - rad, y - rm2), 2 * rad, 256);
+
+         x += 3*rad;
+         glColor(Colors::bronze, 1.0);
+         renderBitfighterLogo(Point(x - rad, y - rm2), 2 * rad, 256);
+
          ///// After all badge rendering
          glPopMatrix();
 

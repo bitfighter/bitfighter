@@ -2212,6 +2212,18 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 }
 
 
+void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask)
+{
+   const F32 sizeToLogoRatio = 0.001162791f;  // Shot in the dark!
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(sizeToLogoRatio * size);
+      renderBitfighterLogo(letterMask);
+   glPopMatrix();
+}
+
+
 void drawSquare(const Point &pos, F32 size, bool filled)
 {
    UserInterface::drawRect(pos.x - size, pos.y - size, pos.x + size, pos.y + size, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
