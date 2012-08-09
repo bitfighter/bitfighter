@@ -549,7 +549,8 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 
    static BadgeDescr badgeDescrs[] = {
       { DEVELOPER_BADGE,         "Developer", "Have code accepted into the codebase" },
-      { BADGE_TWENTY_FIVE_FLAGS, "25 Flags",  "Return 25 flags to the Nexus" }
+      { BADGE_TWENTY_FIVE_FLAGS, "25 Flags",  "Return 25 flags to the Nexus" },
+      { BADGE_BBB_SILVER,        "BBB Medal", "Earn gold, silver, or bronze in a Big Bitfighter Battle" }
    };
 
    for(U32 i = 0; i < ARRAYSIZE(badgeDescrs); i++)
