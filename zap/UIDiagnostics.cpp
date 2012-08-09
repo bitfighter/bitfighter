@@ -705,22 +705,19 @@ void DiagnosticUserInterface::render()
          drawStar(Point(x,y), 7, rad - 1, rad/2);
 
          x += 3*rad;
-         renderBadge(x, y, rad, BADGE_TWENTY_FIVE_FLAGS);
-
-         x += 3*rad;
          renderBadge(x, y, rad, DEVELOPER_BADGE);
 
          x += 3*rad;
-         glColor(Colors::gold, 1.0);
-         renderBitfighterLogo(Point(x - rad, y - rm2), 2 * rad, 256);
+         renderBadge(x, y, rad, BADGE_TWENTY_FIVE_FLAGS);
 
          x += 3*rad;
-         glColor(Colors::silver, 1.0);
-         renderBitfighterLogo(Point(x - rad, y - rm2), 2 * rad, 256);
+         renderBadge(x, y, rad, BADGE_BBB_GOLD);
 
          x += 3*rad;
-         glColor(Colors::bronze, 1.0);
-         renderBitfighterLogo(Point(x - rad, y - rm2), 2 * rad, 256);
+         renderBadge(x, y, rad, BADGE_BBB_SILVER);
+
+         x += 3*rad;
+         renderBadge(x, y, rad, BADGE_BBB_BRONZE);
 
          ///// After all badge rendering
          glPopMatrix();

@@ -2214,7 +2214,7 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
 
 void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask)
 {
-   const F32 sizeToLogoRatio = 0.001162791f;  // Shot in the dark!
+   const F32 sizeToLogoRatio = 0.0013f;  // Shot in the dark!
 
    glPushMatrix();
       glTranslate(pos);
@@ -2394,6 +2394,13 @@ void renderDeveloperBadge(F32 x, F32 y, F32 rad)
 }
 
 
+void renderBBBBadge(F32 x, F32 y, F32 rad, const Color &color)
+{
+   glColor(color, 1.0);
+   renderBitfighterLogo(Point(x - (rad * 0.5f), y - (rad * 0.666f)), 2 * rad, 256);  // Draw the 'B' only
+}
+
+
 void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 {
    switch(S32(badge))
@@ -2403,6 +2410,15 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_TWENTY_FIVE_FLAGS:
          render25FlagsBadge(x, y, rad);
+         break;
+      case BADGE_BBB_GOLD:
+         renderBBBBadge(x, y, rad, Colors::gold);
+         break;
+      case BADGE_BBB_SILVER:
+         renderBBBBadge(x, y, rad, Colors::silver);
+         break;
+      case BADGE_BBB_BRONZE:
+         renderBBBBadge(x, y, rad, Colors::bronze);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");
