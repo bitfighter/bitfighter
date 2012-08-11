@@ -2401,6 +2401,24 @@ void renderBBBBadge(F32 x, F32 y, F32 rad, const Color &color)
 }
 
 
+void renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
+{
+   F32 rm2 = rad - 2;
+
+   Vector<Point> edges;
+   edges.push_back(Point(x - rm2, y - rm2));
+   edges.push_back(Point(x - rm2, y + rm2));
+   edges.push_back(Point(x + rm2, y + rm2));
+   edges.push_back(Point(x + rm2, y - rm2));
+
+   glColor(0.5f, 0.5f, 1.0f);
+   renderWallFill(&edges, false);
+   renderPolygonOutline(&edges, &Colors::blue);
+   glColor(Colors::white);
+   renderCenteredString(Point(x, y), rad, "1");
+}
+
+
 void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 {
    switch(S32(badge))
@@ -2419,6 +2437,9 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_BBB_BRONZE:
          renderBBBBadge(x, y, rad, Colors::bronze);
+         break;
+      case BADGE_LEVEL_DESIGN_WINNER:
+         renderLevelDesignWinnerBadge(x, y, rad);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");
