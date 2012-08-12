@@ -1334,6 +1334,8 @@ S32 BfObject::setGeom(lua_State *L)
    Vector<Point> points = getPointsOrXYs(L, 1);
 
    GeomObject::setGeom(points);
+   onPointsChanged();
+
    updateExtentInDatabase();
 
    setMaskBits(GeomMask);
