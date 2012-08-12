@@ -1099,7 +1099,7 @@ void renderPolygonFill(const Vector<Point> *triangulatedFillPoints, const Color 
 
 
 void renderPolygon(const Vector<Point> *fillPoints, const Vector<Point> *outlinePoints, 
-                   const Color *fillColor, const Color *outlineColor, F32 alpha = 1)
+                   const Color *fillColor, const Color *outlineColor, F32 alpha)
 {
    renderPolygonFill(fillPoints, fillColor, alpha);
    renderPolygonOutline(outlinePoints, outlineColor, alpha);
@@ -2419,6 +2419,28 @@ void renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
 }
 
 
+void renderZoneControllerBadge(F32 x, F32 y, F32 rad)
+{
+   F32 rm2 = rad - 2;
+
+   Vector<Point> points;
+   points.push_back(Point(x - rm2, y + rm2));
+   points.push_back(Point(x + rm2, y + rm2));
+   points.push_back(Point(x + rm2, y - rm2));
+
+   Vector<Point> points2;
+   points2.push_back(Point(x - rm2, y - rm2));
+   points2.push_back(Point(x - rm2, y + rm2));
+   points2.push_back(Point(x + rm2, y - rm2));
+
+   renderPolygon(&points, &points, &Colors::gray40, &Colors::gray80, 1.0);
+   renderPolygon(&points2, &points2, &Colors::blue40, &Colors::blue80, 1.0);
+
+   glColor(Colors::white);
+   renderCenteredString(Point(x, y), rad * 0.9f, "ZC");
+}
+
+
 void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 {
    switch(S32(badge))
@@ -2440,6 +2462,9 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_LEVEL_DESIGN_WINNER:
          renderLevelDesignWinnerBadge(x, y, rad);
+         break;
+      case BADGE_ZONE_CONTROLLER:
+         renderZoneControllerBadge(x, y, rad);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");
