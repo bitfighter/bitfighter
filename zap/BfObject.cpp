@@ -1309,21 +1309,21 @@ S32 BfObject::setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
    setPos(getPointOrXY(L, 1));
-   return returnNil(L);
+   return 0;
 }
 
 
 S32 BfObject::addToGame(lua_State *L)
 {
    addToGame(gServerGame, gServerGame->getGameObjDatabase());
-   return returnNil(L);
+   return 0;
 }
 
 
 S32 BfObject::removeFromGame(lua_State *L)
 {
    deleteObject();
-   return returnNil(L);
+   return 0;
 }
 
 

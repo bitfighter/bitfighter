@@ -781,7 +781,7 @@ S32 MoveObject::setVel(lua_State *L)
    checkArgList(L, functionArgs, "MoveObject", "setVel");
    setActualVel(getPointOrXY(L, 1));
 
-   return returnNil(L);
+   return 0;
 }
 
 ////////////////////////////////////////
