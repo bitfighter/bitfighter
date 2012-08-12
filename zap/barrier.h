@@ -73,9 +73,6 @@ public:
    /// Barrier constructor
    Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
 
-   /// Adds the server object to the net interface's scope always list
-   void onAddedToGame(Game *theGame);
-
    /// Renders barrier fill
    void render(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
    static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
@@ -109,7 +106,6 @@ public:
    // Clean up edge geometry and get barriers ready for proper rendering
    static void prepareRenderingGeometry(Game *game);
 
-
    TNL_DECLARE_CLASS(Barrier);
 };
 
@@ -122,8 +118,12 @@ class WallItem : public LineItem
 {
    typedef LineItem Parent;
 
+private:
+   bool mAddedToGame;         // For tracking whether this item has been added to a game or not
+
 public:
-   WallItem();    // Constructor
+   WallItem();                // Constructor
+   ~WallItem();               // Destructor
    WallItem *clone() const;
 
    Vector<Point> extendedEndPoints;
@@ -153,11 +153,28 @@ public:
    string toString(F32 gridSize) const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
+   void addToGame(Game *game, GridDatabase *database);
+
+   S32 getWidth() const;
    void setWidth(S32 width);
 
    void setSelected(bool selected);
 
    static const S32 VERTEX_SIZE = 5;
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(WallItem);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   // Get/set wall's thickness
+   S32 getWidth(lua_State *L);
+   S32 setWidth(lua_State *L);
+
+   // Override standard methods
+   S32 addToGame(lua_State *L);
 };
 
 

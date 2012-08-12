@@ -71,8 +71,8 @@ public:
 
    // Thickness-related
    virtual void setWidth(S32 width);
-   void setWidth(S32 width, S32 min, S32 max);
-   S32 getWidth() const;
+   virtual void setWidth(S32 width, S32 min, S32 max);
+   virtual S32 getWidth() const;
    void changeWidth(S32 amt);  
 
 

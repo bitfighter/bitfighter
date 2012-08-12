@@ -201,12 +201,6 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 }
 
 
-void Barrier::onAddedToGame(Game *game)
-{
-   Parent::onAddedToGame(game);
-}
-
-
 // Combines multiple barriers into a single complex polygon... fills solution
 bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution)
 {
@@ -462,6 +456,16 @@ WallItem::WallItem()
 {
    mObjectTypeNumber = WallItemTypeNumber;
    setWidth(Barrier::DEFAULT_BARRIER_WIDTH);
+   mAddedToGame = false;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+WallItem::~WallItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -505,6 +509,7 @@ void WallItem::render()
 }
 
 
+// Only called in editor?
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
@@ -521,58 +526,18 @@ Rect WallItem::calcExtents()
 }
 
 
-const char *WallItem::getEditorHelpString()
-{
-   return "Walls define the general form of your level.";
-}
+const char *WallItem::getOnScreenName()     { return "Wall";  }
+const char *WallItem::getOnDockName()       { return "Wall";  }
+const char *WallItem::getPrettyNamePlural() { return "Walls"; }
+const char *WallItem::getEditorHelpString() { return "Walls define the general form of your level."; }
+
+string WallItem::getAttributeString() { return "Width: " + itos(getWidth()); }
+const char *WallItem::getInstructionMsg() { return "[+] and [-] to change"; }
 
 
-const char *WallItem::getPrettyNamePlural()
-{
-   return "Walls";
-}
-
-
-const char *WallItem::getOnDockName()
-{
-   return "Wall";
-}
-
-
-const char *WallItem::getOnScreenName()
-{
-   return "Wall";
-}
-
-
-string WallItem::getAttributeString()
-{
-   return "Width: " + itos(getWidth());
-}
-
-
-const char *WallItem::getInstructionMsg()
-{
-   return "[+] and [-] to change";
-}
-
-
-bool WallItem::hasTeam()
-{
-   return false;
-}
-
-
-bool WallItem::canBeHostile()
-{
-   return false;
-}
-
-
-bool WallItem::canBeNeutral()
-{
-   return false;
-}
+bool WallItem::hasTeam()      { return false; }
+bool WallItem::canBeHostile() { return false; }
+bool WallItem::canBeNeutral() { return false; }
 
 
 const Color *WallItem::getEditorRenderColor()
@@ -604,6 +569,13 @@ void WallItem::scale(const Point &center, F32 scale)
 }
 
 
+// Needed to provide a valid signature
+S32 WallItem::getWidth() const
+{
+   return Parent::getWidth();
+}
+
+
 void WallItem::setWidth(S32 width) 
 {         
    Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need Barrier:: prefix here???
@@ -627,6 +599,63 @@ bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 
    return processGeometry(argc, argv, game);
 }
+
+
+// Here to provide a valid signature in WallItem
+void WallItem::addToGame(Game *game, GridDatabase *database)
+{
+   Parent::addToGame(game, database);
+}
+
+
+/////
+// Lua interface
+
+//               Fn name       Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getWidth,     ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setWidth,     ARRAYDEF({{ INT, END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(WallItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(WallItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *WallItem::luaClassName = "WallItem";
+REGISTER_LUA_SUBCLASS(WallItem, BfObject);
+
+
+S32 WallItem::getWidth(lua_State *L)     { return returnInt(L, getWidth()); }
+S32 WallItem::setWidth(lua_State *L)     
+{ 
+   checkArgList(L, functionArgs, "WallItem", "setWidth");
+
+   if(mAddedToGame)
+   {
+      const char *msg = "Can't modify a wall that's already been added to a game!";
+      logprintf(LogConsumer::LogError, msg);
+      throw LuaException(msg);
+   }
+
+   setWidth(getInt(L, 1));
+
+   return 0; 
+}
+
+
+// Method overrides -- wall items are basically pseudo items that need to be added via a non-standard mechanism
+S32 WallItem::addToGame(lua_State *L)
+{
+   WallRec wallRec(*this);
+   gServerGame->getGameType()->addWall(wallRec, gServerGame);
+   mAddedToGame = true;    // To prevent further modification once this has been added to game
+
+   return 0;
+}
+
+
+
 
 
 ////////////////////////////////////////

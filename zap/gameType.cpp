@@ -1298,8 +1298,8 @@ void GameType::addSpyBug(SpyBug *spybug)
 // Only runs on server
 void GameType::addWall(const WallRec &wall, Game *game)
 {
-   mWalls.push_back(wall);
-   wall.constructWalls(game);
+   mWalls.push_back(wall);       // Add wall to our list of walls
+   wall.constructWalls(game);    // Build it!
 }
 
 
