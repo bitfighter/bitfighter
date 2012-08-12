@@ -1364,8 +1364,7 @@ S32 CentroidObject::setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
 
-   Point newPos = getPointOrXY(L, 1);
-   offset(newPos - getCentroid());
+   offset(getPointOrXY(L, 1) - getCentroid());
 
    return 0;
 }

@@ -120,6 +120,7 @@ class WallItem : public LineItem
 
 private:
    bool mAddedToGame;         // For tracking whether this item has been added to a game or not
+   void checkIfWallHasBeenAddedToTheGame();
 
 public:
    WallItem();                // Constructor
@@ -173,8 +174,10 @@ public:
    S32 getWidth(lua_State *L);
    S32 setWidth(lua_State *L);
 
-   // Override standard methods
+   // Override standard methods basically to add checks to keep us from modifying a wall already in the game
    S32 addToGame(lua_State *L);
+   S32 setLoc(lua_State *L);
+   S32 setGeom(lua_State *L);
 };
 
 

@@ -449,9 +449,10 @@ public:
 // A trivial extension of the above, to provide special geometry methods for 2D objects
 class CentroidObject : public BfObject
 {
+public:
    // Provide special location handlers
-   S32 getLoc(lua_State *L);
-   S32 setLoc(lua_State *L);
+   virtual S32 getLoc(lua_State *L);
+   virtual S32 setLoc(lua_State *L);
 };
 
 

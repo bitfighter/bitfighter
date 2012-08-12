@@ -629,18 +629,24 @@ REGISTER_LUA_SUBCLASS(WallItem, BfObject);
 S32 WallItem::getWidth(lua_State *L)     { return returnInt(L, getWidth()); }
 S32 WallItem::setWidth(lua_State *L)     
 { 
+   checkIfWallHasBeenAddedToTheGame();
+
    checkArgList(L, functionArgs, "WallItem", "setWidth");
 
+   setWidth(getInt(L, 1));
+
+   return 0; 
+}
+
+
+void WallItem::checkIfWallHasBeenAddedToTheGame()
+{
    if(mAddedToGame)
    {
       const char *msg = "Can't modify a wall that's already been added to a game!";
       logprintf(LogConsumer::LogError, msg);
       throw LuaException(msg);
    }
-
-   setWidth(getInt(L, 1));
-
-   return 0; 
 }
 
 
@@ -655,7 +661,18 @@ S32 WallItem::addToGame(lua_State *L)
 }
 
 
+S32 WallItem::setLoc(lua_State *L)
+{
+   checkIfWallHasBeenAddedToTheGame();
+   return Parent::setLoc(L);
+}
 
+
+S32 WallItem::setGeom(lua_State *L)
+{
+   checkIfWallHasBeenAddedToTheGame();
+   return Parent::setGeom(L);
+}
 
 
 ////////////////////////////////////////

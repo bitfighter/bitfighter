@@ -67,13 +67,10 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    /////
-   // Former LuaPolygon methods
    // This class serves only to provide an implementation of the abstract methods in LuaItem
    // that are common to the polygon classes
-   S32 getLoc(lua_State *L);       // Center of item (returns point)
-   S32 setLoc(lua_State *L);       // Shift item so centroid is at specified location
-   S32 getRad(lua_State *L);       // Radius of item (returns number)
-   S32 getVel(lua_State *L);       // Velocity of item (returns point)
+   S32 getRad(lua_State *L);              // Radius of item (returns number)
+   S32 getVel(lua_State *L);              // Velocity of item (returns point)
 };
 
 };

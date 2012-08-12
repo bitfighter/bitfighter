@@ -155,24 +155,6 @@ Point PolygonObject::getInitialPlacementOffset(F32 gridSize)
 }
 
 
-// Polygons need special handling when getting/setting location
-S32 PolygonObject::getLoc(lua_State *L)
-{
-   return LuaObject::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
-}
-
-
-S32 PolygonObject::setLoc(lua_State *L)
-{
-   checkArgList(L, functionArgs, "BfObject", "setLoc");
-
-   Point newPos = getPointOrXY(L, 1);
-   offset(newPos - getCentroid());
-
-   return 0;
-}
-
-
 S32 PolygonObject::getRad(lua_State *L)
 {
    return LuaObject::returnInt(L, 0);
