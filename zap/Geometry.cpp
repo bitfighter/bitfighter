@@ -877,8 +877,7 @@ const Vector<Point> *PolylineGeometry::getFill() const
 
 Point PolylineGeometry::getCentroid()
 {
-   TNLAssert(false, "Polylines don't have Centroid");
-   return Point();
+   return mCentroid;;
 }
 
 
@@ -979,6 +978,14 @@ void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32
 }
 
 
+void PolylineGeometry::onPointsChanged()
+{
+   Parent::onPointsChanged();
+
+   mCentroid = findCentroid(mPolyBounds); 
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -1006,7 +1013,7 @@ const Vector<Point> *PolygonGeometry::getFill() const
 Point PolygonGeometry::getCentroid()
 {
    TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
-   return mCentroid;
+   return Parent::getCentroid();
 }
 
 
@@ -1029,11 +1036,10 @@ void PolygonGeometry::onPointsChanged()
    if(mTriangluationDisabled)
       return;
 
-   mCentroid = findCentroid(mPolyBounds); 
+   Parent::onPointsChanged();
+
    Triangulate::Process(mPolyBounds, mPolyFill);        // Resizes and fills mPolyFill from data in mPolyBounds
    mLabelAngle = angleOfLongestSide(mPolyBounds);
-
-   Parent::onPointsChanged();
 }
 
 

@@ -27,12 +27,10 @@
 #define _SIMPLELINE_H_
 
 #include "EditorObject.h"
-//#include "UIEditor.h"      // For EditorObject (to be moved!)
 #include "Geometry.h"
 
 namespace Zap
 {
-
 
 class SimpleLine : public BfObject
 {

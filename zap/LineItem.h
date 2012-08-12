@@ -33,9 +33,10 @@ using namespace std;
 namespace Zap
 {
 
-class LineItem : public BfObject
+
+class LineItem : public CentroidObject
 {
-   typedef BfObject Parent;
+   typedef CentroidObject Parent;
 
 private:
    Vector<Point> mRenderPoints;     // Precomputed points used for rendering linework

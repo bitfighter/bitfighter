@@ -1349,5 +1349,27 @@ S32 BfObject::getGeom(lua_State *L)
    return 0;      // TODO: return geometry!
 }
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// 2D objects need special handling when getting/setting location
+S32 CentroidObject::getLoc(lua_State *L)
+{
+   return LuaObject::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
+}
+
+
+S32 CentroidObject::setLoc(lua_State *L)
+{
+   checkArgList(L, functionArgs, "BfObject", "setLoc");
+
+   Point newPos = getPointOrXY(L, 1);
+   offset(newPos - getCentroid());
+
+   return 0;
+}
+
+
 };
 

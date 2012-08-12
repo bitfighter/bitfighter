@@ -155,6 +155,12 @@ public:
 
 class PolylineGeometry : public Geometry
 {
+
+typedef Geometry Parent;
+
+private:
+   Point mCentroid;
+
 protected:
    Vector<Point> mPolyBounds;
       
@@ -199,6 +205,7 @@ public:
 
    string geomToString(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
+   virtual void onPointsChanged();
 
    virtual Rect calcExtents();
 };
@@ -214,7 +221,6 @@ class PolygonGeometry : public PolylineGeometry
 private:
    Vector<Point> mPolyFill;
    F32 mLabelAngle;
-   Point mCentroid;
    bool mTriangluationDisabled;     // Allow optimization of adding points for polygons that will never be displayed
 
 public:

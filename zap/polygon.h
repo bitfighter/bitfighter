@@ -36,9 +36,9 @@ namespace Zap
 
 
 // Provide editor related methods to the polygon class
-class PolygonObject : public BfObject
+class PolygonObject : public CentroidObject
 {
-   typedef BfObject Parent;
+   typedef CentroidObject Parent;
 
 private:
    virtual Point getDockLabelPos();
