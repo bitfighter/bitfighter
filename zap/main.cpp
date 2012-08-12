@@ -90,7 +90,7 @@ include (replaces require)
 //------------------------------------------------------------------------------------
 
 #ifdef _MSC_VER
-#pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#  pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
 #include "IniFile.h"
@@ -111,21 +111,23 @@ include (replaces require)
 using namespace TNL;
 
 #ifndef ZAP_DEDICATED
-#include "UIGame.h"
-#include "UINameEntry.h"
-#include "UIEditor.h"
-#include "UIErrorMessage.h"
-#include "Cursor.h"          // For cursor defs
-#include "Joystick.h"
-#include "Event.h"
-#include "SDL.h"
-#ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
-#else
-#include "SDL_opengl.h"
-#endif
-#include "VideoSystem.h"
-#include "ClientGame.h"
+#  include "UIGame.h"
+#  include "UINameEntry.h"
+#  include "UIEditor.h"
+#  include "UIErrorMessage.h"
+#  include "Cursor.h"          // For cursor defs
+#  include "Joystick.h"
+#  include "Event.h"
+#  include "SDL.h"
+
+#  ifdef TNL_OS_MOBILE
+#    include "SDL_opengles.h"
+#  else
+#    include "SDL_opengl.h"
+#  endif
+
+#  include "VideoSystem.h"
+#  include "ClientGame.h"
 #endif
 
 #include "ServerGame.h"
@@ -137,7 +139,6 @@ using namespace TNL;
 #include "dataConnection.h"
 #include "game.h"
 #include "SoundSystem.h"
-//#include "ship.h"
 #include "InputCode.h" // initializeKeyNames()
 #include "ClientInfo.h"
 
@@ -145,17 +146,17 @@ using namespace TNL;
 
 #ifdef WIN32
 // For writeToConsole()
-#include <windows.h>
-#include <io.h>
-#include <fcntl.h>
-#include <shellapi.h>
+#  include <windows.h>
+#  include <io.h>
+#  include <fcntl.h>
+#  include <shellapi.h>
 
-#define USE_BFUP
-#endif
+#  define USE_BFUP
+#  endif
 
 #ifdef TNL_OS_MAC_OSX
-#include "Directory.h"
-#include <unistd.h>
+#  include "Directory.h"
+#  include <unistd.h>
 #endif
 
 
@@ -165,16 +166,16 @@ using namespace TNL;
 //#endif
 
 #ifdef USE_EXCEPTION_BACKTRACE
-#include <execinfo.h>
-#include <signal.h>
+#  include <execinfo.h>
+#  include <signal.h>
 #endif
 
 
 namespace Zap
 {
 #ifndef ZAP_DEDICATED
-extern ClientGame *gClientGame1;
-extern ClientGame *gClientGame2;
+   extern ClientGame *gClientGame1;
+   extern ClientGame *gClientGame2;
 #endif
 
 // Handle any md5 requests
