@@ -3856,10 +3856,7 @@ void EditorUserInterface::onMouseClicked_left()
          removeUndoState();
       }
       else
-      {
          addToEditor(mNewItem);
-         mNewItem->onGeomChanged();             // Add walls BEFORE onGeomChanged() is run!
-      }
 
       mNewItem = NULL;
 
