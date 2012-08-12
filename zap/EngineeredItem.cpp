@@ -337,6 +337,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    // Now we should check for any turrets that may be in the way using the same geometry as in
    // part two.  We can excluded engineered turrets because they can be destroyed
    bool turretInTheWay = false;
+   fillVector.clear();
    gameObjectDatabase->findObjects(TurretTypeNumber, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)

@@ -363,7 +363,7 @@ void SplashUserInterface::render()
          renderBitfighterLogo(ctr, fr *  6.0f + 1, 1 << 5);
          renderBitfighterLogo(ctr, fr * 33.0f + 1, 1 << 6);
          renderBitfighterLogo(ctr, fr *  9.0f + 1, 1 << 7);
-         renderBitfighterLogo(ctr, fr * 25.0f + 1, 1 << 8);
+         renderBitfighterLogo(ctr, fr * 30.0f + 1, 1 << 8);
          renderBitfighterLogo(ctr, fr * 15.0f + 1, 1 << 9);
       }
    }

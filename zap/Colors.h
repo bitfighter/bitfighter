@@ -83,6 +83,11 @@ namespace Colors
    const Color menuHelpColor(green);
    const Color idlePlayerScoreboardColor(gray50);
    const Color standardPlayerScoreboardColor(white);
+
+   // Specialties
+   const Color gold(.85f, .85f, .10f);
+   const Color silver(.90f, .91f, .98f);
+   const Color bronze(.55f, .47f, .33f);
 };
 
 }

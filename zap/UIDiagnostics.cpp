@@ -637,14 +637,14 @@ void DiagnosticUserInterface::render()
          F32 rm23 = rm2 * .333;
 
          glColor(Colors::white);
-         drawPolygon(Point(x,y), rad *.666,rad-2, 0);
+         drawPolygon(Point(x,y), rad *.666, rm2, 0);
          glColor(Colors::red);
          drawCircle(Point(x, y), rad);
 
          x += 3*rad;
 
          glColor(Colors::yellow);
-         drawPolygon(Point(x,y), 3,rad-2, 3.14159/6);
+         drawPolygon(Point(x,y), 3, rm2, FloatTau/12);
          glColor(Colors::red);
          drawCircle(Point(x, y), rad);
 
@@ -693,9 +693,9 @@ void DiagnosticUserInterface::render()
 
          x += 3*rad;
          glColor(Colors::paleBlue);
-         drawPolygon(Point(x,y + rad * .333), 3, rad * 1.2, 3.14159/6);
+         drawPolygon(Point(x,y + r3), 3, rad * 1.2, FloatTau/12);
          glColor(Colors::cyan);
-         drawPolygon(Point(x,y + rad * .333), 3, rad * .6, 3.14159 * .5);
+         drawPolygon(Point(x,y + r3), 3, rad * .6, FloatTau/4);
 
 
          x += 3*rad;
@@ -705,14 +705,38 @@ void DiagnosticUserInterface::render()
          drawStar(Point(x,y), 7, rad - 1, rad/2);
 
          x += 3*rad;
+         renderBadge(x, y, rad, DEVELOPER_BADGE);
+
+         x += 3*rad;
          renderBadge(x, y, rad, BADGE_TWENTY_FIVE_FLAGS);
 
          x += 3*rad;
-         renderBadge(x, y, rad, DEVELOPER_BADGE);
+         renderBadge(x, y, rad, BADGE_BBB_GOLD);
+
+         x += 3*rad;
+         renderBadge(x, y, rad, BADGE_BBB_SILVER);
+
+         x += 3*rad;
+         renderBadge(x, y, rad, BADGE_BBB_BRONZE);
+
+         x += 3*rad;
+         renderBadge(x, y, rad, BADGE_LEVEL_DESIGN_WINNER);
+
+         // Level design contest winner badge
+         x += 3*rad;
+         Vector<Point> points;
+         points.push_back(Point(x - rm2, y - rm2));
+         points.push_back(Point(x - rm2, y + rm2));
+         points.push_back(Point(x + rm2, y + rm2));
+         points.push_back(Point(x + rm2, y - rm2));
+         glColor(0.5f, 0.5f, 1.0f);
+         renderWallFill(&points, false);
+         renderPolygonOutline(&points, &Colors::blue);
+         glColor(Colors::yellow);
+         drawStar(Point(x,y), 5, rad * .5, rad * .25);
 
          ///// After all badge rendering
          glPopMatrix();
-
       }
 #endif // TNL_DEBUG
    }

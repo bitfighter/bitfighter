@@ -2029,19 +2029,19 @@ struct pixLoc
    S16 y;
 };
 
-const S32 LetterLoc1 = 25;   // I
-const S32 LetterLoc2 = 25;   // I
+const S32 LetterLoc1 = 25;   // I (1st)
+const S32 LetterLoc2 = 25;   // I (2nd)
 const S32 LetterLoc3 = 71;   // G
-const S32 LetterLoc4 = 40;
-const S32 LetterLoc5 = 62;
-const S32 LetterLoc6 = 39;
-const S32 LetterLoc7 = 54;
-const S32 LetterLoc8 = 60;
-const S32 LetterLoc9 = 30;
-const S32 LetterLoc10 = 21;
-const S32 LetterLoc11 = 21;
-const S32 LetterLoc12 = 46;
-const S32 LetterLoc13 = 22;
+const S32 LetterLoc4 = 40;   // T (1st)
+const S32 LetterLoc5 = 62;   // H
+const S32 LetterLoc6 = 39;   // T (2nd)
+const S32 LetterLoc7 = 54;   // F
+const S32 LetterLoc8 = 60;   // E
+const S32 LetterLoc9 = 30;   // B outline
+const S32 LetterLoc10 = 21;  // B top hole
+const S32 LetterLoc11 = 21;  // B bottom hole
+const S32 LetterLoc12 = 46;  // R outline
+const S32 LetterLoc13 = 22;  // R hole
 
 pixLoc gLogoPoints[LetterLoc1 + LetterLoc2 + LetterLoc3 + LetterLoc4 + LetterLoc5 + LetterLoc6 +
                    LetterLoc7 + LetterLoc8 + LetterLoc9 + LetterLoc10 + LetterLoc11 + LetterLoc12 + LetterLoc13] =
@@ -2132,6 +2132,18 @@ void renderStaticBitfighterLogo()
 
 
 // Render logo at 0,0
+//
+// mask
+//  1   = I (1st)
+//  2   = I (2nd)
+//  4   = G
+//  8   = T (1st)
+//  16  = H
+//  32  = T (2nd)
+//  64  = F
+//  128 = E
+//  256 = B
+//  512 = R
 void renderBitfighterLogo(U32 mask)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
@@ -2164,19 +2176,21 @@ void renderBitfighterLogo(U32 mask)
    if(mask & 1 << 7)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc8);
    pos += LetterLoc8;
+
    if(mask & 1 << 8)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc9);
    pos += LetterLoc9;
-   if(mask & 1 << 9)
+   if(mask & 1 << 8)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc10);
    pos += LetterLoc10;
-   if(mask & 1 << 2)
+   if(mask & 1 << 8)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc11);
    pos += LetterLoc11;
-   if(mask & 1 << 1)
+
+   if(mask & 1 << 9)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc12);
    pos += LetterLoc12;
-   if(mask & 1 << 1)
+   if(mask & 1 << 9)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc13);
 
    glDisableClientState(GL_VERTEX_ARRAY);
@@ -2194,6 +2208,18 @@ void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
       glTranslatef((gScreenInfo.getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
       glScale(fact);                   // Scale it down...
       renderBitfighterLogo(mask);
+   glPopMatrix();
+}
+
+
+void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask)
+{
+   const F32 sizeToLogoRatio = 0.0013f;  // Shot in the dark!
+
+   glPushMatrix();
+      glTranslate(pos);
+      glScale(sizeToLogoRatio * size);
+      renderBitfighterLogo(letterMask);
    glPopMatrix();
 }
 
@@ -2368,6 +2394,31 @@ void renderDeveloperBadge(F32 x, F32 y, F32 rad)
 }
 
 
+void renderBBBBadge(F32 x, F32 y, F32 rad, const Color &color)
+{
+   glColor(color, 1.0);
+   renderBitfighterLogo(Point(x - (rad * 0.5f), y - (rad * 0.666f)), 2 * rad, 256);  // Draw the 'B' only
+}
+
+
+void renderLevelDesignWinnerBadge(F32 x, F32 y, F32 rad)
+{
+   F32 rm2 = rad - 2;
+
+   Vector<Point> edges;
+   edges.push_back(Point(x - rm2, y - rm2));
+   edges.push_back(Point(x - rm2, y + rm2));
+   edges.push_back(Point(x + rm2, y + rm2));
+   edges.push_back(Point(x + rm2, y - rm2));
+
+   glColor(0.5f, 0.5f, 1.0f);
+   renderWallFill(&edges, false);
+   renderPolygonOutline(&edges, &Colors::blue);
+   glColor(Colors::white);
+   renderCenteredString(Point(x, y), rad, "1");
+}
+
+
 void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
 {
    switch(S32(badge))
@@ -2377,6 +2428,18 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
          break;
       case BADGE_TWENTY_FIVE_FLAGS:
          render25FlagsBadge(x, y, rad);
+         break;
+      case BADGE_BBB_GOLD:
+         renderBBBBadge(x, y, rad, Colors::gold);
+         break;
+      case BADGE_BBB_SILVER:
+         renderBBBBadge(x, y, rad, Colors::silver);
+         break;
+      case BADGE_BBB_BRONZE:
+         renderBBBBadge(x, y, rad, Colors::bronze);
+         break;
+      case BADGE_LEVEL_DESIGN_WINNER:
+         renderLevelDesignWinnerBadge(x, y, rad);
          break;
       default:
          TNLAssert(false, "Unknown Badge!");
