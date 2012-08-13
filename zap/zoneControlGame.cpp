@@ -29,6 +29,7 @@
 #include "gameObjectRender.h"
 #include "ClientInfo.h"
 #include "gameConnection.h"
+#include "masterConnection.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"
@@ -50,6 +51,8 @@ GAMETYPE_RPC_S2C(ZoneControlGameType, s2cSetFlagTeam, (S32 flagTeam), (flagTeam)
 ZoneControlGameType::ZoneControlGameType()
 {
    mFlagTeam = -1;
+   mZcBadgeAchievable = true;
+   mPossibleZcBadgeAchiever = NULL;
 }
 
 
@@ -165,6 +168,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    updateScore(s, CaptureZone);
 
+   z->setCapturer(s->getClientInfo());                   // Assign zone to capturing player
    z->setTeam(s->getTeam());                             // Assign zone to capturing team
    s->getClientInfo()->getStatistics()->mFlagScore++;    // Record the capture
 
@@ -186,9 +190,32 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
          gc->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
    }
 
+   // Test for zone controller badge
+   // We do the following:
+   // - Set the first zone capturer in the touchdown to be the possible badge achiever
+   // - Test to make sure the same person captures all the zones in the touch down
+   // - If the above test ever fails, set a boolean to forbid the badge from being earned
+   if(mZcBadgeAchievable)
+   {
+      if(mPossibleZcBadgeAchiever == NULL)
+         mPossibleZcBadgeAchiever = mZones[0]->getCapturer();
+
+      for(S32 i = 0; i < mZones.size(); i++)
+      {
+         if(mZones[i]->getCapturer() != mPossibleZcBadgeAchiever)
+         {
+            mZcBadgeAchievable = false;
+            break;
+         }
+      }
+   }
+
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
+   {
       mZones[i]->setTeam(-1);
+      mZones[i]->setCapturer(NULL);
+   }
 
    // Return the flag to spawn point
    for(S32 i = 0; i < s->mMountedItems.size(); i++)
@@ -366,6 +393,31 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 0;         // also be credited for a CaptureZone event
          default:
             return naScore;
+      }
+   }
+}
+
+
+void ZoneControlGameType::onGameOver()
+{
+   Parent::onGameOver();
+
+   // Let's see if anyone got the Zone Controller badge
+   if(mZcBadgeAchievable &&                                       // Badge is still achievable (hasn't been forbidden by rules in shipTouchZone() )
+      mPossibleZcBadgeAchiever &&
+      mPossibleZcBadgeAchiever->isAuthenticated() &&              // Player must be authenticated
+      getGame()->getPlayerCount() >= 4 &&                         // Game must have 4+ human players
+      getGame()->getAuthenticatedPlayerCount() >= 2 &&            // Two of whom must be authenticated
+      getLeadingScore() == getWinningScore() &&                   // Game must go the full score (no expired time)
+      mZones.size() >= 3 &&                                       // There must be at least 3 zones
+      getWinningScore() >= 3 * mZones.size() &&                   // The player must capture them all at least 3 times
+      !mPossibleZcBadgeAchiever->hasBadge(BADGE_ZONE_CONTROLLER)) // Player doesn't already have the badge
+   {
+      MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+      if(masterConn && masterConn->isEstablished())
+      {
+         masterConn->s2mAcheivementAchieved(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());     // Notify the master
+         s2cAchievementMessage(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());                  // Alert other players
       }
    }
 }

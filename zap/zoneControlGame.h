@@ -40,6 +40,10 @@ private:
    SafePtr<FlagItem> mFlag;
    S32 mFlagTeam;
 
+   // Zone Controller badge
+   bool mZcBadgeAchievable;
+   ClientInfo *mPossibleZcBadgeAchiever;
+
 public:
    ZoneControlGameType();  // Constructor
 
@@ -71,6 +75,8 @@ public:
    void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+
+   void onGameOver();
 
    TNL_DECLARE_RPC(s2cSetFlagTeam, (S32 newFlagTeam));
    TNL_DECLARE_CLASS(ZoneControlGameType);

@@ -3694,15 +3694,28 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cAchievementMessage,
 #ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
+   string message = "";
+   string textEffectText = "";
+
    if(achievement == BADGE_TWENTY_FIVE_FLAGS)
    {
-      clientGame->displayMessage(Colors::yellow, "%s has earned the TWENTY FIVE FLAGS badge!", clientName.getString());
-      SoundSystem::playSoundEffect(SFXAchievementEarned);
-
-      Ship *ship = clientGame->findShip(clientName);
-      if(ship)
-         clientGame->emitTextEffect("25 FLAGS BADGE", Colors::yellow, ship->getRenderPos() + Point(0, 150));
+      message = "%s has earned the TWENTY FIVE FLAGS badge!";
+      textEffectText = "25 FLAGS BADGE";
    }
+   else if(achievement == BADGE_ZONE_CONTROLLER)
+   {
+      message = "%s has earned the ZONE CONTROLLER badge!";
+      textEffectText = "ZONE CONTROLLER";
+   }
+   else
+      return;
+
+   clientGame->displayMessage(Colors::yellow, message.c_str(), clientName.getString());
+   SoundSystem::playSoundEffect(SFXAchievementEarned);
+
+   Ship *ship = clientGame->findShip(clientName);
+   if(ship)
+      clientGame->emitTextEffect(textEffectText, Colors::yellow, ship->getRenderPos() + Point(0, 150));
 #endif
 }
 

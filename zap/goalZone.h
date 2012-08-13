@@ -44,6 +44,7 @@ private:
 
    bool mHasFlag;     // Is there a flag parked in this zone?
    S32 mScore;        // How much is this zone worth?
+   ClientInfo *mCapturer;  // Who captured this zone - used in Zone Control
 
    S32 mFlashCount;
    Timer mFlashTimer;
@@ -81,6 +82,9 @@ public:
    //bool hasFlag();
    void setHasFlag(bool hasFlag);
    
+   ClientInfo *getCapturer();
+   void setCapturer(ClientInfo *clientInfo);
+
    TNL_DECLARE_CLASS(GoalZone);
 
    /////
