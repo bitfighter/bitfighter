@@ -43,6 +43,7 @@ GoalZone::GoalZone()
    mFlashCount = 0;
    mHasFlag = false;
    mScore = 1;    // For now...
+   mCapturer = NULL;
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
  
@@ -141,6 +142,18 @@ void GoalZone::setTeam(S32 team)
 {
    Parent::setTeam(team);
    setMaskBits(TeamMask);
+}
+
+
+ClientInfo *GoalZone::getCapturer()
+{
+   return mCapturer;
+}
+
+
+void GoalZone::setCapturer(ClientInfo *clientInfo)
+{
+   mCapturer = clientInfo;
 }
 
 
