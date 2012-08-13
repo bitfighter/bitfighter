@@ -35,6 +35,10 @@
 #  include "UIMenuItems.h"      // delete
 #endif
 
+#ifdef WIN32
+#  define vsnprintf vsnprintf_s    // Use secure version on windows
+#endif 
+
 namespace Zap
 {
 

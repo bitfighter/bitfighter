@@ -48,12 +48,11 @@
 #include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
 #include "input.h"
-#include "config.h"
 #include "loadoutHelper.h"
 #include "gameNetInterface.h"
 #include "SoundSystem.h"
 #include "md5wrapper.h"          // For submission of passwords
-#include "oglconsole.h"          // Our console object
+#include "Console.h"             // Our console object
 #include "config.h"              // for Getmap level dir
 #include "ScreenInfo.h"
 #include "ClientGame.h"
@@ -209,24 +208,29 @@ void GameUserInterface::quitEngineerHelper()
       mHelper = NULL;
 }
 
-void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
+
+// Callback for enter key being pressed -- some OGLConsole commands (show, hide) act on a internally maintained "current" instance 
+// of the console, and some (like output) act on a particular (passed) console..  Since we only have a
+// single console instance, we'll just ignore the passed console and work with our global instance.  This is kind of stinky design,
+// but it lets us excoriate all direct references to OGLConsole from our code.
+static void processGameConsoleCommandCallback(OGLCONSOLE_Console console, char *cmd)
 {
    if(strncmp(cmd, "quit", 4) == 0 || strncmp(cmd, "exit", 4) == 0) 
-      OGLCONSOLE_HideConsole();
+      gConsole.hide();
 
    else if(strncmp(cmd, "help", 4) == 0 || strncmp(cmd, "?", 1) == 0)
-      OGLCONSOLE_Output(console, "Commands: help; add; logprint; quit\n");
+      gConsole.output("Commands: help; add; logprint; quit\n");
 
    else if(strncmp(cmd, "add", 3) == 0)
    {
       int a, b;
       if(sscanf(cmd, "add %i %i", &a, &b) == 2)
       {
-         OGLCONSOLE_Output(console, "%i + %i = %i\n", a, b, a+b);
+         gConsole.output("%i + %i = %i\n", a, b, a+b);
          return;
       }
 
-      OGLCONSOLE_Output(console, "usage: add INT INT\n");
+      gConsole.output("usage: add INT INT\n");
    }
 
    else if(strncmp(cmd, "logprint", 8) == 0)
@@ -239,7 +243,7 @@ void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
          logprintf("");
    }
     else
-      OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd);
+      gConsole.output("Unknown command: %s\n", cmd);
 }
 
 
@@ -268,7 +272,7 @@ void GameUserInterface::onActivate()
 
    mShutdownMode = None;
 
-   OGLCONSOLE_EnterKey(processGameConsoleCommand);        // Setup callback for processing console commands
+   gConsole.setCommandProcessorCallback(processGameConsoleCommandCallback);
 }
 
 
@@ -1188,7 +1192,7 @@ void GameUserInterface::activateModule(S32 index)
 void GameUserInterface::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-   if(OGLCONSOLE_ProcessBitfighterTextInputEvent(ascii) != 0)
+   if(gConsole.onKeyDown(ascii))
       return;
 
    // Make sure we have a chat box open
@@ -1225,7 +1229,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))
       return true;
 
-   else if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode))   // Pass the key on to the console for processing
+   else if(gConsole.onKeyDown(inputCode))   // Pass the key on to the console for processing
       return true;
 
    else if(checkInputCode(settings, InputCodeManager::BINDING_HELP, inputCode))   // Turn on help screen
@@ -1248,10 +1252,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // Only open when not in any special mode.
    else if(!mHelper && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
    {
-      if(OGLCONSOLE_GetVisibility())      // Hide console if it's visible...
-         OGLCONSOLE_HideConsole();
-      else                                // ...and show it if it's not
-         OGLCONSOLE_ShowConsole();
+      gConsole.toggleVisibility();
 
       return true;
    }
@@ -1304,7 +1305,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       }
 
       bool handled = false;
-      if(!OGLCONSOLE_GetVisibility())
+      if(!gConsole.isVisible())
       {
          if(mCurrentChatType == NoChat)
             handled = processPlayModeKey(inputCode);
@@ -2748,7 +2749,7 @@ bool GameUserInterface::isInScoreboardMode()
 // Runs only on client
 Move *GameUserInterface::getCurrentMove()
 {
-   if((mCurrentChatType == NoChat) && !mDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
+   if((mCurrentChatType == NoChat) && !mDisableShipKeyboardInput && !gConsole.isVisible())
    {
       // Some helpers (like TeamShuffle) like to disable movement when they are active
       if(mHelper && mHelper->isMovementDisabled())

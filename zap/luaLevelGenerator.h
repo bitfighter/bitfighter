@@ -29,7 +29,7 @@
 #include "luaObject.h"
 #include "gameLoader.h"
 #include "tnlLog.h"
-#include "oglconsole.h"    // For logging to the console
+//#include "oglconsole.h"    // For logging to the console
 
 using namespace std;
 
@@ -42,8 +42,6 @@ class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
 private:
    GridDatabase *mGridDatabase;
-
-   OGLCONSOLE_Console mConsole;
 
    LevelLoader *mCaller;
    F32 mGridSize;

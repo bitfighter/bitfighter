@@ -7,7 +7,7 @@
 
 #include "Event.h"
 
-#include "oglconsole.h"
+#include "Console.h"
 #include "config.h"
 #include "UIMenus.h"
 #include "UIDiagnostics.h"
@@ -497,7 +497,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    gScreenInfo.setWindowSize(newWidth, newHeight);
   
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-   OGLCONSOLE_Reshape();
+   gConsole.onScreenResized();
 
    gINI.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 

@@ -29,7 +29,6 @@
 #include "Zone.h"
 
 //#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
-#include "oglconsole.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UI.h"

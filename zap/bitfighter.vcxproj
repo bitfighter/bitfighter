@@ -146,6 +146,7 @@
     <ClCompile Include="..\zap\CTFGame.cpp" />
     <ClCompile Include="BanList.cpp" />
     <ClCompile Include="ClientInfo.cpp" />
+    <ClCompile Include="Console.cpp" />
     <ClCompile Include="CoreGame.cpp" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="EngineeredItem.cpp" />
@@ -275,6 +276,7 @@
     <ClInclude Include="..\zap\Directory.h" />
     <ClInclude Include="..\zap\dirent.h" />
     <ClInclude Include="ClientInfo.h" />
+    <ClInclude Include="Console.h" />
     <ClInclude Include="CoreGame.h" />
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="EngineeredItem.h" />

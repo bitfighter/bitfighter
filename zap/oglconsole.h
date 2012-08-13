@@ -38,15 +38,13 @@ extern "C" {
 #endif
 
 
+#define MAX_CONSOLE_OUTPUT_LENGTH 4096
+
 
 /* Initialize/uninitialize OGLConsole */
 OGLCONSOLE_Console OGLCONSOLE_Create();
 void OGLCONSOLE_Destroy(OGLCONSOLE_Console console);
 void OGLCONSOLE_Quit();
-
-// These functions munge the Bitfighter keycodes into something oglconsole can understand
-int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode);    // Returns true if console is open, false if it has been closed
-int OGLCONSOLE_ProcessBitfighterTextInputEvent(char ascii);    // Returns true if console is open, false if it has been closed
 
 void OGLCONSOLE_ShowConsole();
 void OGLCONSOLE_HideConsole();

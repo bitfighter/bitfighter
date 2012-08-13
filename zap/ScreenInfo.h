@@ -59,6 +59,8 @@ private:
    F32 mScalingRatioX, mScalingRatioY;          // Ratio of physical pixels to virtual pixels
    bool mIsLandscape;                           // Is our screen landscape or portrait?
 
+   bool mActualized;                            // True once screen has been actualized
+
    F32 mPixelRatio;                             // Number of physical pixels that are used to draw a single virtual pixel
    void calcPixelRatio();
 
@@ -122,6 +124,8 @@ public:
    const Point *getMousePos();
    const Point *getWindowMousePos();
 
+   bool isActualized();
+   void setActualized();
 
    // SDL information
 #ifndef ZAP_DEDICATED

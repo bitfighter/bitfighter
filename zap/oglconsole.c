@@ -13,8 +13,8 @@
 //#endif
 
 #ifdef WIN32
-#   define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen
-#endif /* WIN32 */
+#   define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen and vsnprintf
+#endif 
 
 
 #include "oglconsole.h"
@@ -46,26 +46,26 @@
 
 #define OGLCONSOLE_USE_ALPHA_TEXT
 
-#include "PackedFont.c"
+#  include "PackedFont.c"
 
-#define FIRST_CHARACTER '\x00'
-#define LAST_CHARACTER  '\x7F'
-#define CHAR_PIXEL_W 8
-#define CHAR_PIXEL_H 8
-#define CHAR_WIDTH (CHAR_PIXEL_W/128.0) /* ogl tex coords */
-#define CHAR_HEIGHT (CHAR_PIXEL_H/64.0) /* ogl tex coords */
+#  define FIRST_CHARACTER '\x00'
+#  define LAST_CHARACTER  '\x7F'
+#  define CHAR_PIXEL_W 8
+#  define CHAR_PIXEL_H 8
+#  define CHAR_WIDTH (CHAR_PIXEL_W/128.0) /* ogl tex coords */
+#  define CHAR_HEIGHT (CHAR_PIXEL_H/64.0) /* ogl tex coords */
 
 #else
 
-#include "ConsoleFont.c"
+#  include "ConsoleFont.c"
 
-#define FIRST_CHARACTER ' '
-#define LAST_CHARACTER  '~'
+#  define FIRST_CHARACTER ' '
+#  define LAST_CHARACTER  '~'
 
-#define CHAR_PIXEL_W 6
-#define CHAR_PIXEL_H 13
-#define CHAR_WIDTH 0.0234375 /* ogl tex coords */
-#define CHAR_HEIGHT 0.203125 /* ogl tex coords */
+#  define CHAR_PIXEL_W 6
+#  define CHAR_PIXEL_H 13
+#  define CHAR_WIDTH 0.0234375 /* ogl tex coords */
+#  define CHAR_HEIGHT 0.203125 /* ogl tex coords */
 
 #endif
 
@@ -93,11 +93,10 @@ GLuint OGLCONSOLE_glFontHandle = 0;
 int OGLCONSOLE_CreateFont()
 {
 #ifndef ZAP_DEDICATED
-
-    {int err=glGetError();if(err)printf("GL ERROR: %i\n",err);}
-#ifdef DEBUG
+    { int err = glGetError(); if(err) printf("GL ERROR: %i\n",err); }
+#  ifdef DEBUG
     puts("Creating OGLCONSOLE font");
-#endif
+#  endif
    
     /* Destroy old texture if it exists */
     if(glIsTexture(OGLCONSOLE_glFontHandle))
@@ -105,18 +104,18 @@ int OGLCONSOLE_CreateFont()
 
     /* Get a font index from OpenGL */
     glGenTextures(1, &OGLCONSOLE_glFontHandle);    /* Create 1 texture, store in glFontHandle */
-    {int err=glGetError();if(err)printf("glGenTextures() error: %i\n",err);}
+    { int err = glGetError(); if(err )printf("glGenTextures() error: %i\n",err); }
     
     /* Select our font */
     glBindTexture(GL_TEXTURE_2D, OGLCONSOLE_glFontHandle);
-    {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}
+    { int err = glGetError(); if(err) printf("glBindTexture() error: %i\n",err); }
 
     /* Set some parameters i guess */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 
-#ifdef OGLCONSOLE_CREATE_PACKED_FONT
+#  ifdef OGLCONSOLE_CREATE_PACKED_FONT
 	{
 		unsigned int x, y;
 		unsigned char *buf = _alloca(OGLCONSOLE_FontData.height*OGLCONSOLE_FontData.width/8);
@@ -166,19 +165,19 @@ int OGLCONSOLE_CreateFont()
 			fputs("};\n", file);
 		}
 	}
-#endif
+#  endif
 
 
 
 
-#ifdef OGLCONSOLE_USE_PACKED_FONT
+#  ifdef OGLCONSOLE_USE_PACKED_FONT
 
-// Untested fix from Sam:
-#ifdef OGLCONSOLE_USE_ALPHA_TEXT
-#define ALPHA_FACT 1
-#else
-#define ALPHA_FACT 3
-#endif
+   // Untested fix from Sam:
+#     ifdef OGLCONSOLE_USE_ALPHA_TEXT
+#       define ALPHA_FACT 1
+#     else
+#       define ALPHA_FACT 3
+#     endif
    
    {
 		/* Unpack font data */
@@ -198,18 +197,18 @@ int OGLCONSOLE_CreateFont()
 				{
 					if ((*src >> b) & 1)
 					{
-#ifndef OGLCONSOLE_USE_ALPHA_TEXT
+#     ifndef OGLCONSOLE_USE_ALPHA_TEXT
 						*dst++ = 255;
 						*dst++ = 255;
-#endif
+#     endif
 						*dst++ = 255;
 					}
 					else
 					{
-#ifndef OGLCONSOLE_USE_ALPHA_TEXT
+#     ifndef OGLCONSOLE_USE_ALPHA_TEXT
 						*dst++ = 0;
 						*dst++ = 0;
-#endif
+#     endif
 						*dst++ = 0;
 					}
 				}
@@ -218,38 +217,38 @@ int OGLCONSOLE_CreateFont()
 		}
 
 		/* Upload our font */
-#ifdef OGLCONSOLE_USE_ALPHA_TEXT
+#     ifdef OGLCONSOLE_USE_ALPHA_TEXT
 		glTexImage2D(
 				GL_TEXTURE_2D, 0, GL_ALPHA,
 				OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
 				GL_ALPHA, GL_UNSIGNED_BYTE, data);
-#else
+#     else
 		glTexImage2D(
 				GL_TEXTURE_2D, 0, GL_RGB,
 				OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
 				GL_RGB, GL_UNSIGNED_BYTE, data);
-#endif
+#     endif
 	}
-#else
+#  else
 	/* Upload our font */
-#ifdef OGLCONSOLE_USE_ALPHA_TEXT
+#     ifdef OGLCONSOLE_USE_ALPHA_TEXT
 	glTexImage2D(
 			GL_TEXTURE_2D, 0, GL_ALPHA,
 			OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
 			GL_ALPHA, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);
-#else
+#     else
 	glTexImage2D(
 			GL_TEXTURE_2D, 0, GL_RGB,
 			OGLCONSOLE_FontData.width, OGLCONSOLE_FontData.height, 0,
 			GL_RGB, GL_UNSIGNED_BYTE, OGLCONSOLE_FontData.pixel_data);
-#endif
-#endif
+#     endif
+#  endif
 
-    {int err=glGetError();if(err)printf("glTexImage2D() error: %i\n",err);}
+    { int err = glGetError(); if(err) printf("glTexImage2D() error: %i\n",err); }
     
-#ifdef DEBUG
+#  ifdef DEBUG
     puts("Created  OGLCONSOLE font");
-#endif
+#  endif
 #endif		// ZAP_DEDICATED
     return 1;
 }
@@ -840,14 +839,14 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
      int maxLines = C->maxLines;
  
      /* String buffer */
-     char output[4096];
+     char output[MAX_CONSOLE_OUTPUT_LENGTH];
  
      /* string copy cursors */
      char *consoleCursor, *outputCursor = output;
  
      /* Acrue arguments in argument list */
      va_start(argument, s);
-     vsnprintf(output, 4096, s, argument);
+     vsnprintf(output, MAX_CONSOLE_OUTPUT_LENGTH, s, argument);
      va_end(argument);
  
  
@@ -952,11 +951,11 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
 void OGLCONSOLE_Print(const char *s, ...)
 {
     va_list argument;
-    char output[4096];
+    char output[MAX_CONSOLE_OUTPUT_LENGTH];
 
     /* Acrue arguments in argument list */
     va_start(argument, s);
-    vsnprintf(output, 4096, s, argument);
+    vsnprintf(output, MAX_CONSOLE_OUTPUT_LENGTH, s, argument);
     va_end(argument);
 
     /* TODO: Find some way to pass the va_list arguments to OGLCONSOLE_Output
@@ -1106,30 +1105,6 @@ void OGLCONSOLE_HideConsole()
 #define SHOW_CONSOLE_KEY KEY_NONE      // Bitfighter console created via different mechanism
 #define HIDE_CONSOLE_KEY KEY_ESCAPE
 
-extern int getState_c(int inputCode);
-
-
-// Munge the Bitfighter key handling system into something that works with this setup
-// Returns true if console is open, false if it has been closed
-int OGLCONSOLE_ProcessBitfighterKeyEvent(int inputCode)
-{
-   if(OGLCONSOLE_KeyEvent(inputCode, getState_c(KEY_SHIFT)))
-      return 1;
-
-   return 0;
-
-   //return (userConsole->visibility >= 1);    // True if console visible, false if hidden
-}
-
-
-int OGLCONSOLE_ProcessBitfighterTextInputEvent(char ascii)
-{
-   if(OGLCONSOLE_CharEvent(ascii))
-      return 1;
-
-   return 0;
-}
-
 
 int wrap(_OGLCONSOLE_Console *userConsole, int index)
 {
@@ -1139,7 +1114,6 @@ int wrap(_OGLCONSOLE_Console *userConsole, int index)
       return 0;
    else 
       return index;
-
 }
 
 
@@ -1157,9 +1131,9 @@ void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
    userConsole->inputCursorPos = getCurrentLineLength(userConsole);
 }
 
-
-
 // End Bitfighter specific block
+
+
 
 int OGLCONSOLE_KeyEvent(int sym, int mod)
 {

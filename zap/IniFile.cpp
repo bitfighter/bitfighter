@@ -46,9 +46,9 @@
 
 
 #if defined(WIN32)
-#define iniEOL endl
+#  define iniEOL endl
 #else
-#define iniEOL '\r' << endl
+#  define iniEOL '\r' << endl
 #endif
 
 using namespace std;

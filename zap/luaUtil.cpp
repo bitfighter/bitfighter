@@ -25,7 +25,7 @@
 
 #include "luaUtil.h"
 #include "GameSettings.h"
-#include "oglconsole.h"
+#include "Console.h"
 
 namespace Zap
 {
@@ -67,8 +67,6 @@ S32 LuaUtil::logprint(lua_State *L)
 }
 
 
-extern OGLCONSOLE_Console gConsole;
-
 S32 LuaUtil::printToConsole(lua_State *L)
 {
    static const char *methodName = "LuaUtil:printToConsole()";
@@ -76,7 +74,7 @@ S32 LuaUtil::printToConsole(lua_State *L)
 
    string message = getCheckedString(L, 1, methodName);
 
-   OGLCONSOLE_Output(gConsole, "%s\n", message.c_str());    // Print message to the console
+   gConsole.output("%s\n", message.c_str());    // Print message to the console
 
    return 0;
 }

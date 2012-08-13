@@ -48,6 +48,7 @@ OBJECTS_SHARED=\
    ClientInfo.o\
    Color.o\
    config.o\
+   Console.o\
    controlObjectConnection.o\
    CoreGame.o\
    CTFGame.o\

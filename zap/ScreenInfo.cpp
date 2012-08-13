@@ -37,6 +37,7 @@ ScreenInfo::ScreenInfo()
    mPrevCanvasWidth = GAME_WIDTH;
    mPrevCanvasHeight = GAME_HEIGHT;
    mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
+   mActualized = false;
 }
 
 
@@ -217,6 +218,11 @@ void ScreenInfo::setCanvasMousePos(S32 x, S32 y, DisplayMode mode)
    mWindowMousePos.set(convertCanvasToWindowCoord(x, y, mode));
    mCanvasMousePos.set(x, y);
 }
+
+
+bool ScreenInfo::isActualized()  { return mActualized; }
+void ScreenInfo::setActualized() { mActualized = true; }
+
 
 
 const Point *ScreenInfo::getMousePos() { return &mCanvasMousePos; }

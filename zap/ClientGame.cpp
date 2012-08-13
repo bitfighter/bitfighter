@@ -49,6 +49,8 @@
 #include "NexusGame.h"
 #include "Zone.h"                // For instantiation
 
+#include "soccerGame.h"
+
 #include "UI.h"                  // For renderRect
 
 #include "stringUtils.h"
@@ -82,7 +84,9 @@
 #include <cmath>
 
 
-#include "soccerGame.h"
+#ifdef WIN32
+#  define vsnprintf vsnprintf_s    // Use secure version on windows
+#endif 
 
 
 using namespace TNL;

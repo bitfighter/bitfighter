@@ -35,7 +35,7 @@ using namespace TNL;
 #include "input.h"               // For MaxJoystickButtons const
 #include "config.h"
 #include "ClientGame.h"
-#include "oglconsole.h"          // For console rendering
+#include "Console.h"             // For console rendering
 #include "Colors.h"
 #include "OpenglUtils.h"
 #include "ScreenInfo.h"
@@ -745,8 +745,7 @@ void UserInterface::renderConsole()
    if(scissorMode) 
       glDisable(GL_SCISSOR_TEST);
 
-   OGLCONSOLE_setCursor((Platform::getRealMilliseconds() / 100) % 2);     // Make cursor blink
-   OGLCONSOLE_Draw();   
+   gConsole.render();
 
    if(scissorMode) 
       glEnable(GL_SCISSOR_TEST);
@@ -758,7 +757,7 @@ extern ScreenInfo gScreenInfo;
 
 void UserInterface::renderMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset, S32 style)
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasWidth  = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    S32 inset = 100;                    // Inset for left and right edges of box

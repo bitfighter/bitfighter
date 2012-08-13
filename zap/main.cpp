@@ -100,13 +100,10 @@ include (replaces require)
 #include "tnlGhostConnection.h"
 #include "tnlJournal.h"
 
-#include "oglconsole.h"
-
 #include "zapjournal.h"
 
 #include "md5wrapper.h"
 
-#include <stdarg.h>
 
 using namespace TNL;
 
@@ -139,10 +136,12 @@ using namespace TNL;
 #include "dataConnection.h"
 #include "game.h"
 #include "SoundSystem.h"
-#include "InputCode.h" // initializeKeyNames()
+#include "InputCode.h"     // initializeKeyNames()
 #include "ClientInfo.h"
+#include "Console.h"       // For access to console
 
 #include <math.h>
+#include <stdarg.h>
 
 #ifdef WIN32
 // For writeToConsole()
@@ -152,7 +151,7 @@ using namespace TNL;
 #  include <shellapi.h>
 
 #  define USE_BFUP
-#  endif
+#endif
 
 #ifdef TNL_OS_MAC_OSX
 #  include "Directory.h"
@@ -185,8 +184,7 @@ md5wrapper md5;
 bool gShowAimVector = false;     // Do we render an aim vector?  This should probably not be a global, but until we find a better place for it...
 
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
-
-OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
+Console gConsole;                // For the moment, we'll just have one console for everything.  This may change later, but probably won't.
 
 
 // Some colors -- other candidates include global and local chat colors, which are defined elsewhere.  Include here?
@@ -282,7 +280,7 @@ void abortHosting_noLevels()
 
 // GCC thinks min isn't defined, VC++ thinks it is
 #ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
+#  define min(a,b) ((a) <= (b) ? (a) : (b))
 #endif
 
 // This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
@@ -633,7 +631,7 @@ void dedicatedServerLoop()
 class OglConsoleLogConsumer : public LogConsumer    // Dumps to oglConsole
 {
 private:
-   void writeString(const char *string) { OGLCONSOLE_Output(gConsole, string); }
+   void writeString(const char *string) { gConsole.output(string); }
 };
 
 
@@ -707,7 +705,6 @@ void shutdownBitfighter()
          settings->getIniSettings()->winYPos = VideoSystem::getWindowPositionY();
       }
 
-      OGLCONSOLE_Quit();
       SDL_QuitSubSystem(SDL_INIT_VIDEO);
 #endif
    }
@@ -1042,9 +1039,9 @@ int main(int argc, char **argv)
       Zap::Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
-      VideoSystem::actualizeScreenMode(false);      // Create a display window
+      VideoSystem::actualizeScreenMode(false);     // Create a display window
 
-      gConsole = OGLCONSOLE_Create();  // Create our console *after* the screen mode has been actualized
+      gConsole.initialize();                       // Initialize console *after* the screen mode has been actualized
 
 #ifdef USE_BFUP
       if(settings->getIniSettings()->useUpdater)

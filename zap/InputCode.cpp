@@ -25,21 +25,21 @@
 
 #include "InputCode.h"
 
-#include "../tnl/tnlJournal.h"
-#include "../tnl/tnlLog.h"          // For logprintf
+#include "tnlJournal.h"
+#include "tnlLog.h"              // For logprintf
 
-#include "zapjournal.h"             // For journaling support
-#include "stringUtils.h"            // For itos
+#include "zapjournal.h"          // For journaling support
+#include "stringUtils.h"         // For itos
 
 #include <ctype.h>
 
 #ifndef ZAP_DEDICATED
-#include "Joystick.h"
-#include "SDL.h"
+#  include "Joystick.h"
+#  include "SDL.h"
 #endif
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>                // For ARRAYSIZE 
+#  include <windows.h>           // For ARRAYSIZE 
 #endif
 
 
@@ -54,11 +54,11 @@ static bool inputCodeIsDown[MAX_INPUT_CODES];
 // Constructor
 BindingSet::BindingSet()
 {
-   keyHELP = KEY_F1;              // Display help
-   keyOUTGAMECHAT = KEY_F5;       // Out of game chat
-   keyFPS = KEY_F6;               // Show FPS display
-   keyDIAG = KEY_F7;              // Show diagnostic overlay
-   keyMISSION = KEY_F2;           // Show current mission info
+   keyHELP        = KEY_F1;      // Display help
+   keyOUTGAMECHAT = KEY_F5;      // Out of game chat
+   keyFPS         = KEY_F6;      // Show FPS display
+   keyDIAG        = KEY_F7;      // Show diagnostic overlay
+   keyMISSION     = KEY_F2;      // Show current mission info
 }
 
 
@@ -1937,14 +1937,3 @@ InputCode InputCodeManager::stringToInputCode(const char *inputName)
 }
 
 };
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-// Provide access to getState from C code.
-// Has to be outside the namespace declaration because C doesn't use namespaces.
-int getState_c(int inputCode) { return Zap::InputCodeManager::getState((Zap::InputCode)inputCode); }
-#ifdef __cplusplus
-}
-#endif

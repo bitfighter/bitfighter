@@ -27,29 +27,30 @@
 #include "ClientGame.h"
 #include "GameSettings.h"
 #include "IniFile.h"
-#include "oglconsole.h"
+#include "Console.h"
 #include "ScreenInfo.h"
 #include "UI.h"
 
 #include "tnlLog.h"
 
 #include "SDL.h"
+
 #ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
-// Needed for GLES compatibility
-#define glOrtho glOrthof
+#  include "SDL_opengles.h"
+   // Needed for GLES compatibility
+#  define glOrtho glOrthof
 #else
-#include "SDL_opengl.h"
+#  include "SDL_opengl.h"
 #endif
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
-#include "SDL_syswm.h"
+#  include "SDL_syswm.h"
 #endif
 
 #include <cmath>
 
 #if defined(TNL_OS_LINUX) && !SDL_VERSION_ATLEAST(2,0,0)
-#include <X11/Xlib.h>
+#  include <X11/Xlib.h>
 #endif
 
 namespace Zap
@@ -282,7 +283,6 @@ S32 VideoSystem::getWindowPositionY()
 
 
 extern void setDefaultBlendFunction();
-extern OGLCONSOLE_Console gConsole;
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
@@ -293,6 +293,7 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
    DisplayMode displayMode = settings->getIniSettings()->displayMode;
 
    gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
+   gScreenInfo.setActualized();
 
 
    // If old display mode is windowed or current is windowed but we change interfaces,
@@ -330,7 +331,7 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
    F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
 
    // Set up variables according to display mode
-   switch (displayMode)
+   switch(displayMode)
    {
       case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
          sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
@@ -349,7 +350,7 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
          break;
 
       case DISPLAY_MODE_WINDOWED:
-      default:  //  DISPLAY_MODE_WINDOWED
+      default:  //  Fall through OK
          sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
          sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
          orthoRight = gScreenInfo.getGameCanvasWidth();
@@ -460,16 +461,11 @@ void VideoSystem::actualizeScreenMode(bool changingInterfaces)
    glEnable(GL_BLEND);
 
 #ifndef TNL_OS_MOBILE
-   // If OGLconsole has been created, recreate font texture and handle resize event
-   if (gConsole != NULL)
-   {
-      OGLCONSOLE_CreateFont();
-      OGLCONSOLE_Reshape();
-   }
+   gConsole.onScreenModeChanged();
 #endif
 
    // Now set the window position
-   if (displayMode == DISPLAY_MODE_WINDOWED)
+   if(displayMode == DISPLAY_MODE_WINDOWED)
    {
       if(settings->getIniSettings()->winXPos != 0 || settings->getIniSettings()->winYPos != 0)  // sometimes it happens to be (0,0) hiding the top title bar preventing ability to move the window, in this case we are not moving it unless it is not (0,0). Note that ini config file will default to (0,0).
          setWindowPosition(settings->getIniSettings()->winXPos, settings->getIniSettings()->winYPos);

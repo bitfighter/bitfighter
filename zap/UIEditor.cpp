@@ -60,7 +60,7 @@
 #include "luaLevelGenerator.h"
 #include "stringUtils.h"
 
-#include "oglconsole.h"          // Our console object
+#include "Console.h"          // Our console object
 #include "ScreenInfo.h"
 #include "VideoSystem.h"
 
@@ -635,8 +635,6 @@ void EditorUserInterface::addToEditor(BfObject *obj)
 }
 
 
-extern OGLCONSOLE_Console gConsole;
-
 // User has pressed Ctrl+R -- run the levelgen script and insert any resulting items into the editor in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
@@ -645,7 +643,7 @@ void EditorUserInterface::runLevelGenScript()
    if(scriptName == "")      // No script included!!
       return;
 
-   OGLCONSOLE_Output(gConsole, "Running script %s\n", getGame()->getGameType()->getScriptLine().c_str());
+   gConsole.output("Running script %s\n", getGame()->getGameType()->getScriptLine().c_str());
 
    const Vector<string> *scriptArgs = getGame()->getGameType()->getScriptArgs();
 
@@ -663,8 +661,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 
    if(name == "")
    {
-      OGLCONSOLE_Output(gConsole, "Could not find script %s; looked in folders: %s\n", 
-                                   scriptName.c_str(), concatenate(folderManager->getScriptFolderList()).c_str());
+      gConsole.output("Could not find script %s; looked in folders: %s\n", 
+                      scriptName.c_str(), concatenate(folderManager->getScriptFolderList()).c_str());
       return;
    }
    
@@ -1060,7 +1058,7 @@ void EditorUserInterface::onSelectionChanged()
 
 // Handle console input
 // Valid commands: help, run, clear, quit, exit
-void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
+static void processEditorConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
 {
    Vector<string> words = parseString(cmdline);
    if(words.size() == 0)
@@ -1070,15 +1068,15 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
    EditorUserInterface *ui = gClientGame->getUIManager()->getEditorUserInterface();
 
    if(cmd == "quit" || cmd == "exit") 
-      OGLCONSOLE_HideConsole();
+      gConsole.hide();
 
    else if(cmd == "help" || cmd == "?") 
-      OGLCONSOLE_Output(console, "Commands: help; run; clear; quit\n");
+      gConsole.output("Commands: help; run; clear; quit\n");
 
    else if(cmd == "run")
    {
       if(words.size() == 1)      // Too few args
-         OGLCONSOLE_Output(console, "Usage: run <script_name> {args}\n");
+         gConsole.output("Usage: run <script_name> {args}\n");
       else
       {
          ui->saveUndoState();
@@ -1097,7 +1095,7 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
       ui->clearLevelGenItems();
 
    else
-      OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd.c_str());
+      gConsole.output("Unknown command: %s\n", cmd.c_str());
 }
 
 
@@ -1193,7 +1191,7 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Setup callback for processing console commands
+   gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Setup callback for processing console commands
 
    VideoSystem::actualizeScreenMode(true);
 
@@ -1234,7 +1232,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
 
-   OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
+   gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Restore callback for processing console commands
 
    if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
       VideoSystem::actualizeScreenMode(true);
@@ -3582,7 +3580,7 @@ void EditorUserInterface::zoom(F32 zoomAmount)
 void EditorUserInterface::onTextInput(char ascii)
 {
    // Pass the key on to the console for processing
-   if(OGLCONSOLE_ProcessBitfighterTextInputEvent(ascii) != 0)
+   if(gConsole.onKeyDown(ascii))
       return;
 
    if(entryMode != EntryNone)
@@ -3631,11 +3629,11 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(Parent::onKeyDown(inputCode))
       return true;
 
-   if(OGLCONSOLE_ProcessBitfighterKeyEvent(inputCode))      // Pass the key on to the console for processing
+   if(gConsole.onKeyDown(inputCode))      // Pass the key on to the console for processing
       return true;
 
    // If console is open, then we want to capture text, so return false
-   if(OGLCONSOLE_GetVisibility())
+   if(gConsole.isVisible())
       return false;
 
    string inputString = InputCodeManager::makeInputString(inputCode);
@@ -3694,7 +3692,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    else if(inputString == "V")            // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
-      OGLCONSOLE_ShowConsole();
+      gConsole.show();
 
    else if(inputString == "Ctrl+Shift+L") // Reload level
    {
