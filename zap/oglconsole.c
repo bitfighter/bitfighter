@@ -430,19 +430,27 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
     /* Allocate memory for our console */
     console = (void*)malloc(sizeof(_OGLCONSOLE_Console));
 
+    if(console == NULL)     // Malloc failed?
+       return NULL;
+
 	/* Size the console */
 	console->lines = NULL;
 	OGLCONSOLE_Resize(console);
-
-
 
     /* Screen and scrollback lines */
     /* This is the total number of screen lines in memory (start blank) */
     console->maxLines = DEFAULT_MAX_LINES;
     /* Allocate space for text */
-	 if (console->lines)
+	 if(console->lines)
 	  	  free(console->lines);
     console->lines = (char*)malloc(console->maxLines*(MAX_INPUT_LENGTH+1));    // tw based on vp
+
+    if(console->lines == NULL)
+    {
+       free(console);
+       return NULL;
+    }
+
     /* Initialize to empty strings */
     memset(console->lines, 0, console->maxLines*(MAX_INPUT_LENGTH+1));
     /* This variable represents whether or not a newline has been left */
