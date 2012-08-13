@@ -24,7 +24,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mysql++", "mysql++\mysql++.vcproj", "{59304CAA-A3FD-43B2-8EC6-EB08A5841947}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter", "zap\bitfighter_dedicated.vcproj", "{86822788-7C6F-4DB7-AD45-400F53F186B3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter_dedicated", "zap\bitfighter_dedicated.vcproj", "{86822788-7C6F-4DB7-AD45-400F53F186B3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947} = {59304CAA-A3FD-43B2-8EC6-EB08A5841947}
@@ -89,7 +89,6 @@ Global
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug_mysql|Win32.ActiveCfg = Debug_mysql|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug_mysql|Win32.Build.0 = Debug_mysql|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug|Win32.ActiveCfg = Debug|Win32
-		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug|Win32.Build.0 = Debug|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release_mysql|Win32.ActiveCfg = Release_mysql|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release_mysql|Win32.Build.0 = Release_mysql|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release|Win32.ActiveCfg = Release|Win32

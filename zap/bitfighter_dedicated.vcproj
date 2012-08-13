@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="bitfighter"
+	Name="bitfighter_dedicated"
 	ProjectGUID="{86822788-7C6F-4DB7-AD45-400F53F186B3}"
 	RootNamespace="bitfighter"
 	Keyword="Win32Proj"
