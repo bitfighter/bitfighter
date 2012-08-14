@@ -419,6 +419,8 @@ public:
    void getSortedPlayerScores(S32 teamIndex, Vector<ClientInfo *> &playerScores) const;
    void saveGameStats();                     // Transmit statistics to the master server
 
+   void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
+
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 

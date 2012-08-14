@@ -1159,6 +1159,29 @@ void GameType::saveGameStats()
    }
 }
 
+// Server only
+void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playerName)
+{
+   MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
+   if(masterConn && masterConn->isEstablished())
+   {
+      // Notify the master player earned a badge
+      masterConn->s2mAcheivementAchieved(achievement, playerName);
+
+      // Visually alert other players
+      s2cAchievementMessage(achievement, playerName);
+
+      // Now re-set authentication with the new badge for the earning player; this so
+      // everyone can see the badge in the scoreboard
+      ClientInfo *clientInfo = mGame->findClientInfo(playerName);
+      if(clientInfo)
+      {
+         clientInfo->setAuthenticated(clientInfo->isAuthenticated(),
+               clientInfo->getBadges() | BIT(achievement));
+      }
+   }
+}
+
 
 // Handle the end-of-game...  handles all games... not in any subclasses
 // Can be overridden for any game-specific game over stuff

@@ -413,12 +413,7 @@ void ZoneControlGameType::onGameOver()
       getWinningScore() >= 3 * mZones.size() &&                   // The player must capture them all at least 3 times
       !mPossibleZcBadgeAchiever->hasBadge(BADGE_ZONE_CONTROLLER)) // Player doesn't already have the badge
    {
-      MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
-      if(masterConn && masterConn->isEstablished())
-      {
-         masterConn->s2mAcheivementAchieved(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());     // Notify the master
-         s2cAchievementMessage(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());                  // Alert other players
-      }
+      achievementAchieved(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());
    }
 }
 

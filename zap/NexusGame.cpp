@@ -381,12 +381,7 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusZone *theNexus)
          !hasFlagSpawns() && !hasPredeployedFlags() &&            // Level can have no flag spawns, nor any predeployed flags
          !scorer->hasBadge(BADGE_TWENTY_FIVE_FLAGS))              // Player doesn't already have the badge
       {
-         MasterServerConnection *masterConn = getGame()->getConnectionToMaster();
-         if(masterConn && masterConn->isEstablished())
-         {
-            masterConn->s2mAcheivementAchieved(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());     // Notify the master
-            s2cAchievementMessage(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());                  // Alert other players
-         } 
+         achievementAchieved(BADGE_TWENTY_FIVE_FLAGS, scorer->getName());
       }
    }
 
