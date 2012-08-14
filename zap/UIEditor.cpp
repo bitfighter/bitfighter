@@ -1191,7 +1191,7 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Setup callback for processing console commands
+   //gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Setup callback for processing console commands
 
    VideoSystem::actualizeScreenMode(true);
 
@@ -1232,7 +1232,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
 
-   gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Restore callback for processing console commands
+   //gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Restore callback for processing console commands
 
    if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
       VideoSystem::actualizeScreenMode(true);
@@ -3692,8 +3692,11 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    else if(inputString == "V")            // Flip vertical
       flipSelectionVertical();
    else if(inputString == "/" || inputString == "Keypad /")
-      gConsole.show();
-
+   {
+      if(gConsole.isOk())
+         gConsole.show();
+      //else do what???
+   }
    else if(inputString == "Ctrl+Shift+L") // Reload level
    {
       loadLevel();                        

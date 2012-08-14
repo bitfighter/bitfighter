@@ -272,7 +272,7 @@ void GameUserInterface::onActivate()
 
    mShutdownMode = None;
 
-   gConsole.setCommandProcessorCallback(processGameConsoleCommandCallback);
+   //gConsole.setCommandProcessorCallback(processGameConsoleCommandCallback);
 }
 
 
@@ -1252,7 +1252,9 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    // Only open when not in any special mode.
    else if(!mHelper && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
    {
-      gConsole.toggleVisibility();
+      if(gConsole.isOk())
+         gConsole.toggleVisibility();
+      // else... what?
 
       return true;
    }

@@ -25,6 +25,8 @@
 
 #include "Console.h"       // Our header
 
+#include "luaObject.h"
+
 #include "ScreenInfo.h"    // For ScreenInfo object
 #include "tnlAssert.h"     // For TNLAssert, of course
 
@@ -40,6 +42,8 @@ using namespace TNL;
 
 namespace Zap
 {
+   //static lua_State *L = NULL;    
+
    // Constructor
    Console::Console()
    {
@@ -52,22 +56,114 @@ namespace Zap
    {
       if(mConsole)
          quit();
+
+      if(L)
+         lua_close(L);
    }
 
 
    extern ScreenInfo gScreenInfo;
 
-   void Console::initialize()
+   void Console::initialize(const string &luaDir)
    {
       TNLAssert(gScreenInfo.isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
-      mConsole = OGLCONSOLE_Create();  
+      TNLAssert(!mConsole && !L,            "Only intialize once!");
+
+      mConsole = OGLCONSOLE_Create(); 
+
+      if(!mConsole)
+         return;
+
+      setScriptingDir(luaDir);
+      startLua(LEVELGEN);
+      //L = lua_open();
+
+      //if(!L)
+      //   return;
+
+      //if(!configureNewLuaInstance())
+      //{
+
+      //}
+
+      setCommandProcessorCallback(processConsoleCommandCallback);
    }
+
+
+   bool Console::prepareEnvironment()  { return true; }
 
 
    void Console::quit()
    {
       OGLCONSOLE_Quit();
       mConsole = NULL;
+   }
+
+
+   bool Console::isOk()
+   {
+      return mConsole && L;
+   }
+
+   static bool firstLine = true;
+
+   // Structure of this code borrowed from naev
+   void Console::processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
+   {
+      gConsole.processCommand(cmdline);
+   }
+
+
+   void Console::processCommand(const char *cmdline)
+   {
+      if(!firstLine)               /* o */
+         lua_pushliteral(L, "\n");  /* o \n */
+      
+      /* Load the string. */
+      lua_pushstring(L, cmdline);     /* s */
+      
+      /* Concat. */
+      if(!firstLine)           /* o \n s */
+         lua_concat(L, 3);          /* s */
+      
+      S32 status = luaL_loadbuffer(L, lua_tostring(L,-1), lua_strlen(L,-1), "[consoleInput]" );
+      
+      /* String isn't proper Lua yet. */
+      if(status == LUA_ERRSYNTAX) {
+         size_t lmsg;
+         const char *msg = lua_tolstring(L, -1, &lmsg);
+         const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
+         if (strstr(msg, LUA_QL("<eof>")) == tp) {
+            /* Pop the loaded buffer. */
+            lua_pop(L, 1);
+            firstLine = false;
+         }
+         else {
+            // Error -- print to console
+            output(lua_tostring(L, -1));
+            lua_settop(L, 0);    // Clear stack
+            firstLine = true;
+         }
+      }
+      // Success -- print results to console
+      else if(status == 0) 
+      {
+         lua_remove(L, 1);
+         if(lua_pcall(L, 0, LUA_MULTRET, 0)) 
+         {
+            output(lua_tostring(L, -1));
+            lua_pop(L, 1);
+         }
+         if(lua_gettop(L) > 0) {
+            lua_getglobal(L, "print");
+            lua_insert(L, 1);
+            if(lua_pcall(L, lua_gettop(L) - 1, 0, 0) != 0)
+               output("Error printing results.");
+         }
+      
+         lua_settop(L, 0); // Clear stack
+         firstLine = true;
+      }
    }
 
 

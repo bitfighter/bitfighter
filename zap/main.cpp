@@ -1041,7 +1041,7 @@ int main(int argc, char **argv)
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(false);     // Create a display window
 
-      gConsole.initialize();                       // Initialize console *after* the screen mode has been actualized
+      gConsole.initialize(folderManager->luaDir);     // Initialize console *after* the screen mode has been actualized
 
 #ifdef USE_BFUP
       if(settings->getIniSettings()->useUpdater)

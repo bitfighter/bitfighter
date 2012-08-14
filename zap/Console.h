@@ -26,8 +26,10 @@
 #ifndef _CONSOLE_H_
 #define _CONSOLE_H_
 
-#include "InputCode.h"     // for InputCodeManager and associated enums
+#include "luaObject.h"     // Parent class
+#include "InputCode.h"     // For InputCodeManager and associated enums
 #include "oglconsole.h"
+#include "lua.h"
 #include "tnlTypes.h"
 
 using namespace TNL;
@@ -35,18 +37,20 @@ using namespace TNL;
 namespace Zap
 {
 
-class Console {
+class Console: public LuaScriptRunner
+{
 
 private:
    OGLCONSOLE_Console mConsole;
-   // Lua interpreter
 
 public:
    Console();     // Constructor
    ~Console();    // Destructor
 
-   void initialize();
+   void initialize(const string &luaDir);
    void quit();
+
+   bool prepareEnvironment();
 
    // Handle events
    void onScreenModeChanged();
@@ -54,6 +58,8 @@ public:
    bool onKeyDown(char ascii);
    bool onKeyDown(InputCode inputCode);
    void setCommandProcessorCallback(void(*callback)(OGLCONSOLE_Console console, char *cmd));
+   static void processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline);
+   void processCommand(const char *cmdline);
 
    void render();
 
@@ -61,6 +67,8 @@ public:
    void show();
    void hide();
    void toggleVisibility();
+
+   bool isOk();
 
    void output(const char *s, ...);    // Print message to console
 };
