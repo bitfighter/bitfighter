@@ -826,6 +826,7 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 void EditorUserInterface::validateLevel()
 {
    bool hasError = false;
+
    mLevelErrorMsgs.clear();
    mLevelWarnings.clear();
 
