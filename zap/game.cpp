@@ -121,8 +121,12 @@ ServerGame *gServerGame = NULL;
 static Vector<DatabaseObject *> fillVector2;
 
 
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
+////////////////////////////////////
+////////////////////////////////////
+
+// Statics
+static Game *mObjectAddTarget = NULL;
+
 
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())      //? was without new
@@ -187,6 +191,24 @@ const Vector<SafePtr<BfObject> > &Game::getScopeAlwaysList()
 void Game::setScopeAlwaysObject(BfObject *theObject)
 {
    mScopeAlwaysList.push_back(theObject);
+}
+
+
+void Game::setAddTarget()
+{
+   mObjectAddTarget = this;
+}
+
+
+void Game::clearAddTarget()
+{
+   mObjectAddTarget = NULL;
+}
+
+
+Game *Game::getAddTarget()
+{
+   return mObjectAddTarget;
 }
 
 

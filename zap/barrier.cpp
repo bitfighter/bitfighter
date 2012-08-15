@@ -650,11 +650,14 @@ void WallItem::checkIfWallHasBeenAddedToTheGame()
 }
 
 
-// Method overrides -- wall items are basically pseudo items that need to be added via a non-standard mechanism
+// Lua method overrides.  Because walls are... special.
+
+// Wall items are basically pseudo items that need to be added via a non-standard mechanism
 S32 WallItem::addToGame(lua_State *L)
 {
    WallRec wallRec(*this);
-   gServerGame->getGameType()->addWall(wallRec, gServerGame);
+   Game *game = Game::getAddTarget();
+   game->getGameType()->addWall(wallRec, game);
    mAddedToGame = true;    // To prevent further modification once this has been added to game
 
    return 0;

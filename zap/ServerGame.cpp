@@ -90,6 +90,9 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 {
    mVoteTimer = 0;
 
+   setAddTarget();         // When we do an addToGame, objects should be added to ServerGame
+
+
    // Stupid c++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
@@ -136,6 +139,7 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 ServerGame::~ServerGame()
 {
    cleanUp();
+   clearAddTarget();
 }
 
 

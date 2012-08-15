@@ -166,6 +166,7 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 void EditorUserInterface::onQuitted()
 {
    cleanUp();
+   getGame()->clearAddTarget();
 }
 
 
@@ -701,7 +702,7 @@ static void showPluginError(const ClientGame *game)
 {
    Vector<StringTableEntry> messages;
    messages.push_back("This plugin encountered an error configuring its options menu.");
-   messages.push_back("It is likely that it has been misconfigured.");
+   messages.push_back("It has probably been misconfigured.");
    messages.push_back("");
    messages.push_back("See the Bitfighter logfile or console for details.");
 
@@ -1056,49 +1057,6 @@ void EditorUserInterface::onSelectionChanged()
 }
 
 
-// Handle console input
-// Valid commands: help, run, clear, quit, exit
-static void processEditorConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
-{
-   Vector<string> words = parseString(cmdline);
-   if(words.size() == 0)
-      return;
-
-   string cmd = lcase(words[0]);
-   EditorUserInterface *ui = gClientGame->getUIManager()->getEditorUserInterface();
-
-   if(cmd == "quit" || cmd == "exit") 
-      gConsole.hide();
-
-   else if(cmd == "help" || cmd == "?") 
-      gConsole.output("Commands: help; run; clear; quit\n");
-
-   else if(cmd == "run")
-   {
-      if(words.size() == 1)      // Too few args
-         gConsole.output("Usage: run <script_name> {args}\n");
-      else
-      {
-         ui->saveUndoState();
-         words.erase(0);         // Get rid of "run", leaving script name and args
-
-         string name = words[0];
-         words.erase(0);
-
-         ui->onBeforeRunScriptFromConsole();
-         ui->runScript(ui->getDatabase(), gClientGame->getSettings()->getFolderManager(), name, words);
-         ui->onAfterRunScriptFromConsole();
-      }
-   }   
-
-   else if(cmd == "clear")
-      ui->clearLevelGenItems();
-
-   else
-      gConsole.output("Unknown command: %s\n", cmd.c_str());
-}
-
-
 void EditorUserInterface::onBeforeRunScriptFromConsole()
 {
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
@@ -1191,7 +1149,7 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   //gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Setup callback for processing console commands
+   getGame()->setAddTarget();
 
    VideoSystem::actualizeScreenMode(true);
 
@@ -1227,12 +1185,12 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    }
 
 
+   getGame()->setAddTarget();
+
    getGame()->setActiveTeamManager(mTeamManager);
 
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
-
-   //gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Restore callback for processing console commands
 
    if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
       VideoSystem::actualizeScreenMode(true);

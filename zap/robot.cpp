@@ -76,6 +76,8 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
    mScore = 0;
    mTotalScore = 0;
 
+   mErrorMsgPrefix = "***ROBOT ERROR***";
+
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
    {
       mModulePrimaryActive[i] = false;
@@ -433,25 +435,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
       mScriptArgs.push_back(string(argv[i]));
 
    return true;
-}
-
-
-void Robot::logError(const char *format, ...)
-{
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   vsnprintf(buffer, sizeof(buffer), format, args);
-
-   // Log the error to the logging system and also to the game console
-   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** %s", buffer);
-
-   va_end(args);
-
-   printStackTrace(L);
-
-   LuaObject::clearStack(L);
 }
 
 

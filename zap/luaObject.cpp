@@ -920,6 +920,7 @@ LuaScriptRunner::LuaScriptRunner()
       mSubscriptions[i] = false;
 
    mScriptId = "script" + itos(mNextScriptId++);
+   mErrorMsgPrefix = "SCRIPT";
 }
 
 
@@ -1275,7 +1276,24 @@ void LuaScriptRunner::deleteScript(const char *name)
 
 // Methods that should be abstract but can't be because luaW requires this class to be instantiable
 bool LuaScriptRunner::prepareEnvironment()              { TNLAssert(false, "Unimplemented method!"); return false; }
-void LuaScriptRunner::logError(const char *format, ...) { TNLAssert(false, "Unimplemented method!"); }
+
+void LuaScriptRunner::logError(const char *format, ...) 
+{ 
+   va_list args;
+   va_start(args, format);
+   char buffer[2048];
+
+   vsnprintf(buffer, sizeof(buffer), format, args);
+
+   // Log the error to the logging system and also to the game console
+   logprintf(LogConsumer::LogError, "%s %s", mErrorMsgPrefix, buffer);
+
+   va_end(args);
+
+   printStackTrace(L);
+
+   LuaObject::clearStack(L);
+}
 
 
 static string getStackTraceLine(lua_State *L, S32 level)

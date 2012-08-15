@@ -80,8 +80,6 @@ public:
 
    void kill();
 
-   void logError(const char *format, ...);   // In case of error...
-
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
 

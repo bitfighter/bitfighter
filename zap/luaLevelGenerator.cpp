@@ -61,6 +61,8 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
    mCaller = caller;
    mInEditor = inEditor;
 
+   mErrorMsgPrefix = "***LEVELGEN ERROR***";
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -174,24 +176,6 @@ LuaLevelGenerator::~LuaLevelGenerator()
 }
 
 // TODO: Provide mechanism to modify basic level parameters like game length and teams.
-
-
-void LuaLevelGenerator::logError(const char *format, ...)
-{
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   vsnprintf(buffer, sizeof(buffer), format, args);
-
-   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** %s",buffer);
-
-   va_end(args);
-
-   printStackTrace(L);
-
-   LuaObject::clearStack(L);
-}
 
 
 // Note that this uses rawgeti and therefore bypasses any metamethods set on the table

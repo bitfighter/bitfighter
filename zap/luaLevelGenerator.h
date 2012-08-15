@@ -65,8 +65,6 @@ public:
 
    bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
 
-   void logError(const char *format, ...);
-
    static const char className[];
 
    static Lunar<LuaLevelGenerator>::RegType methods[];

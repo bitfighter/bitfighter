@@ -48,6 +48,8 @@ namespace Zap
    Console::Console()
    {
       mConsole = NULL;
+      mScriptId = "console";    // Overwrite default name with something custom
+      mErrorMsgPrefix = "Console";
    };     
 
 
@@ -67,7 +69,7 @@ namespace Zap
    void Console::initialize(const string &luaDir)
    {
       TNLAssert(gScreenInfo.isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
-      TNLAssert(!mConsole && !L,            "Only intialize once!");
+      TNLAssert(!mConsole,                  "Only intialize once!");
 
       mConsole = OGLCONSOLE_Create(); 
 
@@ -76,21 +78,37 @@ namespace Zap
 
       setScriptingDir(luaDir);
       startLua(LEVELGEN);
-      //L = lua_open();
-
-      //if(!L)
-      //   return;
-
-      //if(!configureNewLuaInstance())
-      //{
-
-      //}
 
       setCommandProcessorCallback(processConsoleCommandCallback);
    }
 
 
-   bool Console::prepareEnvironment()  { return true; }
+   // TODO: Merge with luaLevelGenerator version, which is almost identical
+   bool Console::prepareEnvironment()  
+   { 
+      // Push a pointer to this Script to the Lua stack, then set the name of this pointer in the protected environment.  
+      // This is the name that we'll use to refer to this levelgen from our Lua code.  
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+      luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
+      lua_getglobal(L, "e");                                //                                        -- environment e   
+      lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+
+      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
+         return false;
+
+      //lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
+
+      //lua_pushliteral(L, "levelgen");                       //                                        -- env_table, "levelgen"
+      //luaW_push(L, this);                                   //                                        -- env_table, "levelgen", *this
+      //lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
+
+      //lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      return true;
+   }
 
 
    void Console::quit()
@@ -105,7 +123,6 @@ namespace Zap
       return mConsole && L;
    }
 
-   static bool firstLine = true;
 
    // Structure of this code borrowed from naev
    void Console::processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
@@ -114,56 +131,64 @@ namespace Zap
    }
 
 
+   static string consoleCommand = "";
+
+   // Structure of this code influenced by naev
    void Console::processCommand(const char *cmdline)
    {
-      if(!firstLine)               /* o */
-         lua_pushliteral(L, "\n");  /* o \n */
+      if(consoleCommand == "" && strcmp(cmdline, "") == 0)
+         return;
+
+      setEnvironment();
+
+      // If we are not on the first line of our command, we need to append the command to our existing line
+      if(consoleCommand == "")      
+         consoleCommand = cmdline;
+      else
+         consoleCommand += "\n" + string(cmdline);
+
+      S32 status = luaL_loadbuffer(L, consoleCommand.c_str(), consoleCommand.length(), "ConsoleInput" );
       
-      /* Load the string. */
-      lua_pushstring(L, cmdline);     /* s */
       
-      /* Concat. */
-      if(!firstLine)           /* o \n s */
-         lua_concat(L, 3);          /* s */
-      
-      S32 status = luaL_loadbuffer(L, lua_tostring(L,-1), lua_strlen(L,-1), "[consoleInput]" );
-      
-      /* String isn't proper Lua yet. */
-      if(status == LUA_ERRSYNTAX) {
+      if(status == LUA_ERRSYNTAX)      // cmd is not a complete Lua statement yet -- need to add more input
+      {
          size_t lmsg;
          const char *msg = lua_tolstring(L, -1, &lmsg);
          const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
-         if (strstr(msg, LUA_QL("<eof>")) == tp) {
-            /* Pop the loaded buffer. */
+
+         if(strstr(msg, LUA_QL("<eof>")) == tp) 
             lua_pop(L, 1);
-            firstLine = false;
-         }
-         else {
+         else 
+         {
             // Error -- print to console
-            output(lua_tostring(L, -1));
-            lua_settop(L, 0);    // Clear stack
-            firstLine = true;
+            output("%s\n", lua_tostring(L, -1));
+            consoleCommand = "";       // Reset command
          }
       }
+
       // Success -- print results to console
       else if(status == 0) 
       {
-         lua_remove(L, 1);
+         //lua_remove(L, 1);
          if(lua_pcall(L, 0, LUA_MULTRET, 0)) 
          {
-            output(lua_tostring(L, -1));
+            output("%s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
          }
-         if(lua_gettop(L) > 0) {
+         if(lua_gettop(L) > 0) 
+         {
+            //output(lua_tostring(L, -1));     // Delme
+
             lua_getglobal(L, "print");
             lua_insert(L, 1);
             if(lua_pcall(L, lua_gettop(L) - 1, 0, 0) != 0)
                output("Error printing results.");
          }
       
-         lua_settop(L, 0); // Clear stack
-         firstLine = true;
+         consoleCommand = "";    // Reset command
       }
+
+      LuaObject::clearStack(L);
    }
 
 
@@ -259,80 +284,3 @@ namespace Zap
 // http://gnuwin32.sourceforge.net/packages/readline.htm
 // also see lua.c
 
-// Code for the lua handler
-//static void cli_input( unsigned int wid, char *unused )
-//{
-//   (void) unused;
-//   int status;
-//   char *str;
-//   lua_State *L;
-//   char buf[LINE_LENGTH];
-//
-//   /* Get the input. */
-//   str = window_getInput( wid, "inpInput" );
-//
-//   /* Ignore useless stuff. */
-//   if (str == NULL)
-//      return;
-//
-//   /* Put the message in the console. */
-//   nsnprintf( buf, LINE_LENGTH, "%s %s",
-//         cli_firstline ? "> " : ">>", str );
-//   cli_addMessage( buf );
-//
-//   /* Set up state. */
-//   L = cli_state;
-//
-//   /* Set up for concat. */
-//   if (!cli_firstline)           /* o */
-//      lua_pushliteral(L, "\n");  /* o \n */
-//
-//   /* Load the string. */
-//   lua_pushstring( L, str );     /* s */
-//
-//   /* Concat. */
-//   if (!cli_firstline)           /* o \n s */
-//      lua_concat(L, 3);          /* s */
-//
-//   status = luaL_loadbuffer( L, lua_tostring(L,-1), lua_strlen(L,-1), "=cli" );
-//
-//   /* String isn't proper Lua yet. */
-//   if (status == LUA_ERRSYNTAX) {
-//      size_t lmsg;
-//      const char *msg = lua_tolstring(L, -1, &lmsg);
-//      const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
-//      if (strstr(msg, LUA_QL("<eof>")) == tp) {
-//         /* Pop the loaded buffer. */
-//         lua_pop(L, 1);
-//         cli_firstline = 0;
-//      }
-//      else {
-//         /* Real error, spew message and break. */
-//         cli_addMessage( lua_tostring(L, -1) );
-//         lua_settop(L, 0);
-//         cli_firstline = 1;
-//      }
-//   }
-//   /* Print results - all went well. */
-//   else if (status == 0) {
-//      lua_remove(L,1);
-//      if (lua_pcall(L, 0, LUA_MULTRET, 0)) {
-//         cli_addMessage( lua_tostring(L, -1) );
-//         lua_pop(L,1);
-//      }
-//      if (lua_gettop(L) > 0) {
-//         lua_getglobal(L, "print");
-//         lua_insert(L, 1);
-//         if (lua_pcall(L, lua_gettop(L)-1, 0, 0) != 0)
-//            cli_addMessage( "Error printing results." );
-//      }
-//
-//      /* Clear stack. */
-//      lua_settop(L, 0);
-//      cli_firstline = 1;
-//   }
-//
-//   /* Clear the box now. */
-//   window_setInput( wid, "inpInput", NULL );
-//}
-//
