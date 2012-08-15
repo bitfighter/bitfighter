@@ -25,8 +25,95 @@
 
 #include "EditorPlugin.h"         // Header
 
+#ifndef ZAP_DEDICATED
+#  include "UIMenuItems.h"      // delete
+#endif
+
+
 namespace Zap
 {
+// Default constructor
+EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); }
+
+// Constructor
+EditorPlugin::EditorPlugin(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
+                           GridDatabase *gridDatabase, LevelLoader *caller) : 
+      Parent(scriptName, scriptDir, scriptArgs, gridSize, gridDatabase, caller)
+{
+   // Do nothing
+}
+
+
+void EditorPlugin::registerClasses()
+{
+   Parent::registerClasses();  
+
+   // Specific classes needed for LevelGen scripts
+   //Lunar<LuaLevelGenerator>::Register(L);
+
+#ifndef ZAP_DEDICATED
+   Lunar<ToggleMenuItem>::Register(L);
+   Lunar<YesNoMenuItem>::Register(L);
+   Lunar<CounterMenuItem>::Register(L);
+   Lunar<TextEntryMenuItem>::Register(L);
+#endif
+}
+
+
+// Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
+bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error)
+{
+#ifdef ZAP_DEDICATED
+   return false;
+
+#else
+   error = false;
+
+   try
+   {   
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+      bool ok = retrieveFunction("getArgsMenu");     // If not found, it's OK... Not all plugins will have this
+
+      if(!ok)
+      {
+         LuaObject::clearStack(L);
+         return false;     
+      }
+
+      if(lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
+      {
+         // This should only happen if the getArgs() function is missing
+         logError("Error running getArgsMenu() -- %s", lua_tostring(L, -1));
+         error = true;
+         return true;
+      }
+
+      if(lua_isnil(L, 1))     // Function returned nil, return false
+      {
+         clearStack(L);        // In case there's other junk on there
+         return false;
+      }
+
+      menuTitle = getCheckedString(L, 1, "getArgsMenu");
+      getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
+
+      lua_pop(L, 2);
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      return true;
+   }
+   catch(LuaException &e)
+   {
+      logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
+      error = true;
+      return true;
+   }
+
+   return false;
+#endif
+}
 
 
 }

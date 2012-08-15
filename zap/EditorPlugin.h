@@ -26,9 +26,25 @@
 #ifndef _EDITOR_PLUGIN_H_
 #define _EDITOR_PLUGIN_H_
 
+#include "luaLevelGenerator.h"      // Parent class
+
+
 namespace Zap
 {
+   class EditorPlugin : public LuaLevelGenerator
+   {
+      typedef LuaLevelGenerator Parent;
 
+   public:
+      // Constructors
+      EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
+      EditorPlugin(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
+                   GridDatabase *gridDatabase, LevelLoader *caller);
+     
+      void registerClasses();
+
+      bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
+   };
 
 };
 

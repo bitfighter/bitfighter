@@ -51,6 +51,7 @@
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "config.h"
 #include "goalZone.h"
+#include "EditorPlugin.h"        // For plugin support
 
 #include "gameLoader.h"          // For LevelLoadException def
 
@@ -733,11 +734,15 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   // For the moment, we can treat plugins as levelgens that have a getArgsMenu() function
-   LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
+   //LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
+   //                                                    mLoadTarget, getGame());
+
+   // Create new plugin, will be deleted by boost
+   EditorPlugin *plugin = new EditorPlugin(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
                                                        mLoadTarget, getGame());
 
-   mPluginRunner = boost::shared_ptr<LuaLevelGenerator>(levelGen);
+
+   mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
    if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    {
@@ -749,7 +754,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    Vector<MenuItem *> menuItems;
    bool error;
 
-   if(!levelGen->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
+   if(!plugin->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
    {
       onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
       return;     

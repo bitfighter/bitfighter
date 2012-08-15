@@ -28,10 +28,11 @@
 
 #include "UIMenus.h"
 
+#include "EditorPlugin.h"        // For plugin support
 #include "UIEditorMenus.h"       // For PluginMenuUI
 
 #include "gameLoader.h"
-#include "BfObject.h"          // For BfObject definition
+#include "BfObject.h"            // For BfObject definition
 #include "gridDB.h"              // For DatabaseObject definition
 #include "Timer.h"
 #include "Point.h"
@@ -185,7 +186,7 @@ private:
    bool mPreviewMode;
    LineEditor mEntryBox;
 
-   boost::shared_ptr<LuaLevelGenerator> mPluginRunner;
+   boost::shared_ptr<EditorPlugin> mPluginRunner;
 
    BfObject *mDraggingDockItem;
    Vector<string> mLevelErrorMsgs, mLevelWarnings;

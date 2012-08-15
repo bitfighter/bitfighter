@@ -57,13 +57,11 @@ public:
 
    bool prepareEnvironment();
    
-   void registerClasses();
+   virtual void registerClasses();
    void onScriptInitialized();
    bool loadScript();
    bool runScript();      
    string getScriptName();
-
-   bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
 
    static const char className[];
 

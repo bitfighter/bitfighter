@@ -86,13 +86,7 @@ namespace Zap
    // TODO: Merge with luaLevelGenerator version, which is almost identical
    bool Console::prepareEnvironment()  
    { 
-      // Push a pointer to this Script to the Lua stack, then set the name of this pointer in the protected environment.  
-      // This is the name that we'll use to refer to this levelgen from our Lua code.  
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-      luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
-      lua_getglobal(L, "e");                                //                                        -- environment e   
-      lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+      LuaScriptRunner::prepareEnvironment();
 
       if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
          return false;

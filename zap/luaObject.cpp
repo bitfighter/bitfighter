@@ -1008,7 +1008,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key)
    {
       logError("Failed to load startup functions %s: %s", key, lua_tostring(L, -1));
 
-      lua_pop(L, 1);             // Remove error message from stack
+      lua_pop(L, -1);             // Remove error message from stack
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 
       return false;
@@ -1188,15 +1188,11 @@ bool LuaScriptRunner::startLua(ScriptType scriptType)
 }
 
 
-// Prepare a new Lua environment for use
+// Prepare a new Lua environment ("L") for use -- now only run once since we only
+// have one L which all scripts share
 bool LuaScriptRunner::configureNewLuaInstance()
 {
-   registerClasses();
-
    lua_atpanic(L, luaPanicked);  // Register our panic function 
-
-   // Register some functions not associated with a particular class
-   registerLooseFunctions(L);
 
 #ifdef USE_PROFILER
    init_profiler(L);
@@ -1204,11 +1200,6 @@ bool LuaScriptRunner::configureNewLuaInstance()
 
    luaL_openlibs(L);    // Load the standard libraries
    luaopen_vec(L);      // For vector math (lua-vec)
-
-   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
-   // These will be copied into the script's environment when we run createEnvironment.
-   setEnums(L);    
-
 
    setModulePath();
 
@@ -1275,7 +1266,29 @@ void LuaScriptRunner::deleteScript(const char *name)
 
 
 // Methods that should be abstract but can't be because luaW requires this class to be instantiable
-bool LuaScriptRunner::prepareEnvironment()              { TNLAssert(false, "Unimplemented method!"); return false; }
+bool LuaScriptRunner::prepareEnvironment()              
+{ 
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   // Register all our classes in the global namespace... they will be copied below when we copy the environment
+
+   registerClasses();            // Register classes -- needs to be differentiated by script type
+   registerLooseFunctions(L);    // Register some functions not associated with a particular class
+
+   // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere.
+   // These will be copied into the script's environment when we run createEnvironment.
+   setEnums(L);    
+
+
+   luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
+   lua_getglobal(L, "e");                                //                                        -- environment e   
+   //luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
+   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+
+
+   return true;
+}
+
 
 void LuaScriptRunner::logError(const char *format, ...) 
 { 
@@ -1334,7 +1347,7 @@ void LuaScriptRunner::registerClasses()
 {
    LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
 
-   // Lunar managed objects
+   // Lunar managed objects, these to be ported to LuaW
    Lunar<LuaUtil>::Register(L);
 
    Lunar<LuaGameInfo>::Register(L);
