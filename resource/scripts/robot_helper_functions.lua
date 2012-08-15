@@ -82,11 +82,8 @@ end
 
 
 
---
--- Convenience function... let user use logprint directly, without referencing LuaUtil
---
 function logprint(msg)
-    LuaUtil:logprint("Robot", tostring(msg))
+    logprint("Robot", tostring(msg))
 end
 
 --

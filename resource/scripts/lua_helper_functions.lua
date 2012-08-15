@@ -37,12 +37,12 @@
 -----------------------------------------------------------
 
 -- Our utility object
-LuaUtil = LuaUtil()  -- Could put a call to C++ random function in here...
+-- LuaUtil = LuaUtil()  -- Could put a call to C++ random function in here...
 
 
 -- Smarter implementation of dofile; finds script before loading it into current environment
 function include(filename)
-   fullName = LuaUtil:findFile(filename)
+   fullName = findFile(filename)
    
    if(fullName) then
       f = loadfile(fullName)
@@ -176,7 +176,7 @@ end
 
 -- Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
 math.random = function (x, y)
-   return LuaUtil:getRandomNumber(x, y)
+   return getRandomNumber(x, y)
 end
 
 
