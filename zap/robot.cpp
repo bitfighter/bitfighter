@@ -335,9 +335,6 @@ void Robot::registerClasses()
 {
    // General classes 
    LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
-
-   // Robot-specific classes
-   Lunar<LuaUtil>::Register(L);
 }
 
 
