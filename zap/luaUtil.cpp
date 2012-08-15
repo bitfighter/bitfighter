@@ -82,20 +82,7 @@ namespace Zap
 //};
 
 
-// Write a message to the server logfile
-S32 LuaUtil::logprint(lua_State *L)
-{
-   static const char *methodName = "LuaUtil:logprint()";
-   checkArgCount(L, 2, methodName);
-
-   logprintf(LogConsumer::LuaBotMessage, "%s: %s", getCheckedString(L, 1, methodName), getCheckedString(L, 2, methodName));
-
-   return 0;
-}
-
-
-// This code based directly on Lua's print function, try to replicate functionality
-S32 LuaUtil::printToConsole(lua_State *L)
+static string buildPrintString(lua_State *L)
 {
   int n = lua_gettop(L);  /* number of arguments */
   int i;
@@ -110,8 +97,7 @@ S32 LuaUtil::printToConsole(lua_State *L)
     lua_call(L, 1, 1);
     s = lua_tostring(L, -1);  /* get result */
     if (s == NULL)
-      return luaL_error(L, LUA_QL("tostring") " must return a string to "
-                           LUA_QL("print"));
+      luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
     if(i > 1) 
        out += "\t";
 
@@ -119,7 +105,26 @@ S32 LuaUtil::printToConsole(lua_State *L)
     lua_pop(L, 1);  /* pop result */
   }
 
-  gConsole.output("%s\n", out.c_str());
+  return out;
+}
+
+
+// Write a message to the server logfile
+S32 LuaUtil::logprint(lua_State *L)
+{
+   string str = buildPrintString(L);
+
+   logprintf(LogConsumer::LuaBotMessage, "%s", str.c_str());
+
+   return 0;
+}
+
+
+// This code based directly on Lua's print function, try to replicate functionality
+S32 LuaUtil::printToConsole(lua_State *L)
+{
+   string str = buildPrintString(L);
+   gConsole.output("%s\n", str.c_str());
 
   return 0;
 }
