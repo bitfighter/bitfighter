@@ -31,33 +31,21 @@ namespace Zap
 
 // Fill gModuleInfo with data from MODULE_ITEM_TABLE
 const ModuleInfo gModuleInfo[ModuleCount] = {
-#define MODULE_ITEM(a, b, c, d, e, f, g, h, i) { b, c, d, e, f, g, h, i },
+#define MODULE_ITEM(a, b, c, d, e, f, g) { b, c, d, e, f, g },
    MODULE_ITEM_TABLE
 #undef MODULE_ITEM
 };
 
 
-S32 ModuleInfo::getPrimaryEnergyDrain() const
+S32 ModuleInfo::getEnergyDrain() const
 {
-   return mPrimaryEnergyDrain;
+   return mEnergyDrain;
 }
 
 
-S32 ModuleInfo::getPrimaryPerUseCost() const
+S32 ModuleInfo::getUseCost() const
 {
-   return mPrimaryUseCost;
-}
-
-
-bool ModuleInfo::hasSecondary() const
-{
-   return hasSecondaryComponent;
-}
-
-
-S32 ModuleInfo::getSecondaryPerUseCost() const
-{
-   return mSecondaryUseCost;
+   return mUseCost;
 }
 
 
@@ -67,9 +55,9 @@ const char *ModuleInfo::getName() const
 }
 
 
-ModulePrimaryUseType ModuleInfo::getPrimaryUseType() const
+ModuleUseType ModuleInfo::getUseType() const
 {
-   return mPrimaryUseType;
+   return mUseType;
 }
 
 

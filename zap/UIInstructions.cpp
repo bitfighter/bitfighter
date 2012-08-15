@@ -596,20 +596,19 @@ void InstructionsUserInterface::renderPageGameIndicators()
 
 
 static const char *moduleInstructions[] = {
-   "Modules have up to 3 modes: Passive, Active, and Kinetic (P/A/K)",
+   "Modules have up to 2 modes: Passive and Active (P/A)",
    "Passive mode is always active and costs no energy (e.g. Armor).",
    "Use Active mode by pressing module's activation key (e.g. Shield).",
-   "Double-click activation key to use module's Kinetic mode.",
 };
 
 static const char *moduleDescriptions[][2] = {
-   { "Boost: ",    "Turbo (A), Pulse (K)" },
+   { "Boost: ",    "Turbo (A)" },
    { "Shield: ",   "Reflects incoming projectiles (A)" },
    { "Armor: ",    "Reduces damage, makes ship harder to control (P)" },
    { "",           "Incoming bouncers do more damage" },
    { "Repair: ",   "Repair self and nearby damaged objects (A)" },
-   { "Sensor: ",   "See further (P), Reveal hidden objects (A)," },
-   { "",           "Deploy spy bugs (K)" },
+   { "Sensor: ",   "See further, reveal hidden objects (P)," },
+   { "",           "Deploy spy bugs (A)" },
    { "Cloak: ",    "Make ship invisible to enemies (A)" },
    { "Engineer: ", "Collect resources to build turrets and forcefields (A)" }
 };

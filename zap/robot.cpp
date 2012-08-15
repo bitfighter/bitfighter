@@ -77,10 +77,8 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
    mTotalScore = 0;
 
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
-   {
-      mModulePrimaryActive[i] = false;
-      mModuleSecondaryActive[i] = false;
-   }
+      mModuleActive[i] = false;
+
 #ifndef ZAP_DEDICATED
    mShapeType = ShipShape::Normal;
 #endif
@@ -139,7 +137,7 @@ bool Robot::initialize(Point &pos)
 
       // WarpPositionMask triggers the spinny spawning visual effect
       setMaskBits(RespawnMask | HealthMask        | LoadoutMask         | PositionMask | 
-                  MoveMask    | ModulePrimaryMask | ModuleSecondaryMask | WarpPositionMask);      // Send lots to the client
+                  MoveMask    | ModuleActiveMask | WarpPositionMask);      // Send lots to the client
 
       TNLAssert(!isGhost(), "Didn't expect ghost here... this is supposed to only run on the server!");
 
@@ -599,10 +597,7 @@ void Robot::clearMove()
    mCurrentMove.y = 0;
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-   {
-      mCurrentMove.modulePrimary[i] = false;
-      mCurrentMove.moduleSecondary[i] = false;
-   }
+      mCurrentMove.moduleActive[i] = false;
 }
 
 
@@ -1051,7 +1046,7 @@ S32 Robot::activateModule(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount; i++)
       if(getModule(i) == mod)
       {
-         activateModulePrimary(i);
+         Parent::activateModule(i);
          break;
       }
 
@@ -1066,7 +1061,7 @@ S32 Robot::activateModuleIndex(lua_State *L)
 
    U32 indx = (U32)getInt(L, 1);
 
-   activateModulePrimary(indx);
+   Parent::activateModule(indx);
 
    return 0;
 }

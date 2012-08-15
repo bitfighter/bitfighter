@@ -268,7 +268,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
             else if(isShipType(hitObject->getObjectTypeNumber()))
             {
                Ship *ship = static_cast<Ship *>(hitObject);
-               if(ship->isModulePrimaryActive(ModuleShield))
+               if(ship->isModuleActive(ModuleShield))
                   bounce = true;
             }
 
@@ -365,7 +365,7 @@ void Projectile::explode(BfObject *hitObject, Point pos)
       if(isShip)
          ship = static_cast<Ship *>(hitObject);
 
-      if(ship && ship->isModulePrimaryActive(ModuleShield))
+      if(ship && ship->isModuleActive(ModuleShield))
          sound = SFXBounceShield;
       else if((hitShip || ship))                           // We hit a ship with shields down
          sound = SFXShipHit;
@@ -854,7 +854,7 @@ void Mine::renderItem(const Point &pos)
 
       // Can see mine if laid by teammate in team game || sensor is active ||
       // you laid it yourself
-      visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) || ship->isModulePrimaryActive(ModuleSensor) ||
+      visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) || ship->isModuleActive(ModuleSensor) ||
                   (localClient && localClient->getClientInfo()->getName() == mSetBy);
    }
    else     // Must be in editor?
@@ -1076,7 +1076,7 @@ void SpyBug::renderItem(const Point &pos)
 
       // Can see bug if laid by teammate in team game || sensor is active ||
       //       you laid it yourself                   || spyBug is neutral
-      visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   || ship->isModulePrimaryActive(ModuleSensor) ||
+      visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   || ship->isModuleActive(ModuleSensor) ||
                   (conn && conn->getClientInfo()->getName() == mSetBy) || getTeam() == TEAM_NEUTRAL);
    }
    else    

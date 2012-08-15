@@ -323,6 +323,7 @@ S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfo
                case NUM_GE0:
                   if(lua_isnumber(L, stackPos))
                      ok = (lua_tonumber(L, stackPos) >= 0);
+                  break;
 
                case INTS:
                   ok = lua_isnumber(L, stackPos);
@@ -1550,8 +1551,8 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
 
    // Module enums -- push all, using enum name as the Lua name
-#  define MODULE_ITEM(value, b, c, d, e, f, g, h, i)  lua_pushinteger(L, value);  \
-                                                      lua_setglobal  (L, #value); 
+#  define MODULE_ITEM(value, b, c, d, e, f, g)  lua_pushinteger(L, value);  \
+                                                lua_setglobal  (L, #value);
       MODULE_ITEM_TABLE
 #  undef EVENT
 
