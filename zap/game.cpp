@@ -121,8 +121,12 @@ ServerGame *gServerGame = NULL;
 static Vector<DatabaseObject *> fillVector2;
 
 
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
+////////////////////////////////////
+////////////////////////////////////
+
+// Statics
+static Game *mObjectAddTarget = NULL;
+
 
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())      //? was without new
@@ -187,6 +191,24 @@ const Vector<SafePtr<BfObject> > &Game::getScopeAlwaysList()
 void Game::setScopeAlwaysObject(BfObject *theObject)
 {
    mScopeAlwaysList.push_back(theObject);
+}
+
+
+void Game::setAddTarget()
+{
+   mObjectAddTarget = this;
+}
+
+
+void Game::clearAddTarget()
+{
+   mObjectAddTarget = NULL;
+}
+
+
+Game *Game::getAddTarget()
+{
+   return mObjectAddTarget;
 }
 
 
@@ -576,7 +598,7 @@ void Game::resetLevelInfo()
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
 // Used by ServerGame and the editor
-void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName)
+void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
    S32 strlenCmd = (S32) strlen(argv[0]);
 
@@ -679,7 +701,8 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
          // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
          // The only time this code is run on the client is when loading into the editor.
-         if(inEditor)
+
+         if(!isServer())
             object->markAsGhost();
 
          if(validArgs)

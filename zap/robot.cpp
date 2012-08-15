@@ -76,6 +76,8 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
    mScore = 0;
    mTotalScore = 0;
 
+   mErrorMsgPrefix = "***ROBOT ERROR***";
+
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
       mModuleActive[i] = false;
 
@@ -174,14 +176,10 @@ bool Robot::prepareEnvironment()
 {
    try
    {
+      LuaScriptRunner::prepareEnvironment();
+
       // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
       // This is the name that we'll use to refer to this robot from our Lua code.  
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-      luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
-      lua_getglobal(L, "e");                                //                                        -- environment e   
-      luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
-      lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
       if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY))
          return false;
@@ -210,7 +208,7 @@ bool Robot::prepareEnvironment()
 // Loads script, runs getName, stores result in bot's clientInfo
 bool Robot::startLua()
 {
-   if(!LuaScriptRunner::startLua(ROBOT) || !loadScript() || !runMain())
+   if(!LuaScriptRunner::startLua() || !loadScript() || !runMain())
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
@@ -331,9 +329,6 @@ void Robot::registerClasses()
 {
    // General classes 
    LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
-
-   // Robot-specific classes
-   Lunar<LuaUtil>::Register(L);
 }
 
 
@@ -422,8 +417,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
       return false;
    }
 
-   setScriptingDir(folderManager->luaDir);      // Where our helper scripts are stored
-
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow, because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!
@@ -431,25 +424,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
       mScriptArgs.push_back(string(argv[i]));
 
    return true;
-}
-
-
-void Robot::logError(const char *format, ...)
-{
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   vsnprintf(buffer, sizeof(buffer), format, args);
-
-   // Log the error to the logging system and also to the game console
-   logprintf(LogConsumer::LogError, "***ROBOT ERROR*** %s", buffer);
-
-   va_end(args);
-
-   printStackTrace(L);
-
-   LuaObject::clearStack(L);
 }
 
 

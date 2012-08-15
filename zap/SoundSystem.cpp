@@ -579,12 +579,11 @@ void SoundSystem::processMusic(F32 newMusicVolLevel)
          alSourcef(musicInfos[i].source, AL_GAIN, musicVolume);
    }
 
-   // Determine if we are in-game playing (or elsewhere in other menus)
-   bool inGame = UserInterface::current->getMenuID() == GameUI ||
-         UserInterface::current->getUIManager()->cameFrom(GameUI);
+   UIManager *uiManager = UserInterface::current->getUIManager();
 
-   bool inEditor = UserInterface::current->getMenuID() == EditorUI ||
-         UserInterface::current->getUIManager()->cameFrom(EditorUI);
+   // Determine if we are in-game playing (or elsewhere in other menus)
+   bool inGame = UserInterface::current->getMenuID()   == GameUI   || uiManager->cameFrom(GameUI);
+   bool inEditor = UserInterface::current->getMenuID() == EditorUI ||  uiManager->cameFrom(EditorUI);
 
    if(inGame)
    {

@@ -481,7 +481,7 @@ bool BfObject::canBeHostile()
 void BfObject::addToGame(Game *game, GridDatabase *database)
 {   
    TNLAssert(mGame == NULL, "Error: Object already in a game in BfObject::addToGame.");
-   TNLAssert(game != NULL,  "Error: theGame is NULL in BfObject::addToGame.");
+   TNLAssert(game != NULL,  "Error: thefGame is NULL in BfObject::addToGame.");
 
    mGame = game;
    if(database)
@@ -1315,7 +1315,8 @@ S32 BfObject::setLoc(lua_State *L)
 
 S32 BfObject::addToGame(lua_State *L)
 {
-   addToGame(gServerGame, gServerGame->getGameObjDatabase());
+   Game *game = Game::getAddTarget();
+   addToGame(game, game->getGameObjDatabase());
    return 0;
 }
 

@@ -162,7 +162,7 @@ class Game : public LevelLoader
 private:
    F32 mGridSize;  
 
-   U32 mTimeUnconnectedToMaster;                         // Time that we've been disconnected to the master
+   U32 mTimeUnconnectedToMaster;          // Time that we've been disconnected to the master
    bool mHaveTriedToConnectToMaster;
 
    TeamManager *mActiveTeamManager;
@@ -182,16 +182,16 @@ private:
    NameToAddressThread *mNameToAddressThread;
 
 protected:
-   virtual void cleanUp();
    U32 mNextMasterTryTime;
+
    bool mReadyToConnectToMaster;
 
-   Vector<Robot *> mRobots;                   // Grand master list of all robots in the current game
+   Vector<Robot *> mRobots;               // Grand master list of all robots in the current game
+   Rect mWorldExtents;                    // Extents of everything
+   string mLevelFileHash;                 // MD5 hash of level file
 
-   Rect mWorldExtents;     // Extents of everything
-
-   string mLevelFileHash;  // MD5 hash of level file
-
+   virtual void cleanUp();
+   
    struct DeleteRef
    {
       SafePtr<BfObject> theObject;
@@ -260,6 +260,10 @@ public:
    void removeFromClientList(ClientInfo *clientInfo);                   // Server side
    void clearClientList();
 
+   void setAddTarget();
+   void clearAddTarget();
+   static Game *getAddTarget();
+
    ClientInfo *findClientInfo(const StringTableEntry &name);            // Find client by name
    
    Rect getWorldExtents();
@@ -291,7 +295,7 @@ public:
    void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
 
 
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName);  
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
 

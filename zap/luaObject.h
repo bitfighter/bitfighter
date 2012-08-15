@@ -212,19 +212,20 @@ private:
    void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
    void setEnums(lua_State *L);                 // Set a whole slew of enum values that we want the scripts to have access to
 
-   string mScriptId;             // Unique id for this script
 
 protected:
    static lua_State *L;          // Main Lua state variable
    string mScriptName;           // Fully qualified script name, with path and everything
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
+   string mScriptId;             // Unique id for this script
+   const char *mErrorMsgPrefix;
+
    virtual bool loadScript();
-   bool startLua(ScriptType scriptType);
+   bool startLua();
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
-   // These two methods should be abstract, but luaW requires us to be able to instantiate this class
-   virtual void logError(const char *format, ...);
+   // This method should be abstract, but luaW requires us to be able to instantiate this class
    virtual bool prepareEnvironment();
 
    static void printStackTrace(lua_State *L);
@@ -246,7 +247,7 @@ public:
 
    static void clearScriptCache();
 
-   void setScriptingDir(const string &scriptingDir);
+   static void setScriptingDir(const string &scriptingDir);
 
    static lua_State *getL();
    static void shutdown();
@@ -263,6 +264,9 @@ public:
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
    bool loadAndRunGlobalFunction(lua_State *L, const char *key);
+
+   void logError(const char *format, ...);
+
 
    // Lua interface
    //LUAW_DECLARE_CLASS(LuaScriptRunner);

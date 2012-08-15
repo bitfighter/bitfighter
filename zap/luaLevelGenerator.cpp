@@ -31,10 +31,6 @@
 #include "luaUtil.h"
 #include "ServerGame.h"
 
-#ifndef ZAP_DEDICATED
-#  include "UIMenuItems.h"      // delete
-#endif
-
 #ifdef WIN32
 #  define vsnprintf vsnprintf_s    // Use secure version on windows
 #endif 
@@ -46,20 +42,19 @@ namespace Zap
 LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constructor!"); }
 
 // Standard constructor
-LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     GridDatabase *gridDatabase, LevelLoader *caller, bool inEditor)
+LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
+                                     GridDatabase *gridDatabase, LevelLoader *caller)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
-   setScriptingDir(scriptDir);
 
    mGridDatabase = gridDatabase;
 
    mGridSize = gridSize;
    mCaller = caller;
-   mInEditor = inEditor;
+   mErrorMsgPrefix = "***LEVELGEN ERROR***";
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -68,7 +63,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scr
 // Fire up a Lua interprer, load the script, and execute the chunk to get it in memory
 bool LuaLevelGenerator::loadScript()
 {
-   return startLua(LEVELGEN) && LuaScriptRunner::loadScript();    
+   return startLua() && LuaScriptRunner::loadScript();    
 }
 
 
@@ -105,65 +100,11 @@ string LuaLevelGenerator::getScriptName()
 #endif
 
 
-// Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
-bool LuaLevelGenerator::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error)
-{
-#ifdef ZAP_DEDICATED
-   return false;
-#else
-   error = false;
-   try
-   {   
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-      bool ok = retrieveFunction("getArgsMenu");     // If not found, it's OK... Not all plugins will have this
-
-      if(!ok)
-      {
-         LuaObject::clearStack(L);
-         return false;     
-      }
-
-      if(lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
-      {
-         // This should only happen if the getArgs() function is missing
-         logError("Error running getArgsMenu() -- %s", lua_tostring(L, -1));
-         error = true;
-         return true;
-      }
-
-      if(lua_isnil(L, 1))     // Function returned nil, return false
-      {
-         clearStack(L);        // In case there's other junk on there
-         return false;
-      }
-
-      menuTitle = getCheckedString(L, 1, "getArgsMenu");
-      getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
-
-      lua_pop(L, 2);
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return true;
-   }
-   catch(LuaException &e)
-   {
-      logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
-      error = true;
-      return true;
-   }
-
-   return false;
-#endif
-}
-
 
 const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
 
 // Used in addItem() below...
 static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
-
 
 
 // Destructor
@@ -174,24 +115,6 @@ LuaLevelGenerator::~LuaLevelGenerator()
 }
 
 // TODO: Provide mechanism to modify basic level parameters like game length and teams.
-
-
-void LuaLevelGenerator::logError(const char *format, ...)
-{
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   vsnprintf(buffer, sizeof(buffer), format, args);
-
-   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** %s",buffer);
-
-   va_end(args);
-
-   printStackTrace(L);
-
-   LuaObject::clearStack(L);
-}
 
 
 // Note that this uses rawgeti and therefore bypasses any metamethods set on the table
@@ -252,7 +175,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       logError(e.what());
    }
 
-   mCaller->parseLevelLine(line.c_str(), mGridDatabase, false, "Levelgen script: " + mScriptName);
+   mCaller->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -285,7 +208,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 // Let someone else do the work!
 void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
-   mCaller->processLevelLoadLine(argc, id, argv, database, mInEditor, levelFileName);
+   mCaller->processLevelLoadLine(argc, id, argv, database, levelFileName);
 }
 
 
@@ -297,7 +220,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getCheckedString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, mGridDatabase, mInEditor, "Levelgen script: " + mScriptName);
+   mCaller->parseLevelLine(line, mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -358,13 +281,7 @@ S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 ///// Initialize levelgen specific stuff
 bool LuaLevelGenerator::prepareEnvironment()
 {
-   // Push a pointer to this Script to the Lua stack, then set the name of this pointer in the protected environment.  
-   // This is the name that we'll use to refer to this levelgen from our Lua code.  
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-   luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create our bot environment
-   lua_getglobal(L, "e");                                //                                        -- environment e   
-   lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
+   LuaScriptRunner::prepareEnvironment();
 
    if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
       return false;
@@ -417,14 +334,6 @@ void LuaLevelGenerator::registerClasses()
 
    // Specific classes needed for LevelGen scripts
    //Lunar<LuaLevelGenerator>::Register(L);
-
-#ifndef ZAP_DEDICATED
-   // These are for creating editor plugins
-   Lunar<ToggleMenuItem>::Register(L);
-   Lunar<YesNoMenuItem>::Register(L);
-   Lunar<CounterMenuItem>::Register(L);
-   Lunar<TextEntryMenuItem>::Register(L);
-#endif
 }
 
 

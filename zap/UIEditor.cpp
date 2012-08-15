@@ -51,6 +51,7 @@
 #include "loadoutZone.h"         // For LoadoutZone def
 #include "config.h"
 #include "goalZone.h"
+#include "EditorPlugin.h"        // For plugin support
 
 #include "gameLoader.h"          // For LevelLoadException def
 
@@ -166,6 +167,7 @@ void EditorUserInterface::setDatabase(boost::shared_ptr<GridDatabase> database)
 void EditorUserInterface::onQuitted()
 {
    cleanUp();
+   getGame()->clearAddTarget();
 }
 
 
@@ -558,7 +560,7 @@ void EditorUserInterface::loadLevel()
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   bool levelLoaded = game->loadLevelFromFile(fileName, true, mLoadTarget);
+   bool levelLoaded = game->loadLevelFromFile(fileName, mLoadTarget);
 
    if(!game->getGameType())  // make sure we have GameType
    {
@@ -667,7 +669,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), database, getGame(), true);
+   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
@@ -701,7 +703,7 @@ static void showPluginError(const ClientGame *game)
 {
    Vector<StringTableEntry> messages;
    messages.push_back("This plugin encountered an error configuring its options menu.");
-   messages.push_back("It is likely that it has been misconfigured.");
+   messages.push_back("It has probably been misconfigured.");
    messages.push_back("");
    messages.push_back("See the Bitfighter logfile or console for details.");
 
@@ -732,11 +734,11 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   // For the moment, we can treat plugins as levelgens that have a getArgsMenu() function
-   LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
-                                                       mLoadTarget, getGame());
 
-   mPluginRunner = boost::shared_ptr<LuaLevelGenerator>(levelGen);
+   // Create new plugin, will be deleted by boost
+   EditorPlugin *plugin = new EditorPlugin(fullName, args, getGame()->getGridSize(), mLoadTarget, getGame());
+
+   mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
    if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    {
@@ -748,7 +750,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    Vector<MenuItem *> menuItems;
    bool error;
 
-   if(!levelGen->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
+   if(!plugin->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
    {
       onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
       return;     
@@ -824,6 +826,7 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 void EditorUserInterface::validateLevel()
 {
    bool hasError = false;
+
    mLevelErrorMsgs.clear();
    mLevelWarnings.clear();
 
@@ -1056,49 +1059,6 @@ void EditorUserInterface::onSelectionChanged()
 }
 
 
-// Handle console input
-// Valid commands: help, run, clear, quit, exit
-static void processEditorConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
-{
-   Vector<string> words = parseString(cmdline);
-   if(words.size() == 0)
-      return;
-
-   string cmd = lcase(words[0]);
-   EditorUserInterface *ui = gClientGame->getUIManager()->getEditorUserInterface();
-
-   if(cmd == "quit" || cmd == "exit") 
-      gConsole.hide();
-
-   else if(cmd == "help" || cmd == "?") 
-      gConsole.output("Commands: help; run; clear; quit\n");
-
-   else if(cmd == "run")
-   {
-      if(words.size() == 1)      // Too few args
-         gConsole.output("Usage: run <script_name> {args}\n");
-      else
-      {
-         ui->saveUndoState();
-         words.erase(0);         // Get rid of "run", leaving script name and args
-
-         string name = words[0];
-         words.erase(0);
-
-         ui->onBeforeRunScriptFromConsole();
-         ui->runScript(ui->getDatabase(), gClientGame->getSettings()->getFolderManager(), name, words);
-         ui->onAfterRunScriptFromConsole();
-      }
-   }   
-
-   else if(cmd == "clear")
-      ui->clearLevelGenItems();
-
-   else
-      gConsole.output("Unknown command: %s\n", cmd.c_str());
-}
-
-
 void EditorUserInterface::onBeforeRunScriptFromConsole()
 {
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
@@ -1191,7 +1151,7 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   //gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Setup callback for processing console commands
+   getGame()->setAddTarget();
 
    VideoSystem::actualizeScreenMode(true);
 
@@ -1227,12 +1187,12 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    }
 
 
+   getGame()->setAddTarget();
+
    getGame()->setActiveTeamManager(mTeamManager);
 
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
-
-   //gConsole.setCommandProcessorCallback(processEditorConsoleCommandCallback);     // Restore callback for processing console commands
 
    if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
       VideoSystem::actualizeScreenMode(true);

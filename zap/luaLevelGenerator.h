@@ -45,27 +45,23 @@ private:
 
    LevelLoader *mCaller;
    F32 mGridSize;
-   bool mInEditor;
 
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);
 
 public:
-   LuaLevelGenerator();                                              // Default constructor
-   LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
-                     LevelLoader *caller, bool inEditor = false);    // C++ constructor
-   virtual ~LuaLevelGenerator();                                     // Destructor
+   LuaLevelGenerator();                // Default constructor
+
+   // Standard constructor
+   LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, LevelLoader *caller);   
+   virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();
    
-   void registerClasses();
+   virtual void registerClasses();
    void onScriptInitialized();
    bool loadScript();
    bool runScript();      
    string getScriptName();
-
-   bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
-
-   void logError(const char *format, ...);
 
    static const char className[];
 

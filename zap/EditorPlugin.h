@@ -23,42 +23,29 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LUAUTIL_H_
-#define _LUAUTIL_H_
+#ifndef _EDITOR_PLUGIN_H_
+#define _EDITOR_PLUGIN_H_
 
-#include "luaObject.h"
-#include "tnlRandom.h"
+#include "luaLevelGenerator.h"      // Parent class
 
-using namespace std;
 
 namespace Zap
 {
+   class EditorPlugin : public LuaLevelGenerator
+   {
+      typedef LuaLevelGenerator Parent;
 
-// Some util functions for scripts and levelgen files
+   public:
+      // Constructors
+      EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
+      EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
+                   GridDatabase *gridDatabase, LevelLoader *caller);
+     
+      void registerClasses();
 
-class LuaUtil: public LuaObject
-{
-public:
-   //LuaUtil();      // Constructor
-   //~LuaUtil();     // Destructor
-
-      //// Lua interface
-   //LUAW_DECLARE_CLASS(LuaUtil);
-
-   //static const char *luaClassName;
-   //static const luaL_reg luaMethods[];
-   //static const LuaFunctionProfile functionArgs[];
-
-   // Lua methods
-   static S32 logprint(lua_State *L);
-   static S32 printToConsole(lua_State *L);
-   static S32 getMachineTime(lua_State *L);
-   static S32 getRandomNumber(lua_State *L);
-   static S32 findFile(lua_State *L);
-};
-
+      bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
+   };
 
 };
 
 #endif
-

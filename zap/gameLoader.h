@@ -52,11 +52,11 @@ public:
 
    static const S32 MAX_LEVEL_LINE_LENGTH = 4096;  // Max total level line length we'll tolerate
 
-   bool loadLevelFromFile(const string &filename, bool inEditor, GridDatabase *database);
-   void parseLevelLine(const char *line, GridDatabase *database, bool inEditor, const string &levelFileName);
+   bool loadLevelFromFile(const string &filename, GridDatabase *database);
+   void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
 
    // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, bool inEditor, const string &levelFileName) = 0;
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName) = 0;
    virtual void setGameTime(F32 time) = 0;
 };
 

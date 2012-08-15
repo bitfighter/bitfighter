@@ -986,6 +986,8 @@ int main(int argc, char **argv)
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
+   LuaScriptRunner::setScriptingDir(folderManager->luaDir);          // Get this out of the way, shall we?
+
 
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
@@ -1041,7 +1043,7 @@ int main(int argc, char **argv)
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(false);     // Create a display window
 
-      gConsole.initialize(folderManager->luaDir);     // Initialize console *after* the screen mode has been actualized
+      gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
 #ifdef USE_BFUP
       if(settings->getIniSettings()->useUpdater)

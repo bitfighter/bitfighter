@@ -90,6 +90,9 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 {
    mVoteTimer = 0;
 
+   setAddTarget();         // When we do an addToGame, objects should be added to ServerGame
+
+
    // Stupid c++ spec doesn't allow ternary logic with static const if there is no definition
    // Workaround is to add '+' to force a read of the value
    // See:  http://stackoverflow.com/questions/5446005/why-dont-static-member-variables-play-well-with-the-ternary-operator
@@ -136,6 +139,7 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 ServerGame::~ServerGame()
 {
    cleanUp();
+   clearAddTarget();
 }
 
 
@@ -991,7 +995,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 #ifdef PRINT_SOMETHING
    logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
 #endif
-   if(loadLevelFromFile(filename, false, getGameObjDatabase()))
+   if(loadLevelFromFile(filename, getGameObjDatabase()))
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
    {
@@ -1042,9 +1046,9 @@ void ServerGame::runLevelGenScript(const string &scriptName)
       return;
    }
 
-   // The script file will be the first argument, subsequent args will be passed on to the script -- will be deleted when level ends in ServerGame::cleanUp()
-   LuaLevelGenerator *levelgen = new LuaLevelGenerator(fullname, folderManager->luaDir, *getGameType()->getScriptArgs(), getGridSize(), 
-                                                       getGameObjDatabase(), this);
+   // The script file will be the first argument, subsequent args will be passed on to the script -- 
+   // will be deleted when level ends in ServerGame::cleanUp()
+   LuaLevelGenerator *levelgen = new LuaLevelGenerator(fullname, *getGameType()->getScriptArgs(), getGridSize(), getGameObjDatabase(), this);
 
    if(!levelgen->runScript())
       delete levelgen;

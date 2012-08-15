@@ -54,6 +54,7 @@ OBJECTS_SHARED=\
    CTFGame.o\
    dataConnection.o\
    EditorObject.o\
+   EditorPlugin.o\
    EngineeredItem.o\
    EventManager.o\
    flagItem.o\
