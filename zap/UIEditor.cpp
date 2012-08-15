@@ -734,13 +734,10 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   //LuaLevelGenerator *levelGen = new LuaLevelGenerator(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
-   //                                                    mLoadTarget, getGame());
 
    // Create new plugin, will be deleted by boost
    EditorPlugin *plugin = new EditorPlugin(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
                                                        mLoadTarget, getGame());
-
 
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 

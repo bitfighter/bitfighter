@@ -1265,7 +1265,6 @@ void LuaScriptRunner::deleteScript(const char *name)
 }
 
 
-// Methods that should be abstract but can't be because luaW requires this class to be instantiable
 bool LuaScriptRunner::prepareEnvironment()              
 { 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
