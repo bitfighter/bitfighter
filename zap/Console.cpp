@@ -154,7 +154,6 @@ namespace Zap
       // Success -- print results to console
       else if(status == 0) 
       {
-         //lua_remove(L, 1);
          if(lua_pcall(L, 0, LUA_MULTRET, 0)) 
          {
             output("%s\n", lua_tostring(L, -1));
@@ -162,8 +161,6 @@ namespace Zap
          }
          if(lua_gettop(L) > 0) 
          {
-            //output(lua_tostring(L, -1));     // Delme
-
             lua_getglobal(L, "print");
             lua_insert(L, 1);
             if(lua_pcall(L, lua_gettop(L) - 1, 0, 0) != 0)

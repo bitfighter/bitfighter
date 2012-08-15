@@ -31,28 +31,55 @@ namespace Zap
 {
 
 
-const char LuaUtil::className[] = "LuaUtil";      // Class name as it appears to Lua scripts
+//const char LuaUtil::className[] = "LuaUtil";      // Class name as it appears to Lua scripts
 
 
-// Lua Constructor
-LuaUtil::LuaUtil(lua_State *L)
-{
-   // Do nothing
-}
+// Constructor
+//LuaUtil::LuaUtil()
+//{
+//   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+//}
+
+
+// Destructor
+//LuaUtil::~LuaUtil()
+//{
+//   LUAW_DESTRUCTOR_CLEANUP;
+//}
+
+//// Lua methods
+
+////                Fn name               Param profiles                  Profile count                           
+//#define LUA_METHODS(CLASS, METHOD) \
+//   METHOD(CLASS,  getMachineTime,           ARRAYDEF({{ END }}), 1 )                             \
+//   METHOD(CLASS,  logprint,              ARRAYDEF({{ END }}), 1 )                             \
+//   METHOD(CLASS,  printToConsole,              ARRAYDEF({{ END }}), 1 )                             \
+//   METHOD(CLASS,  getRandomNumber,              ARRAYDEF({{ END }}), 1 )                             \
+//    METHOD(CLASS,  findFile,              ARRAYDEF({{ END }}), 1 )                             \
+//                                                                                            
+//GENERATE_LUA_METHODS_TABLE(LuaUtil, LUA_METHODS);
+//GENERATE_LUA_FUNARGS_TABLE(LuaUtil, LUA_METHODS);
+//
+//#undef LUA_METHODS
+//
+//
+//const char *LuaUtil::luaClassName = "LuaUtil";
+//REGISTER_LUA_CLASS(LuaUtil);
+
 
 
 // Define the methods we will expose to Lua... basically everything we want to use in lua code
 // like LuaUtil:blah needs to be defined here.
-Lunar<LuaUtil>::RegType LuaUtil::methods[] =
-{
-   method(LuaUtil, getMachineTime),
-   method(LuaUtil, logprint),
-   method(LuaUtil, printToConsole),
-   method(LuaUtil, getRandomNumber),
-   method(LuaUtil, findFile),
-
-   {0,0}    // End method list
-};
+//Lunar<LuaUtil>::RegType LuaUtil::methods[] =
+//{
+//   method(LuaUtil, getMachineTime),
+//   method(LuaUtil, logprint),
+//   method(LuaUtil, printToConsole),
+//   method(LuaUtil, getRandomNumber),
+//   method(LuaUtil, findFile),
+//
+//   {0,0}    // End method list
+//};
 
 
 // Write a message to the server logfile
@@ -69,14 +96,29 @@ S32 LuaUtil::logprint(lua_State *L)
 
 S32 LuaUtil::printToConsole(lua_State *L)
 {
-   static const char *methodName = "LuaUtil:printToConsole()";
-   checkArgCount(L, 1, methodName);
+  int n = lua_gettop(L);  /* number of arguments */
+  int i;
+  string out;
 
-   string message = getCheckedString(L, 1, methodName);
+  lua_getglobal(L, "tostring");
+  for (i=1; i<=n; i++) {
+    const char *s;
+    lua_pushvalue(L, -1);  /* function to be called */
+    lua_pushvalue(L, i);   /* value to print */
+    lua_call(L, 1, 1);
+    s = lua_tostring(L, -1);  /* get result */
+    if (s == NULL)
+      return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                           LUA_QL("print"));
+    if(i > 1) 
+       out += "\t";
 
-   gConsole.output("%s\n", message.c_str());    // Print message to the console
+    out += s;
+    lua_pop(L, 1);  /* pop result */
+  }
+  gConsole.output("%s\n", out.c_str());
 
-   return 0;
+  return 0;
 }
 
 

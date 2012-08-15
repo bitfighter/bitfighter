@@ -39,18 +39,22 @@ namespace Zap
 class LuaUtil: public LuaObject
 {
 public:
-   LuaUtil(lua_State *L);      // Lua constructor
+   //LuaUtil();      // Constructor
+   //~LuaUtil();     // Destructor
 
-   static const char className[];
+      //// Lua interface
+   //LUAW_DECLARE_CLASS(LuaUtil);
 
-   static Lunar<LuaUtil>::RegType methods[];
+   //static const char *luaClassName;
+   //static const luaL_reg luaMethods[];
+   //static const LuaFunctionProfile functionArgs[];
 
    // Lua methods
-   S32 logprint(lua_State *L);
-   S32 printToConsole(lua_State *L);
-   S32 getMachineTime(lua_State *L);
-   S32 getRandomNumber(lua_State *L);
-   S32 findFile(lua_State *L);
+   static S32 logprint(lua_State *L);
+   static S32 printToConsole(lua_State *L);
+   static S32 getMachineTime(lua_State *L);
+   static S32 getRandomNumber(lua_State *L);
+   static S32 findFile(lua_State *L);
 };
 
 

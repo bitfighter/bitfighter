@@ -1279,12 +1279,10 @@ bool LuaScriptRunner::prepareEnvironment()
    // These will be copied into the script's environment when we run createEnvironment.
    setEnums(L);    
 
-
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
    //luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
-
 
    return true;
 }
@@ -1348,7 +1346,7 @@ void LuaScriptRunner::registerClasses()
    LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
 
    // Lunar managed objects, these to be ported to LuaW
-   Lunar<LuaUtil>::Register(L);
+   //Lunar<LuaUtil>::Register(L);
 
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
@@ -1481,10 +1479,19 @@ static int handleUnsubscribe(lua_State *L)
 // Register some functions not associated with a particular class
 void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 {
+   // #define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
    lua_register(L, "subscribe_bot",        handleSubscribe<Robot>);
    lua_register(L, "unsubscribe_bot",      handleUnsubscribe<Robot>);
    lua_register(L, "subscribe_levelgen",   handleSubscribe<LuaLevelGenerator>);
    lua_register(L, "unsubscribe_levelgen", handleUnsubscribe<LuaLevelGenerator>);
+
+
+   // Former LuaUtil functions
+   lua_register(L, "logprint", LuaUtil::logprint);
+   lua_register(L, "print", LuaUtil::printToConsole);
+   lua_register(L, "getMachineTime", LuaUtil::getMachineTime);
+   lua_register(L, "getRandomNumber", LuaUtil::getRandomNumber);
+   lua_register(L, "findFile", LuaUtil::findFile);
 }
 
 
