@@ -1332,7 +1332,7 @@ void LuaScriptRunner::printStackTrace(lua_State *L)
 // Register classes needed by all script runners
 void LuaScriptRunner::registerClasses()
 {
-   LuaW_Registrar::registerClasses(L);
+   LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
 
    // Lunar managed objects
    Lunar<LuaUtil>::Register(L);
