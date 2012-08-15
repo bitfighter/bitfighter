@@ -149,6 +149,7 @@
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="CoreGame.cpp" />
     <ClCompile Include="Cursor.cpp" />
+    <ClCompile Include="EditorPlugin.cpp" />
     <ClCompile Include="EngineeredItem.cpp" />
     <ClCompile Include="..\zap\flagItem.cpp" />
     <ClCompile Include="..\zap\game.cpp" />
@@ -279,6 +280,7 @@
     <ClInclude Include="Console.h" />
     <ClInclude Include="CoreGame.h" />
     <ClInclude Include="Cursor.h" />
+    <ClInclude Include="EditorPlugin.h" />
     <ClInclude Include="EngineeredItem.h" />
     <ClInclude Include="..\zap\flagItem.h" />
     <ClInclude Include="..\zap\ftol.h" />
