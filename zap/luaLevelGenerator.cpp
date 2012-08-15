@@ -43,7 +43,7 @@ LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constr
 
 // Standard constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     GridDatabase *gridDatabase, LevelLoader *caller, bool inEditor)
+                                     GridDatabase *gridDatabase, LevelLoader *caller)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
@@ -54,8 +54,6 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 
    mGridSize = gridSize;
    mCaller = caller;
-   mInEditor = inEditor;
-
    mErrorMsgPrefix = "***LEVELGEN ERROR***";
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -177,7 +175,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       logError(e.what());
    }
 
-   mCaller->parseLevelLine(line.c_str(), mGridDatabase, false, "Levelgen script: " + mScriptName);
+   mCaller->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -210,7 +208,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 // Let someone else do the work!
 void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
-   mCaller->processLevelLoadLine(argc, id, argv, database, mInEditor, levelFileName);
+   mCaller->processLevelLoadLine(argc, id, argv, database, levelFileName);
 }
 
 
@@ -222,7 +220,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getCheckedString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, mGridDatabase, mInEditor, "Levelgen script: " + mScriptName);
+   mCaller->parseLevelLine(line, mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }

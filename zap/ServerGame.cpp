@@ -995,7 +995,7 @@ bool ServerGame::loadLevel(const string &levelFileName)
 #ifdef PRINT_SOMETHING
    logprintf("1 server: %d, client %d", gServerGame->getGameObjDatabase()->getObjectCount(),gClientGame->getGameObjDatabase()->getObjectCount());
 #endif
-   if(loadLevelFromFile(filename, false, getGameObjDatabase()))
+   if(loadLevelFromFile(filename, getGameObjDatabase()))
       mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
    else
    {

@@ -560,7 +560,7 @@ void EditorUserInterface::loadLevel()
 
 
    // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
-   bool levelLoaded = game->loadLevelFromFile(fileName, true, mLoadTarget);
+   bool levelLoaded = game->loadLevelFromFile(fileName, mLoadTarget);
 
    if(!game->getGameType())  // make sure we have GameType
    {
@@ -669,7 +669,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame(), true);
+   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
