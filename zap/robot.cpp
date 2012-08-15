@@ -210,7 +210,7 @@ bool Robot::prepareEnvironment()
 // Loads script, runs getName, stores result in bot's clientInfo
 bool Robot::startLua()
 {
-   if(!LuaScriptRunner::startLua(ROBOT) || !loadScript() || !runMain())
+   if(!LuaScriptRunner::startLua() || !loadScript() || !runMain())
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message

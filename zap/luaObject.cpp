@@ -1160,7 +1160,7 @@ bool LuaScriptRunner::retrieveFunction(const char *functionName)
 }
 
 
-bool LuaScriptRunner::startLua(ScriptType scriptType)
+bool LuaScriptRunner::startLua()
 {
    // Start Lua and get everything configured if we haven't already done so
    if(!L)

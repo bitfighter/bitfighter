@@ -222,7 +222,7 @@ protected:
    const char *mErrorMsgPrefix;
 
    virtual bool loadScript();
-   bool startLua(ScriptType scriptType);
+   bool startLua();
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
    // This method should be abstract, but luaW requires us to be able to instantiate this class

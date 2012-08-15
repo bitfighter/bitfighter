@@ -76,7 +76,7 @@ namespace Zap
       if(!mConsole)
          return;
 
-      startLua(LEVELGEN);
+      startLua();
 
       setCommandProcessorCallback(processConsoleCommandCallback);
    }

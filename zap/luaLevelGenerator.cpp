@@ -63,7 +63,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 // Fire up a Lua interprer, load the script, and execute the chunk to get it in memory
 bool LuaLevelGenerator::loadScript()
 {
-   return startLua(LEVELGEN) && LuaScriptRunner::loadScript();    
+   return startLua() && LuaScriptRunner::loadScript();    
 }
 
 
