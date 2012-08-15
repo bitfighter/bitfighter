@@ -94,6 +94,7 @@ S32 LuaUtil::logprint(lua_State *L)
 }
 
 
+// This code based directly on Lua's print function, try to replicate functionality
 S32 LuaUtil::printToConsole(lua_State *L)
 {
   int n = lua_gettop(L);  /* number of arguments */
