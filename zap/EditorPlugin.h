@@ -38,7 +38,7 @@ namespace Zap
    public:
       // Constructors
       EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
-      EditorPlugin(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
+      EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
                    GridDatabase *gridDatabase, LevelLoader *caller);
      
       void registerClasses();

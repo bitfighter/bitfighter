@@ -938,6 +938,7 @@ LuaScriptRunner::~LuaScriptRunner()
 }
 
 
+// Static method setting static vars
 void LuaScriptRunner::setScriptingDir(const string &scriptingDir)
 {
    mScriptingDir = scriptingDir;

@@ -42,14 +42,13 @@ namespace Zap
 LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constructor!"); }
 
 // Standard constructor
-LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
+LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
                                      GridDatabase *gridDatabase, LevelLoader *caller, bool inEditor)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
    mScriptName = scriptName;
    mScriptArgs = scriptArgs;
-   setScriptingDir(scriptDir);
 
    mGridDatabase = gridDatabase;
 

@@ -66,7 +66,7 @@ namespace Zap
 
    extern ScreenInfo gScreenInfo;
 
-   void Console::initialize(const string &luaDir)
+   void Console::initialize()
    {
       TNLAssert(gScreenInfo.isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
       TNLAssert(!mConsole,                  "Only intialize once!");
@@ -76,7 +76,6 @@ namespace Zap
       if(!mConsole)
          return;
 
-      setScriptingDir(luaDir);
       startLua(LEVELGEN);
 
       setCommandProcessorCallback(processConsoleCommandCallback);
@@ -86,18 +85,10 @@ namespace Zap
    // TODO: Merge with luaLevelGenerator version, which is almost identical
    bool Console::prepareEnvironment()  
    { 
-      LuaScriptRunner::prepareEnvironment();
+      Parent::prepareEnvironment();
 
       if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
          return false;
-
-      //lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
-
-      //lua_pushliteral(L, "levelgen");                       //                                        -- env_table, "levelgen"
-      //luaW_push(L, this);                                   //                                        -- env_table, "levelgen", *this
-      //lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
-
-      //lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
 
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 

@@ -419,8 +419,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
       return false;
    }
 
-   setScriptingDir(folderManager->luaDir);      // Where our helper scripts are stored
-
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow, because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!

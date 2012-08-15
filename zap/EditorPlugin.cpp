@@ -36,9 +36,9 @@ namespace Zap
 EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); }
 
 // Constructor
-EditorPlugin::EditorPlugin(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridSize, 
+EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
                            GridDatabase *gridDatabase, LevelLoader *caller) : 
-      Parent(scriptName, scriptDir, scriptArgs, gridSize, gridDatabase, caller)
+      Parent(scriptName, scriptArgs, gridSize, gridDatabase, caller)
 {
    // Do nothing
 }

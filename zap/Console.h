@@ -39,6 +39,7 @@ namespace Zap
 
 class Console: public LuaScriptRunner
 {
+   typedef LuaScriptRunner Parent;
 
 private:
    OGLCONSOLE_Console mConsole;
@@ -47,7 +48,7 @@ public:
    Console();     // Constructor
    ~Console();    // Destructor
 
-   void initialize(const string &luaDir);
+   void initialize();
    void quit();
 
    bool prepareEnvironment();

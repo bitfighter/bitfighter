@@ -247,7 +247,7 @@ public:
 
    static void clearScriptCache();
 
-   void setScriptingDir(const string &scriptingDir);
+   static void setScriptingDir(const string &scriptingDir);
 
    static lua_State *getL();
    static void shutdown();

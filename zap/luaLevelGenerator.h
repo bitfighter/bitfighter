@@ -51,7 +51,7 @@ private:
 
 public:
    LuaLevelGenerator();                                              // Default constructor
-   LuaLevelGenerator(const string &scriptName, const string &scriptDir, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
+   LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, bool inEditor = false);    // C++ constructor
    virtual ~LuaLevelGenerator();                                     // Destructor
 

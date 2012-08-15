@@ -669,7 +669,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, folderManager->luaDir, args, getGame()->getGridSize(), database, getGame(), true);
+   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame(), true);
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
@@ -736,8 +736,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
 
    // Create new plugin, will be deleted by boost
-   EditorPlugin *plugin = new EditorPlugin(fullName, folderManager->luaDir, args, getGame()->getGridSize(), 
-                                                       mLoadTarget, getGame());
+   EditorPlugin *plugin = new EditorPlugin(fullName, args, getGame()->getGridSize(), mLoadTarget, getGame());
 
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
