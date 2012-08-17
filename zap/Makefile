@@ -82,7 +82,7 @@ OBJECTS_SHARED=\
    LuaBase.o\
    luaGameInfo.o\
    luaLevelGenerator.o\
-   luaObject.o\
+   LuaScriptRunner.o\
    main.o\
    masterConnection.o\
    md5wrapper.o\
