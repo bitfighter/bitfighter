@@ -60,7 +60,8 @@ public:
    F32 x, y;
    F32 angle;
    bool fire;
-   bool moduleActive[ShipModuleCount];    // Is given module active?
+   bool modulePrimary[ShipModuleCount];    // Is given module primary component active?
+   bool moduleSecondary[ShipModuleCount];  // Is given module secondary component active?
    U32 time;
 
    enum {

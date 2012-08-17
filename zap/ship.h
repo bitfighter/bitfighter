@@ -76,7 +76,8 @@ private:
 protected:
    SafePtr <ClientInfo> mClientInfo;
 
-   bool mModuleActive[ModuleCount];       // Is the module active at this moment?
+   bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
+   bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
@@ -89,6 +90,8 @@ public:
    static const S32 RepairRadius = 65;
    static const U32 SpawnShieldTime = 5000;        // Time spawn shields are active
    static const U32 SpawnShieldFlashTime = 1500;   // Time at which shields start to flash
+   static const S32 PulseMaxVelocity = 2500; // Maximum speed of Pulse
+   static const S32 PulseMinVelocity = 1000; // Minimum speed of Pulse
 
    enum {
       MaxVelocity = 450,        // points per second
@@ -130,12 +133,13 @@ public:
       WarpPositionMask = BIT(3),    // When ship makes a big jump in position
       ExplosionMask = BIT(4),
       HealthMask = BIT(5),
-      ModuleActiveMask = BIT(6),    // Is module active
-      LoadoutMask = BIT(7),
-      RespawnMask = BIT(8),         // For when robots respawn
-      TeleportMask = BIT(9),        // Ship has just teleported
-      ChangeTeamMask = BIT(10),     // Used for when robots change teams
-      SpawnShieldMask = BIT(11),    // Used for the spawn shield
+      ModulePrimaryMask = BIT(6),   // Is module primary component active
+      ModuleSecondaryMask = BIT(7), // Is module secondary component active
+      LoadoutMask = BIT(8),
+      RespawnMask = BIT(9),         // For when robots respawn
+      TeleportMask = BIT(10),       // Ship has just teleported
+      ChangeTeamMask = BIT(11),     // Used for when robots change teams
+      SpawnShieldMask = BIT(12),    // Used for the spawn shield
    };
 
    enum SensorStatus {
@@ -164,11 +168,14 @@ public:
    WeaponType getWeapon(U32 indx);        // Returns weapon in slot indx
    ShipModule getModule(U32 indx);        // Returns module in slot indx
 
+
    Timer mSensorEquipZoomTimer;
    Timer mSensorActiveZoomTimer;
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
+   Timer mModuleSecondaryTimer[ModuleCount];  // Timer to prevent accidentally firing in quick succession
+   static const U32 ModuleSecondaryTimerDelay = 500;
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;
@@ -199,7 +206,8 @@ public:
 
    void onGhostRemove();
 
-   bool isModuleActive(ShipModule mod);
+   bool isModulePrimaryActive(ShipModule mod);
+   bool isModuleSecondaryActive(ShipModule mod);
 
    void engineerBuildObject();
 
@@ -253,7 +261,8 @@ public:
    void emitShipExplosion(Point pos);
    //void setActualPos(Point p);
    void setActualPos(Point p, bool warp);
-   void activateModule(U32 indx);    // Activate the specified module for the current move
+   void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
+   void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
 
    SensorStatus getSensorStatus();
 

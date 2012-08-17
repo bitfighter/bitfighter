@@ -888,18 +888,23 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      if(gModuleInfo[localShip->getModule(i)].getUseType() != ModuleUseActive)
+      if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() != ModulePrimaryUseActive)
       {
-         if(gModuleInfo[localShip->getModule(i)].getUseType() == ModuleUseHybrid &&
-               localShip->isModuleActive(localShip->getModule(i)))
+         if(gModuleInfo[localShip->getModule(i)].getPrimaryUseType() == ModulePrimaryUseHybrid &&
+               localShip->isModulePrimaryActive(localShip->getModule(i)))
             glColor(INDICATOR_ACTIVE_COLOR);
          else
             glColor(INDICATOR_PASSIVE_COLOR);
       }
-      else if(localShip->isModuleActive(localShip->getModule(i)))
+      else if(localShip->isModulePrimaryActive(localShip->getModule(i)))
          glColor(INDICATOR_ACTIVE_COLOR);
       else 
          glColor(INDICATOR_INACTIVE_COLOR);
+
+      // Always change to orange if module secondary is fired
+      if(gModuleInfo[localShip->getModule(i)].hasSecondary() &&
+            localShip->isModuleSecondaryActive(localShip->getModule(i)))
+         glColor(Colors::orange67);
 
       S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 
@@ -2768,7 +2773,10 @@ Move *GameUserInterface::getCurrentMove()
       mCurrentMove.fire = mFiring;
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         mCurrentMove.moduleActive[i] = mModPrimaryActivated[i];
+      {
+         mCurrentMove.modulePrimary[i] = mModPrimaryActivated[i];
+         mCurrentMove.moduleSecondary[i] = mModSecondaryActivated[i];
+      }
    }
    else
    {
@@ -2778,7 +2786,10 @@ Move *GameUserInterface::getCurrentMove()
       mCurrentMove.fire = mFiring;     // should be false?
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         mCurrentMove.moduleActive[i] = false;
+      {
+         mCurrentMove.modulePrimary[i] = false;
+         mCurrentMove.moduleSecondary[i] = false;
+      }
    }
 
    if(!getGame()->getSettings()->getIniSettings()->controlsRelative)

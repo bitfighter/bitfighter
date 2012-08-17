@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <string>
 
-#include "LuaException.h"
+#include "../../zap/LuaException.h"
 
 extern "C" {
 #include "../lua-vec/src/lua.h"

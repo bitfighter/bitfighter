@@ -30,6 +30,7 @@
 #include "Console.h"
 #include "ScreenInfo.h"
 #include "UI.h"
+#include "version.h"
 
 #include "tnlLog.h"
 
@@ -70,7 +71,7 @@ VideoSystem::~VideoSystem()
 
 extern void shutdownBitfighter();
 
-static const char *WINDOW_TITLE = "Bitfighter";
+static string WINDOW_TITLE = "Bitfighter " + string(ZAP_GAME_RELEASE);
 
 void VideoSystem::init()
 {
@@ -153,7 +154,7 @@ void VideoSystem::init()
    }
 #else
    // Set window and icon title here so window will be created with proper name later
-   SDL_WM_SetCaption(WINDOW_TITLE, WINDOW_TITLE);
+   SDL_WM_SetCaption(WINDOW_TITLE.c_str(), WINDOW_TITLE.c_str());
 
    // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
    SDL_Surface *image = SDL_LoadBMP("bficon.bmp");
