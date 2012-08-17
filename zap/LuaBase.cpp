@@ -642,13 +642,12 @@ void LuaBase::getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &po
 }
 
 
-   // Create a list of type names for displaying function signatures
-   static const char *argTypeNames[] = {
-#     define LUA_ARG_TYPE_ITEM(a, name) name,
-         LUA_ARG_TYPE_TABLE
-#     undef LUA_ARG_TYPE_ITEM
-   };
-
+// Create a list of type names for displaying function signatures
+static const char *argTypeNames[] = {
+#  define LUA_ARG_TYPE_ITEM(a, name) name,
+      LUA_ARG_TYPE_TABLE
+#  undef LUA_ARG_TYPE_ITEM
+};
 
 
 // Return a nicely formatted list of acceptable parameter types.  Use a string to avoid dangling pointer.
