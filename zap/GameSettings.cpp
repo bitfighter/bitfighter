@@ -35,7 +35,7 @@
 #include "tnlLog.h"           // For logprintf
 
 #ifdef TNL_OS_WIN32 
-#  include <Windows.h>          // For ARRAYSIZE def
+#  include <Windows.h>        // For ARRAYSIZE def
 #endif
 
 #include "IniFile.h"

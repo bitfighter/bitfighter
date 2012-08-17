@@ -149,6 +149,7 @@ public:
    static string prettyPrintParamList(const LuaFunctionProfile *functionInfo);
    static void printFunctions(const ArgMap &argMap, const map<ClassName, unsigned int> &nodeMap, 
                               const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex);
+   static void printLooseFunctions();
 
 
    /////

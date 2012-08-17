@@ -65,12 +65,7 @@ public:
 };
 
 
-extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
-                              const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
-
-
-
-////////////////////////////////////////
+//////////////////////////////////////////
 ////////////////////////////////////////
 
 typedef struct { LuaObject *objectPtr; } UserData;
@@ -170,7 +165,7 @@ public:
    static S32 getRandomNumber(lua_State *L);
    static S32 findFile(lua_State *L);
 
-   static const LuaFunctionProfile functionArgs[];
+   static const LuaFunctionProfile functionArgs[]; 
 };
 
 

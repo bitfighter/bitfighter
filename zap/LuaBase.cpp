@@ -661,6 +661,26 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionProfile *functionInfo
 }
 
 
+static void printMethodList(const LuaFunctionProfile *funProfile, const string &prefix)
+{
+   for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
+      for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
+      {
+         std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
+            
+         for(int k = 0; funProfile[i].argList[j][k] != LuaBase::END; k++)  // Iterate over args within a given profile, appending each to the output line
+         {
+            if(k != 0)
+               line += ", ";
+            line += argTypeNames[funProfile[i].argList[j][k]];   
+         }
+         line += ")";
+
+         printf("%s\n", line.c_str());    // Print the line
+      }
+}
+
+
 // Helper for printDocs(), called from luaW with -luadocs option
 void LuaBase::printFunctions(const ArgMap &argMap, const map<ClassName, unsigned int> &nodeMap, 
                              const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex)
@@ -673,27 +693,7 @@ void LuaBase::printFunctions(const ArgMap &argMap, const map<ClassName, unsigned
 
    printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
       
-   // Print method list
-
-   const Zap::LuaFunctionProfile *funProfile = argMap.find(nodeList[nodeIndex].first)->second;
-
-   for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
-      for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
-      {
-         std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
-            
-         //generateArgListString();
-         for(int k = 0; funProfile[i].argList[j][k] != Zap::LuaBase::END; k++)  // Iterate over args within a given profile, appending each to the output line
-         {
-            if(k != 0)
-               line += ", ";
-            line += argTypeNames[funProfile[i].argList[j][k]];   
-         }
-         line += ")";
-
-         printf("%s\n", line.c_str());    // Print the line
-      }
-
+   printMethodList(argMap.find(nodeList[nodeIndex].first)->second, "");
 
    if(nodeList[nodeIndex].second.size() == 0)
       return;
@@ -707,17 +707,33 @@ void LuaBase::printFunctions(const ArgMap &argMap, const map<ClassName, unsigned
       else
          tmpPrefix += "        ";
       unsigned int index = nodeMap.find(nodeList[nodeIndex].second[i])->second;
-      printFunctions(argMap, nodeMap, nodeList, tmpPrefix, index);
+      printFunctions(argMap, nodeMap, nodeList, tmpPrefix, index);      // Recursive!  
    }
+}
+
+
+void LuaBase::printLooseFunctions()
+{
+   printf("The following Bitfighter functions are also available:\n");
+   printMethodList(LuaScriptRunner::functionArgs, "");
 }
 
 
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // This is deliberately outside the zap namespace -- it provides a bridge to the printFunctions function above from luaW
 void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
                            const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
 {
    Zap::LuaBase::printFunctions(argMap, nodeMap, nodeList, prefix, nodeIndex);
+}
+
+
+void printLooseFunctions()
+{
+   Zap::LuaBase::printLooseFunctions();
 }

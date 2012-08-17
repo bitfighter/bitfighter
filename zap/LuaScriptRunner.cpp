@@ -656,15 +656,23 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 
 #define LUA_METHODS(CLASS, METHOD) \
-METHOD("logprint",        logprint,        ARRAYDEF({{ ANY }                                 }), 1 ) \
-METHOD("print",           printToConsole,  ARRAYDEF({{ ANY }                                 }), 1 ) \
-METHOD("getMachineTime",  getMachineTime,  ARRAYDEF({{ END }                                 }), 1 ) \
-METHOD("getRandomNumber", getRandomNumber, ARRAYDEF({{ END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
-METHOD("findFile",        findFile,        ARRAYDEF({{ END }                                 }), 1 ) \
+METHOD("logprint",        logprint,        ARRAYDEF({{ ANY, END }                                }), 1 ) \
+METHOD("print",           printToConsole,  ARRAYDEF({{ ANY, END }                                }), 1 ) \
+METHOD("getMachineTime",  getMachineTime,  ARRAYDEF({{      END }                                }), 1 ) \
+METHOD("getRandomNumber", getRandomNumber, ARRAYDEF({{      END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
+METHOD("findFile",        findFile,        ARRAYDEF({{ STR, END }                                 }), 1 ) \
 
 
 //GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
+
+#undef LUA_METHODS
+
+// Need this because, for some reason, LuaBase can't run ARRAYSIZE on this struct, and we need it for printing 
+// the function documentation
+//LuaScriptRunner::functionCount = ARRAYSIZE(LuaScriptRunner::functionArgs);
+
+
 // Produces:
 //const LuaFunctionProfile LuaScriptRunner::functionArgs[] = { 
 //   { "logprint", {{ ANY } }, 1 }, 

@@ -746,6 +746,7 @@ void luaW_extend(lua_State* L)
 
 extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
                            const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
+extern void printLooseFunctions();
 
 
 // Class to facilitate the semi-autonomous self-registration of LuaW classes.
@@ -998,6 +999,10 @@ public:
          printf("=====================\n");
          printFunctions(getArgMap(), nodeMap, nodeList, "", i);
       }
+
+      // Finally, our "loose" functions...
+      printf("=====================\n");
+      printLooseFunctions();
       printf("=====================\n");
    }
 };
