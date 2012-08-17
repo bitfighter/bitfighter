@@ -60,6 +60,7 @@ LuaObject::~LuaObject()
 }
 
 
+// This method exists only for lunar support
 bool LuaObject::shouldLuaGarbageCollectThisObject()
 {
    return true;
