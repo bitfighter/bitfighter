@@ -47,27 +47,8 @@
 namespace Zap
 {
 
-// Constructor
-LuaObject::LuaObject()
-{
-   // Do nothing
-}
-
-// Destructor
-LuaObject::~LuaObject()
-{
-   // Do nothing
-}
-
-
 // This method exists only for lunar support
-bool LuaObject::shouldLuaGarbageCollectThisObject()
-{
-   return true;
-}
-
-
-
+bool LuaObject::shouldLuaGarbageCollectThisObject() { return true; }
 
 
 ////////////////////////////////////////

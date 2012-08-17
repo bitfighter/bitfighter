@@ -61,9 +61,6 @@ class LuaObject : public LuaBase
    typedef LuaBase Parent;
 
 public:
-   LuaObject();            // Constructor
-   virtual ~LuaObject();   // Destructor
-
    static bool shouldLuaGarbageCollectThisObject();     
 };
 
