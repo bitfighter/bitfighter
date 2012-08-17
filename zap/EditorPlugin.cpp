@@ -116,4 +116,76 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
 }
 
 
+// Pulls values out of the table at specified, verifies that they are MenuItems, and adds them to the menuItems vector
+bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems)
+{
+#ifdef ZAP_DEDICATED
+      throw LuaException("Dedicated server should not use MenuItem");
+#else
+   if(!lua_istable(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a menuItem vector) at position %d", methodName, index);
+      logprintf(LogConsumer::LogError, msg);
+
+      throw LuaException(msg);
+   }
+
+   // The following block (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
+
+   lua_pushvalue(L, index);	// Push our table onto the top of the stack                                               -- table table
+   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops    -- table table nil
+
+   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
+   // The lua_pushnil then pushed the table to -2, where it is currently located
+   while(lua_next(L, -2))     // -2 is our table
+   {
+      UserData *ud = static_cast<UserData *>(lua_touserdata(L, -1));
+
+      if(!ud)                 // Weeds out simple values, wrong userdata types still pass here
+      {
+         char msg[1024];
+         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
+
+         throw LuaException(msg);
+      }
+
+      // We have a userdata
+      LuaObject *obj = ud->objectPtr;                       // Extract the pointer
+      MenuItem *menuItem = dynamic_cast<MenuItem *>(obj);   // Cast it to a MenuItem
+
+      if(!menuItem)                                         // Cast failed -- not a MenuItem... we got some bad args
+      {
+         // TODO: This does not report a line number, for some reason...
+         // Reproduce with code like this in a plugin
+         //function getArgs()
+         //   local items = { }  -- Create an empty table to hold our menu items
+         //   
+         //   -- Create the menu items we need for this script, adding them to our items table
+         //   table.insert(items, ToggleMenuItem:new("Run mode:", { "One", "Two", "Mulitple" }, 1, false, "Specify run mode" ))
+         //   table.insert(items, Point:new(1,2))
+         //
+         //   return "Menu title", items
+         //end
+
+         char msg[256];
+         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
+         logprintf(LogConsumer::LogError, msg);
+
+         throw LuaException(msg);
+      }
+
+      menuItems.push_back(menuItem);                        // Add the MenuItem to our list
+      lua_pop(L, 1);                                        // We extracted that value, pop it off so we can push the next element
+   }
+
+   // We've got all the elements in the table, so clear it off the stack
+   lua_pop(L, 1);
+
+#endif
+   return true;
+}
+
+
+
 }

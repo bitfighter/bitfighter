@@ -25,13 +25,13 @@
 
 #include "luaObject.h"         // Header
 
-#include "luaUtil.h"
 #include "luaGameInfo.h"
 #include "robot.h"             // For subscribing
 #include "playerInfo.h"        // For playerInfo def
 #include "UIMenuItems.h"       // For MenuItem def
 #include "config.h"            
 #include "ClientInfo.h"
+#include "Console.h"           // For gConsole
 
 #include "luaLevelGenerator.h" // For managing event subscriptions
 
@@ -66,829 +66,7 @@ bool LuaObject::shouldLuaGarbageCollectThisObject()
 }
 
 
-// Returns a point to calling Lua function
-S32 LuaObject::returnPoint(lua_State *L, const Point &point)
-{
-   lua_pushvec(L,  point.x, point.y);
-   return 1;
-}
 
-
-// Returns an existing LuaPoint to calling Lua function XXX not used?
-template<class T>
-S32 LuaObject::returnVal(lua_State *L, T value, bool letLuaDelete)
-{
-   Lunar<MenuItem>::push(L, value, letLuaDelete);     // true will allow Lua to delete this object when it goes out of scope
-   return 1;
-}
-
-
-// Returns an int to a calling Lua function
-S32 LuaObject::returnInt(lua_State *L, S32 num)
-{
-   lua_pushinteger(L, num);
-   return 1;
-}
-
-
-// If we have a ship, return it, otherwise return nil
-S32 LuaObject::returnShip(lua_State *L, Ship *ship)
-{
-   if(ship)
-   {
-      ship->push(L);
-      return 1;
-   }
-
-   return returnNil(L);
-}
-
-
-S32 LuaObject::returnPlayerInfo(lua_State *L, Ship *ship)
-{
-   return returnPlayerInfo(L, ship->getClientInfo()->getPlayerInfo());
-}
-
-
-S32 LuaObject::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
-{
-   playerInfo->push(L);
-   return 1;
-}
-
-
-// Returns a float to a calling Lua function
-S32 LuaObject::returnFloat(lua_State *L, F32 num)
-{
-   lua_pushnumber(L, num);
-   return 1;
-}
-
-
-// Returns a boolean to a calling Lua function
-S32 LuaObject::returnBool(lua_State *L, bool boolean)
-{
-   lua_pushboolean(L, boolean);
-   return 1;
-}
-
-
-// Returns a string to a calling Lua function
-S32 LuaObject::returnString(lua_State *L, const char *str)
-{
-   lua_pushstring(L, str);
-   return 1;
-}
-
-
-// Returns nil to calling Lua function
-S32 LuaObject::returnNil(lua_State *L)
-{
-   lua_pushnil(L);
-   return 1;
-}
-
-
-void LuaObject::clearStack(lua_State *L)
-{
-   lua_settop(L, 0);
-}
-
-
-// Assume that table is at the top of the stack
-void LuaObject::setfield (lua_State *L, const char *key, F32 value)
-{
-   lua_pushnumber(L, value);
-   lua_setfield(L, -2, key);
-}
-
-
-// Make sure we got the number of args we wanted
-void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *methodName)
-{
-   S32 args = lua_gettop(L);
-
-   if(args != argsWanted)     // Problem!
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", methodName, args, argsWanted);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-}
-
-
-
-// Create a list of type names for displaying function signatures
-static const char *argTypeNames[] = {
-#  define LUA_ARG_TYPE_ITEM(a, name) name,
-      LUA_ARG_TYPE_TABLE
-#  undef LUA_ARG_TYPE_ITEM
-};
-
-
-// Return a nicely formatted list of acceptable parameter types.  Use a string to avoid dangling pointer.
-string LuaObject::prettyPrintParamList(const LuaFunctionProfile *functionInfo)
-{
-   string msg;
-
-   for(S32 i = 0; i < functionInfo->profileCount; i++)
-   {
-      //if(i > 0)
-      msg += "\n\t";
-
-      for(S32 j = 0; functionInfo->argList[i][j] != END; j++)
-      {
-         if(j > 0)
-            msg += ", ";
-
-         msg += argTypeNames[functionInfo->argList[i][j]];
-      }
-   }
-
-   return msg;
-}
-
-//string generateArgListString()
-//{
-//   string argList = "";
-//   for(int k = 0; funProfile[i].argList[j][k] != END; k++)  // Iterate over args within a given profile, appending each to the output line
-//   {
-//      if(k != 0)
-//         argList += ", ";
-//      argList += argTypeNames[funProfile[i].argList[j][k]];   
-//   }
-//}
-
-
-// Helper for printDocs(), called from luaW with -luadocs option
-// We put this here for easier access to LuaArgType enum
-void LuaObject::printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
-                               const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
-{
-   if(prefix.length() > 8)
-      printf(prefix.substr(0, prefix.length() - 8).c_str());
-
-   if(prefix != "")
-      printf(" +----- ");  
-
-   printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
-      
-   // Print method list
-
-   const LuaFunctionProfile *funProfile = argMap.find(nodeList[nodeIndex].first)->second;
-
-   for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
-      for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
-      {
-         std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
-            
-         //generateArgListString();
-         for(int k = 0; funProfile[i].argList[j][k] != END; k++)  // Iterate over args within a given profile, appending each to the output line
-         {
-            if(k != 0)
-               line += ", ";
-            line += argTypeNames[funProfile[i].argList[j][k]];   
-         }
-         line += ")";
-
-         printf("%s\n", line.c_str());    // Print the line
-      }
-
-
-   if(nodeList[nodeIndex].second.size() == 0)
-      return;
-
-   // Output the children
-   for(unsigned int i = 0; i < nodeList[nodeIndex].second.size(); i++)
-   {
-      std::string tmpPrefix = prefix;
-      if(i < nodeList[nodeIndex].second.size() - 1)
-         tmpPrefix += " |      ";
-      else
-         tmpPrefix += "        ";
-      unsigned int index = nodeMap.find(nodeList[nodeIndex].second[i])->second;
-      printFunctions(argMap, nodeMap, nodeList, tmpPrefix, index);
-   }
-}
-
-
-#define lua_isnumberpair(L, pos) \
-   (lua_isnumber(L, (pos)) && lua_isnumber(L, (pos) + 1))
-
-// === Centralized Parameter Checking ===
-// Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
-// you can blindly convert the stack items with the confidence you'll get what you want; no further type checking is required.
-// In writing this function, I tried to be extra clear, perhaps at the expense of slight redundancy
-S32 LuaObject::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName)
-{
-   const LuaFunctionProfile *functionInfo = NULL;
-
-   // First, find the correct profile for this function
-   for(S32 i = 0; functionInfos[i].functionName != NULL; i++)
-      if(strcmp(functionInfos[i].functionName, functionName) == 0)
-      {
-         functionInfo = &functionInfos[i];
-         break;
-      }
-
-   if(!functionInfo)
-      return -1;
-
-   S32 stackItems = lua_gettop(L);
-   S32 profileCount = functionInfo->profileCount;
-
-   for(S32 i = 0; i < profileCount; i++)
-   {
-      const /*LuaArgType*/int *candidateArgList = functionInfo->argList[i];
-      bool validProfile = true;
-      S32 stackPos = 0;
-
-      for(S32 j = 0; candidateArgList[j] != END; j++)
-      {
-         bool ok = false;
-
-         if(stackPos < stackItems)
-         {
-            stackPos++;
-
-            switch(candidateArgList[j])
-            {
-               case INT:
-               case NUM:
-                  ok = lua_isnumber(L, stackPos);
-                  break;
-
-               case NUM_GE0:
-                  if(lua_isnumber(L, stackPos))
-                     ok = (lua_tonumber(L, stackPos) >= 0);
-                  break;
-
-               case INTS:
-                  ok = lua_isnumber(L, stackPos);
-
-                  while(stackPos < stackItems && lua_isnumber(L, stackPos))
-                     stackPos++;
-
-                  break;
-
-               case STR:               
-                  ok = lua_isstring(L, stackPos);
-                  break;
-
-               case BOOL:               
-                  ok = lua_isboolean(L, stackPos);
-                  break;
-
-               case PT:
-                  if(lua_isvec(L, stackPos))
-                  {
-                     ok = true;
-                  }
-                  else if(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))
-                  {
-                     ok = true;
-                     stackPos++;
-                  }
-                  break;
-
-               // PTS: A series of points, numbers, or a table containing a series of points or numbers
-               case PTS:
-                  if(lua_isvec(L, stackPos))             // Series of Points
-                  {
-                     stackPos++;
-                     while(stackPos < stackItems && lua_isvec(L, stackPos))
-                        stackPos++;
-                     ok = true;
-                  }
-                  else if(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))     // Series of numbers -- look for x,y pairs
-                  {
-                     stackPos += 2;
-                     while(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))
-                        stackPos += 2;
-                     ok = true;
-                     stackPos--;
-                  }
-                  else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
-                  {
-                     ok = true;     // for now...
-                  }
-                  break;
-
-               case LOADOUT:
-                  ok = luaW_is<LuaLoadout>(L, stackPos);
-                  break;
-
-               case ITEM:
-                  ok = luaW_is<Item>(L, stackPos);
-                  break;
-
-               case TABLE:
-                  ok = lua_istable(L, stackPos);
-                  break;
-
-               case WEAP_ENUM:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 0 && i < WeaponCount);
-                  }
-                  break;
-
-               case WEAP_SLOT:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 1 && i <= ShipWeaponCount);       // Slot 1, 2, or 3
-                  }
-                  break;
-
-               case MOD_ENUM:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 0 && i < ModuleCount);
-                  }
-                  break;
-
-               case MOD_SLOT:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 1 && i <= ShipModuleCount);       // Slot 1 or 2
-                  }
-                  break;
-
-               case TEAM_INDX:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos) - 1;    // -1 because Lua indices start with 1
-                     ok = (i >= 0 && i < gServerGame->getTeamCount());       
-                  }
-                  break;
-
-               default:
-                  TNLAssert(false, "Unknown arg type!");
-                  break;
-            }
-         }
-
-         if(!ok)
-         {
-            validProfile = false;       // This profile is not the one we want... proceed to next i
-            break;
-         }
-      }
-
-      if(validProfile && (stackPos == stackItems))
-         return i;
-   }
-   
-   // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
-   char msg[2048];
-   string params = prettyPrintParamList(functionInfo);
-   dSprintf(msg, sizeof(msg), "Could not validate params for function %s::%s(). Expected%s: %s", 
-                              className, functionName, functionInfo->profileCount > 1 ? " one of the following" : "", params.c_str());
-   logprintf(LogConsumer::LogError, msg);
-
-   LuaObject::dumpStack(L, "Current stack state");
-
-   throw LuaException(msg);
-
-   return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
-}
-
-
-
-// Pop integer off stack, check its type, do bounds checking, and return it
-lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
-{
-   lua_Integer val = getInt(L, index);
-
-   if(val < minVal || val > maxVal)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", methodName, index, val);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return val;
-}
-
-
-// Returns defaultVal if there is an invalid or missing value on the stack
-lua_Integer LuaObject::getInt(lua_State *L, S32 index, S32 defaultVal)
-{
-   if(!lua_isnumber(L, index))
-      return defaultVal;
-   // else
-   return lua_tointeger(L, index);
-}
-
-
-lua_Integer LuaObject::getInt(lua_State *L, S32 index)
-{
-   return lua_tointeger(L, index);
-}
-
-
-// Pop integer off stack, check its type, and return it (no bounds check)
-lua_Integer LuaObject::getCheckedInt(lua_State *L, S32 index, const char *methodName)
-{
-   if(!lua_isnumber(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return lua_tointeger(L, index);
-}
-
-
-// Pop a number off stack, convert to float, and return it (no bounds check)
-F32 LuaObject::getFloat(lua_State *L, S32 index)
-{
-   return (F32)lua_tonumber(L, index);
-}
-
-
-// Pop a number off stack, convert to float, and return it (no bounds check)
-F32 LuaObject::getCheckedFloat(lua_State *L, S32 index, const char *methodName)
-{
-   if(!lua_isnumber(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return (F32) lua_tonumber(L, index);
-}
-
-
-// Pop a boolean off stack, and return it
-bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName)
-{
-   if(!lua_isboolean(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return (bool) lua_toboolean(L, index);
-}
-
-
-// Pop a boolean off stack, and return it
-bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal)
-{
-   if(!lua_isboolean(L, index))
-      return defaultVal;
-   // else
-   return (bool) lua_toboolean(L, index);
-}
-
-
-// Pop a string or string-like object off stack, check its type, and return it
-const char *LuaObject::getString(lua_State *L, S32 index, const char *defaultVal)
-{
-   if(!lua_isstring(L, index))
-      return defaultVal;
-   // else
-   return lua_tostring(L, index);
-}
-
-
-// Pop a string or string-like object off stack and return it
-const char *LuaObject::getString(lua_State *L, S32 index)
-{
-   return lua_tostring(L, index);
-}
-
-
-// Pop a string or string-like object off stack, check its type, and return it
-const char *LuaObject::getCheckedString(lua_State *L, S32 index, const char *methodName)
-{
-   if(!lua_isstring(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return lua_tostring(L, index);
-}
-
-
-MenuItem *LuaObject::pushMenuItem (lua_State *L, MenuItem *menuItem)
-{
-  MenuItem *menuItemUserData = (MenuItem *)lua_newuserdata(L, sizeof(MenuItem));
-
-  *menuItemUserData = *menuItem;
-  luaL_getmetatable(L, "MenuItem");
-  lua_setmetatable(L, -2);
-
-  return menuItemUserData;
-}
-
-
-// Pulls values out of the table at specified index as strings, and puts them all into strings vector
-void LuaObject::getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points)
-{
-   // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
-
-   lua_pushvalue(L, index);	// Push our table onto the top of the stack
-   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops
-
-   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
-   // The lua_pushnil then pushed the table to -2, where it is currently located
-   while(lua_next(L, -2))     // -2 is our table
-   {
-      // Grab the value at the top of the stack
-      const F32 *vec = lua_tovec(L, -1);
-      Point p(vec[0], vec[1]);
-      points.push_back(p);
-
-      lua_pop(L, 1);    // We extracted that value, pop it off so we can push the next element
-   }
-}
-
-
-// Pulls values out of the table at specified index as strings, and puts them all into strings vector
-void LuaObject::getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings)
-{
-   strings.clear();
-
-   if(!lua_istable(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a string vector) at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
-
-   lua_pushvalue(L, index);	// Push our table onto the top of the stack
-   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops
-
-   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
-   // The lua_pushnil then pushed the table to -2, where it is currently located
-   while(lua_next(L, -2))     // -2 is our table
-   {
-      // Grab the value at the top of the stack
-      if(!lua_isstring(L, -1))
-      {
-         char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d", 
-                                    methodName, index, strings.size() + 1);
-         logprintf(LogConsumer::LogError, msg);
-
-         throw LuaException(msg);
-      }
-
-      strings.push_back(lua_tostring(L, -1));
-
-      lua_pop(L, 1);    // We extracted that value, pop it off so we can push the next element
-   }
-
-   // We've got all the elements in the table, so clear it off the stack
-   lua_pop(L, 1);
-}
-
-/* // not used?
-static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
-{
-  ToggleMenuItem *pushedMenuItem;
-
-  luaL_checktype(L, index, LUA_TUSERDATA);      // Confirm the item at index is a full userdata
-  pushedMenuItem = (ToggleMenuItem *)luaL_checkudata(L, index, "ToggleMenuItem");
-  if(pushedMenuItem == NULL)
-     luaL_typerror(L, index, "ToggleMenuItem");
-
-  //MenuItem im = *pushedMenuItem;
-  //if(!pushedMenuItem)
-  //  luaL_error(L, "null menuItem");
-
-  return pushedMenuItem;
-}
-*/
-
-// Pulls values out of the table at specified, verifies that they are MenuItems, and adds them to the menuItems vector
-bool LuaObject::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems)
-{
-#ifdef ZAP_DEDICATED
-      throw LuaException("Dedicated server should not use MenuItem");
-#else
-   if(!lua_istable(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a menuItem vector) at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   // The following block (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
-
-   lua_pushvalue(L, index);	// Push our table onto the top of the stack                                               -- table table
-   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops    -- table table nil
-
-   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
-   // The lua_pushnil then pushed the table to -2, where it is currently located
-   while(lua_next(L, -2))     // -2 is our table
-   {
-      UserData *ud = static_cast<UserData *>(lua_touserdata(L, -1));
-
-      if(!ud)                 // Weeds out simple values, wrong userdata types still pass here
-      {
-         char msg[1024];
-         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
-
-         throw LuaException(msg);
-      }
-
-      // We have a userdata
-      LuaObject *obj = ud->objectPtr;                       // Extract the pointer
-      MenuItem *menuItem = dynamic_cast<MenuItem *>(obj);   // Cast it to a MenuItem
-
-      if(!menuItem)                                         // Cast failed -- not a MenuItem... we got some bad args
-      {
-         // TODO: This does not report a line number, for some reason...
-         // Reproduce with code like this in a plugin
-         //function getArgs()
-         //   local items = { }  -- Create an empty table to hold our menu items
-         //   
-         //   -- Create the menu items we need for this script, adding them to our items table
-         //   table.insert(items, ToggleMenuItem:new("Run mode:", { "One", "Two", "Mulitple" }, 1, false, "Specify run mode" ))
-         //   table.insert(items, Point:new(1,2))
-         //
-         //   return "Menu title", items
-         //end
-
-         char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
-         logprintf(LogConsumer::LogError, msg);
-
-         throw LuaException(msg);
-      }
-
-      menuItems.push_back(menuItem);                        // Add the MenuItem to our list
-      lua_pop(L, 1);                                        // We extracted that value, pop it off so we can push the next element
-   }
-
-   // We've got all the elements in the table, so clear it off the stack
-   lua_pop(L, 1);
-
-#endif
-   return true;
-}
-
-
-// Pop a vec object off stack, check its type, and return it
-Point LuaObject::getCheckedVec(lua_State *L, S32 index, const char *methodName)
-{
-   if(!lua_isvec(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   const F32 *vec = lua_tovec(L, index);
-   return Point(vec[0], vec[1]);
-}
-
-
-// Pop a point object off stack, or grab two numbers and create a point from them
-Point LuaObject::getPointOrXY(lua_State *L, S32 index)
-{
-   if(lua_isvec(L, index))
-   {
-      const F32 *vec = lua_tovec(L, index);
-      return Point(vec[0], vec[1]);
-   }
-   else
-   {
-      F32 x = getFloat(L, index);
-      F32 y = getFloat(L, index + 1);
-      return Point(x, y);
-   }
-}
-
-
-// Will retrieve a list of points in one of several formats: points, F32s, or a table of points or F32s
-Vector<Point> LuaObject::getPointsOrXYs(lua_State *L, S32 index)
-{
-   Vector<Point> points;
-   S32 stackItems = lua_gettop(L);
-
-   if(lua_isvec(L, index))          // List of points
-   {
-      S32 offset = 0;
-      while(index + offset <= stackItems && lua_isvec(L, index + offset))
-      {
-         const F32 *vec = lua_tovec(L, index + offset);
-         points.push_back(Point(vec[0], vec[1]));
-         offset++;
-      }
-   }
-   else if(lua_isnumber(L, index))  // List of coords
-   {
-      S32 offset = 0;
-      while(index + offset + 1 <= stackItems && lua_isnumberpair(L, index + offset))
-      {
-         F32 x = getFloat(L, index + offset);
-         F32 y = getFloat(L, index + offset + 1);
-
-         points.push_back(Point(x, y));
-         offset += 2;
-      }
-   }
-   else if(lua_istable(L, index))
-      getPointVectorFromTable(L, index, points);
-
-   return points;
- }
-
-
-// Make a nice looking string representation of the object at the specified index
-static string stringify(lua_State *L, S32 index)
-{
-   int t = lua_type(L, index);
-   //TNLAssert(t >= -1 && t <= LUA_TTHREAD, "Invalid type number!");
-   if(t > LUA_TTHREAD || t < -1)
-      return "Invalid object type id " + itos(t);
-
-   switch (t) 
-   {
-      case LUA_TSTRING:   
-         return "string: " + string(lua_tostring(L, index));
-      case LUA_TBOOLEAN:  
-         return "boolean: " + lua_toboolean(L, index) ? "true" : "false";
-      case LUA_TNUMBER:    
-         return "number: " + itos(S32(lua_tonumber(L, index)));
-      default:             
-         return lua_typename(L, t);
-   }
-}
-
-
-// May interrupt a table traversal if this is called in the middle
-void LuaObject::dumpTable(lua_State *L, S32 tableIndex, const char *msg)
-{
-   bool hasMsg = (strcmp(msg, "") != 0);
-   logprintf("Dumping table at index %d %s%s%s", tableIndex, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
-
-   TNLAssert(lua_type(L, tableIndex) == LUA_TTABLE || dumpStack(L), "No table at specified index!");
-
-   // Compensate for other stuff we'll be putting on the stack
-   if(tableIndex < 0)
-      tableIndex -= 1;
-                                                            // -- ... table  <=== arrive with table and other junk (perhaps) on the stack
-   lua_pushnil(L);      // First key                        // -- ... table nil
-   while(lua_next(L, tableIndex) != 0)                      // -- ... table nextkey table[nextkey]      
-   {
-      string key = stringify(L, -2);                  
-      string val = stringify(L, -1);                  
-
-      logprintf("%s - %s", key.c_str(), val.c_str());        
-      lua_pop(L, 1);                                        // -- ... table key (Pop value; keep key for next iter.)
-   }
-}
-
-
-bool LuaObject::dumpStack(lua_State* L, const char *msg)
-{
-    int top = lua_gettop(L);
-
-    bool hasMsg = (strcmp(msg, "") != 0);
-    logprintf("\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
-
-    for(S32 i = 1; i <= top; i++)
-    {
-      string val = stringify(L, i);
-      logprintf("%d : %s", i, val.c_str());
-    }
-
-    return false;
- }
 
 
 ////////////////////////////////////////
@@ -1347,8 +525,6 @@ void LuaScriptRunner::registerClasses()
    LuaW_Registrar::registerClasses(L);    // Register all objects that use our automatic registration scheme
 
    // Lunar managed objects, these to be ported to LuaW
-   //Lunar<LuaUtil>::Register(L);
-
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
    Lunar<LuaPlayerInfo>::Register(L);
@@ -1444,7 +620,7 @@ int LuaScriptRunner::unsubscribe(lua_State *L)
 {
    // Stack will have a bot or levelgen object at position 1, and the event at position 2
    // Get the event off the stack
-   static const char *methodName = "LuaUtil:unsubscribe()";
+   static const char *methodName = "LuaScriptRunner:unsubscribe()";
    LuaObject::checkArgCount(L, 2, methodName);
 
    lua_Integer eventType = LuaObject::getCheckedInt(L, -1, methodName);
@@ -1457,7 +633,6 @@ int LuaScriptRunner::unsubscribe(lua_State *L)
    mSubscriptions[eventType] = false;
    return 0;
 }
-
 
 template <typename T>
 static int handleSubscribe(lua_State *L)
@@ -1476,6 +651,8 @@ static int handleUnsubscribe(lua_State *L)
    return 0;
 }
 
+//////////////////////////////////////////////////////
+
 
 // Register some functions not associated with a particular class
 void LuaScriptRunner::registerLooseFunctions(lua_State *L)
@@ -1488,12 +665,177 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 
    // Former LuaUtil functions
-   lua_register(L, "logprint", LuaUtil::logprint);
-   lua_register(L, "print", LuaUtil::printToConsole);
-   lua_register(L, "getMachineTime", LuaUtil::getMachineTime);
-   lua_register(L, "getRandomNumber", LuaUtil::getRandomNumber);
-   lua_register(L, "findFile", LuaUtil::findFile);
+   lua_register(L, "logprint",             logprint);          // Any args
+   lua_register(L, "print",                printToConsole);    // Any args
+   lua_register(L, "getMachineTime",       getMachineTime);    // No args
+   lua_register(L, "getRandomNumber",      getRandomNumber);   // 0,1,2 numbers
+   lua_register(L, "findFile",             findFile);          // 1 string arg
 }
+
+
+#define LUA_METHODS(CLASS, METHOD) \
+METHOD("logprint",        logprint,        ARRAYDEF({{ ANY }                                 }), 1 ) \
+METHOD("print",           printToConsole,  ARRAYDEF({{ ANY }                                 }), 1 ) \
+METHOD("getMachineTime",  getMachineTime,  ARRAYDEF({{ END }                                 }), 1 ) \
+METHOD("getRandomNumber", getRandomNumber, ARRAYDEF({{ END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
+METHOD("findFile",        findFile,        ARRAYDEF({{ END }                                 }), 1 ) \
+
+
+//GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
+// Produces:
+//const LuaFunctionProfile LuaScriptRunner::functionArgs[] = { 
+//   { "logprint", {{ ANY } }, 1 }, 
+//   { "printToConsole", {{ ANY } }, 1 }, 
+//   { "getMachineTime", {{ END } }, 1 }, 
+//   { "getRandomNumber", {{ END }, { NUM, END }, { NUM, NUM, END }}, 3 }, 
+//   { "findFile", {{ END } }, 1 }, { 0, { }, 0 } 
+//};
+
+
+// Generates something like the following:
+// const LuaFunctionProfile Teleporter::functionArgs[] =
+// {
+//    { "addDest",    {{ PT,  END }}, 1 }
+//    { "delDest",    {{ INT, END }}, 1 }
+//    { "clearDests", {{      END }}, 1 }
+//    { NULL, { }, 0 }
+// };
+
+////// Lua methods
+//
+////                Fn name               Param profiles                  Profile count                           
+//#define LUA_METHODS(CLASS, METHOD) \
+//   METHOD(CLASS,  getCPUTime,           ARRAYDEF({{ END }}), 1 )                             \
+//   METHOD(CLASS,  getTime,              ARRAYDEF({{ END }}), 1 )                             \
+//                                                                                             \
+//   METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
+//   METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
+//   METHOD(CLASS,  hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
+//                                                                                             \
+//
+//GENERATE_LUA_METHODS_TABLE(Robot, LUA_METHODS);
+//GENERATE_LUA_FUNARGS_TABLE(Robot, LUA_METHODS);
+//
+//#undef LUA_METHODS
+
+
+
+
+
+//////////
+// What follows is a number of static functions, which will be registered directly with our Lua instance as functions
+// that are not related to any particular object, but are just available locally.
+
+static string buildPrintString(lua_State *L)
+{
+  int n = lua_gettop(L);  /* number of arguments */
+  int i;
+  string out;
+
+  lua_getglobal(L, "tostring");
+  for(i = 1; i <= n; i++) 
+  {
+    const char *s;
+    lua_pushvalue(L, -1);  /* function to be called */
+    lua_pushvalue(L, i);   /* value to print */
+    lua_call(L, 1, 1);
+    s = lua_tostring(L, -1);  /* get result */
+    if (s == NULL)
+      luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
+    if(i > 1) 
+       out += "\t";
+
+    out += s;
+    lua_pop(L, 1);  /* pop result */
+  }
+
+  return out;
+}
+
+
+// Write a message to the server logfile
+S32 LuaScriptRunner::logprint(lua_State *L)
+{
+   string str = buildPrintString(L);
+
+   logprintf(LogConsumer::LuaBotMessage, "%s", str.c_str());
+
+   return 0;
+}
+
+
+// This code based directly on Lua's print function, try to replicate functionality
+S32 LuaScriptRunner::printToConsole(lua_State *L)
+{
+   string str = buildPrintString(L);
+   gConsole.output("%s\n", str.c_str());
+
+  return 0;
+}
+
+
+S32 LuaScriptRunner::getMachineTime(lua_State *L)
+{
+   return LuaObject::returnInt(L, Platform::getRealMilliseconds());
+}
+
+
+// Find the specified file, in preparation for loading
+S32 LuaScriptRunner::findFile(lua_State *L)
+{
+   static const char *methodName = "findFile()";
+   checkArgCount(L, 1, methodName);
+
+   string filename = getString(L, 1, "");
+
+   FolderManager *folderManager = GameSettings::getFolderManager();
+
+   string fullname = folderManager->findScriptFile(filename);     // Looks in luadir, levelgens dir, bots dir
+
+   lua_pop(L, 1);    // Remove passed arg from stack
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   if(fullname == "")
+   {
+      logprintf(LogConsumer::LogError, "Could not find script file \"%s\"...", filename.c_str());
+      return returnNil(L);
+   }
+
+   return returnString(L, fullname.c_str());
+}
+
+
+S32 LuaScriptRunner::getRandomNumber(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "getRandomNumber");
+   logprintf("Profile = %d", profile);
+
+   if(lua_isnil(L, 1))
+   {
+      lua_pop(L, 1);
+      lua_pop(L, 2);
+
+      return returnFloat(L, TNL::Random::readF());
+   }
+
+   S32 min = 1;
+   S32 max = 0;
+
+   if(lua_isnil(L,2))
+      max = luaL_checkint(L, 1); 
+   else
+   {
+      min = luaL_checkint(L, 1);
+      max = luaL_checkint(L, 2);
+   }
+
+   lua_pop(L, 1);
+   lua_pop(L, 2);
+
+   return returnInt(L, TNL::Random::readI(min, max));
+}
+
 
 
 
@@ -1644,9 +986,3 @@ void LuaScriptRunner::setEnums(lua_State *L)
 };
 
 
-// This is deliberately outside the zap namespace -- it provides a bridge to the printFunctions function above from luaW
-void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
-                           const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex)
-{
-   Zap::LuaObject::printFunctions(argMap, nodeMap, nodeList, prefix, nodeIndex);
-}

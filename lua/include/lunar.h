@@ -9,6 +9,8 @@
 #include <typeinfo>
 #include <string>
 
+#include "LuaException.h"
+
 extern "C" {
 #include "../lua-vec/src/lua.h"
 #include "../lua-vec/src/lauxlib.h"
@@ -16,15 +18,6 @@ extern "C" {
 
 #include "tnlLog.h"     // for def of logprintf()
 
-// From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
-struct LuaException : public std::exception
-{
-   std::string msg;
-
-   LuaException(std::string str) : msg(str) { /* do nothing */ }    // Constructor
-   ~LuaException() throw() { /* do nothing */ }                     // Destructor, required by gcc to avoid "looser throw" error
-   const char* what() const throw() { return msg.c_str(); }
-};
 
 
 template <typename T> class Lunar {

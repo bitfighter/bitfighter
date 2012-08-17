@@ -23,42 +23,21 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LUAUTIL_H_
-#define _LUAUTIL_H_
+#ifndef _LUAEXCEPTION_H_
+#define _LUAEXCEPTION_H_
 
-#include "luaObject.h"
-#include "tnlRandom.h"
+#include <string>
 
-using namespace std;
+// From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
 
-namespace Zap
+struct LuaException : public std::exception
 {
+   std::string msg;
 
-// Some util functions for scripts and levelgen files
-
-class LuaUtil: public LuaObject
-{
-public:
-   //LuaUtil();      // Constructor
-   //~LuaUtil();     // Destructor
-
-      //// Lua interface
-   //LUAW_DECLARE_CLASS(LuaUtil);
-
-   //static const char *luaClassName;
-   //static const luaL_reg luaMethods[];
-   //static const LuaFunctionProfile functionArgs[];
-
-   // Lua methods
-   static S32 logprint(lua_State *L);
-   static S32 printToConsole(lua_State *L);
-   static S32 getMachineTime(lua_State *L);
-   static S32 getRandomNumber(lua_State *L);
-   static S32 findFile(lua_State *L);
+   LuaException(std::string str) : msg(str) { /* do nothing */ }    // Constructor
+   ~LuaException() throw()                  { /* do nothing */ }    // Destructor, required by gcc to avoid "looser throw" error
+   const char* what() const throw()         { return msg.c_str(); }
 };
 
-
-};
 
 #endif
-

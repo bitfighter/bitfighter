@@ -28,8 +28,8 @@
 #include "config.h"              // For definition of FolderManager struct
 #include "game.h"
 #include "stringUtils.h"
-#include "luaUtil.h"
 #include "ServerGame.h"
+#include "LuaWrapper.h"
 
 #ifdef WIN32
 #  define vsnprintf vsnprintf_s    // Use secure version on windows
@@ -130,6 +130,24 @@ S32 getIntegerFromTable(lua_State *L, int tableIndex, int key)
    S32 rtn = (S32)lua_tointeger(L, -1);
    lua_pop(L, 1);    // Clear value from stack
    return rtn;
+}
+
+
+// TODO: get rid of this function!!!!
+// Pop a vec object off stack, check its type, and return it
+static Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
+{
+   if(!lua_isvec(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
+      logprintf(LogConsumer::LogError, msg);
+
+      throw LuaException(msg);
+   }
+
+   const F32 *vec = lua_tovec(L, index);
+   return Point(vec[0], vec[1]);
 }
 
 

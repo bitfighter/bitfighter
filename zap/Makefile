@@ -79,10 +79,10 @@ OBJECTS_SHARED=\
    lineEditor.o\
    LineItem.o\
    loadoutZone.o\
+   LuaBase.o\
    luaGameInfo.o\
    luaLevelGenerator.o\
    luaObject.o\
-   luaUtil.o\
    main.o\
    masterConnection.o\
    md5wrapper.o\

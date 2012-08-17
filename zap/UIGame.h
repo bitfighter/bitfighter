@@ -41,7 +41,7 @@ namespace Zap
 enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
    TEAM,    // Team name (can be tab-completed)
-   INT,     // Integer argument
+   xINT,     // Integer argument
    STR,     // String argument
    PT,      // Point argument (only used by Lua scripts)
    ARG_TYPES

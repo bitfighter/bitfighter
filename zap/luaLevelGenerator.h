@@ -28,8 +28,9 @@
 
 #include "luaObject.h"
 #include "gameLoader.h"
-#include "tnlLog.h"
-//#include "oglconsole.h"    // For logging to the console
+#include "LuaWrapper.h"
+#include "tnlLog.h"        // For logging
+
 
 using namespace std;
 

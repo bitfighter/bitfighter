@@ -35,6 +35,9 @@ namespace Zap
    {
       typedef LuaLevelGenerator Parent;
 
+   private:
+      static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
+
    public:
       // Constructors
       EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!

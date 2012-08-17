@@ -26,13 +26,9 @@
 #ifndef _LUAOBJECT_H_
 #define _LUAOBJECT_H_
 
-
+#include "LuaBase.h"          // Parent class
 #include "GameTypesEnum.h"
 #include "EventManager.h"
-
-#include "lua.h"
-#include "../lua/include/lunar.h"
-
 #include "LuaWrapper.h"
 
 #include "Point.h"
@@ -60,108 +56,13 @@ class Ship;
 class MenuItem;
 
 
-class LuaObject
+class LuaObject : public LuaBase
 {
-public:
-
-   //                 Enum       Name
-#  define LUA_ARG_TYPE_TABLE \
-   LUA_ARG_TYPE_ITEM( BOOL,      "Boolean"                                     ) \
-   LUA_ARG_TYPE_ITEM( INT,       "Integer"                                     ) \
-   LUA_ARG_TYPE_ITEM( INTS,      "One or more integers"                        ) \
-   LUA_ARG_TYPE_ITEM( NUM,       "Number"                                      ) \
-   LUA_ARG_TYPE_ITEM( NUM_GE0,   "Number >= 0"                                 ) \
-   LUA_ARG_TYPE_ITEM( STR,       "String"                                      ) \
-   LUA_ARG_TYPE_ITEM( PT,        "Point (or two numbers)"                      ) \
-   LUA_ARG_TYPE_ITEM( TABLE,     "Lua table"                                   ) \
-   LUA_ARG_TYPE_ITEM( LOADOUT,   "Loadout Object"                              ) \
-   LUA_ARG_TYPE_ITEM( ITEM,      "Item Object"                                 ) \
-   LUA_ARG_TYPE_ITEM( WEAP_ENUM, "WeaponEnum"                                  ) \
-   LUA_ARG_TYPE_ITEM( WEAP_SLOT, "Weapon slot #"                               ) \
-   LUA_ARG_TYPE_ITEM( MOD_ENUM,  "ModuleEnum"                                  ) \
-   LUA_ARG_TYPE_ITEM( MOD_SLOT,  "Module slot #"                               ) \
-   LUA_ARG_TYPE_ITEM( TEAM_INDX, "Team index"                                  ) \
-   LUA_ARG_TYPE_ITEM( PTS,       "One or more points (or a series of numbers)" ) \
-      
-
-   // Create the enum declaration
-   enum LuaArgType {
-#     define LUA_ARG_TYPE_ITEM(value, b) value,
-         LUA_ARG_TYPE_TABLE
-#     undef LUA_ARG_TYPE_ITEM
-      END      // End of list sentinel value
-   };
-
-protected:
-   static MenuItem *pushMenuItem (lua_State *L, MenuItem *menuItem);
-
-   // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
-   // this one pretty much arbitrarily...  it won't be overridden.
-   static void getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points);
-   virtual void getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings);
-   static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
-
-   static Point getPointOrXY(lua_State *L, S32 index);
-   static Vector<Point> getPointsOrXYs(lua_State *L, S32 index);
-   static Point getCheckedVec(lua_State *L, S32 index, const char *methodName);
-
-
-   static void setfield (lua_State *L, const char *key, F32 value);
+   typedef LuaBase Parent;
 
 public:
    LuaObject();            // Constructor
    virtual ~LuaObject();   // Destructor
-
-   // All of these return<T> functions work in the same way.  Include at the end of a child class method.
-   // Usage: return returnInt(L, int);
-
-   template<class T> S32 returnVal(lua_State *L, T value, bool letLuaDelete = true);
-
-   // The basics:
-   static S32 returnInt(lua_State *L, S32 num);
-   static S32 returnFloat(lua_State *L, F32 num);
-   static S32 returnString(lua_State *L, const char *str);
-   static S32 returnBool(lua_State *L, bool boolean);
-   static S32 returnNil(lua_State *L);
-
-   static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
-   static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName);
-   static string prettyPrintParamList(const LuaFunctionProfile *functionInfo);
-
-   static void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
-                              const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
-
-
-   // More complex objects:
-   static S32 returnPoint(lua_State *L, const Point &point);
-   static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
-   static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
-
-   static S32 returnPlayerInfo(lua_State *L, Ship *ship);
-   static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
-
-
-   static void clearStack(lua_State *L);
-   static F32 getFloat(lua_State *L, S32 index);
-   static F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
-
-   static bool getBool(lua_State *L, S32 index, const char *methodName);
-   static bool getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
-
-   static lua_Integer getInt(lua_State *L, S32 index);
-   static lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
-   static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
-
-   static lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName);
-
-   static const char *getString(lua_State *L, S32 index);
-   static const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
-
-   static const char *getString(lua_State *L, S32 index, const char *defaultVal);
-
-   // Some debugging helpers
-   static void dumpTable(lua_State *L, S32 tableIndex, const char *msg = "");
-   static bool dumpStack(lua_State* L, const char *msg = "");
 
    static bool shouldLuaGarbageCollectThisObject();     
 };
@@ -185,8 +86,11 @@ typedef struct { LuaObject *objectPtr; } UserData;
 #define ROBOT_HELPER_FUNCTIONS_KEY    "robot_helper_functions"
 #define LEVELGEN_HELPER_FUNCTIONS_KEY "levelgen_helper_functions"
 
-class LuaScriptRunner
+class LuaScriptRunner : public LuaBase
 {
+
+typedef LuaBase Parent;
+
 public:
    enum ScriptType {
       ROBOT,
@@ -268,10 +172,15 @@ public:
    void logError(const char *format, ...);
 
 
-   // Lua interface
-   //LUAW_DECLARE_CLASS(LuaScriptRunner);
-   //static const luaL_reg luaMethods[];
-   //static const char *luaClassName;
+   // What follows is a number of static functions, which will be registered directly with our Lua instance as functions
+   // that are not related to any particular object, but are just available locally.
+   static S32 logprint(lua_State *L);
+   static S32 printToConsole(lua_State *L);
+   static S32 getMachineTime(lua_State *L);
+   static S32 getRandomNumber(lua_State *L);
+   static S32 findFile(lua_State *L);
+
+   static const LuaFunctionProfile functionArgs[];
 };
 
 

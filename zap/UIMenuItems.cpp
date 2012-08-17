@@ -493,6 +493,53 @@ void ToggleMenuItem::activatedWithShortcutKey()
 // Lua interface
 const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
 
+
+// Pulls values out of the table at specified index as strings, and puts them all into strings vector
+static void getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings)
+{
+   strings.clear();
+
+   if(!lua_istable(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected table arg (which I wanted to convert to a string vector) at position %d", methodName, index);
+      logprintf(LogConsumer::LogError, msg);
+
+      throw LuaException(msg);
+   }
+
+   // The following block loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
+
+   lua_pushvalue(L, index);	// Push our table onto the top of the stack
+   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops
+
+   // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
+   // The lua_pushnil then pushed the table to -2, where it is currently located
+   while(lua_next(L, -2))     // -2 is our table
+   {
+      // Grab the value at the top of the stack
+      if(!lua_isstring(L, -1))
+      {
+         char msg[256];
+         dSprintf(msg, sizeof(msg), "%s expected a table of strings -- invalid value at stack position %d, table element %d", 
+                                    methodName, index, strings.size() + 1);
+         logprintf(LogConsumer::LogError, msg);
+
+         throw LuaException(msg);
+      }
+
+      strings.push_back(lua_tostring(L, -1));
+
+      lua_pop(L, 1);    // We extracted that value, pop it off so we can push the next element
+   }
+
+   // We've got all the elements in the table, so clear it off the stack
+   lua_pop(L, 1);
+}
+
+
+
+
 // Lua Constructor
 ToggleMenuItem::ToggleMenuItem(lua_State *L)
 {

@@ -40,9 +40,14 @@ extern "C"
 #  include "../lua/lua-vec/src/lauxlib.h"
 }
 
+#include "LuaBase.h"
+
+#include <string>
 #include <vector>
 #include <map>
 #include <cstring>
+
+using namespace Zap;
 
 #define LUAW_BUILDER
 
@@ -739,22 +744,6 @@ void luaW_extend(lua_State* L)
 #undef luaW_getregistry
 #undef luaW_setregistry
 
-
-
-static const S32 MAX_PROFILE_ARGS = 6;          // Max used so far = 3
-static const S32 MAX_PROFILES = 4;              // Max used so far = 2
-
-struct LuaFunctionProfile {
-   const char *functionName;
-   /*LuaArgType*/int argList[MAX_PROFILES][MAX_PROFILE_ARGS];
-   const S32 profileCount;
-};
-
-
-typedef const char* ClassName;
-typedef std::map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
-typedef std::pair<ClassName, std::vector<ClassName> > Node;
-
 extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
                            const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
 
@@ -945,15 +934,15 @@ public:
    }
 
 
-   template<class T>
-   static std::string getArgList(const char *functionName)
-   {
-      for(S32 i = 0; T::functionArgs[i].name != NULL; i++)
-         if(strcmp(functionName, T::functionArgs[i].name) == 0)
-            return prettyPrintParamList(T::functionArgs[i]);
+   //template<class T>
+   //static std::string getArgList(const char *functionName)
+   //{
+   //   for(S32 i = 0; T::functionArgs[i].name != NULL; i++)
+   //      if(strcmp(functionName, T::functionArgs[i].name) == 0)
+   //         return prettyPrintParamList(T::functionArgs[i]);
 
-      return "Arguments unknown";
-   }
+   //   return "Arguments unknown";
+   //}
 
 
    // Has to be run BEFORE sortClassList()!
@@ -1012,7 +1001,6 @@ public:
       printf("=====================\n");
    }
 };
-
 
 
 // Helper classes that extend LuaW_Registrar.  These are intended for use
