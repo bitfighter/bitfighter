@@ -23,7 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "luaObject.h"
 #include "luaGameInfo.h"
 #include "playerInfo.h"
 #include "gameType.h"

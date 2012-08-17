@@ -27,7 +27,7 @@
 #define _LUAGAME_H_
 
 
-#include "luaObject.h"
+#include "LuaScriptRunner.h"
 #include "gameWeapons.h"
 #include "shipItems.h"     // For module defs
 #include "move.h"          // For ShipModuleCount + ShipWeaponCount

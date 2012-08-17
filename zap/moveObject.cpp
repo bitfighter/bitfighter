@@ -34,7 +34,7 @@
 #include "gameConnection.h"
 #include "stringUtils.h"
 
-#include "luaObject.h"
+#include "LuaScriptRunner.h"
 
 #ifndef ZAP_DEDICATED
 #  include "ClientGame.h"

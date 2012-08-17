@@ -28,7 +28,7 @@
 
 
 #include "ship.h"             // Parent class
-#include "luaObject.h"
+#include "LuaScriptRunner.h"
 #include "game.h"             // For ClientInfo def
 
 #include "EventManager.h"

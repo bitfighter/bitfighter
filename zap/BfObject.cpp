@@ -43,7 +43,7 @@
 #include "PickupItem.h"          // For getItem function below
 #include "soccerGame.h"          // For getItem function below
 
-#include "luaObject.h"           // For LuaObject def and returnInt method
+#include "LuaScriptRunner.h"     // For LuaObject def and returnInt method
 #include "lua.h"                 // For push prototype
 
 #include "tnlBitStream.h"

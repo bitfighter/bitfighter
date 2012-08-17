@@ -184,7 +184,6 @@
     <ClCompile Include="..\zap\loadoutZone.cpp" />
     <ClCompile Include="..\zap\luaGameInfo.cpp" />
     <ClCompile Include="..\zap\luaLevelGenerator.cpp" />
-    <ClCompile Include="..\zap\luaObject.cpp" />
     <ClCompile Include="..\zap\main.cpp" />
     <ClCompile Include="..\zap\masterConnection.cpp" />
     <ClCompile Include="..\zap\md5wrapper.cpp" />
@@ -197,6 +196,7 @@
     <ClCompile Include="..\zap\Rect.cpp" />
     <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="LuaBase.cpp" />
+    <ClCompile Include="LuaScriptRunner.cpp" />
     <ClCompile Include="OpenglUtils.cpp" />
     <ClCompile Include="PickupItem.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
@@ -322,7 +322,6 @@
     <ClInclude Include="..\zap\lua.h" />
     <ClInclude Include="..\zap\luaGameInfo.h" />
     <ClInclude Include="..\zap\luaLevelGenerator.h" />
-    <ClInclude Include="..\zap\luaObject.h" />
     <ClInclude Include="..\zap\masterConnection.h" />
     <ClInclude Include="..\zap\md5wrapper.h" />
     <ClInclude Include="..\zap\move.h" />
@@ -336,6 +335,7 @@
     <ClInclude Include="..\zap\projectile.h" />
     <ClInclude Include="LuaBase.h" />
     <ClInclude Include="LuaException.h" />
+    <ClInclude Include="LuaScriptRunner.h" />
     <ClInclude Include="LuaWrapper.h" />
     <ClInclude Include="LuaWrapperUtils.h" />
     <ClInclude Include="OpenglUtils.h" />

@@ -103,7 +103,7 @@ void VideoSystem::init()
    //      flags |= SDL_WINDOW_BORDERLESS;
 
    // SDL 2.0 lets us create the window first, only once
-   gScreenInfo.sdlWindow = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+   gScreenInfo.sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
          gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight(), flags);
 
    if (!gScreenInfo.sdlWindow)

@@ -26,7 +26,7 @@
 #ifndef _LUALEVELGENERATOR_H_
 #define _LUALEVELGENERATOR_H_
 
-#include "luaObject.h"
+#include "LuaScriptRunner.h"
 #include "gameLoader.h"
 #include "LuaWrapper.h"
 #include "tnlLog.h"        // For logging

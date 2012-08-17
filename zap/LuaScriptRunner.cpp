@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "luaObject.h"         // Header
+#include "LuaScriptRunner.h"   // Header
 
 #include "luaGameInfo.h"
 #include "robot.h"             // For subscribing

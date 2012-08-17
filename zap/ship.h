@@ -29,7 +29,7 @@
 #include "item.h"    // for Item and LuaItem
 #include "BfObject.h"
 #include "moveObject.h"
-#include "luaObject.h"
+#include "LuaScriptRunner.h"
 #include "SoundEffect.h"
 #include "Timer.h"
 #include "shipItems.h"

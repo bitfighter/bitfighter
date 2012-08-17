@@ -25,8 +25,6 @@
 
 #include "Console.h"       // Our header
 
-#include "luaObject.h"
-
 #include "ScreenInfo.h"    // For ScreenInfo object
 #include "tnlAssert.h"     // For TNLAssert, of course
 

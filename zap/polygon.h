@@ -28,7 +28,7 @@
 
 #include "BfObject.h"
 #include "EditorObject.h"     // For PolygonObject parentage
-#include "luaObject.h"
+#include "LuaScriptRunner.h"
 #include "Geometry.h"
 
 namespace Zap
