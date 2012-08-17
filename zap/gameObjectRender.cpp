@@ -2460,6 +2460,9 @@ void renderBadge(F32 x, F32 y, F32 rad, MeritBadges badge)
       case BADGE_BBB_BRONZE:
          renderBBBBadge(x, y, rad, Colors::bronze);
          break;
+      case BADGE_BBB_PARTICIPATION:
+         renderBBBBadge(x, y, rad, Colors::green);
+         break;
       case BADGE_LEVEL_DESIGN_WINNER:
          renderLevelDesignWinnerBadge(x, y, rad);
          break;
