@@ -34,20 +34,20 @@ using namespace TNL;
 namespace Zap
 {
 //   drain gets multiplied by milliseconds
-//               enum           name,     drain, cost,       type,          menu name,             menu help text (renders in cyan)
+//               enum           name,     drain, cost,       type,               has2,   2cost,  menu name,             menu help text (renders in cyan)
 #define MODULE_ITEM_TABLE \
-   MODULE_ITEM(ModuleShield,  "Shield",      33,     0, ModuleUseActive,  "Shield Generator",      ""                              ) \
-   MODULE_ITEM(ModuleBoost,   "Turbo",       21,     0, ModuleUseActive,  "Turbo Boost",           ""                              ) \
-   MODULE_ITEM(ModuleSensor,  "Sensor",      14,     0, ModuleUseHybrid,  "Enhanced Sensor",       ""                              ) \
-   MODULE_ITEM(ModuleRepair,  "Repair",      21,     0, ModuleUseActive,  "Repair Module",         ""                              ) \
-   MODULE_ITEM(ModuleEngineer,"Engineer",     0, 75000, ModuleUseActive,  "Engineer",              ""                              ) \
-   MODULE_ITEM(ModuleCloak,   "Cloak",       14,     0, ModuleUseActive,  "Cloak Field Modulator", ""                              ) \
-   MODULE_ITEM(ModuleArmor,   "Armor",        0,     0, ModuleUsePassive, "Armor",                 "(makes ship harder to control)") \
+   MODULE_ITEM(ModuleShield,  "Shield",      33,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \
+   MODULE_ITEM(ModuleBoost,   "Turbo",       21,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                              ) \
+   MODULE_ITEM(ModuleSensor,  "Sensor",      14,     0, ModulePrimaryUseHybrid,  true,  35000, "Enhanced Sensor",       ""                              ) \
+   MODULE_ITEM(ModuleRepair,  "Repair",      21,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                              ) \
+   MODULE_ITEM(ModuleEngineer,"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0, "Engineer",              ""                              ) \
+   MODULE_ITEM(ModuleCloak,   "Cloak",       14,     0, ModulePrimaryUseActive,  false,     0, "Cloak Field Modulator", ""                              ) \
+   MODULE_ITEM(ModuleArmor,   "Armor",        0,     0, ModulePrimaryUsePassive, false,     0, "Armor",                 "(makes ship harder to control)") \
 
 
 // Define an enum from the first values in MODULE_ITEM_TABLE
 enum ShipModule {
-#define MODULE_ITEM(a, b, c, d, e, f, g) a,
+#define MODULE_ITEM(a, b, c, d, e, f, g, h, i) a,
    MODULE_ITEM_TABLE
 #undef MODULE_ITEM
    ModuleCount, 
@@ -56,11 +56,11 @@ enum ShipModule {
 
 
 
-enum ModuleUseType
+enum ModulePrimaryUseType
 {
-   ModuleUseActive,     // Only functional when active
-   ModuleUsePassive,    // Always functional
-   ModuleUseHybrid      // Always functional, with an active component
+   ModulePrimaryUseActive,     // Only functional when active
+   ModulePrimaryUsePassive,    // Always functional
+   ModulePrimaryUseHybrid      // Always functional, with an active component
 };
 
 
@@ -72,16 +72,20 @@ static const U8 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, We
 struct ModuleInfo
 {
    const char *mName;
-   S32 mEnergyDrain;       // Continuous energy drain while active module is in use
-   S32 mUseCost;           // Per use energy drain of module (if it has active use)
-   ModuleUseType mUseType; // If the module is active, passive, both
+   S32 mPrimaryEnergyDrain;       // Continuous energy drain while primary component is in use
+   S32 mPrimaryUseCost;           // Per use energy drain of primary component (if it has one)
+   ModulePrimaryUseType mPrimaryUseType; // How the primary component of the module is activated
+   bool hasSecondaryComponent;
+   S32 mSecondaryUseCost;         // Per use energy drain of secondary component
    const char *mMenuName;
    const char *mMenuHelp;
 
-   S32 getEnergyDrain() const;
-   S32 getUseCost() const;
+   S32 getPrimaryEnergyDrain() const;
+   S32 getPrimaryPerUseCost() const;
+   bool hasSecondary() const;
+   S32 getSecondaryPerUseCost() const;
    const char *getName() const;
-   ModuleUseType getUseType() const;
+   ModulePrimaryUseType getPrimaryUseType() const;
    const char *getMenuName() const;
    const char *getMenuHelp() const;
 };

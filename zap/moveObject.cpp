@@ -1372,7 +1372,7 @@ bool Asteroid::collide(BfObject *otherObject)
       {
          // Client does not know if we actually get destroyed from asteroids
          // prevents bouncing off asteroids, then LAG puts back to position.
-         if(!static_cast<Ship *>(otherObject)->isModuleActive(ModuleShield))
+         if(!static_cast<Ship *>(otherObject)->isModulePrimaryActive(ModuleShield))
             return false;
       }
    }

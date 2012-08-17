@@ -40,17 +40,19 @@ Move::Move()
    time = 32; 
    x = 0;
    y = 0;
-   angle = 0;
 
-   for(U32 i = 0; i < ARRAYSIZE(moduleActive); i++)
-      moduleActive[i] = false;
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   {
+      modulePrimary[i] = false;
+      moduleSecondary[i] = false;
+   }
 }
 
 
 bool Move::isAnyModActive() const
 {
-   for(U32 i = 0; i < ARRAYSIZE(moduleActive); i++)
-      if(moduleActive[i])
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+      if(modulePrimary[i] || moduleSecondary[i])
          return true;
 
    return false;
@@ -61,8 +63,11 @@ bool Move::isEqualMove(Move *prev)
 {
    bool modsUnchanged = true;
 
-   for(U32 i = 0; i < ARRAYSIZE(moduleActive); i++)
-      modsUnchanged = modsUnchanged && (prev->moduleActive[i] == moduleActive[i]);
+   for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
+   {
+      modsUnchanged = modsUnchanged && (prev->modulePrimary[i] == modulePrimary[i]);
+      modsUnchanged = modsUnchanged && (prev->moduleSecondary[i] == moduleSecondary[i]);
+   }
 
    return   prev->x == x &&
             prev->y == y &&
@@ -92,7 +97,10 @@ void Move::pack(BitStream *stream, Move *prev, bool packTime)
       stream->writeFlag(fire);
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         stream->writeFlag(moduleActive[i]);
+      {
+         stream->writeFlag(modulePrimary[i]);
+         stream->writeFlag(moduleSecondary[i]);
+      }
    }
    if(packTime)
    {
@@ -123,7 +131,10 @@ void Move::unpack(BitStream *stream, bool unpackTime)
       fire = stream->readFlag();
 
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
-         moduleActive[i] = stream->readFlag();
+      {
+         modulePrimary[i] = stream->readFlag();
+         moduleSecondary[i] = stream->readFlag();
+      }
    }
 
    if(unpackTime)
