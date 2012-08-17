@@ -608,18 +608,6 @@ void LuaBase::clearStack(lua_State *L)
 }
 
 
-//MenuItem *LuaBase::pushMenuItem (lua_State *L, MenuItem *menuItem)
-//{
-//  MenuItem *menuItemUserData = (MenuItem *)lua_newuserdata(L, sizeof(MenuItem));
-//
-//  *menuItemUserData = *menuItem;
-//  luaL_getmetatable(L, "MenuItem");
-//  lua_setmetatable(L, -2);
-//
-//  return menuItemUserData;
-//}
-
-
 // Pulls values out of the table at specified index as strings, and puts them all into strings vector
 void LuaBase::getPointVectorFromTable(lua_State *L, S32 index, Vector<Point> &points)
 {
