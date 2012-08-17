@@ -88,13 +88,6 @@ class LuaScriptRunner : public LuaBase
 
 typedef LuaBase Parent;
 
-public:
-   enum ScriptType {
-      ROBOT,
-      LEVELGEN,
-      PLUGIN
-   };
-
 private:
    static deque<string> mCachedScripts;
 
