@@ -152,7 +152,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
 
       // We have a userdata
       LuaObject *obj = ud->objectPtr;                       // Extract the pointer
-      MenuItem *menuItem = dynamic_cast<MenuItem *>(obj);   // Cast it to a MenuItem
+      MenuItem *menuItem = static_cast<MenuItem *>(obj);    // Cast it to a MenuItem
 
       if(!menuItem)                                         // Cast failed -- not a MenuItem... we got some bad args
       {
