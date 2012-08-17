@@ -662,7 +662,7 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionProfile *functionInfo
 
 // Helper for printDocs(), called from luaW with -luadocs option
 void LuaBase::printFunctions(const ArgMap &argMap, const map<ClassName, unsigned int> &nodeMap, 
-                              const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex)
+                             const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex)
 {
    if(prefix.length() > 8)
       printf(prefix.substr(0, prefix.length() - 8).c_str());
