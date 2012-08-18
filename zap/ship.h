@@ -118,7 +118,7 @@ public:
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
       SensorZoomTime = 300,
-      SensorInitialEnergyUsage = 5000,
+      SensorCloakDetectionDisance = 400,
       CloakFadeTime = 300,
       CloakCheckRadius = 200,
       RepairHundredthsPerSecond = 16,
@@ -142,18 +142,11 @@ public:
       SpawnShieldMask = BIT(12),    // Used for the spawn shield
    };
 
-   enum SensorStatus {
-      SensorStatusPassive,
-      SensorStatusActive,
-      SensorStatusOff
-   };
-
    S32 mFireTimer;
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
    bool mCooldownNeeded;
-   U32 mSensorStartTime;
    Point mImpulseVector;
 
    F32 getSlipzoneSpeedMoficationFactor();
@@ -170,12 +163,13 @@ public:
 
 
    Timer mSensorEquipZoomTimer;
-   Timer mSensorActiveZoomTimer;
    Timer mWeaponFireDecloakTimer;
    Timer mCloakTimer;
    Timer mSpawnShield;
    Timer mModuleSecondaryTimer[ModuleCount];  // Timer to prevent accidentally firing in quick succession
+   Timer mSpyBugPlacementTimer;
    static const U32 ModuleSecondaryTimerDelay = 500;
+   static const U32 SpyBugPlacementTimerDelay = 800;
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;
@@ -225,8 +219,7 @@ public:
 
    void setEngineeredTeleporter(Teleporter *teleporter);
    Teleporter *getEngineeredTeleporter();
-   F32 getSensorActiveZoomFraction();
-   F32 getSensorEquipZoomFraction();
+   F32 getSensorZoomFraction();
    Point getAimVector();
 
    void getLoadout(Vector<U8> &loadout);    // Fills loadout
@@ -263,8 +256,6 @@ public:
    void setActualPos(Point p, bool warp);
    void activateModulePrimary(U32 indx);    // Activate the specified module primary component for the current move
    void activateModuleSecondary(U32 indx);  // Activate the specified module secondary component for the current move
-
-   SensorStatus getSensorStatus();
 
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();

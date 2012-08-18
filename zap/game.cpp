@@ -301,23 +301,14 @@ void Game::setReadyToConnectToMaster(bool ready)
 }
 
 
-Point Game::getScopeRange(S32 sensorStatus)
+Point Game::getScopeRange(bool sensorEquipped)
 {
-   switch(sensorStatus)
-   {
-      case Ship::SensorStatusPassive:
-         return Point(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-               PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
+   if(sensorEquipped)
+      return Point(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+            PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
 
-      case Ship::SensorStatusActive:
-         return Point(PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-               PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
-
-      case Ship::SensorStatusOff:
-      default:
-         return Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
-               PLAYER_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
-   }
+   return Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+         PLAYER_VISUAL_DISTANCE_VERTICAL + PLAYER_SCOPE_MARGIN);
 }
 
 
@@ -1025,63 +1016,15 @@ Rect Game::computeBarrierExtents()
 
 Point Game::computePlayerVisArea(Ship *ship) const
 {
-   F32 activeFraction = ship->getSensorActiveZoomFraction();
-   F32 equipFraction = ship->getSensorEquipZoomFraction();
+   F32 fraction = ship->getSensorZoomFraction();
 
-   F32 fraction = 0;
+   static const Point regVis(PLAYER_VISUAL_DISTANCE_HORIZONTAL, PLAYER_VISUAL_DISTANCE_VERTICAL);
+   static const Point sensVis(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
 
-   Point regVis(PLAYER_VISUAL_DISTANCE_HORIZONTAL, PLAYER_VISUAL_DISTANCE_VERTICAL);
-   Point sensPassiveVis(PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
-   Point sensActiveVis(PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL);
-
-   Point *comingFrom;
-   Point *goingTo;
-
-   // This trainwreck is how to determine our visibility based on the tri-state sensor module
-   // It depends on the last sensor status, which is determined if one of the two timers is still
-   // running
-   switch(ship->getSensorStatus())
-   {
-      case Ship::SensorStatusPassive:
-         if (equipFraction < 1)
-         {
-            comingFrom = &regVis;
-            goingTo = &sensPassiveVis;
-            fraction = equipFraction;
-         }
-         else if(activeFraction < 1)
-         {
-            goingTo = &sensPassiveVis;
-            comingFrom = &sensActiveVis;
-            fraction = activeFraction;
-         }
-         else
-         {
-            goingTo = &sensPassiveVis;
-            comingFrom = &sensPassiveVis;
-            fraction = 1;
-         }
-         break;
-
-      case Ship::SensorStatusActive:
-         goingTo = &sensActiveVis;
-         comingFrom = &sensPassiveVis;
-         fraction = activeFraction;
-         break;
-
-      case Ship::SensorStatusOff:
-      default:
-         if (activeFraction < 1)
-            comingFrom = &sensActiveVis;
-         else
-            comingFrom = &sensPassiveVis;
-         goingTo = &regVis;
-         fraction = equipFraction;
-         break;
-   }
-
-   // Ugly
-   return *comingFrom + (*goingTo - *comingFrom) * fraction;
+   if(ship->hasModule(ModuleSensor))
+      return regVis + (sensVis - regVis) * fraction;
+   else
+      return sensVis + (regVis - sensVis) * fraction;
 }
 
 

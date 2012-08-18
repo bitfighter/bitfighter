@@ -96,7 +96,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleSecondaryTimer[i].setPeriod(ModuleSecondaryTimerDelay);
 
-   mSensorActiveZoomTimer.setPeriod(SensorZoomTime);
+   mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
 
    mNetFlags.set(Ghostable);
@@ -299,18 +299,6 @@ void Ship::activateModuleSecondary(U32 index)
 }
 
 
-Ship::SensorStatus Ship::getSensorStatus()
-{
-   if(!hasModule(ModuleSensor))
-      return SensorStatusOff;
-
-   if(mModulePrimaryActive[ModuleSensor])
-      return SensorStatusActive;
-   else
-      return SensorStatusPassive;
-}
-
-
 void Ship::setActualPos(Point p, bool warp)
 {
    Parent::setActualPos(p);
@@ -478,13 +466,7 @@ bool Ship::isOnObject(BfObject *object)
 }
 
 
-F32 Ship::getSensorActiveZoomFraction()
-{
-   return 1 - mSensorActiveZoomTimer.getFraction();
-}
-
-
-F32 Ship::getSensorEquipZoomFraction()
+F32 Ship::getSensorZoomFraction()
 {
    return 1 - mSensorEquipZoomTimer.getFraction();
 }
@@ -690,7 +672,6 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       if(path != BfObject::ClientIdleControlReplay) // don't want the replay to make timer count down much faster, while having high ping.
       {
-         mSensorActiveZoomTimer.update(mCurrentMove.time);
          mSensorEquipZoomTimer.update(mCurrentMove.time);
          mCloakTimer.update(mCurrentMove.time);
 
@@ -882,6 +863,8 @@ void Ship::processModules()
    for(S32 i = 0; i < ModuleCount; i++)
       mModuleSecondaryTimer[i].update(mCurrentMove.time);
 
+   mSpyBugPlacementTimer.update(mCurrentMove.time);
+
    // Save the previous module primary/secondary component states; reset them - to be set later
    bool wasModulePrimaryActive[ModuleCount];
    bool wasModuleSecondaryActive[ModuleCount];
@@ -970,7 +953,8 @@ void Ship::processModules()
    {
       if(mModulePrimaryActive[i])
       {
-         S32 energyUsed = getGame()->getModuleInfo((ShipModule) i)->getPrimaryEnergyDrain() * timeInMilliSeconds;
+         const ModuleInfo *moduleInfo = getGame()->getModuleInfo((ShipModule) i);
+         S32 energyUsed = moduleInfo->getPrimaryEnergyDrain() * timeInMilliSeconds;
          mEnergy -= energyUsed;
 
          // Exclude passive modules
@@ -979,6 +963,22 @@ void Ship::processModules()
 
          if(getClientInfo())
             getClientInfo()->getStatistics()->addModuleUsed(ShipModule(i), mCurrentMove.time);
+
+
+         // Sensor module needs to place a spybug
+         if(i == ModuleSensor && !isGhost() &&                 // Server side only
+               mSpyBugPlacementTimer.getCurrent() == 0 &&      // Prevent placement too fast
+               mEnergy > moduleInfo->getPrimaryPerUseCost())   // Have enough energy
+         {
+            Point direction = getAimVector();
+            GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
+                                                getActualVel(), 0, CollisionRadius - 2, this);
+
+            mEnergy -= moduleInfo->getPrimaryPerUseCost();
+
+            if(getClientInfo())
+               getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
+         }
       }
 
       // Fire the module secondary component if it is active and the delay timer has run out
@@ -991,18 +991,8 @@ void Ship::processModules()
             // Reduce energy
             mEnergy -= energyCost;
 
-            // Sensor module needs to place a spybug (done server-side only)
-            if(i == ModuleSensor && !isGhost())
-            {
-               Point direction = getAimVector();
-               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
-                                                   getActualVel(), 0, CollisionRadius - 2, this);
-
-               if(getClientInfo())
-                  getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
-            }
             // Pulse uses up all energy and applies an impulse vector
-            else if(i == ModuleBoost)
+            if(i == ModuleBoost)
             {
                // The impulse should be in the same direction you're already going
                mImpulseVector = getActualVel();
@@ -1041,10 +1031,8 @@ void Ship::processModules()
       {
          if(i == ModuleSensor)
          {
-            mSensorActiveZoomTimer.reset();
-            mSensorStartTime = getGame()->getCurrentTime();
-            if(mModulePrimaryActive[i])
-               mEnergy -= SensorInitialEnergyUsage; // inital energy use, prevents tapping to see cloaked
+            if(mSpyBugPlacementTimer.getCurrent() == 0)
+               mSpyBugPlacementTimer.reset();
          }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
@@ -1535,11 +1523,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Module activity toggled
          if(wasPrimaryActive[i] != mModulePrimaryActive[i])
          {
-            if(i == ModuleSensor)
-            {
-               mSensorStartTime = getGame()->getCurrentTime();
-            }
-            else if(i == ModuleCloak)
+            if(i == ModuleCloak)
                mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
          }
       }
@@ -1568,7 +1552,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    else
       mInterpolating = true;
-
 
 
    if(playSpawnEffect)
@@ -2245,18 +2228,31 @@ void Ship::render(S32 layerIndex)
    // Don't completely hide local player or ships on same team
    if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
       alpha = max(alpha, 0.25f);     // Make sure we have at least .25 alpha
-   
-   if(!localShip)    // Only apply sensor-makes-cloaked-ships-visible to other ships
+
+   // If local ship has sensor, it can see cloaked non-local ships
+   // Only apply sensor-makes-cloaked-ships-visible to other ships
+   if(!localShip)
    {
-      // If local ship has sensor, it can see cloaked non-local ships
-      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());      // <-- this is our local ship
-      if(ship && ship->isModulePrimaryActive(ModuleSensor) && alpha < 0.5)
-         alpha = 0.5;
+      // This is our local ship
+      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
+
+      // If we have sensor equipped and this non-local ship is cloaked
+      if(ship && ship->hasModule(ModuleSensor) && alpha < 0.5)
+      {
+         // Do a distance check - cloaked ships are detected at a reduced distance
+         F32 distanceSquared = (ship->getPos() - getPos()).lenSquared();
+
+         if(distanceSquared < SensorCloakDetectionDisance * SensorCloakDetectionDisance)
+         {
+            // Now de-cloak the detected ship
+            alpha = 0.5;
+         }
+      }
    }
 
 
-   renderShip(mShapeType, gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime() - mSensorStartTime,
-              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), isModulePrimaryActive(ModuleSensor), 
+   renderShip(mShapeType, gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime(),
+              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), hasModule(ModuleSensor),
               isModulePrimaryActive(ModuleRepair) && mHealth < 1, hasModule(ModuleArmor));
 
    if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
