@@ -61,8 +61,9 @@ enum MeritBadges {
    BADGE_BBB_GOLD = 3,
    BADGE_BBB_SILVER = 4,
    BADGE_BBB_BRONZE = 5,
-   BADGE_LEVEL_DESIGN_WINNER = 6,
-   BADGE_ZONE_CONTROLLER = 7,
+   BADGE_BBB_PARTICIPATION = 6,
+   BADGE_LEVEL_DESIGN_WINNER = 7,
+   BADGE_ZONE_CONTROLLER = 8,
    //...
    BADGE_COUNT = 32              // Changing this value will require updating master server and protocol version
 };

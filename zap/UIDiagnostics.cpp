@@ -720,6 +720,9 @@ void DiagnosticUserInterface::render()
          renderBadge(x, y, rad, BADGE_BBB_BRONZE);
 
          x += 3*rad;
+         renderBadge(x, y, rad, BADGE_BBB_PARTICIPATION);
+
+         x += 3*rad;
          renderBadge(x, y, rad, BADGE_LEVEL_DESIGN_WINNER);
 
          x += 3*rad;
