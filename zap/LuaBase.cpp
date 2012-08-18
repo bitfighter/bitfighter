@@ -231,6 +231,14 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                   }
                   break;
 
+               case ROBOT:
+                  ok = luaW_is<Robot>(L, stackPos);
+                  break;
+
+               case LEVELGEN:
+                  ok = luaW_is<LuaLevelGenerator>(L, stackPos);
+                  break;
+
                default:
                   TNLAssert(false, "Unknown arg type!");
                   break;

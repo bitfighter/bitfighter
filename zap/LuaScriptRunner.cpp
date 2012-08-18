@@ -656,11 +656,15 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 
 #define LUA_METHODS(CLASS, METHOD) \
-METHOD("logprint",        logprint,        ARRAYDEF({{ ANY, END }                                }), 1 ) \
-METHOD("print",           printToConsole,  ARRAYDEF({{ ANY, END }                                }), 1 ) \
-METHOD("getMachineTime",  getMachineTime,  ARRAYDEF({{      END }                                }), 1 ) \
-METHOD("getRandomNumber", getRandomNumber, ARRAYDEF({{      END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
-METHOD("findFile",        findFile,        ARRAYDEF({{ STR, END }                                 }), 1 ) \
+METHOD("subscribe_bot",        subscribe_bot<Robot>,                    ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
+METHOD("unsubscribe_bot",      unsubscribe_bot<Robot>,                  ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
+METHOD("subscribe_levelgen",   subscribe_levelgen<LuaLevelGenerator>,   ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
+METHOD("unsubscribe_levelgen", unsubscribe_levelgen<LuaLevelGenerator>, ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
+METHOD("logprint",             logprint,                                ARRAYDEF({{ ANY, END }                                 }), 1 ) \
+METHOD("print",                printToConsole,                          ARRAYDEF({{ ANY, END }                                 }), 1 ) \
+METHOD("getMachineTime",       getMachineTime,                          ARRAYDEF({{      END }                                 }), 1 ) \
+METHOD("getRandomNumber",      getRandomNumber,                         ARRAYDEF({{      END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
+METHOD("findFile",             findFile,                                ARRAYDEF({{ STR, END }                                 }), 1 ) \
 
 
 //GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_METHODS);
