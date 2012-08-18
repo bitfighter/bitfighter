@@ -1644,7 +1644,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
             continue;
 
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
-         queryRect.expand(mGame->getScopeRange(ship->getSensorStatus()));
+         queryRect.expand(mGame->getScopeRange(ship->hasModule(ModuleSensor)));
 
          if(scopeObject == ship)    
             mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1663,7 +1663,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
       Ship *co = static_cast<Ship *>(scopeObject);
 
       Rect queryRect(pos, pos);
-      queryRect.expand( mGame->getScopeRange(co->getSensorStatus()) );
+      queryRect.expand( mGame->getScopeRange(co->hasModule(ModuleSensor)) );
 
       fillVector.clear();
       mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
@@ -1713,7 +1713,7 @@ void GameType::queryItemsOfInterest()
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
       
       Point pos = ioi.theItem->getActualPos();
-      Point scopeRange(Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL);
+      Point scopeRange(Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL);
       Rect queryRect(pos, pos);
 
       queryRect.expand(scopeRange);
@@ -1728,10 +1728,7 @@ void GameType::queryItemsOfInterest()
          delta.y = fabs(delta.y);
 
          if(
-               (theShip->getSensorStatus() == Ship::SensorStatusActive && 
-                     delta.x < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_HORIZONTAL && 
-                     delta.y < Game::PLAYER_SENSOR_ACTIVE_VISUAL_DISTANCE_VERTICAL) ||
-               (theShip->getSensorStatus() == Ship::SensorStatusPassive && 
+               (theShip->hasModule(ModuleSensor) &&
                      delta.x < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL && 
                      delta.y < Game::PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL) ||
                (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && 

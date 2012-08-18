@@ -38,7 +38,7 @@ namespace Zap
 #define MODULE_ITEM_TABLE \
    MODULE_ITEM(ModuleShield,  "Shield",      33,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \
    MODULE_ITEM(ModuleBoost,   "Turbo",       21,     0, ModulePrimaryUseActive,  true,      0, "Turbo Boost",           ""                              ) \
-   MODULE_ITEM(ModuleSensor,  "Sensor",      14,     0, ModulePrimaryUseHybrid,  true,  35000, "Enhanced Sensor",       ""                              ) \
+   MODULE_ITEM(ModuleSensor,  "Sensor",       0, 35000, ModulePrimaryUseHybrid,  false,     0, "Enhanced Sensor",       ""                              ) \
    MODULE_ITEM(ModuleRepair,  "Repair",      21,     0, ModulePrimaryUseActive,  false,     0, "Repair Module",         ""                              ) \
    MODULE_ITEM(ModuleEngineer,"Engineer",     0, 75000, ModulePrimaryUseActive,  false,     0, "Engineer",              ""                              ) \
    MODULE_ITEM(ModuleCloak,   "Cloak",       14,     0, ModulePrimaryUseActive,  false,     0, "Cloak Field Modulator", ""                              ) \
