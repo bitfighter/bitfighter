@@ -659,25 +659,7 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 
 //////////////////////////////////////////////////////
 
-
-// Register some functions not associated with a particular class
-//void LuaScriptRunner::registerLooseFunctions(lua_State *L)
-//{
-//   // #define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
-//   lua_register(L, "subscribe",        subscribe);
-//   lua_register(L, "unsubscribe",      unsubscribe);
-//
-//   // Former LuaUtil functions
-//   lua_register(L, "logprint",             logprint);          // Any args
-//   lua_register(L, "print",                print);             // Any args
-//   lua_register(L, "getMachineTime",       getMachineTime);    // No args
-//   lua_register(L, "getRandomNumber",      getRandomNumber);   // 0,1,2 numbers
-//   lua_register(L, "findFile",             findFile);          // 1 string arg
-//}
-
-
-//#define LUA_FUNARGS_ITEM(class_, name, function, profiles, profileCount) \
-//{ #name, function, profileCount },
+// Define 
 
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, subscribe,       ARRAYDEF({{ ROBOT, EVENT, END }, { LEVELGEN, EVENT, END }}), 2 ) \
@@ -685,8 +667,9 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
    METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,          END }                          }), 1 ) \
    METHOD(CLASS, print,           ARRAYDEF({{ ANY,          END }                          }), 1 ) \
    METHOD(CLASS, getMachineTime,  ARRAYDEF({{               END }                          }), 1 ) \
-   METHOD(CLASS, getRandomNumber, ARRAYDEF({{ END }, { NUM, END }, { NUM, NUM, END }       }), 3 ) \
    METHOD(CLASS, findFile,        ARRAYDEF({{ STR,          END }                          }), 1 ) \
+   METHOD(CLASS, getRandomNumber, ARRAYDEF({{ END }, { NUM, END }, { NUM, NUM, END }       }), 3 ) \
+
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
    
@@ -703,6 +686,8 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 
 #  undef REGISTER_LINE
 
+   // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
+   lua_register(L, "math.random", getRandomNumber);
 }
 
 #undef LUA_METHODS
@@ -791,34 +776,31 @@ S32 LuaScriptRunner::findFile(lua_State *L)
 }
 
 
+// General structure and perculiar error messages taken from lua math lib
 S32 LuaScriptRunner::getRandomNumber(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "getRandomNumber");
-   logprintf("Profile = %d", profile);
+   S32 args = lua_gettop(L);
 
-   if(lua_isnil(L, 1))
-   {
-      lua_pop(L, 1);
-      lua_pop(L, 2);
-
+   if(args == 0)
       return returnFloat(L, TNL::Random::readF());
-   }
 
-   S32 min = 1;
-   S32 max = 0;
-
-   if(lua_isnil(L,2))
-      max = luaL_checkint(L, 1); 
-   else
+   if(args == 1)
    {
-      min = luaL_checkint(L, 1);
-      max = luaL_checkint(L, 2);
+      S32 max = luaL_checkint(L, 1);
+      luaL_argcheck(L, 1 <= max, 1, "interval is empty");
+      return returnInt(L, TNL::Random::readI(1, max));
    }
 
-   lua_pop(L, 1);
-   lua_pop(L, 2);
+   if(args == 2)
+   {
+      int min = luaL_checkint(L, 1);
+      int max = luaL_checkint(L, 2);
+      luaL_argcheck(L, min <= max, 2, "interval is empty");
+      return returnInt(L, TNL::Random::readI(min, max));
+   }
 
-   return returnInt(L, TNL::Random::readI(min, max));
+   else 
+      return luaL_error(L, "wrong number of arguments");
 }
 
 
