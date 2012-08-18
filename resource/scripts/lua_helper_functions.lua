@@ -36,9 +36,6 @@
 
 -----------------------------------------------------------
 
--- Our utility object
--- LuaUtil = LuaUtil()  -- Could put a call to C++ random function in here...
-
 
 -- Smarter implementation of dofile; finds script before loading it into current environment
 function include(filename)
@@ -171,15 +168,3 @@ function values(t)
         if i <= n then return t[i] end
     end
 end
-
-
-
--- Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
-math.random = function (x, y)
-   return getRandomNumber(x, y)
-end
-
-
-
-
-

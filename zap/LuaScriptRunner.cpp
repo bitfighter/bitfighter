@@ -668,7 +668,6 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
    METHOD(CLASS, print,           ARRAYDEF({{ ANY,          END }                          }), 1 ) \
    METHOD(CLASS, getMachineTime,  ARRAYDEF({{               END }                          }), 1 ) \
    METHOD(CLASS, findFile,        ARRAYDEF({{ STR,          END }                          }), 1 ) \
-   METHOD(CLASS, getRandomNumber, ARRAYDEF({{ END }, { NUM, END }, { NUM, NUM, END }       }), 3 ) \
 
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
@@ -687,7 +686,8 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 #  undef REGISTER_LINE
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
-   lua_register(L, "math.random", getRandomNumber);
+   lua_register(L, "getRandomNumber", getRandomNumber);
+   luaL_dostring(L, "math.random = getRandomNumber");
 }
 
 #undef LUA_METHODS
@@ -802,8 +802,6 @@ S32 LuaScriptRunner::getRandomNumber(lua_State *L)
    else 
       return luaL_error(L, "wrong number of arguments");
 }
-
-
 
 
 // Borrowed from http://tdistler.com/2010/09/13/c-enums-in-lua
