@@ -655,27 +655,25 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 }
 
 
+//#define LUA_FUNARGS_ITEM(class_, name, function, profiles, profileCount) \
+//{ #name, function, profileCount },
+
 #define LUA_METHODS(CLASS, METHOD) \
-METHOD("subscribe_bot",        subscribe_bot<Robot>,                    ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
-METHOD("unsubscribe_bot",      unsubscribe_bot<Robot>,                  ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
-METHOD("subscribe_levelgen",   subscribe_levelgen<LuaLevelGenerator>,   ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
-METHOD("unsubscribe_levelgen", unsubscribe_levelgen<LuaLevelGenerator>, ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
-METHOD("logprint",             logprint,                                ARRAYDEF({{ ANY, END }                                 }), 1 ) \
-METHOD("print",                printToConsole,                          ARRAYDEF({{ ANY, END }                                 }), 1 ) \
-METHOD("getMachineTime",       getMachineTime,                          ARRAYDEF({{      END }                                 }), 1 ) \
-METHOD("getRandomNumber",      getRandomNumber,                         ARRAYDEF({{      END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
-METHOD("findFile",             findFile,                                ARRAYDEF({{ STR, END }                                 }), 1 ) \
+METHOD(CLASS, "subscribe_bot",        /*subscribe_bot<Robot>,                   */ ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
+METHOD(CLASS, "unsubscribe_bot",      /*unsubscribe_bot<Robot>,                 */ ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
+METHOD(CLASS, "subscribe_levelgen",   /*subscribe_levelgen<LuaLevelGenerator>,  */ ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
+METHOD(CLASS, "unsubscribe_levelgen", /*unsubscribe_levelgen<LuaLevelGenerator>,*/ ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
+METHOD(CLASS, "logprint",             /*logprint,                               */ ARRAYDEF({{ ANY, END }                                 }), 1 ) \
+METHOD(CLASS, "print",                /*printToConsole,                         */ ARRAYDEF({{ ANY, END }                                 }), 1 ) \
+METHOD(CLASS, "getMachineTime",       /*getMachineTime,                         */ ARRAYDEF({{      END }                                 }), 1 ) \
+METHOD(CLASS, "getRandomNumber",      /*getRandomNumber,                        */ ARRAYDEF({{      END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
+METHOD(CLASS, "findFile",             /*findFile,                               */ ARRAYDEF({{ STR, END }                                 }), 1 ) \
 
 
 //GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_METHODS);
-GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);      // Class, Table
 
 #undef LUA_METHODS
-
-// Need this because, for some reason, LuaBase can't run ARRAYSIZE on this struct, and we need it for printing 
-// the function documentation
-//LuaScriptRunner::functionCount = ARRAYSIZE(LuaScriptRunner::functionArgs);
-
 
 // Produces:
 //const LuaFunctionProfile LuaScriptRunner::functionArgs[] = { 
