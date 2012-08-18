@@ -1022,7 +1022,7 @@ S32 CoreItem::getHealth(lua_State *L) { return returnFloat(L, getTotalHealth());
 
 S32 CoreItem::setHealth(lua_State *L) 
 { 
-   S32 profile = checkArgList(L, functionArgs, "CoreItem", "setHealth");
+   checkArgList(L, functionArgs, "CoreItem", "setHealth");
    setStartingHealth(getFloat(L, 1));
 
    return 0;     

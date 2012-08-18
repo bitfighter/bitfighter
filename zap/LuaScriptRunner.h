@@ -146,10 +146,6 @@ public:
 
    bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
 
-   // Event subscriptions
-   int subscribe(lua_State *L);
-   int unsubscribe(lua_State *L);
-
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
    bool loadAndRunGlobalFunction(lua_State *L, const char *key);
@@ -160,10 +156,16 @@ public:
    // What follows is a number of static functions, which will be registered directly with our Lua instance as functions
    // that are not related to any particular object, but are just available locally.
    static S32 logprint(lua_State *L);
-   static S32 printToConsole(lua_State *L);
+   static S32 print(lua_State *L);
    static S32 getMachineTime(lua_State *L);
    static S32 getRandomNumber(lua_State *L);
    static S32 findFile(lua_State *L);
+   static S32 subscribe(lua_State *L);
+   static S32 unsubscribe(lua_State *L);
+
+   S32 doSubscribe(lua_State *L);
+   S32 doUnsubscribe(lua_State *L);
+
 
    static const LuaFunctionProfile functionArgs[]; 
 };
@@ -180,7 +182,7 @@ public:
 // See discussion of this code here:
 // http://stackoverflow.com/questions/11413663/reducing-code-repetition-in-c
 //
-// Start with a definition like the following:
+// Starting with a definition like the following:
 /*
  #define LUA_METHODS(CLASS, METHOD) \
     METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \

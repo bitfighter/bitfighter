@@ -1111,7 +1111,7 @@ S32 EngineeredItem::getHealth(lua_State *L) { return returnFloat(L, mHealth);   
 
 S32 EngineeredItem::setHealth(lua_State *L) 
 { 
-   S32 profile = checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
+   checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
    mHealth = getFloat(L, 1);
    checkHealthBounds();
    return 0;     
