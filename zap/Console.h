@@ -26,11 +26,27 @@
 #ifndef _CONSOLE_H_
 #define _CONSOLE_H_
 
+#if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
+
+namespace Zap {
+
+class Console
+{
+public:
+   // Do nothing
+   void output(const char *s, ...) {}
+};
+
+
+
+#else
+
 #include "LuaScriptRunner.h"     // Parent class
 #include "InputCode.h"           // For InputCodeManager and associated enums
 #include "oglconsole.h"
 #include "lua.h"
 #include "tnlTypes.h"
+
 
 using namespace TNL;
 
@@ -73,6 +89,8 @@ public:
 
    void output(const char *s, ...);    // Print message to console
 };
+
+#endif // defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
 
 // Provide transparent access to our global console instance
 extern Console gConsole;

@@ -3,34 +3,9 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
-#if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
-
-struct OGLCONSOLE_Console
-{
-	// Do nothing
-};
-
-// define some empty function that will do nothing
-#define OGLCONSOLE_Output
-#define OGLCONSOLE_Print
-#define OGLCONSOLE_HideConsole()
-#define OGLCONSOLE_ShowConsole()
-#define OGLCONSOLE_EnterKey
-#define OGLCONSOLE_setCursor
-#define OGLCONSOLE_Draw()
-#define OGLCONSOLE_Reshape()
-#define OGLCONSOLE_ProcessBitfighterTextInputEvent
-#define OGLCONSOLE_ProcessBitfighterKeyEvent
-#define OGLCONSOLE_GetVisibility() false
-#define OGLCONSOLE_CreateFont()
-#define OGLCONSOLE_Quit()
-#define OGLCONSOLE_Create() OGLCONSOLE_Console()
-
-#else
 
 /* Opaque to you you lowly user */
 typedef struct _OGLCONSOLE_Console *OGLCONSOLE_Console;
-
 
 
 #ifdef __cplusplus
@@ -96,7 +71,6 @@ int OGLCONSOLE_CreateFont();
 #ifdef __cplusplus
 }
 #endif
-#endif
 
-#endif
+#endif // _OGLCONSOLE_H
 
