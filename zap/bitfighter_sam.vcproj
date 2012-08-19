@@ -57,6 +57,7 @@
 				WarnAsError="false"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -147,6 +148,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -237,6 +239,7 @@
 				WarnAsError="false"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -327,6 +330,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -805,10 +809,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\ClassDiagram21.cd"
-			>
-		</File>
-		<File
 			RelativePath=".\ClientGame.cpp"
 			>
 		</File>
@@ -845,6 +845,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Console.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\controlObjectConnection.cpp"
 			>
 		</File>
@@ -866,6 +870,10 @@
 		</File>
 		<File
 			RelativePath=".\EditorObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\EditorPlugin.cpp"
 			>
 		</File>
 		<File
@@ -985,6 +993,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\LuaBase.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\luaGameInfo.cpp"
 			>
 		</File>
@@ -1001,19 +1013,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\luaObject.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\luaObject.h"
-			>
-		</File>
-		<File
-			RelativePath=".\luaUtil.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\luaUtil.h"
+			RelativePath=".\LuaScriptRunner.cpp"
 			>
 		</File>
 		<File

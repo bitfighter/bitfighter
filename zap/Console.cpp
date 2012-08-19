@@ -31,10 +31,6 @@
 #include <stdio.h>         // For vsnprintf
 #include <stdarg.h>        // For va_args support
 
-#ifdef WIN32
-#  define vsnprintf vsnprintf_s    // Use secure version on windows
-#endif 
-
 
 using namespace TNL;
 

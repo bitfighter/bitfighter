@@ -84,10 +84,6 @@
 #include <cmath>
 
 
-#ifdef WIN32
-#  define vsnprintf vsnprintf_s    // Use secure version on windows
-#endif 
-
 
 using namespace TNL;
 

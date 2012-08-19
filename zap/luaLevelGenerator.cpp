@@ -31,10 +31,6 @@
 #include "ServerGame.h"
 #include "LuaWrapper.h"
 
-#ifdef WIN32
-#  define vsnprintf vsnprintf_s    // Use secure version on windows
-#endif 
-
 namespace Zap
 {
 

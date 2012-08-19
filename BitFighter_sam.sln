@@ -81,18 +81,14 @@ Global
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Release|Win32.ActiveCfg = Release|Win32
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Release|Win32.Build.0 = Release|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Debug_mysql|Win32.ActiveCfg = Debug|Win32
-		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Debug_mysql|Win32.Build.0 = Debug|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Debug|Win32.ActiveCfg = Debug|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Release_mysql|Win32.ActiveCfg = Release|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Release_mysql|Win32.Build.0 = Release|Win32
 		{59304CAA-A3FD-43B2-8EC6-EB08A5841947}.Release|Win32.ActiveCfg = Release|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug_mysql|Win32.ActiveCfg = Debug_mysql|Win32
-		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug_mysql|Win32.Build.0 = Debug_mysql|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Debug|Win32.ActiveCfg = Debug|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release_mysql|Win32.ActiveCfg = Release_mysql|Win32
-		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release_mysql|Win32.Build.0 = Release_mysql|Win32
 		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release|Win32.ActiveCfg = Release|Win32
-		{86822788-7C6F-4DB7-AD45-400F53F186B3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -57,6 +57,7 @@
 				WarnAsError="false"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -146,6 +147,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -236,6 +238,7 @@
 				WarnAsError="false"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -325,6 +328,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -791,6 +795,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\LuaBase.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\luaGameInfo.cpp"
 			>
 		</File>
@@ -807,19 +815,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\luaObject.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\luaObject.h"
-			>
-		</File>
-		<File
-			RelativePath=".\luaUtil.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\luaUtil.h"
+			RelativePath=".\LuaScriptRunner.cpp"
 			>
 		</File>
 		<File
@@ -871,10 +867,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\exe\README.txt"
-			>
-		</File>
-		<File
 			RelativePath="..\recast\RecastAlloc.cpp"
 			>
 		</File>
@@ -888,10 +880,6 @@
 		</File>
 		<File
 			RelativePath=".\Rect.h"
-			>
-		</File>
-		<File
-			RelativePath=".\resource2.h"
 			>
 		</File>
 		<File
