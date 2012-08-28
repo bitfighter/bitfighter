@@ -116,7 +116,7 @@
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDL2main.lib;../lib/SDL2.lib;../lib/zlib.lib;../lib/libpng14.lib;Ws2_32.lib;opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
     <CustomBuildStep>
       <Command>

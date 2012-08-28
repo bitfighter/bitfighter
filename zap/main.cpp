@@ -948,6 +948,21 @@ void exceptionHandler(int sig) {
 
 using namespace Zap;
 
+#ifdef WIN32
+// with some help of searching and finding this:
+// http://stackoverflow.com/questions/8610489/distinguish-if-program-runs-by-clicking-on-the-icon-typing-its-name-in-the-cons
+static bool thisProgramHasCreatedConsoleWindow()
+{
+   HWND consoleWindow = GetConsoleWindow();
+   if (consoleWindow != NULL)
+   {
+      DWORD windowCreatorProcessId;
+      GetWindowThreadProcessId(consoleWindow, &windowCreatorProcessId);
+      return (windowCreatorProcessId == GetCurrentProcessId()) ? true : false;
+   }
+   return false;
+}
+#endif
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1051,6 +1066,13 @@ int main(int argc, char **argv)
 #endif   // USE_BFUP
 
 #endif   // !ZAP_DEDICATED
+
+#if defined(WIN32) && !defined(TNL_DEBUG)
+      // This basically hides the console window only if double-clicked from icon
+      // does not freeConsole when started from command (cmd)
+      if(thisProgramHasCreatedConsoleWindow())
+         FreeConsole();
+#endif
    }
 
    dedicatedServerLoop();              // Loop forever, running the idle command endlessly
