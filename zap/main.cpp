@@ -1068,8 +1068,8 @@ int main(int argc, char **argv)
 #endif   // !ZAP_DEDICATED
 
 #if defined(WIN32) && !defined(TNL_DEBUG)
-      // This basically hides the console window only if double-clicked from icon
-      // does not freeConsole when started from command (cmd)
+      // This basically hides the newly created console window only if double-clicked from icon
+      // No freeConsole when started from command (cmd) to continues outputting text to console
       if(thisProgramHasCreatedConsoleWindow())
          FreeConsole();
 #endif
