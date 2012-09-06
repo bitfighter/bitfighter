@@ -377,9 +377,9 @@ void DatabaseWriter::getTopPlayers(const string &table, const string &col2, S32 
 }
 
 
-Int<BADGE_COUNT> DatabaseWriter::getAchievements(const StringTableEntry &name)
+Int<BADGE_COUNT> DatabaseWriter::getAchievements(const char *name)
 {
-   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + string(name.getString()) + "';";
+   string sql = "SELECT achievement_id FROM player_achievements WHERE player_name = '" + string(name) + "';";
 
    Vector<Vector<string> > results;
 

@@ -135,7 +135,7 @@ public:
 
    void getTopPlayers(const string &table, const string &col2, S32 count, Vector<string> &names, Vector<string> &scores);
 
-   Int<BADGE_COUNT> getAchievements(const StringTableEntry &name);
+   Int<BADGE_COUNT> getAchievements(const char *name);
 };
 
 

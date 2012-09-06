@@ -37,7 +37,7 @@ namespace Zap {
    struct GameStats;
 }
 
-
+class MasterServerConnection;
 struct HighScores
 {
     Vector<StringTableEntry> groupNames;
@@ -45,6 +45,9 @@ struct HighScores
     Vector<string> scores;
     bool isValid;
     S32 scoresPerGroup;
+
+    bool isBuzy;  // for multithreading
+    Vector<SafePtr<MasterServerConnection> > waitingClients;
 
     HighScores() { isValid = false; }
 };
@@ -55,9 +58,12 @@ class MasterServerConnection : public MasterServerInterface, public Zap::ChatChe
 private:
    typedef MasterServerInterface Parent;
 
+public:
    static HighScores highScores;    // Cached high scores
+private:
 
-   Int<BADGE_COUNT> getBadges(StringTableEntry name);
+   Int<BADGE_COUNT> mBadges;
+   Int<BADGE_COUNT> getBadges();
 
 protected:
 public:
@@ -167,7 +173,9 @@ public:
    };
 
    // Check username & password against database
-   PHPBB3AuthenticationStatus verifyCredentials(string &username, string password);
+   static PHPBB3AuthenticationStatus verifyCredentials(string &username, string password);
+
+   void processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus status, TNL::Int<32> badges);
 
    // Client has contacted us and requested a list of active servers
    // that match their criteria.
@@ -221,8 +229,6 @@ public:
    // Updates the master with the current status of a game server.
    TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
-
-   DatabaseWriter getDatabaseWriter();
 
    void processIsAuthenticated(Zap::GameStats *gameStats);
    void writeStatisticsToDb(Zap::VersionedGameStats &stats);

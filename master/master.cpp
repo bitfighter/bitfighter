@@ -32,6 +32,7 @@
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
 #include "tnlAsymmetricKey.h"
+#include "tnlThread.h"
 
 #include <stdio.h>
 #include <string>
@@ -174,6 +175,121 @@ static const char *sanitizeForJson(const char *value)
 }
 
 
+// TODO: Should we be reusing these?
+DatabaseWriter getDatabaseWriter()
+{
+   if(gWriteStatsToMySql)
+      return DatabaseWriter(gStatsDatabaseAddress.c_str(),  gStatsDatabaseName.c_str(), 
+                            gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+   else
+      return DatabaseWriter("stats.db");
+}
+
+
+
+class DatabaseAccessThread : public TNL::Thread
+{
+public:
+   class BasicEntry : public RefPtrData
+   {
+   public:
+      virtual void run() = 0;  // runs on seperate thread
+      virtual void finish() {}; // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
+   };
+   struct Auth_Stats : public BasicEntry
+   {
+      SafePtr<MasterServerConnection> client;
+      Int<BADGE_COUNT> badges;
+      MasterServerConnection::PHPBB3AuthenticationStatus stat;
+      string playerName;
+      char password[256];
+      void run()
+      {
+         stat = MasterServerConnection::verifyCredentials(playerName, password);
+         if(stat == MasterServerConnection::Authenticated)
+         {
+            DatabaseWriter databaseWriter = getDatabaseWriter();
+            badges = databaseWriter.getAchievements(playerName.c_str());
+         }
+         else
+            badges = NO_BADGES;
+      }
+      void finish()
+      {
+         if(client) // check for NULL, Sometimes, a client disconnects very fast
+            client->processAutentication(StringTableEntry(playerName.c_str()), stat, badges);
+      }
+   };
+private:
+   U32 mEntryStart;
+   U32 mEntryThread;
+   U32 mEntryEnd;
+   static const U32 mEntrySize = 32;
+
+   RefPtr<BasicEntry> mEntry[mEntrySize];
+
+public:
+   DatabaseAccessThread() // Constructor
+   {
+      mEntryStart = 0;
+      mEntryThread = 0;
+      mEntryEnd = 0;
+   }
+
+   void addEntry(BasicEntry *entry)
+   {
+      U32 entryEnd = mEntryEnd + 1;
+      if(entryEnd >= mEntrySize)
+         entryEnd = 0;
+      if(entryEnd == mEntryStart) // too many entries
+      {
+         logprintf(LogConsumer::LogError, "Database thread overloaded - database access too slow?");
+         return;
+      }
+      mEntry[mEntryEnd] = entry;
+      mEntryEnd = entryEnd;
+   }
+
+   void startAuthentication(MasterServerConnection *client, const char *password)
+   {
+      RefPtr<Auth_Stats> auth = new Auth_Stats();
+      auth->client = client;
+      auth->playerName = client->mPlayerOrServerName.getString();
+      strncpy(auth->password, password, sizeof(auth->password));
+      addEntry(auth);
+   }
+
+   U32 run()
+   {
+      while(true)
+      {
+         Platform::sleep(200);
+         while(mEntryThread != mEntryEnd)
+         {
+            mEntry[mEntryThread]->run();
+            mEntryThread++;
+            if(mEntryThread >= mEntrySize)
+               mEntryThread = 0;
+         }
+      }
+   }
+   void runAtMainThread()
+   {
+      while(mEntryStart != mEntryThread)
+      {
+         mEntry[mEntryStart]->finish();
+         mEntry[mEntryStart].set(NULL);  // RefPtr, we can just set to NULL and it will delete itself.
+         mEntryStart++;
+         if(mEntryStart >= mEntrySize)
+            mEntryStart = 0;
+      }
+   }
+} gDatabaseAccessThread;
+
+
+
+
+
    /// Constructor initializes the linked list info with "safe" values
    /// so we don't explode if we destruct right away.
    MasterServerConnection::MasterServerConnection()
@@ -277,9 +393,64 @@ static const char *sanitizeForJson(const char *value)
    }
 #else // verifyCredentials
    {
+      Platform::sleep(1000);
+      if(username == "sam686")
+         return password == "1" ? Authenticated : WrongPassword;  // TEST ONLY - remove it when done testing
       return Unsupported;
    }
 #endif
+
+
+
+   void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat, TNL::Int<32> badges)
+   {
+      mBadges = NO_BADGES;
+      if(stat == WrongPassword)
+      {
+         logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
+         disconnect(ReasonBadLogin, "");
+      }
+      else if(stat == InvalidUsername)
+      {
+         logprintf(LogConsumer::LogConnection, "User name %s contains illegal characters", mPlayerOrServerName.getString());
+         // Send message back to client to request new username/password
+         disconnect(ReasonInvalidUsername, "");
+      }
+      else if(stat == Authenticated)
+      {
+         logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
+         mAuthenticated = true;
+
+         if(mPlayerOrServerName != newName)
+         {
+            if(isInGlobalChat)  // Need to tell clients new name, in case of delayed authentication
+               for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+                  if (walk != this && walk->isInGlobalChat)
+                  {
+                     walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
+                     walk->m2cPlayerJoinedGlobalChat(newName);
+                  }
+            mPlayerOrServerName = newName;
+         }
+
+         mBadges = badges;
+         m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, badges, newName.getString());
+
+         for(S32 i=0; i < master_admins.size(); i++)  // check for master admin
+            if(newName == master_admins[i])
+            {
+               mIsMasterAdmin = true;
+               break;
+            }
+      }
+      else if(stat == UnknownUser || stat == Unsupported)
+         m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
+
+      else  // stat == CantConnect || stat == UnknownStatus
+         m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
+
+   }
+
 
 
    // Client has contacted us and requested a list of active servers
@@ -653,20 +824,19 @@ static const char *sanitizeForJson(const char *value)
    ////////////////////////////////////////
    ////////////////////////////////////////
 
-   Int<BADGE_COUNT> MasterServerConnection::getBadges(StringTableEntry name)
+   Int<BADGE_COUNT> MasterServerConnection::getBadges()
    {
-      DatabaseWriter databaseWriter = getDatabaseWriter();
-
-      Int<BADGE_COUNT> badges = databaseWriter.getAchievements(name);
-
       //// This is, obviously, temporary; can be removed when we have a real master-side badge system in place
       //if(stricmp(name.getString(), "watusimoto") == 0 || stricmp(name.getString(), "raptor") == 0 ||
       //   stricmp(name.getString(), "sam686") == 0 )
       //{
-      //   badges.value = DEVELOPER_BADGE;
+      //   return DEVELOPER_BADGE;
       //}
 
-      return badges;
+      if(mCSProtocolVersion <= 35) // bitfighter 017 limited to display only some badges
+         return mBadges & (BIT(DEVELOPER_BADGE) | BIT(FIRST_VICTORY) | BIT(BADGE_TWENTY_FIVE_FLAGS));
+
+      return mBadges;
    }
 
 
@@ -686,18 +856,17 @@ static const char *sanitizeForJson(const char *value)
    }
 
 
-   // TODO: Should we be reusing these?
-   DatabaseWriter MasterServerConnection::getDatabaseWriter()
+
+   struct AddGameReport : public DatabaseAccessThread::BasicEntry
    {
-      if(gWriteStatsToMySql)
-         return DatabaseWriter(gStatsDatabaseAddress.c_str(),  gStatsDatabaseName.c_str(), 
-                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
-
-      else
-         return DatabaseWriter("stats.db");
-   }
-
-
+      GameStats mStats;
+      void run()
+      {
+         DatabaseWriter databaseWriter = getDatabaseWriter();
+         // Will fail if compiled without database support and gWriteStatsToDatabase is true
+         databaseWriter.insertStats(mStats);
+      }
+   };
    void MasterServerConnection::writeStatisticsToDb(VersionedGameStats &stats)
    {
       if(!checkActivityTime(6000))     // 6 seconds
@@ -718,13 +887,25 @@ static const char *sanitizeForJson(const char *value)
       processIsAuthenticated(gameStats);
       processStatsResults(gameStats);
 
-      DatabaseWriter databaseWriter = getDatabaseWriter();
-
-      // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      databaseWriter.insertStats(*gameStats);
+      RefPtr<AddGameReport> gameReport = new AddGameReport();
+      gameReport->mStats = *gameStats;  // copy so we keep data during a thread
+      gDatabaseAccessThread.addEntry(gameReport);
    }
 
    
+   struct AchievementWriter : public DatabaseAccessThread::BasicEntry
+   {
+      U8 achievementId;
+      StringTableEntry playerNick;
+      StringTableEntry mPlayerOrServerName;
+      string addressString;
+      void run()
+      {
+         DatabaseWriter databaseWriter = getDatabaseWriter();
+         // Will fail if compiled without database support and gWriteStatsToDatabase is true
+         databaseWriter.insertAchievement(achievementId, playerNick.getString(), mPlayerOrServerName.getString(), addressString);
+      }
+   };
    void MasterServerConnection::writeAchievementToDb(U8 achievementId, const StringTableEntry &playerNick)
    {
       if(!checkActivityTime(6000))  // 6 seconds
@@ -734,13 +915,32 @@ static const char *sanitizeForJson(const char *value)
       if(playerNick == "")
          return;
 
-      DatabaseWriter databaseWriter = getDatabaseWriter();
-
-      // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      databaseWriter.insertAchievement(achievementId, playerNick, mPlayerOrServerName.getString(), getNetAddressString());
+      RefPtr<AchievementWriter> a_writer = new AchievementWriter();
+      a_writer->achievementId = achievementId;
+      a_writer->playerNick = playerNick;
+      a_writer->mPlayerOrServerName = mPlayerOrServerName;
+      a_writer->addressString = getNetAddressString();
+      gDatabaseAccessThread.addEntry(a_writer);
    }
 
 
+   struct LevelInfoWriter : public DatabaseAccessThread::BasicEntry
+   {
+      string hash;
+      string levelName;
+      string creator;
+      StringTableEntry gameType;
+      bool hasLevelGen;
+      U8 teamCount;
+      S32 winningScore;
+      S32 gameDurationInSeconds;
+      void run()
+      {
+         DatabaseWriter databaseWriter = getDatabaseWriter();
+         // Will fail if compiled without database support and gWriteStatsToDatabase is true
+         databaseWriter.insertLevelInfo(hash, levelName, creator, gameType.getString(), hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
+      }
+   };
    void MasterServerConnection::writeLevelInfoToDb(const string &hash, const string &levelName, const string &creator, 
                                                    const StringTableEntry &gameType, bool hasLevelGen, U8 teamCount, S32 winningScore, 
                                                    S32 gameDurationInSeconds)
@@ -752,40 +952,67 @@ static const char *sanitizeForJson(const char *value)
       if(hash == "" || gameType == "")
          return;
 
-      DatabaseWriter databaseWriter = getDatabaseWriter();
-
-      // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      databaseWriter.insertLevelInfo(hash, levelName, creator, gameType.getString(), hasLevelGen, teamCount, winningScore, gameDurationInSeconds);
+      RefPtr<LevelInfoWriter> l_writer = new LevelInfoWriter();
+      l_writer->hash = hash;
+      l_writer->levelName = levelName;
+      l_writer->creator = creator;
+      l_writer->gameType = gameType;
+      l_writer->hasLevelGen = hasLevelGen;
+      l_writer->teamCount = teamCount;
+      l_writer->winningScore = winningScore;
+      l_writer->gameDurationInSeconds = gameDurationInSeconds;
+      gDatabaseAccessThread.addEntry(l_writer);
    }
 
 
-   HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
+   struct HighScoresReader : public DatabaseAccessThread::BasicEntry
    {
-      // Check if we have the scores cached
-      if(!highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)     // Remember... highScores is static!
+      S32 scoresPerGroup;
+      void run()
       {
          DatabaseWriter databaseWriter = getDatabaseWriter();
 
          // Client will display these in two columns, row by row
 
-         highScores.groupNames.clear();
-         highScores.names.clear();
-         highScores.scores.clear();
+         MasterServerConnection::highScores.groupNames.clear();
+         MasterServerConnection::highScores.names.clear();
+         MasterServerConnection::highScores.scores.clear();
 
-         highScores.groupNames.push_back("Official Wins Last Week");
-         databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  scoresPerGroup, highScores.names, highScores.scores);
+         MasterServerConnection::highScores.groupNames.push_back("Official Wins Last Week");
+         databaseWriter.getTopPlayers("v_last_week_top_player_official_wins",    "win_count",  scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
 
-         highScores.groupNames.push_back("Official Wins This Week, So Far");
-         databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  scoresPerGroup, highScores.names, highScores.scores);
+         MasterServerConnection::highScores.groupNames.push_back("Official Wins This Week, So Far");
+         databaseWriter.getTopPlayers("v_current_week_top_player_official_wins", "win_count",  scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
 
-         highScores.groupNames.push_back("Games Played Last Week");
-         databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", scoresPerGroup, highScores.names, highScores.scores);
+         MasterServerConnection::highScores.groupNames.push_back("Games Played Last Week");
+         databaseWriter.getTopPlayers("v_last_week_top_player_games",            "game_count", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
 
-         highScores.groupNames.push_back("Games Played This Week, So Far");
-         databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, highScores.names, highScores.scores);
+         MasterServerConnection::highScores.groupNames.push_back("Games Played This Week, So Far");
+         databaseWriter.getTopPlayers("v_current_week_top_player_games",         "game_count", scoresPerGroup, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
 
-         highScores.scoresPerGroup = scoresPerGroup;
-         highScores.isValid = true;
+         MasterServerConnection::highScores.scoresPerGroup = scoresPerGroup;
+      }
+      void finish()
+      {
+         MasterServerConnection::highScores.isBuzy = false;
+         for(S32 i=0; i < MasterServerConnection::highScores.waitingClients.size(); i++)
+            if(MasterServerConnection::highScores.waitingClients[i])
+               MasterServerConnection::highScores.waitingClients[i]->m2cSendHighScores(MasterServerConnection::highScores.groupNames, MasterServerConnection::highScores.names, MasterServerConnection::highScores.scores);
+         MasterServerConnection::highScores.waitingClients.clear();
+
+      }
+   };
+   HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
+   {
+      // Check if we have the scores cached
+      if(!highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)     // Remember... highScores is static!
+         if(!highScores.isBuzy)
+      {
+         highScores.isBuzy = true;
+         highScores.isValid = false;
+         RefPtr<HighScoresReader> highScoreReader = new HighScoresReader();
+         highScoreReader->scoresPerGroup = scoresPerGroup;
+         gDatabaseAccessThread.addEntry(highScoreReader);
       }
       
       return &highScores;
@@ -803,7 +1030,13 @@ static const char *sanitizeForJson(const char *value)
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
    {
+      if(achievementId > BADGE_COUNT) // out of range badges
+         return;
       writeAchievementToDb(achievementId, playerNick);
+
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         if(walk->mPlayerOrServerName == playerNick)
+            walk->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database.
    }
 
 
@@ -823,7 +1056,17 @@ static const char *sanitizeForJson(const char *value)
 
       HighScores *hightScores = getHighScores(3);     
 
-      m2cSendHighScores(hightScores->groupNames, hightScores->names, hightScores->scores);
+      if(highScores.isBuzy)
+      {
+         bool exists = false;
+            for(S32 i=0; i < highScores.waitingClients.size(); i++)
+               if(highScores.waitingClients[i] == this)
+                  exists = true;
+         if(!exists)
+            highScores.waitingClients.push_back(this);
+      }
+      else
+         m2cSendHighScores(hightScores->groupNames, hightScores->names, hightScores->scores);
    }
 
 
@@ -848,7 +1091,7 @@ static const char *sanitizeForJson(const char *value)
             else
                status = AuthenticationStatusUnauthenticatedName;
 
-            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, getBadges(name));
+            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status, walk->getBadges());
             break;
          }
    }
@@ -912,15 +1155,15 @@ static const char *sanitizeForJson(const char *value)
          bstream->readString(readstr);
          mPlayerOrServerName = cleanName(readstr).c_str();
 
-         bstream->readString(readstr);
-         string password = readstr;
+         bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
+         //string password = readstr;
             
          mPlayerId.read(bstream);
 
          // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
          // possibilities, it most likely will be.
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-            if(walk != this && walk->mCMProtocolVersion >= 3 && walk->mPlayerId == mPlayerId)
+            if(walk != this && walk->mPlayerId == mPlayerId)
             {
                logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
                                                                                              walk->mPlayerOrServerName.getString());
@@ -929,50 +1172,10 @@ static const char *sanitizeForJson(const char *value)
                return false;
             }
 
-         // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
-         string name = mPlayerOrServerName.getString();
-         PHPBB3AuthenticationStatus stat = verifyCredentials(name, password);
-//         Int<BADGE_COUNT> badges = 0;     //<=== here we can read badges from the database
+         // Start the authentication by reading database on seperate thread
+         gDatabaseAccessThread.startAuthentication(this, readstr); // readstr is password
 
-         mPlayerOrServerName.set(name.c_str());
-
-
-         if(stat == WrongPassword)
-         {
-            logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
-            disconnect(ReasonBadLogin, "");
-            reason = ReasonBadLogin;
-            return false;
-         }
-         else if(stat == InvalidUsername)
-         {
-            logprintf(LogConsumer::LogConnection, "User name %s contains illegal characters", mPlayerOrServerName.getString());
-            // Send message back to client to request new username/password
-            disconnect(ReasonInvalidUsername, "");
-            reason = ReasonInvalidUsername;
-            return false;
-         }
          linkToClientList();
-         if(stat == Authenticated)
-         {
-            logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
-            mAuthenticated = true;
-
-            m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, getBadges(mPlayerOrServerName), name.c_str());
-
-            for(S32 i=0; i < master_admins.size(); i++)  // check for master admin
-               if(name == master_admins[i])
-               {
-                  mIsMasterAdmin = true;
-                  break;
-               }
-         }
-
-         else if(stat == UnknownUser || stat == Unsupported)
-            m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, NO_BADGES, "");
-
-         else  // stat == CantConnect || stat == UnknownStatus
-            m2cSetAuthenticated(AuthenticationStatusFailed, NO_BADGES, "");
       }
 
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
@@ -1375,6 +1578,7 @@ int main(int argc, const char **argv)
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
 
+   gDatabaseAccessThread.start();  // start a thread that handles some of slow task with database.
 
     // And until infinity, process whatever comes our way.
    for(;;)     // To infinity and beyond!!
@@ -1434,6 +1638,8 @@ int main(int argc, const char **argv)
          }
 
       }
+
+      gDatabaseAccessThread.runAtMainThread();
 
       Platform::sleep(5);
    }
