@@ -118,7 +118,7 @@ public:
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
       SensorZoomTime = 300,
-      SensorCloakDetectionDisance = 400,
+      SensorCloakDetectionDistance = 400,
       CloakFadeTime = 300,
       CloakCheckRadius = 200,
       RepairHundredthsPerSecond = 16,

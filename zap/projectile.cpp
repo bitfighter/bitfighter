@@ -856,7 +856,7 @@ void Mine::renderItem(const Point &pos)
       // sensor is active and you're within the detection distance
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
             (localClient && localClient->getClientInfo()->getName() == mSetBy) ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakDetectionDisance * Ship::SensorCloakDetectionDisance);
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakDetectionDistance * Ship::SensorCloakDetectionDistance);
    }
    else     // Must be in editor?
    {
