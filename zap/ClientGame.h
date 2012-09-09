@@ -217,10 +217,9 @@ public:
    void displayMessage(const Color &msgColor, const char *format, ...);
 
    void onConnectedToMaster();
-   void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
-   void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr);
+   void onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected);
+   void onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected);
 
-   void onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr);
    void runCommand(const char *command);
 
    string getRequestedServerName();

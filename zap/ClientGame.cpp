@@ -155,6 +155,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 // Destructor
 ClientGame::~ClientGame()
 {
+   if(getConnectionToMaster()) // Prevents errors when ClientGame is gone too soon.
+      getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
    closeConnectionToGameServer();      // I just added this for good measure... not really sure it's needed
    cleanUp();
 
@@ -702,9 +704,7 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
 }
 
 
-static char DisconnectReasonString[128];  // A place to hold all of our chars for const char *reason
-   // That is because of we are sending only a pointer of a string for setMessage
-
+// Only happens when using connectArranged, part of punching through firewall
 void ClientGame::connectionToServerRejected(const char *reason)
 {
    getUIManager()->getMainMenuUserInterface()->activate();
@@ -712,10 +712,11 @@ void ClientGame::connectionToServerRejected(const char *reason)
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
    ui->reset();
    ui->setTitle("Connection Terminated");
-   ui->setMessage(2, "Lost connection with the server.");
-   ui->setMessage(3, "Unable to join game.  Please try again.");
-   strncpy(DisconnectReasonString, reason, sizeof(DisconnectReasonString));
-   ui->setMessage(4, DisconnectReasonString);
+   ui->setMessage(2, "Server did not respond or rejected");
+   ui->setMessage(3, "when trying to punch through firewall");
+   ui->setMessage(4, "Unable to join game.  Please try a different server.");
+   if(reason[0])
+      ui->setMessage(5, string(reason));
    ui->activate();
 
    closeConnectionToGameServer();
@@ -1010,7 +1011,7 @@ void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTa
 
 
 // Established connection is terminated.  Compare to onConnectTerminate() below.
-void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
+void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
    clearClientList();  // this can fix all cases of extra names appearing on score board when connecting to server after getting disconnected other then "SelfDisconnect"
 
@@ -1055,7 +1056,6 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          ui->activate();
 
          break;
-
       case NetConnection::ReasonBanned:
          ui->setMessage(2, "You are banned from playing on this server");
          ui->setMessage(3, "Contact the server administrator if you think");
@@ -1079,28 +1079,50 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          ui->activate();
          break;
 
+      case NetConnection::ReasonNeedServerPassword:
+      {
+         // We have the wrong password, let's make sure it's not saved
+         string serverName = getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
+         gINI.deleteKey("SavedServerPasswords", serverName);
+   
+         ServerPasswordEntryUserInterface *ui = getUIManager()->getServerPasswordEntryUserInterface();
+         ui->setConnectServer(serverAddress);
+         ui->activate();
+         break;
+      }
+      case NetConnection::ReasonServerFull:
+         // Display a context-appropriate error message
+         ui->reset();
+         ui->setTitle("Connection Terminated");
+
+         ui->setMessage(2, "Could not connect to server");
+         ui->setMessage(3, "because server is full.");
+         ui->setMessage(5, "Please try a different server, or try again later.");
+         ui->activate();
+         break;
       case NetConnection::ReasonSelfDisconnect:
             // We get this when we terminate our own connection.  Since this is intentional behavior,
             // we don't want to display any message to the user.
          break;
 
       default:
-         ui->setMessage(1, "Lost connection with the server.");
-         strncpy(DisconnectReasonString, reasonStr, sizeof(DisconnectReasonString));
-         ui->setMessage(2, DisconnectReasonString);
-         ui->setMessage(3, "Please try a different game server, or try again later.");
-         ui->activate();
-         break;
+         if(reasonStr[0])
+         {
+            ui->setMessage(1, "Disconnected for this reason:");
+            ui->setMessage(2, string(reasonStr));
+         }
+         else
+         {
+            ui->setMessage(1, "Disconnected for unknown reason:");
+            ui->setMessage(1, "Error number: " + itos(reason));
+         }
    }
+
 }
 
 
-void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
+void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason reason, const char *reasonStr, bool wasFullyConnected)
 {
-   // Avoid spamming the player if they are not connected to the Internet
-   if(reason == NetConnection::ReasonTimedOut && mSeenTimeOutMessage)
-      return;
-
    ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 
    ui->reset();
@@ -1140,13 +1162,18 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 
       case NetConnection::ReasonError:
          ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
-         strncpy(DisconnectReasonString, reasonStr, sizeof(DisconnectReasonString));
-         ui->setMessage(3, DisconnectReasonString);
+         ui->setMessage(3, string(reasonStr));
          ui->setMessage(5, "Please try a different game server, or try again later.");
          ui->activate();
          break;
 
       case NetConnection::ReasonTimedOut:
+         // Avoid spamming the player if they are not connected to the Internet
+         if(reason == NetConnection::ReasonTimedOut && mSeenTimeOutMessage)
+            break;
+         if(wasFullyConnected)
+            break;
+
          ui->setMessage(2, "My attempt to connect to the Master Server failed because");
          ui->setMessage(3, "the server did not respond.  Either the server is down,");
          ui->setMessage(4, "or, more likely, you are either not connected to the internet");
@@ -1154,15 +1181,19 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(7, "I will continue to try connecting, but you will not see this");
          ui->setMessage(8, "message again until you successfully connect or restart Bitfighter.");
 
-         
          ui->activate();
 
          mSeenTimeOutMessage = true;
          break;
+      case NetConnection::ReasonSelfDisconnect:
+         break;  // no errors when client disconnect (when quitting bitfighter)
 
       default:  // Not handled
          ui->setMessage(2, "Unable to connect to the master server, with error code:");
-         ui->setMessage(3, "MasterServer Error #" + itos(reason));
+         if(reasonStr[0])
+            ui->setMessage(3, itos(reason) + " " + reasonStr);
+         else
+            ui->setMessage(3, "MasterServer Error #" + itos(reason));
          ui->setMessage(5, "Check your Internet Connection and firewall settings.");
          ui->setMessage(7, "Please report this error code to the");
          ui->setMessage(8, "Bitfighter developers.");
@@ -1172,84 +1203,6 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 }
 
 extern CIniFile gINI;
-
-// This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
-// Compare to onConnectIONTerminated()
-void ClientGame::onConnectTerminated(const Address &serverAddress, NetConnection::TerminationReason reason, const char *reasonStr)
-{
-   if(reason == NetConnection::ReasonNeedServerPassword)
-   {
-      // We have the wrong password, let's make sure it's not saved
-      string serverName = getUIManager()->getQueryServersUserInterface()->getLastSelectedServerName();
-      gINI.deleteKey("SavedServerPasswords", serverName);
-
-      ServerPasswordEntryUserInterface *ui = getUIManager()->getServerPasswordEntryUserInterface();
-      ui->setConnectServer(serverAddress);
-      ui->activate();
-   }
-   else if(reason == NetConnection::ReasonServerFull)
-   {
-      getUIManager()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
-
-      // Display a context-appropriate error message
-      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
-      ui->reset();
-      ui->setTitle("Connection Terminated");
-
-      getUIManager()->getMainMenuUserInterface()->activate();
-
-      ui->setMessage(2, "Could not connect to server");
-      ui->setMessage(3, "because server is full.");
-      ui->setMessage(5, "Please try a different server, or try again later.");
-      ui->activate();
-   }
-   else if(reason == NetConnection::ReasonKickedByAdmin)
-   {
-      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
-
-      ui->reset();
-      ui->setTitle("Connection Terminated");
-
-      ui->setMessage(2, "You were kicked off the server by an admin.");
-      ui->setMessage(4, "You can try another server, host your own,");
-      ui->setMessage(5, "or try the server that kicked you again later.");
-
-      getUIManager()->getMainMenuUserInterface()->activate();
-      ui->activate();
-   }
-   else if(reason == NetConnection::ReasonBanned)
-   {
-      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
-
-      ui->reset();
-      ui->setTitle("Connection Terminated");
-
-      ui->setMessage(2, "You are banned from playing on this server");
-      ui->setMessage(4, "Contact the server administrator if you think");
-      ui->setMessage(5, "this was in error.");
-
-      getUIManager()->getMainMenuUserInterface()->activate();
-      ui->activate();
-   }
-   else  // Looks like the connection failed for some unknown reason.  Server died?
-   {
-      getUIManager()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
-
-      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
-
-      // Display a context-appropriate error message
-      ui->reset();
-      ui->setTitle("Connection Terminated");
-
-      getUIManager()->getMainMenuUserInterface()->activate();
-
-      ui->setMessage(2, "Lost connection with the server.");
-      ui->setMessage(3, "Unable to join game.  Please try again.");
-      strncpy(DisconnectReasonString, reasonStr, sizeof(DisconnectReasonString));
-      ui->setMessage(4, DisconnectReasonString);
-      ui->activate();
-   }
-}
 
 
 void ClientGame::runCommand(const char *command)

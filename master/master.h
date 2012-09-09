@@ -175,6 +175,7 @@ public:
    // Check username & password against database
    static PHPBB3AuthenticationStatus verifyCredentials(string &username, string password);
 
+   PHPBB3AuthenticationStatus checkAuthentication(const char *password, bool doNotDelay = false);
    void processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus status, TNL::Int<32> badges);
 
    // Client has contacted us and requested a list of active servers

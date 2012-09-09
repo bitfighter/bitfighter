@@ -196,30 +196,6 @@ public:
       virtual void run() = 0;  // runs on seperate thread
       virtual void finish() {}; // finishes the entry on primary thread after "run()" is done to avoid 2 threads crashing in to the same network TNL and others.
    };
-   struct Auth_Stats : public BasicEntry
-   {
-      SafePtr<MasterServerConnection> client;
-      Int<BADGE_COUNT> badges;
-      MasterServerConnection::PHPBB3AuthenticationStatus stat;
-      string playerName;
-      char password[256];
-      void run()
-      {
-         stat = MasterServerConnection::verifyCredentials(playerName, password);
-         if(stat == MasterServerConnection::Authenticated)
-         {
-            DatabaseWriter databaseWriter = getDatabaseWriter();
-            badges = databaseWriter.getAchievements(playerName.c_str());
-         }
-         else
-            badges = NO_BADGES;
-      }
-      void finish()
-      {
-         if(client) // check for NULL, Sometimes, a client disconnects very fast
-            client->processAutentication(StringTableEntry(playerName.c_str()), stat, badges);
-      }
-   };
 private:
    U32 mEntryStart;
    U32 mEntryThread;
@@ -250,20 +226,11 @@ public:
       mEntryEnd = entryEnd;
    }
 
-   void startAuthentication(MasterServerConnection *client, const char *password)
-   {
-      RefPtr<Auth_Stats> auth = new Auth_Stats();
-      auth->client = client;
-      auth->playerName = client->mPlayerOrServerName.getString();
-      strncpy(auth->password, password, sizeof(auth->password));
-      addEntry(auth);
-   }
-
    U32 run()
    {
       while(true)
       {
-         Platform::sleep(200);
+         Platform::sleep(50);
          while(mEntryThread != mEntryEnd)
          {
             mEntry[mEntryThread]->run();
@@ -393,14 +360,55 @@ public:
    }
 #else // verifyCredentials
    {
-      Platform::sleep(1000);
-      if(username == "sam686")
-         return password == "1" ? Authenticated : WrongPassword;  // TEST ONLY - remove it when done testing
       return Unsupported;
    }
 #endif
 
 
+   struct Auth_Stats : public DatabaseAccessThread::BasicEntry
+   {
+      SafePtr<MasterServerConnection> client;
+      Int<BADGE_COUNT> badges;
+      MasterServerConnection::PHPBB3AuthenticationStatus stat;
+      string playerName;
+      char password[256];
+      void run()
+      {
+         stat = MasterServerConnection::verifyCredentials(playerName, password);
+         if(stat == MasterServerConnection::Authenticated)
+         {
+            DatabaseWriter databaseWriter = getDatabaseWriter();
+            badges = databaseWriter.getAchievements(playerName.c_str());
+         }
+         else
+            badges = NO_BADGES;
+      }
+      void finish()
+      {
+         StringTableEntry playerNameSTE(playerName.c_str());
+         if(client) // check for NULL, Sometimes, a client disconnects very fast
+            client->processAutentication(playerNameSTE, stat, badges);
+      }
+   };
+   MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::checkAuthentication(const char *password, bool doNotDelay)
+   {
+      RefPtr<Auth_Stats> auth = new Auth_Stats();
+      auth->client = this;
+      auth->playerName = mPlayerOrServerName.getString();
+      strncpy(auth->password, password, sizeof(auth->password));
+      auth->stat = UnknownStatus;
+      gDatabaseAccessThread.addEntry(auth);
+      if(doNotDelay)  // Wait up to 1000 milliseconds so we can return some value, for clients version 017 and older
+      {
+         U32 timer = Platform::getRealMilliseconds();
+         while(Platform::getRealMilliseconds() - timer < 1000 && auth->stat == UnknownStatus)
+         {
+            Platform::sleep(5);
+         }
+         return auth->stat;
+      }
+      return UnknownStatus;
+   }
 
    void MasterServerConnection::processAutentication(StringTableEntry newName, PHPBB3AuthenticationStatus stat, TNL::Int<32> badges)
    {
@@ -1173,7 +1181,13 @@ public:
             }
 
          // Start the authentication by reading database on seperate thread
-         gDatabaseAccessThread.startAuthentication(this, readstr); // readstr is password
+         // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
+         // so we pause waiting for database instead of fully connecting yet.
+         switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
+         {
+            case WrongPassword: reason = ReasonBadLogin; return false;
+            case InvalidUsername: reason = ReasonInvalidUsername; return false;
+         }
 
          linkToClientList();
       }

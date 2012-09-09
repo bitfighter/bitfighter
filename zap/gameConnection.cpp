@@ -1494,7 +1494,7 @@ void GameConnection::writeConnectAccept(BitStream *stream)
    Parent::writeConnectAccept(stream);
    stream->write(CONNECT_VERSION);
 
-	stream->writeFlag(!mServerGame->getSettings()->getIniSettings()->disableServerVoiceChat);
+   stream->writeFlag(!mServerGame->getSettings()->getIniSettings()->disableServerVoiceChat);
 }
 
 
@@ -1505,7 +1505,7 @@ bool GameConnection::readConnectAccept(BitStream *stream, NetConnection::Termina
       return false;
    stream->read(&mConnectionVersion);
 
-	mVoiceChatEnabled = stream->readFlag();
+   mVoiceChatEnabled = stream->readFlag();
    return true;
 }
 
@@ -1740,7 +1740,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
       TNLAssert(mClientGame, "onConnectionTerminated: mClientGame is NULL");
 
       if(mClientGame)
-         mClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr);
+         mClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr, true);
 #endif
    }
    else     // Server
@@ -1765,7 +1765,7 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *r
       if(!mClientGame)
          return;
 
-      mClientGame->onConnectTerminated(getNetAddress(), reason, reasonStr);
+      mClientGame->onConnectionTerminated(getNetAddress(), reason, reasonStr, false);
 #endif
 
    }

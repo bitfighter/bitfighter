@@ -100,7 +100,7 @@ public:
 
    void writeConnectRequest(BitStream *bstream);
    void onConnectionEstablished();
-   //void onConnectionTerminated(blah);                                  // An existing connection has been terminated
+   void onConnectionTerminated(TerminationReason r, const char *string); // An existing connection has been terminated
    void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);

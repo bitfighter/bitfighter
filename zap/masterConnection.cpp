@@ -448,14 +448,24 @@ void MasterServerConnection::onConnectionEstablished()
 
 
 // A still-being-established connection has been terminated
+void MasterServerConnection::onConnectionTerminated(TerminationReason reason, const char *reasonStr)   
+{
+#ifndef ZAP_DEDICATED
+   if(!mGame->isServer())
+   {
+      TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
+      static_cast<ClientGame *>(mGame)->onConnectionToMasterTerminated(reason, reasonStr, true);
+   }
+#endif
+}
+// A still-being-established connection has been terminated
 void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
 {
 #ifndef ZAP_DEDICATED
    if(!mGame->isServer())
    {
       TNLAssert(dynamic_cast<ClientGame *>(mGame), "mGame is not ClientGame");
-
-      static_cast<ClientGame *>(mGame)->onConnectionToMasterTerminated(reason, reasonStr);
+      static_cast<ClientGame *>(mGame)->onConnectionToMasterTerminated(reason, reasonStr, false);
    }
 #endif
 }
