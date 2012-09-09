@@ -1191,7 +1191,7 @@ void Ship::updateModuleSounds()
    {
       SFXShieldActive,
       SFXShipBoost,
-      SFXSensorActive,
+      SFXNone,  // No more sensor
       SFXRepairActive,
       SFXUIBoop, // Need better sound...
       SFXCloakActive,
@@ -1238,7 +1238,7 @@ const U32 negativeFireDelay = 123;  // how far into negative we are allowed to s
 
 void Ship::writeControlState(BitStream *stream)
 {
-   stream->write(getActualPos().x);    // TODO: Should these be compressedPoint writes?
+   stream->write(getActualPos().x);
    stream->write(getActualPos().y);
    stream->write(getActualVel().x);
    stream->write(getActualVel().y);
@@ -2138,7 +2138,7 @@ void Ship::render(S32 layerIndex)
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());
    GameConnection *conn = clientGame->getConnectionToServer();
 
-   bool localShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
+   bool isLocalShip = !(conn && conn->getControlObject() != this);    // i.e. the ship belongs to the player viewing the rendering
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : NO_TEAM; // To show cloaked teammates
 
    // Now adjust if using cloak module
@@ -2149,7 +2149,7 @@ void Ship::render(S32 layerIndex)
 
    ClientInfo *clientInfo = getClientInfo();
 
-   if(!localShip && layerIndex == 1 && clientInfo)      // Need to draw this before the glRotatef below, but only on layer 1...
+   if(!isLocalShip && layerIndex == 1 && clientInfo)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
       string str = getClientInfo() ? clientInfo->getName().getString() : string();
 
@@ -2185,7 +2185,7 @@ void Ship::render(S32 layerIndex)
    }
 
    if(clientGame->isShowingDebugShipCoords() && layerIndex == 1)
-      renderShipCoords(getActualPos(), localShip, alpha);
+      renderShipCoords(getActualPos(), isLocalShip, alpha);
 
    glRotatef(radiansToDegrees(getRenderAngle()) - 90 + rotAmount, 0, 0, 1.0);
    glScale(warpInScale);
@@ -2225,37 +2225,56 @@ void Ship::render(S32 layerIndex)
    calcThrustComponents(thrusts);      // Calculate the various thrust components for rendering purposes
 
 
+   bool showSensorIndicator = false;
+
    // Don't completely hide local player or ships on same team
-   if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
+   if(isLocalShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
       alpha = max(alpha, 0.25f);     // Make sure we have at least .25 alpha
+
 
    // If local ship has sensor, it can see cloaked non-local ships
    // Only apply sensor-makes-cloaked-ships-visible to other ships
-   if(!localShip)
+   if(!isLocalShip)
    {
       // This is our local ship
-      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
+      Ship *localShip = dynamic_cast<Ship *>(conn->getControlObject());
 
-      // If we have sensor equipped and this non-local ship is cloaked
-      if(ship && ship->hasModule(ModuleSensor) && alpha < 0.5)
+      if(localShip)
       {
-         // Do a distance check - cloaked ships are detected at a reduced distance
-         F32 distanceSquared = (ship->getPos() - getPos()).lenSquared();
-
-         if(distanceSquared < SensorCloakDetectionDisance * SensorCloakDetectionDisance)
+         // If we have sensor equipped and this non-local ship is cloaked
+         if(localShip->hasModule(ModuleSensor) && alpha < 0.5)
          {
-            // Now de-cloak the detected ship
-            alpha = 0.5;
+            // Do a distance check - cloaked ships are detected at a reduced distance
+            F32 distanceSquared = (localShip->getPos() - getPos()).lenSquared();
+
+            if(distanceSquared < SensorCloakDetectionDisance * SensorCloakDetectionDisance)
+            {
+               // Now de-cloak the detected ship
+               alpha = 0.5;
+            }
+         }
+
+         // If we have cloak, and this non-local ship has sensor
+         if(localShip->isModulePrimaryActive(ModuleCloak) && hasModule(ModuleSensor))
+         {
+            // Do the same distance check as when cloak is detected
+            F32 distanceSquared = (localShip->getPos() - getPos()).lenSquared();
+
+            if(distanceSquared < SensorCloakDetectionDisance * SensorCloakDetectionDisance)
+            {
+               // Now show that the ship has sensor
+               showSensorIndicator = true;
+            }
          }
       }
    }
 
 
    renderShip(mShapeType, gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime(),
-              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), hasModule(ModuleSensor),
+              isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), showSensorIndicator,
               isModulePrimaryActive(ModuleRepair) && mHealth < 1, hasModule(ModuleArmor));
 
-   if(localShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
+   if(isLocalShip && gShowAimVector && mGame->getSettings()->getEnableExperimentalAimMode())   // Only show for local ship
       renderAimVector();
 
    glPopMatrix();
@@ -2275,23 +2294,6 @@ void Ship::render(S32 layerIndex)
       const S32 biggishNumber = 21988;
       F32 offset = F32(Platform::getRealMilliseconds() % biggishNumber) * FloatTau / biggishNumber;
       drawDashedHollowArc(getRenderPos(), CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
-
-      // bink fading code... don't like it
-      //      S32 aaa = 300;  // blink rate
-      //S32 t = mSpawnShield.getCurrent() % aaa;     // t < 150, shield is off, t > 150, shield is on
-      //S32 x = 100;  // duration of fade
-      //if(mSpawnShield.getCurrent() > 1500 || t < x || t > aaa/2 + x)
-      //{
-      //   F32 tfact = 1;
-      //   if(mSpawnShield.getCurrent() < 1500)
-      //   {
-      //      if(t > aaa/2 && t < aaa/2 + x)  // 130  // getting brighter
-      //         tfact = (F32)(t - aaa/2 ) /  (F32)x;
-      //      else if(t < x)  // dimming down
-      //         tfact = (F32)(x-t) / (F32)x;
-      //   logprintf("%f",tfact);
-      //   }
-
    }
 
    if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
