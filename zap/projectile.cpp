@@ -852,10 +852,11 @@ void Mine::renderItem(const Point &pos)
       GameType *gameType = clientGame->getGameType();
 
 
-      // Can see mine if laid by teammate in team game || sensor is active ||
-      // you laid it yourself
-      visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) || ship->isModulePrimaryActive(ModuleSensor) ||
-                  (localClient && localClient->getClientInfo()->getName() == mSetBy);
+      // Can see mine if laid by teammate in team game OR you laid it yourself OR
+      // sensor is active and you're within the detection distance
+      visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
+            (localClient && localClient->getClientInfo()->getName() == mSetBy) ||
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakDetectionDisance * Ship::SensorCloakDetectionDisance);
    }
    else     // Must be in editor?
    {
