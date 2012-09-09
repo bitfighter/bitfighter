@@ -330,9 +330,16 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       Point newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;    // x = x + vt
       setPos(stateIndex, newPos);
 
-      if(objectHit->isMoveObject())     // Collided with a MoveObject
+      if(collided(objectHit, stateIndex) || objectHit->collided(this, stateIndex))
       {
-         MoveObject *moveObjectThatWasHit = static_cast<MoveObject *>(objectHit);  
+         disabledList.push_back(objectHit);
+         objectHit->disableCollision();
+         tryCount--;   // don't count as tryCount
+      }
+      else if(objectHit->isMoveObject())     // Collided with a MoveObject
+      {
+         TNLAssert(dynamic_cast<MoveObject *>(objectHit), "Not a MoveObject");
+         MoveObject *moveObjectThatWasHit = static_cast<MoveObject *>(objectHit);
 
          Point velDelta = moveObjectThatWasHit->getVel(stateIndex) - getVel(stateIndex);
          Point posDelta = moveObjectThatWasHit->getPos(stateIndex) - getPos(stateIndex);
@@ -380,14 +387,6 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       {
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
       }
-      else if(objectHit->getObjectTypeNumber() == SpeedZoneTypeNumber)
-      {
-         SpeedZone *speedZone = static_cast<SpeedZone *>(objectHit);
-         speedZone->collided(this, stateIndex);
-         disabledList.push_back(objectHit);
-         objectHit->disableCollision();
-         tryCount--;   // SpeedZone don't count as tryCount
-      }
       moveTime -= collisionTime;
    }
    for(S32 i = 0; i < disabledList.size(); i++)   // enable any disabled collision
@@ -403,7 +402,6 @@ bool MoveObject::collide(BfObject *otherObject)
 {
    return true;
 }
-
 
 TestFunc MoveObject::collideTypes()
 {

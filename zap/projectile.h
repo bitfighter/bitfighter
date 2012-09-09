@@ -91,8 +91,8 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS(Projectile);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 getRad(lua_State *L);      // Radius of item (returns number)
@@ -140,8 +140,8 @@ public:
    //// Lua interface
    LUAW_DECLARE_CLASS(BurstProjectile);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
@@ -200,8 +200,8 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(Mine);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -253,8 +253,8 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(SpyBug);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -291,6 +291,7 @@ public:
    WeaponType mWeaponType;
 
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
+   bool collided(BfObject *otherObj, U32 stateIndex);   // Things (like bullets) can collide with grenades
 
    void renderItem(const Point &pos);
    void idle(IdleCallPath path);

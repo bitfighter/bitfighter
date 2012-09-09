@@ -138,7 +138,7 @@ public:
    virtual void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
    void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
-   bool collide(BfObject *otherObject);
+   virtual bool collide(BfObject *otherObject);
 
    // CollideTypes is used to improve speed on findFirstCollision
    virtual TestFunc collideTypes();
@@ -157,8 +157,8 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(MoveObject);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    // Get/set object's velocity vector
@@ -231,8 +231,8 @@ public:
    ///// LuaItem interface
    LUAW_DECLARE_CLASS(MoveItem);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
@@ -320,8 +320,8 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(Asteroid);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
@@ -377,8 +377,8 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(Circle);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -477,8 +477,8 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS(TestItem);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 
@@ -517,8 +517,8 @@ public:
    ///// Lua Interface
    LUAW_DECLARE_CLASS(ResourceItem);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 };
 

@@ -1017,7 +1017,7 @@ public:
          if(!highScores.isBuzy)
       {
          highScores.isBuzy = true;
-         highScores.isValid = false;
+         highScores.isValid = true;
          RefPtr<HighScoresReader> highScoreReader = new HighScoresReader();
          highScoreReader->scoresPerGroup = scoresPerGroup;
          gDatabaseAccessThread.addEntry(highScoreReader);

@@ -405,8 +405,10 @@ bool SpeedZone::collide(BfObject *hitObject)
 
 
 // Handles collisions with a SpeedZone
-void SpeedZone::collided(MoveObject *s, U32 stateIndex)
+bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 {
+   TNLAssert(dynamic_cast<MoveObject *>(hitObject), "Not a MoveObject");
+   MoveObject *s = static_cast<MoveObject *>(hitObject);
    Point pos = getVert(0);
    Point dir = getVert(1);
 
@@ -420,7 +422,7 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
    if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
       angleSpeed *= 0.01f;
    if(shipNormal.distanceTo(impulse) < angleSpeed && s->getVel(stateIndex).len() > mSpeed)
-      return;
+      return true;
 
    // This following line will cause ships entering the speedzone to have their location set to the same point
    // within the zone so that their path out will be very predictable.
@@ -452,14 +454,14 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
       {
          s->setPos(stateIndex, oldPos);
          s->setVel(stateIndex, oldVel);
-         return;
+         return true;
       }
       newVel = impulse * 1.5;    // Why multiply by 1.5?
    }
    else
    {
       if(shipNormal.distanceTo(impulse) < mSpeed && s->getVel(stateIndex).len() > mSpeed * 0.8)
-         return;
+         return true;
 
       newVel = s->getVel(stateIndex) + impulse * 1.5;    // Why multiply by 1.5?
    }
@@ -475,6 +477,7 @@ void SpeedZone::collided(MoveObject *s, U32 stateIndex)
       if(s->getControllingClient() && s->getControllingClient().isValid())
          s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
    }
+   return true;
 }
 
 

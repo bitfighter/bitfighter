@@ -791,6 +791,10 @@ bool BfObject::collide(BfObject *hitObject)
 {
    return false;
 }
+bool BfObject::collided(BfObject *hitObject, U32 stateIndex)
+{
+   return false;
+}
 
 
 Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)

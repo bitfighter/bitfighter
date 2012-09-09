@@ -98,7 +98,7 @@ public:
 
    bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
-   void collided(MoveObject *s, U32 stateIndex);
+   bool collided(BfObject *s, U32 stateIndex);
    void idle(BfObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
