@@ -1075,10 +1075,12 @@ void SpyBug::renderItem(const Point &pos)
 
       GameType *gameType = clientGame->getGameType();
 
-      // Can see bug if laid by teammate in team game || sensor is active ||
-      //       you laid it yourself                   || spyBug is neutral
-      visible = ( ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   || ship->isModulePrimaryActive(ModuleSensor) ||
-                  (conn && conn->getClientInfo()->getName() == mSetBy) || getTeam() == TEAM_NEUTRAL);
+      // Can see bug if laid by teammate in team game OR you laid it yourself OR
+      // spyBug is neutral OR sensor is active and you're within the detection distance
+      visible = ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   ||
+            (conn && conn->getClientInfo()->getName() == mSetBy) ||
+            getTeam() == TEAM_NEUTRAL ||
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakDetectionDistance * Ship::SensorCloakDetectionDistance);
    }
    else    
       visible = true;      // We get here in editor when in preview mode
