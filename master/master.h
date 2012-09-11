@@ -43,10 +43,11 @@ struct HighScores
     Vector<StringTableEntry> groupNames;
     Vector<string> names;
     Vector<string> scores;
-    bool isValid;
     S32 scoresPerGroup;
 
+    bool isValid;
     bool isBuzy;  // for multithreading
+    U32 lastClock; // High scores can get old
     Vector<SafePtr<MasterServerConnection> > waitingClients;
 
     HighScores() { isValid = false; }

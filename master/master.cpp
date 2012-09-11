@@ -60,6 +60,7 @@ U32 gLatestReleasedBuildVersion = 0;
 string gMasterName;                // Name of the master server
 string gJasonOutFile;              // File where JSON data gets dumped
 bool gNeedToWriteStatus = true;    // Tracks whether we need to update our status file, for possible display on a website
+U32 gNeedToWriteStatusDelayed = 0; // Delayed update JSON status file
 
 // Variables for managing access to MySQL
 string gMySqlAddress;
@@ -428,6 +429,7 @@ public:
       {
          logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
          mAuthenticated = true;
+         gNeedToWriteStatus = true;  // Make sure JSON show as Authenticated  = true
 
          if(mPlayerOrServerName != newName)
          {
@@ -1012,12 +1014,15 @@ public:
    };
    HighScores *MasterServerConnection::getHighScores(S32 scoresPerGroup)
    {
-      // Check if we have the scores cached
-      if(!highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)     // Remember... highScores is static!
+      // Check if we have the scores cached and not outdated
+      U32 currentTime = Platform::getRealMilliseconds();
+      if(currentTime - highScores.lastClock > 2 * 60 * 1000  // 2 hours
+          || !highScores.isValid || scoresPerGroup != highScores.scoresPerGroup)     // Remember... highScores is static!
          if(!highScores.isBuzy)
       {
          highScores.isBuzy = true;
          highScores.isValid = true;
+         highScores.lastClock = currentTime;
          RefPtr<HighScoresReader> highScoreReader = new HighScoresReader();
          highScoreReader->scoresPerGroup = scoresPerGroup;
          gDatabaseAccessThread.addEntry(highScoreReader);
@@ -1183,13 +1188,21 @@ public:
          // Start the authentication by reading database on seperate thread
          // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
          // so we pause waiting for database instead of fully connecting yet.
+
          switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
          {
             case WrongPassword: reason = ReasonBadLogin; return false;
             case InvalidUsername: reason = ReasonInvalidUsername; return false;
+            case UnknownStatus: // make JSON delay write, to reduce chances of see the newly joined player as unauthenticated
+            {
+               bool NeedToWriteStatusPrev = gNeedToWriteStatus;
+               linkToClientList();
+               gNeedToWriteStatus = NeedToWriteStatusPrev; // Don't let linkToClientList set it to true
+               gNeedToWriteStatusDelayed = Platform::getRealMilliseconds();
+               break;
+            }
+            default: linkToClientList();
          }
-
-         linkToClientList();
       }
 
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
@@ -1597,9 +1610,9 @@ int main(int argc, const char **argv)
     // And until infinity, process whatever comes our way.
    for(;;)     // To infinity and beyond!!
    {
-      U32 currentTime = Platform::getRealMilliseconds();
       gNetInterface->checkIncomingPackets();
       gNetInterface->processConnections();
+      U32 currentTime = Platform::getRealMilliseconds();
 
       if(currentTime - lastConfigReadTime > REREAD_TIME)     // Reread the config file every 5000ms
       {
@@ -1607,12 +1620,17 @@ int main(int argc, const char **argv)
          readConfigFile(&gMasterINI);
       }
 
+      if(gNeedToWriteStatusDelayed != 0)
+         if(currentTime - gNeedToWriteStatusDelayed > REWRITE_TIME)
+            gNeedToWriteStatus = true;
+
       // Write status file as need, at most every REWRITE_TIME ms
       if(gNeedToWriteStatus && currentTime - lastWroteStatusTime > REWRITE_TIME)  
       {
          lastWroteStatusTime = currentTime;
          MasterServerConnection::writeClientServerList_JSON();
          gNeedToWriteStatus = false;
+         gNeedToWriteStatusDelayed = 0;
       }
 
       for(S32 i = MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
