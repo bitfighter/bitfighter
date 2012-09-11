@@ -18,10 +18,10 @@
 #include "InputCode.h"     // For InputCodeManager def
 
 #ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
+#  include "SDL_opengles.h"
 #else
-#include "ScreenShooter.h" // No screenshots on Android
-#include "SDL_opengl.h"
+#  include "ScreenShooter.h" // No screenshots on Android
+#  include "SDL_opengl.h"
 #endif
 
 #include <cmath>
