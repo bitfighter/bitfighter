@@ -68,7 +68,7 @@ public:
    string toString(F32 gridSize) const;
    void setGeom(const Vector<Point> &points);
    void setGeom(const Point &pos, const Point &dest);
-   Rect calcExtent();      // Bounding box for display scoping purposes
+   Rect calcExtents();      // Bounding box for display scoping purposes
 
 
    void onAddedToGame(Game *theGame);  
