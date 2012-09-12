@@ -1330,12 +1330,34 @@ void HeatSeekerProjectile::acquireTarget()
       //if(distanceSq > TargetAcquisitionRadius * TargetAcquisitionRadius)
       //   continue;
 
-      //if(distanceSq > closest)
-      //   continue;
+      // This target is not the closest
+      if(distanceSq > closest)
+         continue;
 
       // See if object is within our "cone of vision"
       F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - getActualAngle());
       if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
+         continue;
+
+      // Finally make sure there are no walls in the way
+      static Vector<DatabaseObject *> localFillVector;
+      localFillVector.clear();
+
+      findObjects((TestFunc)isWallType, localFillVector, Rect(getPos(), foundObject->getPos()));
+      F32 collisionTime;
+      bool wallInTheWay = false;
+      for(S32 i = 0; i < localFillVector.size(); i++)
+      {
+         BfObject *wallObject = static_cast<BfObject *>(localFillVector[i]);
+         if(objectIntersectsSegment(wallObject, getPos(), foundObject->getPos(), collisionTime))
+         {
+            wallInTheWay = true;
+            logprintf("found wall");
+            break;
+         }
+      }
+
+      if(wallInTheWay)
          continue;
 
       closest = distanceSq;
