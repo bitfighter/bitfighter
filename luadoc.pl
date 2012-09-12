@@ -8,7 +8,7 @@ use File::Basename;
 # Need to be in the doc directory
 chdir "doc" || die "Could not change to doc folder: $!";
 
-# Create doc/lua/ directory
+# Create doc/lua/ directory -- this should always exist
 my $luadir = "lua";      
 if (! -d $luadir) {
    mkdir($luadir) || die "Could not create folder $luadir: $!";
@@ -16,20 +16,17 @@ if (! -d $luadir) {
 
 
 # Iterate over all cpp folders in our working dir converting Doxygen comments to Luadoc comments
-my @files = <../zap/*.cpp>;
+my @files = <../zap/*BfObject.cpp>;
 foreach my $file (@files) {
 
    open my $IN, "<", $file || die "Could not open $file for reading: $!";
-   my @lines = <$IN>;
-   close $IN;
 
    # All lines from $file are now in @lines
-
    my @keepers = ("-- This file was generated automatically from the C++ sourcecode to feed Luadoc.  It will be overwritten.\n");
 
    # Visit each line converting Doxygen comments as we go
-   for my $line (@lines) {
-       # Convert Doxygen /** to Luadoc ---
+   foreach my $line (<$IN>) {
+      # Convert Doxygen /** to Luadoc ---
       $line =~ s|^ */\*\* *$|---| && push(@keepers, $line) && next;  # s|^ */\*\* *$|---|p
 
       # Convert special tags to Lua expressions, which is what Luadoc can parse
@@ -38,7 +35,8 @@ foreach my $file (@files) {
                                                                                # Original naev sed commands
       $line =~ s|^ *\* *\@luafunc|function|             && push(@keepers, $line) && next;  # s|^ *\* *@luafunc|function|p
 
-      # $line =~ s|^ *\* *\@luamod *\(.*\)|module "\1"|   && push(@keepers, $line) && next;  # s|^ *\* *@luamod *\(.*\)|module "\1"|p
+      $line =~ s|^ *\* *\@luamod *(.*)|module "\1"|     && push(@keepers, $line) && next;  # s|^ *\* *@luamod *\(.*\)|module "\1"|p
+
       # Rename some tags:      
       $line =~ s|^ *\* *\@brief|-- \@description|       && push(@keepers, $line) && next;  # s|^ *\* *@brief|-- @description|p
       $line =~ s|^ *\* *\@luasee|-- \@see|              && push(@keepers, $line) && next;  # s|^ *\* *@luasee|-- @see|p
@@ -81,7 +79,10 @@ foreach my $file (@files) {
 
       close $OUT;
    }
+   close $IN;
 }
+
+
 
 # Pick the correct luadoc command; OS dependent
 my$luadoc;
