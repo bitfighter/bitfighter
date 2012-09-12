@@ -1304,6 +1304,9 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
 void HeatSeekerProjectile::acquireTarget()
 {
+   // Used for wall detection
+   static Vector<DatabaseObject *> localFillVector;
+
    Rect queryRect(getPos(), TargetAcquisitionRadius);
    fillVector.clear();
    findObjects(isHeatSeekerTarget, fillVector, queryRect);
@@ -1340,16 +1343,16 @@ void HeatSeekerProjectile::acquireTarget()
          continue;
 
       // Finally make sure there are no walls in the way
-      static Vector<DatabaseObject *> localFillVector;
       localFillVector.clear();
-
       findObjects((TestFunc)isWallType, localFillVector, Rect(getPos(), foundObject->getPos()));
-      F32 collisionTime;
+
+      F32 dummy;
       bool wallInTheWay = false;
+
       for(S32 i = 0; i < localFillVector.size(); i++)
       {
          BfObject *wallObject = static_cast<BfObject *>(localFillVector[i]);
-         if(objectIntersectsSegment(wallObject, getPos(), foundObject->getPos(), collisionTime))
+         if(objectIntersectsSegment(wallObject, getPos(), foundObject->getPos(), dummy))
          {
             wallInTheWay = true;
             logprintf("found wall");
