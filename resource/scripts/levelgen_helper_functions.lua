@@ -41,13 +41,13 @@ end
 --
 -- And two more
 --
-function subscribe(event)
-   subscribe_levelgen(levelgen, event)
-end   
+-- function subscribe(event)
+--    subscribe_levelgen(levelgen, event)
+-- end   
 
-function unsubscribe(event)
-   unsubscribe_levelgen(levelgen, event)
-end  
+-- function unsubscribe(event)
+--    unsubscribe_levelgen(levelgen, event)
+-- end  
 
 
 function globalMsg(message)

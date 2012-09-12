@@ -239,6 +239,15 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                   ok = luaW_is<LuaLevelGenerator>(L, stackPos);
                   break;
 
+               case EVENT:
+                  if(lua_isnumber(L, stackPos))
+                  {
+                     lua_Integer i = lua_tointeger(L, stackPos);
+                     ok = (i >= 0 && i < EventManager::EventTypes);
+                  }
+                  break;
+
+
                default:
                   TNLAssert(false, "Unknown arg type!");
                   break;

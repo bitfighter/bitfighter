@@ -94,6 +94,6 @@ if($^O eq 'MSWin32') {
 
 # Run Luadoc, put HTML files into lua/ dir
 chdir "lua";
-#luadoc --nofiles --taglet "naev-taglet" -t templates/ *.luadoc
-system("$luadoc --nofiles  *.luadoc");
+#system($luadoc . ' --nofiles --taglet "bitfighter-taglet" -t templates/ *.luadoc');
+system($luadoc . ' --nofiles  -t templates/ *.luadoc');
 # rm *.luadoc

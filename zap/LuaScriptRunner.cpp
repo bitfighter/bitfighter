@@ -577,50 +577,11 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 }
 
 
-int LuaScriptRunner::subscribe(lua_State *L)
-{
-   // Stack will have a bot or levelgen object at position 1, and the event at position 2
-   // Get the event off the stack
-   static const char *methodName = "subscribe()";
-   LuaObject::checkArgCount(L, 2, methodName);
-
-   lua_Integer eventType = LuaObject::getCheckedInt(L, -1, methodName);
-
-   if(eventType < 0 || eventType >= EventManager::EventTypes)
-      return 0;
-
-   LuaObject::clearStack(L);
-
-   EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType);
-   mSubscriptions[eventType] = true;
-
-   return 0;
-}
-
-
-int LuaScriptRunner::unsubscribe(lua_State *L)
-{
-   // Stack will have a bot or levelgen object at position 1, and the event at position 2
-   // Get the event off the stack
-   static const char *methodName = "LuaScriptRunner:unsubscribe()";
-   LuaObject::checkArgCount(L, 2, methodName);
-
-   lua_Integer eventType = LuaObject::getCheckedInt(L, -1, methodName);
-   if(eventType < 0 || eventType >= EventManager::EventTypes)
-      return 0;
-
-   LuaObject::clearStack(L);
-
-   EventManager::get()->unsubscribe(getScriptId(), (EventManager::EventType)eventType);
-   mSubscriptions[eventType] = false;
-   return 0;
-}
-
 template <typename T>
 static int handleSubscribe(lua_State *L)
 {
    T *o = luaW_check<T>(L, 1);
-   o->subscribe(L);
+   o->doSubscribe(L);
    return 0;
 }
 
@@ -629,92 +590,107 @@ template <typename T>
 static int handleUnsubscribe(lua_State *L)
 {
    T *o = luaW_check<T>(L, 1);
-   o->unsubscribe(L);
+   o->doUnsubscribe(L);
+   return 0;
+}
+
+
+// Lua script handler calls subscribe, which calls handleSubscribe with the proper template parameter, which then calls
+// the script's doSubscribe member.  A bit convoluted, but it works.
+
+S32 LuaScriptRunner::subscribe(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "subscribe");
+
+   if(profile == 0)     
+      return handleSubscribe<Robot>(L);
+   else
+      return handleSubscribe<LuaLevelGenerator>(L);
+}
+
+
+S32 LuaScriptRunner::unsubscribe(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "unsubscribe");
+
+   if(profile == 0)     
+      return handleUnsubscribe<Robot>(L);
+   else
+      return handleUnsubscribe<LuaLevelGenerator>(L);
+}
+
+
+S32 LuaScriptRunner::doSubscribe(lua_State *L)
+{
+   // Stack will have a bot or levelgen object at position 1, and the event at position 2
+   // Get the event off the stack; the object has already been handled and is "this".
+   static const char *methodName = "subscribe()";
+
+   lua_Integer eventType = getInt(L, -1);
+
+   if(!mSubscriptions[eventType])
+   {
+      EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType);
+      mSubscriptions[eventType] = true;
+   }
+
+   clearStack(L);
+
+   return 0;
+}
+
+   
+S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
+{
+   // Stack will have a bot or levelgen object at position 1, and the event at position 2
+   // Get the event off the stack
+   lua_Integer eventType = LuaObject::getInt(L, -1);
+
+   if(mSubscriptions[eventType])
+   {
+      EventManager::get()->unsubscribe(getScriptId(), (EventManager::EventType)eventType);
+      mSubscriptions[eventType] = false;
+   }
+
+   LuaObject::clearStack(L);
+
    return 0;
 }
 
 //////////////////////////////////////////////////////
 
-
-// Register some functions not associated with a particular class
-void LuaScriptRunner::registerLooseFunctions(lua_State *L)
-{
-   // #define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
-   lua_register(L, "subscribe_bot",        handleSubscribe<Robot>);
-   lua_register(L, "unsubscribe_bot",      handleUnsubscribe<Robot>);
-   lua_register(L, "subscribe_levelgen",   handleSubscribe<LuaLevelGenerator>);
-   lua_register(L, "unsubscribe_levelgen", handleUnsubscribe<LuaLevelGenerator>);
-
-
-   // Former LuaUtil functions
-   lua_register(L, "logprint",             logprint);          // Any args
-   lua_register(L, "print",                printToConsole);    // Any args
-   lua_register(L, "getMachineTime",       getMachineTime);    // No args
-   lua_register(L, "getRandomNumber",      getRandomNumber);   // 0,1,2 numbers
-   lua_register(L, "findFile",             findFile);          // 1 string arg
-}
-
+// Define 
 
 #define LUA_METHODS(CLASS, METHOD) \
-METHOD("subscribe_bot",        subscribe_bot<Robot>,                    ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
-METHOD("unsubscribe_bot",      unsubscribe_bot<Robot>,                  ARRAYDEF({{ ROBOT,    END }                            }), 1 ) \
-METHOD("subscribe_levelgen",   subscribe_levelgen<LuaLevelGenerator>,   ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
-METHOD("unsubscribe_levelgen", unsubscribe_levelgen<LuaLevelGenerator>, ARRAYDEF({{ LEVELGEN, END }                            }), 1 ) \
-METHOD("logprint",             logprint,                                ARRAYDEF({{ ANY, END }                                 }), 1 ) \
-METHOD("print",                printToConsole,                          ARRAYDEF({{ ANY, END }                                 }), 1 ) \
-METHOD("getMachineTime",       getMachineTime,                          ARRAYDEF({{      END }                                 }), 1 ) \
-METHOD("getRandomNumber",      getRandomNumber,                         ARRAYDEF({{      END }, { NUM, END }, { NUM, NUM, END }}), 3 ) \
-METHOD("findFile",             findFile,                                ARRAYDEF({{ STR, END }                                 }), 1 ) \
+   METHOD(CLASS, subscribe,       ARRAYDEF({{ ROBOT, EVENT, END }, { LEVELGEN, EVENT, END }}), 2 ) \
+   METHOD(CLASS, unsubscribe,     ARRAYDEF({{ ROBOT, EVENT, END }, { LEVELGEN, EVENT, END }}), 2 ) \
+   METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,          END }                          }), 1 ) \
+   METHOD(CLASS, print,           ARRAYDEF({{ ANY,          END }                          }), 1 ) \
+   METHOD(CLASS, getMachineTime,  ARRAYDEF({{               END }                          }), 1 ) \
+   METHOD(CLASS, findFile,        ARRAYDEF({{ STR,          END }                          }), 1 ) \
 
 
-//GENERATE_LUA_METHODS_TABLE(LuaScriptRunner, LUA_METHODS);
-GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
+   
+
+void LuaScriptRunner::registerLooseFunctions(lua_State *L)
+{
+   // Register the functions listed above by generating a series of lines that look like this:
+   // lua_register(L, "logprint", logprint);     
+
+#  define REGISTER_LINE(class_, name, profiles, profileCount) \
+   lua_register(L, #name, name );
+
+   LUA_METHODS("unused", REGISTER_LINE);
+
+#  undef REGISTER_LINE
+
+   // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
+   lua_register(L, "getRandomNumber", getRandomNumber);
+   luaL_dostring(L, "math.random = getRandomNumber");
+}
 
 #undef LUA_METHODS
-
-// Need this because, for some reason, LuaBase can't run ARRAYSIZE on this struct, and we need it for printing 
-// the function documentation
-//LuaScriptRunner::functionCount = ARRAYSIZE(LuaScriptRunner::functionArgs);
-
-
-// Produces:
-//const LuaFunctionProfile LuaScriptRunner::functionArgs[] = { 
-//   { "logprint", {{ ANY } }, 1 }, 
-//   { "printToConsole", {{ ANY } }, 1 }, 
-//   { "getMachineTime", {{ END } }, 1 }, 
-//   { "getRandomNumber", {{ END }, { NUM, END }, { NUM, NUM, END }}, 3 }, 
-//   { "findFile", {{ END } }, 1 }, { 0, { }, 0 } 
-//};
-
-
-// Generates something like the following:
-// const LuaFunctionProfile Teleporter::functionArgs[] =
-// {
-//    { "addDest",    {{ PT,  END }}, 1 }
-//    { "delDest",    {{ INT, END }}, 1 }
-//    { "clearDests", {{      END }}, 1 }
-//    { NULL, { }, 0 }
-// };
-
-////// Lua methods
-//
-////                Fn name               Param profiles                  Profile count                           
-//#define LUA_METHODS(CLASS, METHOD) \
-//   METHOD(CLASS,  getCPUTime,           ARRAYDEF({{ END }}), 1 )                             \
-//   METHOD(CLASS,  getTime,              ARRAYDEF({{ END }}), 1 )                             \
-//                                                                                             \
-//   METHOD(CLASS,  setAngle,             ARRAYDEF({{ PT, END }, { NUM, END }}), 2 )           \
-//   METHOD(CLASS,  getAnglePt,           ARRAYDEF({{ PT, END }              }), 1 )           \
-//   METHOD(CLASS,  hasLosPt,             ARRAYDEF({{ PT, END }              }), 1 )           \
-//                                                                                             \
-//
-//GENERATE_LUA_METHODS_TABLE(Robot, LUA_METHODS);
-//GENERATE_LUA_FUNARGS_TABLE(Robot, LUA_METHODS);
-//
-//#undef LUA_METHODS
-
-
-
 
 
 //////////
@@ -760,7 +736,7 @@ S32 LuaScriptRunner::logprint(lua_State *L)
 
 
 // This code based directly on Lua's print function, try to replicate functionality
-S32 LuaScriptRunner::printToConsole(lua_State *L)
+S32 LuaScriptRunner::print(lua_State *L)
 {
    string str = buildPrintString(L);
    gConsole.output("%s\n", str.c_str());
@@ -800,37 +776,32 @@ S32 LuaScriptRunner::findFile(lua_State *L)
 }
 
 
+// General structure and perculiar error messages taken from lua math lib
 S32 LuaScriptRunner::getRandomNumber(lua_State *L)
 {
-   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "getRandomNumber");
-   logprintf("Profile = %d", profile);
+   S32 args = lua_gettop(L);
 
-   if(lua_isnil(L, 1))
-   {
-      lua_pop(L, 1);
-      lua_pop(L, 2);
-
+   if(args == 0)
       return returnFloat(L, TNL::Random::readF());
-   }
 
-   S32 min = 1;
-   S32 max = 0;
-
-   if(lua_isnil(L,2))
-      max = luaL_checkint(L, 1); 
-   else
+   if(args == 1)
    {
-      min = luaL_checkint(L, 1);
-      max = luaL_checkint(L, 2);
+      S32 max = luaL_checkint(L, 1);
+      luaL_argcheck(L, 1 <= max, 1, "interval is empty");
+      return returnInt(L, TNL::Random::readI(1, max));
    }
 
-   lua_pop(L, 1);
-   lua_pop(L, 2);
+   if(args == 2)
+   {
+      int min = luaL_checkint(L, 1);
+      int max = luaL_checkint(L, 2);
+      luaL_argcheck(L, min <= max, 2, "interval is empty");
+      return returnInt(L, TNL::Random::readI(min, max));
+   }
 
-   return returnInt(L, TNL::Random::readI(min, max));
+   else 
+      return luaL_error(L, "wrong number of arguments");
 }
-
-
 
 
 // Borrowed from http://tdistler.com/2010/09/13/c-enums-in-lua
