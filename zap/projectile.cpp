@@ -1355,7 +1355,6 @@ void HeatSeekerProjectile::acquireTarget()
          if(objectIntersectsSegment(wallObject, getPos(), foundObject->getPos(), dummy))
          {
             wallInTheWay = true;
-            logprintf("found wall");
             break;
          }
       }
