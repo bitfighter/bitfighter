@@ -1294,13 +1294,19 @@ const char *BfObject::luaClassName = "BfItem";
 REGISTER_LUA_CLASS(BfObject);
 
 /**
- * @luafunc getAllies(f, n)
- * @brief Gets the list of allies of a faction.
+ * @brief Lua methods that deal with BfObjects.
+ * 
+ * @luamod BfObject
+*/
+
+/**
+ * @brief Gets an object's ClassId.
  *
- *    @param f Faction to get allies of.
- *    @param[out] Number of allies.
- *    @return The allies of the faction.
- */
+ * @usage classId = obj:getClassId()
+ *    @luareturn The object's ClassId
+ * @luafunc getClassID()
+*/
+
 
 
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
