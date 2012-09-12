@@ -1293,6 +1293,15 @@ GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
 const char *BfObject::luaClassName = "BfItem";
 REGISTER_LUA_CLASS(BfObject);
 
+/**
+ * @luafunc getAllies(f, n)
+ * @brief Gets the list of allies of a faction.
+ *
+ *    @param f Faction to get allies of.
+ *    @param[out] Number of allies.
+ *    @return The allies of the faction.
+ */
+
 
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
 S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos());          }
