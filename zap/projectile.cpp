@@ -1342,17 +1342,19 @@ void HeatSeekerProjectile::acquireTarget()
       if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
          continue;
 
-      // Finally make sure there are no walls in the way
+      // Finally make sure there are no collideable objects in the way (like walls, forcefields)
       localFillVector.clear();
-      findObjects((TestFunc)isWallType, localFillVector, Rect(getPos(), foundObject->getPos()));
+      findObjects((TestFunc)isCollideableType, localFillVector, Rect(getPos(), foundObject->getPos()));
 
       F32 dummy;
       bool wallInTheWay = false;
 
       for(S32 i = 0; i < localFillVector.size(); i++)
       {
-         BfObject *wallObject = static_cast<BfObject *>(localFillVector[i]);
-         if(objectIntersectsSegment(wallObject, getPos(), foundObject->getPos(), dummy))
+         BfObject *collideObject = static_cast<BfObject *>(localFillVector[i]);
+
+         if(collideObject->collide(this) &&   // Test forcefield up or down
+               objectIntersectsSegment(collideObject, getPos(), foundObject->getPos(), dummy))
          {
             wallInTheWay = true;
             break;
