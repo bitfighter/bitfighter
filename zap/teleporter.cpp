@@ -795,6 +795,13 @@ bool Teleporter::canBeNeutral() { return false; }
 
 //// Lua methods
 
+/**
+  *  @luaclass Teleporter
+  *  @brief Instantly transports ships from here to there.
+  *  @descr Teleporter represents the basic teleporter object.  Every teleporter has an intake location
+  *         and one or more destinations.  When a ship enters the teleporter, a destination will be chosen 
+  *         randomly if there is more than one.   
+  */
 //               Fn name     Param profiles       Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
@@ -810,7 +817,11 @@ GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
 const char *Teleporter::luaClassName = "Teleporter";
 REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
-
+/** 
+ *  @luafunc Teleporter::addDest(dest)
+ *  @brief Adds a destination to the teleporter
+ *  @param dest - A Point or coordinate pair representing the location of the destination
+ */
 S32 Teleporter::addDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "addDest");
@@ -822,6 +833,12 @@ S32 Teleporter::addDest(lua_State *L)
 }
 
 
+/**
+  *  @luafunc Teleporter::delDest(index)
+  *  @brief Removes a destination to the teleporter.
+  *  @param index - The index of the destination to delete.  Remember that in Lua, indices start with 1!  If you specify
+  *         an invalid index, will generate an error.
+  */
 S32 Teleporter::delDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "delDest");
@@ -836,6 +853,10 @@ S32 Teleporter::delDest(lua_State *L)
 }
 
 
+/**
+  *  @luafunc Teleporter::clearDests()
+  *  @brief Removes all destinations from the teleporter.
+  */
 S32 Teleporter::clearDests(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "clearDests");
