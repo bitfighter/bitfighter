@@ -1202,8 +1202,8 @@ static F32 normalizeAngle(F32 angle)
 
 U32 HeatSeekerProjectile::SpeedIncreasePerSecond = 300;
 U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
-F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 3;
-F32 HeatSeekerProjectile::TargetSearchAngle = FloatPi;     // Anglular spread in front of ship to search for targets -- SHOULD BE NO LARGER THAN FLOATPI!
+F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 2;
+F32 HeatSeekerProjectile::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets -- SHOULD BE NO LARGER THAN FLOATPI!  <-- why not?
 
 // Runs on client and server
 void HeatSeekerProjectile::idle(IdleCallPath path)
@@ -1304,6 +1304,9 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
 void HeatSeekerProjectile::acquireTarget()
 {
+   // Used for wall detection
+   static Vector<DatabaseObject *> localFillVector;
+
    Rect queryRect(getPos(), TargetAcquisitionRadius);
    fillVector.clear();
    findObjects(isHeatSeekerTarget, fillVector, queryRect);
@@ -1330,12 +1333,35 @@ void HeatSeekerProjectile::acquireTarget()
       //if(distanceSq > TargetAcquisitionRadius * TargetAcquisitionRadius)
       //   continue;
 
-      //if(distanceSq > closest)
-      //   continue;
+      // This target is not the closest
+      if(distanceSq > closest)
+         continue;
 
       // See if object is within our "cone of vision"
       F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - getActualAngle());
       if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
+         continue;
+
+      // Finally make sure there are no collideable objects in the way (like walls, forcefields)
+      localFillVector.clear();
+      findObjects((TestFunc)isCollideableType, localFillVector, Rect(getPos(), foundObject->getPos()));
+
+      F32 dummy;
+      bool wallInTheWay = false;
+
+      for(S32 i = 0; i < localFillVector.size(); i++)
+      {
+         BfObject *collideObject = static_cast<BfObject *>(localFillVector[i]);
+
+         if(collideObject->collide(this) &&   // Test forcefield up or down
+               objectIntersectsSegment(collideObject, getPos(), foundObject->getPos(), dummy))
+         {
+            wallInTheWay = true;
+            break;
+         }
+      }
+
+      if(wallInTheWay)
          continue;
 
       closest = distanceSq;
@@ -1433,8 +1459,8 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
 
 bool HeatSeekerProjectile::collide(BfObject *otherObj)
 {
-	if(isGhost())
-		return isWallType(otherObj->getObjectTypeNumber());
+   if(isGhost())
+      return isWallType(otherObj->getObjectTypeNumber());
 
    // Don't collide with shooter withing first 500 ms of shooting
    if(mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
@@ -1445,6 +1471,13 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
 
 bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 {
+   if(isShipType(otherObj->getObjectTypeNumber()))
+   {
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
+      if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
+         return false; // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+   }
+
    setVel(stateIndex, Point(0,0));
    if(!isGhost() && stateIndex == ActualState)
    {
