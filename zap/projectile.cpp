@@ -1433,8 +1433,8 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
 
 bool HeatSeekerProjectile::collide(BfObject *otherObj)
 {
-	if(isGhost())
-		return isWallType(otherObj->getObjectTypeNumber());
+   if(isGhost())
+      return isWallType(otherObj->getObjectTypeNumber());
 
    // Don't collide with shooter withing first 500 ms of shooting
    if(mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
@@ -1445,6 +1445,13 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
 
 bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 {
+   if(isShipType(otherObj->getObjectTypeNumber()))
+   {
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
+      if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
+         return false; // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+   }
+
    setVel(stateIndex, Point(0,0));
    if(!isGhost() && stateIndex == ActualState)
    {
