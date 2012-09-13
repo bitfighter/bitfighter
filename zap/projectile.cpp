@@ -1274,9 +1274,9 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          }
 
          // Get current speed
-         F32 speed = getVel().len();
-         speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         F32 speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
 
+         //F32 speed = getVel().len();
          // Set minimum speed to the default
          //if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
          //   speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
@@ -1292,7 +1292,6 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 
          newVelocity.normalize(speed);
          setActualVel(newVelocity);
-         setActualAngle(newVelocity.ATAN2());
       }
    }
 
@@ -1304,6 +1303,8 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
 void HeatSeekerProjectile::acquireTarget()
 {
+   F32 ourAngle = getActualVel().ATAN2();
+
    // Used for wall detection
    static Vector<DatabaseObject *> localFillVector;
 
@@ -1338,7 +1339,7 @@ void HeatSeekerProjectile::acquireTarget()
          continue;
 
       // See if object is within our "cone of vision"
-      F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - getActualAngle());
+      F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - ourAngle);
       if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
          continue;
 
@@ -1459,6 +1460,14 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
 
 bool HeatSeekerProjectile::collide(BfObject *otherObj)
 {
+   if(isShipType(otherObj->getObjectTypeNumber())) // So a Client side can predict better and make some sound effect
+   {
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
+      if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
+         return true;
+   }
+
+
    if(isGhost())
       return isWallType(otherObj->getObjectTypeNumber());
 
@@ -1471,6 +1480,21 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
 
 bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 {
+   static const F32 MAX_VEL_TO_BOUNCE_EACHOTHER = 500;
+
+   if(otherObj->getObjectTypeNumber() == HeatSeekerTypeNumber) // explode if both heatseeker hit each other too hard.
+   {
+      TNLAssert(dynamic_cast<HeatSeekerProjectile *>(otherObj), "Not a HeatSeekerProjectile")
+      HeatSeekerProjectile *other = static_cast<HeatSeekerProjectile *>(otherObj);
+      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE_EACHOTHER * MAX_VEL_TO_BOUNCE_EACHOTHER)
+      {
+         handleCollision(other, getActualPos());
+         other->handleCollision(this, other->getActualPos());
+         return true;
+      }
+      return false;
+   }
+
    if(isShipType(otherObj->getObjectTypeNumber()))
    {
       TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
