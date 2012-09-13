@@ -1,6 +1,5 @@
-# Based on https://github.com/bobbens/naev/blame/master/docs/luadoc.sh
-# Converted to Perl for cross-platform compatibility
-# This script preprocesses our C++ code and generates fodder for luadoc which makes pretty documentation.
+# This script preprocesses our C++ code and generates fodder for Doxygen which makes pretty documentation
+# for our Lua scripters out there
 
 use strict;            # Require vars to be declared!
 use File::Basename;
