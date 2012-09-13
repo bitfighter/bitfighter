@@ -1474,8 +1474,15 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
    if(isShipType(otherObj->getObjectTypeNumber()))
    {
       TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
-      if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
-         return false; // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+      Ship *ship = static_cast<Ship *>(otherObj);
+      if(ship->isModulePrimaryActive(ModuleShield))
+      {
+         // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+         Point p = getPos(stateIndex) - ship->getPos(stateIndex);
+         p.normalize(getVel(stateIndex).len());
+         setVel(stateIndex, p);
+         return true;
+      }
    }
 
    setVel(stateIndex, Point(0,0));
