@@ -16,8 +16,8 @@ if (! -d $luadir) {
 
 
 # Iterate over all cpp folders in our working dir converting Doxygen comments to Luadoc comments
-# my @files = <../zap/*.cpp>;
-my @files = ("../zap/BfObject.cpp", "../zap/teleporter.cpp");
+my @files = <../zap/*.cpp>;
+# my @files = ("../zap/BfObject.cpp", "../zap/teleporter.cpp");
 foreach my $file (@files) {
 
    open my $IN, "<", $file || die "Could not open $file for reading: $!";
@@ -51,7 +51,7 @@ foreach my $file (@files) {
       if( $line =~ m|REGISTER_LUA_SUBCLASS\( *(.+?) *, *(.+?) *\)| ) {
          my $class = $1;
          my $parent = $2;
-         unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class : $parent { \n public:\n");    
+         unshift(@{$classes{$class}}, "$shortClassDescr\n$longClassDescr\nclass $class : public $parent { \n public:\n");    
          $writeFile = 1;
          $shortClassDescr = "";
          $longClassDescr = "";
@@ -62,35 +62,6 @@ foreach my $file (@files) {
          $collectingMethods = 1;
          next;
       }
-
-      # if( $line =~ m|\@luaclass (.*)$| ) {
-      #    $shortClassDescr = "//! $1\n";
-      #    next;
-      # }
-
-      # if( $line =~ m|\@descr (.*)$| ) {
-      #    $longClassDescr = "//! $1\n";
-      #    $collectingLongDescr = 1;
-      #    next;
-      # }
-
-      # if( $collectingLongDescr ) {
-      #    $line =~ s|^\s+||; $line =~ s|\s+$||;     # Trim whitespace from $line
-
-      #    # Did we hit a blank line?
-      #    if( $line eq "" ) {
-      #       $longClassDescr .= "\n";
-      #       $collectingLongDescr = 0;
-      #       next;
-      #    }
-
-      #    # # Strip various comment decorators from line
-      #    $line =~ s|^\?*+||;
-      #    $line =~ s|^\/+||;
-
-      #    $longClassDescr .= "//! $line\n";
-      #    next;
-      # }
 
       if( $collectingMethods ) {
          if( $line =~ m|METHOD\( *CLASS, *(.+?) *,| ) {
@@ -164,6 +135,32 @@ foreach my $file (@files) {
             next;
          }
 
+         if( $line =~ m|\@returns? +(.*)$| ) {
+            push(@comments, "\\return $1\n");
+            next;
+         }
+
+         if( $line =~ m|\@see +(.*)$| ) {
+            push(@comments, "\\see $1\n");
+            next;
+         }
+
+         # if( $line =~ m|\@endcode +(.*)$| ) {
+         #    push(@comments, "\\endcode $1\n");
+         #    next;
+         # }
+         # if( $line =~ m|\@endcode +(.*)$| ) {
+         #    push(@comments, "\\endcode $1\n");
+         #    next;
+         # }
+         # if( $line =~ m|\@endcode +(.*)$| ) {
+         #    push(@comments, "\\endcode $1\n");
+         #    next;
+         # }
+         # if( $line =~ m|\@endcode +(.*)$| ) {
+         #    push(@comments, "\\endcode $1\n");
+         #    next;
+         # }         
 
          # otherwise...
          push(@comments, $line);
