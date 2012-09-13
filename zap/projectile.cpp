@@ -1166,6 +1166,7 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
 
    mTimeRemaining = GameWeapon::weaponInfo[WeaponHeatSeeker].projLiveTime;
    exploded = false;
+   bounced = false;
 
    if(shooter)
    {
@@ -1274,9 +1275,9 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          }
 
          // Get current speed
-         F32 speed = getVel().len();
-         speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
+         F32 speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
 
+         //F32 speed = getVel().len();
          // Set minimum speed to the default
          //if(speed < GameWeapon::weaponInfo[mWeaponType].projVelocity)
          //   speed = GameWeapon::weaponInfo[mWeaponType].projVelocity;
@@ -1292,7 +1293,6 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 
          newVelocity.normalize(speed);
          setActualVel(newVelocity);
-         setActualAngle(newVelocity.ATAN2());
       }
    }
 
@@ -1304,6 +1304,8 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
 void HeatSeekerProjectile::acquireTarget()
 {
+   F32 ourAngle = getActualVel().ATAN2();
+
    // Used for wall detection
    static Vector<DatabaseObject *> localFillVector;
 
@@ -1338,7 +1340,7 @@ void HeatSeekerProjectile::acquireTarget()
          continue;
 
       // See if object is within our "cone of vision"
-      F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - getActualAngle());
+      F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - ourAngle);
       if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
          continue;
 
@@ -1459,11 +1461,19 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
 
 bool HeatSeekerProjectile::collide(BfObject *otherObj)
 {
+   if(isShipType(otherObj->getObjectTypeNumber())) // So a Client side can predict better and make some sound effect
+   {
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
+      if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
+         return true;
+   }
+
+
    if(isGhost())
       return isWallType(otherObj->getObjectTypeNumber());
 
    // Don't collide with shooter withing first 500 ms of shooting
-   if(mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
+   if(!bounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
       return false;
 
    return isWeaponCollideableType(otherObj->getObjectTypeNumber());
@@ -1471,18 +1481,41 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
 
 bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 {
-   if(isShipType(otherObj->getObjectTypeNumber()))
+   static const F32 MAX_VEL_TO_BOUNCE_EACHOTHER = 500;
+
+   if(otherObj->getObjectTypeNumber() == HeatSeekerTypeNumber) // explode if both heatseeker hit each other too hard.
    {
-      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
-      if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
-         return false; // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+      TNLAssert(dynamic_cast<HeatSeekerProjectile *>(otherObj), "Not a HeatSeekerProjectile");
+      HeatSeekerProjectile *other = static_cast<HeatSeekerProjectile *>(otherObj);
+      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE_EACHOTHER * MAX_VEL_TO_BOUNCE_EACHOTHER)
+      {
+         handleCollision(other, getActualPos());
+         other->handleCollision(this, other->getActualPos());
+         return true;
+      }
+      return false;
    }
 
-   setVel(stateIndex, Point(0,0));
+   if(isShipType(otherObj->getObjectTypeNumber()))
+   {
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
+      Ship *ship = static_cast<Ship *>(otherObj);
+      if(ship->isModulePrimaryActive(ModuleShield))
+      {
+         // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+         Point p = getPos(stateIndex) - ship->getPos(stateIndex);
+         p.normalize(getVel(stateIndex).len());
+         setVel(stateIndex, p);
+         bounced = true;
+         return true;
+      }
+   }
+
    if(!isGhost() && stateIndex == ActualState)
    {
       handleCollision(otherObj, getActualPos());
    }
+   setVel(stateIndex, Point(0,0)); // Might save some CPU telling move() to stop moving.
    return true;
 }
 

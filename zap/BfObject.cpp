@@ -1293,11 +1293,21 @@ GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
 const char *BfObject::luaClassName = "BfItem";
 REGISTER_LUA_CLASS(BfObject);
 
-/**
- * @brief Lua methods that deal with BfObjects.
- * 
- * @luamod BfObject
-*/
+/** This is the info that will appear on the first page of the Lua documentation... We could stash this anywhere logical.
+ *
+ * @mainpage Bitfighter Lua Documentation
+ *
+ * @section intro_sec Introduction
+ *
+ * Here is some info about scripting levels and robots in Bitfighter.
+ *
+ * @section install_sec Installation
+ *
+ * @subsection step1 Step 1: Opening the box
+ *
+ * etc...
+ */
+
 
 /**
  * @brief Gets an object's ClassId.
@@ -1306,8 +1316,6 @@ REGISTER_LUA_CLASS(BfObject);
  *    @luareturn The object's ClassId
  * @luafunc getClassID()
 */
-
-
 
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
 S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos());          }

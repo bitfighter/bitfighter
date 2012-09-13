@@ -279,6 +279,7 @@ private:
 
    S32 mTimeRemaining;
    bool exploded;
+   bool bounced;
 
    void acquireTarget();
 

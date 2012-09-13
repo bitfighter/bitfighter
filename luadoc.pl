@@ -110,57 +110,10 @@ foreach my $file (@files) {
             next;
          }
 
-         if( $line =~ m|\@brief +(.*)$| ) {
-            push(@comments, " \\brief $1\n");
-            next;
-         }
-
-         if( $line =~ m|\@param +(.*)$| ) {
-            push(@comments, " \\param $1\n");
-            next;
-         }
-
          if( $line =~ m|\@descr +(.*)$| ) {
             push(@comments, "\n $1\n");
             next;
          }
-
-         if( $line =~ m|\@code +(.*)$| ) {
-            push(@comments, "\\code $1\n");
-            next;
-         }
-
-         if( $line =~ m|\@endcode +(.*)$| ) {
-            push(@comments, "\\endcode $1\n");
-            next;
-         }
-
-         if( $line =~ m|\@returns? +(.*)$| ) {
-            push(@comments, "\\return $1\n");
-            next;
-         }
-
-         if( $line =~ m|\@see +(.*)$| ) {
-            push(@comments, "\\see $1\n");
-            next;
-         }
-
-         # if( $line =~ m|\@endcode +(.*)$| ) {
-         #    push(@comments, "\\endcode $1\n");
-         #    next;
-         # }
-         # if( $line =~ m|\@endcode +(.*)$| ) {
-         #    push(@comments, "\\endcode $1\n");
-         #    next;
-         # }
-         # if( $line =~ m|\@endcode +(.*)$| ) {
-         #    push(@comments, "\\endcode $1\n");
-         #    next;
-         # }
-         # if( $line =~ m|\@endcode +(.*)$| ) {
-         #    push(@comments, "\\endcode $1\n");
-         #    next;
-         # }         
 
          # otherwise...
          push(@comments, $line);
