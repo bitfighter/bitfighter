@@ -1166,6 +1166,7 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
 
    mTimeRemaining = GameWeapon::weaponInfo[WeaponHeatSeeker].projLiveTime;
    exploded = false;
+   bounced = false;
 
    if(shooter)
    {
@@ -1472,7 +1473,7 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
       return isWallType(otherObj->getObjectTypeNumber());
 
    // Don't collide with shooter withing first 500 ms of shooting
-   if(mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
+   if(!bounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
       return false;
 
    return isWeaponCollideableType(otherObj->getObjectTypeNumber());
@@ -1505,6 +1506,7 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
          Point p = getPos(stateIndex) - ship->getPos(stateIndex);
          p.normalize(getVel(stateIndex).len());
          setVel(stateIndex, p);
+         bounced = true;
          return true;
       }
    }
