@@ -581,15 +581,15 @@ void ClientGame::idle(U32 timeDelta)
       theMove->time = timeDelta;
       theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
-      fillVector2.clear();  // need to have our own local fillVector
-      mGameObjDatabase->findObjects(fillVector2);
+      const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
 
-      for(S32 i = 0; i < fillVector2.size(); i++)
+      for(S32 i = gameObjects->size() - 1; i >= 0; i--)
       {
-         if(fillVector2[i]->isDeleted())
-            continue;
+         TNLAssert(dynamic_cast<BfObject *>((*gameObjects)[i]), "Bad cast!");
+         BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
 
-         BfObject *obj = static_cast<BfObject *>(fillVector2[i]);
+         if(obj->isDeleted())
+            continue;
 
          if(obj == controlObject)
          {

@@ -1450,18 +1450,16 @@ void ServerGame::idle(U32 timeDelta)
       botControlTickTimer.reset();
    }
 
-   fillVector2.clear();  // Don't want to clobber fillVector here...
-   mGameObjDatabase->findObjects(fillVector2);
-
+   const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
 
    // Visit each game object, handling moves and running its idle method
-   for(S32 i = 0; i < fillVector2.size(); i++)
+   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
    {
-      if(fillVector2[i]->isDeleted())
-         continue;
+      TNLAssert(dynamic_cast<BfObject *>((*gameObjects)[i]), "Bad cast!");
+      BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
 
-      BfObject *obj = dynamic_cast<BfObject *>(fillVector2[i]);
-      TNLAssert(obj, "Bad cast!");
+      if(obj->isDeleted())
+         continue;
 
       // Here is where the time gets set for all the various object moves
       Move thisMove = obj->getCurrentMove();
