@@ -154,6 +154,16 @@ foreach my $file (@files) {
             next;
          }
 
+         if( $line =~ m|\@code +(.*)$| ) {
+            push(@comments, "\\code $1\n");
+            next;
+         }
+
+         if( $line =~ m|\@endcode +(.*)$| ) {
+            push(@comments, "\\endcode $1\n");
+            next;
+         }
+
 
          # otherwise...
          push(@comments, $line);
