@@ -3,6 +3,7 @@
 
 use strict;            # Require vars to be declared!
 use File::Basename;
+use List::Util 'first';
 
 # Need to be in the doc directory
 chdir "doc" || die "Could not change to doc folder: $!";
@@ -63,13 +64,13 @@ foreach my $file (@files) {
       }
 
       if( $collectingMethods ) {
-         if( $line =~ m|METHOD\( *CLASS, *(.+?) *,| ) {
+         if( $line =~ m|METHOD\( *CLASS, *(.+?) *,| ) {                 # Signals class declaration... methods will follow
             my $method = $1;
             push(@methods, $method);
             next;
          }
 
-         if( $line =~ m|GENERATE_LUA_METHODS_TABLE\( *(.+?) *,| ) {
+         if( $line =~ m|GENERATE_LUA_METHODS_TABLE\( *(.+?) *,| ) {     # Signals we have all methods for this class, gives us class name; now generate code
             my $class = $1;
 
             foreach my $method (@methods) {
@@ -82,7 +83,7 @@ foreach my $file (@files) {
          }
       }
 
-      if( $line =~ m|/\*\*| ) {
+      if( $line =~ m|/\*\*| ) {              # /** signals the beginning of a long comment block we need to pay attention to
          $collectingLongComment = 1;
          push(@comments, "/*!\n");
          next;
@@ -99,8 +100,23 @@ foreach my $file (@files) {
 
          $line =~ s|^\ *\* *||;  # Strip off leading *s and spaces
 
+         # Check for some special custom tags
          if( $line =~ m|\@luafunc +(.*)$| ) {
             push(@comments, " \\fn $1\n");
+
+            $line =~ m| (.+?)::(.+?)\((.+)\)|;    # Grab class, method, and args from line that looks like: @luafunc Teleporter::addDest(dest)
+            my $class = $1;
+            my $method = $2;
+            my $args = $3;
+
+            # Find the original class definition and delete it
+            my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
+            splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
+
+            # Add our new sig to the list
+            push(@{$classes{$class}}, "void $method($args) { }\n");
+            
+
             next;
          }
 
@@ -114,7 +130,7 @@ foreach my $file (@files) {
             next;
          }
 
-         # otherwise...
+         # Otherwise keep the line unaltered
          push(@comments, $line);
       }
    }
@@ -132,8 +148,8 @@ foreach my $file (@files) {
       print $OUT "// This file was generated automatically from the C++ source to feed doxygen.  It will be overwritten.\n\n\n";
 
       foreach my $key ( keys %classes ) {
-         print $OUT @{$classes{$key}};          # Main body of class
-         print $OUT "};\n";      # Close the class
+         print $OUT @{$classes{$key}};    # Main body of class
+         print $OUT "};\n";               # Close the class
       }
 
       print $OUT @comments;

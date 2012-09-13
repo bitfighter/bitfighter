@@ -1310,13 +1310,12 @@ REGISTER_LUA_CLASS(BfObject);
 
 
 /**
- * @brief Gets an object's ClassId.
- *
- * @usage classId = obj:getClassId()
- *    @luareturn The object's ClassId
- * @luafunc getClassID()
+ * @luafunc   BfObject::getClassID()
+ * @brief     Gets an object's ClassId.
+ * @code     classId = obj:getClassId()
+ * @endcode
+ * @luareturn The object's ClassId
 */
-
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
 S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos());          }
 S32 BfObject::getTeamIndx(lua_State *L) { return returnInt  (L, mTeam + 1);         }  // + 1 because Lua indices start at 1
