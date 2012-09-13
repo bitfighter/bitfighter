@@ -1509,11 +1509,11 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
       }
    }
 
-   setVel(stateIndex, Point(0,0));
    if(!isGhost() && stateIndex == ActualState)
    {
       handleCollision(otherObj, getActualPos());
    }
+   setVel(stateIndex, Point(0,0)); // Might save some CPU telling move() to stop moving.
    return true;
 }
 
