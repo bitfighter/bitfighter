@@ -821,6 +821,13 @@ REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
  *  @luafunc Teleporter::addDest(dest)
  *  @brief Adds a destination to the teleporter
  *  @param dest - A Point or coordinate pair representing the location of the destination
+ *
+ *  Example:
+ *  @code 
+ *    t = Teleporter.new()
+ *    t:addDest(100,150)
+ *    t:addToGame()
+ *  @endcode
  */
 S32 Teleporter::addDest(lua_State *L)
 {
