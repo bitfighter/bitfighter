@@ -142,6 +142,10 @@
 		73872A2F152A7CDC0034CD97 /* EventManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73872A2A152A7CDC0034CD97 /* EventManager.cpp */; };
 		73872A30152A7CDC0034CD97 /* ServerGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73872A2C152A7CDC0034CD97 /* ServerGame.cpp */; };
 		73872A38152A7D760034CD97 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 738729DA152A770C0034CD97 /* SDL2.framework */; };
+		7388B3D01601A71000C16E45 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7388B3C71601A71000C16E45 /* Console.cpp */; };
+		7388B3D11601A71000C16E45 /* EditorPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7388B3C91601A71000C16E45 /* EditorPlugin.cpp */; };
+		7388B3D21601A71000C16E45 /* LuaBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7388B3CB1601A71000C16E45 /* LuaBase.cpp */; };
+		7388B3D31601A71000C16E45 /* LuaScriptRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7388B3CE1601A71000C16E45 /* LuaScriptRunner.cpp */; };
 		7388F06C139D5B46003C6BB0 /* music in Resources */ = {isa = PBXBuildFile; fileRef = 7388F069139D5B46003C6BB0 /* music */; };
 		738A4ED215085E6B001C4F67 /* UIHighScores.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738A4ED015085E6B001C4F67 /* UIHighScores.cpp */; };
 		738B57711446185700F25FDF /* BanList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 738B57681446185700F25FDF /* BanList.cpp */; };
@@ -247,8 +251,6 @@
 		73D2F3F112E2D7E800EA5EBE /* loadoutZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2CF12E2D7E800EA5EBE /* loadoutZone.cpp */; };
 		73D2F3F412E2D7E800EA5EBE /* luaGameInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2D512E2D7E800EA5EBE /* luaGameInfo.cpp */; };
 		73D2F3F512E2D7E800EA5EBE /* luaLevelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2D712E2D7E800EA5EBE /* luaLevelGenerator.cpp */; };
-		73D2F3F612E2D7E800EA5EBE /* luaObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2D912E2D7E800EA5EBE /* luaObject.cpp */; };
-		73D2F3F712E2D7E800EA5EBE /* luaUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2DB12E2D7E800EA5EBE /* luaUtil.cpp */; };
 		73D2F3F812E2D7E800EA5EBE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2DD12E2D7E800EA5EBE /* main.cpp */; };
 		73D2F3FA12E2D7E800EA5EBE /* masterConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */; };
 		73D2F3FC12E2D7E800EA5EBE /* md5wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2E312E2D7E800EA5EBE /* md5wrapper.cpp */; };
@@ -701,6 +703,15 @@
 		73872A83152A7ED40034CD97 /* SDL_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_types.h; sourceTree = "<group>"; };
 		73872A84152A7ED40034CD97 /* SDL_version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_version.h; sourceTree = "<group>"; };
 		73872A85152A7ED40034CD97 /* SDL_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_video.h; sourceTree = "<group>"; };
+		7388B3C71601A71000C16E45 /* Console.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Console.cpp; path = ../../../zap/Console.cpp; sourceTree = SOURCE_ROOT; };
+		7388B3C81601A71000C16E45 /* Console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Console.h; path = ../../../zap/Console.h; sourceTree = SOURCE_ROOT; };
+		7388B3C91601A71000C16E45 /* EditorPlugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditorPlugin.cpp; path = ../../../zap/EditorPlugin.cpp; sourceTree = SOURCE_ROOT; };
+		7388B3CA1601A71000C16E45 /* EditorPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditorPlugin.h; path = ../../../zap/EditorPlugin.h; sourceTree = SOURCE_ROOT; };
+		7388B3CB1601A71000C16E45 /* LuaBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LuaBase.cpp; path = ../../../zap/LuaBase.cpp; sourceTree = SOURCE_ROOT; };
+		7388B3CC1601A71000C16E45 /* LuaBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaBase.h; path = ../../../zap/LuaBase.h; sourceTree = SOURCE_ROOT; };
+		7388B3CD1601A71000C16E45 /* LuaException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaException.h; path = ../../../zap/LuaException.h; sourceTree = SOURCE_ROOT; };
+		7388B3CE1601A71000C16E45 /* LuaScriptRunner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LuaScriptRunner.cpp; path = ../../../zap/LuaScriptRunner.cpp; sourceTree = SOURCE_ROOT; };
+		7388B3CF1601A71000C16E45 /* LuaScriptRunner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaScriptRunner.h; path = ../../../zap/LuaScriptRunner.h; sourceTree = SOURCE_ROOT; };
 		7388F020139D5992003C6BB0 /* Ogg-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Ogg-Info.plist"; sourceTree = "<group>"; };
 		7388F048139D5A05003C6BB0 /* Speex-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Speex-Info.plist"; sourceTree = "<group>"; };
 		7388F05B139D5A28003C6BB0 /* Vorbis-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Vorbis-Info.plist"; sourceTree = "<group>"; };
@@ -869,10 +880,6 @@
 		73D2F2D612E2D7E800EA5EBE /* luaGameInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaGameInfo.h; path = ../../../zap/luaGameInfo.h; sourceTree = SOURCE_ROOT; };
 		73D2F2D712E2D7E800EA5EBE /* luaLevelGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luaLevelGenerator.cpp; path = ../../../zap/luaLevelGenerator.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2D812E2D7E800EA5EBE /* luaLevelGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaLevelGenerator.h; path = ../../../zap/luaLevelGenerator.h; sourceTree = SOURCE_ROOT; };
-		73D2F2D912E2D7E800EA5EBE /* luaObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luaObject.cpp; path = ../../../zap/luaObject.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2DA12E2D7E800EA5EBE /* luaObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaObject.h; path = ../../../zap/luaObject.h; sourceTree = SOURCE_ROOT; };
-		73D2F2DB12E2D7E800EA5EBE /* luaUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luaUtil.cpp; path = ../../../zap/luaUtil.cpp; sourceTree = SOURCE_ROOT; };
-		73D2F2DC12E2D7E800EA5EBE /* luaUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = luaUtil.h; path = ../../../zap/luaUtil.h; sourceTree = SOURCE_ROOT; };
 		73D2F2DD12E2D7E800EA5EBE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../zap/main.cpp; sourceTree = SOURCE_ROOT; tabWidth = 4; usesTabs = 0; };
 		73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterConnection.cpp; path = ../../../zap/masterConnection.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2E012E2D7E800EA5EBE /* masterConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterConnection.h; path = ../../../zap/masterConnection.h; sourceTree = SOURCE_ROOT; };
@@ -1794,6 +1801,15 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				7388B3C71601A71000C16E45 /* Console.cpp */,
+				7388B3C81601A71000C16E45 /* Console.h */,
+				7388B3C91601A71000C16E45 /* EditorPlugin.cpp */,
+				7388B3CA1601A71000C16E45 /* EditorPlugin.h */,
+				7388B3CB1601A71000C16E45 /* LuaBase.cpp */,
+				7388B3CC1601A71000C16E45 /* LuaBase.h */,
+				7388B3CD1601A71000C16E45 /* LuaException.h */,
+				7388B3CE1601A71000C16E45 /* LuaScriptRunner.cpp */,
+				7388B3CF1601A71000C16E45 /* LuaScriptRunner.h */,
 				738100E415C768B3001AD1D8 /* BfObject.cpp */,
 				738100E515C768B3001AD1D8 /* BfObject.h */,
 				738100E615C768B3001AD1D8 /* ChatCheck.cpp */,
@@ -1960,10 +1976,6 @@
 				73D2F2D612E2D7E800EA5EBE /* luaGameInfo.h */,
 				73D2F2D712E2D7E800EA5EBE /* luaLevelGenerator.cpp */,
 				73D2F2D812E2D7E800EA5EBE /* luaLevelGenerator.h */,
-				73D2F2D912E2D7E800EA5EBE /* luaObject.cpp */,
-				73D2F2DA12E2D7E800EA5EBE /* luaObject.h */,
-				73D2F2DB12E2D7E800EA5EBE /* luaUtil.cpp */,
-				73D2F2DC12E2D7E800EA5EBE /* luaUtil.h */,
 				73D2F2DD12E2D7E800EA5EBE /* main.cpp */,
 				73D2F2DF12E2D7E800EA5EBE /* masterConnection.cpp */,
 				73D2F2E012E2D7E800EA5EBE /* masterConnection.h */,
@@ -2834,8 +2846,6 @@
 				73D2F3F112E2D7E800EA5EBE /* loadoutZone.cpp in Sources */,
 				73D2F3F412E2D7E800EA5EBE /* luaGameInfo.cpp in Sources */,
 				73D2F3F512E2D7E800EA5EBE /* luaLevelGenerator.cpp in Sources */,
-				73D2F3F612E2D7E800EA5EBE /* luaObject.cpp in Sources */,
-				73D2F3F712E2D7E800EA5EBE /* luaUtil.cpp in Sources */,
 				73D2F3F812E2D7E800EA5EBE /* main.cpp in Sources */,
 				73D2F3FA12E2D7E800EA5EBE /* masterConnection.cpp in Sources */,
 				73D2F3FC12E2D7E800EA5EBE /* md5wrapper.cpp in Sources */,
@@ -2932,6 +2942,10 @@
 				738100EA15C768B3001AD1D8 /* BfObject.cpp in Sources */,
 				738100EB15C768B3001AD1D8 /* ChatCheck.cpp in Sources */,
 				738100EC15C768B3001AD1D8 /* LineItem.cpp in Sources */,
+				7388B3D01601A71000C16E45 /* Console.cpp in Sources */,
+				7388B3D11601A71000C16E45 /* EditorPlugin.cpp in Sources */,
+				7388B3D21601A71000C16E45 /* LuaBase.cpp in Sources */,
+				7388B3D31601A71000C16E45 /* LuaScriptRunner.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

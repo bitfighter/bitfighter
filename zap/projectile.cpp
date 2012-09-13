@@ -1463,7 +1463,7 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
 {
    if(isShipType(otherObj->getObjectTypeNumber())) // So a Client side can predict better and make some sound effect
    {
-      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
       if(static_cast<Ship *>(otherObj)->isModulePrimaryActive(ModuleShield))
          return true;
    }
@@ -1485,7 +1485,7 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 
    if(otherObj->getObjectTypeNumber() == HeatSeekerTypeNumber) // explode if both heatseeker hit each other too hard.
    {
-      TNLAssert(dynamic_cast<HeatSeekerProjectile *>(otherObj), "Not a HeatSeekerProjectile")
+      TNLAssert(dynamic_cast<HeatSeekerProjectile *>(otherObj), "Not a HeatSeekerProjectile");
       HeatSeekerProjectile *other = static_cast<HeatSeekerProjectile *>(otherObj);
       if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE_EACHOTHER * MAX_VEL_TO_BOUNCE_EACHOTHER)
       {
@@ -1498,7 +1498,7 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 
    if(isShipType(otherObj->getObjectTypeNumber()))
    {
-      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship")
+      TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
       Ship *ship = static_cast<Ship *>(otherObj);
       if(ship->isModulePrimaryActive(ModuleShield))
       {
