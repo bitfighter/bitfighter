@@ -912,7 +912,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, value,
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
-   NULL);
+   (char*)NULL);  // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
 
    // Game Types
 #  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \
