@@ -1272,6 +1272,21 @@ void BfObject::writeThisTeam(BitStream *stream)
 /////
 // Lua interface
 
+/** This is the info that will appear on the first page of the Lua documentation... We could stash this anywhere logical.
+ *
+ * @mainpage Bitfighter Lua Documentation
+ *
+ * @section intro_sec Introduction
+ *
+ * Here is some info about scripting levels and robots in Bitfighter.
+ *
+ * @section install_sec Installation
+ *
+ * @subsection step1 Step 1: Opening the box
+ *
+ * etc...
+ */
+
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getClassID,     ARRAYDEF({{            END }}), 1 ) \
@@ -1293,44 +1308,57 @@ GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
 const char *BfObject::luaClassName = "BfItem";
 REGISTER_LUA_CLASS(BfObject);
 
-/** This is the info that will appear on the first page of the Lua documentation... We could stash this anywhere logical.
- *
- * @mainpage Bitfighter Lua Documentation
- *
- * @section intro_sec Introduction
- *
- * Here is some info about scripting levels and robots in Bitfighter.
- *
- * @section install_sec Installation
- *
- * @subsection step1 Step 1: Opening the box
- *
- * etc...
- */
-
-
 /**
  * @luafunc   BfObject::getClassID()
  * @brief     Gets an object's ClassId.
  * @code     classId = obj:getClassId()
  * @endcode
- * @luareturn The object's ClassId
+ * @ref See the ItemTypes section for a list of possible return values.
+ * @return The object's ClassId
 */
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
-S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos());          }
-S32 BfObject::getTeamIndx(lua_State *L) { return returnInt  (L, mTeam + 1);         }  // + 1 because Lua indices start at 1
 
 
+/**
+ * @luafunc  BfObject::getLoc()
+ * @brief    Gets an object's position.
+ * @descr    For objects that are not points (such as a LoadoutZone), will return the object's centroid.
+ * @return   A Point representing the object's location
+*/
+S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos()); }
+
+
+/**
+ * @luafunc  BfObject::getTeamIndx()
+ * @brief    Gets the index of the object's team.
+ * @note     Remember that in Lua, indices start with 1!
+ * @return   Team index of the object
+*/
+S32 BfObject::getTeamIndx(lua_State *L) { return returnInt  (L, mTeam + 1); }  // + 1 because Lua indices start at 1
+
+// http://bitfighter.org/wiki/index.php/Scripting_018
+
+
+/**
+ * @luafunc  BfObject::setTeam(teamIndex)
+ * @brief    Assigns the object to a team.
+ * @param    teamIndex - Index of the team the object should be assigned to.
+ * @descr    Use the special team constants to make an item neutral or hostile.  Will have no effect on items that are inherently teamless (such as a NexusZone).
+ * @note     Remember that in Lua, indices start with 1!
+*/
 S32 BfObject::setTeam(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "BfObject", "setTeam");
-
    setTeam(getInt(L, 1) - 1);    // - 1 because Lua indices start at 1  
-   
    return 0;            
 }  
 
 
+/**
+ * @luafunc  BfObject::setLoc(pos)
+ * @brief    Set the object's location.
+ * @param    pos - Point (or coordinate pair) representing the location of the object. 
+*/
 S32 BfObject::setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
@@ -1339,6 +1367,13 @@ S32 BfObject::setLoc(lua_State *L)
 }
 
 
+/**
+ * @luafunc  BfObject::addToGame()
+ * @brief    Adds object to the current game or editor session.
+ * @descr    A given item can only be added  to a game once. Calling addToGame on an object already in a game will generate an error.
+ *           For most (but not all) objects in a game or editor, updating characteristics such as position  
+ *           will immediately be reflected in the object.
+*/
 S32 BfObject::addToGame(lua_State *L)
 {
    Game *game = Game::getAddTarget();
@@ -1347,6 +1382,11 @@ S32 BfObject::addToGame(lua_State *L)
 }
 
 
+/**
+ * @luafunc  BfObject::removeFromGame()
+ * @brief    Removes the object from the current game or editor session.
+ * @descr    May not be implemented for all objects.
+*/
 S32 BfObject::removeFromGame(lua_State *L)
 {
    deleteObject();
@@ -1370,7 +1410,11 @@ S32 BfObject::setGeom(lua_State *L)
    return 0;
 }
 
-
+/**
+ * @luafunc  BfObject::getGeom()
+ * @brief    Returns an object's geometry. 
+ * @return   ObjectGeometry - For point objects, this will be a single Point. For more complex objects (such as a WallItem or a Zone), will return a Lua table containing a list of Points.
+*/
 S32 BfObject::getGeom(lua_State *L)
 {
    return 0;      // TODO: return geometry!

@@ -98,23 +98,25 @@ foreach my $file (@files) {
             next;
          }
 
-         $line =~ s|^\ *\* *||;  # Strip off leading *s and spaces
+         # $line =~ s|^\ *\* *||;  # Strip off leading *s and spaces
 
          # Check for some special custom tags
          if( $line =~ m|\@luafunc +(.*)$| ) {
             push(@comments, " \\fn $1\n");
 
-            $line =~ m| (.+?)::(.+?)\((.+)\)|;    # Grab class, method, and args from line that looks like: @luafunc Teleporter::addDest(dest)
-            my $class = $1;
-            my $method = $2;
-            my $args = $3;
+            $line =~ m| (\w+)::(.+?)\((.*)\)|;    # Grab class, method, and args from line that looks like: @luafunc Teleporter::addDest(dest); /w == word char
+            my $class = $1  || die "Couldn't get class name from $line\n";      # Must have a class
+            my $method = $2 || die "Couldn't get method name from $line\n";     # Must have a method
+            my $args = $3;                                                      # Args are optional
 
             # Find the original class definition and delete it
             my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
             splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
 
+            chomp($line);     # Remove trailing \n
+
             # Add our new sig to the list
-            push(@{$classes{$class}}, "void $method($args) { }\n");
+            push(@{$classes{$class}}, "void $method($args) { /* From '$line' */ }\n");
             
 
             next;
@@ -149,7 +151,7 @@ foreach my $file (@files) {
 
       foreach my $key ( keys %classes ) {
          print $OUT @{$classes{$key}};    # Main body of class
-         print $OUT "};\n";               # Close the class
+         print $OUT "}; // $key\n";       # Close the class
       }
 
       print $OUT @comments;
