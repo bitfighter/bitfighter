@@ -858,7 +858,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 
     // Iterate over the variadic arguments adding the enum values.
     va_start(args, tname);
-    while((ename = va_arg(args, char*)) != 0)
+    while((ename = va_arg(args, char*)) != NULL)
     {
         evalue = va_arg(args, int);
         code << ename << "=" << evalue << ",";
@@ -912,7 +912,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, value,
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
-   0);
+   NULL);
 
    // Game Types
 #  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \
