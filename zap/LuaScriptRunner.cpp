@@ -686,7 +686,7 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 #  undef REGISTER_LINE
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
-   lua_register(L, "getRandomNumber", getRandomNumber);
+   lua_register(L, "getRandomNumber", getRandomNumber); //Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
    luaL_dostring(L, "math.random = getRandomNumber");
 }
 
@@ -858,7 +858,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 
     // Iterate over the variadic arguments adding the enum values.
     va_start(args, tname);
-    while((ename = va_arg(args, char*)) != 0)
+    while((ename = va_arg(args, char*)) != NULL)
     {
         evalue = va_arg(args, int);
         code << ename << "=" << evalue << ",";
@@ -912,7 +912,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, value,
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
-   0);
+   (char*)NULL);  // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
 
    // Game Types
 #  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \

@@ -1,0 +1,20 @@
+diff -r b91e7565e877 -r 976d9ec6c290 src/video/cocoa/SDL_cocoawindow.m
+--- a/src/video/cocoa/SDL_cocoawindow.m	Sun Jan 08 00:39:41 2012 -0500
++++ b/src/video/cocoa/SDL_cocoawindow.m	Sun Jan 08 00:36:32 2012 -0500
+@@ -526,13 +526,9 @@
+     /* Fill in the SDL window with the window data */
+     {
+         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
+-        NSView *contentView = [ nswindow contentView ];
+-        /* Create view if not already exists */
+-        if (!contentView) {
+-            contentView = [[SDLView alloc] initWithFrame:rect];
+-            [nswindow setContentView: contentView];
+-            [contentView release];
+-        }
++        NSView *contentView = [[SDLView alloc] initWithFrame:rect];
++        [nswindow setContentView: contentView];
++        [contentView release];
+ 
+         ConvertNSRect(&rect);
+         window->x = (int)rect.origin.x;
