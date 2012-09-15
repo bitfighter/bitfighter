@@ -34,9 +34,10 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-function logprint(msg)
-    logprint("Levelgen", tostring(msg))
-end
+-- LUA stack overflow, logprint recursively calls itself?
+-- function logprint(msg)
+--     logprint("Levelgen", tostring(msg))
+-- end
 
 --
 -- And two more

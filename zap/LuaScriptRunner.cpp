@@ -686,7 +686,7 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 #  undef REGISTER_LINE
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
-   lua_register(L, "getRandomNumber", getRandomNumber);
+   lua_register(L, "getRandomNumber", getRandomNumber); //Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
    luaL_dostring(L, "math.random = getRandomNumber");
 }
 

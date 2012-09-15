@@ -82,9 +82,10 @@ end
 
 
 
-function logprint(msg)
-    logprint("Robot", tostring(msg))
-end
+-- LUA stack overflow, logprint recursively calls itself?
+-- function logprint(msg)
+--     logprint("Robot", tostring(msg))
+-- end
 
 --
 -- And two more
