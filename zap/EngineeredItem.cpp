@@ -1104,11 +1104,48 @@ const char *EngineeredItem::luaClassName = "EngineeredItem";
 REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 
-S32 EngineeredItem::isActive(lua_State *L)       { return returnInt  (L, isEnabled()); }
-S32 EngineeredItem::getMountAngle(lua_State *L)  { return returnFloat(L, mAnchorNormal.ATAN2()); }
-S32 EngineeredItem::getHealth(lua_State *L)      { return returnFloat(L, mHealth);     }
+/**
+ * @luafunc  bool EngineeredItem::isActive()
+ * @brief    Determine if the item is active.
+ * @descr    An inactive item can be activated by repairing it.
+ * @return   Returns true if the item is "alive" and active, or false if it is dead.
+*/
+S32 EngineeredItem::isActive(lua_State *L)       
+{ 
+   return returnBool(L, isEnabled()); 
+}
 
 
+/**
+ * @luafunc  num EngineeredItem::getMountAngle()
+ * @brief    Gets the angle (in radians) at which the item is mounted.
+ * @return   Returns the mount angle, in radians.
+*/
+S32 EngineeredItem::getMountAngle(lua_State *L)  
+{ 
+   return returnFloat(L, mAnchorNormal.ATAN2()); 
+}
+
+
+/**
+ * @luafunc  num EngineeredItem::getHealth()
+ * @brief    Returns health of the item. 
+ * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is totally healthy.
+ * @return   Returns a value between 0 and 1 indicating the health of the item.
+*/
+S32 EngineeredItem::getHealth(lua_State *L)      
+{ 
+   return returnFloat(L, mHealth);     
+}
+
+
+/**
+ * @luafunc  EngineeredItem::setHealth(health)
+ * @brief    Set the current health of the item. 
+ * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is totally healthy.
+ *           Values outside this range will be clamped to the valid range.
+ * @param    health - A value between 0 and 1.
+*/
 S32 EngineeredItem::setHealth(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
@@ -1899,7 +1936,9 @@ void Turret::onGeomChanged()
 
 //               Fn name     Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getAimAngle,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getAimAngle,  ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setAimAngle,  ARRAYDEF({{ NUM, END }}), 1 ) \
+
 
 GENERATE_LUA_METHODS_TABLE(Turret, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Turret, LUA_METHODS);
@@ -1911,10 +1950,28 @@ const char *Turret::luaClassName = "Turret";
 REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
 
 
-
+/**
+ * @luafunc  num Turret::getAimAngle()
+ * @brief    Returns the angle (in radians) at which the Turret is aiming.
+ * @return   The angle (in radians) at which the Turret is aiming.
+*/
 S32 Turret::getAimAngle(lua_State *L)
 {
    return returnFloat(L, mCurrentAngle);
+}
+
+
+/**
+ * @luafunc  Turret::setAimAngle(angle)
+ * @brief    Sets the angle (in radians) where the Turret should aim.
+ * @param    angle - Angle (in radians) where the turret should aim.
+*/
+S32 Turret::setAimAngle(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Turret", "setAimAngle");
+   mCurrentAngle = getFloat(L, 1);
+
+   return 0;
 }
 
 

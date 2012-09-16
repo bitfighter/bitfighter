@@ -369,7 +369,7 @@ public:
    S32 getRad(lua_State *L);
    S32 getLoc(lua_State *L);
    S32 getAimAngle(lua_State *L);
-
+   S32 setAimAngle(lua_State *L);
 };
 
 
