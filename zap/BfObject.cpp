@@ -1314,18 +1314,18 @@ const char *BfObject::luaClassName = "BfItem";
 REGISTER_LUA_CLASS(BfObject);
 
 /**
- * @luafunc   BfObject::getClassID()
- * @brief     Gets an object's ClassId.
+ * @luafunc  classId BfObject::getClassID()
+ * @brief    Gets an object's ClassId.
  * @code     classId = obj:getClassId()
  * @endcode
- * @ref See \ref ObjTypeEnum for a list of possible return values.
+ * See \ref ObjTypeEnum for a list of possible return values.
  * @return The object's ClassId
 */
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
 
 
 /**
- * @luafunc  BfObject::getLoc()
+ * @luafunc  Point BfObject::getLoc()
  * @brief    Gets an object's position.
  * @descr    For objects that are not points (such as a LoadoutZone), will return the object's centroid.
  * @return   A Point representing the object's location
@@ -1334,7 +1334,7 @@ S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos()); }
 
 
 /**
- * @luafunc  BfObject::getTeamIndx()
+ * @luafunc  index BfObject::getTeamIndx()
  * @brief    Gets the index of the object's team.
  * @note     Remember that in Lua, indices start with 1!
  * @return   Team index of the object
@@ -1422,9 +1422,10 @@ S32 BfObject::setGeom(lua_State *L)
 }
 
 /**
- * @luafunc  BfObject::getGeom()
+ * @luafunc  geometry BfObject::getGeom()
  * @brief    Returns an object's geometry. 
- * @return   ObjectGeometry - For point objects, this will be a single Point. For more complex objects (such as a WallItem or a Zone), will return a Lua table containing a list of Points.
+ * @return   ObjectGeometry - For point objects, this will be a single Point. For more complex objects 
+ *           (such as a WallItem or a Zone), will return a Lua table containing a list of Points.
 */
 S32 BfObject::getGeom(lua_State *L)
 {

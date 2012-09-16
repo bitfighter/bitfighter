@@ -128,8 +128,8 @@ foreach my $file (@files) {
          # Check for some special custom tags...
 
          # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1)"
-         #                          $1        $2           $3  <== $3 will not appear in all lines
-         if( $line =~ m|\@luaenum (\w+)\s*\((\d+)\s*,?\s*(\d+)?\)| ) {
+         #                            $1        $2           $3  <== $3 will not appear in all lines
+         if( $line =~ m|\@luaenum\s+(\w+)\s*\((\d+)\s*,?\s*(\d+)?\)| ) {
             $collectingEnum = 1;
             $enumName = $1;
             $enumColumn = $2;
@@ -140,13 +140,18 @@ foreach my $file (@files) {
             next;
          }
 
-         if( $line =~ m|\@luafunc\s+(.*)$| ) {
+         if( $line =~ m|\@luafunc\s+(.*)$| ) {     # Line looks like:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
             push(@comments, " \\fn $1\n");
 
-            $line =~ m| (\w+)::(.+?)\((.*)\)|;    # Grab class, method, and args from line that looks like: @luafunc Teleporter::addDest(dest); /w == word char
-            my $class = $1  || die "Couldn't get class name from $line\n";      # Must have a class
-            my $method = $2 || die "Couldn't get method name from $line\n";     # Must have a method
-            my $args = $3;                                                      # Args are optional
+            #               $1      $2     $3    $4     ($1 grabs extra spaces, trimmed below)
+            $line =~ m|\s(\w+\s+)?(\w+)::(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
+            my $retval = $1 eq "" ? "void" : $1;                              # Retval is optional, use void if omitted            
+            my $class  = $2  || die "Couldn't get class name from $line\n";   # Must have a class
+            my $method = $3  || die "Couldn't get method name from $line\n";  # Must have a method
+            my $args   = $4;                                                  # Args are optional
+
+            $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
+
 
             # Find the original class definition and delete it
             my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
@@ -155,7 +160,7 @@ foreach my $file (@files) {
             chomp($line);     # Remove trailing \n
 
             # Add our new sig to the list
-            push(@{$classes{$class}}, "void $method($args) { /* From '$line' */ }\n");
+            push(@{$classes{$class}}, "$retval $method($args) { /* From '$line' */ }\n");
 
             next;
          }
