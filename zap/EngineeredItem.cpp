@@ -1087,12 +1087,12 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 /////
 // Lua interface
 
-//               Fn name    Param profiles  Profile count                           
+//               Fn name              Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, isActive,  ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getAngle,  ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getHealth, ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, setHealth, ARRAYDEF({{ NUM, END }}), 1 ) \
+   METHOD(CLASS, isActive,      ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getMountAngle, ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getHealth,     ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setHealth,     ARRAYDEF({{ NUM, END }}), 1 ) \
 
 
 GENERATE_LUA_METHODS_TABLE(EngineeredItem, LUA_METHODS);
@@ -1104,9 +1104,9 @@ const char *EngineeredItem::luaClassName = "EngineeredItem";
 REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 
-S32 EngineeredItem::isActive(lua_State *L)  { return returnInt  (L, isEnabled()); }
-S32 EngineeredItem::getAngle(lua_State *L)  { return returnFloat(L, mAnchorNormal.ATAN2()); }
-S32 EngineeredItem::getHealth(lua_State *L) { return returnFloat(L, mHealth);     }
+S32 EngineeredItem::isActive(lua_State *L)       { return returnInt  (L, isEnabled()); }
+S32 EngineeredItem::getMountAngle(lua_State *L)  { return returnFloat(L, mAnchorNormal.ATAN2()); }
+S32 EngineeredItem::getHealth(lua_State *L)      { return returnFloat(L, mHealth);     }
 
 
 S32 EngineeredItem::setHealth(lua_State *L) 

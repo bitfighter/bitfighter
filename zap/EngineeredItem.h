@@ -167,7 +167,7 @@ public:
    S32 getHealth(lua_State *L);
    S32 setHealth(lua_State *L);
    S32 isActive(lua_State *L);
-   S32 getAngle(lua_State *L);
+   S32 getMountAngle(lua_State *L);
 };
 
 
