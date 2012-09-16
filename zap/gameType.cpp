@@ -1860,11 +1860,6 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(!damager)            // Anonomyous projectiles are deadly to all!
       return true;
 
-   ClientInfo *damagerOwner = damager->getOwner();
-   ClientInfo *victimOwner = victim->getOwner();
-
-   if(!victimOwner)     // Perhaps the victim is dead?!?
-      return true;
 
    U8 typeNumber = damager->getObjectTypeNumber();
 
@@ -1881,10 +1876,15 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    else if(typeNumber == HeatSeekerTypeNumber)
       weaponType = static_cast<HeatSeekerProjectile*>(damager)->mWeaponType;
    else
+   {
+      TNLAssert(false, "Unknown Damage type");
       return false;
+   }
+
+   ClientInfo *damagerOwner = damager->getOwner();
 
    // Check for self-inflicted damage
-   if(damagerOwner == victimOwner)
+   if(damagerOwner && damagerOwner == victim->getOwner())
       return GameWeapon::weaponInfo[weaponType].damageSelfMultiplier != 0;
 
    // Check for friendly fire
@@ -1934,13 +1934,21 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
    {
       if(killerObject->getObjectTypeNumber() == AsteroidTypeNumber)       // Asteroid
          updateScore(victim, KilledByAsteroid, 0);
-      else                                               // Check for turret shot
+      else if(U32(killerObject->getTeam()) < U32(getGame()->getTeamCount()) && isTeamGame()) // We may have a non-hostile killer team we can use to give credit.
       {
-         Projectile *projectile = NULL;
+         updateScore(killerObject->getTeam(), clientObject->getTeam() == killerObject->getTeam() ? KillTeammate : KillEnemy);
+      }
+      else                                       // Check for turret shot - Can get here if turret is Hostile Team
+      {
+         BfObject *shooter = NULL;
          if(killerObject->getObjectTypeNumber() == BulletTypeNumber)
-            projectile = static_cast<Projectile *>(killerObject);
+            shooter = static_cast<Projectile *>(killerObject)->mShooter;
+         if(killerObject->getObjectTypeNumber() == BurstTypeNumber)
+            shooter = static_cast<BurstProjectile *>(killerObject)->mShooter;
+         if(killerObject->getObjectTypeNumber() == HeatSeekerTypeNumber)
+            shooter = static_cast<HeatSeekerProjectile *>(killerObject)->mShooter;
 
-         if(projectile && projectile->mShooter.isValid() && projectile->mShooter.getPointer()->getObjectTypeNumber() == TurretTypeNumber)
+         if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
             updateScore(victim, KilledByTurret, 0);
       }
 
@@ -1991,7 +1999,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(teamIndex >= mGame->getTeamCount())
+      if(U32(teamIndex) >= U32(mGame->getTeamCount()))
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
