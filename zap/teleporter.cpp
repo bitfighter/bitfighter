@@ -594,48 +594,51 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
-   // Check for players within range.  If found, send them to dest.
-   Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS);
-
-   foundObjects.clear();
-   findObjects((TestFunc)isShipType, foundObjects, queryRect);
-
-   // First see if we're triggered...
-   bool isTriggered = false;
-   Point pos = getVert(0);
-
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   if(mDestManager.getDestCount() > 0)
    {
-      Ship *s = static_cast<Ship *>(foundObjects[i]);
-      if((pos - s->getActualPos()).len() < TeleporterTriggerRadius)
+      // Check for players within range.  If found, send them to dest.
+      Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS);
+
+      foundObjects.clear();
+      findObjects((TestFunc)isShipType, foundObjects, queryRect);
+
+      // First see if we're triggered...
+      bool isTriggered = false;
+      Point pos = getVert(0);
+
+      for(S32 i = 0; i < foundObjects.size(); i++)
       {
-         isTriggered = true;
-         timeout = mTeleporterDelay;    // Temporarily disable teleporter
-         // break; <=== maybe, need to test
+         Ship *s = static_cast<Ship *>(foundObjects[i]);
+         if((pos - s->getActualPos()).len() < TeleporterTriggerRadius)
+         {
+            isTriggered = true;
+            timeout = mTeleporterDelay;    // Temporarily disable teleporter
+            // break; <=== maybe, need to test
+         }
       }
-   }
 
-   if(!isTriggered)
-      return;
-   
-   // We've triggered the teleporter.  Relocate ship.
-   for(S32 i = 0; i < foundObjects.size(); i++)
-   {
-      Ship *ship = static_cast<Ship *>(foundObjects[i]);
-      if((pos - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))
-      {
-         mLastDest = mDestManager.getRandomDest();
-         Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
-         ship->setActualPos(newPos, true);
-         setMaskBits(TeleportMask);
+      if(isTriggered)
+      {   
+         // We've triggered the teleporter.  Relocate ship.
+         for(S32 i = 0; i < foundObjects.size(); i++)
+         {
+            Ship *ship = static_cast<Ship *>(foundObjects[i]);
+            if((pos - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))
+            {
+               mLastDest = mDestManager.getRandomDest();
+               Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
+               ship->setActualPos(newPos, true);
+               setMaskBits(TeleportMask);
 
-         if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
-            ship->getClientInfo()->getStatistics()->mTeleport++;
+               if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
+                  ship->getClientInfo()->getStatistics()->mTeleport++;
 
-         // See if we've teleported onto a loadout zone
-         BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
-         if(zone)
-            zone->collide(ship);
+               // See if we've teleported onto a loadout zone
+               BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
+               if(zone)
+                  zone->collide(ship);
+            }
+         }
       }
    }
 }
