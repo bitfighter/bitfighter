@@ -1280,7 +1280,11 @@ void BfObject::writeThisTeam(BitStream *stream)
  *
  * Here is some info about scripting levels and robots in Bitfighter.
  *
- * @section install_sec Installation
+ * @section datatypes Bitfighter datatypes
+ * * Point
+ * * geometry - When we refer to geometery, we are referring either to a Point object or a table of Point objects, depending on the context.  
+ * For example, if the object is inherently point-like (such as an Item or Projectile), then geometry is a Point.  
+ * For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
  *
  * @subsection step1 Step 1: Opening the box
  *
@@ -1394,6 +1398,12 @@ S32 BfObject::removeFromGame(lua_State *L)
 }
 
 
+/**
+ * @luafunc  BfObject::setGeom(geometry)
+ * @brief    Sets an object's geometry. 
+ * @param    geometry - The object's geometry.  (See \ref datatypes.) 
+ * @descr    Note that not all objects support changing geometry if an object is in a game.
+*/
 S32 BfObject::setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");

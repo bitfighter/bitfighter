@@ -34,6 +34,11 @@ using namespace TNL;
 
 namespace Zap
 {
+/**
+ * @luaenum Weapon(2)
+ * The Weapon enum can be used to represent a weapon in some functions.
+ */
+
    //                                          Enum in Lua:   Fire  Min    Enrgy  Proj Proj. Dam-  Self-dam. Can dam.   Projectile
    //             Enum             Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate      Type
 #define WEAPON_ITEM_TABLE \
