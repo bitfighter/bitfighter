@@ -52,7 +52,6 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString() const;
 
-   S32 getTeamCoreCount(S32 teamIndex);
    bool isTeamCoreBeingAttacked(S32 teamIndex);
 
    // Runs on client
@@ -60,7 +59,8 @@ public:
 
    void addCore(CoreItem *core, S32 team);
 
-   // What does a particular scoring event score?
+   // What does aparticular scoring event score?
+   void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0);
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    void score(ClientInfo *destroyer, S32 coreOwningTeam, S32 score);
 
@@ -216,10 +216,10 @@ public:
    bool canBeNeutral();
 
    ///// Lua interface
-	LUAW_DECLARE_CLASS(CoreItem);
+   LUAW_DECLARE_CLASS(CoreItem);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 getHealth(lua_State *L);   

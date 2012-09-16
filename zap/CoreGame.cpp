@@ -80,10 +80,12 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    Ship *ship = static_cast<Ship *>(object);
 
-   for(S32 i = 0; i < mCores.size(); i++)
+   for(S32 i = mCores.size() - 1; i >= 0; i--)
    {
-      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
-      if(coreItem)
+      CoreItem *coreItem = mCores[i];
+      if(!coreItem)  // Core may have been destroyed
+         mCores.erase(i);
+      else
          if(coreItem->getTeam() != ship->getTeam())
             renderObjectiveArrow(coreItem, coreItem->getColor());
    }
@@ -91,27 +93,14 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-S32 CoreGameType::getTeamCoreCount(S32 teamIndex)
-{
-   S32 count = 0;
-
-   for(S32 i = 0; i < mCores.size(); i++)
-   {
-      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
-      if(coreItem && coreItem->getTeam() == teamIndex)
-         count++;
-   }
-
-   return count;
-}
-
-
 bool CoreGameType::isTeamCoreBeingAttacked(S32 teamIndex)
 {
-   for(S32 i = 0; i < mCores.size(); i++)
+   for(S32 i = mCores.size() - 1; i >= 0; i--)
    {
-      CoreItem *coreItem = mCores[i];  // Core may have been destroyed
-      if(coreItem && coreItem->getTeam() == teamIndex)
+      CoreItem *coreItem = mCores[i];
+      if(!coreItem)  // Core may have been destroyed
+         mCores.erase(i);
+      else if(coreItem->getTeam() == teamIndex)
          if(coreItem->isBeingAttacked())
             return true;
    }
@@ -142,43 +131,42 @@ void CoreGameType::addCore(CoreItem *core, S32 team)
 {
    mCores.push_back(core);
 
-   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
-   {
-      // Make every team that doesn't own this core require another point to win
-      if(i != team)
-      {
-         Team *team = dynamic_cast<Team *>(getGame()->getTeam(i));
-         if(team)
-            team->addScore(-DestroyedCoreScore);
-      }
-   }
+   if(U32(team) < U32(getGame()->getTeamCount()))
+      static_cast<Team *>(getGame()->getTeam(team))->addScore(1);
 }
 
+void CoreGameType::updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data)
+{
+   if(isGameOver()) // Game play ended, no changing score
+      return;
+
+   if(player != NULL)  // Individual scores is only for game reports statistics not seen during game play
+   {
+      S32 points = getEventScore(IndividualScore, event, data);
+      TNLAssert(points != naScore, "Bad score value");
+      player->addScore(points);
+   }
+
+   if((event == OwnCoreDestroyed || event == EnemyCoreDestroyed) && U32(team) < U32(getGame()->getTeamCount()))
+   {
+      ((Team *)getGame()->getTeam(team))->addScore(-1); // Count down when a core is destoryed
+      S32 numberOfTeamsHaveSomeCores = 0;
+      s2cSetTeamScore(team, ((Team *)(getGame()->getTeam(team)))->getScore());     // Broadcast result
+      for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      {
+         if(((Team *)getGame()->getTeam(i))->getScore() != 0)
+            numberOfTeamsHaveSomeCores++;
+      }
+      if(numberOfTeamsHaveSomeCores <= 1)
+         gameOverManGameOver();
+   }
+}
 
 S32 CoreGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
    if(scoreGroup == TeamScore)
    {
-      switch(scoreEvent)
-      {
-         case KillEnemy:
-            return 0;
-         case KilledByAsteroid:  // Fall through OK
-         case KilledByTurret:    // Fall through OK
-         case KillSelf:
-            return 0;
-         case KillTeammate:
-            return 0;
-         case KillEnemyTurret:
-            return 0;
-         case KillOwnTurret:
-            return 0;
-         case OwnCoreDestroyed:   // Scores are adjusted the same for all Core-destroyed events
-         case EnemyCoreDestroyed:
-            return data;
-         default:
-            return naScore;
-      }
+      return naScore;  // We never use TeamScore in CoreGameType
    }
    else  // scoreGroup == IndividualScore
    {

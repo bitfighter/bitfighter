@@ -1982,6 +1982,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
    {
       // Individual scores
       S32 points = getEventScore(IndividualScore, scoringEvent, data);
+      TNLAssert(points != naScore, "Bad score value");
 
       if(points != 0)
       {
@@ -2003,6 +2004,7 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
+      TNLAssert(points != naScore, "Bad score value");
       if(points == 0)
          return;
 
@@ -2018,33 +2020,16 @@ void GameType::updateScore(ClientInfo *player, S32 teamIndex, ScoringEvent scori
       }
 
       // Now add the score
-      //
-      // Exception for Core gametype - all teams get a point except the one that had a Core destroyed
-      if(scoringEvent == OwnCoreDestroyed || scoringEvent == EnemyCoreDestroyed)
-      {
-         for(S32 i = 0; i < mGame->getTeamCount(); i++)
-         {
-            // Skip the
-            if(i == teamIndex)
-               continue;
-
-            ((Team *)mGame->getTeam(i))->addScore(points);            // Add magnitiude of negative score to all teams
-            s2cSetTeamScore(i, ((Team *)(mGame->getTeam(i)))->getScore());     // Broadcast result
-         }
-      }
-      // All other scoring events
-      else
-      {
-         Team *team = (Team *)mGame->getTeam(teamIndex);
-         team->addScore(points);
-         s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
-      }
+      Team *team = (Team *)mGame->getTeam(teamIndex);
+      team->addScore(points);
+      s2cSetTeamScore(teamIndex, team->getScore());     // Broadcast new team score
 
       updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;
    }
 
-   checkForWinningScore(newScore);              // Check if score is high enough to trigger end-of-game
+   if(newScore >= mWinningScore)        // End game if max score has been reached
+      gameOverManGameOver();
 }
 
 
@@ -2130,13 +2115,6 @@ void GameType::updateRatings()
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
       mGame->getClientInfo(i)->endOfGameScoringHandler();
-}
-
-
-void GameType::checkForWinningScore(S32 newScore)
-{
-   if(newScore >= mWinningScore)        // End game if max score has been reached
-      gameOverManGameOver();
 }
 
 
