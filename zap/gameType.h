@@ -421,7 +421,6 @@ public:
 
    void achievementAchieved(U8 achievement, const StringTableEntry &playerName);
 
-   void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 
    void serverAddClient(ClientInfo *clientInfo);         
@@ -504,8 +503,8 @@ public:
    // Not all of these actually used?
    void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);              
    void updateScore(ClientInfo *clientInfo, ScoringEvent scoringEvent, S32 data = 0); 
-   void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0);
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
+   virtual void updateScore(ClientInfo *player, S32 team, ScoringEvent event, S32 data = 0); // Core uses their own updateScore
 
    void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
    void updateLeadingPlayerAndScore(); // Sets mLeadingTeamScore and mLeadingTeam

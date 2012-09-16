@@ -3512,7 +3512,6 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
    const S32 textSize = 32;
    S32 xpos = rightAlignCoord - gameType->getDigitsNeededToDisplayScore() * getStringWidth(textSize, "0");
 
-   // Here we show the number of Cores remaining INSTEAD OF the score, which is negative
    for(S32 i = 0; i < teamCount; i++)
    {
       S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teamCount - i - 1) * 38;
@@ -3534,7 +3533,7 @@ void GameUserInterface::renderCoreScores(const GameType *gameType, U32 rightAlig
       }
 
       glColor(Colors::white);
-      drawStringf(xpos, ypos, textSize, "%d", cgt->getTeamCoreCount(i));
+      drawStringf(xpos, ypos, textSize, "%d", team->getScore());
    }
 }
 

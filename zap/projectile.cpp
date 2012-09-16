@@ -458,6 +458,7 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
       setOwner(shooter->getOwner());
       setTeam(shooter->getTeam());
       mShooter = shooter;
+      mKillString = shooter->getKillString();
    }
    else
       setOwner(NULL);
@@ -1173,6 +1174,7 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
       setOwner(shooter->getOwner());
       setTeam(shooter->getTeam());
       mShooter = shooter;
+      mKillString = shooter->getKillString();
    }
    else
       setOwner(NULL);
