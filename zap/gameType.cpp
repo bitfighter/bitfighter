@@ -1875,8 +1875,6 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
       weaponType = static_cast<BurstProjectile*>(damager)->mWeaponType;
    else if(typeNumber == HeatSeekerTypeNumber)
       weaponType = static_cast<HeatSeekerProjectile*>(damager)->mWeaponType;
-   else if(typeNumber == DeletedTypeNumber)     // Rare, but can happen, apparently
-      return false;
    else
    {
       TNLAssert(false, "Unknown Damage type");
