@@ -1434,6 +1434,9 @@ void HeatSeekerProjectile::doExplosion(const Point &pos)
 // Server-side only
 void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
+   if(exploded)  // Rare, but can happen
+      return;
+
    // Damage the object we hit
    if(hitObject)
    {
