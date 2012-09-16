@@ -1899,7 +1899,7 @@ void Turret::onGeomChanged()
 
 //               Fn name     Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getAngleAim,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getAimAngle,  ARRAYDEF({{ END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Turret, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Turret, LUA_METHODS);
@@ -1912,7 +1912,7 @@ REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
 
 
 
-S32 Turret::getAngleAim(lua_State *L)
+S32 Turret::getAimAngle(lua_State *L)
 {
    return returnFloat(L, mCurrentAngle);
 }
