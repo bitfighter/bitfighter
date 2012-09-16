@@ -167,7 +167,7 @@ public:
    S32 getHealth(lua_State *L);
    S32 setHealth(lua_State *L);
    S32 isActive(lua_State *L);
-   S32 getAngle(lua_State *L);
+   S32 getMountAngle(lua_State *L);
 };
 
 
@@ -368,8 +368,8 @@ public:
    // LuaItem methods
    S32 getRad(lua_State *L);
    S32 getLoc(lua_State *L);
-   S32 getAngleAim(lua_State *L);
-
+   S32 getAimAngle(lua_State *L);
+   S32 setAimAngle(lua_State *L);
 };
 
 
