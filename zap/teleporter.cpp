@@ -644,6 +644,11 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
+
+   // In case a script deleted all the teleporter destinations, don't render it until a destination gets re-added
+   if(!mEngineered && mDestManager.getDestCount() == 0)
+      return;
+
    // Render at a different radius depending on if a ship has just gone into the teleport
    // and we are waiting for the teleport timeout to expire
    F32 radiusFraction;
