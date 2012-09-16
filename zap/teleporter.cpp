@@ -806,15 +806,17 @@ bool Teleporter::canBeNeutral() { return false; }
 /**
   *  @luaclass Teleporter
   *  @brief Instantly transports ships from here to there.
-  *  @descr Teleporter represents the basic teleporter object.  Every teleporter has an intake location
+  *  @descr %Teleporter represents the basic teleporter object.  Every teleporter has an intake location
   *         and one or more destinations.  When a ship enters the teleporter, a destination will be chosen 
   *         randomly if there is more than one.   
   */
 //               Fn name     Param profiles       Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, addDest,    ARRAYDEF({{ PT,  END }}), 1 ) \
-   METHOD(CLASS, delDest,    ARRAYDEF({{ INT, END }}), 1 ) \
-   METHOD(CLASS, clearDests, ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, addDest,      ARRAYDEF({{ PT,  END }}), 1 ) \
+   METHOD(CLASS, delDest,      ARRAYDEF({{ INT, END }}), 1 ) \
+   METHOD(CLASS, clearDests,   ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getDest,      ARRAYDEF({{ INT, END }}), 1 ) \
+   METHOD(CLASS, getDestCount, ARRAYDEF({{      END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Teleporter, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
@@ -879,6 +881,35 @@ S32 Teleporter::clearDests(lua_State *L)
 
    mDestManager.clear();
    return 0;
+}
+
+
+/**
+  *  @luafunc Point Teleporter::getDest(index)
+  *  @brief   Returns the specified destination.
+  *  @param   index - Index of the dest to return.  Will generate an error if index is invalid.
+  *  @return  A Point object representing the requested destination.
+  */
+S32 Teleporter::getDest(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Teleporter", "getDest");
+   S32 index = getInt(L, 1) - 1;    // - 1 corrects for Lua indices starting at 1
+
+   if(index < 0 || index >= mDestManager.getDestCount())
+      throw LuaException("Index out of range (requested " + itos(index) + ")");
+
+   return returnPoint(L, mDestManager.getDest(index));
+}
+
+
+/**
+  *  @luafunc int Teleporter::getDestCount()
+  *  @brief   Returns the number of destinations this teleporter has.
+  *  @return  The number of destinations this teleporter has.
+  */
+S32 Teleporter::getDestCount(lua_State *L)
+{
+   return returnInt(L, mDestManager.getDestCount());
 }
 
    
