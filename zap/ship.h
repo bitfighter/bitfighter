@@ -113,6 +113,7 @@ public:
       EnergyRechargeRateInNeutralLoadoutZoneModifier = 4,
       EnergyRechargeRateInFriendlyLoadoutZoneModifier = 4,
       EnergyRechargeRateInEnemyLoadoutZoneModifier = -2,
+      EnergyRechargeRateIdleRechargeCycle = 40,
 
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
@@ -168,8 +169,10 @@ public:
    Timer mSpawnShield;
    Timer mModuleSecondaryTimer[ModuleCount];  // Timer to prevent accidentally firing in quick succession
    Timer mSpyBugPlacementTimer;
+   Timer mIdleRechargeCycleTimer;
    static const U32 ModuleSecondaryTimerDelay = 500;
    static const U32 SpyBugPlacementTimerDelay = 800;
+   static const U32 IdleRechargeCycleTimerDelay = 2000;
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;

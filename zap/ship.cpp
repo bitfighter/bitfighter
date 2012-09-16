@@ -98,6 +98,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
    mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
+   mIdleRechargeCycleTimer.setPeriod(IdleRechargeCycleTimerDelay);
 
    mNetFlags.set(Ghostable);
 
@@ -1081,6 +1082,15 @@ void Ship::rechargeEnergy()
 
       else if(currentLoadoutZoneTeam != NO_TEAM)
          mEnergy += EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInMilliSeconds;
+
+      // Recharge energy very fast if we're completely idle for a given amount of time
+      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive())
+         mIdleRechargeCycleTimer.reset();
+      else
+         mIdleRechargeCycleTimer.update(timeInMilliSeconds);
+
+      if(mIdleRechargeCycleTimer.getCurrent() == 0)
+         mEnergy += EnergyRechargeRateIdleRechargeCycle * timeInMilliSeconds;
    }
 
    // Movement penalty
