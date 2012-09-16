@@ -48,7 +48,10 @@ class GridDatabase;
 class Game;
 class ClientInfo;
 
-
+/**
+ * @luaenum ObjType(2, 1)
+ * The ObjType enum can be used to represent different kinds of objects.
+ */
 // We're limited to 255 values in this table, as type number is commonly passed as a U8.
 // We don't need to make all these values available to scripts; set the 2nd value to false for
 // those values that we don't want to share.

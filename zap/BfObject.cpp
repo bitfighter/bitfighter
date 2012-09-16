@@ -1287,6 +1287,7 @@ void BfObject::writeThisTeam(BitStream *stream)
  * For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
  *
  * @subsection step1 Step 1: Opening the box
+ * @section Enums
  *
  * etc...
  */
@@ -1317,7 +1318,7 @@ REGISTER_LUA_CLASS(BfObject);
  * @brief     Gets an object's ClassId.
  * @code     classId = obj:getClassId()
  * @endcode
- * @ref See the ItemTypes section for a list of possible return values.
+ * @ref See \ref ObjTypeEnum for a list of possible return values.
  * @return The object's ClassId
 */
 S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }

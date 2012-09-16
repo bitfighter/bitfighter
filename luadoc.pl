@@ -41,6 +41,7 @@ foreach my $file (@files) {
    my $collectingEnum = 0;
 
    my $enumColumn;
+   my $enumIgnoreColumn;
    my $enumName;
 
    my @methods = ();
@@ -126,11 +127,13 @@ foreach my $file (@files) {
 
          # Check for some special custom tags...
 
-         # Handle Lua enum defs
-         if( $line =~ m|\@luaenum (\w+)\s*\((\d+)\)| ) {
+         # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1)"
+         #                          $1        $2           $3  <== $3 will not appear in all lines
+         if( $line =~ m|\@luaenum (\w+)\s*\((\d+)\s*,?\s*(\d+)?\)| ) {
             $collectingEnum = 1;
             $enumName = $1;
             $enumColumn = $2;
+            $enumIgnoreColumn = $3 eq "" ? -1 : $3;
 
             push(@enums, "/**\n\@defgroup $enumName"."Enum $enumName\n");
 
@@ -181,7 +184,7 @@ foreach my $file (@files) {
 
       # Starting with an enum def that looks like this:
       # /**
-      #  * @luaenum Weapon(2)  <=== 2 refers to 0-based index of column containing Lua enum name
+      #  * @luaenum Weapon(2[,n])  <=== 2 refers to 0-based index of column containing Lua enum name, n refers to column specifying whether to include this item
       #  * The Weapon enum can be used to represent a weapon in some functions.
       #  */
       #  #define WEAPON_ITEM_TABLE \
@@ -195,9 +198,8 @@ foreach my $file (@files) {
       #  *  @{
       #  *  @section Weapon
       #  * __Weapon__
-      #  * * %Weapons.Phaser
-      #  * * %Weapons.Bouncer
-      #  * * %Weapons.SpyBug
+      #  * * %Weapon.Phaser
+      #  * * %Weapon.Bouncer
       #  @} 
 
       if($collectingEnum) {
@@ -216,8 +218,11 @@ foreach my $file (@files) {
          unless( $line =~ m|^\s*$| or $line =~ m|^\s*//| or $line =~ m|\s*/\*| ) {
             my @words = split(/,/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple,     "Triple",      "Triple",    ...
 
+            # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
+            next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");     
+
             my $enumval = $words[$enumColumn];
-            $enumval =~ s|[\s"]*||g;         # Strip out quotes and whitespace
+            $enumval =~ s|[\s"\)\\]*||g;         # Strip out quotes and whitespace and other junk
 
             push(@enums, " * * \%" . $enumName . "." . $enumval . "\n");    # Produces:  * * %Weapon.Triple
             # no next here, always want to do the termination check below
