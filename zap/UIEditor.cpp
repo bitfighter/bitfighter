@@ -823,10 +823,40 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 }
 
 
+static bool TeamListToString(string &output, vector<bool> teamVector)
+{
+   string teamList;
+   bool hasError = false;
+   char buf[16];
+   // Make sure each team has a spawn point
+   for(S32 i = 0; i < (S32)teamVector.size(); i++)
+      if(!teamVector[i])
+      {
+         dSprintf(buf, sizeof(buf), "%d", i+1);
+
+         if(!hasError)     // This is our first error
+         {
+            output = "team ";
+            teamList = buf;
+         }
+         else
+         {
+            output = "teams ";
+            teamList += ", ";
+            teamList += buf;
+         }
+         hasError = true;
+      }
+   if(hasError)
+   {
+      output += teamList;
+      return true;
+   }
+   return false;
+}
+
 void EditorUserInterface::validateLevel()
 {
-   bool hasError = false;
-
    mLevelErrorMsgs.clear();
    mLevelWarnings.clear();
 
@@ -838,9 +868,8 @@ void EditorUserInterface::validateLevel()
    bool foundNeutralSpawn = false;
 
    vector<bool> foundSpawn;
-   char buf[32];
 
-   string teamList, teams;
+   string teamList;
 
    // First, catalog items in level
    S32 teamCount = getTeamCount();
@@ -860,7 +889,7 @@ void EditorUserInterface::validateLevel()
 
       if(team == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
-      else if(team >= 0)
+      else if(U32(team) < U32(foundSpawn.size()))
          foundSpawn[team] = true;
    }
 
@@ -928,29 +957,29 @@ void EditorUserInterface::validateLevel()
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams
    if(getGame()->getGameType()->getScriptName() == "" && !foundNeutralSpawn)
    {
-      // Make sure each team has a spawn point
-      for(S32 i = 0; i < (S32)foundSpawn.size(); i++)
-         if(!foundSpawn[i])
-         {
-            dSprintf(buf, sizeof(buf), "%d", i+1);
-
-            if(!hasError)     // This is our first error
-            {
-               teams = "team ";
-               teamList = buf;
-            }
-            else
-            {
-               teams = "teams ";
-               teamList += ", ";
-               teamList += buf;
-            }
-            hasError = true;
-         }
+      if(TeamListToString(teamList, foundSpawn))     // Compose error message
+         mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teamList);
    }
 
-   if(hasError)     // Compose error message
-      mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teams + teamList);
+
+
+   if(gameType->getGameTypeId() == CoreGame)
+   {
+      for(S32 i = 0; i < teamCount; i++)      // Initialize vector
+         foundSpawn[i] = false;
+
+      fillVector.clear();
+      gridDatabase->findObjects(CoreTypeNumber, fillVector);
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         CoreItem *core = static_cast<CoreItem *>(fillVector[i]);
+         const S32 team = core->getTeam();
+         if(U32(team)< U32(foundSpawn.size()))
+            foundSpawn[team] = true;
+      }
+      if(TeamListToString(teamList, foundSpawn))     // Compose error message
+         mLevelErrorMsgs.push_back("ERROR: Need Core for " + teamList);
+   }
 }
 
 
