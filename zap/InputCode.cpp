@@ -1118,11 +1118,13 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
 	   case SDLK_UNDO:
 		   return KEY_UNDO;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
       // Identify some other keys we want to explicitly ignore without triggering the warning below
       case SDLK_VOLUMEUP:        
       case SDLK_VOLUMEDOWN:
       case SDLK_MUTE:
          return KEY_UNKNOWN;
+#endif
 
       default:
          logprintf(LogConsumer::LogWarning, "Unknown key detected: %d", key);
