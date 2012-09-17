@@ -199,6 +199,7 @@ bool Robot::prepareEnvironment()
    catch(LuaException &e)
    {
       logError(e.what());
+      LuaObject::clearStack(L);
       return false;
    }
 
