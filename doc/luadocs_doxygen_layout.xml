@@ -1,11 +1,11 @@
 <doxygenlayout version="1.0">
   <!-- Navigation index tabs for HTML output -->
   <navindex>
-    <tab type="mainpage" visible="yes" title=""/>
+    <tab type="mainpage" visible="yes" title="Overview"/>
     <tab type="pages" visible="yes" title=""/>
     <tab type="modules" visible="yes" title="Enums"/>
     <tab type="namespaces" visible="yes" title="">
-      <tab type="namespaces" visible="yes" title=""/>
+      <tab type="namespaces" visible="yes" title="Events"/>
       <tab type="namespacemembers" visible="yes" title=""/>
     </tab>
     <tab type="classes" visible="yes" title="">

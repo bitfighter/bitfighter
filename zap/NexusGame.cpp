@@ -1135,12 +1135,20 @@ bool NexusZone::collide(BfObject *hitObject)
 
 /////
 // Lua interface
+/**
+  *  @luaclass NexusZone
+  *  @brief Players return flags to a %NexusZone in a Nexus game.
+  *  @descr %NexusZone represents a flag return area in a Nexus game.  It plays no role in any other game type.
+  *         Nexus opening and closing times are actually game parameters, so these methods serve only as a convenient and
+  *         intuitive way to access those parameters.  Therefore, modifying the opening/closing schedule or status of any
+  *         %NexusZone will have the same effect on all NexusZones in the game.
+  */
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, setOpen,       ARRAYDEF({{ BOOL, END }}), 1 ) \
-   METHOD(CLASS, isOpen,        ARRAYDEF({{       END }}), 1 ) \
-   METHOD(CLASS, setOpenTime,   ARRAYDEF({{ NUM,  END }}), 1 ) \
-   METHOD(CLASS, setClosedTime, ARRAYDEF({{ NUM,  END }}), 1 ) \
+   METHOD(CLASS, setOpen,       ARRAYDEF({{ BOOL,    END }}), 1 ) \
+   METHOD(CLASS, isOpen,        ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setOpenTime,   ARRAYDEF({{ INT_GE0, END }}), 1 ) \
+   METHOD(CLASS, setClosedTime, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(NexusZone, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(NexusZone, LUA_METHODS);
@@ -1154,6 +1162,13 @@ REGISTER_LUA_SUBCLASS(NexusZone, Zone);
 
 // All these methods are really just passthroughs to the underlying game object.  They will have no effect if the
 // NexusZone has not been added to the game.  Perhaps this is bad design...
+
+/**
+ * @luafunc  bool NexusZone::isOpen()
+ * @brief    Get the current state of the Nexus (open or closed).
+ * @return   isOpen - Boolean specifying the current state of the Nexus -- true for open, false for closed.
+ * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
+*/
 S32 NexusZone::isOpen(lua_State *L) 
 { 
    if(!mGame)
@@ -1168,6 +1183,12 @@ S32 NexusZone::isOpen(lua_State *L)
 }  
 
 
+/**
+ * @luafunc  NexusZone::setOpen(isOpen)
+ * @brief    Tells the Nexus to open or close.
+ * @param    isOpen - Pass true to open the Nexus, false to close it.
+ * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
+*/
 S32 NexusZone::setOpen(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "NexusZone", "setOpen");
@@ -1186,7 +1207,13 @@ S32 NexusZone::setOpen(lua_State *L)
 }  
 
 
-// 0 means never changes
+/**
+ * @luafunc  NexusZone::setOpenTime(time)
+ * @brief    Set the time (in seconds) that the Nexus should remain open. 
+ * @descr    Pass 0 if the Nexus should never close, causing the Nexus to remain open permanently.  Passing a negative time will generate an error.
+ * @param    time - Time in seconds that the Nexus should remain open.
+ * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
+ */
 S32 NexusZone::setOpenTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "NexusZone", "setOpenTime");
@@ -1201,12 +1228,18 @@ S32 NexusZone::setOpenTime(lua_State *L)
   
    static_cast<NexusGameType *>(gameType)->setNewOpenTime(getInt(L, 1));
 
-
    return 0;
 }
 
 
-// 0 means never changes
+/**
+ * @luafunc  NexusZone::setClosedTime(time)
+ * @brief    Set the time (in seconds) that the Nexus will remain closed. 
+ * @descr    Pass 0 if the Nexus should never open, causing the Nexus to remain closed permanently.   Passing a negative time will generate an error.
+ * @param    time - Time in seconds that the Nexus should remain closed.
+ * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
+ * @note     Note that in a level file, closing times are specified in fractions of minutes.  This method works with seconds.
+ */
 S32 NexusZone::setClosedTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "NexusZone", "setCloseTime");

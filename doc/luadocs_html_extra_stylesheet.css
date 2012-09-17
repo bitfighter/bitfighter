@@ -1,0 +1,4 @@
+/* Cause function params to all be contained on a single line rather than broken over multiple lines */
+.memname tr { 
+   float:left; 
+}  

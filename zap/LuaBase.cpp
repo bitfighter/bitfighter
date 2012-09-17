@@ -123,6 +123,11 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                   ok = lua_isnumber(L, stackPos);
                   break;
 
+               case INT_GE0:
+                  if(lua_isnumber(L, stackPos))
+                     ok = ((S32 lua_tonumber(L, stackPos)) >= 0);
+                  break;
+
                case NUM_GE0:
                   if(lua_isnumber(L, stackPos))
                      ok = (lua_tonumber(L, stackPos) >= 0);
@@ -246,7 +251,10 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                      ok = (i >= 0 && i < EventManager::EventTypes);
                   }
                   break;
-
+               
+               case BFOBJ:
+                  ok = luaW_is<BfObject>(L, stackPos);
+                  break;
 
                default:
                   TNLAssert(false, "Unknown arg type!");
