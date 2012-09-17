@@ -264,6 +264,7 @@ void EventManager::fireEvent(EventType eventType)
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         LuaObject::clearStack(L);
          return;
       }
    }
@@ -294,6 +295,7 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         LuaObject::clearStack(L);
          return;
       }
    }
@@ -321,6 +323,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         LuaObject::clearStack(L);
          return;
       }
    }
@@ -359,6 +362,7 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, const ch
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         LuaObject::clearStack(L);
          return;
       }
    }
@@ -389,6 +393,7 @@ void EventManager::fireEvent(const char *callerId, EventType eventType, LuaPlaye
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         LuaObject::clearStack(L);
          return;
       }
    }
@@ -420,6 +425,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
       catch(LuaException &e)
       {
          handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
+         LuaObject::clearStack(L);
          return;
       }
    }
