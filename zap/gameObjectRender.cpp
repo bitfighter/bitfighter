@@ -1410,11 +1410,38 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 }
 
 
-void renderHeatSeeker(const Point &pos, U32 timeRemaining)
+void renderHeatSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
-   // TODO:  make this more interesting
-   glColor(Colors::red);
-   drawPolygon(pos, 3, 7, 0);
+   glPushMatrix();
+      glTranslate(pos);
+      glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
+
+      // The body of the heat seeker
+      glColor3f(1.0, 0, 0.35);  // A redder magenta
+      F32 vertices[] = {
+            -8, -4,
+            -8, 4,
+            8, 0
+      };
+      renderVertexArray(vertices, 3, GL_LINE_LOOP);
+
+      // The flames
+      F32 speedRatio = speed/600.f;  // 600 is the current projectile velocity for heat seeker
+      glColor(Colors::yellow, 0.5);
+      F32 innerFlame[] = {
+            -9, -1,
+            -8 - (4 * speedRatio), 0,
+            -9, 1,
+      };
+      renderVertexArray(innerFlame, 3, GL_LINE_STRIP);
+      glColor(Colors::orange50, 0.6);
+      F32 outerFlame[] = {
+            -9, -3,
+            -8 - (8 * speedRatio), 0,
+            -9, 3,
+      };
+      renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
+   glPopMatrix();
 }
 
 

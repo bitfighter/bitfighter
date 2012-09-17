@@ -1532,7 +1532,7 @@ void HeatSeekerProjectile::renderItem(const Point &pos)
       return;
 
    F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
-   renderHeatSeeker(pos, (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())) / startLiveTime);
+   renderHeatSeeker(pos, getActualVel().ATAN2(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())) / startLiveTime);
 #endif
 }
 
