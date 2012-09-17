@@ -23,6 +23,8 @@ my @enums = ();
 # Iterate over all cpp folders in our working dir converting Doxygen comments to Luadoc comments
 my @files = <../zap/*>;
 
+push(@files, "./luadoc_static_text.txt");
+
 # Loop through all the files we found above...
 foreach my $file (@files) {
 
