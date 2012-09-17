@@ -1083,8 +1083,10 @@ void Ship::rechargeEnergy()
       else if(currentLoadoutZoneTeam != NO_TEAM)
          mEnergy += EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInMilliSeconds;
 
-      // Recharge energy very fast if we're completely idle for a given amount of time
-      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive())
+      // Recharge energy very fast if we're completely idle for a given amount of time, unless
+      // we're in a hostile loadout zone
+      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() ||
+            currentLoadoutZoneTeam == TEAM_HOSTILE)
          mIdleRechargeCycleTimer.reset();
       else
          mIdleRechargeCycleTimer.update(timeInMilliSeconds);
