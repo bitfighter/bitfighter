@@ -1150,7 +1150,7 @@ REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
 TNL_IMPLEMENT_NETOBJECT(HeatSeekerProjectile);
 
 // Constructor
-const F32 HeatSeeker_Radius = 7;
+const F32 HeatSeeker_Radius = 4;
 const F32 HeatSeeker_Mass = 1;
 
 HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, HeatSeeker_Radius, HeatSeeker_Mass)
