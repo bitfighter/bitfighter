@@ -125,7 +125,7 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
 
                case INT_GE0:
                   if(lua_isnumber(L, stackPos))
-                     ok = ((S32 lua_tonumber(L, stackPos)) >= 0);
+                     ok = ((S32)(lua_tonumber(L, stackPos)) >= 0);
                   break;
 
                case NUM_GE0:
