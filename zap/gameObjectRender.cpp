@@ -1416,6 +1416,23 @@ void renderHeatSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRem
       glTranslate(pos);
       glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
 
+      // The flames first!
+      F32 speedRatio = speed/600.f;  // 600 is the current projectile velocity for heat seeker
+      glColor(Colors::yellow, 0.5);
+      F32 innerFlame[] = {
+            -8, -1,
+            -8 - (4 * speedRatio), 0,
+            -8, 1,
+      };
+      renderVertexArray(innerFlame, 3, GL_LINE_STRIP);
+      glColor(Colors::orange50, 0.6);
+      F32 outerFlame[] = {
+            -8, -3,
+            -8 - (8 * speedRatio), 0,
+            -8, 3,
+      };
+      renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
+
       // The body of the heat seeker
       glColor3f(1.0, 0, 0.35);  // A redder magenta
       F32 vertices[] = {
@@ -1424,23 +1441,6 @@ void renderHeatSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRem
             8, 0
       };
       renderVertexArray(vertices, 3, GL_LINE_LOOP);
-
-      // The flames
-      F32 speedRatio = speed/600.f;  // 600 is the current projectile velocity for heat seeker
-      glColor(Colors::yellow, 0.5);
-      F32 innerFlame[] = {
-            -9, -1,
-            -8 - (4 * speedRatio), 0,
-            -9, 1,
-      };
-      renderVertexArray(innerFlame, 3, GL_LINE_STRIP);
-      glColor(Colors::orange50, 0.6);
-      F32 outerFlame[] = {
-            -9, -3,
-            -8 - (8 * speedRatio), 0,
-            -9, 3,
-      };
-      renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
    glPopMatrix();
 }
 
