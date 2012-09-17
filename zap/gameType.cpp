@@ -1847,10 +1847,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
 
    // Tell other clients about the new guy, who is never us...
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
-                clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true);
+                clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true, true);
 
    if(clientInfo->getTeamIndex() >= 0) 
-      s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex());
+      s2cClientJoinedTeam(clientInfo->getName(), clientInfo->getTeamIndex(), isTeamGame() && !isGameOver());
 
    spawnShip(clientInfo);
 }
@@ -2342,6 +2342,9 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
    ClientInfo *clientInfo = source->getClientInfo();
 
+   if(isGameOver()) // No changing team while on game over
+      return;
+
    if(!clientInfo->isAdmin() && source->mSwitchTimer.getCurrent())    // If we're not admin and we're waiting for our switch-expiration to reset,
       return;                                                     // return without processing the change team request
 
@@ -2416,7 +2419,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
       client->setTeamIndex(team);                                                   // ...use the one provided
 
    if(client->getTeamIndex() >= 0)                                                  // But if we know the team...
-      s2cClientJoinedTeam(client->getName(), client->getTeamIndex());               // ...announce the change
+      s2cClientJoinedTeam(client->getName(), client->getTeamIndex(), !isGameOver()); // ...announce the change
 
    spawnShip(client);                                                               // Create a new ship
 
@@ -2430,8 +2433,8 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
                 (StringTableEntry name, bool isAuthenticated, Int<BADGE_COUNT> badges, bool isLocalClient, 
-                 bool isAdmin, bool isLevelChanger, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert),
-                (name, isAuthenticated, badges, isLocalClient, isAdmin, isLevelChanger, isRobot, isSpawnDelayed, isBusy, playAlert))
+                 bool isAdmin, bool isLevelChanger, bool isRobot, bool isSpawnDelayed, bool isBusy, bool playAlert, bool showMessage),
+                (name, isAuthenticated, badges, isLocalClient, isAdmin, isLevelChanger, isRobot, isSpawnDelayed, isBusy, playAlert, showMessage))
 {
 #ifndef ZAP_DEDICATED
 
@@ -2441,7 +2444,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
    // The new ClientInfo will be deleted in s2cRemoveClient   
    ClientInfo *clientInfo = new RemoteClientInfo(clientGame, name, isAuthenticated, badges, isRobot, isAdmin, isLevelChanger, isSpawnDelayed, isBusy);
 
-   clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert);
+   clientGame->onPlayerJoined(clientInfo, isLocalClient, playAlert, showMessage);
 
 #endif
 }
@@ -2633,8 +2636,8 @@ GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEn
 
 // Announce a new player has joined the team
 GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, 
-                (StringTableEntry name, RangedU32<0, GameType::MAX_TEAMS> teamIndex), 
-                (name, teamIndex))
+                (StringTableEntry name, RangedU32<0, GameType::MAX_TEAMS> teamIndex, bool showMessage), 
+                (name, teamIndex, showMessage))
 {
 #ifndef ZAP_DEDICATED
    ClientInfo *remoteClientInfo = mGame->findClientInfo(name);      // Get RemoteClientInfo for player changing teams
@@ -2648,10 +2651,13 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    ClientGame *clientGame = static_cast<ClientGame *>(mGame);
    ClientInfo *localClientInfo = clientGame->getClientInfo();
 
-   if(localClientInfo->getName() == name)      
-      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", mGame->getTeamName(teamIndex).getString());
-   else
-      clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mGame->getTeamName(teamIndex).getString());
+   if(showMessage)
+   {
+      if(localClientInfo->getName() == name)      
+         clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", mGame->getTeamName(teamIndex).getString());
+      else
+         clientGame->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mGame->getTeamName(teamIndex).getString());
+   }
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
@@ -2746,12 +2752,12 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), isLocalClient, 
                    clientInfo->isAdmin(), clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(),
-                   clientInfo->isBusy(), false);
+                   clientInfo->isBusy(), false, false);
 
       S32 team = clientInfo->getTeamIndex();
 
       if(team >= 0) 
-         s2cClientJoinedTeam(clientInfo->getName(), team);
+         s2cClientJoinedTeam(clientInfo->getName(), team, false);
    }
 
    //for(S32 i = 0; i < Robot::getBotCount(); i++)  //Robot is part of mClientList

@@ -163,7 +163,7 @@ public:
    void playerJoinedGlobalChat(const StringTableEntry &playerNick);
    void playerLeftGlobalChat(const StringTableEntry &playerNick);
 
-   void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert);
+   void onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage);
    void onPlayerQuit(const StringTableEntry &name);
 
    void setSpawnDelayed(bool spawnDelayed);

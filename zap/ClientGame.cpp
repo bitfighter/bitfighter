@@ -660,7 +660,7 @@ void ClientGame::playerLeftGlobalChat(const StringTableEntry &playerNick)
 
 // A new player has just joined the game; if isLocalClient is true, that new player is us!
 // ClientInfo will be a RemoteClientInfo
-void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert)
+void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool playAlert, bool showMessage)
 {
    addToClientList(clientInfo);
 
@@ -674,15 +674,17 @@ void ClientGame::onPlayerJoined(ClientInfo *clientInfo, bool isLocalClient, bool
       if(getUIManager()->getGameUserInterface()->isInScoreboardMode())
          mGameType->c2sRequestScoreboardUpdates(true);
 
-      displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+      if(showMessage)
+         displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
    }
    else     // A remote player has joined the fray
    {
-      displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", clientInfo->getName().getString());
+      if(showMessage) // Might as well not display when no sound being played, prevents message flood of many players join loading new GameType
+         displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", clientInfo->getName().getString());
 
-      if(playAlert)
-         SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
    }
+   if(playAlert)
+      SoundSystem::playSoundEffect(SFXPlayerJoined, 1);
 
    if(getUIMode() == TeamShuffleMode)
       mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerJoined();

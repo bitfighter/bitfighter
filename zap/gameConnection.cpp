@@ -989,7 +989,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
-                  (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e),
+                  (RangedU32<0, NumSFXBuffers> sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e),
                   (sfx, team, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
