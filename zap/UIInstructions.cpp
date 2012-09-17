@@ -736,13 +736,13 @@ const char *gGameObjectInfo[] = {
    /* 01 */   "Bouncer", "Bounces off walls",
    /* 03 */   "Triple", "Fires three diverging shots",
    /* 03 */   "Burst", "Explosive projectile",
-   /* 04 */   "Friendly Mine", "Team's mines show trigger radius",
-   /* 05 */   "Enemy Mine", "These are much harder to see",
+   /* 04 */   "Heat Seeker", "Homing projectile",
+   /* 05 */   "", "",
 
-   /* 06 */   "Friendly Spy Bug", "Lets you surveil the area",
-   /* 07 */   "Enemy Spy Bug", "Destroy these when you find them",
-   /* 08 */   "", "",
-   /* 09 */   "", "",
+   /* 06 */   "Friendly Mine", "Team's mines show trigger radius",
+   /* 07 */   "Enemy Mine", "These are much harder to see",
+   /* 08 */   "Friendly Spy Bug", "Lets you surveil the area",
+   /* 09 */   "Enemy Spy Bug", "Destroy these when you find them",
    /* 10 */   "", "",
    /* 11 */   "", "",
 
@@ -814,20 +814,23 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderGrenade(Point(0, 0), 1);
             break;
          case 4:
-            renderMine(Point(0, 0), true, true);
+            renderHeatSeeker(Point(0, 0), 0, 600, 0);
             break;
-         case 5:
-            renderMine(Point(0, 0), true, false);
+         case 5:     // Blank
             break;
          case 6:
-            renderSpyBug(Point(0, 0), Colors::blue, true, true);
+            renderMine(Point(0, 0), true, true);
             break;
          case 7:
+            renderMine(Point(0, 0), true, false);
+            break;
+         case 8:
+            renderSpyBug(Point(0, 0), Colors::blue, true, true);
+            break;
+         case 9:
             renderSpyBug(Point(0, 0), Colors::blue, false, true);
             break;
-         case 8:     // Blank
-         case 9:
-         case 10:
+         case 10:    // Blank
          case 11:
             break;
          case 12:
