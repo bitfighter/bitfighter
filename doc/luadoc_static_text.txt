@@ -1,4 +1,4 @@
-/** This is the info that will appear on the first page of the Lua documentation... We could stash this anywhere logical.
+/**
  *
  * @mainpage Bitfighter Lua Documentation
  *
