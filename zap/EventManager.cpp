@@ -112,7 +112,6 @@ void EventManager::subscribe(const char *subscriber, EventType eventType, bool f
       return;
 
    lua_State *L = LuaScriptRunner::getL();
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    // Make sure the script has the proper event listener
    LuaScriptRunner::loadFunction(L, subscriber, eventDefs[eventType].function);     // -- function
@@ -122,7 +121,7 @@ void EventManager::subscribe(const char *subscriber, EventType eventType, bool f
       if(!failSilently)
          logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", 
                                           eventDefs[eventType].name);
-      LuaObject::clearStack(L);
+      lua_pop(L, -1);    // Remove function from stack    
 
       return;
    }
@@ -131,9 +130,7 @@ void EventManager::subscribe(const char *subscriber, EventType eventType, bool f
    pendingSubscriptions[eventType].push_back(subscriber);
    anyPending = true;
 
-   lua_pop(L, 1);    // Remove function from stack                                  -- <<empty stack>>
-
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   lua_pop(L, -1);    // Remove function from stack                                  -- <<empty stack>>
 }
 
 
