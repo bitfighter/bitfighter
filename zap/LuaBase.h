@@ -65,6 +65,7 @@ public:
 #  define LUA_ARG_TYPE_TABLE \
    LUA_ARG_TYPE_ITEM( BOOL,      "Boolean"                                     ) \
    LUA_ARG_TYPE_ITEM( INT,       "Integer"                                     ) \
+   LUA_ARG_TYPE_ITEM( INT_GE0,   "Integer >= 0"                                ) \
    LUA_ARG_TYPE_ITEM( INTS,      "One or more integers"                        ) \
    LUA_ARG_TYPE_ITEM( NUM,       "Number"                                      ) \
    LUA_ARG_TYPE_ITEM( NUM_GE0,   "Number >= 0"                                 ) \
@@ -82,6 +83,7 @@ public:
    LUA_ARG_TYPE_ITEM( ROBOT,     "Robot Object"                                ) \
    LUA_ARG_TYPE_ITEM( LEVELGEN,  "Levelgen Script"                             ) \
    LUA_ARG_TYPE_ITEM( EVENT,     "Event"                                       ) \
+   LUA_ARG_TYPE_ITEM( BFOBJ,     "BfObject (or child class)"                   ) \
    LUA_ARG_TYPE_ITEM( ANY,       "Any combination of 0 or more arguments"      ) \
       
 

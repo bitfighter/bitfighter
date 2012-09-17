@@ -9,12 +9,11 @@ use List::Util 'first';
 chdir "doc" || die "Could not change to doc folder: $!";
 
 # Relative path where intermediate outputs will be written
-my $outpath = "lua/";
+my $outpath = "temp-doxygen/";
 
-# Create doc/lua/ directory -- this should always exist
-my $luadir = "lua";      
-if (! -d $luadir) {
-   mkdir($luadir) || die "Could not create folder $luadir: $!";
+# Create it if it doesn't exist
+if (! -d $outpath) {
+   mkdir($outpath) || die "Could not create folder $outpath: $!";
 }
 
 # These are items we collect and build up over all pages, and they will get written to a special .h file at the end
@@ -155,7 +154,10 @@ foreach my $file (@files) {
 
             # Find the original class definition and delete it
             my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
-            splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
+            if($index ne "") {
+               splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
+            }
+
 
             chomp($line);     # Remove trailing \n
 
@@ -165,8 +167,17 @@ foreach my $file (@files) {
             next;
          }
 
-         if( $line =~ m|\@luaclass\s+(.*)$| ) {
+         if( $line =~ m|\@luaclass\s+(\w+)\s*$| ) {       # Description of a class defined in a header file
             push(@comments, " \\class $1\n");
+            next;
+         }
+
+         if( $line =~ m|\@luavclass\s+(\w+)\s*$| ) {      # Description of a virtual class, not defined in any C++ code
+            my $class = $1;
+            push(@comments, " \\class $class\n");
+
+            push(@{$classes{$class}}, "class $1 {\n");
+            push(@{$classes{$class}}, "public:\n");
             next;
          }
 

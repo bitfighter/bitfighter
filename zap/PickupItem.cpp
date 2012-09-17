@@ -270,11 +270,18 @@ string PickupItem::getAttributeString()
 /////
 // Lua interface
 
+/**
+  *  @luaclass PickupItem
+  *  @brief Parent class representing items that can be picked up, such as RepairItem or EnergyItem.
+  *  @descr %PickupItems are items that can be picked up by ships to confer some benefit, such as increased health or energy.
+  *         When PickupItems are picked up, they will regenerate after a time, called the regenTime.  PickupItems continue to 
+  *         exist, even when they are not visible.
+  */
 //               Fn name  Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isVis,        ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setVis,       ARRAYDEF({{ BOOL,    END }}), 1 ) \
-   METHOD(CLASS, setRegenTime, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+   METHOD(CLASS, setRegenTime, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
 
 
 GENERATE_LUA_METHODS_TABLE(PickupItem, LUA_METHODS);
@@ -287,9 +294,22 @@ const char *PickupItem::luaClassName = "PickupItem";
 REGISTER_LUA_SUBCLASS(PickupItem, Item);
 
 
-S32 PickupItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }
+/**
+ * @luafunc  bool PickupItem::isVis()
+ * @brief    Returns true if item is currently visible, false if not. 
+ * @return   isVisible - True if item is currently visible, false if not.
+*/
+S32 PickupItem::isVis(lua_State *L) 
+{ 
+   return returnBool(L, isVisible()); 
+}
 
 
+/**
+ * @luafunc  PickupItem::setVis(isVisible)
+ * @brief    Show or hide the item.  Note that hiding an item will reset the timer that makes it visible again, just as if it had been picked up by a player.
+ * @param    isVisible - Pass true to make the item visible, false to hide it.
+*/
 S32 PickupItem::setVis(lua_State *L) 
 {
    checkArgList(L, functionArgs, "PickupItem", "setVis");
@@ -303,11 +323,16 @@ S32 PickupItem::setVis(lua_State *L)
 }
 
 
+/**
+ * @luafunc  PickupItem::setRegenTime(time)
+ * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
+ * @param    time - Time in seconds for the item to remain hidden.
+*/
 S32 PickupItem::setRegenTime(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "PickupItem", "setRegenTime");
 
-   mRepopDelay = getFloat(L, 1);
+   mRepopDelay = getInt(L, 1);
 
    return 0;
 }

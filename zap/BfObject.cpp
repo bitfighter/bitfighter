@@ -1286,10 +1286,120 @@ void BfObject::writeThisTeam(BitStream *stream)
  * For example, if the object is inherently point-like (such as an Item or Projectile), then geometry is a Point.  
  * For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
  *
+ * bool
+ * int
+ * num
+ *
  * @subsection step1 Step 1: Opening the box
- * @section Enums
+ *
+ * @section programming_robots Programming Robots
+ *
+ * @section programming_levelgens Programming Levelgens
+ *
+ * @section programming_plugins Programming Editor Plugins
+ *
+ * @section events Events
+ *
+ * @section timers Timers
+ * Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
+ *
+ * A timer object that can be used to schedule arbitrary events to be executed at some time in the future. All times are given in milliseconds.
  *
  * etc...
+ */
+
+
+// This is a dummy class here only to provide documentation for the Timer class which is implemented solely in Lua.  This provides NO functionality in C++.
+/**
+  * @luavclass Timer
+  * @brief Trigger one-time or recurring scheduled events.
+  * @descr %Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
+  *
+  * A timer object that can be used to schedule arbitrary events to be executed at some time in the future. All times are given in milliseconds.
+  *
+  * @usage There are four basic timer functions:
+  * @code 
+  *    -- Execute the event once in 'delay' ms
+  *    Timer:scheduleOnce(event, delay)
+  *     
+  *    -- Execute the event repeatedly, every 'delay' ms
+  *    Timer:scheduleRepeating(event, delay)  
+  *     
+  *    -- Execute the event every 'delay' ms while event returns true
+  *    Timer:scheduleRepeatWhileTrue(event, delay)  
+  *     
+  *    -- Remove all pending events from the timer's queue
+  *    Timer:clear()
+  * @endcode
+  *
+  * %Timer Events
+  *
+  * The 'event' used can either be the name a function, a table that contains a function named 'run', or a bit of arbitrary Lua code.  These events
+  * are distinct from the Bitfighter-generated events documented elsewhere.
+  *
+  * Any Lua function can be called by a %Timer.
+  *
+  * Examples:
+  * @code
+  *    function onLevelStart()
+  *       -- Runs the code contained in the string after five seconds. 
+  *       -- Note that the string here is in quotes.
+  *       Timer:scheduleOnce("logprint(\"Once!\")", 5 * 1000)   
+  *     
+  *       -- Runs the "always" function every 30 seconds
+  *       Timer:scheduleRepeating(always, 30 * 1000)            
+  *     
+  *       -- Runs "run" method of maybe every two seconds
+  *       -- until method returns false
+  *       Timer:scheduleRepeatWhileTrue(maybe, 2 * 1000)        
+  *    end                                                  
+  *     
+  *    -- Standard function
+  *    function always()
+  *       logprint("Timer called always")
+  *    end
+  *     
+  *    -- Table: run method will be called
+  *    maybe = {
+  *       count = 3
+  *       run = function(self)
+  *          logprint("Count down " .. self.count)
+  *          self.count = self.count - 1
+  *          return self.count > 0
+  *       end
+  *    }
+  * @endcode
+  *
+  * When using a table as an "event" the first parameter to the run function should always be a parameter named "self". 
+  * The "self" parameter can be used to access the other fields in the table, that is, the "self" parameter will refer to the table that contains 
+  * the run function. If you do not need to refer to any of the other fields in the table then you do not need to include the self parameter.
+  */
+
+/**
+ * @luafunc Timer::scheduleOnce(event, delay)
+ * @brief   Schedules an event to run one time.
+ * @param event - The event to be run.
+ * @param delay - The delay (in ms) when the the event should be run.
+ */
+
+ /**
+ * @luafunc Timer::scheduleRepeating(event, delay)
+ * @brief   Schedules an event to be run every \em delay ms.
+ * @param event - The event to be run.
+ * @param delay - The time (in ms) which \em event repeats.
+ */
+
+ /**
+ * @luafunc Timer::scheduleRepeatWhileTrue(event, delay)
+ * @brief   Schedules an event to run one every \em delay ms until event returns true.
+ * @param event - The event to be run.
+ * @param delay - The time (in ms) which \em event repeats.
+
+ */
+
+ /**
+ * @luafunc Timer::clear()
+ * @brief   Clears all the events currently scheduled with the timer.
  */
 
 //               Fn name         Param profiles     Profile count                           
@@ -1303,6 +1413,7 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }}), 1 ) \
    METHOD(CLASS, setGeom,        ARRAYDEF({{ PTS,       END }}), 1 ) \
    METHOD(CLASS, getGeom,        ARRAYDEF({{            END }}), 1 ) \
+   METHOD(CLASS, clone,          ARRAYDEF({{            END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
@@ -1310,8 +1421,9 @@ GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
 #undef LUA_METHODS
 
 
-const char *BfObject::luaClassName = "BfItem";
+const char *BfObject::luaClassName = "BfObject";
 REGISTER_LUA_CLASS(BfObject);
+
 
 /**
  * @luafunc  classId BfObject::getClassID()
@@ -1321,7 +1433,10 @@ REGISTER_LUA_CLASS(BfObject);
  * See \ref ObjTypeEnum for a list of possible return values.
  * @return The object's ClassId
 */
-S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumber); }
+S32 BfObject::getClassID(lua_State *L)  
+{ 
+   return returnInt  (L, mObjectTypeNumber); 
+}
 
 
 /**
@@ -1330,7 +1445,10 @@ S32 BfObject::getClassID(lua_State *L)  { return returnInt  (L, mObjectTypeNumbe
  * @descr    For objects that are not points (such as a LoadoutZone), will return the object's centroid.
  * @return   A Point representing the object's location
 */
-S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos()); }
+S32 BfObject::getLoc(lua_State *L)      
+{ 
+   return returnPoint(L, getPos()); 
+}
 
 
 /**
@@ -1339,9 +1457,10 @@ S32 BfObject::getLoc(lua_State *L)      { return returnPoint(L, getPos()); }
  * @note     Remember that in Lua, indices start with 1!
  * @return   Team index of the object
 */
-S32 BfObject::getTeamIndx(lua_State *L) { return returnInt  (L, mTeam + 1); }  // + 1 because Lua indices start at 1
-
-// http://bitfighter.org/wiki/index.php/Scripting_018
+S32 BfObject::getTeamIndx(lua_State *L)
+{ 
+   return returnInt  (L, mTeam + 1); // + 1 because Lua indices start at 1
+}  
 
 
 /**
@@ -1429,7 +1548,21 @@ S32 BfObject::setGeom(lua_State *L)
 */
 S32 BfObject::getGeom(lua_State *L)
 {
+   TNLAssert(false, "Not yet implemented!!!");
    return 0;      // TODO: return geometry!
+}
+
+
+/**
+ * @luafunc  BfObject BfObject::clone()
+ * @brief    Make an exact duplicate of an object.
+ * @descr    Returned object will not be added to the current game, and will have a different id than the source object.
+ * @return   Returns the clone.
+*/
+S32 BfObject::clone(lua_State *L)
+{
+   TNLAssert(false, "Not yet implemented!!!");
+   return 0;      // TODO: return clone -- how do we prevent leaks here?
 }
 
 

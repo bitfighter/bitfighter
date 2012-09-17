@@ -445,6 +445,8 @@ public:
 
    virtual S32 setGeom(lua_State *L);
    virtual S32 getGeom(lua_State *L);
+
+   S32 clone(lua_State *L);
 };
 
 
