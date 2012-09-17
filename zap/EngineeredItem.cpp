@@ -1086,14 +1086,26 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
 
 /////
 // Lua interface
-
+/**
+  *  @luaclass EngineeredItem
+  *  @brief Parent class representing mountable items such as Turret and ForceFieldProjector.
+  *  @descr %EngineeredItem is a container class for wall-mountable items.  Currently, all EngineeredItems can be constructed with
+  *         the Engineering module, can be destroyed by enemy fire, and can be healed (and sometimes captured) with the Repair module.
+  *         All %EngineeredItems have a health value that ranges from 0 to 1, where 0 is completely dead and 1 is fully healthy.  When
+  *         health falls below a certain threshold (obtainable with getDisabledThrehold()), the item becomes inactive and must be repaired
+  *         or regenerate itself to be functional again.
+  *  
+  *         If an %EngineeredItem has a healRate > 0, it will slowly repair damage to iteself at a rate of 10% per healRate seconds.
+  */
 //               Fn name              Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, isActive,      ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getMountAngle, ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getHealth,     ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, setHealth,     ARRAYDEF({{ NUM, END }}), 1 ) \
-
+   METHOD(CLASS, isActive,             ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getMountAngle,        ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getHealth,            ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setHealth,            ARRAYDEF({{ NUM, END }}), 1 ) \
+   METHOD(CLASS, getDisabledThreshold, ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, getHealRate,          ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, setHealRate,          ARRAYDEF({{ INT, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(EngineeredItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(EngineeredItem, LUA_METHODS);
@@ -1106,8 +1118,8 @@ REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
 
 /**
  * @luafunc  bool EngineeredItem::isActive()
- * @brief    Determine if the item is active.
- * @descr    An inactive item can be activated by repairing it.
+ * @brief    Determine if the item is active (i.e. its health is above the disbaledThreshold).
+ * @descr    A player can activate an inactive item by repairing it.
  * @return   Returns true if the item is "alive" and active, or false if it is dead.
 */
 S32 EngineeredItem::isActive(lua_State *L)       
@@ -1152,6 +1164,52 @@ S32 EngineeredItem::setHealth(lua_State *L)
    mHealth = getFloat(L, 1);
    checkHealthBounds();
    return 0;     
+}
+
+
+/**
+ * @luafunc  num EngineeredItem::getDisabledThreshold()
+ * @brief    Gets the health threshold below which an %EngineeredItem is disabled. 
+ * @descr    The value will always be between 0 and 1.  This value is constant and will be the same for all %EngineeredItems.
+ * @return   Health threshold below which the item will be disabled.
+*/
+S32 EngineeredItem::getDisabledThreshold(lua_State *L)
+{
+   return returnFloat(L, disabledLevel);
+}
+
+
+/**
+ * @luafunc  int EngineeredItem::getHealRate()
+ * @brief    Gets the item's healRate. 
+ * @descr    The specified healRate will be the time, in seconds, it takes for the item to repair itself by 10%.  
+ *           If an %EngineeredItem is assigned to the neutral team, it will not heal itself.
+ * @return   healRate
+*/
+S32 EngineeredItem::getHealRate(lua_State *L)
+{
+   return returnInt(L, mHealRate);
+}
+
+
+/**
+ * @luafunc  EngineeredItem::setHealRate(healRate)
+ * @brief    Sets the item's healRate. 
+ * @descr    The specified healRate will be the time, in seconds, it takes for the item to repair itself by 10%.  In practice, a heal rate of 1 
+ *           makes an item effectively unkillable.  If an %EngineeredItem is assigned to the neutral team, it will not heal itself.  
+ *           Passing a negative value will generate an error.
+ * @param    healRate - Time, in seconds, it takes an %EngineeredItem to heal itself by 10%.  Specify 0 to disable healing.
+*/
+S32 EngineeredItem::setHealRate(lua_State *L)
+{
+   checkArgList(L, functionArgs, "EngineeredItem", "setHealRate");
+
+   S32 healRate = getInt(L, 1);
+
+   if(healRate < 0)
+      throw LuaException("Specified healRate is negative, and that just makes me crazy!");
+
+   return returnInt(L, mHealRate);
 }
 
 
@@ -1933,7 +1991,10 @@ void Turret::onGeomChanged()
 
 /////
 // Lua interface
-
+/**
+  *  @luaclass Turret
+  *  @brief Mounted gun that shoots at enemy ships and other objects.
+  */
 //               Fn name     Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getAimAngle,  ARRAYDEF({{      END }}), 1 ) \

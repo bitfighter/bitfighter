@@ -62,7 +62,7 @@ protected:
 
    bool mSnapped;             // Item is snapped to a wall
 
-   S32 mHealRate;             // Rate at which items will heal themselves, defaults to 0
+   S32 mHealRate;             // Rate at which items will heal themselves, defaults to 0;  Heals at 10% per mHealRate seconds.
    Timer mHealTimer;          // Timer for tracking mHealRate
 
    Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client
@@ -168,6 +168,9 @@ public:
    S32 setHealth(lua_State *L);
    S32 isActive(lua_State *L);
    S32 getMountAngle(lua_State *L);
+   S32 getDisabledThreshold(lua_State *L);
+   S32 getHealRate(lua_State *L);
+   S32 setHealRate(lua_State *L);
 };
 
 
