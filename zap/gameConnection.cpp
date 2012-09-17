@@ -994,8 +994,10 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
 {
 #ifndef ZAP_DEDICATED
-   displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
-   mClientGame->getGameType()->majorScoringEventOcurred(team);
+   if(formatString.getString()[0] != 0)
+      displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
+   if(mClientGame->getGameType())
+      mClientGame->getGameType()->majorScoringEventOcurred(team);
 #endif
 }
 

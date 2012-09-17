@@ -309,6 +309,9 @@ void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 
 void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject)
 {
+   if(isGameOver())  // Avoid flooding messages on game over.
+      return;
+
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
    Ship *killerShip = NULL;
@@ -349,7 +352,8 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
    if(!ship->getClientInfo())
       return;
 
-   s2cRabbitMessage(RabbitMsgGrab, ship->getClientInfo()->getName());
+   if(!isGameOver())  // Avoid flooding messages on game over.
+      s2cRabbitMessage(RabbitMsgGrab, ship->getClientInfo()->getName());
    flag->mTimer.reset(mFlagScoreTimer);
 
    flag->mountToShip(ship);
@@ -379,7 +383,8 @@ void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
    if(ship->getClientInfo())
    {
       flag->mTimer.reset(mFlagReturnTimer);
-      s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
+      if(!isGameOver())  // Avoid flooding messages on game over.
+         s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
 
       Point vel = ship->getActualVel();
 
@@ -411,14 +416,16 @@ void RabbitGameType::addFlag(FlagItem *flag)
 // Rabbit killed another ship
 void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 {
-   s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getClientInfo()->getName());
+   if(!isGameOver())  // Avoid flooding messages on game over.
+      s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getClientInfo()->getName());
    updateScore(rabbitShip, RabbitKills);  
 }
 
 
 void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
-   s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getClientInfo()->getName());
+   if(!isGameOver())  // Avoid flooding messages on game over.
+      s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getClientInfo()->getName());
    updateScore(killerShip, RabbitKilled); 
 }
 

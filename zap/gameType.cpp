@@ -899,12 +899,14 @@ void GameType::gameOverManGameOver()
    if(mGameOver)     // Only do this once
       return;
 
+   onGameOver();                         // Call game-specific end-of-game code
+   // onGameOver() goes before mGameOver = true; so win messages won't get blocked, part of preving messages going away too fast
+
    mBetweenLevels = true;
    mGameOver = true;                     // Show scores at end of game
    s2cSetGameOver(true);                 // Alerts clients that the game is over
    ((ServerGame *)mGame)->gameEnded();   // Sets level-switch timer, which gives us a short delay before switching games
 
-   onGameOver();                         // Call game-specific end-of-game code
 
    mGameTimer.setGameIsOver();
 
@@ -1898,6 +1900,9 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 // Handle scoring when ship is killed
 void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *clientObject, BfObject *killerObject)
 {
+   if(isGameOver())  // Avoid flooding messages on game over.
+      return;
+
    ClientInfo *killer = killerObject ? killerObject->getOwner() : NULL;
 
    if(!victim)
@@ -4110,9 +4115,10 @@ S32 GameType::getDigitsNeededToDisplayScore() const
 // Send a message to all clients
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, const StringTableEntry &message)
 {
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-      if(!mGame->getClientInfo(i)->isRobot())
-         mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
+   if(!isGameOver())  // Avoid flooding messages on game over.
+      for(S32 i = 0; i < mGame->getClientCount(); i++)
+         if(!mGame->getClientInfo(i)->isRobot())
+            mGame->getClientInfo(i)->getConnection()->s2cDisplayMessage(color, sfx, message);
 }
 
 
@@ -4120,9 +4126,10 @@ void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles
 void GameType::broadcastMessage(GameConnection::MessageColors color, SFXProfiles sfx, 
                                 const StringTableEntry &formatString, const Vector<StringTableEntry> &e)
 {
-   for(S32 i = 0; i < mGame->getClientCount(); i++)
-      if(!mGame->getClientInfo(i)->isRobot())
-         mGame->getClientInfo(i)->getConnection()->s2cDisplayMessageE(color, sfx, formatString, e);
+   if(!isGameOver())  // Avoid flooding messages on game over.
+      for(S32 i = 0; i < mGame->getClientCount(); i++)
+         if(!mGame->getClientInfo(i)->isRobot())
+            mGame->getClientInfo(i)->getConnection()->s2cDisplayMessageE(color, sfx, formatString, e);
 }
 
 

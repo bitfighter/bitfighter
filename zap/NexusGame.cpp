@@ -369,7 +369,8 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusZone *theNexus)
 
    if(flagsReturned > 0 && scorer)
    {
-      s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), theFlag->getFlagCount(), 
+      if(!isGameOver())  // Avoid flooding messages on game over.
+         s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), theFlag->getFlagCount(), 
                       getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
 
@@ -703,6 +704,9 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject)
 {
+   if(isGameOver())  // Avoid flooding messages on game over.
+      return;
+
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
    if(!clientObject || !isShipType(clientObject->getObjectTypeNumber()))
@@ -722,7 +726,8 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject
          {
             Point pos = flag->getActualPos();
             s2cAddYardSaleWaypoint(pos.x, pos.y);
-            s2cNexusMessage(NexusMsgYardSale, theShip->getClientInfo()->getName().getString(), 0, 0);
+            if(!isGameOver())  // Avoid flooding messages on game over.
+               s2cNexusMessage(NexusMsgYardSale, theShip->getClientInfo()->getName().getString(), 0, 0);
          }
 
          return;

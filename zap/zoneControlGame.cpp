@@ -183,11 +183,17 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    Vector<StringTableEntry> e;
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
+   
    for(S32 i = 0; i < getGame()->getClientCount(); i++)
    {
       GameConnection *gc = getGame()->getClientInfo(i)->getConnection();
       if(gc)
-         gc->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+      {
+         if(isGameOver())  // Avoid flooding messages on game over. (empty formatString)
+            gc->s2cTouchdownScored(SFXNone, s->getTeam(), StringTableEntry(), e);
+         else
+            gc->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
+      }
    }
 
    // Test for zone controller badge
