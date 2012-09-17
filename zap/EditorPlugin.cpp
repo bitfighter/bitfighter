@@ -107,6 +107,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
    catch(LuaException &e)
    {
       logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
+      LuaObject::clearStack(L);
       error = true;
       return true;
    }

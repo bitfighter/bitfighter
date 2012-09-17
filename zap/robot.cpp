@@ -149,6 +149,7 @@ bool Robot::initialize(Point &pos)
    catch(LuaException &e)
    {
       logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
+      LuaObject::clearStack(L);
       return false;
    }
 

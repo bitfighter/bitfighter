@@ -187,6 +187,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
    catch(LuaException &e)
    {
       logError(e.what());
+      LuaObject::clearStack(L);
    }
 
    mCaller->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);

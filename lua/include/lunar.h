@@ -191,6 +191,7 @@ private:
      catch(LuaException &e)
      {
         TNL::logprintf("LUA ERROR: Cannot instantiate object %s: %s", typeid(T).name(), e.what());
+        LuaObject::clearStack(L);
         return 0;
      }
   }
