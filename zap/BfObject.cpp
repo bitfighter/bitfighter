@@ -1308,8 +1308,6 @@ void BfObject::writeThisTeam(BitStream *stream)
  * etc...
  */
 
-
-// This is a dummy class here only to provide documentation for the Timer class which is implemented solely in Lua.  This provides NO functionality in C++.
 /**
   * @luavclass Timer
   * @brief Trigger one-time or recurring scheduled events.
