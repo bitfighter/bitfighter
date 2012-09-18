@@ -334,7 +334,7 @@ void NetInterface::processConnections()
             BitStream b(mSendPacketList->packetData, mSendPacketList->packetSize);
             b.setMaxSizes(mSendPacketList->packetSize, 0);
             b.reset();
-            RefPtr<NetConnection> conn = mSendPacketList->receiveTo; // if this packet causes a disconnection, keep the conn until this function exits
+            RefPtr<NetConnection> conn = mSendPacketList->receiveTo.getPointer(); // if this packet causes a disconnection, keep the conn until this function exits
             conn->readRawPacket(&b);
          }
       }
