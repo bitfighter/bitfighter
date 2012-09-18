@@ -66,6 +66,13 @@ NetInterface::~NetInterface()
       NetConnection *c = mConnectionList[0];
       disconnect(c, NetConnection::ReasonShutdown, "");
    }
+   while(mSendPacketList)
+   {
+      DelaySendPacket *next = mSendPacketList->nextPacket;
+      mSendPacketList->~DelaySendPacket(); // properly free stuff like SafePtr
+      free(mSendPacketList);
+      mSendPacketList = next;
+   }
 }
 
 Address NetInterface::getFirstBoundInterfaceAddress()
@@ -100,13 +107,17 @@ NetError NetInterface::sendto(const Address &address, BitStream *stream)
    return mSocket.sendto(address, stream->getBuffer(), stream->getBytePosition());
 }
 
-void NetInterface::sendtoDelayed(const Address &address, BitStream *stream, U32 millisecondDelay)
+void NetInterface::sendtoDelayed(const Address *address, NetConnection *receiveTo, BitStream *stream, U32 millisecondDelay)
 {
    U32 dataSize = stream->getBytePosition();
 
    // allocate the send packet, with the data size added on
    DelaySendPacket *thePacket = (DelaySendPacket *) malloc(sizeof(DelaySendPacket) + dataSize);
-   thePacket->remoteAddress = address;
+   new(thePacket) DelaySendPacket(); // Initalizes SafePtr
+   if(thePacket->isReceive = (address == NULL))
+      thePacket->receiveTo = receiveTo;
+   else
+      thePacket->remoteAddress = *address;
    thePacket->sendTime = getCurrentTime() + millisecondDelay;
    thePacket->packetSize = dataSize;
    memcpy(thePacket->packetData, stream->getBuffer(), dataSize);
@@ -316,8 +327,23 @@ void NetInterface::processConnections()
    while(mSendPacketList && S32(mSendPacketList->sendTime - getCurrentTime()) < 0)
    {
       DelaySendPacket *next = mSendPacketList->nextPacket;
-      mSocket.sendto(mSendPacketList->remoteAddress,
+      if(mSendPacketList->isReceive)
+      {
+         if(mSendPacketList->receiveTo.isValid())
+         {
+            BitStream b(mSendPacketList->packetData, mSendPacketList->packetSize);
+            b.setMaxSizes(mSendPacketList->packetSize, 0);
+            b.reset();
+            RefPtr<NetConnection> conn = mSendPacketList->receiveTo; // if this packet causes a disconnection, keep the conn until this function exits
+            conn->readRawPacket(&b);
+         }
+      }
+      else
+      {
+         mSocket.sendto(mSendPacketList->remoteAddress,
             mSendPacketList->packetData, mSendPacketList->packetSize);
+      }
+      mSendPacketList->~DelaySendPacket(); // properly free stuff like SafePtr
       free(mSendPacketList);
       mSendPacketList = next;
    }
@@ -441,7 +467,15 @@ void NetInterface::processPacket(const Address &sourceAddress, BitStream *pStrea
       // if this packet causes a disconnection, keep the conn around until this function exits
       RefPtr<NetConnection> conn = findConnection(sourceAddress);
       if(conn)
-         conn->readRawPacket(pStream);
+      {
+         if(conn->mSimulatedReceiveLatency)
+         {
+            pStream->setBitPosition(pStream->getMaxReadBitPosition() + 1);
+            sendtoDelayed(NULL, conn, pStream, conn->mSimulatedReceiveLatency);
+         }
+         else
+            conn->readRawPacket(pStream);
+      }
    }
    else
    {

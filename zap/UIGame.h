@@ -377,6 +377,7 @@ public:
    void muteHandler(const Vector<string> &words);
    void voiceMuteHandler(const Vector<string> &words);
    void maxFpsHandler(const Vector<string> &words);
+   void lagHandler(const Vector<string> &words);
    void lineWidthHandler(const Vector<string> &words);
    void idleHandler(const Vector<string> &words);
    void suspendHandler(const Vector<string> &words);

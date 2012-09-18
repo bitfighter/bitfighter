@@ -1919,6 +1919,52 @@ void GameUserInterface::maxFpsHandler(const Vector<string> &words)
       game->getSettings()->getIniSettings()->maxFPS = number;
 }
 
+void GameUserInterface::lagHandler(const Vector<string> &words)
+{
+   ClientGame *game = getGame();
+   U32 sendLag = words.size() > 1 ? atoi(words[1].c_str()) : 0;
+   F32 sendLoss = words.size() > 2 ? atof(words[2].c_str()) : 0;
+   U32 receiveLag;
+   F32 receiveLoss = sendLoss;
+
+
+   if(sendLag > 5000)
+   {
+      game->displayErrorMessage("!!! ReSendceive lag too high or invalid");
+      return;
+   }
+   if(sendLoss < 0 || sendLoss > 100)         // Percent range
+   {
+      game->displayErrorMessage("!!! Send packet loss must be between 0 and 100 percent");
+      return;
+   }
+
+   if(words.size() > 3)
+   {
+      receiveLag = atoi(words[3].c_str());
+      if(words.size() > 4)
+         receiveLoss = atof(words[4].c_str());
+      if(receiveLoss < 0 || receiveLoss > 100)         // Percent range
+      {
+         game->displayErrorMessage("!!! Receive packet loss must be between 0 and 100 percent");
+         return;
+      }
+      if(receiveLag > 5000)
+      {
+         game->displayErrorMessage("!!! Receive lag too high or invalid");
+         return;
+      }
+   }
+   else
+   {
+      receiveLag = (sendLag + 1) / 2;
+      sendLag /= 2;
+   }
+
+
+   getGame()->getConnectionToServer()->setSimulatedNetParams(sendLoss / 100, sendLag, receiveLoss / 100, receiveLag);
+}
+
 
 void GameUserInterface::pmHandler(const Vector<string> &words)
 {
@@ -2418,6 +2464,7 @@ CommandInfo chatCmds[] = {
    { "stepbots",   &GameUserInterface::stepBotsHandler,      { xINT }, 1,DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (default = 1)"},
    { "linewidth",  &GameUserInterface::lineWidthHandler,     { xINT }, 1,DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
    { "maxfps",     &GameUserInterface::maxFpsHandler,        { xINT }, 1,DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
+   { "lag",        &GameUserInterface::lagHandler, {xINT,xINT,xINT,xINT}, 4,DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]"}, "Set additional lag and percent of dropped packets" },
 };
 
 

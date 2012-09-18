@@ -402,8 +402,10 @@ private:
    F32 mRoundTripTime;   ///< Running average round trip time.
    U32 mSendDelayCredit; ///< Metric to help compensate for irregularities on fixed rate packet sends.
 
-   U32 mSimulatedLatency;    ///< Amount of additional time this connection delays its packet sends to simulate latency in the connection
-   F32 mSimulatedPacketLoss; ///< Function to simulate packet loss on a network
+   U32 mSimulatedSendLatency;    ///< Amount of additional time this connection delays its packet sends to simulate latency in the connection
+   U32 mSimulatedReceiveLatency;
+   F32 mSimulatedSendPacketLoss; ///< Function to simulate packet loss on a network
+   F32 mSimulatedReceivePacketLoss;
 
    enum RateDefaults {
       DefaultFixedBandwidth  = 2500,  ///< The default send/receive bandwidth - 2.5 Kb per second.
@@ -487,8 +489,10 @@ public:
       { mPingRetryCount = pingRetryCount; mPingTimeout = msPerPing; }
    
    /// Simulates a network situation with a percentage random packet loss and a connection one way latency as specified.
+   void setSimulatedNetParams(F32 sendLoss, U32 sendLatency, F32 receiveLoss, U32 receiveLatency)
+      { mSimulatedSendPacketLoss = sendLoss; mSimulatedSendLatency = sendLatency; mSimulatedReceivePacketLoss = receiveLoss; mSimulatedReceiveLatency = receiveLatency;}
    void setSimulatedNetParams(F32 packetLoss, U32 latency)
-      { mSimulatedPacketLoss = packetLoss; mSimulatedLatency = latency; }
+      { mSimulatedReceivePacketLoss = mSimulatedSendPacketLoss = packetLoss; mSimulatedReceiveLatency = latency / 2; mSimulatedSendLatency = (latency + 1) / 2;}
 
    /// Specifies that this NetConnection instance is a connection to a "server."
    void setIsConnectionToServer() { mTypeFlags.set(ConnectionToServer); }
