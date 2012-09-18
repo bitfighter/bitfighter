@@ -312,7 +312,7 @@ bool LuaLevelGenerator::prepareEnvironment()
    luaW_push(L, this);                                   //                                        -- env_table, "levelgen", *this
    lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
 
-   lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
+   lua_pop(L, -1);                                       // Cleanup                                -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 
@@ -368,8 +368,16 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
 
    { "globalMsg",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::globalMsg>        },
 
+
+   { "subscribe",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::subscribe>        },
+   { "unsubscribe",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::unsubscribe>      },
+
    { NULL, NULL }   
 };
+
+
+S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L);   }
+S32 LuaLevelGenerator::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 
 const LuaFunctionProfile LuaLevelGenerator::functionArgs[] =

@@ -577,55 +577,9 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 }
 
 
-template <typename T>
-static int handleSubscribe(lua_State *L)
-{
-   T *o = luaW_check<T>(L, 1);
-   o->doSubscribe(L);
-   return 0;
-}
-
-
-template <typename T>
-static int handleUnsubscribe(lua_State *L)
-{
-   T *o = luaW_check<T>(L, 1);
-   o->doUnsubscribe(L);
-   return 0;
-}
-
-
-// Lua script handler calls subscribe, which calls handleSubscribe with the proper template parameter, which then calls
-// the script's doSubscribe member.  A bit convoluted, but it works.
-
-S32 LuaScriptRunner::subscribe(lua_State *L)
-{
-   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "subscribe");
-
-   if(profile == 0)     
-      return handleSubscribe<Robot>(L);
-   else
-      return handleSubscribe<LuaLevelGenerator>(L);
-}
-
-
-S32 LuaScriptRunner::unsubscribe(lua_State *L)
-{
-   S32 profile = checkArgList(L, functionArgs, "LuaScriptRunner", "unsubscribe");
-
-   if(profile == 0)     
-      return handleUnsubscribe<Robot>(L);
-   else
-      return handleUnsubscribe<LuaLevelGenerator>(L);
-}
-
-
-S32 LuaScriptRunner::doSubscribe(lua_State *L)
-{
-   // Stack will have a bot or levelgen object at position 1, and the event at position 2
-   // Get the event off the stack; the object has already been handled and is "this".
-   static const char *methodName = "subscribe()";
-
+// These will be implemented by children classes, and will funnel back to the doSubscribe and doUnscubscribe methods below
+S32 LuaScriptRunner::doSubscribe(lua_State *L)   
+{ 
    lua_Integer eventType = getInt(L, -1);
 
    if(!mSubscriptions[eventType])
@@ -639,11 +593,9 @@ S32 LuaScriptRunner::doSubscribe(lua_State *L)
    return 0;
 }
 
-   
+
 S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 {
-   // Stack will have a bot or levelgen object at position 1, and the event at position 2
-   // Get the event off the stack
    lua_Integer eventType = LuaObject::getInt(L, -1);
 
    if(mSubscriptions[eventType])
@@ -662,12 +614,10 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 // Define 
 
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, subscribe,       ARRAYDEF({{ ROBOT, EVENT, END }, { LEVELGEN, EVENT, END }}), 2 ) \
-   METHOD(CLASS, unsubscribe,     ARRAYDEF({{ ROBOT, EVENT, END }, { LEVELGEN, EVENT, END }}), 2 ) \
-   METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,          END }                          }), 1 ) \
-   METHOD(CLASS, print,           ARRAYDEF({{ ANY,          END }                          }), 1 ) \
-   METHOD(CLASS, getMachineTime,  ARRAYDEF({{               END }                          }), 1 ) \
-   METHOD(CLASS, findFile,        ARRAYDEF({{ STR,          END }                          }), 1 ) \
+   METHOD(CLASS, logprint,        ARRAYDEF({{ ANY,   END }}), 1 ) \
+   METHOD(CLASS, print,           ARRAYDEF({{ ANY,   END }}), 1 ) \
+   METHOD(CLASS, getMachineTime,  ARRAYDEF({{        END }}), 1 ) \
+   METHOD(CLASS, findFile,        ARRAYDEF({{ STR,   END }}), 1 ) \
 
 
 GENERATE_LUA_FUNARGS_TABLE(LuaScriptRunner, LUA_METHODS);    
@@ -686,7 +636,8 @@ void LuaScriptRunner::registerLooseFunctions(lua_State *L)
 #  undef REGISTER_LINE
 
    // Override a few Lua functions -- we can do this outside the structure above because they really don't need to be documented
-   lua_register(L, "getRandomNumber", getRandomNumber); //Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
+   // Ensure we have a good stream of random numbers until we figure out why Lua's randoms suck so bad (bug reported in 5.1, fixed in 5.2?)
+   lua_register(L, "getRandomNumber", getRandomNumber); 
    luaL_dostring(L, "math.random = getRandomNumber");
 }
 

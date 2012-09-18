@@ -990,7 +990,7 @@ bool CoreItem::canBeNeutral() { return false; }
 /////
 // Lua interface
 
-//               Fn name    Param profiles  Profile count                           
+//               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getHealth, ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setHealth, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
