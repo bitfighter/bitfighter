@@ -304,8 +304,8 @@ bool LuaLevelGenerator::prepareEnvironment()
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
 
    // TODO: Do we still really need GRID_SIZE?           
-   lua_pushnumber(L, mGridSize);                         //                                        -- env_table, mGridSize
-   lua_pushliteral(L, "_GRID_SIZE");                     //                                        -- env_table, mGridSize, "_GRID_SIZE"
+   lua_pushliteral(L, "_GRID_SIZE");                     //                                        -- env_table, "_GRID_SIZE"
+   lua_pushnumber(L, mGridSize);                         //                                        -- env_table, "_GRID_SIZE", mGridSize
    lua_rawset(L, -3);                                    // env_table["_GRID_SIZE"] = *this        -- env_table
                                                          
    lua_pushliteral(L, "levelgen");                       //                                        -- env_table, "levelgen"
