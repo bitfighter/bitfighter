@@ -71,8 +71,10 @@ NetConnection::NetConnection()
    mInitialSendSeq = Random::readI();
    mConnectionParameters.mNonce.getRandom();
 
-   mSimulatedLatency = 0;
-   mSimulatedPacketLoss = 0;
+   mSimulatedSendLatency = 0;
+   mSimulatedReceiveLatency = 0;
+   mSimulatedSendPacketLoss = 0;
+   mSimulatedReceivePacketLoss = 0;
 
    mLastPacketRecvTime = 0;
    mLastUpdateTime = 0;
@@ -151,9 +153,6 @@ NetConnection::PacketNotify::PacketNotify()
 
 bool NetConnection::checkTimeout(U32 time)
 {
-   if(!isNetworkConnection())
-      return false;
-
    if(!mLastPingSendTime)
       mLastPingSendTime = time;
 
@@ -175,8 +174,9 @@ bool NetConnection::checkTimeout(U32 time)
    }
    if((time - mLastPingSendTime) > timeout)
    {
-      if(mPingSendCount >= timeoutCount)
-         return true;
+      if(isNetworkConnection()) // Make local connection never time out, but send ping in case of lag / packet loss simulation
+         if(mPingSendCount >= timeoutCount)
+            return true;
       mLastPingSendTime = time;
       mPingSendCount++;
       sendPingPacket();
@@ -238,7 +238,7 @@ void NetConnection::writeRawPacket(BitStream *bstream, NetPacketType packetType)
 
 void NetConnection::readRawPacket(BitStream *bstream)
 {
-   if(mSimulatedPacketLoss && Random::readF() < mSimulatedPacketLoss)
+   if(mSimulatedReceivePacketLoss && Random::readF() < mSimulatedReceivePacketLoss)
    {
       logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECVDROP - %d", mNetAddress.toString(), getLastSendSequence());
       return;
@@ -480,7 +480,8 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
    U32 prevLastSequence = mLastSeqRecvd;
    mLastSeqRecvd = pkSequenceNumber;
 
-   if(pkPacketType == PingPacket || (pkSequenceNumber - mLastRecvAckAck > (MaxPacketWindowSize >> 1)))
+   if(pkPacketType == PingPacket)
+      //   || (pkSequenceNumber - mLastRecvAckAck > (MaxPacketWindowSize >> 1)))  this line appears to cause severe problems with really high lag
    {
       // send an ack to the other side
       // the ack will have the same packet sequence as our last sent packet
@@ -704,7 +705,7 @@ bool NetConnection::windowFull()
 
 NetError NetConnection::sendPacket(BitStream *stream)
 {
-   if(mSimulatedPacketLoss && Random::readF() < mSimulatedPacketLoss)
+   if(mSimulatedSendPacketLoss && Random::readF() < mSimulatedSendPacketLoss)
    {
       logprintf(LogConsumer::LogNetConnection, "NetConnection %s: SENDDROP - %d", mNetAddress.toString(), getLastSendSequence());
       return NoError;
@@ -717,19 +718,26 @@ NetError NetConnection::sendPacket(BitStream *stream)
    {
       // short circuit connection to the other side.
       // handle the packet, then force a notify.
-      U32 size = stream->getBytePosition();
+      if(mSimulatedSendLatency + mRemoteConnection->mSimulatedReceiveLatency != 0)
+      {
+         mInterface->sendtoDelayed(NULL, mRemoteConnection, stream, mSimulatedSendLatency + mRemoteConnection->mSimulatedReceiveLatency);
+      }
+      else
+      {
+         U32 size = stream->getBytePosition();
 
-      stream->reset();
-      stream->setMaxSizes(size, 0);
+         stream->reset();
+         stream->setMaxSizes(size, 0);
       
-      mRemoteConnection->readRawPacket(stream);
+         mRemoteConnection->readRawPacket(stream);
+      }
       return NoError;
    }
    else
    {
-      if(mSimulatedLatency)
+      if(mSimulatedSendLatency)
       {
-         mInterface->sendtoDelayed(getNetAddress(), stream, mSimulatedLatency);
+         mInterface->sendtoDelayed(&getNetAddress(), NULL, stream, mSimulatedSendLatency);
          return NoError;
       }
       else
@@ -894,7 +902,7 @@ bool NetConnection::connectLocal(NetInterface *connectionInterface, NetInterface
    PacketStream stream;
 
    if(!server)
-	   goto errorOut;
+      goto errorOut;
 
    client->setInterface(connectionInterface);
    client->getConnectionParameters().mIsInitiator = true;

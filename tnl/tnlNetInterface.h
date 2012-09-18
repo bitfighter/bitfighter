@@ -202,9 +202,11 @@ protected:
    struct DelaySendPacket
    {
       DelaySendPacket *nextPacket; ///< The next packet in the list of delayed packets.
-      Address remoteAddress;    ///< The address to send this packet to.
+      Address remoteAddress;       ///< The address to send this packet to.
       U32 sendTime;                ///< Time when we should send the packet.
       U32 packetSize;              ///< Size, in bytes, of the packet data.
+      SafePtr<NetConnection> receiveTo; // Used if delayed receiving
+      bool isReceive;
       U8 packetData[1];            ///< Packet data.
    };
    DelaySendPacket *mSendPacketList; ///< List of delayed packets pending to send.
@@ -355,7 +357,7 @@ public:
    /// Sends a packet to the remote address after millisecondDelay time has elapsed.
    ///
    /// This is used to simulate network latency on a LAN or single computer.
-   void sendtoDelayed(const Address &address, BitStream *stream, U32 millisecondDelay);
+   void sendtoDelayed(const Address *address, NetConnection *receiveTo, BitStream *stream, U32 millisecondDelay);
 
    /// Dispatch function for processing all network packets through this NetInterface.
    void checkIncomingPackets();

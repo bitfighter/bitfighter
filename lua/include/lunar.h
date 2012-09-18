@@ -175,6 +175,11 @@ private:
     return (obj->*(l->mfunc))(L);  // call member function
   }
 
+  static void clearStack(lua_State *L)
+  {
+     lua_settop(L, 0);
+  }
+
   // create a new T object and
   // push onto the Lua stack a userdata containing a pointer to T object
   static int new_T(lua_State *L) {
@@ -191,7 +196,7 @@ private:
      catch(LuaException &e)
      {
         TNL::logprintf("LUA ERROR: Cannot instantiate object %s: %s", typeid(T).name(), e.what());
-        LuaObject::clearStack(L);
+        clearStack(L);
         return 0;
      }
   }
