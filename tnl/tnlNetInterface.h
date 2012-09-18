@@ -205,7 +205,7 @@ protected:
       Address remoteAddress;       ///< The address to send this packet to.
       U32 sendTime;                ///< Time when we should send the packet.
       U32 packetSize;              ///< Size, in bytes, of the packet data.
-      SafePtr<NetConnection> receiveTo; // Used if delayed receiving
+      RefPtr<NetConnection> receiveTo; // Used if delayed receiving
       bool isReceive;
       U8 packetData[1];            ///< Packet data.
    };
