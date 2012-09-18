@@ -1,138 +1,38 @@
 /**
- *
- * @mainpage Bitfighter Lua Documentation
- *
- * @section intro_sec Introduction
- *
- * Here is some info about scripting levels and robots in Bitfighter.
- *
- * @section datatypes Bitfighter datatypes
- * * Point
- * * geometry - When we refer to geometery, we are referring either to a Point object or a table of Point objects, depending on the context.  
- * For example, if the object is inherently point-like (such as an Item or Projectile), then geometry is a Point.  
- * For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
- *
- * bool
- * int
- * num
- *
- * @subsection step1 Step 1: Opening the box
- *
- * @section programming_robots Programming Robots
- *
- * @section programming_levelgens Programming Levelgens
- *
- * @section programming_plugins Programming Editor Plugins
- *
- * @section events Events
- *
- * @section timers Timers
- * Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
- *
- * A timer object that can be used to schedule arbitrary events to be executed at some time in the future. All times are given in milliseconds.
- *
- * etc...
- */
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+@mainpage Bitfighter Lua Documentation
 
-/**
-  * @luavclass Timer
-  * @brief Trigger one-time or recurring scheduled events.
-  * @descr %Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
-  *
-  * A timer object that can be used to schedule arbitrary events to be executed at some time in the future. All times are given in milliseconds.
-  *
-  * @usage There are four basic timer functions:
-  * @code 
-  *    -- Execute the event once in 'delay' ms
-  *    Timer:scheduleOnce(event, delay)
-  *     
-  *    -- Execute the event repeatedly, every 'delay' ms
-  *    Timer:scheduleRepeating(event, delay)  
-  *     
-  *    -- Execute the event every 'delay' ms while event returns true
-  *    Timer:scheduleRepeatWhileTrue(event, delay)  
-  *     
-  *    -- Remove all pending events from the timer's queue
-  *    Timer:clear()
-  * @endcode
-  *
-  * %Timer Events
-  *
-  * The 'event' used can either be the name a function, a table that contains a function named 'run', or a bit of arbitrary Lua code.  These events
-  * are distinct from the Bitfighter-generated events documented elsewhere.
-  *
-  * Any Lua function can be called by a %Timer.
-  *
-  * Examples:
-  * @code
-  *    function onLevelStart()
-  *       -- Runs the code contained in the string after five seconds. 
-  *       -- Note that the string here is in quotes.
-  *       Timer:scheduleOnce("logprint(\"Once!\")", 5 * 1000)   
-  *     
-  *       -- Runs the "always" function every 30 seconds
-  *       Timer:scheduleRepeating(always, 30 * 1000)            
-  *     
-  *       -- Runs "run" method of maybe every two seconds
-  *       -- until method returns false
-  *       Timer:scheduleRepeatWhileTrue(maybe, 2 * 1000)        
-  *    end                                                  
-  *     
-  *    -- Standard function
-  *    function always()
-  *       logprint("Timer called always")
-  *    end
-  *     
-  *    -- Table: run method will be called
-  *    maybe = {
-  *       count = 3
-  *       run = function(self)
-  *          logprint("Count down " .. self.count)
-  *          self.count = self.count - 1
-  *          return self.count > 0
-  *       end
-  *    }
-  * @endcode
-  *
-  * When using a table as an "event" the first parameter to the run function should always be a parameter named "self". 
-  * The "self" parameter can be used to access the other fields in the table, that is, the "self" parameter will refer to the table that contains 
-  * the run function. If you do not need to refer to any of the other fields in the table then you do not need to include the self parameter.
-  */
+@section intro_sec Introduction
 
-/**
- * @luafunc Timer::scheduleOnce(event, delay)
- * @brief   Schedules an event to run one time.
- * @param event - The event to be run.
- * @param delay - The delay (in ms) when the the event should be run.
- */
+Here is some info about scripting levels and robots in Bitfighter.
 
- /**
- * @luafunc Timer::scheduleRepeating(event, delay)
- * @brief   Schedules an event to be run every \em delay ms.
- * @param event - The event to be run.
- * @param delay - The time (in ms) which \em event repeats.
- */
+@section datatypes Bitfighter datatypes
+* Point
+* geometry - When we refer to geometery, we are referring either to a Point object or a table of Point objects, depending on the context. 
+For example, if the object is inherently point-like (such as an Item or Projectile), then geometry is a Point.  
+For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
 
- /**
- * @luafunc Timer::scheduleRepeatWhileTrue(event, delay)
- * @brief   Schedules an event to run one every \em delay ms until event returns true.
- * @param event - The event to be run.
- * @param delay - The time (in ms) which \em event repeats.
+The Geom class provides a collection of tools to make common transormations to tables of points.  Currently these functions do not work on a single point.
+bool
+int
+num
+
+@subsection step1 Step 1: Opening the box
+
+@section programming_robots Programming Robots
+
+@section programming_levelgens Programming Levelgens
+
+@section programming_plugins Programming Editor Plugins
+
+@section events Events
+
+@section timers Timers
+Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
+
+A timer object that can be used to schedule arbitrary events to be executed at some time in the future. All times are given in milliseconds.
+
+etc...
 
  */
 
- /**
- * @luafunc Timer::clear()
- * @brief   Clears all the events currently scheduled with the timer.
- */
-
-
- //////////////////////////////////////////////////////////////////////////////
- //////////////////////////////////////////////////////////////////////////////
- //////////////////////////////////////////////////////////////////////////////
- //////////////////////////////////////////////////////////////////////////////

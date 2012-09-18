@@ -20,15 +20,17 @@ if (! -d $outpath) {
 my @mainpage = ();
 my @enums = ();
 
-# Iterate over all cpp folders in our working dir converting Doxygen comments to Luadoc comments
-my @files = <../zap/*>;
+# Collect some file names to process
+my @files = ();
 
-push(@files, "./luadoc_static_text.txt");    # Add our static chunk of text which includes home page and some class defs
+push(@files, <../zap/*.cpp>);                # Core .cpp files
+push(@files, <../zap/*.h>);                  # Core .h files
+push(@files, <../resource/scripts/*.lua>);   # Some Lua scripts
+push(@files, "./luadoc_static_text.txt");    # our static chunk of text which includes home page and some class defs
+
 
 # Loop through all the files we found above...
 foreach my $file (@files) {
-
-   next unless( $file =~ m|\.cpp$| || $file =~ m|\.h$|);    # Skip all but .cpp and .h files
 
    open my $IN, "<", $file || die "Could not open $file for reading: $!";
 
@@ -40,6 +42,9 @@ foreach my $file (@files) {
    my $collectingLongComment = 0;
    my $collectingMainPage = 0;
    my $collectingEnum = 0;
+   my $encounteredDoxygenCmd = 0;      # Gets set to 1 the first time we encounter a @cmd in a file
+
+   my $luafile = $file =~ m|\.lua$|;   # Are we processing a .lua file?
 
    my $enumColumn;
    my $enumIgnoreColumn;
@@ -56,6 +61,11 @@ foreach my $file (@files) {
 
    # Visit each line of the source cpp file
    foreach my $line (<$IN>) {
+
+      # If we are processing a .lua file, we want to remap @luaclass to @luavclass for simplicity
+      if($luafile) {
+         $line =~ s|\@luaclass\s|\@luavclass |;
+      }
 
       # Lua base classes
       if( $line =~ m|REGISTER_LUA_CLASS\( *(.+?) *\)| ) {
@@ -101,8 +111,9 @@ foreach my $file (@files) {
          }
       }
 
-
-      if( $line =~ m|/\*\*| ) {              # /** signals the beginning of a long comment block we need to pay attention to
+      # /** signals the beginning of a long comment block we need to pay attention to
+      # In Lua files we can also use --[[
+      if( !$luafile && $line =~ m|/\*\*| || $luafile && $line =~ m|--\[\[| ) {
          $collectingLongComment = 1;
          push(@comments, "/*!\n");
          next;
@@ -110,11 +121,12 @@ foreach my $file (@files) {
 
       if( $collectingLongComment ) {
 
-         # Look for closing */ to terminate our long comment
-         if( $line =~ m|\*/| ) {
+         # Look for closing */ or --]] to terminate our long comment
+         if( !$luafile && $line =~ m|\*/| || $luafile && $line =~ m|--\]\]| ) {
             push(@comments, "*/\n");
             $collectingLongComment = 0;
-            $collectingMainPage = 0;
+            $collectingMainPage    = 0;
+            $encounteredDoxygenCmd = 0;
             next;
          }
 
@@ -122,7 +134,8 @@ foreach my $file (@files) {
 
          if( $line =~ m|\@mainpage\s| ) {
             push(@mainpage, $line);
-            $collectingMainPage = 1;
+            $collectingMainPage    = 1;
+            $encounteredDoxygenCmd = 1;
             next;
          }
 
@@ -135,6 +148,7 @@ foreach my $file (@files) {
             $enumName = $1;
             $enumColumn = $2;
             $enumIgnoreColumn = $3 eq "" ? -1 : $3;
+            $encounteredDoxygenCmd = 1;
 
             push(@enums, "/**\n\@defgroup $enumName"."Enum $enumName\n");
 
@@ -142,19 +156,26 @@ foreach my $file (@files) {
          }
 
          if( $line =~ m|\@luafunc\s+(.*)$| ) {     # Line looks like:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
-            push(@comments, " \\fn $1\n");
 
-            #               $1      $2     $3    $4     ($1 grabs extra spaces, trimmed below)
-            $line =~ m|\s(\w+\s+)?(\w+)::(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
+            # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
+            my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
+
+            #               $1      $2      $3    $4     (warning: $1 grabs extra spaces, trimmed below)
+            $line =~ m|\s(\w+\s+)?(\w+)$sep(.+?)\((.*)\)|;    # Grab retval, class, method, and args from $line
+
             my $retval = $1 eq "" ? "void" : $1;                              # Retval is optional, use void if omitted            
+            my $voidlessRetval = $1;
             my $class  = $2  || die "Couldn't get class name from $line\n";   # Must have a class
             my $method = $3  || die "Couldn't get method name from $line\n";  # Must have a method
             my $args   = $4;                                                  # Args are optional
 
             $retval =~ s|\s+$||;     # Trim any trailing spaces from $retval
 
+            # Use voidlessRetval to avoid having "void" show up where we'd rather omit the return type altogether
+            push(@comments, " \\fn $voidlessRetval $class" . "::" . "$method($args)\n");
 
-            # Find the original class definition and delete it
+
+            # Find the original class definition and delete it (if it still exists)
             my $index = first { ${$classes{$class}}[$_] eq "void $method() { }\n" } 0..$#{$classes{$class}};
             if($index ne "") {
                splice(@{$classes{$class}}, $index, 1);       # Delete element at $index
@@ -166,11 +187,16 @@ foreach my $file (@files) {
             # Add our new sig to the list
             push(@{$classes{$class}}, "$retval $method($args) { /* From '$line' */ }\n");
 
+            $encounteredDoxygenCmd = 1;
+
             next;
          }
 
          if( $line =~ m|\@luaclass\s+(\w+)\s*$| ) {       # Description of a class defined in a header file
             push(@comments, " \\class $1\n");
+
+            $encounteredDoxygenCmd = 1;
+
             next;
          }
 
@@ -180,11 +206,16 @@ foreach my $file (@files) {
 
             push(@{$classes{$class}}, "class $1 {\n");
             push(@{$classes{$class}}, "public:\n");
+
+            $writeFile = 1;
+            $encounteredDoxygenCmd = 1;
+
             next;
          }
 
          if( $line =~ m|\@descr\s+(.*)$| ) {
             push(@comments, "\n $1\n");
+            $encounteredDoxygenCmd = 1;
             next;
          }
 
@@ -194,7 +225,7 @@ foreach my $file (@files) {
          } elsif($collectingEnum) {
             push(@enums, $line);
          } else {
-            push(@comments, $line);
+            push(@comments, $line) if $encounteredDoxygenCmd;
          }
 
          next;
@@ -261,10 +292,11 @@ foreach my $file (@files) {
    # If we added any lines to keepers, write it out... otherwise skip it!
    if($writeFile)
    {
-      my ($name, $path, $suffix) = fileparse($file, (".cpp", ".h"));
+      my ($name, $path, $suffix) = fileparse($file, (".cpp", ".h", ".lua"));
 
       # Write the simulated .h file
-      my $outfile = $outpath . basename($name) . ".h";
+      $suffix =~ s|\.||;     # Strip the "." that fileparse sticks on the font of $suffix
+      my $outfile = $outpath . $name . "__" . $suffix . ".h";
       open my $OUT, '>', $outfile || die "Can't open $outfile for writing: $!";
 
       print $OUT "// This file was generated automatically from the C++ source to feed doxygen.  It will be overwritten.\n\n\n";

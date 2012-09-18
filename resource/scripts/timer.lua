@@ -17,66 +17,78 @@ Based on code:
    See the License for the specific language governing permissions and
    limitations under the License.
 
-]]
+--]]
 -----------------------------------------------------------
 -----------------------------------------------------------
 
 --[[
+@luaclass Timer
+@brief    Trigger one-time or recurring scheduled events.
+@descr    %Timer is a utility class that makes it easier to manage timing periodic or delayed events. 
+          The timer code is based on a very nice library written by Haywood Slap.
 
-A timer object that can be used to schedule arbitrary events to be executed
-at some time in the future.  All times are given in milliseconds.
+A timer object that can be used to schedule arbitrary events to be executed at some time in the future. 
+All times are given in milliseconds.
 
+@usage There are four basic timer functions:
+@code 
+   -- Execute the event once in 'delay' ms
+   Timer:scheduleOnce(event, delay)
+    
+   -- Execute the event repeatedly, every 'delay' ms
+   Timer:scheduleRepeating(event, delay)  
+    
+   -- Execute the event every 'delay' ms while event returns true
+   Timer:scheduleRepeatWhileTrue(event, delay)  
+    
+   -- Remove all pending events from the timer's queue
+   Timer:clear()
+@endcode
 
-USAGE
+%Timer Events
 
-There are four user functions:
+The 'event' used can either be the name a function, a table that contains a function named 'run', or a bit of arbitrary Lua code.  These events
+are distinct from the Bitfighter-generated events documented elsewhere.
 
-1. Timer:scheduleOnce(event, delay)             -- Executes the event once in 'delay' ms
-2. Timer:scheduleRepeating(event, delay)        -- Executes the event repeatedly every 'delay' ms
-3. Timer:scheduleRepeatWhileTrue(event, delay)  -- Executes the event every 'delay' ms while event returns true
-4. Timer:clear()                                -- Removes all pending events from the timer's queue
+Any Lua function can be called by a %Timer.
 
-
-EVENTS
-
-The 'event' used can either be the name a function, a table that contains
-a function named 'run', or a bit of arbitrary Lua code.
-
-Any Lua function can be called by the Timer.
-
-
-EXAMPLES
-
-function onLevelStart()
-   Timer:scheduleOnce("logprint(\"Once!\")", 5000)   -- compiles and runs string in five seconds
-   Timer:scheduleRepeating(always, 30000)            -- runs always function every 30 seconds
-   Timer:scheduleRepeatWhileTrue(maybe, 2000)        -- runs "run" method of maybe every two seconds
-end                                                  -- until method returns false
-
--- Standard function
-function always()
-   logprint("Timer called always")
-end
-
--- Table: run method will be called
-maybe = {
-   count = 3
-   run = function(self)
-      logprint("Count down " .. self.count)
-      self.count = self.count - 1
-      return self.count > 0
+Examples:
+@code
+   function onLevelStart()
+      -- Runs the code contained in the string after five seconds. 
+      -- Note that the string here is in quotes.
+      Timer:scheduleOnce("logprint(\"Once!\")", 5 * 1000)   
+    
+      -- Runs the "always" function every 30 seconds
+      Timer:scheduleRepeating(always, 30 * 1000)            
+    
+      -- Runs "run" method of maybe every two seconds
+      -- until method returns false
+      Timer:scheduleRepeatWhileTrue(maybe, 2 * 1000)        
+   end                                                  
+    
+   -- Standard function
+   function always()
+      logprint("Timer called always")
    end
-}
+    
+   -- Table: run method will be called
+   maybe = {
+      count = 3
+      run = function(self)
+         logprint("Count down " .. self.count)
+         self.count = self.count - 1
+         return self.count > 0
+      end
+   }
+@endcode
 
-When using a table as an 'event' the first parameter to the run
-function should always be a parameter named "self" (or "this"
-if you prefer).  The "self" parameter can be used to access the
-other fields in the table, that is, the "self" parameter will refer
-to the table that contains the run function.  If you do not need to
-refer to any of the other fields in the table then you do not need
-to include the self parameter.
-
-]]
+When using a table as an "event" the first parameter to the run function should always be a
+parameter named "self".  The "self" parameter can be used to access the other fields in the table,
+that is, the "self" parameter will refer to  the table that contains  the run function. If you do
+not need to refer to any of the other fields in the table then you do not need to include the self
+parameter. 
+--]]
 
 -- Declare our global timer object
 Timer = {}
@@ -88,28 +100,48 @@ function Timer:_initialize()
 end
 
 
--- Schedule an event to be executed only once in 'time' ms
+--[[
+@luafunc Timer:scheduleOnce(event, delay)
+@brief   Schedules an event to run one time, after \em delay ms.
+@param   event - The event to be run.
+@param   delay - The delay (in ms) when the the event should be run.
+--]]
 function Timer:scheduleOnce(event, deltaT)
    local record = {event = event, time = self.time + deltaT }
    self:_insert(record)
 end
 
 
--- Schedule an event to be repeated every 'time' ms
+
+--[[
+@luafunc Timer:scheduleRepeating(event, delay)
+@brief   Schedules an event to be run every \em delay ms.
+@param   event - The event to be run.
+@param   delay - The time (in ms) which \em event repeats.
+--]]
 function Timer:scheduleRepeating(event, deltaT)
    local record = {event = event, time = self.time + deltaT, repeating = deltaT}
    self:_insert(record)
 end
 
--- Schedule an event to be executed every 'time' seconds. The event will be repeated
--- only if the call to 'event' returns true.
+
+--[[
+@luafunc Timer:scheduleRepeatWhileTrue(event, delay)
+@brief   Schedules an event to run one every \em delay ms until event returns true.  
+         The event will be repeated only if the call to 'event' returns true.
+@param   event - The event to be run.
+@param   delay - The time (in ms) which \em event repeats.
+--]]
 function Timer:scheduleRepeatWhileTrue(event, deltaT)
    local record = {event = event, time = self.time + deltaT, repeatIf = deltaT}
    self:_insert(record)
 end
 
 
--- Removes all pending events from the timer queue
+--[[
+@luafunc Timer:clear()
+@brief   Removes all pending events from the timer queue.
+--]]
 function Timer:clear()
    self.queue = {}
 end
