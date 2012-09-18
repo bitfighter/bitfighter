@@ -119,7 +119,6 @@ protected:
 
    static void printStackTrace(lua_State *L);
 
-
    static int luaPanicked(lua_State *L);
 
    virtual void registerClasses();
@@ -160,12 +159,9 @@ public:
    static S32 getMachineTime(lua_State *L);
    static S32 getRandomNumber(lua_State *L);
    static S32 findFile(lua_State *L);
-   static S32 subscribe(lua_State *L);
-   static S32 unsubscribe(lua_State *L);
 
    S32 doSubscribe(lua_State *L);
    S32 doUnsubscribe(lua_State *L);
-
 
    static const LuaFunctionProfile functionArgs[]; 
 };

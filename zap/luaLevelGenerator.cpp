@@ -368,8 +368,16 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
 
    { "globalMsg",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::globalMsg>        },
 
+
+   { "subscribe",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::subscribe>        },
+   { "unsubscribe",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::unsubscribe>      },
+
    { NULL, NULL }   
 };
+
+
+S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L);   }
+S32 LuaLevelGenerator::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 
 const LuaFunctionProfile LuaLevelGenerator::functionArgs[] =

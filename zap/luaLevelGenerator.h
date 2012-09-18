@@ -69,6 +69,11 @@ public:
    static Lunar<LuaLevelGenerator>::RegType methods[];
 
    // Lua methods
+
+   // Handle events
+   S32 subscribe(lua_State *L); 
+   S32 unsubscribe(lua_State *L); 
+
    virtual S32 addWall(lua_State *L);           // Add a wall
    virtual S32 addItem(lua_State *L);           // Add item using a series of parameters
    virtual S32 addLevelLine(lua_State *L);      // Add raw level line

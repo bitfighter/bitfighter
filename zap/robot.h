@@ -129,6 +129,9 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
+   S32 subscribe(lua_State *L);
+   S32 unsubscribe(lua_State *L);
+
    S32 getCPUTime(lua_State *L);
    S32 getTime(lua_State *L);
 
