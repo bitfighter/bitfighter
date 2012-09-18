@@ -312,7 +312,7 @@ bool LuaLevelGenerator::prepareEnvironment()
    luaW_push(L, this);                                   //                                        -- env_table, "levelgen", *this
    lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
 
-   lua_pop(L, 1);                                        // Cleanup                                -- <<empty stack>>
+   lua_pop(L, -1);                                       // Cleanup                                -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 
