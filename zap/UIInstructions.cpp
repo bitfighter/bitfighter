@@ -814,7 +814,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderGrenade(Point(0, 0), 1);
             break;
          case 4:
-            renderHeatSeeker(Point(0, 0), 0, 600, getGame()->getCurrentTime());
+            renderHeatSeeker(Point(0, 0), 0, 400, getGame()->getCurrentTime());
             break;
          case 5:     // Blank
             break;
