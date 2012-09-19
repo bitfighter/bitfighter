@@ -472,29 +472,32 @@ void FXTrail::render()
    {
       F32 t = ((F32)i / (F32)mNodes.size());
 
+      F32 r, g, b, a, rFade, gFade, bFade, aFade;
+
       if(mNodes[i].invisible)
       {
-         fxTrailColorArray[(4*i)]     = 0.f;
-         fxTrailColorArray[(4*i) + 1] = 0.f;
-         fxTrailColorArray[(4*i) + 2] = 0.f;
-         fxTrailColorArray[(4*i) + 3] = 0.f;
+         r = 0;      g = 0;      b = 0;      a = 0.f;
+         rFade = 0;  gFade = 0;  bFade = 0;  aFade = 0.f;
       }
       else if(mNodes[i].boosted)
       {
-         fxTrailColorArray[(4*i)]     = 1.f - t;
-         fxTrailColorArray[(4*i) + 1] = 1.f - t;
-         fxTrailColorArray[(4*i) + 2] = 0.f;
-         fxTrailColorArray[(4*i) + 3] = 1.f - t;
+         r = 1.f;      g = 1.f;      b = 0;      a = 1.f;
+         rFade = 1.f;  gFade = 1.f;  bFade = 0;  aFade = 1.f;
       }
       else
       {
-         fxTrailColorArray[(4*i)]     = 1.f - 2 * t;
-         fxTrailColorArray[(4*i) + 1] = 1.f - 2 * t;
-         fxTrailColorArray[(4*i) + 2] = 1.f;
-         fxTrailColorArray[(4*i) + 3] = 0.7f - 0.7f * t;
+         r = 1;      g = 1;      b = 1;      a = 0.7f;
+         rFade = 2;  gFade = 2;  bFade = 0;  aFade = 0.7f;
       }
 
-      fxTrailVertexArray[(2*i)]     = mNodes[i].pos.x;
+
+      fxTrailColorArray[(4*i) + 0] = r - rFade * t;
+      fxTrailColorArray[(4*i) + 1] = g - gFade * t;
+      fxTrailColorArray[(4*i) + 2] = b - bFade * t;
+      fxTrailColorArray[(4*i) + 3] = a - aFade * t;
+
+
+      fxTrailVertexArray[(2*i) + 0] = mNodes[i].pos.x;
       fxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
