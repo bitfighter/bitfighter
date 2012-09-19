@@ -494,7 +494,7 @@ void FXTrail::render()
          fxTrailColorArray[(4*i) + 3] = 0.7f - 0.7f * t;
       }
 
-      fxTrailVertexArray[2*i]       = mNodes[i].pos.x;
+      fxTrailVertexArray[(2*i)]     = mNodes[i].pos.x;
       fxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
