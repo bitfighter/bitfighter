@@ -51,16 +51,22 @@ static void new_vec( lua_State* L, float x, float y)
   * points do not support . or : syntax.
   *
   * @code      
+  *            -- Define some points
   *            local p = point.new(100, 200)
   *            local q = point.new(  5,  10)
   *            local r = point.new(100, 100)
   *            
+  *            -- Use some library functions
   *            print(point.length(p))        -- 223.60679626465
+  *            print(point.distanceTo(p, r)) -- 100
+  *
+  *            -- Do some vector math
   *            print(p + q)                  -- (105, 210)
   *            print(p * 2)                  -- (200, 400)
   *            print(p * q)                  -- (500, 2000)
   *            
-  *            print(point.distanceTo(p, r)) -- 100
+  *            -- Check the point type
+  *            print(type(p))                -- point
   * @endcode
   *
   */
@@ -154,11 +160,11 @@ static int gcvec_normalize (lua_State *L) {
 
 /**     Bitfighter method
   * @luafunc num point::angleTo(p, q)
-  * @brief   Computes angle from p to q.
+  * @brief   Computes angle from p to q, in radians.
   * @descr   Uses formula: atan2(q.y - p.y, q.x - p.x)
   * @param   p - Point.
   * @param   q - Point.
-  * @return  Computed angle.
+  * @return  Computed angle (in radians).
   */
 static int gcvec_angleto (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
