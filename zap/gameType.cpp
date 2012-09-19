@@ -282,6 +282,17 @@ bool GameType::onGhostAdd(GhostConnection *theConnection)
 #endif
 }
 
+void GameType::onGhostRemove()
+{
+#ifndef ZAP_DEDICATED
+   TNLAssert(dynamic_cast<ClientGame *>(getGame()), "Should only be clientGame here!");
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());
+
+   // Quit EngineerHelper when level changes, or when current GameType get removed
+   clientGame->getUIManager()->getGameUserInterface()->quitEngineerHelper();
+#endif
+}
+
 
 #ifndef ZAP_DEDICATED
 // Menu items we want to show
