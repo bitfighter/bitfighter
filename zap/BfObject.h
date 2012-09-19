@@ -97,7 +97,7 @@ class ClientInfo;
    TYPE_NUMBER( CoreTypeNumber,                true,              "CoreType"                ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "ZoneType"                ) \
    TYPE_NUMBER( CircleTypeNumber,              true,              "CircleType"              ) \
-   TYPE_NUMBER( HeatSeekerTypeNumber,          true,              "HeatSeekerType"          ) \
+   TYPE_NUMBER( HeatSeekerTypeNumber,          true,              "SeekerType"              ) \
    TYPE_NUMBER( DeletedTypeNumber,             false,             "DeletedType"             ) \
    TYPE_NUMBER( UnknownTypeNumber,             false,             "UnknownType"             ) \
 

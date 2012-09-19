@@ -71,7 +71,7 @@ bool isShipType(U8 x)
 bool isProjectileType(U8 x)
 {
    return
-         x == MineTypeNumber || x == SpyBugTypeNumber || x == BulletTypeNumber ||
+         x == MineTypeNumber  || x == SpyBugTypeNumber      || x == BulletTypeNumber ||
          x == BurstTypeNumber || x == HeatSeekerTypeNumber;
 }
 

@@ -1241,7 +1241,7 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
       // Else turn towards target
       else
       {
-         // Create a new velocity vector for the heat seeker to slowly go towards the target.
+         // Create a new velocity vector for the seeker to slowly go towards the target.
          // Adjust the vector to always:
          //  - keep a minimum velocity (projectile default)
          //  - only change angle to a maxium amount from the original direction
@@ -1507,7 +1507,7 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
       Ship *ship = static_cast<Ship *>(otherObj);
       if(ship->isModulePrimaryActive(ModuleShield))
       {
-         // let Heat seeker bounce off the Shield, like all bullet bounce off the shield.
+         // Seekers bounce off shields
          Point p = getPos(stateIndex) - ship->getPos(stateIndex);
          p.normalize(getVel(stateIndex).len());
          setVel(stateIndex, p);
@@ -1550,7 +1550,7 @@ GENERATE_LUA_FUNARGS_TABLE(HeatSeekerProjectile, LUA_METHODS);
 #undef LUA_METHODS
 
 
-const char *HeatSeekerProjectile::luaClassName = "HeatSeeker";
+const char *HeatSeekerProjectile::luaClassName = "Seeker";
 REGISTER_LUA_SUBCLASS(HeatSeekerProjectile, MoveItem);
 
 S32 HeatSeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }

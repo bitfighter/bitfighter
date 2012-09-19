@@ -732,38 +732,38 @@ void InstructionsUserInterface::renderModulesPage()
 }
 
 const char *gGameObjectInfo[] = {
-   /* 00 */   "Phaser", "The default weapon",
+   /* 00 */   "Phaser",  "The default weapon",
    /* 01 */   "Bouncer", "Bounces off walls",
-   /* 03 */   "Triple", "Fires three diverging shots",
-   /* 03 */   "Burst", "Explosive projectile",
-   /* 04 */   "Heat Seeker", "Homing projectile",
+   /* 03 */   "Triple",  "Fires three diverging shots",
+   /* 03 */   "Burst",   "Explosive projectile",
+   /* 04 */   "Seeker",  "Homing projectile",
    /* 05 */   "", "",
 
-   /* 06 */   "Friendly Mine", "Team's mines show trigger radius",
-   /* 07 */   "Enemy Mine", "These are much harder to see",
+   /* 06 */   "Friendly Mine",    "Team's mines show trigger radius",
+   /* 07 */   "Enemy Mine",       "These are much harder to see",
    /* 08 */   "Friendly Spy Bug", "Lets you surveil the area",
-   /* 09 */   "Enemy Spy Bug", "Destroy these when you find them",
+   /* 09 */   "Enemy Spy Bug",    "Destroy these when you find them",
    /* 10 */   "", "",
    /* 11 */   "", "",
 
-   /* 12 */   "Repair Item", "Repairs damage to ship",
-   /* 13 */   "Energy Item", "Restores ship's energy",
-   /* 14 */   "Neutral Turret", "Repair to take team ownership",
-   /* 15 */   "Active Turret", "Fires at enemy team",
-   /* 16 */   "Neutral Emitter", "Repair to take team ownership",
+   /* 12 */   "Repair Item",         "Repairs damage to ship",
+   /* 13 */   "Energy Item",         "Restores ship's energy",
+   /* 14 */   "Neutral Turret",      "Repair to take team ownership",
+   /* 15 */   "Active Turret",       "Fires at enemy team",
+   /* 16 */   "Neutral Emitter",     "Repair to take team ownership",
    /* 17 */   "Force Field Emitter", "Allows only one team to pass",
 
-   /* 18 */   "Teleporter", "Warps ship to another location",
-   /* 19 */   "Flag", "Objective item in some game types",
+   /* 18 */   "Teleporter",   "Warps ship to another location",
+   /* 19 */   "Flag",         "Objective item in some game types",
    /* 20 */   "Loadout Zone", "Updates ship configuration",
-   /* 21 */   "Nexus", "Bring flags here in Nexus game",
-   /* 22 */   "Asteroid", "Silent but deadly",
-   /* 23 */   "GoFast", "Makes ship go fast",
+   /* 21 */   "Nexus",        "Bring flags here in Nexus game",
+   /* 22 */   "Asteroid",     "Silent but deadly",
+   /* 23 */   "GoFast",       "Makes ship go fast",
 
-   /* 24 */   "Test Item", "Bouncy ball",
+   /* 24 */   "Test Item",     "Bouncy ball",
    /* 25 */   "Resource Item", "Use with engineer module",
-   /* 26 */   "Soccer Ball", "Push into enemy goal in Soccer game",
-   /* 27 */   "Core", "Kill the enemy's; defend yours OR DIE!"
+   /* 26 */   "Soccer Ball",   "Push into enemy goal in Soccer game",
+   /* 27 */   "Core",          "Kill the enemy's; defend yours OR DIE!"
 };
 
 static U32 GameObjectCount = ARRAYSIZE(gGameObjectInfo) / 2;   
