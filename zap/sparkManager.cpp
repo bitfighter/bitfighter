@@ -470,32 +470,32 @@ void FXTrail::render()
 
    for(S32 i = 0; i < mNodes.size(); i++)
    {
-      F32 t = ((F32)i/(F32)mNodes.size());
+      F32 t = ((F32)i / (F32)mNodes.size());
 
       if(mNodes[i].invisible)
       {
-         fxTrailColorArray[4*i]     = 0.f;
-         fxTrailColorArray[(4*i)+1] = 0.f;
-         fxTrailColorArray[(4*i)+2] = 0.f;
-         fxTrailColorArray[(4*i)+3] = 0.f;
+         fxTrailColorArray[(4*i)]     = 0.f;
+         fxTrailColorArray[(4*i) + 1] = 0.f;
+         fxTrailColorArray[(4*i) + 2] = 0.f;
+         fxTrailColorArray[(4*i) + 3] = 0.f;
       }
       else if(mNodes[i].boosted)
       {
-         fxTrailColorArray[4*i]     = 1.f - t;
-         fxTrailColorArray[(4*i)+1] = 1.f - t;
-         fxTrailColorArray[(4*i)+2] = 0.f;
-         fxTrailColorArray[(4*i)+3] = 1.f - t;
+         fxTrailColorArray[(4*i)]     = 1.f - t;
+         fxTrailColorArray[(4*i) +1 ] = 1.f - t;
+         fxTrailColorArray[(4*i) +2 ] = 0.f;
+         fxTrailColorArray[(4*i) +3 ] = 1.f - t;
       }
       else
       {
-         fxTrailColorArray[4*i]     = 1.f - 2 * t;
-         fxTrailColorArray[(4*i)+1] = 1.f - 2 * t;
-         fxTrailColorArray[(4*i)+2] = 1.f;
-         fxTrailColorArray[(4*i)+3] = 0.7f - 0.7f * t;
+         fxTrailColorArray[(4*i)]     = 1.f - 2 * t;
+         fxTrailColorArray[(4*i) + 1] = 1.f - 2 * t;
+         fxTrailColorArray[(4*i) + 2] = 1.f;
+         fxTrailColorArray[(4*i) + 3] = 0.7f - 0.7f * t;
       }
 
-      fxTrailVertexArray[2*i]     = mNodes[i].pos.x;
-      fxTrailVertexArray[(2*i)+1] = mNodes[i].pos.y;
+      fxTrailVertexArray[2*i]       = mNodes[i].pos.x;
+      fxTrailVertexArray[(2*i) + 1] = mNodes[i].pos.y;
    }
 
    renderColorVertexArray(fxTrailVertexArray, fxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
