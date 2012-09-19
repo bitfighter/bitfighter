@@ -1448,17 +1448,22 @@ void renderHeatSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRem
 
 void renderMine(const Point &pos, bool armed, bool visible)
 {
-   F32 mod = 0.8f;
-   F32 vis = .18;
-   if(visible)
+   F32 mod;
+   F32 vis;   
+
+   if(visible)    // Friendly mine
    {
       glColor(Colors::gray50);
       drawCircle(pos, Mine::SensorRadius);
       mod = 0.8f;
       vis = 1.0;
    }
-   else
+   else           // Invisible enemy mine
+   {
       glLineWidth(gLineWidth1);
+      mod = 0.8f;
+      vis = .18;
+   }
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
@@ -1474,8 +1479,8 @@ void renderMine(const Point &pos, bool armed, bool visible)
 }
 
 #ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
-#define max(a,b) ((a) >= (b) ? (a) : (b))
+#  define min(a,b) ((a) <= (b) ? (a) : (b))
+#  define max(a,b) ((a) >= (b) ? (a) : (b))
 #endif
 
 
