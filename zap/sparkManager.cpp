@@ -482,15 +482,15 @@ void FXTrail::render()
       else if(mNodes[i].boosted)
       {
          fxTrailColorArray[(4*i)]     = 1.f - t;
-         fxTrailColorArray[(4*i) +1 ] = 1.f - t;
-         fxTrailColorArray[(4*i) +2 ] = 0.f;
-         fxTrailColorArray[(4*i) +3 ] = 1.f - t;
+         fxTrailColorArray[(4*i) + 1] = 1.f - t;
+         fxTrailColorArray[(4*i) + 2] = 0.f;
+         fxTrailColorArray[(4*i) + 3] = 1.f - t;
       }
       else
       {
          fxTrailColorArray[(4*i)]     = 1.f - 2 * t;
          fxTrailColorArray[(4*i) + 1] = 1.f - 2 * t;
-         fxTrailColorArray[(4*i) + 2] = .25f;
+         fxTrailColorArray[(4*i) + 2] = 1.f;
          fxTrailColorArray[(4*i) + 3] = 0.7f - 0.7f * t;
       }
 
