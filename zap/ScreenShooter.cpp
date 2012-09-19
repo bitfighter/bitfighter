@@ -27,6 +27,9 @@
 #include "stringUtils.h"
 #include "config.h"
 #include "ScreenInfo.h"
+#include "ClientGame.h"
+#include "ConfigEnum.h"
+#include "UI.h"
 
 #include "tnlLog.h"
 
@@ -37,6 +40,7 @@
 #endif
 
 #include "string.h"
+#include "cmath"
 
 using namespace std;
 
@@ -52,6 +56,107 @@ ScreenShooter::ScreenShooter()
 ScreenShooter::~ScreenShooter()
 {
    // Do nothing
+}
+
+
+void ScreenShooter::renderFrame()
+{
+   // Draw
+   gClientGame->getUIManager()->renderCurrent();
+
+   // Swap the buffer - this puts the new viewport into the front buffer
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_GL_SwapWindow(gScreenInfo.sdlWindow);
+#else
+   SDL_GL_SwapBuffers();
+#endif
+}
+
+
+void ScreenShooter::resizeViewportToCanvas()
+{
+   // Grab the canvas width/height and normalize our screen to it
+   S32 width = gScreenInfo.getGameCanvasWidth();
+   S32 height = gScreenInfo.getGameCanvasHeight();
+
+   glViewport(0, 0, width, height);
+
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+
+   glOrtho(0, width, height, 0, 0, 1);
+
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
+   glScissor(0, 0, width, height);
+
+   // Now draw our new viewport
+   renderFrame();
+}
+
+
+// Stolen from VideoSystem::actualizeScreenMode()
+void ScreenShooter::restoreViewportToWindow()
+{
+   GameSettings *settings = gClientGame->getSettings();
+   DisplayMode displayMode = settings->getIniSettings()->displayMode;
+
+   // Set up video/window flags amd parameters and get ready to change the window
+   S32 sdlWindowWidth, sdlWindowHeight;
+   F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
+
+   // Set up variables according to display mode
+   switch(displayMode)
+   {
+      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         orthoRight = gScreenInfo.getGameCanvasWidth();
+         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         break;
+
+      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
+         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
+         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
+         orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
+         orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
+         orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
+         break;
+
+      case DISPLAY_MODE_WINDOWED:
+      default:  //  Fall through OK
+         sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
+         sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+         orthoRight = gScreenInfo.getGameCanvasWidth();
+         orthoBottom = gScreenInfo.getGameCanvasHeight();
+      break;
+   }
+
+   glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
+
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+
+   glOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, 0, 1);
+
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
+   // Now scissor
+   if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+   {
+      glScissor(gScreenInfo.getHorizPhysicalMargin(), // x
+            gScreenInfo.getVertPhysicalMargin(),      // y
+            gScreenInfo.getDrawAreaWidth(),           // width
+            gScreenInfo.getDrawAreaHeight());         // height
+   }
+   else
+      glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+
+   // Now draw the original viewport again
+   renderFrame();
 }
 
 
@@ -73,17 +178,46 @@ void ScreenShooter::saveScreenshot(const string &folder)
          break;
    }
 
+   // We won't do any opengl viewport resizing if we're in the editor
+   bool inEditor = gClientGame->getUIManager()->getCurrentUI()->getMenuID() == EditorUI;
+
+   // Change opengl viewport temporarily to have consistent screenshot sizes
+   if(!inEditor)
+      resizeViewportToCanvas();
+
    // Now let's grab them pixels
-   S32 width = gScreenInfo.getWindowWidth();
-   S32 height = gScreenInfo.getWindowHeight();
+   S32 width;
+   S32 height;
+
+   // Editor screen width is the window size
+   if(inEditor)
+   {
+      width = gScreenInfo.getWindowWidth();
+      height = gScreenInfo.getWindowHeight();
+   }
+   // Otherwise screen width is the default canvas size
+   else
+   {
+      width = gScreenInfo.getGameCanvasWidth();
+      height = gScreenInfo.getGameCanvasHeight();
+   }
 
    // Allocate buffer
    GLubyte *screenBuffer = new GLubyte[BytesPerPixel * width * height];  // Glubyte * 3 = 24 bits
    png_bytep *rows = new png_bytep[height];
 
-   // Read pixels from buffer - slow operation
+   // Set alignment at smallest for compatibility
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+   // Grab the front buffer with the new viewport
+   glReadBuffer(GL_FRONT);
+
+   // Read pixels from buffer - slow operation
    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, screenBuffer);
+
+   // Change opengl viewport back to what it was
+   if(!inEditor)
+      restoreViewportToWindow();
 
    // Convert Data
    for (S32 i = 0; i < height; i++)

@@ -44,6 +44,10 @@ private:
    static const S32 BitDepth = 8;
    static const S32 BytesPerPixel = 3;  // 3 bytes = 24 bits
 
+   static void renderFrame();
+   static void resizeViewportToCanvas();
+   static void restoreViewportToWindow();
+
    static bool writePNG(const char *file_name, png_bytep *rows,
                         S32 width, S32 height, S32 colorType, S32 bitDepth);
 
