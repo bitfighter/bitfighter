@@ -34,7 +34,7 @@ LUALIB_API int (luaopen_string) (lua_State *L);
 LUALIB_API int (luaopen_math) (lua_State *L);
 
 /* LUA-VEC */
-#define LUA_VECLIBNAME	"vec"
+#define LUA_VECLIBNAME	"point"
 LUALIB_API int (luaopen_vec) (lua_State *L);
 
 /* LUA-VEC */

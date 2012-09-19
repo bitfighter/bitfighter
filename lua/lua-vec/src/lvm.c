@@ -135,24 +135,24 @@ void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
           switch (*getstr(tsvalue(key))) {
             case 'x':  setnvalue(&res, vecvalue(t)[0]); break;
             case 'y':  setnvalue(&res, vecvalue(t)[1]); break;
-            case 'z':  setnvalue(&res, vecvalue(t)[2]); break;
-            case 'w':  setnvalue(&res, vecvalue(t)[3]); break;
+            //case 'z':  setnvalue(&res, vecvalue(t)[2]); break;
+            //case 'w':  setnvalue(&res, vecvalue(t)[3]); break;
             default:   luaG_typeerror(L, t, "index");
           }
           setobj2s(L, val, &res);
           return;
         }
-        else if (tsvalue(key)->len <= 4) {
+        else if (tsvalue(key)->len <= 2) {      // <== Bitfighter
           /* accessing by swizzling, such as vec.xy, vec.xxyz etc. */
           TValue res;
-          float v[4] = {0.0f,0.0f,0.0f,0.0f};
+          float v[2] = {0.0f,0.0f};   // <== Bitfighter
           unsigned int i;
           for (i = 0; i < tsvalue(key)->len; ++i) {
             switch (getstr(tsvalue(key))[i]) {
               case 'x':  v[i] = vecvalue(t)[0]; break;
               case 'y':  v[i] = vecvalue(t)[1]; break;
-              case 'z':  v[i] = vecvalue(t)[2]; break;
-              case 'w':  v[i] = vecvalue(t)[3]; break;
+              //case 'z':  v[i] = vecvalue(t)[2]; break;
+              //case 'w':  v[i] = vecvalue(t)[3]; break;
               default:   luaG_typeerror(L, t, "index");
             }
           }
@@ -160,6 +160,15 @@ void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
           setobj2s(L, val, &res);
           return;
         }
+        // @watusimoto just hacking around...
+        //else  // Maybe we're trying to access a method like vec:length()?
+        //   /*printf("XXXXX==> %s", getstr(tsvalue(key)));*/
+        //{
+        //   TValue res;
+        //   setnvalue(&res, 99999);
+        //   setobj2s(L, val, &res);
+        //   return;
+        //}
       }
       luaG_typeerror(L, t, "index");
     }

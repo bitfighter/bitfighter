@@ -25,6 +25,7 @@ my @files = ();
 
 push(@files, <../zap/*.cpp>);                # Core .cpp files
 push(@files, <../zap/*.h>);                  # Core .h files
+push(@files, <../lua/lua-vec/src/*.c>);      # Lua-vec .c files
 push(@files, <../resource/scripts/*.lua>);   # Some Lua scripts
 push(@files, "./luadoc_static_text.txt");    # our static chunk of text which includes home page and some class defs
 
