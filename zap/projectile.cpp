@@ -1181,6 +1181,11 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
 
    mAcquiredTarget = NULL;
 
+#ifndef ZAP_DEDICATED
+   for(S32 i = 0; i < TrailCount; i++)
+      mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
+#endif
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -1212,6 +1217,15 @@ F32 HeatSeekerProjectile::TargetSearchAngle = FloatTau * .6f;     // Anglular sp
 void HeatSeekerProjectile::idle(IdleCallPath path)
 {
    Parent::idle(path);
+
+#ifndef ZAP_DEDICATED
+   if(path == BfObject::ClientIdleControlMain || path == BfObject::ClientIdleMainRemote)
+   {
+      emitMovementSparks();
+      for(U32 i = 0; i < TrailCount; i++)
+         mTrail[i].idle(mCurrentMove.time);
+   }
+#endif
 
    if(path != BfObject::ServerIdleMainLoop)      // Server only from now on
       return;
@@ -1371,6 +1385,146 @@ void HeatSeekerProjectile::acquireTarget()
       closest = distanceSq;
       mAcquiredTarget = foundObject;
    }
+}
+
+
+void HeatSeekerProjectile::emitMovementSparks()
+{
+#ifndef ZAP_DEDICATED
+   //U32 deltaT = mCurrentMove.time;
+
+
+   S32 cornerCount = 1;
+
+   Vector<Point> corners;
+   corners.resize(cornerCount);
+
+   Vector<Point> shipDirs;
+   shipDirs.resize(cornerCount);
+
+   for(S32 i = 0; i < cornerCount; i++)
+      corners[i].set(0,0);
+
+   F32 th = FloatHalfPi - getRenderAngle();
+
+   F32 sinTh = sin(th);
+   F32 cosTh = cos(th);
+   F32 warpInScale = 1; //(WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
+
+   for(S32 i = 0; i < cornerCount; i++)
+   {
+      shipDirs[i].x = corners[i].x * cosTh + corners[i].y * sinTh;
+      shipDirs[i].y = corners[i].y * cosTh - corners[i].x * sinTh;
+      shipDirs[i] *= warpInScale;
+   }
+
+   Point leftVec ( getActualVel().y, -getActualVel().x);
+   Point rightVec(-getActualVel().y,  getActualVel().x);
+
+   leftVec.normalize();
+   rightVec.normalize();
+
+   S32 bestId = -1, leftId, rightId;
+   F32 bestDot = -1;
+
+   // Find the left-wards match
+   for(S32 i = 0; i < cornerCount; i++)
+   {
+      F32 d = leftVec.dot(shipDirs[i]);
+      if(d >= bestDot)
+      {
+         bestDot = d;
+         bestId = i;
+      }
+   }
+
+   leftId = bestId;
+   Point leftPt = getRenderPos() + shipDirs[bestId];
+
+   // Find the right-wards match
+   bestId = -1;
+   bestDot = -1;
+
+   for(S32 i = 0; i < cornerCount; i++)
+   {
+      F32 d = rightVec.dot(shipDirs[i]);
+      if(d >= bestDot)
+      {
+         bestDot = d;
+         bestId = i;
+      }
+   }
+
+   rightId = bestId;
+   Point rightPt = getRenderPos() + shipDirs[bestId];
+
+   // Stitch things up if we must...
+   if(leftId == mLastTrailPoint[0] && rightId == mLastTrailPoint[1])
+   {
+      mTrail[0].update(leftPt,  false, false);
+      //mTrail[1].update(rightPt, false, false);
+      mLastTrailPoint[0] = leftId;
+      //mLastTrailPoint[1] = rightId;
+   }
+   else if(leftId == mLastTrailPoint[1] && rightId == mLastTrailPoint[0])
+   {
+      //mTrail[1].update(leftPt,  false, false);
+      mTrail[0].update(rightPt, false, false);
+      //mLastTrailPoint[1] = leftId;
+      mLastTrailPoint[0] = rightId;
+   }
+   else
+   {
+      mTrail[0].update(leftPt,  false, false);
+      //mTrail[1].update(rightPt, false, false);
+      mLastTrailPoint[0] = leftId;
+      //mLastTrailPoint[1] = rightId;
+   }
+
+   //// Finally, do some particles
+   //Point velDir(mCurrentMove.x, mCurrentMove.y);
+   //F32 len = velDir.len();
+
+   //if(len > 0)
+   //{
+   //   if(len > 1)
+   //      velDir *= 1 / len;
+
+   //   Point shipDirs[4];
+   //   shipDirs[0].set(cos(getRenderAngle()), sin(getRenderAngle()));
+   //   shipDirs[1].set(-shipDirs[0]);
+   //   shipDirs[2].set( shipDirs[0].y, -shipDirs[0].x);
+   //   shipDirs[3].set(-shipDirs[0].y, shipDirs[0].x);
+
+   //   for(U32 i = 0; i < 4; i++)
+   //   {
+   //      F32 th = shipDirs[i].dot(velDir);
+
+   //       if(th > 0.1)
+   //       {
+   //          // shoot some sparks...
+   //          if(th >= 0.2*velDir.len())
+   //          {
+   //             Point chaos(TNL::Random::readF(),TNL::Random::readF());
+   //             chaos *= 5;
+
+   //             // interp give us some nice enginey colors...
+   //             Color dim(Colors::red);
+   //             Color light(1, 1, boostActive ? 1.f : 0.f);
+   //             Color thrust;
+
+   //             F32 t = TNL::Random::readF();
+   //             thrust.interp(t, dim, light);
+
+   //             TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+
+   //             static_cast<ClientGame *>(getGame())->emitSpark(getRenderPos() - shipDirs[i] * 13,
+   //                                       -shipDirs[i] * 100 + chaos, thrust, TNL::Random::readI(0, 1500));
+   //          }
+   //       }
+   //   }
+   //}
+#endif
 }
 
 

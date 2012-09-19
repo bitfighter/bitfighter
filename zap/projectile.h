@@ -283,6 +283,14 @@ private:
 
    void acquireTarget();
 
+# ifndef ZAP_DEDICATED
+   static const S32 TrailCount = 1;
+   S32 mLastTrailPoint[TrailCount];
+   FXTrail mTrail[TrailCount];
+#endif
+
+   void emitMovementSparks();
+
 
 public:
    HeatSeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
