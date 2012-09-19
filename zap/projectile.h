@@ -284,9 +284,7 @@ private:
    void acquireTarget();
 
 # ifndef ZAP_DEDICATED
-   static const S32 TrailCount = 1;
-   S32 mLastTrailPoint[TrailCount];
-   FXTrail mTrail[TrailCount];
+   FXTrail mTrail;
 #endif
 
    void emitMovementSparks();
