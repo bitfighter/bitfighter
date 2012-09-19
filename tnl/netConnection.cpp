@@ -361,7 +361,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
       pkSequenceNumber += SequenceNumberWindowSize;
    
    // in the following test, account for wrap around from 0
-   if(pkSequenceNumber - mLastSeqRecvd > (MaxPacketWindowSize - 1))
+   if(pkSequenceNumber - mLastSeqRecvd > (MaxPacketWindowSize - 1) || (pkSequenceNumber - mLastSeqRecvd <= 0 && pkPacketType == DataPacket))
    {
       // the sequence number is outside the window... must be out of order
       // discard.
@@ -374,7 +374,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
    if(pkHighestAck < mHighestAckedSeq)
       pkHighestAck += AckSequenceNumberWindowSize;
    
-   if(pkHighestAck > mLastSendSeq)
+   if(U32(mLastSendSeq - pkHighestAck) > MaxPacketWindowSize)
    {
       // the ack number is outside the window... must be an out of order
       // packet, discard.

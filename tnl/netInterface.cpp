@@ -124,7 +124,7 @@ void NetInterface::sendtoDelayed(const Address *address, NetConnection *receiveT
 
    // insert it into the DelaySendPacket list, sorted by time
    DelaySendPacket **list;
-   for(list = &mSendPacketList; *list && ((*list)->sendTime < thePacket->sendTime); list = &((*list)->nextPacket))
+   for(list = &mSendPacketList; *list && ((*list)->sendTime <= thePacket->sendTime); list = &((*list)->nextPacket))
       ;
    thePacket->nextPacket = *list;
    *list = thePacket;

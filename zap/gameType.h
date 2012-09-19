@@ -210,6 +210,7 @@ public:
 
    Game *getGame() const;
    bool onGhostAdd(GhostConnection *theConnection);
+   void onGhostRemove();
 
    void broadcastTimeSyncSignal();                     // Send remaining time to all clients
    void broadcastNewRemainingTime();                   // Send remaining time to all clients after time has been updated
