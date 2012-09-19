@@ -69,8 +69,9 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
    {
       case WeaponTriple:      // Add three bullets!
          {
+            const F32 SPREAD_FACTOR = 40.0f;    // Larger = broader spread
             Point velPerp(projVel.y, -projVel.x);
-            velPerp.normalize(40.0f); // <== spread factor
+            velPerp.normalize(SPREAD_FACTOR); 
             (new Projectile(weapon, firePos, projVel,           shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
             (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(game, game->getGameObjDatabase());
