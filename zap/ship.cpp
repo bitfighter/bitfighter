@@ -704,8 +704,8 @@ void Ship::idle(BfObject::IdleCallPath path)
    mLastMove = mCurrentMove;
 
    if(path == BfObject::ServerIdleControlFromClient ||
-      path == BfObject::ClientIdleControlMain ||
-      path == BfObject::ClientIdleControlReplay)
+      path == BfObject::ClientIdleControlMain       ||
+      path == BfObject::ClientIdleControlReplay       )
    {
       // Process weapons and modules on controlled object objects
       // This handles all the energy reductions as well
@@ -1977,6 +1977,7 @@ void Ship::emitShipExplosion(Point pos)
    game->emitBurst(pos, Point(b,d), Colors::yellow, Color(0,0.75,0));
 #endif
 }
+
 
 void Ship::emitMovementSparks()
 {
