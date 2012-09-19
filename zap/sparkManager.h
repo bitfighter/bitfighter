@@ -114,14 +114,22 @@ public:
 
 class FXTrail
 {
+public:
+   enum TrailProfile {
+      Ship,
+      CloakedShip,
+      TurboShip,
+      Seeker
+   };
+
 private:
    struct TrailNode
    {
       Point pos;
       S32   ttl;    // Milliseconds
-      bool  boosted;
-      bool  invisible;
+      TrailProfile profile;
    };
+
 
    Vector<TrailNode> mNodes;
 
@@ -139,7 +147,7 @@ public:
    ~FXTrail();
 
    /// Update the point this trail is attached to.
-   void update(Point pos, bool boosted = false, bool invisible = false);
+   void update(Point pos, TrailProfile profile);
 
    void idle(U32 timeDelta);
 

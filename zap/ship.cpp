@@ -2056,25 +2056,35 @@ void Ship::emitMovementSparks()
    rightId = bestId;
    Point rightPt = getRenderPos() + shipDirs[bestId];
 
+   // Select profile
+   FXTrail::TrailProfile profile;
+
+   if(cloakActive)
+      profile = FXTrail::CloakedShip;
+   else if(boostActive)
+      profile = FXTrail::TurboShip;
+   else
+      profile = FXTrail::Ship;
+
    // Stitch things up if we must...
    if(leftId == mLastTrailPoint[0] && rightId == mLastTrailPoint[1])
    {
-      mTrail[0].update(leftPt,  boostActive, cloakActive);
-      mTrail[1].update(rightPt, boostActive, cloakActive);
+      mTrail[0].update(leftPt,  profile);
+      mTrail[1].update(rightPt, profile);
       mLastTrailPoint[0] = leftId;
       mLastTrailPoint[1] = rightId;
    }
    else if(leftId == mLastTrailPoint[1] && rightId == mLastTrailPoint[0])
    {
-      mTrail[1].update(leftPt,  boostActive, cloakActive);
-      mTrail[0].update(rightPt, boostActive, cloakActive);
+      mTrail[1].update(leftPt,  profile);
+      mTrail[0].update(rightPt, profile);
       mLastTrailPoint[1] = leftId;
       mLastTrailPoint[0] = rightId;
    }
    else
    {
-      mTrail[0].update(leftPt,  boostActive, cloakActive);
-      mTrail[1].update(rightPt, boostActive, cloakActive);
+      mTrail[0].update(leftPt,  profile);
+      mTrail[1].update(rightPt, profile);
       mLastTrailPoint[0] = leftId;
       mLastTrailPoint[1] = rightId;
    }

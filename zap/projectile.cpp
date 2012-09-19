@@ -1386,7 +1386,7 @@ void HeatSeekerProjectile::emitMovementSparks()
 {
 #ifndef ZAP_DEDICATED
 
-   Point center(-40, 0);
+   Point center(-10 + -20 * getActualVel().len() / GameWeapon::weaponInfo[WeaponHeatSeeker].projVelocity, 0);
 
    F32 th = getActualVel().ATAN2();
 
@@ -1401,7 +1401,7 @@ void HeatSeekerProjectile::emitMovementSparks()
 
    emissionPoint *= warpInScale;
  
-   mTrail.update(getRenderPos() + emissionPoint,  false, false);
+   mTrail.update(getRenderPos() + emissionPoint, FXTrail::Seeker);
 
 #endif
 }
