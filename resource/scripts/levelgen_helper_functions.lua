@@ -59,7 +59,7 @@ end
 -- Alias vec as Point for backwards compatibility
 --
 function Point(x, y)
-    logprint("WARNING: Use of Point(x,y) is deprecated!  Please change your scripts to use point.new(x,y)!")
+    logprint("WARNING: Use of Point(x,y) is deprecated!  Please change your scripts to use point.new(x,y)!")  -- started warning in 018
     return point.new(x, y)
 end
 
