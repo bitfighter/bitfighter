@@ -56,10 +56,11 @@ function globalMsg(message)
 end   
 
 --
--- Alias vec as Point for backwards compatibility and
+-- Alias vec as Point for backwards compatibility
 --
 function Point(x, y)
-    return vec.new(x, y)
+    logprint("WARNING: Use of Point(x,y) is deprecated!  Please change your scripts to use point.new(x,y)!")
+    return point.new(x, y)
 end
 
 --
