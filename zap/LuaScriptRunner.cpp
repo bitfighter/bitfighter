@@ -249,7 +249,7 @@ bool LuaScriptRunner::loadScript()
 
    logError("%s -- Aborting.", lua_tostring(L, -1));
 
-   lua_pop(L, 1);       // Remove error message from stack
+   lua_pop(L, -1);       // Remove error message from stack
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
    return false;
