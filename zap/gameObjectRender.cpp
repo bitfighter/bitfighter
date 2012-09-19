@@ -1449,7 +1449,7 @@ void renderHeatSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRem
 void renderMine(const Point &pos, bool armed, bool visible)
 {
    F32 mod = 0.8f;
-   F32 vis = .25;
+   F32 vis = .18;
    if(visible)
    {
       glColor(Colors::gray50);
