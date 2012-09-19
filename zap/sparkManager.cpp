@@ -465,7 +465,7 @@ void FXTrail::idle(U32 timeDelta)
 void FXTrail::render()
 {
    // Largest node size found was 15; I chose buffer of 32
-   static F32 fxtrailVertexArray[64];     // 2 coordinates per node
+   static F32 fxTrailVertexArray[64];     // 2 coordinates per node
    static F32 fxTrailColorArray[128];     // 4 colors components per node
 
    for(S32 i = 0; i < mNodes.size(); i++)
@@ -490,7 +490,7 @@ void FXTrail::render()
       {
          fxTrailColorArray[(4*i)]     = 1.f - 2 * t;
          fxTrailColorArray[(4*i) + 1] = 1.f - 2 * t;
-         fxTrailColorArray[(4*i) + 2] = 1.f;
+         fxTrailColorArray[(4*i) + 2] = .25f;
          fxTrailColorArray[(4*i) + 3] = 0.7f - 0.7f * t;
       }
 
