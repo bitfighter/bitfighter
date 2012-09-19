@@ -608,8 +608,8 @@ static const char *moduleDescriptions[][2] = {
    { "Armor: ",    "Reduces damage, makes ship harder to control (P)" },
    { "",           "Incoming bouncers do more damage" },
    { "Repair: ",   "Repair self and nearby damaged objects (A)" },
-   { "Sensor: ",   "See further (P), Reveal hidden objects (A)," },
-   { "",           "Deploy spy bugs (K)" },
+   { "Sensor: ",   "See further and reveal hidden objects (P)" },
+   { "",           "Deploy spy bugs (A)" },
    { "Cloak: ",    "Make ship invisible to enemies (A)" },
    { "Engineer: ", "Collect resources to build turrets and forcefields (A)" }
 };
@@ -814,7 +814,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderGrenade(Point(0, 0), 1);
             break;
          case 4:
-            renderHeatSeeker(Point(0, 0), 0, 600, 0);
+            renderHeatSeeker(Point(0, 0), 0, 600, getGame()->getCurrentTime());
             break;
          case 5:     // Blank
             break;
