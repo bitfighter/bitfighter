@@ -1123,6 +1123,10 @@ InputCode InputCodeManager::sdlKeyToInputCode(int key)
       case SDLK_VOLUMEUP:        
       case SDLK_VOLUMEDOWN:
       case SDLK_MUTE:
+      case SDLK_AUDIONEXT:
+      case SDLK_AUDIOPREV:
+      case SDLK_AUDIOSTOP:
+      case SDLK_AUDIOPLAY:
          return KEY_UNKNOWN;
 #endif
 
