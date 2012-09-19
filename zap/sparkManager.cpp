@@ -466,7 +466,7 @@ void FXTrail::render()
 {
    // Largest node size found was 15; I chose buffer of 32
    static F32 fxtrailVertexArray[64];     // 2 coordinates per node
-   static F32 fxtrailColorArray[128];     // 4 colors components per node
+   static F32 fxTrailColorArray[128];     // 4 colors components per node
 
    for(S32 i = 0; i < mNodes.size(); i++)
    {
@@ -474,31 +474,31 @@ void FXTrail::render()
 
       if(mNodes[i].invisible)
       {
-         fxtrailColorArray[4*i]     = 0.f;
-         fxtrailColorArray[(4*i)+1] = 0.f;
-         fxtrailColorArray[(4*i)+2] = 0.f;
-         fxtrailColorArray[(4*i)+3] = 0.f;
+         fxTrailColorArray[4*i]     = 0.f;
+         fxTrailColorArray[(4*i)+1] = 0.f;
+         fxTrailColorArray[(4*i)+2] = 0.f;
+         fxTrailColorArray[(4*i)+3] = 0.f;
       }
       else if(mNodes[i].boosted)
       {
-         fxtrailColorArray[4*i]     = 1.f - t;
-         fxtrailColorArray[(4*i)+1] = 1.f - t;
-         fxtrailColorArray[(4*i)+2] = 0.f;
-         fxtrailColorArray[(4*i)+3] = 1.f - t;
+         fxTrailColorArray[4*i]     = 1.f - t;
+         fxTrailColorArray[(4*i)+1] = 1.f - t;
+         fxTrailColorArray[(4*i)+2] = 0.f;
+         fxTrailColorArray[(4*i)+3] = 1.f - t;
       }
       else
       {
-         fxtrailColorArray[4*i]     = 1.f - 2 * t;
-         fxtrailColorArray[(4*i)+1] = 1.f - 2 * t;
-         fxtrailColorArray[(4*i)+2] = 1.f;
-         fxtrailColorArray[(4*i)+3] = 0.7f - 0.7f * t;
+         fxTrailColorArray[4*i]     = 1.f - 2 * t;
+         fxTrailColorArray[(4*i)+1] = 1.f - 2 * t;
+         fxTrailColorArray[(4*i)+2] = 1.f;
+         fxTrailColorArray[(4*i)+3] = 0.7f - 0.7f * t;
       }
 
-      fxtrailVertexArray[2*i]     = mNodes[i].pos.x;
-      fxtrailVertexArray[(2*i)+1] = mNodes[i].pos.y;
+      fxTrailVertexArray[2*i]     = mNodes[i].pos.x;
+      fxTrailVertexArray[(2*i)+1] = mNodes[i].pos.y;
    }
 
-   renderColorVertexArray(fxtrailVertexArray, fxtrailColorArray, mNodes.size(), GL_LINE_STRIP);
+   renderColorVertexArray(fxTrailVertexArray, fxTrailColorArray, mNodes.size(), GL_LINE_STRIP);
 }
 
 
