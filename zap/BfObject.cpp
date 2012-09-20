@@ -1273,16 +1273,16 @@ void BfObject::writeThisTeam(BitStream *stream)
 // Lua interface
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getClassID,     ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, getLoc,         ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }}), 1 ) \
-   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }}), 1 ) \
-   METHOD(CLASS, addToGame,      ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, setGeom,        ARRAYDEF({{ PTS,       END }}), 1 ) \
-   METHOD(CLASS, getGeom,        ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, clone,          ARRAYDEF({{            END }}), 1 ) \
+   METHOD(CLASS, getClassID,     ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, getLoc,         ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }              }), 1 ) \
+   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }              }), 1 ) \
+   METHOD(CLASS, addToGame,      ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, setGeom,        ARRAYDEF({{ PT,        END }, { PTS, END }}), 2 ) \
+   METHOD(CLASS, getGeom,        ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, clone,          ARRAYDEF({{            END }              }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
@@ -1410,15 +1410,19 @@ S32 BfObject::setGeom(lua_State *L)
 }
 
 /**
- * @luafunc  geometry BfObject::getGeom()
+ * @luafunc  geom BfObject::getGeom()
  * @brief    Returns an object's geometry. 
- * @return   ObjectGeometry - For point objects, this will be a single Point. For more complex objects 
- *           (such as a WallItem or a Zone), will return a Lua table containing a list of Points.
+ * @return   ObjectGeometry - For %point objects (such as a RepairItem or TestItem), this will be a single point. For more complex objects 
+ *           (such as a WallItem or a Zone), this will be a Lua table containing a list of points.
 */
 S32 BfObject::getGeom(lua_State *L)
 {
-   TNLAssert(false, "Not yet implemented!!!");
-   return 0;      // TODO: return geometry!
+   // Simple geometry
+   if(getGeomType() == geomPoint)
+      return returnPoint(L, GeomObject::getPos());
+
+   // Complex geometry
+   return returnPoints(L, GeomObject::getOutline());
 }
 
 

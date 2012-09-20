@@ -123,6 +123,7 @@ public:
 
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
+   static S32 returnPoints(lua_State *L, const Vector<Point> *);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
 

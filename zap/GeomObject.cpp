@@ -85,7 +85,7 @@ void GeomObject::setNewGeometry(GeomType geomType)
 
 // Basic definitions
 GeomType GeomObject::getGeomType()              {   return mGeometry.getGeometry()->getGeomType();   }
-Point   GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);  }
+Point    GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);  }
 
 bool GeomObject::deleteVert(S32 vertIndex)               
 {   
