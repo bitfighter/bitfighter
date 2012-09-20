@@ -1699,6 +1699,8 @@ void ClientGame::renderCommander()
  //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
          renderObjects[i]->render(1);
 
+   getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
+
    glPopMatrix();
 }
 
