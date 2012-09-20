@@ -1331,11 +1331,11 @@ void HeatSeekerProjectile::acquireTarget()
       TNLAssert(dynamic_cast<BfObject *>(fillVector[i]), "Not a BfObject");
 
       // Don't target self
-      if(mShooter == foundObject)
-         continue;
+      //if(mShooter == foundObject)
+      //   continue;
 
-      // Don't target teammates in team games
-      if(getGame()->getGameType()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam())
+      // Don't target teammates in team games (except self)
+      if(getGame()->getGameType()->isTeamGame() && mShooter && mShooter->getTeam() == foundObject->getTeam() && mShooter != foundObject)
          continue;
 
       Point delta = foundObject->getPos() - getPos();
