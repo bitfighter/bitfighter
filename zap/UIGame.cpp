@@ -3407,12 +3407,25 @@ void GameUserInterface::renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 s
    S32 badgeOffset = S32(2 * badgeRadius) + 5;
    F32 badgeBackgroundEdgeSize = 2 * badgeRadius + 2.f;
 
+   bool hasBBBBadge = false;
+
    for(S32 i = 0; i < BADGE_COUNT; i++)
    {
       MeritBadges badge = MeritBadges(i);    // C++ enums can be rather tedious...
 
       if(clientInfo->hasBadge(badge))
       {
+         // Test for BBB badges.  We're only going to show the most valued one
+         if(badge == BADGE_BBB_GOLD || badge == BADGE_BBB_SILVER || badge == BADGE_BBB_BRONZE || badge == BADGE_BBB_PARTICIPATION)
+         {
+            // If we've already got one, don't draw this badge.  This assumes the value of the badges decrease
+            // with each iteration
+            if(hasBBBBadge)
+               continue;
+
+            hasBBBBadge = true;
+         }
+
          drawFilledRoundedRect(Point(x,y), badgeBackgroundEdgeSize, badgeBackgroundEdgeSize, Colors::black, Colors::black, 3.f);
          renderBadge((F32)x, (F32)y, badgeRadius, badge);
          x += badgeOffset;
