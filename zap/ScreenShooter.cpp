@@ -63,13 +63,6 @@ void ScreenShooter::renderFrame()
 {
    // Draw
    gClientGame->getUIManager()->renderCurrent();
-
-   // Swap the buffer - this puts the new viewport into the front buffer
-#if SDL_VERSION_ATLEAST(2,0,0)
-   SDL_GL_SwapWindow(gScreenInfo.sdlWindow);
-#else
-   SDL_GL_SwapBuffers();
-#endif
 }
 
 
@@ -155,8 +148,8 @@ void ScreenShooter::restoreViewportToWindow()
    else
       glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
 
-   // Now draw the original viewport again
-   renderFrame();
+   // Now draw the original viewport again, need to?
+   //renderFrame();
 }
 
 
@@ -210,7 +203,7 @@ void ScreenShooter::saveScreenshot(const string &folder)
    glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
    // Grab the front buffer with the new viewport
-   glReadBuffer(GL_FRONT);
+   glReadBuffer(GL_BACK);
 
    // Read pixels from buffer - slow operation
    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, screenBuffer);
