@@ -71,6 +71,7 @@ public:
    LUA_ARG_TYPE_ITEM( NUM_GE0,   "Number >= 0"                                 ) \
    LUA_ARG_TYPE_ITEM( STR,       "String"                                      ) \
    LUA_ARG_TYPE_ITEM( PT,        "Point (or two numbers)"                      ) \
+   LUA_ARG_TYPE_ITEM( GEOM,      "Geometry (point or table of points)"         ) \
    LUA_ARG_TYPE_ITEM( TABLE,     "Lua table"                                   ) \
    LUA_ARG_TYPE_ITEM( LOADOUT,   "Loadout Object"                              ) \
    LUA_ARG_TYPE_ITEM( ITEM,      "Item Object"                                 ) \
@@ -123,6 +124,7 @@ public:
 
    // More complex objects:
    static S32 returnPoint(lua_State *L, const Point &point);
+   static S32 returnPoints(lua_State *L, const Vector<Point> *);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
 

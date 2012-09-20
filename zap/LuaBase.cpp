@@ -569,20 +569,30 @@ S32 LuaBase::returnNil(lua_State *L)
 
 
 // Returns a point to calling Lua function
-S32 LuaBase::returnPoint(lua_State *L, const Point &point)
+S32 LuaBase::returnPoint(lua_State *L, const Point &pt)
 {
-   lua_pushvec(L,  point.x, point.y);
+   lua_pushvec(L, pt.x, pt.y);
    return 1;
 }
 
 
-// Returns an existing LuaPoint to calling Lua function XXX not used?
-//template<class T>
-//S32 LuaBase::returnVal(lua_State *L, T value, bool letLuaDelete)
-//{
-//   Lunar<MenuItem>::push(L, value, letLuaDelete);     // true will allow Lua to delete this object when it goes out of scope
-//   return 1;
-//}
+// Return a table of points to calling Lua function
+S32 LuaBase::returnPoints(lua_State *L, const Vector<Point> *points)
+{
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not clean!");
+
+   // Create an empty table with enough space reserved
+   lua_createtable(L, points->size(), 0);                  //                                -- table                                                   
+   S32 tableIndex = 1;     // Table will live on top of the stack, at index 1
+
+   for(S32 i = 0; i < points->size(); i++)
+   {
+      lua_pushvec(L, points->get(i).x, points->get(i).y);  // Push point onto the stack      -- table, point
+      lua_rawseti(L, tableIndex, i + 1);                   // + 1  => Lua indices 1-based    -- table[i + 1] = point                                      
+   }
+
+   return 1;
+}
 
 
 // Returns an int to a calling Lua function
