@@ -9,7 +9,9 @@
 --[[
 @luaclass Geom
 @brief    Library of various geometric transforms.
-@descr    The %Geom class provides a collection of useful geometric operations.
+@descr    The %Geom class provides a collection of useful geometric operations.  Since point objects
+          are immutable, all the %Geom functions return either a new point, or a new table of new points.  
+          All follow the same usage pattern.
 
 In all cases below, \em geom refers to either a single point or a table of points.
 --]]
