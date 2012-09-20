@@ -68,6 +68,7 @@ KeyDefMenuUserInterface::KeyDefMenuUserInterface(ClientGame *game) : Parent(game
 {
    setMenuID(KeyDefUI);
    mMenuTitle = "Define Keys";
+   mMenuSubTitle = "";
    mMenuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";
 }
 
@@ -97,9 +98,9 @@ void KeyDefMenuUserInterface::onActivate()
    InputMode inputMode = inputCodeManager->getInputMode();
 
    if(inputMode == InputModeJoystick)
-      mMenuSubTitle = "Input Mode: Joystick";
+      mMenuTitle = "Define Keys: [Joystick]";
    else
-      mMenuSubTitle = "Input Mode: Keyboard";
+      mMenuTitle = "Define Keys: [Keyboard]";
 
    mMenuSubTitleColor = Colors::white;   
 
