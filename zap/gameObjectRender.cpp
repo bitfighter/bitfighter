@@ -1913,7 +1913,10 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
       renderHealthBar(panelHealth[i] / panelStartingHealth, panelGeom->repair[i], dir, 30, 7);
 
       if(panelHealth[i] == 0)          // Panel is dead
-         glColor(baseColor * .2f);
+      {
+         Color c = *coreColor;
+         glColor(c * 0.2);
+      }
       else
          glColor(baseColor);
 
