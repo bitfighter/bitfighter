@@ -59,13 +59,6 @@ ScreenShooter::~ScreenShooter()
 }
 
 
-void ScreenShooter::renderFrame()
-{
-   // Draw
-   gClientGame->getUIManager()->renderCurrent();
-}
-
-
 void ScreenShooter::resizeViewportToCanvas()
 {
    // Grab the canvas width/height and normalize our screen to it
@@ -84,8 +77,8 @@ void ScreenShooter::resizeViewportToCanvas()
 
    glScissor(0, 0, width, height);
 
-   // Now draw our new viewport
-   renderFrame();
+   // Now render a frame to draw our new viewport to the back buffer
+   gClientGame->getUIManager()->renderCurrent();
 }
 
 
@@ -147,9 +140,6 @@ void ScreenShooter::restoreViewportToWindow()
    }
    else
       glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
-
-   // Now draw the original viewport again, need to?
-   //renderFrame();
 }
 
 
@@ -171,28 +161,30 @@ void ScreenShooter::saveScreenshot(const string &folder)
          break;
    }
 
-   // We won't do any opengl viewport resizing if we're in the editor
-   bool inEditor = gClientGame->getUIManager()->getCurrentUI()->getMenuID() == EditorUI;
+   // We default to resizing the opengl viewport to the standard canvas size, unless we're
+   // in the editor or our window is smaller than the canvas size
+   bool doResize = gClientGame->getUIManager()->getCurrentUI()->getMenuID() != EditorUI &&
+         gScreenInfo.getWindowWidth() >= gScreenInfo.getGameCanvasWidth();
 
    // Change opengl viewport temporarily to have consistent screenshot sizes
-   if(!inEditor)
+   if(doResize)
       resizeViewportToCanvas();
 
    // Now let's grab them pixels
    S32 width;
    S32 height;
 
-   // Editor screen width is the window size
-   if(inEditor)
-   {
-      width = gScreenInfo.getWindowWidth();
-      height = gScreenInfo.getWindowHeight();
-   }
-   // Otherwise screen width is the default canvas size
-   else
+   // If we're resizing, use the default canvas size
+   if(doResize)
    {
       width = gScreenInfo.getGameCanvasWidth();
       height = gScreenInfo.getGameCanvasHeight();
+   }
+   // Otherwise just take the window size
+   else
+   {
+      width = gScreenInfo.getWindowWidth();
+      height = gScreenInfo.getWindowHeight();
    }
 
    // Allocate buffer
@@ -209,7 +201,7 @@ void ScreenShooter::saveScreenshot(const string &folder)
    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, screenBuffer);
 
    // Change opengl viewport back to what it was
-   if(!inEditor)
+   if(doResize)
       restoreViewportToWindow();
 
    // Convert Data
