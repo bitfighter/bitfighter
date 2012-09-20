@@ -1273,16 +1273,16 @@ void BfObject::writeThisTeam(BitStream *stream)
 // Lua interface
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getClassID,     ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, getLoc,         ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }}), 1 ) \
-   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }}), 1 ) \
-   METHOD(CLASS, addToGame,      ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, setGeom,        ARRAYDEF({{ PTS,       END }}), 1 ) \
-   METHOD(CLASS, getGeom,        ARRAYDEF({{            END }}), 1 ) \
-   METHOD(CLASS, clone,          ARRAYDEF({{            END }}), 1 ) \
+   METHOD(CLASS, getClassID,     ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, getLoc,         ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }              }), 1 ) \
+   METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }              }), 1 ) \
+   METHOD(CLASS, addToGame,      ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, setGeom,        ARRAYDEF({{ PT,        END }, { PTS, END }}), 2 ) \
+   METHOD(CLASS, getGeom,        ARRAYDEF({{            END }              }), 1 ) \
+   METHOD(CLASS, clone,          ARRAYDEF({{            END }              }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(BfObject, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(BfObject, LUA_METHODS);
