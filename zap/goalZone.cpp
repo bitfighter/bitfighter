@@ -210,12 +210,6 @@ S32 GoalZone::getScore()
 }
 
 
-//bool GoalZone::hasFlag()
-//{
-//   return mHasFlag;
-//}
-
-
 void GoalZone::setHasFlag(bool hasFlag)
 {
    mHasFlag = hasFlag;
@@ -266,7 +260,11 @@ void GoalZone::idle(BfObject::IdleCallPath path)
 
 /////
 // Lua interface
-
+/**
+  *  @luaclass GoalZone
+  *  @brief Place to deposit flags or get the ball to, depending on game type.
+  *  @descr GoalZones have no purpose in some game types, but can be added to any without problem.
+  */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, hasFlag,  ARRAYDEF({{ END }}), 1 ) \
@@ -280,7 +278,13 @@ GENERATE_LUA_FUNARGS_TABLE(GoalZone, LUA_METHODS);
 const char *GoalZone::luaClassName = "GoalZone";
 REGISTER_LUA_SUBCLASS(GoalZone, Zone);
 
-
+/**
+  *  @luafunc bool GoalZone::hasFlag()
+  *  @brief Does the zone have a flag?
+  *  @descr GoalZones can hold flags in some game types.  If the current game type does not feature
+  *         zones that hold flags (e.g. Soccer), then the function will return false.
+  *  @return True if the GoalZone is currently holding a flag, false otherwise.
+  */
 S32 GoalZone::hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
 
 };
