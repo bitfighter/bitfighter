@@ -1531,6 +1531,7 @@ Circle::Circle() : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
       setVel(i, vel);
 
    mKillString = "crashed into an circle";
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
