@@ -855,7 +855,6 @@ S32 Teleporter::addDest(lua_State *L)
   *  @param index - The index of the destination to delete. If you specify
   *         an invalid index, will generate an error.
   *  @note  Remember that in Lua, indices start with 1!
-  *  @see BfObject::getClassId()
   */
 S32 Teleporter::delDest(lua_State *L)
 {

@@ -167,6 +167,11 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 /////
 // Lua interface
+
+/**
+  *  @luaclass LoadoutZone
+  *  @brief Provides place for players to change ship configuration.
+  */
 const luaL_reg LoadoutZone::luaMethods[]             = { { NULL, NULL } };
 const LuaFunctionProfile LoadoutZone::functionArgs[] = { { NULL, { }, 0 } };
 

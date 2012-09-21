@@ -407,7 +407,11 @@ void Projectile::renderItem(const Point &pos)
 
 
 //// Lua methods
-
+/**
+  *  @luaclass Projectile
+  *  @brief Bullet or missile object.
+  *  @descr %Projectile represents most bullets or missile objects in Bitfighter.   
+  */
 //               Fn name    Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getRad,    ARRAYDEF({{ END }}), 1 ) \
@@ -423,10 +427,37 @@ GENERATE_LUA_FUNARGS_TABLE(Projectile, LUA_METHODS);
 const char *Projectile::luaClassName = "Projectile";
 REGISTER_LUA_SUBCLASS(Projectile, BfObject);
 
+/**
+  *  @luafunc num Projectile::getRad()
+  *  @brief Returns the radius of the projectile.  In the current version of Bitfighter, this may not be accurate.
+  *  @return The radius of the projectile.
+  */
+S32 Projectile::getRad(lua_State *L)    
+{ 
+   return returnInt(L, 10);         // TODO: Wrong!!  Radius of item (returns number)
+} 
 
-S32 Projectile::getRad(lua_State *L)    { return returnInt(L, 10);               } // TODO: Wrong!!  Radius of item (returns number)
-S32 Projectile::getVel(lua_State *L)    { return returnPoint(L, getActualVel()); }
-S32 Projectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType);      }
+
+/**
+  *  @luafunc point Projectile::getVel()
+  *  @brief Returns the velocity of the projectile.
+  *  @return A point representing the projectile's velocity.
+  */
+S32 Projectile::getVel(lua_State *L)    
+{ 
+   return returnPoint(L, getActualVel()); 
+}
+
+
+/**
+  *  @luafunc int Projectile::getWeapon()
+  *  @brief Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
+  *  @return The index of the weapon used to fire the projectile.
+  */
+S32 Projectile::getWeapon(lua_State *L) 
+{ 
+   return returnInt(L, mWeaponType);      
+}
 
 
 ////////////////////////////////////////

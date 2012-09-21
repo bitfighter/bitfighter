@@ -147,6 +147,11 @@ bool Zone::collide(BfObject *hitObject)
 /////
 // Lua interface
 
+/**
+  *  @luaclass Zone
+  *  @brief Invisible objects, used mainly for generating events.
+  */
+
 const luaL_reg           Zone::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile Zone::functionArgs[] = { { NULL, { }, 0 } };
 
