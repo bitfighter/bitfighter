@@ -3562,9 +3562,11 @@ void GameUserInterface::renderTeamFlagScores(const GameType *gameType, U32 right
 
       Team *team = (Team *)game->getTeam(i);
 
-      glColor(Colors::magenta);
-      if( gameType->teamHasFlag(team->getId()) )
+      if(gameType->teamHasFlag(team->getId()))
+      {
+         glColor(Colors::magenta);
          drawString(xpos - 50, ypos + 3, 18, "*");
+      }
 
       renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
 
