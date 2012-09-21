@@ -106,6 +106,8 @@ public:
    Team();              // Constructor
    virtual ~Team();     // Destructor
 
+   S32 mId;             // Only used for tracking teams after sorting; has no inherent meaning
+
    void setName(const char *name);
    void setName(StringTableEntry name);
 
