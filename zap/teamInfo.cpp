@@ -129,6 +129,7 @@ void AbstractTeam::alterBlue(F32 amt)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
 // Constructor
 Team::Team()
 {
@@ -199,12 +200,6 @@ const Vector<FlagSpawn> *Team::getFlagSpawns() const
 StringTableEntry Team::getName()
 {
    return mName;
-}
-
-
-S32 Team::getId()
-{
-   return mId;
 }
 
 

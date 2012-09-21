@@ -225,7 +225,7 @@ public:
    virtual bool isTeamGame() const;                     // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() const;
    virtual bool canBeIndividualGame() const;
-   virtual bool teamHasFlag(S32 teamId) const;
+   virtual bool teamHasFlag(S32 teamIndex) const;
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
 

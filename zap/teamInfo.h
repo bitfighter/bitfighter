@@ -91,6 +91,8 @@ class Team : public AbstractTeam
 private:
    StringTableEntry mName;
 
+   static S32 mNextId;    // Keep track of next available id for a new team
+
    S32 mPlayerCount;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
    S32 mBotCount;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
 
@@ -101,8 +103,6 @@ private:
    Vector<FlagSpawn> mFlagSpawns;       // List of places for team flags to spawn
 
 public:
-   S32 mId;                             // Helps keep track of teams after they've been sorted
-
    Team();              // Constructor
    virtual ~Team();     // Destructor
 
@@ -118,8 +118,6 @@ public:
   
    StringTableEntry getName();
 
-   S32 getId();
-   
    S32 getScore();
    void setScore(S32 score);
    void addScore(S32 score);

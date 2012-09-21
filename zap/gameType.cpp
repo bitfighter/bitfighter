@@ -3949,7 +3949,7 @@ bool GameType::canBeTeamGame()       const { return true;  }
 bool GameType::canBeIndividualGame() const { return true;  }
 
 
-bool GameType::teamHasFlag(S32 teamId) const
+bool GameType::teamHasFlag(S32 teamIndex) const
 {
    return false;
 }

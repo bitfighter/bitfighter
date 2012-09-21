@@ -3560,14 +3560,13 @@ void GameUserInterface::renderTeamFlagScores(const GameType *gameType, U32 right
    {
       S32 ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - lroff - (teamCount - i - 1) * 38;
 
-      Team *team = (Team *)game->getTeam(i);
-
-      if(gameType->teamHasFlag(team->getId()))
+      if(gameType->teamHasFlag(i))
       {
          glColor(Colors::magenta);
          drawString(xpos - 50, ypos + 3, 18, "*");
       }
 
+      Team *team = (Team *)game->getTeam(i);
       renderFlag(F32(xpos - 20), F32(ypos + 18), team->getColor());
 
       glColor(Colors::white);

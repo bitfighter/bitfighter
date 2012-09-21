@@ -316,13 +316,13 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 #endif
 }
 
-bool ZoneControlGameType::teamHasFlag(S32 teamId)
+bool ZoneControlGameType::teamHasFlag(S32 teamIndex) const
 {
    for(S32 i = 0; i < mFlags.size(); i++)
    {
       //TNLAssert(mFlags[i], "NULL flag");
       if(mFlags[i])
-         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
+         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == teamIndex)
             return true;
    }
 

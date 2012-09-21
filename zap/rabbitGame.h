@@ -76,7 +76,7 @@ public:
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool shipHasFlag(Ship *ship);
-   bool teamHasFlag(S32 team) const;
+   bool teamHasFlag(S32 teamIndex) const;
 
    const Color *getShipColor(Ship *s);
    const Color *getTeamColor(S32 team) const;
