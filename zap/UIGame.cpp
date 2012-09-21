@@ -3259,7 +3259,7 @@ void GameUserInterface::renderScoreboard()
    if(!gameType)
       return;
 
-   bool isTeamGame = gameType->isTeamGame();
+   const bool isTeamGame = gameType->isTeamGame();
 
 #ifdef USE_DUMMY_PLAYER_SCORES
    S32 maxTeamPlayers = getDummyMaxPlayers();
@@ -3267,7 +3267,7 @@ void GameUserInterface::renderScoreboard()
 #else
    getGame()->countTeamPlayers();
 
-   S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
+   const S32 teams = isTeamGame ? getGame()->getTeamCount() : 1;
    S32 maxTeamPlayers = 0;
 
    // Check to make sure at least one team has at least one player...
@@ -3292,23 +3292,29 @@ void GameUserInterface::renderScoreboard()
    const U32 teamWidth = drawableWidth / columnCount;
    const U32 teamAreaHeight = isTeamGame ? 40 : 0;
 
-   U32 numTeamRows = (teams + 1) >> 1;
+   const U32 numTeamRows = (teams + 1) >> 1;
+   const U32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
-   U32 maxHeight = MIN(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
+   const U32 desiredHeight = (canvasHeight - vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
+   const U32 maxHeight = MIN(30, (desiredHeight - teamAreaHeight) / maxTeamPlayers);
 
-   U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
-   totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
+   const U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
+   const U32 totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
    // Vertical scale ratio to maximum line height
-   F32 scaleRatio = ((F32)maxHeight)/30.f;
+   const F32 scaleRatio = ((F32)maxHeight) / 30.f;
+
+   const char *botSymbol = "B ";
+   const char *levelChangerSymbol = "+ ";
+   const char *adminSymbol = "@ ";
+
 
    for(S32 i = 0; i < teams; i++)
    {
-      S32 yt = (gScreenInfo.getGameCanvasHeight() - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
-      S32 yb = yt + sectionHeight;     // y-bottom
-      S32 xl = 10 + (i & 1) * teamWidth;
-      S32 xr = xl + teamWidth - 2;
+      const S32 yt = (canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
+      const S32 yb = yt + sectionHeight;     // y-bottom
+      const S32 xl = 10 + (i & 1) * teamWidth;
+      const S32 xr = xl + teamWidth - 2;
 
       const Color *teamColor = getGame()->getTeamColor(i);
 
@@ -3339,15 +3345,13 @@ void GameUserInterface::renderScoreboard()
       gameType->getSortedPlayerScores(i, playerScores);     // Fills playerScores for team i
 #endif
 
+      const S32 fontSize = U32(maxHeight * 0.85f);
+
       S32 curRowY = yt + teamAreaHeight + 1;
-      S32 fontSize = U32(maxHeight * 0.85f);
-      const char *botSymbol = "B ";
-      const char *levelChangerSymbol = "+ ";
-      const char *adminSymbol = "@ ";
 
       // Use any symbol for an offset
-      S32 symbolFontSize = S32(fontSize * 0.8f);
-      S32 symbolSize = getStringWidth(symbolFontSize, botSymbol);
+      const S32 symbolFontSize = S32(fontSize * 0.8f);
+      const S32 symbolSize = getStringWidth(symbolFontSize, botSymbol);
 
       for(S32 j = 0; j < playerScores.size(); j++)
       {
@@ -3398,6 +3402,18 @@ void GameUserInterface::renderScoreboard()
       playerScores.deleteAndClear();      // Clean up
 #endif
    }
+
+   // Render symbol legend 
+   const S32 legendSize = fontSize - 3;     
+   const S32 legendGap  = 3;                        // Space between scoreboard and legend
+   const S32 humans     = getGame()->getPlayerCount();
+   const S32 legendPos  = (canvasHeight - totalHeight) / 2 + totalHeight + legendGap;   
+
+   string legendWhite = itos(humans) + " Human" + (humans != 1 ? "s" : "") + " | " + adminSymbol + "= Admin | " + 
+                        levelChangerSymbol + "= Can Change Levels | " + botSymbol + "= Bot |";
+
+   // Not quite the function's intended purpose, but it does the job
+   drawCenteredStringPair(legendPos, legendSize, Colors::standardPlayerScoreboardColor, Colors::idlePlayerScoreboardColor, legendWhite.c_str(), "Idle Player");
 }
 
 
