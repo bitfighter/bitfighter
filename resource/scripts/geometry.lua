@@ -30,10 +30,10 @@ end
 
 --[[ 
 @luafunc geom Geom.flip(geom, horizontal)
-@brief   Flip points along the x- or y-axis.
+@brief   Flip \em geom along the x- or y-axis.
 @param   geom - The geometry to modify.  Geom can either be a point or a table of points.
 @param   horizontal - Pass true to flip along the x-axis, false to flip along the y-axis.
-@return  A geometry of the same type that was passed in
+@return  A geometry of the same type that was passed in.
  --]]
 function Geom.flip(geom, horizontal)
 
@@ -57,11 +57,11 @@ end
 
 --[[ 
 @luafunc Geom.translate(geom, tx, ty)
-@brief   Translate (offset) the specified geometry by tx, ty.
+@brief   Translate (offset) \em geom by \em tx, \em ty.
 @param   geom - The geometry to modify.  Geom can either be a point or a table of points.
 @param   tx - The amount to add to the x-coord of each point in \em geom.
 @param   ty - The amount to add to the y-coord of each point in \em geom.
-@return  A geometry of the same type that was passed in
+@return  A geometry of the same type that was passed in.
  --]]
 function Geom.translate(geom, tx, ty)
     if(type(geom) == 'point') then          -- Single point
@@ -84,16 +84,16 @@ end
 
 --[[ 
 @luafunc Geom.scale(geom, sx, sy)
-@brief   Scale geom by sx, sy, in reference to the x- and y-axes.
-@param   geom - The geometry to modify.  Geom can either be a point or a table of points.
-@descr   If geom is not centered on (0,0), scaling may cause an apparent shift in the location of the points.  To avoid this, you can translate
+@brief   Scale \em geom by \em sx, \em sy, in reference to the x- and y-axes.
+@param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
+@descr   If \em geom is not centered on (0,0), scaling may cause an apparent shift in the location of the points.  To avoid this, you can translate
          the %geom to the %point (0,0), perform the scaling, then tranlsate the points back to their original location.
 
-If sy is omitted, geom will be scaled evenly horizontally and vertically without distortion.
+If \em sy is omitted, \em geom will be scaled evenly horizontally and vertically without distortion.
 
 @param   sx - The amount to scale each point in \em geom horizontally.
 @param   sy - (Optional) The amount to scale each point in \em geom vertically.  Defaults to \em sx.
-@return  A geometry of the same type that was passed in
+@return  A geometry of the same type that was passed in.
 --]]
 function Geom.scale(geom, sx, sy)
     sy = sy or sx   -- Passing only one param will scale same amount in x & y directions
@@ -120,10 +120,10 @@ end
 
 --[[ 
 @luafunc Geom.rotate(geom, angle)
-@brief   Rotate geom about the point (0,0).
-@param   geom - The geometry to modify.  Geom can either be a point or a table of points.
+@brief   Rotate \em geom about the point (0,0).
+@param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @param   angle - The angle (clockwise, in degrees) to rotate \em geom.
-@return  A geometry of the same type that was passed in
+@return  A geometry of the same type that was passed in.
  --]]
 function Geom.rotate(geom, angle)
     local newPoints = {}
@@ -152,20 +152,20 @@ end
 
 --[[ 
 @luafunc Geom.transform(geom, tx, ty, sx, sy, angle)
-@brief   Transform geom by scaling, rotating, and translating.
+@brief   Transform \em geom by scaling, rotating, and translating.
 @desc    Apply a full transformation to the points in \em geom, doing a combination of the above in a single operation.  
          Scales, rotates, then translates.  Performing these operations together is more effient than applying them
          individually.
 
 Note that \em sy can be omitted for uniform scaling horizontally and vertically.
 
-@param   geom - The geometry to modify.  Geom can either be a point or a table of points.
+@param   geom - The geometry to modify.  \em Geom can either be a point or a table of points.
 @param   tx - The amount to add to the x-coord of each point in \em geom.
 @param   ty - The amount to add to the y-coord of each point in \em geom.
 @param   sx - The amount to scale each point in \em geom horizontally.
 @param   sy - (Optional) The amount to scale each point in \em geom vertically.  Defaults to \em sx.
 @param   angle - The angle (clockwise, in degrees) to rotate \em geom.
-@return  A geometry of the same type that was passed in
+@return  A geometry of the same type that was passed in.
  --]]
 function Geom.transform(geom, sx, sy, angle, tx, ty)
     -- Check for single scaling factor, and adjust args
