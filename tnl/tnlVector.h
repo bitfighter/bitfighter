@@ -270,7 +270,9 @@ template<class T> inline S32 Vector<T>::getIndex(const T &object)
    return -1;
 }
 
-
+// Assigns a copy of vector x as the new content for the vector object.
+// The elements contained in the vector object before the call are dropped, and replaced by copies of those in vector p, if any.
+// After a call to this member function, both the vector object and vector p will have the same size and compare equal to each other.
 template<class T> inline Vector<T>& Vector<T>::operator=(const Vector<T>& p)
 {
    innerVector = p.innerVector;
