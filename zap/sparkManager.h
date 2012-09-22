@@ -97,6 +97,7 @@ class FXManager
 
 public:
    FXManager();
+   virtual ~FXManager();
    void emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl = 0, SparkType = SparkTypePoint);
    void emitExplosion(const Point &pos, F32 size, const Color *colorArray, U32 numColors);
    void emitBurst(const Point &pos, const Point &scale, const Color &color1, const Color &color2);

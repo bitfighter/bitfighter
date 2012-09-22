@@ -87,8 +87,7 @@ Joystick::~Joystick()
 bool Joystick::initJoystick()
 {
    // Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
-#ifdef TNL_OS_LINUX
-#if !SDL_VERSION_ATLEAST(2,0,0)
+#if defined(TNL_OS_LINUX) && !SDL_VERSION_ATLEAST(2,0,0)
    // Hackety hack hack for some joysticks that seem calibrated horribly wrong.
    //
    // What happens is that SDL uses the newer event system at /dev/input/eventX for joystick enumeration
@@ -113,7 +112,6 @@ bool Joystick::initJoystick()
 
       logprintf("Using older Linux joystick device system to workaround calibration problems");
    }
-#endif
 #endif
 
    DetectedJoystickNameList.clear();

@@ -226,11 +226,6 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
 
    mGameTimer.reset(DefaultGameTime);
 
-#ifndef ZAP_DEDICATED
-   // I *think* this is only here to provide a default for the editor
-   mLevelCredits = gClientGame ? gClientGame->getClientInfo()->getName() : "";     
-#endif
-
    mGame = NULL;
 }
 
