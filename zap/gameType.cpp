@@ -2680,8 +2680,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    {
       BurstProjectile *gp = static_cast<BurstProjectile *>(fillVector[i]);
 
-      if(gp->mSetBy == name)
-         gp->mSetBy = "";                                    // No longer set-by-self
+      gp->mIsOwnedByLocalClient = false;
    }
 #endif
 }

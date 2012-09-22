@@ -130,7 +130,7 @@ public:
    void damageObject(DamageInfo *damageInfo);
    void doExplosion(const Point &pos);
    void explode(const Point &pos);
-   StringTableEntry mSetBy;      // Who laid the mine/spy bug?
+   bool mIsOwnedByLocalClient;  // Set client-side to determine how to render
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -170,7 +170,6 @@ public:
    Mine *clone() const;
 
    bool mArmed;
-   SafePtr<GameConnection> mOwnerConnection;
    bool collide(BfObject *otherObj);
    void idle(IdleCallPath path);
 
@@ -221,7 +220,6 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *theGame);
 
-   SafePtr<GameConnection> mOwnerConnection;
    bool collide(BfObject *otherObj);
    void idle(IdleCallPath path);
 
