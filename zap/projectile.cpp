@@ -888,7 +888,7 @@ void Mine::renderItem(const Point &pos)
       // sensor is active and you're within the detection distance
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
             (localClient && localClient->getClientInfo()->getName() == mSetBy) ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakDetectionDistance * Ship::SensorCloakDetectionDistance);
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakInnerDetectionDistance * Ship::SensorCloakInnerDetectionDistance);
    }
    else     // Must be in editor?
    {
@@ -1112,7 +1112,7 @@ void SpyBug::renderItem(const Point &pos)
       visible = ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   ||
             (conn && conn->getClientInfo()->getName() == mSetBy) ||
             getTeam() == TEAM_NEUTRAL ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakDetectionDistance * Ship::SensorCloakDetectionDistance);
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakInnerDetectionDistance * Ship::SensorCloakInnerDetectionDistance);
    }
    else    
       visible = true;      // We get here in editor when in preview mode

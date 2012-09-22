@@ -2270,10 +2270,19 @@ void Ship::render(S32 layerIndex)
             // Do a distance check - cloaked ships are detected at a reduced distance
             F32 distanceSquared = (localShip->getPos() - getPos()).lenSquared();
 
-            if(distanceSquared < SensorCloakDetectionDistance * SensorCloakDetectionDistance)
+            // Ship is within outer detection radius
+            if(distanceSquared < sq(SensorCloakOuterDetectionDistance))
             {
-               // Now de-cloak the detected ship
-               alpha = 0.5;
+               // De-cloak a maximum of 0.5
+               if(distanceSquared < sq(SensorCloakInnerDetectionDistance))
+                  alpha = 0.5;
+               // Otherwise de-cloak proportionally to the distance between inner and outer detection radii
+               else
+               {
+                  F32 ratio = (sq(SensorCloakOuterDetectionDistance) - distanceSquared) /
+                        (sq(SensorCloakOuterDetectionDistance) - sq(SensorCloakInnerDetectionDistance));
+                  alpha = ratio * 0.5f;
+               }
             }
          }
 
@@ -2283,7 +2292,7 @@ void Ship::render(S32 layerIndex)
             // Do the same distance check as when cloak is detected
             F32 distanceSquared = (localShip->getPos() - getPos()).lenSquared();
 
-            if(distanceSquared < SensorCloakDetectionDistance * SensorCloakDetectionDistance)
+            if(distanceSquared < sq(SensorCloakOuterDetectionDistance))
             {
                // Now show that the ship has sensor
                showSensorIndicator = true;
