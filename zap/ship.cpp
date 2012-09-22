@@ -977,6 +977,8 @@ void Ship::processModules()
 
             mEnergy -= moduleInfo->getPrimaryPerUseCost();
 
+            mSpyBugPlacementTimer.reset();
+
             if(getClientInfo())
                getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
          }

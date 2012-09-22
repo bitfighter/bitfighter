@@ -1322,7 +1322,7 @@ void GameType::catalogSpybugs()
 
 void GameType::addSpyBug(SpyBug *spybug)
 {
-   TNLAssert(!isGhost(), "Spybug non-Ghost / ServerGame only, currently useless for client?")
+   TNLAssert(!isGhost(), "Spybug non-Ghost / ServerGame only, currently useless for client?");
    mSpyBugs.push_back(spybug); // convert to SafePtr
 }
 
