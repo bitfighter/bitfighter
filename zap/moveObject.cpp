@@ -737,8 +737,8 @@ bool MoveObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) c
 void MoveObject::onGeomChanged()
 {
    // This is here, to make sure pressing TAB in editor will show correct location for MoveItems
-   //mMoveState[ActualState].pos = getActualPos();
-   //mMoveState[RenderState].pos = getRenderPos();
+   setActualPos(getVert(0));
+   setRenderPos(getVert(0));
    
    Parent::onGeomChanged();
 }
