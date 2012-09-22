@@ -2281,7 +2281,7 @@ void Ship::render(S32 layerIndex)
                {
                   F32 ratio = (sq(SensorCloakOuterDetectionDistance) - distanceSquared) /
                         (sq(SensorCloakOuterDetectionDistance) - sq(SensorCloakInnerDetectionDistance));
-                  alpha = ratio * 0.5f;
+                  alpha = sq(ratio) * 0.5f;  // Non-linear
                }
             }
          }
