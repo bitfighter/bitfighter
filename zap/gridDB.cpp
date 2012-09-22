@@ -174,7 +174,7 @@ void GridDatabase::removeEverythingFromDatabase()
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; )
          {
             BucketEntry *rem = walk;
-				walk->theObject->mDatabase = NULL;  // make sure object don't point to this database anymore
+            walk->theObject->mDatabase = NULL;  // make sure object don't point to this database anymore
             walk = rem->nextInBucket;
             mChunker->free(rem);
          }
@@ -311,10 +311,11 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 }
 
 
-void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins)
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery)
 {
    TNLAssert(this, "findObjects 'this' is NULL");
-   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
+   if(!sameQuery)
+      mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
    for(S32 x = bins->minx; bins->maxx - x >= 0; x++)
       for(S32 y = bins->miny; bins->maxy - y >= 0; y++)
@@ -372,12 +373,12 @@ bool GridDatabase::testTypes(const Vector<U8> &types, U8 objectType) const
 
 
 // Find all objects in &extents derived type test function
-void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents)
+void GridDatabase::findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents, bool sameQuery)
 {
    static IntRect bins;
    fillBins(extents, bins);
 
-   findObjects(testFunc, fillVector, &extents, &bins);
+   findObjects(testFunc, fillVector, &extents, &bins, sameQuery);
 }
 
 

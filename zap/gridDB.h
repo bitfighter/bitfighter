@@ -110,7 +110,7 @@ private:
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
    void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
 
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery = false);
    static U32 mQueryId;
    static U32 mCountGridDatabase;
 
@@ -161,7 +161,7 @@ public:
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);
 
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector);
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect &extents, bool sameQuery = false);
 
    void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector);
    void findObjects(const Vector<U8> &types, Vector<DatabaseObject *> &fillVector, const Rect &extents);

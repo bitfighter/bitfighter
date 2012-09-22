@@ -2114,7 +2114,7 @@ void TeamMenuUserInterface::render()
    if(getGame()->getConnectionToServer() && getGame()->getConnectionToServer()->getControlObject())
    {
       Ship *ship = dynamic_cast<Ship *>(getGame()->getConnectionToServer()->getControlObject());
-      if(ship)
+      if(ship && ship->getClientInfo())
          name = ship->getClientInfo()->getName().getString();
    }
 

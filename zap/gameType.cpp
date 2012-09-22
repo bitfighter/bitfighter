@@ -1322,6 +1322,7 @@ void GameType::catalogSpybugs()
 
 void GameType::addSpyBug(SpyBug *spybug)
 {
+   TNLAssert(!isGhost(), "Spybug non-Ghost / ServerGame only, currently useless for client?")
    mSpyBugs.push_back(spybug); // convert to SafePtr
 }
 
@@ -1582,6 +1583,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    }
 
    // What does the spy bug see?
+   bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
    for(S32 i = mSpyBugs.size()-1; i >= 0; i--)
    {
       SpyBug *sb = mSpyBugs[i].getPointer();
@@ -1598,7 +1600,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
          queryRect.expand(scopeRange);
 
          fillVector.clear();
-         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
+         mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect, sameQuery);
+         sameQuery = true;
 
          for(S32 j = 0; j < fillVector.size(); j++)
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
@@ -1639,6 +1642,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       S32 teamId = clientInfo->getTeamIndex();
       fillVector.clear();
+      bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
 
       for(S32 i = 0; i < mGame->getClientCount(); i++)
       {
@@ -1654,13 +1658,17 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
          Rect queryRect(ship->getActualPos(), ship->getActualPos());
          queryRect.expand(mGame->getScopeRange(ship->hasModule(ModuleSensor)));
 
+         TestFunc testFunc;
          if(scopeObject == ship)    
-            mGame->getGameObjDatabase()->findObjects((TestFunc)isAnyObjectType, fillVector, queryRect);
+            testFunc = &isAnyObjectType;
          else
             if(ship && ship->hasModule(ModuleSensor))
-               mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapWithSensorType, fillVector, queryRect);
+               testFunc = &isVisibleOnCmdrsMapWithSensorType;
             else     // No sensor
-               mGame->getGameObjDatabase()->findObjects((TestFunc)isVisibleOnCmdrsMapType, fillVector, queryRect);
+               testFunc = &isVisibleOnCmdrsMapType;
+
+         mGame->getGameObjDatabase()->findObjects(testFunc, fillVector, queryRect, sameQuery);
+         sameQuery = true;
       }
    }
    else     // Not a team game OR not in commander's map -- Do a simple query of the objects within scope range of the ship
