@@ -2254,10 +2254,8 @@ void Ship::render(S32 layerIndex)
    if(isLocalShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
       alpha = max(alpha, 0.25f);     // Make sure we have at least .25 alpha
 
-
-   // If local ship has sensor, it can see cloaked non-local ships
-   // Only apply sensor-makes-cloaked-ships-visible to other ships
-   if(!isLocalShip)
+   // Apply rules to cloaked players not on your team
+   else
    {
       // This is our local ship
       Ship *localShip = dynamic_cast<Ship *>(conn->getControlObject());
