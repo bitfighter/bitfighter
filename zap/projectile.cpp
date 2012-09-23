@@ -1164,12 +1164,28 @@ bool SpyBug::canBeNeutral() { return true;  }
 
 
 // Can the player see the spybug?
-bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame)
+// client side
+bool SpyBug::isVisibleToPlayer(S32 playerTeam, bool isTeamGame)
 {
-   // On our team (in a team game) || was set by us (in any game) || is neutral (in any game)
-   return ((getTeam() == playerTeam) && isTeamGame) || mIsOwnedByLocalClient || getTeam() == TEAM_NEUTRAL;
-}
+   if(getTeam() == TEAM_NEUTRAL)
+      return true;
 
+   if(isTeamGame)
+      return getTeam() == playerTeam;
+   else
+      return mIsOwnedByLocalClient;
+}
+// server side
+bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
+{
+   if(getTeam() == TEAM_NEUTRAL)
+      return true;
+
+   if(isTeamGame)
+      return getTeam() == clientInfo->getTeamIndex();
+   else
+      return getOwner() == clientInfo;
+}
 
 /////
 // Lua interface

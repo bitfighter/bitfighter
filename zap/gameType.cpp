@@ -1589,11 +1589,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
       SpyBug *sb = mSpyBugs[i].getPointer();
       if(!sb)  // SpyBug is destroyed?
          mSpyBugs.erase_fast(i);
-      else
+      else if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
-         if(!sb->isVisibleToPlayer(clientInfo->getTeamIndex(), clientInfo->getName(), isTeamGame()))
-            break;
-
          Point pos = sb->getActualPos();
          Point scopeRange(gSpyBugRange, gSpyBugRange);
          Rect queryRect(pos, pos);

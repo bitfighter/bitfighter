@@ -36,6 +36,7 @@ namespace Zap
 {
 
 class Ship;
+class ClientInfo;
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -226,7 +227,8 @@ public:
    void damageObject(DamageInfo *damageInfo);
    void renderItem(const Point &pos);
 
-   bool isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame);
+   bool isVisibleToPlayer(S32 playerTeam, bool isTeamGame); // client side
+   bool isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame); // server side
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
