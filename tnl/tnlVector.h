@@ -56,10 +56,22 @@ namespace TNL {
 /// reserve() method.
 ///
 /// This is now just a wrapper for stl::vector
-template<class T> class Vector
+template<class T> class VectorBase
 {
-private:
+protected:
    std::vector<T> innerVector;
+};
+
+// Avoid std::vector<bool>, over 10 times slower on 8 bit per byte, and need to get adderss of bool arrays.
+
+template<> class VectorBase<bool>
+{
+protected:
+   std::vector<char> innerVector;  // sizeof(char) must equal sizeof(bool)
+};
+
+template<class T> class Vector : public VectorBase<T>
+{
 
 public:
    Vector(const U32 initialSize = 0);
@@ -139,25 +151,27 @@ template<class T> inline Vector<T>::Vector(const T *array, U32 length)        //
 template<class T> inline Vector<T>::~Vector() {}       // Destructor
 
 // returns a modifiable reference to the internal std::vector object
-template<class T> inline std::vector<T>& Vector<T>::getStlVector()
-{
-   return innerVector;
-}
+//template<class T> inline std::vector<T>& Vector<T>::getStlVector()
+//{
+//   return innerVector;
+//}
 
 template<class T> inline T* Vector<T>::address()
 {
+   TNLAssert(sizeof(T) == sizeof(*innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
    if (innerVector.begin() == innerVector.end())
       return NULL;
 
-   return &(*innerVector.begin());
+   return (T*)&(*innerVector.begin());
 }
 
 template<class T> const inline T* Vector<T>::address() const
 {
+   TNLAssert(sizeof(T) == sizeof(*innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
    if (innerVector.begin() == innerVector.end())
       return NULL;
 
-   return &(*innerVector.begin());
+   return (T*)&(*innerVector.begin());
 }
 
 // was U32     
@@ -292,19 +306,19 @@ template<class T> inline bool Vector<T>::empty() const
 template<class T> inline T& Vector<T>::get(S32 index)
 {
    TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return innerVector[index];
+   return (T&)innerVector[index];
 }
 
 template<class T> inline const T& Vector<T>::get(S32 index) const
 {
    TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return innerVector[index];
+   return (T&)innerVector[index];
 }
 
 template<class T> inline void Vector<T>::push_front(const T &x)
 {
    insert(0);
-   innerVector[0] = x;
+   (T&)innerVector[0] = x;
 }
 
 template<class T> inline void Vector<T>::push_back(const T &x)
@@ -315,7 +329,7 @@ template<class T> inline void Vector<T>::push_back(const T &x)
 template<class T> inline T& Vector<T>::pop_front()
 {
    TNLAssert(innerVector.size() != 0, "Vector is empty");
-   T& t = innerVector[0];
+   T& t = (T&)innerVector[0];
    innerVector.erase(innerVector.begin());
    return t;
 }
@@ -323,7 +337,7 @@ template<class T> inline T& Vector<T>::pop_front()
 template<class T> inline T& Vector<T>::pop_back()
 {
    TNLAssert(innerVector.size() != 0, "Vector is empty");
-   T& t = *(innerVector.end() - 1);
+   T& t = (T&)*(innerVector.end() - 1);
    innerVector.pop_back();
    return t;
 }
@@ -331,25 +345,25 @@ template<class T> inline T& Vector<T>::pop_back()
 template<class T> inline T& Vector<T>::operator[](U32 index)
 {
    TNLAssert(index < innerVector.size(), "index out of range");
-   return innerVector[index];
+   return (T&)innerVector[index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](U32 index) const
 {
    TNLAssert(index < innerVector.size(), "index out of range");
-   return innerVector[index];
+   return (T&)innerVector[index];
 }
 
 template<class T> inline T& Vector<T>::operator[](S32 index)
 {
    TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return innerVector[(U32)index];
+   return (T&)innerVector[(U32)index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](S32 index) const
 {
    TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return innerVector[(U32)index];
+   return (T&)innerVector[(U32)index];
 }
 
 template<class T> inline void Vector<T>::reserve(U32 size)
@@ -376,87 +390,6 @@ template<class T> inline void Vector<T>::sort(compare_func f)
 }
 
 
-// std::vector have a different vector<bool> where each bool element take up 1 bit instead of 8 bits or more
-template<> inline bool& Vector<bool>::get(S32 index)
-{
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   static bool val = innerVector[(U32)index];
-   return val;
-}
-template<> inline const bool& Vector<bool>::get(S32 index) const
-{
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   static bool val = innerVector[(U32)index];
-   return val;
-}
-template<> inline bool& Vector<bool>::first()
-{
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   static bool val = *innerVector.begin();
-   return val;
-}
-
-template<> inline const bool& Vector<bool>::first() const
-{
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   static bool val = *innerVector.begin();
-   return val;
-}
-
-template<> inline bool& Vector<bool>::last()
-{
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   static bool val = *(innerVector.end() - 1);
-   return val;
-}
-
-template<> inline const bool& Vector<bool>::last() const
-{
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   static bool val = *(innerVector.end() - 1);
-   return val;
-}
-
-template<> inline bool& Vector<bool>::operator[](U32 index)
-{
-   TNLAssert(index < innerVector.size(), "index out of range");
-   static bool val = innerVector[index];
-   return val;
-}
-template<> inline const bool& Vector<bool>::operator[](U32 index) const
-{
-   TNLAssert(index < innerVector.size(), "index out of range");
-   static bool val = innerVector[index];
-   return val;
-}
-template<> inline bool& Vector<bool>::operator[](S32 index)
-{
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   static bool val = innerVector[(U32)index];
-   return val;
-}
-template<> inline const bool& Vector<bool>::operator[](S32 index) const
-{
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   static bool val = innerVector[(U32)index];
-   return val;
-}
-template<> inline bool& Vector<bool>::pop_front()
-{
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   static bool t = innerVector[0];
-   innerVector.erase(innerVector.begin());
-   return t;
-}
-template<> inline bool& Vector<bool>::pop_back()
-{
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   static bool t = *(innerVector.end() - 1);
-   innerVector.pop_back();
-   return t;
-}
-
-
 };
 
-#endif //_TNL_TVECTOR_H_
+#endif
