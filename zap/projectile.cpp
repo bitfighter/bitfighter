@@ -41,6 +41,8 @@
 
 #include <cmath>
 
+#define sq(a) ((a) * (a))
+
 namespace Zap
 {
 
@@ -828,7 +830,13 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(updateMask & InitialMask)
    {
       writeThisTeam(stream);
-      stream->writeStringTableEntry(getOwner() ? getOwner()->getName() : "");
+
+      GameConnection *gc = static_cast<GameConnection *>(connection);
+
+      bool isOwner = getOwner() == gc->getClientInfo();
+
+      // This will set mIsOwnedByLocalClient client-side
+      stream->write(isOwner);
    }
 
    stream->writeFlag(mArmed);
@@ -846,7 +854,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       initial = true;
       readThisTeam(stream);
-      stream->readStringTableEntry(&mSetBy);
+      stream->read(&mIsOwnedByLocalClient);
    }
    bool wasArmed = mArmed;
    mArmed = stream->readFlag();
@@ -883,12 +891,11 @@ void Mine::renderItem(const Point &pos)
 
       GameType *gameType = clientGame->getGameType();
 
-
       // Can see mine if laid by teammate in team game OR you laid it yourself OR
       // sensor is active and you're within the detection distance
       visible = ( (ship->getTeam() == getTeam()) && gameType->isTeamGame() ) ||
-            (localClient && localClient->getClientInfo()->getName() == mSetBy) ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakInnerDetectionDistance * Ship::SensorCloakInnerDetectionDistance);
+            mIsOwnedByLocalClient ||
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(Ship::SensorCloakInnerDetectionDistance));
    }
    else     // Must be in editor?
    {
@@ -1056,12 +1063,12 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
    if(stream->writeFlag(updateMask & InitialMask))
    {
       writeThisTeam(stream);
-      static StringTableEntry NO_OWNER = StringTableEntry();
 
-      if(getOwner() != NULL)
-         stream->writeStringTableEntry(getOwner()->getName());
-      else
-         stream->writeStringTableEntry(NO_OWNER);
+      GameConnection *gc = static_cast<GameConnection *>(connection);
+
+      bool isOwner = getOwner() == gc->getClientInfo();
+
+      stream->write(isOwner);
    }
    return ret;
 }
@@ -1076,7 +1083,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       initial = true;
       readThisTeam(stream);
-      stream->readStringTableEntry(&mSetBy);
+      stream->read(&mIsOwnedByLocalClient);
    }
    if(initial)
       SoundSystem::playSoundEffect(SFXSpyBugDeploy, getActualPos());
@@ -1110,9 +1117,9 @@ void SpyBug::renderItem(const Point &pos)
       // Can see bug if laid by teammate in team game OR you laid it yourself OR
       // spyBug is neutral OR sensor is active and you're within the detection distance
       visible = ((ship->getTeam() == getTeam()) && gameType->isTeamGame())   ||
-            (conn && conn->getClientInfo()->getName() == mSetBy) ||
+            mIsOwnedByLocalClient ||
             getTeam() == TEAM_NEUTRAL ||
-            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < Ship::SensorCloakInnerDetectionDistance * Ship::SensorCloakInnerDetectionDistance);
+            (ship->hasModule(ModuleSensor) && (ship->getPos() - getPos()).lenSquared() < sq(Ship::SensorCloakInnerDetectionDistance));
    }
    else    
       visible = true;      // We get here in editor when in preview mode
@@ -1157,12 +1164,28 @@ bool SpyBug::canBeNeutral() { return true;  }
 
 
 // Can the player see the spybug?
-bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame)
+// client side
+bool SpyBug::isVisibleToPlayer(S32 playerTeam, bool isTeamGame)
 {
-   // On our team (in a team game) || was set by us (in any game) || is neutral (in any game)
-   return ((getTeam() == playerTeam) && isTeamGame) || playerName == mSetBy || getTeam() == TEAM_NEUTRAL;
-}
+   if(getTeam() == TEAM_NEUTRAL)
+      return true;
 
+   if(isTeamGame)
+      return getTeam() == playerTeam;
+   else
+      return mIsOwnedByLocalClient;
+}
+// server side
+bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
+{
+   if(getTeam() == TEAM_NEUTRAL)
+      return true;
+
+   if(isTeamGame)
+      return getTeam() == clientInfo->getTeamIndex();
+   else
+      return getOwner() == clientInfo;
+}
 
 /////
 // Lua interface

@@ -39,6 +39,7 @@
 #include "gameObjectRender.h"
 #include "ClientGame.h"  
 #include "gameType.h"
+#include "ClientInfo.h"          // For getting player name, default level credits
 #include "soccerGame.h"          // For Soccer ball radius
 #include "NexusGame.h"           // For NexusZone def
 #include "CoreGame.h"            // For CoreItem def
@@ -579,6 +580,7 @@ void EditorUserInterface::loadLevel()
    else     
    {
       // New level!
+      game->getGameType()->setLevelCredits(getGame()->getClientInfo()->getName());  // Set default author
    }
 
    clearUndoHistory();                 // Clean out undo/redo buffers

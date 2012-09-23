@@ -110,11 +110,6 @@ U32 NameToAddressThread::run()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-#ifndef ZAP_DEDICATED
-class ClientGame;
-extern ClientGame *gClientGame; // only used to see if we have a ClientGame, for buildBotMeshZones
-#endif
-
 // Global Game objects
 ServerGame *gServerGame = NULL;
 

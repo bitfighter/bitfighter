@@ -51,6 +51,9 @@ FXManager::FXManager()
    teleporterEffects = NULL;
 }
 
+FXManager::~FXManager()
+{
+}
 
 // Create a new spark.   ttl = Time To Live (milliseconds)
 void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, SparkType sparkType)
@@ -307,7 +310,9 @@ void FXManager::render(S32 renderPass)
             alpha = (1 - radius) / 0.5f;
 
          Vector<Point> dummy;
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, gClientGame->getCommanderZoomFraction(),
+         TNLAssert(dynamic_cast<ClientGame *>(this), "Not a ClientGame");
+         ClientGame *clientGame = static_cast<ClientGame *>(this);
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, clientGame->getCommanderZoomFraction(),
                           radius, Teleporter::TeleportInRadius, alpha, &dummy);
       }
    }

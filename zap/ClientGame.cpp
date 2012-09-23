@@ -1667,8 +1667,7 @@ void ClientGame::renderCommander()
          {
             SpyBug *sb = static_cast<SpyBug *>(fillVector[i]);
 
-            if(sb->isVisibleToPlayer(playerTeam, getConnectionToServer() ? getClientInfo()->getName() : StringTableEntry(""), 
-                                     getGameType()->isTeamGame()))
+            if(sb->isVisibleToPlayer(playerTeam, getGameType()->isTeamGame()))
             {
                renderSpyBugVisibleRange(sb->getRenderPos(), teamColor);
                glColor(teamColor * 0.8f);     // Draw a marker in the middle
