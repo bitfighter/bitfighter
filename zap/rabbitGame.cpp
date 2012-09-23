@@ -368,6 +368,19 @@ bool RabbitGameType::teamHasFlag(S32 teamIndex) const
 }
 
 
+void RabbitGameType::onFlagMounted(S32 teamIndex)
+{
+   getGame()->setTeamHasFlag(teamIndex, true);
+   notifyClientsWhoHasTheFlag();
+}
+
+
+void RabbitGameType::onFlagDismounted()
+{
+   updateWhichTeamsHaveFlags();
+}
+
+
 void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
 {
 

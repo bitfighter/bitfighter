@@ -45,7 +45,10 @@ public:
    void itemDropped(Ship *ship, MoveItem *item);
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
    void renderInterfaceOverlay(bool scoreboardVisible);
+
    bool teamHasFlag(S32 teamIndex) const;
+   void onFlagMounted(S32 teamIndex);
+   void onFlagDismounted();
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;

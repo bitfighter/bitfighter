@@ -202,6 +202,19 @@ bool CTFGameType::teamHasFlag(S32 teamIndex) const
 }
 
 
+void CTFGameType::onFlagMounted(S32 teamIndex)
+{
+   getGame()->setTeamHasFlag(teamIndex, true);
+   notifyClientsWhoHasTheFlag();
+}
+
+
+void CTFGameType::onFlagDismounted()
+{
+   updateWhichTeamsHaveFlags();
+}
+
+
 // What does a particular scoring event score?
 S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
