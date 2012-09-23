@@ -1123,7 +1123,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 
    StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
    Vector<StringTableEntry> e;
-   e.push_back(mClientInfo->getName());
+   e.push_back(mClientInfo->getName()); 
    
    if(!restart)
       e.push_back(mServerGame->getLevelNameFromIndex(newLevelIndex));
