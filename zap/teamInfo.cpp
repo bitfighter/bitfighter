@@ -446,12 +446,15 @@ AbstractTeam *TeamManager::getTeam(S32 teamIndex)
 void TeamManager::removeTeam(S32 teamIndex)
 {
    mTeams.deleteAndErase(teamIndex);
+   mTeamHasFlagList.resize(mTeams.size());
 }
 
 
 void TeamManager::addTeam(AbstractTeam *team)
 {
    mTeams.push_back(team);
+   mTeamHasFlagList.resize(mTeams.size());
+   mTeamHasFlagList[mTeamHasFlagList.size() - 1] = false;
 }
 
 
@@ -459,6 +462,27 @@ void TeamManager::addTeam(AbstractTeam *team, S32 index)
 {
    mTeams.insert(index);
    mTeams[index] = team;
+   mTeamHasFlagList.resize(mTeams.size());
+   mTeamHasFlagList[index] = false;
+}
+
+
+bool TeamManager::getTeamHasFlag(S32 teamIndex) const
+{
+   return mTeamHasFlagList[teamIndex] != 0;
+}
+
+
+void TeamManager::setTeamHasFlag(S32 teamIndex, bool hasFlag)
+{
+   mTeamHasFlagList[teamIndex] = hasFlag ? 1 : 0;
+}
+
+
+void TeamManager::clearTeamHasFlagList()
+{
+   for(S32 i = 0; i < mTeamHasFlagList.size(); i++)
+      mTeamHasFlagList[i] = 0;
 }
 
 
@@ -472,6 +496,7 @@ void TeamManager::replaceTeam(AbstractTeam *team, S32 index)
 void TeamManager::clearTeams()
 {
    mTeams.deleteAndClear();
+   mTeamHasFlagList.clear();
 }
 
 

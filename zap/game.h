@@ -327,6 +327,7 @@ public:
    S32 getTeamCount() const;
    AbstractTeam *getTeam(S32 teamIndex) const;
    Vector<Team *> *getSortedTeamList_score() const;
+   bool getTeamHasFlag(S32 teamIndex) const;
 
    S32 getTeamIndex(const StringTableEntry &playerName);
 
@@ -337,6 +338,10 @@ public:
    void replaceTeam(AbstractTeam *team, S32 index);
    void removeTeam(S32 teamIndex);
    void clearTeams();
+
+   void setTeamHasFlag(S32 teamIndex, bool hasFlag);
+   void clearTeamHasFlagList();
+
 
    StringTableEntry getTeamName(S32 teamIndex) const;   // Return the name of the team
 

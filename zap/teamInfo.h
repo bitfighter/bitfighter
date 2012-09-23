@@ -100,7 +100,7 @@ private:
    F32 mRating; 
 
    Vector<Point> mItemSpawnPoints;
-   Vector<FlagSpawn> mFlagSpawns;       // List of places for team flags to spawn
+   Vector<FlagSpawn> mFlagSpawns;      // List of places for team flags to spawn
 
 public:
    Team();              // Constructor
@@ -195,6 +195,7 @@ class TeamManager
 {
 private:
    Vector<AbstractTeam *> mTeams;
+   Vector<S32> mTeamHasFlagList;      // Track which team (or teams) have the flag
 
 public:
    ~TeamManager();      // Destructor
@@ -209,6 +210,11 @@ public:
    void addTeam(AbstractTeam *team, S32 index);
    void replaceTeam(AbstractTeam *team, S32 index);
    void clearTeams();
+
+   // Access to mTeamHasFlagList
+   bool getTeamHasFlag(S32 teamIndex) const;
+   void setTeamHasFlag(S32 teamIndex, bool hasFlag);
+   void clearTeamHasFlagList();
 };
 
 

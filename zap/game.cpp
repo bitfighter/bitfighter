@@ -450,18 +450,6 @@ GameType *Game::getGameType() const
 }
 
 
-S32 Game::getTeamCount() const
-{
-   return mActiveTeamManager->getTeamCount();
-}
-
-
-AbstractTeam *Game::getTeam(S32 team) const
-{
-   return mActiveTeamManager->getTeam(team);
-}
-
-
 // Sorts teams by score, high to low
 S32 QSORT_CALLBACK teamScoreSort(Team **a, Team **b)
 {
@@ -519,6 +507,21 @@ void Game::addTeam(AbstractTeam *team)                { mActiveTeamManager->addT
 void Game::addTeam(AbstractTeam *team, S32 index)     { mActiveTeamManager->addTeam(team, index);     }
 void Game::replaceTeam(AbstractTeam *team, S32 index) { mActiveTeamManager->replaceTeam(team, index); }
 void Game::clearTeams()                               { mActiveTeamManager->clearTeams();             }
+void Game::clearTeamHasFlagList()                     { mActiveTeamManager->clearTeamHasFlagList();   }
+
+
+void Game::setTeamHasFlag(S32 teamIndex, bool hasFlag)
+{
+   mActiveTeamManager->setTeamHasFlag(teamIndex, hasFlag);
+}
+
+
+
+S32           Game::getTeamCount()                const { return mActiveTeamManager->getTeamCount();            } 
+AbstractTeam *Game::getTeam(S32 team)             const { return mActiveTeamManager->getTeam(team);             }
+bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
+
+
 
 
 // Makes sure that the mTeams[] structure has the proper player counts
@@ -560,7 +563,7 @@ void Game::countTeamPlayers()
 }
 
 
-void Game::setGameType(GameType *theGameType)      // TODO==> Need to store gameType as a shared_ptr or auto_ptr
+void Game::setGameType(GameType *theGameType)      // TODO==> Need to store gameType as a shared_ptr or auto_ptr   Why?
 {
    //delete mGameType;          // Cleanup, if need be
    mGameType = theGameType;

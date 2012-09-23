@@ -41,27 +41,11 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(ZoneControlGameType);
 
-// Which team has the flag?
-GAMETYPE_RPC_S2C(ZoneControlGameType, s2cSetFlagTeam, (S32 flagTeam), (flagTeam))
-{
-   mFlagTeam = flagTeam;
-}
-
 // Constructor
 ZoneControlGameType::ZoneControlGameType()
 {
-   mFlagTeam = -1;
    mZcBadgeAchievable = true;
    mPossibleZcBadgeAchiever = NULL;
-}
-
-
-void ZoneControlGameType::onGhostAvailable(GhostConnection *theConnection)
-{
-   Parent::onGhostAvailable(theConnection);
-   NetObject::setRPCDestConnection(theConnection);
-   s2cSetFlagTeam(mFlagTeam);
-   NetObject::setRPCDestConnection(NULL);
 }
 
 
@@ -100,9 +84,6 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
    theShip->getClientInfo()->getStatistics()->mFlagPickup++;
 
-   mFlagTeam = theShip->getTeam();
-   s2cSetFlagTeam(mFlagTeam);
-
    BfObject *theZone = theShip->isInZone(GoalZoneTypeNumber);
 
    if(theZone && theZone->getObjectTypeNumber() == GoalZoneTypeNumber)
@@ -118,7 +99,6 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 
    if(ship->getClientInfo())
    {
-      s2cSetFlagTeam(-1);
       static StringTableEntry dropString("%e0 dropped the flag!");
 
       Vector<StringTableEntry> e;
@@ -235,9 +215,6 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       mountedFlag->dismount();
       mountedFlag->sendHome();
    }
-
-   mFlagTeam = -1;
-   s2cSetFlagTeam(-1);
 }
 
 
@@ -275,58 +252,71 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    BfObject *object = static_cast<ClientGame *>(getGame())->getConnectionToServer()->getControlObject();
 
-   if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
+   if(!object)
       return;
+
+   TNLAssert(object->getObjectTypeNumber() == PlayerShipTypeNumber, "Control object is not ship?!?");    // Added 9/23/2012, can probably delete
 
    Ship *ship = static_cast<Ship *>(object);
 
-   bool hasFlag = mFlag.isValid() && mFlag->getMount() == ship;
+   bool localClientHasFlag = mFlag.isValid() && mFlag->getMount() == ship;
 
-   // First, render all zones that have not yet been taken by the flag holding team
-   if(mFlagTeam != -1)
+
+   // Render some objective arrow
+   for(S32 i = 0; i < mZones.size(); i++)
    {
-      for(S32 i = 0; i < mZones.size(); i++)
+      // First, render objective arrows to all zones that have not yet been taken by the flag holding team.
+      // If local client has flag, this is where they will want to go next.
+      // If local client doesn't have flag, this is where the enemy will be headed.
+      if(getGame()->getTeamHasFlag(mZones[i]->getTeam()))
+         renderObjectiveArrow(mZones[i], mZones[i]->getColor(), localClientHasFlag ? 1.0f : 0.4f);
+
+      //      Zone recently changed hands        &&    Zone is not neutral     &&    local player's team does not have flag 
+      else if(mZones[i]->didRecentlyChangeTeam() && mZones[i]->getTeam() != -1 && !getGame()->getTeamHasFlag(ship->getTeam()))
       {
-         if(mZones[i]->getTeam() != mFlagTeam)
-            renderObjectiveArrow(mZones[i], mZones[i]->getColor(), hasFlag ? 1.0f : 0.4f);
-         else if(mZones[i]->didRecentlyChangeTeam() && mZones[i]->getTeam() != -1 && ship->getTeam() != mFlagTeam)
-         {
-            // Render a blinky arrow for a recently taken zone
-            Color c = mZones[i]->getColor();
-            if(mZones[i]->isFlashing())
-               c *= 0.7f;
-            renderObjectiveArrow(mZones[i], &c);
-         }
+         // Render a blinky arrow for a recently captured zone
+         Color c = mZones[i]->getColor();
+         if(mZones[i]->isFlashing())
+            c *= 0.7f;
+         renderObjectiveArrow(mZones[i], &c);
       }
    }
-   if(!hasFlag)
+
+   // If local client doesn't have the flag, we need to render an objective arrow to show player where it is
+   if(!localClientHasFlag)
    {
       if(mFlag.isValid())
       {
          if(!mFlag->isMounted())
-            renderObjectiveArrow(mFlag, mFlag->getColor());     // Arrow to flag, if not held by player
+            renderObjectiveArrow(mFlag, mFlag->getColor());       // Arrow to flag itself
          else
          {
             Ship *mount = mFlag->getMount();
             if(mount)
-               renderObjectiveArrow(mount, mount->getColor());
+               renderObjectiveArrow(mount, mount->getColor());    // Arrow to ship holding the flag
          }
       }
    }
 #endif
 }
 
+
 bool ZoneControlGameType::teamHasFlag(S32 teamIndex) const
 {
-   for(S32 i = 0; i < mFlags.size(); i++)
-   {
-      //TNLAssert(mFlags[i], "NULL flag");
-      if(mFlags[i])
-         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == teamIndex)
-            return true;
-   }
+   return doTeamHasFlag(teamIndex);
+}
 
-   return false;
+
+void ZoneControlGameType::onFlagMounted(S32 teamIndex)
+{
+   getGame()->setTeamHasFlag(teamIndex, true);
+   notifyClientsWhoHasTheFlag();
+}
+
+
+void ZoneControlGameType::onFlagDismounted()
+{
+   updateWhichTeamsHaveFlags();
 }
 
 

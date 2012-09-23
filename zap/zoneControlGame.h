@@ -38,7 +38,6 @@ private:
 
    Vector<GoalZone*> mZones;
    SafePtr<FlagItem> mFlag;
-   S32 mFlagTeam;
 
    // Zone Controller badge
    bool mZcBadgeAchievable;
@@ -47,8 +46,6 @@ private:
 public:
    ZoneControlGameType();  // Constructor
 
-
-   void onGhostAvailable(GhostConnection *theConnection);
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item);
@@ -67,6 +64,9 @@ public:
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 
+   void onFlagMounted(S32 teamIndex);
+   void onFlagDismounted();
+
 
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamIndex) const;
@@ -78,7 +78,6 @@ public:
 
    void onGameOver();
 
-   TNL_DECLARE_RPC(s2cSetFlagTeam, (S32 newFlagTeam));
    TNL_DECLARE_CLASS(ZoneControlGameType);
 };
 

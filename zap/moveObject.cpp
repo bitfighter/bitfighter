@@ -861,6 +861,12 @@ void MoveItem::mountToShip(Ship *theShip)
 
    mIsMounted = true;
    setMaskBits(MountMask);
+
+    if(!isGhost()) 
+    {
+       TNLAssert(getGame(), "NULL game!");
+       getGame()->getGameType()->onFlagMounted(theShip->getTeam());
+    }
 }
 
 
@@ -945,12 +951,19 @@ void MoveItem::dismount()
          }
    }
 
-   if(isGhost())     // Client only; on server, we came from onItemDropped()
+   if(isGhost())     // Client only; on server, we may have come from onItemDropped()
       onItemDropped();
 
    mMount = NULL;
    mIsMounted = false;
    setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
+
+   // On server, we need to check who still has a flag and update the clients accordingly. 
+   if(!isGhost())
+   {
+      TNLAssert(getGame(), "NULL game!");
+      getGame()->getGameType()->onFlagDismounted();   // Must run AFTER mount info is cleared
+   }
 }
 
 

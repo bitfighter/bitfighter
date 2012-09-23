@@ -184,13 +184,18 @@ private:
 protected:
    Timer mScoreboardUpdateTimer;
 
-   GameTimer mGameTimer;              // Track when current game will end
-   Timer mGameTimeUpdateTimer;        // Timer for when to send clients a game clock update
-   Timer mBotBalanceAnalysisTimer;    // Analyze if we need to add/remove bots to balance team
+   GameTimer mGameTimer;               // Track when current game will end
+   Timer mGameTimeUpdateTimer;         // Timer for when to send clients a game clock update
+   Timer mBotBalanceAnalysisTimer;     // Analyze if we need to add/remove bots to balance team
                        
    virtual void syncTimeRemaining(U32 timeLeft);
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited);                         // Runs on server
    virtual void setTimeRemaining(U32 timeLeft, bool isUnlimited, S32 renderingOffset);    // Runs on client
+
+   void notifyClientsWhoHasTheFlag();           // Notify the clients when flag status changes... only called by some game types (server only)
+   bool doTeamHasFlag(S32 teamIndex) const;     // Do the actual work of figuring out if the specified team has the flag  (server only)
+   void updateWhichTeamsHaveFlags();         
+
 
 public:
    // Define an enum of scoring events from the values in SCORING_EVENT_TABLE
@@ -220,12 +225,16 @@ public:
    const char *getGameTypeName() const;   
 
    virtual GameTypeId getGameTypeId() const;
-   virtual const char *getShortName() const;            // Will be overridden by other games
-   virtual const char *getInstructionString() const;    //          -- ditto --
-   virtual bool isTeamGame() const;                     // Team game if we have teams.  Otherwise it's every man for himself.
+   virtual const char *getShortName() const;          // Will be overridden by other games
+   virtual const char *getInstructionString() const;  //          -- ditto --
+   virtual bool isTeamGame() const;                   // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() const;
    virtual bool canBeIndividualGame() const;
    virtual bool teamHasFlag(S32 teamIndex) const;
+
+   virtual void onFlagMounted(S32 teamIndex);         // A flag was picked up by a ship on the specified team
+   virtual void onFlagDismounted();                   // A flag was dropped by a ship
+
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
 
@@ -490,7 +499,8 @@ public:
    TNL_DECLARE_RPC(s2cSyncTimeRemaining, (U32 timeLeftInMs));
    TNL_DECLARE_RPC(s2cSetNewTimeRemaining, (U32 timeLeftInMs, bool isUnlimited, S32 renderingOffset));
    TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
-   
+
+   TNL_DECLARE_RPC(s2cSendFlagPossessionStatus, (U16 packedBits));
 
    TNL_DECLARE_RPC(s2cCanSwitchTeams, (bool allowed));
 

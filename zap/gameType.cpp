@@ -268,6 +268,7 @@ void GameType::addToGame(Game *game, GridDatabase *database)
 }
 
 
+// Client only
 bool GameType::onGhostAdd(GhostConnection *theConnection)
 {
 #ifndef ZAP_DEDICATED
@@ -1798,7 +1799,7 @@ const Color *GameType::getShipColor(Ship *s)
 }
 
 
-// These run on the server.
+// Run on the server.
 // Adds a new client to the game when a player or bot joins, or when a level cycles.
 // Note that when a new game starts, players will be added in order from
 // strongest to weakest.  Bots will be added to their predefined teams, or if that is invalid, to the lowest ranked team.
@@ -1856,7 +1857,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    
    clientInfo->setTeamIndex(minTeamIndex);     // Add new player to their assigned team
 
-   // Tell other clients about the new guy, who is never us...
+   // Tell other clients about the new guy (who is never us)
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
                 clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true, true);
 
@@ -1967,7 +1968,6 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
          if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
             updateScore(victim, KilledByTurret, 0);
       }
-
 
       s2cKillMessage(victim->getName(), NULL, killerDescr);
    }
@@ -2752,6 +2752,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
       s2cAddTeam(team->getName(), color->r, color->g, color->b, team->getScore(), i == 0);
    }
+
+   notifyClientsWhoHasTheFlag();
 
    // Add all the client and team information
    for(S32 i = 0; i < mGame->getClientCount(); i++)
@@ -3952,6 +3954,62 @@ bool GameType::canBeIndividualGame() const { return true;  }
 bool GameType::teamHasFlag(S32 teamIndex) const
 {
    return false;
+}
+
+
+// Look at every flag and see if its mounted on a ship belonging to the specified team
+// Does the actual work for subclass implementations of teamHasFlag
+bool GameType::doTeamHasFlag(S32 teamIndex) const
+{
+   return getGame()->getTeamHasFlag(teamIndex);
+}
+
+
+void GameType::updateWhichTeamsHaveFlags()
+{
+   getGame()->clearTeamHasFlagList();
+
+   for(S32 i = 0; i < mFlags.size(); i++)
+      if(mFlags[i] && mFlags[i]->isMounted() && mFlags[i]->getMount())
+         getGame()->setTeamHasFlag(mFlags[i]->getMount()->getTeam(), true);
+
+   notifyClientsWhoHasTheFlag();
+}
+
+
+// A flag was either mounted or dismounted from a ship -- in some GameTypes we need to notifiy the clients so they can 
+// update their displays to show who has the flag.  Will be overridden in some GameTypes.
+// Server only!
+void GameType::onFlagMounted(S32 teamIndex)
+{
+   // Do nothing
+}
+
+
+void GameType::onFlagDismounted()
+{
+   // Do nothing
+}
+
+
+// Notify the clients when flag status changes... only called by some GameTypes
+// Server only!
+void GameType::notifyClientsWhoHasTheFlag()
+{
+   U16 packedBits = 0;
+
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      if(getGame()->getTeamHasFlag(i))
+         packedBits += BIT(i);
+
+   s2cSendFlagPossessionStatus(packedBits);
+}
+
+
+GAMETYPE_RPC_S2C(GameType, s2cSendFlagPossessionStatus, (U16 packedBits), (packedBits))
+{
+   for(S32 i = 0; i < getGame()->getTeamCount(); i++)
+      getGame()->setTeamHasFlag(i, packedBits & BIT(i));
 }
 
 
