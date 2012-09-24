@@ -2178,7 +2178,7 @@ void GameUserInterface::addBotsHandler(const Vector<string> &words)
    {
       if(words.size() < 2)
       {
-         game->displayErrorMessage("!!! Enter number of bots to add");
+         game->displayErrorMessage("!!! Specify number of bots to add");
          return;
       }
 
