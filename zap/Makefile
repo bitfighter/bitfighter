@@ -183,7 +183,7 @@ OBJECTS_DEDICATED=\
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 .cpp.o: 
-	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
+	$(CC) -Wno-c++0x-compat $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 
 default: release

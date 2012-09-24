@@ -70,6 +70,7 @@ protected:
    std::vector<char> innerVector;  // sizeof(char) must equal sizeof(bool)
 };
 
+
 template<class T> class Vector : public VectorBase<T>
 {
 
@@ -130,22 +131,22 @@ public:
 // Note that tnlVector reserves the space whereas std::vector actually sets the size
 template<class T> inline Vector<T>::Vector(const U32 initialSize)   // Constructor
 {
-   innerVector.reserve(initialSize);
+   this->innerVector.reserve(initialSize);
 }
 
 template<class T> inline Vector<T>::Vector(const Vector& p)        // Copy constructor
 {
-   innerVector = std::vector<T>(p.innerVector);
+   this->innerVector = std::vector<T>(p.innerVector);
 }
 
 template<class T> inline Vector<T>::Vector(const std::vector<T>& p)        // Constructor to wrap std::vector
 {
-   innerVector = p;
+   this->innerVector = p;
 }
 
 template<class T> inline Vector<T>::Vector(const T *array, U32 length)        // Constructor to wrap a C-style array
 {
-   innerVector = std::vector<T>(array, array + length);
+   this->innerVector = std::vector<T>(array, array + length);
 }
 
 template<class T> inline Vector<T>::~Vector() {}       // Destructor
@@ -153,121 +154,121 @@ template<class T> inline Vector<T>::~Vector() {}       // Destructor
 // returns a modifiable reference to the internal std::vector object
 //template<class T> inline std::vector<T>& Vector<T>::getStlVector()
 //{
-//   return innerVector;
+//   return this->innerVector;
 //}
 
 template<class T> inline T* Vector<T>::address()
 {
-   TNLAssert(sizeof(T) == sizeof(*innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
-   if (innerVector.begin() == innerVector.end())
+   TNLAssert(sizeof(T) == sizeof(*this->innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
+   if (this->innerVector.begin() == this->innerVector.end())
       return NULL;
 
-   return (T*)&(*innerVector.begin());
+   return (T*)&(*this->innerVector.begin());
 }
 
 template<class T> const inline T* Vector<T>::address() const
 {
-   TNLAssert(sizeof(T) == sizeof(*innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
-   if (innerVector.begin() == innerVector.end())
+   TNLAssert(sizeof(T) == sizeof(*this->innerVector.begin()), "sizeof(char) must equal sizeof(bool)");
+   if (this->innerVector.begin() == this->innerVector.end())
       return NULL;
 
-   return (T*)&(*innerVector.begin());
+   return (T*)&(*this->innerVector.begin());
 }
 
 // was U32     
 template<class T> inline void Vector<T>::resize(U32 size)
 {
-   innerVector.resize(size);
+   this->innerVector.resize(size);
 }
 
 // inserts an empty element at the specified index
 template<class T> inline void Vector<T>::insert(U32 index)
 {
-   TNLAssert(index <= innerVector.size(), "index out of range");
-   innerVector.insert(innerVector.begin() + index, 1, T());
+   TNLAssert(index <= this->innerVector.size(), "index out of range");
+   this->innerVector.insert(this->innerVector.begin() + index, 1, T());
 }
 
 // inserts an object at a specified index
 template<class T> inline void Vector<T>::insert(U32 index, const T &x)
 {
-   TNLAssert(index <= innerVector.size(), "index out of range");
-   innerVector.insert(innerVector.begin() + index, x);
+   TNLAssert(index <= this->innerVector.size(), "index out of range");
+   this->innerVector.insert(this->innerVector.begin() + index, x);
 }
 
 template<class T> inline void Vector<T>::erase(U32 index)
 {
-   TNLAssert(index < innerVector.size(), "index out of range");
-   innerVector.erase(innerVector.begin() + index);
+   TNLAssert(index < this->innerVector.size(), "index out of range");
+   this->innerVector.erase(this->innerVector.begin() + index);
 }
 
 
 template<class T> inline void Vector<T>::deleteAndErase(U32 index)
 {
-   TNLAssert(index < innerVector.size(), "index out of range");
-   delete innerVector[index];
+   TNLAssert(index < this->innerVector.size(), "index out of range");
+   delete this->innerVector[index];
    erase(index);
 }
 
 
 template<class T> inline void Vector<T>::erase_fast(U32 index)
 {
-   TNLAssert(index < innerVector.size(), "index out of range");
+   TNLAssert(index < this->innerVector.size(), "index out of range");
    // CAUTION: this operator does NOT maintain list order
    // Copy the last element into the deleted 'hole' and decrement the
    //   size of the vector.
 
-   if(index != innerVector.size() - 1)
-      std::swap(innerVector[index], innerVector[innerVector.size() - 1]);
-   innerVector.pop_back();
+   if(index != this->innerVector.size() - 1)
+      std::swap(this->innerVector[index], this->innerVector[this->innerVector.size() - 1]);
+   this->innerVector.pop_back();
 }
 
 
 template<class T> inline void Vector<T>::deleteAndErase_fast(U32 index)
 {
-   TNLAssert(index < innerVector.size(), "index out of range");
+   TNLAssert(index < this->innerVector.size(), "index out of range");
    // CAUTION: this operator does NOT maintain list order
    // Copy the last element into the deleted 'hole' and decrement the
    //   size of the vector.
-   delete innerVector[index];
+   delete this->innerVector[index];
    erase_fast(index);
 }
 
 
 template<class T> inline T& Vector<T>::first()
 {
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   return *innerVector.begin();
+   TNLAssert(this->innerVector.size() != 0, "Vector is empty");
+   return *this->innerVector.begin();
 }
 
 template<class T> inline const T& Vector<T>::first() const
 {
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   return *innerVector.begin();
+   TNLAssert(this->innerVector.size() != 0, "Vector is empty");
+   return *this->innerVector.begin();
 }
 
 template<class T> inline T& Vector<T>::last()
 {
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   return *(innerVector.end() - 1);
+   TNLAssert(this->innerVector.size() != 0, "Vector is empty");
+   return *(this->innerVector.end() - 1);
 }
 
 template<class T> inline const T& Vector<T>::last() const
 {
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   return *(innerVector.end() - 1);
+   TNLAssert(this->innerVector.size() != 0, "Vector is empty");
+   return *(this->innerVector.end() - 1);
 }
 
 template<class T> inline void Vector<T>::clear()
 {
-   innerVector.clear();
+   this->innerVector.clear();
 }
 
 template<class T> inline void Vector<T>::deleteAndClear()
 {
-   for(U32 i = 0; i < innerVector.size(); i++)
-      delete innerVector[i];
+   for(U32 i = 0; i < this->innerVector.size(); i++)
+      delete this->innerVector[i];
 
-   innerVector.clear();
+   this->innerVector.clear();
 }
 
 template<class T> inline bool Vector<T>::contains(const T &object)
@@ -277,8 +278,8 @@ template<class T> inline bool Vector<T>::contains(const T &object)
 
 template<class T> inline S32 Vector<T>::getIndex(const T &object)
 {
-   for(U32 i = 0; i < innerVector.size(); i++)
-      if(object == innerVector[i])
+   for(U32 i = 0; i < this->innerVector.size(); i++)
+      if(object == this->innerVector[i])
          return i;
 
    return -1;
@@ -289,96 +290,96 @@ template<class T> inline S32 Vector<T>::getIndex(const T &object)
 // After a call to this member function, both the vector object and vector p will have the same size and compare equal to each other.
 template<class T> inline Vector<T>& Vector<T>::operator=(const Vector<T>& p)
 {
-   innerVector = p.innerVector;
+   this->innerVector = p.innerVector;
    return *this;
 }
 
 template<class T> inline S32 Vector<T>::size() const
 {
-   return (S32)innerVector.size();
+   return (S32)this->innerVector.size();
 }
 
 template<class T> inline bool Vector<T>::empty() const
 {
-   return innerVector.begin() == innerVector.end();
+   return this->innerVector.begin() == this->innerVector.end();
 }
 
 template<class T> inline T& Vector<T>::get(S32 index)
 {
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return (T&)innerVector[index];
+   TNLAssert(U32(index) < this->innerVector.size(), "index out of range");
+   return (T&)this->innerVector[index];
 }
 
 template<class T> inline const T& Vector<T>::get(S32 index) const
 {
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return (T&)innerVector[index];
+   TNLAssert(U32(index) < this->innerVector.size(), "index out of range");
+   return (T&)this->innerVector[index];
 }
 
 template<class T> inline void Vector<T>::push_front(const T &x)
 {
    insert(0);
-   (T&)innerVector[0] = x;
+   (T&)this->innerVector[0] = x;
 }
 
 template<class T> inline void Vector<T>::push_back(const T &x)
 {
-   innerVector.push_back(x);
+   this->innerVector.push_back(x);
 }
 
 template<class T> inline T& Vector<T>::pop_front()
 {
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   T& t = (T&)innerVector[0];
-   innerVector.erase(innerVector.begin());
+   TNLAssert(this->innerVector.size() != 0, "Vector is empty");
+   T& t = (T&)this->innerVector[0];
+   this->innerVector.erase(this->innerVector.begin());
    return t;
 }
 
 template<class T> inline T& Vector<T>::pop_back()
 {
-   TNLAssert(innerVector.size() != 0, "Vector is empty");
-   T& t = (T&)*(innerVector.end() - 1);
-   innerVector.pop_back();
+   TNLAssert(this->innerVector.size() != 0, "Vector is empty");
+   T& t = (T&)*(this->innerVector.end() - 1);
+   this->innerVector.pop_back();
    return t;
 }
 
 template<class T> inline T& Vector<T>::operator[](U32 index)
 {
-   TNLAssert(index < innerVector.size(), "index out of range");
-   return (T&)innerVector[index];
+   TNLAssert(index < this->innerVector.size(), "index out of range");
+   return (T&)this->innerVector[index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](U32 index) const
 {
-   TNLAssert(index < innerVector.size(), "index out of range");
-   return (T&)innerVector[index];
+   TNLAssert(index < this->innerVector.size(), "index out of range");
+   return (T&)this->innerVector[index];
 }
 
 template<class T> inline T& Vector<T>::operator[](S32 index)
 {
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return (T&)innerVector[(U32)index];
+   TNLAssert(U32(index) < this->innerVector.size(), "index out of range");
+   return (T&)this->innerVector[(U32)index];
 }
 
 template<class T> inline const T& Vector<T>::operator[](S32 index) const
 {
-   TNLAssert(U32(index) < innerVector.size(), "index out of range");
-   return (T&)innerVector[(U32)index];
+   TNLAssert(U32(index) < this->innerVector.size(), "index out of range");
+   return (T&)this->innerVector[(U32)index];
 }
 
 template<class T> inline void Vector<T>::reserve(U32 size)
 {
-   innerVector.reserve(size);
+   this->innerVector.reserve(size);
 }
 
 // Reverses this Vector's elements in place.
 template<class T> inline void Vector<T>::reverse()
 {
-   for(S32 i = (S32(innerVector.size()) >> 1) - 1; i >= 0; i--)
+   for(S32 i = (S32(this->innerVector.size()) >> 1) - 1; i >= 0; i--)
    {
-      T temp = innerVector[innerVector.size() - i - 1];
-      innerVector[innerVector.size() - i - 1] = innerVector[i];
-      innerVector[i] = temp;
+      T temp = this->innerVector[this->innerVector.size() - i - 1];
+      this->innerVector[this->innerVector.size() - i - 1] = this->innerVector[i];
+      this->innerVector[i] = temp;
    }
 }
 

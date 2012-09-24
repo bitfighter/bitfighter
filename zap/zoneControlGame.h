@@ -37,7 +37,6 @@ private:
    typedef GameType Parent;
 
    Vector<GoalZone*> mZones;
-   SafePtr<FlagItem> mFlag;
 
    // Zone Controller badge
    bool mZcBadgeAchievable;

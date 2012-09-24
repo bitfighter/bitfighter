@@ -1324,14 +1324,9 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
          // This is the maximum change in angle we will allow
          F32 maxTickAngle = MaximumAngleChangePerSecond * F32(deltaT) / 1000.f;
 
-         // We will reduce speed if we have to turn a lot
-         bool reduceSpeed = false;
-
          // If our difference in angles are greater than maximum allowed, reduce to the maximum
          if(fabs(difference) > maxTickAngle)
          {
-            reduceSpeed = true;
-
             if(difference > 0)
                newVelocity.setAngle(currentAngle + maxTickAngle);
             else

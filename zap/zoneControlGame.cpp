@@ -52,7 +52,6 @@ ZoneControlGameType::ZoneControlGameType()
 void ZoneControlGameType::addFlag(FlagItem *flag)
 {
    Parent::addFlag(flag);
-   mFlag = flag;
    if(!isGhost())
       addItemOfInterest(flag);      // Server only
 }
@@ -226,20 +225,24 @@ void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientIn
    GameConnection *connection = clientInfo->getConnection();
 
    S32 uTeam = scopeObject->getTeam();
-   if(mFlag.isValid())
-   {
-      if(mFlag->isAtHome())
-         connection->objectInScope(mFlag);
+   for(S32 i=0; i < mFlags.size(); i++)
+      if(!mFlags[i].isValid())
+         mFlags.erase(i);
       else
       {
-         Ship *mount = mFlag->getMount();
-         if(mount && mount->getTeam() == uTeam)
+         FlagItem *flag = mFlags[i];
+         if(flag->isAtHome())
+            connection->objectInScope(flag);
+         else
          {
-            connection->objectInScope(mount);
-            connection->objectInScope(mFlag);
+            Ship *mount = flag->getMount();
+            if(mount && mount->getTeam() == uTeam)
+            {
+               connection->objectInScope(mount);
+               connection->objectInScope(flag);
+            }
          }
       }
-   }
 }
 
 
@@ -259,43 +262,66 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    Ship *ship = static_cast<Ship *>(object);
 
-   bool localClientHasFlag = mFlag.isValid() && mFlag->getMount() == ship;
+   bool localClientHasFlag = (ship->getFlagCount() != 0);
 
-
-   // Render some objective arrow
-   for(S32 i = 0; i < mZones.size(); i++)
+   if(localClientHasFlag)
    {
-      // First, render objective arrows to all zones that have not yet been taken by the flag holding team.
-      // If local client has flag, this is where they will want to go next.
-      // If local client doesn't have flag, this is where the enemy will be headed.
-      if(getGame()->getTeamHasFlag(mZones[i]->getTeam()))
-         renderObjectiveArrow(mZones[i], mZones[i]->getColor(), localClientHasFlag ? 1.0f : 0.4f);
-
-      //      Zone recently changed hands        &&    Zone is not neutral     &&    local player's team does not have flag 
-      else if(mZones[i]->didRecentlyChangeTeam() && mZones[i]->getTeam() != -1 && !getGame()->getTeamHasFlag(ship->getTeam()))
+      // Show all the goalZones to go to.
+      for(S32 i = 0; i < mZones.size(); i++)
       {
-         // Render a blinky arrow for a recently captured zone
-         Color c = mZones[i]->getColor();
-         if(mZones[i]->isFlashing())
-            c *= 0.7f;
-         renderObjectiveArrow(mZones[i], &c);
+         if(!mZones[i])
+            mZones.erase(i);
+         else if(mZones[i]->getTeam() != ship->getTeam())
+            renderObjectiveArrow(mZones[i], mZones[i]->getColor(), 1.0f);
       }
    }
-
-   // If local client doesn't have the flag, we need to render an objective arrow to show player where it is
-   if(!localClientHasFlag)
+   else
    {
-      if(mFlag.isValid())
+      // Show all flags that can be picked up or is on the ship
+      for(S32 i = 0; i < mFlags.size(); i++)
       {
-         if(!mFlag->isMounted())
-            renderObjectiveArrow(mFlag, mFlag->getColor());       // Arrow to flag itself
-         else
+         if(!mFlags[i])
+            mFlags.erase(i);
+         else if(mFlags[i]->getTeam() == TEAM_NEUTRAL || mFlags[i]->getTeam() == ship->getTeam() || mFlags[i]->isMounted())
          {
-            Ship *mount = mFlag->getMount();
-            if(mount)
-               renderObjectiveArrow(mount, mount->getColor());    // Arrow to ship holding the flag
+            if(!mFlags[i]->isMounted())
+               renderObjectiveArrow(mFlags[i], mFlags[i]->getColor());
+            else
+               if(mFlags[i]->getMount())
+                  renderObjectiveArrow(mFlags[i]->getMount(), mFlags[i]->getMount()->getColor());
          }
       }
+
+      S32 whichTeamHasFlag = -1;
+      for(S32 i = getGame()->getTeamCount() - 1; i >= 0; i--)
+         if(getGame()->getTeamHasFlag(i))
+         {
+            if(whichTeamHasFlag != -1)
+            {
+               whichTeamHasFlag = -9; // multiple teams have flags
+               break;
+            }
+            whichTeamHasFlag = i;
+         }
+
+      // Show all zones the ship holding flag can go to
+      if(whichTeamHasFlag != -1)
+         for(S32 i = 0; i < mZones.size(); i++)
+         {
+            if(!mZones[i])
+               mZones.erase(i);
+            else if(mZones[i]->getTeam() != whichTeamHasFlag)
+               renderObjectiveArrow(mZones[i], mZones[i]->getColor(), 0.4f);
+            //      Zone recently changed hands        &&    Zone is not neutral               &&   Zone is not local player's team 
+            else if(mZones[i]->didRecentlyChangeTeam() && mZones[i]->getTeam() != TEAM_NEUTRAL && mZones[i]->getTeam() != ship->getTeam())
+            {
+               // Render a blinky arrow for a recently captured zone
+               Color c = mZones[i]->getColor();
+               if(mZones[i]->isFlashing())
+                  c *= 0.7f;
+               renderObjectiveArrow(mZones[i], &c);
+            }
+         }
    }
 #endif
 }
