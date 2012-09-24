@@ -2185,7 +2185,7 @@ void GameUserInterface::addBotsHandler(const Vector<string> &words)
       S32 count = 0;
       count = atoi(words[1].c_str());
 
-      if(count <= 0 || count >= 0x00010000)
+      if(count <= 0 || count > 16)
       {
          game->displayErrorMessage("!!! Invalid number of bots to add");
          return;
@@ -2196,7 +2196,7 @@ void GameUserInterface::addBotsHandler(const Vector<string> &words)
       for(S32 i = 2; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
 
-      fixupArgs(game, args);        // Reorder args for c2sAddBot
+      fixupArgs(game, args);        // Reorder args for c2sAddBot translate team names to indices
 
       if(game->getGameType())
          game->getGameType()->c2sAddBots(count, args);
