@@ -1122,7 +1122,9 @@ void EditorUserInterface::onAfterRunScriptFromConsole()
 
 void EditorUserInterface::onActivate()
 {
-   FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
+   GameSettings *settings = getGame()->getSettings();
+
+   FolderManager *folderManager = settings->getFolderManager();
 
    if(folderManager->levelDir == "")      // Never did resolve a leveldir... no editing for you!
    {
@@ -1184,7 +1186,7 @@ void EditorUserInterface::onActivate()
 
    getGame()->setAddTarget();
 
-   VideoSystem::actualizeScreenMode(true);
+   VideoSystem::actualizeScreenMode(settings, true);
 
    centerView();
 }
@@ -1226,7 +1228,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
       mCurrentTeam = 0;
 
    if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(true);
+      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true);
 
    mDockItemHit = NULL;
 }

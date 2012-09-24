@@ -59,7 +59,7 @@ ScreenShooter::~ScreenShooter()
 }
 
 
-void ScreenShooter::resizeViewportToCanvas()
+void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
 {
    // Grab the canvas width/height and normalize our screen to it
    S32 width = gScreenInfo.getGameCanvasWidth();
@@ -78,14 +78,13 @@ void ScreenShooter::resizeViewportToCanvas()
    glScissor(0, 0, width, height);
 
    // Now render a frame to draw our new viewport to the back buffer
-   gClientGame->getUIManager()->renderCurrent();
+   uiManager->renderCurrent();
 }
 
 
 // Stolen from VideoSystem::actualizeScreenMode()
-void ScreenShooter::restoreViewportToWindow()
+void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 {
-   GameSettings *settings = gClientGame->getSettings();
    DisplayMode displayMode = settings->getIniSettings()->displayMode;
 
    // Set up video/window flags amd parameters and get ready to change the window
@@ -145,8 +144,10 @@ void ScreenShooter::restoreViewportToWindow()
 
 // Thanks to the good developers of naev for excellent code to base this off of.
 // Much was copied directly.
-void ScreenShooter::saveScreenshot(const string &folder)
+void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings)
 {
+   string folder = settings->getFolderManager()->screenshotDir;
+
    // Let's find a filename to use
    makeSureFolderExists(folder);
 
@@ -163,12 +164,12 @@ void ScreenShooter::saveScreenshot(const string &folder)
 
    // We default to resizing the opengl viewport to the standard canvas size, unless we're
    // in the editor or our window is smaller than the canvas size
-   bool doResize = gClientGame->getUIManager()->getCurrentUI()->getMenuID() != EditorUI &&
+   bool doResize = uiManager->getCurrentUI()->getMenuID() != EditorUI &&
          gScreenInfo.getWindowWidth() >= gScreenInfo.getGameCanvasWidth();
 
    // Change opengl viewport temporarily to have consistent screenshot sizes
    if(doResize)
-      resizeViewportToCanvas();
+      resizeViewportToCanvas(uiManager);
 
    // Now let's grab them pixels
    S32 width;
@@ -202,7 +203,7 @@ void ScreenShooter::saveScreenshot(const string &folder)
 
    // Change opengl viewport back to what it was
    if(doResize)
-      restoreViewportToWindow();
+      restoreViewportToWindow(settings);
 
    // Convert Data
    for (S32 i = 0; i < height; i++)

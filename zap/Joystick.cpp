@@ -69,8 +69,6 @@ JoystickInput Joystick::JoystickInputData[MaxAxesDirections] = {
 
 CIniFile joystickPresetsINI("dummy");
 
-extern ClientGame *gClientGame;
-
 // Constructor
 Joystick::Joystick()
 {
@@ -84,7 +82,7 @@ Joystick::~Joystick()
    // Do nothing
 }
 
-bool Joystick::initJoystick()
+bool Joystick::initJoystick(GameSettings *settings)
 {
    // Make sure "SDL_Init(0)" was done before calling this function, otherwise joystick will fail to work on windows.
 #if defined(TNL_OS_LINUX) && !SDL_VERSION_ATLEAST(2,0,0)
@@ -105,7 +103,7 @@ bool Joystick::initJoystick()
    //   http://superuser.com/questions/17959/linux-joystick-seems-mis-calibrated-in-an-sdl-game-freespace-2-open
 
 
-   if(gClientGame->getSettings()->getIniSettings()->joystickLinuxUseOldDeviceSystem)
+   if(settings->getIniSettings()->joystickLinuxUseOldDeviceSystem)
    {
       string joystickEnv = "SDL_JOYSTICK_DEVICE=/dev/input/js" + itos(0);
       SDL_putenv((char *)joystickEnv.c_str());
@@ -166,8 +164,7 @@ bool Joystick::initJoystick()
 
 
    // Now try and autodetect the joystick and update the game settings
-   string joystickType = Joystick::autodetectJoystick();
-   GameSettings *settings = gClientGame->getSettings();
+   string joystickType = Joystick::autodetectJoystick(settings);
 
    // Set joystick type if we found anything
    // Otherwise, it makes more sense to remember what the user had last specified
@@ -233,7 +230,7 @@ S32 Joystick::checkJoystickString_partial_match(const string &controllerName)
 
 
 // Returns a valid name of one of our joystick profiles
-string Joystick::autodetectJoystick()
+string Joystick::autodetectJoystick(GameSettings *settings)
 {
    if(DetectedJoystickNameList.size() == 0)  // No controllers detected
       return "NoJoystick";
@@ -253,7 +250,6 @@ string Joystick::autodetectJoystick()
       return JoystickPresetList[match].identifier;
    
    // If we've made it here, let's try the value stored in the INI
-   GameSettings *settings = gClientGame->getSettings();
    string lastStickUsed = settings->getIniSettings()->joystickType;
 
    // Let's validate that, shall we?
@@ -460,14 +456,14 @@ U32 Joystick::getJoystickIndex(const string &joystickType)
 }
 
 
-void Joystick::loadJoystickPresets()
+void Joystick::loadJoystickPresets(GameSettings *settings)
 {
 
 // Load up the joystick presets INI
 string dir;
 
 #ifdef TNL_OS_MAC_OSX
-   FolderManager *folderManager = gClientGame->getSettings()->getFolderManager();
+   FolderManager *folderManager = settings->getFolderManager();
    dir = folderManager->iniDir;
 #else
    dir = ".";

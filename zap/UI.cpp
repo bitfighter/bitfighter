@@ -69,12 +69,12 @@ S32 UserInterface::chatMessageMargin = 515;
 UserInterface *UserInterface::current = NULL;
 UserInterface *UserInterface::comingFrom = NULL;
 
+extern Vector<ClientGame *> gClientGames;
 
-
-float gLineWidth1 = 1.0f;
-float gDefaultLineWidth = 2.0f;
-float gLineWidth3 = 3.0f;
-float gLineWidth4 = 4.0f;
+F32 gLineWidth1 = 1.0f;
+F32 gDefaultLineWidth = 2.0f;
+F32 gLineWidth3 = 3.0f;
+F32 gLineWidth4 = 4.0f;
 
 
 ////////////////////////////////////////
@@ -125,10 +125,10 @@ void UserInterface::activate(bool save)
    comingFrom = current;
    current = this;            // Now it is current
 
-   if(comingFrom)
+   if(comingFrom)             // Deactivate the previous UI...
       comingFrom->onDeactivate(usesEditorScreenMode());
 
-   onActivate();              // Activate the now current current UI
+   onActivate();              // ...and activate the current one
 }
 
 
@@ -167,15 +167,15 @@ UIID UserInterface::getPrevMenuID() const
 }
 
 
-void UserInterface::onActivate()   { /* Do nothing */ }
-void UserInterface::onReactivate() { /* Do nothing */ }
-
+void UserInterface::onActivate()          { /* Do nothing */ }
+void UserInterface::onReactivate()        { /* Do nothing */ }
 void UserInterface::onDisplayModeChange() { /* Do nothing */ }
+
 
 void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode) 
 {
    if(prevUIUsesEditorScreenMode != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(true);
+      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true);
 }
 
 
@@ -184,9 +184,6 @@ U32 UserInterface::getTimeSinceLastInput()
    return mTimeSinceLastInput;
 }
 
-
-extern ClientGame *gClientGame1;
-extern ClientGame *gClientGame2;
 
 // Clean up and get ready to render
 void UserInterface::renderCurrent()    
@@ -202,27 +199,33 @@ void UserInterface::renderCurrent()
    if(scissorMode)
       glEnable(GL_SCISSOR_TEST);
    
-   if(gClientGame2)
+   if(gClientGames.size() > 1)
    {
-      gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
-      gClientGame = gClientGame2;
-      gClientGame1->mUserInterfaceData->get();
-      gClientGame2->mUserInterfaceData->set();
+      for(S32 i = 0; i < gClientGames.size(); i++)
+      {
+      //gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
+      //gClientGame = gClientGame2;
+      //gClientGame1->mUserInterfaceData->get();
+      //gClientGame2->mUserInterfaceData->set();
 
-      glEnable(GL_SCISSOR_TEST);
-      glViewport(gScreenInfo.getWindowWidth()/2, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
+         glEnable(GL_SCISSOR_TEST);
 
-      // Run the active UI renderer
-      if(current)
-         current->render();
+         S32 x = i = 0 ? 0 : gScreenInfo.getWindowWidth() / 2;
 
-      gClientGame = gClientGame1;
-      gClientGame2->mUserInterfaceData->get();
-      gClientGame1->mUserInterfaceData->set();
-      glViewport(0, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
-      gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
+         glViewport(x, 0, gScreenInfo.getWindowWidth() / 2, gScreenInfo.getWindowHeight());
+         glMatrixMode(GL_MODELVIEW);
+         glLoadIdentity();
+
+         // Run the active UI renderer
+         if(current)
+            current->render();
+
+         //gClientGame = gClientGame1;
+         //gClientGame2->mUserInterfaceData->get();
+         //gClientGame1->mUserInterfaceData->set();
+         //glViewport(0, 0, gScreenInfo.getWindowWidth() / 2, gScreenInfo.getWindowHeight());
+         //gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
+      }
    }
 
    glMatrixMode(GL_MODELVIEW);
@@ -235,7 +238,7 @@ void UserInterface::renderCurrent()
    // By putting this here, it will always get rendered, regardless of which UI (if any) is active (kind of ugly)
    // This block will dump any keys and raw stick button inputs depressed to the screen when in diagnostic mode
    // This should make it easier to see what happens when users press joystick buttons
-   if(gClientGame->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
+   if(gClientGames[0]->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
    {
      S32 vpos = gScreenInfo.getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;

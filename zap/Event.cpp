@@ -322,7 +322,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 #ifndef TNL_OS_MOBILE
    // CTRL+Q --> screenshot!
    else if(key == SDLK_q && InputCodeManager::getState(KEY_CTRL))
-      ScreenShooter::saveScreenshot(game->getSettings()->getFolderManager()->screenshotDir);
+      ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings());
 #endif
    // The rest
    else

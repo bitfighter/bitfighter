@@ -1067,11 +1067,13 @@ static void setControlsCallback(ClientGame *game, U32 val)
 
 static void setFullscreenCallback(ClientGame *game, U32 mode)
 {
-   // Save existing setting
-   game->getSettings()->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
+   GameSettings *settings = game->getSettings();
 
-   game->getSettings()->getIniSettings()->displayMode = (DisplayMode)mode;
-   VideoSystem::actualizeScreenMode(false);
+   // Save existing setting
+   settings->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
+
+   settings->getIniSettings()->displayMode = (DisplayMode)mode;
+   VideoSystem::actualizeScreenMode(game->getSettings(), false);
 }
 
 
@@ -1106,7 +1108,7 @@ static S32 sticks = -1;
 static void setInputModeCallback(ClientGame *game, U32 inputModeIndex)
 {
    // Refills Joystick::DetectedJoystickNameList to allow people to plug in joystick while in this menu...
-   Joystick::initJoystick();
+   Joystick::initJoystick(game->getSettings());
 
    // If there is a different number of sticks than previously detected
    if(sticks != Joystick::DetectedJoystickNameList.size())
@@ -1181,7 +1183,7 @@ void OptionsMenuUserInterface::setupMenus()
 
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
 
-   Joystick::initJoystick();   // Refresh joystick list
+   Joystick::initJoystick(settings);   // Refresh joystick list
 
    addStickOptions(&opts);
 
@@ -1283,7 +1285,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       settings->getIniSettings()->displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
    }
 
-   VideoSystem::actualizeScreenMode(false);
+   VideoSystem::actualizeScreenMode(settings, false);
 }
 
 

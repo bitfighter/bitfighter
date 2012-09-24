@@ -94,9 +94,13 @@ bool showDebugBots = false;
 
 // Global Game objects
 // TODO: Replace this rigamarole with something like: Vector<ClientGame *> gClientGames;
-ClientGame *gClientGame = NULL;
-ClientGame *gClientGame1 = NULL;
-ClientGame *gClientGame2 = NULL;
+//ClientGame *gClientGame = NULL;
+//ClientGame *gClientGame1 = NULL;
+//ClientGame *gClientGame2 = NULL;
+
+Vector<ClientGame *> gClientGames;
+
+
 
 extern ScreenInfo gScreenInfo;
 
@@ -170,7 +174,7 @@ ClientGame::~ClientGame()
 // Also get here when hosting a game
 void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
-   //setActiveTeamManager(mTeamManager);     <== pointless!!
+   //setActiveTeamManager(mTeamManager);     <== pointless!!   
 
    mClientInfo->setIsAdmin(false); // Always start out with no permission
    mClientInfo->setIsLevelChanger(false);

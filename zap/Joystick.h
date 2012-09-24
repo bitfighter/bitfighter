@@ -45,6 +45,7 @@ namespace Zap {
 
 #include "InputCodeEnum.h"    // Include inside Zap namespace
 
+class GameSettings;
 
 enum JoystickAxesMask {
    MoveAxesLeftMask = BIT(0),
@@ -193,11 +194,11 @@ public:
    static U32 AxesInputCodeMask;
    static U32 HatInputCodeMask;
 
-   static bool initJoystick();
+   static bool initJoystick(GameSettings *settings);
    static void shutdownJoystick();
 
-   static void loadJoystickPresets();
-   static string autodetectJoystick();
+   static void loadJoystickPresets(GameSettings *settings);
+   static string autodetectJoystick(GameSettings *settings);
    static S32 checkJoystickString_exact_match(const string &controllerName);     // Searches for an exact match for controllerName
    static S32 checkJoystickString_partial_match(const string &controllerName);   // Searches for an exact match for controllerName
    static JoystickInfo getGenericJoystickInfo();

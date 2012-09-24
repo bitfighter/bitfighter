@@ -99,7 +99,7 @@ void VideoSystem::init()
    S32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
    // Fake fullscreen might not be needed with SDL2 - I think it does the fast switching
    // on platforms that support it
-   //   if(gClientGame->getSettings()->getIniSettings()->useFakeFullscreen)
+   //   if(gClientGame->getSettings()->getIniSettings()->useFakeFullscreen)  <== don't use gClientGame here, please!
    //      flags |= SDL_WINDOW_BORDERLESS;
 
    // SDL 2.0 lets us create the window first, only once
@@ -288,10 +288,8 @@ extern void setDefaultBlendFunction();
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
-void VideoSystem::actualizeScreenMode(bool changingInterfaces)
+void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces)
 {
-   GameSettings *settings = gClientGame->getSettings();
-
    DisplayMode displayMode = settings->getIniSettings()->displayMode;
 
    gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values

@@ -33,6 +33,8 @@ using namespace TNL;
 namespace Zap
 {
 
+class GameSettings;
+
 class VideoSystem
 {
 public:
@@ -47,7 +49,7 @@ public:
    static S32 getWindowPositionX();
    static S32 getWindowPositionY();
 
-   static void actualizeScreenMode(bool changingInterfaces);
+   static void actualizeScreenMode(GameSettings *settings, bool changingInterfaces);
 };
 
 } /* namespace Zap */

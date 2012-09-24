@@ -173,8 +173,7 @@ using namespace TNL;
 namespace Zap
 {
 #ifndef ZAP_DEDICATED
-   extern ClientGame *gClientGame1;
-   extern ClientGame *gClientGame2;
+   extern Vector<ClientGame *> gClientGames;
 #endif
 
 // Handle any md5 requests
@@ -245,9 +244,10 @@ void abortHosting_noLevels()
 
 
 #ifndef ZAP_DEDICATED
-   if(gClientGame)
+   for(S32 i = 0; i < gClientGames.size(); i++)
    {
-      ErrorMessageUserInterface *errUI = gClientGame->getUIManager()->getErrorMsgUserInterface();
+      ErrorMessageUserInterface *errUI = gClientGames[i]->getUIManager()->getErrorMsgUserInterface();
+
       FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       string levelDir = folderManager->levelDir;
 
@@ -262,7 +262,7 @@ void abortHosting_noLevels()
       errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
       errUI->activate();
 
-      HostMenuUserInterface *menuUI = gClientGame->getUIManager()->getHostMenuUserInterface();
+      HostMenuUserInterface *menuUI = gClientGames[i]->getUIManager()->getHostMenuUserInterface();
       menuUI->levelLoadDisplayDisplay = false;
       menuUI->levelLoadDisplayFadeTimer.clear();
    }
@@ -272,7 +272,7 @@ void abortHosting_noLevels()
    gServerGame = NULL;
 
 #ifndef ZAP_DEDICATED
-   if(!gClientGame)
+   if(gClientGames.size() == 0)
 #endif
       shutdownBitfighter();      // Quit in an orderly fashion
 }
@@ -382,8 +382,8 @@ void initHostGame(GameSettings *settings, const Vector<string> &levelList, bool 
       gServerGame->resetLevelLoadIndex();
 
 #ifndef ZAP_DEDICATED
-      if(gClientGame)
-         gClientGame->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
+      for(S32 i = 0; i < gClientGames.size(); i++)
+         gClientGames[i]->getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = true;
 #endif
    }
    else  // No levels!
@@ -407,14 +407,14 @@ void hostGame()
    }
 
 #ifndef ZAP_DEDICATED
-   if(gClientGame)      // Should be true if this isn't a dedicated server...
+   for(S32 i = 0; i < gClientGames.size(); i++)      // Should be true if this isn't a dedicated server...
    {
-      HostMenuUserInterface *ui = gClientGame->getUIManager()->getHostMenuUserInterface();
+      HostMenuUserInterface *ui = gClientGames[i]->getUIManager()->getHostMenuUserInterface();
 
       ui->levelLoadDisplayDisplay = false;
       ui->levelLoadDisplayFadeTimer.reset();
 
-      gClientGame->joinGame(Address(), false, true);   // ...then we'll play, too!
+      gClientGames[i]->joinGame(Address(), false, true);   // ...then we'll play, too!
    }
 #endif
 }
@@ -425,7 +425,8 @@ void hostGame()
 // Draw the screen
 void display()
 {
-   gClientGame->getUIManager()->renderCurrent();
+   for(S32 i = 0; i < gClientGames.size(); i++)
+      gClientGames[i]->getUIManager()->renderCurrent();
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
@@ -450,56 +451,65 @@ void gameIdle(U32 integerTime)
       UserInterface::current->idle(integerTime);
 
    // If the main game interface is in the stack, idle that too to keep things current, update timers, etc.
-   UIManager *uiManager = gClientGame ? gClientGame->getUIManager() : NULL;
-   if(uiManager && uiManager->cameFrom(GameUI))
-      uiManager->getGameUserInterface()->idle(integerTime);
+   for(S32 i = 0; i < gClientGames.size(); i++)
+   {
+      UIManager *uiManager = gClientGames[i]->getUIManager();
+      if(uiManager->cameFrom(GameUI))
+         uiManager->getGameUserInterface()->idle(integerTime);
+   }
 #endif
 
    if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
    {
 #ifndef ZAP_DEDICATED
-      if(gClientGame2)
+      for(S32 i = 0; i < gClientGames.size(); i++)
       {
-         gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
+         //if(gClientGame2)
+         //{
+         //   gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
 
-         gClientGame1->mUserInterfaceData->get();
-         gClientGame2->mUserInterfaceData->set();
+         //   gClientGame1->mUserInterfaceData->get();
+         //   gClientGame2->mUserInterfaceData->set();
 
-         gClientGame = gClientGame2;
-         gClientGame->idle(integerTime);
+         //   gClientGame = gClientGame2;
+         //   gClientGame->idle(integerTime);
 
-         gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
+         //   gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
 
-         gClientGame2->mUserInterfaceData->get();
-         gClientGame1->mUserInterfaceData->set();
-      }
-      if(gClientGame1)
-      {
-         gClientGame = gClientGame1;
-         gClientGame->idle(integerTime);
+         //   gClientGame2->mUserInterfaceData->get();
+         //   gClientGame1->mUserInterfaceData->set();
+         //}
+         //if(gClientGame1)
+         //{
+         //   gClientGame = gClientGame1;
+         //   gClientGame->idle(integerTime);
+         //}
+
+         gClientGames[i]->idle(integerTime);
       }
 #endif
 
       if(gServerGame)
       {
          // This block has to be outside gServerGame because deleting an object from within is in rather poor form
-         if(gServerGame->isReadyToShutdown(integerTime))
+         if(!gServerGame->isReadyToShutdown(integerTime))         
+            gServerGame->idle(integerTime);
+
+         else                                                     // gServerGame closing down so...
          {
 #ifndef ZAP_DEDICATED
-            if(gClientGame)
-            {
-               gClientGame->closeConnectionToGameServer();
+            for(S32 i = 0; i < gClientGames.size(); i++)
+               gClientGames[i]->closeConnectionToGameServer();    // ...disconnect any local clients
 
-               delete gServerGame;
+           if(gClientGames.size() > 0)    // If there are any clients running...
+            {
+               delete gServerGame;        // ...purge gServerGame (leaving the clients running)...
                gServerGame = NULL;
             }
-            else
+            else                          // ...otherwise...     
 #endif
-               shutdownBitfighter();
+               shutdownBitfighter();      // ...shut down the whole shebang!
          }
-
-         else
-            gServerGame->idle(integerTime);
       }
    }
 }
@@ -521,8 +531,8 @@ void idle()
          hostGame();
    }
 #ifndef ZAP_DEDICATED
-   else
-      settings = gClientGame->getSettings();
+   else     // If there is no server game, and this code is running, there *MUST* be a client game.
+      settings = gClientGames[0]->getSettings();
 #endif
 
 /*
@@ -594,12 +604,14 @@ void idle()
 
    while(SDL_PollEvent(&event))
    {
-      TNLAssert(gClientGame, "Why are we here if there is no client game??");
+      TNLAssert(gClientGames.size() > 0, "Why are we here if there is no client game??");
 
       if(event.type == SDL_QUIT) // Handle quit here
          shutdownBitfighter();
 
-      Event::onEvent(gClientGame, &event);
+      // Pass the event to all clientGames..
+      for(S32 i = 0; i < gClientGames.size(); i++)
+         Event::onEvent(gClientGames[i], &event);
    }
    // END SDL event polling
 #endif
@@ -664,19 +676,18 @@ void shutdownBitfighter()
 
    // Avoid this function being called twice when we exit via methods 1-4 above
 #ifndef ZAP_DEDICATED
-   if(!gClientGame)
+   if(gClientGames.size() == 0)
 #endif
       if(!gServerGame)
          exitToOs();
 
 // Grab a pointer to settings wherever we can.  Note that gClientGame and gServerGame refer to the same object.
 #ifndef ZAP_DEDICATED
-   if(gClientGame)
-   {
-      settings = gClientGame->getSettings();
-      delete gClientGame;     // Destructor terminates connection to master
-      gClientGame = NULL;
-   }
+   if(gClientGames.size() > 0)
+      settings = gClientGames[0]->getSettings();
+
+   gClientGames.deleteAndClear();
+
 #endif
 
    if(gServerGame)
@@ -753,47 +764,58 @@ void createClientGame(GameSettings *settings)
 #ifndef ZAP_DEDICATED
    if(!settings->isDedicatedServer())                      // Create ClientGame object
    {
-      gClientGame1 = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);   //   Let the system figure out IP address and assign a port
-      gClientGame = gClientGame1;
+      // Create a new client, and let the system figure out IP address and assign a port
+      ClientGame *clientGame = new ClientGame(Address(IPProtocol, Address::Any, settings->getIniSettings()->clientPortNumber), settings);  
 
-      gClientGame->setLoginPassword(settings->getPlayerPassword());
+      clientGame->setLoginPassword(settings->getPlayerPassword());
 
        // Put any saved filename into the editor file entry thingy
-      gClientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
+      clientGame->getUIManager()->getLevelNameEntryUserInterface()->setString(settings->getIniSettings()->lastEditorName);
 
       seedRandomNumberGenerator(settings->getIniSettings()->lastName);
-      gClientGame->getClientInfo()->getId()->getRandom();
+      clientGame->getClientInfo()->getId()->getRandom();
 
-      //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
+      gClientGames.push_back(clientGame);
+
+      //gClientGames.push_back(new ClientGame(Address(), settings));   //  !!! 2-player split-screen game in same game.
 
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
-         if(gClientGame2)
-         {
-            gClientGame = gClientGame2;
-            gClientGame1->mUserInterfaceData->get();
-            gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
-            gClientGame2->mUserInterfaceData->get();
-            gClientGame1->mUserInterfaceData->set();
-            gClientGame = gClientGame1;
-         }
-         gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
+         for(S32 i = 0; i < gClientGames.size(); i++)
+            gClientGames[i]->getUIManager()->getNameEntryUserInterface()->activate();
+
+         //if(gClientGame)
+         //{
+         //   gClientGame = gClientGame2;
+         //   gClientGame1->mUserInterfaceData->get();
+         //   gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
+         //   gClientGame2->mUserInterfaceData->get();
+         //   gClientGame1->mUserInterfaceData->set();
+         //   gClientGame = gClientGame1;
+         //}
+         //gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
          seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       }
       else
       {
-         if(gClientGame2)
+         for(S32 i = 0; i < gClientGames.size(); i++)
          {
-            gClientGame = gClientGame2;
-            gClientGame1->mUserInterfaceData->get();
-
-            gClientGame2->mUserInterfaceData->get();
-            gClientGame1->mUserInterfaceData->set();
-            gClientGame = gClientGame1;
+            gClientGames[i]->getUIManager()->getMainMenuUserInterface()->activate();
+            gClientGames[i]->setReadyToConnectToMaster(true);        
          }
-         gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
 
-         gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
+         //if(gClientGame2)
+         //{
+         //   gClientGame = gClientGame2;
+         //   gClientGame1->mUserInterfaceData->get();
+
+         //   gClientGame2->mUserInterfaceData->get();
+         //   gClientGame1->mUserInterfaceData->set();
+         //   gClientGame = gClientGame1;
+         //}
+         //gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
+
+         //gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          seedRandomNumberGenerator(settings->getPlayerName());
       }
    }
@@ -1031,13 +1053,13 @@ int main(int argc, char **argv)
    else
    {
 #ifndef ZAP_DEDICATED
-      createClientGame(settings);         // Instantiate gClientGame
+      createClientGame(settings);         // Instantiate ClietGame
 
       InputCodeManager::resetStates();    // Reset keyboard state mapping to show no keys depressed
 
-      Joystick::loadJoystickPresets();    // Load joystick presets from INI first
-      SDL_Init(0);                        // Allows Joystick and VideoSystem to work.
-      Joystick::initJoystick();           // Initialize joystick system
+      Joystick::loadJoystickPresets(settings);    // Load joystick presets from INI first
+      SDL_Init(0);                                // Allows Joystick and VideoSystem to work.
+      Joystick::initJoystick(settings);           // Initialize joystick system
 
 #ifdef TNL_OS_MAC_OSX
       moveToAppPath();        // On OS X, make sure we're in the right directory
@@ -1056,7 +1078,7 @@ int main(int argc, char **argv)
       Zap::Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
-      VideoSystem::actualizeScreenMode(false);     // Create a display window
+      VideoSystem::actualizeScreenMode(settings, false);                   // Create a display window
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 
