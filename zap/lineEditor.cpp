@@ -158,7 +158,7 @@ void LineEditor::buildMatchList(const Vector<string> *candidates, const string &
       for(S32 i = 0; i < candidates->size(); i++)
       {
          // If partial is empty, then everything matches -- we want all candidates in our list
-         if(partial == "" || partial == (*candidates)[i].substr(0, len))
+         if(partial == "" || stricmp(partial.c_str(), (*candidates)[i].substr(0, len).c_str()) == 0)
             mMatchList.push_back((*candidates)[i]);
       }
    }
