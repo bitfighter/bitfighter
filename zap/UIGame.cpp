@@ -2456,15 +2456,15 @@ CommandInfo chatCmds[] = {
    { "maxbots",            &GameUserInterface::setMaxBotsHandler,         { xINT },       1, ADMIN_COMMANDS,  0,  1,  {"<count>"},             "Set the maximum bots allowed for this server" },
    { "shuffle",            &GameUserInterface::shuffleTeams,              { },            0, ADMIN_COMMANDS,  0,  1,   { "" },                 "Randomly reshuffle teams" },
 
-   { "showcoords", &GameUserInterface::showCoordsHandler,    {  },     0, DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
-   { "showzones",  &GameUserInterface::showZonesHandler,     {  },     0, DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },
-   { "showpaths",  &GameUserInterface::showPathsHandler,     {  },     0, DEBUG_COMMANDS, 0,  1, {  },         "Show robot paths" },
-   { "showbots",   &GameUserInterface::showBotsHandler,      {  },     0, DEBUG_COMMANDS, 0,  1, {  },         "Show all robots" },
-   { "pausebots",  &GameUserInterface::pauseBotsHandler,     {  },     0, DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots. Reissue to start again" },
-   { "stepbots",   &GameUserInterface::stepBotsHandler,      { xINT }, 1, DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (default = 1)"},
-   { "linewidth",  &GameUserInterface::lineWidthHandler,     { xINT }, 1, DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
-   { "maxfps",     &GameUserInterface::maxFpsHandler,        { xINT }, 1, DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
-   { "lag",        &GameUserInterface::lagHandler, {xINT,xINT,xINT,xINT}, 4,DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]"}, "Set additional lag and percent of dropped packets" },
+   { "showcoords", &GameUserInterface::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
+   { "showzones",  &GameUserInterface::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },
+   { "showpaths",  &GameUserInterface::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show robot paths" },
+   { "showbots",   &GameUserInterface::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show all robots" },
+   { "pausebots",  &GameUserInterface::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots. Reissue to start again" },
+   { "stepbots",   &GameUserInterface::stepBotsHandler,      { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[steps]"},  "Advance bots by number of steps (default = 1)"},
+   { "linewidth",  &GameUserInterface::lineWidthHandler,     { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
+   { "maxfps",     &GameUserInterface::maxFpsHandler,        { xINT },    1, DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
+   { "lag",        &GameUserInterface::lagHandler, {xINT,xINT,xINT,xINT}, 4, DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]"}, "Set additional lag and percent of dropped packets" },
 };
 
 
