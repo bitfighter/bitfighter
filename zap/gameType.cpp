@@ -1852,10 +1852,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       if(clientInfo->getShip()->getTeam() >= 0 && robot->getTeam() < mGame->getTeamCount())   // No neutral or hostile bots -- why not?
          minTeamIndex = robot->getTeam();
 
-      robot->setMaskBits(Ship::ChangeTeamMask);                               // Needed to avoid gray robot ships when using /addbot
+      robot->setMaskBits(Ship::ChangeTeamMask);    // Needed to avoid gray robot ships when using /addbot
    }
    
-   clientInfo->setTeamIndex(minTeamIndex);     // Add new player to their assigned team
+   clientInfo->setTeamIndex(minTeamIndex);         // Add new player to their assigned team
 
    // Tell other clients about the new guy (who is never us)
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
