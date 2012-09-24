@@ -43,6 +43,7 @@ public:
 
    LuaPlayerInfo();                 // Constructor
    LuaPlayerInfo(lua_State *L);     // Lua constructor
+   virtual ~LuaPlayerInfo();
 
    // These would be declared asbstract, except that Lunar strenusously objects...
    virtual S32 getName(lua_State *L);

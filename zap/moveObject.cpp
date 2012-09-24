@@ -2007,7 +2007,7 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    stream->writeInt(mHeadIndex, 5);
 
    // Most of time, we only update the Point at mHeadIndex, which can save 28 bits.
-   if(stream->writeFlag((TailPointPartsMask << mHeadIndex) == (updateMask & TailPointPartsFullMask)))
+   if(stream->writeFlag(U32(TailPointPartsMask << mHeadIndex) == (updateMask & TailPointPartsFullMask)))
       mPoints[mHeadIndex].write(stream);
    else
       for(S32 i = 0; i < maxTailLength; i++)

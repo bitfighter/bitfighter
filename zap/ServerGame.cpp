@@ -1036,8 +1036,6 @@ void ServerGame::runLevelGenScript(const string &scriptName)
    if(scriptName == "")    // No script specified!
       return;
 
-   FolderManager *folderManager = getSettings()->getFolderManager();
-
    // Find full name of levelgen script -- returns "" if file not found
    string fullname = getSettings()->getFolderManager()->findLevelGenScript(scriptName);  
 

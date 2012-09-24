@@ -62,6 +62,13 @@ LuaPlayerInfo::LuaPlayerInfo(lua_State *L)
 }
 
 
+// Destructor
+LuaPlayerInfo::~LuaPlayerInfo()
+{
+   // Do nothing
+}
+
+
 S32 LuaPlayerInfo::getName(lua_State *L)
 {
    TNLAssert(false, "Unimplemented method!");
