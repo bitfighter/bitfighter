@@ -2580,7 +2580,11 @@ void GameUserInterface::renderCurrentChat()
 
             if(!stricmp(cmd, chatCmds[i].cmdName.c_str()))
             {
-               if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ')
+               // My thinking here is that if the number of quotes is odd, the last argument is not complete, even if
+               // it ends in a space.  There may be an edge case that voids this argument, but our use is simple enough 
+               // that this should work well.  If a number is even, num % 2 will be 0.
+               S32 numberOfQuotes = count(line.begin(), line.end(), '"');
+               if(chatCmds[i].cmdArgCount >= words.size() && line[line.size() - 1] == ' ' && numberOfQuotes % 2 == 0)
                {
                   glColor(baseColor * .5);
                   drawString(xStartPos + displayWidth, ypos, CHAT_FONT_SIZE, chatCmds[i].helpArgString[words.size() - 1].c_str());
