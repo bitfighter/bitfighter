@@ -393,12 +393,23 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+// Expect <team> <bot>
 bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &errorMessage)
 {
-   if(argc >= 1)
-      setTeam(atoi(argv[0]));
-   else
+   if(argc <= 1)
       setTeam(NO_TEAM);   
+   else
+   {
+      S32 team = atoi(argv[0]);
+
+      if(team == NO_TEAM || (team >= 0 && team < game->getTeamCount()))
+         setTeam(atoi(argv[0]));
+      else
+      {
+         errorMessage = "Invalid team specified";
+         return false;
+      }
+   }
    
 
    string scriptName;
@@ -416,7 +427,6 @@ bool Robot::processArguments(S32 argc, const char **argv, Game *game, string &er
    if(mScriptName == "")     // Bot script could not be located
    {
       errorMessage = "Could not find bot file " + scriptName;
-      logprintf(LogConsumer::LuaBotMessage, "Could not find bot file %s", scriptName.c_str());
       return false;
    }
 

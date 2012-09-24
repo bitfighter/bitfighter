@@ -2115,40 +2115,46 @@ void GameUserInterface::resetScoreHandler(const Vector<string> &words)
 }
 
 
-static void fixupArgs(Game *game, Vector<StringTableEntry> &args)
+static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
 {
    // c2sAddBot expects the args is a slightly different order than what we have; it wants team first, then bot name, then bot args
    // However, we want users to be able to enter the bot name first, followed by an optional team.
-   // If the first arg is a string and the second is a number, switch the args.  If first arg is a string, and there is no second arg,
-   // insert the NO_TEAM arg.
-   // Also, if the user specifies a team name, we'll try to translate that into a team number.
+   // If the user specifies a team name as the 2nd arg, translate that into a team number.
+   // If the first arg is a string and there is a second arg, switch them.  If first arg is a string, and there is no second arg,
+   // insert the NO_TEAM arg.  If first arg is numeric, hope user entered a team index first, and do not switch the args.
    // Normal arg order is bot name, team, bot args
 
    // First thing is to try to translate the 2nd arg into a team number
-   if(args.size() >= 2)
+   if(args.size() >= 2 && !isInteger(args[1].getString()))
    {
       S32 teamIndex = game->getTeamIndexFromTeamName(args[1].getString());
-      if(teamIndex != NO_TEAM)
-         args[1] = itos(teamIndex);
+      if(teamIndex == NO_TEAM)
+      {
+         game->displayErrorMessage("!!! Invalid team specified");
+         return false;
+      }
+
+      args[1] = itos(teamIndex);
    }
 
    bool firstArgIsInt  = args.size() >= 1 && isInteger(args[0].getString());
-   bool secondArgIsInt = args.size() >= 2 && isInteger(args[1].getString());
    
-   if(!firstArgIsInt)
+   if(firstArgIsInt)          // If first arg is numeric, hope user entered a team index first, and do not switch the args.
+      return true;
+
+   if(args.size() >= 2)       // If the first arg is a string and there is a second arg, switch them.
    {
-      if(secondArgIsInt)         // Looks like bot name came first... time to switch!
-      {
-         StringTableEntry temp = args[0];
-         args[0] = args[1];
-         args[1] = temp;
-      }
-      else if(args.size() == 1)  // Only one arg, and it's a string; move it to 2nd and put NO_TEAMS first
-      {
-         args.push_back(args[0]);
-         args[0] = itos(NO_TEAM).c_str();
-      }
+      StringTableEntry temp = args[0];
+      args[0] = args[1];
+      args[1] = temp;
    }
+   else if(args.size() == 1)  // If first arg is a string, and there is no second arg, insert the NO_TEAM arg.
+   {
+      args.push_back(args[0]);
+      args[0] = itos(NO_TEAM).c_str();
+   }
+
+   return true;
 }
 
 
@@ -2163,7 +2169,8 @@ void GameUserInterface::addBotHandler(const Vector<string> &words)
       for(S32 i = 1; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
 
-      fixupArgs(game, args);     // Reorder args for c2sAddBot, translate team names to indices
+      if(!fixupArgs(game, args))    // Reorder args for c2sAddBot, translate team names to indices, and do a little checking
+         return;     
 
       if(game->getGameType())
          game->getGameType()->c2sAddBot(args);
@@ -2196,7 +2203,8 @@ void GameUserInterface::addBotsHandler(const Vector<string> &words)
       for(S32 i = 2; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
 
-      fixupArgs(game, args);        // Reorder args for c2sAddBot translate team names to indices
+      if(!fixupArgs(game, args))        // Reorder args for c2sAddBot translate team names to indices
+         return;
 
       if(game->getGameType())
          game->getGameType()->c2sAddBots(count, args);
