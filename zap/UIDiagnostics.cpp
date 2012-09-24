@@ -100,7 +100,7 @@ bool DiagnosticUserInterface::onKeyDown(InputCode inputCode)
    {
       mCurPage++;
       if(mCurPage >= NUM_PAGES)
-         mCurPage = 0;
+         quit();
    }
    else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
    {

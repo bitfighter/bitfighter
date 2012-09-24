@@ -507,8 +507,15 @@ bool EditorInstructionsUserInterface::onKeyDown(InputCode inputCode)
       playBoop();
       nextPage();
    }
-   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode) ||
-          inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
+   // F1 has dual use... advance page, then quit out of help when done
+   else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode))
+   {
+      if(mCurPage != getPageCount())
+         nextPage();
+      else
+         exitInstructions();
+   }
+   else if(inputCode == KEY_ESCAPE  || inputCode == BUTTON_BACK)
       exitInstructions();
    // Nothing was handled
    else
