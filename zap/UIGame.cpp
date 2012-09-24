@@ -2115,15 +2115,26 @@ void GameUserInterface::resetScoreHandler(const Vector<string> &words)
 }
 
 
-static void fixupArgs(Vector<StringTableEntry> &args)
+static void fixupArgs(Game *game, Vector<StringTableEntry> &args)
 {
    // c2sAddBot expects the args is a slightly different order than what we have; it wants team first, then bot name, then bot args
    // However, we want users to be able to enter the bot name first, followed by an optional team.
    // If the first arg is a string and the second is a number, switch the args.  If first arg is a string, and there is no second arg,
    // insert the NO_TEAM arg.
-   bool firstArgIsInt = args.size() >= 1 && isInteger(args[0].getString());
-   bool secondArgIsInt = args.size() >= 2 && isInteger(args[1].getString());
+   // Also, if the user specifies a team name, we'll try to translate that into a team number.
+   // Normal arg order is bot name, team, bot args
 
+   // First thing is to try to translate the 2nd arg into a team number
+   if(args.size() >= 2)
+   {
+      S32 teamIndex = game->getTeamIndexFromTeamName(args[1].getString());
+      if(teamIndex != NO_TEAM)
+         args[1] = itos(teamIndex);
+   }
+
+   bool firstArgIsInt  = args.size() >= 1 && isInteger(args[0].getString());
+   bool secondArgIsInt = args.size() >= 2 && isInteger(args[1].getString());
+   
    if(!firstArgIsInt)
    {
       if(secondArgIsInt)         // Looks like bot name came first... time to switch!
@@ -2144,6 +2155,7 @@ static void fixupArgs(Vector<StringTableEntry> &args)
 void GameUserInterface::addBotHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasLevelChange("!!! Need level change permissions to add a bot"))
    {
       // Build args by skipping first word (the command)
@@ -2151,7 +2163,7 @@ void GameUserInterface::addBotHandler(const Vector<string> &words)
       for(S32 i = 1; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
 
-      fixupArgs(args);     // Reorder args for c2sAddBot
+      fixupArgs(game, args);     // Reorder args for c2sAddBot, translate team names to indices
 
       if(game->getGameType())
          game->getGameType()->c2sAddBot(args);
@@ -2184,7 +2196,7 @@ void GameUserInterface::addBotsHandler(const Vector<string> &words)
       for(S32 i = 2; i < words.size(); i++)
          args.push_back(StringTableEntry(words[i]));
 
-      fixupArgs(args);        // Reorder args for c2sAddBot
+      fixupArgs(game, args);        // Reorder args for c2sAddBot
 
       if(game->getGameType())
          game->getGameType()->c2sAddBots(count, args);
@@ -2435,8 +2447,8 @@ CommandInfo chatCmds[] = {
    { "settime",     &GameUserInterface::setTimeHandler,         { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Set play time for the level" },
    { "setscore",    &GameUserInterface::setWinningScoreHandler, { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<score>"},                                "Set score to win the level" },
    { "resetscore",  &GameUserInterface::resetScoreHandler,      {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
-   { "addbot",      &GameUserInterface::addBotHandler,          { STR, TEAM, STR },       3, LEVEL_COMMANDS,  1,  2,  {"[file]", "[team num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
-   { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
+   { "addbot",      &GameUserInterface::addBotHandler,          { STR, TEAM, STR },       3, LEVEL_COMMANDS,  1,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
+   { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     1, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
    { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     1, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
 

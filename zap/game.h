@@ -325,11 +325,14 @@ public:
 
    // Team functions
    S32 getTeamCount() const;
+   
    AbstractTeam *getTeam(S32 teamIndex) const;
+
    Vector<Team *> *getSortedTeamList_score() const;
    bool getTeamHasFlag(S32 teamIndex) const;
 
    S32 getTeamIndex(const StringTableEntry &playerName);
+   S32 getTeamIndexFromTeamName(const char *teamName) const;
 
    void countTeamPlayers();      // Makes sure that the mTeams[] structure has the proper player counts
 

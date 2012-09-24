@@ -517,6 +517,19 @@ AbstractTeam *Game::getTeam(S32 team)             const { return mActiveTeamMana
 bool          Game::getTeamHasFlag(S32 teamIndex) const { return mActiveTeamManager->getTeamHasFlag(teamIndex); }
 
 
+S32 Game::getTeamIndexFromTeamName(const char *teamName) const 
+{ 
+   for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
+      if(stricmp(teamName, getTeamName(i).getString()) == 0)
+         return i;
+
+   if(stricmp(teamName, "Hostile") == 0)
+      return TEAM_HOSTILE;
+   if(stricmp(teamName, "Neutral") == 0)
+      return TEAM_NEUTRAL;
+
+   return NO_TEAM;
+}
 
 
 // Makes sure that the mTeams[] structure has the proper player counts
