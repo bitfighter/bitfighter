@@ -580,7 +580,7 @@ public:
    TNL_DECLARE_RPC(c2sBanIp, (StringTableEntry ipAddressString, U32 duration));
    TNL_DECLARE_RPC(c2sRenamePlayer, (StringTableEntry playerName, StringTableEntry newName));
    TNL_DECLARE_RPC(c2sGlobalMutePlayer, (StringTableEntry playerName));
-
+   TNL_DECLARE_RPC(c2sClearScriptCache, ());
    TNL_DECLARE_RPC(c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex));
    TNL_DECLARE_RPC(c2sKickPlayer, (StringTableEntry playerName));
 

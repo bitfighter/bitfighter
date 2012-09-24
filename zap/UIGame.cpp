@@ -1919,6 +1919,7 @@ void GameUserInterface::maxFpsHandler(const Vector<string> &words)
       game->getSettings()->getIniSettings()->maxFPS = number;
 }
 
+
 void GameUserInterface::lagHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
@@ -1961,8 +1962,16 @@ void GameUserInterface::lagHandler(const Vector<string> &words)
       sendLag /= 2;
    }
 
-
    getGame()->getConnectionToServer()->setSimulatedNetParams(sendLoss / 100, sendLag, receiveLoss / 100, receiveLag);
+}
+
+
+void GameUserInterface::clearCacheHandler(const Vector<string> &words)
+{
+   if(getGame()->hasAdmin("!!! Need admin permissions"))
+
+   if(getGame()->getGameType())
+         getGame()->getGameType()->c2sClearScriptCache();
 }
 
 
@@ -2447,7 +2456,7 @@ CommandInfo chatCmds[] = {
    { "mute",    &GameUserInterface::muteHandler,      { NAME },      1,      ADV_COMMANDS,     3,     1,    {"<name>"},             "Toggle hiding chat messages from <name>" },
    { "vmute",   &GameUserInterface::voiceMuteHandler, { NAME },      1,      ADV_COMMANDS,     3,     1,    {"<name>"},             "Toggle muting voice chat from <name>" },
 
-   { "add",         &GameUserInterface::addTimeHandler,         { xINT },                 0, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Add time to the current game" },
+   { "add",         &GameUserInterface::addTimeHandler,         { xINT },                 1, LEVEL_COMMANDS,  0,  1,  {"<time in minutes>"},                      "Add time to the current game" },
    { "next",        &GameUserInterface::nextLevelHandler,       {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Start next level" },
    { "prev",        &GameUserInterface::prevLevelHandler,       {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Replay previous level" },
    { "restart",     &GameUserInterface::restartLevelHandler,    {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Restart current level" },
@@ -2485,6 +2494,7 @@ CommandInfo chatCmds[] = {
    { "linewidth",  &GameUserInterface::lineWidthHandler,     { xINT },    1, DEBUG_COMMANDS, 1,  1, {"[number]"}, "Change width of all lines (default = 2)" },
    { "maxfps",     &GameUserInterface::maxFpsHandler,        { xINT },    1, DEBUG_COMMANDS, 1,  1, {"<number>"}, "Set maximum speed of game in frames per second" },
    { "lag",        &GameUserInterface::lagHandler, {xINT,xINT,xINT,xINT}, 4, DEBUG_COMMANDS, 1,  2, {"<send lag>", "[% of send drop packets]", "[receive lag]", "[% of receive drop packets]"}, "Set additional lag and percent of dropped packets" },
+   { "clearcache", &GameUserInterface::clearCacheHandler,    {  },        0, DEBUG_COMMANDS, 1,  1, { },          "Clear any cached scripts, forcing them to be reloaded" },
 };
 
 

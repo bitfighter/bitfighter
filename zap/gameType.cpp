@@ -2860,8 +2860,6 @@ void GameType::processServerCommand(ClientInfo *clientInfo, const char *cmd, Vec
       serverGame->voteClient(clientInfo, true);
    else if(!stricmp(cmd, "no"))
       serverGame->voteClient(clientInfo, false);
-   else if(!stricmp(cmd, "clearcache"))
-      LuaScriptRunner::clearScriptCache();
    else if(!stricmp(cmd, "loadini") || !stricmp(cmd, "loadsetting"))
    {
       if(clientInfo->isAdmin())
@@ -3396,6 +3394,19 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
 
    conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is unmuted");
 }
+
+
+GAMETYPE_RPC_C2S(GameType, c2sClearScriptCache, (), ())
+{
+   LuaScriptRunner::clearScriptCache();
+   ClientInfo *clientInfo = ((GameConnection *) getRPCSourceConnection())->getClientInfo();
+
+   if(!clientInfo->isAdmin())    // Error message handled client-side
+      return;  
+
+   clientInfo->getConnection()->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Script cache cleared; scripts will be reloaded on next use");
+}
+
 
 
 GAMETYPE_RPC_C2S(GameType, c2sTriggerTeamChange, (StringTableEntry playerName, S32 teamIndex), (playerName, teamIndex))
