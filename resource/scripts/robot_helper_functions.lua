@@ -91,11 +91,11 @@ end
 -- And two more
 --
 function subscribe(event)
-   subscribe_bot(bot, event)
+   bot:subscribe(event)
 end   
 
 function unsubscribe(event)
-   unsubscribe_bot(bot, event)
+   bot:unsubscribe(event)
 end  
 
 function globalMsg(message)
