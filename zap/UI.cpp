@@ -1113,7 +1113,9 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    }
    else if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))  // Turn on Global Chat overlay
    {
-      if(uiManager->isOpen(GlobalChatUI))
+      // Don't activate if we're already in chat or if we're on the Name Entry
+      // screen (since we don't have a nick yet)
+      if(uiManager->isOpen(GlobalChatUI) || uiManager->isOpen(NameEntryUI))
          return false;
 
       getGame()->getUIManager()->getChatUserInterface()->activate();
