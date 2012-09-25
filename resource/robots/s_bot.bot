@@ -1,22 +1,7 @@
 --- from quickBot v2, modified by sam686
 --- works on all game modes, except this bot don't work on non-pickup soccer
 
-game = nil
-difficulty = nil
-speed = nil
-directionThreshold = nil
-averageIndex = nil
-averageMax = nil
-myOrbitalDirection = nil
-agression = nil
-defense = nil
-myNum = nil
-gameType = nil
 goalPt = point.new(0,0)
-dirToGo = nil
-
-pathTimer = nil
-pathTimerMax = nil
 
 prevtarget = nil
 
@@ -25,10 +10,11 @@ gotoPositionWasNil = true
 o = point.new(0,0)
  
 botLoc = nil        -- Bot's location, will be updated when onTick() is run
- 
-botRadius = nil
- 
+
 function main()
+    -- global(botRadius, pathTimerMax, pathTimer, dirToGo, game, difficulty, agression, 
+    --        defense, speed, directionThreshold, gameType, averageIndex, averageMax, 
+    --        averageArray, myOrbitalDirection, myNum)
     botRadius = bot:getRad()
     pathTimerMax = 250
     pathTimer = pathTimerMax
@@ -39,17 +25,19 @@ function main()
     defense = tonumber(arg[3]) or 0
     speed = tonumber(arg[4]) or 1
     directionThreshold = tonumber(arg[5]) or .25
- 
+
     gameType = game:getGameType()
     
     averageIndex = 1
     averageMax = 20
-    averageArray = {}
+
+    averageArray = { }
     for i = 1, averageMax do
         averageArray[i] = false
     end
+
     myOrbitalDirection = 1
-    myNum = math.random(0,10)
+    myNum = math.random(0, 10)
 end
  
 function vectorX(dir, dist)
@@ -61,15 +49,15 @@ function vectorY(dir, dist)
 end
  
 function shieldSelf()
-    local bullets = findItems(BulletType,AsteroidType,MineType)
-    local distToShieldAt = bot:getRad()*2 + (1-difficulty)*100
+    local bullets = findItems(BulletType, AsteroidType, MineType)
+    local distToShieldAt = botRadius * 2 + (1 - difficulty) * 100
     if (bullets ~= nil) then
         for i,bullet in ipairs(bullets) do
             local bulletLoc = bullet:getLoc()
             local bulletVel = bullet:getVel()
             local angleDiff = math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletLoc, botLoc)))
             --logprint(angleDiff)
-            if (point.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel)*50 and angleDiff < math.pi/4) then
+            if (point.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel) * 50 and angleDiff < math.pi / 4) then
                 bot:activateModule(ModuleShield)
                 return(true)
             end
@@ -77,8 +65,8 @@ function shieldSelf()
     end
 end
 
-function angleDifference(angleA,angleB)
-    return (math.mod(math.mod(angleA - angleB, math.pi*2) + math.pi*3, math.pi*2) - math.pi)
+function angleDifference(angleA, angleB)
+    return (math.mod(math.mod(angleA - angleB, math.pi * 2) + math.pi * 3, math.pi * 2) - math.pi)
 end
 
 function fireAtObjects()
@@ -95,23 +83,22 @@ end
 --Does not fire if object is on the same team or if there is something in the way.
 --Returns whether it fired or not.
 function fireAtObject(obj, weapon)
-    if(obj:getClassID() == TurretType or obj:getClassID() == ForceFieldProjectorType) then
-        if(obj:getHealth() < .1) then
-            --logprint("It's dead.")
-            return(false)
+    local classId = obj:getClassID()
+
+    if(classId == TurretType or classId == ForceFieldProjectorType) then
+     if(obj:getHealth() < .1) then
+         --logprint("He's dead, Jim.")
+         return(false)
         end
     end
     
-    if(obj:getClassID() == ShipType or
-        obj:getClassID() == RobotType or
-        obj:getClassID() == TurretType or
-        obj:getClassID() == ForceFieldProjectorType or
-        obj:getClassID() == CoreType) then
-            if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == NeutralTeamIndx then
+    if(classId == ShipType    or   classId == RobotType   or   classId == ForceFieldProjectorType   or
+        classId == TurretType  or   classId == CoreType) then
+           if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == NeutralTeamIndx then
                 --logprint("It's an ally.")
                 return(false)
-            end
-    end
+           end
+   end
 
     
     local angle = getFiringSolution(obj)
@@ -131,13 +118,15 @@ function getName()
      return("S_Bot")
 end
  
+
 function findEnemy()
     local enemies = findItems(ShipType, RobotType)
     local target = nil
     local smallestDist = 999999
+    local botTeamIndx = bot:getTeamIndx()
     
     for index,enemy in ipairs(enemies) do
-        if (enemy:getTeamIndx() ~= bot:getTeamIndx() or not game:isTeamGame()) then     -- Put cheaper test first
+        if (enemy:getTeamIndx() ~= botTeamIndx or not game:isTeamGame()) then     -- Put cheaper test first
             local d = point.distSquared(botLoc, enemy:getLoc())  
             if( d < smallestDist ) then
                 target = enemy
@@ -154,13 +143,17 @@ function findEnemy()
     
     return(nil)
 end
+
+
 function getNearestEnemy()
     local enemies = findItems(ShipType, RobotType)
     local target = nil
     local smallestDist = 99999999
+    local botTeamIndx = bot:getTeamIndx()
+    local isTeamGame = game:isTeamGame()
     
     for index,enemy in ipairs(enemies) do
-        if (enemy:getTeamIndx() ~= bot:getTeamIndx() or not game:isTeamGame()) then     -- Put cheaper test first
+        if (enemy:getTeamIndx() ~= botTeamIndx or not isTeamGame) then     -- Put cheaper test first
             local d = point.distSquared(botLoc, enemy:getLoc())  
             if( d < smallestDist ) then
                 target = enemy
@@ -171,17 +164,22 @@ function getNearestEnemy()
     
     return(target)
 end
- 
+
+
 function shield()
     averageArray[averageIndex] = shieldSelf()
     averageIndex = math.mod(averageIndex,averageMax) + 1
+
     local shieldPercent = 0
+
     for i = 1, averageMax do
         if(averageArray[averageIndex]) then
             shieldPercent = shieldPercent + 1
         end
     end
+
     shieldPercent = shieldPercent / averageMax
+
     if(shieldPercent > directionThreshold) then
         myOrbitalDirection = -myOrbitalDirection
         for i = 1, averageMax do
@@ -191,12 +189,23 @@ function shield()
 end
  
 function orbitPoint(pt, dir, inputDist, inputStrictness)
-    local distAway = bot:getRad()*7
+    local distAway = botRadius * 7
     local strictness = 2
     local direction = 1
-    if(dir ~= nil) then direction = dir end
-    if(inputDist ~= nil) then distAway = inputDist end
-    if(inputStrictness ~= nil) then strictness = inputStrictness end
+
+    if(dir ~= nil) then 
+        direction = dir 
+    end
+
+
+    if(inputDist ~= nil) then 
+        distAway = inputDist 
+    end
+
+    if(inputStrictness ~= nil) then 
+        strictness = inputStrictness 
+    end
+
     if(pt ~= nil) then
         local dist = point.distanceTo(pt, botLoc)
         local deltaDistance = (dist - distAway) * strictness / distAway
@@ -206,10 +215,11 @@ function orbitPoint(pt, dir, inputDist, inputStrictness)
         elseif(deltaDistance < 0) then
             sign = -1
         end
-        local changeInAngle = (math.abs(deltaDistance)/(deltaDistance + sign))*math.pi/2
+
+        local changeInAngle = (math.abs(deltaDistance)/(deltaDistance + sign)) * math.pi/2
         local angleToPoint = point.angleTo(pt, bot:getLoc())
         dirToGo = angleToPoint + (math.pi/2 + changeInAngle)*direction
-        --bot:setThrust(speed,dirToGo)
+        --bot:setThrust(speed, dirToGo)
     end
 end
 
@@ -219,7 +229,7 @@ function gotoPosition(pt)
         if pathTimer<.01 then
             goalPt=bot:getWaypoint(pt)
             if(goalPt ~= nil) then
-                       dirToGo = point.angleTo(botLoc,goalPt)
+                       dirToGo = point.angleTo(botLoc, goalPt)
                     end
         end
     end
@@ -255,8 +265,8 @@ function attackNearbyEnemies(agressionLevel)
         local otherPow = target:getEnergy() + target:getHealth() * #enemies
       
         --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
-        local advantage = (myPow-otherPow) / math.max(myPow,otherPow)
-        if(advantage/2 + .5>agressionLevel) then
+        local advantage = (myPow - otherPow) / math.max(myPow, otherPow)
+        if(advantage  /2 + .5  >agressionLevel) then
             --orbitPoint(targetLoc, myOrbitalDirection, botRadius * 9, 2)
             prevtarget = targetLoc
             return(false)      -- was true
