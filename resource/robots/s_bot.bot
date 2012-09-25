@@ -12,7 +12,7 @@ agression = nil
 defense = nil
 myNum = nil
 gameType = nil
-goalPt = vec.new(0,0)
+goalPt = point.new(0,0)
 dirToGo = nil
 
 pathTimer = nil
@@ -22,71 +22,72 @@ prevtarget = nil
 
 gotoPositionWasNil = true
  
-o = vec.new(0,0)
+o = point.new(0,0)
  
-botLoc = nil		-- Bot's location, will be updated when onTick() is run
+botLoc = nil        -- Bot's location, will be updated when onTick() is run
  
 botRadius = nil
  
 function main()
-	botRadius = bot:getRad()
-	pathTimerMax = 250
-	pathTimer = pathTimerMax
-	dirToGo = 0
-	game = GameInfo()
-	difficulty = tonumber(arg[1]) or .5
-	agression = tonumber(arg[2]) or 0.5
-	defense = tonumber(arg[3]) or 0
-	speed = tonumber(arg[4]) or 1
-	directionThreshold = tonumber(arg[5]) or .25
+    botRadius = bot:getRad()
+    pathTimerMax = 250
+    pathTimer = pathTimerMax
+    dirToGo = 0
+    game = GameInfo()
+    difficulty = tonumber(arg[1]) or .5
+    agression = tonumber(arg[2]) or 0.5
+    defense = tonumber(arg[3]) or 0
+    speed = tonumber(arg[4]) or 1
+    directionThreshold = tonumber(arg[5]) or .25
  
-	gameType = game:getGameType()
-	
-	averageIndex = 1
-	averageMax = 20
-	averageArray = {}
-	for i = 1, averageMax do
-		averageArray[i] = false
-	end
-	myOrbitalDirection = 1
-	myNum = math.random(0,10)
+    gameType = game:getGameType()
+    
+    averageIndex = 1
+    averageMax = 20
+    averageArray = {}
+    for i = 1, averageMax do
+        averageArray[i] = false
+    end
+    myOrbitalDirection = 1
+    myNum = math.random(0,10)
 end
  
 function vectorX(dir, dist)
-	return(dist * math.cos(dir))
+    return(dist * math.cos(dir))
 end
+
 function vectorY(dir, dist)
-	return(-dist * math.sin(dir))  
+    return(-dist * math.sin(dir))  
 end
  
 function shieldSelf()
-	local bullets = findItems(BulletType,AsteroidType,MineType)
-	local distToShieldAt = bot:getRad()*2 + (1-difficulty)*100
-	if (bullets ~= nil) then
-		for i,bullet in ipairs(bullets) do
-			local bulletLoc = bullet:getLoc()
-			local bulletVel = bullet:getVel()
-			local angleDiff = math.abs(angleDifference(vec.angleTo(o, bulletVel), vec.angleTo(bulletLoc, botLoc)))
-			--logprint(angleDiff)
-			if (vec.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + vec.distanceTo(o,bulletVel)*50 and angleDiff < math.pi/4) then
-				bot:activateModule(ModuleShield)
-				return(true)
-			end
-		end
-	end
+    local bullets = findItems(BulletType,AsteroidType,MineType)
+    local distToShieldAt = bot:getRad()*2 + (1-difficulty)*100
+    if (bullets ~= nil) then
+        for i,bullet in ipairs(bullets) do
+            local bulletLoc = bullet:getLoc()
+            local bulletVel = bullet:getVel()
+            local angleDiff = math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletLoc, botLoc)))
+            --logprint(angleDiff)
+            if (point.distanceTo(bulletLoc, botLoc) < distToShieldAt + bullet:getRad() + point.distanceTo(o, bulletVel)*50 and angleDiff < math.pi/4) then
+                bot:activateModule(ModuleShield)
+                return(true)
+            end
+        end
+    end
 end
 
 function angleDifference(angleA,angleB)
-	return (math.mod(math.mod(angleA - angleB, math.pi*2) + math.pi*3, math.pi*2) - math.pi)
+    return (math.mod(math.mod(angleA - angleB, math.pi*2) + math.pi*3, math.pi*2) - math.pi)
 end
 
 function fireAtObjects()
-	local enemies = findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
-	for index,enemy in ipairs(enemies) do
-		if(fireAtObject(enemy, WeaponPhaser)) then
-			break
-		end
-	end
+    local enemies = findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
+    for index,enemy in ipairs(enemies) do
+        if(fireAtObject(enemy, WeaponPhaser)) then
+            break
+        end
+    end
 end
  
  
@@ -94,175 +95,175 @@ end
 --Does not fire if object is on the same team or if there is something in the way.
 --Returns whether it fired or not.
 function fireAtObject(obj, weapon)
-	if(obj:getClassID() == TurretType or obj:getClassID() == ForceFieldProjectorType) then
-		if(obj:getHealth() < .1) then
-			--logprint("It's dead.")
-			return(false)
-		end
-	end
-	
-	if(obj:getClassID() == ShipType or
-		obj:getClassID() == RobotType or
-		obj:getClassID() == TurretType or
-		obj:getClassID() == ForceFieldProjectorType or
-		obj:getClassID() == CoreType) then
-			if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == NeutralTeamIndx then
-				--logprint("It's an ally.")
-				return(false)
-			end
-	end
+    if(obj:getClassID() == TurretType or obj:getClassID() == ForceFieldProjectorType) then
+        if(obj:getHealth() < .1) then
+            --logprint("It's dead.")
+            return(false)
+        end
+    end
+    
+    if(obj:getClassID() == ShipType or
+        obj:getClassID() == RobotType or
+        obj:getClassID() == TurretType or
+        obj:getClassID() == ForceFieldProjectorType or
+        obj:getClassID() == CoreType) then
+            if obj:getTeamIndx() == bot:getTeamIndx() and game:isTeamGame() or obj:getTeamIndx() == NeutralTeamIndx then
+                --logprint("It's an ally.")
+                return(false)
+            end
+    end
 
-	
-	local angle = getFiringSolution(obj)
-	if angle ~= nil and bot:hasWeapon(weapon) then
-		bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
-		bot:setWeapon(weapon)
-		bot:fire()
-		--logprint("bot:fire() called!");
-		return(true)
-	end
-	--logprint("Firing solution not found.");
-	return(false)
+    
+    local angle = getFiringSolution(obj)
+    if angle ~= nil and bot:hasWeapon(weapon) then
+        bot:setAngle(angle + math.rad((math.random()-0.5)*20*(1-difficulty)))
+        bot:setWeapon(weapon)
+        bot:fire()
+        --logprint("bot:fire() called!");
+        return(true)
+    end
+    --logprint("Firing solution not found.");
+    return(false)
 end
  
  
 function getName()
-	 return("S_Bot")
+     return("S_Bot")
 end
  
 function findEnemy()
-	local enemies = findItems(ShipType, RobotType)
-	local target = nil
-	local smallestDist = 999999
-	
-	for index,enemy in ipairs(enemies) do
-		if (enemy:getTeamIndx() ~= bot:getTeamIndx() or not game:isTeamGame()) then		-- Put cheaper test first
-			local d = vec.distSquared(botLoc, enemy:getLoc())  
-			if( d < smallestDist ) then
-				target = enemy
-				smallestDist = d
-			end
-		end  
-	end
-	
-	if(target ~= nil and bot:hasLosPt(target:getLoc())) then
-		return(target)
-	elseif(enemies[0] ~= nil) then
-		return(enemies[0])
-	end
-	
-	return(nil)
+    local enemies = findItems(ShipType, RobotType)
+    local target = nil
+    local smallestDist = 999999
+    
+    for index,enemy in ipairs(enemies) do
+        if (enemy:getTeamIndx() ~= bot:getTeamIndx() or not game:isTeamGame()) then     -- Put cheaper test first
+            local d = point.distSquared(botLoc, enemy:getLoc())  
+            if( d < smallestDist ) then
+                target = enemy
+                smallestDist = d
+            end
+        end  
+    end
+    
+    if(target ~= nil and bot:hasLosPt(target:getLoc())) then
+        return(target)
+    elseif(enemies[0] ~= nil) then
+        return(enemies[0])
+    end
+    
+    return(nil)
 end
 function getNearestEnemy()
-	local enemies = findItems(ShipType, RobotType)
-	local target = nil
-	local smallestDist = 99999999
-	
-	for index,enemy in ipairs(enemies) do
-		if (enemy:getTeamIndx() ~= bot:getTeamIndx() or not game:isTeamGame()) then		-- Put cheaper test first
-			local d = vec.distSquared(botLoc, enemy:getLoc())  
-			if( d < smallestDist ) then
-				target = enemy
-				smallestDist = d
-			end
-		end  
-	end
-	
-	return(target)
+    local enemies = findItems(ShipType, RobotType)
+    local target = nil
+    local smallestDist = 99999999
+    
+    for index,enemy in ipairs(enemies) do
+        if (enemy:getTeamIndx() ~= bot:getTeamIndx() or not game:isTeamGame()) then     -- Put cheaper test first
+            local d = point.distSquared(botLoc, enemy:getLoc())  
+            if( d < smallestDist ) then
+                target = enemy
+                smallestDist = d
+            end
+        end  
+    end
+    
+    return(target)
 end
  
 function shield()
-	averageArray[averageIndex] = shieldSelf()
-	averageIndex = math.mod(averageIndex,averageMax) + 1
-	local shieldPercent = 0
-	for i = 1, averageMax do
-		if(averageArray[averageIndex]) then
-			shieldPercent = shieldPercent + 1
-		end
-	end
-	shieldPercent = shieldPercent / averageMax
-	if(shieldPercent > directionThreshold) then
-		myOrbitalDirection = -myOrbitalDirection
-		for i = 1, averageMax do
-			averageArray[i] = false
-		end
-	end
+    averageArray[averageIndex] = shieldSelf()
+    averageIndex = math.mod(averageIndex,averageMax) + 1
+    local shieldPercent = 0
+    for i = 1, averageMax do
+        if(averageArray[averageIndex]) then
+            shieldPercent = shieldPercent + 1
+        end
+    end
+    shieldPercent = shieldPercent / averageMax
+    if(shieldPercent > directionThreshold) then
+        myOrbitalDirection = -myOrbitalDirection
+        for i = 1, averageMax do
+            averageArray[i] = false
+        end
+    end
 end
  
 function orbitPoint(pt, dir, inputDist, inputStrictness)
-	local distAway = bot:getRad()*7
-	local strictness = 2
-	local direction = 1
-	if(dir ~= nil) then direction = dir end
-	if(inputDist ~= nil) then distAway = inputDist end
-	if(inputStrictness ~= nil) then strictness = inputStrictness end
-	if(pt ~= nil) then
-		local dist = vec.distanceTo(pt, botLoc)
-		local deltaDistance = (dist - distAway) * strictness / distAway
-		local sign = 1
-		if(deltaDistance > 0) then
-			sign = 1
-		elseif(deltaDistance < 0) then
-			sign = -1
-		end
-		local changeInAngle = (math.abs(deltaDistance)/(deltaDistance + sign))*math.pi/2
-		local angleToPoint = vec.angleTo(pt, bot:getLoc())
-		dirToGo = angleToPoint + (math.pi/2 + changeInAngle)*direction
-		--bot:setThrust(speed,dirToGo)
-	end
+    local distAway = bot:getRad()*7
+    local strictness = 2
+    local direction = 1
+    if(dir ~= nil) then direction = dir end
+    if(inputDist ~= nil) then distAway = inputDist end
+    if(inputStrictness ~= nil) then strictness = inputStrictness end
+    if(pt ~= nil) then
+        local dist = point.distanceTo(pt, botLoc)
+        local deltaDistance = (dist - distAway) * strictness / distAway
+        local sign = 1
+        if(deltaDistance > 0) then
+            sign = 1
+        elseif(deltaDistance < 0) then
+            sign = -1
+        end
+        local changeInAngle = (math.abs(deltaDistance)/(deltaDistance + sign))*math.pi/2
+        local angleToPoint = point.angleTo(pt, bot:getLoc())
+        dirToGo = angleToPoint + (math.pi/2 + changeInAngle)*direction
+        --bot:setThrust(speed,dirToGo)
+    end
 end
 
 function gotoPosition(pt)
-	if pt ~= nil then
-		gotoPositionWasNil = false
-		if pathTimer<.01 then
-			goalPt=bot:getWaypoint(pt)
-			if(goalPt ~= nil) then
-	                   dirToGo = vec.angleTo(botLoc,goalPt)
-       		        end
-		end
-	end
+    if pt ~= nil then
+        gotoPositionWasNil = false
+        if pathTimer<.01 then
+            goalPt=bot:getWaypoint(pt)
+            if(goalPt ~= nil) then
+                       dirToGo = point.angleTo(botLoc,goalPt)
+                    end
+        end
+    end
 end
 
 function gotoAndOrbitPosition(pt)
-	if pt ~= nil then
-		gotoPositionWasNil = false
-		if not bot:hasLosPt(pt) then
-			gotoPositionWasNil = false
-			gotoPosition(pt)
-		else
-			gotoPositionWasNil = false
-			orbitPoint(pt, myOrbitalDirection, botRadius * 5, 2)
-		end
-	end
+    if pt ~= nil then
+        gotoPositionWasNil = false
+        if not bot:hasLosPt(pt) then
+            gotoPositionWasNil = false
+            gotoPosition(pt)
+        else
+            gotoPositionWasNil = false
+            orbitPoint(pt, myOrbitalDirection, botRadius * 5, 2)
+        end
+    end
 end
  
 --returns if it found an enemy to fight
 function attackNearbyEnemies(agressionLevel)
-	local target = findEnemy()
-	if target ~= nil then
-		local targetLoc = target:getLoc()
-	  
-		local dist = vec.distanceTo(botLoc, targetLoc)
-		local myPow = (bot:getEnergy() + bot:getHealth() )
-		local enemies = findItems(ShipType, RobotType)
-	  
-		--for index, otherShip in ipairs(enemies) do
-		-- otherPow = otherPow + target:getEnergy() + target:getHealth()
-		--end
-		-- Means this, right?
-		local otherPow = target:getEnergy() + target:getHealth() * #enemies
-	  
-		--advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
-		local advantage = (myPow-otherPow) / math.max(myPow,otherPow)
-		if(advantage/2 + .5>agressionLevel) then
-			--orbitPoint(targetLoc, myOrbitalDirection, botRadius * 9, 2)
-			prevtarget = targetLoc
-			return(false)      -- was true
-		else
-		end
-	end
-	return(false)
+    local target = findEnemy()
+    if target ~= nil then
+        local targetLoc = target:getLoc()
+      
+        local dist = point.distanceTo(botLoc, targetLoc)
+        local myPow = (bot:getEnergy() + bot:getHealth() )
+        local enemies = findItems(ShipType, RobotType)
+      
+        --for index, otherShip in ipairs(enemies) do
+        -- otherPow = otherPow + target:getEnergy() + target:getHealth()
+        --end
+        -- Means this, right?
+        local otherPow = target:getEnergy() + target:getHealth() * #enemies
+      
+        --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
+        local advantage = (myPow-otherPow) / math.max(myPow,otherPow)
+        if(advantage/2 + .5>agressionLevel) then
+            --orbitPoint(targetLoc, myOrbitalDirection, botRadius * 9, 2)
+            prevtarget = targetLoc
+            return(false)      -- was true
+        else
+        end
+    end
+    return(false)
 end
 
 
@@ -270,199 +271,200 @@ end
  
 --Returns the objective for the bot based on myNum.  This makes bots choose different defending locations.
 function getObjective(objType, team, onTeam)
-	local items = findGlobalItems(objType)
-	local itemsOnMyTeam = {}
-	local currentIndex = 1
-	for ind, it in ipairs(items) do
-		local itTeamIndex = it:getTeamIndx()
+    local items = findGlobalItems(objType)
+    local itemsOnMyTeam = {}
+    local currentIndex = 1
+    for ind, it in ipairs(items) do
+        local itTeamIndex = it:getTeamIndx()
 
-		if objType == FlagType and gameType == NexusGame then
-			if not it:isOnShip() then
-				itemsOnMyTeam[currentIndex] = it
-				currentIndex = currentIndex + 1
- 			end
-		elseif (objType == FlagType and (gameType == HTFGame or gameType == RetrieveGame) and it:isInCaptureZone()) then
-				--logprint(it:getCaptureZone():getTeamIndx());
-			if it:getCaptureZone():getTeamIndx() ~= bot:getTeamIndx() then
-				itemsOnMyTeam[currentIndex] = it
-				currentIndex = currentIndex + 1
- 			end
-		elseif objType == GoalZoneType and (gameType == HTFGame or gameType == RetrieveGame) then
-			if (itTeamIndex == team) == onTeam then
-				if not it:hasFlag() then
-					itemsOnMyTeam[currentIndex] = it
-					currentIndex = currentIndex + 1
- 				end
-			end
-		else
-			if (itTeamIndex == NeutralTeamIndx and (objType ~= GoalZoneType or gameType ~= ZoneControlGame)) then
-				itTeamIndex = team   -- anything Neutral is on our team (except zone control neutral goal zone)
-			end
-			if (itTeamIndex == team) == onTeam then
-				itemsOnMyTeam[currentIndex] = it
-				currentIndex = currentIndex + 1
-			end
-		end
-	end
-	local listMax = 0
-	--find max
-	if itemsOnMyTeam[1] ~= nil then
-		for index,item in ipairs(itemsOnMyTeam) do
-			if(item ~= nil) then
-				listMax = listMax + 1
-			end
-		end
-		local targetNum = math.mod(myNum,listMax) + 1
-		return(itemsOnMyTeam[targetNum])
-	else
-		return(nil)
-	end
+        if objType == FlagType and gameType == NexusGame then
+            if not it:isOnShip() then
+                itemsOnMyTeam[currentIndex] = it
+                currentIndex = currentIndex + 1
+            end
+        elseif (objType == FlagType and (gameType == HTFGame or gameType == RetrieveGame) and it:isInCaptureZone()) then
+                --logprint(it:getCaptureZone():getTeamIndx());
+            if it:getCaptureZone():getTeamIndx() ~= bot:getTeamIndx() then
+                itemsOnMyTeam[currentIndex] = it
+                currentIndex = currentIndex + 1
+            end
+        elseif objType == GoalZoneType and (gameType == HTFGame or gameType == RetrieveGame) then
+            if (itTeamIndex == team) == onTeam then
+                if not it:hasFlag() then
+                    itemsOnMyTeam[currentIndex] = it
+                    currentIndex = currentIndex + 1
+                end
+            end
+        else
+            if (itTeamIndex == NeutralTeamIndx and (objType ~= GoalZoneType or gameType ~= ZoneControlGame)) then
+                itTeamIndex = team   -- anything Neutral is on our team (except zone control neutral goal zone)
+            end
+            if (itTeamIndex == team) == onTeam then
+                itemsOnMyTeam[currentIndex] = it
+                currentIndex = currentIndex + 1
+            end
+        end
+    end
+    local listMax = 0
+    --find max
+    if itemsOnMyTeam[1] ~= nil then
+        for index,item in ipairs(itemsOnMyTeam) do
+            if(item ~= nil) then
+                listMax = listMax + 1
+            end
+        end
+        local targetNum = math.mod(myNum,listMax) + 1
+        return(itemsOnMyTeam[targetNum])
+    else
+        return(nil)
+    end
 
---	local closestitem = 0 --itemsOnMyTeam[1]
---	local cur = 1
---	local closestdist = 99999999
---	while itemsOnMyTeam[cur] ~= nil do
---		local item1 = itemsOnMyTeam[cur]
---		if item1 ~= nil then
---			local loc = item1.getLoc()
---			if loc ~= nil then
---				local dist = vec.distanceTo(botLoc, loc)
---				if dist < closestdist then
---					closestdist = dist
---					closesetitem = item1
---				end
---			end
---		end
---		cur=cur+1
---	end
---	return(closestitem)
+--  local closestitem = 0 --itemsOnMyTeam[1]
+--  local cur = 1
+--  local closestdist = 99999999
+--  while itemsOnMyTeam[cur] ~= nil do
+--      local item1 = itemsOnMyTeam[cur]
+--      if item1 ~= nil then
+--          local loc = item1.getLoc()
+--          if loc ~= nil then
+--              local dist = point.distanceTo(botLoc, loc)
+--              if dist < closestdist then
+--                  closestdist = dist
+--                  closesetitem = item1
+--              end
+--          end
+--      end
+--      cur=cur+1
+--  end
+--  return(closestitem)
 end
 
 
 function doObjective()
-	gotoPositionWasNil = true
-	if(gameType == BitmatchGame) then
-		--Nothing to do here.			
-	elseif(gameType == NexusGame) then
-		--Grab any flags that is found, and go to nexus when it opens
-		local otherFlag = getObjective(FlagType,-100,false)
-		if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
-		-- logprint(bot:getFlagCount())  -- always 1
-		if bot:getFlagCount() > 3 and (game:isNexusOpen() or game:getNexusTimeLeft() < 10000) then  --  Need to know if nexus is open
-			local nexusOrFlag = getObjective(NexusType,-100,false)  -- unimplemented push function error.
-			if nexusOrFlag ~= nil then gotoPosition(nexusOrFlag:getLoc()) end
-		end
-	elseif(gameType == RabbitGame) then
-		--Grab a flag, or go after the flag.			
-		if not bot:hasFlag() then
-			local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
-			gotoPosition(otherFlag:getLoc())
-		end
-	elseif(gameType == HTFGame or gameType == RetrieveGame) then
-		-- Grab the flag and put it into goal zones
-		-- Robot keeps trying to pick up the flags that is already in the goalZones
-		if bot:hasFlag() then
-			local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),true)
-			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
-		else
-			local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
-			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
-		end
-	elseif(gameType == CTFGame) then
-		--defend the flag
-		local myFlag = getObjective(FlagType,bot:getTeamIndx(),true)
-		local otherFlag = getObjective(FlagType,bot:getTeamIndx(),false)
-		if(defense<.5) then
-			if bot:hasFlag() then
-				if not myFlag:isOnShip() then
-					gotoPosition(myFlag:getLoc())
-				else
-					gotoAndOrbitPosition(myFlag:getLoc())
-				end
-				--gotoPosition(myFlag:getLoc())
-			elseif(otherFlag ~= nil) then
-				if myFlag:isOnShip() then
-					gotoPosition(myFlag:getLoc())
-				elseif not otherFlag:isOnShip() then
-					gotoPosition(otherFlag:getLoc())
-				else
-					gotoAndOrbitPosition(otherFlag:getLoc())
-				end
-			end
-		else
-			if bot:hasFlag() then
-				gotoPosition(myFlag:getLoc())
-			elseif myFlag:isInInitLoc() then
-				gotoAndOrbitPosition(myFlag:getLoc())
-			else
-				if myFlag:isOnShip() then
-					gotoAndOrbitPosition(myFlag:getLoc())
-				else
-					gotoPosition(myFlag:getLoc())
-				end
-			end
-		end
-	elseif(gameType == SoccerGame) then
-		--grab soccer and put into enemy goal
-		-- How do we know if we are holding soccer ? (not supported when cannot pickup soccer (016)
-		if bot:getMountedItems(SoccerBallItemType)[1] ~= nil then
-			local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),false)
-			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end			
-		else
-			local otherFlag = getObjective(SoccerBallItemType,-100,false)
-			if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
-		end
-	elseif(gameType == ZoneControlGame) then
-		-- Grab flag, then go after zones that is not ours.
-		if not bot:hasFlag() then
-			local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
-			if otherFlag ~= nil then
-				if otherFlag:isOnShip() then
-					gotoAndOrbitPosition(otherFlag:getLoc())
-				else
-					gotoPosition(otherFlag:getLoc())
-				end
-			end
-		else
-			local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),false)
-			gotoPosition(otherFlag:getLoc())
-		end
+    gotoPositionWasNil = true
+    if(gameType == BitmatchGame) then
+        --Nothing to do here.           
+    elseif(gameType == NexusGame) then
+        --Grab any flags that is found, and go to nexus when it opens
+        local otherFlag = getObjective(FlagType,-100,false)
+        if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+        -- logprint(bot:getFlagCount())  -- always 1
+        if bot:getFlagCount() > 3 and (game:isNexusOpen() or game:getNexusTimeLeft() < 10000) then  --  Need to know if nexus is open
+            local nexusOrFlag = getObjective(NexusType,-100,false)  -- unimplemented push function error.
+            if nexusOrFlag ~= nil then gotoPosition(nexusOrFlag:getLoc()) end
+        end
+    elseif(gameType == RabbitGame) then
+        --Grab a flag, or go after the flag.            
+        if not bot:hasFlag() then
+            local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
+            gotoPosition(otherFlag:getLoc())
+        end
+    elseif(gameType == HTFGame or gameType == RetrieveGame) then
+        -- Grab the flag and put it into goal zones
+        -- Robot keeps trying to pick up the flags that is already in the goalZones
+        if bot:hasFlag() then
+            local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(),true)
+            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+        else
+            local otherFlag = getObjective(FlagType,bot:getTeamIndx(),true)
+            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+        end
+    elseif(gameType == CTFGame) then
+        --defend the flag
+        local myFlag = getObjective(FlagType,bot:getTeamIndx(),true)
+        local otherFlag = getObjective(FlagType,bot:getTeamIndx(),false)
+        if(defense<.5) then
+            if bot:hasFlag() then
+                if not myFlag:isOnShip() then
+                    gotoPosition(myFlag:getLoc())
+                else
+                    gotoAndOrbitPosition(myFlag:getLoc())
+                end
+                --gotoPosition(myFlag:getLoc())
+            elseif(otherFlag ~= nil) then
+                if myFlag:isOnShip() then
+                    gotoPosition(myFlag:getLoc())
+                elseif not otherFlag:isOnShip() then
+                    gotoPosition(otherFlag:getLoc())
+                else
+                    gotoAndOrbitPosition(otherFlag:getLoc())
+                end
+            end
+        else
+            if bot:hasFlag() then
+                gotoPosition(myFlag:getLoc())
+            elseif myFlag:isInInitLoc() then
+                gotoAndOrbitPosition(myFlag:getLoc())
+            else
+                if myFlag:isOnShip() then
+                    gotoAndOrbitPosition(myFlag:getLoc())
+                else
+                    gotoPosition(myFlag:getLoc())
+                end
+            end
+        end
+    elseif(gameType == SoccerGame) then
+        --grab soccer and put into enemy goal
+        -- How do we know if we are holding soccer ? (not supported when cannot pickup soccer (016)
+        if bot:getMountedItems(SoccerBallItemType)[1] ~= nil then
+            local otherFlag = getObjective(GoalZoneType,bot:getTeamIndx(), false)
+            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end           
+        else
+            local otherFlag = getObjective(SoccerBallItemType,-100,false)
+            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+        end
+    elseif(gameType == ZoneControlGame) then
+        -- Grab flag, then go after zones that is not ours.
+        if not bot:hasFlag() then
+            local otherFlag = getObjective(FlagType,bot:getTeamIndx(), true)
+            if otherFlag ~= nil then
+                if otherFlag:isOnShip() then
+                    gotoAndOrbitPosition(otherFlag:getLoc())
+                else
+                    gotoPosition(otherFlag:getLoc())
+                end
+            end
+        else
+            local otherFlag = getObjective(GoalZoneType, bot:getTeamIndx(), false)
+            if otherFlag then
+                gotoPosition(otherFlag:getLoc())
+            end
+        end
 
-	elseif(gameType == CoreGame) then
-		local obj = getObjective(CoreType,bot:getTeamIndx(),false)
-		if obj ~= nil then
-			gotoAndOrbitPosition(obj:getLoc())
-		end
+    elseif(gameType == CoreGame) then
+        local obj = getObjective(CoreType, bot:getTeamIndx(), false)
+        if obj ~= nil then
+            gotoAndOrbitPosition(obj:getLoc())
+        end
+    end
 
-	end
-
-	-- If we have no where to go, go to nearest enemy.
-	if gotoPositionWasNil then
-		local target = getNearestEnemy()
-		if(target ~= nil) then
-			prevtarget = target:getLoc()
-		end
-		if(prevtarget ~= nil) then gotoAndOrbitPosition(prevtarget) end
-	end
+    -- If we have no where to go, go to nearest enemy.
+    if gotoPositionWasNil then
+        local target = getNearestEnemy()
+        if(target ~= nil) then
+            prevtarget = target:getLoc()
+        end
+        if(prevtarget ~= nil) then gotoAndOrbitPosition(prevtarget) end
+    end
 end
  
 function goInDirection()
-	bot:setThrust(speed,dirToGo)
+    bot:setThrust(speed,dirToGo)
 end
  
 function onTick(deltaTime)
-	botLoc = bot:getLoc()
-	pathTimer = pathTimer - deltaTime
-	assert(bot:getLoc() ~= nil)
-	
-	if not attackNearbyEnemies(1-agression) then
-		doObjective()
-	end
-	doObjective()
-	goInDirection()
-	fireAtObjects()
-	shield()
-	if(pathTimer<0)then
-		pathTimer=pathTimerMax+math.random(0,pathTimerMax)
-	end
+    botLoc = bot:getLoc()
+    pathTimer = pathTimer - deltaTime
+    assert(bot:getLoc() ~= nil)
+    
+    if not attackNearbyEnemies(1-agression) then
+        doObjective()
+    end
+    doObjective()
+    goInDirection()
+    fireAtObjects()
+    shield()
+    if(pathTimer<0)then
+        pathTimer=pathTimerMax+math.random(0,pathTimerMax)
+    end
 end
