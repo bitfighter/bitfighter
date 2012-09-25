@@ -2062,6 +2062,7 @@ void PlayerMenuUserInterface::onEscape()
 TeamMenuUserInterface::TeamMenuUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(TeamUI);
+   mMenuSubTitle = "[Human Players | Bots | Score]";
 }
 
 

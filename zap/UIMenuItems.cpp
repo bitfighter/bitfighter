@@ -1067,7 +1067,8 @@ string TeamMenuItem::getOptionText()
 
    // Static may help reduce allocation/deallocation churn at the cost of 2K memory; not sure either are really a problem
    static char buffer[2048];  
-   dSprintf(buffer, sizeof(buffer), "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getPrompt().c_str(), team->getPlayerCount(), team->getScore());
+   dSprintf(buffer, sizeof(buffer), "%s%s  [ %d | %d | %d ]", mIsCurrent ? "* " : "", getPrompt().c_str(), 
+                                                           team->getPlayerCount(), team->getBotCount(), team->getScore());
 
    return buffer;
 }
