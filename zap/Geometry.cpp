@@ -769,7 +769,7 @@ bool PolylineGeometry::addVertFront(Point vert)
       return false;
 
    mPolyBounds.push_front(vert); 
-   mVertSelected.insert(mVertSelected.begin(), false); 
+   mVertSelected.push_front(false); 
 
    return true;
 }
@@ -783,7 +783,7 @@ bool PolylineGeometry::deleteVert(S32 vertIndex)
       return false;
 
    mPolyBounds.erase(vertIndex); 
-   mVertSelected.erase(mVertSelected.begin() + vertIndex); 
+   mVertSelected.erase(vertIndex); 
    checkIfAnyVertsSelected();
 
    return true;
@@ -795,10 +795,8 @@ bool PolylineGeometry::insertVert(Point vertex, S32 vertIndex)
    if(mPolyBounds.size() >= gMaxPolygonPoints)
       return false;
 
-   mPolyBounds.insert(vertIndex); 
-   mPolyBounds[vertIndex] = vertex; 
-                                                  
-   mVertSelected.insert(mVertSelected.begin() + vertIndex, 1, false); 
+   mPolyBounds.insert(vertIndex, vertex);                                                   
+   mVertSelected.insert(vertIndex, false); 
 
    return true;
 }
