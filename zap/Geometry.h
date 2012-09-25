@@ -165,7 +165,7 @@ protected:
    Vector<Point> mPolyBounds;
       
    bool mAnyVertsSelected;
-   vector<bool> mVertSelected; 
+   Vector<bool> mVertSelected; 
 
    void checkIfAnyVertsSelected();     
 

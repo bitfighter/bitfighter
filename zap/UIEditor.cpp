@@ -825,7 +825,7 @@ void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName
 }
 
 
-static bool TeamListToString(string &output, vector<bool> teamVector)
+static bool TeamListToString(string &output, Vector<bool> teamVector)
 {
    string teamList;
    bool hasError = false;
@@ -869,7 +869,7 @@ void EditorUserInterface::validateLevel()
    bool foundTeamFlagSpawns = false;
    bool foundNeutralSpawn = false;
 
-   vector<bool> foundSpawn;
+   Vector<bool> foundSpawn;
 
    string teamList;
 
