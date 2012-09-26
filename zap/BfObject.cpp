@@ -1351,7 +1351,7 @@ S32 BfObject::setTeam(lua_State *L)
  * @luafunc  BfObject::setLoc(pos)
  * @brief    Set the object's location.
  * @param    pos - Point (or coordinate pair) representing the location of the object. 
-*/
+ */
 S32 BfObject::setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
@@ -1366,7 +1366,7 @@ S32 BfObject::setLoc(lua_State *L)
  * @descr    A given item can only be added  to a game once. Calling addToGame on an object already in a game will generate an error.
  *           For most (but not all) objects in a game or editor, updating characteristics such as position  
  *           will immediately be reflected in the object.
-*/
+ */
 S32 BfObject::addToGame(lua_State *L)
 {
    Game *game = Game::getAddTarget();
@@ -1379,7 +1379,7 @@ S32 BfObject::addToGame(lua_State *L)
  * @luafunc  BfObject::removeFromGame()
  * @brief    Removes the object from the current game or editor session.
  * @descr    May not be implemented for all objects.
-*/
+ */
 S32 BfObject::removeFromGame(lua_State *L)
 {
    deleteObject();
@@ -1392,7 +1392,7 @@ S32 BfObject::removeFromGame(lua_State *L)
  * @brief    Sets an object's geometry. 
  * @param    geometry - The object's geometry.  (See \ref datatypes.) 
  * @descr    Note that not all objects support changing geometry if an object is in a game.
-*/
+ */
 S32 BfObject::setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
@@ -1414,7 +1414,7 @@ S32 BfObject::setGeom(lua_State *L)
  * @brief    Returns an object's geometry. 
  * @return   ObjectGeometry - For %point objects (such as a RepairItem or TestItem), this will be a single point. For more complex objects 
  *           (such as a WallItem or a Zone), this will be a Lua table containing a list of points.
-*/
+ */
 S32 BfObject::getGeom(lua_State *L)
 {
    // Simple geometry
@@ -1431,7 +1431,7 @@ S32 BfObject::getGeom(lua_State *L)
  * @brief    Make an exact duplicate of an object.
  * @descr    Returned object will not be added to the current game, and will have a different id than the source object.
  * @return   Returns the clone.
-*/
+ */
 S32 BfObject::clone(lua_State *L)
 {
    TNLAssert(false, "Not yet implemented!!!");
