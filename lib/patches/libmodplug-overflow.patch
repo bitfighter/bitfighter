@@ -1,0 +1,13 @@
+Index: libmodplug-0.8.8.4/src/load_amf.cpp
+===================================================================
+--- libmodplug-0.8.8.4.orig/src/load_amf.cpp
++++ libmodplug-0.8.8.4/src/load_amf.cpp
+@@ -371,7 +371,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStrea
+ 	}
+ 	// Store tracks positions
+ 	BYTE **pTrackData = new BYTE *[realtrackcnt];
+-	memset(pTrackData, 0, sizeof(pTrackData));
++	memset(*pTrackData, 0, sizeof(pTrackData));
+ 	for (UINT iTrack=0; iTrack<realtrackcnt; iTrack++) if (dwMemPos <= dwMemLength - 3)
+ 	{
+ 		UINT nTrkSize = bswapLE16(*(USHORT *)(lpStream+dwMemPos));

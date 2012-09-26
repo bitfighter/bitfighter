@@ -18,6 +18,7 @@ istream.o\
 codec_wav.o\
 codec_aiff.o\
 alure.o\
+codec_modplug.o\
 codec_vorbisfile.o
 
 .cpp.o: 
