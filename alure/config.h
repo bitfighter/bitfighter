@@ -51,5 +51,5 @@
 /* #undef HAS_SNDFILE */
 /* #undef HAS_FLUIDSYNTH */
 /* #undef HAS_DUMB */
-/* #undef HAS_MODPLUG */
+#define HAS_MODPLUG
 /* #undef HAS_MPG123 */

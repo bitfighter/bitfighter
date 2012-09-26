@@ -104,6 +104,13 @@
 		7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */; };
 		7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */; };
 		7378E23912F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
+		73793C0816138ACC000E693E /* codec_modplug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73793C0716138ACC000E693E /* codec_modplug.cpp */; };
+		73793C0D16138BAF000E693E /* libmodplug.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73793C0C16138BAF000E693E /* libmodplug.framework */; };
+		73793C1116138BC4000E693E /* libmodplug.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73793C0C16138BAF000E693E /* libmodplug.framework */; };
+		73793C2B16138CD6000E693E /* it_defs.h in Headers */ = {isa = PBXBuildFile; fileRef = 73793C2716138CD6000E693E /* it_defs.h */; };
+		73793C2C16138CD6000E693E /* modplug.h in Headers */ = {isa = PBXBuildFile; fileRef = 73793C2816138CD6000E693E /* modplug.h */; };
+		73793C2D16138CD6000E693E /* sndfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 73793C2916138CD6000E693E /* sndfile.h */; };
+		73793C2E16138CD6000E693E /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = 73793C2A16138CD6000E693E /* stdafx.h */; };
 		737B3D9C157FD84A0096DDC2 /* GeomObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737B3D96157FD84A0096DDC2 /* GeomObject.cpp */; };
 		737B3D9D157FD84A0096DDC2 /* ShipShape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737B3D9A157FD84A0096DDC2 /* ShipShape.cpp */; };
 		737C80FA135CC67500FF5282 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737C80F4135CC67500FF5282 /* Color.cpp */; };
@@ -579,6 +586,12 @@
 		7377F2D61381C7AD00DB1417 /* SoundSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SoundSystem.h; path = ../../../zap/SoundSystem.h; sourceTree = SOURCE_ROOT; };
 		7378E23612F93C9D005EF681 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = ../../../master/database.cpp; sourceTree = SOURCE_ROOT; };
 		7378E23712F93C9D005EF681 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = database.h; path = ../../../master/database.h; sourceTree = SOURCE_ROOT; };
+		73793C0716138ACC000E693E /* codec_modplug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = codec_modplug.cpp; sourceTree = "<group>"; };
+		73793C0C16138BAF000E693E /* libmodplug.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libmodplug.framework; path = /Users/geeko/temp/hg/bitfighter/lib/libmodplug.framework; sourceTree = "<absolute>"; };
+		73793C2716138CD6000E693E /* it_defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = it_defs.h; sourceTree = "<group>"; };
+		73793C2816138CD6000E693E /* modplug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modplug.h; sourceTree = "<group>"; };
+		73793C2916138CD6000E693E /* sndfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sndfile.h; sourceTree = "<group>"; };
+		73793C2A16138CD6000E693E /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
 		7379552E136E1C42003A660B /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		73795535136E1C60003A660B /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		7379553C136E1CCE003A660B /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
@@ -1207,6 +1220,7 @@
 				73B0FC171370ABAC0019AE4E /* OpenAL-Soft.framework in Frameworks */,
 				73974A6414B4EE780053CCF4 /* Ogg.framework in Frameworks */,
 				737E800814CDDDF900CBBA54 /* Vorbis.framework in Frameworks */,
+				73793C1116138BC4000E693E /* libmodplug.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1240,6 +1254,7 @@
 				7397499E14B4EDC60053CCF4 /* Speex.framework in Frameworks */,
 				739749A014B4EDC60053CCF4 /* Vorbis.framework in Frameworks */,
 				73872A38152A7D760034CD97 /* SDL2.framework in Frameworks */,
+				73793C0D16138BAF000E693E /* libmodplug.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1269,6 +1284,7 @@
 				7397499B14B4EDC60053CCF4 /* Ogg.framework */,
 				7397499D14B4EDC60053CCF4 /* Speex.framework */,
 				7397499F14B4EDC60053CCF4 /* Vorbis.framework */,
+				73793C0C16138BAF000E693E /* libmodplug.framework */,
 			);
 			name = "Pre Compiled";
 			sourceTree = "<group>";
@@ -1328,6 +1344,7 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				73793C2516138CD6000E693E /* libmodplug */,
 				73A2B22213DE58630002EF92 /* libpng */,
 				73851EFA13ABF0FF00D88D2A /* libsdl */,
 				7388F213139D6B5F003C6BB0 /* libvorbis */,
@@ -1447,6 +1464,26 @@
 			path = ../../../Triangle;
 			sourceTree = SOURCE_ROOT;
 		};
+		73793C2516138CD6000E693E /* libmodplug */ = {
+			isa = PBXGroup;
+			children = (
+				73793C2616138CD6000E693E /* libmodplug */,
+			);
+			name = libmodplug;
+			path = ../../../libmodplug;
+			sourceTree = SOURCE_ROOT;
+		};
+		73793C2616138CD6000E693E /* libmodplug */ = {
+			isa = PBXGroup;
+			children = (
+				73793C2716138CD6000E693E /* it_defs.h */,
+				73793C2816138CD6000E693E /* modplug.h */,
+				73793C2916138CD6000E693E /* sndfile.h */,
+				73793C2A16138CD6000E693E /* stdafx.h */,
+			);
+			path = libmodplug;
+			sourceTree = "<group>";
+		};
 		737CE2FD1290469000D732B7 /* lua */ = {
 			isa = PBXGroup;
 			children = (
@@ -1498,6 +1535,7 @@
 		7386BA07136FE3520094A660 /* alure */ = {
 			isa = PBXGroup;
 			children = (
+				73793C0716138ACC000E693E /* codec_modplug.cpp */,
 				D3A9DC2C139C925E00FC8814 /* vorbis */,
 				D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */,
 				7317B9CE1370CAC30025A41E /* AL */,
@@ -2382,6 +2420,10 @@
 				7317B9DC1370CAC30025A41E /* alext.h in Headers */,
 				7317B9E11370CAC30025A41E /* config.h in Headers */,
 				7317B9E31370CAC30025A41E /* main.h in Headers */,
+				73793C2B16138CD6000E693E /* it_defs.h in Headers */,
+				73793C2C16138CD6000E693E /* modplug.h in Headers */,
+				73793C2D16138CD6000E693E /* sndfile.h in Headers */,
+				73793C2E16138CD6000E693E /* stdafx.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2776,6 +2818,7 @@
 				7317B9E51370CAC30025A41E /* streamdec.cpp in Sources */,
 				7317B9E61370CAC30025A41E /* streamplay.cpp in Sources */,
 				D3A9DC4F139C930300FC8814 /* codec_vorbisfile.cpp in Sources */,
+				73793C0816138ACC000E693E /* codec_modplug.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3139,6 +3182,7 @@
 					../../../libogg,
 					../../../libvorbis,
 					../../../alure,
+					../../../libmodplug,
 				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
@@ -3514,6 +3558,7 @@
 					../../../libogg,
 					../../../libvorbis,
 					../../../alure,
+					../../../libmodplug,
 				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
@@ -3637,6 +3682,7 @@
 					../../../libogg,
 					../../../libvorbis,
 					../../../alure,
+					../../../libmodplug,
 				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
@@ -3672,6 +3718,7 @@
 					../../../libogg,
 					../../../libvorbis,
 					../../../alure,
+					../../../libmodplug,
 				);
 				INFOPLIST_FILE = "ALURE-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
