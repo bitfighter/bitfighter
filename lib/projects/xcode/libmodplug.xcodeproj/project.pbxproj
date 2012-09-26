@@ -1,0 +1,477 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		73793A1516137C5A000E693E /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C416137C5A000E693E /* config.h */; };
+		73793A1716137C5A000E693E /* fastmix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939C616137C5A000E693E /* fastmix.cpp */; };
+		73793A1816137C5A000E693E /* it_defs.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C816137C5A000E693E /* it_defs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		73793A1916137C5A000E693E /* sndfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C916137C5A000E693E /* sndfile.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		73793A1A16137C5A000E693E /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939CA16137C5A000E693E /* stdafx.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		73793A1B16137C5A000E693E /* load_669.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CB16137C5A000E693E /* load_669.cpp */; };
+		73793A1C16137C5A000E693E /* load_abc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CC16137C5A000E693E /* load_abc.cpp */; };
+		73793A1D16137C5A000E693E /* load_amf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CD16137C5A000E693E /* load_amf.cpp */; };
+		73793A1E16137C5A000E693E /* load_ams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CE16137C5A000E693E /* load_ams.cpp */; };
+		73793A1F16137C5A000E693E /* load_dbm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CF16137C5A000E693E /* load_dbm.cpp */; };
+		73793A2016137C5A000E693E /* load_dmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D016137C5A000E693E /* load_dmf.cpp */; };
+		73793A2116137C5A000E693E /* load_dsm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D116137C5A000E693E /* load_dsm.cpp */; };
+		73793A2216137C5A000E693E /* load_far.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D216137C5A000E693E /* load_far.cpp */; };
+		73793A2316137C5A000E693E /* load_it.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D316137C5A000E693E /* load_it.cpp */; };
+		73793A2416137C5A000E693E /* load_j2b.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D416137C5A000E693E /* load_j2b.cpp */; };
+		73793A2516137C5A000E693E /* load_mdl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D516137C5A000E693E /* load_mdl.cpp */; };
+		73793A2616137C5A000E693E /* load_med.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D616137C5A000E693E /* load_med.cpp */; };
+		73793A2716137C5A000E693E /* load_mid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D716137C5A000E693E /* load_mid.cpp */; };
+		73793A2816137C5A000E693E /* load_mod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D816137C5A000E693E /* load_mod.cpp */; };
+		73793A2916137C5A000E693E /* load_mt2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D916137C5A000E693E /* load_mt2.cpp */; };
+		73793A2A16137C5A000E693E /* load_mtm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DA16137C5A000E693E /* load_mtm.cpp */; };
+		73793A2B16137C5A000E693E /* load_okt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DB16137C5A000E693E /* load_okt.cpp */; };
+		73793A2C16137C5A000E693E /* load_pat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DC16137C5A000E693E /* load_pat.cpp */; };
+		73793A2D16137C5A000E693E /* load_pat.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939DD16137C5A000E693E /* load_pat.h */; };
+		73793A2E16137C5A000E693E /* load_psm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DE16137C5A000E693E /* load_psm.cpp */; };
+		73793A2F16137C5A000E693E /* load_ptm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DF16137C5A000E693E /* load_ptm.cpp */; };
+		73793A3016137C5A000E693E /* load_s3m.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E016137C5A000E693E /* load_s3m.cpp */; };
+		73793A3116137C5A000E693E /* load_stm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E116137C5A000E693E /* load_stm.cpp */; };
+		73793A3216137C5A000E693E /* load_ult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E216137C5A000E693E /* load_ult.cpp */; };
+		73793A3316137C5A000E693E /* load_umx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E316137C5A000E693E /* load_umx.cpp */; };
+		73793A3416137C5A000E693E /* load_wav.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E416137C5A000E693E /* load_wav.cpp */; };
+		73793A3516137C5A000E693E /* load_xm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E516137C5A000E693E /* load_xm.cpp */; };
+		73793A3916137C5A000E693E /* mmcmp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E916137C5A000E693E /* mmcmp.cpp */; };
+		73793A3A16137C5A000E693E /* modplug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EA16137C5A000E693E /* modplug.cpp */; };
+		73793A3B16137C5A000E693E /* modplug.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939EB16137C5A000E693E /* modplug.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		73793A3C16137C5A000E693E /* snd_dsp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EC16137C5A000E693E /* snd_dsp.cpp */; };
+		73793A3D16137C5A000E693E /* snd_flt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939ED16137C5A000E693E /* snd_flt.cpp */; };
+		73793A3E16137C5A000E693E /* snd_fx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EE16137C5A000E693E /* snd_fx.cpp */; };
+		73793A3F16137C5A000E693E /* sndfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EF16137C5A000E693E /* sndfile.cpp */; };
+		73793A4016137C5A000E693E /* sndmix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939F016137C5A000E693E /* sndmix.cpp */; };
+		73793A4216137C5A000E693E /* tables.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939F216137C5A000E693E /* tables.h */; };
+		73793A4616137CC0000E693E /* libmodplug_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 73793A4516137CC0000E693E /* libmodplug_Prefix.pch */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0867D69BFE84028FC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		737939C416137C5A000E693E /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		737939C616137C5A000E693E /* fastmix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fastmix.cpp; sourceTree = "<group>"; };
+		737939C816137C5A000E693E /* it_defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = it_defs.h; sourceTree = "<group>"; };
+		737939C916137C5A000E693E /* sndfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sndfile.h; sourceTree = "<group>"; };
+		737939CA16137C5A000E693E /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
+		737939CB16137C5A000E693E /* load_669.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_669.cpp; sourceTree = "<group>"; };
+		737939CC16137C5A000E693E /* load_abc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_abc.cpp; sourceTree = "<group>"; };
+		737939CD16137C5A000E693E /* load_amf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_amf.cpp; sourceTree = "<group>"; };
+		737939CE16137C5A000E693E /* load_ams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_ams.cpp; sourceTree = "<group>"; };
+		737939CF16137C5A000E693E /* load_dbm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_dbm.cpp; sourceTree = "<group>"; };
+		737939D016137C5A000E693E /* load_dmf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_dmf.cpp; sourceTree = "<group>"; };
+		737939D116137C5A000E693E /* load_dsm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_dsm.cpp; sourceTree = "<group>"; };
+		737939D216137C5A000E693E /* load_far.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_far.cpp; sourceTree = "<group>"; };
+		737939D316137C5A000E693E /* load_it.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_it.cpp; sourceTree = "<group>"; };
+		737939D416137C5A000E693E /* load_j2b.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_j2b.cpp; sourceTree = "<group>"; };
+		737939D516137C5A000E693E /* load_mdl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_mdl.cpp; sourceTree = "<group>"; };
+		737939D616137C5A000E693E /* load_med.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_med.cpp; sourceTree = "<group>"; };
+		737939D716137C5A000E693E /* load_mid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_mid.cpp; sourceTree = "<group>"; };
+		737939D816137C5A000E693E /* load_mod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_mod.cpp; sourceTree = "<group>"; };
+		737939D916137C5A000E693E /* load_mt2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_mt2.cpp; sourceTree = "<group>"; };
+		737939DA16137C5A000E693E /* load_mtm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_mtm.cpp; sourceTree = "<group>"; };
+		737939DB16137C5A000E693E /* load_okt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_okt.cpp; sourceTree = "<group>"; };
+		737939DC16137C5A000E693E /* load_pat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_pat.cpp; sourceTree = "<group>"; };
+		737939DD16137C5A000E693E /* load_pat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = load_pat.h; sourceTree = "<group>"; };
+		737939DE16137C5A000E693E /* load_psm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_psm.cpp; sourceTree = "<group>"; };
+		737939DF16137C5A000E693E /* load_ptm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_ptm.cpp; sourceTree = "<group>"; };
+		737939E016137C5A000E693E /* load_s3m.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_s3m.cpp; sourceTree = "<group>"; };
+		737939E116137C5A000E693E /* load_stm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_stm.cpp; sourceTree = "<group>"; };
+		737939E216137C5A000E693E /* load_ult.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_ult.cpp; sourceTree = "<group>"; };
+		737939E316137C5A000E693E /* load_umx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_umx.cpp; sourceTree = "<group>"; };
+		737939E416137C5A000E693E /* load_wav.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_wav.cpp; sourceTree = "<group>"; };
+		737939E516137C5A000E693E /* load_xm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = load_xm.cpp; sourceTree = "<group>"; };
+		737939E916137C5A000E693E /* mmcmp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mmcmp.cpp; sourceTree = "<group>"; };
+		737939EA16137C5A000E693E /* modplug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modplug.cpp; sourceTree = "<group>"; };
+		737939EB16137C5A000E693E /* modplug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modplug.h; sourceTree = "<group>"; };
+		737939EC16137C5A000E693E /* snd_dsp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = snd_dsp.cpp; sourceTree = "<group>"; };
+		737939ED16137C5A000E693E /* snd_flt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = snd_flt.cpp; sourceTree = "<group>"; };
+		737939EE16137C5A000E693E /* snd_fx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = snd_fx.cpp; sourceTree = "<group>"; };
+		737939EF16137C5A000E693E /* sndfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sndfile.cpp; sourceTree = "<group>"; };
+		737939F016137C5A000E693E /* sndmix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sndmix.cpp; sourceTree = "<group>"; };
+		737939F216137C5A000E693E /* tables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tables.h; sourceTree = "<group>"; };
+		73793A4516137CC0000E693E /* libmodplug_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libmodplug_Prefix.pch; sourceTree = "<group>"; };
+		8DC2EF5A0486A6940098B216 /* libmodplug-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "libmodplug-Info.plist"; sourceTree = "<group>"; };
+		8DC2EF5B0486A6940098B216 /* libmodplug.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libmodplug.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DC2EF560486A6940098B216 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DFFF38A50411DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DC2EF5B0486A6940098B216 /* libmodplug.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* libmodplug */ = {
+			isa = PBXGroup;
+			children = (
+				737939A016137C5A000E693E /* src */,
+				08FB77AEFE84172EC02AAC07 /* Classes */,
+				32C88DFF0371C24200C91783 /* Other Sources */,
+				089C1665FE841158C02AAC07 /* Resources */,
+				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
+				034768DFFF38A50411DB9C8B /* Products */,
+			);
+			name = libmodplug;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7B0FEA5585E11CA2CBB /* Linked Frameworks */,
+				1058C7B2FEA5585E11CA2CBB /* Other Frameworks */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C1665FE841158C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				73793A4516137CC0000E693E /* libmodplug_Prefix.pch */,
+				8DC2EF5A0486A6940098B216 /* libmodplug-Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77AEFE84172EC02AAC07 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				737938661613708F000E693E /* libmodplug */,
+				737937A616136C2E000E693E /* libmodplug */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		1058C7B0FEA5585E11CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7B2FEA5585E11CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0867D69BFE84028FC02AAC07 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		32C88DFF0371C24200C91783 /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		737937A616136C2E000E693E /* libmodplug */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = libmodplug;
+			path = "../../libmodplug-0.8.8.4/src/libmodplug";
+			sourceTree = SOURCE_ROOT;
+		};
+		737938661613708F000E693E /* libmodplug */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = libmodplug;
+			path = ../src/libmodplug;
+			sourceTree = SOURCE_ROOT;
+		};
+		737939A016137C5A000E693E /* src */ = {
+			isa = PBXGroup;
+			children = (
+				737939A116137C5A000E693E /* .deps */,
+				737939C416137C5A000E693E /* config.h */,
+				737939C616137C5A000E693E /* fastmix.cpp */,
+				737939C716137C5A000E693E /* libmodplug */,
+				737939CB16137C5A000E693E /* load_669.cpp */,
+				737939CC16137C5A000E693E /* load_abc.cpp */,
+				737939CD16137C5A000E693E /* load_amf.cpp */,
+				737939CE16137C5A000E693E /* load_ams.cpp */,
+				737939CF16137C5A000E693E /* load_dbm.cpp */,
+				737939D016137C5A000E693E /* load_dmf.cpp */,
+				737939D116137C5A000E693E /* load_dsm.cpp */,
+				737939D216137C5A000E693E /* load_far.cpp */,
+				737939D316137C5A000E693E /* load_it.cpp */,
+				737939D416137C5A000E693E /* load_j2b.cpp */,
+				737939D516137C5A000E693E /* load_mdl.cpp */,
+				737939D616137C5A000E693E /* load_med.cpp */,
+				737939D716137C5A000E693E /* load_mid.cpp */,
+				737939D816137C5A000E693E /* load_mod.cpp */,
+				737939D916137C5A000E693E /* load_mt2.cpp */,
+				737939DA16137C5A000E693E /* load_mtm.cpp */,
+				737939DB16137C5A000E693E /* load_okt.cpp */,
+				737939DC16137C5A000E693E /* load_pat.cpp */,
+				737939DD16137C5A000E693E /* load_pat.h */,
+				737939DE16137C5A000E693E /* load_psm.cpp */,
+				737939DF16137C5A000E693E /* load_ptm.cpp */,
+				737939E016137C5A000E693E /* load_s3m.cpp */,
+				737939E116137C5A000E693E /* load_stm.cpp */,
+				737939E216137C5A000E693E /* load_ult.cpp */,
+				737939E316137C5A000E693E /* load_umx.cpp */,
+				737939E416137C5A000E693E /* load_wav.cpp */,
+				737939E516137C5A000E693E /* load_xm.cpp */,
+				737939E916137C5A000E693E /* mmcmp.cpp */,
+				737939EA16137C5A000E693E /* modplug.cpp */,
+				737939EB16137C5A000E693E /* modplug.h */,
+				737939EC16137C5A000E693E /* snd_dsp.cpp */,
+				737939ED16137C5A000E693E /* snd_flt.cpp */,
+				737939EE16137C5A000E693E /* snd_fx.cpp */,
+				737939EF16137C5A000E693E /* sndfile.cpp */,
+				737939F016137C5A000E693E /* sndmix.cpp */,
+				737939F216137C5A000E693E /* tables.h */,
+			);
+			name = src;
+			path = ../src;
+			sourceTree = SOURCE_ROOT;
+		};
+		737939A116137C5A000E693E /* .deps */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = .deps;
+			sourceTree = "<group>";
+		};
+		737939C716137C5A000E693E /* libmodplug */ = {
+			isa = PBXGroup;
+			children = (
+				737939C816137C5A000E693E /* it_defs.h */,
+				737939C916137C5A000E693E /* sndfile.h */,
+				737939CA16137C5A000E693E /* stdafx.h */,
+			);
+			path = libmodplug;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		8DC2EF500486A6940098B216 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73793A1516137C5A000E693E /* config.h in Headers */,
+				73793A1816137C5A000E693E /* it_defs.h in Headers */,
+				73793A1916137C5A000E693E /* sndfile.h in Headers */,
+				73793A1A16137C5A000E693E /* stdafx.h in Headers */,
+				73793A2D16137C5A000E693E /* load_pat.h in Headers */,
+				73793A3B16137C5A000E693E /* modplug.h in Headers */,
+				73793A4216137C5A000E693E /* tables.h in Headers */,
+				73793A4616137CC0000E693E /* libmodplug_Prefix.pch in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		8DC2EF4F0486A6940098B216 /* libmodplug */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB91AD08733DA50010E9CD /* Build configuration list for PBXNativeTarget "libmodplug" */;
+			buildPhases = (
+				8DC2EF540486A6940098B216 /* Sources */,
+				8DC2EF560486A6940098B216 /* Frameworks */,
+				8DC2EF500486A6940098B216 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libmodplug;
+			productInstallPath = "$(HOME)/Library/Frameworks";
+			productName = libmodplug;
+			productReference = 8DC2EF5B0486A6940098B216 /* libmodplug.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB91B108733DA50010E9CD /* Build configuration list for PBXProject "libmodplug" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 0867D691FE84028FC02AAC07 /* libmodplug */;
+			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8DC2EF4F0486A6940098B216 /* libmodplug */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DC2EF540486A6940098B216 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73793A1716137C5A000E693E /* fastmix.cpp in Sources */,
+				73793A1B16137C5A000E693E /* load_669.cpp in Sources */,
+				73793A1C16137C5A000E693E /* load_abc.cpp in Sources */,
+				73793A1D16137C5A000E693E /* load_amf.cpp in Sources */,
+				73793A1E16137C5A000E693E /* load_ams.cpp in Sources */,
+				73793A1F16137C5A000E693E /* load_dbm.cpp in Sources */,
+				73793A2016137C5A000E693E /* load_dmf.cpp in Sources */,
+				73793A2116137C5A000E693E /* load_dsm.cpp in Sources */,
+				73793A2216137C5A000E693E /* load_far.cpp in Sources */,
+				73793A2316137C5A000E693E /* load_it.cpp in Sources */,
+				73793A2416137C5A000E693E /* load_j2b.cpp in Sources */,
+				73793A2516137C5A000E693E /* load_mdl.cpp in Sources */,
+				73793A2616137C5A000E693E /* load_med.cpp in Sources */,
+				73793A2716137C5A000E693E /* load_mid.cpp in Sources */,
+				73793A2816137C5A000E693E /* load_mod.cpp in Sources */,
+				73793A2916137C5A000E693E /* load_mt2.cpp in Sources */,
+				73793A2A16137C5A000E693E /* load_mtm.cpp in Sources */,
+				73793A2B16137C5A000E693E /* load_okt.cpp in Sources */,
+				73793A2C16137C5A000E693E /* load_pat.cpp in Sources */,
+				73793A2E16137C5A000E693E /* load_psm.cpp in Sources */,
+				73793A2F16137C5A000E693E /* load_ptm.cpp in Sources */,
+				73793A3016137C5A000E693E /* load_s3m.cpp in Sources */,
+				73793A3116137C5A000E693E /* load_stm.cpp in Sources */,
+				73793A3216137C5A000E693E /* load_ult.cpp in Sources */,
+				73793A3316137C5A000E693E /* load_umx.cpp in Sources */,
+				73793A3416137C5A000E693E /* load_wav.cpp in Sources */,
+				73793A3516137C5A000E693E /* load_xm.cpp in Sources */,
+				73793A3916137C5A000E693E /* mmcmp.cpp in Sources */,
+				73793A3A16137C5A000E693E /* modplug.cpp in Sources */,
+				73793A3C16137C5A000E693E /* snd_dsp.cpp in Sources */,
+				73793A3D16137C5A000E693E /* snd_flt.cpp in Sources */,
+				73793A3E16137C5A000E693E /* snd_fx.cpp in Sources */,
+				73793A3F16137C5A000E693E /* sndfile.cpp in Sources */,
+				73793A4016137C5A000E693E /* sndmix.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB91AE08733DA50010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_PREFIX_HEADER = libmodplug_Prefix.pch;
+				GCC_VERSION = 4.0;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../src,
+					../src/libmodplug,
+				);
+				INFOPLIST_FILE = "libmodplug-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks\n";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
+				OTHER_CFLAGS = "-DHAVE_CONFIG_H";
+				PRODUCT_NAME = libmodplug;
+				SDKROOT = "";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		1DEB91AF08733DA50010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREFIX_HEADER = libmodplug_Prefix.pch;
+				GCC_VERSION_i386 = 4.0;
+				GCC_VERSION_ppc = 4.0;
+				GCC_VERSION_x86_64 = 4.2;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../src,
+					../src/libmodplug,
+				);
+				INFOPLIST_FILE = "libmodplug-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks\n";
+				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
+				OTHER_CFLAGS = "-DHAVE_CONFIG_H";
+				PRODUCT_NAME = libmodplug;
+				SDKROOT = macosx10.4;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+		1DEB91B208733DA50010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		1DEB91B308733DA50010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB91AD08733DA50010E9CD /* Build configuration list for PBXNativeTarget "libmodplug" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91AE08733DA50010E9CD /* Debug */,
+				1DEB91AF08733DA50010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB91B108733DA50010E9CD /* Build configuration list for PBXProject "libmodplug" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91B208733DA50010E9CD /* Debug */,
+				1DEB91B308733DA50010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}

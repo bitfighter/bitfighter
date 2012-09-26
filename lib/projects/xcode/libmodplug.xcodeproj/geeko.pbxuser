@@ -1,0 +1,142 @@
+// !$*UTF8*$!
+{
+	0867D690FE84028FC02AAC07 /* Project object */ = {
+		activeBuildConfigurationName = Release;
+		activeSDKPreference = macosx10.6;
+		activeTarget = 8DC2EF4F0486A6940098B216 /* libmodplug */;
+		addToTargets = (
+			8DC2EF4F0486A6940098B216 /* libmodplug */,
+		);
+		codeSenseManager = 7379373216136923000E693E /* Code sense */;
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					301,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 370375683;
+			PBXWorkspaceStateSaveDate = 370375683;
+		};
+		perUserProjectItems = {
+			73793733161369E5000E693E /* PBXTextBookmark */ = 73793733161369E5000E693E /* PBXTextBookmark */;
+			7379375F16136BBC000E693E /* PlistBookmark */ = 7379375F16136BBC000E693E /* PlistBookmark */;
+			73793B7B16138726000E693E /* PlistBookmark */ = 73793B7B16138726000E693E /* PlistBookmark */;
+		};
+		sourceControlManager = 7379373116136923000E693E /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	7379373116136923000E693E /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	7379373216136923000E693E /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	73793733161369E5000E693E /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73793734161369E5000E693E /* config.h */;
+		name = "config.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 620;
+		vrLoc = 0;
+	};
+	73793734161369E5000E693E /* config.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = config.h;
+		path = "/Users/geeko/temp/libmodplug-0.8.8.4/src/config.h";
+		sourceTree = "<absolute>";
+	};
+	7379375F16136BBC000E693E /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8DC2EF5A0486A6940098B216 /* libmodplug-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			CFBundleVersion,
+		);
+		name = /Users/geeko/temp/xcode_projects/libmodplug/Info.plist;
+		rLen = 0;
+		rLoc = 9223372036854775808;
+	};
+	737939CD16137C5A000E693E /* load_amf.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {873, 5447}}";
+			sepNavSelRange = "{10469, 0}";
+			sepNavVisRange = "{10065, 1180}";
+			sepNavWindowFrame = "{{86, 113}, {750, 558}}";
+		};
+	};
+	73793A4516137CC0000E693E /* libmodplug_Prefix.pch */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {845, 430}}";
+			sepNavSelRange = "{187, 0}";
+			sepNavVisRange = "{0, 218}";
+			sepNavWindowFrame = "{{176, 131}, {750, 558}}";
+		};
+	};
+	73793B7B16138726000E693E /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8DC2EF5A0486A6940098B216 /* libmodplug-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			CFBundlePackageType,
+		);
+		name = "/Users/geeko/temp/libmodplug-0.8.8.4/xcode/libmodplug-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	8DC2EF4F0486A6940098B216 /* libmodplug */ = {
+		activeExec = 0;
+	};
+}
