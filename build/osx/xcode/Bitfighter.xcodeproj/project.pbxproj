@@ -103,6 +103,7 @@
 		7375E3AA1369176300F71273 /* luavec.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7375E28E13690E1900F71273 /* luavec.framework */; };
 		7377F2D71381C7AD00DB1417 /* SoundEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D31381C7AD00DB1417 /* SoundEffect.cpp */; };
 		7377F2D81381C7AD00DB1417 /* SoundSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7377F2D51381C7AD00DB1417 /* SoundSystem.cpp */; };
+		73783E2E1613AF29008EEA7A /* libmodplug.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73793C0C16138BAF000E693E /* libmodplug.framework */; };
 		7378E23912F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
 		73793C0816138ACC000E693E /* codec_modplug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73793C0716138ACC000E693E /* codec_modplug.cpp */; };
 		73793C0D16138BAF000E693E /* libmodplug.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73793C0C16138BAF000E693E /* libmodplug.framework */; };
@@ -527,6 +528,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				73783E2E1613AF29008EEA7A /* libmodplug.framework in CopyFiles */,
 				73872A1E152A7BBC0034CD97 /* SDL2.framework in CopyFiles */,
 				73974A5514B4EE0B0053CCF4 /* Ogg.framework in CopyFiles */,
 				73974A5614B4EE0B0053CCF4 /* Speex.framework in CopyFiles */,
