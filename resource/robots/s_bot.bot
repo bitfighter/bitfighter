@@ -145,27 +145,6 @@ function findEnemy()
 end
 
 
-function getNearestEnemy()
-    local enemies = findItems(ShipType, RobotType)
-    local target = nil
-    local smallestDist = 99999999
-    local botTeamIndx = bot:getTeamIndx()
-    local isTeamGame = game:isTeamGame()
-    
-    for index,enemy in ipairs(enemies) do
-        if (enemy:getTeamIndx() ~= botTeamIndx or not isTeamGame) then     -- Put cheaper test first
-            local d = point.distSquared(botLoc, enemy:getLoc())  
-            if( d < smallestDist ) then
-                target = enemy
-                smallestDist = d
-            end
-        end  
-    end
-    
-    return(target)
-end
-
-
 function shield()
     averageArray[averageIndex] = shieldSelf()
     averageIndex = math.mod(averageIndex,averageMax) + 1
@@ -450,7 +429,7 @@ function doObjective()
 
     -- If we have no where to go, go to nearest enemy.
     if gotoPositionWasNil then
-        local target = getNearestEnemy()
+        local target = bot:getNearestEnemy()
         if(target ~= nil) then
             prevtarget = target:getLoc()
         end

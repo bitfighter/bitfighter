@@ -1859,7 +1859,7 @@ void Turret::idle(IdleCallPath path)
          Ship *potential = static_cast<Ship *>(fillVector[i]);
 
          // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
-         if(!potential->isVisible() || potential->hasExploded)
+         if(!potential->isVisible(false) || potential->hasExploded)
             continue;
       }
 

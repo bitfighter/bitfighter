@@ -82,6 +82,7 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
       mModulePrimaryActive[i] = false;
       mModuleSecondaryActive[i] = false;
    }
+
 #ifndef ZAP_DEDICATED
    mShapeType = ShipShape::Normal;
 #endif
@@ -705,6 +706,7 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS,  findClosestEnemy,     ARRAYDEF({{              END }, { NUM,  END }}), 2 ) \
                                                                                              \
    METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ ITEM, END }}), 1 )                       \
    METHOD(CLASS,  getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
@@ -917,6 +919,70 @@ S32 Robot::getWaypoint(lua_State *L)
       return returnPoint(L, flightPlan.last());
    else
       return returnNil(L);    // Out of options, end of the road
+}
+
+
+/**
+  * @luafunc Robot::findClosestEnemy(range)
+  * @brief   Finds the closest enemy ship or robot that is within the specified distance.
+  * @descr   Finds closest enemy within specified distance of the bot.  If dist is omitted, this will use standard 
+  *          scanner range, taking into account whether the bot has the Sensor module.  To search the entire map,
+  *          specify -1 for the range.
+  * @param   range - (Optional) Radius in which to search.  Use -1 to search entire map.  If omitted, will use normal scanner range.
+  * @return  Ship object representing closest enemy, or nil if none were found.
+  */
+S32 Robot::findClosestEnemy(lua_State *L)
+{
+   S32 profile = checkArgList(L, functionArgs, "Robot", "findClosestEnemy");
+
+   Point pos = getActualPos();
+   Rect queryRect(pos, pos);
+   bool useRange = true;
+
+   if(profile == 0)           // Args: None
+      queryRect.expand(getGame()->computePlayerVisArea(this));  
+   else                       // Args: Range
+   {
+      F32 range = getFloat(L, 1);
+      if(range == -1)
+         useRange = false;
+      else
+         queryRect.expand(Point(range, range));
+   }
+
+
+   F32 minDist = F32_MAX;
+   Ship *closest = NULL;
+
+   if(useRange)
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector, queryRect);   
+   else
+      getGame()->getGameObjDatabase()->findObjects((TestFunc)isShipType, fillVector);   
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Ignore self 
+      if(fillVector[i] == this) 
+         continue;
+
+      // Ignore ship/robot if it's dead or cloaked
+      Ship *ship = static_cast<Ship *>(fillVector[i]);
+      if(ship->hasExploded || !ship->isVisible(hasModule(ModuleSensor)))
+         continue;
+
+      // Ignore ships on same team during team games
+      if(ship->getTeam() == getTeam() && getGame()->getGameType()->isTeamGame())
+         continue;
+
+      F32 dist = ship->getActualPos().distSquared(getActualPos());
+      if(dist < minDist)
+      {
+         minDist = dist;
+         closest = ship;
+      }
+   }
+
+   return returnShip(L, closest);    // Handles closest == NULL
 }
 
 
@@ -1149,7 +1215,7 @@ S32 Robot::findItems(lua_State *L)
 
    Point pos = getActualPos();
    Rect queryRect(pos, pos);
-   queryRect.expand(getGame()->computePlayerVisArea(this));  // XXX This may be wrong...  computePlayerVisArea is only used client-side
+   queryRect.expand(getGame()->computePlayerVisArea(this));  
 
    return doFindItems(L, "Robot:findItems", &queryRect);
 }
@@ -1220,14 +1286,12 @@ S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
-         // Ignore self (use cheaper typeNumber check first) 
-         // TODO: Do we need the cast here, or can we compare fillVector[i] to this directly??
-         if(fillVector[i]->getObjectTypeNumber() == RobotShipTypeNumber && static_cast<Robot *>(fillVector[i]) == this) 
+         if(fillVector[i] == this) 
             continue;
 
-         // Ignore ship/robot if it's dead or cloaked
+         // Ignore ship/robot if it's dead or cloaked (unless bot has sensor)
          Ship *ship = static_cast<Ship *>(fillVector[i]);
-         if(!ship->isVisible() || ship->hasExploded)
+         if(!ship->isVisible(hasModule(ModuleSensor)) || ship->hasExploded)
             continue;
       }
 
@@ -1243,7 +1307,7 @@ S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
 
 
 static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, 
-                                F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
+                                F32 aimLife, bool ignoreFriendly, bool botHasSensor, F32 &interceptAngle)
 {
    Point offset = target->getPos() - aimPos;    // Account for fact that robot doesn't fire from center
    offset.normalize(aimRadius * 1.2f);          // 1.2 ==> fudge factor to prevent robot from not shooting because it thinks it will hit itself
@@ -1256,7 +1320,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
       Ship *potential = static_cast<Ship *>(target);
 
       // Is it dead or cloaked?  If so, ignore
-      if(!potential->isVisible() || potential->hasExploded)
+      if(!potential->isVisible(botHasSensor) || potential->hasExploded)
          return false;
    }
 
@@ -1319,7 +1383,8 @@ S32 Robot::getFiringSolution(lua_State *L)
 
    F32 interceptAngle;
 
-   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), (F32)weap.projVelocity, (F32)weap.projLiveTime, false, interceptAngle))
+   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), (F32)weap.projVelocity, 
+                          (F32)weap.projLiveTime, false, hasModule(ModuleSensor), interceptAngle))
       return returnFloat(L, interceptAngle);
 
    return returnNil(L);
@@ -1336,7 +1401,7 @@ S32 Robot::getInterceptCourse(lua_State *L)
 
    F32 interceptAngle;     // <== will be set by calcInterceptCourse() below
 
-   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), 256, 3000, false, interceptAngle))
+   if(calcInterceptCourse(target, getActualPos(), getRadius(), getTeam(), 256, 3000, false, hasModule(ModuleSensor), interceptAngle))
       return returnFloat(L, interceptAngle);
       
    return returnNil(L);

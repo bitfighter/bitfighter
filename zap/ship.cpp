@@ -1631,9 +1631,9 @@ bool Ship::isItemMounted()
 }
 
 
-bool Ship::isVisible() 
+bool Ship::isVisible(bool viewerHasSensor) 
 {
-   if(!isModulePrimaryActive(ModuleCloak))
+   if(viewerHasSensor || !isModulePrimaryActive(ModuleCloak))
       return true;
 
    for(S32 i = 0; i < mMountedItems.size(); i++)

@@ -213,7 +213,7 @@ public:
 
    bool isDestroyed();
    bool isItemMounted();    // <== unused
-   bool isVisible();
+   bool isVisible(bool viewerHasSensor);
 
    S32 carryingFlag();     // Returns index of first flag, or NO_FLAG if ship has no flags
    S32 getFlagCount();     // Returns the number of flags ship is carrying

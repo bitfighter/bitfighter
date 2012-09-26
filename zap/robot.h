@@ -145,6 +145,9 @@ public:
    S32 findItems(lua_State *L);
    S32 findGlobalItems(lua_State *L);
 
+   // Bad dudes
+   S32 findClosestEnemy(lua_State *L);
+
    // Ship control
    S32 setThrust(lua_State *L);
    S32 setThrustToPt(lua_State *L);
