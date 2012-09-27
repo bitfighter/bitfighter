@@ -72,22 +72,22 @@ function _main()
 end
 
 
-_fillTable = {}
+-- _fillTable = {}
 
 function table.clear(tab)
    for k,v in pairs(tab) do tab[k]=nil end
 end
 
-function findItems(...)
-   table.clear(_fillTable)
-   return bot:findItems(_fillTable, ...)
-end
+-- function findItems(...)
+--    table.clear(_fillTable)
+--    return bot:findItems(_fillTable, ...)
+-- end
 
 
-function findGlobalItems(...)
-   table.clear(_fillTable)
-   return bot:findGlobalItems(_fillTable, ...)
-end
+-- function findGlobalItems(...)
+--    table.clear(_fillTable)
+--    return bot:findGlobalItems(_fillTable, ...)
+-- end
 
 
 
