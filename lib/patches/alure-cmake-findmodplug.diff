@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3c4b628..f924fd9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -346,16 +346,11 @@ ENDIF(DUMB)
+ 
+ # ModPlug support
+ IF(MODPLUG)
+-    CHECK_INCLUDE_FILE(libmodplug/modplug.h HAVE_LIBMODPLUG_MODPLUG_H)
+-    IF(HAVE_LIBMODPLUG_MODPLUG_H)
+-        CHECK_SHARED_FUNCTION_EXISTS(ModPlug_Load "libmodplug/modplug.h" modplug "" HAVE_LIBMODPLUG)
+-        IF(DYNLOAD OR HAVE_LIBMODPLUG)
+-            SET(HAS_MODPLUG 1)
+-            IF(HAVE_LIBMODPLUG)
+-                SET(MODPLUG_LIBRARIES "modplug")
+-            ENDIF(HAVE_LIBMODPLUG)
+-        ENDIF(DYNLOAD OR HAVE_LIBMODPLUG)
+-    ENDIF(HAVE_LIBMODPLUG_MODPLUG_H)
++    FIND_PACKAGE(MODPLUG)
++    IF(MODPLUG_FOUND)
++        INCLUDE_DIRECTORIES(${MODPLUG_INCLUDE_DIR})
++        SET(HAS_MODPLUG 1)
++    ENDIF(MODPLUG_FOUND)
+     IF(HAS_MODPLUG)
+         SET(ALURE_OBJS ${ALURE_OBJS} src/codec_modplug.cpp)
+     ENDIF(HAS_MODPLUG)

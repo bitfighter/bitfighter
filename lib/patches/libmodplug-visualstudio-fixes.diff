@@ -1,0 +1,59 @@
+diff --git a/libmodplug/src/load_abc.cpp b/libmodplug/src/load_abc.cpp
+index 9f4b328..91f1127 100644
+--- a/libmodplug/src/load_abc.cpp
++++ b/libmodplug/src/load_abc.cpp
+@@ -2247,11 +2247,19 @@ static void abc_preprocess(ABCHANDLE *h, ABCMACRO *m)
+ 	if( m->n ) {
+ 		k = m->n - m->name;
+ 		for( i=0; i<14; i++ ) {
++#ifdef _MSC_VER
++			char* t = reinterpret_cast<char*>(malloc(strlen(m->name) + 1));
++#else
+ 			char t[strlen(m->name) + 1];
++#endif
+ 			strcpy(t, m->name);
+ 			t[k] = "CDEFGABcdefgab"[i];
+ 			l = strlen(m->subst);
++#ifdef _MSC_VER
++			char* s = reinterpret_cast<char*>(malloc(2 * l + 1));
++#else
+ 			char s[2 * l + 1];
++#endif
+ 			char *p = s;
+ 			for( j=0; j<l; j++ ) {
+ 				a = m->subst[j];
+@@ -2268,6 +2276,10 @@ static void abc_preprocess(ABCHANDLE *h, ABCMACRO *m)
+ 			}
+ 			*p = '\0';
+ 			abc_substitute(h, t, s);
++#ifdef _MSC_VER
++			free(s);
++			free(t);
++#endif
+ 		}
+ 	}
+ 	else
+diff --git a/libmodplug/src/load_pat.cpp b/libmodplug/src/load_pat.cpp
+index 85d62dd..bc1cde0 100644
+--- a/libmodplug/src/load_pat.cpp
++++ b/libmodplug/src/load_pat.cpp
+@@ -65,6 +65,19 @@ typedef UWORD WORD;
+ 
+ #define PAT_ENV_PATH2CFG			"MMPAT_PATH_TO_CFG"
+ 
++
++// Where is isblank() in Visual Studio?
++#ifdef _MSC_VER
++inline int isblank(int c)
++{
++  if (c != ' ' && c != '\t')
++      return 0;
++   
++  return c;
++}
++#endif
++
++
+ // 128 gm and 63 drum
+ #define MAXSMP				191
+ static char midipat[MAXSMP][128];
