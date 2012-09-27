@@ -40,12 +40,17 @@ function main()
     myObjective = math.random(0, 10)
 end
  
- 
+
+items = { }     -- Global variable, reusable container for findGlobalItems.  Reusing this table avoids costs of
+                -- constructing and destructing it every time we call findGlobalItems().  Be sure to clear the
+                -- table before reusing it!
 function shieldSelf()
-    local bullets = findItems(BulletType, AsteroidType, MineType)
+    table.clear(items)
+    findItems(items, BulletType, AsteroidType, MineType)
+
     local distToShieldAt = botRadius * 2 + (1 - difficulty) * 100
-    if (bullets ~= nil) then
-        for i,bullet in ipairs(bullets) do
+    if (items ~= nil) then
+        for i,bullet in ipairs(items) do
             local bulletLoc = bullet:getLoc()
             local bulletVel = bullet:getVel()
             local angleDiff = math.abs(angleDifference(point.angleTo(o, bulletVel), point.angleTo(bulletLoc, botLoc)))
@@ -63,8 +68,9 @@ function angleDifference(angleA, angleB)
 end
 
 function fireAtObjects()
-    local enemies = findItems(RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
-    for index,enemy in ipairs(enemies) do
+    table.clear(items)
+    findItems(items, RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
+    for index,enemy in ipairs(items) do
         if(fireAtObject(enemy, WeaponPhaser)) then
             break
         end
@@ -72,9 +78,9 @@ function fireAtObjects()
 end
  
  
---Fires at the specified object with the specified weapon if the obj is a good target.
---Does not fire if object is on the same team or if there is something in the way.
---Returns whether it fired or not.
+-- Fires at the specified object with the specified weapon if the obj is a good target.
+-- Does not fire if object is on the same team or if there is something in the way.
+-- Returns whether it fired or not.
 function fireAtObject(obj, weapon)
     local classId = obj:getClassID()
 
@@ -203,10 +209,11 @@ function attackNearbyEnemies(agressionLevel)
       
         -- local dist    = point.distanceTo(botLoc, targetLoc)
         local myPow   = bot:getEnergy() + bot:getHealth()
-        local enemies = findItems(ShipType, RobotType)
+
+        table.clear(items)
+        findItems(items, ShipType, RobotType)
       
-        print(target:getClassID())
-        local otherPow = target:getEnergy() + target:getHealth() * #enemies
+        local otherPow = target:getEnergy() + target:getHealth() * #items
       
         --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
         local advantage = (myPow - otherPow) / math.max(myPow, otherPow)
@@ -220,9 +227,6 @@ function attackNearbyEnemies(agressionLevel)
     return(false)
 end
 
-
-items = { }     -- Global variable, reusable container for findGlobalItems.  Reusing this table avoids costs of
-                -- constructing and destructing it every time we call findGlobalItems()
 
 -- Returns the objective for the bot, in the form of an object the bot can navigate towards.  This makes bots choose different defending locations.
 -- If onTeam is true, will only return items on specified team.  If onTeam is false, will return items *not* on 
