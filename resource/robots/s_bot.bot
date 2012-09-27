@@ -14,9 +14,6 @@ botLoc = nil        -- Bot's location, will be updated when onTick() is run
 -- This function gets run once during setup.  It is the only time we can declare variables
 -- and have them be defined as globals.
 function main()
-    -- global(botRadius, pathTimerMax, pathTimer, dirToGo, game, difficulty, agression, 
-    --        defense, speed, directionThreshold, gameType, averageIndex, averageMax, 
-    --        averageArray, myOrbitalDirection, myObjective)
     botRadius = bot:getRad()
     pathTimerMax = 250
     pathTimer = pathTimerMax
