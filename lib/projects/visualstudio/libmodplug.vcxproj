@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\libmodplug\it_defs.h" />
+    <ClInclude Include="..\src\libmodplug\sndfile.h" />
+    <ClInclude Include="..\src\libmodplug\stdafx.h" />
+    <ClInclude Include="..\src\load_pat.h" />
+    <ClInclude Include="..\src\modplug.h" />
+    <ClInclude Include="..\src\tables.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\fastmix.cpp" />
+    <ClCompile Include="..\src\load_669.cpp" />
+    <ClCompile Include="..\src\load_abc.cpp" />
+    <ClCompile Include="..\src\load_amf.cpp" />
+    <ClCompile Include="..\src\load_ams.cpp" />
+    <ClCompile Include="..\src\load_dbm.cpp" />
+    <ClCompile Include="..\src\load_dmf.cpp" />
+    <ClCompile Include="..\src\load_dsm.cpp" />
+    <ClCompile Include="..\src\load_far.cpp" />
+    <ClCompile Include="..\src\load_it.cpp" />
+    <ClCompile Include="..\src\load_j2b.cpp" />
+    <ClCompile Include="..\src\load_mdl.cpp" />
+    <ClCompile Include="..\src\load_med.cpp" />
+    <ClCompile Include="..\src\load_mid.cpp" />
+    <ClCompile Include="..\src\load_mod.cpp" />
+    <ClCompile Include="..\src\load_mt2.cpp" />
+    <ClCompile Include="..\src\load_mtm.cpp" />
+    <ClCompile Include="..\src\load_okt.cpp" />
+    <ClCompile Include="..\src\load_pat.cpp" />
+    <ClCompile Include="..\src\load_psm.cpp" />
+    <ClCompile Include="..\src\load_ptm.cpp" />
+    <ClCompile Include="..\src\load_s3m.cpp" />
+    <ClCompile Include="..\src\load_stm.cpp" />
+    <ClCompile Include="..\src\load_ult.cpp" />
+    <ClCompile Include="..\src\load_umx.cpp" />
+    <ClCompile Include="..\src\load_wav.cpp" />
+    <ClCompile Include="..\src\load_xm.cpp" />
+    <ClCompile Include="..\src\mmcmp.cpp" />
+    <ClCompile Include="..\src\modplug.cpp" />
+    <ClCompile Include="..\src\sndfile.cpp" />
+    <ClCompile Include="..\src\sndmix.cpp" />
+    <ClCompile Include="..\src\snd_dsp.cpp" />
+    <ClCompile Include="..\src\snd_flt.cpp" />
+    <ClCompile Include="..\src\snd_fx.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libmodplug</RootNamespace>
+    <ProjectGuid>{98A4824F-C44B-A684-3777-E818E2FEB2A0}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v100</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v100</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>..\src\libmodplug;..\src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>..\src\libmodplug;..\src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>MODPLUG_NO_FILESAVE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>$(OutDir)libmodplug.lib</ImportLibrary>
+      <ModuleDefinitionFile>libmodplug.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>MODPLUG_NO_FILESAVE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ImportLibrary>$(OutDir)libmodplug.lib</ImportLibrary>
+      <ModuleDefinitionFile>libmodplug.def</ModuleDefinitionFile>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

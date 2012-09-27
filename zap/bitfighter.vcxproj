@@ -74,7 +74,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDL2main.lib;../lib/SDL2.lib;../lib/libpng14.lib;../lib/zlib.lib;Ws2_32.lib;opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/libmodplug.lib;../lib/ALURE32.lib;../lib/SDL2main.lib;../lib/SDL2.lib;../lib/libpng14.lib;../lib/zlib.lib;Ws2_32.lib;opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <ProjectReference>
@@ -115,7 +115,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../lib;</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/ALURE32.lib;../lib/SDL2main.lib;../lib/SDL2.lib;../lib/zlib.lib;../lib/libpng14.lib;Ws2_32.lib;opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../Release/libtomcrypt.lib;../Release/tnl.lib;../Release/lua-vec.lib;../lib/OpenAL32.lib;../lib/libspeex.lib;../lib/libogg.lib;../lib/libvorbis.lib;../lib/libvorbisfile.lib;../lib/libmodplug.lib;../lib/ALURE32.lib;../lib/SDL2main.lib;../lib/SDL2.lib;../lib/zlib.lib;../lib/libpng14.lib;Ws2_32.lib;opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
     <CustomBuildStep>
