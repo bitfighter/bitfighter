@@ -148,20 +148,30 @@ public:
         total += fstream->gcount();
         if(total < 32) return;
 
-        if(memcmp(&data[0], "Extended Module: ", 17) == 0 || /* XM */
-           (data[28] == 0x1A && data[29] == 0x10) || /* S3M */
-           memcmp(&data[0], "IMPM", 4) == 0) /* IT */
+        while(1)
         {
-            while(1)
-            {
-                data.resize(total*2);
-                fstream->read(&data[total], data.size()-total);
-                if(fstream->gcount() == 0) break;
-                total += fstream->gcount();
-            }
-            data.resize(total);
+            data.resize(total*2);
+            fstream->read(&data[total], data.size()-total);
+            if(fstream->gcount() == 0) break;
+            total += fstream->gcount();
+        }
+        data.resize(total);
 
-            modFile = ModPlug_Load(&data[0], data.size());
+        modFile = ModPlug_Load(&data[0], data.size());
+
+        if(modFile)
+        {
+            // First 26 bits to handle all modplug types..  I think
+            // See sndfile.h definitions, MOD_TYPE_...
+            if(ModPlug_GetModuleType(modFile) & 0x3FFFFFF)
+            {
+               // Do nothing, we're good!
+            }
+            else
+            {
+                ModPlug_Unload(modFile);
+                modFile = NULL;
+            }
         }
     }
 
