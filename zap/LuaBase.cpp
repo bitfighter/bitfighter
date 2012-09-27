@@ -692,6 +692,8 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionProfile *functionInfo
       }
    }
 
+   msg += "\n";
+
    return msg;
 }
 

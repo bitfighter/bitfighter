@@ -41,14 +41,6 @@ function getName()
     return nil
 end
 
---
--- Wrap getFiringSolution with some code that helps C++ sort out what type of item
--- we're handing it
---
-function getFiringSolution(item)
-    return bot:getFiringSolution(item)
-end
-
 
 --
 -- Convenience function: find closest item in a list of items
@@ -82,28 +74,27 @@ end
 
 
 
--- LUA stack overflow, logprint recursively calls itself?
--- function logprint(msg)
---     logprint("Robot", tostring(msg))
--- end
-
 --
--- And two more
+-- The following functions are provided so users don't need to run them with the bot: prefix
 --
-function subscribe(event)
-   bot:subscribe(event)
+function subscribe(...)
+   return bot:subscribe(...)
 end   
 
-function unsubscribe(event)
-   bot:unsubscribe(event)
+function unsubscribe(...)
+   return bot:unsubscribe(...)
 end  
 
-function globalMsg(message)
-   bot:globalMsg(message)
+function globalMsg(...)
+   return bot:globalMsg(...)
 end
 
---
--- Let the log know that this file was processed correctly
---
-logprint("Loaded robot helper functions...")
+function findGlobalItems(...)
+  return bot:findGlobalItems(...)
+end
+
+function getFiringSolution(...)
+    return bot:getFiringSolution(...)
+end
+
 
