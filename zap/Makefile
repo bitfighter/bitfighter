@@ -25,7 +25,7 @@ THREADLIB= -lpthread
 EXEFILE=bitfighter
 
 # sound linker flags
-SFX_LFLAGS=-lopenal -lspeex -lvorbis
+SFX_LFLAGS=-lopenal -lspeex -lvorbis -lmodplug
 
 # graphics linker flags
 PNG_LFLAGS:=$(shell pkg-config --libs libpng)
