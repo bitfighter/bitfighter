@@ -89,6 +89,10 @@ function globalMsg(...)
    return bot:globalMsg(...)
 end
 
+function findItems(...)
+  return bot:findGlobalItems(...)
+end
+
 function findGlobalItems(...)
   return bot:findGlobalItems(...)
 end
