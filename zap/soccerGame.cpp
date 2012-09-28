@@ -587,6 +587,10 @@ void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream
 /////
 // Lua interface
 
+/**
+ *  @luaclass SoccerBallItem
+ *  @brief    Target object used in Soccer games
+ */
 // No soccerball specific methods!
 const luaL_reg           SoccerBallItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile SoccerBallItem::functionArgs[] = { { NULL, { }, 0 } };
