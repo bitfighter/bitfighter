@@ -441,11 +441,12 @@ function onTick(deltaTime)
     
     -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
     attackNearbyEnemies(closestEnemy, 1 - agression)
-    doObjective(closestEnemy)
+    doObjective(closestEnemy)   -- Set bot's objective
 
-    goInDirection()
-    fireAtObjects()
-    shield()
+    goInDirection()             -- Move the ship
+    fireAtObjects()             -- Fire weapons
+    shield()                    -- Apply shield
+
     if(pathTimer < 0) then
         pathTimer = pathTimerMax + math.random(0, pathTimerMax)
     end
