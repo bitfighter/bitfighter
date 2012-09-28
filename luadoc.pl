@@ -320,12 +320,16 @@ my $outfile = $outpath . "main_page_content.h";
 open my $OUT, '>', $outfile || die "Can't open $outfile for writing: $!";
 
 print $OUT "// This file was generated automatically from the C++ source to feed doxygen.  It will be overwritten.\n\n\n";
-
+  
 print $OUT "/**\n";
 print $OUT @mainpage;
-print $OUT "*/\n";
+# print $OUT "*/\n";
 
 print $OUT @enums;
 
-close $OUT;           
+close $OUT;   
+
+# Finally, launch doxygen
+chdir("doc");
+system("doxygen luadocs.doxygen");
 
