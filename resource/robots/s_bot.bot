@@ -178,11 +178,11 @@ end
 function gotoPosition(pt)
     if pt ~= nil then
         gotoPositionWasNil = false
-        if pathTimer<.01 then
-            goalPt=bot:getWaypoint(pt)
+        if pathTimer < .01 then
+            goalPt = bot:getWaypoint(pt)
             if(goalPt ~= nil) then
-                       dirToGo = point.angleTo(botLoc, goalPt)
-                    end
+                dirToGo = point.angleTo(botLoc, goalPt)
+            end
         end
     end
 end
@@ -201,9 +201,7 @@ function gotoAndOrbitPosition(pt)
 end
  
 -- Returns true if it found an enemy to fight
-function attackNearbyEnemies(agressionLevel)
-    local target = bot:findClosestEnemy()
-
+function attackNearbyEnemies(target, agressionLevel)
     if target ~= nil then
         local targetLoc = target:getLoc()
       
@@ -217,7 +215,7 @@ function attackNearbyEnemies(agressionLevel)
       
         --advantage is between -1 and 1, -1 meaning an extreme disadvantage and 1 meaning an extreme advantage
         local advantage = (myPow - otherPow) / math.max(myPow, otherPow)
-        if(advantage  /2 + .5  >agressionLevel) then
+        if(advantage  / 2 + .5  >agressionLevel) then
             --orbitPoint(targetLoc, myOrbitalDirection, botRadius * 9, 2)
             prevtarget = targetLoc
             return(false)      -- was true
@@ -305,7 +303,7 @@ function getObjective(objType, team, onTeam)
 end
 
 
-function doObjective()
+function doObjective(closestEnemy)
     gotoPositionWasNil = true
     if(gameType == BitmatchGame) then
         --Nothing to do here.           
@@ -316,7 +314,9 @@ function doObjective()
         -- logprint(bot:getFlagCount())  -- always 1
         if bot:getFlagCount() > 3 and (game:isNexusOpen() or game:getNexusTimeLeft() < 10000) then  --  Need to know if nexus is open
             local nexusOrFlag = getObjective(NexusType)  -- unimplemented push function error.
-            if nexusOrFlag ~= nil then gotoPosition(nexusOrFlag:getLoc()) end
+            if nexusOrFlag ~= nil then 
+                gotoPosition(nexusOrFlag:getLoc()) 
+            end
         end
     elseif(gameType == RabbitGame) then
         --Grab a flag, or go after the flag.            
@@ -329,10 +329,14 @@ function doObjective()
         -- Robot keeps trying to pick up the flags that is already in the goalZones
         if bot:hasFlag() then
             local otherFlag = getObjective(GoalZoneType, bot:getTeamIndx(), true)   -- Find GoalZone on our team
-            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+            if otherFlag ~= nil then 
+                gotoPosition(otherFlag:getLoc()) 
+            end
         else
             local otherFlag = getObjective(FlagType, bot:getTeamIndx(), true)       -- Find flags on our team
-            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+            if otherFlag ~= nil then 
+                gotoPosition(otherFlag:getLoc()) 
+            end
         end
     elseif(gameType == CTFGame) then
         --defend the flag
@@ -374,10 +378,14 @@ function doObjective()
         -- How do we know if we are holding soccer ? (not supported when cannot pickup soccer (016)
         if bot:getMountedItems(SoccerBallItemType)[1] ~= nil then
             local otherFlag = getObjective(GoalZoneType, bot:getTeamIndx(), false)      -- Find GoalZones not on our team
-            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end           
+            if otherFlag ~= nil then 
+                gotoPosition(otherFlag:getLoc()) 
+            end           
         else
             local otherFlag = getObjective(SoccerBallItemType)                          -- Find SoccerBall
-            if otherFlag ~= nil then gotoPosition(otherFlag:getLoc()) end
+            if otherFlag ~= nil then 
+                gotoPosition(otherFlag:getLoc()) 
+            end
         end
     elseif(gameType == ZoneControlGame) then
         -- Grab flag, then go after zones that is not ours.
@@ -406,34 +414,40 @@ function doObjective()
 
     -- If we have no where to go, go to nearest enemy.
     if gotoPositionWasNil then
-        local target = bot:findClosestEnemy()
-        if(target ~= nil) then
-            prevtarget = target:getLoc()
+        if(closestEnemy ~= nil) then
+            prevtarget = closestEnemy:getLoc()
         end
-        if(prevtarget ~= nil) then gotoAndOrbitPosition(prevtarget) end
+        if(prevtarget ~= nil) then 
+            gotoAndOrbitPosition(prevtarget) 
+        end
     end
 end
  
+
 function goInDirection()
     bot:setThrust(speed,dirToGo)
 end
 
 
--- This function gets called every game tick
+-- This function gets called every game tick; deltaTime is the time that has elapsed since it was last called
 function onTick(deltaTime)
     botLoc = bot:getLoc()
     pathTimer = pathTimer - deltaTime
     assert(bot:getLoc() ~= nil)
+
+    local closestEnemy = bot:findClosestEnemy();
     
-    if not attackNearbyEnemies(1 - agression) then
-        doObjective()
+    -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
+    if not attackNearbyEnemies(closestEnemy, 1 - agression) then
+        doObjective(closestEnemy)
     end
 
-    doObjective()
+    doObjective(closestEnemy)
+    
     goInDirection()
     fireAtObjects()
     shield()
-    if(pathTimer<0)then
-        pathTimer=pathTimerMax+math.random(0,pathTimerMax)
+    if(pathTimer < 0) then
+        pathTimer = pathTimerMax + math.random(0, pathTimerMax)
     end
 end
