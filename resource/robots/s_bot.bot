@@ -435,7 +435,7 @@ function onTick(deltaTime)
     pathTimer = pathTimer - deltaTime
     assert(bot:getLoc() ~= nil)
 
-    local closestEnemy = bot:findClosestEnemy();
+    local closestEnemy = bot:findClosestEnemy()
     
     -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
     if not attackNearbyEnemies(closestEnemy, 1 - agression) then
@@ -443,7 +443,7 @@ function onTick(deltaTime)
     end
 
     doObjective(closestEnemy)
-    
+
     goInDirection()
     fireAtObjects()
     shield()
