@@ -40,8 +40,10 @@ void moveToAppPath()
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSFileManager *fm = [NSFileManager defaultManager];
     
-	//On load, change to the application directory so we can get to the graphics/sounds/etc...
-	[fm changeCurrentDirectoryPath:[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent]];
+    //On load, change to the application directory so we can get to the graphics/sounds/etc...
+    [fm changeCurrentDirectoryPath:[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent]];
     
+    system([[NSString stringWithFormat:@"%@/firstlaunch-osx.sh",
+             [[[NSBundle mainBundle] executablePath] stringByDeletingLastPathComponent]] UTF8String]);
     [pool release];
 }
