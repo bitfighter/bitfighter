@@ -70,7 +70,9 @@ end
 function fireAtObjects()
     table.clear(items)
     findItems(items, RobotType, TurretType, ShipType, AsteroidType, ForceFieldProjectorType, SpyBugType, CoreType)
-    for index,enemy in ipairs(items) do
+
+    -- Cycle through list of potential items until we find one that we can attack
+    for index, enemy in ipairs(items) do
         if(fireAtObject(enemy, WeaponPhaser)) then
             break
         end
@@ -425,7 +427,7 @@ end
  
 
 function goInDirection()
-    bot:setThrust(speed,dirToGo)
+    bot:setThrust(speed, dirToGo)
 end
 
 
@@ -438,10 +440,7 @@ function onTick(deltaTime)
     local closestEnemy = bot:findClosestEnemy()
     
     -- attackNearbyEnemies returns true if there is an enemy to fight, false if the bot can do something else
-    if not attackNearbyEnemies(closestEnemy, 1 - agression) then
-        doObjective(closestEnemy)
-    end
-
+    attackNearbyEnemies(closestEnemy, 1 - agression)
     doObjective(closestEnemy)
 
     goInDirection()
