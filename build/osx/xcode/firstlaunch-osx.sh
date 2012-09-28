@@ -21,6 +21,8 @@ if [ ! -d "$userdatadir/robots" ]; then
   cp -r "$datadir/editor_plugins" "$userdatadir/"
   cp -r "$datadir/music" "$userdatadir/"
   ln -s "$userdatadir" "$HOME/Documents/bitfighter_settings"
+else
+  exit
 fi
 
 ## Upgrade specifics
@@ -50,13 +52,3 @@ if [ ! -f "$userdatadir/music/menu.ogg" -o ! -f "$userdatadir/music/game.ogg" ];
   cp -f "$datadir/robots/s_bot.bot" "$userdatadir/robots/"
 fi
 
-
-# Full path is need on some Mac systems for sfx - not sure why yet
-cd "$datadir"
-absolute_datadir="$( pwd )"
-cd -
-
-sfxdir="$absolute_datadir/sfx"
-
-# Run the program
-./Bitfighter -rootdatadir "$userdatadir" -sfxdir "$sfxdir" 

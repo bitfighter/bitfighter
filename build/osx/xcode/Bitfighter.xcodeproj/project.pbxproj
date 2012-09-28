@@ -36,8 +36,8 @@
 		7317B9E51370CAC30025A41E /* streamdec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D91370CAC30025A41E /* streamdec.cpp */; };
 		7317B9E61370CAC30025A41E /* streamplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9DA1370CAC30025A41E /* streamplay.cpp */; };
 		73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
-		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
-		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		736DE9A612906AA400C3CB73 /* firstlaunch-osx.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */; };
+		736DE9B412906D0E00C3CB73 /* firstlaunch-osx.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */; };
 		7370288F132A020B00397F99 /* RecastAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702884132A020B00397F99 /* RecastAlloc.cpp */; };
 		73702890132A020B00397F99 /* RecastMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702886132A020B00397F99 /* RecastMesh.cpp */; };
 		73702895132A020B00397F99 /* triangle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7370288C132A020B00397F99 /* triangle.c */; };
@@ -518,7 +518,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */,
+				736DE9B412906D0E00C3CB73 /* firstlaunch-osx.sh in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -567,7 +567,7 @@
 		7364B18112EBC1E9001993A7 /* Bitfighterd.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighterd.icns; sourceTree = "<group>"; };
 		73657A0412E2E3FB00BED56F /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../../../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73657A0512E2E3FB00BED56F /* masterInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterInterface.h; path = ../../../master/masterInterface.h; sourceTree = SOURCE_ROOT; };
-		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
+		736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "firstlaunch-osx.sh"; sourceTree = "<group>"; };
 		73702883132A020B00397F99 /* Recast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Recast.h; sourceTree = "<group>"; };
 		73702884132A020B00397F99 /* RecastAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecastAlloc.cpp; sourceTree = "<group>"; };
 		73702885132A020B00397F99 /* RecastAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecastAlloc.h; sourceTree = "<group>"; };
@@ -1439,7 +1439,7 @@
 		736DE9A01290699A00C3CB73 /* shell script */ = {
 			isa = PBXGroup;
 			children = (
-				736DE9A512906AA400C3CB73 /* bitfighter.sh */,
+				736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */,
 			);
 			name = "shell script";
 			sourceTree = "<group>";
@@ -2583,6 +2583,7 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -2651,7 +2652,7 @@
 				737CE40612904D5300D732B7 /* scripts in Resources */,
 				737CE44E12904D7D00D732B7 /* levels in Resources */,
 				737CE45012904D7D00D732B7 /* sfx in Resources */,
-				736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */,
+				736DE9A612906AA400C3CB73 /* firstlaunch-osx.sh in Resources */,
 				73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */,
 				73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */,
 				D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */,
