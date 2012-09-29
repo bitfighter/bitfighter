@@ -109,8 +109,8 @@ public:
    void deleteAndErase_fast(U32 index);
    void clear();
    void deleteAndClear();
-   bool contains(const T&);
-   S32 getIndex(const T&);
+   bool contains(const T&) const;
+   S32 getIndex(const T&) const;
 
 
    T& first();
@@ -271,12 +271,12 @@ template<class T> inline void Vector<T>::deleteAndClear()
    this->innerVector.clear();
 }
 
-template<class T> inline bool Vector<T>::contains(const T &object)
+template<class T> inline bool Vector<T>::contains(const T &object) const
 {
    return getIndex(object) != -1;
 }
 
-template<class T> inline S32 Vector<T>::getIndex(const T &object)
+template<class T> inline S32 Vector<T>::getIndex(const T &object) const
 {
    for(U32 i = 0; i < this->innerVector.size(); i++)
       if(object == this->innerVector[i])
