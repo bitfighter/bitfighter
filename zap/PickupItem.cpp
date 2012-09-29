@@ -338,10 +338,10 @@ S32 PickupItem::setRegenTime(lua_State *L)
 
 /**
  * @luafunc  PickupItem::getRegenTime()
- * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
- * @return   int - Time in seconds for the item to remain hidden.
+ * @brief    Returns the time (in seconds) for the %PickupItem to regenerate itself.
+ * @return   int - Time in seconds for the item will remain hidden.
 */
-S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(mRepopDelay); }
+S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
 
 
 ////////////////////////////////////////
