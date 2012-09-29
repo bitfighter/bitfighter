@@ -124,6 +124,8 @@ public:
    S32 mTimeRemaining;
    bool exploded;
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
+   void handleCollision(BfObject *hitObject, Point collisionPoint);
+
 
    WeaponType mWeaponType;
    void renderItem(const Point &pos);
@@ -297,7 +299,7 @@ public:
    SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;
 
-   bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
+   bool collide(BfObject *otherObj);                    // Things (like bullets) can collide with grenades
    bool collided(BfObject *otherObj, U32 stateIndex);   // Things (like bullets) can collide with grenades
 
    void renderItem(const Point &pos);

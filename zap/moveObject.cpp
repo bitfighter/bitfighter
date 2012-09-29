@@ -328,7 +328,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
       // Collision!  Advance to the point of collision
       Point newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;    // x = x + vt
-      setPos(stateIndex, newPos);
+      setPos(stateIndex, newPos);                                                // setPos(x)
 
       if(collided(objectHit, stateIndex) || objectHit->collided(this, stateIndex))
       {
@@ -389,6 +389,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       }
       moveTime -= collisionTime;
    }
+
    for(S32 i = 0; i < disabledList.size(); i++)   // enable any disabled collision
       if(disabledList[i].isValid())
          disabledList[i]->enableCollision();
@@ -511,7 +512,8 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
                      bool collide1 = collide(foundObject);
                      bool collide2 = foundObject->collide(this);
 
-                     if(!(collide1 && collide2))
+                     // If A and B collide, both A and B's collide functions must return true to proceed
+                     if(!collide1 || !collide2)
                         continue;
 
                      collisionTime = t;
