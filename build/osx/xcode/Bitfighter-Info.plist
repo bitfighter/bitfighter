@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>bitfighter.sh</string>
+	<string>Bitfighter</string>
 	<key>CFBundleIconFile</key>
 	<string>Bitfighter.icns</string>
 	<key>CFBundleIdentifier</key>

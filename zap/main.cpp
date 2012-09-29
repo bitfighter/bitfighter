@@ -1018,6 +1018,11 @@ int main(int argc, char **argv)
 
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
+   
+#ifdef TNL_OS_MAC_OSX
+   // Set default -rootdatadir and -sfxdir if they are not set
+   setDefaultPaths(argVector);
+#endif
 
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
