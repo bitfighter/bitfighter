@@ -98,6 +98,7 @@ public:
    S32 isVis(lua_State *L);
    S32 setVis(lua_State *L);
    S32 setRegenTime(lua_State *L);
+   S32 getRegenTime(lua_State *L);
 };
 
 

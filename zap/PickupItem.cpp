@@ -282,6 +282,7 @@ string PickupItem::getAttributeString()
    METHOD(CLASS, isVis,        ARRAYDEF({{          END }}), 1 ) \
    METHOD(CLASS, setVis,       ARRAYDEF({{ BOOL,    END }}), 1 ) \
    METHOD(CLASS, setRegenTime, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
+   METHOD(CLASS, getRegenTime, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
 
 
 GENERATE_LUA_METHODS_TABLE(PickupItem, LUA_METHODS);
@@ -297,12 +298,9 @@ REGISTER_LUA_SUBCLASS(PickupItem, Item);
 /**
  * @luafunc  bool PickupItem::isVis()
  * @brief    Returns true if item is currently visible, false if not. 
- * @return   isVisible - True if item is currently visible, false if not.
+ * @return   \e bool - True if item is currently visible, false if not.
 */
-S32 PickupItem::isVis(lua_State *L) 
-{ 
-   return returnBool(L, isVisible()); 
-}
+S32 PickupItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }
 
 
 /**
@@ -324,7 +322,7 @@ S32 PickupItem::setVis(lua_State *L)
 
 
 /**
- * @luafunc  PickupItem::setRegenTime(time)
+ * @luafunc  PickupItem::setRegenTime(int time)
  * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
  * @param    time - Time in seconds for the item to remain hidden.
 */
@@ -336,6 +334,14 @@ S32 PickupItem::setRegenTime(lua_State *L)
 
    return 0;
 }
+
+
+/**
+ * @luafunc  PickupItem::getRegenTime
+ * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
+ * @return   int - Time in seconds for the item to remain hidden.
+*/
+S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(mRepopDelay); }
 
 
 ////////////////////////////////////////
