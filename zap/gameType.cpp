@@ -1501,7 +1501,7 @@ string GameType::validateLoadout(const Vector<U8> &loadout)
       if(loadout[i] == WeaponTurret)      // Reject WeaponTurret
          return "Illegal weapon in loadout";
 
-//      if(loadout[i] == WeaponHeatSeeker)  // Reject HeatSeeker, not supported yet
+//      if(loadout[i] == WeaponSeeker)  // Reject Seeker, not supported yet
 //         return "Illegal weapon in loadout";
    }
 
@@ -1887,8 +1887,8 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
       weaponType = static_cast<Projectile*>(damager)->mWeaponType;
    else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
       weaponType = static_cast<BurstProjectile*>(damager)->mWeaponType;
-   else if(typeNumber == HeatSeekerTypeNumber)
-      weaponType = static_cast<HeatSeekerProjectile*>(damager)->mWeaponType;
+   else if(typeNumber == SeekerTypeNumber)
+      weaponType = static_cast<SeekerProjectile*>(damager)->mWeaponType;
    else
    {
       TNLAssert(false, "Unknown Damage type");
@@ -1962,8 +1962,8 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
             shooter = static_cast<Projectile *>(killerObject)->mShooter;
          if(killerObject->getObjectTypeNumber() == BurstTypeNumber)
             shooter = static_cast<BurstProjectile *>(killerObject)->mShooter;
-         if(killerObject->getObjectTypeNumber() == HeatSeekerTypeNumber)
-            shooter = static_cast<HeatSeekerProjectile *>(killerObject)->mShooter;
+         if(killerObject->getObjectTypeNumber() == SeekerTypeNumber)
+            shooter = static_cast<SeekerProjectile *>(killerObject)->mShooter;
 
          if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
             updateScore(victim, KilledByTurret, 0);

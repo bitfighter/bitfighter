@@ -91,8 +91,8 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
       case WeaponSpyBug:
          (new SpyBug(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
          break;
-      case WeaponHeatSeeker:
-         (new HeatSeekerProjectile(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
+      case WeaponSeeker:
+         (new SeekerProjectile(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       default:
          break;

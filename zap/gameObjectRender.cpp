@@ -1410,14 +1410,14 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
 }
 
 
-void renderHeatSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining)
+void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaining)
 {
    glPushMatrix();
       glTranslate(pos);
       glRotatef(angleRadians * 360.f / FloatTau, 0, 0, 1.0);
 
       // The flames first!
-      F32 speedRatio = speed / GameWeapon::weaponInfo[WeaponHeatSeeker].projVelocity + (S32(timeRemaining) % 200)/ 400.0;  
+      F32 speedRatio = speed / GameWeapon::weaponInfo[WeaponSeeker].projVelocity + (S32(timeRemaining) % 200)/ 400.0;  
       glColor(Colors::yellow, 0.5);
       F32 innerFlame[] = {
             -8, -1,

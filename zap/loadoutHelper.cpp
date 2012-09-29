@@ -100,12 +100,12 @@ void LoadoutHelper::initialize(bool includeEngineer)
    if(includeEngineer)
       gLoadoutModules.push_back(LoadoutItem(getGame(), KEY_7, BUTTON_7, ModuleEngineer));
 
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_1, BUTTON_1, WeaponPhaser,     "Phaser",      "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_2, BUTTON_2, WeaponBounce,     "Bouncer",     "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, WeaponTriple,     "Triple",      "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, WeaponBurst,      "Burster",     "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,       "Mine Layer",  "", ModuleNone));
-   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponHeatSeeker, "Seeker",      "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_1, BUTTON_1, WeaponPhaser, "Phaser",     "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_2, BUTTON_2, WeaponBounce, "Bouncer",    "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_3, BUTTON_3, WeaponTriple, "Triple",     "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_4, BUTTON_4, WeaponBurst,  "Burster",    "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_5, BUTTON_5, WeaponMine,   "Mine Layer", "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(getGame(), KEY_6, BUTTON_6, WeaponSeeker, "Seeker",     "", ModuleNone));
 };
 
 

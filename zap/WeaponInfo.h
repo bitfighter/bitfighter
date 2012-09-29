@@ -39,17 +39,17 @@ namespace Zap
  * The Weapon enum can be used to represent a weapon in some functions.
  */
 
-   //                                          Enum in Lua:   Fire  Min    Enrgy  Proj Proj. Dam-  Self-dam. Can dam.   Projectile
-   //             Enum             Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate      Type
+   //                                       Enum in Lua:   Fire  Min    Enrgy  Proj Proj. Dam-  Self-dam. Can dam.   Projectile
+   //             Enum          Name        Weapon.Phaser  Delay Enrgy  Drain  Vel. Life  age    Factor   Teammate      Type
 #define WEAPON_ITEM_TABLE \
-   WEAPON_ITEM(WeaponPhaser,     "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
-   WEAPON_ITEM(WeaponBounce,     "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
-   WEAPON_ITEM(WeaponTriple,     "Triple",      "Triple",     200,  1700,  1700,  550,  850, 0.14f,  0,       false, ProjectileTriple ) \
-   WEAPON_ITEM(WeaponBurst,      "Burst",       "Burst",      700,  5000,  5000,  500, 1000, 0.50f,  1.0f,    false, NotAProjectile   ) \
-   WEAPON_ITEM(WeaponHeatSeeker, "Seeker",      "Seeker",     700, 20000, 20000,  600, 8000, 0.26f,  1.0f,    false, NotAProjectile   ) \
-   WEAPON_ITEM(WeaponMine,       "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  NotAProjectile   ) \
-   WEAPON_ITEM(WeaponTurret,     "Turret",      "Turret",     150,     0,     0,  800,  800, 0.11f,  1.0f,    true,  ProjectileTurret ) \
-   WEAPON_ITEM(WeaponSpyBug,     "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      0,       true,  NotAProjectile   ) \
+   WEAPON_ITEM(WeaponPhaser,  "Phaser",      "Phaser",     100,   500,   500,  600, 1000, 0.21f,  0,       false, ProjectilePhaser ) \
+   WEAPON_ITEM(WeaponBounce,  "Bouncer",     "Bouncer",    100,  1800,  1800,  540, 1500, 0.15f,  0.5f,    false, ProjectileBounce ) \
+   WEAPON_ITEM(WeaponTriple,  "Triple",      "Triple",     200,  1700,  1700,  550,  850, 0.14f,  0,       false, ProjectileTriple ) \
+   WEAPON_ITEM(WeaponBurst,   "Burst",       "Burst",      700,  5000,  5000,  500, 1000, 0.50f,  1.0f,    false, NotAProjectile   ) \
+   WEAPON_ITEM(WeaponSeeker,  "Seeker",      "Seeker",     700, 20000, 20000,  600, 8000, 0.26f,  1.0f,    false, NotAProjectile   ) \
+   WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  NotAProjectile   ) \
+   WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     150,     0,     0,  800,  800, 0.11f,  1.0f,    true,  ProjectileTurret ) \
+   WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      0,       true,  NotAProjectile   ) \
 
 
 // Define an enum from the first values in WEAPON_ITEM_TABLE
@@ -68,7 +68,6 @@ enum ProjectileType
    ProjectilePhaser,
    ProjectileBounce,
    ProjectileTriple,
-//   ProjectileGuided,    // Heatseeker
    ProjectileTurret,
    ProjectileTypeCount,
    NotAProjectile  // Need this so we can fit a non-ProjectileType (like mine) into a constructor intended for proper projectiles

@@ -480,8 +480,8 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
             shooter = static_cast<Projectile*>(theInfo->damagingObject)->mShooter;
          else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
             shooter = static_cast<BurstProjectile*>(theInfo->damagingObject)->mShooter;
-         else if(typeNumber == HeatSeekerTypeNumber)
-            shooter = static_cast<HeatSeekerProjectile*>(theInfo->damagingObject)->mShooter;
+         else if(typeNumber == SeekerTypeNumber)
+            shooter = static_cast<SeekerProjectile*>(theInfo->damagingObject)->mShooter;
          else
          {
             TNLAssert(false, "Undefined projectile type?");

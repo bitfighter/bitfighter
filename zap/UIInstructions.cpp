@@ -802,42 +802,42 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       switch(i)
       {
          case 0:
-            renderProjectile(Point(0, 0), 0, getGame()->getCurrentTime());
+            renderProjectile(Point(0,0), 0, getGame()->getCurrentTime());
             break;
          case 1:
-            renderProjectile(Point(0, 0), 1, getGame()->getCurrentTime());
+            renderProjectile(Point(0,0), 1, getGame()->getCurrentTime());
             break;
          case 2:
-            renderProjectile(Point(0, 0), 2, getGame()->getCurrentTime());
+            renderProjectile(Point(0,0), 2, getGame()->getCurrentTime());
             break;
          case 3:
-            renderGrenade(Point(0, 0), 1);
+            renderGrenade(Point(0,0), 1);
             break;
          case 4:
-            renderHeatSeeker(Point(0, 0), 0, 400, getGame()->getCurrentTime());
+            renderSeeker(Point(0,0), 0, 400, getGame()->getCurrentTime());
             break;
          case 5:     // Blank
             break;
          case 6:
-            renderMine(Point(0, 0), true, true);
+            renderMine(Point(0,0), true, true);
             break;
          case 7:
-            renderMine(Point(0, 0), true, false);
+            renderMine(Point(0,0), true, false);
             break;
          case 8:
-            renderSpyBug(Point(0, 0), Colors::blue, true, true);
+            renderSpyBug(Point(0,0), Colors::blue, true, true);
             break;
          case 9:
-            renderSpyBug(Point(0, 0), Colors::blue, false, true);
+            renderSpyBug(Point(0,0), Colors::blue, false, true);
             break;
          case 10:    // Blank
          case 11:
             break;
          case 12:
-            renderRepairItem(Point(0, 0));
+            renderRepairItem(Point(0,0));
             break;
          case 13:
-            renderEnergyItem(Point(0, 0));
+            renderEnergyItem(Point(0,0));
             break;
          case 14:
             renderTurret(Colors::white, Point(0, 15), Point(0, -1), false, 0, 0);
@@ -856,7 +856,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 18:
             {
                Vector<Point> dummy;
-               renderTeleporter(Point(0, 0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &dummy);
+               renderTeleporter(Point(0,0), 0, true, getGame()->getCurrentTime(), 1, 1, (F32)Teleporter::TELEPORTER_RADIUS, 1, &dummy);
             }
             break;
          case 19:
@@ -866,9 +866,9 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             {              // braces needed: see C2360
                Vector<Point> o;     // outline
                o.push_back(Point(-150, -30));
-               o.push_back(Point(150, -30));
-               o.push_back(Point(150, 30));
-               o.push_back(Point(-150, 30));
+               o.push_back(Point( 150, -30));
+               o.push_back(Point( 150,  30));
+               o.push_back(Point(-150,  30));
 
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
@@ -882,9 +882,9 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             {
                Vector<Point> o;     // outline
                o.push_back(Point(-150, -30));
-               o.push_back(Point(150, -30));
-               o.push_back(Point(150, 30));
-               o.push_back(Point(-150, 30));
+               o.push_back(Point( 150, -30));
+               o.push_back(Point( 150,  30));
+               o.push_back(Point(-150,  30));
 
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);

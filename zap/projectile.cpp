@@ -1201,25 +1201,25 @@ REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(HeatSeekerProjectile);
+TNL_IMPLEMENT_NETOBJECT(SeekerProjectile);
 
 // Constructor
-const F32 HeatSeeker_Radius = 4;
-const F32 HeatSeeker_Mass = 1;
+const F32 Seeker_Radius = 4;
+const F32 Seeker_Mass = 1;
 
-HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, HeatSeeker_Radius, HeatSeeker_Mass)
+SeekerProjectile::SeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
 {
-   mObjectTypeNumber = HeatSeekerTypeNumber;
+   mObjectTypeNumber = SeekerTypeNumber;
 
    mNetFlags.set(Ghostable);
 
    setPosVelAng(pos, vel, vel.ATAN2());
    setMaskBits(PositionMask);
-   mWeaponType = WeaponHeatSeeker;
+   mWeaponType = WeaponSeeker;
 
    updateExtentInDatabase();
 
-   mTimeRemaining = GameWeapon::weaponInfo[WeaponHeatSeeker].projLiveTime;
+   mTimeRemaining = GameWeapon::weaponInfo[WeaponSeeker].projLiveTime;
    exploded = false;
    bounced = false;
 
@@ -1240,7 +1240,7 @@ HeatSeekerProjectile::HeatSeekerProjectile(Point pos, Point vel, BfObject *shoot
 
 
 // Destructor
-HeatSeekerProjectile::~HeatSeekerProjectile()
+SeekerProjectile::~SeekerProjectile()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
@@ -1257,13 +1257,13 @@ static F32 normalizeAngle(F32 angle)
 }
 
 
-U32 HeatSeekerProjectile::SpeedIncreasePerSecond = 300;
-U32 HeatSeekerProjectile::TargetAcquisitionRadius = 800;
-F32 HeatSeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 2;
-F32 HeatSeekerProjectile::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
+U32 SeekerProjectile::SpeedIncreasePerSecond = 300;
+U32 SeekerProjectile::TargetAcquisitionRadius = 800;
+F32 SeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 2;
+F32 SeekerProjectile::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
 
 // Runs on client and server
-void HeatSeekerProjectile::idle(IdleCallPath path)
+void SeekerProjectile::idle(IdleCallPath path)
 {
    Parent::idle(path);
 
@@ -1359,9 +1359,9 @@ void HeatSeekerProjectile::idle(IdleCallPath path)
 }
 
 
-// Here we find a suitable target for the heatSeeker to home in on
+// Here we find a suitable target for the Seeker to home in on
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
-void HeatSeekerProjectile::acquireTarget()
+void SeekerProjectile::acquireTarget()
 {
    F32 ourAngle = getActualVel().ATAN2();
 
@@ -1370,7 +1370,7 @@ void HeatSeekerProjectile::acquireTarget()
 
    Rect queryRect(getPos(), TargetAcquisitionRadius);
    fillVector.clear();
-   findObjects(isHeatSeekerTarget, fillVector, queryRect);
+   findObjects(isSeekerTarget, fillVector, queryRect);
 
    F32 closest = F32_MAX;
 
@@ -1431,11 +1431,11 @@ void HeatSeekerProjectile::acquireTarget()
 }
 
 
-void HeatSeekerProjectile::emitMovementSparks()
+void SeekerProjectile::emitMovementSparks()
 {
 #ifndef ZAP_DEDICATED
 
-   Point center(-10 + -20 * getActualVel().len() / GameWeapon::weaponInfo[WeaponHeatSeeker].projVelocity, 0);
+   Point center(-10 + -20 * getActualVel().len() / GameWeapon::weaponInfo[WeaponSeeker].projVelocity, 0);
 
    F32 th = getActualVel().ATAN2();
 
@@ -1456,7 +1456,7 @@ void HeatSeekerProjectile::emitMovementSparks()
 }
 
 
-U32 HeatSeekerProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 SeekerProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
@@ -1466,7 +1466,7 @@ U32 HeatSeekerProjectile::packUpdate(GhostConnection *connection, U32 updateMask
 }
 
 
-void HeatSeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void SeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
@@ -1484,7 +1484,7 @@ void HeatSeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *
 }
 
 
-void HeatSeekerProjectile::damageObject(DamageInfo *theInfo)
+void SeekerProjectile::damageObject(DamageInfo *theInfo)
 {
    // If we're being damaged by a burst, explode...
    if(theInfo->damageType == DamageTypeArea)
@@ -1499,7 +1499,7 @@ void HeatSeekerProjectile::damageObject(DamageInfo *theInfo)
 }
 
 
-void HeatSeekerProjectile::doExplosion(const Point &pos)
+void SeekerProjectile::doExplosion(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(isGhost())
@@ -1514,7 +1514,7 @@ void HeatSeekerProjectile::doExplosion(const Point &pos)
 
 
 // Server-side only
-void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionPoint)
+void SeekerProjectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
    if(exploded)  // Rare, but can happen
       return;
@@ -1546,7 +1546,7 @@ void HeatSeekerProjectile::handleCollision(BfObject *hitObject, Point collisionP
 }
 
 
-bool HeatSeekerProjectile::collide(BfObject *otherObj)
+bool SeekerProjectile::collide(BfObject *otherObj)
 {
    if(isShipType(otherObj->getObjectTypeNumber())) // So a Client side can predict better and make some sound effect
    {
@@ -1566,14 +1566,14 @@ bool HeatSeekerProjectile::collide(BfObject *otherObj)
    return isWeaponCollideableType(otherObj->getObjectTypeNumber());
 }
 
-bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
+bool SeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 {
    static const F32 MAX_VEL_TO_BOUNCE_EACHOTHER = 500;
 
-   if(otherObj->getObjectTypeNumber() == HeatSeekerTypeNumber) // explode if both heatseeker hit each other too hard.
+   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber) // explode if both seeker hit each other too hard.
    {
-      TNLAssert(dynamic_cast<HeatSeekerProjectile *>(otherObj), "Not a HeatSeekerProjectile");
-      HeatSeekerProjectile *other = static_cast<HeatSeekerProjectile *>(otherObj);
+      TNLAssert(dynamic_cast<SeekerProjectile *>(otherObj), "Not a SeekerProjectile");
+      SeekerProjectile *other = static_cast<SeekerProjectile *>(otherObj);
       if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE_EACHOTHER * MAX_VEL_TO_BOUNCE_EACHOTHER)
       {
          handleCollision(other, getActualPos());
@@ -1607,14 +1607,14 @@ bool HeatSeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
 }
 
 
-void HeatSeekerProjectile::renderItem(const Point &pos)
+void SeekerProjectile::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(exploded)
       return;
 
    F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
-   renderHeatSeeker(pos, getActualVel().ATAN2(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
+   renderSeeker(pos, getActualVel().ATAN2(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
 #endif
 }
 
@@ -1626,16 +1626,16 @@ void HeatSeekerProjectile::renderItem(const Point &pos)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
 
-GENERATE_LUA_METHODS_TABLE(HeatSeekerProjectile, LUA_METHODS);
-GENERATE_LUA_FUNARGS_TABLE(HeatSeekerProjectile, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(SeekerProjectile, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(SeekerProjectile, LUA_METHODS);
 
 #undef LUA_METHODS
 
 
-const char *HeatSeekerProjectile::luaClassName = "Seeker";
-REGISTER_LUA_SUBCLASS(HeatSeekerProjectile, MoveObject);
+const char *SeekerProjectile::luaClassName = "Seeker";
+REGISTER_LUA_SUBCLASS(SeekerProjectile, MoveObject);
 
-S32 HeatSeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 SeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 
 

@@ -72,7 +72,7 @@ bool isProjectileType(U8 x)
 {
    return
          x == MineTypeNumber  || x == SpyBugTypeNumber      || x == BulletTypeNumber ||
-         x == BurstTypeNumber || x == HeatSeekerTypeNumber;
+         x == BurstTypeNumber || x == SeekerTypeNumber;
 }
 
 bool isGrenadeType(U8 x)
@@ -109,7 +109,7 @@ bool isDamageableType(U8 x)
          x == ResourceItemTypeNumber || x == TestItemTypeNumber            || x == AsteroidTypeNumber ||
          x == TurretTypeNumber       || x == ForceFieldProjectorTypeNumber || x == CoreTypeNumber     ||
          x == FlagTypeNumber         || x == SoccerBallItemTypeNumber      || x == CircleTypeNumber   ||
-         x == TeleporterTypeNumber   || x == HeatSeekerTypeNumber          || x == WormTypeNumber;
+         x == TeleporterTypeNumber   || x == SeekerTypeNumber          || x == WormTypeNumber;
 }
 
 
@@ -178,7 +178,7 @@ bool isWeaponCollideableType(U8 x)
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
          x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber          ||
-         x == TeleporterTypeNumber || x == HeatSeekerTypeNumber     || x == WormTypeNumber;
+         x == TeleporterTypeNumber || x == SeekerTypeNumber     || x == WormTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -228,7 +228,7 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander
          x == SpeedZoneTypeNumber  || x == TeleporterTypeNumber     || x == BurstTypeNumber               ||
          x == LineTypeNumber       || x == TextItemTypeNumber       || x == RepairItemTypeNumber          ||
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == EnergyItemTypeNumber          ||
-         x == BulletTypeNumber     || x == MineTypeNumber           || x == HeatSeekerTypeNumber;
+         x == BulletTypeNumber     || x == MineTypeNumber           || x == SeekerTypeNumber;
 }
 
 
@@ -240,7 +240,7 @@ bool isZoneType(U8 x)      // Zones a ship could be in
 }
 
 
-bool isHeatSeekerTarget(U8 x)
+bool isSeekerTarget(U8 x)
 {
    return isShipType(x);
 }

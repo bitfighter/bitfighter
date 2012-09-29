@@ -97,7 +97,7 @@ class ClientInfo;
    TYPE_NUMBER( CoreTypeNumber,                true,              "CoreType"                ) \
    TYPE_NUMBER( ZoneTypeNumber,                true,              "ZoneType"                ) \
    TYPE_NUMBER( CircleTypeNumber,              true,              "CircleType"              ) \
-   TYPE_NUMBER( HeatSeekerTypeNumber,          true,              "SeekerType"              ) \
+   TYPE_NUMBER( SeekerTypeNumber,              true,              "SeekerType"              ) \
    TYPE_NUMBER( DeletedTypeNumber,             false,             "DeletedType"             ) \
    TYPE_NUMBER( UnknownTypeNumber,             false,             "UnknownType"             ) \
 
@@ -133,7 +133,7 @@ bool isFlagOrShipCollideableType(U8 x);
 bool isVisibleOnCmdrsMapType(U8 x);
 bool isVisibleOnCmdrsMapWithSensorType(U8 x);
 bool isZoneType(U8 x);
-bool isHeatSeekerTarget(U8 x);
+bool isSeekerTarget(U8 x);
 
 bool isAnyObjectType(U8 x);
 // END GAME OBJECT TYPES

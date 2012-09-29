@@ -260,7 +260,7 @@ public:
 
 
 // Basic burst object, and the base clase used for both mines and spybugs
-class HeatSeekerProjectile : public MoveItem
+class SeekerProjectile : public MoveItem
 {
 private:
    typedef MoveItem Parent;
@@ -291,8 +291,8 @@ private:
 
 
 public:
-   HeatSeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
-   ~HeatSeekerProjectile();                                                                      // Destructor
+   SeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
+   ~SeekerProjectile();                                                                      // Destructor
 
    SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;
@@ -309,10 +309,10 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   TNL_DECLARE_CLASS(HeatSeekerProjectile);
+   TNL_DECLARE_CLASS(SeekerProjectile);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(HeatSeekerProjectile);
+   LUAW_DECLARE_CLASS(SeekerProjectile);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
