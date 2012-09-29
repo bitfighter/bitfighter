@@ -671,7 +671,7 @@ GENERATE_LUA_FUNARGS_TABLE(BurstProjectile, LUA_METHODS);
 
 
 const char *BurstProjectile::luaClassName = "Burst";
-REGISTER_LUA_SUBCLASS(BurstProjectile, MoveItem);
+REGISTER_LUA_SUBCLASS(BurstProjectile, MoveObject);
 
 
 S32 BurstProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
@@ -1633,7 +1633,7 @@ GENERATE_LUA_FUNARGS_TABLE(HeatSeekerProjectile, LUA_METHODS);
 
 
 const char *HeatSeekerProjectile::luaClassName = "Seeker";
-REGISTER_LUA_SUBCLASS(HeatSeekerProjectile, MoveItem);
+REGISTER_LUA_SUBCLASS(HeatSeekerProjectile, MoveObject);
 
 S32 HeatSeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 

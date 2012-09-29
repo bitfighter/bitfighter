@@ -597,7 +597,7 @@ const LuaFunctionProfile SoccerBallItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *SoccerBallItem::luaClassName = "SoccerBallItem";
-REGISTER_LUA_SUBCLASS(SoccerBallItem, MoveItem);
+REGISTER_LUA_SUBCLASS(SoccerBallItem, MoveObject);
 
 
 };

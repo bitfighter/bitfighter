@@ -756,6 +756,10 @@ void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
 
 /////
 // Lua interface
+/**
+ *   @luaclass MoveObject
+ *   @brief    Parent class of most things that move (except bullets)
+ */
 
 //               Fn name Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -772,8 +776,21 @@ const char *MoveObject::luaClassName = "MoveObject";
 REGISTER_LUA_SUBCLASS(MoveObject, Item);
 
 
+/**
+ *   @luafunc MoveObject::getVel()
+ *   @brief   Returns the items's velocity.
+ *   @descr   Points are used to represent velocity; the x and y components represent the speed in the x and y directions respectively.
+ *   @return  \e point representing the item's velocity.
+ */
 S32 MoveObject::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
 
+
+/**
+ * @luafunc MoveObject::setVel(vel)
+ * @brief   Sets the item's velocity.
+ * @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
+ * @param   vel - A point representing item's velocity.
+ */
 S32 MoveObject::setVel(lua_State *L)
 {
    checkArgList(L, functionArgs, "MoveObject", "setVel");
@@ -794,14 +811,14 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
 
    updateTimer = 0;
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   // LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 MoveItem::~MoveItem()
 {
-   LUAW_DESTRUCTOR_CLEANUP;
+   // LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -870,16 +887,9 @@ void MoveItem::mountToShip(Ship *theShip)
 }
 
 
-void MoveItem::setMountedMask()
-{
-   setMaskBits(MountMask);
-}
-
-
-void MoveItem::setPositionMask()
-{
-   setMaskBits(PositionMask);
-}
+// Mask setting
+void MoveItem::setMountedMask()  { setMaskBits(MountMask);    }
+void MoveItem::setPositionMask() { setMaskBits(PositionMask); }
 
 
 bool MoveItem::isMounted()
@@ -1161,14 +1171,18 @@ S32 MoveItem::getShip(lua_State *L)
 
 /////
 // Lua interface
+/**
+ *   @luaclass MoveItem
+ *   @brief    Parent class of most things that move (but noy ships, bullets, or projectiles)
+ */
 
-// Standard methods available to all MoveItems
-const luaL_reg           MoveItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile MoveItem::functionArgs[] = { { NULL, { }, 0 } };
+// MoveItem has no additional Lua methods available to them
+// const luaL_reg           MoveItem::luaMethods[]   = { { NULL, NULL } };
+// const LuaFunctionProfile MoveItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
-const char *MoveItem::luaClassName = "MoveItem";
-REGISTER_LUA_SUBCLASS(MoveItem, MoveObject);
+// const char *MoveItem::luaClassName = "MoveItem";
+// REGISTER_LUA_SUBCLASS(MoveItem, MoveObject);
 
 
 ////////////////////////////////////////
@@ -1511,7 +1525,7 @@ GENERATE_LUA_FUNARGS_TABLE(Asteroid, LUA_METHODS);
 
 
 const char *Asteroid::luaClassName = "Asteroid";
-REGISTER_LUA_SUBCLASS(Asteroid, MoveItem);
+REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 
 
 S32 Asteroid::getSize(lua_State *L)      { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }
@@ -1709,7 +1723,7 @@ const LuaFunctionProfile Circle::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *Circle::luaClassName = "Circle";
-REGISTER_LUA_SUBCLASS(Circle, MoveItem);
+REGISTER_LUA_SUBCLASS(Circle, MoveObject);
 
 
 ////////////////////////////////////////
@@ -2163,7 +2177,7 @@ const LuaFunctionProfile TestItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *TestItem::luaClassName = "TestItem";
-REGISTER_LUA_SUBCLASS(TestItem, MoveItem);
+REGISTER_LUA_SUBCLASS(TestItem, MoveObject);
 
 
 ////////////////////////////////////////
@@ -2277,7 +2291,7 @@ const LuaFunctionProfile ResourceItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *ResourceItem::luaClassName = "ResourceItem";
-REGISTER_LUA_SUBCLASS(ResourceItem, MoveItem);
+REGISTER_LUA_SUBCLASS(ResourceItem, MoveObject);
 
 
 };

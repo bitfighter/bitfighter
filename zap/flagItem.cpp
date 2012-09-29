@@ -436,7 +436,7 @@ GENERATE_LUA_FUNARGS_TABLE(FlagItem, LUA_METHODS);
 
 
 const char *FlagItem::luaClassName = "FlagItem";
-REGISTER_LUA_SUBCLASS(FlagItem, MoveItem);
+REGISTER_LUA_SUBCLASS(FlagItem, MoveObject);
 
 
 S32 FlagItem::isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }

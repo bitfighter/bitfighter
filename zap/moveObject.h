@@ -229,11 +229,11 @@ public:
    bool collide(BfObject *otherObject);
 
    ///// LuaItem interface
-   LUAW_DECLARE_CLASS(MoveItem);
+   //LUAW_DECLARE_CLASS(MoveItem);
 
-   static const char *luaClassName;
-   static const luaL_reg luaMethods[];
-   static const LuaFunctionProfile functionArgs[];
+   //static const char *luaClassName;
+   //static const luaL_reg luaMethods[];
+   //static const LuaFunctionProfile functionArgs[];
 
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);

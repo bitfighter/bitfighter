@@ -263,7 +263,6 @@ void GoalZone::idle(BfObject::IdleCallPath path)
 /**
   *  @luaclass GoalZone
   *  @brief Place to deposit flags or get the ball to, depending on game type.
-  *  @descr GoalZones have no purpose in some game types, but can be added to any without problem.
   */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
