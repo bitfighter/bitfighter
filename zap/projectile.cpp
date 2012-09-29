@@ -1621,7 +1621,10 @@ void SeekerProjectile::renderItem(const Point &pos)
 
 /////
 // Lua interface
-
+/**
+ *   @luaclass Seeker
+ *   @brief    Guided projectile that homes in on enemy players.
+ */
 //               Fn name    Param profiles  Profile count
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
@@ -1635,8 +1638,12 @@ GENERATE_LUA_FUNARGS_TABLE(SeekerProjectile, LUA_METHODS);
 const char *SeekerProjectile::luaClassName = "Seeker";
 REGISTER_LUA_SUBCLASS(SeekerProjectile, MoveObject);
 
+/**
+ *  @luafunc SeekerProjectile::getWeapon()
+ *  @brief   Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
+ *  @return  \e int - The index of the weapon used to fire the projectile.
+ */
 S32 SeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
-
 
 
 };
