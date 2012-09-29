@@ -281,8 +281,8 @@ REGISTER_LUA_SUBCLASS(GoalZone, Zone);
   *  @luafunc bool GoalZone::hasFlag()
   *  @brief Does the zone have a flag?
   *  @descr GoalZones can hold flags in some game types.  If the current game type does not feature
-  *         zones that hold flags (e.g. Soccer), then the function will return false.
-  *  @return True if the GoalZone is currently holding a flag, false otherwise.
+  *         zones that hold flags (e.g. Soccer, ZoneControl), then the function will return false.
+  *  @return \e bool - True if the %GoalZone is currently holding a flag, false otherwise.
   */
 S32 GoalZone::hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
 

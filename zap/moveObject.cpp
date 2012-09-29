@@ -772,7 +772,7 @@ GENERATE_LUA_FUNARGS_TABLE(MoveObject, LUA_METHODS);
 #undef LUA_METHODS
 
 
-const char *MoveObject::luaClassName = "MoveObject";
+const char *MoveObject::luaClassName = "MoveObject";     // <== Can we rename this to MoveItem without too much confusion?
 REGISTER_LUA_SUBCLASS(MoveObject, Item);
 
 
