@@ -13,8 +13,13 @@ For example, if the object is inherently point-like (such as an Item or Projecti
 For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
 
 The Geom class provides a collection of tools to make common transormations to tables of points.  Currently these functions do not work on a single point.
+
+* Other datatypes
+
 bool
+
 int
+
 num
 
 @subsection step1 Step 1: Opening the box

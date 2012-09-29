@@ -425,6 +425,10 @@ void FlagItem::onMountDestroyed()
 /////
 // Lua interface
 
+/**
+ *  @luaclass FlagItem
+ *  @brief    Flags are used in many games, such as Nexus and Capture The Flag (CTF).
+ */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, isInInitLoc,  ARRAYDEF({{ END }}), 1 ) \
@@ -439,6 +443,11 @@ const char *FlagItem::luaClassName = "FlagItem";
 REGISTER_LUA_SUBCLASS(FlagItem, MoveObject);
 
 
+/**
+ *  @luafunc FlagItem::isInInitLoc()
+ *  @brief   Returns true if the flag is in its starting position, false if it has been moved.
+ *  @return  \e bool - True if flag is in its starting position, false if it has been moved.
+ */
 S32 FlagItem::isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }
 
 
@@ -456,9 +465,6 @@ S32 FlagItem::getCaptureZone(lua_State *L)
 
 
 // Override parent method
-S32 FlagItem::isInCaptureZone(lua_State *L)
-{
-   return returnBool(L, mZone.isValid());
-}
+S32 FlagItem::isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }
 
 };

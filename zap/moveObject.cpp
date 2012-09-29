@@ -1169,22 +1169,6 @@ S32 MoveItem::getShip(lua_State *L)
 }
 
 
-/////
-// Lua interface
-/**
- *   @luaclass MoveItem
- *   @brief    Parent class of most things that move (but noy ships, bullets, or projectiles)
- */
-
-// MoveItem has no additional Lua methods available to them
-// const luaL_reg           MoveItem::luaMethods[]   = { { NULL, NULL } };
-// const LuaFunctionProfile MoveItem::functionArgs[] = { { NULL, { }, 0 } };
-
-
-// const char *MoveItem::luaClassName = "MoveItem";
-// REGISTER_LUA_SUBCLASS(MoveItem, MoveObject);
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -1286,7 +1270,7 @@ bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
    //   polyPoints.push_back(p);
    //}
 
-   return false;  // No Collision Poly, that may help reduce lag with client and server
+   return false;  // No Collision Poly, that may help reduce lag with client and server  <== Why?
 }
 
 
@@ -1513,9 +1497,14 @@ string Asteroid::getAttributeString()
 /////
 // Lua interface
 
+/**
+ *   @luaclass Asteroid
+ *   @brief    Just like the arcade game!  Yo!
+ */
+
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getSize,      ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getSizeIndex, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getSizeCount, ARRAYDEF({{ END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(Asteroid, LUA_METHODS);
@@ -1527,8 +1516,20 @@ GENERATE_LUA_FUNARGS_TABLE(Asteroid, LUA_METHODS);
 const char *Asteroid::luaClassName = "Asteroid";
 REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 
+/**
+ *  @luafunc Asteroid::getSizeIndex()
+ *  @brief   Get %s asteroids current size index.
+ *  @descr   Index 0 represents the %asteroid's initial size.  After it has been broken once, it's size index will be 1, and so on.
+ *           This method will always return an integer between 0 and the value returned by the %getSizeCount() method.
+ *  @return  \e int - Index corresponding to the %asteroid's current size.
+ */
+S32 Asteroid::getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }
 
-S32 Asteroid::getSize(lua_State *L)      { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }
+/**
+ *  @luafunc Asteroid::getSizeCount()
+ *  @brief   Returns size index of smallest asteroid.
+ *  @return  \e int - Index of the %asteroid's smallest size.
+ */
 S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT);             }
 
 
@@ -2171,6 +2172,11 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 /////
 // Lua interface
 
+/**
+ *  @luaclass TestItem
+ *  @brief    Large bouncy ball type item.
+ */
+
 // Inherits all MoveItem methods, has no custom methods
 const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile TestItem::functionArgs[] = { { NULL, { }, 0 } };
@@ -2284,6 +2290,12 @@ void ResourceItem::onItemDropped()
 
 /////
 // Lua interface
+
+/**
+ *  @luaclass ResourceItem
+ *  @brief    Small bouncy ball type item.  In levels where Engineer module is allowed, ResourceItems can be collected and transformed
+ *            into other items.
+ */
 
 // Inherits all MoveItem methods, and has a few of its own
 const luaL_reg           ResourceItem::luaMethods[]   = { { NULL, NULL } };

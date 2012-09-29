@@ -337,7 +337,7 @@ S32 PickupItem::setRegenTime(lua_State *L)
 
 
 /**
- * @luafunc  PickupItem::getRegenTime
+ * @luafunc  PickupItem::getRegenTime()
  * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
  * @return   int - Time in seconds for the item to remain hidden.
 */
@@ -430,6 +430,11 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
 /////
 // Lua interface
 
+/**
+ *   @luaclass RepairItem
+ *   @brief    Adds health to ships that pick them up.
+ */
+
 // Only implements inherited methods
 const luaL_reg           RepairItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile RepairItem::functionArgs[] = { { NULL, { }, 0 } };
@@ -505,6 +510,11 @@ const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships
 
 /////
 // Lua interface
+
+/**
+ *   @luaclass EnergyItem
+ *   @brief    Adds energy to ships that pick them up.
+ */
 
 // Only implements inherited methods
 const luaL_reg           EnergyItem::luaMethods[]   = { { NULL, NULL } };

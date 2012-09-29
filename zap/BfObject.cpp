@@ -1323,8 +1323,10 @@ S32 BfObject::getLoc(lua_State *L)
 /**
  * @luafunc  index BfObject::getTeamIndx()
  * @brief    Gets the index of the object's team.
+ * @descr    Many BfObjects (such as \link TestItem TestItems\endlink) are never part of any particular team.  For these objects, 
+ *             this method will return NeutralTeamIndx.
  * @note     Remember that in Lua, indices start with 1!
- * @return   Team index of the object
+ * @return   \e int - Team index of the object
 */
 S32 BfObject::getTeamIndx(lua_State *L)
 { 
