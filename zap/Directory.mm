@@ -47,3 +47,19 @@ void moveToAppPath()
              [[[NSBundle mainBundle] executablePath] stringByDeletingLastPathComponent]] UTF8String]);
     [pool release];
 }
+
+void setDefaultPaths(Vector<string> &argv)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    if (argv.contains("-rootdatadir") == NO) {
+        argv.push_back("-rootdatadir");
+        NSString* libraryPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/"];
+        NSString* bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
+        argv.push_back([[NSString stringWithFormat:@"%@/Application Support/%@",libraryPath, bundleName] UTF8String]);
+    }
+    if (argv.contains("-sfxdir") == NO) {
+        argv.push_back("-sfxdir");
+        argv.push_back([[NSString stringWithFormat:@"%@/sfx",[[NSBundle mainBundle] resourcePath]] UTF8String]);
+    }
+    [pool release];
+}

@@ -38,6 +38,7 @@ namespace TNL
 }
 
 void moveToAppPath();
+void setDefaultPaths(TNL::Vector<std::string> &argv);
 
 #endif
 
