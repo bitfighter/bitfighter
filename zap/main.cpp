@@ -1002,10 +1002,6 @@ int main(int argc, char **argv)
 // Enable some heap checking stuff for Windows... slow... do not include in release version!!
 //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );
 
-#ifdef TNL_OS_MAC_OSX
-   // Move to the application bundle's path (RDW)
-   moveToAppPath();
-#endif
 
 #ifdef USE_EXCEPTION_BACKTRACE
    signal(SIGSEGV, exceptionHandler);   // install our handler
@@ -1020,6 +1016,10 @@ int main(int argc, char **argv)
       argVector.push_back(argv[i]);
    
 #ifdef TNL_OS_MAC_OSX
+   // Move to the application bundle's path (RDW)
+   moveToAppPath();
+   // Copy some initialisation files
+   prepareFirstLaunch();
    // Set default -rootdatadir and -sfxdir if they are not set
    setDefaultPaths(argVector);
 #endif
