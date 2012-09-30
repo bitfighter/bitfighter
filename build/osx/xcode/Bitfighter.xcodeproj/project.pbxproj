@@ -23,6 +23,9 @@
 
 /* Begin PBXBuildFile section */
 		5E481F4413053943004F9637 /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = 5E481F4213053943004F9637 /* sqlite3.c */; };
+		6149CB6016185CBC00783189 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6149CB5F16185CBC00783189 /* Sparkle.framework */; };
+		6149CC1516186F1E00783189 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6149CB5F16185CBC00783189 /* Sparkle.framework */; };
+		6149CC6B161875A900783189 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 6149CC6A161875A900783189 /* dsa_pub.pem */; };
 		7317B9DB1370CAC30025A41E /* alure.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9CF1370CAC30025A41E /* alure.h */; };
 		7317B9DC1370CAC30025A41E /* alext.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9D01370CAC30025A41E /* alext.h */; };
 		7317B9DD1370CAC30025A41E /* alure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D11370CAC30025A41E /* alure.cpp */; };
@@ -36,8 +39,6 @@
 		7317B9E51370CAC30025A41E /* streamdec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D91370CAC30025A41E /* streamdec.cpp */; };
 		7317B9E61370CAC30025A41E /* streamplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9DA1370CAC30025A41E /* streamplay.cpp */; };
 		73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
-		736DE9A612906AA400C3CB73 /* firstlaunch-osx.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */; };
-		736DE9B412906D0E00C3CB73 /* firstlaunch-osx.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */; };
 		7370288F132A020B00397F99 /* RecastAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702884132A020B00397F99 /* RecastAlloc.cpp */; };
 		73702890132A020B00397F99 /* RecastMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702886132A020B00397F99 /* RecastMesh.cpp */; };
 		73702895132A020B00397F99 /* triangle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7370288C132A020B00397F99 /* triangle.c */; };
@@ -250,7 +251,6 @@
 		73D2F3E412E2D7E800EA5EBE /* helperMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2B912E2D7E800EA5EBE /* helperMenu.cpp */; };
 		73D2F3E512E2D7E800EA5EBE /* HTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */; };
 		73D2F3E612E2D7E800EA5EBE /* NexusGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */; };
-		73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
 		73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
 		73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2C812E2D7E800EA5EBE /* keymap.txt */; };
@@ -512,22 +512,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		736DE9BF12906D1900C3CB73 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 6;
-			files = (
-				736DE9B412906D0E00C3CB73 /* firstlaunch-osx.sh in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9462BEAA11D7D28B00791A0B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				6149CC1516186F1E00783189 /* Sparkle.framework in CopyFiles */,
 				73783E2E1613AF29008EEA7A /* libmodplug.framework in CopyFiles */,
 				73872A1E152A7BBC0034CD97 /* SDL2.framework in CopyFiles */,
 				73974A5514B4EE0B0053CCF4 /* Ogg.framework in CopyFiles */,
@@ -551,6 +542,13 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		5E481F4213053943004F9637 /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sqlite3.c; sourceTree = "<group>"; };
 		5E481F4313053943004F9637 /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
+		6149CB5F16185CBC00783189 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = ../../../lib/Sparkle.framework; sourceTree = SOURCE_ROOT; };
+		6149CBEB16186DBC00783189 /* Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sparkle.h; path = ../../../lib/Sparkle.framework/Headers/Sparkle.h; sourceTree = SOURCE_ROOT; };
+		6149CBEC16186DBC00783189 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUAppcast.h; path = ../../../lib/Sparkle.framework/Headers/SUAppcast.h; sourceTree = SOURCE_ROOT; };
+		6149CBED16186DBC00783189 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUAppcastItem.h; path = ../../../lib/Sparkle.framework/Headers/SUAppcastItem.h; sourceTree = SOURCE_ROOT; };
+		6149CBEE16186DBC00783189 /* SUUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUUpdater.h; path = ../../../lib/Sparkle.framework/Headers/SUUpdater.h; sourceTree = SOURCE_ROOT; };
+		6149CBEF16186DBC00783189 /* SUVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUVersionComparisonProtocol.h; path = ../../../lib/Sparkle.framework/Headers/SUVersionComparisonProtocol.h; sourceTree = SOURCE_ROOT; };
+		6149CC6A161875A900783189 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		7317B9CF1370CAC30025A41E /* alure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alure.h; sourceTree = "<group>"; };
 		7317B9D01370CAC30025A41E /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
 		7317B9D11370CAC30025A41E /* alure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alure.cpp; sourceTree = "<group>"; };
@@ -563,11 +561,8 @@
 		7317B9D81370CAC30025A41E /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream.cpp; sourceTree = "<group>"; };
 		7317B9D91370CAC30025A41E /* streamdec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streamdec.cpp; sourceTree = "<group>"; };
 		7317B9DA1370CAC30025A41E /* streamplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streamplay.cpp; sourceTree = "<group>"; };
-		73649AEB12976345004366A3 /* Bitfighterd-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighterd-Info.plist"; sourceTree = "<group>"; };
-		7364B18112EBC1E9001993A7 /* Bitfighterd.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighterd.icns; sourceTree = "<group>"; };
 		73657A0412E2E3FB00BED56F /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../../../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73657A0512E2E3FB00BED56F /* masterInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterInterface.h; path = ../../../master/masterInterface.h; sourceTree = SOURCE_ROOT; };
-		736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "firstlaunch-osx.sh"; sourceTree = "<group>"; };
 		73702883132A020B00397F99 /* Recast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Recast.h; sourceTree = "<group>"; };
 		73702884132A020B00397F99 /* RecastAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecastAlloc.cpp; sourceTree = "<group>"; };
 		73702885132A020B00397F99 /* RecastAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecastAlloc.h; sourceTree = "<group>"; };
@@ -629,7 +624,7 @@
 		7382225A1479FE5900930942 /* TeamShuffleHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TeamShuffleHelper.cpp; path = ../../../zap/TeamShuffleHelper.cpp; sourceTree = SOURCE_ROOT; };
 		7382225B1479FE5900930942 /* TeamShuffleHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TeamShuffleHelper.h; path = ../../../zap/TeamShuffleHelper.h; sourceTree = SOURCE_ROOT; };
 		73844F2613500C2F00033B85 /* clipper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clipper.cpp; sourceTree = "<group>"; };
-		73844F2713500C2F00033B85 /* clipper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clipper.h; sourceTree = "<group>"; };
+		73844F2713500C2F00033B85 /* clipper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = clipper.hpp; sourceTree = "<group>"; };
 		73844F4B13500E1600033B85 /* GeomUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GeomUtils.cpp; path = ../../../zap/GeomUtils.cpp; sourceTree = SOURCE_ROOT; };
 		73844F4C13500E1600033B85 /* GeomUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GeomUtils.h; path = ../../../zap/GeomUtils.h; sourceTree = SOURCE_ROOT; };
 		73844F4D13500E1600033B85 /* polygon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cpp; path = ../../../zap/polygon.cpp; sourceTree = SOURCE_ROOT; };
@@ -877,7 +872,6 @@
 		73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HTFGame.cpp; path = ../../../zap/HTFGame.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NexusGame.cpp; path = ../../../zap/NexusGame.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2BD12E2D7E800EA5EBE /* NexusGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NexusGame.h; path = ../../../zap/NexusGame.h; sourceTree = SOURCE_ROOT; };
-		73D2F2BE12E2D7E800EA5EBE /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IniFile.cpp; path = ../../../zap/IniFile.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C012E2D7E800EA5EBE /* IniFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IniFile.h; path = ../../../zap/IniFile.h; sourceTree = SOURCE_ROOT; };
 		73D2F2C212E2D7E800EA5EBE /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = input.h; path = ../../../zap/input.h; sourceTree = SOURCE_ROOT; };
@@ -1257,6 +1251,7 @@
 				739749A014B4EDC60053CCF4 /* Vorbis.framework in Frameworks */,
 				73872A38152A7D760034CD97 /* SDL2.framework in Frameworks */,
 				73793C0D16138BAF000E693E /* libmodplug.framework in Frameworks */,
+				6149CB6016185CBC00783189 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1276,6 +1271,7 @@
 		036FF04E12D1D79500C14EE2 /* Pre Compiled */ = {
 			isa = PBXGroup;
 			children = (
+				6149CB5F16185CBC00783189 /* Sparkle.framework */,
 				738729DA152A770C0034CD97 /* SDL2.framework */,
 				7397469F14B373980053CCF4 /* libpng.framework */,
 				73A2B1FF13DE57C40002EF92 /* libz.dylib */,
@@ -1363,7 +1359,7 @@
 				73D2F67A12E2E18D00EA5EBE /* lua */,
 				73D2F45C12E2D96D00EA5EBE /* libtomcrypt */,
 				73D2F45912E2D95C00EA5EBE /* tnl */,
-				736DE9A01290699A00C3CB73 /* shell script */,
+				6149CBE416186D7F00783189 /* Sparkle */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -1374,6 +1370,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				6149CC6A161875A900783189 /* dsa_pub.pem */,
 				73846BC214CDD70D00A5553F /* editor_plugins */,
 				73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */,
 				7388F020139D5992003C6BB0 /* Ogg-Info.plist */,
@@ -1382,8 +1379,6 @@
 				7388F069139D5B46003C6BB0 /* music */,
 				73A4901513709B3400785E2E /* ALURE-Info.plist */,
 				73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */,
-				7364B18112EBC1E9001993A7 /* Bitfighterd.icns */,
-				73649AEB12976345004366A3 /* Bitfighterd-Info.plist */,
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
 				7375E3A4136916E000F71273 /* luavec-Info.plist */,
 				737CE61E1290553D00D732B7 /* tnl-Info.plist */,
@@ -1417,6 +1412,18 @@
 			path = ../../../sqlite;
 			sourceTree = SOURCE_ROOT;
 		};
+		6149CBE416186D7F00783189 /* Sparkle */ = {
+			isa = PBXGroup;
+			children = (
+				6149CBEB16186DBC00783189 /* Sparkle.h */,
+				6149CBEC16186DBC00783189 /* SUAppcast.h */,
+				6149CBED16186DBC00783189 /* SUAppcastItem.h */,
+				6149CBEE16186DBC00783189 /* SUUpdater.h */,
+				6149CBEF16186DBC00783189 /* SUVersionComparisonProtocol.h */,
+			);
+			name = Sparkle;
+			sourceTree = "<group>";
+		};
 		7317B9CE1370CAC30025A41E /* AL */ = {
 			isa = PBXGroup;
 			children = (
@@ -1434,14 +1441,6 @@
 				73657A0512E2E3FB00BED56F /* masterInterface.h */,
 			);
 			name = master;
-			sourceTree = "<group>";
-		};
-		736DE9A01290699A00C3CB73 /* shell script */ = {
-			isa = PBXGroup;
-			children = (
-				736DE9A512906AA400C3CB73 /* firstlaunch-osx.sh */,
-			);
-			name = "shell script";
 			sourceTree = "<group>";
 		};
 		73702882132A020B00397F99 /* recast */ = {
@@ -1511,7 +1510,7 @@
 			isa = PBXGroup;
 			children = (
 				73844F2613500C2F00033B85 /* clipper.cpp */,
-				73844F2713500C2F00033B85 /* clipper.h */,
+				73844F2713500C2F00033B85 /* clipper.hpp */,
 			);
 			name = clipper;
 			path = ../../../clipper;
@@ -1998,7 +1997,6 @@
 				73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */,
 				73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */,
 				73D2F2BD12E2D7E800EA5EBE /* NexusGame.h */,
-				73D2F2BE12E2D7E800EA5EBE /* Info.plist */,
 				73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */,
 				73D2F2C012E2D7E800EA5EBE /* IniFile.h */,
 				73D2F2C212E2D7E800EA5EBE /* input.h */,
@@ -2559,7 +2557,6 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				9462BEAA11D7D28B00791A0B /* CopyFiles */,
-				736DE9BF12906D1900C3CB73 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -2652,12 +2649,11 @@
 				737CE40612904D5300D732B7 /* scripts in Resources */,
 				737CE44E12904D7D00D732B7 /* levels in Resources */,
 				737CE45012904D7D00D732B7 /* sfx in Resources */,
-				736DE9A612906AA400C3CB73 /* firstlaunch-osx.sh in Resources */,
-				73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */,
 				73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */,
 				D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */,
 				7388F06C139D5B46003C6BB0 /* music in Resources */,
 				73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */,
+				6149CC6B161875A900783189 /* dsa_pub.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3912,6 +3908,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../libspeex,
 					../openal,
 					../glut,
 					../tnl,
