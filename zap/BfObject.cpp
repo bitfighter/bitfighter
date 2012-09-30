@@ -178,7 +178,7 @@ bool isWeaponCollideableType(U8 x)
          x == AsteroidTypeNumber   || x == TestItemTypeNumber       || x == ResourceItemTypeNumber        ||
          x == TurretTypeNumber     || x == CircleTypeNumber         || x == CoreTypeNumber                ||
          x == BarrierTypeNumber    || x == PolyWallTypeNumber       || x == ForceFieldTypeNumber          ||
-         x == TeleporterTypeNumber || x == SeekerTypeNumber     || x == WormTypeNumber;
+         x == TeleporterTypeNumber || x == SeekerTypeNumber         || x == WormTypeNumber;
 }
 
 bool isAsteroidCollideableType(U8 x)
@@ -787,14 +787,8 @@ void BfObject::damageObject(DamageInfo *theInfo)
 }
 
 
-bool BfObject::collide(BfObject *hitObject)
-{
-   return false;
-}
-bool BfObject::collided(BfObject *hitObject, U32 stateIndex)
-{
-   return false;
-}
+bool BfObject::collide(BfObject *hitObject)                  { return false; }
+bool BfObject::collided(BfObject *hitObject, U32 stateIndex) { return false; }
 
 
 Vector<Point> BfObject::getRepairLocations(const Point &repairOrigin)
