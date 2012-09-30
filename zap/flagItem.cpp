@@ -405,7 +405,7 @@ void FlagItem::dismount()
 {
    Parent::dismount();
 
-   // On server, we need to check who still has a flag and update the clients accordingly. 
+   // On server, we need to check who still has a flag and update the clients accordingly
    if(!isGhost())
    {
       TNLAssert(getGame(), "NULL game!");
