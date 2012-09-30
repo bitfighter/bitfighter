@@ -30,6 +30,8 @@
 #include "Directory.h"
 #import <Cocoa/Cocoa.h>
 #include "tnlVector.h"
+#import "SUUpdater.h"
+#define SPARKLE_APPCAST_URL @"http://127.0.0.1" //TODO: specify right url to appcast
 
 using TNL::Vector;
 using std::string;
@@ -97,6 +99,15 @@ void prepareFirstLaunch()
 
     //NOTE: intentionally not backporting `ln -s "$userdatadir" "$HOME/Documents/bitfighter_settings"`
     //TODO: "Upgrade specifics" sections need to be backported in some way
+    [pool release];
+}
+
+void checkForUpdates()
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SUUpdater* updater = [SUUpdater sharedUpdater];
+    [updater setFeedURL:[NSURL URLWithString:SPARKLE_APPCAST_URL]];
+    [updater checkForUpdatesInBackground];
     [pool release];
 }
 

@@ -23,6 +23,9 @@
 
 /* Begin PBXBuildFile section */
 		5E481F4413053943004F9637 /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = 5E481F4213053943004F9637 /* sqlite3.c */; };
+		6149CB6016185CBC00783189 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6149CB5F16185CBC00783189 /* Sparkle.framework */; };
+		6149CC1516186F1E00783189 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6149CB5F16185CBC00783189 /* Sparkle.framework */; };
+		6149CC6B161875A900783189 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 6149CC6A161875A900783189 /* dsa_pub.pem */; };
 		7317B9DB1370CAC30025A41E /* alure.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9CF1370CAC30025A41E /* alure.h */; };
 		7317B9DC1370CAC30025A41E /* alext.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9D01370CAC30025A41E /* alext.h */; };
 		7317B9DD1370CAC30025A41E /* alure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D11370CAC30025A41E /* alure.cpp */; };
@@ -528,6 +531,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				6149CC1516186F1E00783189 /* Sparkle.framework in CopyFiles */,
 				73783E2E1613AF29008EEA7A /* libmodplug.framework in CopyFiles */,
 				73872A1E152A7BBC0034CD97 /* SDL2.framework in CopyFiles */,
 				73974A5514B4EE0B0053CCF4 /* Ogg.framework in CopyFiles */,
@@ -551,6 +555,13 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		5E481F4213053943004F9637 /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sqlite3.c; sourceTree = "<group>"; };
 		5E481F4313053943004F9637 /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
+		6149CB5F16185CBC00783189 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = "../Sparkle 1.5b6/Sparkle.framework"; sourceTree = SOURCE_ROOT; };
+		6149CBEB16186DBC00783189 /* Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sparkle.h; path = "../Sparkle 1.5b6/Sparkle.framework/Headers/Sparkle.h"; sourceTree = SOURCE_ROOT; };
+		6149CBEC16186DBC00783189 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUAppcast.h; path = "../Sparkle 1.5b6/Sparkle.framework/Headers/SUAppcast.h"; sourceTree = SOURCE_ROOT; };
+		6149CBED16186DBC00783189 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUAppcastItem.h; path = "../Sparkle 1.5b6/Sparkle.framework/Headers/SUAppcastItem.h"; sourceTree = SOURCE_ROOT; };
+		6149CBEE16186DBC00783189 /* SUUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUUpdater.h; path = "../Sparkle 1.5b6/Sparkle.framework/Headers/SUUpdater.h"; sourceTree = SOURCE_ROOT; };
+		6149CBEF16186DBC00783189 /* SUVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUVersionComparisonProtocol.h; path = "../Sparkle 1.5b6/Sparkle.framework/Headers/SUVersionComparisonProtocol.h"; sourceTree = SOURCE_ROOT; };
+		6149CC6A161875A900783189 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsa_pub.pem; sourceTree = "<group>"; };
 		7317B9CF1370CAC30025A41E /* alure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alure.h; sourceTree = "<group>"; };
 		7317B9D01370CAC30025A41E /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
 		7317B9D11370CAC30025A41E /* alure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alure.cpp; sourceTree = "<group>"; };
@@ -1257,6 +1268,7 @@
 				739749A014B4EDC60053CCF4 /* Vorbis.framework in Frameworks */,
 				73872A38152A7D760034CD97 /* SDL2.framework in Frameworks */,
 				73793C0D16138BAF000E693E /* libmodplug.framework in Frameworks */,
+				6149CB6016185CBC00783189 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1276,6 +1288,7 @@
 		036FF04E12D1D79500C14EE2 /* Pre Compiled */ = {
 			isa = PBXGroup;
 			children = (
+				6149CB5F16185CBC00783189 /* Sparkle.framework */,
 				738729DA152A770C0034CD97 /* SDL2.framework */,
 				7397469F14B373980053CCF4 /* libpng.framework */,
 				73A2B1FF13DE57C40002EF92 /* libz.dylib */,
@@ -1363,6 +1376,7 @@
 				73D2F67A12E2E18D00EA5EBE /* lua */,
 				73D2F45C12E2D96D00EA5EBE /* libtomcrypt */,
 				73D2F45912E2D95C00EA5EBE /* tnl */,
+				6149CBE416186D7F00783189 /* Sparkle */,
 				736DE9A01290699A00C3CB73 /* shell script */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -1374,6 +1388,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				6149CC6A161875A900783189 /* dsa_pub.pem */,
 				73846BC214CDD70D00A5553F /* editor_plugins */,
 				73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */,
 				7388F020139D5992003C6BB0 /* Ogg-Info.plist */,
@@ -1416,6 +1431,18 @@
 			name = sqlite;
 			path = ../../../sqlite;
 			sourceTree = SOURCE_ROOT;
+		};
+		6149CBE416186D7F00783189 /* Sparkle */ = {
+			isa = PBXGroup;
+			children = (
+				6149CBEB16186DBC00783189 /* Sparkle.h */,
+				6149CBEC16186DBC00783189 /* SUAppcast.h */,
+				6149CBED16186DBC00783189 /* SUAppcastItem.h */,
+				6149CBEE16186DBC00783189 /* SUUpdater.h */,
+				6149CBEF16186DBC00783189 /* SUVersionComparisonProtocol.h */,
+			);
+			name = Sparkle;
+			sourceTree = "<group>";
 		};
 		7317B9CE1370CAC30025A41E /* AL */ = {
 			isa = PBXGroup;
@@ -2658,6 +2685,7 @@
 				D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */,
 				7388F06C139D5B46003C6BB0 /* music in Resources */,
 				73946E6114D50F0F00B95333 /* joystick_presets.ini in Resources */,
+				6149CC6B161875A900783189 /* dsa_pub.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3103,6 +3131,7 @@
 					"\"$(SRCROOT)/../tools\"",
 					"\"$(SRCROOT)/build/Release\"",
 					"\"$(SRCROOT)/build/Debug\"",
+					"\"$(SRCROOT)/../Sparkle 1.5b6\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -3476,6 +3505,7 @@
 					"\"$(SRCROOT)/../tools\"",
 					"\"$(SRCROOT)/build/Release\"",
 					"\"$(SRCROOT)/build/Debug\"",
+					"\"$(SRCROOT)/../Sparkle 1.5b6\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -3812,6 +3842,7 @@
 					"\"$(SRCROOT)/../tools\"",
 					"\"$(SRCROOT)/build/Release\"",
 					"\"$(SRCROOT)/build/Debug\"",
+					"\"$(SRCROOT)/../Sparkle 1.5b6\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -3850,6 +3881,7 @@
 					"\"$(SRCROOT)/../tools\"",
 					"\"$(SRCROOT)/build/Release\"",
 					"\"$(SRCROOT)/build/Debug\"",
+					"\"$(SRCROOT)/../Sparkle 1.5b6\"",
 				);
 				GCC_MODEL_TUNING = G4;
 				GCC_OPTIMIZATION_LEVEL = 2;
@@ -3912,6 +3944,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../libspeex,
 					../openal,
 					../glut,
 					../tnl,

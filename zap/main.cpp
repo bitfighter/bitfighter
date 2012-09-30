@@ -1020,6 +1020,8 @@ int main(int argc, char **argv)
    moveToAppPath();
    // Copy some initialisation files
    prepareFirstLaunch();
+   // Check for a new version via Sparkle
+   checkForUpdates();
    // Set default -rootdatadir and -sfxdir if they are not set
    setDefaultPaths(argVector);
 #endif
