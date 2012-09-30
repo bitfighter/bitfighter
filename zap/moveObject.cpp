@@ -2241,8 +2241,6 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
  *  @luaclass TestItem
  *  @brief    Large bouncy ball type item.
  */
-
-// Inherits all MoveItem methods, has no custom methods
 const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile TestItem::functionArgs[] = { { NULL, { }, 0 } };
 
@@ -2361,8 +2359,6 @@ void ResourceItem::onItemDropped()
  *  @brief    Small bouncy ball type item.  In levels where Engineer module is allowed, ResourceItems can be collected and transformed
  *            into other items.
  */
-
-// Inherits all MoveItem methods, and has a few of its own
 const luaL_reg           ResourceItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile ResourceItem::functionArgs[] = { { NULL, { }, 0 } };
 
