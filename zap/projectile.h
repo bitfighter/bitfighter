@@ -63,10 +63,10 @@ public:
    U32 mTimeRemaining;
    ProjectileType mType;
    WeaponType mWeaponType;
-   bool collided;
+   bool mCollided;
    bool hitShip;
-   bool alive;
-   bool hasBounced;
+   bool mAlive;
+   bool mBounced;
    SafePtr<BfObject> mShooter;
 
    Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);    // Constructor
@@ -261,7 +261,7 @@ public:
 
 
 // Basic burst object, and the base clase used for both mines and spybugs
-class SeekerProjectile : public MoveItem
+class Seeker : public MoveItem
 {
 private:
    typedef MoveItem Parent;
@@ -280,7 +280,7 @@ private:
 
    S32 mTimeRemaining;
    bool exploded;
-   bool bounced;
+   bool mBounced;
 
    void acquireTarget();
 
@@ -292,8 +292,8 @@ private:
 
 
 public:
-   SeekerProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
-   ~SeekerProjectile();                                                                      // Destructor
+   Seeker(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
+   ~Seeker();                                                                      // Destructor
 
    SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;
@@ -310,10 +310,10 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   TNL_DECLARE_CLASS(SeekerProjectile);
+   TNL_DECLARE_CLASS(Seeker);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(SeekerProjectile);
+   LUAW_DECLARE_CLASS(Seeker);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

@@ -330,11 +330,12 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       Point newPos = getPos(stateIndex) + getVel(stateIndex) * collisionTime;    // x = x + vt
       setPos(stateIndex, newPos);                                                // setPos(x)
 
+      // Collided is a sort of collision pre-handler; it will return true if the collision was dealt with, false if not
       if(collided(objectHit, stateIndex) || objectHit->collided(this, stateIndex))
       {
          disabledList.push_back(objectHit);
          objectHit->disableCollision();
-         tryCount--;   // don't count as tryCount
+         tryCount--;   // Don't count as tryCount
       }
       else if(objectHit->isMoveObject())     // Collided with a MoveObject
       {
@@ -384,9 +385,8 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          }
       }
       else if(isCollideableType(objectHit->getObjectTypeNumber()))
-      {
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
-      }
+
       moveTime -= collisionTime;
    }
 

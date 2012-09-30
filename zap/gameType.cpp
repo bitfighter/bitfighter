@@ -1884,11 +1884,11 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    WeaponType weaponType;
 
    if(typeNumber == BulletTypeNumber)
-      weaponType = static_cast<Projectile*>(damager)->mWeaponType;
+      weaponType = static_cast<Projectile *>(damager)->mWeaponType;
    else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
-      weaponType = static_cast<BurstProjectile*>(damager)->mWeaponType;
+      weaponType = static_cast<BurstProjectile *>(damager)->mWeaponType;
    else if(typeNumber == SeekerTypeNumber)
-      weaponType = static_cast<SeekerProjectile*>(damager)->mWeaponType;
+      weaponType = static_cast<Seeker *>(damager)->mWeaponType;
    else
    {
       TNLAssert(false, "Unknown Damage type");
@@ -1963,7 +1963,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
          if(killerObject->getObjectTypeNumber() == BurstTypeNumber)
             shooter = static_cast<BurstProjectile *>(killerObject)->mShooter;
          if(killerObject->getObjectTypeNumber() == SeekerTypeNumber)
-            shooter = static_cast<SeekerProjectile *>(killerObject)->mShooter;
+            shooter = static_cast<Seeker *>(killerObject)->mShooter;
 
          if(shooter && shooter->getObjectTypeNumber() == TurretTypeNumber)
             updateScore(victim, KilledByTurret, 0);

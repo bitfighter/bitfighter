@@ -60,10 +60,10 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
    mVelocity = vel;
 
    mTimeRemaining = GameWeapon::weaponInfo[type].projLiveTime;
-   collided = false;
+   mCollided = false;
    hitShip = false;
-   alive = true;
-   hasBounced = false;
+   mAlive = true;
+   mBounced = false;
    mShooter = shooter;
 
    setOwner(NULL);
@@ -114,10 +114,10 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
          stream->writeInt(index, GhostConnection::GhostIdBitSize);
    }
 
-   stream->writeFlag(collided);
-   if(collided)
+   stream->writeFlag(mCollided);
+   if(mCollided)
       stream->writeFlag(hitShip);
-   stream->writeFlag(alive);
+   stream->writeFlag(mAlive);
 
    return 0;
 }
@@ -149,42 +149,44 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
       initial = true;
       SoundSystem::playSoundEffect(GameWeapon::projectileInfo[mType].projectileSound, getPos(), mVelocity);
    }
-   bool preCollided = collided;
-   collided = stream->readFlag();
+   bool preCollided = mCollided;
+   mCollided = stream->readFlag();
    
-   if(collided)
+   if(mCollided)
       hitShip = stream->readFlag();
 
-   alive = stream->readFlag();
+   mAlive = stream->readFlag();
 
-   if(!preCollided && collided)     // Projectile has "become" collided
+   if(!preCollided && mCollided)     // Projectile has "become" collided
       explode(NULL, getPos());
 
-   if(!collided && initial)
+   if(!mCollided && initial)
       mCurrentMove.time = U32(connection->getOneWayTime());
 }
 
 
+// The projectile has collided with hitObject at collisionPoint
 void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
-   collided = true;
+   mCollided = true;
 
    if(isShipType(hitObject->getObjectTypeNumber()))
       hitShip = static_cast<Ship *>(hitObject);
 
    if(!isGhost())    // If we're on the server, that is
    {
-      DamageInfo theInfo;
+      DamageInfo damageInfo;
 
-      theInfo.collisionPoint = collisionPoint;
-      theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
-      theInfo.damageType = DamageTypePoint;
-      theInfo.damagingObject = this;
-      theInfo.impulseVector = mVelocity;
-      theInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+      damageInfo.collisionPoint       = collisionPoint;
+      damageInfo.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+      damageInfo.damageType           = DamageTypePoint;
+      damageInfo.damagingObject       = this;
+      damageInfo.impulseVector        = mVelocity;
+      damageInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
 
-      hitObject->damageObject(&theInfo);
+      hitObject->damageObject(&damageInfo);
 
+      // Log the shot to the shooter's stats
       Ship *shooter = NULL;
       if(mShooter.getPointer() != NULL && isShipType(mShooter.getPointer()->getObjectTypeNumber()))
          shooter = static_cast<Ship *>(mShooter.getPointer());
@@ -193,6 +195,7 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
          shooter->getClientInfo()->getStatistics()->countHit(mWeaponType);
    }
 
+   // Client and server:
    mTimeRemaining = 0;
    explode(hitObject, collisionPoint);
 }
@@ -202,9 +205,9 @@ void Projectile::idle(BfObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
 
-   if(!collided && alive)
+   if(!mCollided && mAlive)
    {
-      U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
+      U32 objAge = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
       F32 timeLeft = (F32)deltaT;
       S32 loopcount = 32;
 
@@ -228,7 +231,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 
 
          // Don't collide with shooter during first 500ms of life
-         if(mShooter.isValid() && aliveTime < 500 && !hasBounced)
+         if(mShooter.isValid() && objAge < 500 && !mBounced)
          {
             disabledList.push_back(mShooter);
             mShooter->disableCollision();
@@ -276,7 +279,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
 
             if(bounce)
             {
-               hasBounced = true;
+               mBounced = true;
 
                // We hit something that we should bounce from, so bounce!
                F32 float1 = surfNormal.dot(mVelocity) * 2;
@@ -328,17 +331,17 @@ void Projectile::idle(BfObject::IdleCallPath path)
          
 
    // Kill old projectiles
-   if(alive && path == BfObject::ServerIdleMainLoop)
+   if(mAlive && path == BfObject::ServerIdleMainLoop)
    {
-      if(mTimeRemaining <= deltaT)
+      if(mTimeRemaining > deltaT)
+         mTimeRemaining -= deltaT;     // Decrement time left to live
+      else
       {
          deleteObject(500);
          mTimeRemaining = 0;
-         alive = false;
+         mAlive = false;
          setMaskBits(ExplodedMask);
       }
-      else
-         mTimeRemaining -= deltaT;     // Decrement time left to live
    }
 }
 
@@ -401,7 +404,7 @@ void Projectile::render()
 
 void Projectile::renderItem(const Point &pos)
 {
-   if(collided || !alive)
+   if(mCollided || !mAlive)
       return;
 
    renderProjectile(pos, mType, getGame()->getCurrentTime() - getCreationTime());
@@ -516,12 +519,12 @@ void BurstProjectile::idle(IdleCallPath path)
 #ifndef ZAP_DEDICATED
    if(isGhost())   // Fix effect of ship getting ahead of burst on laggy client  
    {
-      U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
+      U32 objAge = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
       ClientGame *clientGame = static_cast<ClientGame *>(getGame());
       gc = clientGame->getConnectionToServer();
 
-      collisionDisabled = aliveTime < 250 && gc && gc->getControlObject();
+      collisionDisabled = objAge < 250 && gc && gc->getControlObject();
 
       if(collisionDisabled) 
          gc->getControlObject()->disableCollision();
@@ -1201,13 +1204,13 @@ REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(SeekerProjectile);
+TNL_IMPLEMENT_NETOBJECT(Seeker);
 
 // Constructor
 const F32 Seeker_Radius = 4;
 const F32 Seeker_Mass = 1;
 
-SeekerProjectile::SeekerProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
+Seeker::Seeker(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
 {
    mObjectTypeNumber = SeekerTypeNumber;
 
@@ -1221,7 +1224,7 @@ SeekerProjectile::SeekerProjectile(Point pos, Point vel, BfObject *shooter): Mov
 
    mTimeRemaining = GameWeapon::weaponInfo[WeaponSeeker].projLiveTime;
    exploded = false;
-   bounced = false;
+   mBounced = false;
 
    if(shooter)
    {
@@ -1240,7 +1243,7 @@ SeekerProjectile::SeekerProjectile(Point pos, Point vel, BfObject *shooter): Mov
 
 
 // Destructor
-SeekerProjectile::~SeekerProjectile()
+Seeker::~Seeker()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
@@ -1257,13 +1260,13 @@ static F32 normalizeAngle(F32 angle)
 }
 
 
-U32 SeekerProjectile::SpeedIncreasePerSecond = 300;
-U32 SeekerProjectile::TargetAcquisitionRadius = 800;
-F32 SeekerProjectile::MaximumAngleChangePerSecond = FloatTau / 2;
-F32 SeekerProjectile::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
+U32 Seeker::SpeedIncreasePerSecond = 300;
+U32 Seeker::TargetAcquisitionRadius = 800;
+F32 Seeker::MaximumAngleChangePerSecond = FloatTau / 2;
+F32 Seeker::TargetSearchAngle = FloatTau * .6f;     // Anglular spread in front of ship to search for targets
 
 // Runs on client and server
-void SeekerProjectile::idle(IdleCallPath path)
+void Seeker::idle(IdleCallPath path)
 {
    Parent::idle(path);
 
@@ -1361,7 +1364,7 @@ void SeekerProjectile::idle(IdleCallPath path)
 
 // Here we find a suitable target for the Seeker to home in on
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
-void SeekerProjectile::acquireTarget()
+void Seeker::acquireTarget()
 {
    F32 ourAngle = getActualVel().ATAN2();
 
@@ -1431,7 +1434,7 @@ void SeekerProjectile::acquireTarget()
 }
 
 
-void SeekerProjectile::emitMovementSparks()
+void Seeker::emitMovementSparks()
 {
 #ifndef ZAP_DEDICATED
 
@@ -1456,7 +1459,7 @@ void SeekerProjectile::emitMovementSparks()
 }
 
 
-U32 SeekerProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 Seeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
@@ -1466,7 +1469,7 @@ U32 SeekerProjectile::packUpdate(GhostConnection *connection, U32 updateMask, Bi
 }
 
 
-void SeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
@@ -1484,7 +1487,7 @@ void SeekerProjectile::unpackUpdate(GhostConnection *connection, BitStream *stre
 }
 
 
-void SeekerProjectile::damageObject(DamageInfo *theInfo)
+void Seeker::damageObject(DamageInfo *theInfo)
 {
    // If we're being damaged by a burst or a bullet, explode...
    if(theInfo->damageType == DamageTypeArea || theInfo->damagingObject->getObjectTypeNumber() == BulletTypeNumber)
@@ -1499,7 +1502,7 @@ void SeekerProjectile::damageObject(DamageInfo *theInfo)
 }
 
 
-void SeekerProjectile::doExplosion(const Point &pos)
+void Seeker::doExplosion(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(isGhost())
@@ -1514,7 +1517,7 @@ void SeekerProjectile::doExplosion(const Point &pos)
 
 
 // Server-side only
-void SeekerProjectile::handleCollision(BfObject *hitObject, Point collisionPoint)
+void Seeker::handleCollision(BfObject *hitObject, Point collisionPoint)
 {
    if(exploded)  // Rare, but can happen
       return;
@@ -1546,7 +1549,7 @@ void SeekerProjectile::handleCollision(BfObject *hitObject, Point collisionPoint
 }
 
 
-bool SeekerProjectile::collide(BfObject *otherObj)
+bool Seeker::collide(BfObject *otherObj)
 {
    if(isShipType(otherObj->getObjectTypeNumber())) // So client-side can predict better and make some sound effect
    {
@@ -1562,22 +1565,25 @@ bool SeekerProjectile::collide(BfObject *otherObj)
    // Server only from here
 
    // Don't collide with shooter within first 500 ms of shooting
-   if(!bounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
+   if(!mBounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
       return false;
 
    return isWeaponCollideableType(otherObj->getObjectTypeNumber());     // Includes bullets... well, includes most everything
 }
 
 
-bool SeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
+// Returns true if collision was handled, false if not
+bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 {
-   static const F32 MAX_VEL_TO_BOUNCE_EACHOTHER = 500;
+   static const F32 MAX_VEL_TO_BOUNCE = 500;    // Slower than this, and seekers bounce off one another.  Faster, and they explode.
 
-   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber) // explode if both seeker hit each other too hard.
+   // Seeker hits seeker
+   if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)  // Do they bounce or explode?
    {
-      SeekerProjectile *other = static_cast<SeekerProjectile *>(otherObj);
-      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE_EACHOTHER * MAX_VEL_TO_BOUNCE_EACHOTHER)
+      Seeker *other = static_cast<Seeker *>(otherObj);
+      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE * MAX_VEL_TO_BOUNCE)
       {
+         // They explode
          handleCollision(other, getActualPos());
          other->handleCollision(this, other->getActualPos());
          return true;
@@ -1585,6 +1591,7 @@ bool SeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
       return false;
    }
 
+   // Seeker hits ship
    if(isShipType(otherObj->getObjectTypeNumber()))
    {
       TNLAssert(dynamic_cast<Ship *>(otherObj), "Not a ship");
@@ -1595,21 +1602,20 @@ bool SeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
          Point p = getPos(stateIndex) - ship->getPos(stateIndex);
          p.normalize(getVel(stateIndex).len());
          setVel(stateIndex, p);
-         bounced = true;
+         mBounced = true;
          return true;
       }
    }
 
    if(!isGhost() && stateIndex == ActualState)
-   {
       handleCollision(otherObj, getActualPos());
-   }
+
    setVel(stateIndex, Point(0,0)); // Might save some CPU telling move() to stop moving.
    return true;
 }
 
 
-void SeekerProjectile::renderItem(const Point &pos)
+void Seeker::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(exploded)
@@ -1631,21 +1637,21 @@ void SeekerProjectile::renderItem(const Point &pos)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
 
-GENERATE_LUA_METHODS_TABLE(SeekerProjectile, LUA_METHODS);
-GENERATE_LUA_FUNARGS_TABLE(SeekerProjectile, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Seeker, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Seeker, LUA_METHODS);
 
 #undef LUA_METHODS
 
 
-const char *SeekerProjectile::luaClassName = "Seeker";
-REGISTER_LUA_SUBCLASS(SeekerProjectile, MoveObject);
+const char *Seeker::luaClassName = "Seeker";
+REGISTER_LUA_SUBCLASS(Seeker, MoveObject);
 
 /**
- *  @luafunc SeekerProjectile::getWeapon()
+ *  @luafunc Seeker::getWeapon()
  *  @brief   Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
  *  @return  \e int - The index of the weapon used to fire the projectile.
  */
-S32 SeekerProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 Seeker::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 
 };
