@@ -265,6 +265,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
          {
             bool bounce = false;
 
+            // Bounce off a wall and off a ship that has its shields up
             if(mType == ProjectileBounce && isWallType(hitObject->getObjectTypeNumber()))
                bounce = true;
             else if(isShipType(hitObject->getObjectTypeNumber()))
@@ -277,6 +278,7 @@ void Projectile::idle(BfObject::IdleCallPath path)
             if(bounce)
             {
                hasBounced = true;
+
                // We hit something that we should bounce from, so bounce!
                F32 float1 = surfNormal.dot(mVelocity) * 2;
                mVelocity -= surfNormal * float1;
@@ -295,21 +297,21 @@ void Projectile::idle(BfObject::IdleCallPath path)
                {
                   startPos = getPos();
 
-                  setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
+                  setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync
                   float1 = startPos.distanceTo(obj->getRenderPos());
                   if(float1 < obj->getRadius())
                   {
                      float1 = obj->getRadius() * 1.01f / float1;
-                     setVert(startPos * float1 + obj->getRenderPos() * (1 - float1), 0);  // to fix bouncy stuck inside shielded ship
+                     setVert(startPos * float1 + obj->getRenderPos() * (1 - float1), 0);  // Fix bouncy stuck inside shielded ship
                   }
                }
 
                if(isGhost())
                   SoundSystem::playSoundEffect(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(mVelocity) * 2);
             }
-            else
+            else  // Not bouncing
             {
-               // Not bouncing, so advance to location of collision
+               // Since we didn't bounce, advance to location of collision
                startPos = getPos();
                collisionPoint = startPos + (endPos - startPos) * collisionTime;
                handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
