@@ -124,7 +124,6 @@ public:
    S32 mTimeRemaining;
    bool exploded;
    bool collide(BfObject *otherObj);   // Things (like bullets) can collide with grenades
-   void handleCollision(BfObject *hitObject, Point collisionPoint);
 
 
    WeaponType mWeaponType;

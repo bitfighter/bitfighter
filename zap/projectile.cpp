@@ -583,7 +583,7 @@ void BurstProjectile::unpackUpdate(GhostConnection *connection, BitStream *strea
 void BurstProjectile::damageObject(DamageInfo *theInfo)
 {
    // If we're being damaged by another burst, explode...
-   if(theInfo->damageType == DamageTypeArea)
+   if(theInfo->damageType == DamageTypeArea || theInfo->damagingObject->getObjectTypeNumber() == SeekerTypeNumber)
    {
       explode(getActualPos());
       return;
@@ -592,40 +592,6 @@ void BurstProjectile::damageObject(DamageInfo *theInfo)
    computeImpulseDirection(theInfo);
 
    setMaskBits(PositionMask);
-}
-
-
-void BurstProjectile::handleCollision(BfObject *hitObject, Point collisionPoint)
-{
-   //collided = true;
-   Ship *hitShip = NULL;
-
-   if(isShipType(hitObject->getObjectTypeNumber()))
-      hitShip = static_cast<Ship *>(hitObject);
-
-   if(!isGhost())    // If we're on the server, that is
-   {
-      DamageInfo theInfo;
-
-      theInfo.collisionPoint = collisionPoint;
-      theInfo.damageAmount = GameWeapon::weaponInfo[mWeaponType].damageAmount;
-      theInfo.damageType = DamageTypePoint;
-      theInfo.damagingObject = this;
-      theInfo.impulseVector = getActualVel();
-      theInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
-
-      hitObject->damageObject(&theInfo);
-
-      Ship *shooter = NULL;
-      if(mShooter.getPointer() != NULL && isShipType(mShooter.getPointer()->getObjectTypeNumber()))
-         shooter = static_cast<Ship *>(mShooter.getPointer());
-
-      if(hitShip && shooter && shooter->getClientInfo())
-         shooter->getClientInfo()->getStatistics()->countHit(mWeaponType);
-   }
-
-   mTimeRemaining = 0;
-   explode(collisionPoint);
 }
 
 
@@ -1616,19 +1582,6 @@ bool SeekerProjectile::collided(BfObject *otherObj, U32 stateIndex)
          return true;
       }
       return false;
-   }
-
-   if(otherObj->getObjectTypeNumber() == BurstTypeNumber)
-   {
-      BurstProjectile *other = static_cast<BurstProjectile *>(otherObj);
-      if(!isGhost() && stateIndex == ActualState)
-      {
-         handleCollision(other, getActualPos());
-         other->handleCollision(this, other->getActualPos());
-         return true;
-      }
-      return false;
-
    }
 
    if(isShipType(otherObj->getObjectTypeNumber()))
