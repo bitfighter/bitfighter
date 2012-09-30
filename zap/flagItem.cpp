@@ -401,6 +401,19 @@ bool FlagItem::collide(BfObject *hitObject)
 }
 
 
+void FlagItem::dismount()
+{
+   Parent::dismount();
+
+   // On server, we need to check who still has a flag and update the clients accordingly. 
+   if(!isGhost())
+   {
+      TNLAssert(getGame(), "NULL game!");
+      getGame()->getGameType()->onFlagDismounted();   // Must run AFTER mount info is cleared
+   }
+}
+
+
 TestFunc FlagItem::collideTypes()
 {
    return (TestFunc)isFlagOrShipCollideableType;

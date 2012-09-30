@@ -244,7 +244,7 @@ public:
 
    // Mounting related functions
    Ship *getMount();
-   void dismount();
+   virtual void dismount();
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();

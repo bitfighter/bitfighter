@@ -1115,13 +1115,6 @@ void MountableItem::dismount()
    mMount = NULL;
    mIsMounted = false;
    setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
-
-   // On server, we need to check who still has a flag and update the clients accordingly. 
-   if(!isGhost())
-   {
-      TNLAssert(getGame(), "NULL game!");
-      getGame()->getGameType()->onFlagDismounted();   // Must run AFTER mount info is cleared
-   }
 }
 
 

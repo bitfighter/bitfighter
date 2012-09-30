@@ -80,6 +80,7 @@ public:
 
    virtual void onMountDestroyed();
    virtual bool collide(BfObject *hitObject);
+   void dismount();
 
    TestFunc collideTypes();
 
