@@ -257,7 +257,6 @@ void Projectile::idle(BfObject::IdleCallPath path)
          // Note that if we hit an object that does want to be collided with, it won't be in disabledList
          // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
          // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
-
          for(S32 i = 0; i < disabledList.size(); i++)
             disabledList[i]->enableCollision();
 
