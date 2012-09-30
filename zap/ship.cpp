@@ -1418,7 +1418,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       while(stream->readFlag())
       {
          S32 index = stream->readInt(GhostConnection::GhostIdBitSize);
-         MoveItem *item = (MoveItem *) connection->resolveGhost(index);
+         MountableItem *item = static_cast<MountableItem *>(connection->resolveGhost(index));
          item->mountToShip(this);
       }
 
@@ -1679,12 +1679,12 @@ bool Ship::isCarryingItem(U8 objectType)
 }
 
 
-MoveItem *Ship::unmountItem(U8 objectType)
+MountableItem *Ship::unmountItem(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
-         MoveItem *item = mMountedItems[i];
+         MountableItem *item = mMountedItems[i];
          item->dismount();
          return item;
       }

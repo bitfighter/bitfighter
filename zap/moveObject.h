@@ -179,24 +179,17 @@ protected:
    enum MaskBits {
       PositionMask     = Parent::FirstFreeMask << 0,     // <-- Indicates position has changed and needs to be updated
       WarpPositionMask = Parent::FirstFreeMask << 1,
-      MountMask        = Parent::FirstFreeMask << 2,
       ItemChangedMask  = Parent::FirstFreeMask << 3,
       FirstFreeMask    = Parent::FirstFreeMask << 4
    };
 
-   SafePtr<Ship> mMount;
-
-   bool mIsMounted;
    bool mIsCollideable;
-
-   Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
-   static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
 
 public:
    MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
    virtual ~MoveItem();                                                                          // Destructor
 
-   void idle(BfObject::IdleCallPath path);
+   virtual void idle(BfObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
@@ -207,33 +200,68 @@ public:
    virtual void setActualPos(const Point &pos);
    virtual void setActualVel(const Point &vel);
 
+   void setCollideable(bool isCollideable);
+   void setPositionMask();
+
+   virtual void render();
+
+   virtual void renderItem(const Point &pos);                  // Does actual rendering, allowing render() to be generic for all Items
+   virtual void renderItemAlpha(const Point &pos, F32 alpha);  // Used for mounted items when cloaked
+
+   virtual bool collide(BfObject *otherObject);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class MountableItem : public MoveItem
+{
+   typedef MoveItem Parent;
+
+protected:
+   enum MaskBits {
+      MountMask        = Parent::FirstFreeMask << 0,
+      FirstFreeMask    = Parent::FirstFreeMask << 1
+   };
+
+   bool mIsMounted;
+   SafePtr<Ship> mMount;
+
+   static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
+   Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
+
+public:
+   MountableItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+   ~MountableItem();                                                                                  // Destructor
+
+   // Override some parent functions
+   void idle(BfObject::IdleCallPath path);
+   void render();
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   bool collide(BfObject *otherObject);
+
+   // Mounting related functions
+   Ship *getMount();
+   void dismount();
+
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();
-   void setPositionMask();
 
    bool isMounted();
    virtual bool isItemThatMakesYouVisibleWhileCloaked();      // NexusFlagItem overrides to false
 
-   void setCollideable(bool isCollideable);
-
-   Ship *getMount();
-   void dismount();
-   void render();
-
-   virtual void renderItem(const Point &pos);             // Does actual rendering, allowing render() to be generic for all Items
-   virtual void renderItemAlpha(const Point &pos, F32 alpha);  // Used for mounted items when cloaked
-
    virtual void onMountDestroyed();
    virtual void onItemDropped();
 
-   bool collide(BfObject *otherObject);
 
-   ///// LuaItem interface
-   //LUAW_DECLARE_CLASS(MoveItem);
+   ///// Lua interface
+   LUAW_DECLARE_CLASS(MountableItem);
 
-   //static const char *luaClassName;
-   //static const luaL_reg luaMethods[];
-   //static const LuaFunctionProfile functionArgs[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 
    virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
    virtual S32 getShip(lua_State *L);
@@ -300,7 +328,6 @@ public:
 
    string getAttributeString();
 #endif
-
 
    static U32 getDesignCount();
 
@@ -486,9 +513,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ResourceItem : public MoveItem
+class ResourceItem : public MountableItem
 {
-   typedef MoveItem Parent; 
+   typedef MountableItem Parent; 
 
 public:
    ResourceItem();      // Constructor

@@ -111,7 +111,7 @@ public:
    string toString(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);
-   void onItemDropped();
+   //void onItemDropped();
 
    bool collide(BfObject *hitObject);
 

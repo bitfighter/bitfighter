@@ -3693,7 +3693,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
    if(mCacheResendItem.size() == 0)
       mCacheResendItem.resize(1024);
 
-   for(S32 i=0; i < 1024; i += 256)
+   for(S32 i = 0; i < 1024; i += 256)
    {
       MoveItem *item = mCacheResendItem[S32(itemId & 255) | i];
       if(item && item->getItemId() == itemId)

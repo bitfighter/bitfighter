@@ -440,7 +440,7 @@ GENERATE_LUA_FUNARGS_TABLE(FlagItem, LUA_METHODS);
 
 
 const char *FlagItem::luaClassName = "FlagItem";
-REGISTER_LUA_SUBCLASS(FlagItem, MoveObject);
+REGISTER_LUA_SUBCLASS(FlagItem, MountableItem);
 
 
 /**

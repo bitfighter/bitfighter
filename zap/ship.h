@@ -185,7 +185,7 @@ public:
    F32 mass;            // Mass of ship, not used
    bool hasExploded;
 
-   Vector<SafePtr<MoveItem> > mMountedItems;    // TODO: Make these private
+   Vector<SafePtr<MountableItem> > mMountedItems;    // TODO: Make these protected
    Vector<SafePtr<BfObject> > mRepairTargets;
 
    virtual void render(S32 layerIndex);
@@ -219,7 +219,7 @@ public:
    S32 getFlagCount();     // Returns the number of flags ship is carrying
 
    bool isCarryingItem(U8 objectType);
-   MoveItem *unmountItem(U8 objectType);
+   MountableItem *unmountItem(U8 objectType);
 
    void setEngineeredTeleporter(Teleporter *teleporter);
    Teleporter *getEngineeredTeleporter();

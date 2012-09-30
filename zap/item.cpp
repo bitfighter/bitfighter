@@ -228,7 +228,7 @@ S32 Item::getRad(lua_State *L) { return returnFloat(L, getRadius()); }
 /**
  * @luafunc Item::isOnShip()
  * @brief   Returns true if item is mounted on a ship.
- * @descr   Currently, only \link FlagItem FlagItems \endlink and \link ResourceItem ResourceItems \endlink can be mounted on ships.
+ * @descr   Currently, only \link FlagItem FlagItems\endlink and \link ResourceItem ResourceItems\endlink can be mounted on ships.
  * @return  \e bool True if the item is mounted on a ship, false otherwise.
  */
 S32 Item::isOnShip (lua_State *L) { return returnBool(L, false); }
@@ -237,7 +237,7 @@ S32 Item::isOnShip (lua_State *L) { return returnBool(L, false); }
  * @luafunc Item::getCaptureZone()
  * @brief   Returns capture zone holding the item.
  * @descr   Many games do not feature capture zones.  For those games, this function will always return nil.
- *          Currently only \link FlagItem FlagItems \endlink can be captured.
+ *          Currently only \link FlagItem FlagItems\endlink can be captured.
  * @return  \e Zone where the item has been captured.  Returns nil if the item is not in a capture zone.
  */
 S32 Item::getCaptureZone (lua_State *L) { return returnNil(L); }

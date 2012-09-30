@@ -807,20 +807,18 @@ S32 MoveObject::setVel(lua_State *L)
 // Constructor
 MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
 {
-   mIsMounted = false;
    mIsCollideable = collideable;
    mInitial = false;
 
    updateTimer = 0;
 
-   // LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 MoveItem::~MoveItem()
 {
-   // LUAW_DESTRUCTOR_CLEANUP;
+   // Do nothing
 }
 
 
@@ -852,57 +850,7 @@ string MoveItem::toString(F32 gridSize) const
 // Client only, in-game
 void MoveItem::render()
 {
-   // If the item is mounted, renderItem will be called from the ship it is mounted to
-   if(mIsMounted)
-      return;
-
    renderItem(getRenderPos());
-}
-
-
-// Runs on both client and server, comes from collision() on the server and the colliding client, and from
-// unpackUpdate() in the case of all clients
-//
-// theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
-void MoveItem::mountToShip(Ship *theShip)     
-{
-   TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
-
-   if(mMount.isValid() && mMount == theShip)    // Already mounted on ship!  Nothing to do!
-      return;
-
-   if(mMount.isValid())                         // Mounted on something else; dismount!
-      dismount();
-
-   mMount = theShip;
-   if(theShip)
-      theShip->mMountedItems.push_back(this);
-
-   mIsMounted = true;
-   setMaskBits(MountMask);
-
-    if(!isGhost()) 
-    {
-       TNLAssert(getGame(), "NULL game!");
-       getGame()->getGameType()->onFlagMounted(theShip->getTeam());
-    }
-}
-
-
-// Mask setting
-void MoveItem::setMountedMask()  { setMaskBits(MountMask);    }
-void MoveItem::setPositionMask() { setMaskBits(PositionMask); }
-
-
-bool MoveItem::isMounted()
-{
-   return mIsMounted;
-}
-
-
-bool MoveItem::isItemThatMakesYouVisibleWhileCloaked()
-{
-   return true;
 }
 
 
@@ -912,71 +860,8 @@ void MoveItem::setCollideable(bool isCollideable)
 }
 
 
-void MoveItem::renderItem(const Point &pos)
-{
-   TNLAssert(false, "Unimplemented function!");
-}
-
-
-void MoveItem::renderItemAlpha(const Point &pos, F32 alpha)
-{
-   TNLAssert(false, "Unimplemented function!");
-}
-
-
-void MoveItem::onMountDestroyed()
-{
-   dismount();
-}
-
-
-// Runs on client & server, via different code paths
-void MoveItem::onItemDropped()
-{
-   if(!getGame())    // Can happen on game startup
-      return;
-
-   GameType *gt = getGame()->getGameType();
-   if(!gt || !mMount.isValid())
-      return;
-
-   if(!isGhost())    // Server only; on client calls onItemDropped from dismount
-   {
-      gt->itemDropped(mMount, this);
-      dismount();
-   }
-
-   mDroppedTimer.reset(DROP_DELAY);
-}
-
-
-// Client & server, called via different paths
-void MoveItem::dismount()
-{
-   if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
-   {
-      for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
-         if(mMount->mMountedItems[i].getPointer() == this)
-         {
-            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
-            break;
-         }
-   }
-
-   if(isGhost())     // Client only; on server, we may have come from onItemDropped()
-      onItemDropped();
-
-   mMount = NULL;
-   mIsMounted = false;
-   setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
-
-   // On server, we need to check who still has a flag and update the clients accordingly. 
-   if(!isGhost())
-   {
-      TNLAssert(getGame(), "NULL game!");
-      getGame()->getGameType()->onFlagDismounted();   // Must run AFTER mount info is cleared
-   }
-}
+void MoveItem::renderItem(const Point &pos)                 { TNLAssert(false, "Unimplemented function!"); }
+void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "Unimplemented function!"); }
 
 
  // if wanting to use setActualPos(const Point &p), will have to change all class that have setActualPos, to allow virtual inheritance to work right.
@@ -994,12 +879,6 @@ void MoveItem::setActualVel(const Point &vel)
 }
 
 
-Ship *MoveItem::getMount()
-{
-   return mMount;
-}
-
-
 void MoveItem::idle(BfObject::IdleCallPath path)
 {
    if(!isInDatabase())
@@ -1007,55 +886,41 @@ void MoveItem::idle(BfObject::IdleCallPath path)
 
    Parent::idle(path);
 
-   if(mIsMounted)    // Item is mounted on something else
-   {
-      if(mMount.isNull() || mMount->hasExploded)
-      {
-         if(!isGhost())    // Server only
-            dismount();
-      }
-      else
-      {
-         setActualPos(mMount->getActualPos());
-         setRenderPos(mMount->getRenderPos());
-      }
-   }
-   else              // Not mounted
-   {
-      float time = mCurrentMove.time * 0.001f;
-      move(time, ActualState, false);
-      if(path == BfObject::ServerIdleMainLoop)
-      {
-         // Only update if it's actually moving...
-         if(getActualVel().lenSquared() != 0)
-         {
-            // Update less often on slow moving item, more often on fast moving item, and update when we change velocity.
-            // Update at most every 5 seconds.
-            updateTimer -= (getActualVel().len() + 20) * time;
-            if(updateTimer < 0 || getActualVel().distSquared(prevMoveVelocity) > 100)
-            {
-               setMaskBits(PositionMask);
-               updateTimer = 100;
-               prevMoveVelocity = getActualVel();
-            }
-         }
-         else if(prevMoveVelocity.lenSquared() != 0)
-         {
-            setMaskBits(PositionMask);  // Tell client that this item is no longer moving
-            prevMoveVelocity.set(0,0);
-         }
 
-         copyMoveState(ActualState, RenderState);
+   float time = mCurrentMove.time * 0.001f;
+   move(time, ActualState, false);
+   if(path == BfObject::ServerIdleMainLoop)
+   {
+      // Only update if it's actually moving...
+      if(getActualVel().lenSquared() != 0)
+      {
+         // Update less often on slow moving item, more often on fast moving item, and update when we change velocity.
+         // Update at most every 5 seconds.
+         updateTimer -= (getActualVel().len() + 20) * time;
+         if(updateTimer < 0 || getActualVel().distSquared(prevMoveVelocity) > 100)
+         {
+            setMaskBits(PositionMask);
+            updateTimer = 100;
+            prevMoveVelocity = getActualVel();
+         }
       }
-      else
-         updateInterpolation();
+      else if(prevMoveVelocity.lenSquared() != 0)
+      {
+         setMaskBits(PositionMask);  // Tell client that this item is no longer moving
+         prevMoveVelocity.set(0,0);
+      }
+
+      copyMoveState(ActualState, RenderState);
    }
+   else
+      updateInterpolation();
+
+
    updateExtentInDatabase();
-
-   // Server only...
-   U32 deltaT = mCurrentMove.time;
-   mDroppedTimer.update(deltaT);
 }
+
+
+void MoveItem::setPositionMask() { setMaskBits(PositionMask); }
 
 
 static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1, the biggest int we can pack into 9 bits.
@@ -1068,21 +933,14 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
       // Send id in inital packet
       stream->writeRangedU32(getItemId(), 0, U16_MAX);
    }
+
    if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
       writeCompressedVelocity(getActualVel(), VEL_POINT_SEND_BITS, stream);
       stream->writeFlag(updateMask & WarpPositionMask);
    }
-   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
-   {
-      S32 index = connection->getGhostIndex(mMount);     // Index of ship with item mounted
 
-      if(stream->writeFlag(index != -1))                 // True if some ship has item, false if nothing is mounted
-         stream->writeInt(index, GhostConnection::GhostIdBitSize);
-      else
-         retMask |= MountMask;
-   }
    return retMask;
 }
 
@@ -1111,6 +969,115 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       interpolate = !stream->readFlag();
    }
 
+   if(positionChanged)
+   {
+      if(interpolate)
+      {
+         mInterpolating = true;
+         move(connection->getOneWayTime() * 0.001f, ActualState, false);
+      }
+      else
+      {
+         mInterpolating = false;
+
+         setRenderPos(getActualPos());
+         setRenderVel(getActualVel());
+         setRenderAngle(getActualAngle());
+      }
+   }
+}
+
+
+bool MoveItem::collide(BfObject *otherObject)
+{
+   return mIsCollideable;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+// Constructor
+MountableItem::MountableItem(Point p, bool collideable, float radius, float mass) : Parent(p, collideable, radius, mass)
+{
+   mIsMounted = false;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+MountableItem::~MountableItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+ 
+
+void MountableItem::idle(BfObject::IdleCallPath path)
+{
+   if(!isInDatabase())
+      return;
+
+   // If item is mounted, it does nothing; all updates are tied to the mount.  If item is not mounted, it will idle normally.
+   if(!mIsMounted)    
+      Parent::idle(path);
+
+   else
+   {
+      if(mMount.isNull() || mMount->hasExploded)   // Mount has been killed... dismount!
+      {
+         if(!isGhost())    // Server only
+            dismount();
+      }
+      else     // Mount is still ok -- update item's position to match that of mount
+      {
+         setActualPos(mMount->getActualPos());
+         setRenderPos(mMount->getRenderPos());
+      }
+
+      updateExtentInDatabase();
+   }
+
+
+   // Runs on client and server, but only has meaning on server
+   mDroppedTimer.update(mCurrentMove.time);
+}
+
+
+// Client only, in-game
+void MountableItem::render()
+{
+   // If the item is mounted, renderItem will be called from the ship it is mounted to
+   if(mIsMounted)
+      return;
+
+   Parent::render();
+}
+
+
+U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+
+   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
+   {
+      S32 index = connection->getGhostIndex(mMount);     // Index of ship with item mounted
+
+      if(stream->writeFlag(index != -1))                 // True if some ship has item, false if nothing is mounted
+         stream->writeInt(index, GhostConnection::GhostIdBitSize);
+      else
+         retMask |= MountMask;
+   }
+
+   return retMask;
+}
+
+
+void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+
    if(stream->readFlag())     // MountMask
    {
       bool isMounted = stream->readFlag();
@@ -1126,48 +1093,153 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       else
          dismount();
    }
+}
 
-   if(positionChanged)
+
+// Client & server, called via different paths
+void MountableItem::dismount()
+{
+   if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
    {
-      if(interpolate)
-      {
-         mInterpolating = true;
-         move(connection->getOneWayTime() * 0.001f, ActualState, false);
-      }
-      else
-      {
-         mInterpolating = false;
+      for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
+         if(mMount->mMountedItems[i].getPointer() == this)
+         {
+            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
+            break;
+         }
+   }
 
-         setRenderPos(getActualPos());
-         setRenderVel(getActualVel());
-         setRenderAngle(getActualAngle());
+   if(isGhost())     // Client only; on server, we may have come from onItemDropped()
+      onItemDropped();
 
-      }
+   mMount = NULL;
+   mIsMounted = false;
+   setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
+
+   // On server, we need to check who still has a flag and update the clients accordingly. 
+   if(!isGhost())
+   {
+      TNLAssert(getGame(), "NULL game!");
+      getGame()->getGameType()->onFlagDismounted();   // Must run AFTER mount info is cleared
    }
 }
 
 
-bool MoveItem::collide(BfObject *otherObject)
+bool MountableItem::collide(BfObject *otherObject)
 {
-   return mIsCollideable && !mIsMounted;
+   // Mounted items do not collide
+   return !mIsMounted && Parent::collide(otherObject);
 }
 
 
-S32 MoveItem::isOnShip(lua_State *L)
+void MountableItem::onMountDestroyed()
 {
-   return returnBool(L, mIsMounted);
+   dismount();
 }
 
 
-S32 MoveItem::getShip(lua_State *L) 
-{ 
-   if(mMount.isValid()) 
+// Runs on both client and server, comes from collision() on the server and the colliding client, and from
+// unpackUpdate() in the case of all clients
+//
+// theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
+void MountableItem::mountToShip(Ship *theShip)     
+{
+   TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
+
+   if(mMount.isValid() && mMount == theShip)    // Already mounted on ship!  Nothing to do!
+      return;
+
+   if(mMount.isValid())                         // Mounted on something else; dismount!
+      dismount();
+
+   mMount = theShip;
+   if(theShip)
+      theShip->mMountedItems.push_back(this);
+
+   mIsMounted = true;
+   setMaskBits(MountMask);
+
+    if(!isGhost()) 
+    {
+       TNLAssert(getGame(), "NULL game!");
+       getGame()->getGameType()->onFlagMounted(theShip->getTeam());
+    }
+}
+
+
+// Runs on client & server, via different code paths
+void MountableItem::onItemDropped()
+{
+   if(!getGame())    // Can happen on game startup
+      return;
+
+   GameType *gt = getGame()->getGameType();
+   if(!gt || !mMount.isValid())
+      return;
+
+   if(!isGhost())    // Server only; on client calls onItemDropped from dismount
    {
-      mMount->push(L); 
-      return 1;
-   } 
+      gt->itemDropped(mMount, this);
+      dismount();
+   }
+
+   mDroppedTimer.reset(DROP_DELAY);
+}
+
+
+void MountableItem::setMountedMask()  { setMaskBits(MountMask);    }
+
+bool MountableItem::isMounted() { return mIsMounted; }
+Ship *MountableItem::getMount() { return mMount;     }
+
+
+bool MountableItem::isItemThatMakesYouVisibleWhileCloaked() { return true; }
+
+
+/////
+// Lua interface
+
+/**
+ *   @luaclass MountableItem
+ *   @brief    Class of items that can be mounted on ships (such as \link Flag Flags\endlink and \link ResourceItem ResourceItems \endlink).
+ */
+
+//               Fn name       Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getShip,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, isOnShip, ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(MountableItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(MountableItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *MountableItem::luaClassName = "MountableItem";
+REGISTER_LUA_SUBCLASS(MountableItem, MoveObject);
+
+/**
+ *  @luafunc ship MountableItem::getShip()
+ *  @brief   Gets ship that item is mounted to.  If item is not mounted, returns nil.
+ *  @return  \e ship - Ship item is mounted to, or nil if item is unmounted
+ */
+S32 MountableItem::getShip(lua_State *L) 
+{ 
+   if(mMount.isValid())
+      return returnShip(L, mMount);
    else 
       return returnNil(L); 
+}
+
+
+/**
+ *  @luafunc bool MountableItem::isOnShip()
+ *  @brief   Returns true if the item is mounted on a %ship, false otherwise.
+ *  @return  \e bool - True if item is mounted on a %ship, false otherwise.
+ */
+S32 MountableItem::isOnShip(lua_State *L)
+{
+   return returnBool(L, mIsMounted);
 }
 
 
@@ -1784,8 +1856,6 @@ void Worm::render()
 {
 #ifndef ZAP_DEDICATED
 
-
-
    if(!hasExploded)
    {
       if(mTailLength <= 1)
@@ -2305,7 +2375,7 @@ const LuaFunctionProfile ResourceItem::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *ResourceItem::luaClassName = "ResourceItem";
-REGISTER_LUA_SUBCLASS(ResourceItem, MoveObject);
+REGISTER_LUA_SUBCLASS(ResourceItem, MountableItem);
 
 
 };

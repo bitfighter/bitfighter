@@ -38,8 +38,10 @@ namespace Zap
 class FlagSpawn;
 class GoalZone;
 
-class FlagItem : public MoveItem
+class FlagItem : public MountableItem
 {
+   typedef MountableItem Parent;
+
 private:
    Point mInitialPos;                 // Where flag was "born"
    bool mIsAtHome;
@@ -49,8 +51,6 @@ private:
    const Vector<FlagSpawn> *getSpawnPoints();
 
 protected:
-   typedef MoveItem Parent;
-
    enum MaskBits {
       ZoneMask         = Parent::FirstFreeMask << 0,
       FirstFreeMask    = Parent::FirstFreeMask << 1

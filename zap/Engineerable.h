@@ -33,7 +33,7 @@ namespace Zap
 {
 
 // Forward declaraions
-class MoveItem;
+class MountableItem;
 class GridDatabase;
 
 // Things you can build with Engineer
@@ -60,7 +60,7 @@ class Engineerable
 {
 protected:
    bool mEngineered;
-   SafePtr<MoveItem> mResource;
+   SafePtr<MountableItem> mResource;
 
 public:
    Engineerable();           // Constructor
@@ -69,7 +69,7 @@ public:
    void setEngineered(bool isEngineered);
    bool isEngineered(); // Was this engineered by a player?
 
-   void setResource(MoveItem *resource);
+   void setResource(MountableItem *resource);
    void releaseResource(const Point &releasePos, GridDatabase *database);
 
    virtual void computeExtent() = 0;  // The object must have extents recomputed before being added

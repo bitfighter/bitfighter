@@ -373,18 +373,17 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 }
 
 
-// Runs on client & server?
-void SoccerBallItem::onItemDropped()
-{
-
-   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
-   {
-      this->setActualPos(mMount->getActualPos()); 
-      this->setActualVel(mMount->getActualVel() * 1.5);
-   }   
-   
-   Parent::onItemDropped();
-}
+//// Runs on client & server?
+//void SoccerBallItem::onItemDropped()
+//{
+//   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
+//   {
+//      this->setActualPos(mMount->getActualPos()); 
+//      this->setActualVel(mMount->getActualVel() * 1.5);
+//   }   
+//   
+//   Parent::onItemDropped();
+//}
 
 
 void SoccerBallItem::renderItem(const Point &pos)
@@ -445,16 +444,16 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
    Parent::idle(path);
 
    // If crash into something, the ball will hit first, so we want to make sure it has an up-to-date velocity vector
-   if(isMounted())
-   if(mMount)      //client side NULL when the soccer is mounted to far away ship.
-      setActualVel(mMount->getActualVel());
+   //if(isMounted())
+   //if(mMount)      //client side NULL when the soccer is mounted to far away ship.
+   //   setActualVel(mMount->getActualVel());
 }
 
 
 void SoccerBallItem::damageObject(DamageInfo *theInfo)
 {
-   if(mMount != NULL)
-      onItemDropped();
+   //if(mMount != NULL)
+   //   onItemDropped();
   
    computeImpulseDirection(theInfo);
 

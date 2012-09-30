@@ -88,9 +88,8 @@ bool Engineerable::isEngineered()
 }
 
 
-void Engineerable::setResource(MoveItem *resource)
+void Engineerable::setResource(MountableItem *resource)
 {
-   TNLAssert(resource->isMounted() == false, "Doh!");
    mResource = resource;
    mResource->removeFromDatabase();
 }
@@ -439,7 +438,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
 
    engineerable->onConstructed();
 
-   MoveItem *resource = ship->unmountItem(ResourceItemTypeNumber);
+   MountableItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
    engineerable->setResource(resource);
    engineerable->setEngineered(true);
@@ -1864,7 +1863,7 @@ void Turret::idle(IdleCallPath path)
       }
 
       // Don't target mounted items (like resourceItems and flagItems)
-      MoveItem *item = dynamic_cast<MoveItem *>(fillVector[i]);  // TODO get rid of dynamic_cast somehow
+      MountableItem *item = dynamic_cast<MountableItem *>(fillVector[i]);  // TODO get rid of dynamic_cast with a type check
       if(item && item->isMounted())
          continue;
 
