@@ -251,7 +251,6 @@
 		73D2F3E412E2D7E800EA5EBE /* helperMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2B912E2D7E800EA5EBE /* helperMenu.cpp */; };
 		73D2F3E512E2D7E800EA5EBE /* HTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */; };
 		73D2F3E612E2D7E800EA5EBE /* NexusGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */; };
-		73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2BE12E2D7E800EA5EBE /* Info.plist */; };
 		73D2F3E812E2D7E800EA5EBE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */; };
 		73D2F3EA12E2D7E800EA5EBE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F2C312E2D7E800EA5EBE /* item.cpp */; };
 		73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73D2F2C812E2D7E800EA5EBE /* keymap.txt */; };
@@ -562,8 +561,6 @@
 		7317B9D81370CAC30025A41E /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream.cpp; sourceTree = "<group>"; };
 		7317B9D91370CAC30025A41E /* streamdec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streamdec.cpp; sourceTree = "<group>"; };
 		7317B9DA1370CAC30025A41E /* streamplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streamplay.cpp; sourceTree = "<group>"; };
-		73649AEB12976345004366A3 /* Bitfighterd-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighterd-Info.plist"; sourceTree = "<group>"; };
-		7364B18112EBC1E9001993A7 /* Bitfighterd.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighterd.icns; sourceTree = "<group>"; };
 		73657A0412E2E3FB00BED56F /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../../../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73657A0512E2E3FB00BED56F /* masterInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterInterface.h; path = ../../../master/masterInterface.h; sourceTree = SOURCE_ROOT; };
 		73702883132A020B00397F99 /* Recast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Recast.h; sourceTree = "<group>"; };
@@ -875,7 +872,6 @@
 		73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HTFGame.cpp; path = ../../../zap/HTFGame.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NexusGame.cpp; path = ../../../zap/NexusGame.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2BD12E2D7E800EA5EBE /* NexusGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NexusGame.h; path = ../../../zap/NexusGame.h; sourceTree = SOURCE_ROOT; };
-		73D2F2BE12E2D7E800EA5EBE /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IniFile.cpp; path = ../../../zap/IniFile.cpp; sourceTree = SOURCE_ROOT; };
 		73D2F2C012E2D7E800EA5EBE /* IniFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IniFile.h; path = ../../../zap/IniFile.h; sourceTree = SOURCE_ROOT; };
 		73D2F2C212E2D7E800EA5EBE /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = input.h; path = ../../../zap/input.h; sourceTree = SOURCE_ROOT; };
@@ -1383,8 +1379,6 @@
 				7388F069139D5B46003C6BB0 /* music */,
 				73A4901513709B3400785E2E /* ALURE-Info.plist */,
 				73B4BF00136A9D8600D5CAFF /* OpenAL-Soft-Info.plist */,
-				7364B18112EBC1E9001993A7 /* Bitfighterd.icns */,
-				73649AEB12976345004366A3 /* Bitfighterd-Info.plist */,
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
 				7375E3A4136916E000F71273 /* luavec-Info.plist */,
 				737CE61E1290553D00D732B7 /* tnl-Info.plist */,
@@ -2003,7 +1997,6 @@
 				73D2F2BB12E2D7E800EA5EBE /* HTFGame.cpp */,
 				73D2F2BC12E2D7E800EA5EBE /* NexusGame.cpp */,
 				73D2F2BD12E2D7E800EA5EBE /* NexusGame.h */,
-				73D2F2BE12E2D7E800EA5EBE /* Info.plist */,
 				73D2F2BF12E2D7E800EA5EBE /* IniFile.cpp */,
 				73D2F2C012E2D7E800EA5EBE /* IniFile.h */,
 				73D2F2C212E2D7E800EA5EBE /* input.h */,
@@ -2656,7 +2649,6 @@
 				737CE40612904D5300D732B7 /* scripts in Resources */,
 				737CE44E12904D7D00D732B7 /* levels in Resources */,
 				737CE45012904D7D00D732B7 /* sfx in Resources */,
-				73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */,
 				73D2F3EC12E2D7E800EA5EBE /* keymap.txt in Resources */,
 				D3AAAE98139C0C6C006DA288 /* libalure.map in Resources */,
 				7388F06C139D5B46003C6BB0 /* music in Resources */,
