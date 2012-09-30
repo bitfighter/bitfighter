@@ -52,53 +52,74 @@ void prepareFirstLaunch()
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSFileManager *fm = [NSFileManager defaultManager];
+    BOOL copyResources = NO;
 
     NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
     NSString *fullAppSupportPath = [NSString stringWithFormat:@"%@/%@", [appSupportPaths objectAtIndex:0], bundleName];
 
-    //First check if ~/Library/Application Support/Bitfighter exists, if so do nothing
+    //First check if ~/Library/Application Support/Bitfighter exists
     BOOL isDirectory = NO;
-    if ([fm fileExistsAtPath:fullAppSupportPath isDirectory:&isDirectory] && isDirectory)
-        return;
+    if (([fm fileExistsAtPath:fullAppSupportPath isDirectory:&isDirectory] && isDirectory) == NO)
+        copyResources = YES;
+    
+    //Then check whether we are performing an update
+    NSString *currentVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *trackingVersion = [userDefaults stringForKey:@"BitfighterVersion"];
 
-    //Then, create basic directories
-    NSString *screenshotsPath = [fullAppSupportPath stringByAppendingPathComponent:@"screenshots"];
-    if ([fm respondsToSelector:@selector(createDirectoryAtPath:withIntermediateDirectories:attributes:error:)])
-    {
-        [fm createDirectoryAtPath:fullAppSupportPath
-      withIntermediateDirectories:YES
-                       attributes:nil
-                            error:NULL];
-        [fm createDirectoryAtPath:screenshotsPath
-      withIntermediateDirectories:YES
-                       attributes:nil
-                            error:NULL];
-    }
-    else
-    {
-        [fm createDirectoryAtPath:fullAppSupportPath attributes:nil];
-        [fm createDirectoryAtPath:screenshotsPath attributes:nil];
+    if (trackingVersion == nil || [trackingVersion isEqualToString:currentVersion] == NO) {
+        // update the tracking version with the new one
+        [userDefaults setObject:currentVersion forKey:@"BitfighterVersion"];
+        [userDefaults synchronize];
+        copyResources = YES;
     }
 
-    //And finally copy resources
-    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
-    NSArray *pathsToCreate = [NSArray arrayWithObjects:@"levels",@"robots",@"scripts",@"editor_plugins",@"music",nil];
-    for (int i = 0; i < [pathsToCreate count]; i++)
-    {
-        NSString *path = [pathsToCreate objectAtIndex:i];
-        if ([fm respondsToSelector:@selector(copyItemAtPath:toPath:error:)])
-            [fm copyItemAtPath:[resourcePath stringByAppendingPathComponent:path]
-                        toPath:[fullAppSupportPath stringByAppendingPathComponent:path]
-                         error:NULL];
+    if (copyResources) {
+        //Create directories
+        NSString *screenshotsPath = [fullAppSupportPath stringByAppendingPathComponent:@"screenshots"];
+        if ([fm respondsToSelector:@selector(createDirectoryAtPath:withIntermediateDirectories:attributes:error:)])
+        {
+            [fm createDirectoryAtPath:fullAppSupportPath
+          withIntermediateDirectories:YES
+                           attributes:nil
+                                error:NULL];
+            [fm createDirectoryAtPath:screenshotsPath
+          withIntermediateDirectories:YES
+                           attributes:nil
+                                error:NULL];
+        }
         else
-            [fm copyPath:[resourcePath stringByAppendingPathComponent:path]
-                  toPath:[fullAppSupportPath stringByAppendingPathComponent:path]
-                 handler:nil];
+        {
+            [fm createDirectoryAtPath:fullAppSupportPath attributes:nil];
+            [fm createDirectoryAtPath:screenshotsPath attributes:nil];
+        }
+        
+        //Copy resources
+        NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+        NSArray *pathsToCreate = [NSArray arrayWithObjects:@"levels",@"robots",@"scripts",@"editor_plugins",@"music",nil];
+        for (int i = 0; i < [pathsToCreate count]; i++)
+        {
+            NSString *path = [pathsToCreate objectAtIndex:i];
+            if ([fm respondsToSelector:@selector(copyItemAtPath:toPath:error:)])
+                [fm copyItemAtPath:[resourcePath stringByAppendingPathComponent:path]
+                            toPath:[fullAppSupportPath stringByAppendingPathComponent:path]
+                             error:NULL];
+            else
+                [fm copyPath:[resourcePath stringByAppendingPathComponent:path]
+                      toPath:[fullAppSupportPath stringByAppendingPathComponent:path]
+                     handler:nil];
+        }
+        
+        //Link preferences
+        NSArray *documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *prefencesPath = [[documentsPath objectAtIndex:0] stringByAppendingPathComponent:@"Bitfighter Settings"];
+        if ([fm respondsToSelector:@selector(createSymbolicLinkAtPath:withDestinationPath:error:)])
+            [fm createSymbolicLinkAtPath:prefencesPath withDestinationPath:fullAppSupportPath error:&error];
+        else
+            [fm createSymbolicLinkAtPath:prefencesPath pathContent:fullAppSupportPath];
     }
 
-    //NOTE: intentionally not backporting `ln -s "$userdatadir" "$HOME/Documents/bitfighter_settings"`
-    //TODO: "Upgrade specifics" sections need to be backported in some way
     [pool release];
 }
 
