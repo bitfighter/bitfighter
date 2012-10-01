@@ -404,6 +404,7 @@ bool MoveObject::collide(BfObject *otherObject)
    return true;
 }
 
+
 TestFunc MoveObject::collideTypes()
 {
    return (TestFunc) isAnyObjectType;
@@ -874,7 +875,7 @@ void MoveItem::setActualPos(const Point &pos)
 
 void MoveItem::setActualVel(const Point &vel)
 {
-   setVel(ActualState, vel);
+   Parent::setActualVel(vel);
    setMaskBits(PositionMask);
 }
 
@@ -990,7 +991,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool MoveItem::collide(BfObject *otherObject)
 {
-   return mIsCollideable;
+   return Parent::collide(otherObject) && mIsCollideable;
 }
 
 
