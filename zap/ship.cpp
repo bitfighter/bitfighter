@@ -271,22 +271,6 @@ void Ship::engineerBuildObject()
 }
 
 
-// Looks like we only expect an x,y pair -- extra args will be ignored
-bool Ship::processArguments(S32 argc, const char **argv, Game *game)
-{
-   if(argc < 2)
-      return false;
-
-   Parent::processArguments(argc, argv, game);
-
-   setPosVelAng(getPos(), Point(0,0), 0);
-
-   updateExtentInDatabase();
-
-   return true;
-}
-
-
 void Ship::activateModulePrimary(U32 index)
 {
    mCurrentMove.modulePrimary[index] = true;

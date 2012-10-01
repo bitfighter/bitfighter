@@ -95,6 +95,8 @@ public:
    MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
    ~MoveObject();                                                                   // Destructor
 
+   virtual bool processArguments(S32 argc, const char **argv, Game *game);
+
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);    // Called from child object idle methods
    void updateInterpolation();
@@ -191,7 +193,6 @@ public:
 
    virtual void idle(BfObject::IdleCallPath path);
 
-   bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

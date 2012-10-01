@@ -93,6 +93,22 @@ MoveObject::~MoveObject()
 }
 
 
+bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 2)
+      return false;
+   else if(!Parent::processArguments(argc, argv, game))
+      return false;
+
+   setPosVelAng(getPos(), Point(0,0), 0);
+      
+   updateExtentInDatabase();
+
+   return true;
+}
+
+
+
 void MoveObject::idle(BfObject::IdleCallPath path)
 {
    mHitLimit = 16;      // Reset hit limit
@@ -820,24 +836,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
 MoveItem::~MoveItem()
 {
    // Do nothing
-}
-
-
-bool MoveItem::processArguments(S32 argc, const char **argv, Game *game)
-{
-   if(argc < 2)
-      return false;
-   else if(!Parent::processArguments(argc, argv, game))
-      return false;
-
-   Point pos = getActualPos();
-
-   for(U32 i = 0; i < MoveStateCount; i++)
-      setPos(i, pos);
-      
-   updateExtentInDatabase();
-
-   return true;
 }
 
 

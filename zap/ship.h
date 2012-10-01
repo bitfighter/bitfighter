@@ -278,8 +278,6 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   virtual bool processArguments(S32 argc, const char **argv, Game *game);
-
    bool isRobot();
 
    BfObject *isInZone(U8 zoneType);           // Return whether the ship is currently in a zone of the specified type, and which one
