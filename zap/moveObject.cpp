@@ -108,7 +108,6 @@ bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-// Server only
 string MoveObject::toString(F32 gridSize) const
 {
    return string(getClassName()) + " " + geomToString(gridSize);
