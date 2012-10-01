@@ -271,10 +271,10 @@ void Ship::engineerBuildObject()
 }
 
 
-// Looks like we only expect an x,y pair
+// Looks like we only expect an x,y pair -- extra args will be ignored
 bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc != 2)
+   if(argc < 2)
       return false;
 
    Parent::processArguments(argc, argv, game);
