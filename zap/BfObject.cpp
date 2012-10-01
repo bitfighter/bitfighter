@@ -534,6 +534,9 @@ void BfObject::onGeomChanged()
 }
 
 
+// Item is being dragged around in the editor...
+void BfObject::onItemDragging()  { onGeomChanged(); }
+
 
 #ifndef ZAP_DEDICATED
 void BfObject::prepareForDock(ClientGame *game, const Point &point, S32 teamIndex)

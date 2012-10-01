@@ -387,7 +387,8 @@ public:
 
    void onPointsChanged();
    void updateExtentInDatabase();
-   virtual void onGeomChanged();                   // Item changed geometry (or moved), do any internal updating that might be required
+   virtual void onGeomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
+   virtual void onItemDragging();   // Item is being dragged around in the editor; make any updates necessary
 
    void unselect();
 
