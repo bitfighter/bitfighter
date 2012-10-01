@@ -104,17 +104,13 @@ void FlagItem::onAddedToGame(Game *theGame)
 
 void FlagItem::setZone(GoalZone *goalZone)
 {
-   // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
-   // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
-   // for objects that meet certain criteria, such as for zones that contain a flag.
-   FlagItem *flag = dynamic_cast<FlagItem *>(this);
-
-   if(flag)
+   if(goalZone)
+      goalZone->setHasFlag(true);
+   else     // We passed NULL
    {
-      GoalZone *zone = ((goalZone == NULL) ? flag->getZone() : goalZone);
-
+      GoalZone *zone = getZone();
       if(zone)
-         zone->setHasFlag(goalZone != NULL);
+         zone->setHasFlag(false);
    }
 
    // Now we can get around to setting the zone, which is what we came here to do
