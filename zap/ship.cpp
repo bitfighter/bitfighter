@@ -271,16 +271,15 @@ void Ship::engineerBuildObject()
 }
 
 
+// Looks like we only expect an x,y pair
 bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 {
-   if(argc != 3)
+   if(argc != 2)
       return false;
 
-   Point pos;
-   pos.read(argv + 1);
-   pos *= game->getGridSize();
+   Parent::processArguments(argc, argv, game);
 
-   setPosVelAng(pos, Point(0,0), 0);
+   setPosVelAng(getPos(), Point(0,0), 0);
 
    updateExtentInDatabase();
 
