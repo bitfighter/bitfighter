@@ -736,19 +736,19 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject
 }
 
 
-void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theOtherFlag)
+void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
    // Don't mount to ship, instead increase current mounted NexusFlag
    //    flagCount, and remove collided flag from game
-   for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
+   for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
    {
-      NexusFlagItem *shipFlag = dynamic_cast<NexusFlagItem *>(theShip->mMountedItems[i].getPointer());
+      NexusFlagItem *shipFlag = dynamic_cast<NexusFlagItem *>(ship->mMountedItems[i].getPointer());
       if(shipFlag)
       {
          U32 flagCount = shipFlag->getFlagCount();
-         NexusFlagItem *theOtherNexusFlag = dynamic_cast<NexusFlagItem *>(theOtherFlag);
-         if(theOtherNexusFlag)
-            flagCount += theOtherNexusFlag->getFlagCount();
+         NexusFlagItem *nexusFlag = dynamic_cast<NexusFlagItem *>(flag);
+         if(nexusFlag)
+            flagCount += nexusFlag->getFlagCount();
          else
             flagCount += 1;
          shipFlag->changeFlagCount(flagCount);
@@ -756,19 +756,19 @@ void NexusGameType::shipTouchFlag(Ship *theShip, FlagItem *theOtherFlag)
          if(mNexusIsOpen)
          {
             // Check if ship is sitting on an open Nexus (can use static_cast because we already know the type, even though it could be NULL)
-            NexusZone *nexus = static_cast<NexusZone *>(theShip->isInZone(NexusTypeNumber));
+            NexusZone *nexus = static_cast<NexusZone *>(ship->isInZone(NexusTypeNumber));
 
             if(nexus)         
-               shipTouchNexus(theShip, nexus);
+               shipTouchNexus(ship, nexus);
          }
 
          break;
       }
    }
 
-   theOtherFlag->setCollideable(false);
-   theOtherFlag->removeFromDatabase();
-   theOtherFlag->deleteObject();
+   flag->setCollideable(false);
+   flag->removeFromDatabase();
+   flag->deleteObject();
 }
 
 
