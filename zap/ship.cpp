@@ -1914,7 +1914,7 @@ void Ship::kill()
 
    deleteObject(KillDeleteDelay);
    hasExploded = true;
-   setMaskBits(ExplosionMask);
+   setMaskBits(ExplodedMask);
    disableCollision();
 
    // Handle any mounted items
@@ -1941,11 +1941,13 @@ void Ship::destroyTeleporter()
 }
 
 
-enum {
-   NumShipExplosionColors = 12,
-};
+void Ship::setChangeTeamMask()
+{
+   setMaskBits(ChangeTeamMask);  
+}
 
-Color ShipExplosionColors[NumShipExplosionColors] = {
+
+Color ShipExplosionColors[] = {
    Colors::red,
    Color(0.9, 0.5, 0),
    Colors::white,
@@ -1959,6 +1961,9 @@ Color ShipExplosionColors[NumShipExplosionColors] = {
    Colors::white,
    Colors::yellow,
 };
+
+
+static const S32 NumShipExplosionColors = ARRAYSIZE(ShipExplosionColors);
 
 void Ship::emitShipExplosion(Point pos)
 {

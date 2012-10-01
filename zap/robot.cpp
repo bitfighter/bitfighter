@@ -373,7 +373,7 @@ void Robot::kill()
 
    hasExploded = true;
 
-   setMaskBits(ExplosionMask);
+   setMaskBits(ExplodedMask);
    if(!isGhost() && getOwner())
       getLoadout(getOwner()->mOldLoadout);
 

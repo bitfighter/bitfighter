@@ -74,6 +74,19 @@ private:
    Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
 
 protected:
+   enum MaskBits {
+      MoveMask            = Parent::FirstFreeMask << 0, // New user input
+      HealthMask          = Parent::FirstFreeMask << 1,
+      ModulePrimaryMask   = Parent::FirstFreeMask << 2, // Is module primary component active
+      ModuleSecondaryMask = Parent::FirstFreeMask << 3, // Is module secondary component active
+      LoadoutMask         = Parent::FirstFreeMask << 4,
+      RespawnMask         = Parent::FirstFreeMask << 5, // For when robots respawn
+      TeleportMask        = Parent::FirstFreeMask << 6, // Ship has just teleported
+      ChangeTeamMask      = Parent::FirstFreeMask << 7, // Used for when robots change teams
+      SpawnShieldMask     = Parent::FirstFreeMask << 8, // Used for the spawn shield
+      FirstFreeMask       = Parent::FirstFreeMask << 9
+   };
+
    SafePtr <ClientInfo> mClientInfo;
 
    bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
@@ -128,21 +141,7 @@ public:
       WarpFadeInTime = 500,
    };
 
-   enum MaskBits {
-      InitialMask = BIT(0),         // Initial ship position
-      PositionMask = BIT(1),        // Ship position to be sent
-      MoveMask = BIT(2),            // New user input
-      WarpPositionMask = BIT(3),    // When ship makes a big jump in position
-      ExplosionMask = BIT(4),
-      HealthMask = BIT(5),
-      ModulePrimaryMask = BIT(6),   // Is module primary component active
-      ModuleSecondaryMask = BIT(7), // Is module secondary component active
-      LoadoutMask = BIT(8),
-      RespawnMask = BIT(9),         // For when robots respawn
-      TeleportMask = BIT(10),       // Ship has just teleported
-      ChangeTeamMask = BIT(11),     // Used for when robots change teams
-      SpawnShieldMask = BIT(12),    // Used for the spawn shield
-   };
+
 
    S32 mFireTimer;
    Timer mWarpInTimer;
@@ -174,6 +173,8 @@ public:
    static const U32 ModuleSecondaryTimerDelay = 500;
    static const U32 SpyBugPlacementTimerDelay = 800;
    static const U32 IdleRechargeCycleTimerDelay = 2000;
+
+   void setChangeTeamMask();
 
 #ifndef ZAP_DEDICATED
    U32 mSparkElapsed;

@@ -1852,10 +1852,10 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
       if(clientInfo->getShip()->getTeam() >= 0 && robot->getTeam() < mGame->getTeamCount())   // No neutral or hostile bots -- why not?
          minTeamIndex = robot->getTeam();
 
-      robot->setMaskBits(Ship::ChangeTeamMask);    // Needed to avoid gray robot ships when using /addbot
+      robot->setChangeTeamMask();            // Needed to avoid gray robot ships when using /addbot
    }
    
-   clientInfo->setTeamIndex(minTeamIndex);         // Add new player to their assigned team
+   clientInfo->setTeamIndex(minTeamIndex);   // Add new player to their assigned team
 
    // Tell other clients about the new guy (who is never us)
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
@@ -2416,10 +2416,10 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
             obj->setOwner(NULL);
       }
 
-      if(ship->isRobot())     // Players get a new ship, robots reuse the same object
-         ship->setMaskBits(Ship::ChangeTeamMask);
+      if(ship->isRobot())              // Players get a new ship, robots reuse the same object
+         ship->setChangeTeamMask();
       else
-         client->respawnTimer.clear();    // If we've just died, this will keep a second copy of ourselves from appearing
+         client->respawnTimer.clear(); // If we've just died, this will keep a second copy of ourselves from appearing
 
       ship->kill();           // Destroy the old ship
    }

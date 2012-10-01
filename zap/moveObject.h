@@ -84,6 +84,13 @@ protected:
    bool mInterpolating;
    F32 mMass;
 
+   enum MaskBits {
+      PositionMask     = Parent::FirstFreeMask << 0,     // <-- Indicates position has changed and needs to be updated
+      WarpPositionMask = Parent::FirstFreeMask << 1,
+      FirstFreeMask    = Parent::FirstFreeMask << 2
+   };
+
+
 public:
    MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
    ~MoveObject();                                                                   // Destructor
@@ -176,13 +183,6 @@ private:
    Point prevMoveVelocity;
 
 protected:
-   enum MaskBits {
-      PositionMask     = Parent::FirstFreeMask << 0,     // <-- Indicates position has changed and needs to be updated
-      WarpPositionMask = Parent::FirstFreeMask << 1,
-      ItemChangedMask  = Parent::FirstFreeMask << 3,
-      FirstFreeMask    = Parent::FirstFreeMask << 4
-   };
-
    bool mIsCollideable;
 
 public:
@@ -292,6 +292,12 @@ private:
    S32 mSizeLeft;
    bool hasExploded;
    S32 mDesign;
+
+protected:
+   enum MaskBits {
+      ItemChangedMask  = Parent::FirstFreeMask << 0,
+      FirstFreeMask    = Parent::FirstFreeMask << 1
+   };
 
 public:
    Asteroid();       // Constructor  
