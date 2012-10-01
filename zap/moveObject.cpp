@@ -833,7 +833,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
    mInitial = false;
 
    updateTimer = 0;
-
 }
 
 
@@ -844,19 +843,15 @@ MoveItem::~MoveItem()
 }
 
 
-// Client only, in-game
-void MoveItem::render()
-{
-   renderItem(getRenderPos());
-}
-
-
 void MoveItem::setCollideable(bool isCollideable)
 {
    mIsCollideable = isCollideable;
 }
 
+// Rendering - client only, in-game
+void MoveItem::render()                                     { renderItem(getRenderPos());                  }
 
+// Override the following to actually draw our items
 void MoveItem::renderItem(const Point &pos)                 { TNLAssert(false, "Unimplemented function!"); }
 void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "Unimplemented function!"); }
 
@@ -917,7 +912,7 @@ void MoveItem::idle(BfObject::IdleCallPath path)
 }
 
 
-void MoveItem::setPositionMask() { setMaskBits(PositionMask); }
+void MoveItem::setPositionMask() { setMaskBits(PositionMask); }      // Could be moved to MoveObject
 
 
 static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1, the biggest int we can pack into 9 bits.
@@ -987,7 +982,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool MoveItem::collide(BfObject *otherObject)
 {
-   return Parent::collide(otherObject) && mIsCollideable;
+   return mIsCollideable && Parent::collide(otherObject);
 }
 
 
