@@ -163,8 +163,8 @@ private:
    bool showMinorGridLines();
 
    // Helper drawing methods
-   void renderTurretRanges(GridDatabase *editorDb);      // Draw translucent turret ranges
-   void renderObjectsUnderConstruction();                // Render partially constructed walls and other items that aren't yet in a db
+   void renderTurretAndSpyBugRanges(GridDatabase *editorDb);   // Draw translucent turret & spybug ranges
+   void renderObjectsUnderConstruction();                      // Render partially constructed walls and other items that aren't yet in a db
    void renderDock();
    void renderInfoPanel();
    void renderPanelInfoLine(S32 line, const char *format, ...);

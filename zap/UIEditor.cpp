@@ -1460,7 +1460,7 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 }
 
 
-void EditorUserInterface::renderTurretRanges(GridDatabase *editorDb)
+void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 {
    fillVector.clear();
       
@@ -1803,9 +1803,10 @@ void EditorUserInterface::render()
 
    // Render bottom-most layer of our display
    if(mPreviewMode)
-      renderTurretRanges(editorDb);    // Render range of all turrets in editorDb
+      renderTurretAndSpyBugRanges(editorDb);    // Render range of all turrets and spybugs in editorDb
    else
-      renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), getGame()->getGridSize(), mSnapContext == FULL_SNAPPING, showMinorGridLines());                    
+      renderGrid(mCurrentScale, mCurrentOffset, convertLevelToCanvasCoord(Point(0,0)), 
+                 getGame()->getGridSize(), mSnapContext == FULL_SNAPPING, showMinorGridLines());                    
 
    glPushMatrix();
       glTranslate(getCurrentOffset());
