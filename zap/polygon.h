@@ -61,7 +61,6 @@ public:
    void newObjectFromDock(F32 gridSize);
 
    // Item is being actively dragged
-   virtual void onItemDragging();  // maybe not for polywalls??
    virtual void onGeomChanged();   // Tell the geometry that things have changed
 
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);

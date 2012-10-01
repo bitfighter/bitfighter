@@ -55,12 +55,6 @@ PolygonObject::~PolygonObject()
 }
 
 
-void PolygonObject::onItemDragging()
-{
-   onGeomChanged();
-}
-
-
 // Tell the geometry that things have changed
 void PolygonObject::onGeomChanged() 
 { 

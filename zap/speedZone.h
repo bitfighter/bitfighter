@@ -110,7 +110,6 @@ public:
 
    void onAttrsChanging();
    void onGeomChanging();
-   void onItemDragging();
    void onGeomChanged();
 
 #ifndef ZAP_DEDICATED

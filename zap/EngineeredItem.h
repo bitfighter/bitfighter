@@ -279,8 +279,6 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
-   void onItemDragging();   // Item is being actively dragged
-
    void onGeomChanged();
    void findForceFieldEnd();                      // Find end of forcefield in editor
 
@@ -356,7 +354,6 @@ public:
    bool canBeNeutral();
 
    void onGeomChanged();
-   void onItemDragging();
 
    void renderDock();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);

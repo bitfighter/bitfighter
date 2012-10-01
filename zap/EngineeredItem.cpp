@@ -1397,12 +1397,6 @@ bool ForceFieldProjector::canBeHostile() { return true; }
 bool ForceFieldProjector::canBeNeutral() { return true; }
 
 
-void ForceFieldProjector::onItemDragging()
-{
-   onGeomChanged();
-}
-
-
 // Determine on which segment forcefield lands -- only used in the editor, wraps ForceField::findForceFieldEnd()
 void ForceFieldProjector::findForceFieldEnd()
 {
@@ -1973,12 +1967,6 @@ const char *Turret::getEditorHelpString() { return "Creates shooting turret.  Ca
 bool Turret::hasTeam()      { return true; }
 bool Turret::canBeHostile() { return true; }
 bool Turret::canBeNeutral() { return true; }
-
-
-void Turret::onItemDragging()
-{
-   onGeomChanged();
-}
 
 
 void Turret::onGeomChanged() 

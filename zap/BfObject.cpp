@@ -535,6 +535,7 @@ void BfObject::onGeomChanged()
 
 
 // Item is being dragged around in the editor...
+// Update their geometry so they will be visible in game-preview mode (tab key in the editor) while being dragged
 void BfObject::onItemDragging()  { onGeomChanged(); }
 
 
