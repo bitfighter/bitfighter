@@ -96,6 +96,8 @@ public:
    ~MoveObject();                                                                   // Destructor
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
+   virtual string toString(F32 gridSize) const;
+
 
    void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);    // Called from child object idle methods
@@ -192,8 +194,6 @@ public:
    virtual ~MoveItem();                                                                          // Destructor
 
    virtual void idle(BfObject::IdleCallPath path);
-
-   string toString(F32 gridSize) const;
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);

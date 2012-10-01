@@ -108,6 +108,12 @@ bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+// Server only
+string MoveObject::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + geomToString(gridSize);
+}
+
 
 void MoveObject::idle(BfObject::IdleCallPath path)
 {
@@ -836,13 +842,6 @@ MoveItem::MoveItem(Point p, bool collideable, float radius, float mass) : MoveOb
 MoveItem::~MoveItem()
 {
    // Do nothing
-}
-
-
-// Server only
-string MoveItem::toString(F32 gridSize) const
-{
-   return string(getClassName()) + " " + geomToString(gridSize);
 }
 
 
