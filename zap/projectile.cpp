@@ -1134,7 +1134,7 @@ void SpyBug::renderItem(const Point &pos)
 
 void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   renderSpyBug(getRenderPos(), getColor(), true, true);
+   renderSpyBug(getPos(), getColor(), true, true);
 }
 
 
