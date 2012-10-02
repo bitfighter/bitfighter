@@ -1643,11 +1643,8 @@ S32 Ship::getFlagCount()
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
       {
-         NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(mMountedItems[i].getPointer());
-         if(flag == NULL)   
-            count++;
-         else
-            count += flag->getFlagCount();      // Nexus flag have multiple flags as one item
+         FlagItem *flag = static_cast<FlagItem *>(mMountedItems[i].getPointer());
+         count += flag->getFlagCount();      // Nexus flag have multiple flags as one item
       }
    return count;
 }

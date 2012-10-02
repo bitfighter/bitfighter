@@ -97,6 +97,10 @@ public:
    GoalZone *getZone();
    bool isInZone();
 
+   // Methods that really only apply to NexusFlagItems; having them here lets us get rid of a bunch of dynamic_casts
+   virtual void changeFlagCount(U32 change);
+   virtual U32 getFlagCount();
+
 
    TNL_DECLARE_CLASS(FlagItem);
 

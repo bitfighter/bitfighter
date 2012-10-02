@@ -240,18 +240,14 @@ bool NexusGameType::isCarryingItems(Ship *ship)
 }
 
 
-// Cycle through mounted items and find the first one (last one, actually) that's a NexusFlagItem.
+// Cycle through mounted items and find the first one (last one, actually) that's a FlagItem.
+// In practice, this will always be a NexusFlagItem... I think...
 // Returns NULL if it can't find one.
-static NexusFlagItem *findFirstNexusFlag(Ship *ship)
+static FlagItem *findFirstFlag(Ship *ship)
 {
    for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
-   {
-      MoveItem *item = ship->mMountedItems[i];
-      NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
-
-      if(flag)
-         return flag;
-   }
+      if(ship->mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber)
+         return static_cast<FlagItem *>(ship->mMountedItems[i].getPointer());
 
    return NULL;
 }
@@ -260,9 +256,10 @@ static NexusFlagItem *findFirstNexusFlag(Ship *ship)
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items
 void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
-   if(!flag)
+   if(item->getObjectTypeNumber() != FlagTypeNumber)
       return;
+
+   FlagItem *flag = static_cast<FlagItem *>(item);
 
    U32 flagCount = flag->getFlagCount();
 
@@ -357,7 +354,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusZone, s2cFlagsReturned, (), (), NetClassGroupGa
 // Runs on server only
 void NexusGameType::shipTouchNexus(Ship *theShip, NexusZone *theNexus)
 {
-   NexusFlagItem *theFlag = findFirstNexusFlag(theShip);
+   FlagItem *theFlag = findFirstFlag(theShip);
 
    if(!theFlag)      // Just in case!
       return;
@@ -712,22 +709,22 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject
    if(!clientObject || !isShipType(clientObject->getObjectTypeNumber()))
       return;
 
-   Ship *theShip = static_cast<Ship *>(clientObject);
+   Ship *ship = static_cast<Ship *>(clientObject);
 
    // Check for yard sale  (is this when the flags a player is carrying go drifting about??)
-   for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
+   for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
    {
-      MoveItem *item = theShip->mMountedItems[i];
-      NexusFlagItem *flag = dynamic_cast<NexusFlagItem *>(item);
-
-      if(flag)
+      if(ship->mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber)
       {
+         FlagItem *flag = static_cast<NexusFlagItem *>(ship->mMountedItems[i].getPointer());
+
          if(flag->getFlagCount() >= YardSaleCount)
          {
             Point pos = flag->getActualPos();
+
             s2cAddYardSaleWaypoint(pos.x, pos.y);
             if(!isGameOver())  // Avoid flooding messages on game over.
-               s2cNexusMessage(NexusMsgYardSale, theShip->getClientInfo()->getName().getString(), 0, 0);
+               s2cNexusMessage(NexusMsgYardSale, ship->getClientInfo()->getName().getString(), 0, 0);
          }
 
          return;
@@ -742,15 +739,17 @@ void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
    //    flagCount, and remove collided flag from game
    for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
    {
-      NexusFlagItem *shipFlag = dynamic_cast<NexusFlagItem *>(ship->mMountedItems[i].getPointer());
-      if(shipFlag)
+      if(ship->mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber)
       {
+         FlagItem *shipFlag = static_cast<FlagItem *>(ship->mMountedItems[i].getPointer());
+
          U32 flagCount = shipFlag->getFlagCount();
-         NexusFlagItem *nexusFlag = dynamic_cast<NexusFlagItem *>(flag);
-         if(nexusFlag)
-            flagCount += nexusFlag->getFlagCount();
+
+         if(flag)
+            flagCount += flag->getFlagCount();
          else
             flagCount += 1;
+
          shipFlag->changeFlagCount(flagCount);
 
          if(mNexusIsOpen)

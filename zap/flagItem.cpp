@@ -131,6 +131,12 @@ bool FlagItem::isInZone()
 }
 
 
+// Methods that really only apply to NexusFlagItems; having them here lets us get rid of a bunch of dynamic_casts
+void FlagItem::changeFlagCount(U32 change) { TNLAssert(false, "Should never be called!"); }
+U32 FlagItem::getFlagCount()               { return 1; }
+
+
+
 static bool isTeamFlagSpawn(Game *game, S32 team)
 {
    return game->getGameType()->isTeamFlagGame() && team >= 0 && team < game->getTeamCount();
