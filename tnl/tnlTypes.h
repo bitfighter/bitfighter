@@ -292,7 +292,8 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #    define TNL_OS_STRING "iOS"
 #    define TNL_OS_IPHONE
 #    define TNL_OS_MOBILE
-#    define TNL_OS_MAC_OSX
+#    define __IPHONEOS__ // needed by SDL headers
+//#    define TNL_OS_MAC_OSX // different platform
 #  else
 #    define TNL_OS_STRING "MacOSX"
 #    define TNL_OS_MAC_OSX
