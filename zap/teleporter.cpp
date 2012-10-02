@@ -253,11 +253,9 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    setVert(pos, 0);
    setVert(dest, 1);
 
-   // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
-
-#ifndef ZAP_DEDICATED
-   if(!dynamic_cast<ClientGame *>(game))              // Editor handles multi-dest teleporters as separate single dest items
-#endif
+   // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter.
+   // Note that editor handles multi-dest teleporters as separate single dest items, so this only runs on server!
+   if(game->isServer())    
    {
       foundObjects.clear();
       game->getGameObjDatabase()->findObjects(TeleporterTypeNumber, foundObjects, Rect(pos, 1));
