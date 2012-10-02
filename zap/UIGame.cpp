@@ -209,6 +209,7 @@ void GameUserInterface::quitEngineerHelper()
 }
 
 
+#ifndef TNL_OS_MOBILE
 // Callback for enter key being pressed -- some OGLConsole commands (show, hide) act on a internally maintained "current" instance 
 // of the console, and some (like output) act on a particular (passed) console..  Since we only have a
 // single console instance, we'll just ignore the passed console and work with our global instance.  This is kind of stinky design,
@@ -245,6 +246,7 @@ static void processGameConsoleCommandCallback(OGLCONSOLE_Console console, char *
     else
       gConsole.output("Unknown command: %s\n", cmd);
 }
+#endif
 
 
 void GameUserInterface::onActivate()

@@ -1,0 +1,24 @@
+--- SDLActivity.java.SDL	2012-08-30 11:15:50.710047939 -0600
++++ SDLActivity.java	2012-10-02 02:11:20.689592382 -0600
+@@ -20,6 +20,7 @@ import android.hardware.*;
+ import android.content.*;
+ 
+ import java.lang.*;
++import org.bitfighter.app.R;
+ 
+ 
+ /**
+@@ -51,9 +52,10 @@ public class SDLActivity extends Activit
+     // Load the .so
+     static {
+         System.loadLibrary("SDL2");
+-        //System.loadLibrary("SDL2_image");
+-        //System.loadLibrary("SDL2_mixer");
+-        //System.loadLibrary("SDL2_ttf");
++        System.loadLibrary("tomcrypt");
++        System.loadLibrary("tnl");
++        System.loadLibrary("luavec");
++//        System.loadLibrary("bitfighter");
+         System.loadLibrary("main");
+     }
+ 

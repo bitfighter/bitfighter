@@ -501,7 +501,10 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
    gScreenInfo.setWindowSize(newWidth, newHeight);
   
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+
+#ifndef TNL_OS_MOBILE
    gConsole.onScreenResized();
+#endif
 
    gINI.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 

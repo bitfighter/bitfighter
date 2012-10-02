@@ -32,9 +32,17 @@ namespace Zap {
 
 class Console
 {
+
 public:
    // Do nothing
    void output(const char *s, ...) {}
+   bool onKeyDown(char ascii) {}
+   bool onKeyDown(InputCode inputCode) {}
+   bool isVisible() {}
+   void show() {}
+   bool isOk() {}
+   void toggleVisibility() {}
+   void initialize() {};
 };
 
 
