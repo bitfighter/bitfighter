@@ -1434,7 +1434,7 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
       renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
 
       // The body of the seeker
-      glColor3f(1.0, 0, 0.35);  // A redder magenta
+      glColor4f(1.0, 0, 0.35, 1.0);  // A redder magenta
       F32 vertices[] = {
             -8, -4,
             -8,  4,

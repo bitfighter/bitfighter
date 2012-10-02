@@ -741,6 +741,7 @@ void UserInterface::renderMasterStatus()
 
 void UserInterface::renderConsole()
 {
+#ifndef TNL_OS_MOBILE
    // Temporarily disable scissors mode so we can use the full width of the screen
    // to show our console text, black bars be damned!
    bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
@@ -752,6 +753,7 @@ void UserInterface::renderConsole()
 
    if(scissorMode) 
       glEnable(GL_SCISSOR_TEST);
+#endif
 }
 
 

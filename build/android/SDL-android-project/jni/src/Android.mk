@@ -61,6 +61,7 @@ $(ZAP_PATH)/BanList.cpp \
 $(ZAP_PATH)/barrier.cpp \
 $(ZAP_PATH)/BfObject.cpp \
 $(ZAP_PATH)/BotNavMeshZone.cpp \
+$(ZAP_PATH)/ChatCheck.cpp \
 $(ZAP_PATH)/ClientInfo.cpp \
 $(ZAP_PATH)/Color.cpp \
 $(ZAP_PATH)/config.cpp \
@@ -69,6 +70,7 @@ $(ZAP_PATH)/CoreGame.cpp \
 $(ZAP_PATH)/CTFGame.cpp \
 $(ZAP_PATH)/dataConnection.cpp \
 $(ZAP_PATH)/EditorObject.cpp \
+$(ZAP_PATH)/EditorPlugin.cpp \
 $(ZAP_PATH)/EngineeredItem.cpp \
 $(ZAP_PATH)/EventManager.cpp \
 $(ZAP_PATH)/flagItem.cpp \
@@ -92,10 +94,10 @@ $(ZAP_PATH)/item.cpp \
 $(ZAP_PATH)/lineEditor.cpp \
 $(ZAP_PATH)/LineItem.cpp \
 $(ZAP_PATH)/loadoutZone.cpp \
+$(ZAP_PATH)/LuaBase.cpp \
 $(ZAP_PATH)/luaGameInfo.cpp \
 $(ZAP_PATH)/luaLevelGenerator.cpp \
-$(ZAP_PATH)/luaObject.cpp \
-$(ZAP_PATH)/luaUtil.cpp \
+$(ZAP_PATH)/LuaScriptRunner.cpp \
 $(ZAP_PATH)/main.cpp \
 $(ZAP_PATH)/masterConnection.cpp \
 $(ZAP_PATH)/md5wrapper.cpp \
