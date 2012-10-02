@@ -294,9 +294,10 @@ void Projectile::idle(BfObject::IdleCallPath path)
                setPos(collisionPoint + surfNormal);
                timeLeft = timeLeft * (1 - collisionTime);
 
-               MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);  // TODO somehow get rid of this dynamic_cast
-               if(obj)
+               if(hitObject->isMoveObject())
                {
+                  MoveObject *obj = static_cast<MoveObject *>(hitObject);  
+
                   startPos = getPos();
 
                   setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync

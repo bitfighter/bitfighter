@@ -347,7 +347,7 @@ public:
 
    void disableCollision();        
    void enableCollision();         
-   bool isCollisionEnabled();      
+   bool isCollisionEnabled(); 
 
    //bool collisionPolyPointIntersect(Point point);
    //bool collisionPolyPointIntersect(Vector<Point> points);
