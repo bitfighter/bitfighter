@@ -12,25 +12,30 @@
 -- This is called by the robot's idle routine each tick.
 -- This function must be present for the robot to work!
 
-function getMove()
+-------------------------------------------------------------------------------
+-- This function is called once and should return the robot's name
+
+function getName()
+    return("AegisBot")
+end
+
+
+function main()
+    -- Not much to do
+end
+
+-------------------------------------------------------------------------------
+-- This function called every tick
+
+items = {}       -- Reusable container for finding objects
+
+function onTick()
 
     local loc = bot:getLoc()
-    local items = bot:findItems(BulletType, MineType, SpyBugType)        -- Find a projectile
+    table.clear(items)
+    bot:findItems(items, BurstType, SeekerType, MineType, SpyBugType)   -- Find a suitable target
 
-    local minDist = 999999
-    local closestItem = nil
-
-    for indx, item in ipairs(items) do      -- Iterate over our list
-        -- Use distSquared because it is less computationally expensive
-        -- and works great for comparing distances
-        d = loc:distSquared(item:getLoc())  -- Dist btwn robot and TestItem
-
-        if(d < minDist) then                -- Is it the closest yet?
-           closestItem = item
-           minDist = d
-        end
-    end
-
+    local closestItem = findClosest(items)
 
     if(closestItem == nil) then   -- Didn't find any bullets
         return
@@ -51,29 +56,4 @@ function getMove()
 
 end
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- This function is called once and should return the robot's name
 
-function getName()
-    return("AegisBot")
-end
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Setup code here: this is run once when the robot is initialized, and
--- any variables set here will persist throughout the robot's life.  These
--- variables can be accessed from various functions defined in this file.
--------------------------------------------------------------------------------
--- Global variables
-
-
--- Other initialization code
-bot:logprint("Hello, I'm "..getName())        -- Print a message to the game log
