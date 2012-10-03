@@ -141,7 +141,7 @@ function outputMaze()
             -- Skip a horizontal wall if it's only one cell wide, because
             -- that portion will get covered by a vertical segment later.
             if(endx - xstart > cellsize) then
-               local pts = { Point(xstart, ceny - cellsize * 0.5), Point(endx, ceny - cellsize * 0.5) }
+               local pts = { point.new(xstart, ceny - cellsize * 0.5), point.new(endx, ceny - cellsize * 0.5) }
                levelgen:addWall(wallsize, false, pts)
             end
 
@@ -151,10 +151,10 @@ function outputMaze()
          -- LL quadrant drawn only when a W wall is present
          if(cell["W Wall"]) then
             if vwallstart[x] == nil then
-               vwallstart[x] = Point(cenx - cellsize * 0.5, ceny - cellsize )
+               vwallstart[x] = point.new(cenx - cellsize * 0.5, ceny - cellsize )
             end
 
-            vwallend[x] = Point(cenx - cellsize * 0.5, ceny + cellsize * 2)
+            vwallend[x] = point.new(cenx - cellsize * 0.5, ceny + cellsize * 2)
 
          else  -- Finish vertical wall
             if(vwallstart[x]) then
@@ -176,7 +176,7 @@ function outputMaze()
    for x = 1, gridXSize do
       local cenx = ulCornerX + (2 * x - 1) * cellsize
       if(vwallstart[x]) then
-         local pts = { vwallstart[x], Point(cenx - cellsize * 0.5, ceny + cellsize * 2) }
+         local pts = { vwallstart[x], point.new(cenx - cellsize * 0.5, ceny + cellsize * 2) }
 
          levelgen:addWall(wallsize, false, pts)
          vwallstart[x] = nil
@@ -184,11 +184,11 @@ function outputMaze()
    end
 
    -- Now add walls along entire bottom and right sides of the maze
-   local pts = { Point(ulCornerX,
+   local pts = { point.new(ulCornerX,
                        ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
-                 Point(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
+                 point.new(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
                        ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
-                 Point(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
+                 point.new(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
                        ulCornerY) }
    levelgen:addWall(wallsize, false, pts)
 end
