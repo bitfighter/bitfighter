@@ -198,9 +198,11 @@ end
 ------------------------------------------------------------------------
 
 function main()
-   bot:globalMsg("WELCOME TO ANOTHER SESSION WITH YOUR COMPUTER PSYCHIATRIST, ELIZA")
-   bot:globalMsg("IT SURE IS NEAT TO HAVE YOU DROP BY")
-   bot:globalMsg("WHAT IS YOUR PROBLEM?")
+   globalMsg("WELCOME TO ANOTHER SESSION WITH YOUR COMPUTER PSYCHIATRIST, ELIZA")
+   globalMsg("IT SURE IS NEAT TO HAVE YOU DROP BY")
+   globalMsg("WHAT IS YOUR PROBLEM?")
    
    subscribe(MsgReceivedEvent)
+   unsubscribe(TickEvent)
 end
+
