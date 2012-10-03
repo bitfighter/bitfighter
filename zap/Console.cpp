@@ -25,6 +25,8 @@
 
 #include "Console.h"       // Our header
 
+#ifndef BF_NO_CONSOLE
+
 #include "ScreenInfo.h"    // For ScreenInfo object
 #include "tnlAssert.h"     // For TNLAssert, of course
 
@@ -260,3 +262,4 @@ namespace Zap
 // http://gnuwin32.sourceforge.net/packages/readline.htm
 // also see lua.c
 
+#endif // BF_NO_CONSOLE

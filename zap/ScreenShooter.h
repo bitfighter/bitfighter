@@ -26,7 +26,14 @@
 #ifndef SCREENSHOOTER_H_
 #define SCREENSHOOTER_H_
 
+
 #include "tnlTypes.h"
+
+#ifdef TNL_OS_MOBILE
+#define BF_NO_SCREENSHOTS
+#endif
+
+#ifndef BF_NO_SCREENSHOTS
 
 #include "png.h"
 
@@ -61,4 +68,7 @@ public:
 };
 
 } /* namespace Zap */
+
+#endif // BF_NO_SCREENSHOTS
+
 #endif /* SCREENSHOOTER_H_ */

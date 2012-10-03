@@ -27,6 +27,10 @@
 #define _CONSOLE_H_
 
 #if defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
+#define BF_NO_CONSOLE
+#endif
+
+#ifdef BF_NO_CONSOLE
 
 namespace Zap {
 
@@ -44,6 +48,7 @@ public:
    void toggleVisibility() {}
    void initialize() {}
    void onScreenModeChanged() {}
+   void onScreenResized() {}
 };
 
 
@@ -99,7 +104,7 @@ public:
    void output(const char *s, ...);    // Print message to console
 };
 
-#endif // defined(ZAP_DEDICATED) || defined(TNL_OS_MOBILE)
+#endif // BF_NO_CONSOLE
 
 // Provide transparent access to our global console instance
 extern Console gConsole;

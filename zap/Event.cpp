@@ -16,11 +16,11 @@
 #include "Joystick.h"
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
+#include "ScreenShooter.h"
 
 #ifdef TNL_OS_MOBILE
 #  include "SDL_opengles.h"
 #else
-#  include "ScreenShooter.h" // No screenshots on Android
 #  include "SDL_opengl.h"
 #endif
 
@@ -323,7 +323,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
 #endif
    }
-#ifndef TNL_OS_MOBILE
+#ifndef BF_NO_SCREENSHOTS
    // CTRL+Q --> screenshot!
    else if(key == SDLK_q && InputCodeManager::getState(KEY_CTRL))
       ScreenShooter::saveScreenshot(game->getUIManager(), game->getSettings());
@@ -502,9 +502,7 @@ void Event::onResize(ClientGame *game, S32 width, S32 height)
   
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
 
-#ifndef TNL_OS_MOBILE
    gConsole.onScreenResized();
-#endif
 
    gINI.SetValueF("Settings", "WindowScalingFactor", iniSettings->winSizeFact, true);
 
