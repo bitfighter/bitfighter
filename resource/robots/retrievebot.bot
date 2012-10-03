@@ -8,6 +8,36 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Setup code here: this is run once when the robot is initialized, and
+-- any variables set here will persist throughout the robot's life.  These
+-- variables can be accessed from various functions defined in this file.
+
+-- Global variables
+function main()
+
+   targetType = nil        -- Item we're currently searching for
+   team = nil              -- Will only find items that match this team
+   lastwaypoint = nil
+
+   haveFlag = true         -- Well we don't really, but this will trigger the flag
+                           -- seeking mechanism in the getMove() function to get us
+                           -- started on the right track.  Later, this will be used to
+                           -- track whether we have the flag or not.  If we don't,
+                           -- then our mission is to get the flag.  If we do, then
+                           -- our mission is to return it to one of our capture zones.
+
+
+   game = GameInfo()     -- Create the GameInfo object so we can get information about
+                         -- the current game
+
+   print("Level name ==> " .. game:getLevelName())
+end
+
+
+-------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- This is called by the robot's idle routine each tick.  
 -- This function must be present for the robot to work!
@@ -29,7 +59,6 @@ function onTick()
    end
 
    local targets = bot:findGlobalItems(targetType)
-   --logprint("Targets ("..targetType..") found: "..#targets)
    local target = findClosest(targets, team)    
 
    if(target == nil) then                   -- Check for nil
@@ -56,12 +85,12 @@ function onTick()
 
    --logprint("Next waypoint: "..tostring(waypoint))                                             
 
-   bot:setAngle(waypoint)           -- Doesn't really matter, but it looks better when we aim
-                                    -- the ship towards our target
+   bot:setAngle(waypoint)       -- Doesn't really matter, but it looks better when we aim
+                                -- the ship towards our target
 
    -- Note there is a bug in setThrustPt in 012a, so this may not work 
-   bot:setThrustPt(1, waypoint)     -- Travel towards target at full speed (valid speeds range 
-                                    -- from 0 (stopped) to 1 (full bore)
+   bot:setThrust(1, waypoint)   -- Travel towards target at full speed (valid speeds range 
+                                -- from 0 (stopped) to 1 (full bore)
         
 end
 
@@ -72,29 +101,4 @@ function getName()
     return("RetrieveBot")
 end
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Setup code here: this is run once when the robot is initialized, and
--- any variables set here will persist throughout the robot's life.  These
--- variables can be accessed from various functions defined in this file.
 
--- Global variables
-function main()
-
-   targetType = nil        -- Item we're currently searching for
-   team = nil              -- Will only find items that match this team
-   lastwaypoint = nil
-
-   haveFlag = true         -- Well we don't really, but this will trigger the flag
-                           -- seeking mechanism in the getMove() function to get us
-                           -- started on the right track.  Later, this will be used to
-                           -- track whether we have the flag or not.  If we don't,
-                           -- then our mission is to get the flag.  If we do, then
-                           -- our mission is to return it to one of our capture zones.
-
-
-   game = GameInfo()     -- Create the GameInfo object so we can get information about
-                         -- the current game
-
-   logprint("Level name ==> "..game:getLevelName())
-end
