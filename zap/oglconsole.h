@@ -3,6 +3,11 @@
 #ifndef _OGLCONSOLE_H
 #define _OGLCONSOLE_H
 
+#ifdef TNL_OS_MOBILE
+#define BF_NO_CONSOLE
+#endif
+
+#ifndef BF_NO_CONSOLE
 
 /* Opaque to you you lowly user */
 typedef struct _OGLCONSOLE_Console *OGLCONSOLE_Console;
@@ -71,6 +76,8 @@ int OGLCONSOLE_CreateFont();
 #ifdef __cplusplus
 }
 #endif
+
+#endif // BF_NO_CONSOLE
 
 #endif // _OGLCONSOLE_H
 

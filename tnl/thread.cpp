@@ -148,7 +148,7 @@ Mutex::Mutex()
 {
    pthread_mutexattr_t attr;
    pthread_mutexattr_init(&attr);
-#ifdef TNL_OS_LINUX
+#if defined(TNL_OS_LINUX) || defined (TNL_OS_ANDROID)
    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
 #else
    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);

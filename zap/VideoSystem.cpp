@@ -255,10 +255,6 @@ S32 VideoSystem::getWindowPositionCoord(bool getX)
    }
 #endif
 
-#ifdef TNL_OS_MAC_OSX
-   // I don't know if anything can be done here..
-#endif
-
 #ifdef TNL_OS_WIN32
    RECT rect;
    GetWindowRect(windowManagerInfo.window, &rect);
@@ -460,9 +456,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
    glEnable(GL_BLEND);
 
-#ifndef TNL_OS_MOBILE
    gConsole.onScreenModeChanged();
-#endif
 
    // Now set the window position
    if(displayMode == DISPLAY_MODE_WINDOWED)

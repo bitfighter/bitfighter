@@ -28,7 +28,11 @@
 
 #include "../tnl/tnlByteBuffer.h"
 
-#ifndef NO_AUDIO
+#if defined(TNL_OS_MOBILE) || defined(BF_NO_AUDIO)
+#  define BF_NO_VOICECHAT
+#endif
+
+#ifndef BF_NO_VOICECHAT
 #  include "speex/speex.h"
 #else
    typedef struct SpeexBits {} SpeexBits;

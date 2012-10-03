@@ -15,7 +15,7 @@ $(LOCAL_PATH)/$(ZAP_PATH)/../boost \
 $(LOCAL_PATH)/$(ZAP_PATH)/../sqlite \
 
 # using -DTNL_DEBUG hangs on start-up
-LOCAL_CFLAGS := -DNO_AUDIO -Dfdatasync=fsync -DTNL_ENABLE_LOGGING
+LOCAL_CFLAGS := -DBF_NO_AUDIO -Dfdatasync=fsync -DTNL_ENABLE_LOGGING
 
 # Add your application source files here...
 LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.cpp \

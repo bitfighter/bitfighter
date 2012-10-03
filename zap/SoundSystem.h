@@ -29,10 +29,10 @@
 #include "ConfigEnum.h"     // For sfxSets
 
 #ifdef ZAP_DEDICATED
-#  define NO_AUDIO
+#  define BF_NO_AUDIO
 #endif
 
-#ifndef NO_AUDIO
+#ifndef BF_NO_AUDIO
 #include "../openal/alInclude.h"
 #include "../alure/AL/alure.h"
 #else

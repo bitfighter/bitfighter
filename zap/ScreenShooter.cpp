@@ -24,6 +24,9 @@
 //------------------------------------------------------------------------------------
 
 #include "ScreenShooter.h"
+
+#ifndef BF_NO_SCREENSHOTS
+
 #include "stringUtils.h"
 #include "config.h"
 #include "ScreenInfo.h"
@@ -264,3 +267,5 @@ bool ScreenShooter::writePNG(const char *file_name, png_bytep *rows, S32 width, 
 }
 
 } /* namespace Zap */
+
+#endif // BF_NO_SCREENSHOTS

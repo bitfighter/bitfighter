@@ -92,8 +92,22 @@ ByteBufferPtr VoiceDecoder::decompressBuffer(ByteBufferRef compressedBuffer)
 }
 
 
+
+#ifdef BF_NO_VOICECHAT
+SpeexVoiceEncoder::SpeexVoiceEncoder() { /* Do nothing */ }
+SpeexVoiceEncoder::~SpeexVoiceEncoder() { /* Do nothing */  }
+U32 SpeexVoiceEncoder::getSamplesPerFrame() { return 0; }
+U32 SpeexVoiceEncoder::getMaxCompressedFrameSize() { return 0; }
+U32 SpeexVoiceEncoder::compressFrame(S16 *samplePtr, U8 *outputPtr) { return 0; }
+
+SpeexVoiceDecoder::SpeexVoiceDecoder() { /* Do nothing */  }
+SpeexVoiceDecoder::~SpeexVoiceDecoder() { /* Do nothing */  }
+U32 SpeexVoiceDecoder::getSamplesPerFrame() { return 0; }
+U32 SpeexVoiceDecoder::getAvgCompressedFrameSize() { return 0; }
+U32 SpeexVoiceDecoder::decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize) { return 0; }
+
 // Begin Speex
-#ifndef NO_AUDIO
+#else // BF_NO_VOICECHAT
 
 SpeexVoiceEncoder::SpeexVoiceEncoder()
 {
@@ -161,22 +175,7 @@ U32 SpeexVoiceDecoder::decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize)
 
    return maxFrameByteSize;
 }
-
-#else // NO_AUDIO
-
-SpeexVoiceEncoder::SpeexVoiceEncoder() { /* Do nothing */ }
-SpeexVoiceEncoder::~SpeexVoiceEncoder() { /* Do nothing */  }
-U32 SpeexVoiceEncoder::getSamplesPerFrame() { return 0; }
-U32 SpeexVoiceEncoder::getMaxCompressedFrameSize() { return 0; }
-U32 SpeexVoiceEncoder::compressFrame(S16 *samplePtr, U8 *outputPtr) { return 0; }
-
-SpeexVoiceDecoder::SpeexVoiceDecoder() { /* Do nothing */  }
-SpeexVoiceDecoder::~SpeexVoiceDecoder() { /* Do nothing */  }
-U32 SpeexVoiceDecoder::getSamplesPerFrame() { return 0; }
-U32 SpeexVoiceDecoder::getAvgCompressedFrameSize() { return 0; }
-U32 SpeexVoiceDecoder::decompressFrame(S16 *framePtr, U8 *inputPtr, U32 inSize) { return 0; }
-
-#endif
+#endif // BF_NO_VOICECHAT
 
 
 };

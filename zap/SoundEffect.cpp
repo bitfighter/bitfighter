@@ -26,10 +26,35 @@
 #include "SoundEffect.h"
 
 #ifdef ZAP_DEDICATED
-#  define NO_AUDIO
+#  define BF_NO_AUDIO
 #endif
 
-#if !defined (NO_AUDIO)
+
+#ifdef BF_NO_AUDIO
+
+using namespace TNL;
+
+namespace Zap
+{
+
+SoundEffect::SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity)
+{
+   // Do nothing
+}
+
+SoundEffect::~SoundEffect()
+{
+   // Do nothing
+}
+
+bool SoundEffect::isPlaying()
+{
+   return false;
+}
+
+};
+
+#else // BF_NO_AUDIO
 
 namespace Zap {
 
@@ -62,28 +87,4 @@ bool SoundEffect::isPlaying()
 
 }
 
-#elif defined (NO_AUDIO)
-
-using namespace TNL;
-
-namespace Zap
-{
-
-SoundEffect::SoundEffect(U32 profileIndex, ByteBufferPtr ib, F32 gain, Point position, Point velocity)
-{
-   // Do nothing
-}
-
-SoundEffect::~SoundEffect()
-{
-   // Do nothing
-}
-
-bool SoundEffect::isPlaying()
-{
-   return false;
-}
-
-};
-
-#endif
+#endif // BF_NO_AUDIO

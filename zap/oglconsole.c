@@ -19,6 +19,8 @@
 
 #include "oglconsole.h"
 
+#ifndef BF_NO_CONSOLE
+
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -1418,3 +1420,5 @@ int OGLCONSOLE_CharEvent(int unicode)
 
    return 1;
 }
+
+#endif // BF_NO_CONSOLE

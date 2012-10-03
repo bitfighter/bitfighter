@@ -25,11 +25,11 @@
 
 #include "SoundSystem.h"
 #include "SoundEffect.h"
-#include "Point.h"
 #include "tnlLog.h"
+#include "Point.h"
 #include "tnlByteBuffer.h"
 
-#if !defined (NO_AUDIO)
+#ifndef BF_NO_AUDIO
 
 #include "SFXProfile.h"
 #include "config.h"
@@ -961,7 +961,7 @@ void SoundSystem::playPrevTrack()
 
 };
 
-#elif defined (NO_AUDIO)
+#elif defined (BF_NO_AUDIO)
 
 using namespace TNL;
 
@@ -1061,31 +1061,18 @@ void SoundSystem::playPrevTrack()
 
 };
 
-#endif      // #ifdef defined NO_AUDIO
-
-
-#if defined(NO_AUDIO)
-namespace Zap
-{
-bool SoundSystem::startRecording()
-{
-   return false;
-}
-
-void SoundSystem::captureSamples(ByteBufferPtr buffer)
-{
-}
-
-void SoundSystem::stopRecording()
-{
-}
-
-};
-
-#else
+#endif // BF_NO_AUDIO
 
 namespace Zap
 {
+
+#if defined(BF_NO_AUDIO) || defined(BF_NO_VOICECHAT)
+
+bool SoundSystem::startRecording() { return false; }
+void SoundSystem::captureSamples(ByteBufferPtr buffer) { }
+void SoundSystem::stopRecording() { }
+
+#else // BF_NO_AUDIO || BF_NO_VOICECHAT
 
 // requires OpenAL version 1.1 (OpenAL-Soft might be required)
 
@@ -1120,7 +1107,7 @@ void SoundSystem::stopRecording()
    alcCaptureCloseDevice(captureDevice);
    captureDevice = NULL;
 }
+#endif // BF_NO_AUDIO || BF_NO_VOICECHAT
 
 };
 
-#endif
