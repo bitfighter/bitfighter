@@ -256,6 +256,10 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                   ok = luaW_is<BfObject>(L, stackPos);
                   break;
 
+               case MOVOBJ:
+                  ok = luaW_is<MoveObject>(L, stackPos);
+                  break;
+
                default:
                   TNLAssert(false, "Unknown arg type!");
                   break;

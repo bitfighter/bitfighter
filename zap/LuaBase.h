@@ -83,6 +83,7 @@ public:
    LUA_ARG_TYPE_ITEM( ROBOT,     "Robot Object"                                ) \
    LUA_ARG_TYPE_ITEM( LEVELGEN,  "Levelgen Script"                             ) \
    LUA_ARG_TYPE_ITEM( EVENT,     "Event"                                       ) \
+   LUA_ARG_TYPE_ITEM( MOVOBJ,    "MoveObject"                                  ) \
    LUA_ARG_TYPE_ITEM( BFOBJ,     "BfObject (or child class)"                   ) \
    LUA_ARG_TYPE_ITEM( ANY,       "Any combination of 0 or more arguments"      ) \
       

@@ -708,15 +708,15 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findClosestEnemy,     ARRAYDEF({{              END }, { NUM,  END }}), 2 ) \
                                                                                              \
-   METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ ITEM, END }}), 1 )                       \
-   METHOD(CLASS,  getInterceptCourse,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
+   METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ BFOBJ, END }}), 1 )                      \
+   METHOD(CLASS,  getInterceptCourse,   ARRAYDEF({{ BFOBJ, END }}), 1 )                      \
                                                                                              \
-   METHOD(CLASS,  engineerDeployObject, ARRAYDEF({{ INT,  END }}), 1 )                       \
-   METHOD(CLASS,  dropItem,             ARRAYDEF({{       END }}), 1 )                       \
-   METHOD(CLASS,  copyMoveFromObject,   ARRAYDEF({{ ITEM, END }}), 1 )                       \
-   \
-   METHOD(CLASS,  subscribe,            ARRAYDEF({{ EVENT, END }}), 1 ) \
-   METHOD(CLASS,  unsubscribe,          ARRAYDEF({{ EVENT, END }}), 1 ) \
+   METHOD(CLASS,  engineerDeployObject, ARRAYDEF({{ INT,    END }}), 1 )                     \
+   METHOD(CLASS,  dropItem,             ARRAYDEF({{         END }}), 1 )                     \
+   METHOD(CLASS,  copyMoveFromObject,   ARRAYDEF({{ MOVOBJ, END }}), 1 )                     \
+                                                                                             \
+   METHOD(CLASS,  subscribe,            ARRAYDEF({{ EVENT, END }}), 1 )                      \
+   METHOD(CLASS,  unsubscribe,          ARRAYDEF({{ EVENT, END }}), 1 )                      \
 
 
 GENERATE_LUA_METHODS_TABLE(Robot, LUA_METHODS);
@@ -1403,7 +1403,7 @@ S32 Robot::getFiringSolution(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getFiringSolution");
 
-   Item *target = luaW_check<Item>(L, 1);
+   BfObject *target = luaW_check<BfObject>(L, 1);
 
    WeaponInfo weap = GameWeapon::weaponInfo[getSelectedWeapon()];    // Robot's active weapon
 
@@ -1423,7 +1423,7 @@ S32 Robot::getInterceptCourse(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getInterceptCourse");
 
-   Item *target = luaW_check<Item>(L, 1);
+   BfObject *target = luaW_check<BfObject>(L, 1);
 
    F32 interceptAngle;     // <== will be set by calcInterceptCourse() below
 
@@ -1460,7 +1460,7 @@ S32 Robot::copyMoveFromObject(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "copyMoveFromObject");
 
-   Item *obj = luaW_check<Item>(L, 1);
+   MoveObject *obj = luaW_check<MoveObject>(L, 1);
 
    Move move = obj->getCurrentMove();
    move.time = getCurrentMove().time;     // Keep current move time
