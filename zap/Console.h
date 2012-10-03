@@ -42,7 +42,8 @@ public:
    void show() {}
    bool isOk() {}
    void toggleVisibility() {}
-   void initialize() {};
+   void initialize() {}
+   void onScreenModeChanged() {}
 };
 
 

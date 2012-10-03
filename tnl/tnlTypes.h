@@ -257,8 +257,6 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #if defined (__ANDROID__)
 #  define TNL_OS_STRING "Android"
 #  define TNL_OS_ANDROID
-#  define TNL_OS_MOBILE
-#  define TNL_OS_LINUX
 #  define FN_CDECL
 
 #elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN__)
@@ -290,12 +288,9 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #include "TargetConditionals.h"
 #  if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 #    define TNL_OS_STRING "iOS"
-#    define TNL_OS_IPHONE
-#    define TNL_OS_MOBILE
-#    define __IPHONEOS__ // needed by SDL headers
-//#    define TNL_OS_MAC_OSX // different platform
+#    define TNL_OS_IOS
 #  else
-#    define TNL_OS_STRING "MacOSX"
+#    define TNL_OS_STRING "Mac OS X"
 #    define TNL_OS_MAC_OSX
 #  endif
 #  define FN_CDECL
@@ -304,6 +299,10 @@ static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);            ///< Constant 
 #  error "TNL: Unsupported Operating System"
 #endif
 
+// Helper platform macros
+#if defined(TNL_OS_ANDROID) || defined(TNL_OS_IOS)
+#  define TNL_OS_MOBILE
+#endif
 
 
 //----------------------------------------------------------------------------------

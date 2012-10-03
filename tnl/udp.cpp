@@ -44,7 +44,7 @@ typedef int socklen_t;
 
 typedef int socklen_t;
 
-#elif defined ( TNL_OS_MAC_OSX ) || defined ( TNL_OS_IPHONE )
+#elif defined ( TNL_OS_MAC_OSX ) || defined ( TNL_OS_IOS )
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -68,7 +68,7 @@ typedef in_addr IN_ADDR;
 
 #define closesocket close
 
-#elif defined TNL_OS_LINUX
+#elif defined(TNL_OS_LINUX) || defined (TNL_OS_ANDROID)
 
 
 #include <unistd.h>
@@ -512,7 +512,7 @@ void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
    free(pIPAddrTable);
 }
 
-#elif defined (TNL_OS_MAC_OSX) || defined (TNL_OS_IPHONE)
+#elif defined (TNL_OS_MAC_OSX) || defined (TNL_OS_IOS)
 #include <ifaddrs.h>
 
 void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
@@ -534,7 +534,7 @@ void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
    freeifaddrs(addrs);
 }
 
-#elif defined (TNL_OS_LINUX)
+#elif defined (TNL_OS_LINUX) || defined (TNL_OS_ANDROID)
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
