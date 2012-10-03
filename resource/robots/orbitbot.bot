@@ -8,6 +8,27 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+-- Setup; all vars declared here are global unless declared with "local" keyword
+
+function main()
+    orbitAng = 0
+    orbitRadius = 300
+    isInOrbit = false
+    targetItem = nil
+end
+
+
+-------------------------------------------------------------------------------
+-- This function is called once and should return the robot's name
+
+function getName()
+    return( "OrbitBot" )
+end
+
+
 -------------------------------------------------------------------------------
 -- This is called by the robot's idle routine each tick.
 -- This function must be present for the robot to work!
@@ -24,7 +45,7 @@ function onTick(deltaTime)
     local botLoc = bot:getLoc()
     local itemLoc = targetItem:getLoc()
 
-    local distSq = vec.distSquared( botLoc, itemLoc )
+    local distSq = point.distSquared( botLoc, itemLoc )
 
     -- Here we use the deltaTime to make the motion look smooth.
     -- If we just advanced orbitAng by a fixed amount each frame, it would
@@ -37,52 +58,21 @@ function onTick(deltaTime)
     local dest
 
     if( distSq <= orbitRadius * orbitRadius * 1.1 ) then    -- Close enough to enter orbit
-         dest = vec.new( itemLoc.x + orbitRadius * math.cos (orbitAng),
-         itemLoc.y + orbitRadius * math.sin (orbitAng) )
+         dest = point.new( itemLoc.x + orbitRadius * math.cos (orbitAng),
+                           itemLoc.y + orbitRadius * math.sin (orbitAng) )
 
         if( not isInOrbit ) then
-            orbitAng = vec.angleTo( botLoc, dest ) - math.pi / 2
+            orbitAng = point.angleTo( botLoc, dest ) - math.pi / 2
         end    
         
         isInOrbit = true
                     
     else                                    -- Travel directly toward object
         dest = itemLoc
-        orbitAng = vec.angleTo( botLoc, dest )
+        orbitAng = point.angleTo( botLoc, dest )
         isInOrbit = false
     end
 
-    bot:setThrustToPt( dest )                       -- Travel towards calculated point
-    bot:setAngle( vec.angleTo( botLoc, itemLoc ) )  -- Aim ship that way too
-end
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- This function is called once and should return the robot's name
-
-function getName()
-    return( "OrbitBot" )
-end
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Setup code here: this is run once when the robot is initialized, and
--- any variables set here will persist throughout the robot's life.  These
--- variables can be accessed from various functions defined in this file.
--------------------------------------------------------------------------------
--- Global variables must be declared here before they can be used elsewhere
-orbitAng = 0
-orbitRadius = 300
-isInOrbit = false
-targetItem = nil
-
-function main()
-
+    bot:setThrustToPt( dest )                         -- Travel towards calculated point
+    bot:setAngle( point.angleTo( botLoc, itemLoc ) )  -- Aim ship that way too
 end
