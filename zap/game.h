@@ -377,10 +377,10 @@ private:
    void initialize();      // Called by constructors
 
 public:
-   StringTableEntry levelFileName;  // File level is stored in
-   StringTableEntry levelName;      // Level "in-game" names
+   StringTableEntry mLevelFileName;  // File level is stored in
+   StringTableEntry mLevelName;      // Level "in-game" names
 
-   GameTypeId levelType;      
+   GameTypeId mLevelType;      
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
 

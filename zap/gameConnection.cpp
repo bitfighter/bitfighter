@@ -1041,7 +1041,7 @@ void GameConnection::sendLevelList()
    for(S32 i = 0; i < mServerGame->getLevelCount(); i++)
    {
       LevelInfo levelInfo = mServerGame->getLevelInfo(i);
-      s2cAddLevel(levelInfo.levelName, levelInfo.levelType);
+      s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
 }
 
@@ -1292,7 +1292,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       //BitStream s(mDataBuffer.getBuffer(), mDataBuffer.getBufferSize());
       char filename[128];
 
-      string titleName = makeFilenameFromString(levelInfo.levelName.getString());
+      string titleName = makeFilenameFromString(levelInfo.mLevelName.getString());
       dSprintf(filename, sizeof(filename), "upload_%s.level", titleName.c_str());
 
       string fullFilename = strictjoindir(folderManager->levelDir, filename);

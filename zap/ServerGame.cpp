@@ -298,7 +298,7 @@ string ServerGame::getLastLevelLoadName()
    else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
       return "";
    else
-      return mLevelInfos[mLevelLoadIndex - 1].levelName.getString();
+      return mLevelInfos[mLevelLoadIndex - 1].mLevelName.getString();
 }
 
 
@@ -380,7 +380,7 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
                GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
                if(gt)
                {
-                  levelInfo.levelType = gt->getGameTypeId();
+                  levelInfo.mLevelType = gt->getGameTypeId();
                   foundGameType = true;
                }
 
@@ -393,7 +393,7 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
                for(S32 i = 2; i < list.size(); i++)
                   levelName += " " + list[i];
 
-               levelInfo.levelName = levelName;
+               levelInfo.mLevelName = levelName;
 
                foundLevelName = true;
             }
@@ -420,7 +420,7 @@ void ServerGame::loadNextLevelInfo()
 {
    FolderManager *folderManager = getSettings()->getFolderManager();
 
-   string levelFile = folderManager->findLevelFile(mLevelInfos[mLevelLoadIndex].levelFileName.getString());
+   string levelFile = folderManager->findLevelFile(mLevelInfos[mLevelLoadIndex].mLevelFileName.getString());
 
    if(getLevelInfo(levelFile, mLevelInfos[mLevelLoadIndex]))    // Populate mLevelInfos[i] with data from levelFile
       mLevelLoadIndex++;
@@ -435,7 +435,7 @@ void ServerGame::loadNextLevelInfo()
 // Populates levelInfo with data from fullFilename
 bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
 {
-   TNLAssert(levelInfo.levelFileName != "", "Invalid assumption");
+   TNLAssert(levelInfo.mLevelFileName != "", "Invalid assumption");
 
    FILE *f = fopen(fullFilename.c_str(), "rb");
 
@@ -448,15 +448,15 @@ bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
       getLevelInfoFromFileChunk(data, size, levelInfo);
 
       // Provide a default levelname
-      if(levelInfo.levelName == "")
-         levelInfo.levelName = levelInfo.levelFileName;   
+      if(levelInfo.mLevelName == "")
+         levelInfo.mLevelName = levelInfo.mLevelFileName;   
 
       return true;
    }
    else
    {
       // was mLevelInfos[mLevelLoadIndex].levelFileName.getString()
-      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", levelInfo.levelFileName.getString(), fullFilename.c_str());
+      logprintf(LogConsumer::LogWarning, "Could not load level %s [%s].  Skipping...", levelInfo.mLevelFileName.getString(), fullFilename.c_str());
       return false;
    }
 }
@@ -465,7 +465,7 @@ bool ServerGame::getLevelInfo(const string &fullFilename, LevelInfo &levelInfo)
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
 {
-   return mLevelInfos[getAbsoluteLevelIndex(indx)].levelName;
+   return mLevelInfos[getAbsoluteLevelIndex(indx)].mLevelName;
 }
 
 
@@ -475,28 +475,28 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
    if(indx < 0 || indx >= mLevelInfos.size())
       return "";
    else
-      return mLevelInfos[indx].levelFileName.getString();
+      return mLevelInfos[indx].mLevelFileName.getString();
 }
 
 
 // Return filename of level currently in play
 StringTableEntry ServerGame::getCurrentLevelFileName()
 {
-   return mLevelInfos[mCurrentLevelIndex].levelFileName;
+   return mLevelInfos[mCurrentLevelIndex].mLevelFileName;
 }
 
 
 // Return name of level currently in play
 StringTableEntry ServerGame::getCurrentLevelName()
 {
-   return mLevelInfos[mCurrentLevelIndex].levelName;
+   return mLevelInfos[mCurrentLevelIndex].mLevelName;
 }
 
 
 // Return type of level currently in play
 GameTypeId ServerGame::getCurrentLevelType()
 {
-   return mLevelInfos[mCurrentLevelIndex].levelType;
+   return mLevelInfos[mCurrentLevelIndex].mLevelType;
 }
 
 
@@ -793,7 +793,7 @@ static bool checkIfLevelIsOk(ServerGame *game, const LevelInfo &levelInfo, S32 p
       return false;
 
    if(game->getSettings()->getIniSettings()->skipUploads)
-      if(!strncmp(levelInfo.levelFileName.getString(), "upload_", 7))
+      if(!strncmp(levelInfo.mLevelFileName.getString(), "upload_", 7))
          return false;
 
    return true;
@@ -1526,14 +1526,14 @@ void ServerGame::gameEnded()
 
 S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
 {
-   if(levelInfo.levelName == "")            // Make sure we have something in the name field
-      levelInfo.levelName = filename;
+   if(levelInfo.mLevelName == "")            // Make sure we have something in the name field
+      levelInfo.mLevelName = filename;
 
-   levelInfo.levelFileName = filename; 
+   levelInfo.mLevelFileName = filename; 
 
    // Check if we already have this one
    for(S32 i = 0; i < mLevelInfos.size(); i++)
-      if(mLevelInfos[i].levelFileName == levelInfo.levelFileName)
+      if(mLevelInfos[i].mLevelFileName == levelInfo.mLevelFileName)
          return i;
 
    // We don't... so add it!
@@ -1546,7 +1546,7 @@ S32 ServerGame::addUploadedLevelInfo(const char *filename, LevelInfo &levelInfo)
       ClientInfo *clientInfo = getClientInfo(i);
 
       if(clientInfo->isLevelChanger())
-         clientInfo->getConnection()->s2cAddLevel(levelInfo.levelName, levelInfo.levelType);
+         clientInfo->getConnection()->s2cAddLevel(levelInfo.mLevelName, levelInfo.mLevelType);
    }
 
    return mLevelInfos.size() - 1;

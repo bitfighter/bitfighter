@@ -1889,12 +1889,12 @@ void LevelMenuSelectUserInterface::onActivate()
  
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
    {
-      if(gc->mLevelInfos[i].levelName == "")   // Skip levels with blank names --> but all should have names now!
+      if(gc->mLevelInfos[i].mLevelName == "")   // Skip levels with blank names --> but all should have names now!
          continue;
 
       if(strcmp(gc->mLevelInfos[i].getLevelTypeName(), category.c_str()) == 0 || category == ALL_LEVELS)
       {
-         const char *levelName = gc->mLevelInfos[i].levelName.getString();
+         const char *levelName = gc->mLevelInfos[i].mLevelName.getString();
          c[0] = levelName[0];
          addMenuItem(new MenuItem(i, levelName, processLevelSelectionCallback, "", InputCodeManager::stringToInputCode(c)));
       }

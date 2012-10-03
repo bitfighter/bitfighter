@@ -1090,8 +1090,8 @@ LevelInfo::LevelInfo(const StringTableEntry &name, GameTypeId type)
 {
    initialize();
 
-   levelName = name;  
-   levelType = type; 
+   mLevelName = name;  
+   mLevelType = type; 
 }
 
 
@@ -1100,15 +1100,15 @@ LevelInfo::LevelInfo(const string &levelFile)
 {
    initialize();
 
-   levelFileName = levelFile.c_str();
+   mLevelFileName = levelFile.c_str();
 }
 
 
 void LevelInfo::initialize()
 {
-   levelName = "";
-   levelType = BitmatchGame;
-   levelFileName = "";
+   mLevelName = "";
+   mLevelType = BitmatchGame;
+   mLevelFileName = "";
    minRecPlayers = 0;
    maxRecPlayers = 0;
 }
@@ -1116,7 +1116,7 @@ void LevelInfo::initialize()
 
 const char *LevelInfo::getLevelTypeName()
 {
-   return GameType::getGameTypeName(levelType);
+   return GameType::getGameTypeName(mLevelType);
 }
 
 
