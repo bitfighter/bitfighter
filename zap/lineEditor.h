@@ -64,7 +64,7 @@ public:
       digitsOnlyFilter,        // 0-9
       numericFilter,           // 0-9, -, .
       fileNameFilter,          // A-Z, a-z, 0-9, _
-      noQuoteOrPercentsFilter  // No "s or %s
+      nickNameFilter           // No "s, and don't let name start with spaces
    };
 
    LineEditor(U32 maxLength = 256, string value = "");   // Constructor
