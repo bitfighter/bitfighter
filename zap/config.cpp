@@ -381,11 +381,12 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
    string section = "Settings";
 
 #ifdef TNL_OS_MOBILE
-   // mobile usually have a single, fullscreen mode
+   // Mobile usually have a single, fullscreen mode
    iniSettings->displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 #else
    iniSettings->displayMode = stringToDisplayMode( ini->GetValue(section, "WindowMode", displayModeToString(iniSettings->displayMode)));
 #endif
+
    iniSettings->oldDisplayMode = iniSettings->displayMode;
 
    iniSettings->controlsRelative = (lcase(ini->GetValue(section, "ControlMode", (iniSettings->controlsRelative ? "Relative" : "Absolute"))) == "relative");
