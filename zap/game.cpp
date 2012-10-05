@@ -1043,6 +1043,9 @@ Point Game::computePlayerVisArea(Ship *ship) const
 // This makes the assumption that we'll find a unique name before numstr runs out of space (allowing us to try 999,999,999 or so combinations)
 string Game::makeUnique(const char *name)
 {
+   if(name[0] == 0)  // No zero-length name allowed
+      name = "ChumpChange";
+
    U32 index = 0;
    string proposedName = name;
 

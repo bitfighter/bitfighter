@@ -582,10 +582,7 @@ bool MenuUserInterface::onKeyDown(InputCode inputCode)
 
 
    // Process each key handler in turn until one works
-   bool keyHandled = (U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->handleKey(inputCode));
-
-   if(!keyHandled)
-      keyHandled = processMenuSpecificKeys(inputCode);
+   bool keyHandled = processMenuSpecificKeys(inputCode);
 
    if(!keyHandled)
       keyHandled = processKeys(inputCode);
@@ -618,7 +615,7 @@ void MenuUserInterface::onKeyUp(InputCode inputCode)
 bool MenuUserInterface::processMenuSpecificKeys(InputCode inputCode)
 {
    // Don't process shortcut keys if the current menuitem has text input
-   if(mMenuItems[selectedIndex]->hasTextInput())
+   if(U32(selectedIndex) < U32(mMenuItems.size()) && mMenuItems[selectedIndex]->hasTextInput())
       return false;
 
    // Check for some shortcut keys
@@ -661,12 +658,13 @@ bool MenuUserInterface::processKeys(InputCode inputCode)
       // Do nothing 
    }
 
-   else if(inputCode == KEY_LEFT || inputCode == KEY_RIGHT || inputCode == MOUSE_LEFT || inputCode == MOUSE_RIGHT)
+   else if(U32(selectedIndex) >= U32(mMenuItems.size()))  // Probably empty menu... Can only go back.
    {
-      mMenuItems[selectedIndex]->handleKey(inputCode);
-      playBoop();
+      onEscape();
    }
-
+   else if(mMenuItems[selectedIndex]->handleKey(inputCode))
+   {
+   }
    else if(inputCode == KEY_ENTER || (inputCode == KEY_SPACE && !mMenuItems[selectedIndex]->hasTextInput()))
    {
       playBoop();
@@ -1382,7 +1380,7 @@ void NameEntryUserInterface::setupMenu()
    menuItem->setSize(MENU_ITEM_SIZE_SMALL);
    addMenuItem(menuItem);
    
-   getMenuItem(1)->setFilter(LineEditor::noQuoteOrPercentsFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
+   getMenuItem(1)->setFilter(LineEditor::nickNameFilter);  // Quotes are incompatible with PHPBB3 logins, %s are used for var substitution
    getMenuItem(2)->setSecret(true);
 }
 

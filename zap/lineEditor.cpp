@@ -252,22 +252,23 @@ bool LineEditor::addChar(const char c)
    if(c == 0)
       return false;
 
-   if((mFilter == digitsOnlyFilter) && (c < '0' || c > '9'))
-      return false;
-      
-   else if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
-      return false;
+   switch(mFilter)
+   {
+   case digitsOnlyFilter: if(c < '0' || c > '9') return false;
+      break;
+   case numericFilter: if(c != '-' && c != '.' && (c < '0' || c > '9')) return false;
+      break;
+   case nickNameFilter:
+      if(c == '"') return false;
+      // if(c == '%') return false; // Did not see any problem with allowing % in usernames; to avoid this problem, use logprintf("%s", nicknamestring), not logprintf(nicknamestring)
+      if(c == ' ' && mLine.c_str()[0] == 0) return false; // Don't let name start with a space.
+      break;
+   case fileNameFilter:
+      if((c < '0' || c > '9') && (c != '_') && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) return false;
+      break;
+   }
 
-   else if((mFilter == noQuoteOrPercentsFilter) && (c == '"' || c == '%'))
-      return false;
-   
-   else if((mFilter == fileNameFilter) && ! ( (c >= '0' && c <= '9') ||
-                                              (c == '_')             ||
-                                              (c >= 'A' && c <= 'Z') ||
-                                              (c >= 'a' && c <= 'z') )  )
-      return false;
-   
-   if(length() < mMaxLen) mLine.append(string(1, c)); 
+   if(length() < mMaxLen) mLine += c; 
    mMatchIndex = -1;
    return true;
 }
