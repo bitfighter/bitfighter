@@ -336,6 +336,14 @@
 		617D1060161E7CC400DDCF78 /* libalure.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D1033161E7B2200DDCF78 /* libalure.a */; };
 		617D25F9161F807300DDCF78 /* libtremor.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D25F8161F807300DDCF78 /* libtremor.a */; };
 		617D2670161F84E200DDCF78 /* libmodplug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D266F161F84E200DDCF78 /* libmodplug.a */; };
+		617D2681161F87A400DDCF78 /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29212E2D7E700EA5EBE /* Directory.mm */; };
+		617D26DC161F8CA300DDCF78 /* editor_plugins in Resources */ = {isa = PBXBuildFile; fileRef = 73846BC214CDD70D00A5553F /* editor_plugins */; };
+		617D26DD161F8CA300DDCF78 /* music in Resources */ = {isa = PBXBuildFile; fileRef = 7388F069139D5B46003C6BB0 /* music */; };
+		617D26DE161F8CA300DDCF78 /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
+		617D26DF161F8CA300DDCF78 /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = 737CE42212904D7D00D732B7 /* sfx */; };
+		617D26E0161F8CA300DDCF78 /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
+		617D26E1161F8CA300DDCF78 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
+		617D26E2161F8CA300DDCF78 /* joystick_presets.ini in Resources */ = {isa = PBXBuildFile; fileRef = 73946E6014D50F0F00B95333 /* joystick_presets.ini */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2086,6 +2094,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				617D26DC161F8CA300DDCF78 /* editor_plugins in Resources */,
+				617D26DD161F8CA300DDCF78 /* music in Resources */,
+				617D26DE161F8CA300DDCF78 /* levels in Resources */,
+				617D26DF161F8CA300DDCF78 /* sfx in Resources */,
+				617D26E0161F8CA300DDCF78 /* robots in Resources */,
+				617D26E1161F8CA300DDCF78 /* scripts in Resources */,
+				617D26E2161F8CA300DDCF78 /* joystick_presets.ini in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2096,6 +2111,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				617D2681161F87A400DDCF78 /* Directory.mm in Sources */,
 				617D0250161B8A6F00DDCF78 /* BanList.cpp in Sources */,
 				617D0251161B8A6F00DDCF78 /* barrier.cpp in Sources */,
 				617D0252161B8A6F00DDCF78 /* BfObject.cpp in Sources */,

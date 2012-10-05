@@ -28,10 +28,14 @@
 #endif
 
 #include "Directory.h"
-#import <Cocoa/Cocoa.h>
 #include "tnlVector.h"
+#ifdef TNL_OS_MAC_OSX
+#import <Cocoa/Cocoa.h>
 #import "SUUpdater.h"
 #define SPARKLE_APPCAST_URL @"http://127.0.0.1" //TODO: specify right url to appcast
+#else
+#import <Foundation/Foundation.h>
+#endif
 
 using TNL::Vector;
 using std::string;
@@ -50,6 +54,7 @@ void moveToAppPath()
 
 void prepareFirstLaunch()
 {
+#ifdef TNL_OS_MAC_OSX
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSFileManager *fm = [NSFileManager defaultManager];
     BOOL copyResources = NO;
@@ -121,20 +126,25 @@ void prepareFirstLaunch()
     }
 
     [pool release];
+#endif
 }
 
 void checkForUpdates()
 {
+#ifdef TNL_OS_MAC_OSX
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SUUpdater* updater = [SUUpdater sharedUpdater];
     [updater setFeedURL:[NSURL URLWithString:SPARKLE_APPCAST_URL]];
     [updater checkForUpdatesInBackground];
     [pool release];
+#endif
 }
 
 void setDefaultPaths(Vector<string> &argv)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+#ifdef TNL_OS_MAC_OSX
     if (argv.contains("-rootdatadir") == NO) {
         argv.push_back("-rootdatadir");
         NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
@@ -145,5 +155,18 @@ void setDefaultPaths(Vector<string> &argv)
         argv.push_back("-sfxdir");
         argv.push_back([[NSString stringWithFormat:@"%@/sfx",[[NSBundle mainBundle] resourcePath]] UTF8String]);
     }
+#else
+    // On iOS there are no command line paramenters
+    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+    NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    argv.push_back("-rootdatadir");
+    argv.push_back([resourcePath UTF8String]); //read-only
+    argv.push_back("-inidir");
+    argv.push_back([[documentPaths objectAtIndex:0] UTF8String]); //read-write
+    argv.push_back("-sfxdir");
+    argv.push_back([[NSString stringWithFormat:@"%@/sfx", resourcePath] UTF8String]); //read-only
+    NSLog(@"Loading from %@", resourcePath);
+#endif
+
     [pool release];
 }
