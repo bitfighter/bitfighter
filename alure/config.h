@@ -51,7 +51,5 @@
 /* #undef HAS_SNDFILE */
 /* #undef HAS_FLUIDSYNTH */
 /* #undef HAS_DUMB */
-#ifndef __IPHONEOS__
 #define HAS_MODPLUG
-#endif
 /* #undef HAS_MPG123 */
