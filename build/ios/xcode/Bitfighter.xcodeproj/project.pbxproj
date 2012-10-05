@@ -935,7 +935,6 @@
 		73D2F6B312E2E1D400EA5EBE /* print.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = print.c; path = "../../../lua/lua-vec/src/print.c"; sourceTree = SOURCE_ROOT; };
 		73D6B5081370C349002ABC48 /* ALURE_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ALURE_Prefix.pch; path = ../build/osx/xcode/ALURE_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Bitfighter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info.plist"; sourceTree = "<group>"; };
-		94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighter.icns; sourceTree = "<group>"; };
 		D37210E013D4E481008E86F6 /* Joystick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Joystick.cpp; path = ../../../zap/Joystick.cpp; sourceTree = SOURCE_ROOT; };
 		D37210E113D4E481008E86F6 /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Joystick.h; path = ../../../zap/Joystick.h; sourceTree = SOURCE_ROOT; };
 		D37210E213D4E481008E86F6 /* JoystickRender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JoystickRender.cpp; path = ../../../zap/JoystickRender.cpp; sourceTree = SOURCE_ROOT; };
@@ -1056,7 +1055,6 @@
 				737CE42212904D7D00D732B7 /* sfx */,
 				737CE3F412904D5300D732B7 /* robots */,
 				737CE3FC12904D5300D732B7 /* scripts */,
-				94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */,
 				73946E6014D50F0F00B95333 /* joystick_presets.ini */,
 				8D1107310486CEB800E47090 /* Bitfighter-Info.plist */,
 			);
@@ -2440,6 +2438,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Bitfighter;
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -2484,6 +2483,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Bitfighter;
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2526,6 +2526,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Bitfighter;
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = "x86_64-Debug";
 		};
@@ -2567,6 +2568,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Bitfighter;
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = "x86_64-Release";
 		};

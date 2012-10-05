@@ -1181,7 +1181,9 @@ void OptionsMenuUserInterface::setupMenus()
    addMenuItem(new ToggleMenuItem("CONTROLS:", opts, relative ? 1 : 0, true, 
                                   setControlsCallback, "Set controls to absolute or relative mode", KEY_C));
 
+#ifndef TNL_OS_MOBILE
    addMenuItem(getWindowModeMenuItem((U32)settings->getIniSettings()->displayMode));
+#endif
 
    Joystick::initJoystick(settings);   // Refresh joystick list
 

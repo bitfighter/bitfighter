@@ -101,6 +101,12 @@ void VideoSystem::init()
    // on platforms that support it
    //   if(gClientGame->getSettings()->getIniSettings()->useFakeFullscreen)  <== don't use gClientGame here, please!
    //      flags |= SDL_WINDOW_BORDERLESS;
+#ifdef TNL_OS_MOBILE
+   // no fullscreen option on mobile
+   flags |= SDL_WINDOW_FULLSCREEN;
+   // this hint should be only for phones, tablets could rotate freely
+   SDL_SetHint("SDL_IOS_ORIENTATIONS","LandscapeLeft LandscapeRight");
+#endif
 
    // SDL 2.0 lets us create the window first, only once
    gScreenInfo.sdlWindow = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
