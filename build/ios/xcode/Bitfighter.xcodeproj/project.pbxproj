@@ -319,6 +319,21 @@
 		617D0F5F161B9C8000DDCF78 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D0F5E161B9C8000DDCF78 /* CoreAudio.framework */; };
 		617D0F61161B9C8000DDCF78 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D0F60161B9C8000DDCF78 /* CoreGraphics.framework */; };
 		617D0F6A161B9CA300DDCF78 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D0F69161B9CA300DDCF78 /* QuartzCore.framework */; };
+		617D102E161E7B0D00DDCF78 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D102D161E7B0D00DDCF78 /* OpenAL.framework */; };
+		617D103A161E7B5600DDCF78 /* alure.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9CF1370CAC30025A41E /* alure.h */; };
+		617D103B161E7B5600DDCF78 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9D51370CAC30025A41E /* config.h */; };
+		617D103C161E7B5600DDCF78 /* main.h in Headers */ = {isa = PBXBuildFile; fileRef = 7317B9D71370CAC30025A41E /* main.h */; };
+		617D103D161E7B7F00DDCF78 /* alure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D11370CAC30025A41E /* alure.cpp */; };
+		617D103E161E7B7F00DDCF78 /* buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D21370CAC30025A41E /* buffer.cpp */; };
+		617D103F161E7B7F00DDCF78 /* codec_aiff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D31370CAC30025A41E /* codec_aiff.cpp */; };
+		617D1040161E7B7F00DDCF78 /* codec_modplug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73793C0716138ACC000E693E /* codec_modplug.cpp */; };
+		617D1041161E7B7F00DDCF78 /* codec_vorbisfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */; };
+		617D1042161E7B7F00DDCF78 /* codec_wav.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D41370CAC30025A41E /* codec_wav.cpp */; };
+		617D1043161E7B7F00DDCF78 /* istream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D61370CAC30025A41E /* istream.cpp */; };
+		617D1044161E7B7F00DDCF78 /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D81370CAC30025A41E /* stream.cpp */; };
+		617D1045161E7B7F00DDCF78 /* streamdec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D91370CAC30025A41E /* streamdec.cpp */; };
+		617D1046161E7B7F00DDCF78 /* streamplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9DA1370CAC30025A41E /* streamplay.cpp */; };
+		617D1060161E7CC400DDCF78 /* libalure.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D1033161E7B2200DDCF78 /* libalure.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -357,16 +372,18 @@
 			remoteGlobalIDString = 617D03E3161B908200DDCF78;
 			remoteInfo = luavec;
 		};
+		617D105E161E7CBE00DDCF78 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 617D1032161E7B2200DDCF78 /* alure */;
+			remoteInfo = alure;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		5E481F4213053943004F9637 /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sqlite3.c; sourceTree = "<group>"; };
 		5E481F4313053943004F9637 /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
-		6149CBEB16186DBC00783189 /* Sparkle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sparkle.h; path = ../../../lib/Sparkle.framework/Headers/Sparkle.h; sourceTree = SOURCE_ROOT; };
-		6149CBEC16186DBC00783189 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUAppcast.h; path = ../../../lib/Sparkle.framework/Headers/SUAppcast.h; sourceTree = SOURCE_ROOT; };
-		6149CBED16186DBC00783189 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUAppcastItem.h; path = ../../../lib/Sparkle.framework/Headers/SUAppcastItem.h; sourceTree = SOURCE_ROOT; };
-		6149CBEE16186DBC00783189 /* SUUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUUpdater.h; path = ../../../lib/Sparkle.framework/Headers/SUUpdater.h; sourceTree = SOURCE_ROOT; };
-		6149CBEF16186DBC00783189 /* SUVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUVersionComparisonProtocol.h; path = ../../../lib/Sparkle.framework/Headers/SUVersionComparisonProtocol.h; sourceTree = SOURCE_ROOT; };
 		617D0310161B8EC200DDCF78 /* liblibtomcrypt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibtomcrypt.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		617D0379161B8F7A00DDCF78 /* libtnl.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtnl.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		617D03E4161B908200DDCF78 /* libluavec.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libluavec.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -380,7 +397,9 @@
 		617D0F5E161B9C8000DDCF78 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		617D0F60161B9C8000DDCF78 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		617D0F69161B9CA300DDCF78 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		7317B9CF1370CAC30025A41E /* alure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alure.h; sourceTree = "<group>"; };
+		617D102D161E7B0D00DDCF78 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		617D1033161E7B2200DDCF78 /* libalure.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libalure.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7317B9CF1370CAC30025A41E /* alure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = alure.h; path = AL/alure.h; sourceTree = "<group>"; };
 		7317B9D01370CAC30025A41E /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
 		7317B9D11370CAC30025A41E /* alure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alure.cpp; sourceTree = "<group>"; };
 		7317B9D21370CAC30025A41E /* buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = buffer.cpp; sourceTree = "<group>"; };
@@ -933,7 +952,6 @@
 		D3A9DCC9139C9A9000FC8814 /* UIEditorMenus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UIEditorMenus.h; path = ../../../zap/UIEditorMenus.h; sourceTree = SOURCE_ROOT; };
 		D3A9DCDE139C9B2300FC8814 /* EditorObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EditorObject.cpp; path = ../../../zap/EditorObject.cpp; sourceTree = SOURCE_ROOT; };
 		D3A9DCDF139C9B2300FC8814 /* EditorObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditorObject.h; path = ../../../zap/EditorObject.h; sourceTree = SOURCE_ROOT; };
-		D3AAAE97139C0C6C006DA288 /* libalure.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libalure.map; sourceTree = "<group>"; };
 		D3B2F665139C0AFC004AEE67 /* SimpleLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleLine.cpp; path = ../../../zap/SimpleLine.cpp; sourceTree = SOURCE_ROOT; };
 		D3B2F666139C0AFC004AEE67 /* SimpleLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleLine.h; path = ../../../zap/SimpleLine.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -943,6 +961,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				617D1060161E7CC400DDCF78 /* libalure.a in Frameworks */,
 				617D042B161B90F600DDCF78 /* libtnl.a in Frameworks */,
 				617D0429161B90F600DDCF78 /* liblibtomcrypt.a in Frameworks */,
 				617D042A161B90F600DDCF78 /* libluavec.a in Frameworks */,
@@ -955,6 +974,7 @@
 				617D0F5F161B9C8000DDCF78 /* CoreAudio.framework in Frameworks */,
 				617D0F61161B9C8000DDCF78 /* CoreGraphics.framework in Frameworks */,
 				617D0F6A161B9CA300DDCF78 /* QuartzCore.framework in Frameworks */,
+				617D102E161E7B0D00DDCF78 /* OpenAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -979,16 +999,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		617D1031161E7B2200DDCF78 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				617D0524161B9B6900DDCF78 /* Bitfighter.app */,
 				617D0310161B8EC200DDCF78 /* liblibtomcrypt.a */,
 				617D0379161B8F7A00DDCF78 /* libtnl.a */,
 				617D03E4161B908200DDCF78 /* libluavec.a */,
-				617D0524161B9B6900DDCF78 /* Bitfighter.app */,
+				617D1033161E7B2200DDCF78 /* libalure.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1012,7 +1040,6 @@
 				73D2F67A12E2E18D00EA5EBE /* lua */,
 				73D2F45C12E2D96D00EA5EBE /* libtomcrypt */,
 				73D2F45912E2D95C00EA5EBE /* tnl */,
-				6149CBE416186D7F00783189 /* Sparkle */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -1048,6 +1075,7 @@
 				617D0F5E161B9C8000DDCF78 /* CoreAudio.framework */,
 				617D0F60161B9C8000DDCF78 /* CoreGraphics.framework */,
 				617D0F69161B9CA300DDCF78 /* QuartzCore.framework */,
+				617D102D161E7B0D00DDCF78 /* OpenAL.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1061,26 +1089,6 @@
 			name = sqlite;
 			path = ../../../sqlite;
 			sourceTree = SOURCE_ROOT;
-		};
-		6149CBE416186D7F00783189 /* Sparkle */ = {
-			isa = PBXGroup;
-			children = (
-				6149CBEB16186DBC00783189 /* Sparkle.h */,
-				6149CBEC16186DBC00783189 /* SUAppcast.h */,
-				6149CBED16186DBC00783189 /* SUAppcastItem.h */,
-				6149CBEE16186DBC00783189 /* SUUpdater.h */,
-				6149CBEF16186DBC00783189 /* SUVersionComparisonProtocol.h */,
-			);
-			name = Sparkle;
-			sourceTree = "<group>";
-		};
-		7317B9CE1370CAC30025A41E /* AL */ = {
-			isa = PBXGroup;
-			children = (
-				7317B9CF1370CAC30025A41E /* alure.h */,
-			);
-			path = AL;
-			sourceTree = "<group>";
 		};
 		73657A0312E2E3CF00BED56F /* master */ = {
 			isa = PBXGroup;
@@ -1165,10 +1173,10 @@
 		7386BA07136FE3520094A660 /* alure */ = {
 			isa = PBXGroup;
 			children = (
-				73793C0716138ACC000E693E /* codec_modplug.cpp */,
 				D3A9DC2C139C925E00FC8814 /* vorbis */,
+				7317B9CF1370CAC30025A41E /* alure.h */,
+				73793C0716138ACC000E693E /* codec_modplug.cpp */,
 				D3A9DC4E139C930300FC8814 /* codec_vorbisfile.cpp */,
-				7317B9CE1370CAC30025A41E /* AL */,
 				7317B9D01370CAC30025A41E /* alext.h */,
 				7317B9D11370CAC30025A41E /* alure.cpp */,
 				7317B9D21370CAC30025A41E /* buffer.cpp */,
@@ -1181,7 +1189,6 @@
 				7317B9D91370CAC30025A41E /* streamdec.cpp */,
 				7317B9DA1370CAC30025A41E /* streamplay.cpp */,
 				73D6B5081370C349002ABC48 /* ALURE_Prefix.pch */,
-				D3AAAE97139C0C6C006DA288 /* libalure.map */,
 			);
 			name = alure;
 			path = ../../../alure;
@@ -1933,6 +1940,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		617D102F161E7B2200DDCF78 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				617D103A161E7B5600DDCF78 /* alure.h in Headers */,
+				617D103B161E7B5600DDCF78 /* config.h in Headers */,
+				617D103C161E7B5600DDCF78 /* main.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -1950,6 +1967,7 @@
 				617D0421161B90CE00DDCF78 /* PBXTargetDependency */,
 				617D036F161B8F3E00DDCF78 /* PBXTargetDependency */,
 				617D0383161B8F9200DDCF78 /* PBXTargetDependency */,
+				617D105F161E7CBE00DDCF78 /* PBXTargetDependency */,
 			);
 			name = Bitfighter;
 			productName = Bitfighter;
@@ -2009,6 +2027,23 @@
 			productReference = 617D03E4161B908200DDCF78 /* libluavec.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		617D1032161E7B2200DDCF78 /* alure */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 617D1038161E7B4100DDCF78 /* Build configuration list for PBXNativeTarget "alure" */;
+			buildPhases = (
+				617D102F161E7B2200DDCF78 /* Headers */,
+				617D1030161E7B2200DDCF78 /* Sources */,
+				617D1031161E7B2200DDCF78 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = alure;
+			productName = alure;
+			productReference = 617D1033161E7B2200DDCF78 /* libalure.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -2035,6 +2070,7 @@
 				617D030F161B8EC200DDCF78 /* libtomcrypt */,
 				617D0378161B8F7A00DDCF78 /* tnl */,
 				617D03E3161B908200DDCF78 /* luavec */,
+				617D1032161E7B2200DDCF78 /* alure */,
 			);
 		};
 /* End PBXProject section */
@@ -2310,6 +2346,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		617D1030161E7B2200DDCF78 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				617D103D161E7B7F00DDCF78 /* alure.cpp in Sources */,
+				617D103E161E7B7F00DDCF78 /* buffer.cpp in Sources */,
+				617D103F161E7B7F00DDCF78 /* codec_aiff.cpp in Sources */,
+				617D1040161E7B7F00DDCF78 /* codec_modplug.cpp in Sources */,
+				617D1041161E7B7F00DDCF78 /* codec_vorbisfile.cpp in Sources */,
+				617D1042161E7B7F00DDCF78 /* codec_wav.cpp in Sources */,
+				617D1043161E7B7F00DDCF78 /* istream.cpp in Sources */,
+				617D1044161E7B7F00DDCF78 /* stream.cpp in Sources */,
+				617D1045161E7B7F00DDCF78 /* streamdec.cpp in Sources */,
+				617D1046161E7B7F00DDCF78 /* streamplay.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -2338,6 +2391,11 @@
 			target = 617D03E3161B908200DDCF78 /* luavec */;
 			targetProxy = 617D0420161B90CE00DDCF78 /* PBXContainerItemProxy */;
 		};
+		617D105F161E7CBE00DDCF78 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 617D1032161E7B2200DDCF78 /* alure */;
+			targetProxy = 617D105E161E7CBE00DDCF78 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -2352,7 +2410,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_PREPROCESSOR_DEFINITIONS = NO_AUDIO;
+				GCC_PREPROCESSOR_DEFINITIONS = __IPHONEOS__;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
@@ -2396,7 +2454,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_PREPROCESSOR_DEFINITIONS = NO_AUDIO;
+				GCC_PREPROCESSOR_DEFINITIONS = __IPHONEOS__;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
@@ -2438,7 +2496,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_PREPROCESSOR_DEFINITIONS = NO_AUDIO;
+				GCC_PREPROCESSOR_DEFINITIONS = __IPHONEOS__;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
@@ -2479,7 +2537,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_PREPROCESSOR_DEFINITIONS = NO_AUDIO;
+				GCC_PREPROCESSOR_DEFINITIONS = __IPHONEOS__;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../../zlib,
@@ -2518,7 +2576,9 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
@@ -2533,6 +2593,8 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
@@ -2545,6 +2607,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
@@ -2556,6 +2620,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = libtomcrypt;
@@ -2569,7 +2635,9 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
 				SDKROOT = iphoneos;
@@ -2583,6 +2651,8 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
 				SDKROOT = iphoneos;
@@ -2594,6 +2664,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
 				SDKROOT = iphoneos;
@@ -2604,6 +2676,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = tnl;
 				SDKROOT = iphoneos;
@@ -2616,7 +2690,9 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
 				SDKROOT = iphoneos;
@@ -2630,6 +2706,8 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
 				SDKROOT = iphoneos;
@@ -2641,6 +2719,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
 				SDKROOT = iphoneos;
@@ -2651,8 +2731,117 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = luavec;
+				SDKROOT = iphoneos;
+			};
+			name = "x86_64-Release";
+		};
+		617D1034161E7B2200DDCF78 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__IPHONEOS__,
+					ALURE_STATIC_LIBRARY,
+					"DYNLOAD=1",
+					HAVE_CONFIG_H,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+					../../../libmodplug,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = alure;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		617D1035161E7B2200DDCF78 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__IPHONEOS__,
+					ALURE_STATIC_LIBRARY,
+					"DYNLOAD=1",
+					HAVE_CONFIG_H,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+					../../../libmodplug,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = alure;
+				SDKROOT = iphoneos;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		617D1036161E7B2200DDCF78 /* x86_64-Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__IPHONEOS__,
+					ALURE_STATIC_LIBRARY,
+					"DYNLOAD=1",
+					HAVE_CONFIG_H,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+					../../../libmodplug,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = alure;
+				SDKROOT = iphoneos;
+			};
+			name = "x86_64-Debug";
+		};
+		617D1037161E7B2200DDCF78 /* x86_64-Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					__IPHONEOS__,
+					ALURE_STATIC_LIBRARY,
+					"DYNLOAD=1",
+					HAVE_CONFIG_H,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../lib,
+					../../../libogg,
+					../../../libvorbis,
+					../../../alure,
+					../../../libmodplug,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = alure;
 				SDKROOT = iphoneos;
 			};
 			name = "x86_64-Release";
@@ -2792,6 +2981,17 @@
 				617D03E8161B908200DDCF78 /* Release */,
 				617D03E9161B908200DDCF78 /* x86_64-Debug */,
 				617D03EA161B908200DDCF78 /* x86_64-Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		617D1038161E7B4100DDCF78 /* Build configuration list for PBXNativeTarget "alure" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				617D1034161E7B2200DDCF78 /* Debug */,
+				617D1035161E7B2200DDCF78 /* Release */,
+				617D1036161E7B2200DDCF78 /* x86_64-Debug */,
+				617D1037161E7B2200DDCF78 /* x86_64-Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
