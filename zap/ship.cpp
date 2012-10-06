@@ -1905,7 +1905,8 @@ void Ship::kill()
    if(!isGhost())   // Server only
    {
       destroyTeleporter();
-      getClientInfo()->sTeleporterCleanup();
+      if(getClientInfo())
+         getClientInfo()->sTeleporterCleanup();
    }
 }
 

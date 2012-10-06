@@ -301,7 +301,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          }
          else //if(bstream->getBitPosition() < MaxPacketDataSize*8 - MinimumPaddingBits)
          {
-            TNLAssert(false, "Packet too big to send, one or more events may be unable to send");
+            TNLAssertV(false, ("%s Packet too big to send, one or more events may be unable to send", ev->mEvent->getDebugName()));
             // dequeue the event:
             mUnorderedSendEventQueueHead = ev->mNextEvent;
             ev->mNextEvent = NULL;
@@ -376,7 +376,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          }
          else
          {
-            TNLAssert(false, "Packet too big to send, one or more events may be unable to send");
+            TNLAssertV(false, ("%s Packet too big to send, one or more events may be unable to send", ev->mEvent->getDebugName()));
             for(EventNote *walk = ev->mNextEvent; walk; walk = walk->mNextEvent)
                walk->mSeqCount--;    // removing a GuaranteedOrdered needs to re-order mSeqCount
             mNextSendEventSeq--;
