@@ -2203,7 +2203,7 @@ void GameUserInterface::addBotsHandler(const Vector<string> &words)
       S32 count = 0;
       count = atoi(words[1].c_str());
 
-      if(count <= 0 || count > 16)
+      if(count <= 0 || count > 1000)
       {
          game->displayErrorMessage("!!! Invalid number of bots to add");
          return;
