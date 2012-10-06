@@ -7,6 +7,48 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		617D2622161F834700DDCF78 /* fastmix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939C616137C5A000E693E /* fastmix.cpp */; };
+		617D2623161F834700DDCF78 /* load_669.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CB16137C5A000E693E /* load_669.cpp */; };
+		617D2624161F834700DDCF78 /* load_abc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CC16137C5A000E693E /* load_abc.cpp */; };
+		617D2625161F834700DDCF78 /* load_amf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CD16137C5A000E693E /* load_amf.cpp */; };
+		617D2626161F834700DDCF78 /* load_ams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CE16137C5A000E693E /* load_ams.cpp */; };
+		617D2627161F834700DDCF78 /* load_dbm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939CF16137C5A000E693E /* load_dbm.cpp */; };
+		617D2628161F834700DDCF78 /* load_dmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D016137C5A000E693E /* load_dmf.cpp */; };
+		617D2629161F834700DDCF78 /* load_dsm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D116137C5A000E693E /* load_dsm.cpp */; };
+		617D262A161F834700DDCF78 /* load_far.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D216137C5A000E693E /* load_far.cpp */; };
+		617D262B161F834700DDCF78 /* load_it.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D316137C5A000E693E /* load_it.cpp */; };
+		617D262C161F834700DDCF78 /* load_j2b.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D416137C5A000E693E /* load_j2b.cpp */; };
+		617D262D161F834700DDCF78 /* load_mdl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D516137C5A000E693E /* load_mdl.cpp */; };
+		617D262E161F834700DDCF78 /* load_med.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D616137C5A000E693E /* load_med.cpp */; };
+		617D262F161F834700DDCF78 /* load_mid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D716137C5A000E693E /* load_mid.cpp */; };
+		617D2630161F834700DDCF78 /* load_mod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D816137C5A000E693E /* load_mod.cpp */; };
+		617D2631161F834700DDCF78 /* load_mt2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939D916137C5A000E693E /* load_mt2.cpp */; };
+		617D2632161F834700DDCF78 /* load_mtm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DA16137C5A000E693E /* load_mtm.cpp */; };
+		617D2633161F834700DDCF78 /* load_okt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DB16137C5A000E693E /* load_okt.cpp */; };
+		617D2634161F834700DDCF78 /* load_pat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DC16137C5A000E693E /* load_pat.cpp */; };
+		617D2635161F834700DDCF78 /* load_psm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DE16137C5A000E693E /* load_psm.cpp */; };
+		617D2636161F834700DDCF78 /* load_ptm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939DF16137C5A000E693E /* load_ptm.cpp */; };
+		617D2637161F834700DDCF78 /* load_s3m.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E016137C5A000E693E /* load_s3m.cpp */; };
+		617D2638161F834700DDCF78 /* load_stm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E116137C5A000E693E /* load_stm.cpp */; };
+		617D2639161F834700DDCF78 /* load_ult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E216137C5A000E693E /* load_ult.cpp */; };
+		617D263A161F834700DDCF78 /* load_umx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E316137C5A000E693E /* load_umx.cpp */; };
+		617D263B161F834700DDCF78 /* load_wav.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E416137C5A000E693E /* load_wav.cpp */; };
+		617D263C161F834700DDCF78 /* load_xm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E516137C5A000E693E /* load_xm.cpp */; };
+		617D263D161F834700DDCF78 /* mmcmp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939E916137C5A000E693E /* mmcmp.cpp */; };
+		617D263E161F834700DDCF78 /* modplug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EA16137C5A000E693E /* modplug.cpp */; };
+		617D263F161F834700DDCF78 /* snd_dsp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EC16137C5A000E693E /* snd_dsp.cpp */; };
+		617D2640161F834700DDCF78 /* snd_flt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939ED16137C5A000E693E /* snd_flt.cpp */; };
+		617D2641161F834700DDCF78 /* snd_fx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EE16137C5A000E693E /* snd_fx.cpp */; };
+		617D2642161F834700DDCF78 /* sndfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939EF16137C5A000E693E /* sndfile.cpp */; };
+		617D2643161F834700DDCF78 /* sndmix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939F016137C5A000E693E /* sndmix.cpp */; };
+		617D2644161F835000DDCF78 /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C416137C5A000E693E /* config.h */; };
+		617D2645161F835000DDCF78 /* it_defs.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C816137C5A000E693E /* it_defs.h */; };
+		617D2646161F835000DDCF78 /* libmodplug_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 73793A4516137CC0000E693E /* libmodplug_Prefix.pch */; };
+		617D2647161F835000DDCF78 /* load_pat.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939DD16137C5A000E693E /* load_pat.h */; };
+		617D2648161F835000DDCF78 /* modplug.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939EB16137C5A000E693E /* modplug.h */; };
+		617D2649161F835000DDCF78 /* sndfile.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C916137C5A000E693E /* sndfile.h */; };
+		617D264A161F835000DDCF78 /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939CA16137C5A000E693E /* stdafx.h */; };
+		617D264B161F835000DDCF78 /* tables.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939F216137C5A000E693E /* tables.h */; };
 		73793A1516137C5A000E693E /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C416137C5A000E693E /* config.h */; };
 		73793A1716137C5A000E693E /* fastmix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737939C616137C5A000E693E /* fastmix.cpp */; };
 		73793A1816137C5A000E693E /* it_defs.h in Headers */ = {isa = PBXBuildFile; fileRef = 737939C816137C5A000E693E /* it_defs.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -53,6 +95,7 @@
 
 /* Begin PBXFileReference section */
 		0867D69BFE84028FC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		617D261F161F833700DDCF78 /* libmodplug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmodplug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		737939C416137C5A000E693E /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		737939C616137C5A000E693E /* fastmix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fastmix.cpp; sourceTree = "<group>"; };
 		737939C816137C5A000E693E /* it_defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = it_defs.h; sourceTree = "<group>"; };
@@ -96,10 +139,17 @@
 		737939F216137C5A000E693E /* tables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tables.h; sourceTree = "<group>"; };
 		73793A4516137CC0000E693E /* libmodplug_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libmodplug_Prefix.pch; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* libmodplug-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "libmodplug-Info.plist"; sourceTree = "<group>"; };
-		8DC2EF5B0486A6940098B216 /* libmodplug.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libmodplug.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DC2EF5B0486A6940098B216 /* libmodplug */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.framework; path = libmodplug; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		617D261D161F833700DDCF78 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8DC2EF560486A6940098B216 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -113,7 +163,8 @@
 		034768DFFF38A50411DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DC2EF5B0486A6940098B216 /* libmodplug.framework */,
+				8DC2EF5B0486A6940098B216 /* libmodplug */,
+				617D261F161F833700DDCF78 /* libmodplug.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -264,6 +315,21 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		617D261B161F833700DDCF78 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				617D2644161F835000DDCF78 /* config.h in Headers */,
+				617D2645161F835000DDCF78 /* it_defs.h in Headers */,
+				617D2646161F835000DDCF78 /* libmodplug_Prefix.pch in Headers */,
+				617D2647161F835000DDCF78 /* load_pat.h in Headers */,
+				617D2648161F835000DDCF78 /* modplug.h in Headers */,
+				617D2649161F835000DDCF78 /* sndfile.h in Headers */,
+				617D264A161F835000DDCF78 /* stdafx.h in Headers */,
+				617D264B161F835000DDCF78 /* tables.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8DC2EF500486A6940098B216 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -282,6 +348,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		617D261E161F833700DDCF78 /* libmodplug-static */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 617D2651161F835E00DDCF78 /* Build configuration list for PBXNativeTarget "libmodplug-static" */;
+			buildPhases = (
+				617D261B161F833700DDCF78 /* Headers */,
+				617D261C161F833700DDCF78 /* Sources */,
+				617D261D161F833700DDCF78 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "libmodplug-static";
+			productName = "libmodplug-static";
+			productReference = 617D261F161F833700DDCF78 /* libmodplug.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		8DC2EF4F0486A6940098B216 /* libmodplug */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB91AD08733DA50010E9CD /* Build configuration list for PBXNativeTarget "libmodplug" */;
@@ -297,7 +380,7 @@
 			name = libmodplug;
 			productInstallPath = "$(HOME)/Library/Frameworks";
 			productName = libmodplug;
-			productReference = 8DC2EF5B0486A6940098B216 /* libmodplug.framework */;
+			productReference = 8DC2EF5B0486A6940098B216 /* libmodplug */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -307,18 +390,67 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91B108733DA50010E9CD /* Build configuration list for PBXProject "libmodplug" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* libmodplug */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				8DC2EF4F0486A6940098B216 /* libmodplug */,
+				617D261E161F833700DDCF78 /* libmodplug-static */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		617D261C161F833700DDCF78 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				617D2622161F834700DDCF78 /* fastmix.cpp in Sources */,
+				617D2623161F834700DDCF78 /* load_669.cpp in Sources */,
+				617D2624161F834700DDCF78 /* load_abc.cpp in Sources */,
+				617D2625161F834700DDCF78 /* load_amf.cpp in Sources */,
+				617D2626161F834700DDCF78 /* load_ams.cpp in Sources */,
+				617D2627161F834700DDCF78 /* load_dbm.cpp in Sources */,
+				617D2628161F834700DDCF78 /* load_dmf.cpp in Sources */,
+				617D2629161F834700DDCF78 /* load_dsm.cpp in Sources */,
+				617D262A161F834700DDCF78 /* load_far.cpp in Sources */,
+				617D262B161F834700DDCF78 /* load_it.cpp in Sources */,
+				617D262C161F834700DDCF78 /* load_j2b.cpp in Sources */,
+				617D262D161F834700DDCF78 /* load_mdl.cpp in Sources */,
+				617D262E161F834700DDCF78 /* load_med.cpp in Sources */,
+				617D262F161F834700DDCF78 /* load_mid.cpp in Sources */,
+				617D2630161F834700DDCF78 /* load_mod.cpp in Sources */,
+				617D2631161F834700DDCF78 /* load_mt2.cpp in Sources */,
+				617D2632161F834700DDCF78 /* load_mtm.cpp in Sources */,
+				617D2633161F834700DDCF78 /* load_okt.cpp in Sources */,
+				617D2634161F834700DDCF78 /* load_pat.cpp in Sources */,
+				617D2635161F834700DDCF78 /* load_psm.cpp in Sources */,
+				617D2636161F834700DDCF78 /* load_ptm.cpp in Sources */,
+				617D2637161F834700DDCF78 /* load_s3m.cpp in Sources */,
+				617D2638161F834700DDCF78 /* load_stm.cpp in Sources */,
+				617D2639161F834700DDCF78 /* load_ult.cpp in Sources */,
+				617D263A161F834700DDCF78 /* load_umx.cpp in Sources */,
+				617D263B161F834700DDCF78 /* load_wav.cpp in Sources */,
+				617D263C161F834700DDCF78 /* load_xm.cpp in Sources */,
+				617D263D161F834700DDCF78 /* mmcmp.cpp in Sources */,
+				617D263E161F834700DDCF78 /* modplug.cpp in Sources */,
+				617D263F161F834700DDCF78 /* snd_dsp.cpp in Sources */,
+				617D2640161F834700DDCF78 /* snd_flt.cpp in Sources */,
+				617D2641161F834700DDCF78 /* snd_fx.cpp in Sources */,
+				617D2642161F834700DDCF78 /* sndfile.cpp in Sources */,
+				617D2643161F834700DDCF78 /* sndmix.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8DC2EF540486A6940098B216 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -373,6 +505,7 @@
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREFIX_HEADER = libmodplug_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
 				GCC_VERSION = 4.0;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
@@ -387,7 +520,7 @@
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				OTHER_CFLAGS = "-DHAVE_CONFIG_H";
+				OTHER_CFLAGS = "";
 				PRODUCT_NAME = libmodplug;
 				SDKROOT = "";
 				WRAPPER_EXTENSION = framework;
@@ -404,6 +537,7 @@
 				FRAMEWORK_VERSION = A;
 				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PREFIX_HEADER = libmodplug_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 4.0;
 				GCC_VERSION_x86_64 = 4.2;
@@ -417,7 +551,7 @@
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				OTHER_CFLAGS = "-DHAVE_CONFIG_H";
+				OTHER_CFLAGS = "";
 				PRODUCT_NAME = libmodplug;
 				SDKROOT = macosx10.4;
 				WRAPPER_EXTENSION = framework;
@@ -450,6 +584,45 @@
 			};
 			name = Release;
 		};
+		617D2620161F833800DDCF78 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../src,
+					../src/libmodplug,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = modplug;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		617D2621161F833800DDCF78 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = HAVE_CONFIG_H;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../src,
+					../src/libmodplug,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = modplug;
+				SDKROOT = iphoneos;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -467,6 +640,15 @@
 			buildConfigurations = (
 				1DEB91B208733DA50010E9CD /* Debug */,
 				1DEB91B308733DA50010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		617D2651161F835E00DDCF78 /* Build configuration list for PBXNativeTarget "libmodplug-static" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				617D2620161F833800DDCF78 /* Debug */,
+				617D2621161F833800DDCF78 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

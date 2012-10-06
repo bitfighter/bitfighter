@@ -153,7 +153,7 @@ using namespace TNL;
 #  define USE_BFUP
 #endif
 
-#ifdef TNL_OS_MAC_OSX
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
 #  include "Directory.h"
 #  include <unistd.h>
 #endif
@@ -1015,7 +1015,7 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
    
-#ifdef TNL_OS_MAC_OSX
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
    // Move to the application bundle's path (RDW)
    moveToAppPath();
    // Copy some initialisation files

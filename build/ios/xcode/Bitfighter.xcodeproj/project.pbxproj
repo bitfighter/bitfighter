@@ -334,6 +334,16 @@
 		617D1045161E7B7F00DDCF78 /* streamdec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9D91370CAC30025A41E /* streamdec.cpp */; };
 		617D1046161E7B7F00DDCF78 /* streamplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7317B9DA1370CAC30025A41E /* streamplay.cpp */; };
 		617D1060161E7CC400DDCF78 /* libalure.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D1033161E7B2200DDCF78 /* libalure.a */; };
+		617D25F9161F807300DDCF78 /* libtremor.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D25F8161F807300DDCF78 /* libtremor.a */; };
+		617D2670161F84E200DDCF78 /* libmodplug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 617D266F161F84E200DDCF78 /* libmodplug.a */; };
+		617D2681161F87A400DDCF78 /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 73D2F29212E2D7E700EA5EBE /* Directory.mm */; };
+		617D26DC161F8CA300DDCF78 /* editor_plugins in Resources */ = {isa = PBXBuildFile; fileRef = 73846BC214CDD70D00A5553F /* editor_plugins */; };
+		617D26DD161F8CA300DDCF78 /* music in Resources */ = {isa = PBXBuildFile; fileRef = 7388F069139D5B46003C6BB0 /* music */; };
+		617D26DE161F8CA300DDCF78 /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
+		617D26DF161F8CA300DDCF78 /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = 737CE42212904D7D00D732B7 /* sfx */; };
+		617D26E0161F8CA300DDCF78 /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
+		617D26E1161F8CA300DDCF78 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
+		617D26E2161F8CA300DDCF78 /* joystick_presets.ini in Resources */ = {isa = PBXBuildFile; fileRef = 73946E6014D50F0F00B95333 /* joystick_presets.ini */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -376,7 +386,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 617D1032161E7B2200DDCF78 /* alure */;
+			remoteGlobalIDString = 617D1032161E7B2200DDCF78;
 			remoteInfo = alure;
 		};
 /* End PBXContainerItemProxy section */
@@ -399,6 +409,8 @@
 		617D0F69161B9CA300DDCF78 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		617D102D161E7B0D00DDCF78 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		617D1033161E7B2200DDCF78 /* libalure.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libalure.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		617D25F8161F807300DDCF78 /* libtremor.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtremor.a; path = ../lib/libtremor.a; sourceTree = SOURCE_ROOT; };
+		617D266F161F84E200DDCF78 /* libmodplug.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmodplug.a; path = ../lib/libmodplug.a; sourceTree = SOURCE_ROOT; };
 		7317B9CF1370CAC30025A41E /* alure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = alure.h; path = AL/alure.h; sourceTree = "<group>"; };
 		7317B9D01370CAC30025A41E /* alext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alext.h; sourceTree = "<group>"; };
 		7317B9D11370CAC30025A41E /* alure.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alure.cpp; sourceTree = "<group>"; };
@@ -974,6 +986,8 @@
 				617D0F61161B9C8000DDCF78 /* CoreGraphics.framework in Frameworks */,
 				617D0F6A161B9CA300DDCF78 /* QuartzCore.framework in Frameworks */,
 				617D102E161E7B0D00DDCF78 /* OpenAL.framework in Frameworks */,
+				617D25F9161F807300DDCF78 /* libtremor.a in Frameworks */,
+				617D2670161F84E200DDCF78 /* libmodplug.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1064,8 +1078,10 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				617D0F33161B9BE100DDCF78 /* AudioToolbox.framework */,
+				617D25F8161F807300DDCF78 /* libtremor.a */,
+				617D266F161F84E200DDCF78 /* libmodplug.a */,
 				617D0485161B960400DDCF78 /* libSDL2.a */,
+				617D0F33161B9BE100DDCF78 /* AudioToolbox.framework */,
 				617D0F45161B9C1900DDCF78 /* Foundation.framework */,
 				617D0F47161B9C1900DDCF78 /* OpenGLES.framework */,
 				617D0F49161B9C1900DDCF78 /* UIKit.framework */,
@@ -2078,6 +2094,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				617D26DC161F8CA300DDCF78 /* editor_plugins in Resources */,
+				617D26DD161F8CA300DDCF78 /* music in Resources */,
+				617D26DE161F8CA300DDCF78 /* levels in Resources */,
+				617D26DF161F8CA300DDCF78 /* sfx in Resources */,
+				617D26E0161F8CA300DDCF78 /* robots in Resources */,
+				617D26E1161F8CA300DDCF78 /* scripts in Resources */,
+				617D26E2161F8CA300DDCF78 /* joystick_presets.ini in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2088,6 +2111,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				617D2681161F87A400DDCF78 /* Directory.mm in Sources */,
 				617D0250161B8A6F00DDCF78 /* BanList.cpp in Sources */,
 				617D0251161B8A6F00DDCF78 /* barrier.cpp in Sources */,
 				617D0252161B8A6F00DDCF78 /* BfObject.cpp in Sources */,
@@ -2750,9 +2774,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					__IPHONEOS__,
 					ALURE_STATIC_LIBRARY,
-					"DYNLOAD=1",
 					HAVE_CONFIG_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2778,9 +2800,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					__IPHONEOS__,
 					ALURE_STATIC_LIBRARY,
-					"DYNLOAD=1",
 					HAVE_CONFIG_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2804,9 +2824,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					__IPHONEOS__,
 					ALURE_STATIC_LIBRARY,
-					"DYNLOAD=1",
 					HAVE_CONFIG_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2829,9 +2847,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					__IPHONEOS__,
 					ALURE_STATIC_LIBRARY,
-					"DYNLOAD=1",
 					HAVE_CONFIG_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
