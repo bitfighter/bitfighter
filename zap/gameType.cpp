@@ -3821,9 +3821,9 @@ void GameType::updateClientScoreboard(ClientInfo *requestor)
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cScoreboardUpdate,
                  (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<SignedFloat<8> > ratings),
-                 (pingTimes, scores, ratings))
+                 (pingTimes, scores, ratings), NetClassGroupGameMask, RPCGuaranteedOrderedBigData, RPCToGhost, 0)
 {
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
