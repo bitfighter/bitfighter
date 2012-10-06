@@ -591,6 +591,12 @@ void WallItem::setSelected(bool selected)
 }
 
 
+void WallItem::onItemDragging()
+{
+   // Do nothing -- this is here to override Parent::onItemDragging(), onGeomChanged() should only be called after move is complete
+}
+
+
 // Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 {

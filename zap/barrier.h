@@ -127,9 +127,14 @@ public:
    ~WallItem();               // Destructor
    WallItem *clone() const;
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
+
    Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
    virtual void onGeomChanged();
+   virtual void onItemDragging();
+
    void processEndPoints();  
 
    void render();
@@ -151,9 +156,6 @@ public:
 
    void scale(const Point &center, F32 scale);
 
-   string toString(F32 gridSize) const;
-
-   bool processArguments(S32 argc, const char **argv, Game *game);
    void addToGame(Game *game, GridDatabase *database);
 
    S32 getWidth() const;
