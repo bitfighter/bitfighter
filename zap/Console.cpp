@@ -56,7 +56,10 @@ namespace Zap
          quit();
 
       if(L)
+      {
          lua_close(L);
+         L = NULL;
+      }
    }
 
 

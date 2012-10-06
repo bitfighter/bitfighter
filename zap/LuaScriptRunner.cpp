@@ -342,6 +342,7 @@ bool LuaScriptRunner::startLua()
       {
          logError("Could not configure Lua interpreter.  I cannot run any scripts until the problem is resolved.");
          lua_close(L);
+         L = NULL;
          return false;
       }
    }
