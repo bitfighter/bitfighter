@@ -3380,18 +3380,26 @@ GAMETYPE_RPC_C2S(GameType, c2sGlobalMutePlayer, (StringTableEntry playerName), (
    if(!clientInfo->isAdmin())
       return;  // Error message handled client-side
 
-   GameConnection *gc = mGame->findClientInfo(playerName)->getConnection();
+   ClientInfo *targetClientInfo = mGame->findClientInfo(playerName);
 
-   if(!gc)
+   if(!targetClientInfo)
       return;  // Error message handled client-side
 
-   GameConnection *conn = clientInfo->getConnection();
+   if(targetClientInfo->isAdmin())
+      return;  // Error message handled client-side
+
+   GameConnection *gc = targetClientInfo->getConnection();
+
+   if(!gc)
+      return;
 
    // Toggle
    gc->mChatMute = !gc->mChatMute;
 
    if(!getGame()->getSettings()->getIniSettings()->disableServerVoiceChat)  // if server voice chat is allowed, send voice chat status.
       gc->s2rVoiceChatEnable(!gc->mChatMute);
+
+   GameConnection *conn = clientInfo->getConnection();
 
    conn->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is unmuted");
 }

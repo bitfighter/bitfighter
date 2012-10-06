@@ -2415,6 +2415,12 @@ void GameUserInterface::globalMuteHandler(const Vector<string> &words)
          return;
       }
 
+      if(clientInfo->isAdmin())
+      {
+         game->displayErrorMessage("!!! Cannot mute an admin");
+         return;
+      }
+
       if(game->getGameType())
          game->getGameType()->c2sGlobalMutePlayer(words[1].c_str());
    }
