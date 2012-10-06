@@ -937,6 +937,10 @@ void SoundSystem::resumeMusic(MusicInfo &musicInfo)
 
 void SoundSystem::playNextTrack()
 {
+   // No music, so return
+   if(!mGameMusicValid)
+      return;
+
    stopMusic(musicInfos[MusicTypeGame]);
 
    // Increment the playing index
@@ -948,6 +952,10 @@ void SoundSystem::playNextTrack()
 
 void SoundSystem::playPrevTrack()
 {
+   // No music, so return
+   if(!mGameMusicValid)
+      return;
+
    stopMusic(musicInfos[MusicTypeGame]);
 
    // Decrement the playing index
