@@ -91,6 +91,7 @@ bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point 
 bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough);
 bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint, Point *ignoreVelocityEpsilon = NULL);
+bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &center2, F32 radius2);
 
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end);  // This is four times faster than the Detailed one.

@@ -62,6 +62,7 @@ void Point::set(const Point *pt)
 }
 
 // Distance from (0,0)
+// lenSquared() is faster!
 F32 Point::len() const
 {
    return (F32) sqrt(x * x + y * y);

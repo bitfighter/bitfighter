@@ -91,6 +91,8 @@ bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &in
 #define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
 
+#define sq(a) ((a) * (a))
+
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {
    Vector<Point> outputPoly(sideCount);
@@ -230,6 +232,19 @@ bool triangulatedFillContains(const Vector<Point> *triangulatedFillPoints, const
 //  
 //  return  (cur_det_value * det_value) >= 0.0;
 //}
+
+
+// If the sum of the radii is greater than the distance between the center points,
+// then the circles intersect
+bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &center2, F32 radius2)
+{
+   // Remove square root for speed
+   // (r1+r2)^2 > (x2-x1)^2 + (y2-y1)^2
+   if(sq(radius1 + radius2) > center1.distSquared(center2))
+      return true;
+
+   return false;
+}
 
 
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
