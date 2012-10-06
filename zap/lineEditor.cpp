@@ -266,6 +266,9 @@ bool LineEditor::addChar(const char c)
    case fileNameFilter:
       if((c < '0' || c > '9') && (c != '_') && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) return false;
       break;
+   case allAsciiFilter:
+   default:
+      break;
    }
 
    if(length() < mMaxLen) mLine += c; 
