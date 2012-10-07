@@ -116,7 +116,7 @@ bool isDamageableType(U8 x)
 bool isMotionTriggerType(U8 x)
 {
    return
-         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber ||
+         x == PlayerShipTypeNumber   || x == RobotShipTypeNumber || x == SoccerBallItemTypeNumber ||
          x == ResourceItemTypeNumber || x == TestItemTypeNumber  || 
          x == AsteroidTypeNumber     || x == MineTypeNumber;
 }
