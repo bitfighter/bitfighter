@@ -32,8 +32,6 @@
 #include "LuaWrapper.h"
 #include "LuaScriptRunner.h"  // Base class
 
-//struct lua_State;  // or #include "lua.h"
-
 #ifdef TNL_OS_WIN32 
 #  pragma warning( disable : 4250)
 #endif
