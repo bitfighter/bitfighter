@@ -132,7 +132,7 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
       throw LuaException(msg);
    }
 
-   // The following block (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
+   // The following block is (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
 
    lua_pushvalue(L, index);	// Push our table onto the top of the stack                                               -- table table
    lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops    -- table table nil
