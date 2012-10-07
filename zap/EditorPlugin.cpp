@@ -121,7 +121,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
 bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems)
 {
 #ifdef ZAP_DEDICATED
-      throw LuaException("Dedicated server should not use MenuItem");
+   throw LuaException("Dedicated server should not use MenuItem");
 #else
    if(!lua_istable(L, index))
    {

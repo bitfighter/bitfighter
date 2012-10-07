@@ -776,6 +776,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    for(S32 i = 0; i < menuItems.size(); i++)
       mPluginMenu->addMenuItem(menuItems[i]);
 
+   
    mPluginMenu->addSaveAndQuitMenuItem("Run plugin", "Saves values and runs plugin");
 
    mPluginMenu->setMenuCenterPoint(Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2));  
