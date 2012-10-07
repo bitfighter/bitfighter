@@ -460,22 +460,9 @@ Game *BfObject::getGame() const
 }
 
 
-bool BfObject::hasTeam()
-{
-   return true;
-}
-
-
-bool BfObject::canBeNeutral()
-{
-   return true;
-}
-
-
-bool BfObject::canBeHostile()
-{
-   return true;
-}
+bool BfObject::hasTeam()      { return true; }
+bool BfObject::canBeNeutral() { return true; }
+bool BfObject::canBeHostile() { return true; }
 
 
 void BfObject::addToGame(Game *game, GridDatabase *database)
