@@ -226,8 +226,8 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings)
 // alternative is to make FILE* pointer get created, written and closed entirely inside libpng14.dll
 static void PNGAPI png_user_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-   png_uint_32 check;
-   check = fwrite(data, 1, length, (png_FILE_p)(png_ptr->io_ptr));
+   FILE *f = (png_FILE_p)(png_get_io_ptr(png_ptr));
+   png_size_t check = fwrite(data, 1, length, f);
    if (check != length)
       png_error(png_ptr, "Write Error");
 }
