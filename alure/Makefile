@@ -9,6 +9,10 @@ EXTRA_FLAGS=-D_GNU_SOURCE -DALURE_STATIC_LIBRARY -DDYNLOAD=1 -DHAVE_CONFIG_H -fP
 CC=g++ -I. -I../libvorbis -I../libogg -I../libmodplug -W
 AR=ar cr
 
+ifeq ($(findstring Windows, $(OS)), Windows)
+CC += -I../openal/include
+endif
+
 OBJECTS=\
 buffer.o\
 streamdec.o\

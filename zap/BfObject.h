@@ -32,7 +32,7 @@
 #include "LuaWrapper.h"
 #include "LuaScriptRunner.h"  // Base class
 
-#ifdef TNL_OS_WIN32 
+#if defined(TNL_COMPILER_VISUALC)
 #  pragma warning( disable : 4250)
 #endif
 

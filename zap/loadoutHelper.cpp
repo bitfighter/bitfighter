@@ -245,7 +245,7 @@ bool LoadoutHelper::processInputCode(InputCode inputCode)
 
    // Make sure user doesn't select the same loadout item twice
    bool alreadyUsed = false;
-
+	
    if(mCurrentIndex < ShipModuleCount)    // We're working with modules
    {                                      // (note... braces required here!)
       for(S32 i = 0; i < mCurrentIndex && !alreadyUsed; i++)

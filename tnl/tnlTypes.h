@@ -190,6 +190,7 @@ typedef unsigned long long  U64;  ///< Compiler independent unsigned 64-bit inte
 #if defined(__MINGW32__)
 #  define TNL_COMPILER_STRING "GCC (MinGW)"
 #  define TNL_COMPILER_MINGW
+#  define ARRAYSIZE(X)    (sizeof(X)/sizeof(X[0]))
 #elif defined(__CYGWIN__)
 #  define TNL_COMPILER_STRING "GCC (Cygwin)"
 #  define TNL_COMPILER_MINGW

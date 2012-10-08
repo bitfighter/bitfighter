@@ -1053,7 +1053,7 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
       return true;
 }
 
-#ifdef TNL_OS_WIN32
+#if defined(TNL_OS_WIN32) && defined(TNL_COMPILER_VISUALC) && !defined(TNL_DEBUG)
 void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 {
    // error C2712: Cannot use __try in functions that require object unwinding

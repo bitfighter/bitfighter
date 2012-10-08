@@ -203,7 +203,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addItem()";
 
-   S32 argc = min(lua_gettop(L), LevelLoader::MAX_LEVEL_LINE_ARGS);     // Never more that MaxArgc args, please.
+   S32 argc = min((S32)lua_gettop(L), (S32)LevelLoader::MAX_LEVEL_LINE_ARGS);     // Never more that MaxArgc args, please.
 
    if(argc == 0)
    {
