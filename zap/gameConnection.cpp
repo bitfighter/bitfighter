@@ -1496,7 +1496,7 @@ void GameConnection::writeConnectAccept(BitStream *stream)
    Parent::writeConnectAccept(stream);
    stream->write(CONNECT_VERSION);
 
-   stream->writeFlag(!mServerGame->getSettings()->getIniSettings()->disableServerVoiceChat);
+   stream->writeFlag(mServerGame->getSettings()->getIniSettings()->enableServerVoiceChat);
 }
 
 
