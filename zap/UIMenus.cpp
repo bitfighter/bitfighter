@@ -1807,7 +1807,7 @@ void LevelMenuUserInterface::onActivate()
 
    sortMenuItems();
 
-   if((gc->mSendableFlags & 1) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
+   if((gc->mSendableFlags & GameConnection::ServerFlagAllowUpload) && !gc->isLocalConnection())   // local connection is useless, already have all maps..
       addMenuItem(new MenuItem(UPLOAD_LEVELS_MENUID, UPLOAD_LEVELS, selectLevelTypeCallback, "", InputCodeManager::stringToInputCode(c)));
 }
 
@@ -1846,7 +1846,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
       FolderManager *folderManager = getGame()->getSettings()->getFolderManager();
       string filename = strictjoindir(folderManager->levelDir, mLevels[index & (~UPLOAD_LEVELS_BIT)]);
 
-      if(!gc->s2rUploadFile(filename.c_str(), 1))     // TODO: 1 Should be an enum
+      if(!gc->s2rUploadFile(filename.c_str(), GameConnection::LevelFileTransmissionInProgress))
          getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
    }
    else

@@ -515,7 +515,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       s2cSetIsAdmin(true);                         // Tell client they have been granted access
 
       if(mSettings->getIniSettings()->allowAdminMapUpload)
-         s2rSendableFlags(1);                      // Enable level uploads
+         s2rSendableFlags(ServerFlagAllowUpload);                      // Enable level uploads
 
       GameType *gameType = mServerGame->getGameType();
 
@@ -1279,7 +1279,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
       mDataBuffer->takeOwnership();
    }
 
-   if(type == 1 &&      // TODO: 1 Should be an enum, means we're transmitting a level file.  Probably already have an enum that would work.
+   if(type == LevelFileTransmissionInProgress &&
          (mSettings->getIniSettings()->allowMapUpload || (mSettings->getIniSettings()->allowAdminMapUpload && mClientInfo->isAdmin())) &&
          !isInitiator() && mDataBuffer->getBufferSize() != 0)
    {
@@ -1310,7 +1310,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendDataParts, (U8 type, ByteBufferPtr data
          s2cDisplayErrorMessage("!!! Upload failed -- server can't write file");
    }
 
-   if(type != 0)
+   if(type != LevelFileTransmissionComplete)
    {
       delete mDataBuffer;
       mDataBuffer = NULL;
@@ -1337,7 +1337,7 @@ bool GameConnection::s2rUploadFile(const char *filename, U8 type)
          if(size != partsSize)
             bytebuffer->resize(size);
 
-         s2rSendDataParts(size == partsSize ? 0 : type, ByteBufferPtr(bytebuffer));
+         s2rSendDataParts(size == partsSize ? LevelFileTransmissionComplete : type, ByteBufferPtr(bytebuffer));
       }
       fclose(f);
       return true;
@@ -1729,7 +1729,7 @@ void GameConnection::onConnectionEstablished_server()
                                           isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
 
    if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)
-      s2rSendableFlags(1);
+      s2rSendableFlags(ServerFlagAllowUpload);
 }
 
 

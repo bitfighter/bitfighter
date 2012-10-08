@@ -270,6 +270,16 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestCurrentLevel, ());
 
+   enum ServerFlags {
+      ServerFlagAllowUpload = BIT(0),
+      // U8 max!
+   };
+
+   enum LevelFileTransmissionStage {
+      LevelFileTransmissionInProgress,
+      LevelFileTransmissionComplete
+   };
+
    U8 mSendableFlags;
    ByteBuffer *mDataBuffer;
 
