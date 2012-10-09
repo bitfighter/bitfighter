@@ -117,10 +117,7 @@ const char *pageHeadersEditor[] = {
 
 
 static ControlStringsEditor consoleCommands[] = {
-   { "add <a> <b>", "Print a + b -- test command" },
-   { "run", "Run the current levelgen" },
-   { "clear", "Clear results of the levelgen" },
-   { "exit, quit", "Close the console" },
+   { "Coming soon...", "Coming soon..." },
    { "", "" },      // End of list
 };
 

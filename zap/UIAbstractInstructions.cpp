@@ -65,7 +65,7 @@ void AbstractInstructionsUserInterface::renderConsoleCommands(const char *activa
    const S32 cmdGap = 10;
 
    glColor(secColor);
-   drawString(cmdCol, ypos, headerSize, "Command");
+   drawString(cmdCol, ypos, headerSize, "Code Example");
    drawString(descrCol, ypos, headerSize, "Description");
 
    ypos += cmdSize + cmdGap;
