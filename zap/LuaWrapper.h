@@ -73,9 +73,9 @@ template <class T> class LuaProxy;
 // alternative option, you may select a different function when registering
 // your class.
 template <typename T>
-T* luaW_defaultallocator(lua_State*)
+T* luaW_defaultallocator(lua_State *L)
 {
-    return new T();
+    return new T(L);
 }
 template <typename T>
 void luaW_defaultdeallocator(lua_State*, T* obj)
@@ -641,8 +641,12 @@ int luaW__gc(lua_State* L)
 // but still represent the same object. For cases like that, you may specify an
 // identifier function which is responsible for pushing a key representing your
 // object on to the stack.
+//
+// Allocator -> constructor, Deallocator => destructor
 template <typename T>
-void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>)
+void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, 
+                   T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, 
+                   void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>)
 {
     LuaWrapper<T>::classname = classname;
     LuaWrapper<T>::identifier = identifier;
@@ -1100,15 +1104,17 @@ public:
 
 
 
+#define  LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
+   LuaProxy<className> *mLuaProxy; \
+   LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
+   virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
+   virtual void push(lua_State *L) { luaW_push(L, this); }
 
 
 // This goes in the header of a "wrapped class"
 #define  LUAW_DECLARE_CLASS(className) \
-   LuaProxy<className> *mLuaProxy; \
-   LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
-   virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
-   className (lua_State *L) { }  /* Unused but required constructor */ \
-   virtual void push(lua_State *L) { luaW_push(L, this); }
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
+   className(lua_State *L) { } \
 
 
 // This goes in the constructor of the "wrapped class"

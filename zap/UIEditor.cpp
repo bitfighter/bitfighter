@@ -720,7 +720,10 @@ string EditorUserInterface::getPluginSignature()
 
    if(mPluginMenu)
       for(S32 i = 0; i < mPluginMenu->getMenuItemCount(); i++)
-         key += itos(mPluginMenu->getMenuItem(i)->getItemType()) + "-";
+      {
+         MenuItem *menuItem = mPluginMenu->getMenuItem(i);
+         key += itos(menuItem->getItemType()) + "-";
+      }
 
    return key;
 }

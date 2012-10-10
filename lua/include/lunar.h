@@ -185,7 +185,7 @@ private:
   static int new_T(lua_State *L) {
      try
      {
-        //lua_remove(L, 1);   // use classname:new(), instead of classname.new()         <=== Why?
+        lua_remove(L, 1);   // use classname:new(), instead of classname.new()         <=== Why?
         T *obj = new T(L);  // call constructor for T objects  (i.e. new TestItem(L) )
 
         // Lua gc will delete this object if T::shouldLuaGarbageCollectThisObject() returns true

@@ -151,6 +151,14 @@ public:
    void setUnselectedColor(const Color &color);
    virtual void setSelectedValueColor(const Color &color);
    virtual void setUnselectedValueColor(const Color &color);
+
+   ///// Lua interface
+   // Top level Lua methods
+   LUAW_DECLARE_CLASS(MenuItem);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
@@ -200,18 +208,18 @@ class ToggleMenuItem : public ValueMenuItem
    typedef ValueMenuItem Parent;
 
 private:
-   string getOptionText();     // Helper function
-
+   string getOptionText();    // Helper function
+   
 protected:
-   //string mValue;
    U32 mIndex;
    bool mWrap;
 
 public:
-   ToggleMenuItem();
+   ToggleMenuItem();          // Default constructor -- do not use!
+
    ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                   void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   ~ToggleMenuItem();
+   ~ToggleMenuItem();      // Destructor
 
    virtual MenuItemTypes getItemType();
    virtual string getValueForDisplayingInMenu();
@@ -231,12 +239,13 @@ public:
 
    Vector<string> mOptions;
 
-   /////// Lua Interface
-   static const char className[];
-   static Lunar<ToggleMenuItem>::RegType methods[];
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ToggleMenuItem)
+   ToggleMenuItem(lua_State *L);      // Constructor called from Lua
 
-   ToggleMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
-   virtual void push(lua_State *L);
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
@@ -292,9 +301,12 @@ protected:
    virtual S32 getBigIncrement();    // How much our counter is incremented when shift is down (multiplier)
 
 public:
+   CounterMenuItem();      // Default constructor, do not use
    CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, 
                    const string &units, const string &minMsg, 
                    const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+
+   ~CounterMenuItem();     // Destructor
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -315,12 +327,14 @@ public:
 
    virtual void activatedWithShortcutKey();
 
-   /////// Lua Interface
-   static const char className[];
-   static Lunar<CounterMenuItem>::RegType methods[];
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CounterMenuItem)
+   CounterMenuItem(lua_State *L);      // Constructor called from Lua
 
-   CounterMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
-   virtual void push(lua_State *L);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 

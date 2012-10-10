@@ -52,9 +52,9 @@ void EditorPlugin::registerClasses()
    //Lunar<LuaLevelGenerator>::Register(L);
 
 #ifndef ZAP_DEDICATED
-   Lunar<ToggleMenuItem>::Register(L);
+   //Lunar<ToggleMenuItem>::Register(L);
    Lunar<YesNoMenuItem>::Register(L);
-   Lunar<CounterMenuItem>::Register(L);
+   //Lunar<CounterMenuItem>::Register(L);
    Lunar<TextEntryMenuItem>::Register(L);
 #endif
 }
@@ -134,28 +134,18 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
 
    // The following block is (very) loosely based on http://www.gamedev.net/topic/392970-lua-table-iteration-in-c---basic-walkthrough/
 
-   lua_pushvalue(L, index);	// Push our table onto the top of the stack                                               -- table table
-   lua_pushnil(L);            // lua_next (below) will start the iteration, it needs nil to be the first key it pops    -- table table nil
+   lua_pushvalue(L, index);	// Push our table onto the top of the stack                                    -- menuName table table
+   lua_pushnil(L);            // lua_next (below) will start the iteration, nil must be first key it pops    -- menuName table table nil
 
    // The table was pushed onto the stack at -1 (recall that -1 is equivalent to lua_gettop)
    // The lua_pushnil then pushed the table to -2, where it is currently located
-   while(lua_next(L, -2))     // -2 is our table
+   // lua_next pops a key from the stack, and pushes a key-value pair from the table at the given index 
+   // (the "next" pair after the given key).  When iteration is finished, lua_next returns 0.
+   while(lua_next(L, -2))     // -2 is our table                                                             -- menuName table table nextIndex menuItem
    {
-      UserData *ud = static_cast<UserData *>(lua_touserdata(L, -1));
+      MenuItem *menuItem = luaW_check<MenuItem>(L, -1);                                                   // -- menuName table table nextIndex menuItem
 
-      if(!ud)                 // Weeds out simple values, wrong userdata types still pass here
-      {
-         char msg[1024];
-         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
-
-         throw LuaException(msg);
-      }
-
-      // We have a userdata
-      LuaObject *obj = ud->objectPtr;                       // Extract the pointer
-      MenuItem *menuItem = static_cast<MenuItem *>(obj);    // Cast it to a MenuItem
-
-      if(!menuItem)                                         // Cast failed -- not a MenuItem... we got some bad args
+      if(!menuItem)        // Cast failed -- not a MenuItem... we got some bad args
       {
          // TODO: This does not report a line number, for some reason...
          // Reproduce with code like this in a plugin
@@ -170,18 +160,17 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
          //end
 
          char msg[256];
-         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at position %d", methodName, menuItems.size() + 1);
+         dSprintf(msg, sizeof(msg), "%s expected a MenuItem at table index %d", methodName, menuItems.size() + 1);
          logprintf(LogConsumer::LogError, msg);
 
          throw LuaException(msg);
       }
 
-      menuItems.push_back(menuItem);                        // Add the MenuItem to our list
-      lua_pop(L, 1);                                        // We extracted that value, pop it off so we can push the next element
-   }
+      menuItems.push_back(menuItem);   // Add the MenuItem to our list
+      lua_pop(L, 1);                   // Remove extracted element from stack                                -- menuName table table nextIndex
+   }                                                                                                   // OR -- menuName table 0 on last iteration
 
-   // We've got all the elements in the table, so clear it off the stack
-   lua_pop(L, 1);
+   lua_pop(L, 1);                      // Remove the "0"                                                     -- menuName table
 
 #endif
    return true;

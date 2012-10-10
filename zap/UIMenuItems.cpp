@@ -38,6 +38,7 @@ namespace Zap
 MenuItem::MenuItem()
 {
    initialize();
+
 }
 
 
@@ -93,13 +94,15 @@ void MenuItem::initialize()
    mSelectedColor = Colors::yellow;
    mUnselectedColor = Colors::white;
    mDisplayValAppendage = " >";
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 MenuItem::~MenuItem() 
 { 
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 } 
 
 // Generally speaking, we don't want Lua to collect menu items -- they are useless if they are not passed back to Bitfighter, and our menu
@@ -215,10 +218,9 @@ bool MenuItem::handleKey(InputCode inputCode)
 }
 
 
-
 void MenuItem::handleTextInput(char ascii)
 {
-
+   // Do nothing
 }
 
 
@@ -228,22 +230,15 @@ void MenuItem::setEnterAdvancesItem(bool enterAdvancesItem)
 }
 
 
-const char *MenuItem::getSpecialEditingInstructions()
-{
-   return "";
-}
+// Default implementations will be overridden by child classes
+const char *MenuItem::getSpecialEditingInstructions() { return ""; } 
+string      MenuItem::getValueForDisplayingInMenu()   { return ""; }
+S32         MenuItem::getIntValue() const             { return 0;  }
 
 
-string MenuItem::getValueForDisplayingInMenu()
-{
-   return "";
-}
-
-
-S32 MenuItem::getIntValue() const
-{
-   return 0;
-}
+void MenuItem::setValue(const string &val)                    { /* Do nothing */ }
+void MenuItem::setIntValue(S32 val)                           { /* Do nothing */ }
+void MenuItem::setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
 
 
 string MenuItem::getValueForWritingToLevelFile()
@@ -255,24 +250,6 @@ string MenuItem::getValueForWritingToLevelFile()
 string MenuItem::getValue() const
 {
    return mDisplayVal;
-}
-
-
-void MenuItem::setValue(const string &val)
-{
-   /* Do nothing */
-}
-
-
-void MenuItem::setIntValue(S32 val)
-{
-   /* Do nothing */
-}
-
-
-void MenuItem::setFilter(LineEditor::LineEditorFilter filter)
-{
-   /* Do nothing */
 }
 
 
@@ -306,20 +283,23 @@ void MenuItem::setUnselectedColor(const Color &color)
 }
 
 
-void MenuItem::setSelectedValueColor(const Color &color)
-{
-   /* Override in children */
-}
+void MenuItem::setSelectedValueColor(const Color &color)   { /* Override in children */ }
+void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in children */ }
 
 
-void MenuItem::setUnselectedValueColor(const Color &color)
-{
-   /* Override in children */
-}
+/**
+ *  @luaclass MenuItem
+ *  @brief    Simple menu item that calls a method or opens a submenu when selected.
+ */
+const luaL_reg           MenuItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile MenuItem::functionArgs[] = { { NULL, { }, 0 } };
+
+const char *MenuItem::luaClassName = "MenuItem";
+REGISTER_LUA_CLASS(MenuItem);
+
 
 ////////////////////////////////////
 ////////////////////////////////////
-
 
 
 MessageMenuItem::MessageMenuItem(string displayVal, const Color &color) : MenuItem(displayVal)
@@ -386,19 +366,28 @@ void ValueMenuItem::setUnselectedValueColor(const Color &color)
 
 ToggleMenuItem::ToggleMenuItem()
 {
-   // Do nothing
+   // Do nothing -- do not use this constructor, please!
 }
 
 
+// Constructor
 ToggleMenuItem::ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                                void (*callback)(ClientGame *, U32), const char *help, InputCode k1, InputCode k2) :
       ValueMenuItem(title, callback, help, k1, k2)
 {
-   //mValue = "";
    mOptions = options;
    mIndex = clamp(currOption, 0, mOptions.size() - 1);
    mWrap = wrap;
    mEnterAdvancesItem = true;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+ToggleMenuItem::~ToggleMenuItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -488,12 +477,6 @@ void ToggleMenuItem::activatedWithShortcutKey()
 }
 
 
-
-//////////
-// Lua interface
-const char ToggleMenuItem::className[] = "ToggleMenuItem";      // Class name as it appears to Lua scripts
-
-
 // Pulls values out of the table at specified index as strings, and puts them all into strings vector
 static void getStringVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<string> &strings)
 {
@@ -538,9 +521,7 @@ static void getStringVectorFromTable(lua_State *L, S32 index, const char *method
 }
 
 
-
-
-// Lua Constructor
+// Lua Constructor, called from scripts
 ToggleMenuItem::ToggleMenuItem(lua_State *L)
 {
    const char *methodName = "ToggleMenuItem constructor";
@@ -553,13 +534,8 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
    mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
    mWrap = getBool(L, 4, methodName, false);
    mHelp = getString(L, 4, "");
-}
 
-
-// Destructor
-ToggleMenuItem::~ToggleMenuItem()
-{
-   // Do nothing
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -599,17 +575,18 @@ string ToggleMenuItem::getValue() const
 }
 
 
-// Define the methods we will expose to Lua
-Lunar<ToggleMenuItem>::RegType ToggleMenuItem::methods[] =
-{
-   {0,0}    // End method list
-};
+//////////
+// Lua interface
 
+/**
+ *  @luaclass ToggleMenuItem
+ *  @brief    Menu with defined list of options
+ */
+const luaL_reg           ToggleMenuItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile ToggleMenuItem::functionArgs[] = { { NULL, { }, 0 } };
 
-void ToggleMenuItem::push(lua_State *L) 
-{  
-   Lunar<ToggleMenuItem>::push(L, this, false); 
-}
+const char *ToggleMenuItem::luaClassName = "ToggleMenuItem";
+REGISTER_LUA_SUBCLASS(ToggleMenuItem, MenuItem);
 
 
 ////////////////////////////////////
@@ -709,6 +686,7 @@ void YesNoMenuItem::push(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
+// Constructor
 CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, 
                                  const string &minMsg, const char *help, InputCode k1, InputCode k2) :
    Parent(title, NULL, help, k1, k2)
@@ -725,9 +703,23 @@ CounterMenuItem::CounterMenuItem(const string &title, S32 value, S32 step, S32 m
 }
 
 
+CounterMenuItem::CounterMenuItem()
+{
+   // Do nothing
+}
+
+
+// Destructor
+CounterMenuItem::~CounterMenuItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
 void CounterMenuItem::initialize()
 {
    mEnterAdvancesItem = true;
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -867,9 +859,19 @@ void CounterMenuItem::activatedWithShortcutKey()
 
 //////////
 // Lua interface
-const char CounterMenuItem::className[] = "CounterMenuItem";      // Class name as it appears to Lua scripts
 
-// Lua Constructor
+/**
+ *  @luaclass CounterMenuItem
+ *  @brief    Menu item for entering a numeric value, with increment and decrement controls.
+ */
+const luaL_reg           CounterMenuItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile CounterMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+
+const char *CounterMenuItem::luaClassName = "CounterMenuItem";
+REGISTER_LUA_SUBCLASS(CounterMenuItem, MenuItem);
+
+
+// Lua Constructor, called from scripts
 CounterMenuItem::CounterMenuItem(lua_State *L)
 {
    const char *methodName = "CounterMenuItem constructor";
@@ -899,19 +901,6 @@ CounterMenuItem::CounterMenuItem(lua_State *L)
       logprintf(LogConsumer::ConsoleMsg, "Usage: CounterMenuItem(<display val (str)> [step (i)] [min val (i)] [max val (i)] [units (str)] [min msg (str)] [help (str)] <value (int))");
       throw e;
    }
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<CounterMenuItem>::RegType CounterMenuItem::methods[] =
-{
-   {0,0}    // End method list
-};
-
-
-void CounterMenuItem::push(lua_State *L) 
-{  
-   Lunar<CounterMenuItem>::push(L, this, false); 
 }
 
 
