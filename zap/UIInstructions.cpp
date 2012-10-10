@@ -87,9 +87,9 @@ static const char *pageHeaders[] = {
 
 
 static ControlStringsEditor consoleCommands1[] = {
-   { "add <a> <b>", "Print a + b -- test command" },
-   { "logprint <str>", "Print a message to the logfile" },
-   { "exit, quit", "Close the console" },
+   { "a = Asteroid.new()", "Create an asteroid and set it to the variable 'a'" },
+   { "a:setVel(100, 0)", "Set the asteroid's velocity to move slowly to the right" },
+   { "a:addToGame()", "Insert the asteroid into the currently running game" },
    { "", "" },      // End of list
 };
 

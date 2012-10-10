@@ -221,6 +221,17 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings)
    delete [] screenBuffer;
 }
 
+// We have created FILE* pointer, we write FILE* pointer here, not in libpng14.dll
+// This is to avoid conflicts with different FILE struct between compilers.
+// alternative is to make FILE* pointer get created, written and closed entirely inside libpng14.dll
+static void PNGAPI png_user_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+   FILE *f = (png_FILE_p)(png_get_io_ptr(png_ptr));
+   png_size_t check = fwrite(data, 1, length, f);
+   if (check != length)
+      png_error(png_ptr, "Write Error");
+}
+
 
 // Saves a PNG
 bool ScreenShooter::writePNG(const char *file_name, png_bytep *rows, S32 width, S32 height, S32 colorType, S32 bitDepth)
@@ -246,7 +257,9 @@ bool ScreenShooter::writePNG(const char *file_name, png_bytep *rows, S32 width, 
    pngInfo = png_create_info_struct(pngContainer);
 
    // Set the image details
-   png_init_io(pngContainer, file);
+   //png_init_io(pngContainer, file); // Having fwrite inside libpng14.dll (and fopen outside of .dll) can be crashy...
+   png_set_write_fn(pngContainer, file, &png_user_write_data, NULL);
+
    png_set_compression_level(pngContainer, Z_DEFAULT_COMPRESSION);
    png_set_IHDR(pngContainer, pngInfo, width, height, bitDepth, colorType,
          PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,

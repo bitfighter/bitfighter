@@ -209,6 +209,7 @@ Section "Install"
   File "..\..\..\lib\libvorbisfile.dll"
   File "..\..\..\lib\SDL.dll"
   File "..\..\..\lib\zlib1.dll"
+  File "..\..\..\lib\libpng14.dll"
 
   File "..\..\..\doc\readme.txt"
   File "..\..\..\End-User License.txt"

@@ -209,46 +209,6 @@ void GameUserInterface::quitEngineerHelper()
 }
 
 
-#ifndef BF_NO_CONSOLE
-// Callback for enter key being pressed -- some OGLConsole commands (show, hide) act on a internally maintained "current" instance 
-// of the console, and some (like output) act on a particular (passed) console..  Since we only have a
-// single console instance, we'll just ignore the passed console and work with our global instance.  This is kind of stinky design,
-// but it lets us excoriate all direct references to OGLConsole from our code.
-static void processGameConsoleCommandCallback(OGLCONSOLE_Console console, char *cmd)
-{
-   if(strncmp(cmd, "quit", 4) == 0 || strncmp(cmd, "exit", 4) == 0) 
-      gConsole.hide();
-
-   else if(strncmp(cmd, "help", 4) == 0 || strncmp(cmd, "?", 1) == 0)
-      gConsole.output("Commands: help; add; logprint; quit\n");
-
-   else if(strncmp(cmd, "add", 3) == 0)
-   {
-      int a, b;
-      if(sscanf(cmd, "add %i %i", &a, &b) == 2)
-      {
-         gConsole.output("%i + %i = %i\n", a, b, a+b);
-         return;
-      }
-
-      gConsole.output("usage: add INT INT\n");
-   }
-
-   else if(strncmp(cmd, "logprint", 8) == 0)
-   {
-      const char *cstr = strstr(cmd, " ");
-
-      if(cstr)
-         logprintf("%s", trim_left(cstr).c_str());
-      else
-         logprintf("");
-   }
-    else
-      gConsole.output("Unknown command: %s\n", cmd);
-}
-#endif
-
-
 void GameUserInterface::onActivate()
 {
    mDisableShipKeyboardInput = false;  // Make sure our ship controls are active
@@ -273,8 +233,6 @@ void GameUserInterface::onActivate()
    }
 
    mShutdownMode = None;
-
-   //gConsole.setCommandProcessorCallback(processGameConsoleCommandCallback);
 }
 
 

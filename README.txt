@@ -66,8 +66,20 @@ Bitfighter README
 
    Click Debug > Start Debugging (or press F5) to run the game.
 
+ c) Windows Mingw
 
- c) MacOS X (10.4 - 10.7)
+   Bitfighter can also be compiled using Mingw for windows.
+
+   Install Mingw, available as free download at www.mingw.org
+
+   Run "cmd" to open command, then enter these command:
+
+   PATH = C:\MinGW\bin;%PATH%
+   cd C:\Program Files\Bitfighter
+   mingw32-make
+
+
+ d) MacOS X (10.4 - 10.7)
 
    Bitfighter is built with the Xcode IDE.  The Xcode project is found in the directory:
 

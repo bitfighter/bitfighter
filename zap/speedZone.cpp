@@ -299,7 +299,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 
 
    if(argc >= 5)
-      mSpeed = max(minSpeed, min(maxSpeed, (U16)(atoi(argv[4]))));
+      mSpeed = max((U16)minSpeed, min((U16)maxSpeed, (U16)(atoi(argv[4]))));
 
    preparePoints();
 

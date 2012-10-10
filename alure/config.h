@@ -6,13 +6,15 @@
 #define WIN
 #endif
 
-#ifndef WIN
+#ifdef __GNUC__
 /* Define if we have GCC's constructor attribute */
 #define HAVE_GCC_CONSTRUCTOR
 
 /* Define if we have GCC's visibility attribute */
 #define HAVE_GCC_VISIBILITY
+#endif
 
+#ifndef WIN
 /* Define if we have dlfcn.h */
 #define HAVE_DLFCN_H
 
@@ -31,7 +33,9 @@
 #define HAVE_WINDOWS_H
 
 /* Define if we have _fseeki64 */
+#if defined(_MSC_VER) || __MSVCRT_VERSION__ >= 0x800  // mingw might not use MSVCRT
 #define HAVE__FSEEKI64
+#endif
 #endif
 
 

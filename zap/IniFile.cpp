@@ -197,7 +197,7 @@ bool CIniFile::WriteFile()
 S32 CIniFile::findSection(const string &sectionName) const
 {
    for(S32 sectionId = 0; sectionId < sectionNames.size(); ++sectionId)
-      if(CheckCase(sectionNames[sectionId]) == CheckCase(sectionName))
+      if(CheckCase(sectionNames[sectionId], sectionName))
          return sectionId;
    return noID;
 }
@@ -208,7 +208,7 @@ S32 CIniFile::FindValue(S32 const sectionId, const string &keyName) const
       return noID;
 
    for(S32 keyID = 0; keyID < sections[sectionId].keys.size(); ++keyID)
-      if(CheckCase(sections[sectionId].keys[keyID]) == CheckCase(keyName))
+      if(CheckCase(sections[sectionId].keys[keyID], keyName))
          return keyID;
    return noID;
 }
@@ -659,12 +659,12 @@ bool CIniFile::deleteAllSectionComments()
 }
 
 
-string CIniFile::CheckCase(string s) const
+bool CIniFile::CheckCase(const string &s1, const string &s2) const
 {
    if(caseInsensitive)
-      for(string::size_type i = 0; i < s.length(); i++)
-         s[i] = tolower(s[i]);
-   return s;
+      return stricmp(s1.c_str(), s2.c_str()) == 0;
+   else
+      return s1 == s2;
 }
 
 

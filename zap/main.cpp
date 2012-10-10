@@ -159,6 +159,11 @@ using namespace TNL;
 #endif
 
 
+#ifdef __MINGW32__
+#undef main
+#endif
+
+
 // Maybe don't enable by default?
 //#if defined(TNL_OS_LINUX) && defined(ZAP_DEDICATED)
 //#define USE_EXCEPTION_BACKTRACE
@@ -970,7 +975,11 @@ void exceptionHandler(int sig) {
 
 using namespace Zap;
 
-#ifdef WIN32
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0500  // windows 2000 or later
+#define USE_HIDING_CONSOLE
+#endif
+
+#ifdef USE_HIDING_CONSOLE
 // with some help of searching and finding this:
 // http://stackoverflow.com/questions/8610489/distinguish-if-program-runs-by-clicking-on-the-icon-typing-its-name-in-the-cons
 static bool thisProgramHasCreatedConsoleWindow()
@@ -1096,7 +1105,7 @@ int main(int argc, char **argv)
 
 #endif   // !ZAP_DEDICATED
 
-#if defined(WIN32) && !defined(TNL_DEBUG)
+#if defined(USE_HIDING_CONSOLE) && !defined(TNL_DEBUG)
       // This basically hides the newly created console window only if double-clicked from icon
       // No freeConsole when started from command (cmd) to continues outputting text to console
       if(thisProgramHasCreatedConsoleWindow())

@@ -184,8 +184,11 @@ int OGLCONSOLE_CreateFont()
    {
 		/* Unpack font data */
 
+#if defined(__GNUC__) && __GNUC__ >= 4  // gcc 4.7.0 on mingw appears to have problems with _alloca
+      unsigned char data[OGLCONSOLE_FontData.height * OGLCONSOLE_FontData.width * ALPHA_FACT];
+#else
       unsigned char *data = (unsigned char *) _alloca(OGLCONSOLE_FontData.height * OGLCONSOLE_FontData.width * ALPHA_FACT);
-
+#endif
 
 		const unsigned char *src = OGLCONSOLE_FontData.pixel_data;
 		unsigned char *dst = data;
