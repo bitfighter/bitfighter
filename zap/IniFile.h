@@ -50,7 +50,7 @@ private:
    Vector<section> sections;         // This is our main Vector that holds all of our INI data
    Vector<string>  sectionNames;     // Holds just the section names
    Vector<string>  headerComments;   // Holds the header comments that aren't part of any section
-   string CheckCase( string s) const;
+   bool CheckCase(const string &s1, const string &s2) const;
 
    string section;
 
