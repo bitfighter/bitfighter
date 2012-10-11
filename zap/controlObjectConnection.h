@@ -69,6 +69,9 @@ private:
 
    void onGotNewMove(const Move &move);
 
+protected:
+   bool mIsBusy;
+
 public:
    ControlObjectConnection();
 

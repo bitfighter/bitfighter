@@ -1213,7 +1213,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsBusy, (StringTableEntry name, bool isB
 // Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
-   if(mClientInfo->isBusy() == isBusy)
+   if(mIsBusy == isBusy)
       return;
 
    for(S32 i = 0; i < mServerGame->getClientCount(); i++)
@@ -1226,6 +1226,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
       clientInfo->getConnection()->s2cSetIsBusy(mClientInfo->getName(), isBusy);
    }
 
+   mIsBusy = isBusy;
    mClientInfo->setIsBusy(isBusy);
 
    // If we're busy, force spawndelay timer to run out

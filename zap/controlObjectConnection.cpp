@@ -45,6 +45,7 @@ ControlObjectConnection::ControlObjectConnection()
    mPrevAngle = 0;
 
    mObjectMovedThisGame = false;
+   mIsBusy = false;
 }
 
 
@@ -257,8 +258,11 @@ void ControlObjectConnection::onGotNewMove(const Move &move)
    // See if the player actually moved, or if this is just an empty "do nothing" move
    if(move.x != 0 || move.y != 0 || move.fire || move.isAnyModActive() || move.angle != mPrevAngle)
    {
-      resetTimeSinceLastMove();
       setObjectMovedThisGame(true);
+
+      // Only reset time if this connection isn't 'busy' (chatting or in menus)
+      if(!mIsBusy)
+         resetTimeSinceLastMove();
    }
 
    mPrevAngle = move.angle;
