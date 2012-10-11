@@ -20,11 +20,11 @@ The Geom class provides a collection of tools to make common transormations to a
 
 * Other datatypes
 
-bool
+bool - Either \e true or \e false.  In Lua, both nil and false make a condition false; any other value makes it true.
 
-int
+int - 
 
-num
+*num - A real (double-precision floating-point) number.
 
 @subsection step1 Step 1: Opening the box
 
