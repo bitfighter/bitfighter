@@ -262,6 +262,7 @@ private:
 
 public:
    YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
+   ~YesNoMenuItem();    // Destructor
 
    virtual string getValueForDisplayingInMenu();
    virtual string getValueForWritingToLevelFile();
@@ -270,11 +271,13 @@ public:
    virtual void setIntValue(S32 value);
 
    /////// Lua Interface
-   static const char className[];
-   static Lunar<YesNoMenuItem>::RegType methods[];
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(YesNoMenuItem)
+   YesNoMenuItem(lua_State *L);      // Constructor called from Lua
 
-   YesNoMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
-   virtual void push(lua_State *L);
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
 };
 
 ////////////////////////////////////////
@@ -330,7 +333,6 @@ public:
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CounterMenuItem)
    CounterMenuItem(lua_State *L);      // Constructor called from Lua
-
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -401,6 +403,8 @@ public:
    TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
+   ~TextEntryMenuItem();      // Destructor
+
    virtual MenuItemTypes getItemType();
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
@@ -429,12 +433,12 @@ public:
    virtual bool hasTextInput();
 
    /////// Lua Interface
-   static const char className[];
-   static Lunar<TextEntryMenuItem>::RegType methods[];
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TextEntryMenuItem)
+   TextEntryMenuItem(lua_State *L);      // Constructor called from Lua
 
-   TextEntryMenuItem(lua_State *L);                      //  Lua constructor -- so we can construct this from Lua for plugins
-   virtual void push(lua_State *L);
-
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 ////////////////////////////////////

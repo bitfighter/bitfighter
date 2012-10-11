@@ -44,8 +44,6 @@ namespace Zap
       EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
                    GridDatabase *gridDatabase, LevelLoader *caller);
      
-      void registerClasses();
-
       bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
    };
 

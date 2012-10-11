@@ -44,22 +44,6 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
 }
 
 
-void EditorPlugin::registerClasses()
-{
-   Parent::registerClasses();  
-
-   // Specific classes needed for LevelGen scripts
-   //Lunar<LuaLevelGenerator>::Register(L);
-
-#ifndef ZAP_DEDICATED
-   //Lunar<ToggleMenuItem>::Register(L);
-   Lunar<YesNoMenuItem>::Register(L);
-   //Lunar<CounterMenuItem>::Register(L);
-   Lunar<TextEntryMenuItem>::Register(L);
-#endif
-}
-
-
 // Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
 bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error)
 {

@@ -580,7 +580,7 @@ string ToggleMenuItem::getValue() const
 
 /**
  *  @luaclass ToggleMenuItem
- *  @brief    Menu with defined list of options
+ *  @brief    Menu item that lets users choose one of several options.
  */
 const luaL_reg           ToggleMenuItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile ToggleMenuItem::functionArgs[] = { { NULL, { }, 0 } };
@@ -599,6 +599,13 @@ YesNoMenuItem::YesNoMenuItem(string title, bool currOption, const char *help, In
    initialize();
 
    setIndex(currOption);
+}
+
+
+// Destructor
+YesNoMenuItem::~YesNoMenuItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -639,6 +646,8 @@ void YesNoMenuItem::initialize()
 
    mOptions.push_back("No");     // 0
    mOptions.push_back("Yes");    // 1
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -650,7 +659,17 @@ void YesNoMenuItem::setIndex(S32 index)
 
 //////////
 // Lua interface
-const char YesNoMenuItem::className[] = "YesNoMenuItem";      // Class name as it appears to Lua scripts
+
+/**
+ *  @luaclass YesNoMenuItem
+ *  @brief    Menu where user can choose Yes or No.
+ */
+const luaL_reg           YesNoMenuItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile YesNoMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+
+const char *YesNoMenuItem::luaClassName = "YesNoMenuItem";
+REGISTER_LUA_SUBCLASS(YesNoMenuItem, MenuItem);
+
 
 // Lua Constructor
 YesNoMenuItem::YesNoMenuItem(lua_State *L)
@@ -667,19 +686,6 @@ YesNoMenuItem::YesNoMenuItem(lua_State *L)
    // Optional (but recommended) items
    setIndex(getInt(L, 2, 1) - 1);                // - 1 for compatibility with Lua's 1-based array index
    mHelp = getString(L, 3, "");
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<YesNoMenuItem>::RegType YesNoMenuItem::methods[] =
-{
-   {0,0}    // End method list
-};
-
-
-void YesNoMenuItem::push(lua_State *L) 
-{  
-   Lunar<YesNoMenuItem>::push(L, this, false); 
 }
 
 
@@ -1100,10 +1106,19 @@ TextEntryMenuItem::TextEntryMenuItem(string title, string val, string emptyVal, 
 }
 
 
+// Destructor
+TextEntryMenuItem::~TextEntryMenuItem()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
 void TextEntryMenuItem::initialize()
 {
    mEnterAdvancesItem = true;
    mTextEditedCallback = NULL;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -1240,7 +1255,17 @@ void TextEntryMenuItem::setSecret(bool secret)
 
 //////////
 // Lua interface
-const char TextEntryMenuItem::className[] = "TextEntryMenuItem";      // Class name as it appears to Lua scripts
+
+/**
+ *  @luaclass TextEntryMenuItem
+ *  @brief    Menu item allowing users to enter a text value.
+ */
+const luaL_reg           TextEntryMenuItem::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile TextEntryMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+
+const char *TextEntryMenuItem::luaClassName = "TextEntryMenuItem";
+REGISTER_LUA_SUBCLASS(TextEntryMenuItem, MenuItem);
+
 
 // Lua Constructor
 TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
@@ -1257,19 +1282,6 @@ TextEntryMenuItem::TextEntryMenuItem(lua_State *L)
    mEmptyVal = getString(L, 3, "");
    mLineEditor.mMaxLen = getInt(L, 4, 32);
    mHelp = getString(L, 5, "");
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<TextEntryMenuItem>::RegType TextEntryMenuItem::methods[] =
-{
-   {0,0}    // End method list
-};
-
-
-void TextEntryMenuItem::push(lua_State *L) 
-{  
-   Lunar<TextEntryMenuItem>::push(L, this, false); 
 }
 
 
