@@ -691,8 +691,6 @@ extern Color EDITOR_WALL_FILL_COLOR;
 
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
-const char PolyWall::className[] = "PolyWall";      // Class name as it appears to Lua scripts
-
 
 // Constructor
 PolyWall::PolyWall() : Parent()
@@ -753,28 +751,10 @@ F32 PolyWall::getEditorRadius(F32 currentScale)
 }
 
 
-const char *PolyWall::getEditorHelpString()
-{
-   return "Polygonal wall item lets you be creative with your wall design.";
-}
-
-
-const char *PolyWall::getPrettyNamePlural()
-{
-   return "PolyWalls";
-}
-
-
-const char *PolyWall::getOnDockName()
-{
-   return "PolyWall";
-}
-
-
-const char *PolyWall::getOnScreenName()
-{
-   return "PolyWall";
-}
+const char *PolyWall::getOnScreenName()     { return "PolyWall";  }
+const char *PolyWall::getOnDockName()       { return "PolyWall";  }
+const char *PolyWall::getPrettyNamePlural() { return "PolyWalls"; }
+const char *PolyWall::getEditorHelpString() { return "Polygonal wall item lets you be creative with your wall design."; }
 
 
 void PolyWall::setSelected(bool selected)
@@ -798,28 +778,6 @@ void PolyWall::onGeomChanged()
 void PolyWall::onItemDragging()
 {
    // Do nothing -- this is here to override PolygonObject::onItemDragging(), onGeomChanged() should only be called after move is complete
-}
-
-
-/////
-// Lua interface  ==>  don't need these!!
-
-//  Lua constructor
-PolyWall::PolyWall(lua_State *L)
-{
-   /* Do nothing */
-}
-
-
-S32 PolyWall::getClassID(lua_State *L)
-{
-   return returnInt(L, PolyWallTypeNumber);
-}
-
-
-void PolyWall::push(lua_State *L)
-{
-   Lunar<PolyWall>::push(L, this);
 }
 
 
@@ -847,16 +805,8 @@ WallEdge::~WallEdge()
 }
 
 
-Point *WallEdge::getStart()
-{
-   return &mStart;
-}
-
-
-Point *WallEdge::getEnd()
-{
-   return &mEnd;
-}
+Point *WallEdge::getStart() { return &mStart; }
+Point *WallEdge::getEnd()   { return &mEnd;   }
 
 
 bool WallEdge::getCollisionPoly(Vector<Point> &polyPoints) const

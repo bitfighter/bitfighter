@@ -215,19 +215,7 @@ public:
 
    F32 getEditorRadius(F32 currentScale);
 
-   /////
-   // Lua interface  ==>  don't need these!!
-
-   PolyWall(lua_State *L);         //  Lua constructor
-
-   static const char className[];  // Class name as it appears to Lua scripts
-   static Lunar<PolyWall>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
    TNL_DECLARE_CLASS(PolyWall);
-
-private:
-   void push(lua_State *L);
 };
 
 
