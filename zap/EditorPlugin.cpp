@@ -26,7 +26,7 @@
 #include "EditorPlugin.h"         // Header
 
 #ifndef ZAP_DEDICATED
-#  include "UIMenuItems.h"      // delete
+//#  include "UIMenuItems.h"      // delete
 #endif
 
 
@@ -40,8 +40,19 @@ EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scrip
                            GridDatabase *gridDatabase, LevelLoader *caller) : 
       Parent(scriptName, scriptArgs, gridSize, gridDatabase, caller)
 {
-   // Do nothing
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
+
+
+// Destructor
+EditorPlugin::~EditorPlugin()
+{
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted EditorPlugin (%p)\n", this);
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+const char *EditorPlugin::getErrorMessagePrefix() { return "***PLUGIN ERROR***"; }
 
 
 // Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
@@ -98,6 +109,19 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
 
    return false;
 #endif
+}
+
+
+bool EditorPlugin::prepareEnvironment()
+{
+   LuaScriptRunner::prepareEnvironment();
+
+   //if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
+   //   return false;
+
+   setSelf(L, this, "plugin");
+
+   return true;
 }
 
 
@@ -160,6 +184,43 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
    return true;
 }
 
+
+//// Lua methods
+/**
+ *  @luaclass EditorPlugin
+ *  @brief    Main object for running methods related to editor plugins.
+ *  @descr    The current editor plugin is always available in a global variable called "plugin".
+ */
+
+const char *EditorPlugin::luaClassName = "EditorPlugin";
+
+REGISTER_LUA_CLASS(EditorPlugin);
+
+//               Fn name    Param profiles         Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const LuaFunctionProfile EditorPlugin::functionArgs[] = { { NULL, { }, 0 } };
+
+
+// Return a table of all objects in the current selection 
+S32 EditorPlugin::getSelectedObjects(lua_State *L)
+{
+   return 0;
+}
+
+
+// Return a table of all objects in the editor 
+S32 EditorPlugin::getAllObjects(lua_State *L)
+{
+   return 0;
+}
 
 
 }

@@ -75,8 +75,6 @@ Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),
    mScore = 0;
    mTotalScore = 0;
 
-   mErrorMsgPrefix = "***ROBOT ERROR***";
-
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
    {
       mModulePrimaryActive[i] = false;
@@ -158,6 +156,9 @@ bool Robot::initialize(Point &pos)
 } 
 
 
+const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
+
+
 // Server only
 bool Robot::start()
 {
@@ -187,16 +188,7 @@ bool Robot::prepareEnvironment()
       if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY))
          return false;
 
-      // The following code pushes the robot onto the lua stack, and binds it to the variable "bot" which can 
-      // be used to call functions using bot:f() syntax
-      lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
-      lua_pushliteral(L, "bot");                            //                                        -- env_table, "bot"
-      luaW_push<Robot>(L, this);                            //                                        -- env_table, "bot", *this
-
-      lua_rawset(L, -3);                                    // env_table["bot"] = *this               -- env_table
-      lua_pop(L, 1);                                        //                                        -- <<empty stack>>
-
-      TNLAssert(lua_gettop(L) <= 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+      setSelf(L, this, "bot");
    }
    catch(LuaException &e)
    {

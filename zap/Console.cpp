@@ -45,7 +45,6 @@ namespace Zap
    {
       mConsole = NULL;
       mScriptId = "console";    // Overwrite default name with something custom
-      mErrorMsgPrefix = "Console";
    };     
 
 
@@ -79,6 +78,9 @@ namespace Zap
 
       setCommandProcessorCallback(processConsoleCommandCallback);
    }
+
+
+   const char *Console::getErrorMessagePrefix() { return "Console"; }
 
 
    // TODO: Merge with luaLevelGenerator version, which is almost identical

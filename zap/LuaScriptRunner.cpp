@@ -81,7 +81,6 @@ LuaScriptRunner::LuaScriptRunner()
       mSubscriptions[i] = false;
 
    mScriptId = "script" + itos(mNextScriptId++);
-   mErrorMsgPrefix = "SCRIPT";
 }
 
 
@@ -97,6 +96,8 @@ LuaScriptRunner::~LuaScriptRunner()
    // And delete the script's environment table from the Lua instance
    deleteScript(getScriptId());
 }
+
+ const char *LuaScriptRunner::getErrorMessagePrefix() { return "SCRIPT"; }
 
 
 // Static method setting static vars
@@ -231,7 +232,7 @@ bool LuaScriptRunner::loadScript()
    if(lua_gettop(L) == 0)     // Script compile error?
    {
       logError("Error compiling script -- aborting.");
-      return false;
+         return false;
    }
 
    // So, however we got here, the script we want to run is now sitting on top of the stack
@@ -270,16 +271,14 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
    try 
    {
       // Retrieve the bot's getName function, and put it on top of the stack
-      bool ok = retrieveFunction("_main");     
-
-      TNLAssert(ok, "_main function not found -- is lua_helper_functions corrupt?");
+      bool ok = retrieveFunction("main");     
 
       if(!ok)
       {      
-         const char *msg = "Function _main() could not be found! Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.";
+         const char *msg = "Function main() could not be found.  This _might_ be OK, but probably isn't.  If it is intentional, please add an empty function called main() to avoid this message.";
          logError(msg);
          throw LuaException(msg);
-      }
+      }  
 
       setLuaArgs(args);
 
@@ -443,7 +442,6 @@ bool LuaScriptRunner::prepareEnvironment()
 
    luaL_dostring(L, "e = table.copy(_G)");               // Copy global environment to create a local scripting environment
    lua_getglobal(L, "e");                                //                                        -- environment e   
-   //luaL_dostring(L, "e = nil");  // ??? Does this fix the stack overflow??
    lua_setfield(L, LUA_REGISTRYINDEX, getScriptId());    // Store copied table in the registry     -- <<empty stack>> 
 
    return true;
@@ -459,7 +457,7 @@ void LuaScriptRunner::logError(const char *format, ...)
    vsnprintf(buffer, sizeof(buffer), format, args);
 
    // Log the error to the logging system and also to the game console
-   logprintf(LogConsumer::LogError, "%s %s", mErrorMsgPrefix, buffer);
+   logprintf(LogConsumer::LogError, "%s %s", getErrorMessagePrefix(), buffer);
 
    va_end(args);
 

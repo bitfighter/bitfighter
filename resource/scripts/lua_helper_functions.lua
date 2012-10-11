@@ -60,18 +60,6 @@ include("list")
 arg = arg or { }  -- Make sure arg is defined before we ban globals
 
 
---
--- Wrapper to call the script's main() function in a safe manner
---
-function _main()
-   if _declared("main") and type(main) == "function" then
-      main()
-   else   
-      error("WARNING: No main() function could be found!")
-   end
-end
-
-
 -- _fillTable = {}
 
 function table.clear(tab)
@@ -120,7 +108,7 @@ mt.__declared = {}
 mt.__newindex = function (t, n, v)
   if __STRICT and not mt.__declared[n] then
     local w = debug.getinfo(2, "S").what     -- See PiL ch 23
-    if w == "Lua" then                       -- It's a Lua function!
+    if w == "C" then                         -- It's a C function!
       local name = debug.getinfo(2, "n").name
       if name ~= "main" then                    -- Allowed to declare globals in main function
          error("Attempted assign to undeclared variable '"..n.."' in function '"..(name or "<<unknown function>>").."'.\n" ..

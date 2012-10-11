@@ -56,13 +56,15 @@ public:
    LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, LevelLoader *caller);   
    virtual ~LuaLevelGenerator();       // Destructor
 
-   bool prepareEnvironment();
+   virtual bool prepareEnvironment();
    
    virtual void registerClasses();
    void onScriptInitialized();
    bool loadScript();
    bool runScript();      
    string getScriptName();
+
+   virtual const char *getErrorMessagePrefix();
 
    static const char className[];
 

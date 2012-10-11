@@ -50,10 +50,20 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 
    mGridSize = gridSize;
    mCaller = caller;
-   mErrorMsgPrefix = "***LEVELGEN ERROR***";
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
+
+
+// Destructor
+LuaLevelGenerator::~LuaLevelGenerator()
+{
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaLevelGenerator (%p)\n", this);
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+const char *LuaLevelGenerator::getErrorMessagePrefix() { return "***LEVELGEN ERROR***"; }
 
 
 // Fire up a Lua interprer, load the script, and execute the chunk to get it in memory
@@ -75,40 +85,11 @@ string LuaLevelGenerator::getScriptName()
 }
 
 
-#ifndef ZAP_DEDICATED
-/* This function not used anywhere?
-      static ToggleMenuItem *getMenuItem(lua_State *L, S32 index)
-      {
-         LuaUtil::dumpStack(L);
-
-        //luaL_checktype(L, index, LUA_TUSERDATA);      // Confirm the item at index is a full userdata
-        ToggleMenuItem *pushedMenuItem = static_cast<ToggleMenuItem *>(lua_touserdata(L, index));
-        if(pushedMenuItem == NULL) 
-           luaL_typerror(L, index, "ToggleMenuItem");
-
-        //MenuItem im = *pushedMenuItem;
-        //if(!pushedMenuItem)
-        //  luaL_error(L, "null menuItem");
-
-        return pushedMenuItem;
-      }
-*/
-#endif
-
-
-
 const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
 
 // Used in addItem() below...
 static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 
-
-// Destructor
-LuaLevelGenerator::~LuaLevelGenerator()
-{
-   logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaLevelGenerator (%p)\n", this);
-   LUAW_DESTRUCTOR_CLEANUP;
-}
 
 // TODO: Provide mechanism to modify basic level parameters like game length and teams.
 
@@ -307,14 +288,9 @@ bool LuaLevelGenerator::prepareEnvironment()
    lua_pushliteral(L, "_GRID_SIZE");                     //                                        -- env_table, "_GRID_SIZE"
    lua_pushnumber(L, mGridSize);                         //                                        -- env_table, "_GRID_SIZE", mGridSize
    lua_rawset(L, -3);                                    // env_table["_GRID_SIZE"] = *this        -- env_table
-                                                         
-   lua_pushliteral(L, "levelgen");                       //                                        -- env_table, "levelgen"
-   luaW_push(L, this);                                   //                                        -- env_table, "levelgen", *this
-   lua_rawset(L, -3);                                    // env_table["levelgen"] = *this          -- env_table
-
    lua_pop(L, -1);                                       // Cleanup                                -- <<empty stack>>
 
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   setSelf(L, this, "levelgen");
 
    return true;
 }
@@ -380,14 +356,9 @@ S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L);   }
 S32 LuaLevelGenerator::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 
-const LuaFunctionProfile LuaLevelGenerator::functionArgs[] =
-{
-   { NULL, { }, 0 }
-};
-
+const LuaFunctionProfile LuaLevelGenerator::functionArgs[] = { { NULL, { }, 0 } };
 
 REGISTER_LUA_CLASS(LuaLevelGenerator);
-
 
 };
 

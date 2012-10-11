@@ -98,8 +98,7 @@ private:
    bool loadCompileSaveScript(const char *filename, const char *registryKey);
    bool loadCompileScript(const char *filename);
 
-   void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
-   void setEnums(lua_State *L);                 // Set a whole slew of enum values that we want the scripts to have access to
+   void setEnums(lua_State *L);                       // Set a whole slew of enum values that we want the scripts to have access to
 
 
 protected:
@@ -108,7 +107,6 @@ protected:
    Vector<string> mScriptArgs;   // List of arguments passed to the script
 
    string mScriptId;             // Unique id for this script
-   const char *mErrorMsgPrefix;
 
    virtual bool loadScript();
    bool startLua();
@@ -116,18 +114,38 @@ protected:
 
    // This method should be abstract, but luaW requires us to be able to instantiate this class
    virtual bool prepareEnvironment();
+   void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
    static void printStackTrace(lua_State *L);
 
    static int luaPanicked(lua_State *L);
-
    virtual void registerClasses();
-   
    void setEnvironment();
+   static void deleteScript(const char *name);  // Remove saved script from the Lua registry
+   virtual void tickTimer(U32 deltaT);          // Advance script timers
 
-   static void deleteScript(const char *name);     // Remove saved script from the Lua registry
+   void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
-   virtual void tickTimer(U32 deltaT);             // Advance script timers
+
+
+   // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
+// Basically sets the "bot", "levelgen", and "plugin" vars.
+template <class T>
+void setSelf(lua_State *L, T *self, const char *name)
+{
+   lua_getfield(L, LUA_REGISTRYINDEX, self->getScriptId());  // Put script's env table onto the stack  -- env_table
+                                                         
+   lua_pushstring(L, name);                              //                                            -- env_table, "plugin"
+   luaW_push(L, self);                                   //                                            -- env_table, "plugin", *this
+   lua_rawset(L, -3);                                    // env_table["plugin"] = *this                -- env_table
+                                                                                                    
+   lua_pop(L, -1);                                       // Cleanup                                    -- <<empty stack>>
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+}
+
+
+
 
 public:
    LuaScriptRunner();               // Constructor
@@ -136,6 +154,8 @@ public:
    static void clearScriptCache();
 
    static void setScriptingDir(const string &scriptingDir);
+
+   virtual const char *getErrorMessagePrefix();
 
    static lua_State *getL();
    static void shutdown();

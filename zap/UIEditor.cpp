@@ -701,10 +701,10 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 }
 
 
-static void showPluginError(const ClientGame *game)
+static void showPluginError(const ClientGame *game, const char *msg)
 {
    Vector<StringTableEntry> messages;
-   messages.push_back("This plugin encountered an error configuring its options menu.");
+   messages.push_back(string("This plugin encountered an error ") + msg + ".");
    messages.push_back("It has probably been misconfigured.");
    messages.push_back("");
    messages.push_back("See the Bitfighter logfile or console for details.");
@@ -747,7 +747,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
    {
-      showPluginError(getGame());
+      showPluginError(getGame(), "during loading");
       return;
    }
 
@@ -763,7 +763,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    if(error)
    {
-      showPluginError(getGame());
+      showPluginError(getGame(), "configuring its options menu.");
       return;
    }
 

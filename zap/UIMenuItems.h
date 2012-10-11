@@ -240,7 +240,7 @@ public:
    Vector<string> mOptions;
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ToggleMenuItem)
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ToggleMenuItem);
    ToggleMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
@@ -271,7 +271,7 @@ public:
    virtual void setIntValue(S32 value);
 
    /////// Lua Interface
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(YesNoMenuItem)
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(YesNoMenuItem);
    YesNoMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
@@ -331,7 +331,7 @@ public:
    virtual void activatedWithShortcutKey();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CounterMenuItem)
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CounterMenuItem);
    CounterMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
@@ -433,7 +433,7 @@ public:
    virtual bool hasTextInput();
 
    /////// Lua Interface
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TextEntryMenuItem)
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TextEntryMenuItem);
    TextEntryMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;

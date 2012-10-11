@@ -102,6 +102,8 @@ public:
 
    bool isRobot();
 
+   const char *getErrorMessagePrefix();
+
    LuaPlayerInfo *getPlayerInfo();
    bool start();
 

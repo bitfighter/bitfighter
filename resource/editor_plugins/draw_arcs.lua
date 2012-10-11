@@ -19,9 +19,10 @@ function getArgsMenu()
          CounterMenuItem.new("Start of arc",   90, 1,       0,   360, "degrees",    "", "Start angle of arc from the positive x axis"),
 
          ToggleMenuItem.new ("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert"),
-         
+
          CounterMenuItem.new("Barrier Width",  50, 1,       1,    50, "grid units", "", "Width of wall if BarrierMaker is selected above"),
          CounterMenuItem.new("Center X",        0, 10, -10000, 10000, "",           "", "X coordinate of center of arc"),
+         
          CounterMenuItem.new("Center Y",        0, 10, -10000, 10000, "",           "", "Y coordinate of center of arc")
       }
 end

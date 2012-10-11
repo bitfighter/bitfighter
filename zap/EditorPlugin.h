@@ -31,21 +31,41 @@
 
 namespace Zap
 {
-   class EditorPlugin : public LuaLevelGenerator
-   {
-      typedef LuaLevelGenerator Parent;
+class EditorPlugin : public LuaLevelGenerator
+{
+   typedef LuaLevelGenerator Parent;
 
-   private:
-      static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
+private:
+   static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
 
-   public:
-      // Constructors
-      EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
-      EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                   GridDatabase *gridDatabase, LevelLoader *caller);
+public:
+   // Constructors
+   EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!
+   EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
+                  GridDatabase *gridDatabase, LevelLoader *caller);
+
+   ~EditorPlugin();     // Destructor
+
+   bool prepareEnvironment();
+
+   const char *getErrorMessagePrefix();
      
-      bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);
-   };
+   bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);    // Get menu def from the plugin
+
+   // Lua methods
+   S32 getSelectedObjects(lua_State *L);        // Return all selected objects in the editor
+   S32 getAllObjects(lua_State *L);             // Return all objects in the editor
+
+
+   //// Lua interface
+   LUAW_DECLARE_CLASS(EditorPlugin);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+};
+
 
 };
 

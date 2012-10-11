@@ -81,6 +81,8 @@ public:
    void initialize();
    void quit();
 
+   const char *getErrorMessagePrefix();
+
    bool prepareEnvironment();
 
    // Handle events
