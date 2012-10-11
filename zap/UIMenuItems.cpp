@@ -290,6 +290,9 @@ void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in chil
 /**
  *  @luaclass MenuItem
  *  @brief    Simple menu item that calls a method or opens a submenu when selected.
+ *  @descr    %MenuItem is the parent class for all other MenuItems.  
+ *
+ *  Currently, you cannot instantiate a %MenuItem from Lua, though you can instatiate %MenuItem subclasses.
  */
 const luaL_reg           MenuItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile MenuItem::functionArgs[] = { { NULL, { }, 0 } };
@@ -521,24 +524,6 @@ static void getStringVectorFromTable(lua_State *L, S32 index, const char *method
 }
 
 
-// Lua Constructor, called from scripts
-ToggleMenuItem::ToggleMenuItem(lua_State *L)
-{
-   const char *methodName = "ToggleMenuItem constructor";
-
-   // Required items -- will throw if they are missing or misspecified
-   mDisplayVal = getCheckedString(L, 1, methodName);
-   getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
-
-   // Optional (but recommended) items
-   mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
-   mWrap = getBool(L, 4, methodName, false);
-   mHelp = getString(L, 4, "");
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
 MenuItemTypes ToggleMenuItem::getItemType()
 {
    return ToggleMenuItemType;
@@ -581,12 +566,48 @@ string ToggleMenuItem::getValue() const
 /**
  *  @luaclass ToggleMenuItem
  *  @brief    Menu item that lets users choose one of several options.
+ *  @descr    To create a %ToggleMenuItem from a plugin, use the following syntax:
+ *
+ *  \code
+ * ToggleMenuItem.new(name, options, currentIndex, wrap, help)
+ *  \endcode
+ *
+ *  @param name - A string representing the text shown on the menu item.
+ *  @param options - A table of strings representing the options to be displayed.
+ *  @param currentIndex - An integer representing the index of the item to be selected initially (1 = first item).
+ *  @param wrap - bool, true if the items should wrap around when you reach the last index.
+ *  @param help - A string with a bit of help text.
+ *
+ *  The %MenuItem will return the index of the item the user selected (where, again, 1 = the first item).
+ *
+ *  For example:
+ *  \code
+ *    m = ToggleMenuItem.new("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert")
+ *  \endcode
  */
 const luaL_reg           ToggleMenuItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile ToggleMenuItem::functionArgs[] = { { NULL, { }, 0 } };
 
 const char *ToggleMenuItem::luaClassName = "ToggleMenuItem";
 REGISTER_LUA_SUBCLASS(ToggleMenuItem, MenuItem);
+
+
+// Lua Constructor, called from plugins
+ToggleMenuItem::ToggleMenuItem(lua_State *L)
+{
+   const char *methodName = "ToggleMenuItem constructor";
+
+   // Required items -- will throw if they are missing or misspecified
+   mDisplayVal = getCheckedString(L, 1, methodName);
+   getStringVectorFromTable(L, 2, methodName, mOptions);    // Fills mOptions with elements in a table 
+
+   // Optional (but recommended) items
+   mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
+   mWrap = getBool(L, 4, methodName, false);
+   mHelp = getString(L, 4, "");
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
 
 
 ////////////////////////////////////
@@ -662,13 +683,30 @@ void YesNoMenuItem::setIndex(S32 index)
 
 /**
  *  @luaclass YesNoMenuItem
- *  @brief    Menu where user can choose Yes or No.
+ *  @brief    A specialized ToggleMenuItem prepopulated with Yes and No.
+ *  @descr    To create a %YesNoMenuItem from a plugin, use the following syntax:
+ *
+ *  \code
+ * YesNoMenuItem.new(name, currentIndex, help)
+ *  \endcode
+ *
+ *  @param name - A string representing the text shown on the menu item.
+ *  @param currentIndex - An integer representing the index of the item to be selected initially (1 = Yes, 2 = No).
+ *  @param help - A string with a bit of help text.
+ *
+ *  The %YesNoMenuItem will return 1 if the user selected Yes, 2 if No.
+ *
+ *  For example:
+ *  \code
+ *    m = YesNoMenuItem.new("Hostile", 1, "Should this turret be hostile?")
+ *  \endcode
  */
+
 const luaL_reg           YesNoMenuItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile YesNoMenuItem::functionArgs[] = { { NULL, { }, 0 } };
 
 const char *YesNoMenuItem::luaClassName = "YesNoMenuItem";
-REGISTER_LUA_SUBCLASS(YesNoMenuItem, MenuItem);
+REGISTER_LUA_SUBCLASS(YesNoMenuItem, ToggleMenuItem);
 
 
 // Lua Constructor
@@ -869,7 +907,28 @@ void CounterMenuItem::activatedWithShortcutKey()
 /**
  *  @luaclass CounterMenuItem
  *  @brief    Menu item for entering a numeric value, with increment and decrement controls.
+ *
+ *  \code
+ * CounterMenuItem.new(name, startingVal, step, minVal, maxVal, units, minText, help)
+ *  \endcode
+ *
+ *  @param name -        A string representing the text shown on the menu item.
+ *  @param startingVal - A number representing the starting value of the menu item.     
+ *  @param step -        A number specifying how much the value should increase or decrease when the arrow keys are used.
+ *  @param minVal -      A number representing the minimum allowable value that can be entered.  
+ *  @param maxVal -      A number representing the maximum allowable value that can be entered.  
+ *  @param units -       A string representing the units to be shown alongside the numeric item.  Pass "" if you don't want to display units.
+ *  @param minText -     A string representing the text shown on the menu item when the minimum value has been reached.  Pass "" to simply display the minimum value.  
+ *  @param help -        A string with a bit of help text.
+ *
+ *  The %MenuItem will return the value entered.
+ *
+ *  For example:
+ *  \code
+ *    m = CounterMenuItem.new("Wall Thickness", 50, 1, 1, 50, "grid units", "", "Thickness of wall to be created")
+ *  \endcode
  */
+
 const luaL_reg           CounterMenuItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile CounterMenuItem::functionArgs[] = { { NULL, { }, 0 } };
 
