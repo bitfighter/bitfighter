@@ -7,12 +7,16 @@
 Here is some info about scripting levels and robots in Bitfighter.
 
 @section datatypes Bitfighter datatypes
-* Point
-* geometry - When we refer to geometery, we are referring either to a Point object or a table of Point objects, depending on the context. 
+* point - Point is a low-overhead custom structure that represents an xy coordinate pair.  See the \link point point class documentation \endlink for further details.
+
+Note that points are immutable, so cannot be changed once created.
+
+
+* geometry - Geometry is not a formal datatype, but rather a reference to either to a point or a table of points, depending on the context. 
 For example, if the object is inherently point-like (such as an Item or Projectile), then geometry is a Point.  
 For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
 
-The Geom class provides a collection of tools to make common transormations to tables of points.  Currently these functions do not work on a single point.
+The Geom class provides a collection of tools to make common transormations to a point or a table of points. 
 
 * Other datatypes
 
@@ -30,7 +34,37 @@ num
 
 @section programming_plugins Programming Editor Plugins
 
+Editor plugins can be used to extend the functionality of the editor, and to add new or experimental geometry manipulation functions.
+
+When the user runs a plugin, the editor first tries to call a function called \e getArgsMenu().  If this function exists, it must
+return a table containing the menu name and the various items to be displayed on it.  The values that the user enters for these
+items will be passed to the script in the arg table, Lua's structure for passing command line arguments to a script.  If \e getArgsMenu()
+does not exist, the plugin will be run with no arguments.
+
+The following is the getArgsMenu() function from the draw_arcs plugin, which can be found in Bitfighter's \e editor_plugins folder. 
+\code
+function getArgsMenu()
+   
+   return "Create Arc",         -- Title shown on menu
+      {
+         CounterMenuItem.new("Angle",          90, 1,       0,   360, "deg.",       "", "Sweep of arc"),    
+         CounterMenuItem.new("Precision",      16, 1,       4,    62, "divisions",  "", "Number of sections per arc"),
+         CounterMenuItem.new("Radius of arc", 100, 1,       1,   500, "grid units", "", "Radius of the arc"),
+         CounterMenuItem.new("Start of arc",   90, 1,       0,   360, "degrees",    "", "Start angle of arc from the positive x axis"),
+
+         ToggleMenuItem.new ("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert"),
+         
+         CounterMenuItem.new("Barrier Width",  50, 1,       1,    50, "grid units", "", "Width of wall if BarrierMaker is selected above"),
+         CounterMenuItem.new("Center X",        0, 10, -10000, 10000, "",           "", "X coordinate of center of arc"),
+         CounterMenuItem.new("Center Y",        0, 10, -10000, 10000, "",           "", "Y coordinate of center of arc")
+      }
+end
+\endcode
+
 @section events Events
+
+Robots and Levelgens can register to be notified of certain game events.  When the event occurs, a special function in the script is called, which can do anything from 
+add an item to the game (in the case of Levelgens) to changing destinations (for Robots).  Editor plugins cannot subscribe to events.
 
 @section timers Timers
 Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
