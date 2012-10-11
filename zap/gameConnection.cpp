@@ -1227,6 +1227,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
    }
 
    mClientInfo->setIsBusy(isBusy);
+
+   // If we're busy, force spawndelay timer to run out
+   addTimeSinceLastMove(SPAWN_DELAY_TIME);
+
+   // Respawn if we were spawn delayed
+   if(!isBusy && mClientInfo->isSpawnDelayed())
+      c2sPlayerSpawnUndelayed();  // Can I call a c2s from a c2s?  Seems to work..
 }
 
 

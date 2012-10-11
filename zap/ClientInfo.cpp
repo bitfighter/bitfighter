@@ -145,7 +145,7 @@ bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 // Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
 bool ClientInfo::shouldDelaySpawn()
 {
-   return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > 20000;    // 20 secs -- includes time between games
+   return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > GameConnection::SPAWN_DELAY_TIME;    // 20 secs -- includes time between games
 }
 
 
