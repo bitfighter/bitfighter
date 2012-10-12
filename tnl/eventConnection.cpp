@@ -488,7 +488,13 @@ void EventConnection::readPacket(BitStream *bstream)
 }
 
 bool EventConnection::postNetEvent(NetEvent *theEvent)
-{   
+{
+   // Check if the direction this event moves is a valid direction.
+   TNLAssertV(   (theEvent->getEventDirection() != NetEvent::DirUnset)
+      && (theEvent->getEventDirection() != NetEvent::DirServerToClient || isConnectionToClient())
+      && (theEvent->getEventDirection() != NetEvent::DirClientToServer || isConnectionToServer()),
+      ("Trying to send wrong event direction in %s", theEvent->getClassName()));
+
    S32 classId = theEvent->getClassId(getNetClassGroup());
    if(U32(classId) >= mEventClassCount && getConnectionState() == Connected)
       return false;
