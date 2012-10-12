@@ -112,7 +112,7 @@ mt.__newindex = function (t, n, v)
       local name = debug.getinfo(2, "n").name
       if name ~= "main" then                    -- Allowed to declare globals in main function
          error("Attempted assign to undeclared variable '"..n.."' in function '"..(name or "<<unknown function>>").."'.\n" ..
-               "All vars must be declared 'local' or 'global'; all globals must be defined in main().", 2)
+               "All vars must be declared with 'local'; globals must be defined either in main() or outside a function declaration.", 2)
       end
     end
     mt.__declared[n] = true
