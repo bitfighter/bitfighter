@@ -202,7 +202,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGa
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+void GameConnection::undelaySpawn()
 {
    resetTimeSinceLastMove();
 
@@ -212,6 +212,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
    mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
 
    mServerGame->getGameType()->spawnShip(clientInfo);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+{
+   undelaySpawn();
 }
 
 
@@ -1234,7 +1240,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
 
    // Respawn if we were spawn delayed
    if(!isBusy && mClientInfo->isSpawnDelayed())
-      c2sPlayerSpawnUndelayed();  // Can I call a c2s from a c2s?  Seems to work..
+      undelaySpawn();
 }
 
 

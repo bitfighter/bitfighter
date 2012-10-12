@@ -204,6 +204,8 @@ public:
    TNL_DECLARE_RPC(s2cSuspendGame, (bool gameIsRunning));
    TNL_DECLARE_RPC(s2cUnsuspend, ());
 
+   void undelaySpawn();
+
    // Delay/undelay spawn
    TNL_DECLARE_RPC(s2cPlayerSpawnDelayed, ());
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
