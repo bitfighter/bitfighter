@@ -204,9 +204,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGa
 
 void GameConnection::undelaySpawn()
 {
-   resetTimeSinceLastMove();
-
    ClientInfo *clientInfo = getClientInfo();
+
+   // Already spawn undelayed, ignore command
+   if(!clientInfo->isSpawnDelayed())
+      return;
+
+   resetTimeSinceLastMove();
 
    clientInfo->setSpawnDelayed(false);
    mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
