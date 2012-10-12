@@ -42,12 +42,12 @@ class GridDatabase;
 class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
 private:
-   GridDatabase *mGridDatabase;
-
    LevelLoader *mCaller;
    F32 mGridSize;
+   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
 
-   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);
+protected:
+   GridDatabase *mGridDatabase;
 
 public:
    LuaLevelGenerator();                // Default constructor

@@ -23,11 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "EditorPlugin.h"         // Header
-
-#ifndef ZAP_DEDICATED
-//#  include "UIMenuItems.h"      // delete
-#endif
+#include "EditorPlugin.h"     // Header
+#include "gridDB.h"           // For database methods
+#include "BfObject.h"         // So we can cast to BfObject
 
 
 namespace Zap
@@ -198,6 +196,8 @@ REGISTER_LUA_CLASS(EditorPlugin);
 
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getGridSize,        ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, addLevelLine,       ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getSelectedObjects, ARRAYDEF({{ END }}), 1 ) \
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
 
@@ -209,17 +209,90 @@ GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
 const LuaFunctionProfile EditorPlugin::functionArgs[] = { { NULL, { }, 0 } };
 
 
-// Return a table of all objects in the current selection 
-S32 EditorPlugin::getSelectedObjects(lua_State *L)
+// These two methods are reproduced here because it is (probably) better to have the plugin object stand on its own rather than
+// appear to be a subclass of levelgen.  Therefore, we need to have these methods be members of the class that we expose to Lua.
+
+/**
+ * @luafunc  num EditorPlugin::getGridSize()
+ * @brief    Returns the current Grid Size setting.
+ * @return   \e num - Current GridSize setting in the editor.
+*/
+S32 EditorPlugin::getGridSize(lua_State *L)
 {
-   return 0;
+   return Parent::getGridSize(L);    
 }
 
 
-// Return a table of all objects in the editor 
+/**
+ * @luafunc    EditorPlugin::addLevelLine(levelLine)
+ * @brief      Adds an object to the editor by passing a line from a level file.
+ * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
+ *             add it to the game using %BfObject's \link BfObject::addToGame() addToGame() \endlink method.
+ * @param      levelLine - string containing the line of levelcode.
+ * @return     \e num - Current GridSize setting in the editor.
+*/
+S32 EditorPlugin::addLevelLine(lua_State *L)
+{
+   return Parent::addLevelLine(L);    
+}
+
+
+/**
+ * @luafunc  table EditorPlugin::getSelectedObjects()
+ * @brief    Returns a list of all selected objects in the editor.
+ * @return   \e table - Lua table containing all the objects in the editor that are currently selected.
+*/
+S32 EditorPlugin::getSelectedObjects(lua_State *L)
+{
+   S32 count = mGridDatabase->getObjectCount();
+
+   lua_createtable(L, 0, 0);    // Create a table with no slots --> we don't know how many selected items there will be!
+
+   const Vector<DatabaseObject *> *objects = mGridDatabase->findObjects_fast();
+
+   S32 pushed = 0;
+
+   for(S32 i = 0; i < count; i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objects->get(i));
+         
+      if(!obj->isSelected())
+         continue;
+
+      obj->push(L);
+      pushed++;         // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
+   }
+
+   return 1;
+}
+
+
+/**
+ * @luafunc  table EditorPlugin::getAllObjects()
+ * @brief    Returns a list of all objects in the editor.
+ * @return   \e table - Lua table containing all the objects in the editor.
+*/
 S32 EditorPlugin::getAllObjects(lua_State *L)
 {
-   return 0;
+   S32 count = mGridDatabase->getObjectCount();
+
+   lua_createtable(L, count, 0);    // Create a table with enough slots for our objects
+
+   const Vector<DatabaseObject *> *objects = mGridDatabase->findObjects_fast();
+
+   S32 pushed = 0;
+
+   for(S32 i = 0; i < count; i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objects->get(i));
+
+      obj->push(L);
+      pushed++;         // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
+   }
+
+   return 1;
 }
 
 

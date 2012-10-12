@@ -14,7 +14,7 @@ function getArgsMenu()
    return "Create Arc",         -- Title shown on menu
       {
          CounterMenuItem.new("Angle",          90, 1,       0,   360, "deg.",       "", "Sweep of arc"),    
-         CounterMenuItem.new("Precision",      16, 1,       4,    62, "divisions",  "", "Number of sections per arc"),
+         CounterMenuItem.new("Precision",      16, 1,     4,   20, "divisions",   "", "Number of sections per arc"),
          CounterMenuItem.new("Radius of arc", 100, 1,       1,   500, "grid units", "", "Radius of the arc"),
          CounterMenuItem.new("Start of arc",   90, 1,       0,   360, "degrees",    "", "Start angle of arc from the positive x axis"),
 
@@ -22,7 +22,6 @@ function getArgsMenu()
 
          CounterMenuItem.new("Barrier Width",  50, 1,       1,    50, "grid units", "", "Width of wall if BarrierMaker is selected above"),
          CounterMenuItem.new("Center X",        0, 10, -10000, 10000, "",           "", "X coordinate of center of arc"),
-         
          CounterMenuItem.new("Center Y",        0, 10, -10000, 10000, "",           "", "Y coordinate of center of arc")
       }
 end
@@ -42,7 +41,7 @@ end
 function main()
    -- arg table will include values from menu items above, in order
  
-   local gridsize = levelgen:getGridSize()
+   local gridsize = plugin:getGridSize()
    
    local scriptName = arg[0]
    local degrees = arg[1]
@@ -77,6 +76,6 @@ function main()
    end
 
    -- Now add item to the level
-   levelgen:addLevelLine(levelLine)
+   plugin:addLevelLine(levelLine)
 end   
 
