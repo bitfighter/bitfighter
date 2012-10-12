@@ -578,7 +578,7 @@ string ToggleMenuItem::getValue() const
  *  @param wrap - bool, true if the items should wrap around when you reach the last index.
  *  @param help - A string with a bit of help text.
  *
- *  The %MenuItem will return the index of the item the user selected (where, again, 1 = the first item).
+ *  The %MenuItem will return the text of the item the user selected.
  *
  *  For example:
  *  \code
