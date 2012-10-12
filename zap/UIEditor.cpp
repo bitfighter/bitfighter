@@ -1084,7 +1084,7 @@ void EditorUserInterface::onSelectionChanged()
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       TNLAssert(dynamic_cast<BfObject *>(fillVector[i]), "Bad cast!");
-      BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
+      BfObject *obj = static_cast<BfObject *>(fillVector[i]);
 
       if(obj->isSelected())
          wallSegmentManager->setSelected(obj->getSerialNumber(), true);
