@@ -588,7 +588,7 @@ NetEvent *EventConnection::unpackNetEvent(BitStream *bstream)
       || (evt->getEventDirection() == NetEvent::DirServerToClient && isConnectionToClient())
       || (evt->getEventDirection() == NetEvent::DirClientToServer && isConnectionToServer()) )
    {
-      setLastError("Invalid Packet -- event direction wrong.");
+      setLastError("Invalid Packet -- event direction wrong. %s", evt->getClassName());
       delete evt;
       return NULL;
    }
