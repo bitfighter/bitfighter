@@ -2,7 +2,7 @@
 --
 -- Bitfighter geometry library
 -- These functions are available for bots, levelgens, and plugins
--- Functions written by Joseph Ivie
+-- Functions written by Joseph Ivie and Christopher Eykamp
 --
 ---------------------------------------
 
