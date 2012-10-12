@@ -1124,6 +1124,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
          mServerGame->getPlayerCount() > 1 && mServerGame->voteStart(mClientInfo, 0, newLevelIndex))
       return;
 
+   // Don't let spawn delay kick in for caller.  This prevents a race condition with spawn undelay and becoming unbusy
+   resetTimeSinceLastMove();
+
    bool restart = false;
 
    if(isRelative)
@@ -1226,6 +1229,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
    if(mIsBusy == isBusy)
       return;
 
+   mIsBusy = isBusy;
+
    for(S32 i = 0; i < mServerGame->getClientCount(); i++)
    {
       ClientInfo *clientInfo = mServerGame->getClientInfo(i);
@@ -1236,15 +1241,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
       clientInfo->getConnection()->s2cSetIsBusy(mClientInfo->getName(), isBusy);
    }
 
-   mIsBusy = isBusy;
    mClientInfo->setIsBusy(isBusy);
 
    // If we're busy, force spawndelay timer to run out
-   addTimeSinceLastMove(SPAWN_DELAY_TIME);
-
-   // Respawn if we were spawn delayed
-   if(!isBusy && mClientInfo->isSpawnDelayed())
-      undelaySpawn();
+   if(isBusy)
+      addTimeSinceLastMove(SPAWN_DELAY_TIME - 2000);
+   else
+      resetTimeSinceLastMove();
 }
 
 

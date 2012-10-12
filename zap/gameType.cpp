@@ -2368,6 +2368,9 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
          return;
    }
 
+   // Don't let spawn delay kick in for caller.  This prevents a race condition with spawn undelay and becoming unbusy
+   source->resetTimeSinceLastMove();
+
    changeClientTeam(clientInfo, team);
 
    if(!clientInfo->isAdmin() && getGame()->getPlayerCount() > 1)
