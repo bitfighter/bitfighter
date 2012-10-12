@@ -491,8 +491,8 @@ bool EventConnection::postNetEvent(NetEvent *theEvent)
 {
    // Check if the direction this event moves is a valid direction.
    TNLAssertV(   (theEvent->getEventDirection() != NetEvent::DirUnset)
-      && (theEvent->getEventDirection() != NetEvent::DirServerToClient || isConnectionToClient())
-      && (theEvent->getEventDirection() != NetEvent::DirClientToServer || isConnectionToServer()),
+      && (theEvent->getEventDirection() != NetEvent::DirServerToClient || !isConnectionToServer())
+      && (theEvent->getEventDirection() != NetEvent::DirClientToServer || !isConnectionToClient()),
       ("Trying to send wrong event direction in %s", theEvent->getClassName()));
 
    S32 classId = theEvent->getClassId(getNetClassGroup());
