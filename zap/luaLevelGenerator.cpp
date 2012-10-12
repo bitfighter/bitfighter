@@ -282,14 +282,6 @@ bool LuaLevelGenerator::prepareEnvironment()
    if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
       return false;
 
-   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's env table onto the stack  -- env_table
-
-   // TODO: Do we still really need GRID_SIZE?           
-   lua_pushliteral(L, "_GRID_SIZE");                     //                                        -- env_table, "_GRID_SIZE"
-   lua_pushnumber(L, mGridSize);                         //                                        -- env_table, "_GRID_SIZE", mGridSize
-   lua_rawset(L, -3);                                    // env_table["_GRID_SIZE"] = *this        -- env_table
-   lua_pop(L, -1);                                       // Cleanup                                -- <<empty stack>>
-
    setSelf(L, this, "levelgen");
 
    return true;
@@ -322,9 +314,6 @@ void LuaLevelGenerator::registerClasses()
 {
    // General classes
    LuaScriptRunner::registerClasses();    // LuaScriptRunner is a parent class
-
-   // Specific classes needed for LevelGen scripts
-   //Lunar<LuaLevelGenerator>::Register(L);
 }
 
 
