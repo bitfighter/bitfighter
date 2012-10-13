@@ -54,7 +54,7 @@ public:
    LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, LevelLoader *caller);   
    virtual ~LuaLevelGenerator();       // Destructor
 
-   virtual bool prepareEnvironment();
+   bool prepareEnvironment();
    
    virtual void registerClasses();
    void onScriptInitialized();

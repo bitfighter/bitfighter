@@ -137,6 +137,12 @@ bool EditorPlugin::prepareEnvironment()
 }
 
 
+bool EditorPlugin::loadScript()
+{
+   return startLua() && LuaScriptRunner::loadScript();    
+}
+
+
 // Pulls values out of the table at specified, verifies that they are MenuItems, and adds them to the menuItems vector
 bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems)
 {

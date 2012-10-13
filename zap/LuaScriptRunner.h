@@ -162,7 +162,7 @@ public:
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
 
-   virtual bool loadScript();
+      virtual bool loadScript();
 
    bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
 
