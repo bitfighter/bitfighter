@@ -3123,13 +3123,13 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
 
       // ...and broadcast it to the clients
       s2cSetTeamScore(i, 0);
-
-      StringTableEntry msg("%e0 has reset the score of the game");
-      Vector<StringTableEntry> e;
-      e.push_back(clientInfo->getName());
-
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
    }
+
+   StringTableEntry msg("%e0 has reset the score of the game");
+   Vector<StringTableEntry> e;
+   e.push_back(clientInfo->getName());
+
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
 }
 
 
