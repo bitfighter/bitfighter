@@ -239,7 +239,7 @@ const LuaFunctionProfile EditorPlugin::functionArgs[] = { { NULL, { }, 0 } };
 */
 S32 EditorPlugin::getGridSize(lua_State *L)
 {
-   return mGridSize;    
+   return returnFloat(L, mGridSize);    
 }
 
 
