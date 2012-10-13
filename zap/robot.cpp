@@ -162,8 +162,17 @@ const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 // Server only
 bool Robot::start()
 {
-   if(!startLua())
+    if(!startLua() || !loadScript() || !runMain())
       return false;
+
+   // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
+   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent, true);
+
+   mSubscriptions[EventManager::TickEvent] = true;
+
+   string name = runGetName();                                             // Run bot's getName function
+   getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
+
 
    if(mClientInfo->getName() == "")                          // Make sure bots have a name
       mClientInfo->setName(getGame()->makeUnique("Robot").c_str());
@@ -196,24 +205,6 @@ bool Robot::prepareEnvironment()
       LuaObject::clearStack(L);
       return false;
    }
-
-   return true;
-}
-
-
-// Loads script, runs getName, stores result in bot's clientInfo
-bool Robot::startLua()
-{
-   if(!LuaScriptRunner::startLua() || !loadScript() || !runMain())
-      return false;
-
-   // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
-   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent, true);
-
-   mSubscriptions[EventManager::TickEvent] = true;
-
-   string name = runGetName();                                             // Run bot's getName function
-   getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
    return true;
 }
