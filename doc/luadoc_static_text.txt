@@ -70,9 +70,9 @@ Robots and Levelgens can register to be notified of certain game events.  When t
 add an item to the game (in the case of Levelgens) to changing destinations (for Robots).  Editor plugins cannot subscribe to events.
 
 @section timers Timers
-Timer is a utility class that makes it easier to manage timing periodic or delayed events. The timer code is based on a very nice library written by Haywood Slap.
+Timer is a utility class that makes it easier to manage timing periodic or delayed events.  The timer code is based on a very nice library written by Haywood Slap.
 
-A timer object that can be used to schedule arbitrary events to be executed at some time in the future. All times are given in milliseconds.
+A timer object that can be used to schedule arbitrary events to be executed at some time in the future.  All times are given in milliseconds.
 
 etc...
 
