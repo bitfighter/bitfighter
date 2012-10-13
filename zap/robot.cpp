@@ -162,7 +162,7 @@ const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 // Server only
 bool Robot::start()
 {
-    if(!startLua() || !loadScript() || !runMain())
+    if(!prepareEnvironment() || !loadScript() || !runMain())
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message

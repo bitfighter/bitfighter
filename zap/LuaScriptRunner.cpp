@@ -333,20 +333,20 @@ bool LuaScriptRunner::startLua()
       if(!L)
       {  
          // Failure here is likely to be something systemic, something bad.  Like smallpox.
-         logError("Could not create Lua interpreter.  Aborting script.");     
+         logErrorHandler("Could not create Lua interpreter.  Aborting script.", "STARTUP");     
          return false;
       }
 
       if(!configureNewLuaInstance())
       {
-         logError("Could not configure Lua interpreter.  I cannot run any scripts until the problem is resolved.");
+         logErrorHandler("Could not configure Lua interpreter.  I cannot run any scripts until the problem is resolved.", "STARTUP");
          lua_close(L);
          L = NULL;
          return false;
       }
    }
-   
-   return prepareEnvironment();     // Bots and Levelgens each override this -- sets vars in the created environment
+
+   return true;
 }
 
 
@@ -358,6 +358,7 @@ bool LuaScriptRunner::configureNewLuaInstance()
 
 #ifdef USE_PROFILER
    init_profiler(L);
+   `
 #endif
 
    luaL_openlibs(L);    // Load the standard libraries
@@ -455,11 +456,16 @@ void LuaScriptRunner::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-
-   // Log the error to the logging system and also to the game console
-   logprintf(LogConsumer::LogError, "%s %s", getErrorMessagePrefix(), buffer);
-
    va_end(args);
+
+   logErrorHandler(buffer, getErrorMessagePrefix());
+}
+
+
+void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix) 
+{ 
+   // Log the error to the logging system and also to the game console
+   logprintf(LogConsumer::LogError, "%s %s", prefix, msg);
 
    printStackTrace(L);
 

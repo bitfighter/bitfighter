@@ -74,7 +74,7 @@ void Console::initialize()
    if(!mConsole)
       return;
 
-   startLua();
+   prepareEnvironment();   
 
    setCommandProcessorCallback(processConsoleCommandCallback);
 }

@@ -1039,8 +1039,9 @@ int main(int argc, char **argv)
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
-   LuaScriptRunner::setScriptingDir(folderManager->luaDir);          // Get this out of the way, shall we?
 
+   LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
+   LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
 
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
