@@ -58,7 +58,6 @@ public:
    
    virtual void registerClasses();
    void onScriptInitialized();
-   bool loadScript();
    bool runScript();      
    string getScriptName();
 

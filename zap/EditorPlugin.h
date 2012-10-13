@@ -52,7 +52,6 @@ public:
 
    bool prepareEnvironment();
    string getScriptName();
-   bool loadScript();
 
    const char *getErrorMessagePrefix();
      

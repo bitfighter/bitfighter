@@ -745,7 +745,8 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    mPluginRunner = boost::shared_ptr<EditorPlugin>(plugin);
 
-   if(!mPluginRunner->loadScript())       // Loads the script and runs it to get everything loaded into memory.  Does not run main().
+   // Loads the script and runs it to get everything loaded into memory.  Does not run main().
+   if(!(mPluginRunner->startLua() && mPluginRunner->loadScript()))  
    {
       showPluginError(getGame(), "during loading");
       return;

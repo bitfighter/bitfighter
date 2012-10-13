@@ -108,7 +108,6 @@ protected:
 
    string mScriptId;             // Unique id for this script
 
-   bool startLua();
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
    // This method should be abstract, but luaW requires us to be able to instantiate this class
@@ -145,7 +144,6 @@ void setSelf(lua_State *L, T *self, const char *name)
 
 
 
-
 public:
    LuaScriptRunner();               // Constructor
    virtual ~LuaScriptRunner();      // Destructor
@@ -159,10 +157,12 @@ public:
    static lua_State *getL();
    static void shutdown();
 
+   bool startLua();     // Can make protected again when we get it out of UIEditor
+
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
 
-      virtual bool loadScript();
+   bool loadScript();
 
    bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
 

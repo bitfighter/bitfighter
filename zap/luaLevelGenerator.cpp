@@ -66,16 +66,10 @@ LuaLevelGenerator::~LuaLevelGenerator()
 const char *LuaLevelGenerator::getErrorMessagePrefix() { return "***LEVELGEN ERROR***"; }
 
 
-// Fire up a Lua interprer, load the script, and execute the chunk to get it in memory
-bool LuaLevelGenerator::loadScript()
-{
-   return startLua() && LuaScriptRunner::loadScript();    
-}
-
-
+// Fire up a Lua interprer, load the script, and execute the chunk to get it in memory, then run its main() function
 bool LuaLevelGenerator::runScript()
 {
-   return loadScript() && runMain(); 
+   return startLua() && loadScript() && runMain(); 
 }
 
 
