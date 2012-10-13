@@ -38,227 +38,229 @@ using namespace TNL;
 
 namespace Zap
 {
-   //static lua_State *L = NULL;    
+//static lua_State *L = NULL;    
 
-   // Constructor
-   Console::Console()
+// Constructor
+Console::Console()
+{
+   mConsole = NULL;
+   mScriptId = "console";    // Overwrite default name with something custom
+};     
+
+
+// Destructor
+Console::~Console()
+{
+   if(mConsole)
+      quit();
+
+   if(L)
    {
-      mConsole = NULL;
-      mScriptId = "console";    // Overwrite default name with something custom
-   };     
+      lua_close(L);
+      L = NULL;
+   }
+}
 
 
-   // Destructor
-   Console::~Console()
+extern ScreenInfo gScreenInfo;
+
+void Console::initialize()
+{
+   TNLAssert(gScreenInfo.isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
+   TNLAssert(!mConsole,                  "Only intialize once!");
+
+   mConsole = OGLCONSOLE_Create(); 
+
+   if(!mConsole)
+      return;
+
+   startLua();
+
+   setCommandProcessorCallback(processConsoleCommandCallback);
+}
+
+
+const char *Console::getErrorMessagePrefix() { return "Console"; }
+
+
+// TODO: Merge with luaLevelGenerator version, which is almost identical
+bool Console::prepareEnvironment()  
+{ 
+   Parent::prepareEnvironment();
+
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
+      return false;
+
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   return true;
+}
+
+
+void Console::quit()
+{
+   OGLCONSOLE_Quit();
+   mConsole = NULL;
+}
+
+
+bool Console::isOk()
+{
+   return mConsole && L;
+}
+
+
+// Structure of this code borrowed from naev
+void Console::processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
+{
+   gConsole.processCommand(cmdline);
+}
+
+
+static string consoleCommand = "";
+
+// Structure of this code influenced by naev
+void Console::processCommand(const char *cmdline)
+{
+   if(consoleCommand == "" && strcmp(cmdline, "") == 0)
+      return;
+
+   setEnvironment();
+
+   // If we are not on the first line of our command, we need to append the command to our existing line
+   if(consoleCommand == "")      
+      consoleCommand = cmdline;
+   else
+      consoleCommand += "\n" + string(cmdline);
+
+   S32 status = luaL_loadbuffer(L, consoleCommand.c_str(), consoleCommand.length(), "ConsoleInput" );
+      
+      
+   if(status == LUA_ERRSYNTAX)      // cmd is not a complete Lua statement yet -- need to add more input
    {
-      if(mConsole)
-         quit();
+      size_t lmsg;
+      const char *msg = lua_tolstring(L, -1, &lmsg);
+      const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
 
-      if(L)
+      if(strstr(msg, LUA_QL("<eof>")) == tp) 
+         lua_pop(L, 1);
+      else 
       {
-         lua_close(L);
-         L = NULL;
+         // Error -- print to console
+         output("%s\n", lua_tostring(L, -1));
+         consoleCommand = "";       // Reset command
       }
    }
 
-
-   extern ScreenInfo gScreenInfo;
-
-   void Console::initialize()
+   // Success -- print results to console
+   else if(status == 0) 
    {
-      TNLAssert(gScreenInfo.isActualized(), "Must run VideoSystem::actualizeScreenMode() before initializing console!");
-      TNLAssert(!mConsole,                  "Only intialize once!");
-
-      mConsole = OGLCONSOLE_Create(); 
-
-      if(!mConsole)
-         return;
-
-      startLua();
-
-      setCommandProcessorCallback(processConsoleCommandCallback);
-   }
-
-
-   const char *Console::getErrorMessagePrefix() { return "Console"; }
-
-
-   // TODO: Merge with luaLevelGenerator version, which is almost identical
-   bool Console::prepareEnvironment()  
-   { 
-      Parent::prepareEnvironment();
-
-      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
-         return false;
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return true;
-   }
-
-
-   void Console::quit()
-   {
-      OGLCONSOLE_Quit();
-      mConsole = NULL;
-   }
-
-
-   bool Console::isOk()
-   {
-      return mConsole && L;
-   }
-
-
-   // Structure of this code borrowed from naev
-   void Console::processConsoleCommandCallback(OGLCONSOLE_Console console, char *cmdline)
-   {
-      gConsole.processCommand(cmdline);
-   }
-
-
-   static string consoleCommand = "";
-
-   // Structure of this code influenced by naev
-   void Console::processCommand(const char *cmdline)
-   {
-      if(consoleCommand == "" && strcmp(cmdline, "") == 0)
-         return;
-
-      setEnvironment();
-
-      // If we are not on the first line of our command, we need to append the command to our existing line
-      if(consoleCommand == "")      
-         consoleCommand = cmdline;
-      else
-         consoleCommand += "\n" + string(cmdline);
-
-      S32 status = luaL_loadbuffer(L, consoleCommand.c_str(), consoleCommand.length(), "ConsoleInput" );
-      
-      
-      if(status == LUA_ERRSYNTAX)      // cmd is not a complete Lua statement yet -- need to add more input
+      if(lua_pcall(L, 0, LUA_MULTRET, 0)) 
       {
-         size_t lmsg;
-         const char *msg = lua_tolstring(L, -1, &lmsg);
-         const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
-
-         if(strstr(msg, LUA_QL("<eof>")) == tp) 
-            lua_pop(L, 1);
-         else 
-         {
-            // Error -- print to console
-            output("%s\n", lua_tostring(L, -1));
-            consoleCommand = "";       // Reset command
-         }
+         output("%s\n", lua_tostring(L, -1));
+         lua_pop(L, 1);
       }
-
-      // Success -- print results to console
-      else if(status == 0) 
+      if(lua_gettop(L) > 0) 
       {
-         if(lua_pcall(L, 0, LUA_MULTRET, 0)) 
-         {
-            output("%s\n", lua_tostring(L, -1));
-            lua_pop(L, 1);
-         }
-         if(lua_gettop(L) > 0) 
-         {
-            lua_getglobal(L, "print");
-            lua_insert(L, 1);
-            if(lua_pcall(L, lua_gettop(L) - 1, 0, 0) != 0)
-               output("Error printing results.");
-         }
-      
-         consoleCommand = "";    // Reset command
+         lua_getglobal(L, "print");
+         lua_insert(L, 1);
+         if(lua_pcall(L, lua_gettop(L) - 1, 0, 0) != 0)
+            output("Error printing results.");
       }
-
-      LuaObject::clearStack(L);
+      
+      consoleCommand = "";    // Reset command
    }
 
-
-   void Console::onScreenModeChanged()
-   {
-      if(!mConsole)
-         return;
-
-      OGLCONSOLE_CreateFont();
-      OGLCONSOLE_Reshape();
-   }
+   LuaObject::clearStack(L);
+}
 
 
-   void Console::onScreenResized()
-   {
-      if(!mConsole)
-         return;
+void Console::onScreenModeChanged()
+{
+   if(!mConsole)
+      return;
 
-      OGLCONSOLE_Reshape();
-   }
-
-
-   bool Console::onKeyDown(char ascii)
-   {
-      return OGLCONSOLE_CharEvent(ascii);
-   }
+   OGLCONSOLE_CreateFont();
+   OGLCONSOLE_Reshape();
+}
 
 
-   bool Console::onKeyDown(InputCode inputCode)
-   {
-      return OGLCONSOLE_KeyEvent(inputCode, InputCodeManager::getState(KEY_SHIFT));
-   }
+void Console::onScreenResized()
+{
+   if(!mConsole)
+      return;
+
+   OGLCONSOLE_Reshape();
+}
 
 
-   // User pressed Enter, time to run command
-   void Console::setCommandProcessorCallback(void(*callback)(OGLCONSOLE_Console console, char *cmd))
-   {
-      OGLCONSOLE_EnterKey(callback);
-   }
+bool Console::onKeyDown(char ascii)
+{
+   return OGLCONSOLE_CharEvent(ascii);
+}
 
 
-   void Console::render()
-   {
-      OGLCONSOLE_setCursor((Platform::getRealMilliseconds() / 100) % 2);     // Make cursor blink
-      OGLCONSOLE_Draw();   
-   }
+bool Console::onKeyDown(InputCode inputCode)
+{
+   return OGLCONSOLE_KeyEvent(inputCode, InputCodeManager::getState(KEY_SHIFT));
+}
 
 
-   bool Console::isVisible()
-   {
-      return OGLCONSOLE_GetVisibility();
-   }
+// User pressed Enter, time to run command
+void Console::setCommandProcessorCallback(void(*callback)(OGLCONSOLE_Console console, char *cmd))
+{
+   OGLCONSOLE_EnterKey(callback);
+}
 
 
-   void Console::show()
-   {
-      OGLCONSOLE_ShowConsole();
-   }
+void Console::render()
+{
+   OGLCONSOLE_setCursor((Platform::getRealMilliseconds() / 100) % 2);     // Make cursor blink
+   OGLCONSOLE_Draw();   
+}
 
 
-   void Console::hide()
-   {
-      OGLCONSOLE_HideConsole();
-   }
+bool Console::isVisible()
+{
+   return OGLCONSOLE_GetVisibility();
+}
 
 
-   void Console::toggleVisibility()
-   {
-      if(isVisible())
-         hide();
-      else
-         show();
-   }
+void Console::show()
+{
+   OGLCONSOLE_ShowConsole();
+}
 
 
-   // Print message to console
-   void Console::output(const char *format, ...)
-   {
-      va_list args;
-      static char message[MAX_CONSOLE_OUTPUT_LENGTH];    // Reusable buffer
+void Console::hide()
+{
+   OGLCONSOLE_HideConsole();
+}
 
-      va_start(args, format);
-      vsnprintf(message, sizeof(message), format, args); 
-      va_end(args);
 
-      OGLCONSOLE_Output(mConsole, message); 
-   }
+void Console::toggleVisibility()
+{
+   if(isVisible())
+      hide();
+   else
+      show();
+}
+
+
+// Print message to console
+void Console::output(const char *format, ...)
+{
+   va_list args;
+   static char message[MAX_CONSOLE_OUTPUT_LENGTH];    // Reusable buffer
+
+   va_start(args, format);
+   vsnprintf(message, sizeof(message), format, args); 
+   va_end(args);
+
+   OGLCONSOLE_Output(mConsole, message); 
+}
+
+
 };
 
 
