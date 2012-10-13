@@ -41,6 +41,9 @@ return a table containing the menu name and the various items to be displayed on
 items will be passed to the script in the arg table, Lua's structure for passing command line arguments to a script.  If \e getArgsMenu()
 does not exist, the plugin will be run with no arguments.
 
+Unlike levelgen and bot scripts, plugins do not respond to events, and often consist of only a \e main() function, and, if they require 
+special inputs, a \e getArgsMenu() function.
+
 The following is the getArgsMenu() function from the draw_arcs plugin, which can be found in Bitfighter's \e editor_plugins folder. 
 \code
 function getArgsMenu()
