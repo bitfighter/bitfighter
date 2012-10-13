@@ -14,7 +14,7 @@ function getArgsMenu()
    return "Create Arc",         -- Title shown on menu
       {
          CounterMenuItem.new("Angle",          90, 1,       0,   360, "deg.",       "", "Sweep of arc"),    
-         CounterMenuItem.new("Precision",      16, 1,     4,   20, "divisions",   "", "Number of sections per arc"),
+         CounterMenuItem.new("Precision",      16, 1,       4,   62,  "divisions",  "", "Number of sections per arc"),
          CounterMenuItem.new("Radius of arc", 100, 1,       1,   500, "grid units", "", "Radius of the arc"),
          CounterMenuItem.new("Start of arc",   90, 1,       0,   360, "degrees",    "", "Start angle of arc from the positive x axis"),
 
