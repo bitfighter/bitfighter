@@ -98,7 +98,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
 
    mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
-   mIdleRechargeCycleTimer.setPeriod(IdleRechargeCycleTimerDelay);
+   mIdleRechargeCycleTimer.reset(IdleRechargeCycleTimerDelay, IdleRechargeCycleTimerDelay);
 
    mNetFlags.set(Ghostable);
 
