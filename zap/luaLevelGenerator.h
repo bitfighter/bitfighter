@@ -45,8 +45,6 @@ private:
    LevelLoader *mCaller;
    F32 mGridSize;
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
-
-protected:
    GridDatabase *mGridDatabase;
 
 public:

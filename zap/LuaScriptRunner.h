@@ -108,7 +108,6 @@ protected:
 
    string mScriptId;             // Unique id for this script
 
-   virtual bool loadScript();
    bool startLua();
    bool mSubscriptions[EventManager::EventTypes];  // Keep track of which events we're subscribed to for rapid unsubscription upon death or destruction
 
@@ -162,6 +161,8 @@ public:
 
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
+
+   virtual bool loadScript();
 
    bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
 

@@ -31,12 +31,16 @@
 
 namespace Zap
 {
-class EditorPlugin : public LuaLevelGenerator
+class EditorPlugin : public LuaScriptRunner
 {
-   typedef LuaLevelGenerator Parent;
+   typedef LuaScriptRunner Parent;
 
 private:
    static bool getMenuItemVectorFromTable(lua_State *L, S32 index, const char *methodName, Vector<MenuItem *> &menuItems);
+
+   GridDatabase *mGridDatabase;
+   LevelLoader *mCaller;
+   F32 mGridSize;
 
 public:
    // Constructors
@@ -47,6 +51,7 @@ public:
    ~EditorPlugin();     // Destructor
 
    bool prepareEnvironment();
+   string getScriptName();
 
    const char *getErrorMessagePrefix();
      

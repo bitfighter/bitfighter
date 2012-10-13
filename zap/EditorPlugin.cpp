@@ -35,9 +35,17 @@ EditorPlugin::EditorPlugin() { TNLAssert(false, "Don't use this constructor!"); 
 
 // Constructor
 EditorPlugin::EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                           GridDatabase *gridDatabase, LevelLoader *caller) : 
-      Parent(scriptName, scriptArgs, gridSize, gridDatabase, caller)
+                           GridDatabase *gridDatabase, LevelLoader *caller)
 {
+   
+   mScriptName = scriptName;
+   mScriptArgs = scriptArgs;
+
+   mGridDatabase = gridDatabase;
+
+   mGridSize = gridSize;
+   mCaller = caller;
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -107,6 +115,12 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
 
    return false;
 #endif
+}
+
+
+string EditorPlugin::getScriptName()
+{
+   return mScriptName;
 }
 
 
@@ -219,7 +233,7 @@ const LuaFunctionProfile EditorPlugin::functionArgs[] = { { NULL, { }, 0 } };
 */
 S32 EditorPlugin::getGridSize(lua_State *L)
 {
-   return Parent::getGridSize(L);    
+   return mGridSize;    
 }
 
 
@@ -233,7 +247,14 @@ S32 EditorPlugin::getGridSize(lua_State *L)
 */
 S32 EditorPlugin::addLevelLine(lua_State *L)
 {
-   return Parent::addLevelLine(L);    
+   static const char *methodName = "EditorPlugin:addLevelLine()";
+
+   checkArgCount(L, 1, methodName);
+   const char *line = getCheckedString(L, 1, methodName);
+
+   mCaller->parseLevelLine(line, mGridDatabase, "Editor plugin: " + mScriptName);
+
+   return 0;
 }
 
 
