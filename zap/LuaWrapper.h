@@ -1101,6 +1101,10 @@ public:
 };
 
 
+// This goes in the constructor of the "wrapped class"
+#define LUAW_CONSTRUCTOR_INITIALIZATIONS \
+   mLuaProxy = NULL
+
 
 #define  LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
    LuaProxy<className> *mLuaProxy; \
@@ -1112,12 +1116,7 @@ public:
 // This goes in the header of a "wrapped class"
 #define  LUAW_DECLARE_CLASS(className) \
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
-   className(lua_State *L) { } \
-
-
-// This goes in the constructor of the "wrapped class"
-#define LUAW_CONSTRUCTOR_INITIALIZATIONS \
-   mLuaProxy = NULL
+   className(lua_State *L) { LUAW_CONSTRUCTOR_INITIALIZATIONS; } 
 
 
 // And this in the destructor of the "wrapped class"
