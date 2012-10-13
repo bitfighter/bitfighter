@@ -240,6 +240,18 @@ S32 EditorPlugin::addLevelLine(lua_State *L)
 /**
  * @luafunc  table EditorPlugin::getSelectedObjects()
  * @brief    Returns a list of all selected objects in the editor.
+ * @descr    The following code sample shows how to visit each object selected in the editor.  Here, we 
+ *           nudge every selected item 100 pixels to the right.
+ * @code
+   local t = plugin:getSelectedObjects()  -- Get every selected object
+
+   for i, v in ipairs(t) do               -- Iterate over list
+      local g = v:getGeom()               -- Get the object's geometry
+      g = Geom.translate(g, 100, 0)       -- Add 100 to the x-coords
+      v:setGeom(g)                        -- Save the new geometry
+   end
+
+ * @endcode
  * @return   \e table - Lua table containing all the objects in the editor that are currently selected.
 */
 S32 EditorPlugin::getSelectedObjects(lua_State *L)
