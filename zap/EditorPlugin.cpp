@@ -114,8 +114,8 @@ bool EditorPlugin::prepareEnvironment()
 {
    LuaScriptRunner::prepareEnvironment();
 
-   //if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
-   //   return false;
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) /*|| !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY)*/)
+      return false;
 
    setSelf(L, this, "plugin");
 
