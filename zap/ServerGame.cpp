@@ -1410,7 +1410,7 @@ void ServerGame::idle(U32 timeDelta)
    if(!dataSender.isDone())
       dataSender.sendNextLine();
 
-   // Play any sounds server might have made...
+   // Play any sounds server might have made... (this is only for special alerts such as player joined or left)
    if(isDedicated())   // Non-dedicated servers will process sound in client side
       SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
 
