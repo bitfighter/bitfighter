@@ -161,8 +161,8 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                   }
                   break;
 
-               // PTS: A series of points, numbers, or a table containing a series of points or numbers
-               case PTS:
+               // GEOM: A series of points, numbers, or a table containing a series of points or numbers
+               case GEOM:
                   if(lua_isvec(L, stackPos))             // Series of Points
                   {
                      stackPos++;

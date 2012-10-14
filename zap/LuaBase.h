@@ -79,7 +79,7 @@ public:
    LUA_ARG_TYPE_ITEM( MOD_ENUM,  "ModuleEnum"                                  ) \
    LUA_ARG_TYPE_ITEM( MOD_SLOT,  "Module slot #"                               ) \
    LUA_ARG_TYPE_ITEM( TEAM_INDX, "Team index"                                  ) \
-   LUA_ARG_TYPE_ITEM( PTS,       "One or more points (or a series of numbers)" ) \
+   LUA_ARG_TYPE_ITEM( GEOM,      "Geometry (see documentation)"                ) \
    LUA_ARG_TYPE_ITEM( ROBOT,     "Robot Object"                                ) \
    LUA_ARG_TYPE_ITEM( LEVELGEN,  "Levelgen Script"                             ) \
    LUA_ARG_TYPE_ITEM( EVENT,     "Event"                                       ) \

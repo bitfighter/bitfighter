@@ -180,7 +180,7 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
   */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { TEAM_INDX, PTS, END }}), 2 ) \
+   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { TEAM_INDX, GEOM, END }}), 2 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(LoadoutZone, LUA_METHODS);
 
