@@ -36,6 +36,8 @@
 
 #include "tnlLog.h"
 
+#include "zlib.h"
+
 #ifdef TNL_OS_MOBILE
 #include "SDL_opengles.h"
 #else
