@@ -232,7 +232,7 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
                   if(lua_isnumber(L, stackPos))
                   {
                      lua_Integer i = lua_tointeger(L, stackPos) - 1;    // -1 because Lua indices start with 1
-                     ok = (i >= 0 && i < Game::getAddTarget()->getTeamCount());       
+                     ok = (i >= 0 && i < Game::getAddTarget()->getTeamCount() || (i + 1) == TEAM_NEUTRAL || (i + 1) == TEAM_HOSTILE);       
                   }
                   break;
 
