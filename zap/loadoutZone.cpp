@@ -36,11 +36,7 @@ TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 // C++ constructor
 LoadoutZone::LoadoutZone()
 {
-   setTeam(0);
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = LoadoutZoneTypeNumber;
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   initialize();
 }
 
 
@@ -48,6 +44,16 @@ LoadoutZone::LoadoutZone()
 LoadoutZone::~LoadoutZone()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void LoadoutZone::initialize()
+{
+   setTeam(0);
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = LoadoutZoneTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -174,6 +180,20 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
   */
 const luaL_reg LoadoutZone::luaMethods[]             = { { NULL, NULL } };
 const LuaFunctionProfile LoadoutZone::functionArgs[] = { { NULL, { }, 0 } };
+
+
+/**
+  *  @luafunc LoadoutZone::LoadoutZone()
+  *  @luafunc LoadoutZone::LoadoutZone(team, geom)
+  *  @brief %LoadoutZone constructor.
+  *  @descr Default team is Neutral.
+  */
+LoadoutZone::LoadoutZone(lua_State *L)
+{
+   initialize();
+   setTeam(TEAM_NEUTRAL);     // Override default set in initialize()
+}
+
 
 const char *LoadoutZone::luaClassName = "LoadoutZone";
 REGISTER_LUA_SUBCLASS(LoadoutZone, Zone);

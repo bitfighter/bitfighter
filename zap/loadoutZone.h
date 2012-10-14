@@ -42,6 +42,8 @@ class LoadoutZone : public GameZone
 public:
    LoadoutZone();             // C++ constructor
    virtual ~LoadoutZone();    // Destructor
+
+   void initialize();
    LoadoutZone *clone() const;
 
    void render();
@@ -72,7 +74,8 @@ public:
    TNL_DECLARE_CLASS(LoadoutZone);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(LoadoutZone);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LoadoutZone);
+   LoadoutZone(lua_State *L);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
