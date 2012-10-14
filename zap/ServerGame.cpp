@@ -1410,12 +1410,15 @@ void ServerGame::idle(U32 timeDelta)
    if(!dataSender.isDone())
       dataSender.sendNextLine();
 
+   // Play any sounds server might have made...
+   if(isDedicated())   // Non-dedicated servers will process sound in client side
+      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
 
-   if(!mGameSuspended)     // If game is suspended, we need do nothing more
-   {
+   if(mGameSuspended)     // If game is suspended, we need do nothing more
+      return;
+
 
    mCurrentTime += timeDelta;
-
 
    for(S32 i = 0; i < getClientCount(); i++)
    {
@@ -1427,7 +1430,6 @@ void ServerGame::idle(U32 timeDelta)
          TNLAssert(conn, "clientInfo->getConnection() shouldn't be NULL");
 
          conn->updateTimers(timeDelta);
-
       }
    }
 
@@ -1482,12 +1484,6 @@ void ServerGame::idle(U32 timeDelta)
       cycleLevel(mNextLevel);
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
-
-   }  // end of  if(!mGameSuspended)
-
-   // Lastly, play any sounds server might have made...
-   if(isDedicated())   // non-dedicated will process sound in client side.
-      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
 }
 
 
