@@ -79,8 +79,6 @@ string LuaLevelGenerator::getScriptName()
 }
 
 
-const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
-
 // Used in addItem() below...
 static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 
@@ -202,7 +200,13 @@ void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv
 }
 
 
-// Feed a raw level line into the level processor
+/**
+ * @luafunc    Levelgen::addLevelLine(levelLine)
+ * @brief      Adds an object to the editor by passing a line from a level file.
+ * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
+ *             add it to the game using %BfObject's \link BfObject::addToGame() addToGame() \endlink method.
+ * @param      levelLine - string containing the line of levelcode.
+*/
 S32 LuaLevelGenerator::addLevelLine(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addLevelLine()";
@@ -219,7 +223,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
 // Set the duration of this level
 S32 LuaLevelGenerator::setGameTime(lua_State *L)
 {
-   static const char *methodName = "LevelGenerator:setGameTime()";
+   static const char *methodName = "Levelgen:setGameTime()";
 
    checkArgCount(L, 1, methodName);
    F32 time = getCheckedFloat(L, 1, methodName);
@@ -232,7 +236,7 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
 
 S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 {
-   static const char *methodName = "LevelGenerator:pointCanSeePoint()";
+   static const char *methodName = "Levelgen:pointCanSeePoint()";
 
    checkArgCount(L, 2, methodName);
 
@@ -248,10 +252,10 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 // Write a message to the server logfile
 S32 LuaLevelGenerator::logprint(lua_State *L)
 {
-   static const char *methodName = "LuaLevelGenerator:logprint()";
+   static const char *methodName = "Levelgen:logprint()";
    checkArgCount(L, 1, methodName);
 
-   logprintf(LogConsumer::LuaLevelGenerator, "LuaLevelGenerator: %s", getCheckedString(L, 1, methodName));
+   logprintf(LogConsumer::LuaLevelGenerator, "Levelgen: %s", getCheckedString(L, 1, methodName));
    return 0;
 }
 
@@ -285,7 +289,7 @@ bool LuaLevelGenerator::prepareEnvironment()
 // Send message to all players
 S32 LuaLevelGenerator::globalMsg(lua_State *L)
 {
-   static const char *methodName = "LuaLevelGenerator:globalMsg()";
+   static const char *methodName = "Levelgen:globalMsg()";
    checkArgCount(L, 1, methodName);
 
    const char *message = getCheckedString(L, 1, methodName);
