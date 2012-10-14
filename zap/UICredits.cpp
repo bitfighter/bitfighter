@@ -48,6 +48,7 @@ static const char *gameCredits[] = {
    "Originally based on the Zap demo in OpenTNL",
    "-",
    "Mac support:",
+   "Vittorio Giovara (koda)",
    "Ryan Witmer",
    "Max Hushahn",
    "-",
