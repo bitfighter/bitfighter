@@ -81,6 +81,8 @@ string gStatsDatabasePassword;
 
 Vector<string> master_admins;
 
+Vector<Address> gListAddressHide;
+
 bool gWriteStatsToMySql;
 
 CIniFile gMasterINI("dummy");
@@ -270,7 +272,7 @@ public:
       setIsAdaptive();
       isInGlobalChat = false;
       mAuthenticated = false;
-      mIsServerIgnoredFromList = false;
+      mIsIgnoredFromList = false;
       mIsMasterAdmin = false;
    }
 
@@ -427,6 +429,7 @@ public:
       }
       else if(stat == Authenticated)
       {
+         mIsIgnoredFromList = false;  // just for authenticating..
          logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
          mAuthenticated = true;
          gNeedToWriteStatus = true;  // Make sure JSON show as Authenticated  = true
@@ -476,7 +479,7 @@ public:
 
       for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
       {
-         if(walk->mIsServerIgnoredFromList)  // hide hidden servers...
+         if(walk->mIsIgnoredFromList)  // hide hidden servers...
             continue;
 
          // First check the version -- we only want to match potential players that agree on which protocol to use
@@ -616,7 +619,7 @@ public:
 
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
             {
-               if(walk->mIsServerIgnoredFromList)
+               if(walk->mIsIgnoredFromList)
                   continue;
 
                fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
@@ -632,8 +635,11 @@ public:
          first = true;
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
-            first = false;
+            if(!walk->mIsIgnoredFromList)
+            {
+               fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
+               first = false;
+            }
          }
 
          // Authentication status      // "authenticated": [ true, false, false, true, true ],
@@ -641,8 +647,11 @@ public:
          first = true;
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            fprintf(f, "%s%s", first ? "":", ", walk->mAuthenticated ? "true" : "false");
-            first = false;
+            if(!walk->mIsIgnoredFromList)
+            {
+               fprintf(f, "%s%s", first ? "":", ", walk->mAuthenticated ? "true" : "false");
+               first = false;
+            }
          }
 
          // Finally, the player and server counts
@@ -1189,6 +1198,10 @@ public:
          // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
          // so we pause waiting for database instead of fully connecting yet.
 
+         for(S32 i=0; i < gListAddressHide.size(); i++)
+            if(getNetAddress().isEqualAddress(gListAddressHide[i]))
+               mIsIgnoredFromList = true;
+
          switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
          {
             case WrongPassword: reason = ReasonBadLogin; return false;
@@ -1278,6 +1291,9 @@ public:
       if(names.size() > 0)
          m2cPlayersInGlobalChat(names); // Send to this client, to avoid blank name list of quickly leave/join.
 
+      if(mIsIgnoredFromList) // don't list name in lobby, too.
+         return;
+
       mLeaveGlobalChatTimer = 0; // don't continue with delayed chat leave.
       if(isInGlobalChat)  // Already in Global Chat
          return;
@@ -1324,7 +1340,7 @@ public:
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
                if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 || addr.port == walk->getNetAddress().port))
                {
-                  walk->mIsServerIgnoredFromList = true;
+                  walk->mIsIgnoredFromList = true;
                   m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
                   droppedServer = true;
                }
@@ -1336,20 +1352,52 @@ public:
          {
             bool broughtBackServer = false;
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
-               if(walk->mIsServerIgnoredFromList)
+               if(walk->mIsIgnoredFromList)
                {
                   broughtBackServer = true;
-                  walk->mIsServerIgnoredFromList = false;
+                  walk->mIsIgnoredFromList = false;
                   m2cSendChat(walk->mPlayerOrServerName, true, "brought back");
                }
             if(!broughtBackServer)
                m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
             return;
          }
-         else if(mIsMasterAdmin && !stricmp(message.getString(), "/kickplayer "))
+         else if(mIsMasterAdmin && !stricmp(message.getString(), "/hideplayer "))
+         {
+            bool found = false;
             for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
                if(strcmp(&message.getString()[12], walk->mPlayerOrServerName.getString()))
-                  disconnect(ReasonBadLogin, "");  // not sure which is better to stop the client from auto-reconnecting..
+               {
+                  walk->mIsIgnoredFromList = !walk->mIsIgnoredFromList;
+                  m2cSendChat(walk->mPlayerOrServerName, true, walk->mIsIgnoredFromList ? "player hidden" : "player not hidden anymore");
+                  found = true;
+               }
+            if(!found)
+               m2cSendChat(mPlayerOrServerName, true, "player not found");
+         }
+         else if(mIsMasterAdmin && !stricmp(message.getString(), "/hideIP "))
+         {
+            Address addr(&message.getString()[8]);
+            bool found = false;
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+               if(addr.isEqualAddress(walk->getNetAddress()))
+               {
+                  walk->mIsIgnoredFromList = true;
+                  m2cSendChat(walk->mPlayerOrServerName, true, "player now hidden");
+                  c2mLeaveGlobalChat_remote(); // also mute and delist that player.
+                  found = true;
+               }
+            gListAddressHide.push_back(addr);
+            if(found)
+               m2cSendChat(mPlayerOrServerName, true, "player found, and is in IP hidden list");
+            if(!found)
+               m2cSendChat(mPlayerOrServerName, true, "player not found, but is in hidden IP list");
+         }
+         else if(mIsMasterAdmin && !stricmp(message.getString(), "/unhideIPs"))
+         {
+            gListAddressHide.clear();
+            m2cSendChat(mPlayerOrServerName, true, "cleared hiding IP list");
+         }
          else
          {
             isPrivate = true;
@@ -1383,10 +1431,10 @@ public:
          }
       }
 
-      if(!checkMessage(message, isPrivate ? 2 : 0)) // prevent problems with chatting too fast that no one can read.
+      if(mIsIgnoredFromList || !checkMessage(message, isPrivate ? 2 : 0)) // prevent problems with chatting too fast that no one can read.
       {
          if(!mChatTooFast)
-            logprintf(LogConsumer::LogChat, "This player may be chatting to fast: %s ", mPlayerOrServerName.getString());
+            logprintf(LogConsumer::LogChat, mIsIgnoredFromList ? "Tried to chat but muted and hidden: %s" : "This player may be chatting to fast: %s ", mPlayerOrServerName.getString());
          mChatTooFast = true;
          static const StringTableEntry msg("< You are chatting too fast, your message didn't make it through. ");
          m2cSendChat(msg, false, StringPtr(" "));
