@@ -165,7 +165,10 @@ void CreditsUserInterface::render()
          fxList[i]->render();
 
    if(quitting)
+   {
+      quitting = false;
       quit();
+   }
 }
 
 
