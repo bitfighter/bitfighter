@@ -1332,7 +1332,7 @@ public:
                m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
             return;
          }
-         else if(!stricmp(message.getString(), "/bringbackservers") && mIsMasterAdmin)
+         else if(mIsMasterAdmin && !stricmp(message.getString(), "/bringbackservers"))
          {
             bool broughtBackServer = false;
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
@@ -1346,6 +1346,10 @@ public:
                m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
             return;
          }
+         else if(mIsMasterAdmin && !stricmp(message.getString(), "/kickplayer "))
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+               if(strcmp(&message.getString()[12], walk->mPlayerOrServerName.getString()))
+                  disconnect(ReasonBadLogin, "");  // not sure which is better to stop the client from auto-reconnecting..
          else
          {
             isPrivate = true;
