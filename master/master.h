@@ -139,7 +139,7 @@ public:
 
    bool mIsMasterAdmin;
 
-   bool mIsServerIgnoredFromList;
+   bool mIsIgnoredFromList;
 
    StringTableEntry mAutoDetectStr;             // Player's joystick autodetect string, for research purposes
 

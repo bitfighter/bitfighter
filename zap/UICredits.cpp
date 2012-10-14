@@ -48,6 +48,7 @@ static const char *gameCredits[] = {
    "Originally based on the Zap demo in OpenTNL",
    "-",
    "Mac support:",
+   "Vittorio Giovara (koda)",
    "Ryan Witmer",
    "Max Hushahn",
    "-",
@@ -162,6 +163,12 @@ void CreditsUserInterface::render()
    for(S32 i = 0; i < fxList.size(); i++)
       if(fxList[i]->isActive())
          fxList[i]->render();
+
+   if(quitting)
+   {
+      quitting = false;
+      quit();
+   }
 }
 
 
@@ -255,13 +262,11 @@ void CreditsScroller::updateFX(U32 delta)
 {
    // Scroll the credits text from bottom to top
    for(S32 i = 0; i < credits.size(); i++)
-   {
       credits[i].pos -= (delta / 8.f);
 
-      // Reached the top, reset
-      if(credits[i].pos < -CreditSpace )
-         credits[i].pos += mTotalSize - 200;
-   }
+   // If we've reached the end, say we're quitting
+   if(credits[credits.size() - 1].pos < -CreditSpace)
+      quitting = true;
 }
 
 

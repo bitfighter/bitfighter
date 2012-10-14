@@ -530,6 +530,7 @@ void GameUserInterface::render()
 
    if(getGame()->isSuspended()  || getGame()->isSpawnDelayed())
    {
+      renderChatMessageDisplay();
       renderCurrentChat();
       renderSuspendedMessage();
 
