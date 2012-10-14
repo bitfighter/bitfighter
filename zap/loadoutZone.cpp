@@ -178,8 +178,15 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
   *  @luaclass LoadoutZone
   *  @brief Provides place for players to change ship configuration.
   */
-const luaL_reg LoadoutZone::luaMethods[]             = { { NULL, NULL } };
-const LuaFunctionProfile LoadoutZone::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { TEAM_INDX, PTS, END }}), 2 ) \
+
+GENERATE_LUA_FUNARGS_TABLE(LoadoutZone, LUA_METHODS);
+
+const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
+
+#undef LUA_METHODS
 
 
 /**
@@ -192,6 +199,16 @@ LoadoutZone::LoadoutZone(lua_State *L)
 {
    initialize();
    setTeam(TEAM_NEUTRAL);     // Override default set in initialize()
+
+   S32 profile = checkArgList(L, functionArgs, "LoadoutZone", "constructor");
+
+   if(profile == 0)           // No args constructor
+      return;
+   if(profile == 1)           // Team, Geom
+   {
+      setTeam(L, 1);
+      setGeom(L, 2);
+   }
 }
 
 

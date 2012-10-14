@@ -448,6 +448,26 @@ void BfObject::setTeam(S32 team)
 }
 
 
+// Lua helper methods -- these assume that the params have already been checked and are valid
+void BfObject::setTeam(lua_State *L, S32 stackIndex)
+{
+   setTeam(getInt(L, stackIndex) - 1);    // - 1 because Lua indices start at 1  
+}
+
+
+void BfObject::setGeom(lua_State *L, S32 stackIndex)
+{
+   Vector<Point> points = getPointsOrXYs(L, stackIndex);
+
+   GeomObject::setGeom(points);
+   onPointsChanged();
+
+   updateExtentInDatabase();
+
+   setMaskBits(GeomMask);
+}
+
+
 const Color *BfObject::getColor() const
 { 
    return mGame->getTeamColor(mTeam);
@@ -1329,7 +1349,7 @@ S32 BfObject::getTeamIndx(lua_State *L)
 S32 BfObject::setTeam(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "BfObject", "setTeam");
-   setTeam(getInt(L, 1) - 1);    // - 1 because Lua indices start at 1  
+   setTeam(L, 1);
    return 0;            
 }  
 
@@ -1383,15 +1403,7 @@ S32 BfObject::removeFromGame(lua_State *L)
 S32 BfObject::setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
-
-   Vector<Point> points = getPointsOrXYs(L, 1);
-
-   GeomObject::setGeom(points);
-   onPointsChanged();
-
-   updateExtentInDatabase();
-
-   setMaskBits(GeomMask);
+   setGeom(L, 1);
 
    return 0;
 }

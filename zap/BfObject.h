@@ -359,6 +359,10 @@ public:
    // Team related
    S32 getTeam() const;
    void setTeam(S32 team);
+   void setTeam(lua_State *L, S32 stackIndex);
+   void setGeom(lua_State *L, S32 stackIndex);
+
+
    const Color *getColor() const;      // Get object's team's color
 
    // These methods used to be in EditorObject, but we'll need to know about them as we add
