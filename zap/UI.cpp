@@ -64,7 +64,6 @@ namespace Zap
 extern S32 gLoadoutIndicatorHeight;
 
 S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
-S32 UserInterface::chatMessageMargin = 515;
 
 UserInterface *UserInterface::current = NULL;
 UserInterface *UserInterface::comingFrom = NULL;

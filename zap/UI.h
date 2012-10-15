@@ -102,7 +102,6 @@ public:
 
    static S32 vertMargin, horizMargin;
    static S32 messageMargin;
-   static S32 chatMessageMargin;
 
    U32 getTimeSinceLastInput();
 

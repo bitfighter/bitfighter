@@ -96,34 +96,13 @@ private:
    // Related to display of in-game chat and status messages
    static const S32 MessageDisplayCount = 6;           // How many server messages to display
    static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
-
-   static const S32 ChatMessageStoreCount = 24;        // How many chat messages to store (only top MessageDisplayCount are normally displayed)
-   static const S32 ChatMessageDisplayCount = 5;       // How many chat messages to display
-   static const S32 DisplayChatMessageTimeout = 4000;  // How long to display them (ms)
-
-   enum MessageDisplayMode {
-      ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
-      ShortFixed,              // Same length as ShortTimeout, but without timeout
-      LongFixed,               // Long form: Display MessageStoreCount messages, no timout
-      MessageDisplayModes
-   };
-
-   MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
+   static const S32 ChatMessageMargin = 515;
 
    // These are our normal server messages, that "time out"
    Color mDisplayMessageColor[MessageDisplayCount];
    char mDisplayMessage[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];
 
-   // These are our chat messages, that "time out"
-   Color mDisplayChatMessageColor[ChatMessageDisplayCount];
-   char mDisplayChatMessage[ChatMessageDisplayCount][MAX_CHAT_MSG_LENGTH];
-
-   // These are only displayed in the extended chat panel, and don't time out
-   Color mStoreChatMessageColor[ChatMessageStoreCount];
-   char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
-
    Timer mDisplayMessageTimer;
-   Timer mDisplayChatMessageTimer;
    Timer mShutdownTimer;
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
@@ -151,8 +130,6 @@ private:
    bool mInScoreboardMode;
    ShutdownMode mShutdownMode;
 
-   void setChatColor(S32 i);        // Set color for chat message display
-
    // Some rendering routines
    void renderScoreboard();
 
@@ -171,6 +148,8 @@ private:
    Timer mWrongModeMsgDisplay;               // Help if user is trying to use keyboard in joystick mode
    Timer mInputModeChangeAlertDisplayTimer;  // Remind user that they just changed input modes
    Timer mLevelInfoDisplayTimer;
+
+   void updateChatMessages(U32 timeDelta);
 
    void renderInputModeChangeAlert();
    void renderMissionOverlay(const GameType *gameType);
@@ -230,6 +209,49 @@ private:
       void render();
    } mVoiceRecorder;
 
+
+   class ChatMessageDisplayer
+   {
+      private:
+         enum MessageDisplayMode {
+            ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
+            ShortFixed,              // Same length as ShortTimeout, but without timeout
+            LongFixed,               // Long form: Display MessageStoreCount messages, no timout
+            MessageDisplayModes
+         };
+
+         MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
+
+         static const S32 ChatMessageStoreCount   = 24;   // How many chat messages to store (only top MessageDisplayCount are normally displayed)
+         static const S32 ChatMessageDisplayCount =  5;   // How many chat messages to display in "normal" mode
+
+         Timer mChatScrollTimer;
+         Timer mDisplayChatMessageTimer;
+
+         ClientGame *mGame;
+
+         // These are the messages and their colors
+         Color mMessageColor[ChatMessageDisplayCount];
+         char mMessage[ChatMessageDisplayCount][MAX_CHAT_MSG_LENGTH];
+
+         // These are only displayed in the extended chat panel, and don't time out
+         Color mStoreChatMessageColor[ChatMessageStoreCount];
+         char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
+
+      public:
+         ChatMessageDisplayer(ClientGame *game);         // Constructor
+         void reset();
+
+         void idle(U32 timeDelta);
+         void render(bool helperVisible);                // Render incoming chat msgs
+
+         void onChatMessageRecieved(const Color &msgColor, const char *msg);
+         void toggleDisplayMode();
+   };
+
+   ChatMessageDisplayer mChatMessageDisplayer;
+
+
    LineEditor mLineEditor;    // Message being composed
 
    void dropItem();                       // User presses drop item key
@@ -264,7 +286,6 @@ public:
    void displayMessage(const Color &msgColor, const char *message);
    void displayMessagef(const Color &msgColor, const char *format, ...);
    void onChatMessageRecieved(const Color &msgColor, const char *format, ...);
-   string getSubstVarVal(const string &var);
 
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
@@ -272,7 +293,6 @@ public:
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
    void renderMessageDisplay();     // Render incoming server msgs
-   void renderChatMessageDisplay(); // Render incoming chat msgs
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down

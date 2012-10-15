@@ -90,8 +90,8 @@ static void makeCommandCandidateList();      // Forward delcaration
 // Constructor
 GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game), 
                                                          mVoiceRecorder(game),
-                                                         mLineEditor(200)
-                                                         
+                                                         mLineEditor(200),
+                                                         mChatMessageDisplayer(game)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
@@ -130,12 +130,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    for(S32 i = 0; i < MessageDisplayCount; i++)
       mDisplayMessage[i][0] = 0;
 
-   for(S32 i = 0; i < ChatMessageStoreCount; i++)
-      mStoreChatMessage[i][0] = 0;
-
-   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
-      mDisplayChatMessage[i][0] = 0;
-
    mGotControlUpdate = false;
    mRecalcFPSTimer = 0;
 
@@ -148,7 +142,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
    }
 
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
-   mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
    //populateChatCmdList();
 
    makeCommandCandidateList();
@@ -217,13 +210,11 @@ void GameUserInterface::onActivate()
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
-   for(S32 i = 0; i < ChatMessageStoreCount; i++)
-      mDisplayMessage[i][0] = 0;
+   mChatMessageDisplayer.reset();
 
    for(S32 i = 0; i < MessageDisplayCount; i++)
-      mStoreChatMessage[i][0] = 0;
+      mDisplayMessage[i][0] = 0;
 
-   mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
    enterMode(PlayMode);                         // Make sure we're not in chat or loadout-select mode
 
    for(S32 i = 0; i < ShipModuleCount; i++)
@@ -309,7 +300,7 @@ void GameUserInterface::displayMessagef(const Color &msgColor, const char *forma
 void GameUserInterface::displayMessage(const Color &msgColor, const char *message)
 {
    // Ignore empty message
-   if(!strcmp(message, ""))
+   if(strcmp(message, "") == 0)
       return;
 
    // Create a slot for our new message
@@ -326,97 +317,6 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
 }
 
 
-// Add it to the list, will be displayed in render()
-void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
-{
-   // Ignore empty message
-   if(!strcmp(format, ""))
-      return;
-
-   // Create a slot for our new message
-   if(mDisplayChatMessage[0][0])
-      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
-      {
-         strcpy(mDisplayChatMessage[i], mDisplayChatMessage[i-1]);
-         mDisplayChatMessageColor[i] = mDisplayChatMessageColor[i-1];
-      }
-
-   for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
-   {
-      strcpy(mStoreChatMessage[i], mStoreChatMessage[i-1]);
-      mStoreChatMessageColor[i] = mStoreChatMessageColor[i-1];
-   }
-
-   va_list args;
-
-   va_start(args, format);
-   vsnprintf(mDisplayChatMessage[0], sizeof(mDisplayChatMessage[0]), format, args);
-   va_end(args);
-
-   // Check if we have any %variables% that need substituting
-
-   bool inside = false;
-   bool replacedAny = false;
-
-   size_t startPos, endPos;
-
-   inside = false;
-
-   string s = mDisplayChatMessage[0];
-
-   for(size_t i = 0; i < s.length(); i++)
-   {
-      if(s[i] == '%')
-      {
-         if(!inside)    // Found beginning of variable
-         {
-            startPos = i + 1;
-            inside = true;
-         }
-         else           // Found end of variable
-         {
-            endPos = i - startPos;
-            inside = false;
-
-            string var = s.substr(startPos, endPos);
-            string val = getSubstVarVal(var);
-
-            s.replace(startPos - 1, endPos + 2, val);
-            replacedAny = true;
-
-            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val
-         }
-      }
-   }
-
-   if(replacedAny)
-      strncpy(mDisplayChatMessage[0], s.c_str(), sizeof(mDisplayChatMessage[0]));
-   
-   strncpy(mStoreChatMessage[0], mDisplayChatMessage[0], sizeof(mStoreChatMessage[0]));
-
-   mDisplayChatMessageColor[0] = msgColor;
-   mStoreChatMessageColor[0] = msgColor;
-
-   mDisplayChatMessageTimer.reset();
-}
-
-
-// Replace %vars% in chat messages 
-// Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
-// Vars are case insensitive
-string GameUserInterface::getSubstVarVal(const string &var)
-{
-   InputCode inputCode = getGame()->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
-   if(inputCode != KEY_UNKNOWN)
-      return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
-   
-   if(caseInsensitiveStringCompare(var, "playerName"))
-      return getGame()->getClientInfo()->getName().getString();
-
-   return "%" + var + "%";
-}
-
-
 void GameUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
@@ -427,6 +327,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
    mLevelInfoDisplayTimer.update(timeDelta);
+
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       mModuleDoubleTapTimer[i].update(timeDelta);
 
@@ -444,17 +345,7 @@ void GameUserInterface::idle(U32 timeDelta)
    }
 
    // Chat messages
-   if(mDisplayChatMessageTimer.update(timeDelta))
-   {
-      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
-      {
-         strcpy(mDisplayChatMessage[i], mDisplayChatMessage[i-1]);
-         mDisplayChatMessageColor[i] = mDisplayChatMessageColor[i-1];
-      }
-
-      mDisplayChatMessage[0][0] = 0;    // Null, that is
-      mDisplayChatMessageTimer.reset();
-   }
+   mChatMessageDisplayer.idle(timeDelta);
 
    // Time to recalc FPS?
    if(mFPSVisible)        // Only bother if we're displaying the value...
@@ -530,7 +421,7 @@ void GameUserInterface::render()
 
    if(getGame()->isSuspended()  || getGame()->isSpawnDelayed())
    {
-      renderChatMessageDisplay();
+      mChatMessageDisplayer.render(mHelper != NULL);
       renderCurrentChat();
       renderSuspendedMessage();
 
@@ -539,11 +430,11 @@ void GameUserInterface::render()
    }
    else
    {
-      renderReticle();              // Draw crosshairs if using mouse
-      renderMessageDisplay();       // Render incoming server msgs
-      renderChatMessageDisplay();   // Render incoming chat msgs
-      renderCurrentChat();          // Render any chat msg user is composing
-      renderLoadoutIndicators();    // Draw indicators for the various loadout items
+      renderReticle();                  // Draw crosshairs if using mouse
+      renderMessageDisplay();           // Render incoming server msgs
+      mChatMessageDisplayer.render(mHelper != NULL);   // Render incoming chat msgs
+      renderCurrentChat();              // Render any chat msg user is composing
+      renderLoadoutIndicators();        // Draw indicators for the various loadout items
 
       getUIManager()->getHostMenuUserInterface()->renderProgressListItems();  // This is the list of levels loaded while hosting
 
@@ -905,21 +796,170 @@ void GameUserInterface::renderMessageDisplay()
 }
 
 
-void GameUserInterface::setChatColor(S32 i)
+// Constructor
+GameUserInterface::ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
 {
-   if(mHelper)   // Fade out text if a helper menu is active
-      glColor(mDisplayChatMessageColor[i], 0.2f);
-   else
-      glColor(mDisplayChatMessageColor[i]);
+   static const S32 DisplayChatMessageTimeout = 4000;    // How long messages stay visible (ms)
+
+   mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
+   mChatScrollTimer.setPeriod(50);
+
+   reset();
+
+   mGame = game;
+
+   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
+      mMessage[i][0] = 0;
+
+   mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
+}
+
+
+void GameUserInterface::ChatMessageDisplayer::reset()
+{
+   for(S32 i = 0; i < ChatMessageStoreCount; i++)
+      mStoreChatMessage[i][0] = 0;
+}
+
+
+void GameUserInterface::ChatMessageDisplayer::idle(U32 timeDelta)
+{
+   mChatScrollTimer.update(timeDelta);
+
+   if(mDisplayChatMessageTimer.update(timeDelta))
+   {
+      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+      {
+         strcpy(mMessage[i], mMessage[i-1]);
+         mMessageColor[i] = mMessageColor[i-1];
+      }
+
+      mMessage[0][0] = 0;    // Null, that is
+      mDisplayChatMessageTimer.reset();
+   }
+}
+
+
+void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
+{
+   // Ignore empty message
+   if(!strcmp(format, ""))
+      return;
+
+   static char buffer[MAX_CHAT_MSG_LENGTH];
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(buffer, sizeof(buffer), format, args);
+   va_end(args);
+
+   mChatMessageDisplayer.onChatMessageRecieved(msgColor, buffer);
+}
+
+
+// Replace %vars% in chat messages 
+// Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
+// Vars are case insensitive
+static string getSubstVarVal(ClientGame *game, const string &var)
+{
+   InputCode inputCode = game->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
+   if(inputCode != KEY_UNKNOWN)
+      return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
+   
+   if(caseInsensitiveStringCompare(var, "playerName"))
+      return game->getClientInfo()->getName().getString();
+
+   return "%" + var + "%";
+}
+
+
+// Add it to the list, will be displayed in render()
+void GameUserInterface::ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
+{
+   // Create a slot for our new message
+   if(mMessage[0][0])
+      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+      {
+         strcpy(mMessage[i], mMessage[i-1]);
+         mMessageColor[i] = mMessageColor[i-1];
+      }
+
+   for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
+   {
+      strcpy(mStoreChatMessage[i], mStoreChatMessage[i-1]);
+      mStoreChatMessageColor[i] = mStoreChatMessageColor[i-1];
+   }
+
+   strcpy(mMessage[0], msg);
+   strcpy(mStoreChatMessage[0], msg);
+
+   mMessageColor[0] = msgColor;
+   mStoreChatMessageColor[0] = msgColor;
+
+   // Check if we have any %variables% that need substituting
+
+   bool inside = false;
+   bool replacedAny = false;
+
+   size_t startPos, endPos;
+
+   inside = false;
+
+   string s = mMessage[0];
+
+   for(size_t i = 0; i < s.length(); i++)
+   {
+      if(s[i] == '%')
+      {
+         if(!inside)    // Found beginning of variable
+         {
+            startPos = i + 1;
+            inside = true;
+         }
+         else           // Found end of variable
+         {
+            endPos = i - startPos;
+            inside = false;
+
+            string var = s.substr(startPos, endPos);
+            string val = getSubstVarVal(mGame, var);
+
+            s.replace(startPos - 1, endPos + 2, val);
+            replacedAny = true;
+
+            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val
+         }
+      }
+   }
+
+   if(replacedAny)
+   {
+      strncpy(mMessage[0], s.c_str(), sizeof(mMessage[0]));
+      strncpy(mStoreChatMessage[0], mMessage[0], sizeof(mStoreChatMessage[0]));
+   }
+
+   mDisplayChatMessageTimer.reset();
+}
+
+
+void GameUserInterface::ChatMessageDisplayer::toggleDisplayMode()
+{
+   S32 m = mMessageDisplayMode + 1;
+
+   if(m >= MessageDisplayModes)
+      m = 0;
+   mMessageDisplayMode = MessageDisplayMode(m);
 }
 
 
 // Render any incoming player chat msgs
-void GameUserInterface::renderChatMessageDisplay()
+void GameUserInterface::ChatMessageDisplayer::render(bool helperVisible)
 {
    glColor(Colors::white);
+   const F32 AlphaWhenHelperMenuVisible = 0.2f;
 
-   S32 y = chatMessageMargin;
+   S32 y = ChatMessageMargin;
    S32 msgCount;
 
    if(mMessageDisplayMode == LongFixed)
@@ -932,11 +972,14 @@ void GameUserInterface::renderChatMessageDisplay()
    if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
       for(S32 i = 0; i < msgCount; i++)
       {
-         if(mDisplayChatMessage[i][0])
+         if(mMessage[i][0])
          {
-            setChatColor(i);
+            if(helperVisible)   
+               glColor(mMessageColor[i], AlphaWhenHelperMenuVisible);
+            else
+               glColor(mMessageColor[i]);
 
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mDisplayChatMessage[i], horizMargin, y,
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mMessage[i], horizMargin, y,
                   700,                             // wrap width
                   y_end,                           // ypos_end
                   CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
@@ -950,7 +993,10 @@ void GameUserInterface::renderChatMessageDisplay()
       {
          if(mStoreChatMessage[i][0])
          {
-            setChatColor(i);
+            if(helperVisible)   
+               glColor(mStoreChatMessageColor[i], AlphaWhenHelperMenuVisible);
+            else
+               glColor(mStoreChatMessageColor[i]);
 
             y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,
                   700,                             // wrap width
@@ -1226,11 +1272,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
    {
-      S32 m = mMessageDisplayMode + 1;
-      if(m >= MessageDisplayModes)
-         m = 0;
-      mMessageDisplayMode = MessageDisplayMode(m);
-
+      mChatMessageDisplayer.toggleDisplayMode();
       return true;
    }
    else if(mHelper && mHelper->processInputCode(inputCode))   // Will return true if key was processed
@@ -2501,7 +2543,7 @@ void GameUserInterface::renderCurrentChat()
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
-   const S32 ypos = chatMessageMargin + CHAT_FONT_SIZE + (2 * CHAT_FONT_GAP) + 5;
+   const S32 ypos = ChatMessageMargin + CHAT_FONT_SIZE + (2 * CHAT_FONT_GAP) + 5;
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
 
