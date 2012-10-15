@@ -2932,7 +2932,7 @@ void GameUserInterface::runCommand(const char *input)
    }
 
    for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
-      if(words[0] == chatCmds[i].cmdName)
+      if(lcase(words[0]) == chatCmds[i].cmdName)
       {
          (this->*(chatCmds[i].cmdCallback))(words);
          return;
