@@ -3600,16 +3600,32 @@ void GameUserInterface::renderDebugStatus()
 }
 
 
+void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
+{
+   // Ignore empty message
+   if(!strcmp(format, ""))
+      return;
+
+   static char buffer[MAX_CHAT_MSG_LENGTH];
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(buffer, sizeof(buffer), format, args);
+   va_end(args);
+
+   mChatMessageDisplayer.onChatMessageRecieved(msgColor, buffer);
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Constructor
 GameUserInterface::ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
 {
-   static const S32 DisplayChatMessageTimeout = 4000;    // How long messages stay visible (ms)
-
-   mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
-   mChatScrollTimer.setPeriod(50);
+   mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
+   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives
 
    reset();
 
@@ -3626,12 +3642,15 @@ void GameUserInterface::ChatMessageDisplayer::reset()
 
    for(S32 i = 0; i < MessageDisplayCount; i++)
        mMessage[i][0] = 0;
+
+   mTopMessage[0] = 0;
 }
 
 
 void GameUserInterface::ChatMessageDisplayer::idle(U32 timeDelta)
 {
-   mChatScrollTimer.update(timeDelta);
+   if(mChatScrollTimer.update(timeDelta))
+      mTopMessage[0] = 0;
 
    if(mDisplayChatMessageTimer.update(timeDelta))
    {
@@ -3644,24 +3663,6 @@ void GameUserInterface::ChatMessageDisplayer::idle(U32 timeDelta)
       mMessage[0][0] = 0;    // Null, that is
       mDisplayChatMessageTimer.reset();
    }
-}
-
-
-void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
-{
-   // Ignore empty message
-   if(!strcmp(format, ""))
-      return;
-
-   static char buffer[MAX_CHAT_MSG_LENGTH];
-
-   va_list args;
-
-   va_start(args, format);
-   vsnprintf(buffer, sizeof(buffer), format, args);
-   va_end(args);
-
-   mChatMessageDisplayer.onChatMessageRecieved(msgColor, buffer);
 }
 
 
@@ -3684,6 +3685,25 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 // Add it to the list, will be displayed in render()
 void GameUserInterface::ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
 {
+   S32 maxMessages;
+   
+   if(mMessageDisplayMode == LongFixed)
+   {
+      strcpy(mTopMessage, mStoreChatMessage[ChatMessageStoreCount - 1]);
+      mTopColor = mStoreChatMessageColor[ChatMessageStoreCount - 1];
+   }
+   else if(mMessageDisplayMode == ShortFixed)
+   {
+      strcpy(mTopMessage, mStoreChatMessage[ChatMessageDisplayCount - 1]);
+      mTopColor = mStoreChatMessageColor[ChatMessageDisplayCount - 1];
+   }
+   else
+   {
+      strcpy(mTopMessage, mMessage[ChatMessageDisplayCount - 1]);
+      mTopColor = mMessageColor[ChatMessageDisplayCount - 1];
+   }
+   
+
    // Create a slot for our new message
    if(mMessage[0][0])
       for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
@@ -3747,6 +3767,7 @@ void GameUserInterface::ChatMessageDisplayer::onChatMessageRecieved(const Color 
    }
 
    mDisplayChatMessageTimer.reset();
+   mChatScrollTimer.reset();
 }
 
 
@@ -3766,7 +3787,7 @@ void GameUserInterface::ChatMessageDisplayer::render(bool helperVisible)
    glColor(Colors::white);
    const F32 AlphaWhenHelperMenuVisible = 0.2f;
 
-   S32 y = ChatMessageMargin;
+   S32 y = ChatMessageMargin + mChatScrollTimer.getFraction() * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
    S32 msgCount;
 
    if(mMessageDisplayMode == LongFixed)
@@ -3786,13 +3807,7 @@ void GameUserInterface::ChatMessageDisplayer::render(bool helperVisible)
             else
                glColor(mMessageColor[i]);
 
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mMessage[i], horizMargin, y,
-                  700,                             // wrap width
-                  y_end,                           // ypos_end
-                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
-                  CHAT_FONT_SIZE,                  // font size
-                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
-                  true);                           // align bottom
+            y -= renderLine(mMessage[i], y, y_end);
          }
       }
    else                                            // We're in a mode where messages do not expire
@@ -3805,15 +3820,26 @@ void GameUserInterface::ChatMessageDisplayer::render(bool helperVisible)
             else
                glColor(mStoreChatMessageColor[i]);
 
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,
+            y -= renderLine(mStoreChatMessage[i], y, y_end);
+         }
+      }
+
+
+   if(mTopMessage[0])
+      renderLine(mTopMessage, y, y_end - (CHAT_FONT_SIZE + CHAT_FONT_GAP));
+}
+
+
+S32 GameUserInterface::ChatMessageDisplayer::renderLine(char *msg, S32 y, S32 y_end) 
+{
+   return 
+   (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(msg, horizMargin, y,
                   700,                             // wrap width
                   y_end,                           // ypos_end
                   CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
                   CHAT_FONT_SIZE,                  // font size
                   CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
                   true);                           // align bottom
-         }
-      }
 }
 
 

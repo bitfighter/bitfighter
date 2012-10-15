@@ -238,6 +238,11 @@ private:
          Color mStoreChatMessageColor[ChatMessageStoreCount];
          char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
 
+         char mTopMessage[MAX_CHAT_MSG_LENGTH];    // Used for animation purposes
+         Color mTopColor;
+
+         S32 renderLine(char *msg, S32 y, S32 y_end);     // Rendering helper
+
       public:
          ChatMessageDisplayer(ClientGame *game);         // Constructor
          void reset();
