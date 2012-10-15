@@ -905,6 +905,15 @@ void GameUserInterface::renderMessageDisplay()
 }
 
 
+void GameUserInterface::setChatColor(S32 i)
+{
+   if(mHelper)   // Fade out text if a helper menu is active
+      glColor(mDisplayChatMessageColor[i], 0.2f);
+   else
+      glColor(mDisplayChatMessageColor[i]);
+}
+
+
 // Render any incoming player chat msgs
 void GameUserInterface::renderChatMessageDisplay()
 {
@@ -923,35 +932,28 @@ void GameUserInterface::renderChatMessageDisplay()
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
-   if(mMessageDisplayMode == ShortTimeout)
+   if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
       for(S32 i = 0; i < msgCount; i++)
       {
          if(mDisplayChatMessage[i][0])
          {
-            if(mHelper)   // fade out text if a helper menu is active
-               glColor(mDisplayChatMessageColor[i], 0.2f);
-            else
-               glColor(mDisplayChatMessageColor[i]);
+            setChatColor(i);
 
-            //drawString(horizMargin, y, CHAT_FONTSIZE, mDisplayChatMessage[i]);
             y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mDisplayChatMessage[i], horizMargin, y,
-                  700, // wrap width
-                  y_end, // ypos_end
-                  CHAT_FONT_SIZE + CHAT_FONT_GAP, // line height
-                  CHAT_FONT_SIZE, // font size
-                  CHAT_MULTILINE_INDENT, // how much extra to indent if chat has muliple lines
-                  true); // align bottom
+                  700,                             // wrap width
+                  y_end,                           // ypos_end
+                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
+                  CHAT_FONT_SIZE,                  // font size
+                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
+                  true);                           // align bottom
          }
       }
-   else
+   else                                            // We're in a mode where messages do not expire
       for(S32 i = 0; i < msgCount; i++)
       {
          if(mStoreChatMessage[i][0])
          {
-            if(mHelper)   // fade out text if a helper menu is active
-               glColor(mStoreChatMessageColor[i], 0.2f);
-            else
-               glColor(mStoreChatMessageColor[i]);
+            setChatColor(i);
 
             //drawString(horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
             y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,

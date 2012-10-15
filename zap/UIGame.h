@@ -151,6 +151,8 @@ private:
    bool mInScoreboardMode;
    ShutdownMode mShutdownMode;
 
+   void setChatColor(S32 i);        // Set color for chat message display
+
    // Some rendering routines
    void renderScoreboard();
 
