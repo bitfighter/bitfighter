@@ -3600,6 +3600,9 @@ void GameUserInterface::renderDebugStatus()
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Constructor
 GameUserInterface::ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
 {
@@ -3612,9 +3615,6 @@ GameUserInterface::ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
 
    mGame = game;
 
-   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
-      mMessage[i][0] = 0;
-
    mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
 }
 
@@ -3623,6 +3623,9 @@ void GameUserInterface::ChatMessageDisplayer::reset()
 {
    for(S32 i = 0; i < ChatMessageStoreCount; i++)
       mStoreChatMessage[i][0] = 0;
+
+   for(S32 i = 0; i < MessageDisplayCount; i++)
+       mMessage[i][0] = 0;
 }
 
 
