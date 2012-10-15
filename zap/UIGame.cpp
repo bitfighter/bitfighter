@@ -929,9 +929,6 @@ void GameUserInterface::renderChatMessageDisplay()
 
    S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
 
-
-   TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
-
    if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
       for(S32 i = 0; i < msgCount; i++)
       {
@@ -955,14 +952,13 @@ void GameUserInterface::renderChatMessageDisplay()
          {
             setChatColor(i);
 
-            //drawString(horizMargin, y, CHAT_FONTSIZE, mStoreChatMessage[i]);
             y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,
-                  700, // wrap width
-                  y_end, // ypos_end
-                  CHAT_FONT_SIZE + CHAT_FONT_GAP, // line height
-                  CHAT_FONT_SIZE, // font size
-                  CHAT_MULTILINE_INDENT, // how much extra to indent if chat has muliple lines
-                  true); // align bottom
+                  700,                             // wrap width
+                  y_end,                           // ypos_end
+                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
+                  CHAT_FONT_SIZE,                  // font size
+                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
+                  true);                           // align bottom
          }
       }
 }
