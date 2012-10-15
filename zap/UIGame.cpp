@@ -796,220 +796,6 @@ void GameUserInterface::renderMessageDisplay()
 }
 
 
-// Constructor
-GameUserInterface::ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
-{
-   static const S32 DisplayChatMessageTimeout = 4000;    // How long messages stay visible (ms)
-
-   mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
-   mChatScrollTimer.setPeriod(50);
-
-   reset();
-
-   mGame = game;
-
-   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
-      mMessage[i][0] = 0;
-
-   mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
-}
-
-
-void GameUserInterface::ChatMessageDisplayer::reset()
-{
-   for(S32 i = 0; i < ChatMessageStoreCount; i++)
-      mStoreChatMessage[i][0] = 0;
-}
-
-
-void GameUserInterface::ChatMessageDisplayer::idle(U32 timeDelta)
-{
-   mChatScrollTimer.update(timeDelta);
-
-   if(mDisplayChatMessageTimer.update(timeDelta))
-   {
-      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
-      {
-         strcpy(mMessage[i], mMessage[i-1]);
-         mMessageColor[i] = mMessageColor[i-1];
-      }
-
-      mMessage[0][0] = 0;    // Null, that is
-      mDisplayChatMessageTimer.reset();
-   }
-}
-
-
-void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
-{
-   // Ignore empty message
-   if(!strcmp(format, ""))
-      return;
-
-   static char buffer[MAX_CHAT_MSG_LENGTH];
-
-   va_list args;
-
-   va_start(args, format);
-   vsnprintf(buffer, sizeof(buffer), format, args);
-   va_end(args);
-
-   mChatMessageDisplayer.onChatMessageRecieved(msgColor, buffer);
-}
-
-
-// Replace %vars% in chat messages 
-// Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
-// Vars are case insensitive
-static string getSubstVarVal(ClientGame *game, const string &var)
-{
-   InputCode inputCode = game->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
-   if(inputCode != KEY_UNKNOWN)
-      return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
-   
-   if(caseInsensitiveStringCompare(var, "playerName"))
-      return game->getClientInfo()->getName().getString();
-
-   return "%" + var + "%";
-}
-
-
-// Add it to the list, will be displayed in render()
-void GameUserInterface::ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
-{
-   // Create a slot for our new message
-   if(mMessage[0][0])
-      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
-      {
-         strcpy(mMessage[i], mMessage[i-1]);
-         mMessageColor[i] = mMessageColor[i-1];
-      }
-
-   for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
-   {
-      strcpy(mStoreChatMessage[i], mStoreChatMessage[i-1]);
-      mStoreChatMessageColor[i] = mStoreChatMessageColor[i-1];
-   }
-
-   strcpy(mMessage[0], msg);
-   strcpy(mStoreChatMessage[0], msg);
-
-   mMessageColor[0] = msgColor;
-   mStoreChatMessageColor[0] = msgColor;
-
-   // Check if we have any %variables% that need substituting
-
-   bool inside = false;
-   bool replacedAny = false;
-
-   size_t startPos, endPos;
-
-   inside = false;
-
-   string s = mMessage[0];
-
-   for(size_t i = 0; i < s.length(); i++)
-   {
-      if(s[i] == '%')
-      {
-         if(!inside)    // Found beginning of variable
-         {
-            startPos = i + 1;
-            inside = true;
-         }
-         else           // Found end of variable
-         {
-            endPos = i - startPos;
-            inside = false;
-
-            string var = s.substr(startPos, endPos);
-            string val = getSubstVarVal(mGame, var);
-
-            s.replace(startPos - 1, endPos + 2, val);
-            replacedAny = true;
-
-            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val
-         }
-      }
-   }
-
-   if(replacedAny)
-   {
-      strncpy(mMessage[0], s.c_str(), sizeof(mMessage[0]));
-      strncpy(mStoreChatMessage[0], mMessage[0], sizeof(mStoreChatMessage[0]));
-   }
-
-   mDisplayChatMessageTimer.reset();
-}
-
-
-void GameUserInterface::ChatMessageDisplayer::toggleDisplayMode()
-{
-   S32 m = mMessageDisplayMode + 1;
-
-   if(m >= MessageDisplayModes)
-      m = 0;
-   mMessageDisplayMode = MessageDisplayMode(m);
-}
-
-
-// Render any incoming player chat msgs
-void GameUserInterface::ChatMessageDisplayer::render(bool helperVisible)
-{
-   glColor(Colors::white);
-   const F32 AlphaWhenHelperMenuVisible = 0.2f;
-
-   S32 y = ChatMessageMargin;
-   S32 msgCount;
-
-   if(mMessageDisplayMode == LongFixed)
-      msgCount = ChatMessageStoreCount;    // Long form
-   else
-      msgCount = ChatMessageDisplayCount;  // Short form
-
-   S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
-
-   if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
-      for(S32 i = 0; i < msgCount; i++)
-      {
-         if(mMessage[i][0])
-         {
-            if(helperVisible)   
-               glColor(mMessageColor[i], AlphaWhenHelperMenuVisible);
-            else
-               glColor(mMessageColor[i]);
-
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mMessage[i], horizMargin, y,
-                  700,                             // wrap width
-                  y_end,                           // ypos_end
-                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
-                  CHAT_FONT_SIZE,                  // font size
-                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
-                  true);                           // align bottom
-         }
-      }
-   else                                            // We're in a mode where messages do not expire
-      for(S32 i = 0; i < msgCount; i++)
-      {
-         if(mStoreChatMessage[i][0])
-         {
-            if(helperVisible)   
-               glColor(mStoreChatMessageColor[i], AlphaWhenHelperMenuVisible);
-            else
-               glColor(mStoreChatMessageColor[i]);
-
-            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,
-                  700,                             // wrap width
-                  y_end,                           // ypos_end
-                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
-                  CHAT_FONT_SIZE,                  // font size
-                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
-                  true);                           // align bottom
-         }
-      }
-}
-
-
 bool GameUserInterface::isCmdChat()
 {
    return mLineEditor.at(0) == '/' || mCurrentChatType == CmdChat;
@@ -3813,6 +3599,219 @@ void GameUserInterface::renderDebugStatus()
    }
 }
 
+
+// Constructor
+GameUserInterface::ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
+{
+   static const S32 DisplayChatMessageTimeout = 4000;    // How long messages stay visible (ms)
+
+   mDisplayChatMessageTimer.setPeriod(DisplayChatMessageTimeout);
+   mChatScrollTimer.setPeriod(50);
+
+   reset();
+
+   mGame = game;
+
+   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
+      mMessage[i][0] = 0;
+
+   mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
+}
+
+
+void GameUserInterface::ChatMessageDisplayer::reset()
+{
+   for(S32 i = 0; i < ChatMessageStoreCount; i++)
+      mStoreChatMessage[i][0] = 0;
+}
+
+
+void GameUserInterface::ChatMessageDisplayer::idle(U32 timeDelta)
+{
+   mChatScrollTimer.update(timeDelta);
+
+   if(mDisplayChatMessageTimer.update(timeDelta))
+   {
+      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+      {
+         strcpy(mMessage[i], mMessage[i-1]);
+         mMessageColor[i] = mMessageColor[i-1];
+      }
+
+      mMessage[0][0] = 0;    // Null, that is
+      mDisplayChatMessageTimer.reset();
+   }
+}
+
+
+void GameUserInterface::onChatMessageRecieved(const Color &msgColor, const char *format, ...)
+{
+   // Ignore empty message
+   if(!strcmp(format, ""))
+      return;
+
+   static char buffer[MAX_CHAT_MSG_LENGTH];
+
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(buffer, sizeof(buffer), format, args);
+   va_end(args);
+
+   mChatMessageDisplayer.onChatMessageRecieved(msgColor, buffer);
+}
+
+
+// Replace %vars% in chat messages 
+// Currently only evaluates names of keybindings (as used in the INI file), and %playerName%
+// Vars are case insensitive
+static string getSubstVarVal(ClientGame *game, const string &var)
+{
+   InputCode inputCode = game->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
+   if(inputCode != KEY_UNKNOWN)
+      return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
+   
+   if(caseInsensitiveStringCompare(var, "playerName"))
+      return game->getClientInfo()->getName().getString();
+
+   return "%" + var + "%";
+}
+
+
+// Add it to the list, will be displayed in render()
+void GameUserInterface::ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
+{
+   // Create a slot for our new message
+   if(mMessage[0][0])
+      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+      {
+         strcpy(mMessage[i], mMessage[i-1]);
+         mMessageColor[i] = mMessageColor[i-1];
+      }
+
+   for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
+   {
+      strcpy(mStoreChatMessage[i], mStoreChatMessage[i-1]);
+      mStoreChatMessageColor[i] = mStoreChatMessageColor[i-1];
+   }
+
+   strcpy(mMessage[0], msg);
+   strcpy(mStoreChatMessage[0], msg);
+
+   mMessageColor[0] = msgColor;
+   mStoreChatMessageColor[0] = msgColor;
+
+   // Check if we have any %variables% that need substituting
+
+   bool inside = false;
+   bool replacedAny = false;
+
+   size_t startPos, endPos;
+
+   inside = false;
+
+   string s = mMessage[0];
+
+   for(size_t i = 0; i < s.length(); i++)
+   {
+      if(s[i] == '%')
+      {
+         if(!inside)    // Found beginning of variable
+         {
+            startPos = i + 1;
+            inside = true;
+         }
+         else           // Found end of variable
+         {
+            endPos = i - startPos;
+            inside = false;
+
+            string var = s.substr(startPos, endPos);
+            string val = getSubstVarVal(mGame, var);
+
+            s.replace(startPos - 1, endPos + 2, val);
+            replacedAny = true;
+
+            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val
+         }
+      }
+   }
+
+   if(replacedAny)
+   {
+      strncpy(mMessage[0], s.c_str(), sizeof(mMessage[0]));
+      strncpy(mStoreChatMessage[0], mMessage[0], sizeof(mStoreChatMessage[0]));
+   }
+
+   mDisplayChatMessageTimer.reset();
+}
+
+
+void GameUserInterface::ChatMessageDisplayer::toggleDisplayMode()
+{
+   S32 m = mMessageDisplayMode + 1;
+
+   if(m >= MessageDisplayModes)
+      m = 0;
+   mMessageDisplayMode = MessageDisplayMode(m);
+}
+
+
+// Render any incoming player chat msgs
+void GameUserInterface::ChatMessageDisplayer::render(bool helperVisible)
+{
+   glColor(Colors::white);
+   const F32 AlphaWhenHelperMenuVisible = 0.2f;
+
+   S32 y = ChatMessageMargin;
+   S32 msgCount;
+
+   if(mMessageDisplayMode == LongFixed)
+      msgCount = ChatMessageStoreCount;    // Long form
+   else
+      msgCount = ChatMessageDisplayCount;  // Short form
+
+   S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
+
+   if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
+      for(S32 i = 0; i < msgCount; i++)
+      {
+         if(mMessage[i][0])
+         {
+            if(helperVisible)   
+               glColor(mMessageColor[i], AlphaWhenHelperMenuVisible);
+            else
+               glColor(mMessageColor[i]);
+
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mMessage[i], horizMargin, y,
+                  700,                             // wrap width
+                  y_end,                           // ypos_end
+                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
+                  CHAT_FONT_SIZE,                  // font size
+                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
+                  true);                           // align bottom
+         }
+      }
+   else                                            // We're in a mode where messages do not expire
+      for(S32 i = 0; i < msgCount; i++)
+      {
+         if(mStoreChatMessage[i][0])
+         {
+            if(helperVisible)   
+               glColor(mStoreChatMessageColor[i], AlphaWhenHelperMenuVisible);
+            else
+               glColor(mStoreChatMessageColor[i]);
+
+            y -= (CHAT_FONT_SIZE + CHAT_FONT_GAP) * drawWrapText(mStoreChatMessage[i], horizMargin, y,
+                  700,                             // wrap width
+                  y_end,                           // ypos_end
+                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
+                  CHAT_FONT_SIZE,                  // font size
+                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
+                  true);                           // align bottom
+         }
+      }
+}
 
 
 };
