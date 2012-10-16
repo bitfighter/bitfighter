@@ -3871,14 +3871,16 @@ void ChatMessageDisplayer::render(bool helperVisible)
 
 S32 ChatMessageDisplayer::renderLine(const string &msg, S32 y, S32 y_end) 
 {
+   static const S32 LineHeight = CHAT_FONT_SIZE + CHAT_FONT_GAP;
+
    return 
-   (CHAT_FONT_SIZE + CHAT_FONT_GAP) * UserInterface::drawWrapText(msg, UserInterface::horizMargin, y,
-                  CHAT_WIDTH,                      // wrap width
-                  y_end,                           // ypos_end
-                  CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
-                  CHAT_FONT_SIZE,                  // font size
-                  CHAT_MULTILINE_INDENT,           // how much extra to indent if chat has muliple lines
-                  true);                           // align bottom
+   LineHeight * UserInterface::drawWrapText(msg, UserInterface::horizMargin, y,
+                  CHAT_WIDTH,             // wrap width
+                  y_end,                  // ypos_end
+                  LineHeight,             // line height
+                  CHAT_FONT_SIZE,         // font size
+                  CHAT_MULTILINE_INDENT,  // how much extra to indent if chat has muliple lines
+                  true);                  // align bottom
 }
 
 

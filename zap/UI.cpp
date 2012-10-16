@@ -957,6 +957,7 @@ void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2)
 }
 
 
+// Returns the number of lines our msg consumed during rendering
 U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
                                 S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
 {
