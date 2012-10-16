@@ -272,7 +272,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
             S32 allowedWidth = gScreenInfo.getGameCanvasWidth() - (2 * UserInterface::horizMargin) - xpos;
 
             // Calculate (and draw if in renderLoop) the message lines
-            U32 lineCount = UserInterface::drawWrapText((char*)msg.message.c_str(), xpos, ypos, allowedWidth, ypos_top,
+            U32 lineCount = UserInterface::drawWrapText(msg.message, xpos, ypos, allowedWidth, ypos_top,
                AbstractChat::CHAT_FONT_SIZE + AbstractChat::CHAT_FONT_MARGIN,  // line height
                AbstractChat::CHAT_FONT_SIZE, // font size
                0, // how much to indent if the message is multi-line - not needed here because we already indent message

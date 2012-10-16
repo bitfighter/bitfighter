@@ -72,6 +72,69 @@ struct CommandInfo
    string helpTextString;
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+struct ColorString
+{
+   Color color;
+   string str;
+
+   void clear();
+   void set(const string &s, const Color &c);
+
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+ class ChatMessageDisplayer
+{
+   private:
+      enum MessageDisplayMode {
+         ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
+         ShortFixed,              // Same length as ShortTimeout, but without timeout
+         LongFixed,               // Long form: Display MessageStoreCount messages, no timout
+         MessageDisplayModes
+      };
+
+      MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
+
+      static const S32 ChatMessageStoreCount   = 24;   // How many chat messages to store (only top MessageDisplayCount are normally displayed)
+      static const S32 ChatMessageDisplayCount =  5;   // How many chat messages to display in "normal" mode
+
+      Timer mChatScrollTimer;
+      Timer mDisplayChatMessageTimer;
+
+      ClientGame *mGame;
+
+      // These are the messages and their colors
+      //Color mMessageColor[ChatMessageDisplayCount];
+      //char mMessage[ChatMessageDisplayCount][MAX_CHAT_MSG_LENGTH];
+
+      ColorString mMessage[ChatMessageDisplayCount];
+
+      // These are only displayed in the extended chat panel, and don't time out
+      Color mStoreChatMessageColor[ChatMessageStoreCount];
+      char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
+
+      ColorString mTopMessage;                         // Used for animation purposes
+
+      S32 renderLine(const string &msg, S32 y, S32 y_end);     // Rendering helper
+
+   public:
+      ChatMessageDisplayer(ClientGame *game);         // Constructor
+      void reset();
+
+      void idle(U32 timeDelta);
+      void render(bool helperVisible);                // Render incoming chat msgs
+
+      void onChatMessageRecieved(const Color &msgColor, const char *msg);
+      void toggleDisplayMode();
+};
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -93,10 +156,7 @@ private:
    Move mTransformedMove;
    Point mMousePoint;
 
-   // Related to display of in-game chat and status messages
    static const S32 MessageDisplayCount = 6;           // How many server messages to display
-   static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
-   static const S32 ChatMessageMargin = 515;
 
    // These are our normal server messages, that "time out"
    Color mDisplayMessageColor[MessageDisplayCount];
@@ -210,50 +270,6 @@ private:
    } mVoiceRecorder;
 
 
-   class ChatMessageDisplayer
-   {
-      private:
-         enum MessageDisplayMode {
-            ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
-            ShortFixed,              // Same length as ShortTimeout, but without timeout
-            LongFixed,               // Long form: Display MessageStoreCount messages, no timout
-            MessageDisplayModes
-         };
-
-         MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
-
-         static const S32 ChatMessageStoreCount   = 24;   // How many chat messages to store (only top MessageDisplayCount are normally displayed)
-         static const S32 ChatMessageDisplayCount =  5;   // How many chat messages to display in "normal" mode
-
-         Timer mChatScrollTimer;
-         Timer mDisplayChatMessageTimer;
-
-         ClientGame *mGame;
-
-         // These are the messages and their colors
-         Color mMessageColor[ChatMessageDisplayCount];
-         char mMessage[ChatMessageDisplayCount][MAX_CHAT_MSG_LENGTH];
-
-         // These are only displayed in the extended chat panel, and don't time out
-         Color mStoreChatMessageColor[ChatMessageStoreCount];
-         char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
-
-         char mTopMessage[MAX_CHAT_MSG_LENGTH];    // Used for animation purposes
-         Color mTopColor;
-
-         S32 renderLine(char *msg, S32 y, S32 y_end);     // Rendering helper
-
-      public:
-         ChatMessageDisplayer(ClientGame *game);         // Constructor
-         void reset();
-
-         void idle(U32 timeDelta);
-         void render(bool helperVisible);                // Render incoming chat msgs
-
-         void onChatMessageRecieved(const Color &msgColor, const char *msg);
-         void toggleDisplayMode();
-   };
-
    ChatMessageDisplayer mChatMessageDisplayer;
 
 
@@ -266,12 +282,6 @@ private:
    bool mModSecondaryActivated[ShipModuleCount];
 
    void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
-
-   static const S32 SERVER_MSG_FONT_SIZE = 14;
-   static const S32 SERVER_MSG_FONT_GAP = 4;
-   static const S32 CHAT_FONT_SIZE = 12;
-   static const S32 CHAT_FONT_GAP = 3;
-   static const S32 CHAT_MULTILINE_INDENT = 12;
 
    Timer mModuleDoubleTapTimer[ShipModuleCount];  // Timer for detecting if a module key is double-tapped
    static const S32 DoubleClickTimeout = 200;          // Timeout in milliseconds

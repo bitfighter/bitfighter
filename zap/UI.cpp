@@ -957,21 +957,22 @@ void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2)
 }
 
 
-U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
+U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
                                 S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
 {
+   string text = msg;               // Make local working copy that we can alter
+
    U32 lines = 0;
    U32 lineStartIndex = 0;
    U32 lineEndIndex = 0;
    U32 lineBreakCandidateIndex = 0;
    Vector<U32> seperator;           // Collection of character indexes at which to split the message
 
-   while(text[lineEndIndex] != 0)
+
+   while(lineEndIndex < text.length())
    {
       char c = text[lineEndIndex];  // Store character
-      text[lineEndIndex] = 0;       // Temporarily set this index as char array terminator
-      bool overWidthLimit = UserInterface::getStringWidth(fontSize, &text[lineStartIndex]) > (width - multiLineIndentation);
-      text[lineEndIndex] = c;       // Now set it back again
+      bool overWidthLimit = UserInterface::getStringWidth(fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str()) > (width - multiLineIndentation);
 
       // If this character is a space, keep track in case we need to split here
       if(text[lineEndIndex] == ' ')
@@ -985,7 +986,7 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
 
          seperator.push_back(lineBreakCandidateIndex);  // Add this index to line split list
          text[lineBreakCandidateIndex] = ' ';           // Add the space
-         lineStartIndex = lineBreakCandidateIndex + 1;  // Skip a char which is a space.
+         lineStartIndex = lineBreakCandidateIndex + 1;  // Skip a char which is a space
          lineBreakCandidateIndex = lineStartIndex;      // Reset line break index to start of list
       }
 
@@ -1009,13 +1010,10 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
       {
          if(draw)
          {
-            char c = text[lineEndIndex];        // Store character
-            text[lineEndIndex] = 0;             // Temporarily set this index as char array terminator
             if(i == 0)                          // Don't draw the extra margin if it is the first line
-               UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+               UserInterface::drawString(xpos, ypos, fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str());
             else
-               UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, &text[lineStartIndex]);
-            text[lineEndIndex] = c;             // Now set it back again
+               UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str());
          }
          lines++;
          if(ypos < ypos_end && !alignBottom)    // If drawing from align top, and ran out of room, then stop and return
@@ -1036,9 +1034,9 @@ U32 UserInterface::drawWrapText(char *text, S32 xpos, S32 ypos, S32 width, S32 y
          if(draw)
          {
             if (seperator.size() == 0)          // Don't draw the extra margin if it is the only line
-               UserInterface::drawString(xpos, ypos, fontSize, &text[lineStartIndex]);
+               UserInterface::drawString(xpos, ypos, fontSize, text.substr(lineStartIndex).c_str());
             else
-               UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, &text[lineStartIndex]);
+               UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, text.substr(lineStartIndex).c_str());
          }
 
          lines++;
