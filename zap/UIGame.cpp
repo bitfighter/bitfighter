@@ -3670,15 +3670,12 @@ void ChatMessageDisplayer::reset()
 
    for(S32 i = 0; i < ChatMessageDisplayCount; i++)
        mMessage[i].clear();
-
-   mTopMessage.clear();
 }
 
 
 void ChatMessageDisplayer::idle(U32 timeDelta)
 {
-   if(mChatScrollTimer.update(timeDelta))
-      mTopMessage.clear();
+   mChatScrollTimer.update(timeDelta);
 
    if(mDisplayChatMessageTimer.update(timeDelta))
    {
@@ -3711,14 +3708,6 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
 {
-   if(mMessageDisplayMode == LongFixed)
-      mTopMessage.set(mStoreChatMessage[ChatMessageStoreCount - 1], mStoreChatMessageColor[ChatMessageStoreCount - 1]);
-   else if(mMessageDisplayMode == ShortFixed)
-      mTopMessage.set(mStoreChatMessage[ChatMessageDisplayCount - 1], mStoreChatMessageColor[ChatMessageDisplayCount - 1]);
-   else
-      mTopMessage = mMessage[ChatMessageDisplayCount - 1];
-   
-
    // Create a slot for our new message
    if(mMessage[0].str != "")
       for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
@@ -3778,7 +3767,7 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const ch
    }
 
    mDisplayChatMessageTimer.reset();
-   mChatScrollTimer.reset();
+   mChatScrollTimer.reset(2000);
 }
 
 
@@ -3807,7 +3796,7 @@ void ChatMessageDisplayer::render(bool helperVisible)
    else
       msgCount = ChatMessageDisplayCount;  // Short form
 
-   S32 y_end = y - msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
+   S32 y_end = y - (msgCount - 1) * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
 
    DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;
 
@@ -3826,7 +3815,7 @@ void ChatMessageDisplayer::render(bool helperVisible)
                                                mode);
    // p2 will be w and h
    p2 = gScreenInfo.convertCanvasToWindowCoord(CHAT_WIDTH - UserInterface::horizMargin, 
-                                               msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP), 
+                                               (msgCount - 1) * (CHAT_FONT_SIZE + CHAT_FONT_GAP), 
                                                mode);
    glScissor(p1.x, p1.y, p2.x, p2.y);
 
@@ -3858,9 +3847,6 @@ void ChatMessageDisplayer::render(bool helperVisible)
             y -= renderLine(mStoreChatMessage[i], y, y_end);
          }
       }
-
-   if(mTopMessage.str != "")
-      renderLine(mTopMessage.str, y, y_end - (CHAT_FONT_SIZE + CHAT_FONT_GAP));
 
    if(scissorsShouldBeEnabled)
       glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3]);

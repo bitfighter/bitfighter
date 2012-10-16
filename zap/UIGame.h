@@ -103,7 +103,7 @@ struct ColorString
       MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
       static const S32 ChatMessageStoreCount   = 24;   // How many chat messages to store (only top MessageDisplayCount are normally displayed)
-      static const S32 ChatMessageDisplayCount =  5;   // How many chat messages to display in "normal" mode
+      static const S32 ChatMessageDisplayCount =  5 + 1;   // How many chat messages to display in "normal" mode
 
       Timer mChatScrollTimer;
       Timer mDisplayChatMessageTimer;
@@ -111,16 +111,11 @@ struct ColorString
       ClientGame *mGame;
 
       // These are the messages and their colors
-      //Color mMessageColor[ChatMessageDisplayCount];
-      //char mMessage[ChatMessageDisplayCount][MAX_CHAT_MSG_LENGTH];
-
       ColorString mMessage[ChatMessageDisplayCount];
 
       // These are only displayed in the extended chat panel, and don't time out
       Color mStoreChatMessageColor[ChatMessageStoreCount];
       char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
-
-      ColorString mTopMessage;                         // Used for animation purposes
 
       S32 renderLine(const string &msg, S32 y, S32 y_end);     // Rendering helper
 
