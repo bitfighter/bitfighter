@@ -56,8 +56,10 @@ protected:
    };
 
 public:
-   GoalZone();        // Constructor
-   ~GoalZone();
+   GoalZone();       // Constructor
+   ~GoalZone();      // Destructor
+
+   void initialize();
    GoalZone *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -105,12 +107,13 @@ public:
    void renderDock();
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(GoalZone);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(GoalZone);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
+   GoalZone(lua_State *L);
    S32 hasFlag(lua_State *L);
 };
 

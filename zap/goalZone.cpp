@@ -38,6 +38,18 @@ TNL_IMPLEMENT_NETOBJECT(GoalZone);
 // Constructor
 GoalZone::GoalZone()
 {
+   initialize();
+}
+ 
+
+GoalZone::~GoalZone()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void GoalZone::initialize()
+{
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = GoalZoneTypeNumber;
    mFlashCount = 0;
@@ -45,11 +57,7 @@ GoalZone::GoalZone()
    mScore = 1;    // For now...
    mCapturer = NULL;
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
- 
-GoalZone::~GoalZone()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
+
 }
 
 GoalZone *GoalZone::clone() const
@@ -266,16 +274,42 @@ void GoalZone::idle(BfObject::IdleCallPath path)
   */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, hasFlag,  ARRAYDEF({{ END }}), 1 ) \
+   METHOD(CLASS, hasFlag,     ARRAYDEF({{ END }                          }), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(GoalZone, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(GoalZone, LUA_METHODS);
 
 #undef LUA_METHODS
 
-
 const char *GoalZone::luaClassName = "GoalZone";
 REGISTER_LUA_SUBCLASS(GoalZone, Zone);
+
+
+/**
+  *  @luafunc GoalZone::GoalZone()
+  *  @luafunc GoalZone::GoalZone(team, geom)
+  *  @brief %GoalZone constructor.
+  *  @descr Default team is Neutral.
+  */
+GoalZone::GoalZone(lua_State *L)
+{
+   initialize();
+
+   S32 profile = checkArgList(L, functionArgs, "GoalZone", "constructor");
+
+   if(profile == 0)           // No args constructor
+   {
+      setTeam(TEAM_NEUTRAL);  // Override default set in initialize()
+      return;
+   }
+
+   if(profile == 1)           // Team, Geom
+   {
+      //setTeam(L, 1);
+      setGeom(L, 2);
+   }
+}
+
 
 /**
   *  @luafunc bool GoalZone::hasFlag()

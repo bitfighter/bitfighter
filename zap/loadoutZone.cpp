@@ -198,12 +198,15 @@ const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
 LoadoutZone::LoadoutZone(lua_State *L)
 {
    initialize();
-   setTeam(TEAM_NEUTRAL);     // Override default set in initialize()
 
    S32 profile = checkArgList(L, functionArgs, "LoadoutZone", "constructor");
 
    if(profile == 0)           // No args constructor
+   {
+      setTeam(TEAM_NEUTRAL);  // Override default set in initialize()
       return;
+   }
+
    if(profile == 1)           // Team, Geom
    {
       setTeam(L, 1);
