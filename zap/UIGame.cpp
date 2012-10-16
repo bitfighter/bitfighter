@@ -91,9 +91,8 @@ static const S32 SERVER_MSG_FONT_SIZE = 14;
 static const S32 SERVER_MSG_FONT_GAP = 4;
 static const S32 CHAT_FONT_SIZE = 12;
 static const S32 CHAT_FONT_GAP = 3;
-static const S32 CHAT_MULTILINE_INDENT = 12;
-
-
+static const S32 CHAT_MULTILINE_INDENT = 12;       // How much subsequent lines of long chat messages are indented
+static const S32 CHAT_WIDTH = 700;                 // Max width of chat messages displayed in-game
 
 
 Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
@@ -3820,10 +3819,15 @@ void ChatMessageDisplayer::render(bool helperVisible)
    if(scissorsShouldBeEnabled)
       glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
 
-
-   Point p1 = gScreenInfo.convertCanvasToWindowCoord(UserInterface::horizMargin, 600 - ChatMessageMargin, mode);
-   Point p2 = gScreenInfo.convertCanvasToWindowCoord(700 - UserInterface::horizMargin, msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP), mode);
-
+   static Point p1, p2;
+   // p1 will be x and y
+   p1 = gScreenInfo.convertCanvasToWindowCoord(UserInterface::horizMargin, 
+                                               gScreenInfo.getGameCanvasHeight() - ChatMessageMargin, 
+                                               mode);
+   // p2 will be w and h
+   p2 = gScreenInfo.convertCanvasToWindowCoord(CHAT_WIDTH - UserInterface::horizMargin, 
+                                               msgCount * (CHAT_FONT_SIZE + CHAT_FONT_GAP), 
+                                               mode);
    glScissor(p1.x, p1.y, p2.x, p2.y);
 
    glEnable(GL_SCISSOR_TEST);
@@ -3869,7 +3873,7 @@ S32 ChatMessageDisplayer::renderLine(const string &msg, S32 y, S32 y_end)
 {
    return 
    (CHAT_FONT_SIZE + CHAT_FONT_GAP) * UserInterface::drawWrapText(msg, UserInterface::horizMargin, y,
-                  700,                             // wrap width
+                  CHAT_WIDTH,                      // wrap width
                   y_end,                           // ypos_end
                   CHAT_FONT_SIZE + CHAT_FONT_GAP,  // line height
                   CHAT_FONT_SIZE,                  // font size
