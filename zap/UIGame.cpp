@@ -84,15 +84,16 @@ extern Color gCmdChatColor;
 
 // Some constants related to display of in-game chat and status messages
 static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
-static const S32 ChatMessageMargin = 515;
 
 // Sizes and other things to help with positioning
-static const S32 SERVER_MSG_FONT_SIZE = 14;
-static const S32 SERVER_MSG_FONT_GAP = 4;
+static const S32 CHAT_Y_POS = 515;
+static const S32 SRV_MSG_FONT_SIZE = 14;
+static const S32 SRV_MSG_FONT_GAP = 4;
 static const S32 CHAT_FONT_SIZE = 12;
 static const S32 CHAT_FONT_GAP = 3;
 static const S32 CHAT_MULTILINE_INDENT = 12;       // How much subsequent lines of long chat messages are indented
-static const S32 CHAT_WIDTH = 700;                 // Max width of chat messages displayed in-game
+static const S32 CHAT_WRAP_WIDTH = 700;            // Max width of chat messages displayed in-game
+static const S32 SRV_MSG_WRAP_WIDTH = 750;
 
 
 Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
@@ -101,12 +102,14 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(Colors::blue);
 static void makeCommandCandidateList();      // Forward delcaration
 
 // Constructor
-GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game), 
-                                                         mVoiceRecorder(game),
-                                                         mLineEditor(200),
-                                                         mChatMessageDisplayer1(game, 5, true),
-                                                         mChatMessageDisplayer2(game, 5, false),
-                                                         mChatMessageDisplayer3(game, 24, false)
+GameUserInterface::GameUserInterface(ClientGame *game) : 
+                  Parent(game), 
+                  mVoiceRecorder(game),
+                  mLineEditor(200),
+                  mServerMessageDisplayer(game, 6, true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
+                  mChatMessageDisplayer1(game,  5, true,  CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mChatMessageDisplayer2(game,  5, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mChatMessageDisplayer3(game, 24, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
@@ -142,11 +145,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
       mPing[i] = 100;
    }
 
-
-   // Initialize message buffers
-   for(S32 i = 0; i < MessageDisplayCount; i++)
-      mDisplayMessage[i][0] = 0;
-
    mGotControlUpdate = false;
    mRecalcFPSTimer = 0;
 
@@ -157,9 +155,6 @@ GameUserInterface::GameUserInterface(ClientGame *game) : Parent(game),
       mModSecondaryActivated[i] = false;
       mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
-
-   mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
-   //populateChatCmdList();
 
    makeCommandCandidateList();
 }
@@ -226,13 +221,12 @@ void GameUserInterface::onActivate()
    Cursor::disableCursor();            // Turn off cursor
    onMouseMoved();                     // Make sure ship pointed is towards mouse
 
-   // Clear out any lingering chat messages
+
+   // Clear out any lingering server or chat messages
+   mServerMessageDisplayer.reset();
    mChatMessageDisplayer1.reset();
    mChatMessageDisplayer2.reset();
    mChatMessageDisplayer3.reset();
-
-   for(S32 i = 0; i < MessageDisplayCount; i++)
-      mDisplayMessage[i][0] = 0;
 
    enterMode(PlayMode);                         // Make sure we're not in chat or loadout-select mode
 
@@ -322,17 +316,7 @@ void GameUserInterface::displayMessage(const Color &msgColor, const char *messag
    if(strcmp(message, "") == 0)
       return;
 
-   // Create a slot for our new message
-   if(mDisplayMessage[0][0])
-      for(S32 i = MessageDisplayCount - 1; i > 0; i--)
-      {
-         strcpy(mDisplayMessage[i], mDisplayMessage[i-1]);
-         mDisplayMessageColor[i] = mDisplayMessageColor[i-1];
-      }
-
-   strncpy(mDisplayMessage[0], message, sizeof(mDisplayMessage[0]));    // Use strncpy to avoid buffer overflows
-   mDisplayMessageColor[0] = msgColor;
-   mDisplayMessageTimer.reset();
+   mServerMessageDisplayer.onChatMessageRecieved(msgColor, message);
 }
 
 
@@ -350,20 +334,8 @@ void GameUserInterface::idle(U32 timeDelta)
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       mModuleDoubleTapTimer[i].update(timeDelta);
 
-   // Server messages
-   if(mDisplayMessageTimer.update(timeDelta))
-   {
-      for(S32 i = MessageDisplayCount - 1; i > 0; i--)
-      {
-         strcpy(mDisplayMessage[i], mDisplayMessage[i-1]);
-         mDisplayMessageColor[i] = mDisplayMessageColor[i-1];
-      }
-
-      mDisplayMessage[0][0] = 0;    // Null, that is
-      mDisplayMessageTimer.reset();
-   }
-
-   // Chat messages
+   // Messages
+   mServerMessageDisplayer.idle(timeDelta);
    mChatMessageDisplayer1.idle(timeDelta);
    mChatMessageDisplayer2.idle(timeDelta);
    mChatMessageDisplayer3.idle(timeDelta);
@@ -452,8 +424,7 @@ void GameUserInterface::render()
    else
    {
       renderReticle();              // Draw crosshairs if using mouse
-      renderMessageDisplay();       // Render incoming server msgs
-      renderChatMsgs();             // Render incoming chat msgs
+      renderChatMsgs();             // Render incoming chat and server msgs
       renderCurrentChat();          // Render any chat msg user is composing
       renderLoadoutIndicators();    // Draw indicators for the various loadout items
 
@@ -782,37 +753,6 @@ void GameUserInterface::renderLoadoutIndicators()
       S32 width = renderIndicator(xPos, getGame()->getModuleInfo(localShip->getModule(i))->getName());
 
       xPos += width + gapSize;
-   }
-}
-
-
-// Render any incoming server msgs
-void GameUserInterface::renderMessageDisplay()
-{
-   glColor(Colors::white);
-
-   S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin;
-   S32 msgCount;
-
-   msgCount = MessageDisplayCount;  // Short form
-
-   S32 y_end = y + msgCount * (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP);
-
-   for(S32 i = msgCount - 1; i >= 0; i--)
-   {
-      if(mDisplayMessage[i][0])
-      {
-         glColor(mDisplayMessageColor[i]);
-         //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
-         //y += FONTSIZE + FONT_GAP;
-         y += (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP)
-            * drawWrapText(mDisplayMessage[i], horizMargin, y,
-               750, // wrap width
-               y_end, // ypos_end
-               SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP, // line height
-               SERVER_MSG_FONT_SIZE, // font size
-               false); // align top
-      }
    }
 }
 
@@ -2315,14 +2255,19 @@ CommandInfo chatCmds[] = {
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs()
 {
+   bool helperActive = (mHelper != NULL);
+
    if(mMessageDisplayMode == ShortTimeout)
-      mChatMessageDisplayer1.render(mHelper != NULL);
+      mChatMessageDisplayer1.render(CHAT_Y_POS, false, helperActive);
 
    else if(mMessageDisplayMode == ShortFixed)
-      mChatMessageDisplayer2.render(mHelper != NULL);
+      mChatMessageDisplayer2.render(CHAT_Y_POS, false, helperActive);
 
    else
-      mChatMessageDisplayer3.render(mHelper != NULL);
+      mChatMessageDisplayer3.render(CHAT_Y_POS, false, helperActive);
+
+
+   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, true, helperActive);
 }
 
 
@@ -2363,7 +2308,7 @@ void GameUserInterface::renderCurrentChat()
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
-   const S32 ypos = ChatMessageMargin + CHAT_FONT_SIZE + (2 * CHAT_FONT_GAP) + 5;
+   const S32 ypos = CHAT_Y_POS + CHAT_FONT_SIZE + (2 * CHAT_FONT_GAP) + 5;
 
    S32 boxWidth = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) - 230;
 
@@ -3686,7 +3631,7 @@ void ColorString::set(const string &s, const Color &c)
 ////////////////////////////////////////
 
 // Constructor
-ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire)
+ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
    mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
    mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives
@@ -3697,6 +3642,9 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
 
    mGame = game;
    mExpire = expire;
+   mWrapWidth = wrapWidth;
+   mFontSize = fontSize;
+   mFontGap = fontWidth;
 }
 
 
@@ -3806,14 +3754,39 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
    return s;
 }
-
+//
+//   S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin;
+//   S32 msgCount;
+//
+//   msgCount = MessageDisplayCount;  // Short form
+//
+//   S32 y_end = y + msgCount * (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP);
+//
+//   for(S32 i = msgCount - 1; i >= 0; i--)
+//   {
+//      if(mDisplayMessage[i][0])
+//      {
+//         glColor(mDisplayMessageColor[i]);
+//         //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
+//         //y += FONTSIZE + FONT_GAP;
+//         y += (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP)
+//            * drawWrapText(mDisplayMessage[i], horizMargin, y,
+//               750, // wrap width
+//               y_end, // ypos_end
+//               SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP, // line height
+//               SERVER_MSG_FONT_SIZE, // font size
+//               false); // align top
+//      }
+//   }
+//}
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(bool helperVisible)
+void ChatMessageDisplayer::render(S32 ypos, bool isTop, bool helperVisible)
 {
-   glColor(Colors::white);
+   if(mFirst == mLast)
+      return;
 
-   S32 y = ChatMessageMargin + mChatScrollTimer.getFraction() * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
+
    S32 msgCount = mMessages.size();
 
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);
@@ -3822,7 +3795,23 @@ void ChatMessageDisplayer::render(bool helperVisible)
    if(!isScrolling)
       msgCount--;
 
-   S32 y_end = y - (msgCount) * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
+
+   // Figure out where to display the messages
+   S32 lineHeight = mFontSize + mFontGap;
+
+   S32 y, y_end;     // Bottom and top of the message display area, respectively.  Crappy variable names.
+
+   if(isTop)
+   {
+      y_end = ypos - mChatScrollTimer.getFraction() * lineHeight;
+      y = y_end + msgCount * lineHeight;
+   }
+   else
+   {
+      y = ypos + mChatScrollTimer.getFraction() * lineHeight;
+      y_end = y - msgCount * lineHeight;
+   }
+
 
    DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;
 
@@ -3839,13 +3828,13 @@ void ChatMessageDisplayer::render(bool helperVisible)
          glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
 
       // p1 will be x and y
-      p1 = gScreenInfo.convertCanvasToWindowCoord(UserInterface::horizMargin, 
-                                                  gScreenInfo.getGameCanvasHeight() - ChatMessageMargin, 
+      p1 = gScreenInfo.convertCanvasToWindowCoord(0, 
+                                                  gScreenInfo.getGameCanvasHeight() - CHAT_Y_POS, 
                                                   mode);
       // p2 will be w and h -- remember that our message list contains an extra entry that exists primarily for scrolling purposes.
-      // We want the height of the clip window to omit this line.
-      p2 = gScreenInfo.convertCanvasToWindowCoord(CHAT_WIDTH - UserInterface::horizMargin, 
-                                                  (msgCount - 1) * (CHAT_FONT_SIZE + CHAT_FONT_GAP), 
+      // We want the height of the clip window to omit this line.  Also don't care about width here... wrapping takes care of that.
+      p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), 
+                                                  (msgCount - 1) * lineHeight, 
                                                   mode);
       glScissor(p1.x, p1.y, p2.x, p2.y);
 
@@ -3879,16 +3868,16 @@ void ChatMessageDisplayer::render(bool helperVisible)
 
 S32 ChatMessageDisplayer::renderLine(const string &msg, S32 y, S32 y_end) 
 {
-   static const S32 LineHeight = CHAT_FONT_SIZE + CHAT_FONT_GAP;
+   const S32 lineHeight = mFontSize + mFontGap;
 
    return 
-   LineHeight * UserInterface::drawWrapText(msg, UserInterface::horizMargin, y,
-                  CHAT_WIDTH,             // wrap width
-                  y_end,                  // ypos_end
-                  LineHeight,             // line height
-                  CHAT_FONT_SIZE,         // font size
-                  CHAT_MULTILINE_INDENT,  // how much extra to indent if chat has muliple lines
-                  true);                  // align bottom
+   lineHeight * UserInterface::drawWrapText(msg, UserInterface::horizMargin, y,
+                                            mWrapWidth,             // wrap width
+                                            y_end,                  // ypos_end
+                                            lineHeight,             // line height
+                                            mFontSize,              // font size
+                                            CHAT_MULTILINE_INDENT,  // how much extra to indent if chat has muliple lines
+                                            true);                  // align bottom
 }
 
 

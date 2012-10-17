@@ -95,6 +95,8 @@ struct ColorString
    private:
       U32 mFirst, mLast;
       bool mExpire;
+      S32 mWrapWidth;
+      S32 mFontSize, mFontGap;
 
       void advanceFirst();
       void advanceLast();
@@ -110,14 +112,15 @@ struct ColorString
       S32 renderLine(const string &msg, S32 y, S32 y_end);     // Rendering helper
 
    public:
-      ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire);         // Constructor
+      // Constructor
+      ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, S32 wrapWidth, S32 fontSize, S32 fontGap);  
       void reset();
 
       void idle(U32 timeDelta);
-      void render(bool helperVisible);                // Render incoming chat msgs
+      void render(S32 ypos, bool isTop, bool helperVisible);   // Render incoming chat msgs
 
       void onChatMessageRecieved(const Color &msgColor, const char *msg);
-      string ChatMessageDisplayer::substitueVars(const string &str);
+      string substitueVars(const string &str);
 };
 
 ////////////////////////////////////////
@@ -151,13 +154,7 @@ private:
    Move mTransformedMove;
    Point mMousePoint;
 
-   static const S32 MessageDisplayCount = 6;           // How many server messages to display
-
-   // These are our normal server messages, that "time out"
-   Color mDisplayMessageColor[MessageDisplayCount];
-   char mDisplayMessage[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];
-
-   Timer mDisplayMessageTimer;
+   //Timer mDisplayMessageTimer;
    Timer mShutdownTimer;
 
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
@@ -263,7 +260,7 @@ private:
       void render();
    } mVoiceRecorder;
 
-
+   ChatMessageDisplayer mServerMessageDisplayer;   // Messages from the server
    ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
    ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
@@ -304,7 +301,7 @@ public:
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
-   void renderMessageDisplay();     // Render incoming server msgs
+   //void renderMessageDisplay();     // Render incoming server msgs
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down

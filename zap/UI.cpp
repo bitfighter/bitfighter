@@ -1128,9 +1128,12 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 }
 
 
-void UserInterface::onKeyUp(InputCode inputCode)  { /* Do nothing */ }
+void UserInterface::onKeyUp(InputCode inputCode) { /* Do nothing */ }
+void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
 
-void UserInterface::onTextInput(char ascii)  { /* Do nothing */ }
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 UserInterfaceData::UserInterfaceData() 
 {
@@ -1143,7 +1146,6 @@ void UserInterfaceData::get()
 {
    comingFrom = current;
    current = UserInterface::current;
-   //prevUIs = UserInterface::prevUIs;    <=== what should this be now??
    vertMargin = UserInterface::vertMargin;
    horizMargin = UserInterface::horizMargin;
    chatMargin = UserInterface::messageMargin;
@@ -1154,7 +1156,6 @@ void UserInterfaceData::set()
 {
    comingFrom = current;
    UserInterface::current = current;
-   //UserInterface::prevUIs = prevUIs;  <=== what should happen here??
    UserInterface::vertMargin = vertMargin;
    UserInterface::horizMargin = horizMargin;
    UserInterface::messageMargin = chatMargin;
