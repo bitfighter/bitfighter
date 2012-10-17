@@ -93,21 +93,8 @@ struct ColorString
  class ChatMessageDisplayer
 {
    private:
-      enum MessageDisplayMode {
-         ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
-         ShortFixed,              // Same length as ShortTimeout, but without timeout
-         LongFixed,               // Long form: Display MessageStoreCount messages, no timout
-         MessageDisplayModes
-      };
-
-      MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
-
-      // Here the + 1 represents the fact that we need to store one extra message for scrolling purposes.  Normally, only the "number
-      // without the + 1" messages are displayed.
-      static const S32 ChatMessageStoreCount   = 24 + 1;   // How many chat messages to display in "long form" mode
-      static const S32 ChatMessageDisplayCount =  5 + 1;   // How many chat messages to display in "normal" mode
-
-      S32 mFirst, mLast;
+      U32 mFirst, mLast;
+      bool mExpire;
 
       void advanceFirst();
       void advanceLast();
@@ -118,15 +105,12 @@ struct ColorString
       ClientGame *mGame;
 
       // These are the messages and their colors
-      ColorString mMessage[ChatMessageDisplayCount];
-
-      // These are only displayed in the extended chat panel, and don't time out
-      ColorString mMessageStore[ChatMessageStoreCount];
+      Vector<ColorString> mMessages;
 
       S32 renderLine(const string &msg, S32 y, S32 y_end);     // Rendering helper
 
    public:
-      ChatMessageDisplayer(ClientGame *game);         // Constructor
+      ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire);         // Constructor
       void reset();
 
       void idle(U32 timeDelta);
@@ -134,8 +118,6 @@ struct ColorString
 
       void onChatMessageRecieved(const Color &msgColor, const char *msg);
       string ChatMessageDisplayer::substitueVars(const string &str);
-
-      void toggleDisplayMode();
 };
 
 ////////////////////////////////////////
@@ -155,6 +137,16 @@ class GameUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
+   enum MessageDisplayMode {
+      ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
+      ShortFixed,              // Same length as ShortTimeout, but without timeout
+      LongFixed,               // Long form: Display MessageStoreCount messages, no timout
+      MessageDisplayModes
+   };
+
+   MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
+   void renderChatMsgs();
+
    Move mCurrentMove;
    Move mTransformedMove;
    Point mMousePoint;
@@ -223,7 +215,6 @@ private:
    void renderTalkingClients();              // Render things related to voice chat
    void renderDebugStatus();                 // Render things related to debugging
 
-
    F32 mFPSAvg;
    F32 mPingAvg;
 
@@ -273,7 +264,9 @@ private:
    } mVoiceRecorder;
 
 
-   ChatMessageDisplayer mChatMessageDisplayer;
+   ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
+   ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
+   ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
 
 
    LineEditor mLineEditor;    // Message being composed
@@ -295,6 +288,7 @@ public:
 
    bool displayInputModeChangeAlert;
 
+   void toggleChatDisplayMode();            // Set which chat message display mode we're in (Ctrl-M)
 
    bool isShowingMissionOverlay() const;    // Are game instructions (F2) visible?
 
