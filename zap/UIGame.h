@@ -102,8 +102,12 @@ struct ColorString
 
       MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
 
-      static const S32 ChatMessageStoreCount   = 24;   // How many chat messages to store (only top MessageDisplayCount are normally displayed)
+      // Here the + 1 represents the fact that we need to store one extra message for scrolling purposes.  Normally, only the "number
+      // without the + 1" messages are displayed.
+      static const S32 ChatMessageStoreCount   = 24 + 1;   // How many chat messages to display in "long form" mode
       static const S32 ChatMessageDisplayCount =  5 + 1;   // How many chat messages to display in "normal" mode
+
+
 
       Timer mChatScrollTimer;
       Timer mDisplayChatMessageTimer;
