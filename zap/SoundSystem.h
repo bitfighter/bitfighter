@@ -27,6 +27,7 @@
 #define SOUNDSYSTEM_H_
 
 #include "ConfigEnum.h"     // For sfxSets
+#include "Timer.h"
 
 #ifdef ZAP_DEDICATED
 #  define BF_NO_AUDIO
@@ -143,22 +144,44 @@ enum SFXProfiles
    NumSFXBuffers     // Count of the number of SFX sounds we have
 };
 
+enum MusicCommand {
+   MusicCommandNone,
+   MusicCommandStop,     // Instantly stop music
+   MusicCommandPlay,     // Play/resume music (no fading)
+   MusicCommandPause,    // Pause music
+   MusicCommandFadeIn,   // Start and fade in music
+   MusicCommandFadeOut,  // Fade out and stop music
+};
+
 enum MusicState {
-   MusicPlaying,
-   MusicStopped,
-   MusicPaused
+   MusicStateNone,
+   MusicStateFadingIn,
+   MusicStateFadingOut,
+   MusicStatePlaying,
+   MusicStateStopped,
+   MusicStatePaused,
+   // Interim states
+   MusicStateLoading,
+   MusicStateStopping,
+   MusicStatePausing,
+   MusicStateResuming,
 };
 
-enum MusicInfoType {
-   MusicTypeMenu = 0,
-   MusicTypeGame,
-   MaxMusicTypes,
+enum MusicLocation {
+   MusicLocationNone,
+   MusicLocationMenus,
+   MusicLocationGame,
+   MusicLocationCredits,
+   MusicLocationEditor,
 };
 
-struct MusicInfo
+struct MusicData
 {
-   MusicInfoType type;
-   MusicState state;
+   MusicLocation currentLocation;   // Music location (in menus, in game, etc..)
+   MusicLocation previousLocation;
+   MusicCommand command;            // Command to target a different music state
+   MusicState state;                // Current music state
+   ALfloat volume;
    ALuint source;
    alureStream* stream;
 };
@@ -176,17 +199,25 @@ private:
    static void updateGain(SFXHandle& effect, F32 sfxVolLevel, F32 voiceVolLevel);
    static void playOnSource(SFXHandle& effect, F32 sfxVol, F32 voiceVol);
 
-   static void game_music_end_callback(void* userData, ALuint source);
+   static void music_end_callback(void* userData, ALuint source);
    static void menu_music_end_callback(void* userData, ALuint source);
+
+   static MusicData mMusicData;
 
    static string mMusicDir;
    static string mMenuMusicFile;
+   static string mCreditsMusicFile;
 
    static bool mMenuMusicValid;
    static bool mGameMusicValid;
+   static bool mCreditsMusicValid;
 
-   static Vector<string> mMusicList;
+   static Vector<string> mGameMusicList;
    static S32 mCurrentlyPlayingIndex;
+
+   static Timer mMusicFadeTimer;
+   static const U32 MusicFadeOutDelay = 500;
+   static const U32 MusicFadeInDelay = 1000;
 
    static bool musicSystemValid();
 
@@ -198,7 +229,7 @@ public:
    static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
-   static void processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol);    // Client version
+   static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol);    // Client version
    static void processAudio(F32 sfxVol);                                // Server version
 
    // Sound Effect functions
@@ -221,12 +252,13 @@ public:
    static void stopRecording();
 
    // Music functions
-   static void processMusic(F32 newMusicVolLevel);
-   static void playGameMusic();
-   static void playMenuMusic();
-   static void stopMusic(MusicInfo &musicInfo);
-   static void pauseMusic(MusicInfo &musicInfo);
-   static void resumeMusic(MusicInfo &musicInfo);
+   static void processMusic(U32 timeDelta, F32 musicVol);
+   static void playMusic();
+   static void stopMusic();
+   static void pauseMusic();
+   static void resumeMusic();
+   static void fadeInMusic();
+   static void fadeOutMusic();
    static void playNextTrack();
    static void playPrevTrack();
 };
