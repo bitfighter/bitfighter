@@ -114,8 +114,7 @@ struct ColorString
       ColorString mMessage[ChatMessageDisplayCount];
 
       // These are only displayed in the extended chat panel, and don't time out
-      Color mStoreChatMessageColor[ChatMessageStoreCount];
-      char mStoreChatMessage[ChatMessageStoreCount][MAX_CHAT_MSG_LENGTH];
+      ColorString mMessageStore[ChatMessageStoreCount];
 
       S32 renderLine(const string &msg, S32 y, S32 y_end);     // Rendering helper
 

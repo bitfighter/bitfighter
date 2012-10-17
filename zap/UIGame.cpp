@@ -3666,7 +3666,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
 void ChatMessageDisplayer::reset()
 {
    for(S32 i = 0; i < ChatMessageStoreCount; i++)
-      mStoreChatMessage[i][0] = 0;
+      mMessageStore[i].clear();
 
    for(S32 i = 0; i < ChatMessageDisplayCount; i++)
        mMessage[i].clear();
@@ -3714,15 +3714,10 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const ch
          mMessage[i] = mMessage[i-1];
 
    for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
-   {
-      strcpy(mStoreChatMessage[i], mStoreChatMessage[i-1]);
-      mStoreChatMessageColor[i] = mStoreChatMessageColor[i-1];
-   }
+      mMessageStore[i] = mMessageStore[i-1];
 
    mMessage[0].set(msg, msgColor);
-
-   strcpy(mStoreChatMessage[0], msg);
-   mStoreChatMessageColor[0] = msgColor;
+   mMessageStore[0].set(msg, msgColor);
 
    // Check if we have any %variables% that need substituting
 
@@ -3763,11 +3758,11 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const ch
    if(replacedAny)
    {
       mMessage[0].str = s;
-      strncpy(mStoreChatMessage[0], s.c_str(), sizeof(mStoreChatMessage[0]));
+      mMessageStore[0].str = s;
    }
 
    mDisplayChatMessageTimer.reset();
-   mChatScrollTimer.reset(2000);
+   mChatScrollTimer.reset();
 }
 
 
@@ -3791,35 +3786,46 @@ void ChatMessageDisplayer::render(bool helperVisible)
    S32 y = ChatMessageMargin + mChatScrollTimer.getFraction() * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
    S32 msgCount;
 
+   bool isScrolling = (mChatScrollTimer.getCurrent() > 0);
+
    if(mMessageDisplayMode == LongFixed)
       msgCount = ChatMessageStoreCount;    // Long form
    else
       msgCount = ChatMessageDisplayCount;  // Short form
 
-   S32 y_end = y - (msgCount - 1) * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
+   // We display one extra item during scrolling
+   if(!isScrolling)
+      msgCount--;
+
+   S32 y_end = y - (msgCount) * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
 
    DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;
 
    GLboolean scissorsShouldBeEnabled;
    GLint scissorBox[4];
 
-   glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
-
-   if(scissorsShouldBeEnabled)
-      glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
-
    static Point p1, p2;
-   // p1 will be x and y
-   p1 = gScreenInfo.convertCanvasToWindowCoord(UserInterface::horizMargin, 
-                                               gScreenInfo.getGameCanvasHeight() - ChatMessageMargin, 
-                                               mode);
-   // p2 will be w and h
-   p2 = gScreenInfo.convertCanvasToWindowCoord(CHAT_WIDTH - UserInterface::horizMargin, 
-                                               (msgCount - 1) * (CHAT_FONT_SIZE + CHAT_FONT_GAP), 
-                                               mode);
-   glScissor(p1.x, p1.y, p2.x, p2.y);
 
-   glEnable(GL_SCISSOR_TEST);
+   if(isScrolling)    // Not scrolling --> no need to set scissors
+   {
+      glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
+
+      if(scissorsShouldBeEnabled)
+         glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
+
+      // p1 will be x and y
+      p1 = gScreenInfo.convertCanvasToWindowCoord(UserInterface::horizMargin, 
+                                                  gScreenInfo.getGameCanvasHeight() - ChatMessageMargin, 
+                                                  mode);
+      // p2 will be w and h -- remember that our message list contains an extra entry that exists primarily for scrolling purposes.
+      // We want the height of the clip window to omit this line.
+      p2 = gScreenInfo.convertCanvasToWindowCoord(CHAT_WIDTH - UserInterface::horizMargin, 
+                                                  (msgCount - 1) * (CHAT_FONT_SIZE + CHAT_FONT_GAP), 
+                                                  mode);
+      glScissor(p1.x, p1.y, p2.x, p2.y);
+
+      glEnable(GL_SCISSOR_TEST);
+   }
 
    if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
       for(S32 i = 0; i < msgCount; i++)
@@ -3837,21 +3843,25 @@ void ChatMessageDisplayer::render(bool helperVisible)
    else                                            // We're in a mode where messages do not expire
       for(S32 i = 0; i < msgCount; i++)
       {
-         if(mStoreChatMessage[i][0])
+         if(mMessageStore[i].str != "")
          {
             if(helperVisible)   
-               glColor(mStoreChatMessageColor[i], AlphaWhenHelperMenuVisible);
+               glColor(mMessageStore[i].color, AlphaWhenHelperMenuVisible);
             else
-               glColor(mStoreChatMessageColor[i]);
+               glColor(mMessageStore[i].color);
 
-            y -= renderLine(mStoreChatMessage[i], y, y_end);
+            y -= renderLine(mMessageStore[i].str, y, y_end);
          }
       }
 
-   if(scissorsShouldBeEnabled)
-      glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3]);
-   else
-      glDisable(GL_SCISSOR_TEST);
+
+   if(isScrolling)
+   {
+      if(scissorsShouldBeEnabled)
+         glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3]);
+      else
+         glDisable(GL_SCISSOR_TEST);
+   }
 }
 
 
