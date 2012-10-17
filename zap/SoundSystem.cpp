@@ -614,7 +614,7 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
    else if(UserInterface::current->getMenuID() == EditorUI ||  uiManager->cameFrom(EditorUI))
       mMusicData.currentLocation = MusicLocationEditor;
    // In credits
-   else if(UserInterface::current->getMenuID() == CreditsUI)
+   else if(UserInterface::current->getMenuID() == CreditsUI ||  uiManager->cameFrom(CreditsUI))
       mMusicData.currentLocation = MusicLocationCredits;
    // Else, in menus
    else
@@ -732,10 +732,6 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
 
       case MusicStateStopping:
          alureStopSource(mMusicData.source, AL_TRUE);
-
-         // Clean up the stream here since we aren't calling the callback
-         if(mMusicData.stream)
-            alureDestroyStream(mMusicData.stream, 0, NULL);
 
          mMusicData.state = MusicStateStopped;
          break;
