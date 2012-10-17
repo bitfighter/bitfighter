@@ -179,7 +179,6 @@ bool AbstractChat::isPlayerInGlobalChat(const StringTableEntry &playerNick)
 // First message has index == 0, second has index == 1, etc.
 ChatMessage AbstractChat::getMessage(U32 index)
 {
-   //U32 first = (mMessageCount < MESSAGES_TO_RETAIN) ? 0 : mMessageCount % MESSAGES_TO_RETAIN;
    return mMessages[index % MESSAGES_TO_RETAIN];
 }
 
@@ -236,13 +235,13 @@ void AbstractChat::renderMessages(U32 ypos, U32 lineCountToDisplay)  // ypos is 
    if (mMessageCount == 0)
       return;
 
-   U32 firstMsg = (mMessageCount <= lineCountToDisplay) ? 0 : (mMessageCount - lineCountToDisplay);       // Don't use min/max because of U32/S32 issues!
+   U32 firstMsg = (mMessageCount <= lineCountToDisplay) ? 0 : (mMessageCount - lineCountToDisplay);  // Don't use min/max because of U32/S32 issues!
    U32 ypos_top = ypos;
    ypos += (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * lineCountToDisplay;
 
    // Double pass.  First loop is just to calculate number of lines used, then second pass will render.
    bool renderLoop = false;
-   do{
+   do {
       for(U32 i = lineCountToDisplay - 1; i != U32_MAX; i--)
       {
          // No more rendering - we've rendered to the line count limit
