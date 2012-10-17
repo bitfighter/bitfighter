@@ -3716,19 +3716,24 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const ch
    for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
       mMessageStore[i] = mMessageStore[i-1];
 
-   mMessage[0].set(msg, msgColor);
-   mMessageStore[0].set(msg, msgColor);
+   mMessage[0].set(substitueVars(msg), msgColor);    
+   mMessageStore[0].set(mMessage[0].str, msgColor);
 
-   // Check if we have any %variables% that need substituting
+   mDisplayChatMessageTimer.reset();
+   mChatScrollTimer.reset();
+}
+
+
+// Check if we have any %variables% that need substituting
+string ChatMessageDisplayer::substitueVars(const string &str)
+{
+   string s = str;      // Make working copy
 
    bool inside = false;
-   bool replacedAny = false;
 
    size_t startPos, endPos;
 
    inside = false;
-
-   string s = mMessage[0].str;
 
    for(size_t i = 0; i < s.length(); i++)
    {
@@ -3748,22 +3753,15 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const ch
             string val = getSubstVarVal(mGame, var);
 
             s.replace(startPos - 1, endPos + 2, val);
-            replacedAny = true;
 
-            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val
+            i += val.length() - var.length() - 2;     // Make sure we don't evaluate the contents of val; i.e. no recursion
          }
       }
    }
 
-   if(replacedAny)
-   {
-      mMessage[0].str = s;
-      mMessageStore[0].str = s;
-   }
-
-   mDisplayChatMessageTimer.reset();
-   mChatScrollTimer.reset();
+   return s;
 }
+
 
 
 void ChatMessageDisplayer::toggleDisplayMode()

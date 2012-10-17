@@ -126,6 +126,8 @@ struct ColorString
       void render(bool helperVisible);                // Render incoming chat msgs
 
       void onChatMessageRecieved(const Color &msgColor, const char *msg);
+      string ChatMessageDisplayer::substitueVars(const string &str);
+
       void toggleDisplayMode();
 };
 
