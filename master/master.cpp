@@ -395,6 +395,10 @@ public:
    };
    MasterServerConnection::PHPBB3AuthenticationStatus MasterServerConnection::checkAuthentication(const char *password, bool doNotDelay)
    {
+      // Don't let username start with spaces or be zero length.
+      if(mPlayerOrServerName.getString()[0] == ' ' || mPlayerOrServerName.getString()[0] == 0)
+         return InvalidUsername;
+
       RefPtr<Auth_Stats> auth = new Auth_Stats();
       auth->client = this;
       auth->playerName = mPlayerOrServerName.getString();
