@@ -107,7 +107,10 @@ struct ColorString
       static const S32 ChatMessageStoreCount   = 24 + 1;   // How many chat messages to display in "long form" mode
       static const S32 ChatMessageDisplayCount =  5 + 1;   // How many chat messages to display in "normal" mode
 
+      S32 mFirst, mLast;
 
+      void advanceFirst();
+      void advanceLast();
 
       Timer mChatScrollTimer;
       Timer mDisplayChatMessageTimer;

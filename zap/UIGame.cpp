@@ -3665,11 +3665,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game)
 
 void ChatMessageDisplayer::reset()
 {
-   for(S32 i = 0; i < ChatMessageStoreCount; i++)
-      mMessageStore[i].clear();
-
-   for(S32 i = 0; i < ChatMessageDisplayCount; i++)
-       mMessage[i].clear();
+   mFirst = mLast = 0;
 }
 
 
@@ -3677,15 +3673,30 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
 {
    mChatScrollTimer.update(timeDelta);
 
+   // Clear out any expired messages
    if(mDisplayChatMessageTimer.update(timeDelta))
    {
-      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
-         mMessage[i] = mMessage[i-1];
-
-      mMessage[0].clear();
-
+      advanceLast();         
       mDisplayChatMessageTimer.reset();
    }
+}
+
+
+void ChatMessageDisplayer::advanceFirst()
+{
+   mFirst++;
+
+   if(mLast % ChatMessageDisplayCount == mFirst % ChatMessageDisplayCount)
+      mLast++;
+}
+
+
+void ChatMessageDisplayer::advanceLast()
+{
+   mLast++;
+
+   if(mLast >= mFirst)
+      mLast = mFirst;
 }
 
 
@@ -3709,15 +3720,17 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
 {
    // Create a slot for our new message
-   if(mMessage[0].str != "")
-      for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
-         mMessage[i] = mMessage[i-1];
+   //if(mMessage[0].str != "")
+   //   for(S32 i = ChatMessageDisplayCount - 1; i > 0; i--)
+   //      mMessage[i] = mMessage[i-1];
+   advanceFirst();
+   
 
    for(S32 i = ChatMessageStoreCount - 1; i > 0; i--)
       mMessageStore[i] = mMessageStore[i-1];
 
-   mMessage[0].set(substitueVars(msg), msgColor);    
-   mMessageStore[0].set(mMessage[0].str, msgColor);
+   mMessage[mFirst % ChatMessageDisplayCount].set(substitueVars(msg), msgColor);    
+   mMessageStore[0].set(mMessage[mFirst % ChatMessageDisplayCount].str, msgColor);
 
    mDisplayChatMessageTimer.reset();
    mChatScrollTimer.reset();
@@ -3826,16 +3839,16 @@ void ChatMessageDisplayer::render(bool helperVisible)
    }
 
    if(mMessageDisplayMode == ShortTimeout)         // Messages expire over time
-      for(S32 i = 0; i < msgCount; i++)
+      for(S32 i = mFirst; i != mLast; i--)
       {
-         if(mMessage[i].str != "")
+         if(mMessage[i % ChatMessageDisplayCount].str != "")
          {
             if(helperVisible)   
-               glColor(mMessage[i].color, AlphaWhenHelperMenuVisible);
+               glColor(mMessage[i % ChatMessageDisplayCount].color, AlphaWhenHelperMenuVisible);
             else
-               glColor(mMessage[i].color);
+               glColor(mMessage[i % ChatMessageDisplayCount].color);
 
-            y -= renderLine(mMessage[i].str, y, y_end);
+            y -= renderLine(mMessage[i % ChatMessageDisplayCount].str, y, y_end);
          }
       }
    else                                            // We're in a mode where messages do not expire
