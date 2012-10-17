@@ -3812,7 +3812,6 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 void ChatMessageDisplayer::render(bool helperVisible)
 {
    glColor(Colors::white);
-   const F32 AlphaWhenHelperMenuVisible = 0.2f;
 
    S32 y = ChatMessageMargin + mChatScrollTimer.getFraction() * (CHAT_FONT_SIZE + CHAT_FONT_GAP);
    S32 msgCount = mMessages.size();
@@ -3860,7 +3859,7 @@ void ChatMessageDisplayer::render(bool helperVisible)
       if(mMessages[index].str != "")
       {
          if(helperVisible)   
-            glColor(mMessages[index].color, AlphaWhenHelperMenuVisible);
+            glColor(mMessages[index].color, 0.2f);
          else
             glColor(mMessages[index].color);
 
