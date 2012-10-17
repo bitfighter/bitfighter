@@ -3743,13 +3743,16 @@ void ChatMessageDisplayer::advanceLast()
 // Vars are case insensitive
 static string getSubstVarVal(ClientGame *game, const string &var)
 {
+   // %keybinding%
    InputCode inputCode = game->getSettings()->getInputCodeManager()->getKeyBoundToBindingCodeName(var);
    if(inputCode != KEY_UNKNOWN)
       return string("[") + InputCodeManager::inputCodeToString(inputCode) + "]";
    
+   // %playerName%
    if(caseInsensitiveStringCompare(var, "playerName"))
       return game->getClientInfo()->getName().getString();
 
+   // Not a variable... preserve formatting
    return "%" + var + "%";
 }
 
