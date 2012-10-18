@@ -97,6 +97,13 @@ void DestManager::addDest(const Point &dest)
 }
 
 
+void DestManager::setDest(S32 index, const Point &dest)
+{
+   TNLAssert(index < mDests.size(), "Invalid index!");
+   mDests[index] = dest;
+}
+
+
 void DestManager::delDest(S32 index)
 {
    if(mDests.size() == 1)
@@ -317,6 +324,12 @@ Rect Teleporter::calcExtents()
    return rect;
 }
 
+
+void Teleporter::newObjectFromDock(F32 gridSize)
+{
+   addDest(Point(0,0));      // We need to have one for rendering preview... actual location will be updated in onGeomChanged()
+   Parent::newObjectFromDock(gridSize);
+}
 
 
 bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship)
@@ -770,6 +783,7 @@ void Teleporter::doExplosion()
 }
 #endif
 
+
 void Teleporter::renderEditorItem()
 {
 #ifndef ZAP_DEDICATED
@@ -796,8 +810,17 @@ void Teleporter::onAttrsChanging()
 
 void Teleporter::onGeomChanging()
 {
-   /* Do nothing */
+   onGeomChanged();
 }
+
+
+void Teleporter::onGeomChanged()
+{
+   Parent::onGeomChanged();
+
+   // Update the dest manager.  We need this for rendering in preview mode.
+   mDestManager.setDest(0, getVert(1));
+}	
 
 
 const char *Teleporter::getOnScreenName()     { return "Teleport";    }
