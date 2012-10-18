@@ -796,7 +796,15 @@ void Teleporter::onAttrsChanging()
 
 void Teleporter::onGeomChanging()
 {
-   /* Do nothing */
+   onGeomChanged();
+}
+
+
+void Teleporter::onGeomChanged()
+{
+   Parent::onGeomChanged();
+   mDestManager.clear();
+   mDestManager.addDest(getVert(1));
 }
 
 

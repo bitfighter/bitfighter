@@ -161,6 +161,7 @@ public:
 
    void onAttrsChanging();
    void onGeomChanging();
+   void onGeomChanged();
 
    void onConstructed();
 
