@@ -110,8 +110,6 @@ struct ColorString
       // These are the messages and their colors
       Vector<ColorString> mMessages;
 
-      S32 renderLine(const string &msg, S32 y, S32 y_end);     // Rendering helper
-
    public:
       // Constructor
       ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);  

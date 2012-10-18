@@ -86,7 +86,7 @@ extern Color gCmdChatColor;
 static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
 
 // Sizes and other things to help with positioning
-static const S32 CHAT_Y_POS = 515;
+static const S32 CHAT_Y_POS = 500;
 static const S32 SRV_MSG_FONT_SIZE = 14;
 static const S32 SRV_MSG_FONT_GAP = 4;
 static const S32 CHAT_FONT_SIZE = 12;
@@ -3633,7 +3633,7 @@ void ColorString::set(const string &s, const Color &c)
 // Constructor
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
-   mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
+   mDisplayChatMessageTimer.setPeriod(12000);    // How long messages stay visible (ms)
    mChatScrollTimer.setPeriod(2000);             // Transition time when new msg arrives
 
    mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
@@ -3718,7 +3718,10 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const st
       mMessages[mFirst % mMessages.size()].set(substitueVars(msg), msgColor); 
    }
 
-   mDisplayChatMessageTimer.reset();
+   // When displaying messages from the top of the screen, the animation happens when we expire messages
+   if(!mTopDown)
+      mDisplayChatMessageTimer.reset();
+
    mChatScrollTimer.reset();
 }
 
@@ -3781,19 +3784,19 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
    // Figure out where to display the messages
    S32 lineHeight = mFontSize + mFontGap;
 
-   S32 ybot, ytop;     // Bottom and top of the message display area, respectively
+   S32 ybot;    
+
+   S32 cliph = (msgCount - 1) * lineHeight;
 
    if(mTopDown)
    {
       // Display area is anchored at the top (ypos is top coordinate)
-      ytop = ypos - mChatScrollTimer.getFraction() * lineHeight;
-      ybot = ytop + msgCount * lineHeight;
+      ybot = ypos + cliph - lineHeight; /*+ mChatScrollTimer.getFraction() * lineHeight*/;
    }
    else
    {
       // Display area is anchored at the bottom (ypos is bottom coordinate)
       ybot = ypos + mChatScrollTimer.getFraction() * lineHeight;
-      ytop = ybot - msgCount * lineHeight;
    }
 
 
@@ -3812,23 +3815,26 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
       if(scissorsShouldBeEnabled)
          glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
 
-      // p1 will be x and y
-      p1 = gScreenInfo.convertCanvasToWindowCoord(0, 
-                                                  gScreenInfo.getGameCanvasHeight() - ypos - lineHeight, 
-                                                  mode);
+      S32 clipy = mTopDown ? (ypos + cliph) : (ypos + lineHeight);
+
+      // p1 will be x and y, uses raw OpenGL coordinates, which are flipped from the system used in the game
+      p1 = gScreenInfo.convertCanvasToWindowCoord(0, gScreenInfo.getGameCanvasHeight() - clipy,  mode);
       // p2 will be w and h -- remember that our message list contains an extra entry that exists primarily for scrolling purposes.
       // We want the height of the clip window to omit this line.  Also don't care about width here... wrapping takes care of that.
-      p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), 
-                                                  (msgCount - 1) * lineHeight, 
-                                                  mode);
+      p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), cliph, mode);
+
+      glColor(Colors::cyan);
+      drawHorizLine(0,400,clipy);
+
+      glColor(Colors::blue);
+      drawHorizLine(0,400,clipy - cliph);
+
       glScissor(p1.x, p1.y, p2.x, p2.y);
 
       glEnable(GL_SCISSOR_TEST);
    }
 
-   logprintf("%d, %d, %d", mFirst, mLast, mFirst-mLast);
-
-   S32 y = mTopDown ? (ytop + (mFirst - mLast - 1) * lineHeight) : ybot;
+   S32 y = mTopDown ? ypos + (mFirst - mLast - 1) * lineHeight : ybot;
 
 
    for(S32 i = mFirst; i != mLast - (isScrolling ? 1 : 0); i--)
@@ -3844,12 +3850,10 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
          glColor(mMessages[index].color);
 
       // Render top-down or bottom up depending on mTopDown
-      //ybot += renderLine(mMessages[index].str, ybot, ytop) * (mTopDown ? 1 : -1);
 
-      UserInterface::drawString(UserInterface::horizMargin, y,  mFontSize, mMessages[index].str.c_str());
-      y -= lineHeight;
+      UserInterface::drawString(UserInterface::horizMargin, y, mFontSize, (itos(i) + " " + mMessages[index].str).c_str());
+      y += lineHeight * (mTopDown ? -1 : -1);
    }
-
 
    // Restore scissors settings
    if(isScrolling)
@@ -3859,21 +3863,6 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
       else
          glDisable(GL_SCISSOR_TEST);
    }
-}
-
-
-S32 ChatMessageDisplayer::renderLine(const string &msg, S32 ybot, S32 ytop) 
-{
-   const S32 lineHeight = mFontSize + mFontGap;
-
-   return 
-      lineHeight * UserInterface::drawWrapText(msg, UserInterface::horizMargin, ybot,
-                                               mWrapWidth,             // wrap width
-                                               ytop,                   // top of message render area
-                                               lineHeight,             // line height
-                                               mFontSize,              // font size
-                                               CHAT_MULTILINE_INDENT,  // how much extra to indent if chat has muliple lines
-                                               true);                  // align bottom
 }
 
 
