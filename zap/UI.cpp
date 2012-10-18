@@ -957,6 +957,75 @@ void UserInterface::drawHollowRect(S32 x1, S32 y1, S32 x2, S32 y2)
 }
 
 
+// Given a string, break it up such that no part is wider than width.  Prefix subsequent lines with indentPrefix.
+Vector<string> UserInterface::wrapString(const string &str, S32 wrapWidth, S32 fontSize, const string &indentPrefix)
+{
+   string text = str;               // Make local working copy that we can alter
+
+   U32 lineStartIndex = 0;
+   U32 lineEndIndex = 0;
+   U32 lineBreakCandidateIndex = 0;
+   Vector<U32> separator;           // Collection of character indexes at which to split the message
+   Vector<string> wrappedLines;
+
+   while(lineEndIndex < text.length())
+   {
+      char c = text[lineEndIndex];  // Store character
+      S32 indentWidth = UserInterface::getStringWidth(fontSize, indentPrefix.c_str());
+
+      string substr = text.substr(lineStartIndex, lineEndIndex - lineStartIndex);
+
+      // Does this char put us over the width limit?
+      bool overWidthLimit = getStringWidth(fontSize, substr.c_str()) > (wrapWidth - indentWidth);
+
+      // If this character is a space, keep track in case we need to split here
+      if(text[lineEndIndex] == ' ')
+         lineBreakCandidateIndex = lineEndIndex;
+
+      if(overWidthLimit)
+      {
+         // If no spaces were found, we need to force a line break at this character.  We'll do this by inserting a space.
+         if(lineBreakCandidateIndex == lineStartIndex)
+            lineBreakCandidateIndex = lineEndIndex;
+
+         separator.push_back(lineBreakCandidateIndex);  // Add this index to line split list
+         if(text[lineBreakCandidateIndex] != ' ')
+          text.insert(lineBreakCandidateIndex, 1, ' '); // Add a space if there's not already one there
+         lineStartIndex = lineBreakCandidateIndex + 1;  // Skip a char which is a space
+         lineBreakCandidateIndex = lineStartIndex;      // Reset line break index to start of list
+      }
+
+      lineEndIndex++;
+   }
+
+   // Handle lines that need to wrap
+   lineStartIndex = 0;
+
+   for(S32 i = 0; i < separator.size(); i++)
+   {
+      lineEndIndex = separator[i];
+
+      if(i == 0)           
+         wrappedLines.push_back(               text.substr(lineStartIndex, lineEndIndex - lineStartIndex));
+      else
+         wrappedLines.push_back(indentPrefix + text.substr(lineStartIndex, lineEndIndex - lineStartIndex));
+
+      lineStartIndex = lineEndIndex + 1;  // Skip a char which is a space
+   }
+
+   // Handle any remaining characters
+   if(lineStartIndex != lineEndIndex)
+   {
+      if(separator.size() == 0)           // Don't draw the extra margin if it is the first and only line
+         wrappedLines.push_back(               text.substr(lineStartIndex));
+      else
+         wrappedLines.push_back(indentPrefix + text.substr(lineStartIndex));
+   }
+
+   return wrappedLines;
+}
+
+
 // Returns the number of lines our msg consumed during rendering
 U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width, S32 ypos_end,
                                 S32 lineHeight, S32 fontSize, S32 multiLineIndentation, bool alignBottom, bool draw)
@@ -967,7 +1036,7 @@ U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width
    U32 lineStartIndex = 0;
    U32 lineEndIndex = 0;
    U32 lineBreakCandidateIndex = 0;
-   Vector<U32> seperator;           // Collection of character indexes at which to split the message
+   Vector<U32> separator;           // Collection of character indexes at which to split the message
 
 
    while(lineEndIndex < text.length())
@@ -985,10 +1054,11 @@ U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width
          if(lineBreakCandidateIndex == lineStartIndex)
             lineBreakCandidateIndex = lineEndIndex;
 
-         seperator.push_back(lineBreakCandidateIndex);  // Add this index to line split list
-         text[lineBreakCandidateIndex] = ' ';           // Add the space
-         lineStartIndex = lineBreakCandidateIndex + 1;  // Skip a char which is a space
-         lineBreakCandidateIndex = lineStartIndex;      // Reset line break index to start of list
+         separator.push_back(lineBreakCandidateIndex);    // Add this index to line split list
+         if(text[lineBreakCandidateIndex] != ' ')
+            text.insert(lineBreakCandidateIndex, 1, ' '); // Add a space if there's not already one there
+         lineStartIndex = lineBreakCandidateIndex + 1;    // Skip a char which is a space
+         lineBreakCandidateIndex = lineStartIndex;        // Reset line break index to start of list
       }
 
       lineEndIndex++;
@@ -997,16 +1067,16 @@ U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width
    // Align the y position, if alignBottom is enabled
    if(alignBottom)
    {
-      ypos -= seperator.size() * lineHeight;  // Align according to number of wrapped lines
+      ypos -= separator.size() * lineHeight;  // Align according to number of wrapped lines
       if(lineStartIndex != lineEndIndex)      // Align the remaining line
          ypos -= lineHeight;
    }
 
    // Draw lines that need to wrap
    lineStartIndex = 0;
-   for(S32 i = 0; i < seperator.size(); i++)
+   for(S32 i = 0; i < separator.size(); i++)
    {
-      lineEndIndex = seperator[i];
+      lineEndIndex = separator[i];
       if(ypos >= ypos_end || !alignBottom)      // If there is room to draw some lines at top when aligned bottom
       {
          if(draw)
@@ -1034,7 +1104,7 @@ U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width
       {
          if(draw)
          {
-            if (seperator.size() == 0)          // Don't draw the extra margin if it is the only line
+            if (separator.size() == 0)          // Don't draw the extra margin if it is the only line
                UserInterface::drawString(xpos, ypos, fontSize, text.substr(lineStartIndex).c_str());
             else
                UserInterface::drawString(xpos + multiLineIndentation, ypos, fontSize, text.substr(lineStartIndex).c_str());
