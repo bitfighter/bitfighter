@@ -625,8 +625,20 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
       mMusicData.command = MusicCommandFadeOut;
 
    // Debug
-//   if(musicData.command != MusicCommandNone)
-//      logprintf("command: %d", musicData.command);
+//   if(mMusicData.command != MusicCommandNone)
+//      logprintf("location: %d", mMusicData.currentLocation);
+
+   // Special case for editor - no music
+   if(mMusicData.currentLocation == MusicLocationEditor && mMusicData.state == MusicStateStopped)
+      return;
+
+   // Restart music if coming from editor
+   if(mMusicData.previousLocation == MusicLocationEditor && mMusicData.state == MusicStateStopped)
+      mMusicData.command = MusicCommandFadeIn;
+
+   // Debug
+//   if(mMusicData.command != MusicCommandNone)
+//      logprintf("command: %d", mMusicData.command);
 
    // Process any received music commands
    switch(mMusicData.command)
@@ -673,8 +685,8 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
    }
 
    // Debug
-//   if(musicData.command != MusicCommandNone)
-//      logprintf("state: %d", musicData.state);
+//   if(mMusicData.command != MusicCommandNone)
+//      logprintf("state: %d", mMusicData.state);
 
    // Clear command
    mMusicData.command = MusicCommandNone;
