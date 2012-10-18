@@ -3633,19 +3633,19 @@ void ColorString::set(const string &s, const Color &c)
 // Constructor
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
-   mDisplayChatMessageTimer.setPeriod(6000);    // How long messages stay visible (ms)
-   mChatScrollTimer.setPeriod(2000);             // Transition time when new msg arrives
+   mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
+   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives
 
    mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
 
    reset();
 
-   mGame = game;
-   mExpire = expire;
-   mTopDown = topDown;
+   mGame      = game;
+   mExpire    = expire;
+   mTopDown   = topDown;
    mWrapWidth = wrapWidth;
-   mFontSize = fontSize;
-   mFontGap = fontWidth;
+   mFontSize  = fontSize;
+   mFontGap   = fontWidth;
 }
 
 
@@ -3716,7 +3716,6 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const string &msg)
 {
-
    Vector<string> lines = UserInterface::wrapString(msg, mWrapWidth, mFontSize, "      ");
 
    for(S32 i = 0; i < lines.size(); i++)
@@ -3830,12 +3829,6 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
       // We want the height of the clip window to omit this line.  Also don't care about width here... wrapping takes care of that.
       p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), cliph, mode);
 
-      glColor(Colors::cyan);
-      drawHorizLine(0,400,clipy);
-
-      glColor(Colors::blue);
-      drawHorizLine(0,400,clipy - cliph);
-
       glScissor(p1.x, p1.y, p2.x, p2.y);
 
       glEnable(GL_SCISSOR_TEST);
@@ -3858,7 +3851,7 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
 
       // Render top-down or bottom up depending on mTopDown
 
-      UserInterface::drawString(UserInterface::horizMargin, y, mFontSize, (itos(i) + " " + mMessages[index].str).c_str());
+      UserInterface::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
       y += lineHeight * (mTopDown ? -1 : -1);
    }
 
