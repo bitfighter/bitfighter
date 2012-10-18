@@ -37,14 +37,14 @@
 #include <boost/tokenizer.hpp>
 
 #ifdef TNL_OS_WIN32
-#include <direct.h>        // For mkdir
+#  include <direct.h>        // For mkdir
 #endif
 
-#  ifdef TNL_OS_WIN32
-#     include "dirent.h"        // Need local copy for Windows builds
-#  else
-#     include <dirent.h>        // Need standard copy for *NIXes
-#  endif
+#ifdef TNL_OS_WIN32
+#  include "dirent.h"        // Need local copy for Windows builds
+#else
+#  include <dirent.h>        // Need standard copy for *NIXes
+#endif
 
 
 namespace Zap
@@ -56,14 +56,14 @@ using namespace boost;
 // Constructor
 SaveException::SaveException(string str) : msg(str)
 {
-   // do nothing
+   // Do nothing
 }
 
 
 // Destructor
 SaveException::~SaveException() throw ()
 {
-   // do nothing
+   // Do nothing
 }
 
 
