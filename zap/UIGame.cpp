@@ -105,11 +105,11 @@ static void makeCommandCandidateList();      // Forward delcaration
 GameUserInterface::GameUserInterface(ClientGame *game) : 
                   Parent(game), 
                   mVoiceRecorder(game),
-                  mLineEditor(200),
-                  mServerMessageDisplayer(game, 6, true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
-                  mChatMessageDisplayer1(game,  5, true,  CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer2(game,  5, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer3(game, 24, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
+                  mLineEditor(200),    //    lines expr  topdown   wrap width          font size          line gap
+                  mServerMessageDisplayer(game, 6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
+                  mChatMessageDisplayer1(game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mChatMessageDisplayer2(game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+                  mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
@@ -2258,16 +2258,16 @@ void GameUserInterface::renderChatMsgs()
    bool helperActive = (mHelper != NULL);
 
    if(mMessageDisplayMode == ShortTimeout)
-      mChatMessageDisplayer1.render(CHAT_Y_POS, false, helperActive);
+      mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive);
 
    else if(mMessageDisplayMode == ShortFixed)
-      mChatMessageDisplayer2.render(CHAT_Y_POS, false, helperActive);
+      mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive);
 
    else
-      mChatMessageDisplayer3.render(CHAT_Y_POS, false, helperActive);
+      mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive);
 
 
-   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, true, helperActive);
+   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive);
 }
 
 
@@ -3631,7 +3631,7 @@ void ColorString::set(const string &s, const Color &c)
 ////////////////////////////////////////
 
 // Constructor
-ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, S32 wrapWidth, S32 fontSize, S32 fontWidth)
+ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
    mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
    mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives
@@ -3642,6 +3642,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
 
    mGame = game;
    mExpire = expire;
+   mTopDown = topDown;
    mWrapWidth = wrapWidth;
    mFontSize = fontSize;
    mFontGap = fontWidth;
@@ -3706,11 +3707,16 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 
 
 // Add it to the list, will be displayed in render()
-void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const char *msg)
+void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const string &msg)
 {
-   advanceFirst();
 
-   mMessages[mFirst % mMessages.size()].set(substitueVars(msg), msgColor);    
+   Vector<string> lines = UserInterface::wrapString(msg, mWrapWidth, mFontSize, "      ");
+
+   for(S32 i = 0; i < lines.size(); i++)
+   {
+      advanceFirst();
+      mMessages[mFirst % mMessages.size()].set(substitueVars(msg), msgColor); 
+   }
 
    mDisplayChatMessageTimer.reset();
    mChatScrollTimer.reset();
@@ -3760,7 +3766,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 //
 //   msgCount = MessageDisplayCount;  // Short form
 //
-//   S32 y_end = y + msgCount * (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP);
+//   S32 ytop = y + msgCount * (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP);
 //
 //   for(S32 i = msgCount - 1; i >= 0; i--)
 //   {
@@ -3772,7 +3778,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 //         y += (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP)
 //            * drawWrapText(mDisplayMessage[i], horizMargin, y,
 //               750, // wrap width
-//               y_end, // ypos_end
+//               ytop, // ypos_end
 //               SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP, // line height
 //               SERVER_MSG_FONT_SIZE, // font size
 //               false); // align top
@@ -3781,46 +3787,49 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 //}
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 ypos, bool isTop, bool helperVisible)
+void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
 {
+   // Check if there any messages to display... if not, bail
    if(mFirst == mLast)
       return;
 
-
    S32 msgCount = mMessages.size();
 
-   bool isScrolling = (mChatScrollTimer.getCurrent() > 0);
+   // Are we in the act of transitioning btwn one message and another?
+   bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
 
-   // We display one extra item during scrolling
+   // We display one extra item during scrolling.  When we're not scrolling, that item is not used.
    if(!isScrolling)
       msgCount--;
-
 
    // Figure out where to display the messages
    S32 lineHeight = mFontSize + mFontGap;
 
-   S32 y, y_end;     // Bottom and top of the message display area, respectively.  Crappy variable names.
+   S32 ybot, ytop;     // Bottom and top of the message display area, respectively
 
-   if(isTop)
+   if(mTopDown)
    {
-      y_end = ypos - mChatScrollTimer.getFraction() * lineHeight;
-      y = y_end + msgCount * lineHeight;
+      // Display area is anchored at the top (ypos is top coordinate)
+      ytop = ypos - mChatScrollTimer.getFraction() * lineHeight;
+      ybot = ytop + msgCount * lineHeight;
    }
    else
    {
-      y = ypos + mChatScrollTimer.getFraction() * lineHeight;
-      y_end = y - msgCount * lineHeight;
+      // Display area is anchored at the bottom (ypos is bottom coordinate)
+      ybot = ypos + mChatScrollTimer.getFraction() * lineHeight;
+      ytop = ybot - msgCount * lineHeight;
    }
 
 
-   DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;
+   DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
 
    GLboolean scissorsShouldBeEnabled;
-   GLint scissorBox[4];
 
+   // Make these static to save a tiny bit of construction and tear-down costs
+   static GLint scissorBox[4];
    static Point p1, p2;
 
-   if(isScrolling)    // Not scrolling --> no need to set scissors
+   if(isScrolling)    // If not scrolling --> no need to set scissors
    {
       glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
 
@@ -3841,6 +3850,8 @@ void ChatMessageDisplayer::render(S32 ypos, bool isTop, bool helperVisible)
       glEnable(GL_SCISSOR_TEST);
    }
 
+   S32 y = mTopDown ? (ytop + (mFirst - mLast - 1) * lineHeight) : ybot;
+
    for(S32 i = mFirst; i != mLast; i--)
    {
       S32 index = i % mMessages.size();
@@ -3852,10 +3863,16 @@ void ChatMessageDisplayer::render(S32 ypos, bool isTop, bool helperVisible)
          else
             glColor(mMessages[index].color);
 
-         y -= renderLine(mMessages[index].str, y, y_end);
+         // Render top-down or bottom up depending on mTopDown
+         //ybot += renderLine(mMessages[index].str, ybot, ytop) * (mTopDown ? 1 : -1);
+
+         UserInterface::drawString(UserInterface::horizMargin, y,  mFontSize, mMessages[index].str.c_str());
+         y -= lineHeight;
       }
    }
 
+
+   // Restore scissors settings
    if(isScrolling)
    {
       if(scissorsShouldBeEnabled)
@@ -3866,18 +3883,18 @@ void ChatMessageDisplayer::render(S32 ypos, bool isTop, bool helperVisible)
 }
 
 
-S32 ChatMessageDisplayer::renderLine(const string &msg, S32 y, S32 y_end) 
+S32 ChatMessageDisplayer::renderLine(const string &msg, S32 ybot, S32 ytop) 
 {
    const S32 lineHeight = mFontSize + mFontGap;
 
    return 
-   lineHeight * UserInterface::drawWrapText(msg, UserInterface::horizMargin, y,
-                                            mWrapWidth,             // wrap width
-                                            y_end,                  // ypos_end
-                                            lineHeight,             // line height
-                                            mFontSize,              // font size
-                                            CHAT_MULTILINE_INDENT,  // how much extra to indent if chat has muliple lines
-                                            true);                  // align bottom
+      lineHeight * UserInterface::drawWrapText(msg, UserInterface::horizMargin, ybot,
+                                               mWrapWidth,             // wrap width
+                                               ytop,                   // top of message render area
+                                               lineHeight,             // line height
+                                               mFontSize,              // font size
+                                               CHAT_MULTILINE_INDENT,  // how much extra to indent if chat has muliple lines
+                                               true);                  // align bottom
 }
 
 

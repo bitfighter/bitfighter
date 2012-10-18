@@ -95,6 +95,7 @@ struct ColorString
    private:
       U32 mFirst, mLast;
       bool mExpire;
+      bool mTopDown;    // Render from top down or bottom up?
       S32 mWrapWidth;
       S32 mFontSize, mFontGap;
 
@@ -113,13 +114,13 @@ struct ColorString
 
    public:
       // Constructor
-      ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, S32 wrapWidth, S32 fontSize, S32 fontGap);  
+      ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);  
       void reset();
 
       void idle(U32 timeDelta);
-      void render(S32 ypos, bool isTop, bool helperVisible);   // Render incoming chat msgs
+      void render(S32 ypos, bool helperVisible);   // Render incoming chat msgs
 
-      void onChatMessageRecieved(const Color &msgColor, const char *msg);
+      void onChatMessageRecieved(const Color &msgColor, const string &msg);
       string substitueVars(const string &str);
 };
 
