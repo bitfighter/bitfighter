@@ -3634,7 +3634,7 @@ void ColorString::set(const string &s, const Color &c)
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
    mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
-   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives
+   mChatScrollTimer.setPeriod(2000);             // Transition time when new msg arrives
 
    mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
 
@@ -3760,31 +3760,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
    return s;
 }
-//
-//   S32 y = getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin;
-//   S32 msgCount;
-//
-//   msgCount = MessageDisplayCount;  // Short form
-//
-//   S32 ytop = y + msgCount * (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP);
-//
-//   for(S32 i = msgCount - 1; i >= 0; i--)
-//   {
-//      if(mDisplayMessage[i][0])
-//      {
-//         glColor(mDisplayMessageColor[i]);
-//         //drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
-//         //y += FONTSIZE + FONT_GAP;
-//         y += (SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP)
-//            * drawWrapText(mDisplayMessage[i], horizMargin, y,
-//               750, // wrap width
-//               ytop, // ypos_end
-//               SERVER_MSG_FONT_SIZE + SERVER_MSG_FONT_GAP, // line height
-//               SERVER_MSG_FONT_SIZE, // font size
-//               false); // align top
-//      }
-//   }
-//}
+
 
 // Render any incoming player chat msgs
 void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
@@ -3838,7 +3814,7 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
 
       // p1 will be x and y
       p1 = gScreenInfo.convertCanvasToWindowCoord(0, 
-                                                  gScreenInfo.getGameCanvasHeight() - CHAT_Y_POS, 
+                                                  gScreenInfo.getGameCanvasHeight() - ypos - lineHeight, 
                                                   mode);
       // p2 will be w and h -- remember that our message list contains an extra entry that exists primarily for scrolling purposes.
       // We want the height of the clip window to omit this line.  Also don't care about width here... wrapping takes care of that.
@@ -3850,25 +3826,28 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
       glEnable(GL_SCISSOR_TEST);
    }
 
+   logprintf("%d, %d, %d", mFirst, mLast, mFirst-mLast);
+
    S32 y = mTopDown ? (ytop + (mFirst - mLast - 1) * lineHeight) : ybot;
 
-   for(S32 i = mFirst; i != mLast; i--)
+
+   for(S32 i = mFirst; i != mLast - (isScrolling ? 1 : 0); i--)
    {
       S32 index = i % mMessages.size();
 
-      if(mMessages[index].str != "")
-      {
-         if(helperVisible)   
-            glColor(mMessages[index].color, 0.2f);
-         else
-            glColor(mMessages[index].color);
+      if(mMessages[index].str == "")      // needed?
+         break;
 
-         // Render top-down or bottom up depending on mTopDown
-         //ybot += renderLine(mMessages[index].str, ybot, ytop) * (mTopDown ? 1 : -1);
+      if(helperVisible)   
+         glColor(mMessages[index].color, 0.2f);
+      else
+         glColor(mMessages[index].color);
 
-         UserInterface::drawString(UserInterface::horizMargin, y,  mFontSize, mMessages[index].str.c_str());
-         y -= lineHeight;
-      }
+      // Render top-down or bottom up depending on mTopDown
+      //ybot += renderLine(mMessages[index].str, ybot, ytop) * (mTopDown ? 1 : -1);
+
+      UserInterface::drawString(UserInterface::horizMargin, y,  mFontSize, mMessages[index].str.c_str());
+      y -= lineHeight;
    }
 
 
