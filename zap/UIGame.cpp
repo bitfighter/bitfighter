@@ -3633,7 +3633,7 @@ void ColorString::set(const string &s, const Color &c)
 // Constructor
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
-   mDisplayChatMessageTimer.setPeriod(12000);    // How long messages stay visible (ms)
+   mDisplayChatMessageTimer.setPeriod(6000);    // How long messages stay visible (ms)
    mChatScrollTimer.setPeriod(2000);             // Transition time when new msg arrives
 
    mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
@@ -3663,8 +3663,15 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
    // Clear out any expired messages
    if(mExpire && mDisplayChatMessageTimer.update(timeDelta))
    {
-      advanceLast();         
       mDisplayChatMessageTimer.reset();
+
+      if(mFirst > mLast)
+      {
+         if(mTopDown)
+            mChatScrollTimer.reset();
+
+         advanceLast();         
+      }
    }
 }
 
@@ -3719,10 +3726,10 @@ void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const st
    }
 
    // When displaying messages from the top of the screen, the animation happens when we expire messages
-   if(!mTopDown)
-      mDisplayChatMessageTimer.reset();
+   mDisplayChatMessageTimer.reset();
 
-   mChatScrollTimer.reset();
+   if(!mTopDown)
+      mChatScrollTimer.reset();
 }
 
 
@@ -3769,7 +3776,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
 {
    // Check if there any messages to display... if not, bail
-   if(mFirst == mLast)
+   if(mFirst == mLast && !(mTopDown && mChatScrollTimer.getCurrent() > 0))
       return;
 
    S32 msgCount = mMessages.size();
@@ -3834,7 +3841,7 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
       glEnable(GL_SCISSOR_TEST);
    }
 
-   S32 y = mTopDown ? ypos + (mFirst - mLast - 1) * lineHeight : ybot;
+   S32 y = mTopDown ? ypos + (mFirst - mLast - 1) * lineHeight + mChatScrollTimer.getFraction() * lineHeight : ybot;
 
 
    for(S32 i = mFirst; i != mLast - (isScrolling ? 1 : 0); i--)
