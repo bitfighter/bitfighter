@@ -325,13 +325,6 @@ Rect Teleporter::calcExtents()
 }
 
 
-void Teleporter::newObjectFromDock(F32 gridSize)
-{
-   addDest(Point(0,0));      // We need to have one for rendering preview... actual location will be updated in onGeomChanged()
-   Parent::newObjectFromDock(gridSize);
-}
-
-
 bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship)
 {
    Rect queryRect(position, TELEPORTER_RADIUS * 2);
@@ -799,6 +792,13 @@ void Teleporter::renderEditorItem()
 Color Teleporter::getEditorRenderColor()
 {
    return Colors::green;
+}
+
+
+void Teleporter::newObjectFromDock(F32 gridSize)
+{
+   addDest(Point(0,0));      // We need to have one for rendering preview... actual location will be updated in onGeomChanged()
+   Parent::newObjectFromDock(gridSize);
 }
 
 
