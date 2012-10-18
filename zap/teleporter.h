@@ -193,7 +193,6 @@ public:
    S32 clearDests(lua_State *L);
    S32 getDest(lua_State *L);
    S32 getDestCount(lua_State *L);
-
 };
 
 
