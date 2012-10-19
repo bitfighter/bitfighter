@@ -3614,16 +3614,11 @@ void GameUserInterface::toggleChatDisplayMode()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-void ColorString::clear()
-{
-   str = "";
-}
-
-
-void ColorString::set(const string &s, const Color &c)
+void ColorString::set(const string &s, const Color &c, U32 id)    // id defaults to 0
 {
    str = s;
    color = c;
+   groupId = id;
 }
 
 
@@ -3646,6 +3641,9 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
    mWrapWidth = wrapWidth;
    mFontSize  = fontSize;
    mFontGap   = fontWidth;
+   mFull = false;
+
+   mNextGroupId = 0;
 }
 
 
@@ -3676,21 +3674,32 @@ void ChatMessageDisplayer::idle(U32 timeDelta)
 }
 
 
+// Make room for a new message at the head of our list
 void ChatMessageDisplayer::advanceFirst()
 {
    mFirst++;
 
    if(mLast % mMessages.size() == mFirst % mMessages.size())
+   {
       mLast++;
+      mFull = true;
+   }
 }
 
 
+// Clear out messages from the back of our list; expire all messages with same id together.
 void ChatMessageDisplayer::advanceLast()
 {
    mLast++;
 
-   if(mLast > mFirst)
-      mLast = mFirst;
+   U32 id = mMessages[mLast % mMessages.size()].groupId;
+
+   while(mMessages[(mLast + 1) % mMessages.size()].groupId == id && mFirst > mLast)
+      mLast++;
+
+   mFull = false;
+
+   TNLAssert(mLast <= mFirst, "index error! -- add check to correct this!");
 }
 
 
@@ -3716,13 +3725,16 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const string &msg)
 {
-   Vector<string> lines = UserInterface::wrapString(msg, mWrapWidth, mFontSize, "      ");
+   Vector<string> lines = UserInterface::wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
 
+   // All lines from this message will share a groupId.  We'll use that to expire the group as a whole.
    for(S32 i = 0; i < lines.size(); i++)
    {
       advanceFirst();
-      mMessages[mFirst % mMessages.size()].set(substitueVars(msg), msgColor); 
+      mMessages[mFirst % mMessages.size()].set(lines[i], msgColor, mNextGroupId); 
    }
+
+   mNextGroupId++;
 
    // When displaying messages from the top of the screen, the animation happens when we expire messages
    mDisplayChatMessageTimer.reset();
@@ -3772,90 +3784,87 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible)
 {
-   // Check if there any messages to display... if not, bail
-   if(mFirst == mLast && !(mTopDown && mChatScrollTimer.getCurrent() > 0))
-      return;
-
-   S32 msgCount = mMessages.size();
-
-   // Are we in the act of transitioning btwn one message and another?
+   // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
 
-   // We display one extra item during scrolling.  When we're not scrolling, that item is not used.
-   if(!isScrolling)
-      msgCount--;
+   // Check if there any messages to display... if not, bail
+   if(mFirst == mLast && !(mTopDown && isScrolling))
+      return;
 
-   // Figure out where to display the messages
    S32 lineHeight = mFontSize + mFontGap;
-
-   S32 ybot;    
-
-   S32 cliph = (msgCount - 1) * lineHeight;
-
-   if(mTopDown)
-   {
-      // Display area is anchored at the top (ypos is top coordinate)
-      ybot = ypos + cliph - lineHeight; /*+ mChatScrollTimer.getFraction() * lineHeight*/;
-   }
-   else
-   {
-      // Display area is anchored at the bottom (ypos is bottom coordinate)
-      ybot = ypos + mChatScrollTimer.getFraction() * lineHeight;
-   }
-
-
-   DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
 
    GLboolean scissorsShouldBeEnabled;
 
-   // Make these static to save a tiny bit of construction and tear-down costs
+   // Make these static to save a tiny bit of construction and tear-down costs.  We run this a lot, and they're small.
    static GLint scissorBox[4];
    static Point p1, p2;
 
-   if(isScrolling)    // If not scrolling --> no need to set scissors
+   // Only need to set scissors if we're scrolling.  When not scrolling, we control the display by only showing
+   // the specified number of lines; there are normally no partial lines that need vertical clipping as 
+   // there are when we're scrolling.  Note also that we only clip vertically, and can ignore the horizontal.
+   if(isScrolling)    
    {
       glGetBooleanv(GL_SCISSOR_TEST, &scissorsShouldBeEnabled);
 
       if(scissorsShouldBeEnabled)
          glGetIntegerv(GL_SCISSOR_BOX, &scissorBox[0]);
 
-      S32 clipy = mTopDown ? (ypos + cliph) : (ypos + lineHeight);
+      // Remember that our message list contains an extra entry that exists only for scrolling purposes.
+      // We want the height of the clip window to omit this line, so we subtract 1 below.  
+      S32 displayAreaHeight = (mMessages.size() - 1) * lineHeight;     
+      S32 displayAreaYPos = anchorPos + (mTopDown ? displayAreaHeight : lineHeight);
+
+      DisplayMode mode = mGame->getSettings()->getIniSettings()->displayMode;    // Windowed, full_screen_stretched, full_screen_unstretched
 
       // p1 will be x and y, uses raw OpenGL coordinates, which are flipped from the system used in the game
-      p1 = gScreenInfo.convertCanvasToWindowCoord(0, gScreenInfo.getGameCanvasHeight() - clipy,  mode);
-      // p2 will be w and h -- remember that our message list contains an extra entry that exists primarily for scrolling purposes.
-      // We want the height of the clip window to omit this line.  Also don't care about width here... wrapping takes care of that.
-      p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), cliph, mode);
+      p1 = gScreenInfo.convertCanvasToWindowCoord(0, gScreenInfo.getGameCanvasHeight() - displayAreaYPos,  mode);
+      // p2 will be w and h.  Also we don't care about width here... wrapping takes care of that.
+      p2 = gScreenInfo.convertCanvasToWindowCoord(gScreenInfo.getGameCanvasWidth(), displayAreaHeight, mode);
 
       glScissor(p1.x, p1.y, p2.x, p2.y);
 
       glEnable(GL_SCISSOR_TEST);
    }
 
-   S32 y = mTopDown ? ypos + (mFirst - mLast - 1) * lineHeight + mChatScrollTimer.getFraction() * lineHeight : ybot;
 
+   // Initialize the starting rendering position.  This represents the bottom of the message rendering area, and
+   // we'll work our way up as we go.  In all cases, newest messages will appear on the bottom, older ones on top.
+   // Note that anchorPos reflects something different (i.e. the top or the bottom of the area) in each case.
+   S32 y = anchorPos + mChatScrollTimer.getFraction() * lineHeight;
 
-   for(S32 i = mFirst; i != mLast - (isScrolling ? 1 : 0); i--)
+   // Advance anchor from top to the bottom of the render area.  When we are rendering at the bottom, anchorPos
+   // already represents the bottom, so no additional adjustment is necessary.
+   if(mTopDown)
+      y += (mFirst - mLast - 1) * lineHeight; 
+
+   // Render an extra message while we're scrolling (in some cases).  Scissors will control the total vertical height.
+   S32 renderExtra = 0;
+   if(isScrolling)
    {
-      S32 index = i % mMessages.size();
-
-      if(mMessages[index].str == "")      // needed?
-         break;
+      if(mTopDown)
+         renderExtra = 1;
+      else if(mFull)    // Only render extra item on bottom-up if list is fully occupied
+         renderExtra = 1;
+   }
+                                  
+   for(U32 i = mFirst; i != mLast - renderExtra; i--)
+   {
+      U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
 
       if(helperVisible)   
-         glColor(mMessages[index].color, 0.2f);
+         glColor(mMessages[index].color, 0.2f); // Dim
       else
-         glColor(mMessages[index].color);
-
-      // Render top-down or bottom up depending on mTopDown
+         glColor(mMessages[index].color);       // Bright
 
       UserInterface::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
-      y += lineHeight * (mTopDown ? -1 : -1);
+
+      y -= lineHeight;
    }
 
-   // Restore scissors settings
+
+   // Restore scissors settings -- only used during scrolling
    if(isScrolling)
    {
       if(scissorsShouldBeEnabled)

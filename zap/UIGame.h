@@ -80,10 +80,9 @@ struct ColorString
 {
    Color color;
    string str;
+   U32 groupId;
 
-   void clear();
-   void set(const string &s, const Color &c);
-
+   void set(const string &s, const Color &c, U32 groupId = 0);
 };
 
 
@@ -98,6 +97,10 @@ struct ColorString
       bool mTopDown;    // Render from top down or bottom up?
       S32 mWrapWidth;
       S32 mFontSize, mFontGap;
+      bool mFull;       // Our message displayer is full up
+
+      U32 mNextGroupId;
+
 
       void advanceFirst();
       void advanceLast();
