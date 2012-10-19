@@ -65,16 +65,20 @@ static const char *gameCredits[] = {
    "Samuel Williams (sam686)",
    "Joseph Ivie",
    "-",
+   "Web development:",
+   "kaen",
+   "-",
    "Testing and ideas:",
    "Pierce Youatt (karamazovapy)",
    "Jonathan Hansen",
    "-",
    "Music:",
    "vovk50",
+   "United States Marine Band",
    "-",
-   "Get the latest",
+   "Join us",
    "at",
-   "Bitfighter.org",
+   "bitfighter.org",
    "-",                    // Need to end with this...
    NULL                    // ...then this
 };
@@ -259,19 +263,20 @@ CreditsScroller::~CreditsScroller()       // Destructor
 
 void CreditsScroller::updateFX(U32 delta)
 {
-   // If the second-to-last credits has gone of the screen, don't update anymore.  This
-   // leaves the final message drawn on the screen.
    static bool creditsMusicExists = false;
    static S32 delayTimer = 4000;
 
-   if(credits[credits.size() - 2].pos > CreditSpace)
+   // If the second-to-last credits has gone of the screen, don't update anymore.  This
+   // leaves the final message drawn on the screen.
+   U32 indexMinus1 = credits.size() - 2;
+   if(credits[indexMinus1].pos > 150 - (CreditSpace * credits[indexMinus1].creditsLine.size()))  // 150 = banner height
    {
       // Scroll the credits text from bottom to top
       for(S32 i = 0; i < credits.size(); i++)
          credits[i].pos -= (delta / 8.f);
 
       // Test if credit music is playing - this just picks an arbitrary time to test if the music loaded properly
-      if(!creditsMusicExists && credits[credits.size() - 2].pos > gScreenInfo.getGameCanvasHeight() && SoundSystem::isMusicPlaying())
+      if(!creditsMusicExists && credits[indexMinus1].pos > gScreenInfo.getGameCanvasHeight() && SoundSystem::isMusicPlaying())
          creditsMusicExists = true;
    }
    else
