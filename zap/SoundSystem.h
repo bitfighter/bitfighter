@@ -261,6 +261,8 @@ public:
    static void fadeOutMusic();
    static void playNextTrack();
    static void playPrevTrack();
+
+   static bool isMusicPlaying();
 };
 
 }

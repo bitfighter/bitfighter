@@ -620,23 +620,23 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
    else
       mMusicData.currentLocation = MusicLocationMenus;
 
-   // Check if our location has changed, send command to stop music
+   // Check if our location has changed, send command to stop previous music or restart it
    if(mMusicData.currentLocation != mMusicData.previousLocation && mMusicData.previousLocation != MusicLocationNone)
-      mMusicData.command = MusicCommandFadeOut;
-
-   // Debug
-//   if(mMusicData.command != MusicCommandNone)
-//      logprintf("location: %d", mMusicData.currentLocation);
+   {
+      if(mMusicData.state == MusicStateStopped)
+         mMusicData.command = MusicCommandPlay;
+      else
+         mMusicData.command = MusicCommandFadeOut;
+   }
 
    // Special case for editor - no music
    if(mMusicData.currentLocation == MusicLocationEditor && mMusicData.state == MusicStateStopped)
       return;
 
-   // Restart music if coming from editor
-   if(mMusicData.previousLocation == MusicLocationEditor && mMusicData.state == MusicStateStopped)
-      mMusicData.command = MusicCommandFadeIn;
-
    // Debug
+//   if(mMusicData.command != MusicCommandNone)
+//      logprintf("location: %d", mMusicData.currentLocation);
+//
 //   if(mMusicData.command != MusicCommandNone)
 //      logprintf("command: %d", mMusicData.command);
 
@@ -700,15 +700,22 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
          // Determine which music file to play based on our location
          string musicFile = "";
          ALsizei loopcount = 0;
-         if(mMusicData.currentLocation == MusicLocationMenus)
+         if(mMusicData.currentLocation == MusicLocationMenus && mMenuMusicValid)
          {
             musicFile = mMenuMusicFile;
             loopcount = -1;  // Play indefinitely
          }
-         else if(mMusicData.currentLocation == MusicLocationGame)
+         else if(mMusicData.currentLocation == MusicLocationGame && mGameMusicValid)
             musicFile = mGameMusicList[mCurrentlyPlayingIndex];
-         else if(mMusicData.currentLocation == MusicLocationCredits)
+         else if(mMusicData.currentLocation == MusicLocationCredits && mCreditsMusicValid)
             musicFile = mCreditsMusicFile;
+
+         if(musicFile == "")
+         {
+            logprintf(LogConsumer::LogError, "Music is invalid for this location");
+            mMusicData.state = MusicStateStopped;
+            break;
+         }
 
          // Grab the full path
          string fullMusicPath = joindir(mMusicDir, musicFile);
@@ -719,6 +726,7 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
          {
             logprintf(LogConsumer::LogError, "Failed to create music stream for: %s", fullMusicPath.c_str());
             mMusicData.state = MusicStateStopped;
+            break;
          }
 
          // Play stream
@@ -726,6 +734,7 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
          {
             logprintf(LogConsumer::LogError, "Failed to play music file: %s", mGameMusicList[mCurrentlyPlayingIndex].c_str());
             mMusicData.state = MusicStateStopped;
+            break;
          }
 
          // Debug
@@ -1011,6 +1020,8 @@ void SoundSystem::music_end_callback(void* userdata, ALuint source)
    if(mMusicData.currentLocation == MusicLocationGame)
       mCurrentlyPlayingIndex = (mCurrentlyPlayingIndex + 1) % mGameMusicList.size();
 
+   mMusicData.state = MusicStateStopped;
+
    // Send command to start next song
    mMusicData.command = MusicCommandPlay;
 }
@@ -1076,6 +1087,12 @@ void SoundSystem::playPrevTrack()
 
    // Sending the stop command should automatically trigger the previous track
    mMusicData.command = MusicCommandFadeOut;
+}
+
+
+bool SoundSystem::isMusicPlaying()
+{
+   return mMusicData.state == MusicStatePlaying || mMusicData.state == MusicStateFadingIn;
 }
 
 
