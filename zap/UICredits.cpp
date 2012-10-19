@@ -257,16 +257,38 @@ CreditsScroller::~CreditsScroller()       // Destructor
    // Do nothing
 }
 
-
 void CreditsScroller::updateFX(U32 delta)
 {
-   // Scroll the credits text from bottom to top
-   for(S32 i = 0; i < credits.size(); i++)
-      credits[i].pos -= (delta / 8.f);
+   // If the second-to-last credits has gone of the screen, don't update anymore.  This
+   // leaves the final message drawn on the screen.
+   static bool creditsMusicExists = false;
+   static S32 delayTimer = 4000;
 
-   // If we've reached the end, say we're quitting
-   if(credits[credits.size() - 1].pos < -CreditSpace)
-      quitting = true;
+   if(credits[credits.size() - 2].pos > CreditSpace)
+   {
+      // Scroll the credits text from bottom to top
+      for(S32 i = 0; i < credits.size(); i++)
+         credits[i].pos -= (delta / 8.f);
+
+      // Test if credit music is playing - this just picks an arbitrary time to test if the music loaded properly
+      if(!creditsMusicExists && credits[credits.size() - 2].pos > gScreenInfo.getGameCanvasHeight() && SoundSystem::isMusicPlaying())
+         creditsMusicExists = true;
+   }
+   else
+   {
+      delayTimer -= delta;
+
+      // We will exit when the music has stopped, or the delay timer runs out
+      if((creditsMusicExists && !SoundSystem::isMusicPlaying()) || (!creditsMusicExists && delayTimer < 0))
+      {
+         // Reset statics
+         creditsMusicExists = false;
+         delayTimer = 4000;
+
+         // Quit
+         quitting = true;
+      }
+   }
 }
 
 
