@@ -970,7 +970,6 @@ Vector<string> UserInterface::wrapString(const string &str, S32 wrapWidth, S32 f
 
    while(lineEndIndex < text.length())
    {
-      char c = text[lineEndIndex];  // Store character
       S32 indentWidth = UserInterface::getStringWidth(fontSize, indentPrefix.c_str());
 
       string substr = text.substr(lineStartIndex, lineEndIndex - lineStartIndex);
@@ -1041,7 +1040,6 @@ U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width
 
    while(lineEndIndex < text.length())
    {
-      char c = text[lineEndIndex];  // Store character
       bool overWidthLimit = UserInterface::getStringWidth(fontSize, text.substr(lineStartIndex, lineEndIndex - lineStartIndex).c_str()) > (width - multiLineIndentation);
 
       // If this character is a space, keep track in case we need to split here

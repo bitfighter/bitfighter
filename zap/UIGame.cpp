@@ -3837,7 +3837,7 @@ void ChatMessageDisplayer::render(S32 ypos, bool helperVisible)
    S32 y = mTopDown ? ypos + (mFirst - mLast - 1) * lineHeight + mChatScrollTimer.getFraction() * lineHeight : ybot;
 
 
-   for(S32 i = mFirst; i != mLast - (isScrolling ? 1 : 0); i--)
+   for(U32 i = mFirst; i != mLast - (isScrolling ? 1 : 0); i--)
    {
       S32 index = i % mMessages.size();
 
