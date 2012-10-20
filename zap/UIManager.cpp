@@ -611,7 +611,6 @@ void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 }
 
 
-
 void UIManager::saveUI(UserInterface *ui)
 {
    if(ui)
