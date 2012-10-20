@@ -59,9 +59,10 @@ using namespace std;
 
 namespace Zap {
 
-// forward declarations
+// Forward declarations
 class Point;
 class SoundEffect;
+class UIManager;
 typedef RefPtr<SoundEffect> SFXHandle;
 
 // Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
@@ -229,8 +230,8 @@ public:
    static void init(sfxSets sfxSet, const string &sfxDir, const string &musicDir, float musicVol);
    static void shutdown();
    static void setListenerParams(Point pos, Point velocity);
-   static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol);    // Client version
-   static void processAudio(F32 sfxVol);                                // Server version
+   static void processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager);  // Client version
+   static void processAudio(F32 sfxVol);                                                                   // Server version
 
    // Sound Effect functions
    static void processSoundEffects(F32 sfxVol, F32 voiceVol);
@@ -252,7 +253,7 @@ public:
    static void stopRecording();
 
    // Music functions
-   static void processMusic(U32 timeDelta, F32 musicVol);
+   static void processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicLocation);
    static void playMusic();
    static void stopMusic();
    static void pauseMusic();

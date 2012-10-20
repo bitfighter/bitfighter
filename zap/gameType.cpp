@@ -2196,16 +2196,17 @@ static void switchTeamsCallback(ClientGame *game, U32 unused)
       if(!controlObject || !isShipType(controlObject->getObjectTypeNumber()))
          return;
 
-      Ship *ship = static_cast<Ship *>(controlObject);  // Returns player's ship...
+      Ship *ship = static_cast<Ship *>(controlObject);   // Returns player's ship...
 
-      gt->c2sChangeTeams(1 - ship->getTeam());                                            // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      game->getUIManager()->reactivateMenu(game->getUIManager()->getGameUserInterface()); // Jump back into the game (this option takes place immediately)
+      gt->c2sChangeTeams(1 - ship->getTeam());           // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      game->getUIManager()->reactivate(GameUI);          // Jump back into the game (this option takes place immediately)
    }
    else
    {
+      // Show menu to let player select a new team
       TeamMenuUserInterface *ui = game->getUIManager()->getTeamMenuUserInterface();
-      ui->activate();     // Show menu to let player select a new team
       ui->nameToChange = game->getClientInfo()->getName();
+      game->getUIManager()->activate(ui);                  
    }
  }
 
@@ -2237,7 +2238,7 @@ static void switchPlayersTeamCallback(ClientGame *game, U32 unused)
    PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
 
    ui->action = PlayerMenuUserInterface::ChangeTeam;
-   ui->activate();
+   game->getUIManager()->activate(ui);
 }
 
 

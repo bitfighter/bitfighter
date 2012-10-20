@@ -26,6 +26,7 @@
 #ifndef _UI_MANAGER_H_
 #define _UI_MANAGER_H_
 
+#include "Timer.h"
 #include "tnlVector.h"
 #include <memory>
 
@@ -73,8 +74,6 @@ class Game;
 class ClientGame;
 
 enum UIID {
-   AdminPasswordEntryUI,
-   ChatUI,
    CreditsUI,
    DiagnosticsScreenUI,
    EditorInstructionsUI,
@@ -99,7 +98,6 @@ enum UIID {
    NameEntryUI,
    OptionsUI,
    PasswordEntryUI,
-   ReservedNamePasswordEntryUI,
    PlayerUI,
    TeamUI,
    QueryServersScreenUI,
@@ -107,10 +105,7 @@ enum UIID {
    TeamDefUI,
    TextEntryUI,
    YesOrNoUI,
-   GoFastAttributeEditorUI,
-   TextItemAttributeEditorUI,
-   PickupItemAttributeMenuUI,
-   InvalidUI,        // Not a valid UI
+   InvalidUI        // Not a valid UI
 };
 
 class UIManager
@@ -118,6 +113,7 @@ class UIManager
 
 private:
    ClientGame *mGame;
+   UserInterface *mCurrentInterface;
 
    MainMenuUserInterface *mMainMenuUserInterface;
    GameParamUserInterface *mGameParamUserInterface;
@@ -152,11 +148,15 @@ private:
 
    Vector<UserInterface *> mPrevUIs;   // Previously active menus
 
+   Timer mMenuTransitionTimer;
+
 public:
    UIManager(ClientGame *clientGame);  // Constructor
    ~UIManager();                       // Destructor
 
-   bool isOpen(UIID uiid);
+   bool isCurrentUI(UIID uiid);
+   UserInterface *getUI(UIID menuId);
+
 
    /////
    // Interface getting methods
@@ -192,7 +192,7 @@ public:
    SplashUserInterface *getSplashUserInterface();
 
    void reactivatePrevUI();
-   void reactivateMenu(const UserInterface *target);
+   void reactivate(UIID menuId);
    bool hasPrevUI();
    void clearPrevUIs();
    void renderPrevUI(const UserInterface *ui);
@@ -202,8 +202,13 @@ public:
    void renderCurrent();
    UserInterface *getCurrentUI();
    UserInterface *getPrevUI();
+   void activate(UIID menuID, bool save = true);
+   void activate(UserInterface *, bool save = true);
+
+   void idle(U32 timeDelta);
 };
 
 };
 
 #endif
+

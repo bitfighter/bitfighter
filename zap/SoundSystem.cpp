@@ -565,11 +565,33 @@ void SoundSystem::updateMovementParams(SFXHandle& effect)
 }
 
 
+// Select music based on where we are
+static MusicLocation selectMusic(UIManager *uiManager)
+{
+   UIID currentUI = uiManager->getCurrentUI()->getMenuID();
+
+   // In game (or one of its submenus)...
+   if(currentUI == GameUI || uiManager->cameFrom(GameUI))
+      return MusicLocationGame;
+
+   // In editor...
+   if(currentUI == EditorUI || uiManager->cameFrom(EditorUI))
+      return MusicLocationEditor;
+
+   // In credits...
+   if(currentUI == CreditsUI || uiManager->cameFrom(CreditsUI))
+      return MusicLocationCredits;
+
+   // Otherwise in menus...
+   return MusicLocationMenus;
+}
+
+
 // Client version
-void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol)
+void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager)
 {
    processSoundEffects(sfxVol, voiceVol);
-   processMusic(timeDelta, musicVol);
+   processMusic(timeDelta, musicVol, selectMusic(uiManager));
    processVoiceChat();
 
    alureUpdate();
@@ -585,7 +607,7 @@ void SoundSystem::processAudio(F32 sfxVol)
 }
 
 
-void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
+void SoundSystem::processMusic(U32 timeDelta, F32 musicVol, MusicLocation musicLocation)
 {
    // If music system failed to initialize, just return
    if(!musicSystemValid())
@@ -602,23 +624,9 @@ void SoundSystem::processMusic(U32 timeDelta, F32 musicVol)
    // Update our fade timer
    mMusicFadeTimer.update(timeDelta);
 
-   UIManager *uiManager = UserInterface::current->getUIManager();
-
    // Update music location
    mMusicData.previousLocation = mMusicData.currentLocation;
-
-   // In game
-   if(UserInterface::current->getMenuID() == GameUI || uiManager->cameFrom(GameUI))
-      mMusicData.currentLocation = MusicLocationGame;
-   // In editor
-   else if(UserInterface::current->getMenuID() == EditorUI ||  uiManager->cameFrom(EditorUI))
-      mMusicData.currentLocation = MusicLocationEditor;
-   // In credits
-   else if(UserInterface::current->getMenuID() == CreditsUI ||  uiManager->cameFrom(CreditsUI))
-      mMusicData.currentLocation = MusicLocationCredits;
-   // Else, in menus
-   else
-      mMusicData.currentLocation = MusicLocationMenus;
+   mMusicData.currentLocation = musicLocation;
 
    // Check if our location has changed, send command to stop music
    if(mMusicData.currentLocation != mMusicData.previousLocation && mMusicData.previousLocation != MusicLocationNone)

@@ -157,7 +157,7 @@ void InstructionsUserInterface::render()
 
 void InstructionsUserInterface::activatePage(IntructionPages pageIndex)
 {
-   this->activate();
+   getUIManager()->activate(getMenuID());                // Activates ourselves, essentially
    mCurPage = pageIndex;
 }
 

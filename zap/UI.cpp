@@ -65,9 +65,6 @@ extern S32 gLoadoutIndicatorHeight;
 
 S32 UserInterface::messageMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
 
-UserInterface *UserInterface::current = NULL;
-UserInterface *UserInterface::comingFrom = NULL;
-
 extern Vector<ClientGame *> gClientGames;
 
 F32 gLineWidth1 = 1.0f;
@@ -116,25 +113,16 @@ bool UserInterface::usesEditorScreenMode()
 }
 
 
-void UserInterface::activate(bool save)
+void UserInterface::activate()
 {
-   if(current && save)        // Current is not really current any more... it's actually the previously active UI
-       getUIManager()->saveUI(current);
-
-   comingFrom = current;
-   current = this;            // Now it is current
-
-   if(comingFrom)             // Deactivate the previous UI...
-      comingFrom->onDeactivate(usesEditorScreenMode());
-
-   onActivate();              // ...and activate the current one
+   onActivate(); 
 }
 
 
 void UserInterface::reactivate()
 {
-   comingFrom = current;
-   current = this;
+   //comingFrom = current;
+   //current = this;
    onReactivate();
 }
 
@@ -174,7 +162,7 @@ void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode) 
 {
    if(prevUIUsesEditorScreenMode != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true);
+      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
 }
 
 
@@ -187,52 +175,12 @@ U32 UserInterface::getTimeSinceLastInput()
 // Clean up and get ready to render
 void UserInterface::renderCurrent()    
 {
-   // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
-
-   if(scissorMode)
-      glDisable(GL_SCISSOR_TEST);
-
-   glClear(GL_COLOR_BUFFER_BIT);
-
-   if(scissorMode)
-      glEnable(GL_SCISSOR_TEST);
-   
-   if(gClientGames.size() > 1)
-   {
-      for(S32 i = 0; i < gClientGames.size(); i++)
-      {
-      //gClientGame2->getSettings()->getInputCodeManager()->setInputMode(InputModeJoystick);
-      //gClientGame = gClientGame2;
-      //gClientGame1->mUserInterfaceData->get();
-      //gClientGame2->mUserInterfaceData->set();
-
-         glEnable(GL_SCISSOR_TEST);
-
-         S32 x = i = 0 ? 0 : gScreenInfo.getWindowWidth() / 2;
-
-         glViewport(x, 0, gScreenInfo.getWindowWidth() / 2, gScreenInfo.getWindowHeight());
-         glMatrixMode(GL_MODELVIEW);
-         glLoadIdentity();
-
-         // Run the active UI renderer
-         if(current)
-            current->render();
-
-         //gClientGame = gClientGame1;
-         //gClientGame2->mUserInterfaceData->get();
-         //gClientGame1->mUserInterfaceData->set();
-         //glViewport(0, 0, gScreenInfo.getWindowWidth() / 2, gScreenInfo.getWindowHeight());
-         //gClientGame->getSettings()->getInputCodeManager()->setInputMode(InputModeKeyboard);
-      }
-   }
-
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
    // Run the active UI renderer
-   if(current)
-      current->render();
+   if(getUIManager()->getCurrentUI())
+      getUIManager()->getCurrentUI()->render();
 
    // By putting this here, it will always get rendered, regardless of which UI (if any) is active (kind of ugly)
    // This block will dump any keys and raw stick button inputs depressed to the screen when in diagnostic mode
@@ -1172,7 +1120,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
    if(checkInputCode(settings, InputCodeManager::BINDING_DIAG, inputCode))              // Turn on diagnostic overlay
    { 
-      if(uiManager->isOpen(DiagnosticsScreenUI))
+      if(uiManager->isCurrentUI(DiagnosticsScreenUI))
          return false;
 
       uiManager->getDiagnosticUserInterface()->activate();
@@ -1185,7 +1133,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
    {
       // Don't activate if we're already in chat or if we're on the Name Entry
       // screen (since we don't have a nick yet)
-      if(uiManager->isOpen(GlobalChatUI) || uiManager->isOpen(NameEntryUI))
+      if(uiManager->isCurrentUI(GlobalChatUI) || uiManager->isCurrentUI(NameEntryUI))
          return false;
 
       getGame()->getUIManager()->getChatUserInterface()->activate();
@@ -1205,17 +1153,9 @@ void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-UserInterfaceData::UserInterfaceData() 
-{
-   current = NULL;
-   comingFrom = NULL;
-}
-
 
 void UserInterfaceData::get()
 {
-   comingFrom = current;
-   current = UserInterface::current;
    vertMargin = UserInterface::vertMargin;
    horizMargin = UserInterface::horizMargin;
    chatMargin = UserInterface::messageMargin;
@@ -1224,8 +1164,6 @@ void UserInterfaceData::get()
 
 void UserInterfaceData::set()
 {
-   comingFrom = current;
-   UserInterface::current = current;
    UserInterface::vertMargin = vertMargin;
    UserInterface::horizMargin = horizMargin;
    UserInterface::messageMargin = chatMargin;

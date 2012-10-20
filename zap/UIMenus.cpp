@@ -777,41 +777,41 @@ void MenuUserInterface::onEscape()
 
 static void joinSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getQueryServersUserInterface()->activate();
+   game->getUIManager()->activate(QueryServersScreenUI);
 }
 
 static void hostSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getHostMenuUserInterface()->activate();
+   game->getUIManager()->activate(HostingUI);
 }
 
 static void helpSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getInstructionsUserInterface()->activate();
+   game->getUIManager()->activate(InstructionsUI);
 }
 
 static void optionsSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getOptionsMenuUserInterface()->activate();
+   game->getUIManager()->activate(OptionsUI);
 }
 
 
 static void highScoresSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getHighScoresUserInterface()->activate();
+   game->getUIManager()->activate(HighScoresUI);
 }
 
 
 static void editorSelectedCallback(ClientGame *game, U32 unused)
 {
    game->getUIManager()->getEditorUserInterface()->setLevelFileName("");      // Reset this so we get the level entry screen
-   game->getUIManager()->getEditorUserInterface()->activate();
+   game->getUIManager()->activate(EditorUI);
 }
 
 
 static void creditsSelectedCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getCreditsUserInterface()->activate();
+   game->getUIManager()->activate(CreditsUI);
 }
 
 
@@ -864,7 +864,7 @@ void MainMenuUserInterface::onActivate()
    mFirstTime = false;
 
    if(showAnimation)
-      getUIManager()->getSplashUserInterface()->activate();   // Show splash screen the first time through
+      getUIManager()->activate(SplashUI);   // Show splash screen the first time through
 }
 
 
@@ -973,7 +973,7 @@ void MainMenuUserInterface::showUpgradeAlert()
    ui->setMessage(4, "");
    ui->setMessage(5, "To get the latest, visit bitfighter.org");
 
-   ui->activate();
+   getUIManager()->activate(ui);
 
    mShowedUpgradeAlert = true;            // Only show this alert once per session -- we don't need to beat them over the head with it!
 }
@@ -1071,13 +1071,13 @@ static void setFullscreenCallback(ClientGame *game, U32 mode)
    settings->getIniSettings()->oldDisplayMode = game->getSettings()->getIniSettings()->displayMode;     
 
    settings->getIniSettings()->displayMode = (DisplayMode)mode;
-   VideoSystem::actualizeScreenMode(game->getSettings(), false);
+   VideoSystem::actualizeScreenMode(game->getSettings(), false, game->getUIManager()->getCurrentUI()->usesEditorScreenMode());
 }
 
 
 static void defineKeysCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getKeyDefMenuUserInterface()->activate();
+   game->getUIManager()->activate(KeyDefUI);
 }
 
 static void setControllerCallback(ClientGame *game, U32 joystickIndex)
@@ -1266,7 +1266,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
    settings->getIniSettings()->oldDisplayMode = settings->getIniSettings()->displayMode;     // Save current setting
 
    // When we're in the editor, and we toggle views, we'll skip one of the fullscreen modes, as they essentially do the same thing in that UI
-   if(UserInterface::current->usesEditorScreenMode())
+   if(getGame()->getUIManager()->getCurrentUI()->usesEditorScreenMode())
    {
       if(isFullScreen(settings->getIniSettings()->displayMode))
          settings->getIniSettings()->displayMode = DISPLAY_MODE_WINDOWED;
@@ -1285,7 +1285,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       settings->getIniSettings()->displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
    }
 
-   VideoSystem::actualizeScreenMode(settings, false);
+   VideoSystem::actualizeScreenMode(settings, false, usesEditorScreenMode());
 }
 
 
@@ -1347,7 +1347,7 @@ static void nameAndPasswordAcceptCallback(ClientGame *clientGame, U32 unused)
    if(uiManager->hasPrevUI())
       uiManager->reactivatePrevUI();
    else
-      uiManager->getMainMenuUserInterface()->activate();
+      uiManager->activate(MainUI);
 
    clientGame->resetMasterConnectTimer();
    
@@ -1638,7 +1638,7 @@ static void addTwoMinsCallback(ClientGame *game, U32 unused)
 
 static void chooseNewLevelCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getLevelMenuUserInterface()->activate();
+   game->getUIManager()->activate(LevelTypeUI);
 }
 
 
@@ -1651,7 +1651,7 @@ static void restartGameCallback(ClientGame *game, U32 unused)
 
 static void levelChangeOrAdminPWCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getLevelChangeOrAdminPasswordEntryUserInterface()->activate();
+   game->getUIManager()->activate(LevelChangePasswordEntryUI);
 }
 
 
@@ -1660,7 +1660,8 @@ static void kickPlayerCallback(ClientGame *game, U32 unused)
    PlayerMenuUserInterface *ui = game->getUIManager()->getPlayerMenuUserInterface();
 
    ui->action = PlayerMenuUserInterface::Kick;
-   ui->activate();
+
+   game->getUIManager()->activate(ui);
 }
 
 
@@ -1763,7 +1764,7 @@ static void selectLevelTypeCallback(ClientGame *game, U32 level)
       ui->category = gc->mLevelInfos[level - 1].getLevelTypeName();
    }
 
-  ui->activate();
+  game->getUIManager()->activate(ui);
 }
 
 
@@ -1850,9 +1851,9 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
          getGame()->displayErrorMessage("!!! Can't upload level: unable to read file");
    }
    else
-      gc->c2sRequestLevelChange(index, false);        // The selection index is the level to load
+      gc->c2sRequestLevelChange(index, false);     // The selection index is the level to load
 
-   getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());    // Jump back to the game menu
+   getUIManager()->reactivate(GameUI);             // Back to the game menu
 }
 
 
@@ -1999,16 +2000,17 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    if(action == ChangeTeam)
    {
       TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
-
-      ui->activate();     // Show menu to let player select a new team
       ui->nameToChange = getMenuItem(index)->getPrompt();
+
+      getUIManager()->activate(TeamDefUI);     // Show menu to let player select a new team
    }
+
    else if(gt)    // action == Kick
       gt->c2sKickPlayer(getMenuItem(index)->getPrompt());
 
 
-   if(action != ChangeTeam)                              // Unless we need to move on to the change team screen...
-      getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());     // ...it's back to the game!
+   if(action != ChangeTeam)                   // Unless we need to move on to the change team screen...
+      getUIManager()->reactivate(GameUI);     // ...it's back to the game!
 }
 
 
@@ -2082,16 +2084,16 @@ void TeamMenuUserInterface::processSelection(U32 index)
    // Make sure user isn't just changing to the team they're already on...
    if(index != (U32)getGame()->getTeamIndex(nameToChange.c_str()))
    {
-      if(getPrevMenuID() == PlayerUI)     // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
+      if(getPrevMenuID() == PlayerUI)        // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       {
          StringTableEntry e(nameToChange.c_str());
-         gt->c2sTriggerTeamChange(e, index);   // Index will be the team index
+         gt->c2sTriggerTeamChange(e, index); // Index will be the team index
       }
-      else                                // Came from player changing own team
-         gt->c2sChangeTeams(index);
+      else                                   // Came from player changing own team
+         gt->c2sChangeTeams(index); 
    }
 
-   getUIManager()->reactivateMenu(getUIManager()->getGameUserInterface());    // Back to the game!
+   getUIManager()->reactivate(GameUI);       // Back to the game!
 }
 
 
@@ -2100,9 +2102,9 @@ void TeamMenuUserInterface::render()
 {
    clearMenuItems();
 
-   getGame()->countTeamPlayers();    // Make sure numPlayers is correctly populated
+   getGame()->countTeamPlayers();                     // Make sure numPlayers is correctly populated
 
-   char c[] = "A";      // Dummy shortcut key, will change below
+   char c[] = "A";                                    // Dummy shortcut key, will change below
    for(S32 i = 0; i < getGame()->getTeamCount(); i++)
    {
       AbstractTeam *team = getGame()->getTeam(i);

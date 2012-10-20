@@ -980,8 +980,9 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
       if(mShowChat) 
       {
          ChatUserInterface *ui = getUIManager()->getChatUserInterface();
-         ui->activate();
          ui->setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
+
+         getUIManager()->activate(ui);
       }
 
       return true;
@@ -1045,7 +1046,7 @@ bool QueryServersUserInterface::onKeyDown(InputCode inputCode)
    {
       playBoop();
       leaveGlobalChat();
-      getUIManager()->getMainMenuUserInterface()->activate();
+      getUIManager()->activate(MainUI);
    }
    else if(inputCode == KEY_LEFT)
    {

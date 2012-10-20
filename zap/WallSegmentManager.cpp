@@ -380,9 +380,8 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
                                      const Point &selectedItemOffset, bool previewMode, bool showSnapVertices, F32 alpha)
 {
 #ifndef ZAP_DEDICATED
-   // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
-   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && previewMode;
-   Color fillColor = useGameColor ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
+   // We'll use the editor color most of the time; only in preview mode do we use the game color
+   Color fillColor = previewMode ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
 

@@ -105,7 +105,7 @@ CreditsUserInterface::~CreditsUserInterface()
 void CreditsUserInterface::onActivate()
 {
    quitting = false;
-   getUIManager()->getSplashUserInterface()->activate();          // Show splash animation at beginning of credits
+   getUIManager()->activate(SplashUI);          // Show splash animation at beginning of credits
 
    // Construct the creditsfx objects here, they will
    // get properly deleted when the CreditsUI
@@ -401,10 +401,10 @@ bool SplashUserInterface::onKeyDown(InputCode inputCode)
 
       // Unless user hit Enter or Escape, or some other thing...
       if(inputCode != KEY_ESCAPE && inputCode != KEY_ENTER && inputCode != MOUSE_LEFT && inputCode != MOUSE_MIDDLE && inputCode != MOUSE_RIGHT)    
-         current->onKeyDown(inputCode);                // ...pass keystroke on  (after reactivate in quit(), current is now the underlying
+         getUIManager()->getCurrentUI()->onKeyDown(inputCode); // ...pass keystroke on  (after reactivate in quit(), current is now the prev
 
       if(inputCode == MOUSE_LEFT && inputCode == MOUSE_MIDDLE && inputCode == MOUSE_RIGHT)
-         current->onMouseMoved();
+         getUIManager()->getCurrentUI()->onMouseMoved();
    }
 
    return true;

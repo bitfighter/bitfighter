@@ -49,7 +49,7 @@ public:
    static S32 getWindowPositionX();
    static S32 getWindowPositionY();
 
-   static void actualizeScreenMode(GameSettings *settings, bool changingInterfaces);
+   static void actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode);
 };
 
 } /* namespace Zap */

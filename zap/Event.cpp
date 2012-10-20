@@ -44,10 +44,10 @@ Event::~Event()
 }
 
 
-void Event::setMousePos(S32 x, S32 y, DisplayMode reportedDisplayMode)
+void Event::setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode reportedDisplayMode)
 {
    // Handle special case of editor... would be better handled elsewhere?
-   if(UserInterface::current->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+   if(currentUI->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
       reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
 
    gScreenInfo.setMousePos(x, y, reportedDisplayMode);
@@ -56,7 +56,7 @@ void Event::setMousePos(S32 x, S32 y, DisplayMode reportedDisplayMode)
 
 // Argument of axisMask is one of the 4 axes:
 //    MoveAxisLeftRightMask, MoveAxisUpDownMask, ShootAxisLeftRightMask, ShootAxisUpDownMask
-void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
+void Event::updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 value)
 {
    // Get our current joystick-axis-direction and its opposite on the same axis
    U32 detectedAxesDirectionMask = 0;
@@ -124,36 +124,35 @@ void Event::updateJoyAxesDirections(U32 axisMask, S16 value)
       // If the current axes direction is set in the inputCodeDownDeltaMask, set the input code down
       if(Joystick::JoystickInputData[i].axesMask & inputCodeDownDeltaMask)
       {
-         inputCodeDown(Joystick::JoystickInputData[i].inputCode);
+         inputCodeDown(currentUI, Joystick::JoystickInputData[i].inputCode);
          continue;
       }
 
       // If the current axes direction is set in the inputCodeUpDeltaMask, set the input code up
       if(Joystick::JoystickInputData[i].axesMask & inputCodeUpDeltaMask)
-         inputCodeUp(Joystick::JoystickInputData[i].inputCode);
+         inputCodeUp(currentUI, Joystick::JoystickInputData[i].inputCode);
    }
-
 
    // Finally alter the global axes InputCode mask to reflect the current inputCodeState
    Joystick::AxesInputCodeMask = currentInputCodeMask;
 }
 
 
-void Event::inputCodeUp(InputCode inputCode)
+void Event::inputCodeUp(UserInterface *currentUI, InputCode inputCode)
 {
    InputCodeManager::setState(inputCode, false);
 
-   if(UserInterface::current)
-      UserInterface::current->onKeyUp(inputCode);
+   if(currentUI)
+      currentUI->onKeyUp(inputCode);
 }
 
 
-bool Event::inputCodeDown(InputCode inputCode)
+bool Event::inputCodeDown(UserInterface *currentUI, InputCode inputCode)
 {
    InputCodeManager::setState(inputCode, true);
 
-   if(UserInterface::current)
-      return UserInterface::current->onKeyDown(inputCode);
+   if(currentUI)
+      return currentUI->onKeyDown(inputCode);
 
    return false;
 }
@@ -162,6 +161,7 @@ bool Event::inputCodeDown(InputCode inputCode)
 void Event::onEvent(ClientGame *game, SDL_Event* event)
 {
    IniSettings *iniSettings = game->getSettings()->getIniSettings();
+   UserInterface *currentUI = game->getUIManager()->getCurrentUI();
 
    switch (event->type)
    {
@@ -170,34 +170,34 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_KEYUP:
-         onKeyUp(event);
+         onKeyUp(currentUI, event);
          break;
 
 #if SDL_VERSION_ATLEAST(2,0,0)
       case SDL_TEXTINPUT:
          if(mAllowTextInput)
-            onTextInput(event->text.text[0]);
+            onTextInput(currentUI, event->text.text[0]);
 
          break;
 #endif
 
       case SDL_MOUSEMOTION:
-            onMouseMoved(event->motion.x, event->motion.y, iniSettings->displayMode);
+         onMouseMoved(currentUI, event->motion.x, event->motion.y, iniSettings->displayMode);
          break;
 
       case SDL_MOUSEBUTTONDOWN:
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonDown(event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
+               onMouseButtonDown(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
                break;
 #if !SDL_VERSION_ATLEAST(2,0,0)
             case SDL_BUTTON_WHEELUP:
@@ -213,9 +213,9 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
 #if SDL_VERSION_ATLEAST(2,0,0)
       case SDL_MOUSEWHEEL:
          if(event->wheel.y > 0)
-            onMouseWheel(true, false);
+            onMouseWheel(currentUI, true, false);
          else
-            onMouseWheel(false, true);
+            onMouseWheel(currentUI, false, true);
 
          break;
 #endif
@@ -224,21 +224,21 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          switch (event->button.button)
          {
             case SDL_BUTTON_LEFT:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_LEFT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_RIGHT:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_RIGHT, iniSettings->displayMode);
                break;
 
             case SDL_BUTTON_MIDDLE:
-               onMouseButtonUp(event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
+               onMouseButtonUp(currentUI, event->button.x, event->button.y, MOUSE_MIDDLE, iniSettings->displayMode);
                break;
          }
          break;
 
       case SDL_JOYAXISMOTION:
-         onJoyAxis(event->jaxis.which, event->jaxis.axis, event->jaxis.value);
+         onJoyAxis(currentUI, event->jaxis.which, event->jaxis.axis, event->jaxis.value);
          break;
 
       case SDL_JOYBALLMOTION:
@@ -246,15 +246,15 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
          break;
 
       case SDL_JOYHATMOTION:
-         onJoyHat(event->jhat.which, event->jhat.hat, event->jhat.value);
+         onJoyHat(currentUI, event->jhat.which, event->jhat.hat, event->jhat.value);
          break;
 
       case SDL_JOYBUTTONDOWN:
-         onJoyButtonDown(event->jbutton.which, event->jbutton.button);
+         onJoyButtonDown(currentUI, event->jbutton.which, event->jbutton.button);
          break;
 
       case SDL_JOYBUTTONUP:
-         onJoyButtonUp(event->jbutton.which, event->jbutton.button);
+         onJoyButtonUp(currentUI, event->jbutton.which, event->jbutton.button);
          break;
 
       case SDL_SYSWMEVENT:
@@ -334,7 +334,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       InputCode inputCode = InputCodeManager::sdlKeyToInputCode(key);
 
       // If an input code is not handled by a UI, then we will allow text translation to pass through
-      mAllowTextInput = !inputCodeDown(inputCode);
+      mAllowTextInput = !inputCodeDown(game->getUIManager()->getCurrentUI(), inputCode);
 
       // SDL 1.2 has the translated key along with the keysym, so we trigger text input from here
 #if !SDL_VERSION_ATLEAST(2,0,0)
@@ -345,61 +345,61 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
 }
 
 
-void Event::onKeyUp(SDL_Event *event)
+void Event::onKeyUp(UserInterface *currentUI, SDL_Event *event)
 {
-   inputCodeUp(InputCodeManager::sdlKeyToInputCode(event->key.keysym.sym));
+   inputCodeUp(currentUI, InputCodeManager::sdlKeyToInputCode(event->key.keysym.sym));
 }
 
 
-void Event::onTextInput(char unicode)
+void Event::onTextInput(UserInterface *currentUI, char unicode)
 {
-   if(UserInterface::current)
-      UserInterface::current->onTextInput(unicode);
+   if(currentUI)
+      currentUI->onTextInput(unicode);
 }
 
 
-void Event::onMouseMoved(S32 x, S32 y, DisplayMode mode)
+void Event::onMouseMoved(UserInterface *currentUI, S32 x, S32 y, DisplayMode mode)
 {
-   setMousePos(x, y, mode);
+   setMousePos(currentUI, x, y, mode);
 
-   if(UserInterface::current)
-      UserInterface::current->onMouseMoved();
+   if(currentUI)
+      currentUI->onMouseMoved();
 }
 
 
-void Event::onMouseWheel(bool up, bool down)
+void Event::onMouseWheel(UserInterface *currentUI, bool up, bool down)
 {
    if(up)
    {
-      inputCodeDown(MOUSE_WHEEL_UP);
-      inputCodeUp(MOUSE_WHEEL_UP);
+      inputCodeDown(currentUI, MOUSE_WHEEL_UP);
+      inputCodeUp(currentUI, MOUSE_WHEEL_UP);
    }
 
    if(down)
    {
-      inputCodeDown(MOUSE_WHEEL_DOWN);
-      inputCodeUp(MOUSE_WHEEL_DOWN);
+      inputCodeDown(currentUI, MOUSE_WHEEL_DOWN);
+      inputCodeUp(currentUI, MOUSE_WHEEL_DOWN);
    }
 }
 
 
-void Event::onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode)
+void Event::onMouseButtonDown(UserInterface *currentUI, S32 x, S32 y, InputCode inputCode, DisplayMode mode)
 {
-   setMousePos(x, y, mode);
+   setMousePos(currentUI, x, y, mode);
 
-   inputCodeDown(inputCode);
+   inputCodeDown(currentUI, inputCode);
 }
 
 
-void Event::onMouseButtonUp(S32 x, S32 y, InputCode inputCode, DisplayMode mode)
+void Event::onMouseButtonUp(UserInterface *currentUI, S32 x, S32 y, InputCode inputCode, DisplayMode mode)
 {
-   setMousePos(x, y, mode);
+   setMousePos(currentUI,x, y, mode);
 
-   inputCodeUp(inputCode);
+   inputCodeUp(currentUI, inputCode);
 }
 
 
-void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
+void Event::onJoyAxis(UserInterface *currentUI, U8 whichJoystick, U8 axis, S16 value)
 {
 //   logprintf("SDL Axis number: %u, value: %d", axis, value);
 
@@ -408,40 +408,40 @@ void Event::onJoyAxis(U8 whichJoystick, U8 axis, S16 value)
 
    // Left/Right movement axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[0])
-      updateJoyAxesDirections(MoveAxisLeftRightMask,  value);
+      updateJoyAxesDirections(currentUI, MoveAxisLeftRightMask,  value);
 
    // Up/down movement axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].moveAxesSdlIndex[1])
-      updateJoyAxesDirections(MoveAxisUpDownMask,  value);
+      updateJoyAxesDirections(currentUI, MoveAxisUpDownMask,  value);
 
    // Left/Right shooting axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[0])
-      updateJoyAxesDirections(ShootAxisLeftRightMask, value);
+      updateJoyAxesDirections(currentUI, ShootAxisLeftRightMask, value);
 
    // Up/down shooting axis
    if(axis == Joystick::JoystickPresetList[Joystick::SelectedPresetIndex].shootAxesSdlIndex[1])
-      updateJoyAxesDirections(ShootAxisUpDownMask, value);
+      updateJoyAxesDirections(currentUI, ShootAxisUpDownMask, value);
 }
 
 
-void Event::onJoyButtonDown(U8 which, U8 button)
+void Event::onJoyButtonDown(UserInterface *currentUI, U8 which, U8 button)
 {
 //   logprintf("SDL button down number: %u", button);
-   inputCodeDown(InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
+   inputCodeDown(currentUI, InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
    Joystick::ButtonMask |= BIT(button);
 }
 
 
-void Event::onJoyButtonUp(U8 which, U8 button)
+void Event::onJoyButtonUp(UserInterface *currentUI, U8 which, U8 button)
 {
 //   logprintf("SDL button up number: %u", button);
-   inputCodeUp(InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
+   inputCodeUp(currentUI, InputCodeManager::joystickButtonToInputCode(Joystick::remapSdlButtonToJoystickButton(button)));
    Joystick::ButtonMask = Joystick::ButtonMask & ~BIT(button);
 }
 
 
 // See SDL_Joystick.h for the SDL_HAT_* mask definitions
-void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
+void Event::onJoyHat(UserInterface *currentUI, U8 which, U8 hat, U8 directionMask)
 {
 //   logprintf("SDL Hat number: %u, value: %u", hat, directionMask);
 
@@ -455,11 +455,11 @@ void Event::onJoyHat(U8 which, U8 hat, U8 directionMask)
 
       // If the current hat direction is set in the inputCodeDownDeltaMask, set the input code down
       if(inputCodeDownDeltaMask & BIT(i))
-         inputCodeDown(inputCode);
+         inputCodeDown(currentUI, inputCode);
 
       // If the current hat direction is set in the inputCodeUpDeltaMask, set the input code up
       if(inputCodeUpDeltaMask & BIT(i))
-         inputCodeUp(inputCode);
+         inputCodeUp(currentUI, inputCode);
    }
 
    // Finally alter the global hat InputCode mask to reflect the current input code State

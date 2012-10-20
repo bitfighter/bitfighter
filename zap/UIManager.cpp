@@ -53,6 +53,8 @@ namespace Zap
 UIManager::UIManager(ClientGame *clientGame) 
 { 
    mGame = clientGame; 
+   mCurrentInterface = NULL;
+
 
    mMainMenuUserInterface = NULL;
    mGameParamUserInterface = NULL;
@@ -84,6 +86,8 @@ UIManager::UIManager(ClientGame *clientGame)
    mLevelNameEntryUserInterface = NULL;
    mEditorUserInterface = NULL;
    mTeamDefUserInterface = NULL;
+
+   mMenuTransitionTimer.reset(2000);
 }
 
 
@@ -122,10 +126,81 @@ UIManager::~UIManager()
 }
 
 
-// Check whether a particular menu is already being displayed
-bool UIManager::isOpen(UIID uiid)
+UserInterface *UIManager::getUI(UIID menuId)
 {
-   if(UserInterface::current->getMenuID() == uiid)
+   switch(menuId)
+   {
+      case LevelChangePasswordEntryUI:
+         return getLevelChangeOrAdminPasswordEntryUserInterface();
+      case GlobalChatUI:
+         return getChatUserInterface();
+      case CreditsUI:
+         return getCreditsUserInterface();
+      case DiagnosticsScreenUI:
+         return getDiagnosticUserInterface();
+      case EditorInstructionsUI:
+         return getEditorInstructionsUserInterface();
+      case EditorUI:
+         return getEditorUserInterface();
+      case EditorMenuUI:
+         return getEditorMenuUserInterface();
+      case ErrorMessageUI:
+         return getErrorMsgUserInterface();
+      case GameMenuUI:
+         return getGameMenuUserInterface();
+      case GameParamsUI:
+         return getGameParamUserInterface();
+      case GameUI:
+         return getGameUserInterface();
+      case SuspendedUI:
+         return getSuspendedUserInterface();
+      case HighScoresUI:
+         return getHighScoresUserInterface();
+      case HostingUI:
+         return getHostMenuUserInterface();
+      case InstructionsUI:
+         return getInstructionsUserInterface();
+      case KeyDefUI:
+         return getKeyDefMenuUserInterface();
+      case LevelUI:
+         return getLevelMenuUserInterface();
+      case LevelNameEntryUI:
+         return getLevelNameEntryUserInterface();
+      case LevelTypeUI:
+         return getLevelMenuUserInterface();
+      case MainUI:
+         return getMainMenuUserInterface();
+      case NameEntryUI:
+         return getNameEntryUserInterface();
+      case OptionsUI:
+         return getOptionsMenuUserInterface();
+      case PasswordEntryUI:
+         return getServerPasswordEntryUserInterface();
+      case PlayerUI:
+         return getPlayerMenuUserInterface();
+      case TeamUI:
+         return getTeamMenuUserInterface();
+      case QueryServersScreenUI:
+         return getQueryServersUserInterface();
+      case SplashUI:
+         return getSplashUserInterface();
+      case TeamDefUI:
+         return getTeamDefUserInterface();
+      //case TextEntryUI:
+      //   return getTextEntryUserInterface();
+      case YesOrNoUI:
+         return getYesNoUserInterface();
+      default:
+         TNLAssert(false, "Unknown or unexpected UI!");
+         return NULL;
+   }
+}
+
+
+// Check whether a particular menu is already being displayed
+bool UIManager::isCurrentUI(UIID uiid)
+{
+   if(mCurrentInterface->getMenuID() == uiid)
       return true;
 
    for(S32 i = 0; i < mPrevUIs.size(); i++)
@@ -443,18 +518,21 @@ void UIManager::reactivatePrevUI()
    {
       UserInterface *prev = mPrevUIs.last();
       mPrevUIs.pop_back();
-      prev->reactivate();
+
+      mCurrentInterface = prev;
+      mCurrentInterface->reactivate();
    }
    else
       getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
+
+   mMenuTransitionTimer.reset();
 }
 
 
-// Like above, except we specify a target menu to go to
-void UIManager::reactivateMenu(const UserInterface *target)
+void UIManager::reactivate(UIID menuId)
 {
    // Keep discarding menus until we find the one we want
-   while(mPrevUIs.size() && (mPrevUIs.last()->getMenuID() != target->getMenuID()) )
+   while(mPrevUIs.size() && (mPrevUIs.last()->getMenuID() != menuId) )
       mPrevUIs.pop_back();
 
    if(mPrevUIs.size())
@@ -462,18 +540,22 @@ void UIManager::reactivateMenu(const UserInterface *target)
       reactivatePrevUI();
    else
       getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
+
 }
 
 
 UserInterface *UIManager::getPrevUI()
 {
+   if(mPrevUIs.size() == 0)
+      return NULL;
+
    return mPrevUIs.last();
 }
 
 
 UserInterface *UIManager::getCurrentUI()
 {
-   return UserInterface::current;
+   return mCurrentInterface;
 }
 
 
@@ -509,18 +591,60 @@ bool UIManager::cameFrom(UIID menuID)
 }
 
 
+void UIManager::activate(UIID menuID, bool save)         // save defaults to true
+{
+   activate(getUI(menuID), save);
+}
+
+
+void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
+{
+   if(save)
+      saveUI(mCurrentInterface);
+
+   // Deactivate the UI we're no longer using
+   if(mCurrentInterface)             
+     mCurrentInterface->onDeactivate(mCurrentInterface->usesEditorScreenMode());
+
+   mCurrentInterface = ui;
+   mCurrentInterface->activate();
+}
+
+
+
 void UIManager::saveUI(UserInterface *ui)
 {
-   mPrevUIs.push_back(ui);
+   if(ui)
+      mPrevUIs.push_back(ui);
 }
 
 
 void UIManager::renderCurrent()
 {
-   UserInterface *current = UserInterface::current;
+   // The viewport has been setup by the caller so, regardless of how many clients we're running, we can just render away here.
+   // Each viewport should have an aspect ratio of 800x600.
 
-   current->renderCurrent();
-   current->renderMasterStatus();
+   // Run the active UI renderer
+   if(mCurrentInterface)
+      mCurrentInterface->render();
+
+   if(false && mMenuTransitionTimer.getCurrent())
+   {
+      if(mPrevUIs.size() > 0)
+      {
+         mPrevUIs.last()->renderCurrent();
+         return;
+      }
+   }
+
+   mCurrentInterface->renderCurrent();
+   mCurrentInterface->renderMasterStatus();
+}
+
+
+void UIManager::idle(U32 timeDelta)
+{
+   mMenuTransitionTimer.update(timeDelta);
 }
 
 

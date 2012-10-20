@@ -14,8 +14,8 @@
 #include "SDL.h"
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-#define SDLKey SDL_Keycode
-#define SDLMod SDL_Keymod
+#  define SDLKey SDL_Keycode
+#  define SDLMod SDL_Keymod
 #endif
 
 using namespace TNL;
@@ -23,29 +23,30 @@ using namespace TNL;
 namespace Zap {
 
 class ClientGame;
+class UserInterface;
 
 class Event 
 {
 private:
    static bool mAllowTextInput;   // Flag to allow text translation pass-through
 
-   static void setMousePos(S32 x, S32 y, DisplayMode mode);
-   static void updateJoyAxesDirections(U32 axisMask, S16 value);
+   static void setMousePos(UserInterface *currentUI, S32 x, S32 y, DisplayMode mode);
+   static void updateJoyAxesDirections(UserInterface *currentUI, U32 axisMask, S16 value);
 
-   static void inputCodeUp(InputCode inputCode);
-   static bool inputCodeDown(InputCode inputCode);
+   static void inputCodeUp(UserInterface *currentUI, InputCode inputCode);
+   static bool inputCodeDown(UserInterface *currentUI, InputCode inputCode);
 
    static void onKeyDown(ClientGame *game, SDL_Event *event);
-   static void onKeyUp(SDL_Event *event);
-   static void onTextInput(char unicode);
-   static void onMouseMoved(S32 x, S32 y, DisplayMode mode);
-   static void onMouseWheel(bool Up, bool Down);  //Not implemented
-   static void onMouseButtonDown(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
-   static void onMouseButtonUp(S32 x, S32 y, InputCode inputCode, DisplayMode mode);
-   static void onJoyAxis(U8 which, U8 axis, S16 value);
-   static void onJoyButtonDown(U8 which, U8 button);
-   static void onJoyButtonUp(U8 which, U8 button);
-   static void onJoyHat(U8 which, U8 hat, U8 directionMask);
+   static void onKeyUp(UserInterface *currentUI, SDL_Event *event);
+   static void onTextInput(UserInterface *currentUI, char unicode);
+   static void onMouseMoved(UserInterface *currentUI, S32 x, S32 y, DisplayMode mode);
+   static void onMouseWheel(UserInterface *currentUI, bool Up, bool Down);  //Not implemented
+   static void onMouseButtonDown(UserInterface *currentUI, S32 x, S32 y, InputCode inputCode, DisplayMode mode);
+   static void onMouseButtonUp(UserInterface *currentUI, S32 x, S32 y, InputCode inputCode, DisplayMode mode);
+   static void onJoyAxis(UserInterface *currentUI, U8 which, U8 axis, S16 value);
+   static void onJoyButtonDown(UserInterface *currentUI, U8 which, U8 button);
+   static void onJoyButtonUp(UserInterface *currentUI, U8 which, U8 button);
+   static void onJoyHat(UserInterface *currentUI, U8 which, U8 hat, U8 directionMask);
    static void onJoyBall(U8 which, U8 ball, S16 xrel, S16 yrel);
    static void onResize(ClientGame *game, S32 w, S32 h);
    static void onUser(U8 type, S32 code, void* data1, void* data2);

@@ -251,7 +251,9 @@ void abortHosting_noLevels()
 #ifndef ZAP_DEDICATED
    for(S32 i = 0; i < gClientGames.size(); i++)
    {
-      ErrorMessageUserInterface *errUI = gClientGames[i]->getUIManager()->getErrorMsgUserInterface();
+      UIManager *uiManager = gClientGames[i]->getUIManager();
+
+      ErrorMessageUserInterface *errUI = static_cast<ErrorMessageUserInterface *>(uiManager->getUI(ErrorMessageUI));
 
       FolderManager *folderManager = gServerGame->getSettings()->getFolderManager();
       string levelDir = folderManager->levelDir;
@@ -265,9 +267,10 @@ void abortHosting_noLevels()
       errUI->setMessage(6, "valid level files.");
       errUI->setMessage(8, "Trying to load levels from folder:");
       errUI->setMessage(9, levelDir == "" ? "<<Unresolvable>>" : levelDir.c_str());
-      errUI->activate();
 
-      HostMenuUserInterface *menuUI = gClientGames[i]->getUIManager()->getHostMenuUserInterface();
+      uiManager->activate(ErrorMessageUI);
+
+      HostMenuUserInterface *menuUI = static_cast<HostMenuUserInterface *>(uiManager->getUI(HostingUI));
       menuUI->levelLoadDisplayDisplay = false;
       menuUI->levelLoadDisplayFadeTimer.clear();
    }
@@ -425,13 +428,42 @@ void hostGame()
 }
 
 
+// Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
+static void clearScreen()
+{
+#ifndef ZAP_DEDICATED
+
+   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+
+   if(scissorMode)
+      glDisable(GL_SCISSOR_TEST);
+
+   glClear(GL_COLOR_BUFFER_BIT);
+
+   if(scissorMode)
+      glEnable(GL_SCISSOR_TEST);
+
+#endif
+}
+
+
+
 #ifndef ZAP_DEDICATED
 
 // Draw the screen
 void display()
 {
+   clearScreen();
+
    for(S32 i = 0; i < gClientGames.size(); i++)
+   {
+      // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if
+      // we have two games, we might want to divide the screen into two viewports, configuring each before running the 
+      // associated render method which follows...
+      // Each viewport should have an aspect ratio of 800x600.  The aspect ratio of the entire window will likely need to be different.
+      TNLAssert(i == 0, "You need a little tra-la-la here before you can do that!");
       gClientGames[i]->getUIManager()->renderCurrent();
+   }
 
    // Swap the buffers. This this tells the driver to render the next frame from the contents of the
    // back-buffer, and to set all rendering operations to occur on what was the front-buffer.
@@ -452,19 +484,24 @@ void display()
 void gameIdle(U32 integerTime)
 {
 #ifndef ZAP_DEDICATED
-   if(UserInterface::current)
-      UserInterface::current->idle(integerTime);
 
    // If the main game interface is in the stack, idle that too to keep things current, update timers, etc.
    for(S32 i = 0; i < gClientGames.size(); i++)
    {
       UIManager *uiManager = gClientGames[i]->getUIManager();
+
+      // Idle the currently active UI
+      if(uiManager->getCurrentUI())
+         uiManager->getCurrentUI()->idle(integerTime);
+
+      // If we're in a UI and GameUI is still running, we need to idle that too
       if(uiManager->cameFrom(GameUI))
          uiManager->getGameUserInterface()->idle(integerTime);
    }
 #endif
 
-   if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
+   // Don't idle games during level load
+   if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    
    {
 #ifndef ZAP_DEDICATED
       for(S32 i = 0; i < gClientGames.size(); i++)
@@ -784,10 +821,11 @@ void createClientGame(GameSettings *settings)
 
       //gClientGames.push_back(new ClientGame(Address(), settings));   //  !!! 2-player split-screen game in same game.
 
+      // Set the intial UI
       if(settings->shouldShowNameEntryScreenOnStartup())
       {
          for(S32 i = 0; i < gClientGames.size(); i++)
-            gClientGames[i]->getUIManager()->getNameEntryUserInterface()->activate();
+            gClientGames[i]->getUIManager()->activate(NameEntryUI);
 
          //if(gClientGame)
          //{
@@ -805,7 +843,7 @@ void createClientGame(GameSettings *settings)
       {
          for(S32 i = 0; i < gClientGames.size(); i++)
          {
-            gClientGames[i]->getUIManager()->getMainMenuUserInterface()->activate();
+            gClientGames[i]->getUIManager()->activate(MainUI);
             gClientGames[i]->setReadyToConnectToMaster(true);        
          }
 
@@ -1095,7 +1133,7 @@ int main(int argc, char **argv)
       Zap::Cursor::init();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
-      VideoSystem::actualizeScreenMode(settings, false);                   // Create a display window
+      VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
 

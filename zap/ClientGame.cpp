@@ -188,11 +188,11 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
    if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
-      getUIManager()->getGameUserInterface()->activate();
+      getUIManager()->activate(GameUI);
    }
    else                                                         // Try a direct connection
    {
-      getUIManager()->getGameUserInterface()->activate();
+      getUIManager()->activate(GameUI);
       GameConnection *gameConnection = new GameConnection(this);
 
       setConnectionToServer(gameConnection);
@@ -519,8 +519,9 @@ void ClientGame::idle(U32 timeDelta)
    {
       mNetInterface->processConnections();
       SoundSystem::processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
-            mSettings->getIniSettings()->getMusicVolLevel(),
-            mSettings->getIniSettings()->voiceChatVolLevel);     // Process sound effects (SFX)
+                                           mSettings->getIniSettings()->getMusicVolLevel(),
+                                           mSettings->getIniSettings()->voiceChatVolLevel,
+                                           getUIManager()); 
 
       // Need to update the game clock to keep it in sync with the clients
       if(mGameIsRunning && getGameType())
@@ -560,9 +561,8 @@ void ClientGame::idle(U32 timeDelta)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
    if(mSettings->getInputCodeManager()->getInputMode() == InputModeJoystick || 
-      UserInterface::current == getUIManager()->getOptionsMenuUserInterface())
+      getUIManager()->getCurrentUI() == getUIManager()->getOptionsMenuUserInterface())
          joystickUpdateMove(mSettings, theMove);
-
 
    theMove->time = timeDelta + prevTimeDelta;
 
@@ -622,7 +622,8 @@ void ClientGame::idle(U32 timeDelta)
    FXManager::idle(timeDelta);                           // Processes sparks and teleporter effects
    SoundSystem::processAudio(timeDelta, mSettings->getIniSettings()->sfxVolLevel,
          mSettings->getIniSettings()->getMusicVolLevel(),
-         mSettings->getIniSettings()->voiceChatVolLevel);  // Process sound effects (SFX)
+         mSettings->getIniSettings()->voiceChatVolLevel,
+         getUIManager());  
 
    mNetInterface->processConnections();                  // Pass updated ship info to the server
 
@@ -633,6 +634,8 @@ void ClientGame::idle(U32 timeDelta)
    }
 
    mSpawnUndelayTimer.update(timeDelta);
+
+   mUIManager->idle(timeDelta);
 }
 
 
@@ -717,17 +720,22 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
 // Only happens when using connectArranged, part of punching through firewall
 void ClientGame::connectionToServerRejected(const char *reason)
 {
-   getUIManager()->getMainMenuUserInterface()->activate();
+   UIManager *uiManager = getUIManager();
 
-   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+   uiManager->activate(MainUI);
+
+   ErrorMessageUserInterface *ui = static_cast<ErrorMessageUserInterface *>(uiManager->getUI(ErrorMessageUI));
+
    ui->reset();
    ui->setTitle("Connection Terminated");
    ui->setMessage(2, "Server did not respond or rejected");
    ui->setMessage(3, "when trying to punch through firewall");
    ui->setMessage(4, "Unable to join game.  Please try a different server.");
+
    if(reason[0])
       ui->setMessage(5, string(reason));
-   ui->activate();
+
+   uiManager->activate(ErrorMessageUI);
 
    closeConnectionToGameServer();
 }
@@ -772,7 +780,7 @@ void ClientGame::gotAdminPermissionsReply(bool granted)
    static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
 
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(UserInterface::current->getMenuID() == GameMenuUI)
+   if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? adminPassSuccessMsg : adminPassFailureMsg;
    else
       displayMessage(gCmdChatColor, granted ? adminPassSuccessMsg : adminPassFailureMsg);
@@ -785,7 +793,7 @@ void ClientGame::gotLevelChangePermissionsReply(bool granted)
    static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
 
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(UserInterface::current->getMenuID() == GameMenuUI)
+   if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = granted ? levelPassSuccessMsg : levelPassFailureMsg;
    else
       displayMessage(gCmdChatColor, granted ? levelPassSuccessMsg : levelPassFailureMsg);
@@ -796,7 +804,7 @@ void ClientGame::gotWrongPassword()
    static const char *levelPassFailureMsg = "Incorrect password";
 
    // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-   if(UserInterface::current->getMenuID() == GameMenuUI)
+   if(getUIManager()->getCurrentUI()->getMenuID() == GameMenuUI)
       getUIManager()->getGameMenuUserInterface()->mMenuSubTitle = levelPassFailureMsg;
    else
       displayMessage(gCmdChatColor, levelPassFailureMsg);
@@ -1016,7 +1024,7 @@ void ClientGame::displayMessageBox(const StringTableEntry &title, const StringTa
    for(S32 i = 0; i < message.size(); i++)
       ui->setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
 
-   ui->activate();
+   getUIManager()->activate(ui);
 }
 
 
@@ -1026,9 +1034,9 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    clearClientList();  // this can fix all cases of extra names appearing on score board when connecting to server after getting disconnected other then "SelfDisconnect"
 
    if(getUIManager()->cameFrom(EditorUI))
-     getUIManager()->reactivateMenu(getUIManager()->getEditorUserInterface());
+     getUIManager()->reactivate(EditorUI);
    else
-     getUIManager()->reactivateMenu(getUIManager()->getMainMenuUserInterface());
+     getUIManager()->reactivate(MainUI);
 
    unsuspendGame();
 
@@ -1042,51 +1050,57 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    {
       case NetConnection::ReasonTimedOut:
          ui->setMessage(2, "Your connection timed out.  Please try again later.");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonIdle:
          ui->setMessage(2, "The server kicked you because you were idle too long.");
          ui->setMessage(4, "Feel free to rejoin the game when you are ready.");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonPuzzle:
          ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
          ui->setMessage(3, "Invalid puzzle solution");
          ui->setMessage(5, "Please try a different game server, or try again later.");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonKickedByAdmin:
          ui->setMessage(2, "You were kicked off the server by an admin.");
          ui->setMessage(4, "You can try another server, host your own,");
          ui->setMessage(5, "or try the server that kicked you again later.");
-         getUIManager()->getNameEntryUserInterface()->activate();
-         ui->activate();
 
+         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate(ui);
          break;
+
       case NetConnection::ReasonBanned:
          ui->setMessage(2, "You are banned from playing on this server");
          ui->setMessage(3, "Contact the server administrator if you think");
          ui->setMessage(4, "this was in error.");
-         ui->activate();
 
-        break;
+         getUIManager()->activate(ui);
+         break;
 
       case NetConnection::ReasonFloodControl:
          ui->setMessage(2, "Your connection was rejected by the server");
          ui->setMessage(3, "because you sent too many connection requests.");
          ui->setMessage(5, "Please try a different game server, or try again later.");
-         getUIManager()->getNameEntryUserInterface()->activate();
-         ui->activate();
+
+         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonShutdown:
          ui->setMessage(2, "Remote server shut down.");
          ui->setMessage(4, "Please try a different server,");
          ui->setMessage(5, "or host a game of your own!");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonNeedServerPassword:
@@ -1097,9 +1111,11 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
    
          ServerPasswordEntryUserInterface *ui = getUIManager()->getServerPasswordEntryUserInterface();
          ui->setConnectServer(serverAddress);
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
       }
+
       case NetConnection::ReasonServerFull:
          // Display a context-appropriate error message
          ui->reset();
@@ -1108,8 +1124,10 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          ui->setMessage(2, "Could not connect to server");
          ui->setMessage(3, "because server is full.");
          ui->setMessage(5, "Please try a different server, or try again later.");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
+
       case NetConnection::ReasonSelfDisconnect:
             // We get this when we terminate our own connection.  Since this is intentional behavior,
             // we don't want to display any message to the user.
@@ -1126,6 +1144,8 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
             ui->setMessage(1, "Disconnected for unknown reason:");
             ui->setMessage(1, "Error number: " + itos(reason));
          }
+
+         getUIManager()->activate(ui);
    }
 
 }
@@ -1145,7 +1165,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(4, "generated randomly, and collisions are extremely rare.");
          ui->setMessage(5, "Please restart Bitfighter and try again.  Statistically");
          ui->setMessage(6, "speaking, you should never see this message again!");
-         ui->activate();
+         getUIManager()->activate(ui);
 
          getClientInfo()->getId()->getRandom();        // Get a different ID and retry to successfully connect to master
          break;
@@ -1157,8 +1177,8 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(5, "try another.");
          ui->setMessage(7, "Please check your credentials and try again.");
 
-         getUIManager()->getNameEntryUserInterface()->activate();
-         ui->activate();
+         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonInvalidUsername:
@@ -1166,15 +1186,16 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(3, "you sent an username that contained illegal characters.");
          ui->setMessage(5, "Please try a different name.");
 
-         getUIManager()->getNameEntryUserInterface()->activate();
-         ui->activate();
+         getUIManager()->activate(NameEntryUI);
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonError:
          ui->setMessage(2, "Unable to connect to the server.  Recieved message:");
          ui->setMessage(3, string(reasonStr));
          ui->setMessage(5, "Please try a different game server, or try again later.");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
 
       case NetConnection::ReasonTimedOut:
@@ -1191,7 +1212,7 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
          ui->setMessage(7, "I will continue to try connecting, but you will not see this");
          ui->setMessage(8, "message again until you successfully connect or restart Bitfighter.");
 
-         ui->activate();
+         getUIManager()->activate(ui);
 
          mSeenTimeOutMessage = true;
          break;
@@ -1200,14 +1221,17 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 
       default:  // Not handled
          ui->setMessage(2, "Unable to connect to the master server, with error code:");
+
          if(reasonStr[0])
             ui->setMessage(3, itos(reason) + " " + reasonStr);
          else
             ui->setMessage(3, "MasterServer Error #" + itos(reason));
+
          ui->setMessage(5, "Check your Internet Connection and firewall settings.");
          ui->setMessage(7, "Please report this error code to the");
          ui->setMessage(8, "Bitfighter developers.");
-         ui->activate();
+
+         getUIManager()->activate(ui);
          break;
    }
 }

@@ -291,10 +291,11 @@ S32 VideoSystem::getWindowPositionY()
 
 
 extern void setDefaultBlendFunction();
+extern Vector<ClientGame *> gClientGames;
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.
-void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces)
+void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode)
 {
    DisplayMode displayMode = settings->getIniSettings()->displayMode;
 
@@ -315,7 +316,8 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    }
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
-   if(UserInterface::current->usesEditorScreenMode() &&
+   // We might want to disallow this when we're in split screen mode?
+   if(currentUIUsesEditorScreenMode &&
          (displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
       // Smaller values give bigger magnification; makes small things easier to see on full screen
@@ -452,7 +454,7 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
       // probably due to lines and points was not being clipped,
       // causing some lines to wrap around the screen, or by writing other
       // parts of RAM that can crash Bitfighter, graphics driver, or the entire computer.
-      // This is probably a BUG in linux intel graphics driver.
+      // This is probably a bug in the Linux Intel graphics driver.
       glScissor(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
    }
 
@@ -477,7 +479,11 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
    else
       setWindowPosition(0, 0);
 
-   UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
+   // Notify all active UIs that the screen has changed mode.  This will likely need some work to not do something
+   // horrible in split-screen mode.
+   for(S32 i = 0; i < gClientGames.size(); i++)
+      if(gClientGames[i]->getUIManager()->getCurrentUI())
+         gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();     
 }
 
 

@@ -337,8 +337,9 @@ void AbstractChat::renderMessageComposition(S32 ypos)
 void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
 {
    // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message.
-   UIID currId = UserInterface::current->getMenuID();
-   if(currId != ChatUI && currId != QueryServersScreenUI )
+   UIID currId = mGame->getUIManager()->getCurrentUI()->getMenuID();
+
+   if(currId != QueryServersScreenUI )
    {
       GameUserInterface *gameUI = mGame->getUIManager()->getGameUserInterface();
 

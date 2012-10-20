@@ -284,10 +284,11 @@ extern CIniFile gINI;
 
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {
-   EditorUserInterface *ui = getUIManager()->getEditorUserInterface();
+   EditorUserInterface *ui = static_cast<EditorUserInterface *>(getUIManager()->getUI(EditorUI));
    ui->setLevelFileName(name);
+
    playBoop();
-   ui->activate(false);
+   getUIManager()->activate(ui, false);
    
    // Get that baby into the INI file
    getGame()->getSettings()->getIniSettings()->lastEditorName = name;
@@ -358,7 +359,7 @@ void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 
 void PreGamePasswordEntryUserInterface::onEscape()
 {
-   getUIManager()->getMainMenuUserInterface()->activate();
+   getUIManager()->activate(MainUI);
 }
 
 

@@ -107,16 +107,16 @@ static void saveLevelCallback(ClientGame *game)
    UIManager *uiManager = game->getUIManager();
 
    if(uiManager->getEditorUserInterface()->saveLevel(true, true))
-      uiManager->reactivateMenu(uiManager->getMainMenuUserInterface());   
+      uiManager->reactivate(MainUI);   
    else
-      uiManager->getEditorUserInterface()->reactivate();
+      uiManager->reactivate(EditorUI);
 }
 
 
 void backToMainMenuCallback(ClientGame *game)
 {
    game->getUIManager()->getEditorUserInterface()->onQuitted();
-   game->getUIManager()->reactivateMenu(game->getUIManager()->getMainMenuUserInterface());    
+   game->getUIManager()->reactivate(MainUI);    
 }
 
 
@@ -792,7 +792,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       for(S32 i = 0; i < mPluginMenuValues[key].size(); i++)
          mPluginMenu->getMenuItem(i)->setValue(mPluginMenuValues[key].get(i));
 
-   mPluginMenu->activate();
+   getGame()->getUIManager()->activate(mPluginMenu.get());
 }
 
 
@@ -1143,7 +1143,8 @@ void EditorUserInterface::onActivate()
       ui->setMessage(4, "Check the LevelDir parameter in your INI file,");
       ui->setMessage(5, "or your command-line parameters to make sure");
       ui->setMessage(6, "you have correctly specified a valid folder.");
-      ui->activate();
+
+      getUIManager()->activate(ui);
 
       return;
    }
@@ -1153,7 +1154,7 @@ void EditorUserInterface::onActivate()
    {
       // Don't save this menu (false, below).  That way, if the user escapes out, and is returned to the "previous"
       // UI, they will get back to where they were before (prob. the main menu system), not back to here.
-      getUIManager()->getLevelNameEntryUserInterface()->activate(false);
+      getUIManager()->activate(LevelNameEntryUI, false);
 
       return;
    }
@@ -1191,7 +1192,7 @@ void EditorUserInterface::onActivate()
 
    getGame()->setAddTarget();
 
-   VideoSystem::actualizeScreenMode(settings, true);
+   VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
 
    centerView();
 }
@@ -1232,8 +1233,8 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
 
-   if(UserInterface::comingFrom->usesEditorScreenMode() != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true);
+   if(UserInterface::getUIManager()->getPrevUI()->usesEditorScreenMode() != usesEditorScreenMode())
+      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
 
    mDockItemHit = NULL;
 }
@@ -3785,12 +3786,12 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       mOut = true;
    else if(inputString == "F3")        // Level Parameter Editor
    {
+      getUIManager()->activate(GameParamsUI);
       playBoop();
-      getUIManager()->getGameParamUserInterface()->activate();
    }
    else if(inputString == "F2")               // Team Editor Menu
    {
-      getUIManager()->getTeamDefUserInterface()->activate();
+      getUIManager()->activate(TeamDefUI);
       playBoop();
    }
    else if(inputString == "T")                // Teleporter
@@ -3813,13 +3814,13 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       deleteSelection(false);
    else if(checkInputCode(getGame()->getSettings(), InputCodeManager::BINDING_HELP, inputCode)) // Turn on help screen
    {
-      getGame()->getUIManager()->getEditorInstructionsUserInterface()->activate();
+      getGame()->getUIManager()->activate(EditorInstructionsUI);
       playBoop();
    }
    else if(inputCode == KEY_ESCAPE)          // Activate the menu
    {
       playBoop();
-      getGame()->getUIManager()->getEditorMenuUserInterface()->activate();
+      getGame()->getUIManager()->activate(EditorMenuUI);
    }
    else if(inputString == "Space")           // No snapping to grid, but still to other things
       mSnapContext = NO_GRID_SNAPPING;
@@ -4122,7 +4123,7 @@ void EditorUserInterface::startAttributeEditor()
          if(menu)
          {
             menu->startEditingAttrs(obj_i);
-            menu->activate();
+            getUIManager()->activate(menu);
 
             saveUndoState();
          }
@@ -4414,7 +4415,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          ui->setMessage(2, "To correct the problem, please change the file name using the");
          ui->setMessage(3, "Game Parameters menu, which you can access by pressing [F3].");
 
-         ui->activate();
+         getUIManager()->activate(ui);
 
          return false;
       }
@@ -4510,7 +4511,8 @@ void EditorUserInterface::testLevel()
 
       ui->setInstr("Press [Y] to start, [ESC] to cancel");
       ui->registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
-      ui->activate();
+
+      getUIManager()->activate(ui);
 
       return;
    }
@@ -4595,19 +4597,19 @@ void returnToEditorCallback(ClientGame *game, U32 unused)
 
 static void activateHelpCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getEditorInstructionsUserInterface()->activate();
+   game->getUIManager()->activate(EditorInstructionsUI);
 }
 
 
 static void activateLevelParamsCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getGameParamUserInterface()->activate();
+   game->getUIManager()->activate(GameParamsUI);
 }
 
 
 static void activateTeamDefCallback(ClientGame *game, U32 unused)
 {
-   game->getUIManager()->getTeamDefUserInterface()->activate();
+   game->getUIManager()->activate(TeamDefUI);
 }
 
 
@@ -4626,7 +4628,8 @@ void quitEditorCallback(ClientGame *game, U32 unused)
       ui->setMessage(3, "Do you want to?");
       ui->registerYesFunction(saveLevelCallback);
       ui->registerNoFunction(backToMainMenuCallback);
-      ui->activate();
+
+      game->getUIManager()->activate(ui);
    }
    else
      backToMainMenuCallback(game);

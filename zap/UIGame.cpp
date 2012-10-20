@@ -612,7 +612,7 @@ void GameUserInterface::renderProgressBar()
 void GameUserInterface::renderReticle()
 {
    bool shouldRender = getGame()->getSettings()->getInputCodeManager()->getInputMode() == InputModeKeyboard &&   // Reticle in keyboard mode only
-                       current->getMenuID() == GameUI;                                                           // And not when menu is active
+                       getUIManager()->getCurrentUI()->getMenuID() == GameUI;                                    // And not when a menu is active
    if(shouldRender)
    {
 #if 0 // TNL_OS_WIN32
@@ -995,7 +995,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       else if(mCurrentChatType == CmdChat)
          getUIManager()->getInstructionsUserInterface()->activatePage(InstructionsUserInterface::InstructionAdvancedCommands);
       else
-         getUIManager()->getInstructionsUserInterface()->activate();
+         getUIManager()->activate(InstructionsUI);
 
       return true;
    }
@@ -1204,15 +1204,15 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 
       playBoop();
 
-      if(!getGame()->isConnectedToServer())      // Perhaps we're still joining?
+      if(!getGame()->isConnectedToServer())     // Perhaps we're still joining?
       {
          getGame()->closeConnectionToGameServer();
-         getUIManager()->getMainMenuUserInterface()->activate();     // Back to main menu
+         getUIManager()->activate(MainUI);      // Back to main menu
       }
       else
       {
          setBusyChatting(true);
-         getUIManager()->getGameMenuUserInterface()->activate();
+         getUIManager()->activate(GameMenuUI);
       }
    }     
    else if(checkInputCode(settings, InputCodeManager::BINDING_CMDRMAP, inputCode))
@@ -3015,9 +3015,9 @@ void GameUserInterface::VoiceRecorder::process()
 
 void GameUserInterface::suspendGame()
 {
-   getGame()->getConnectionToServer()->suspendGame();          // Tell server we're suspending
-   getGame()->suspendGame(false);                              // Suspend locally
-   getUIManager()->getSuspendedUserInterface()->activate();    // And enter chat mode
+   getGame()->getConnectionToServer()->suspendGame();    // Tell server we're suspending
+   getGame()->suspendGame(false);                        // Suspend locally
+   getUIManager()->activate(SuspendedUI);                // And enter chat mode
 }
 
 

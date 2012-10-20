@@ -273,8 +273,8 @@ void QuickMenuUI::setMenuCenterPoint(const Point &location)
 
 static void saveAndQuit(ClientGame *game, U32 unused)
 {
-   QuickMenuUI *ui = dynamic_cast<QuickMenuUI *>(UserInterface::current);
-   TNLAssert(ui, "Unexpcted UI here -- expected a QuickMenuUI or child class!");
+   QuickMenuUI *ui = dynamic_cast<QuickMenuUI *>(game->getUIManager()->getCurrentUI());
+   TNLAssert(ui, "Unexpected UI here -- expected a QuickMenuUI or child class!");
 
    ui->doneEditing();
    ui->getUIManager()->reactivatePrevUI();

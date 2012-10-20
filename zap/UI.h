@@ -72,6 +72,8 @@ class UIManager;
 
 class UserInterface
 {
+   friend class UIManager;    // Give UIManager access to private and protected members
+
 private:
    UIID mInternalMenuID;                     // Unique interface ID
    static void doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool autoLineWidth = true);
@@ -81,6 +83,10 @@ private:
 
    U32 mTimeSinceLastInput;
 
+   // Activate menus via the UIManager, please!
+   void activate();
+   void reactivate();
+
 protected:
    static bool mDisableShipKeyboardInput;    // Disable ship movement while user is in menus
    void setMenuID(UIID menuID);              // Set interface's name
@@ -89,9 +95,6 @@ public:
    UserInterface(ClientGame *game);                // Constructor
    virtual ~UserInterface();                       // Destructor
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
-
-   static UserInterface *current;            // Currently active menu
-   static UserInterface *comingFrom;         // Immediately previously active menu
 
    UIID getMenuID() const;                   // Retrieve interface's name
    UIID getPrevMenuID() const;               // Retrieve previous interface's name
@@ -114,8 +117,6 @@ public:
    virtual void onReactivate();
    virtual void onDisplayModeChange();
 
-   void activate(bool save = true);
-   virtual void reactivate();
 
    virtual bool usesEditorScreenMode();   // Returns true if the UI attempts to use entire screen like editor, false otherwise
 
@@ -258,12 +259,9 @@ public:
 // Used only for multiple mClientGame in one instance
 struct UserInterfaceData
 {
-   UserInterface *current;            // Currently active UI
-   UserInterface *comingFrom;         // Most recently active previous UI
-   Vector<UserInterface *> prevUIs;   // Previously active menus
    S32 vertMargin, horizMargin;
    S32 chatMargin;
-   UserInterfaceData();
+
    void get();
    void set();
 };
