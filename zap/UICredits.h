@@ -80,6 +80,9 @@ public:
    void render();
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // Credits UI
 class CreditsUserInterface : public UserInterface
 {
