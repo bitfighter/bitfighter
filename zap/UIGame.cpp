@@ -3629,7 +3629,7 @@ void ColorString::set(const string &s, const Color &c, U32 id)    // id defaults
 ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool expire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontWidth)
 {
    mDisplayChatMessageTimer.setPeriod(4000);    // How long messages stay visible (ms)
-   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives
+   mChatScrollTimer.setPeriod(100);             // Transition time when new msg arrives (ms)
 
    mMessages.resize(msgCount + 1);              // Have an extra message for scrolling effect.  Will only display msgCount messages.
 
@@ -3641,8 +3641,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
    mWrapWidth = wrapWidth;
    mFontSize  = fontSize;
    mFontGap   = fontWidth;
-   mFull = false;
-
+   
    mNextGroupId = 0;
 }
 
@@ -3651,6 +3650,7 @@ ChatMessageDisplayer::ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool 
 void ChatMessageDisplayer::reset()
 {
    mFirst = mLast = 0;
+   mFull = false;
 }
 
 
