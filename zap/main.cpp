@@ -834,12 +834,12 @@ void createClientGame(GameSettings *settings)
          //{
          //   gClientGame = gClientGame2;
          //   gClientGame1->mUserInterfaceData->get();
-         //   gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
+         //   gClientGame->getUIManager()->getNameEntryUserInterface()->activate();  <-- won't work no more!
          //   gClientGame2->mUserInterfaceData->get();
          //   gClientGame1->mUserInterfaceData->set();
          //   gClientGame = gClientGame1;
          //}
-         //gClientGame->getUIManager()->getNameEntryUserInterface()->activate();
+         //gClientGame->getUIManager()->getNameEntryUserInterface()->activate();     <-- won't work no more!
          seedRandomNumberGenerator(settings->getIniSettings()->lastName);
       }
       else
@@ -859,7 +859,7 @@ void createClientGame(GameSettings *settings)
          //   gClientGame1->mUserInterfaceData->set();
          //   gClientGame = gClientGame1;
          //}
-         //gClientGame->getUIManager()->getMainMenuUserInterface()->activate();
+         //gClientGame->getUIManager()->getMainMenuUserInterface()->activate();<-- won't work no more!
 
          //gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          seedRandomNumberGenerator(settings->getPlayerName());
