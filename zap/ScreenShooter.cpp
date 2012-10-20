@@ -27,21 +27,22 @@
 
 #ifndef BF_NO_SCREENSHOTS
 
-#include "stringUtils.h"
 #include "config.h"
 #include "ScreenInfo.h"
 #include "ClientGame.h"
+#include "VideoSystem.h"      // For setting screen geom vars
 #include "ConfigEnum.h"
 #include "UI.h"
+#include "stringUtils.h"
 
 #include "tnlLog.h"
 
 #include "zlib.h"
 
 #ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
+#  include "SDL_opengles.h"
 #else
-#include "SDL_opengl.h"
+#  include "SDL_opengl.h"
 #endif
 
 #include "string.h"
@@ -94,35 +95,9 @@ void ScreenShooter::restoreViewportToWindow(GameSettings *settings)
 
    // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;
-   F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
+   F64 orthoLeft, orthoRight, orthoTop, orthoBottom;
 
-   // Set up variables according to display mode
-   switch(displayMode)
-   {
-      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-         orthoRight = gScreenInfo.getGameCanvasWidth();
-         orthoBottom = gScreenInfo.getGameCanvasHeight();
-         break;
-
-      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-         orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
-         orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
-         orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
-         orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
-         break;
-
-      case DISPLAY_MODE_WINDOWED:
-      default:  //  Fall through OK
-         sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-         sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
-         orthoRight = gScreenInfo.getGameCanvasWidth();
-         orthoBottom = gScreenInfo.getGameCanvasHeight();
-      break;
-   }
+   VideoSystem::getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
    glViewport(0, 0, sdlWindowWidth, sdlWindowHeight);
 
