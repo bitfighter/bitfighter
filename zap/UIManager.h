@@ -148,6 +148,9 @@ private:
 
    Vector<UserInterface *> mPrevUIs;   // Previously active menus
 
+   UserInterface *mLastUI;             // Menu most immediately active before mCurrentUI
+   bool mLastWasLower;                 // True if mLastUI was lower in the hierarchy than mCurrentUI
+
    Timer mMenuTransitionTimer;
 
 public:

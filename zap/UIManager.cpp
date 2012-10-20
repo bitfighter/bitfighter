@@ -44,6 +44,7 @@
 #include "UITeamDefMenu.h"
 #include "UIGame.h"
 #include "UIHighScores.h"
+#include "ScreenInfo.h"
 
 
 namespace Zap
@@ -54,6 +55,9 @@ UIManager::UIManager(ClientGame *clientGame)
 { 
    mGame = clientGame; 
    mCurrentInterface = NULL;
+
+   mLastUI = NULL;
+   mLastWasLower = false;
 
 
    mMainMenuUserInterface = NULL;
@@ -87,7 +91,7 @@ UIManager::UIManager(ClientGame *clientGame)
    mEditorUserInterface = NULL;
    mTeamDefUserInterface = NULL;
 
-   mMenuTransitionTimer.reset(2000);
+   mMenuTransitionTimer.reset(0);      // Set to 100 for a dizzying effect; doing so will cause editor to crash, so beware!
 }
 
 
@@ -519,7 +523,10 @@ void UIManager::reactivatePrevUI()
       UserInterface *prev = mPrevUIs.last();
       mPrevUIs.pop_back();
 
+      mLastUI = mCurrentInterface;
       mCurrentInterface = prev;
+      mLastWasLower = true;
+      
       mCurrentInterface->reactivate();
    }
    else
@@ -602,6 +609,8 @@ void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
    if(mCurrentInterface)             
      mCurrentInterface->onDeactivate(mCurrentInterface->usesEditorScreenMode());
 
+   mLastUI = mCurrentInterface;
+   mLastWasLower = false;
    mCurrentInterface = ui;
    mCurrentInterface->activate();
 
@@ -616,23 +625,39 @@ void UIManager::saveUI(UserInterface *ui)
 }
 
 
+//extern ScreenInfo gScreenInfo;
+
 void UIManager::renderCurrent()
 {
    // The viewport has been setup by the caller so, regardless of how many clients we're running, we can just render away here.
    // Each viewport should have an aspect ratio of 800x600.
 
+   if(mMenuTransitionTimer.getCurrent() && mLastUI)
+   {
+      //mLastUI->render();
+      //mLastWasLower
+         
+      S32 w = gScreenInfo.getGameCanvasWidth();
+
+      // Save viewport
+      GLint viewport[4];
+      glGetIntegerv(GL_VIEWPORT, viewport);    
+
+      glViewport(viewport[0] + (mLastWasLower ? 1 : -1) * viewport[2] * (1 - mMenuTransitionTimer.getFraction()), 0, viewport[2], viewport[3]);
+      mLastUI->render();
+
+      glViewport(viewport[0] - (mLastWasLower ? 1 : -1) * viewport[2] * mMenuTransitionTimer.getFraction(), 0, viewport[2], viewport[3]);
+      mCurrentInterface->render();
+
+      // Restore viewport for posterity
+      glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+      return;
+   }
+
    // Run the active UI renderer
    if(mCurrentInterface)
       mCurrentInterface->render();
-
-   if(false && mMenuTransitionTimer.getCurrent())
-   {
-      if(mPrevUIs.size() > 0)
-      {
-         mPrevUIs.last()->render();
-         return;
-      }
-   }
 
    mCurrentInterface->render();
    UserInterface::renderDiagnosticKeysOverlay();    // By putting this here, it will always get rendered, regardless of active UI
