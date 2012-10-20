@@ -429,7 +429,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(mTeleporterDelay != 0 && stream->readFlag())
          timeout = stream->readInt(32);
    }
-   else if(stream->readFlag() && isGhost())
+   else if(stream->readFlag())
    {
       S32 dest;
       stream->read(&dest);
@@ -664,10 +664,6 @@ void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
 
-   // In case a script deleted all the teleporter destinations, don't render it until a destination gets re-added
-   if(!mEngineered && mDestManager.getDestCount() == 0)
-      return;
-
    // Render at a different radius depending on if a ship has just gone into the teleport
    // and we are waiting for the teleport timeout to expire
    F32 radiusFraction;
@@ -720,7 +716,7 @@ void Teleporter::render()
                        (F32)TELEPORTER_RADIUS, 1.0, mDestManager.getDestList(), trackerCount);
    }
 
-   if(mEngineered && mDestManager.getDestCount() > 0)
+   if(mEngineered)
    {
       // Render the exit of engineered teleports with an outline.  If teleporter has exploded, implode the exit.
       // The implosion calculations were an attempt to avoid using another timer, but perhaps that would be clearer than this mess
@@ -732,7 +728,8 @@ void Teleporter::render()
       F32 sizeFraction = mHasExploded ? F32(mExplosionTimer.getCurrent() - implosionOffset) / implosionTime : 1;
 
       if(sizeFraction > 0)
-         renderTeleporterOutline(getVert(1), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
+         for(S32 i = mDestManager.getDestCount() - 1; i >= 0; i--)
+            renderTeleporterOutline(mDestManager.getDest(i), (F32)TELEPORTER_RADIUS * sizeFraction, Colors::richGreen);
    }
 #endif
 }
