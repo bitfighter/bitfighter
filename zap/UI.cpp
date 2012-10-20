@@ -1082,7 +1082,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       if(uiManager->isCurrentUI(DiagnosticsScreenUI))
          return false;
 
-      uiManager->getDiagnosticUserInterface()->activate();
+      uiManager->activate(DiagnosticsScreenUI);
 
       playBoop();
       
@@ -1095,7 +1095,7 @@ bool UserInterface::onKeyDown(InputCode inputCode)
       if(uiManager->isCurrentUI(GlobalChatUI) || uiManager->isCurrentUI(NameEntryUI))
          return false;
 
-      getGame()->getUIManager()->getChatUserInterface()->activate();
+      getGame()->getUIManager()->activate(GlobalChatUI);
       playBoop();
 
       handled = true;
