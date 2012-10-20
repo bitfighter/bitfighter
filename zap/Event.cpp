@@ -201,10 +201,10 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
                break;
 #if !SDL_VERSION_ATLEAST(2,0,0)
             case SDL_BUTTON_WHEELUP:
-               onMouseWheel(true, false);
+               onMouseWheel(currentUI, true, false);
                break;
             case SDL_BUTTON_WHEELDOWN:
-               onMouseWheel(false, true);
+               onMouseWheel(currentUI, false, true);
                break;
 #endif
          }
@@ -339,7 +339,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       // SDL 1.2 has the translated key along with the keysym, so we trigger text input from here
 #if !SDL_VERSION_ATLEAST(2,0,0)
       if(mAllowTextInput)
-         onTextInput(InputCodeManager::keyToAscii(event->key.keysym.unicode, inputCode));
+         onTextInput(game->getUIManager()->getCurrentUI(), InputCodeManager::keyToAscii(event->key.keysym.unicode, inputCode));
 #endif
    }
 }
