@@ -262,13 +262,12 @@ private:
       void render();
    } mVoiceRecorder;
 
+   LineEditor mLineEditor;    // Message being composed
+
    ChatMessageDisplayer mServerMessageDisplayer;   // Messages from the server
    ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
    ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
-
-
-   LineEditor mLineEditor;    // Message being composed
 
    void dropItem();                       // User presses drop item key
 

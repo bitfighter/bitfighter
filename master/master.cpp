@@ -1366,7 +1366,7 @@ public:
                m2cSendChat(mPlayerOrServerName, true, "No server was hidden");
             return;
          }
-         else if(mIsMasterAdmin && !stricmp(message.getString(), "/hideplayer "))
+         else if(mIsMasterAdmin && !strnicmp(message.getString(), "/hideplayer ", 12))
          {
             bool found = false;
             for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
@@ -1379,7 +1379,7 @@ public:
             if(!found)
                m2cSendChat(mPlayerOrServerName, true, "player not found");
          }
-         else if(mIsMasterAdmin && !stricmp(message.getString(), "/hideIP "))
+         else if(mIsMasterAdmin && !strnicmp(message.getString(), "/hideIP ", 8))
          {
             Address addr(&message.getString()[8]);
             bool found = false;
