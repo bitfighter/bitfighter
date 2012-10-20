@@ -26,6 +26,7 @@
 #ifndef VIDEOSYSTEM_H_
 #define VIDEOSYSTEM_H_
 
+#include "ConfigEnum.h"    // For DisplayMode enum
 #include "tnlTypes.h"
 
 using namespace TNL;
@@ -50,6 +51,9 @@ public:
    static S32 getWindowPositionY();
 
    static void actualizeScreenMode(GameSettings *settings, bool changingInterfaces, bool currentUIUsesEditorScreenMode);
+   static void getWindowParameters(GameSettings *settings, DisplayMode displayMode, 
+                                   S32 &sdlWindowWidth, S32 &sdlWindowHeight, F64 &orthoLeft, F64 &orthoRight, F64 &orthoTop, F64 &orthoBottom);
+
 };
 
 } /* namespace Zap */

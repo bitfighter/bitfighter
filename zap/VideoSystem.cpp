@@ -336,35 +336,10 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
 
    // Set up video/window flags amd parameters and get ready to change the window
    S32 sdlWindowWidth, sdlWindowHeight;
-   F64 orthoLeft = 0, orthoRight = 0, orthoTop = 0, orthoBottom = 0;
+   F64 orthoLeft, orthoRight, orthoTop, orthoBottom;
 
-   // Set up variables according to display mode
-   switch(displayMode)
-   {
-      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
-         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-         orthoRight = gScreenInfo.getGameCanvasWidth();
-         orthoBottom = gScreenInfo.getGameCanvasHeight();
-         break;
+   getWindowParameters(settings, displayMode, sdlWindowWidth, sdlWindowHeight, orthoLeft, orthoRight, orthoTop, orthoBottom);
 
-      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
-         sdlWindowWidth = gScreenInfo.getPhysicalScreenWidth();
-         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
-         orthoLeft = -1 * (gScreenInfo.getHorizDrawMargin());
-         orthoRight = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
-         orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
-         orthoTop = -1 * (gScreenInfo.getVertDrawMargin());
-         break;
-
-      case DISPLAY_MODE_WINDOWED:
-      default:  //  Fall through OK
-         sdlWindowWidth = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
-         sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
-         orthoRight = gScreenInfo.getGameCanvasWidth();
-         orthoBottom = gScreenInfo.getGameCanvasHeight();
-         break;
-   }
 
 #if SDL_VERSION_ATLEAST(2,0,0)
    // Change video modes based on selected display mode
@@ -486,5 +461,42 @@ void VideoSystem::actualizeScreenMode(GameSettings *settings, bool changingInter
          gClientGames[i]->getUIManager()->getCurrentUI()->onDisplayModeChange();     
 }
 
+
+
+void VideoSystem::getWindowParameters(GameSettings *settings, DisplayMode displayMode, 
+                                      S32 &sdlWindowWidth, S32 &sdlWindowHeight, F64 &orthoLeft, F64 &orthoRight, F64 &orthoTop, F64 &orthoBottom)
+{
+   // Set up variables according to display mode
+   switch(displayMode)
+   {
+      case DISPLAY_MODE_FULL_SCREEN_STRETCHED:
+         sdlWindowWidth  = gScreenInfo.getPhysicalScreenWidth();
+         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         orthoLeft   = 0;
+         orthoRight  = gScreenInfo.getGameCanvasWidth();
+         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         orthoTop    = 0;
+         break;
+
+      case DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED:
+         sdlWindowWidth  = gScreenInfo.getPhysicalScreenWidth();
+         sdlWindowHeight = gScreenInfo.getPhysicalScreenHeight();
+         orthoLeft   = -1 * gScreenInfo.getHorizDrawMargin();
+         orthoRight  = gScreenInfo.getGameCanvasWidth() + gScreenInfo.getHorizDrawMargin();
+         orthoBottom = gScreenInfo.getGameCanvasHeight() + gScreenInfo.getVertDrawMargin();
+         orthoTop    = -1 * gScreenInfo.getVertDrawMargin();
+         break;
+
+      case DISPLAY_MODE_WINDOWED:
+      default:  //  Fall through OK
+         sdlWindowWidth  = (S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * settings->getIniSettings()->winSizeFact + 0.5f);
+         sdlWindowHeight = (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * settings->getIniSettings()->winSizeFact + 0.5f);
+         orthoLeft   = 0;
+         orthoRight  = gScreenInfo.getGameCanvasWidth();
+         orthoBottom = gScreenInfo.getGameCanvasHeight();
+         orthoTop    = 0;
+         break;
+   }
+}
 
 } /* namespace Zap */
