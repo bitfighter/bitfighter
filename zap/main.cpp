@@ -455,6 +455,9 @@ void display()
 {
    clearScreen();
 
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+
    for(S32 i = 0; i < gClientGames.size(); i++)
    {
       // Do any la-ti-da that we might need to get the viewport setup for the game we're about to run.  For example, if

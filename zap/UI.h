@@ -108,8 +108,6 @@ public:
 
    U32 getTimeSinceLastInput();
 
-   void renderCurrent();
-
    virtual void render();
    virtual void idle(U32 timeDelta);
    virtual void onActivate();
@@ -141,6 +139,8 @@ public:
    void renderUnboxedMessageBox(const char *title, const char *instr, string message[], S32 msgLines, S32 vertOffset = 0);
 
    void dimUnderlyingUI();
+
+   static void renderDiagnosticKeysOverlay();
 
    static void drawMenuItemHighlight(S32 x1, S32 y1, S32 x2, S32 y2, bool disabled = false);
    static void drawFilledRect(S32 x1, S32 y1, S32 x2, S32 y2);

@@ -172,48 +172,6 @@ U32 UserInterface::getTimeSinceLastInput()
 }
 
 
-// Clean up and get ready to render
-void UserInterface::renderCurrent()    
-{
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-
-   // Run the active UI renderer
-   if(getUIManager()->getCurrentUI())
-      getUIManager()->getCurrentUI()->render();
-
-   // By putting this here, it will always get rendered, regardless of which UI (if any) is active (kind of ugly)
-   // This block will dump any keys and raw stick button inputs depressed to the screen when in diagnostic mode
-   // This should make it easier to see what happens when users press joystick buttons
-   if(gClientGames[0]->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
-   {
-     S32 vpos = gScreenInfo.getGameCanvasHeight() / 2;
-     S32 hpos = horizMargin;
-
-     glColor(Colors::white);
-
-     // Key states
-     for (U32 i = 0; i < MAX_INPUT_CODES; i++)
-        if(InputCodeManager::getState((InputCode) i))
-           hpos += drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
-
-      vpos += 23;
-      hpos = horizMargin;
-      glColor(Colors::magenta);
-
-      for(U32 i = 0; i < Joystick::MaxSdlButtons; i++)
-         if(Joystick::ButtonMask & (1 << i))
-         {
-            drawStringf( hpos, vpos, 18, "RawBut [%d]", i );
-            hpos += getStringWidthf(18, "RawBut [%d]", i ) + 5;
-         }
-   }
-   // End diagnostic key dump mode
-
-   renderMasterStatus();
-}
-
-
 extern const F32 radiansToDegreesConversion;
 
 #define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; vsnprintf(buffer, sizeof(buffer), format, args); va_end(args);
@@ -1065,7 +1023,10 @@ U32 UserInterface::drawWrapText(const string &msg, S32 xpos, S32 ypos, S32 width
 
 
 // These will be overridden in child classes if needed
-void UserInterface::render()  { /* Do nothing */ }
+void UserInterface::render() 
+{ 
+   // Do nothing -- probably never even gets called
+}
 
 
 void UserInterface::idle(U32 timeDelta)
@@ -1146,6 +1107,37 @@ bool UserInterface::onKeyDown(InputCode inputCode)
 
 void UserInterface::onKeyUp(InputCode inputCode) { /* Do nothing */ }
 void UserInterface::onTextInput(char ascii)      { /* Do nothing */ }
+
+
+
+// Dumps any keys and raw stick button inputs depressed to the screen when in diagnostic mode.
+// This should make it easier to see what happens when users press joystick buttons.
+void UserInterface::renderDiagnosticKeysOverlay()
+{
+   if(gClientGames[0]->getSettings()->getIniSettings()->diagnosticKeyDumpMode)
+   {
+     S32 vpos = gScreenInfo.getGameCanvasHeight() / 2;
+     S32 hpos = horizMargin;
+
+     glColor(Colors::white);
+
+     // Key states
+     for (U32 i = 0; i < MAX_INPUT_CODES; i++)
+        if(InputCodeManager::getState((InputCode) i))
+           hpos += drawStringAndGetWidth( hpos, vpos, 18, InputCodeManager::inputCodeToString((InputCode) i) );
+
+      vpos += 23;
+      hpos = horizMargin;
+      glColor(Colors::magenta);
+
+      for(U32 i = 0; i < Joystick::MaxSdlButtons; i++)
+         if(Joystick::ButtonMask & (1 << i))
+         {
+            drawStringf( hpos, vpos, 18, "RawBut [%d]", i );
+            hpos += getStringWidthf(18, "RawBut [%d]", i ) + 5;
+         }
+   }
+}   
 
 
 ////////////////////////////////////////

@@ -535,12 +535,8 @@ void UIManager::reactivate(UIID menuId)
    while(mPrevUIs.size() && (mPrevUIs.last()->getMenuID() != menuId) )
       mPrevUIs.pop_back();
 
-   if(mPrevUIs.size())
-      // Now that the next one is our target, when we reactivate, we'll be where we want to be
-      reactivatePrevUI();
-   else
-      getMainMenuUserInterface()->reactivate();      // Fallback if everything else has failed
-
+   // Now that the next one is our target, when we reactivate, we'll be where we want to be
+   reactivatePrevUI();
 }
 
 
@@ -608,6 +604,8 @@ void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 
    mCurrentInterface = ui;
    mCurrentInterface->activate();
+
+   mMenuTransitionTimer.reset();
 }
 
 
@@ -631,12 +629,13 @@ void UIManager::renderCurrent()
    {
       if(mPrevUIs.size() > 0)
       {
-         mPrevUIs.last()->renderCurrent();
+         mPrevUIs.last()->render();
          return;
       }
    }
 
-   mCurrentInterface->renderCurrent();
+   mCurrentInterface->render();
+   UserInterface::renderDiagnosticKeysOverlay();    // By putting this here, it will always get rendered, regardless of active UI
    mCurrentInterface->renderMasterStatus();
 }
 
