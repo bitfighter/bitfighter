@@ -121,6 +121,12 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 }
 
 
+void GridDatabase::addToDatabase(DatabaseObject *obj)
+{
+   addToDatabase(obj, obj->getExtent());
+}
+
+
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again");
