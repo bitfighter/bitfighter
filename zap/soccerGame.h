@@ -95,8 +95,8 @@ private:
    F32 mDragFactor;
 
 public:
-   SoccerBallItem(Point pos = Point());   // C++ constructor
-   ~SoccerBallItem();                     // Destructor
+   SoccerBallItem();    // C++ constructor
+   ~SoccerBallItem();   // Destructor
 
    SoccerBallItem *clone() const;
 

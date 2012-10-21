@@ -87,7 +87,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Note that on client, we use all default values set in declaration; on the server, these values will be provided
 // Most of these values are set in the initial packet set from the server (see packUpdate() below)
 // Also, the following is also run by robot's constructor
-Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, (F32)CollisionRadius), mSpawnPoint(p)
+Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : MoveObject(pos, (F32)CollisionRadius), mSpawnPoint(pos)
 {
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
@@ -110,14 +110,14 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, Point p, F32 m, bool isRobot) : Mov
    mClientInfo = clientInfo;
 
    setTeam(team);
-   mass = m;            // Ship's mass, not used
+   mass = 1.0;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
 
    mIsRobot = isRobot;
 
    if(!isRobot)               // Robots will run this during their own initialization; no need to run it twice!
-      initialize(p);
+      initialize(Point(0,0));
    else
       hasExploded = false;    // Client needs this false for unpackUpdate
 

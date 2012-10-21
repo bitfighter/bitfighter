@@ -46,10 +46,10 @@ namespace Zap
 bool Item::mInitial;
 
 // Constructor
-Item::Item(const Point &pos, F32 radius) : Parent()
+Item::Item(F32 radius) : Parent()
 {
    mRadius = radius;
-   setPos(pos);
+   setPos(Point(0,0));
 
    static U16 itemId = 1;
    mItemId = itemId++;

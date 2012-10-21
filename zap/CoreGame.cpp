@@ -272,7 +272,7 @@ const F32 CoreItem::DamageReductionRatio = 1000.0f;
 const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
 // Constructor
-CoreItem::CoreItem() : Parent(Point(0,0), F32(CoreRadius * 2))
+CoreItem::CoreItem() : Parent(F32(CoreRadius * 2))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;

@@ -283,11 +283,11 @@ TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 static const F32 SOCCER_BALL_ITEM_MASS = 4;
 
 // Constructor
-SoccerBallItem::SoccerBallItem(Point pos) : Parent(pos, true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
+SoccerBallItem::SoccerBallItem() : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
-   initialPos = pos;
+   initialPos = Point(0,0);
    mLastPlayerTouch = NULL;
    mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);

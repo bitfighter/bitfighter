@@ -42,7 +42,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 // C++ constructor
-FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) // radius was 20
+FlagItem::FlagItem() : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
 
@@ -51,7 +51,7 @@ FlagItem::FlagItem(Point pos) : Parent(pos, true, (F32)Ship::CollisionRadius) //
 
 
 // Alternate constructor, currently used by NexusFlag
-FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Parent(pos, collidable, radius, mass)
+FlagItem::FlagItem(const Point &pos, bool collidable, float radius, float mass) : Parent(Point(0,0), collidable, radius, mass)
 {
    initialize();
 
@@ -60,7 +60,7 @@ FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Paren
 
 
 // Alternate constructor, currently used by dropping flags in hunterGame
-FlagItem::FlagItem(Point pos, Point vel, bool useDropDelay) : Parent(pos, true, (F32)Ship::CollisionRadius, 4)
+FlagItem::FlagItem(const Point &pos, const Point &vel, bool useDropDelay) : Parent(pos, true, (F32)Ship::CollisionRadius, 4)
 {
    initialize();
 

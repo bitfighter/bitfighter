@@ -48,7 +48,7 @@ namespace Zap
 
 
 // Constructor
-PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Parent(p, radius)
+PickupItem::PickupItem(float radius, S32 repopDelay) : Parent(radius)
 {
    show();
 
@@ -350,11 +350,15 @@ S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
 // Constructor
-RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
+RepairItem::RepairItem() :             Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
 { 
-   mObjectTypeNumber = RepairItemTypeNumber;
+   initialize();
+}
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+
+RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
+{ 
+   initialize();
 }
 
 
@@ -362,6 +366,14 @@ RepairItem::RepairItem(Point pos) : PickupItem(pos, (F32)REPAIR_ITEM_RADIUS, DEF
 RepairItem::~RepairItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void RepairItem::initialize()
+{
+   mObjectTypeNumber = RepairItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -444,18 +456,23 @@ const char *RepairItem::luaClassName = "RepairItem";
 REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 
 // Constructor
-EnergyItem::EnergyItem(Point p) : PickupItem(p, 20, DEFAULT_RESPAWN_TIME) 
+EnergyItem::EnergyItem() :             Parent(20, DEFAULT_RESPAWN_TIME) 
 { 
-   mObjectTypeNumber = EnergyItemTypeNumber;
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   initialize();
 };   
+
+
+EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME) 
+{
+   initialize();
+}
 
 
 // Destructor
@@ -463,6 +480,15 @@ EnergyItem::~EnergyItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
+
+
+void EnergyItem::initialize()
+{ 
+   mObjectTypeNumber = EnergyItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+};   
+
 
 
 EnergyItem *EnergyItem::clone() const

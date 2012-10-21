@@ -55,8 +55,8 @@ protected:
    };
 
 public:
-   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20);   // Constructor
-   virtual ~PickupItem();                                                  // Destructor
+   PickupItem(float radius = 1, S32 repopDelay = 20);   // Constructor
+   virtual ~PickupItem();                               // Destructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
@@ -114,8 +114,10 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // In seconds
    static const S32 REPAIR_ITEM_RADIUS = 20;
 
-   RepairItem(Point pos = Point());   // Constructor
-   ~RepairItem();                     // Destructor
+   RepairItem();           // Constructor
+   ~RepairItem();          // Destructor
+
+   void initialize();
 
    RepairItem *clone() const;
 
@@ -136,7 +138,8 @@ public:
    void renderDock();
 
    ///// Lua interface
-	LUAW_DECLARE_CLASS(RepairItem);
+	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(RepairItem);
+   RepairItem(lua_State *L);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -155,8 +158,10 @@ private:
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // In seconds
 
-   EnergyItem(Point p = Point());   // Constructor
-   ~EnergyItem();                   // Destructor
+   EnergyItem();     // Constructor
+   ~EnergyItem();    // Destructor
+
+   void initialize();
 
    EnergyItem *clone() const;
 
@@ -174,7 +179,9 @@ public:
 
 
    ///// Lua interface
-	LUAW_DECLARE_CLASS(EnergyItem);
+	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(EnergyItem);
+
+   EnergyItem(lua_State *L);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

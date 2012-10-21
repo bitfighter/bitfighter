@@ -92,9 +92,9 @@ protected:
 
 
 public:
-   MoveObject(const Point &pos = Point(0,0), float radius = 1, float mass = 1);     // Constructor
-   ~MoveObject();                                                                   // Destructor
-
+   MoveObject(const Point &p = Point(0,0), float radius = 1, float mass = 1);     // Constructor
+   ~MoveObject();                                                                 // Destructor
+      
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    virtual string toString(F32 gridSize) const;
 
@@ -190,8 +190,8 @@ protected:
    bool mIsCollideable;
 
 public:
-   MoveItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-   virtual ~MoveItem();                                                                          // Destructor
+   MoveItem(const Point &p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+   virtual ~MoveItem();                                                                                 // Destructor
 
    virtual void idle(BfObject::IdleCallPath path);
 
@@ -233,8 +233,8 @@ protected:
    Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
 
 public:
-   MountableItem(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-   ~MountableItem();                                                                                  // Destructor
+   MountableItem(const Point &pos = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+   ~MountableItem();                                                                                           // Destructor
 
    // Override some parent functions
    void idle(BfObject::IdleCallPath path);
@@ -301,9 +301,9 @@ protected:
    };
 
 public:
-   Asteroid();       // Constructor  
-   ~Asteroid();      // Destructor
-   void initialize();
+   Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   ~Asteroid();                   // Destructor
+
    Asteroid *clone() const;
 
    static F32 getAsteroidRadius(S32 size_left);
@@ -341,7 +341,6 @@ public:
 
    TNL_DECLARE_CLASS(Asteroid);
 
-
    ///// Editor methods
    const char *getEditorHelpString();
    const char *getPrettyNamePlural();
@@ -354,7 +353,6 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Asteroid);
-   Asteroid(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -377,9 +375,8 @@ private:
    bool hasExploded;
 
 public:
-   Circle();      // Constructor  
-   ~Circle();     // Destructor
-   void initialize();
+   Circle(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   ~Circle();                   // Destructor
    Circle *clone() const;
 
    static const S32 CIRCLE_RADIUS = 10;
@@ -413,7 +410,6 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Circle);
-   Circle(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -486,12 +482,9 @@ class TestItem : public MoveItem
    typedef MoveItem Parent;
 
 public:
-   TestItem();                // Constructor
-   ~TestItem();               // Destructor
+   TestItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   ~TestItem();                   // Destructor
    TestItem *clone() const;
-
-   void initialize();
-
 
    // Test methods
    void idle(BfObject::IdleCallPath path);
@@ -516,7 +509,6 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TestItem);
-   TestItem(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -532,11 +524,8 @@ class ResourceItem : public MountableItem
    typedef MountableItem Parent; 
 
 public:
-   ResourceItem();      // Constructor
-   ~ResourceItem();     // Destructor
-
-   void initialize();
-
+   ResourceItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   ~ResourceItem();                   // Destructor
    ResourceItem *clone() const;
 
    static const S32 RESOURCE_ITEM_RADIUS = 20;
@@ -559,7 +548,6 @@ public:
 
    ///// Lua Interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ResourceItem);
-   ResourceItem(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

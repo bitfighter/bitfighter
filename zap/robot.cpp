@@ -62,7 +62,7 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
 // Constructor, runs on client and server
-Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(), 1, true),   
+Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
                  LuaScriptRunner() 
 {
    mHasSpawned = false;

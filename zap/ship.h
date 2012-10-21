@@ -193,7 +193,7 @@ public:
    void calcThrustComponents(F32 *thrust);
 
    // Constructor
-   Ship(ClientInfo *clientInfo = NULL, S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      
+   Ship(ClientInfo *clientInfo = NULL, S32 team = -1, const Point &p = Point(0,0), bool isRobot = false);      
    
    ~Ship();           // Destructor
 

@@ -57,10 +57,10 @@ protected:
    };
 
 public:
-   FlagItem(Point pos = Point());                                    // C++ constructor
-   FlagItem(Point pos, bool collidable, float radius, float mass);   // Alternate C++ constructor
-   FlagItem(Point pos, Point vel, bool useDropDelay = false);        // Alternate alternate C++ constructor
-   ~FlagItem();                                                      // Destructor
+   FlagItem();                                                                 // C++ constructor
+   FlagItem(const Point &pos, bool collidable, float radius, float mass);      // Alternate C++ constructor
+   FlagItem(const Point &pos, const Point &vel, bool useDropDelay = false);    // Alternate alternate C++ constructor
+   ~FlagItem();                                                                // Destructor
 
    FlagItem *clone() const;
    void copyAttrs(FlagItem *target);
