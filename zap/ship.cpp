@@ -147,7 +147,7 @@ Ship *Ship::clone() const
 
 // Initialize some things that both ships and bots care about... this will get run during the ship's constructor
 // and also after a bot respawns and needs to reset itself
-void Ship::initialize(Point &pos)
+void Ship::initialize(const Point &pos)
 {
    // Does this ever evaluate to true?
    if(getGame())
