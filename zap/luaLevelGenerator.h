@@ -44,7 +44,6 @@ class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
 
 private:
-   LevelLoader *mCaller;
    Game *mGame;
    F32 mGridSize;
    GridDatabase *mGridDatabase;
@@ -56,7 +55,7 @@ public:
 
    // Standard constructor
    LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, 
-                     GridDatabase *gridDatabase, LevelLoader *caller, Game *game);   
+                     GridDatabase *gridDatabase, Game *game);   
    virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();

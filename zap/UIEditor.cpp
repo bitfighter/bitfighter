@@ -672,7 +672,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame(), getGame());
+   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;

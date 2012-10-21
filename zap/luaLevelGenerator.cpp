@@ -39,7 +39,7 @@ LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constr
 
 // Standard constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     GridDatabase *gridDatabase, LevelLoader *caller, Game *game)
+                                     GridDatabase *gridDatabase, Game *game)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
@@ -50,7 +50,6 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
    mGame = game;
 
    mGridSize = gridSize;
-   mCaller = caller;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -164,7 +163,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       LuaObject::clearStack(L);
    }
 
-   mCaller->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);
+   mGame->parseLevelLine(line.c_str(), mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -208,7 +207,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 // Let someone else do the work!
 void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
-   mCaller->processLevelLoadLine(argc, id, argv, database, levelFileName);
+   mGame->processLevelLoadLine(argc, id, argv, database, levelFileName);
 }
 
 
@@ -226,7 +225,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getCheckedString(L, 1, methodName);
 
-   mCaller->parseLevelLine(line, mGridDatabase, "Levelgen script: " + mScriptName);
+   mGame->parseLevelLine(line, mGridDatabase, "Levelgen script: " + mScriptName);
 
    return 0;
 }
@@ -240,7 +239,7 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
    checkArgCount(L, 1, methodName);
    F32 time = getCheckedFloat(L, 1, methodName);
 
-   mCaller->setGameTime(time);
+   mGame->setGameTime(time);
 
    return 0;
 }
