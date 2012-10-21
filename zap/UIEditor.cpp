@@ -694,10 +694,6 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
 
    rebuildEverything(database);
-   // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
-   // June of what year?  -bbr
-   // June 2011 -- obviously this is unfinished business
-   // OK OK, We should probably handle other items that have geometry to render, like turrets/etc...
 }
 
 
