@@ -642,14 +642,15 @@ void EditorUserInterface::addToEditor(BfObject *obj)
 // User has pressed Ctrl+R -- run the levelgen script and insert any resulting items into the editor in a separate database
 void EditorUserInterface::runLevelGenScript()
 {
-   string scriptName = getGame()->getGameType()->getScriptName();
+   GameType *gameType = getGame()->getGameType();
+   string scriptName = gameType->getScriptName();
 
    if(scriptName == "")      // No script included!!
       return;
 
-   gConsole.output("Running script %s\n", getGame()->getGameType()->getScriptLine().c_str());
+   gConsole.output("Running script %s\n", gameType->getScriptLine().c_str());
 
-   const Vector<string> *scriptArgs = getGame()->getGameType()->getScriptArgs();
+   const Vector<string> *scriptArgs = gameType->getScriptArgs();
 
    clearLevelGenItems();      // Clear out any items from the last run
 
@@ -676,8 +677,8 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
 
-   // Process new items that need it
-   // Walls need processing so that they can render properly
+   // Process new items that need it (walls need processing so that they can render properly).
+   // Items that need no extra processing will be kept as-is.
    fillVector.clear();
    database->findObjects((TestFunc)isWallType, fillVector);
 
@@ -693,7 +694,6 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
 
    rebuildEverything(database);
-
    // When I came through here in early june, there was nothing else here... shouldn't there be some handling of non-wall objects?  -CE
    // June of what year?  -bbr
    // June 2011 -- obviously this is unfinished business
@@ -1917,7 +1917,7 @@ static void setColor(bool isSelected, bool isLitUp, bool isScriptItem)
 // Render objects in the specified database
 void EditorUserInterface::renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay)
 {
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
 
    bool wantSelected = (renderMode == RENDER_SELECTED_NONWALLS || renderMode == RENDER_SELECTED_WALLS);
    bool wantWalls =    (renderMode == RENDER_UNSELECTED_WALLS  || renderMode == RENDER_SELECTED_WALLS);
