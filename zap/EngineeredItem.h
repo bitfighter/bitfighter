@@ -68,6 +68,8 @@ protected:
    Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client
    void computeObjectGeometry();          // Populates mCollisionPolyPoints
 
+   void findMountPoint(Game *game, const Point &pos);     // Figure out where to mount this item during construction
+
 
    WallSegment *mMountSeg;    // Segment we're mounted to in the editor (don't care in the game)
 
@@ -79,8 +81,8 @@ protected:
    };
 
 public:
-   EngineeredItem(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());    // Constructor
-   ~EngineeredItem();                                                                           // Destructor
+   EngineeredItem(S32 team = -1, const Point &anchorPoint = Point(0,0), const Point &anchorNormal = Point(0,0));  // Constructor
+   ~EngineeredItem();                                                                                             // Destructor
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -171,6 +173,10 @@ public:
    S32 getDisabledThreshold(lua_State *L);
    S32 getHealRate(lua_State *L);
    S32 setHealRate(lua_State *L);
+
+   // Some overrides
+   S32 setGeom(lua_State *L);
+
 };
 
 
@@ -235,15 +241,18 @@ private:
    WallSegment *mForceFieldEndSegment;
    Point forceFieldEnd;
 
-   void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
+   void initialize();
+
+   void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;  
 
    F32 getSelectionOffsetMagnitude();
 
 public:
    static const S32 defaultRespawnTime = 0;
 
-   ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
-   ~ForceFieldProjector();                                                                         // Destructor
+   ForceFieldProjector(lua_State *L = NULL);                                              // Combined Lua / C++ default constructor
+   ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal);    // Constructor for when ffp is built with engineer
+   ~ForceFieldProjector();                                                                // Destructor
 
    ForceFieldProjector *clone() const;
    
@@ -283,7 +292,7 @@ public:
    void findForceFieldEnd();                      // Find end of forcefield in editor
 
 	///// Lua interface
-	LUAW_DECLARE_CLASS(ForceFieldProjector);
+	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ForceFieldProjector);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -304,11 +313,14 @@ private:
    Timer mFireTimer;
    F32 mCurrentAngle;
 
+   void initialize();
+
    F32 getSelectionOffsetMagnitude();
 
 public:
-   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));  // Constructor
-   ~Turret();                                                                             // Destructor
+   Turret(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor
+   Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal);  // Constructor for when turret is built with engineer
+   ~Turret();                                                              // Destructor
 
    Turret *clone() const;
 
@@ -359,7 +371,7 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    ///// Lua interface
-	LUAW_DECLARE_CLASS(Turret);
+	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Turret);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
