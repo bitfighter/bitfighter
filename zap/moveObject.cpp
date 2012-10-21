@@ -1232,7 +1232,6 @@ S32 MountableItem::isOnShip(lua_State *L)
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
-class LuaAsteroid;
 
 static F32 asteroidVel = 250;
 
@@ -1246,13 +1245,35 @@ F32 Asteroid::getAsteroidRadius(S32 size_left)
    return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
 }
 
+
 F32 Asteroid::getAsteroidMass(S32 size_left)
 {
    return ASTEROID_MASS_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
 }
 
+
 // Constructor
-Asteroid::Asteroid() : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
+Asteroid::Asteroid() :             Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
+{
+   initialize();
+}
+
+
+Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
+{
+   initialize();
+}
+
+
+
+// Destructor
+Asteroid::~Asteroid()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Asteroid::initialize()
 {
    mSizeLeft = ASTEROID_INITIAL_SIZELEFT;  // higher = bigger
 
@@ -1272,13 +1293,6 @@ Asteroid::Asteroid() : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITI
    mKillString = "crashed into an asteroid";
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Destructor
-Asteroid::~Asteroid()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -1575,6 +1589,7 @@ GENERATE_LUA_FUNARGS_TABLE(Asteroid, LUA_METHODS);
 const char *Asteroid::luaClassName = "Asteroid";
 REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 
+
 /**
  *  @luafunc Asteroid::getSizeIndex()
  *  @brief   Get %s asteroids current size index.
@@ -1596,14 +1611,33 @@ S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Circle);
-class LuaCircle;
 
 static F32 CIRCLE_VEL = 250;
 
 static const F32 CIRCLE_MASS = 4;
 
 // Constructor
-Circle::Circle() : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
+Circle::Circle() :             Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
+{
+   initialize();
+}
+
+
+Circle::Circle(lua_State *L) : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
+{
+   initialize();
+}
+
+
+
+// Destructor
+Circle::~Circle()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Circle::initialize()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CircleTypeNumber;
@@ -1619,13 +1653,6 @@ Circle::Circle() : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
 
    mKillString = "crashed into an circle";
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Destructor
-Circle::~Circle()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -2152,12 +2179,15 @@ TNL_IMPLEMENT_NETOBJECT(TestItem);
 static const F32 TEST_ITEM_MASS = 4;
 
 // Constructor
-TestItem::TestItem() : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
+TestItem::TestItem()             : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = TestItemTypeNumber;
+   initialize();
+}
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+
+TestItem::TestItem(lua_State *L) : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
+{
+   initialize();
 }
 
 
@@ -2165,6 +2195,15 @@ TestItem::TestItem() : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM
 TestItem::~TestItem() 
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void TestItem::initialize()
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = TestItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -2236,7 +2275,6 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile TestItem::functionArgs[] = { { NULL, { }, 0 } };
 
-
 const char *TestItem::luaClassName = "TestItem";
 REGISTER_LUA_SUBCLASS(TestItem, MoveObject);
 
@@ -2249,12 +2287,15 @@ TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 static const F32 RESOURCE_ITEM_MASS = 1;
 
    // Constructor
-ResourceItem::ResourceItem() : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
+ResourceItem::ResourceItem()             : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = ResourceItemTypeNumber;
+   initialize();
+}
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+
+ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
+{
+   initialize();
 }
 
 
@@ -2262,6 +2303,15 @@ ResourceItem::ResourceItem() : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIU
 ResourceItem::~ResourceItem() 
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void ResourceItem::initialize()
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = ResourceItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 

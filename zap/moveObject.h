@@ -303,6 +303,7 @@ protected:
 public:
    Asteroid();       // Constructor  
    ~Asteroid();      // Destructor
+   void initialize();
    Asteroid *clone() const;
 
    static F32 getAsteroidRadius(S32 size_left);
@@ -352,7 +353,8 @@ public:
    void renderDock();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(Asteroid);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Asteroid);
+   Asteroid(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -377,6 +379,7 @@ private:
 public:
    Circle();      // Constructor  
    ~Circle();     // Destructor
+   void initialize();
    Circle *clone() const;
 
    static const S32 CIRCLE_RADIUS = 10;
@@ -409,7 +412,8 @@ public:
    void renderDock();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(Circle);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Circle);
+   Circle(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -471,7 +475,6 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(Worm);
-
 };
 
 
@@ -486,6 +489,9 @@ public:
    TestItem();                // Constructor
    ~TestItem();               // Destructor
    TestItem *clone() const;
+
+   void initialize();
+
 
    // Test methods
    void idle(BfObject::IdleCallPath path);
@@ -509,7 +515,8 @@ public:
    void renderDock();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(TestItem);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TestItem);
+   TestItem(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -527,6 +534,8 @@ class ResourceItem : public MountableItem
 public:
    ResourceItem();      // Constructor
    ~ResourceItem();     // Destructor
+
+   void initialize();
 
    ResourceItem *clone() const;
 
@@ -549,7 +558,8 @@ public:
    void renderDock();
 
    ///// Lua Interface
-   LUAW_DECLARE_CLASS(ResourceItem);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ResourceItem);
+   ResourceItem(lua_State *L);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
