@@ -349,16 +349,11 @@ S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
 
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
-// Constructor
-RepairItem::RepairItem() :             Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
+RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME)   // Combined Lua / C++ default constructor
 { 
-   initialize();
-}
+   mObjectTypeNumber = RepairItemTypeNumber;
 
-
-RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME) 
-{ 
-   initialize();
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -366,14 +361,6 @@ RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_R
 RepairItem::~RepairItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
-}
-
-
-void RepairItem::initialize()
-{
-   mObjectTypeNumber = RepairItemTypeNumber;
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -462,16 +449,12 @@ REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 
-// Constructor
-EnergyItem::EnergyItem() :             Parent(20, DEFAULT_RESPAWN_TIME) 
-{ 
-   initialize();
-};   
 
-
-EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME) 
+EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Combined Lua / C++ default constructor
 {
-   initialize();
+   mObjectTypeNumber = EnergyItemTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -480,15 +463,6 @@ EnergyItem::~EnergyItem()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
-
-
-void EnergyItem::initialize()
-{ 
-   mObjectTypeNumber = EnergyItemTypeNumber;
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
-};   
-
 
 
 EnergyItem *EnergyItem::clone() const

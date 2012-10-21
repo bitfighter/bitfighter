@@ -114,10 +114,8 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // In seconds
    static const S32 REPAIR_ITEM_RADIUS = 20;
 
-   RepairItem();           // Constructor
-   ~RepairItem();          // Destructor
-
-   void initialize();
+   RepairItem(lua_State *L = NULL);    // Combined Lua / C++ default constructor
+   ~RepairItem();                      // Destructor
 
    RepairItem *clone() const;
 
@@ -139,7 +137,6 @@ public:
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(RepairItem);
-   RepairItem(lua_State *L);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -158,10 +155,8 @@ private:
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // In seconds
 
-   EnergyItem();     // Constructor
-   ~EnergyItem();    // Destructor
-
-   void initialize();
+   EnergyItem(lua_State *L = NULL);    // Combined Lua / C++ default constructor
+   ~EnergyItem();                      // Destructor
 
    EnergyItem *clone() const;
 
@@ -180,8 +175,6 @@ public:
 
    ///// Lua interface
 	LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(EnergyItem);
-
-   EnergyItem(lua_State *L);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
