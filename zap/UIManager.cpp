@@ -637,8 +637,6 @@ void UIManager::renderCurrent()
       //mLastUI->render();
       //mLastWasLower
          
-      S32 w = gScreenInfo.getGameCanvasWidth();
-
       // Save viewport
       GLint viewport[4];
       glGetIntegerv(GL_VIEWPORT, viewport);    
