@@ -38,20 +38,32 @@ namespace Zap
 {
 
 class GridDatabase;
+class Game;
 
 class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
+
+public:
+   enum RunContext {
+      EditorContext,
+      GameContext
+   };
+
 private:
    LevelLoader *mCaller;
+   Game *mGame;
    F32 mGridSize;
-   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
    GridDatabase *mGridDatabase;
+   RunContext mRunContext;
+
+   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
 
 public:
    LuaLevelGenerator();                // Default constructor
 
    // Standard constructor
-   LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, LevelLoader *caller);   
+   LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, 
+                     RunContext runContext, GridDatabase *gridDatabase, LevelLoader *caller, Game *game);   
    virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();

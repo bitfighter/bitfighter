@@ -148,8 +148,8 @@ protected:
    };
 
 public:
-   CoreItem();                // Constructor
-   ~CoreItem();               // Destructor
+   CoreItem(lua_State *L = NULL);   // Combined Lua / C++ default constructor
+   ~CoreItem();                     // Destructor
    CoreItem *clone() const;
 
    static F32 getCoreAngle(U32 time);
@@ -216,7 +216,7 @@ public:
    bool canBeNeutral();
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(CoreItem);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CoreItem);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

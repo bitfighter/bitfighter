@@ -195,12 +195,17 @@ void Game::setAddTarget()
 }
 
 
+// Clear the addTarget, but only if it's us -- this prevents the ServerGame destructor from wiping this out
+// after it has already been set by the editor after testing a level.
 void Game::clearAddTarget()
 {
-   mObjectAddTarget = NULL;
+   if(mObjectAddTarget == this)
+      mObjectAddTarget = NULL;
 }
 
 
+// When we're adding an object and don't know where to put it... put it here!
+// Static method
 Game *Game::getAddTarget()
 {
    return mObjectAddTarget;

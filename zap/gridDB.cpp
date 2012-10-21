@@ -149,19 +149,11 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 }
 
 
-// Note: This method is a remainer from the old EditorObjectDatabase; leaving it here for 
-// compatibility reasons for the moment... we're not actually sorting anymore, but we might
-// want to bring it back.  Not yet sure.
-// Add items in bulk to avoid resorting after each of a dozen or two objects are added
+// Bulk add items to database
 void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 {
    for(S32 i = 0; i < objects.size(); i++)
-   {
       addToDatabase(objects[i], objects[i]->getExtent());
-      //mAllEditorObjects.push_back(objects[i]);
-   }
-
-   //geomSort(mAllEditorObjects);
 }
 
 

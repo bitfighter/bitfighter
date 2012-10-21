@@ -39,7 +39,7 @@ LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constr
 
 // Standard constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     GridDatabase *gridDatabase, LevelLoader *caller)
+                                     RunContext runContext, GridDatabase *gridDatabase, LevelLoader *caller, Game *game)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
@@ -47,9 +47,12 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
    mScriptArgs = scriptArgs;
 
    mGridDatabase = gridDatabase;
+   mGame = game;
 
    mGridSize = gridSize;
    mCaller = caller;
+
+   mRunContext = runContext;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -176,7 +179,21 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addItem()";
 
-   S32 argc = min((S32)lua_gettop(L), (S32)LevelLoader::MAX_LEVEL_LINE_ARGS);     // Never more that MaxArgc args, please.
+   // First check to see if item is a BfObject
+   BfObject *obj = luaW_check<BfObject>(L, 1);
+
+   if(obj)
+   {
+      //if(mRunContext == EditorContext)      // Add object to database
+      //   obj->addToGame(game, mGridDatabase);
+      //else if(mRunContext == GameContext)
+         obj->addToGame(mGame, mGridDatabase);
+      return 0;
+   }
+
+   // Otherwise, try older method of converting stack items to params to be passed to processLevelLoadLine
+
+   S32 argc = min((S32)lua_gettop(L), (S32)LevelLoader::MAX_LEVEL_LINE_ARGS);     // Never more that MaxArgc args, please!
 
    if(argc == 0)
    {

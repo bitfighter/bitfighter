@@ -458,7 +458,7 @@ string EngineerModuleDeployer::getErrorMessage()
 
 
 // Constructor
-EngineeredItem::EngineeredItem(S32 team, Point anchorPoint, Point anchorNormal) : Engineerable(), mAnchorNormal(anchorNormal)
+EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Engineerable(), mAnchorNormal(anchorNormal)
 {
    setPos(anchorPoint);
    mHealth = 1.0f;
@@ -502,24 +502,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
       mHealTimer.setPeriod(mHealRate * 1000);
    }
 
-   // Find the mount point:
-   Point normal, anchor;
-
-   // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, (F32)MAX_SNAP_DISTANCE, true, anchor, normal))
-   {
-      setPos(pos);               // Found no mount point, but for editor, needs to set the position
-      mAnchorNormal.set(1,0);
-   }
-   else
-   {
-      setPos(anchor + normal);
-      mAnchorNormal.set(normal);
-   }
-   
-   computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
-   computeExtent();                                            // Uses mCollisionPolyPoints
-   computeBufferForBotZone(mBufferedObjectPointsForBotZone);   // Fill mBufferedObjectPointsForBotZone
+   findMountPoint(game, pos);
 
    return true;
 }
@@ -714,6 +697,7 @@ void EngineeredItem::setEndSegment(WallSegment *endSegment)
 }
 
 
+// Only called from editor
 void EngineeredItem::setSnapped(bool snapped)
 {
    mSnapped = snapped;
@@ -1037,7 +1021,31 @@ const Vector<Point> *EngineeredItem::getBufferForBotZone()
 }
 
 
-// Find mount point or turret or forcefield closest to pos
+// Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.  
+// findDeployPoint() is version used during deployment of engineerered item.
+void EngineeredItem::findMountPoint(Game *game, const Point &pos)
+{
+   Point normal, anchor;
+
+   // Anchor objects to the correct point
+   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, (F32)MAX_SNAP_DISTANCE, true, anchor, normal))
+   {
+      setPos(pos);               // Found no mount point, but for editor, needs to set the position
+      mAnchorNormal.set(1,0);
+   }
+   else
+   {
+      setPos(anchor + normal);
+      mAnchorNormal.set(normal);
+   }
+   
+   computeObjectGeometry();                                    // Fills mCollisionPolyPoints 
+   computeExtent();                                            // Uses mCollisionPolyPoints
+   computeBufferForBotZone(mBufferedObjectPointsForBotZone);   // Fill mBufferedObjectPointsForBotZone
+}
+
+
+// Find mount point or turret or forcefield closest to pos; used in editor.  See findMountPoint() for in-game version.
 Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegmentManager)
 {  
    Point anchor, nrml;
@@ -1212,19 +1220,36 @@ S32 EngineeredItem::setHealRate(lua_State *L)
 }
 
 
+// Override some methods
+S32 EngineeredItem::setGeom(lua_State *L)
+{
+   S32 retVal = Parent::setGeom(L);
+
+   findMountPoint(Game::getAddTarget(), getPos());
+
+   return retVal;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
-// Constructor
-ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : Parent(team, anchorPoint, anchorNormal)
+// Combined Lua / C++ default constructor
+ForceFieldProjector::ForceFieldProjector(lua_State *L)
 {
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = ForceFieldProjectorTypeNumber;
-   onGeomChanged(); // can't be placed on parent, as parent construtor must initalized first
+   initialize();
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   if(L)
+      findMountPoint(Game::getAddTarget(), getPos());
+}
+
+
+// Constructor for when projector is built with engineer
+ForceFieldProjector::ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(team, anchorPoint, anchorNormal)
+{
+   initialize();
 }
 
 
@@ -1232,6 +1257,16 @@ ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anch
 ForceFieldProjector::~ForceFieldProjector()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void ForceFieldProjector::initialize()
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = ForceFieldProjectorTypeNumber;
+   onGeomChanged();     // Can't be placed on parent, as parent construtor must initalized first
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -1648,8 +1683,32 @@ void ForceField::getForceFieldStartAndEndPoints(Point &start, Point &end)
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
-// Constructor
-Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredItem(team, anchorPoint, anchorNormal)
+
+// Combined Lua / C++ default constructor
+Turret::Turret(lua_State *L)
+{
+   initialize();
+
+   if(L)
+      findMountPoint(Game::getAddTarget(), getPos());
+}
+
+
+// Constructor for when turret is built with engineer
+Turret::Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal) : EngineeredItem(team, anchorPoint, anchorNormal)
+{
+   initialize();
+}
+
+
+// Destructor
+Turret::~Turret()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Turret::initialize()
 {
    mObjectTypeNumber = TurretTypeNumber;
 
@@ -1659,13 +1718,6 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredItem
    onGeomChanged();
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Destructor
-Turret::~Turret()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
