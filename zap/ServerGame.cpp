@@ -141,6 +141,7 @@ ServerGame::~ServerGame()
    if(getConnectionToMaster()) // Prevents errors when ServerGame is gone too soon.
       getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
    cleanUp();
+
    clearAddTarget();
 }
 
