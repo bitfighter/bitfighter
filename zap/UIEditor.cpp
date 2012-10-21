@@ -3724,6 +3724,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "Ctrl+R")       // Run levelgen script, or clear last results
    {
+      // Ctrl+R is a toggle -- we either add items or clear them
       if(mLevelGenDatabase.getObjectCount() == 0)
          runLevelGenScript();
       else
