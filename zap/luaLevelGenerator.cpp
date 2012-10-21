@@ -39,7 +39,7 @@ LuaLevelGenerator::LuaLevelGenerator() { TNLAssert(false, "Don't use this constr
 
 // Standard constructor
 LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
-                                     RunContext runContext, GridDatabase *gridDatabase, LevelLoader *caller, Game *game)
+                                     GridDatabase *gridDatabase, LevelLoader *caller, Game *game)
 {
    TNLAssert(fileExists(scriptName), "Files should be checked before we get here -- something has gone wrong!");
 
@@ -51,8 +51,6 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 
    mGridSize = gridSize;
    mCaller = caller;
-
-   mRunContext = runContext;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -184,10 +182,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 
    if(obj)
    {
-      //if(mRunContext == EditorContext)      // Add object to database
-      //   obj->addToGame(game, mGridDatabase);
-      //else if(mRunContext == GameContext)
-         obj->addToGame(mGame, mGridDatabase);
+      obj->addToGame(mGame, mGridDatabase);
       return 0;
    }
 

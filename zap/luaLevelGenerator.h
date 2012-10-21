@@ -43,18 +43,11 @@ class Game;
 class LuaLevelGenerator: public LuaScriptRunner, public LuaObject
 {
 
-public:
-   enum RunContext {
-      EditorContext,
-      GameContext
-   };
-
 private:
    LevelLoader *mCaller;
    Game *mGame;
    F32 mGridSize;
    GridDatabase *mGridDatabase;
-   RunContext mRunContext;
 
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
 
@@ -63,7 +56,7 @@ public:
 
    // Standard constructor
    LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, 
-                     RunContext runContext, GridDatabase *gridDatabase, LevelLoader *caller, Game *game);   
+                     GridDatabase *gridDatabase, LevelLoader *caller, Game *game);   
    virtual ~LuaLevelGenerator();       // Destructor
 
    bool prepareEnvironment();
