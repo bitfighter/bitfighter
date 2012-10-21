@@ -41,12 +41,10 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
-// C++ constructor
-FlagItem::FlagItem() : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
+// Combined Lua / C++ default constructor
+FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -54,8 +52,6 @@ FlagItem::FlagItem() : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // r
 FlagItem::FlagItem(const Point &pos, bool collidable, float radius, float mass) : Parent(Point(0,0), collidable, radius, mass)
 {
    initialize();
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -67,8 +63,6 @@ FlagItem::FlagItem(const Point &pos, const Point &vel, bool useDropDelay) : Pare
    setActualVel(vel);
    if(useDropDelay)
       mDroppedTimer.reset(DROP_DELAY);
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -92,6 +86,8 @@ void FlagItem::initialize()
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = FlagTypeNumber;
    setZone(NULL);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -134,7 +130,6 @@ bool FlagItem::isInZone()
 // Methods that really only apply to NexusFlagItems; having them here lets us get rid of a bunch of dynamic_casts
 void FlagItem::changeFlagCount(U32 change) { TNLAssert(false, "Should never be called!"); }
 U32 FlagItem::getFlagCount()               { return 1; }
-
 
 
 static bool isTeamFlagSpawn(Game *game, S32 team)
