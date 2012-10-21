@@ -672,7 +672,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    }
    
    // Load the items
-   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
+   LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), LuaLevelGenerator::EditorContext, database, getGame(), getGame());
 
    if(!levelGen.runScript())     // Error reporting handled within
       return;
@@ -1190,7 +1190,7 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   getGame()->setAddTarget();
+   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
 
    VideoSystem::actualizeScreenMode(settings, true, usesEditorScreenMode());
 
@@ -1226,7 +1226,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
    }
 
 
-   getGame()->setAddTarget();
+   getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
 
    getGame()->setActiveTeamManager(mTeamManager);
 
