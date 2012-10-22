@@ -94,9 +94,10 @@ protected:
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
+   Point mSpawnPoint;                     // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
    void initialize(const Point &pos);     // Some initialization code needed by both bots and ships
-   Point mSpawnPoint;                     // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
+   void initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot);
 
 public:
    static const S32 CollisionRadius = 24;

@@ -89,6 +89,32 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Also, the following is also run by robot's constructor
 Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : MoveObject(pos, (F32)CollisionRadius), mSpawnPoint(pos)
 {
+   initialize(clientInfo, team, pos, isRobot);
+}
+
+
+// Combined Lua / C++ default constructor
+Ship::Ship(lua_State *L)                                                     
+{
+   if(L)
+   {
+      luaL_error(L, "Currently cannot instantiate a Ship object from Lua.");
+      return;
+   }
+
+   initialize(NULL, TEAM_NEUTRAL, Point(0,0), false);
+}
+
+
+// Destructor
+Ship::~Ship()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot)
+{
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
 
@@ -129,23 +155,6 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : M
 #endif
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Combined Lua / C++ default constructor
-Ship::Ship(lua_State *L)                                                     
-{
-   if(L)
-      luaL_error(L, "Currently cannot instantiate a Ship object from Lua.");
-
-   TNLAssert(false, "Should not be using this constructor!");
-}
-
-
-// Destructor
-Ship::~Ship()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
