@@ -172,7 +172,7 @@ void Ship::initialize(const Point &pos)
    if(getGame())
       mRespawnTime = getGame()->getCurrentTime();
 
-   setPosVelAng(pos,Point(0,0), 0);
+   setPosVelAng(pos, Point(0,0), 0);
 
    updateExtentInDatabase();
 
