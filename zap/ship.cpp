@@ -93,8 +93,8 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : M
 }
 
 
-// Combined Lua / C++ default constructor
-Ship::Ship(lua_State *L)                                                     
+// Combined Lua / C++ default constructor -- this is used by Lua and by TNL, so we need to programatically separate the two
+Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius), mSpawnPoint(Point(0,0))
 {
    if(L)
    {
