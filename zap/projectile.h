@@ -87,6 +87,8 @@ public:
    virtual Point getRenderVel() const;
    virtual Point getActualVel() const;
 
+   virtual bool canAddToEditor();
+
    void render();
    void renderItem(const Point &pos);
 
@@ -139,6 +141,8 @@ public:
    void doExplosion(const Point &pos);
    void explode(const Point &pos);
    bool mIsOwnedByLocalClient;  // Set client-side to determine how to render
+
+   virtual bool canAddToEditor();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -207,6 +211,8 @@ public:
    bool canBeHostile();
    bool canBeNeutral();
 
+   virtual bool canAddToEditor();
+
    string toString(F32 gridSize) const;
 
    ///// Lua interface
@@ -261,9 +267,12 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();
+
+   virtual bool canAddToEditor();
 
    string toString(F32 gridSize) const;
 
@@ -317,6 +326,8 @@ public:
 
    bool collide(BfObject *otherObj);                    // Things (like bullets) can collide with grenades
    bool collided(BfObject *otherObj, U32 stateIndex);   // Things (like bullets) can collide with grenades
+
+   virtual bool canAddToEditor();
 
    void renderItem(const Point &pos);
    void idle(IdleCallPath path);

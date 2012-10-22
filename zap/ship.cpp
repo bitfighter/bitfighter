@@ -218,6 +218,9 @@ ClientInfo *Ship::getClientInfo()
 }
 
 
+bool Ship::canAddToEditor() { return false; }      // No ships in the editor
+
+
 void Ship::setEngineeredTeleporter(Teleporter *teleporter)
 {
    mEngineeredTeleporter = teleporter;

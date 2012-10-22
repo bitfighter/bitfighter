@@ -392,6 +392,8 @@ public:
    virtual void onGeomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
    virtual void onItemDragging();   // Item is being dragged around in the editor; make any updates necessary
 
+   virtual bool canAddToEditor();   // True if item can be added to the editor, false otherwise
+
    void unselect();
 
    // Account for the fact that the apparent selection center and actual object center are not quite aligned

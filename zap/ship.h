@@ -151,6 +151,8 @@ public:
    bool mCooldownNeeded;
    Point mImpulseVector;
 
+   virtual bool canAddToEditor();
+
    F32 getSlipzoneSpeedMoficationFactor();
 
    SFXHandle mModuleSound[ModuleCount];

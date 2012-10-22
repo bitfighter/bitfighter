@@ -181,7 +181,11 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 
    if(obj)
    {
-      obj->addToGame(mGame, mGridDatabase);
+      // Silently ignore illegal items when being run from the editor.  For the moment, if mGame is not a server, then
+      // we are running from the editor.  This could conceivably change, but for the moment it seems to hold true.
+      if(mGame->isServer() || obj->canAddToEditor())
+         obj->addToGame(mGame, mGridDatabase);
+
       return 0;
    }
 

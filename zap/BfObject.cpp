@@ -449,9 +449,9 @@ void BfObject::setTeam(S32 team)
 
 
 // Lua helper methods -- these assume that the params have already been checked and are valid
-void BfObject::setTeam(lua_State *L, S32 stackIndex)
+void BfObject::setTeam(lua_State *L, S32 stackPos)
 {
-   setTeam(getInt(L, stackIndex) - 1);    // - 1 because Lua indices start at 1  
+   setTeam(getInt(L, stackPos) - 1);    // - 1 because Lua indices start at 1  
 }
 
 
@@ -483,6 +483,9 @@ Game *BfObject::getGame() const
 bool BfObject::hasTeam()      { return true; }
 bool BfObject::canBeNeutral() { return true; }
 bool BfObject::canBeHostile() { return true; }
+
+
+bool BfObject::canAddToEditor() { return true; }
 
 
 void BfObject::addToGame(Game *game, GridDatabase *database)

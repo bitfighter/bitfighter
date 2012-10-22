@@ -65,6 +65,13 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
                              LuaScriptRunner() 
 {
+   // For now...  In future we'll need to specify a script in our L object, then we can instantiate a bot
+   if(L)
+   {
+      luaL_error(L, "Currently cannot instantiate a Robot object from Lua.  This will be changed in the near future!");
+      return;
+   }
+
    mHasSpawned = false;
    mObjectTypeNumber = RobotShipTypeNumber;
 
@@ -162,7 +169,7 @@ const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 // Server only
 bool Robot::start()
 {
-    if(!prepareEnvironment() || !loadScript() || !runMain())
+   if(!prepareEnvironment() || !loadScript() || !runMain())
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message

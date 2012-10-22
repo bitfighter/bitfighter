@@ -397,16 +397,8 @@ void Projectile::explode(BfObject *hitObject, Point pos)
 }
 
 
-Point Projectile::getRenderVel() const
-{
-   return mVelocity;
-}
-
-
-Point Projectile::getActualVel() const
-{
-   return mVelocity;
-}
+Point Projectile::getRenderVel() const { return mVelocity; }
+Point Projectile::getActualVel() const { return mVelocity; }
 
 
 // TODO: Get rid of this! (currently won't render without it)
@@ -414,6 +406,9 @@ void Projectile::render()
 {
    renderItem(getPos());
 }
+
+
+bool Projectile::canAddToEditor() { return false; }      // No projectiles in the editor
 
 
 void Projectile::renderItem(const Point &pos)
@@ -677,6 +672,10 @@ bool BurstProjectile::collide(BfObject *otherObj)
 {
    return true;
 }
+
+
+bool BurstProjectile::canAddToEditor() { return false; }      // No bursts in the editor
+
 
 
 void BurstProjectile::renderItem(const Point &pos)
@@ -971,9 +970,12 @@ const char *Mine::getPrettyNamePlural() { return "Mines"; }
 const char *Mine::getEditorHelpString() { return "Mines can be prepositioned, and are are \"hostile to all\". [M]"; }
 
 
-bool Mine::hasTeam()      { return false; }
-bool Mine::canBeHostile() { return false; }
-bool Mine::canBeNeutral() { return false; }
+bool Mine::hasTeam()        { return false; }
+bool Mine::canBeHostile()   { return false; }
+bool Mine::canBeNeutral()   { return false; }
+
+bool Mine::canAddToEditor() { return true; }     
+
 
 
 /////
@@ -1198,9 +1200,12 @@ const char *SpyBug::getPrettyNamePlural() { return "Spy Bugs"; }
 const char *SpyBug::getEditorHelpString() { return "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]"; }
 
 
-bool SpyBug::hasTeam()      { return true;  }
-bool SpyBug::canBeHostile() { return false; }
-bool SpyBug::canBeNeutral() { return true;  }
+bool SpyBug::hasTeam()        { return true;  }
+bool SpyBug::canBeHostile()   { return false; }
+bool SpyBug::canBeNeutral()   { return true;  }
+
+bool SpyBug::canAddToEditor() { return true;  }  
+
 
 
 // Can the player see the spybug?
@@ -1295,7 +1300,6 @@ void Seeker::initialize(const Point &pos, const Point &vel, BfObject *shooter)
       mKillString = shooter->getKillString();
    }
       
-
    mAcquiredTarget = NULL;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -1678,6 +1682,9 @@ void Seeker::renderItem(const Point &pos)
    renderSeeker(pos, getActualVel().ATAN2(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
 #endif
 }
+
+
+bool Seeker::canAddToEditor() { return false; }    // No seekers in the editor!
 
 
 /////
