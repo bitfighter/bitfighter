@@ -692,6 +692,12 @@ void BurstProjectile::renderItem(const Point &pos)
 
 /////
 // Lua interface
+/**
+  *  @luaclass Burst
+  *  @brief Grenade-like exploding object.
+  *  @descr Note that Bursts explode when their velocity is too low.  Be sure to set the %Burst's velocity if you 
+  *         don't want it to explode immediately after it is created.   
+  */
 
 //               Fn name    Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
@@ -977,7 +983,7 @@ const luaL_reg           Mine::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile Mine::functionArgs[] = { { NULL, { }, 0 } };
 
 
-const char *Mine::luaClassName = "MineItem";
+const char *Mine::luaClassName = "Mine";
 REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
 
 
