@@ -658,18 +658,6 @@ void WallItem::checkIfWallHasBeenAddedToTheGame()
 
 // Lua method overrides.  Because walls are... special.
 
-// Wall items are basically pseudo items that need to be added via a non-standard mechanism
-S32 WallItem::addToGame(lua_State *L)
-{
-   WallRec wallRec(*this);
-   Game *game = Game::getAddTarget();
-   game->getGameType()->addWall(wallRec, game);
-   mAddedToGame = true;    // To prevent further modification once this has been added to game
-
-   return 0;
-}
-
-
 S32 WallItem::setLoc(lua_State *L)
 {
    checkIfWallHasBeenAddedToTheGame();

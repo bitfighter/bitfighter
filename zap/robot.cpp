@@ -61,9 +61,9 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
-// Constructor, runs on client and server
-Robot::Robot() : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
-                 LuaScriptRunner() 
+// Combined Lua / C++ default constructor, runs on client and server
+Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),   
+                             LuaScriptRunner() 
 {
    mHasSpawned = false;
    mObjectTypeNumber = RobotShipTypeNumber;
@@ -189,7 +189,8 @@ bool Robot::prepareEnvironment()
 {
    try
    {
-      LuaScriptRunner::prepareEnvironment();
+      if(!LuaScriptRunner::prepareEnvironment())
+         return false;
 
       // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
       // This is the name that we'll use to refer to this robot from our Lua code.  

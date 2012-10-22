@@ -177,7 +177,6 @@ public:
    S32 setWidth(lua_State *L);
 
    // Override standard methods basically to add checks to keep us from modifying a wall already in the game
-   S32 addToGame(lua_State *L);
    S32 setLoc(lua_State *L);
    S32 setGeom(lua_State *L);
 };

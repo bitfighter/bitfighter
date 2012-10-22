@@ -73,8 +73,8 @@ private:
    S32 doFindItems(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
 
 public:
-   Robot();       // Constructor
-   ~Robot();      // Destructor
+   Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
+   ~Robot();                        // Destructor
 
    bool initialize(Point &pos);
 
@@ -124,7 +124,7 @@ public:
    TNL_DECLARE_CLASS(Robot);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(Robot);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Robot);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

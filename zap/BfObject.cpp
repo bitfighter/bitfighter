@@ -1283,7 +1283,6 @@ void BfObject::writeThisTeam(BitStream *stream)
    METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setTeam,        ARRAYDEF({{ TEAM_INDX, END }               }), 1 ) \
-   METHOD(CLASS, addToGame,      ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, removeFromGame, ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setGeom,        ARRAYDEF({{ PT,        END }, { GEOM, END }}), 2 ) \
    METHOD(CLASS, getGeom,        ARRAYDEF({{            END }               }), 1 ) \
@@ -1363,21 +1362,6 @@ S32 BfObject::setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
    setPos(getPointOrXY(L, 1));
-   return 0;
-}
-
-
-/**
- * @luafunc  BfObject::addToGame()
- * @brief    Adds object to the current game or editor session.
- * @descr    A given item can only be added  to a game once. Calling addToGame on an object already in a game will generate an error.
- *           For most (but not all) objects in a game or editor, updating characteristics such as position  
- *           will immediately be reflected in the object.
- */
-S32 BfObject::addToGame(lua_State *L)
-{
-   Game *game = Game::getAddTarget();
-   addToGame(game, game->getGameObjDatabase());
    return 0;
 }
 

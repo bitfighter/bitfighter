@@ -192,17 +192,20 @@ Point MoveObject::getPos(S32 stateIndex) const
 void MoveObject::setPos(S32 stateIndex, const Point &pos)
 {
    if(stateIndex == ActualState)
+   {
       Parent::setPos(pos);
+      setMaskBits(WarpPositionMask | PositionMask);
+   }
    else
       mMoveStates.setPos(stateIndex, pos);
 }
 
 
 // mMoveStates access ok here...
-Point MoveObject::getVel  (S32 stateIndex) const { return mMoveStates.getVel(stateIndex);   }
+Point MoveObject::getVel  (S32 stateIndex) const { return mMoveStates.getVel  (stateIndex); }
 F32   MoveObject::getAngle(S32 stateIndex) const { return mMoveStates.getAngle(stateIndex); }
 
-void MoveObject::setVel  (S32 stateIndex, const Point &vel) { mMoveStates.setVel(stateIndex, vel);     }
+void MoveObject::setVel  (S32 stateIndex, const Point &vel) { mMoveStates.setVel  (stateIndex, vel);   }
 void MoveObject::setAngle(S32 stateIndex, F32 angle)        { mMoveStates.setAngle(stateIndex, angle); }
 
 
@@ -856,11 +859,9 @@ void MoveItem::renderItem(const Point &pos)                 { TNLAssert(false, "
 void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "Unimplemented function!"); }
 
 
- // if wanting to use setActualPos(const Point &p), will have to change all class that have setActualPos, to allow virtual inheritance to work right.
 void MoveItem::setActualPos(const Point &pos)
 {
    setPos(ActualState, pos);
-   setMaskBits(WarpPositionMask | PositionMask);
 }
 
 

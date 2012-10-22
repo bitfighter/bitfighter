@@ -132,6 +132,16 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : M
 }
 
 
+// Combined Lua / C++ default constructor
+Ship::Ship(lua_State *L)                                                     
+{
+   if(L)
+      luaL_error(L, "Currently cannot instantiate a Ship object from Lua.");
+
+   TNLAssert(false, "Should not be using this constructor!");
+}
+
+
 // Destructor
 Ship::~Ship()
 {

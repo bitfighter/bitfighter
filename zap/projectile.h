@@ -49,6 +49,8 @@ class Projectile : public BfObject
 private:
    static const S32 COMPRESSED_VELOCITY_MAX = 2047;
 
+   void initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);
+
 protected:
    enum MaskBits {
       InitialMask   = Parent::FirstFreeMask << 0,
@@ -69,8 +71,9 @@ public:
    bool mBounced;
    SafePtr<BfObject> mShooter;
 
-   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);    // Constructor
-   ~Projectile();                                                                                                     // Destructor
+   Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  
+   Projectile(lua_State *L = NULL);                                                     // Combined Lua / C++ default constructor -- only used in Lua at the moment
+   ~Projectile();                                                                       // Destructor
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -90,7 +93,7 @@ public:
    TNL_DECLARE_CLASS(Projectile);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(Projectile);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Projectile);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -105,12 +108,15 @@ public:
 // Basic burst object, and the base clase used for both mines and spybugs
 class BurstProjectile : public MoveItem
 {
-private:
    typedef MoveItem Parent;
 
+private:
+   void initialize(const Point &pos, const Point &vel, BfObject *shooter);
+
 public:
-   BurstProjectile(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
-   ~BurstProjectile();                                                                        // Destructor
+   BurstProjectile(const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when burst is fired
+   BurstProjectile(lua_State *L = NULL);                                    // Combined Lua / C++ default constructor -- used in Lua only at the moment
+   ~BurstProjectile();                                                      // Destructor
 
    enum Constants
    {
@@ -140,7 +146,7 @@ public:
    TNL_DECLARE_CLASS(BurstProjectile);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(BurstProjectile);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(BurstProjectile);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -157,6 +163,9 @@ class Mine : public BurstProjectile
 {
    typedef BurstProjectile Parent;
 
+private:
+   void initialize(const Point &pos, Ship *planter);
+
 public:
    enum Constants
    {
@@ -167,8 +176,10 @@ public:
    static const S32 InnerBlastRadius = 100;
    static const S32 OuterBlastRadius = 250;
 
-   Mine(Point pos = Point(), Ship *owner=NULL);    // Constructor
-   ~Mine();                                        // Destructor
+   Mine(const Point &pos, Ship *owner);   // Constructor -- used when mine is planted
+   Mine(lua_State *L = NULL);             // Combined Lua / C++ default constructor -- used in Lua and editor
+   ~Mine();                               // Destructor
+
    Mine *clone() const;
 
    bool mArmed;
@@ -199,7 +210,7 @@ public:
    string toString(F32 gridSize) const;
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(Mine);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Mine);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -214,9 +225,14 @@ class SpyBug : public BurstProjectile
 {
    typedef BurstProjectile Parent;
 
+private:
+   void initialize(const Point &pos, Ship *owner);
+
+
 public:
-   SpyBug(Point pos = Point(), Ship *owner = NULL);      // Constructor
-   ~SpyBug();                                            // Destructor
+   SpyBug(const Point &pos, Ship *planter);  // Constructor -- used when SpyBug is deployed
+   SpyBug(lua_State *L = NULL);              // Combined Lua / C++ default constructor -- used in Lua and editor
+   ~SpyBug();                                // Destructor
    SpyBug *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -252,7 +268,7 @@ public:
    string toString(F32 gridSize) const;
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(SpyBug);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(SpyBug);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -282,18 +298,19 @@ private:
    bool exploded;
    bool mBounced;
 
+   void initialize(const Point &pos, const Point &vel, BfObject *shooter);
    void acquireTarget();
+   void emitMovementSparks();
 
-# ifndef ZAP_DEDICATED
+#ifndef ZAP_DEDICATED
    FXTrail mTrail;
 #endif
 
-   void emitMovementSparks();
-
 
 public:
-   Seeker(Point pos = Point(), Point vel = Point(), BfObject *shooter = NULL);     // Constructor
-   ~Seeker();                                                                      // Destructor
+   Seeker(const Point &pos, const Point &vel, BfObject *shooter);    // Constructor
+   Seeker(lua_State *L = NULL);                                      // Combined Lua / C++ default constructor
+   ~Seeker();                                                        // Destructor
 
    SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;
@@ -313,7 +330,7 @@ public:
    TNL_DECLARE_CLASS(Seeker);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(Seeker);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Seeker);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

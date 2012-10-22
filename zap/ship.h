@@ -193,9 +193,9 @@ public:
    void calcThrustComponents(F32 *thrust);
 
    // Constructor
-   Ship(ClientInfo *clientInfo = NULL, S32 team = -1, const Point &p = Point(0,0), bool isRobot = false);      
-   
-   ~Ship();           // Destructor
+   Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
+   Ship(lua_State *L = NULL);                                                      // Combined Lua / C++ default constructor
+   ~Ship();                                                                        // Destructor
 
    F32 getHealth();
    S32 getEnergy();
@@ -291,7 +291,7 @@ public:
    TNL_DECLARE_CLASS(Ship);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(Ship);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Ship);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

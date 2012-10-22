@@ -95,8 +95,8 @@ private:
    F32 mDragFactor;
 
 public:
-   SoccerBallItem();    // C++ constructor
-   ~SoccerBallItem();   // Destructor
+   SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
+   ~SoccerBallItem();                        // Destructor
 
    SoccerBallItem *clone() const;
 
@@ -133,7 +133,7 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    ///// Lua Interface
-   LUAW_DECLARE_CLASS(SoccerBallItem);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(SoccerBallItem);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

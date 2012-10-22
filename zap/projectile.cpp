@@ -49,8 +49,28 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
-// Constructor
-Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
+// Constructor -- used when weapon is fired  
+Projectile::Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
+{
+   initialize(type, pos, vel, shooter);
+}
+
+
+// Combined Lua / C++ default constructor -- only used in Lua at the moment
+Projectile::Projectile(lua_State *L)
+{
+   initialize(WeaponPhaser, Point(0,0), Point(0,0), NULL);
+}
+
+
+// Destructor
+Projectile::~Projectile()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
 {
    mObjectTypeNumber = BulletTypeNumber;
    setNewGeometry(geomPoint);
@@ -85,13 +105,6 @@ Projectile::Projectile(WeaponType type, Point pos, Point vel, BfObject *shooter)
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Destructor
-Projectile::~Projectile()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -473,34 +486,18 @@ TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
 
 const F32 BurstProjectile_Radius = 7;
 const F32 BurstProjectile_Mass = 1;
-// Constructor
-BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, BurstProjectile_Radius, BurstProjectile_Mass)
+
+// Constructor -- used when burst is fired
+BurstProjectile::BurstProjectile(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(pos, true, BurstProjectile_Radius, BurstProjectile_Mass)
 {
-   mObjectTypeNumber = BurstTypeNumber;
+   initialize(pos, vel, shooter);
+}
 
-   mNetFlags.set(Ghostable);
 
-   setActualPos(pos);
-   setActualVel(vel);
-   setMaskBits(PositionMask);
-   mWeaponType = WeaponBurst;
-
-   updateExtentInDatabase();
-
-   mTimeRemaining = GameWeapon::weaponInfo[WeaponBurst].projLiveTime;
-   exploded = false;
-
-   if(shooter)
-   {
-      setOwner(shooter->getOwner());
-      setTeam(shooter->getTeam());
-      mShooter = shooter;
-      mKillString = shooter->getKillString();
-   }
-   else
-      setOwner(NULL);
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+// Combined Lua / C++ default constructor -- used in Lua only at the moment
+BurstProjectile::BurstProjectile(lua_State *L)
+{
+   initialize(Point(0,0), Point(0,0), NULL);
 }
 
 
@@ -508,6 +505,38 @@ BurstProjectile::BurstProjectile(Point pos, Point vel, BfObject *shooter): MoveI
 BurstProjectile::~BurstProjectile()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void BurstProjectile::initialize(const Point &pos, const Point &vel, BfObject *shooter)
+{
+   mObjectTypeNumber = BurstTypeNumber;
+   mWeaponType = WeaponBurst;
+
+   mNetFlags.set(Ghostable);
+
+   setActualPos(pos);
+   setActualVel(vel);
+
+   updateExtentInDatabase();
+
+   mTimeRemaining = GameWeapon::weaponInfo[WeaponBurst].projLiveTime;
+   exploded = false;
+
+   if(!shooter)
+   {
+      setTeam(TEAM_HOSTILE);    // Hostile to all, as loose projectiles generally are!
+      setOwner(NULL);
+   }
+   else
+   {
+      setOwner(shooter->getOwner());
+      setTeam(shooter->getTeam());
+      mShooter = shooter;
+      mKillString = shooter->getKillString();
+   }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -705,29 +734,17 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
 
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
-// Constructor (planter defaults to null)
-Mine::Mine(Point pos, Ship *planter) : BurstProjectile(pos, Point())
+// Constructor -- used when mine is planted
+Mine::Mine(const Point &pos, Ship *planter) : BurstProjectile(pos, Point(0,0), planter)
 {
-   mObjectTypeNumber = MineTypeNumber;
-   mWeaponType = WeaponMine;
+   initialize(pos, planter);
+}
 
-   if(planter)
-   {
-      setOwner(planter->getOwner());
-      setTeam(planter->getTeam());
-   }
-   else
-   {
-      setTeam(TEAM_HOSTILE);    // Hostile to all, as mines generally are!
-      setOwner(NULL);
-   }
 
-   mArmed = false;
-   mKillString = "mine";      // Triggers special message when player killed
-
-   setExtent(Rect(pos, pos));
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+// Combined Lua / C++ default constructor -- used in Lua and editor
+Mine::Mine(lua_State *L) : BurstProjectile(Point(0,0), Point(0,0), NULL)
+{
+   initialize(Point(0,0), NULL);
 }
 
 
@@ -735,6 +752,18 @@ Mine::Mine(Point pos, Ship *planter) : BurstProjectile(pos, Point())
 Mine::~Mine()
 {
    LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Mine::initialize(const Point &pos, Ship *planter)
+{
+   mObjectTypeNumber = MineTypeNumber;
+   mWeaponType = WeaponMine;
+
+   mArmed = false;
+   mKillString = "mine";      // Triggers special message when player killed
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -957,26 +986,27 @@ REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
 
 TNL_IMPLEMENT_NETOBJECT(SpyBug);
 
-// Constructor
-SpyBug::SpyBug(Point pos, Ship *planter) : BurstProjectile(pos, Point())
+// Constructor -- used when SpyBug is deployed
+SpyBug::SpyBug(const Point &pos, Ship *planter) : BurstProjectile(pos, Point(0,0), planter)
+{
+   initialize(pos, planter);
+}
+
+
+// Combined Lua / C++ default constructor -- used in Lua and editor
+SpyBug::SpyBug(lua_State *L)  : BurstProjectile(Point(0,0), Point(0,0), NULL)
+{
+   initialize(Point(0,0), NULL);
+}
+
+
+void SpyBug::initialize(const Point &pos, Ship *planter)
 {
    mObjectTypeNumber = SpyBugTypeNumber;
-
    mWeaponType = WeaponSpyBug;
-   mNetFlags.set(Ghostable);
 
-   if(planter)
-   {
-      setTeam(planter->getTeam());
-      setOwner(planter->getOwner());
-   }
-   else
-   {
-      setTeam(TEAM_NEUTRAL);
-      setOwner(NULL);
-   }
-
-   setExtent(Rect(pos, pos));
+   if(!planter)
+      setTeam(TEAM_NEUTRAL);     // BurstProjectile will set this to TEAM_HOSTILE
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1211,14 +1241,33 @@ TNL_IMPLEMENT_NETOBJECT(Seeker);
 const F32 Seeker_Radius = 4;
 const F32 Seeker_Mass = 1;
 
-Seeker::Seeker(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
+Seeker::Seeker(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
+{
+   initialize(pos, vel, shooter);
+}
+
+
+// Combined Lua / C++ default constructor
+Seeker::Seeker(lua_State *L)
+{
+   initialize(Point(0,0), Point(0,0), NULL);
+}
+
+
+// Destructor
+Seeker::~Seeker()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Seeker::initialize(const Point &pos, const Point &vel, BfObject *shooter)
 {
    mObjectTypeNumber = SeekerTypeNumber;
 
    mNetFlags.set(Ghostable);
 
    setPosVelAng(pos, vel, vel.ATAN2());
-   setMaskBits(PositionMask);
    mWeaponType = WeaponSeeker;
 
    updateExtentInDatabase();
@@ -1227,26 +1276,23 @@ Seeker::Seeker(Point pos, Point vel, BfObject *shooter): MoveItem(pos, true, See
    exploded = false;
    mBounced = false;
 
-   if(shooter)
+   if(!shooter)
+   {
+      setOwner(NULL);
+      setTeam(TEAM_HOSTILE);
+   }
+   else
    {
       setOwner(shooter->getOwner());
       setTeam(shooter->getTeam());
       mShooter = shooter;
       mKillString = shooter->getKillString();
    }
-   else
-      setOwner(NULL);
+      
 
    mAcquiredTarget = NULL;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Destructor
-Seeker::~Seeker()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 

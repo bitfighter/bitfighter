@@ -282,8 +282,8 @@ TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 static const F32 SOCCER_BALL_ITEM_MASS = 4;
 
-// Constructor
-SoccerBallItem::SoccerBallItem() : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
+// Combined Lua / C++ default constructor
+SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
