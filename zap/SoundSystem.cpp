@@ -1173,7 +1173,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
    logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }
 
-void SoundSystem::processAudio(F32 sfxVol, F32 musicVol, F32 voiceVol)
+void SoundSystem::processAudio(U32 timeDelta, F32 sfxVol, F32 musicVol, F32 voiceVol, UIManager *uiManager)
 {
    // Do nothing
 }

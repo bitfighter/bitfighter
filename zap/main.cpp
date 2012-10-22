@@ -1080,13 +1080,13 @@ int main(int argc, char **argv)
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
+   // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
+   // only way to specify a non-standard location is via the command line, which we've now read.
+   setupLogging(folderManager->logDir);
 
    LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
    LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
 
-   // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
-   // only way to specify a non-standard location is via the command line, which we've now read.
-   setupLogging(folderManager->logDir);
 
    // Load the INI file
    gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));

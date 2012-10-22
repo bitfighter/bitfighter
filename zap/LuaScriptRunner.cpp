@@ -333,7 +333,7 @@ bool LuaScriptRunner::startLua()
       if(!L)
       {  
          // Failure here is likely to be something systemic, something bad.  Like smallpox.
-         logErrorHandler("Could not create Lua interpreter.  Aborting script.", "STARTUP");     
+         logprintf(LogConsumer::LogError, "%s %s", "STARTUP", "Could not create Lua interpreter.  Aborting script.");
          return false;
       }
 
@@ -429,7 +429,13 @@ void LuaScriptRunner::deleteScript(const char *name)
 
 
 bool LuaScriptRunner::prepareEnvironment()              
-{ 
+{
+   if(!L)
+   {
+      logprintf(LogConsumer::LogError, "%s %s.", getErrorMessagePrefix(), "Lua interpreter doesn't exist.  Aborting environment setup");
+      return false;
+   }
+
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    // Register all our classes in the global namespace... they will be copied below when we copy the environment

@@ -126,7 +126,8 @@ string EditorPlugin::getScriptName()
 
 bool EditorPlugin::prepareEnvironment()
 {
-   LuaScriptRunner::prepareEnvironment();
+   if(!LuaScriptRunner::prepareEnvironment())
+      return false;
 
    if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) /*|| !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY)*/)
       return false;

@@ -47,6 +47,7 @@ class alureStream;
 
 // forward declarations
 typedef unsigned int ALuint;
+typedef float ALfloat;
 
 namespace TNL {
    template <class T> class RefPtr;
