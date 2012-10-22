@@ -189,7 +189,8 @@ bool Robot::prepareEnvironment()
 {
    try
    {
-      LuaScriptRunner::prepareEnvironment();
+      if(!LuaScriptRunner::prepareEnvironment())
+         return false;
 
       // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
       // This is the name that we'll use to refer to this robot from our Lua code.  

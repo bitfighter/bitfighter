@@ -86,7 +86,8 @@ const char *Console::getErrorMessagePrefix() { return "Console"; }
 // TODO: Merge with luaLevelGenerator version, which is almost identical
 bool Console::prepareEnvironment()  
 { 
-   Parent::prepareEnvironment();
+   if(!Parent::prepareEnvironment())
+      return false;
 
    if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
       return false;
