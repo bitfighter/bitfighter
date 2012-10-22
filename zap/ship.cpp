@@ -94,7 +94,7 @@ Ship::Ship(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot) : M
 
 
 // Combined Lua / C++ default constructor -- this is used by Lua and by TNL, so we need to programatically separate the two
-Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius), mSpawnPoint(Point(0,0))
+Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
 {
    if(L)
    {
@@ -143,7 +143,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mIsRobot = isRobot;
 
    if(!isRobot)               // Robots will run this during their own initialization; no need to run it twice!
-      initialize(Point(0,0));
+      initialize(pos);
    else
       hasExploded = false;    // Client needs this false for unpackUpdate
 
