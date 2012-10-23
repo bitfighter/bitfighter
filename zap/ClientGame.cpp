@@ -1657,7 +1657,7 @@ void ClientGame::renderCommander()
          renderObjects.push_back(getBot(i));
 
    // If we're drawing bot zones, get them now
-   if(isShowingDebugMeshZones())
+   if(mDebugShowMeshZones)
       populateRenderZones();
 
    if(ship)
@@ -1712,8 +1712,9 @@ void ClientGame::renderCommander()
    // Now render the objects themselves
    renderObjects.sort(renderSortCompare);
 
-   for(S32 i = 0; i < renderZones.size(); i++)
-      renderZones[i]->render(0);
+   if(mDebugShowMeshZones)
+      for(S32 i = 0; i < renderZones.size(); i++)
+         renderZones[i]->render(0);
 
    // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
@@ -1722,8 +1723,9 @@ void ClientGame::renderCommander()
    // Second pass
    Barrier::renderEdges(1, mSettings->getWallOutlineColor());    // Render wall edges
 
-   for(S32 i = 0; i < renderZones.size(); i++)
-      renderZones[i]->render(1);
+   if(mDebugShowMeshZones)
+      for(S32 i = 0; i < renderZones.size(); i++)
+         renderZones[i]->render(1);
 
    for(S32 i = 0; i < renderObjects.size(); i++)
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
@@ -1880,7 +1882,7 @@ void ClientGame::renderNormal()
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
-   if(isShowingDebugMeshZones())
+   if(mDebugShowMeshZones)
       populateRenderZones(extentRect);
 
 
@@ -1895,8 +1897,9 @@ void ClientGame::renderNormal()
    {
       Barrier::renderEdges(j, mSettings->getWallOutlineColor());    // Render wall edges
 
-      for(S32 i = 0; i < renderZones.size(); i++)
-         renderZones[i]->render(j);
+      if(mDebugShowMeshZones)
+         for(S32 i = 0; i < renderZones.size(); i++)
+            renderZones[i]->render(j);
 
       for(S32 i = 0; i < renderObjects.size(); i++)
          renderObjects[i]->render(j);

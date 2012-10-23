@@ -93,11 +93,13 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
+#ifndef ZAP_DEDICATED
    if(layerIndex == 0)
       renderNavMeshZone(getOutline(), getFill(), getCentroid(), mZoneId, true);
 
    else if(layerIndex == 1)
       renderNavMeshBorders(mNeighbors);
+#endif
 }
 
 
