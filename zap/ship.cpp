@@ -1566,7 +1566,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mInterpolating = false;
       copyMoveState(ActualState, RenderState);
 
-      for(S32 i = 0; i<TrailCount; i++)
+      for(S32 i = 0; i < TrailCount; i++)
          mTrail[i].reset();
    }
    else
