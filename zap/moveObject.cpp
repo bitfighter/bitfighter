@@ -192,10 +192,7 @@ Point MoveObject::getPos(S32 stateIndex) const
 void MoveObject::setPos(S32 stateIndex, const Point &pos)
 {
    if(stateIndex == ActualState)
-   {
       Parent::setPos(pos);
-      setMaskBits(WarpPositionMask | PositionMask);
-   }
    else
       mMoveStates.setPos(stateIndex, pos);
 }
@@ -862,6 +859,7 @@ void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "
 void MoveItem::setActualPos(const Point &pos)
 {
    setPos(ActualState, pos);
+   setMaskBits(WarpPositionMask | PositionMask);
 }
 
 
