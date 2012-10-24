@@ -35,10 +35,42 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(GoalZone);
 
-// Constructor
-GoalZone::GoalZone()
+/**
+*  @luafunc GoalZone::GoalZone()
+*  @luafunc GoalZone::GoalZone(team, geom)
+*  @brief %GoalZone constructor.
+*  @descr Default team is Neutral.
+*/
+
+// Combined Lua / C++ constructor
+GoalZone::GoalZone(lua_State *L)
 {
-   initialize();
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = GoalZoneTypeNumber;
+
+   mFlashCount = 0;
+   mHasFlag = false;
+   mScore = 1;             // For now...  may someday let GoalZones have different scoring values
+   mCapturer = NULL;
+
+   if(L)    // Coming from Lua -- grab params from L
+   {
+      S32 profile = checkArgList(L, functionArgs, "GoalZone", "constructor");
+
+      if(profile == 0)           // No args constructor
+      {
+         setTeam(TEAM_NEUTRAL);  
+         return;
+      }
+
+      if(profile == 1)           // Team, Geom
+      {
+         BfObject::setTeam(L, 1);
+         setGeom(L, 2);
+      }
+   }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
  
 
@@ -47,18 +79,6 @@ GoalZone::~GoalZone()
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
-
-void GoalZone::initialize()
-{
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = GoalZoneTypeNumber;
-   mFlashCount = 0;
-   mHasFlag = false;
-   mScore = 1;    // For now...
-   mCapturer = NULL;
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
-
-}
 
 GoalZone *GoalZone::clone() const
 {
@@ -283,32 +303,6 @@ GENERATE_LUA_FUNARGS_TABLE(GoalZone, LUA_METHODS);
 
 const char *GoalZone::luaClassName = "GoalZone";
 REGISTER_LUA_SUBCLASS(GoalZone, Zone);
-
-
-/**
-  *  @luafunc GoalZone::GoalZone()
-  *  @luafunc GoalZone::GoalZone(team, geom)
-  *  @brief %GoalZone constructor.
-  *  @descr Default team is Neutral.
-  */
-GoalZone::GoalZone(lua_State *L)
-{
-   initialize();
-
-   S32 profile = checkArgList(L, functionArgs, "GoalZone", "constructor");
-
-   if(profile == 0)           // No args constructor
-   {
-      setTeam(TEAM_NEUTRAL);  // Override default set in initialize()
-      return;
-   }
-
-   if(profile == 1)           // Team, Geom
-   {
-      //setTeam(L, 1);
-      setGeom(L, 2);
-   }
-}
 
 
 /**

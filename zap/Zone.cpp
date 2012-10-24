@@ -31,8 +31,8 @@ namespace Zap
 {
 
 
-// C++ constructor
-Zone::Zone()
+// Combined Lua / C++ constructor)
+Zone::Zone(lua_State *L)   
 {
    setTeam(TEAM_NEUTRAL);
    mObjectTypeNumber = ZoneTypeNumber;

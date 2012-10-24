@@ -56,10 +56,9 @@ protected:
    };
 
 public:
-   GoalZone();       // Constructor
-   ~GoalZone();      // Destructor
+   GoalZone(lua_State *L = NULL);   // Combined Lua / C++ constructor
+   ~GoalZone();                     // Destructor
 
-   void initialize();
    GoalZone *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -113,7 +112,6 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   GoalZone(lua_State *L);
    S32 hasFlag(lua_State *L);
 };
 

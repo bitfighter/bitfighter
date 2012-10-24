@@ -899,6 +899,7 @@ void PolylineGeometry::unpackGeom(GhostConnection *connection, BitStream *stream
    U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
 
    mPolyBounds.resize(size);
+   mVertSelected.resize(size);
    
    for(U32 i = 0; i < size; i++)
       mPolyBounds[i].read(stream);
@@ -910,6 +911,7 @@ void PolylineGeometry::setGeom(const Vector<Point> &points)
    S32 size = points.size();
 
    mPolyBounds.resize(size);
+   mVertSelected.resize(size);
 
    for(S32 i = 0; i < size; i++)
       mPolyBounds[i] = points[i];
@@ -939,9 +941,9 @@ string PolylineGeometry::geomToString(F32 gridSize) const
 }
 
 
-// Fills bounds with points from argv starting at firstCoord
+// Fills bounds with points from argv starting at firstCoord; also resizes selected to match the size of bounds
 static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, 
-                           bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds)
+                           bool allowFirstAndLastPointToBeEqual, Vector<Point> &bounds, Vector<bool> &selected)
 {
    Point p, lastP;
    
@@ -965,14 +967,15 @@ static void readPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 grid
    // Check if last point was same as first; if so, scrap it
    if(!allowFirstAndLastPointToBeEqual && bounds.first() == bounds.last())
       bounds.erase(bounds.size() - 1);
+
+   selected.resize(bounds.size());
 }
 
 
 // For walls at least, this is client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 void PolylineGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
-    readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds);      // Fills mPolyBounds
-    mVertSelected.resize(mPolyBounds.size());
+    readPolyBounds(argc, argv, firstCoord, gridSize, true, mPolyBounds, mVertSelected);      // Fills mPolyBounds
 }
 
 
@@ -1024,8 +1027,7 @@ F32 PolygonGeometry::getLabelAngle()
 
 void PolygonGeometry::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
 {
-   readPolyBounds(argc, argv, firstCoord, gridSize, false, mPolyBounds);
-   mVertSelected.resize(mPolyBounds.size());
+   readPolyBounds(argc, argv, firstCoord, gridSize, false, mPolyBounds, mVertSelected);
 }
 
 

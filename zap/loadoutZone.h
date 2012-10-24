@@ -40,10 +40,9 @@ class LoadoutZone : public GameZone
    typedef GameZone Parent;
 
 public:
-   LoadoutZone();             // C++ constructor
-   virtual ~LoadoutZone();    // Destructor
+   LoadoutZone(lua_State *L = NULL);   // Combined Lua / C++ constructor
+   virtual ~LoadoutZone();             // Destructor
 
-   void initialize();
    LoadoutZone *clone() const;
 
    void render();
@@ -75,7 +74,6 @@ public:
 
    //// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LoadoutZone);
-   LoadoutZone(lua_State *L);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

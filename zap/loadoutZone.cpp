@@ -32,11 +32,39 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 
+/**
+*  @luafunc LoadoutZone::LoadoutZone()
+*  @luafunc LoadoutZone::LoadoutZone(team, geom)
+*  @brief %LoadoutZone constructor.
+*  @descr Default team is Neutral.
+*/
 
-// C++ constructor
-LoadoutZone::LoadoutZone()
+// Combined Lua / C++ constructor
+LoadoutZone::LoadoutZone(lua_State *L)    
 {
-   initialize();
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = LoadoutZoneTypeNumber;
+
+   if(!L)   // C+ constructor, use default params
+   {
+      setTeam(0);
+   }
+
+   else     // Coming from Lua -- grab params from L
+   {
+      S32 profile = checkArgList(L, functionArgs, "LoadoutZone", "constructor");
+
+      if(profile == 0)              // No args constructor
+         setTeam(TEAM_NEUTRAL);     
+
+      else if(profile == 1)         // Team, Geom
+      {
+         setTeam(L, 1);
+         setGeom(L, 2);
+      }
+   }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -44,16 +72,6 @@ LoadoutZone::LoadoutZone()
 LoadoutZone::~LoadoutZone()
 {
    LUAW_DESTRUCTOR_CLEANUP;
-}
-
-
-void LoadoutZone::initialize()
-{
-   setTeam(0);
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = LoadoutZoneTypeNumber;
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -187,32 +205,6 @@ GENERATE_LUA_FUNARGS_TABLE(LoadoutZone, LUA_METHODS);
 const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
 
 #undef LUA_METHODS
-
-
-/**
-  *  @luafunc LoadoutZone::LoadoutZone()
-  *  @luafunc LoadoutZone::LoadoutZone(team, geom)
-  *  @brief %LoadoutZone constructor.
-  *  @descr Default team is Neutral.
-  */
-LoadoutZone::LoadoutZone(lua_State *L)
-{
-   initialize();
-
-   S32 profile = checkArgList(L, functionArgs, "LoadoutZone", "constructor");
-
-   if(profile == 0)           // No args constructor
-   {
-      setTeam(TEAM_NEUTRAL);  // Override default set in initialize()
-      return;
-   }
-
-   if(profile == 1)           // Team, Geom
-   {
-      setTeam(L, 1);
-      setGeom(L, 2);
-   }
-}
 
 
 const char *LoadoutZone::luaClassName = "LoadoutZone";

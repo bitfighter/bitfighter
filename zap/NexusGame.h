@@ -196,9 +196,12 @@ class NexusZone : public GameZone
 {
    typedef GameZone Parent;
 
+private:
+   void processArguments_ArchaicZapFormat(S32 argc, const char **argv, F32 gridSize);    // Helper for processArguments
+
 public:
-   NexusZone();       // Constructor
-   ~NexusZone();      // Destructor
+   NexusZone(lua_State *L = NULL);     // Combined Lua / C++ constructor
+   ~NexusZone();                       // Destructor
 
    NexusZone *clone() const;
 
@@ -238,7 +241,7 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(NexusZone);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(NexusZone);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

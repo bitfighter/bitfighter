@@ -951,9 +951,8 @@ void NexusFlagItem::sendHome()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
-// Constructor
-NexusZone::NexusZone()
+// Combined Lua / C++ constructor)
+NexusZone::NexusZone(lua_State *L)
 {
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
@@ -975,7 +974,7 @@ NexusZone *NexusZone::clone() const
 }
 
 
-// The nexus object itself
+// The Nexus object itself
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
@@ -1005,26 +1004,32 @@ bool NexusZone::processArguments(S32 argc2, const char **argv2, Game *game)
       return false;
 
    if(argc <= 4)     // Archaic Zap! format
-   {
-      Point pos;
-      pos.read(argv);
-      pos *= game->getGridSize();
-
-      Point ext(50, 50);
-      if(argc == 4)
-         ext.set(atoi(argv[2]), atoi(argv[3]));
-
-      addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
-      addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
-      addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
-      addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
-
-      updateExtentInDatabase();  
-   }
+      processArguments_ArchaicZapFormat(argc, argv, game->getGridSize());
    else              // Sleek, modern Bitfighter format
       Parent::processArguments(argc, argv, game);
 
    return true;
+}
+
+
+// Read and process NexusZone format used in Zap -- we need this for backwards compatibility
+void NexusZone::processArguments_ArchaicZapFormat(S32 argc, const char **argv, F32 gridSize)
+{
+   Point pos;
+   pos.read(argv);
+   pos *= gridSize;
+
+   Point ext(50, 50);
+
+   if(argc == 4)
+      ext.set(atoi(argv[2]), atoi(argv[3]));
+
+   addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
+   addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
+   addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
+   addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
+   
+   updateExtentInDatabase(); 
 }
 
 

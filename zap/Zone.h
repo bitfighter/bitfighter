@@ -40,8 +40,8 @@ class Zone : public PolygonObject
    typedef PolygonObject Parent;
 
 public:
-   Zone();              // C++ constructor
-   virtual ~Zone();     // Destructor
+   Zone(lua_State *L = NULL);    // Combined Lua / C++ constructor
+   virtual ~Zone();              // Destructor
    Zone *clone() const;
 
    virtual void render();
@@ -68,7 +68,7 @@ public:
    virtual void renderDock();
 
    //// Lua interface
-   LUAW_DECLARE_CLASS(Zone);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Zone);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
