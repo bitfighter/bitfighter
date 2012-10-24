@@ -1996,7 +1996,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(argc >= 2)
       {
-         BfObject *newObject = new PolyWall();  
+         PolyWall *polywall = new PolyWall();  
          
          S32 skipArgs = 0;
          if(!stricmp(argv[0], "BarrierMakerS"))
@@ -2006,17 +2006,14 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
             skipArgs = 1;
          }
 
-         newObject->initializeEditor();     // Only runs unselectVerts
+         polywall->initializeEditor();     // Only runs unselectVerts
 
-         newObject->processArguments(argc - skipArgs, argv + skipArgs, this);
+         polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
          
-         if(newObject->getVertCount() >= 2)
-         {
-            newObject->addToGame(this, database);
-            newObject->onGeomChanged(); 
-         }
+         if(polywall->getVertCount() >= 2)
+            addPolyWall(polywall, mGameObjDatabase.get());
          else
-            delete newObject;
+            delete polywall;
       }
    }
    else if(!stricmp(argv[0], "Robot"))
@@ -2054,6 +2051,14 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       return false;
 
    return true;
+}
+
+
+// Add polywall item to game
+void ClientGame::addPolyWall(PolyWall *polyWall, GridDatabase *database)
+{
+   polyWall->addToGame(this, database);
+   polyWall->onGeomChanged(); 
 }
 
 

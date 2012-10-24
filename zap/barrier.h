@@ -190,7 +190,9 @@ class PolyWall : public PolygonObject     // Don't need BfObject component of th
    typedef PolygonObject Parent;
 
 public:
-   PolyWall();      // Constructor
+   PolyWall(lua_State *L = NULL);   // Combined Lua / C++ constructor
+   ~PolyWall();                     // Destructor
+
    PolyWall *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -215,6 +217,14 @@ public:
    F32 getEditorRadius(F32 currentScale);
 
    TNL_DECLARE_CLASS(PolyWall);
+
+   //// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(PolyWall);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
 };
 
 
@@ -232,7 +242,7 @@ struct WallRec
 public:
    WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
    WallRec(const WallItem &wallItem);                          // Constructor
-   WallRec(const PolyWall &polyWall);                          // Constructor
+   WallRec(const PolyWall *polyWall);                          // Constructor
 
    void constructWalls(Game *theGame) const;
 };

@@ -36,6 +36,7 @@ namespace Zap
 
 class LuaLevelGenerator;
 class Robot;
+class PolyWall;
 
 class ServerGame : public Game
 {
@@ -148,6 +149,7 @@ public:
    void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);   // Spawns and such aren't really items
+   void addPolyWall(PolyWall *polyWall, GridDatabase *database);
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();

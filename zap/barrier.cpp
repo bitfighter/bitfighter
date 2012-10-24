@@ -92,15 +92,15 @@ WallRec::WallRec(const WallItem &wallItem)
 
 
 // Constructor
-WallRec::WallRec(const PolyWall &polyWall)
+WallRec::WallRec(const PolyWall *polyWall)
 {
    width = 1;      // Doesn't really matter... will be ignored
    solid = true;
 
-   for(S32 i = 0; i < polyWall.getVertCount(); i++)
+   for(S32 i = 0; i < polyWall->getVertCount(); i++)
    {
-      verts.push_back(polyWall.getVert(i).x);
-      verts.push_back(polyWall.getVert(i).y);
+      verts.push_back(polyWall->getVert(i).x);
+      verts.push_back(polyWall->getVert(i).y);
    }
 }
 
@@ -680,10 +680,18 @@ extern Color EDITOR_WALL_FILL_COLOR;
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
 
-// Constructor
-PolyWall::PolyWall() : Parent()
+// Combined Lua / C++ constructor
+PolyWall::PolyWall(lua_State *L)
 {
    mObjectTypeNumber = PolyWallTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+PolyWall::~PolyWall()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -767,6 +775,22 @@ void PolyWall::onItemDragging()
 {
    // Do nothing -- this is here to override PolygonObject::onItemDragging(), onGeomChanged() should only be called after move is complete
 }
+
+
+/////
+// Lua interface
+
+/**
+  *  @luaclass PolyWall
+  *  @brief Polygonal wall items.
+  */
+const luaL_reg           PolyWall::luaMethods[]   = { { NULL, NULL } };
+const LuaFunctionProfile PolyWall::functionArgs[] = { { NULL, { }, 0 } };
+
+#undef LUA_METHODS
+
+const char *PolyWall::luaClassName = "PolyWall";
+REGISTER_LUA_SUBCLASS(PolyWall, BfObject);
 
 
 ////////////////////////////////////////

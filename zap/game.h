@@ -156,6 +156,7 @@ public:
 class ClientRef;
 class TeamManager;
 class ClientInfo;
+class PolyWall;
 
 class Game : public LevelLoader
 {
@@ -239,35 +240,35 @@ public:
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_HORIZONTAL = 800;    // How far player can see with sensor equipped horizontally...
    static const S32 PLAYER_SENSOR_PASSIVE_VISUAL_DISTANCE_VERTICAL = 600;      // ...and vertically
 
-   Game(const Address &theBindAddress, GameSettings *settings);         // Constructor
-   virtual ~Game();                                                     // Destructor
+   Game(const Address &theBindAddress, GameSettings *settings);   // Constructor
+   virtual ~Game();                                               // Destructor
 
    void setActiveTeamManager(TeamManager *teamManager);
 
-   S32 getClientCount() const;                                          // Total number of players, human and robot
-   S32 getPlayerCount() const;                                          // Returns number of human players
-   S32 getAuthenticatedPlayerCount() const;                             // Number of authenticated human players
-   S32 getRobotCount() const;                                           // Returns number of bots
+   S32 getClientCount() const;                                    // Total number of players, human and robot
+   S32 getPlayerCount() const;                                    // Returns number of human players
+   S32 getAuthenticatedPlayerCount() const;                       // Number of authenticated human players
+   S32 getRobotCount() const;                                     // Returns number of bots
 
    ClientInfo *getClientInfo(S32 index) const;
    const Vector<RefPtr<ClientInfo> > *getClientInfos();
 
-   void addToClientList(ClientInfo *clientInfo);               
-   void removeFromClientList(const StringTableEntry &name);             // Client side
-   void removeFromClientList(ClientInfo *clientInfo);                   // Server side
+   void addToClientList(ClientInfo *clientInfo);                  
+   void removeFromClientList(const StringTableEntry &name);       // Client side
+   void removeFromClientList(ClientInfo *clientInfo);             // Server side
    void clearClientList();
 
    void setAddTarget();
    void clearAddTarget();
    static Game *getAddTarget();
 
-   ClientInfo *findClientInfo(const StringTableEntry &name);            // Find client by name
+   ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    
    Rect getWorldExtents();
 
-   virtual bool isTestServer();                                         // Overridden in ServerGame
+   virtual bool isTestServer();                                   // Overridden in ServerGame
 
-   virtual const Color *getTeamColor(S32 teamId) const;                 // ClientGame will override
+   virtual const Color *getTeamColor(S32 teamId) const;           // ClientGame will override
 
    static const ModuleInfo *getModuleInfo(ShipModule module);
    
@@ -297,6 +298,8 @@ public:
    string toString();
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database) = 0;
+   virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
+
 
    void setGameTime(F32 time);                                          // Only used during level load process
 
