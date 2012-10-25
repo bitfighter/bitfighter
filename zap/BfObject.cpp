@@ -984,9 +984,9 @@ BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, Point
 }
 
 
-void BfObject::onAddedToGame(Game *)
+void BfObject::onAddedToGame(Game *game)
 {
-   getGame()->mObjectsLoaded++;
+   game->mObjectsLoaded++;
 }
 
 

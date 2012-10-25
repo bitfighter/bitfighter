@@ -492,6 +492,22 @@ void WallItem::onGeomChanged()
 }
 
 
+void WallItem::onItemDragging()
+{
+   // Do nothing -- this is here to override Parent::onItemDragging(), onGeomChanged() should only be called after move is complete
+}
+
+
+// WallItems are not really added to the game in the sense of other objects; rather their geometry is used
+// to create Barriers that are added directly.  Here we will mark the item as added (to catch errors in Lua
+// scripts that attempt to modify an added item), but we have no need to pass the event handler up the stack
+// to superclass event handlers.
+void WallItem::onAddedToGame(Game *game)
+{
+   mAddedToGame = true;
+}
+
+
 // Only called in editor during preview mode -- basicaly prevents parent class from rendering spine of wall
 void WallItem::render()
 {
@@ -580,12 +596,6 @@ void WallItem::setSelected(bool selected)
 }
 
 
-void WallItem::onItemDragging()
-{
-   // Do nothing -- this is here to override Parent::onItemDragging(), onGeomChanged() should only be called after move is complete
-}
-
-
 // Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
 bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 {
@@ -605,6 +615,8 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
    // is convenient to transmit to the clients
    WallRec wallRec(this);
    game->getGameType()->addWall(wallRec, game);
+
+   //mAddedToGame = true;
 }
 
 
@@ -678,6 +690,7 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 PolyWall::PolyWall(lua_State *L)
 {
    mObjectTypeNumber = PolyWallTypeNumber;
+   mAddedToGame = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -765,12 +778,27 @@ void PolyWall::onGeomChanged()
 }
 
 
+void PolyWall::addToGame(Game *game, GridDatabase *database)
+{
+   Parent::addToGame(game, database);
+   //mAddedToGame = true;
+}
+
+
 void PolyWall::onItemDragging()
 {
    // Do nothing -- this is here to override PolygonObject::onItemDragging(), onGeomChanged() should only be called after move is complete
 }
 
 
+// PolyWalls are not really added to the game in the sense of other objects; rather their geometry is used
+// to create Barriers that are added directly.  Here we will mark the item as added (to catch errors in Lua
+// scripts that attempt to modify an added item), but we have no need to pass the event handler up the stack
+// to superclass event handlers.
+void PolyWall::onAddedToGame(Game *game)
+{
+   mAddedToGame = true;
+}
 
 /////
 // Lua interface
@@ -782,15 +810,15 @@ const char *PolyWall::luaClassName = "PolyWall";
 REGISTER_LUA_SUBCLASS(PolyWall, BfObject);
 
 
-//void WallItem::checkIfWallHasBeenAddedToTheGame()
-//{
-//   if(mAddedToGame)
-//   {
-//      const char *msg = "Can't modify a wall that's already been added to a game!";
-//      logprintf(LogConsumer::LogError, msg);
-//      throw LuaException(msg);
-//   }
-//}
+void PolyWall::checkIfWallHasBeenAddedToTheGame()
+{
+   if(mAddedToGame)
+   {
+      const char *msg = "Can't modify a PolyWall that's already been added to a game!";
+      logprintf(LogConsumer::LogError, msg);
+      throw LuaException(msg);
+   }
+}
 
 
 // Lua method overrides.  Because walls are... special.

@@ -601,6 +601,8 @@ void ServerGame::addPolyWall(PolyWall *polyWall, GridDatabase *unused)
    // is convenient to transmit to the clients
    WallRec wallRec(polyWall);
    getGameType()->addWall(wallRec, this);
+
+   polyWall->onAddedToGame(this);
 }
 
 
@@ -610,6 +612,8 @@ void ServerGame::addWallItem(WallItem *wallItem, GridDatabase *unused)
    // is convenient to transmit to the clients
    WallRec wallRec(wallItem);
    getGameType()->addWall(wallRec, this);
+
+   wallItem->onAddedToGame(this);
 }
 
 

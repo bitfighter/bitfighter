@@ -156,8 +156,10 @@ public:
 
    Vector<Point> extendedEndPoints;
    virtual Rect calcExtents();
+
    virtual void onGeomChanged();
    virtual void onItemDragging();
+   virtual void onAddedToGame(Game *game);
 
    void processEndPoints();  
 
@@ -213,6 +215,10 @@ class PolyWall : public PolygonObject
 {
    typedef PolygonObject Parent;
 
+private:
+   bool mAddedToGame;
+   void checkIfWallHasBeenAddedToTheGame();
+
 public:
    PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
    ~PolyWall();                        // Destructor
@@ -229,6 +235,11 @@ public:
 
    virtual void onGeomChanged();
    virtual void onItemDragging();
+   virtual void onAddedToGame(Game *game);
+
+
+   void addToGame(Game *game, GridDatabase *database);
+
 
    /////
    // Editor methods
