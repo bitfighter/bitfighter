@@ -2220,8 +2220,8 @@ CommandInfo chatCmds[] = {
    { "resetscore",  &GameUserInterface::resetScoreHandler,      {  },                     0, LEVEL_COMMANDS,  0,  1,  {  },                                       "Reset all scores to zero" },
    { "addbot",      &GameUserInterface::addBotHandler,          { STR, TEAM, STR },       3, LEVEL_COMMANDS,  1,  2,  {"[file]", "[team name or num]","[args]"},          "Add bot from [file] to [team num], pass [args] to bot" },
    { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
-   { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     1, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
-   { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     1, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
+   { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
+   { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
 
    { "kick",               &GameUserInterface::kickPlayerHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
    { "ban",                &GameUserInterface::banPlayerHandler,          { NAME, xINT }, 2, ADMIN_COMMANDS,  0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
