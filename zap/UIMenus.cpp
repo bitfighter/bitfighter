@@ -2002,7 +2002,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
       TeamMenuUserInterface *ui = getUIManager()->getTeamMenuUserInterface();
       ui->nameToChange = getMenuItem(index)->getPrompt();
 
-      getUIManager()->activate(TeamDefUI);     // Show menu to let player select a new team
+      getUIManager()->activate(TeamUI);     // Show menu to let player select a new team
    }
 
    else if(gt)    // action == Kick
