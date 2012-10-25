@@ -33,7 +33,7 @@
 #include "stringUtils.h"
 
 #ifndef ZAP_DEDICATED 
-#   include "OpenglUtils.h"
+#  include "OpenglUtils.h"
 #endif
 
 #include <cmath>
@@ -382,11 +382,11 @@ void Barrier::computeBufferForBotZone(Vector<Point> &bufferedPoints)
 
       // Now add/subtract perpendicular and parallel vectors to buffer the segments
       bufferedPoints.push_back((start - parallelVector)  + crossPartial);
-      bufferedPoints.push_back((start - parallelPartial)  + crossVector);
-      bufferedPoints.push_back(end   + parallelPartial + crossVector);
-      bufferedPoints.push_back(end   + parallelVector  + crossPartial);
-      bufferedPoints.push_back(end   + parallelVector  - crossPartial);
-      bufferedPoints.push_back(end   + parallelPartial - crossVector);
+      bufferedPoints.push_back((start - parallelPartial) + crossVector);
+      bufferedPoints.push_back((end   + parallelPartial) + crossVector);
+      bufferedPoints.push_back((end   + parallelVector)  + crossPartial);
+      bufferedPoints.push_back((end   + parallelVector)  - crossPartial);
+      bufferedPoints.push_back((end   + parallelPartial) - crossVector);
       bufferedPoints.push_back((start - parallelPartial) - crossVector);
       bufferedPoints.push_back((start - parallelVector)  - crossPartial);
    }
@@ -791,6 +791,17 @@ const LuaFunctionProfile PolyWall::functionArgs[] = { { NULL, { }, 0 } };
 
 const char *PolyWall::luaClassName = "PolyWall";
 REGISTER_LUA_SUBCLASS(PolyWall, BfObject);
+
+
+// Override some Lua methods from BfObject.  Because PolyWalls are a step away from the real in-game geometry we're using, 
+// we need to do some special work to get and set their geometry.
+S32 PolyWall::setGeom(lua_State *L)
+{
+   if(getGame() && getGame()->isServer())
+      return luaL_error(L, "At this time, polywall geometry cannot be changed once the item has been added to a game.");
+
+   return Parent::setGeom(L);
+}
 
 
 ////////////////////////////////////////

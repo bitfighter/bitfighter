@@ -206,6 +206,8 @@ public:
    virtual void onGeomChanged();
    virtual void onItemDragging();
 
+   S32 setGeom(lua_State *L);
+
    /////
    // Editor methods
    const char *getEditorHelpString();
