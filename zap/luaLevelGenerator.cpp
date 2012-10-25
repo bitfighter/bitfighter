@@ -189,6 +189,8 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
          // Some objects require special handling
          if(obj->getObjectTypeNumber() == PolyWallTypeNumber)
             mGame->addPolyWall(static_cast<PolyWall *>(obj), mGridDatabase);
+         else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
+            mGame->addWallItem(static_cast<WallItem *>(obj), mGridDatabase);
          else
             obj->addToGame(mGame, mGridDatabase);
       }

@@ -571,18 +571,14 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
       // and geom processing in our place.
       WallItem wallItem;
       if(wallItem.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
-      {
-         // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
-         // is convenient to transmit to the clients
-         WallRec wallRec(&wallItem);
-         getGameType()->addWall(wallRec, this);
-      }
+         addWallItem(&wallItem, NULL);
    }
    else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
       PolyWall polywall;
       if(polywall.processArguments(argc, argv, this))    // Returns true if wall was successfully processed
          addPolyWall(&polywall, NULL);
+
    }
    else if(!stricmp(argv[0], "Zone")) 
    {
@@ -607,6 +603,14 @@ void ServerGame::addPolyWall(PolyWall *polyWall, GridDatabase *unused)
    getGameType()->addWall(wallRec, this);
 }
 
+
+void ServerGame::addWallItem(WallItem *wallItem, GridDatabase *unused)
+{
+   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+   // is convenient to transmit to the clients
+   WallRec wallRec(wallItem);
+   getGameType()->addWall(wallRec, this);
+}
 
 
 // Sort by order in which players should be added to teams
