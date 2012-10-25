@@ -462,7 +462,7 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
    GeomObject::setGeom(points);
    onPointsChanged();
 
-   updateExtentInDatabase();
+   //updateExtentInDatabase();  done in onPointsChanged()
 
    setMaskBits(GeomMask);
 }

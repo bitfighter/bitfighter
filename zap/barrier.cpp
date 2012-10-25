@@ -48,20 +48,6 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 Vector<Point> Barrier::mRenderLineSegments;
 
-bool loadBarrierPoints(const WallRec *barrier, Vector<Point> &points)
-{
-   // Convert the list of floats into a list of points
-   for(S32 i = 1; i < barrier->verts.size(); i += 2)
-      points.push_back( Point(barrier->verts[i-1], barrier->verts[i]) );
-
-   removeCollinearPoints(points, false);   // Remove collinear points to make rendering nicer and datasets smaller
-
-   return (points.size() >= 2);
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 
 // Constructor
@@ -78,15 +64,15 @@ WallRec::WallRec(F32 width, bool solid, const Vector<F32> &verts)
 
 
 // Constructor
-WallRec::WallRec(const WallItem &wallItem)
+WallRec::WallRec(const WallItem *wallItem)
 {
-   width = (F32)wallItem.getWidth();
+   width = (F32)wallItem->getWidth();
    solid = false;
 
-   for(S32 i = 0; i < wallItem.getVertCount(); i++)
+   for(S32 i = 0; i < wallItem->getVertCount(); i++)
    {
-      verts.push_back(wallItem.getVert(i).x);
-      verts.push_back(wallItem.getVert(i).y);
+      verts.push_back(wallItem->getVert(i).x);
+      verts.push_back(wallItem->getVert(i).y);
    }
 }
 
@@ -106,11 +92,13 @@ WallRec::WallRec(const PolyWall *polyWall)
 
 
 // Runs on server or on client, never in editor
-void WallRec::constructWalls(Game *theGame) const
+// Generates a list of barriers, which are then added to the game one-by-one
+// Barriers will either be a simple 2-point segment, or a longer list of vertices defining a polygon
+void WallRec::constructWalls(Game *game) const
 {
-   Vector<Point> vec;
+   Vector<Point> vec = floatsToPoints(verts);
 
-   if(!loadBarrierPoints(this, vec))
+   if(vec.size() < 2)
       return;
 
    if(solid)   // This is a polywall
@@ -119,7 +107,7 @@ void WallRec::constructWalls(Game *theGame) const
          vec.erase(vec.size() - 1);      // If so, remove last vertex
 
       Barrier *b = new Barrier(vec, width, true);
-      b->addToGame(theGame, theGame->getGameObjDatabase());
+      b->addToGame(game, game->getGameObjDatabase());
    }
    else        // This is a standard series of segments
    {
@@ -136,7 +124,7 @@ void WallRec::constructWalls(Game *theGame) const
          pts.push_back(barrierEnds[i+1]);
 
          Barrier *b = new Barrier(pts, width, false);    // false = not solid
-         b->addToGame(theGame, theGame->getGameObjDatabase());
+         b->addToGame(game, game->getGameObjDatabase());
       }
    }
 }
@@ -451,8 +439,10 @@ S32 Barrier::getRenderSortValue()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-WallItem::WallItem()
+// WallItem is child of LineItem... the only thing LineItem brings to the party is width
+
+// Combined C++/Lua constructor
+WallItem::WallItem(lua_State *L)
 {
    mObjectTypeNumber = WallItemTypeNumber;
    setWidth(Barrier::DEFAULT_BARRIER_WIDTH);
@@ -509,7 +499,6 @@ void WallItem::render()
 }
 
 
-// Only called in editor?
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
@@ -578,7 +567,7 @@ S32 WallItem::getWidth() const
 
 void WallItem::setWidth(S32 width) 
 {         
-   Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);     // Why do we need Barrier:: prefix here???
+   Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);
 }
 
 
@@ -611,6 +600,11 @@ bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 void WallItem::addToGame(Game *game, GridDatabase *database)
 {
    Parent::addToGame(game, database);
+
+   // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
+   // is convenient to transmit to the clients
+   WallRec wallRec(this);
+   game->getGameType()->addWall(wallRec, game);
 }
 
 
@@ -680,7 +674,7 @@ extern Color EDITOR_WALL_FILL_COLOR;
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
 
-// Combined Lua / C++ constructor
+// Combined Lua/C++ constructor
 PolyWall::PolyWall(lua_State *L)
 {
    mObjectTypeNumber = PolyWallTypeNumber;
@@ -777,31 +771,43 @@ void PolyWall::onItemDragging()
 }
 
 
+
 /////
 // Lua interface
 
-/**
-  *  @luaclass PolyWall
-  *  @brief Polygonal wall items.
-  */
 const luaL_reg           PolyWall::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile PolyWall::functionArgs[] = { { NULL, { }, 0 } };
-
-#undef LUA_METHODS
 
 const char *PolyWall::luaClassName = "PolyWall";
 REGISTER_LUA_SUBCLASS(PolyWall, BfObject);
 
 
-// Override some Lua methods from BfObject.  Because PolyWalls are a step away from the real in-game geometry we're using, 
-// we need to do some special work to get and set their geometry.
+//void WallItem::checkIfWallHasBeenAddedToTheGame()
+//{
+//   if(mAddedToGame)
+//   {
+//      const char *msg = "Can't modify a wall that's already been added to a game!";
+//      logprintf(LogConsumer::LogError, msg);
+//      throw LuaException(msg);
+//   }
+//}
+
+
+// Lua method overrides.  Because walls are... special.
+
+S32 PolyWall::setLoc(lua_State *L)
+{
+   //checkIfWallHasBeenAddedToTheGame();
+   return Parent::setLoc(L);
+}
+
+
 S32 PolyWall::setGeom(lua_State *L)
 {
-   if(getGame() && getGame()->isServer())
-      return luaL_error(L, "At this time, polywall geometry cannot be changed once the item has been added to a game.");
-
+   //checkIfWallHasBeenAddedToTheGame();
    return Parent::setGeom(L);
 }
+
 
 
 ////////////////////////////////////////

@@ -113,7 +113,31 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// TODO: Don't need this to be a BfObject  -- perhaps merge with barrier above?
+class WallItem;
+class PolyWall;
+
+// This is just a small container for the bits of a wall that we transfer from the client to the server
+// I feel as if this should be a parent class for both WallItem and PolyWall, but I can't quite seem to
+// get it to work...
+
+struct WallRec
+{
+   Vector<F32> verts;
+   F32 width;
+   bool solid;
+
+public:
+   WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
+   WallRec(const WallItem *wallItem);                          // Constructor
+   WallRec(const PolyWall *polyWall);                          // Constructor
+
+   void constructWalls(Game *theGame) const;
+};
+ 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class WallItem : public LineItem
 {
    typedef LineItem Parent;
@@ -123,8 +147,8 @@ private:
    void checkIfWallHasBeenAddedToTheGame();
 
 public:
-   WallItem();                // Constructor
-   ~WallItem();               // Destructor
+   WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
+   ~WallItem();                     // Destructor
    WallItem *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -166,7 +190,7 @@ public:
    static const S32 VERTEX_SIZE = 5;
 
    ///// Lua interface
-   LUAW_DECLARE_CLASS(WallItem);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(WallItem);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -185,13 +209,13 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class PolyWall : public PolygonObject     // Don't need BfObject component of this...
+class PolyWall : public PolygonObject
 {
    typedef PolygonObject Parent;
 
 public:
-   PolyWall(lua_State *L = NULL);   // Combined Lua / C++ constructor
-   ~PolyWall();                     // Destructor
+   PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
+   ~PolyWall();                        // Destructor
 
    PolyWall *clone() const;
 
@@ -206,8 +230,6 @@ public:
    virtual void onGeomChanged();
    virtual void onItemDragging();
 
-   S32 setGeom(lua_State *L);
-
    /////
    // Editor methods
    const char *getEditorHelpString();
@@ -220,33 +242,17 @@ public:
 
    TNL_DECLARE_CLASS(PolyWall);
 
-   //// Lua interface
+
+   ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(PolyWall);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// This is just a small container for the bits of a wall that we transfer from the client to the server
-
-struct WallRec
-{
-   Vector<F32> verts;
-   F32 width;
-   bool solid;
-
-public:
-   WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
-   WallRec(const WallItem &wallItem);                          // Constructor
-   WallRec(const PolyWall *polyWall);                          // Constructor
-
-   void constructWalls(Game *theGame) const;
+   // Override standard methods basically to add checks to keep us from modifying a wall already in the game
+   S32 setLoc(lua_State *L);
+   S32 setGeom(lua_State *L);
 };
 
 

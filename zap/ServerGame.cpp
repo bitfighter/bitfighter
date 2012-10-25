@@ -574,7 +574,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
       {
          // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
          // is convenient to transmit to the clients
-         WallRec wallRec(wallItem);
+         WallRec wallRec(&wallItem);
          getGameType()->addWall(wallRec, this);
       }
    }
