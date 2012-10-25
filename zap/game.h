@@ -157,6 +157,7 @@ class ClientRef;
 class TeamManager;
 class ClientInfo;
 class PolyWall;
+class WallItem;
 
 class Game : public LevelLoader
 {
@@ -299,6 +300,7 @@ public:
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database) = 0;
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
+   virtual void addWallItem(WallItem *wallItem, GridDatabase *database) = 0;     
 
 
    void setGameTime(F32 time);                                          // Only used during level load process

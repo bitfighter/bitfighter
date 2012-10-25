@@ -1031,6 +1031,21 @@ void offsetPolygon(const Vector<Point> *inputPoly, Vector<Point> &outputPoly, co
 }
 
 
+// Convert a list of floats into a list of points, removing all collinear points
+Vector<Point> floatsToPoints(const Vector<F32> floats)
+{
+   Vector<Point> points;
+   points.reserve(floats.size() / 2);
+
+   for(S32 i = 1; i < floats.size(); i += 2)
+      points.push_back( Point(floats[i-1], floats[i]) );
+
+   removeCollinearPoints(points, false);   // Remove collinear points to make rendering nicer and datasets smaller
+
+   return points;
+}
+
+
 // Test if a complex polygon has clockwise point winding order
 // Implemented from
 // http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943

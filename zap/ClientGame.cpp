@@ -1980,10 +1980,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          if(wallItem->getVertCount() < 2)     // Too small!  Need at least 2 points for a wall!
             delete wallItem;
          else
-         {
-            wallItem->addToGame(this, database);
-            wallItem->processEndPoints();
-         }
+            addWallItem(wallItem, database);
       }
    }
    // TODO: Integrate code above with code above!!  EASY!!
@@ -2011,7 +2008,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
          
          if(polywall->getVertCount() >= 2)
-            addPolyWall(polywall, mGameObjDatabase.get());
+            addPolyWall(polywall, database);
          else
             delete polywall;
       }
@@ -2059,6 +2056,14 @@ void ClientGame::addPolyWall(PolyWall *polyWall, GridDatabase *database)
 {
    polyWall->addToGame(this, database);
    polyWall->onGeomChanged(); 
+}
+
+
+// Add polywall item to game
+void ClientGame::addWallItem(WallItem *wallItem, GridDatabase *database)
+{
+   wallItem->addToGame(this, database);
+   wallItem->processEndPoints();
 }
 
 

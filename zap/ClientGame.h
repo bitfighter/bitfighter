@@ -234,7 +234,8 @@ public:
 
    // For loading levels in editor
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);
-   void addPolyWall(PolyWall *polyWall, GridDatabase *database);                          // Add polywall item to game
+   void addPolyWall(PolyWall *polyWall, GridDatabase *database);                          // Add polyWall item to game
+   void addWallItem(WallItem *wallItem, GridDatabase *database);                          // Add wallItem item to game
 
 
    void setSelectedEngineeredObject(U32 objectType);
