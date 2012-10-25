@@ -2011,7 +2011,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          polywall->processArguments(argc - skipArgs, argv + skipArgs, this);
          
          if(polywall->getVertCount() >= 2)
-            addPolyWall(polywall, mGameObjDatabase.get());
+            addPolyWall(polywall, database);
          else
             delete polywall;
       }
