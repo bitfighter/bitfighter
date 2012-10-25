@@ -1532,12 +1532,15 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
 
+   bool wasExploded = exploded;
    exploded = stream->readFlag();
-   if(exploded)
+   if(exploded && !wasExploded)
    {
       disableCollision();
       doExplosion(getPos());
    }
+   else if(!exploded && !isCollisionEnabled() && getActualVel().lenSquared() != 0)
+      enableCollision();
 
    if(stream->readFlag())
       SoundSystem::playSoundEffect(SFXBurstProjectile, getPos(), getVel());
@@ -1615,12 +1618,6 @@ bool Seeker::collide(BfObject *otherObj)
          return true;
    }
 
-   // On client, check for collision with wall.  All other collisions handled on server.
-   if(isGhost())
-      return isWallType(otherObj->getObjectTypeNumber());
-
-   // Server only from here
-
    // Don't collide with shooter within first 500 ms of shooting
    if(!mBounced && mShooter.isValid() && mShooter == otherObj && getGame()->getCurrentTime() - getCreationTime() < 500)
       return false;
@@ -1664,8 +1661,13 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
       }
    }
 
-   if(!isGhost() && stateIndex == ActualState)
-      handleCollision(otherObj, getActualPos());
+   if(stateIndex == ActualState)
+   {
+      if(!isGhost())
+         handleCollision(otherObj, getActualPos());
+      else if(isCollisionEnabled())
+         disableCollision();
+   }
 
    setVel(stateIndex, Point(0,0)); // Might save some CPU telling move() to stop moving.
    return true;
@@ -1675,7 +1677,7 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
 void Seeker::renderItem(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
-   if(exploded)
+   if(!isCollisionEnabled())  // (exploded) always disables collision.
       return;
 
    F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
