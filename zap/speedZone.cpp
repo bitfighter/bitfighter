@@ -36,9 +36,9 @@
 #include "Colors.h"
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
-#include "UI.h"
+   #include "ClientGame.h"
+   #include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
+   #include "UI.h"
 #endif
 
 
@@ -47,9 +47,9 @@ namespace Zap
 
 // Needed on OS X, but cause link errors in VC++
 #ifndef WIN32
-const U16 SpeedZone::minSpeed;
-const U16 SpeedZone::maxSpeed;
-const U16 SpeedZone::defaultSpeed;
+   const U16 SpeedZone::minSpeed;
+   const U16 SpeedZone::maxSpeed;
+   const U16 SpeedZone::defaultSpeed;
 #endif
 
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
