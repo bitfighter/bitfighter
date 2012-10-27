@@ -35,10 +35,8 @@ namespace Zap
 
 struct CreditsInfo 
 {
-   Vector<const char *> line;
+   Vector<const char *> lines;
    F32 pos;
-
-   CreditsInfo();    // Constructor
 };
 
 
@@ -49,20 +47,21 @@ public:
    enum Credits {
       MaxCreditLen = 32,
       CreditSpace  = 45,
+      SectionSpace = 100,
    };
 
 private:
 
    Vector<CreditsInfo> mCredits;
    void readCredits(const char *file);
-   F32 mTotalSize;
    bool mActivated;
 
 public:
-   CreditsScroller();      // Constructor
-   virtual ~CreditsScroller();             // Destructor
+   CreditsScroller();           // Constructor
+   virtual ~CreditsScroller();  // Destructor
    void updateFX(U32 delta);
    void render();
+   void resetPosition();
 
    void setActive(bool active);
    bool isActive();
