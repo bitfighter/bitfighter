@@ -619,7 +619,7 @@ S32 SpeedZone::setSpeed(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setSpeed");
    U32 speed = getInt(L, 1);
-   mSpeed = min(speed, U16_MAX);    // Speed is a U16 -- respond to larger values in a sane manner
+   mSpeed = min(speed, (U32)U16_MAX);    // Speed is a U16 -- respond to larger values in a sane manner
 
    return 0;
 }
