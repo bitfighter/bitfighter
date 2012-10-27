@@ -364,8 +364,7 @@ void WallSegmentManager::deleteSegments(S32 owner)
    for(S32 i = 0; i < count; i++)
       if(mWallSegments[i]->getOwner() == owner)
       {
-         delete mWallSegments[i];      // Destructor will remove segment from database
-         mWallSegments.erase_fast(i);  // Order of segments isn't important
+         mWallSegments.deleteAndErase_fast(i);   // Destructor will remove segment from database; order of segments isn't important
          i--;
          count--;
       }
