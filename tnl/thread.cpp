@@ -27,7 +27,9 @@
 #include "tnlThread.h"
 #include "tnlLog.h"
 
+#ifndef TNL_OS_WIN32
 #include "stdint.h"
+#endif
 
 namespace TNL
 {
