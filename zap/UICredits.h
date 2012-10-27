@@ -32,34 +32,18 @@
 namespace Zap
 {
 
-class CreditsFX
-{
-protected:
-   bool activated;
-
-public:
-   CreditsFX(ClientGame *game);     // Constructor
-   virtual ~CreditsFX();            // Destructor
-   
-   void setActive(bool active);
-   bool isActive();
-   virtual void updateFX(U32 delta) = 0;
-   virtual void render() = 0;
-};
-
 
 struct CreditsInfo 
 {
-   Vector<const char *> creditsLine;
+   Vector<const char *> line;
    F32 pos;
 
    CreditsInfo();    // Constructor
 };
 
 
-class CreditsScroller : public CreditsFX
+class CreditsScroller
 {
-   typedef CreditsFX Parent;
 
 public:
    enum Credits {
@@ -69,15 +53,19 @@ public:
 
 private:
 
-   Vector<CreditsInfo> credits;
+   Vector<CreditsInfo> mCredits;
    void readCredits(const char *file);
    F32 mTotalSize;
+   bool mActivated;
 
 public:
-   CreditsScroller(ClientGame *game);      // Constructor
+   CreditsScroller();      // Constructor
    virtual ~CreditsScroller();             // Destructor
    void updateFX(U32 delta);
    void render();
+
+   void setActive(bool active);
+   bool isActive();
 };
 
 ////////////////////////////////////////
@@ -89,7 +77,7 @@ class CreditsUserInterface : public UserInterface
    typedef UserInterface Parent;
 
 private:
-   Vector<CreditsFX *> fxList;
+   CreditsScroller *mScroller;
 
 public:
    CreditsUserInterface(ClientGame *game);   // Constructor
@@ -97,7 +85,6 @@ public:
 
    void onActivate();
    void onReactivate();
-   void addFX(CreditsFX *fx);
    void idle(U32 timeDelta);
    void render();
    void quit();
@@ -112,16 +99,23 @@ class SplashUserInterface : public UserInterface
 {
    typedef UserInterface Parent;
 
-   enum {                // All times in ms
-     spinTime = 1500,
-     restTime = 150,
-     riseTime = 800,
-  };
-
 private:
+   enum {                // All times in ms
+      spinTime = 1500,
+      restTime = 150,
+      riseTime = 800,
+   };
+
+   enum SplashPhase {
+      SplashPhaseNone = 0,
+      SplashPhaseAnimation = 1,
+      SplashPhaseResting = 2,
+      SplashPhaseRising = 3,
+      SplashPhaseDone = 4
+   };
+
    Timer mSplashTimer;    // Timer controlling progress through the phase
-   S32 mPhase;            // Phase of the animation
-   S32 mType;             // Type of animation (twirl, zoom out, etc.)
+   SplashPhase mPhase;            // Phase of the animation
 
 public:
    SplashUserInterface(ClientGame *game);      // Constructor

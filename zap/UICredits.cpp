@@ -90,50 +90,27 @@ static bool quitting = false;
 CreditsUserInterface::CreditsUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(CreditsUI);
+
+   mScroller = new CreditsScroller();
 }
 
 
 // Destructor (only gets run when we quit the game!)
 CreditsUserInterface::~CreditsUserInterface()
 {
-   for(S32 i = 0; i < fxList.size(); i++)
-   {
-      delete fxList[i];
-      fxList[i] = NULL;
-   }
-
-   fxList.clear();
+   delete mScroller;
+   mScroller = NULL;
 }
 
 
 void CreditsUserInterface::onActivate()
 {
    quitting = false;
-   getUIManager()->activate(SplashUI);          // Show splash animation at beginning of credits
 
-   // Construct the creditsfx objects here, they will
-   // get properly deleted when the CreditsUI
-   // destructor is invoked
+   // Show splash animation at beginning of credits
+   getUIManager()->activate(SplashUI);
 
-   // Add credits scroller first and make it active
-   CreditsScroller *scroller = new CreditsScroller(getGame());    // Constructor adds this to fxList
-   scroller->setActive(true);
-
-   if(fxList.size() > 1)
-      for(S32 i = 0; i < fxList.size(); i++)
-         fxList[i]->setActive(false);
-
-   // Add CreditsFX effects below here, don't activate:
-
-   // Choose randomly another CreditsFX effect aside from CreditsScroller to activate
-   if(fxList.size() > 1)
-   {
-      U32 rand = TNL::Random::readI(0, fxList.size() - 1);
-      while(fxList[rand]->isActive())
-         rand = TNL::Random::readI(0, fxList.size() - 1);
-
-      fxList[rand]->setActive(true);
-   }
+   mScroller->setActive(true);
 }
 
 
@@ -144,29 +121,19 @@ void CreditsUserInterface::onReactivate()
 }
 
 
-void CreditsUserInterface::addFX(CreditsFX *fx)
-{
-   fxList.push_back(fx);
-}
-
-
 void CreditsUserInterface::idle(U32 timeDelta)
 {
    Parent::idle(timeDelta);
 
-   for(S32 i = 0; i < fxList.size(); i++)
-      if(fxList[i]->isActive())
-         fxList[i]->updateFX(timeDelta);
+   if(mScroller->isActive())
+      mScroller->updateFX(timeDelta);
 }
 
 
 void CreditsUserInterface::render()
 {
-   // loop through all the attached effects and
-   // call their render function
-   for(S32 i = 0; i < fxList.size(); i++)
-      if(fxList[i]->isActive())
-         fxList[i]->render();
+   if(mScroller->isActive())
+      mScroller->render();
 
    if(quitting)
    {
@@ -192,39 +159,9 @@ bool CreditsUserInterface::onKeyDown(InputCode inputCode)
    return false;
 }
 
-//-----------------------------------------------------
-// CreditsFX Objects
-//-----------------------------------------------------
 
 // Constructor
-CreditsFX::CreditsFX(ClientGame *game)
-{
-   activated = false;
-   game->getUIManager()->getCreditsUserInterface()->addFX(this);
-}
-
-
-// Destructor
-CreditsFX::~CreditsFX()
-{
-   // Do nothing
-}
-
-
-void CreditsFX::setActive(bool active)
-{
-   activated = active;
-}
-
-
-bool CreditsFX::isActive()
-{
-   return activated;
-}
-
-
-// Constructor
-CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
+CreditsScroller::CreditsScroller()
 {
    glLineWidth(gDefaultLineWidth);
 
@@ -240,19 +177,21 @@ CreditsScroller::CreditsScroller(ClientGame *game) : Parent(game)
    while(gameCredits[index])
    {
       if(strcmp(gameCredits[index], "-"))
-         c.creditsLine.push_back(gameCredits[index]);
+         c.line.push_back(gameCredits[index]);
 
       else   // Place credit in cache
       {
-         credits.push_back(c);
-         c.pos += CreditSpace * c.creditsLine.size() + SPACE_BETWEEN_SECTIONS;
-         c.creditsLine.clear();
+         mCredits.push_back(c);
+         c.pos += CreditSpace * c.line.size() + SPACE_BETWEEN_SECTIONS;
+         c.line.clear();
       }
 
       index++;
    }
 
    mTotalSize = c.pos;
+
+   mActivated = false;
 }
 
 
@@ -268,15 +207,15 @@ void CreditsScroller::updateFX(U32 delta)
 
    // If the second-to-last credits has gone of the screen, don't update anymore.  This
    // leaves the final message drawn on the screen.
-   U32 indexMinus1 = credits.size() - 2;
-   if(credits[indexMinus1].pos > 150 - (CreditSpace * credits[indexMinus1].creditsLine.size()))  // 150 = banner height
+   U32 indexMinus1 = mCredits.size() - 2;
+   if(mCredits[indexMinus1].pos > 150 - (CreditSpace * mCredits[indexMinus1].line.size()))  // 150 = banner height
    {
       // Scroll the credits text from bottom to top
-      for(S32 i = 0; i < credits.size(); i++)
-         credits[i].pos -= (delta / 8.f);
+      for(S32 i = 0; i < mCredits.size(); i++)
+         mCredits[i].pos -= (delta / 8.f);
 
       // Test if credit music is playing - this just picks an arbitrary time to test if the music loaded properly
-      if(!creditsMusicExists && credits[indexMinus1].pos > gScreenInfo.getGameCanvasHeight() && SoundSystem::isMusicPlaying())
+      if(!creditsMusicExists && mCredits[indexMinus1].pos > gScreenInfo.getGameCanvasHeight() && SoundSystem::isMusicPlaying())
          creditsMusicExists = true;
    }
    else
@@ -302,9 +241,9 @@ void CreditsScroller::render()
    glColor(Colors::white);
 
    // Draw the credits text, section by section, line by line
-   for(S32 i = 0; i < credits.size(); i++)
-      for(S32 j = 0; j < credits[i].creditsLine.size(); j++)
-         UserInterface::drawCenteredString(S32(credits[i].pos) + CreditSpace * (j), 25, credits[i].creditsLine[j]);
+   for(S32 i = 0; i < mCredits.size(); i++)
+      for(S32 j = 0; j < mCredits[i].line.size(); j++)
+         UserInterface::drawCenteredString(S32(mCredits[i].pos) + CreditSpace * (j), 25, mCredits[i].line[j]);
 
    glColor(Colors::black);
    F32 vertices[] = {
@@ -319,12 +258,25 @@ void CreditsScroller::render()
 }
 
 
+void CreditsScroller::setActive(bool active)
+{
+   mActivated = active;
+}
+
+
+bool CreditsScroller::isActive()
+{
+   return mActivated;
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 // Constructor
 CreditsInfo::CreditsInfo()
 {
+   // Initially set the position to be outside the viewing area
    pos = (F32)gScreenInfo.getGameCanvasHeight();
 }
 
@@ -336,6 +288,7 @@ CreditsInfo::CreditsInfo()
 SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(SplashUI);
+   mPhase = SplashPhaseNone;
 }
 
 
@@ -344,10 +297,7 @@ void SplashUserInterface::onActivate()
    mSplashTimer.reset(spinTime);
    glLineWidth(gDefaultLineWidth);
 
-   mPhase = 1;    // Start in the first phase, of course
-   mType = rand() % 3 + 1;     // 1 = twirl, 2 = zoom in, 3 = single letters
-
-   mType = 3;     // For now, we'll stick with this one, as it's the best!
+   mPhase = SplashPhaseAnimation;
 }
 
 
@@ -357,54 +307,46 @@ void SplashUserInterface::idle(U32 timeDelta)
 
    if(mSplashTimer.update(timeDelta))
    {
-      mPhase++;
-      if(mPhase == 2)
+      mPhase = SplashPhase(S32(mPhase) + 1);
+
+      if(mPhase == SplashPhaseResting)
          mSplashTimer.reset(restTime);
-      else if(mPhase == 3)
+      else if(mPhase == SplashPhaseRising)
          mSplashTimer.reset(riseTime);
    }
 
-   if(mPhase > 3)
+   if(mPhase >= SplashPhaseDone)
       quit();
 }
 
 
 void SplashUserInterface::render()
 {
-   if(mPhase == 1)            // Main animation phase
+   if(mPhase == SplashPhaseAnimation)             // Main animation phase
    {
       glColor(0, mSplashTimer.getFraction(), 1);
 
-      if(mType == 1)          // Twirl - unused?   arguments might be wrong..
-         renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
-                             (1 - mSplashTimer.getFraction()), U32((1 - mSplashTimer.getFraction()) * 360.0f));
-      else if(mType == 2)     // Zoom in - unused?   arguments might be wrong..
-         renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
-                              1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, U32(mSplashTimer.getFraction() * 20));
-      else if(mType == 3)     // Single letters
-      {
-         F32 fr = pow(mSplashTimer.getFraction(), 2);
+      F32 fr = pow(mSplashTimer.getFraction(), 2);
 
-         S32 ctr = gScreenInfo.getGameCanvasHeight() / 2;
+      S32 ctr = gScreenInfo.getGameCanvasHeight() / 2;
 
-         renderBitfighterLogo(ctr, fr * 20.0f + 1, 1 << 0);
-         renderBitfighterLogo(ctr, fr * 50.0f + 1, 1 << 1);
-         renderBitfighterLogo(ctr, fr * 10.0f + 1, 1 << 2);
-         renderBitfighterLogo(ctr, fr *  2.0f + 1, 1 << 3);
-         renderBitfighterLogo(ctr, fr * 14.0f + 1, 1 << 4);
-         renderBitfighterLogo(ctr, fr *  6.0f + 1, 1 << 5);
-         renderBitfighterLogo(ctr, fr * 33.0f + 1, 1 << 6);
-         renderBitfighterLogo(ctr, fr *  9.0f + 1, 1 << 7);
-         renderBitfighterLogo(ctr, fr * 30.0f + 1, 1 << 8);
-         renderBitfighterLogo(ctr, fr * 15.0f + 1, 1 << 9);
-      }
+      renderBitfighterLogo(ctr, fr * 20.0f + 1, 1 << 0);
+      renderBitfighterLogo(ctr, fr * 50.0f + 1, 1 << 1);
+      renderBitfighterLogo(ctr, fr * 10.0f + 1, 1 << 2);
+      renderBitfighterLogo(ctr, fr *  2.0f + 1, 1 << 3);
+      renderBitfighterLogo(ctr, fr * 14.0f + 1, 1 << 4);
+      renderBitfighterLogo(ctr, fr *  6.0f + 1, 1 << 5);
+      renderBitfighterLogo(ctr, fr * 33.0f + 1, 1 << 6);
+      renderBitfighterLogo(ctr, fr *  9.0f + 1, 1 << 7);
+      renderBitfighterLogo(ctr, fr * 30.0f + 1, 1 << 8);
+      renderBitfighterLogo(ctr, fr * 15.0f + 1, 1 << 9);
    }
-   else if(mPhase == 2)           // Resting phase
+   else if(mPhase == SplashPhaseResting)          // Resting phase
    {
       glColor(Colors::blue);
       renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 1);
    }
-   else if(mPhase == 3)           // Rising phase
+   else if(mPhase == SplashPhaseRising)           // Rising phase
    {
       glColor(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
       renderBitfighterLogo((S32)(73.0f + ((F32) gScreenInfo.getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1);
