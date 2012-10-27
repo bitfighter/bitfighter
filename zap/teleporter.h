@@ -122,9 +122,13 @@ public:
 
    U32 mTeleporterDelay;
 
+   // Destination management
    S32 getDestCount();
    Point getDest(S32 index);
    void addDest(const Point &dest);
+   void delDest(S32 index);
+
+
    void newObjectFromDock(F32 gridSize);
 
    static bool checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship);
@@ -195,6 +199,10 @@ public:
    S32 clearDests(lua_State *L);
    S32 getDest(lua_State *L);
    S32 getDestCount(lua_State *L);
+
+   // Overrides
+   S32 setGeom(lua_State *L);
+   S32 getGeom(lua_State *L);
 };
 
 

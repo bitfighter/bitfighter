@@ -192,7 +192,10 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
          else if(obj->getObjectTypeNumber() == WallItemTypeNumber)
             mGame->addWallItem(static_cast<WallItem *>(obj), mGridDatabase);
          else
+         {
             obj->addToGame(mGame, mGridDatabase);
+            mAddedObjects.push_back(obj);
+         }
       }
 
       return 0;

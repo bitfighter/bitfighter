@@ -693,6 +693,35 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
          dynamic_cast<WallItem *>(obj)->processEndPoints();
    }
 
+   // Also find any teleporters and make sure their destinations are in order.  Teleporters with no dests will be deleted.
+   // Those with multiple dests will be broken down into multiple single dest versions.
+   fillVector.clear();
+   database->findObjects(TeleporterTypeNumber, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
+      if(teleporter->getDestCount() == 0)
+         database->removeFromDatabase(teleporter);
+      else
+      {
+         for(S32 i = 1; i < teleporter->getDestCount(); i++)
+         {
+            Teleporter *newTel = new Teleporter;
+            newTel->setPos(teleporter->getPos());
+            newTel->setEndpoint(teleporter->getDest(i));
+            newTel->addDest(teleporter->getDest(i));
+
+            newTel->addToGame(getGame(), database);     
+         }
+
+         // Delete any destinations past the first one
+         for(S32 i = 1; i < teleporter->getDestCount(); i++)
+            teleporter->delDest(i);
+      }
+   }
+
+
    rebuildEverything(database);
 }
 

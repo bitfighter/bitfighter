@@ -573,6 +573,12 @@ void Teleporter::addDest(const Point &dest)
 }
 
 
+void Teleporter::delDest(S32 index)
+{
+   mDestManager.delDest(index);
+}
+
+
 void Teleporter::onConstructed()
 {
    // Do nothing
@@ -952,6 +958,79 @@ S32 Teleporter::getDest(lua_State *L)
 S32 Teleporter::getDestCount(lua_State *L)
 {
    return returnInt(L, mDestManager.getDestCount());
+}
+
+
+// Overrides
+
+/**
+  *  @luafunc Teleporter::setGeom(geometry)
+  *  @brief   Sets teleporter geometry; differs from standard conventions.
+  *  @descr   In this case, geometry represents both %Teleporter's location and those of all destinations.
+  *           The first point specified will be used to set the location.  All existing destinations will be
+  *           deleted, and each subsequent point will be used to define a new destination.
+  *
+  *  Note that in the editor, teleporters can only have a single destination.  Since scripts can add or modify editor items,
+  *  when the script has finished running, all affected teleporters will be converted into a series of single destination 
+  *  items, all having the same location but with different destinations.
+  *
+  *  If the teleporter has no destinations, it will not be added to the editor.
+  *  @param   \e Geom geometry: New geometry for %Teleporter.
+  */
+S32 Teleporter::setGeom(lua_State *L)
+{
+   S32 stackPos = 1;
+
+   if(!checkLuaArgs(L, LuaBase::GEOM, stackPos))      // Warning: stackPos will likely be altered!!
+   {
+      const char *msg = "Could not validate params for function Teleporter::setGeom().  Expected Geometry.";
+      logprintf(LogConsumer::LogError, msg);
+
+      dumpStack(L, "Current stack state");
+
+      throw LuaException(msg);
+   }
+
+   Vector<Point> points = getPointsOrXYs(L, 1);    
+
+   mDestManager.clear();      // Any existing destinations are toast
+
+   if(points.size() > 0)
+   {
+      // We'll use the first point to set the object's origin
+      setPos(points[0]);
+
+      // Subsequent points will be used as destinations for the teleporter
+      for(S32 i = 1; i < points.size(); i++)
+         mDestManager.addDest(points[i]);
+   }
+
+   clearStack(L);    // Why do we need this?
+   return 0;
+}
+
+
+/**
+  *  @luafunc Geom Teleporter::getGeom()
+  *  @brief   Gets teleporter geometry; differs from standard conventions.
+  *  @descr   In this case, geometry represents both %Teleporter's location and those of all destinations.
+  *           The first point in the Geom will be the %teleporter's intake location.  Each destination will be represented by
+  *           an additional point.
+  *
+  *  In the editor, all teleporters are simple lines, and will return geometries with two points -- an origin and a destination.
+  *  @param   \e Geom geometry: New geometry for %Teleporter.
+  */
+ 
+S32 Teleporter::getGeom(lua_State *L)
+{
+   Vector<Point> points;
+
+   points.push_back(getPos());
+
+   for(S32 i = 0; i < mDestManager.getDestCount(); i++)
+      points.push_back(mDestManager.getDest(i));
+
+   return returnPoints(L, &points);
 }
 
    

@@ -48,6 +48,8 @@ private:
    F32 mGridSize;
    GridDatabase *mGridDatabase;
 
+   Vector<BfObject *> mAddedObjects;   // List of objects added by the levelgen
+
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
 
 public:
