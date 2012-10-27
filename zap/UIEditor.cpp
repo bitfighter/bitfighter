@@ -721,7 +721,6 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       }
    }
 
-
    rebuildEverything(database);
 }
 
