@@ -172,9 +172,28 @@ TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
 static Vector<DatabaseObject *> foundObjects;
 
-// Constructor --> need to set the pos and dest via methods like processArguments to make sure
-// that we get the multiple destination aspect of teleporters right
-Teleporter::Teleporter(Point pos, Point dest, Ship *engineeringShip) : Engineerable()
+// Combined default C++/Lua constructor
+Teleporter::Teleporter(lua_State *L)
+{
+   initialize(Point(0,0), Point(0,0), NULL);
+}
+
+
+// Constructor used by engineer
+Teleporter::Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip) : Engineerable()
+{
+   initialize(pos, dest, engineeringShip);
+}
+
+
+// Destructor
+Teleporter::~Teleporter()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void Teleporter:: initialize(const Point &pos, const Point &dest, Ship *engineeringShip)
 {
    mObjectTypeNumber = TeleporterTypeNumber;
    mNetFlags.set(Ghostable);
@@ -188,8 +207,8 @@ Teleporter::Teleporter(Point pos, Point dest, Ship *engineeringShip) : Engineera
    setVert(dest, 1);
 
    mHasExploded = false;
-   mStartingHealth = 1.0f;
    mFinalExplosionTriggered = false;
+   mStartingHealth = 1.0f;
 
    mLastDest = 0;
    mDestManager.setOwner(this);
@@ -197,13 +216,6 @@ Teleporter::Teleporter(Point pos, Point dest, Ship *engineeringShip) : Engineera
    mEngineeringShip = engineeringShip;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-}
-
-
-// Destructor
-Teleporter::~Teleporter()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -383,7 +395,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       for(S32 i = 0; i < dests; i++)
          getDest(i).write(stream);
 
-      if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))  // most teleporter will be at a default timing
+      if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))  // Most teleporter will have default timing
          stream->writeInt(mTeleporterDelay, 32);
 
       if(mTeleporterDelay != 0 && stream->writeFlag(timeout != 0))
@@ -836,7 +848,7 @@ bool Teleporter::canBeNeutral() { return false; }
 /**
   *  @luaclass Teleporter
   *  @brief Instantly transports ships from here to there.
-  *  @descr %Teleporter represents the basic teleporter object.  Every teleporter has an intake location
+  *  @descr A %Teleporter represents the basic teleporter object.  Every teleporter has an intake location
   *         and one or more destinations.  When a ship enters the teleporter, a destination will be chosen 
   *         randomly if there is more than one.   
   */
@@ -859,14 +871,14 @@ REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
 
 /** 
  *  @luafunc Teleporter::addDest(dest)
- *  @brief Adds a destination to the teleporter
- *  @param dest - A Point or coordinate pair representing the location of the destination
+ *  @brief Adds a destination to the teleporter.
+ *  @param dest - A point or coordinate pair representing the location of the destination.
  *
  *  Example:
  *  @code 
  *    t = Teleporter.new()
  *    t:addDest(100,150)
- *    t:addToGame()
+ *    levelgen:addItem(t)  -- or plugin:addItem(t) in a plugin
  *  @endcode
  */
 S32 Teleporter::addDest(lua_State *L)
@@ -878,6 +890,7 @@ S32 Teleporter::addDest(lua_State *L)
 
    return 0;
 }
+
 
 /**
   *  @luafunc Teleporter::delDest(index)
@@ -914,10 +927,10 @@ S32 Teleporter::clearDests(lua_State *L)
 
 
 /**
-  *  @luafunc Point Teleporter::getDest(index)
+  *  @luafunc point Teleporter::getDest(index)
   *  @brief   Returns the specified destination.
   *  @param   index - Index of the dest to return.  Will generate an error if index is invalid.
-  *  @return  A Point object representing the requested destination.
+  *  @return  A point object representing the requested destination.
   */
 S32 Teleporter::getDest(lua_State *L)
 {

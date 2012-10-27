@@ -136,8 +136,8 @@ public:
    static F32 getFloat(lua_State *L, S32 index);
    static F32 getCheckedFloat(lua_State *L, S32 index, const char *methodName);
 
-   static bool getBool(lua_State *L, S32 index, const char *methodName);
-   static bool getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
+   static bool getBool(lua_State *L, S32 index);
+   static bool getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal);
 
    static lua_Integer getInt(lua_State *L, S32 index);
    static lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);

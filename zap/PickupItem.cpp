@@ -312,7 +312,7 @@ S32 PickupItem::setVis(lua_State *L)
 {
    checkArgList(L, functionArgs, "PickupItem", "setVis");
 
-   if(getBool(L, 1, "delete this msg"))
+   if(getBool(L, 1))
       show();
    else
       hide();

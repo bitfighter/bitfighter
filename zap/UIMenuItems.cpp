@@ -603,7 +603,7 @@ ToggleMenuItem::ToggleMenuItem(lua_State *L)
 
    // Optional (but recommended) items
    mIndex = clamp(getInt(L, 3, 1) - 1, 0,  mOptions.size() - 1);   // First - 1 for compatibility with Lua's 1-based array index
-   mWrap = getBool(L, 4, methodName, false);
+   mWrap = getCheckedBool(L, 4, methodName, false);
    mHelp = getString(L, 4, "");
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

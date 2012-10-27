@@ -1392,6 +1392,8 @@ S32 BfObject::setGeom(lua_State *L)
    checkArgList(L, functionArgs, "BfObject", "setGeom");
    setGeom(L, 1);
 
+   onGeomChanged();
+
    return 0;
 }
 

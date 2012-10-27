@@ -481,24 +481,15 @@ F32 LuaBase::getCheckedFloat(lua_State *L, S32 index, const char *methodName)
 }
 
 
-// Pop a boolean off stack, and return it
-bool LuaBase::getBool(lua_State *L, S32 index, const char *methodName)
+// Return a bool at the specified index
+bool LuaBase::getBool(lua_State *L, S32 index)
 {
-   if(!lua_isboolean(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   return (bool) lua_toboolean(L, index);
+    return (bool) lua_toboolean(L, index);
 }
 
 
 // Pop a boolean off stack, and return it
-bool LuaBase::getBool(lua_State *L, S32 index, const char *methodName, bool defaultVal)
+bool LuaBase::getCheckedBool(lua_State *L, S32 index, const char *methodName, bool defaultVal)
 {
    if(!lua_isboolean(L, index))
       return defaultVal;

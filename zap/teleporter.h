@@ -100,8 +100,6 @@ private:
    bool mHasExploded;
    F32 mStartingHealth;
 
-   void computeExtent();
-
    Timer mExplosionTimer;
    bool mFinalExplosionTriggered;
 
@@ -109,9 +107,13 @@ private:
 
    SafePtr<Ship> mEngineeringShip;
 
+   void initialize(const Point &pos, const Point &dest, Ship *engineeringShip);
+   void computeExtent();
+
 public:
-   Teleporter(Point pos = Point(), Point dest = Point(), Ship *engineeringShip = NULL);  // Constructor
-   virtual ~Teleporter();                                                                // Destructor
+   Teleporter(lua_State *L = NULL);                                           // Combined default C++/Lua constructor
+   Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip);    // Constructor used by engineer
+   virtual ~Teleporter();                                                     // Destructor
 
    Teleporter *clone() const;
 
@@ -182,7 +184,7 @@ public:
 
 
    ///// Lua Interface
-   LUAW_DECLARE_CLASS(Teleporter);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Teleporter);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];

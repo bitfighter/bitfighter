@@ -68,11 +68,10 @@ public:
       HitMask      = BIT(1),
    };
 
-   SpeedZone();           // Constructor
-   virtual ~SpeedZone();  // Destructor
-
+   SpeedZone(lua_State *L = NULL);     // Combined C++/Lua constructor
+   virtual ~SpeedZone();               // Destructor
+      
    SpeedZone *clone() const;
-   //void copyAttrs(SpeedZone *target);
 
    static const U16 minSpeed = 500;       // How slow can you go?
    static const U16 maxSpeed = 5000;      // Max speed for the goFast
@@ -131,6 +130,21 @@ public:
    bool canBeNeutral();
 
    TNL_DECLARE_CLASS(SpeedZone);
+
+
+   ///// Lua Interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(SpeedZone);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   S32 setDir(lua_State *L);
+   S32 getDir(lua_State *L);
+   S32 setSpeed(lua_State *L);
+   S32 getSpeed(lua_State *L);
+   S32 setSnapping(lua_State *L);
+   S32 getSnapping(lua_State *L);
 };
 
 

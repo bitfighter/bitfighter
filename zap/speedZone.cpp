@@ -36,9 +36,9 @@
 #include "Colors.h"
 
 #ifndef ZAP_DEDICATED
-   #include "ClientGame.h"
-   #include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
-   #include "UI.h"
+#  include "ClientGame.h"
+#  include "UIEditorMenus.h"    // For GoFastEditorAttributeMenuUI def
+#  include "UI.h"
 #endif
 
 
@@ -60,8 +60,8 @@ TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 #endif
 
 
-// Constructor
-SpeedZone::SpeedZone()
+// Combined C++/Lua constructor
+SpeedZone::SpeedZone(lua_State *L)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = SpeedZoneTypeNumber;
@@ -70,13 +70,17 @@ SpeedZone::SpeedZone()
    mSnapLocation = false;     // Don't snap unless specified
    mRotateSpeed = 0;
    mUnpackInit = 0;           // Some form of counter, to know that it is a rotating speed zone
+
+   preparePoints();           // If this is constructed by Lua, we need to have some default geometry in place
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 SpeedZone::~SpeedZone()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -107,21 +111,7 @@ void SpeedZone::setSnapping(bool snapping)
 SpeedZone *SpeedZone::clone() const
 {
    return new SpeedZone(*this);
-
-   //copyAttrs(clone.get());
-
-   //return clone;
 }
-
-
-//void SpeedZone::copyAttrs(SpeedZone *target)
-//{
-//   SimpleLine::copyAttrs(target);
-//
-//   target->mSpeed = mSpeed;
-//   target->mSnapLocation = mSnapLocation;
-//   target->mRotateSpeed = mRotateSpeed;
-//}
 
 
 // Take our basic inputs, pos and dir, and expand them into a three element
@@ -222,8 +212,6 @@ void SpeedZone::onAddedToGame(Game *theGame)
 
    if(!isGhost())
       setScopeAlways();    // Runs on server
-   //else
-      //preparePoints();     // Runs on client,preparePoints runs in unpackUpdate
 }
 
 
@@ -260,7 +248,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
       {
          if(firstChar == 'R') // 015a
             mRotateSpeed = (F32)atof(&argv2[i][1]);   // using second char to handle number, "R3.4" or "R-1.7"
-         else if(!strnicmp(argv2[i], "Rotate=", 7))  // 016, same as 'R', better name
+         else if(!strnicmp(argv2[i], "Rotate=", 7))   // 016, same as 'R', better name
             mRotateSpeed = (F32)atof(&argv2[i][7]);   // "Rotate=3.4" or "Rotate=-1.7"
          else if(!stricmp(argv2[i], "SnapEnabled"))
             mSnapLocation = true;
@@ -538,47 +526,145 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-
 // Some properties about the item that will be needed in the editor
-const char *SpeedZone::getEditorHelpString()
+const char *SpeedZone::getOnScreenName()     { return "GoFast";  }
+const char *SpeedZone::getOnDockName()       { return "GoFast";  }
+const char *SpeedZone::getPrettyNamePlural() { return "GoFasts"; }
+const char *SpeedZone::getEditorHelpString() { return "Makes ships go fast in direction of arrow. [P]"; }
+
+bool SpeedZone::hasTeam()      { return false; }
+bool SpeedZone::canBeHostile() { return false; }
+bool SpeedZone::canBeNeutral() { return false; }
+
+
+//// Lua methods
+
+/**
+  *  @luaclass SpeedZone
+  *  @brief Propels ships at high speed.
+  *  @descr SpeedZones are game objects that propel ships around a level.  Each %SpeedZone has a direction point
+  *         that is only used for aiming the %SpeedZone.  The speed at which ships are flung can be set
+  *         with the \e setSpeed() method.  SpeedZones also have a \e snapping parameter which, when true,
+  *         will first move the ship to the %SpeedZone's center before propelling them.  This allows level
+  *         designers to control the exact path a ship will take, which can be useful if there is a target that
+  *         the ships should hit.
+  *
+  *         Note that a %SpeedZone's setGeom() method will take two points.  The first will be the %SpeedZone's location, 
+  *         the second represents its direction.  The distance between the two points is not important; only the 
+  *         angle between them matters.
+  */
+//               Fn name     Param profiles       Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, setDir,      ARRAYDEF({{ PT,      END }}), 1 ) \
+   METHOD(CLASS, getDir,      ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setSpeed,    ARRAYDEF({{ INT_GE0, END }}), 1 ) \
+   METHOD(CLASS, getSpeed,    ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setSnapping, ARRAYDEF({{ BOOL,    END }}), 1 ) \
+   METHOD(CLASS, getSnapping, ARRAYDEF({{          END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(SpeedZone, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(SpeedZone, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *SpeedZone::luaClassName = "SpeedZone";
+REGISTER_LUA_SUBCLASS(SpeedZone, BfObject);
+
+
+/** 
+ *  @luafunc SpeedZone::setDir(dest)
+ *  @brief Sets the direction of the SpeedZone.
+ *  @param dest - A point or coordinate pair representing the location of the destination.
+ *
+ *  Example:
+ *  @code 
+ *    s = SpeedZone.new()
+ *    s:setDir(100,150)
+ *    levelgen:addItem(s)  -- or plugin:addItem(s) in a plugin
+ *  @endcode
+ */
+S32 SpeedZone::setDir(lua_State *L)
 {
-   return "Makes ships go fast in direction of arrow. [P]";
+   checkArgList(L, functionArgs, "SpeedZone", "setDir");
+
+   Point point = getPointOrXY(L, 1);
+   setVert(point, 1);
+
+   onGeomChanged();
+
+   return 0;
+}
+
+/**
+  *  @luafunc point SpeedZone::getDir()
+  *  @brief   Returns the object's direction.
+  *  @descr   The distance between the returned point and the object's location is not important;
+  *           only the angle between them matters.
+  *  @return  A point object representing the %SpeedZone's direction.  
+  */
+S32 SpeedZone::getDir(lua_State *L)
+{
+   return returnPoint(L, getVert(1));
 }
 
 
-const char *SpeedZone::getPrettyNamePlural()
+/**
+  *  @luafunc SpeedZone::setSpeed(speed)
+  *  @brief   Sets the %SpeedZone's speed.
+  *  @descr   Speed must be a positive number, and will be limited to a maximum of 65536.  Default speed is 2000.
+  *  @param   speed - The speed that the %SpeedZone should propel ships.
+  */
+S32 SpeedZone::setSpeed(lua_State *L)
 {
-   return "GoFasts";
+   checkArgList(L, functionArgs, "SpeedZone", "setSpeed");
+   U32 speed = getInt(L, 1);
+   mSpeed = min(speed, U16_MAX);    // Speed is a U16 -- respond to larger values in a sane manner
+
+   return 0;
 }
 
 
-const char *SpeedZone::getOnDockName()
+/**
+  *  @luafunc num SpeedZone::getSpeed()
+  *  @brief   Returns the %SpeedZone's speed.
+  *  @return  A number representing the %SpeedZone's speed.  Bigger is faster, obviously.
+  */
+S32 SpeedZone::getSpeed(lua_State *L)
 {
-   return "GoFast";
+   return returnInt(L, mSpeed);
 }
 
 
-const char *SpeedZone::getOnScreenName()
+/**
+  *  @luafunc SpeedZone::setSnapping(snapping)
+  *  @brief   Sets the %SpeedZone's snapping parameter.
+  *  @descr   When a ship hits a %SpeedZone, it is flung at speed in the direction the %SpeedZone is pointing.  
+              Depending on exactly how the %ship approaches the %SpeedZone, its trajectory may differ slightly.
+              By enabling snapping, the %ship will first be moved to the center of the %SpeedZone before its
+              velocity is calculated.  This will cause the %ship to follow an exact and predictable path, which
+              may be important if there is a specific target you want the ship to hit.
+
+  *  Snapping is off by default.
+  *  @param   snapping - True if snapping should be enabled, false otherwise.
+  */
+S32 SpeedZone::setSnapping(lua_State *L)
 {
-   return "GoFast";
+   checkArgList(L, functionArgs, "SpeedZone", "setSnapping");
+   mSnapLocation = getBool(L, 1);
+
+   return 0;
 }
 
 
-bool SpeedZone::hasTeam()
+/**
+  *  @luafunc num SpeedZone::getSnapping()
+  *  @brief   Returns the %SpeedZone's snapping parameter.
+  *  @return  A boolean; true if snapping is enabled, false if not.
+  */
+S32 SpeedZone::getSnapping(lua_State *L)
 {
-   return false;
-}
-
-
-bool SpeedZone::canBeHostile()
-{
-   return false;
-}
-
-
-bool SpeedZone::canBeNeutral()
-{
-   return false;
+   return returnBool(L, mSnapLocation);
 }
 
 

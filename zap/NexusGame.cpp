@@ -1205,7 +1205,7 @@ S32 NexusZone::setOpen(lua_State *L)
    if(gameType->getGameTypeId() != NexusGame)       // Do nothing if this is not a Nexus game
       return 0;
   
-   static_cast<NexusGameType *>(gameType)->setNexusState(getBool(L, 1, "blah"));
+   static_cast<NexusGameType *>(gameType)->setNexusState(getBool(L, 1));
 
    return 0;
 }  
