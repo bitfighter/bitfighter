@@ -3638,7 +3638,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    // This is where we handle entering things like rotation angle and other data that requires a special entry box.
    // NOT for editing an item's attributes.  Still used, but untested in refactor.
    if(entryMode != EntryNone)
-      textEntryInputCodeHandler(inputCode);
+      return textEntryInputCodeHandler(inputCode);
 
    else if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)       // Enter - Edit props
       startAttributeEditor();
@@ -4045,7 +4045,7 @@ void EditorUserInterface::textEntryTextInputHandler(char ascii)
 
 
 // Handle keyboard activity when we're editing an item's attributes
-void EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
+bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
 {
    if(inputCode == KEY_ENTER || inputCode == KEY_KEYPAD_ENTER)
    {
@@ -4081,15 +4081,21 @@ void EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
       }
 
       entryMode = EntryNone;
+      return true;
    }
    else if(inputCode == KEY_ESCAPE)
    {
       entryMode = EntryNone;
+      return true;
    }
    else if(inputCode == KEY_BACKSPACE || inputCode == KEY_DELETE)
+   {
       mEntryBox.handleBackspace(inputCode);
+      return true;
+   }
 
-   // else ignore keystroke
+   // Else ignore keystroke
+   return false;
 }
 
 
