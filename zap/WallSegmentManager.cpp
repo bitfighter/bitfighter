@@ -54,8 +54,8 @@ WallSegmentManager::WallSegmentManager()
 // Destructor
 WallSegmentManager::~WallSegmentManager()
 {
-   deleteSegments();
-   deleteEdges();
+   //deleteSegments();
+   //deleteEdges();
 
    delete mWallEdgeDatabase;
    mWallEdgeDatabase = NULL;
@@ -306,8 +306,8 @@ void WallSegmentManager::clear()
 {
    mWallEdgeDatabase->removeEverythingFromDatabase();
    mWallSegmentDatabase->removeEverythingFromDatabase();
-   deleteSegments();
-   deleteEdges();
+   //deleteSegments();
+   //deleteEdges();
 
    mWallEdgePoints.clear();
 }

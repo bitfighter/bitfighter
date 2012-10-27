@@ -173,7 +173,8 @@ void GridDatabase::removeEverythingFromDatabase()
          mBuckets[x & BucketMask][y & BucketMask] = NULL;
       }
    }
-   mAllObjects.clear();
+
+   mAllObjects.deleteAndClear();
 
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
