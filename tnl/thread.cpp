@@ -27,6 +27,8 @@
 #include "tnlThread.h"
 #include "tnlLog.h"
 
+#include "stdint.h"
+
 namespace TNL
 {
 
@@ -144,15 +146,17 @@ void Semaphore::increment(U32 count)
       sem_post(&mSemaphore);
 }
 
+
+// Workaround for missing definition on some systems
+#if !defined(PTHREAD_MUTEX_RECURSIVE) && (defined(TNL_OS_LINUX) || defined (TNL_OS_ANDROID))
+#  define PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
+#endif
+
 Mutex::Mutex()
 {
    pthread_mutexattr_t attr;
    pthread_mutexattr_init(&attr);
-#if defined(TNL_OS_LINUX) || defined (TNL_OS_ANDROID)
-   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-#else
    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-#endif
    pthread_mutex_init(&mMutex, &attr);
    pthread_mutexattr_destroy(&attr);
 }
@@ -199,7 +203,7 @@ void ThreadStorage::set(void *value)
 
 void *ThreadProc(void *lpParameter)
 {
-   return (void *) ((Thread *) lpParameter)->run();
+   return (void *) (uintptr_t) ((Thread *) lpParameter)->run();
 }
 
 Thread::Thread()
