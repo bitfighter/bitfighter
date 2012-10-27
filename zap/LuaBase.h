@@ -153,6 +153,8 @@ public:
    /////
    // Documenting and help
    static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName);
+   static bool checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos);
+
    static string prettyPrintParamList(const LuaFunctionProfile *functionInfo);
    static void printFunctions(const ArgMap &argMap, const map<ClassName, unsigned int> &nodeMap, 
                               const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex);

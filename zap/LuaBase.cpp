@@ -75,7 +75,7 @@ void LuaBase::checkArgCount(lua_State *L, S32 argsWanted, const char *methodName
 // === Centralized Parameter Checking ===
 // Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
 // you can blindly convert the stack items with the confidence you'll get what you want; no further type checking is required.
-// In writing this function, I tried to be extra clear, perhaps at the expense of slight redundancy
+// In writing this function, I tried to be extra clear, perhaps at the expense of slight redundancy.
 S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName)
 {
    const LuaFunctionProfile *functionInfo = NULL;
@@ -91,7 +91,7 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
    if(!functionInfo)
       return -1;
 
-   S32 stackItems = lua_gettop(L);
+   S32 stackDepth = lua_gettop(L);
    S32 profileCount = functionInfo->profileCount;
 
    for(S32 i = 0; i < profileCount; i++)
@@ -104,176 +104,21 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
       {
          bool ok = false;
 
-         if(stackPos < stackItems)
+         if(stackPos < stackDepth)
          {
             stackPos++;
-
-            switch(candidateArgList[j])
-            {
-               case ANY:      // Means anything goes from here on out... if profile is valid when we hit this, then it's ok
-                  if(validProfile)
-                     return i;
-                  else
-                     TNLAssert(false, "If this never hits, can turn entire case into return i;");
-                     ok = false;
-                  break;
-
-               case INT:
-               case NUM:
-                  ok = lua_isnumber(L, stackPos);
-                  break;
-
-               case INT_GE0:
-                  if(lua_isnumber(L, stackPos))
-                     ok = ((S32)(lua_tonumber(L, stackPos)) >= 0);
-                  break;
-
-               case NUM_GE0:
-                  if(lua_isnumber(L, stackPos))
-                     ok = (lua_tonumber(L, stackPos) >= 0);
-                  break;
-
-               case INTS:
-                  ok = lua_isnumber(L, stackPos);
-
-                  while(stackPos < stackItems && lua_isnumber(L, stackPos))
-                     stackPos++;
-
-                  break;
-
-               case STR:               
-                  ok = lua_isstring(L, stackPos);
-                  break;
-
-               case BOOL:               
-                  ok = lua_isboolean(L, stackPos);
-                  break;
-
-               case PT:
-                  if(lua_isvec(L, stackPos))
-                  {
-                     ok = true;
-                  }
-                  else if(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))
-                  {
-                     ok = true;
-                     stackPos++;
-                  }
-                  break;
-
-               // GEOM: A series of points, numbers, or a table containing a series of points or numbers
-               case GEOM:
-                  if(lua_isvec(L, stackPos))             // Series of Points
-                  {
-                     stackPos++;
-                     while(stackPos < stackItems && lua_isvec(L, stackPos))
-                        stackPos++;
-                     ok = true;
-                  }
-                  else if(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))     // Series of numbers -- look for x,y pairs
-                  {
-                     stackPos += 2;
-                     while(stackPos + 1 <= stackItems && lua_isnumberpair(L, stackPos))
-                        stackPos += 2;
-                     ok = true;
-                     stackPos--;
-                  }
-                  else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
-                  {
-                     ok = true;     // for now...
-                  }
-                  break;
-
-               case LOADOUT:
-                  ok = luaW_is<LuaLoadout>(L, stackPos);
-                  break;
-
-               case ITEM:
-                  ok = luaW_is<Item>(L, stackPos);
-                  break;
-
-               case TABLE:
-                  ok = lua_istable(L, stackPos);
-                  break;
-
-               case WEAP_ENUM:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 0 && i < WeaponCount);
-                  }
-                  break;
-
-               case WEAP_SLOT:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 1 && i <= ShipWeaponCount);       // Slot 1, 2, or 3
-                  }
-                  break;
-
-               case MOD_ENUM:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 0 && i < ModuleCount);
-                  }
-                  break;
-
-               case MOD_SLOT:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 1 && i <= ShipModuleCount);       // Slot 1 or 2
-                  }
-                  break;
-
-               case TEAM_INDX:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos) - 1;    // -1 because Lua indices start with 1
-                     ok = ((i >= 0 && i < Game::getAddTarget()->getTeamCount()) || (i + 1) == TEAM_NEUTRAL || (i + 1) == TEAM_HOSTILE);
-                  }
-                  break;
-
-               case ROBOT:
-                  ok = luaW_is<Robot>(L, stackPos);
-                  break;
-
-               case LEVELGEN:
-                  ok = luaW_is<LuaLevelGenerator>(L, stackPos);
-                  break;
-
-               case EVENT:
-                  if(lua_isnumber(L, stackPos))
-                  {
-                     lua_Integer i = lua_tointeger(L, stackPos);
-                     ok = (i >= 0 && i < EventManager::EventTypes);
-                  }
-                  break;
-               
-               case BFOBJ:
-                  ok = luaW_is<BfObject>(L, stackPos);
-                  break;
-
-               case MOVOBJ:
-                  ok = luaW_is<MoveObject>(L, stackPos);
-                  break;
-
-               default:
-                  TNLAssert(false, "Unknown arg type!");
-                  break;
-            }
+            ok = checkLuaArgs(L, candidateArgList[j], stackPos);
          }
+
 
          if(!ok)
          {
-            validProfile = false;       // This profile is not the one we want... proceed to next i
+            validProfile = false;            // This profile is not the one we want... proceed to next i
             break;
          }
       }
 
-      if(validProfile && (stackPos == stackItems))
+      if(validProfile && (stackPos == stackDepth))
          return i;
    }
    
@@ -289,6 +134,161 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
    throw LuaException(msg);
 
    return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
+}
+
+
+// Warning... may alter stackPos!
+bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos)
+{
+   S32 stackDepth = lua_gettop(L);
+
+   switch(argType)
+   {
+      case INT:      // Passthrough ok!
+      case NUM:
+         return lua_isnumber(L, stackPos);
+
+      case INT_GE0:
+         if(lua_isnumber(L, stackPos))
+            return ((S32)(lua_tonumber(L, stackPos)) >= 0);
+
+         return false;
+
+      case NUM_GE0:
+         if(lua_isnumber(L, stackPos))
+            return (lua_tonumber(L, stackPos) >= 0);
+
+         return false;
+
+      case INTS:
+      {
+         bool ok = lua_isnumber(L, stackPos);
+
+         if(ok)
+            while(stackPos < stackDepth && lua_isnumber(L, stackPos))
+               stackPos++;
+
+         return ok;
+      }
+
+      case STR:               
+         return lua_isstring(L, stackPos);
+
+      case BOOL:               
+         return lua_isboolean(L, stackPos);
+
+      case PT:
+         if(lua_isvec(L, stackPos))
+            return true;
+         else if(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))
+         {
+            stackPos++;
+            return true;
+         }
+         
+         return false;
+
+      // GEOM: A series of points, numbers, or a table containing a series of points or numbers
+      case GEOM:
+         if(lua_isvec(L, stackPos))             // Series of Points
+         {
+            stackPos++;
+            while(stackPos < stackDepth && lua_isvec(L, stackPos))
+               stackPos++;
+
+            return true;
+         }
+         else if(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))     // Series of numbers -- look for x,y pairs
+         {
+            stackPos += 2;
+            while(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))
+               stackPos += 2;
+            stackPos--;
+
+            return true;
+         }
+         else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
+            return true;     // for now...
+
+         return false;
+
+      case LOADOUT:
+         return luaW_is<LuaLoadout>(L, stackPos);
+
+      case ITEM:
+         return luaW_is<Item>(L, stackPos);
+
+      case TABLE:
+         return lua_istable(L, stackPos);
+
+      case WEAP_ENUM:
+         if(lua_isnumber(L, stackPos))
+         {
+            lua_Integer i = lua_tointeger(L, stackPos);
+            return (i >= 0 && i < WeaponCount);
+         }
+         return false;
+
+      case WEAP_SLOT:
+         if(lua_isnumber(L, stackPos))
+         {
+            lua_Integer i = lua_tointeger(L, stackPos);
+            return (i >= 1 && i <= ShipWeaponCount);       // Slot 1, 2, or 3
+         }
+         return false;
+
+      case MOD_ENUM:
+         if(lua_isnumber(L, stackPos))
+         {
+            lua_Integer i = lua_tointeger(L, stackPos);
+            return (i >= 0 && i < ModuleCount);
+         }
+         return false;
+
+      case MOD_SLOT:
+         if(lua_isnumber(L, stackPos))
+         {
+            lua_Integer i = lua_tointeger(L, stackPos);
+            return (i >= 1 && i <= ShipModuleCount);       // Slot 1 or 2
+         }
+         return false;
+
+      case TEAM_INDX:
+         if(lua_isnumber(L, stackPos))
+         {
+            lua_Integer i = lua_tointeger(L, stackPos) - 1;    // -1 because Lua indices start with 1
+            return ((i >= 0 && i < Game::getAddTarget()->getTeamCount()) || (i + 1) == TEAM_NEUTRAL || (i + 1) == TEAM_HOSTILE);
+         }
+         return false;
+
+      case ROBOT:
+         return luaW_is<Robot>(L, stackPos);
+
+      case LEVELGEN:
+         return luaW_is<LuaLevelGenerator>(L, stackPos);
+
+      case EVENT:
+         if(lua_isnumber(L, stackPos))
+         {
+            lua_Integer i = lua_tointeger(L, stackPos);
+            return (i >= 0 && i < EventManager::EventTypes);
+         }
+         return false;
+               
+      case BFOBJ:
+         return luaW_is<BfObject>(L, stackPos);
+
+      case MOVOBJ:
+         return luaW_is<MoveObject>(L, stackPos);
+
+      case ANY:
+         stackPos = stackDepth;
+         return true;
+
+      default:
+         TNLAssert(false, "Unknown arg type!");
+         return false;
+   }
 }
 
 
@@ -313,12 +313,12 @@ Point LuaBase::getPointOrXY(lua_State *L, S32 index)
 Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
 {
    Vector<Point> points;
-   S32 stackItems = lua_gettop(L);
+   S32 stackDepth = lua_gettop(L);
 
    if(lua_isvec(L, index))          // List of points
    {
       S32 offset = 0;
-      while(index + offset <= stackItems && lua_isvec(L, index + offset))
+      while(index + offset <= stackDepth && lua_isvec(L, index + offset))
       {
          const F32 *vec = lua_tovec(L, index + offset);
          points.push_back(Point(vec[0], vec[1]));
@@ -328,7 +328,7 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
    else if(lua_isnumber(L, index))  // List of coords
    {
       S32 offset = 0;
-      while(index + offset + 1 <= stackItems && lua_isnumberpair(L, index + offset))
+      while(index + offset + 1 <= stackDepth && lua_isnumberpair(L, index + offset))
       {
          F32 x = getFloat(L, index + offset);
          F32 y = getFloat(L, index + offset + 1);
