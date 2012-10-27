@@ -145,6 +145,8 @@ void CreditsUserInterface::render()
 
 void CreditsUserInterface::quit()
 {
+   mScroller->resetPosition();
+
    getUIManager()->reactivatePrevUI();      // gMainMenuUserInterface
 }
 
@@ -170,32 +172,31 @@ CreditsScroller::CreditsScroller()
    // by 0 or more people doing that job
 
    CreditsInfo c;    // Reusable object, gets implicitly copied when pushed
-
-   static const S32 SPACE_BETWEEN_SECTIONS = 100;
-
    S32 index = 0;
    while(gameCredits[index])
    {
-      if(strcmp(gameCredits[index], "-"))
-         c.line.push_back(gameCredits[index]);
-
-      else   // Place credit in cache
+      // If we've hit a section break, add the current CreditsInfo to the list
+      if(strcmp(gameCredits[index], "-") == 0)
       {
          mCredits.push_back(c);
-         c.pos += CreditSpace * c.line.size() + SPACE_BETWEEN_SECTIONS;
-         c.line.clear();
+         c.lines.clear();
       }
+      // Else add the current line to the current CreditsInfo
+      else
+         c.lines.push_back(gameCredits[index]);
 
       index++;
    }
 
-   mTotalSize = c.pos;
+   // Start credits position at the appropriate place
+   resetPosition();
 
    mActivated = false;
 }
 
 
-CreditsScroller::~CreditsScroller()       // Destructor
+// Destructor
+CreditsScroller::~CreditsScroller()
 {
    // Do nothing
 }
@@ -208,7 +209,7 @@ void CreditsScroller::updateFX(U32 delta)
    // If the second-to-last credits has gone of the screen, don't update anymore.  This
    // leaves the final message drawn on the screen.
    U32 indexMinus1 = mCredits.size() - 2;
-   if(mCredits[indexMinus1].pos > 150 - (CreditSpace * mCredits[indexMinus1].line.size()))  // 150 = banner height
+   if(mCredits[indexMinus1].pos > 150 - (CreditSpace * mCredits[indexMinus1].lines.size()))  // 150 = banner height
    {
       // Scroll the credits text from bottom to top
       for(S32 i = 0; i < mCredits.size(); i++)
@@ -242,8 +243,8 @@ void CreditsScroller::render()
 
    // Draw the credits text, section by section, line by line
    for(S32 i = 0; i < mCredits.size(); i++)
-      for(S32 j = 0; j < mCredits[i].line.size(); j++)
-         UserInterface::drawCenteredString(S32(mCredits[i].pos) + CreditSpace * (j), 25, mCredits[i].line[j]);
+      for(S32 j = 0; j < mCredits[i].lines.size(); j++)
+         UserInterface::drawCenteredString(S32(mCredits[i].pos) + CreditSpace * (j), 25, mCredits[i].lines[j]);
 
    glColor(Colors::black);
    F32 vertices[] = {
@@ -258,6 +259,15 @@ void CreditsScroller::render()
 }
 
 
+void CreditsScroller::resetPosition()
+{
+   mCredits[0].pos = (F32)gScreenInfo.getGameCanvasHeight();
+
+   for(S32 i = 1; i < mCredits.size(); i++)
+      mCredits[i].pos = mCredits[i-1].pos + (CreditSpace * mCredits[i-1].lines.size()) + SectionSpace;
+}
+
+
 void CreditsScroller::setActive(bool active)
 {
    mActivated = active;
@@ -267,17 +277,6 @@ void CreditsScroller::setActive(bool active)
 bool CreditsScroller::isActive()
 {
    return mActivated;
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Constructor
-CreditsInfo::CreditsInfo()
-{
-   // Initially set the position to be outside the viewing area
-   pos = (F32)gScreenInfo.getGameCanvasHeight();
 }
 
 
