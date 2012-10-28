@@ -221,34 +221,12 @@ string Spawn::toString(F32 gridSize) const
 }
 
 
-const char *Spawn::getEditorHelpString()
-{
-   return "Location where ships start.  At least one per team is required. [G]";
-}
+const char *Spawn::getOnScreenName()     { return "Spawn";        }
+const char *Spawn::getOnDockName()       { return "Spawn";        }
+const char *Spawn::getPrettyNamePlural() { return "Spawn Points"; }
+const char *Spawn::getEditorHelpString() { return "Location where ships start.  At least one per team is required. [G]"; }
 
-
-const char *Spawn::getPrettyNamePlural()
-{
-   return "Spawn Points";
-}
-
-
-const char *Spawn::getOnDockName()
-{
-   return "Spawn";
-}
-
-
-const char *Spawn::getOnScreenName()
-{
-   return "Spawn";
-}
-
-
-const char *Spawn::getClassName() const
-{
-   return "Spawn";
-}
+const char *Spawn::getClassName() const  { return "Spawn"; }
 
 
 S32 Spawn::getDefaultRespawnTime()
