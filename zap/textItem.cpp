@@ -71,10 +71,6 @@ TextItem::~TextItem()
 TextItem *TextItem::clone() const
 {
    return new TextItem(*this);
-
-   //copyAttrs(clone);
-
-   //return clone;
 }
 
 
@@ -82,16 +78,6 @@ const char *TextItem::getInstructionMsg()
 {
    return "[Enter] to edit text";
 }
-
-
-//
-//void TextItem::copyAttrs(TextItem *target)
-//{
-//   SimpleLine::copyAttrs(target);
-//
-//   target->mSize = mSize;
-//   target->mText = mText;
-//}
 
 
 void TextItem::newObjectFromDock(F32 gridSize)
@@ -131,46 +117,15 @@ void TextItem::renderEditorItem()
 }
 
 
-const char *TextItem::getEditorHelpString()
-{
-   return "Draws a bit of text on the map.  Visible only to team, or to all if neutral.";
-}
+const char *TextItem::getOnScreenName()     { return "Text";      }
+const char *TextItem::getOnDockName()       { return "TextItem";  }
+const char *TextItem::getPrettyNamePlural() { return "TextItems"; }
+const char *TextItem::getEditorHelpString() { return "Draws a bit of text on the map.  Visible only to team, or to all if neutral."; }
 
 
-const char *TextItem::getPrettyNamePlural()
-{
-   return "Text Items";
-}
-
-
-const char *TextItem::getOnDockName()
-{
-   return "TextItem";
-}
-
-
-const char *TextItem::getOnScreenName()
-{
-   return "Text";
-}
-
-
-bool TextItem::hasTeam()
-{
-   return true;
-}
-
-
-bool TextItem::canBeHostile()
-{
-   return true;
-}
-
-
-bool TextItem::canBeNeutral()
-{
-   return true;
-}
+bool TextItem::hasTeam()      { return true; }
+bool TextItem::canBeHostile() { return true; }
+bool TextItem::canBeNeutral() { return true; }
 
 
 Color TextItem::getEditorRenderColor()
@@ -459,5 +414,12 @@ void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 #endif
 
+
+/**
+ * @luafunc  BfObject::setGeom(geometry)
+ * @brief    Sets an object's geometry. 
+ * @param    geometry - The object's geometry.  (See \ref datatypes.) 
+ * @descr    Note that not all objects support changing geometry if an object is in a game.
+ */
 
 };
