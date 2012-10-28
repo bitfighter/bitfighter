@@ -1384,8 +1384,8 @@ S32 BfObject::removeFromGame(lua_State *L)
 /**
  * @luafunc  BfObject::setGeom(geometry)
  * @brief    Sets an object's geometry. 
- * @param    geometry - The object's geometry.  (See \ref datatypes.) 
- * @descr    Note that not all objects support changing geometry if an object is in a game.
+ * @param    geometry - The object's geometry.  (See \ref datatypes for an explanation of geometry.) 
+ * @descr    Note that not all objects support changing geometry if the object has already been added to a game.
  */
 S32 BfObject::setGeom(lua_State *L)
 {
