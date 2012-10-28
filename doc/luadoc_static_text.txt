@@ -15,6 +15,8 @@ Note that points are immutable, so cannot be changed once created.
 * geometry - Geometry is not a formal datatype, but rather a reference to either to a point or a table of points, depending on the context. 
 For example, if the object is inherently point-like (such as an Item or Projectile), then geometry is a Point.  
 For more complex objects (such as a WallItem or a Zone), geometry refers to a Lua table of points.
+Some objects have a specific number of points.  A TextItem, for example, consists of exactly two points, defining its
+start and endpoints.  Some items (like Zones and \link PolyWall PolyWalls \endlink) must have a minimum of three points.  See the documentation for individual items for details.
 
 The Geom class provides a collection of tools to make common transormations to a point or a table of points. 
 
@@ -22,9 +24,9 @@ The Geom class provides a collection of tools to make common transormations to a
 
 bool - Either \e true or \e false.  In Lua, both nil and false make a condition false; any other value makes it true.
 
-int - 
+int - A number that has no decimal component.  Unlike some languages, Lua does not distinguish between integers and floating point numbers -- they are both stored internally as numbers.  When a function requires an integer argument, and you provide a floating point number, the fraction will be silently dropped.
 
-*num - A real (double-precision floating-point) number.
+*num - A real (double-precision floating-point) number.  You can also specify an integer without any problems.
 
 @subsection step1 Step 1: Opening the box
 
