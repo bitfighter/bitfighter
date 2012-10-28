@@ -989,7 +989,10 @@ bool CoreItem::canBeNeutral() { return false; }
 
 /////
 // Lua interface
-
+/**
+  *  @luaclass CoreItem
+  *  @brief Target of hate during Core game.
+  */
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getCurrentHealth, ARRAYDEF({{          END }}), 1 ) \
