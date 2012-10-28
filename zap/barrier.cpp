@@ -854,7 +854,7 @@ WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database)
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallEdgeTypeNumber;
 
-   edgeCounter++;
+   edgeCounter++; logprintf("Creating wallEdge...");
 }
 
 
@@ -899,8 +899,6 @@ WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const P
    // Calculate segment corners by expanding the extended end points into a rectangle
    Barrier::expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
    init(gridDatabase, owner);
-
-   instanceCounter++;
 }
 
 
@@ -913,8 +911,6 @@ WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points
       mCorners.reverse();
 
    init(gridDatabase, owner);
-
-   instanceCounter++;
 }
 
 
@@ -937,6 +933,9 @@ void WallSegment::init(GridDatabase *database, S32 owner)
    /////
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallSegmentTypeNumber;
+
+   logprintf("Creating wallSegment");
+   instanceCounter++;
 }
 
 
