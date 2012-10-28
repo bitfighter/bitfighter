@@ -112,6 +112,7 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Class of spawns that spawn items, rather than places ships might appear
 class ItemSpawn : public AbstractSpawn
 {
    typedef AbstractSpawn Parent;
@@ -203,7 +204,7 @@ public:
 
    S32 getDefaultRespawnTime();
 
-   void spawn(Game *game, const Point &pos);
+   //void spawn(Game *game, const Point &pos);
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
