@@ -125,7 +125,7 @@ void SpeedZone::preparePoints()
 
 
 // static method
-void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize, Vector<Point> &points)
+void SpeedZone::generatePoints(const Point &start, const Point &end, F32 gridSize, Vector<Point> &points)
 {
    const S32 inset = 3;
    const F32 halfWidth = SpeedZone::halfWidth;
@@ -133,14 +133,14 @@ void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize,
 
    points.resize(12);
 
-   Point parallel(dir - pos);
+   Point parallel(end - start);
    parallel.normalize();
 
    const F32 chevronThickness = height / 3;
    const F32 chevronDepth = halfWidth - inset;
 
-   Point tip = pos + parallel * height;
-   Point perpendic(pos.y - tip.y, tip.x - pos.x);
+   Point tip = start + parallel * height;
+   Point perpendic(start.y - tip.y, tip.x - start.x);
    perpendic.normalize();
 
    
@@ -151,12 +151,12 @@ void SpeedZone::generatePoints(const Point &pos, const Point &dir, F32 gridSize,
       F32 offset = halfWidth * 2 * i - (i * 4);
 
       // Red chevron
-      points[index++] = pos + parallel *  (chevronThickness + offset);                                          
-      points[index++] = pos + perpendic * (halfWidth-2*inset) + parallel * (inset + offset);                             //  2   3
-      points[index++] = pos + perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);          //    1    4
-      points[index++] = pos + parallel *  (chevronDepth + chevronThickness + inset + offset);                            //  6    5
-      points[index++] = pos - perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);
-      points[index++] = pos - perpendic * (halfWidth-2*inset) + parallel * (inset + offset);
+      points[index++] = start + parallel *  (chevronThickness + offset);
+      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (inset + offset);                             //  2   3
+      points[index++] = start + perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);          //    1    4
+      points[index++] = start + parallel *  (chevronDepth + chevronThickness + inset + offset);                            //  6    5
+      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (chevronThickness + inset + offset);
+      points[index++] = start - perpendic * (halfWidth-2*inset) + parallel * (inset + offset);
    }
 }
 
@@ -193,7 +193,7 @@ void SpeedZone::onGeomChanging()
 
 void SpeedZone::onGeomChanged()   
 {  
-   generatePoints(getVert(0), getVert(1), 1, mPolyBounds); 
+   generatePoints(getVert(0), getVert(1), 1, mPolyBounds);
    Parent::onGeomChanged();
 }
 
@@ -268,23 +268,17 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    if(argc < 4)      // Need two points at a minimum, with an optional speed item
       return false;
 
-   Point pos, dir;
+   Point start, end;
 
-   pos.read(argv);
-   pos *= game->getGridSize();
+   start.read(argv);
+   start *= game->getGridSize();
 
-   dir.read(argv + 2);
-   dir *= game->getGridSize();
-
-   // Adjust the direction point so that it also represents the tip of the triangle
-   Point offset(dir - pos);
-   offset.normalize();
-   dir = Point(pos + offset * height);
+   end.read(argv + 2);
+   end *= game->getGridSize();
 
    // Save the points we read into our geometry
-   setVert(pos, 0);
-   setVert(dir, 1);
-
+   setVert(start, 0);
+   setVert(end, 1);
 
    if(argc >= 5)
       mSpeed = max((U16)minSpeed, min((U16)maxSpeed, (U16)(atoi(argv[4]))));
@@ -391,10 +385,10 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 {
    TNLAssert(dynamic_cast<MoveObject *>(hitObject), "Not a MoveObject");
    MoveObject *s = static_cast<MoveObject *>(hitObject);
-   Point pos = getVert(0);
-   Point dir = getVert(1);
+   Point start = getVert(0);
+   Point end = getVert(1);
 
-   Point impulse = (dir - pos);           // Gives us direction
+   Point impulse = end - start;           // Gives us direction
    impulse.normalize(mSpeed);             // Gives us the magnitude of speed
    Point shipNormal = s->getVel(stateIndex);
    shipNormal.normalize(mSpeed);
@@ -412,10 +406,10 @@ bool SpeedZone::collided(BfObject *hitObject, U32 stateIndex)
 
    if(mSnapLocation)
    {
-      Point diffpos = s->getPos(stateIndex) - pos;
-      Point thisAngle = dir - pos;
+      Point diffpos = s->getPos(stateIndex) - start;
+      Point thisAngle = end - start;
       thisAngle.normalize();
-      Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001f;
+      Point newPos = thisAngle * diffpos.dot(thisAngle) + start + impulse * 0.001f;
 
       Point oldPos = s->getPos(stateIndex);
       Point oldVel = s->getVel(stateIndex);
@@ -467,16 +461,18 @@ void SpeedZone::idle(BfObject::IdleCallPath path)
 {
    if(mRotateSpeed != 0)
    {
-      Point dir = getVert(1);
-
-      dir -= getVert(0);
+      Point dir = getVert(1) - getVert(0);
       F32 angle = dir.ATAN2();
-      angle += mRotateSpeed * mCurrentMove.time * 0.001f;
-      dir.setPolar(1, angle);
-      dir += getVert(0);
-      setMaskBits(InitMask);
 
+      // Adjust angle
+      angle += mRotateSpeed * mCurrentMove.time * 0.001f;
+      dir.setPolar(dir.len(), angle);
+
+      // Set new end point
+      dir += getVert(0);
       setVert(dir, 1);
+
+      setMaskBits(InitMask);
 
       preparePoints();     // Avoids "off center" problem
    }
@@ -605,7 +601,11 @@ S32 SpeedZone::setDir(lua_State *L)
   */
 S32 SpeedZone::getDir(lua_State *L)
 {
-   return returnPoint(L, getVert(1));
+   // Calculate the direction point
+   Point offset(getVert(1) - getVert(0));
+   offset.normalize();
+
+   return returnPoint(L, offset);
 }
 
 
