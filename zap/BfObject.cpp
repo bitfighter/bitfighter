@@ -434,7 +434,6 @@ S32 BfObject::getSerialNumber()
 }
 
 
-
 S32 BfObject::getTeam() const
 {
    return mTeam;     // Team index, actually!
