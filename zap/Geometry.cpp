@@ -668,7 +668,7 @@ void SimpleLineGeometry::setGeom(const Vector<Point> &points)
    if(points.size() >= 2)
    {
       mFromPos = points[0];
-      mFromPos = points[1];
+      mToPos   = points[1];
    }
 }
 
