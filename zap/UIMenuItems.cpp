@@ -34,8 +34,8 @@
 namespace Zap
 {
 
-// Constructor
-MenuItem::MenuItem()
+// Combined default C++ / Lua constructor
+MenuItem::MenuItem(lua_State *L)
 {
    initialize();
 

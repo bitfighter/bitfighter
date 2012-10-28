@@ -89,7 +89,7 @@ protected:
 
 public:
    // Constructors
-   MenuItem();
+   MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
    MenuItem(const string &displayVal);
    MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
@@ -154,7 +154,7 @@ public:
 
    ///// Lua interface
    // Top level Lua methods
-   LUAW_DECLARE_CLASS(MenuItem);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(MenuItem);
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
