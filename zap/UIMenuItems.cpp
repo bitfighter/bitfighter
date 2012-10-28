@@ -38,7 +38,6 @@ namespace Zap
 MenuItem::MenuItem(lua_State *L)
 {
    initialize();
-
 }
 
 
