@@ -56,8 +56,8 @@ public:
    static const S32 MAX_TEXT_SIZE = 255;
    static const S32 MIN_TEXT_SIZE = 10;
 
-   TextItem();            // Constructor
-   virtual ~TextItem();   // Destructor
+   TextItem(lua_State *L = NULL);   // Combined Lua / C++ constructor
+   virtual ~TextItem();             // Destructor
 
    TextItem *clone() const;
 
@@ -121,6 +121,16 @@ public:
    void newObjectFromDock(F32 gridSize);
 
    TNL_DECLARE_CLASS(TextItem);
+
+   //// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TextItem);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   S32 lua_setText(lua_State *L);
+   S32 lua_getText(lua_State *L);
 };
 
 

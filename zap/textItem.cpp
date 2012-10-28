@@ -50,21 +50,23 @@ TNL_IMPLEMENT_NETOBJECT(TextItem);
 EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 #endif
 
-// Constructor
-TextItem::TextItem()
+// Combined Lua / C++ constructor
+TextItem::TextItem(lua_State *L)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TextItemTypeNumber;
 
    // Some default values
    mSize = 20;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 TextItem::~TextItem()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -156,6 +158,7 @@ string TextItem::getText()
 void TextItem::setText(string text)
 {
    mText = text;
+   onGeomChanged();
 }
 
 
@@ -373,7 +376,6 @@ static void textEditedCallback(string text)
 {
    TextItem *textItem = dynamic_cast<TextItem *>(TextItem::getAttributeEditorObject());
    textItem->setText(text);
-   textItem->recalcTextSize();
 }
 
 
@@ -415,11 +417,59 @@ void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 #endif
 
 
+//// Lua methods
+
 /**
- * @luafunc  BfObject::setGeom(geometry)
- * @brief    Sets an object's geometry. 
- * @param    geometry - The object's geometry.  (See \ref datatypes.) 
- * @descr    Note that not all objects support changing geometry if an object is in a game.
- */
+  *  @luaclass TextItem
+  *  @brief Display text message in level.
+  *  @descr A %TextItem displays text in a level.  If the %TextItem belongs to a team, it is only visible to players on that team.
+  *         If it is assigned to NeutralTeam (the default), it will be visible to all players.  Text is always displayed in the color
+  *         of the team it belongs to.
+  *
+  * Note that you will likely want to set the text of a new %TextItem (see setText()), as, by default, the display string is blank.
+  *
+  * Geometry for a %TextItem consists of two points representing the start and end points of the item.  Text will be scaled to
+  * fit between these points.
+  */
+//               Fn name     Param profiles       Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, setText,      ARRAYDEF({{ STR, END }}), 1 ) \
+   METHOD(CLASS, getText,      ARRAYDEF({{      END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE_NEW(TextItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(TextItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *TextItem::luaClassName = "TextItem";
+REGISTER_LUA_SUBCLASS(TextItem, BfObject);
+
+
+/** 
+  *  @luafunc TextItem::setText(text)
+  *  @brief Sets the text of a %TextItem.
+  *  @param text - A \e string specifying what the %TextItem should display.
+  */
+S32 TextItem::lua_setText(lua_State *L)
+{
+   checkArgList(L, functionArgs, "TextItem", "setText");
+
+   setText(getString(L, 1));
+
+   return 0;
+}
+
+
+/** 
+  *  @luafunc text TextItem::getText()
+  *  @brief Sets the text of a %TextItem.
+  *  @return text - A \e string specifying what the %TextItem is currently displaying.
+  */
+S32 TextItem::lua_getText(lua_State *L)
+{
+   return returnString(L, getText().c_str());
+}
+
 
 };
