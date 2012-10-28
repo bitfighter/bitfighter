@@ -309,35 +309,12 @@ AsteroidSpawn *AsteroidSpawn::clone() const
 }
 
 
-const char *AsteroidSpawn::getEditorHelpString()
-{
-   return "Periodically spawns a new asteroid.";
-}
+const char *AsteroidSpawn::getOnScreenName()     { return "AsteroidSpawn";         }
+const char *AsteroidSpawn::getOnDockName()       { return "ASP";                   }
+const char *AsteroidSpawn::getPrettyNamePlural() { return "Asteroid Spawn Points"; }
+const char *AsteroidSpawn::getEditorHelpString() { return "Periodically spawns a new asteroid."; }
 
-
-const char *AsteroidSpawn::getPrettyNamePlural()
-{
-   return "Asteroid Spawn Points";
-}
-
-
-const char *AsteroidSpawn::getOnDockName()
-{
-   return "ASP";
-}
-
-
-const char *AsteroidSpawn::getOnScreenName()
-{
-   return "AsteroidSpawn";
-}
-
-
-const char *AsteroidSpawn::getClassName() const
-{
-   return "AsteroidSpawn";
-}
-
+const char *AsteroidSpawn::getClassName() const  { return "AsteroidSpawn"; }
 
 S32 AsteroidSpawn::getDefaultRespawnTime()
 {
@@ -411,34 +388,12 @@ CircleSpawn *CircleSpawn::clone() const
 }
 
 
-const char *CircleSpawn::getEditorHelpString()
-{
-   return "Periodically spawns a new circle.";
-}
+const char *CircleSpawn::getOnScreenName()     { return "CircleSpawn";         }
+const char *CircleSpawn::getOnDockName()       { return "CSP";                 }
+const char *CircleSpawn::getPrettyNamePlural() { return "Circle Spawn Points"; }
+const char *CircleSpawn::getEditorHelpString() { return "Periodically spawns a new circle."; }
 
-
-const char *CircleSpawn::getPrettyNamePlural()
-{
-   return "Circle Spawn Points";
-}
-
-
-const char *CircleSpawn::getOnDockName()
-{
-   return "CSP";
-}
-
-
-const char *CircleSpawn::getOnScreenName()
-{
-   return "CircleSpawn";
-}
-
-
-const char *CircleSpawn::getClassName() const
-{
-   return "CircleSpawn";
-}
+const char *CircleSpawn::getClassName() const  { return "CircleSpawn"; }
 
 
 S32 CircleSpawn::getDefaultRespawnTime()
@@ -503,7 +458,7 @@ void CircleSpawn::renderDock()
 ////////////////////////////////////////
 
 // Constructor
-FlagSpawn::FlagSpawn(const Point &pos, S32 time) : AbstractSpawn(pos, time)
+FlagSpawn::FlagSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
    mObjectTypeNumber = FlagSpawnTypeNumber;
 }
@@ -533,34 +488,12 @@ void FlagSpawn::resetTimer()
 }
 
 
-const char *FlagSpawn::getEditorHelpString()
-{
-   return "Location where flags (or balls in Soccer) spawn after capture.";
-}
+const char *FlagSpawn::getOnScreenName()     { return "FlagSpawn";         }
+const char *FlagSpawn::getOnDockName()       { return "FlagSpawn";         }
+const char *FlagSpawn::getPrettyNamePlural() { return "Flag Spawn points"; }
+const char *FlagSpawn::getEditorHelpString() { return "Location where flags (or balls in Soccer) spawn after capture."; }
 
-
-const char *FlagSpawn::getPrettyNamePlural()
-{
-   return "Flag Spawn points";
-}
-
-
-const char *FlagSpawn::getOnDockName()
-{
-   return "FlagSpawn";
-}
-
-
-const char *FlagSpawn::getOnScreenName()
-{
-   return "FlagSpawn";
-}
-
-
-const char *FlagSpawn::getClassName() const
-{
-   return "FlagSpawn";
-}
+const char *FlagSpawn::getClassName() const  { return "FlagSpawn"; }
 
 
 S32 FlagSpawn::getDefaultRespawnTime()
