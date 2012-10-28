@@ -653,7 +653,7 @@ S32 WallItem::setWidth(lua_State *L)
 
 void WallItem::checkIfWallHasBeenAddedToTheGame()
 {
-   if(mAddedToGame)
+   if(getGame() && getGame()->isServer())
    {
       const char *msg = "Can't modify a wall that's already been added to a game!";
       logprintf(LogConsumer::LogError, msg);
