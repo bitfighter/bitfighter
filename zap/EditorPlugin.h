@@ -70,7 +70,6 @@ public:
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
-
 };
 
 
