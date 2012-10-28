@@ -161,8 +161,8 @@ public:
    bool isBeingAttacked();
 
    void setStartingHealth(F32 health);
-   F32 getTotalHealth();                  // Returns total health of all panels
-   F32 getHealth();                       // Returns overall health of item as a ratio between 0 and 1
+   F32 getTotalCurrentHealth();           // Returns total current health of all panels
+   F32 getHealth();                       // Returns overall current health of item as a ratio between 0 and 1
    bool isPanelDamaged(S32 panelIndex);
    bool isPanelInRepairRange(const Point &origin, S32 panelIndex);
 
@@ -222,8 +222,9 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 getHealth(lua_State *L);   
-   S32 setHealth(lua_State *L);   
+   S32 getCurrentHealth(lua_State *L);    // Current health = FullHealth - damage sustained
+   S32 getFullHealth(lua_State *L);       // Health with no damange
+   S32 setFullHealth(lua_State *L);     
 };
 
 

@@ -779,7 +779,7 @@ void CoreItem::setStartingHealth(F32 health)
 }
 
 
-F32 CoreItem::getTotalHealth()
+F32 CoreItem::getTotalCurrentHealth()
 {
    F32 total = 0;
 
@@ -793,7 +793,7 @@ F32 CoreItem::getTotalHealth()
 F32 CoreItem::getHealth()
 {
    // health is from 0 to 1.0
-   return getTotalHealth() / mStartingHealth;
+   return getTotalCurrentHealth() / mStartingHealth;
 }
 
 
@@ -992,8 +992,9 @@ bool CoreItem::canBeNeutral() { return false; }
 
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getHealth, ARRAYDEF({{          END }}), 1 ) \
-   METHOD(CLASS, setHealth, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+   METHOD(CLASS, getCurrentHealth, ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, getFullHealth,    ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setFullHealth,    ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(CoreItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(CoreItem, LUA_METHODS);
@@ -1005,12 +1006,39 @@ const char *CoreItem::luaClassName = "CoreItem";
 REGISTER_LUA_SUBCLASS(CoreItem, Item);
 
 
-S32 CoreItem::getHealth(lua_State *L) { return returnFloat(L, getTotalHealth()); }
-
-
-S32 CoreItem::setHealth(lua_State *L) 
+/**
+  *  @luafunc num CoreItem::getCurrentHealth()
+  *  @brief   Returns %CoreItem's current health.
+  *  @return   \e health: Number representing %CoreItem's current health 
+  */
+S32 CoreItem::getCurrentHealth(lua_State *L) 
 { 
-   checkArgList(L, functionArgs, "CoreItem", "setHealth");
+   return returnFloat(L, getTotalCurrentHealth()); 
+}
+
+
+/**
+  *  @luafunc num CoreItem::getFullHealth()
+  *  @brief   Returns %CoreItem's total health.
+  *  @descr   %CoreItem's full health represents the total health of all panels before they have suffered any damage.
+  *  @return   \e health: Number representing %CoreItem's total health 
+  */
+S32 CoreItem::getFullHealth(lua_State *L) 
+{ 
+   return returnFloat(L, mStartingHealth); 
+}
+
+
+/**
+  *  @luafunc CoreItem::setFullHealth(health)
+  *  @brief   Sets %CoreItem's full health.
+  *  @descr   %CoreItem's full health represents the total health of all panels before they have suffered any damage.  This method has no effect
+  *           on the CoreItem's current health
+  *  @param   \e health: Number representing %CoreItem's total health 
+  */
+S32 CoreItem::setFullHealth(lua_State *L) 
+{ 
+   checkArgList(L, functionArgs, "CoreItem", "setFullHealth");
    setStartingHealth(getFloat(L, 1));
 
    return 0;     
