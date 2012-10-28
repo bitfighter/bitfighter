@@ -51,9 +51,12 @@ FXManager::FXManager()
    teleporterEffects = NULL;
 }
 
+
 FXManager::~FXManager()
 {
+   // Do nothing
 }
+
 
 // Create a new spark.   ttl = Time To Live (milliseconds)
 void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color, S32 ttl, SparkType sparkType)
@@ -104,13 +107,13 @@ void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color
 }
 
 
-#define dr(x) (float) (x) * FloatTau / 360     // degreesToRadians()
-#define rd(x) (float) (x) * 360 / FloatTau    // radiansToDegrees();
+#define dr(x) (float) (x) * FloatTau / 360    // degreesToRadians()
+#define rd(x) (float) (x) * 360 / FloatTau    // radiansToDegrees()
 
 
 void FXManager::DebrisChunk::idle(U32 timeDelta)
 {
-   F32 dT = F32(timeDelta) * 0.001f;
+   F32 dT = F32(timeDelta) * 0.001f;      // Convert timeDelta to seconds
 
    pos   += vel      * dT;
    angle += rotation * dT;
@@ -139,7 +142,7 @@ void FXManager::DebrisChunk::render()
 
 void FXManager::TextEffect::idle(U32 timeDelta)
 {
-   F32 dTsecs = F32(timeDelta) * 0.001f;
+   F32 dTsecs = F32(timeDelta) * 0.001f;     // Convert timeDelta to seconds
 
    pos += vel * dTsecs;
    if(size < 10)
@@ -153,7 +156,7 @@ void FXManager::TextEffect::render()
 {
    F32 alpha = 1;
    if(ttl < 300)
-      alpha = F32(ttl) / 300.f;
+      alpha = F32(ttl) / 300.f;     // Fade as item nears the end of its life
    glColor(color, alpha);
    //glLineWidth(size);
    glPushMatrix();
@@ -169,12 +172,12 @@ void FXManager::emitDebrisChunk(const Vector<Point> &points, const Color &color,
 {
    DebrisChunk debrisChunk;
 
-   debrisChunk.points = points;
-   debrisChunk.color = color;
-   debrisChunk.pos = pos;
-   debrisChunk.vel = vel;
-   debrisChunk.ttl = ttl;
-   debrisChunk.angle = angle;
+   debrisChunk.points   = points;
+   debrisChunk.color    = color;
+   debrisChunk.pos      = pos;
+   debrisChunk.vel      = vel;
+   debrisChunk.ttl      = ttl;
+   debrisChunk.angle    = angle;
    debrisChunk.rotation = rotation;
 
    mDebrisChunks.push_back(debrisChunk);
@@ -185,11 +188,11 @@ void FXManager::emitTextEffect(string text, Color color, Point pos)
 {
    TextEffect textEffect;
 
-   textEffect.text = text;
+   textEffect.text  = text;
    textEffect.color = color;
-   textEffect.pos = pos;
+   textEffect.pos   = pos;
 
-   textEffect.vel = Point(0,-130);
+   textEffect.vel  = Point(0,-130);
    textEffect.size = 0;
    textEffect.growthRate = 20;
    textEffect.ttl = 1500;
@@ -210,6 +213,7 @@ struct FXManager::TeleporterEffect
 void FXManager::emitTeleportInEffect(Point pos, U32 type)
 {
    TeleporterEffect *e = new TeleporterEffect;
+
    e->pos = pos;
    e->time = 0;
    e->type = type;
@@ -298,6 +302,10 @@ void FXManager::idle(U32 timeDelta)
 
 void FXManager::render(S32 renderPass)
 {
+   TNLAssert(dynamic_cast<ClientGame *>(this), "Not a ClientGame");
+   ClientGame *clientGame = static_cast<ClientGame *>(this);
+   F32 commanderZoomFraction = clientGame->getCommanderZoomFraction();
+
    // The teleporter effects should render under the ships and such
    if(renderPass == 0)
    {
@@ -310,12 +318,12 @@ void FXManager::render(S32 renderPass)
             alpha = (1 - radius) / 0.5f;
 
          Vector<Point> dummy;
-         TNLAssert(dynamic_cast<ClientGame *>(this), "Not a ClientGame");
-         ClientGame *clientGame = static_cast<ClientGame *>(this);
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, clientGame->getCommanderZoomFraction(),
+         
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, commanderZoomFraction,
                           radius, Teleporter::TeleportInRadius, alpha, &dummy);
       }
    }
+
    else if(renderPass == 1)      // Time for sparks!!
    {
       for(S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
