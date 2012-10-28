@@ -395,8 +395,6 @@ public:
 
    void playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit, F32 velocity);
 
-   static U32 getDesignCount();
-
    TNL_DECLARE_CLASS(Circle);
 
    ///// Editor methods

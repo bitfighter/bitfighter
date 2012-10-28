@@ -1770,15 +1770,14 @@ void Circle::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit
 }
 
 
-U32 Circle::getDesignCount()
-{
-   return ASTEROID_DESIGNS;
-}
-
-
 /////
 // Lua interface
-
+/**
+  *  @luaclass Circle
+  *  @brief Annoying circle that follows ships around.
+  *  @descr This is not really a supported object.  Just something we were playing around with.  Do not use this!
+  *  @geom  The geometry of %Circle is a single point.
+  */
 const luaL_reg           Circle::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile Circle::functionArgs[] = { { NULL, { }, 0 } };
 
