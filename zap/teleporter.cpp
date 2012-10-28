@@ -1020,7 +1020,6 @@ S32 Teleporter::setGeom(lua_State *L)
   *  In the editor, all teleporters are simple lines, and will return geometries with two points -- an origin and a destination.
   *  @param   \e Geom geometry: New geometry for %Teleporter.
   */
- 
 S32 Teleporter::getGeom(lua_State *L)
 {
    Vector<Point> points;
