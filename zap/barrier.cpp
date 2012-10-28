@@ -446,7 +446,6 @@ WallItem::WallItem(lua_State *L)
 {
    mObjectTypeNumber = WallItemTypeNumber;
    setWidth(Barrier::DEFAULT_BARRIER_WIDTH);
-   mAddedToGame = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -504,7 +503,7 @@ void WallItem::onItemDragging()
 // to superclass event handlers.
 void WallItem::onAddedToGame(Game *game)
 {
-   mAddedToGame = true;
+   Parent::onAddedToGame(game);
 }
 
 
@@ -615,8 +614,6 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
    // is convenient to transmit to the clients
    WallRec wallRec(this);
    game->getGameType()->addWall(wallRec, game);
-
-   //mAddedToGame = true;
 }
 
 
@@ -641,7 +638,7 @@ REGISTER_LUA_SUBCLASS(WallItem, BfObject);
 S32 WallItem::getWidth(lua_State *L)     { return returnInt(L, getWidth()); }
 S32 WallItem::setWidth(lua_State *L)     
 { 
-   checkIfWallHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame();
 
    checkArgList(L, functionArgs, "WallItem", "setWidth");
 
@@ -651,7 +648,7 @@ S32 WallItem::setWidth(lua_State *L)
 }
 
 
-void WallItem::checkIfWallHasBeenAddedToTheGame()
+void WallItem::checkIfHasBeenAddedToTheGame()
 {
    if(getGame() && getGame()->isServer())
    {
@@ -666,14 +663,14 @@ void WallItem::checkIfWallHasBeenAddedToTheGame()
 
 S32 WallItem::setLoc(lua_State *L)
 {
-   checkIfWallHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame();
    return Parent::setLoc(L);
 }
 
 
 S32 WallItem::setGeom(lua_State *L)
 {
-   checkIfWallHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame();
    return Parent::setGeom(L);
 }
 
@@ -690,7 +687,6 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 PolyWall::PolyWall(lua_State *L)
 {
    mObjectTypeNumber = PolyWallTypeNumber;
-   mAddedToGame = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -781,7 +777,6 @@ void PolyWall::onGeomChanged()
 void PolyWall::addToGame(Game *game, GridDatabase *database)
 {
    Parent::addToGame(game, database);
-   //mAddedToGame = true;
 }
 
 
@@ -797,7 +792,7 @@ void PolyWall::onItemDragging()
 // to superclass event handlers.
 void PolyWall::onAddedToGame(Game *game)
 {
-   mAddedToGame = true;
+  Parent::onAddedToGame(game);
 }
 
 /////
@@ -810,9 +805,9 @@ const char *PolyWall::luaClassName = "PolyWall";
 REGISTER_LUA_SUBCLASS(PolyWall, BfObject);
 
 
-void PolyWall::checkIfWallHasBeenAddedToTheGame()
+void PolyWall::checkIfHasBeenAddedToTheGame()
 {
-   if(mAddedToGame)
+   if(getGame() && getGame()->isServer())
    {
       const char *msg = "Can't modify a PolyWall that's already been added to a game!";
       logprintf(LogConsumer::LogError, msg);

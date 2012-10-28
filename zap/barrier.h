@@ -143,8 +143,7 @@ class WallItem : public LineItem
    typedef LineItem Parent;
 
 private:
-   bool mAddedToGame;         // For tracking whether this item has been added to a game or not
-   void checkIfWallHasBeenAddedToTheGame();
+   void checkIfHasBeenAddedToTheGame();
 
 public:
    WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
@@ -216,8 +215,7 @@ class PolyWall : public PolygonObject
    typedef PolygonObject Parent;
 
 private:
-   bool mAddedToGame;
-   void checkIfWallHasBeenAddedToTheGame();
+   void checkIfHasBeenAddedToTheGame();
 
 public:
    PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
