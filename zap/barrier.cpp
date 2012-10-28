@@ -619,7 +619,16 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 
 /////
 // Lua interface
-
+/**
+  *  @luaclass WallItem
+  *  @brief Linear wall item.
+  *  @descr A %WallItem is a traditional wall consisting of a series of straight-line segments.  WallItems have a width setting that 
+  *         expands the walls outward on the edges, but not the ends.  The game may make slight adjustments to the interior vertices
+  *         of a wall to improve visual appearance.  Collinear vertices may be deleted to simplify wall geometry.
+  *
+  *  @geom %WallItem geometry consists of two or more points forming a linear sequence, each consecutive pair defining a straight-line 
+  *        segment.  %WallItem geometry can cross or form loops with no adverse consequences.
+  */
 //               Fn name       Param profiles  Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWidth,     ARRAYDEF({{      END }}), 1 ) \
@@ -634,8 +643,24 @@ GENERATE_LUA_FUNARGS_TABLE(WallItem, LUA_METHODS);
 const char *WallItem::luaClassName = "WallItem";
 REGISTER_LUA_SUBCLASS(WallItem, BfObject);
 
+/**
+  *  @luafunc num WallItem::getWidth()
+  *  @brief   Returns %WallItem's width setting.
+  *  @descr   Walls have a default width of 50.
+  *  @return  \e width: \e Int representing %WallItem's width.
+  */
+S32 WallItem::getWidth(lua_State *L)     
+{ 
+   return returnInt(L, getWidth()); 
+}
 
-S32 WallItem::getWidth(lua_State *L)     { return returnInt(L, getWidth()); }
+
+/**
+  *  @luafunc WallItem::setWidth(width)
+  *  @brief   Sets %WallItem's width.
+  *  @descr   Walls have a default width of 50.
+  *  @param  \e width: \e Int representing %WallItem's width.
+  */
 S32 WallItem::setWidth(lua_State *L)     
 { 
    checkIfHasBeenAddedToTheGame();
@@ -801,6 +826,13 @@ void PolyWall::onAddedToGame(Game *game)
 /////
 // Lua interface
 
+/**
+  *  @luaclass PolyWall
+  *  @brief Polygonal wall item.
+  *  @descr A %PolyWall is a wall consisting of a filled polygonal shape.  
+  *
+  *  @geom %PolyWall geometry is a typical polygon.
+  */
 const luaL_reg           PolyWall::luaMethods[]   = { { NULL, NULL } };
 const LuaFunctionProfile PolyWall::functionArgs[] = { { NULL, { }, 0 } };
 
