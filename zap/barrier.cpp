@@ -841,6 +841,8 @@ S32 PolyWall::setGeom(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+static S32 edgeCounter = 0;
+
 // Constructor
 WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database) 
 { 
@@ -851,6 +853,8 @@ WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database)
 
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallEdgeTypeNumber;
+
+   edgeCounter++;
 }
 
 
@@ -859,6 +863,9 @@ WallEdge::~WallEdge()
 {
     // Make sure object is out of the database
    removeFromDatabase(); 
+
+   edgeCounter--;
+   logprintf("Wall edge instances outstanding: %d", edgeCounter);
 }
 
 
@@ -884,12 +891,16 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+static S32 instanceCounter = 0;
+
 // Regular constructor
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
 { 
    // Calculate segment corners by expanding the extended end points into a rectangle
    Barrier::expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
    init(gridDatabase, owner);
+
+   instanceCounter++;
 }
 
 
@@ -902,6 +913,8 @@ WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points
       mCorners.reverse();
 
    init(gridDatabase, owner);
+
+   instanceCounter++;
 }
 
 
@@ -933,6 +946,9 @@ WallSegment::~WallSegment()
    // Make sure object is out of the database
    if(getDatabase())
       getDatabase()->removeFromDatabase(this); 
+
+   instanceCounter--;
+   logprintf("Wallsegment instances outstanding: %d", instanceCounter);
 }
 
 
