@@ -621,7 +621,7 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 // Lua interface
 /**
   *  @luaclass WallItem
-  *  @brief Linear wall item.
+  *  @brief Traditional wall item.
   *  @descr A %WallItem is a traditional wall consisting of a series of straight-line segments.  WallItems have a width setting that 
   *         expands the walls outward on the edges, but not the ends.  The game may make slight adjustments to the interior vertices
   *         of a wall to improve visual appearance.  Collinear vertices may be deleted to simplify wall geometry.
