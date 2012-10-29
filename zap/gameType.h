@@ -174,7 +174,6 @@ private:
    S32 mMaxRecPlayers;         // Recommended max players for this level
 
    Vector<FlagSpawn> mFlagSpawnPoints;                        // List of non-team specific spawn points for flags
-   Vector<boost::shared_ptr<ItemSpawn> > mItemSpawnPoints;    // List of spawn points for asteroids, circles, etc.
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
@@ -304,8 +303,6 @@ public:
    S32 getFlagSpawnCount() const;
 
    void addFlagSpawn(FlagSpawn flagSpawn);
-   void addItemSpawn(ItemSpawn *spawn);
-
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)

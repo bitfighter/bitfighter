@@ -38,6 +38,7 @@ class LuaLevelGenerator;
 class Robot;
 class PolyWall;
 class WallItem;
+class ItemSpawn;
 
 class ServerGame : public Game
 {
@@ -64,6 +65,9 @@ private:
    bool mShuttingDown;
    Timer mShutdownTimer;
    GameConnection *mShutdownOriginator;   // Who started the shutdown?
+
+   Vector<ItemSpawn *> mItemSpawnPoints;  // List of spawn points for asteroids, circles, etc.
+
 
    bool mDedicated;
 
@@ -155,6 +159,8 @@ public:
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
+
+   void addToGame(BfObject *object);
 
    void onConnectedToMaster();
 

@@ -29,6 +29,7 @@
 
 #include "EditorObject.h"     // For PointObject def
 #include "Timer.h"
+#include "LuaWrapper.h"
 
 
 namespace Zap
@@ -118,9 +119,32 @@ class ItemSpawn : public AbstractSpawn
    typedef AbstractSpawn Parent;
 
 public:
-   ItemSpawn(const Point &pos, S32 time);
-   virtual void spawn(Game *game, const Point &pos) = 0;
+   ItemSpawn(const Point &pos, S32 time);    // C++ constructor
+   virtual ~ItemSpawn();                     // Destructor
+
+   virtual void spawn();                     // All ItemSpawns will use this to spawn things
+   void idle(U32 deltaTime);
+
+   // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
+   virtual const char *getClassName() const;
+   virtual S32 getDefaultRespawnTime();
+   virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
+   virtual void renderDock();
+
+
+   ///// Lua interface
+   LUAW_DECLARE_ABSTRACT_CLASS(ItemSpawn);
+
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
+
+   S32 lua_getSpawnTime(lua_State *L);
+   S32 lua_setSpawnTime(lua_State *L);
+   S32 lua_spawnNow(lua_State *L);
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -129,11 +153,16 @@ class AsteroidSpawn : public ItemSpawn
 {
    typedef ItemSpawn Parent;
 
+private:
+   void initialize();
+
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
-   AsteroidSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   AsteroidSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
+   AsteroidSpawn(lua_State *L);                                                 // Lua constructor
    virtual ~AsteroidSpawn();
+
    AsteroidSpawn *clone() const;
 
    const char *getEditorHelpString();
@@ -145,9 +174,16 @@ public:
 
    S32 getDefaultRespawnTime();
 
-   void spawn(Game *game, const Point &pos);
+   void spawn();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(AsteroidSpawn);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
@@ -158,10 +194,16 @@ class CircleSpawn : public ItemSpawn
 {
    typedef ItemSpawn Parent;
 
+private:
+   void initialize();
+
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // in seconds
 
-   CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
+   CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
+   CircleSpawn(lua_State *L);                                                 // Lua constructor
+   ~CircleSpawn();                                                            // Destructor
+
    CircleSpawn *clone() const;
 
    const char *getEditorHelpString();
@@ -173,9 +215,16 @@ public:
 
    S32 getDefaultRespawnTime();
 
-   void spawn(Game *game, const Point &pos);
+   void spawn();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CircleSpawn);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 ////////////////////////////////////////
@@ -204,7 +253,7 @@ public:
 
    S32 getDefaultRespawnTime();
 
-   //void spawn(Game *game, const Point &pos);
+   //void spawn(Game *game);
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 

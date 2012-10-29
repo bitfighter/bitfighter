@@ -40,7 +40,8 @@ extern "C"
 #  include "../lua/lua-vec/src/lauxlib.h"
 }
 
-#include "LuaBase.h"
+#include "LuaBase.h"   
+#include "LuaException.h"   
 
 #include <string>
 #include <vector>
@@ -897,6 +898,7 @@ protected:
       lua_pop(L, 1);       // Remove metatable from stack
    }
 
+
    template<class T>
    void static registerClass()
    {
@@ -1106,17 +1108,26 @@ public:
    mLuaProxy = NULL
 
 
+// TODO: Replace following with one of the above
 #define  LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
    LuaProxy<className> *mLuaProxy; \
    LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
    virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
    virtual void push(lua_State *L) { luaW_push(L, this); }
 
+#define  LUAW_DECLARE_ABSTRACT_CLASS(className) \
+   LuaProxy<className> *mLuaProxy; \
+   LuaProxy<className> *getLuaProxy() { return mLuaProxy; } \
+   virtual void setLuaProxy(LuaProxy<className> *obj) { mLuaProxy = obj; } \
+   className(lua_State *L) { throw LuaException("Illegal attempt to instantiate abstract class!"); }
 
-// This goes in the header of a "wrapped class"
+
+// This goes in the header of a "wrapped class"  TODO- Convert everything to use the above, rename it, and get rid of this one
 #define  LUAW_DECLARE_CLASS(className) \
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(className) \
    className(lua_State *L) { LUAW_CONSTRUCTOR_INITIALIZATIONS; } 
+
+
 
 
 // And this in the destructor of the "wrapped class"

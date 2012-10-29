@@ -551,8 +551,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    {
       AsteroidSpawn *spawn = new AsteroidSpawn();
 
-      if(spawn->processArguments(argc - 1, argv + 1, this))   // processArguments don't like "AsteroidSpawn" as argv[0]
-         getGameType()->addItemSpawn(spawn);
+      if(spawn->processArguments(argc - 1, argv + 1, this))   // processArguments doesn't like "AsteroidSpawn" as first arg
+         addToGame(spawn);
       else
          delete spawn;
    }
@@ -561,7 +561,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
       CircleSpawn *spawn = new CircleSpawn();
 
       if(spawn->processArguments(argc - 1, argv + 1, this))
-         getGameType()->addItemSpawn(spawn);
+        addToGame(spawn);
       else
          delete spawn;
    }
@@ -592,6 +592,19 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
       return false;
 
    return true;
+}
+
+
+void ServerGame::addToGame(BfObject *object)
+{
+   if(object->getObjectTypeNumber() == CircleSpawnTypeNumber || object->getObjectTypeNumber() == AsteroidSpawnTypeNumber )
+   {
+      mItemSpawnPoints.push_back(static_cast<ItemSpawn *>(object));
+      logprintf("spawn time: %d", mItemSpawnPoints.last()->getPeriod());
+   }
+
+   object->addToGame(this, this->getGameObjDatabase());
+
 }
 
 
@@ -1489,6 +1502,11 @@ void ServerGame::idle(U32 timeDelta)
       mGameType->idle(BfObject::ServerIdleMainLoop, timeDelta);
 
    processDeleteList(timeDelta);
+
+
+   // Spawn any items that need spawning (except ships)
+   for(S32 i = 0; i < mItemSpawnPoints.size(); i++)
+      mItemSpawnPoints[i]->idle(timeDelta);
 
 
    // Load a new level if the time is out on the current one

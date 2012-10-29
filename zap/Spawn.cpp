@@ -261,7 +261,89 @@ void Spawn::renderDock()
 // Constructor
 ItemSpawn::ItemSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
-   // Do nothing
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+ItemSpawn::~ItemSpawn()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+// This is primarily here to keep this class from being abstract... but we'll use it for some trivial code deduplication purposes since we have to have it
+// Children classes will add the spawned item, and call this.
+void ItemSpawn::spawn()
+{
+   resetTimer();     // Reset the spawn timer
+}
+
+
+void ItemSpawn::idle(U32 deltaTime)
+{
+   if(mTimer.update(deltaTime))
+      spawn();
+}
+
+
+// These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
+const char *ItemSpawn::getClassName() const                                       { TNLAssert(false, "Not implemented!"); return ""; }
+S32 ItemSpawn::getDefaultRespawnTime()                                            { TNLAssert(false, "Not implemented!");  return 0; }
+void ItemSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled) { TNLAssert(false, "Not implemented!"); }
+void ItemSpawn::renderDock()                                                      { TNLAssert(false, "Not implemented!"); }
+
+
+/////
+// Lua interface
+/**
+  *  @luaclass ItemSpawn
+  *  @brief Class of Spawns that emit various objects at various times.
+  *  @geom  The geometry of all ItemSpawns is a single point.
+  */
+//               Fn name    Param profiles         Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, getSpawnTime, ARRAYDEF({{          END }}), 1 ) \
+   METHOD(CLASS, setSpawnTime, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
+   METHOD(CLASS, spawnNow,     ARRAYDEF({{          END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE_NEW(ItemSpawn, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(ItemSpawn, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *ItemSpawn::luaClassName = "ItemSpawn";
+REGISTER_LUA_SUBCLASS(ItemSpawn, BfObject);
+
+
+S32 ItemSpawn::lua_getSpawnTime(lua_State *L)
+{
+   return returnInt(L, mSpawnTime);
+}
+
+
+S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
+{
+   checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
+
+   mSpawnTime = getInt(L, 1);
+
+   return 0;
+}
+
+
+S32 ItemSpawn::lua_spawnNow(lua_State *L)
+{
+   if(!getGame())
+   {
+      const char *msg = "Cannot spawn item before spawn has been added to game!";
+      logprintf(LogConsumer::LogError, msg);
+      throw LuaException(msg);
+   }
+
+   spawn();
+   return 0;
 }
 
 
@@ -271,13 +353,28 @@ ItemSpawn::ItemSpawn(const Point &pos, S32 time) : Parent(pos, time)
 // Constructor
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
-   mObjectTypeNumber = AsteroidSpawnTypeNumber;
+   initialize();
 }
+
+
+AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
+{
+   initialize();
+}
+
 
 // Destructor
 AsteroidSpawn::~AsteroidSpawn()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void AsteroidSpawn::initialize()
+{
+   mObjectTypeNumber = AsteroidSpawnTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -300,13 +397,17 @@ S32 AsteroidSpawn::getDefaultRespawnTime()
 }
 
 
-void AsteroidSpawn::spawn(Game *game, const Point &pos)
+void AsteroidSpawn::spawn()
 {
+   Parent::spawn();
+
+   Game *game = getGame();
+
    Asteroid *asteroid = new Asteroid();   // Create a new asteroid
 
    F32 ang = TNL::Random::readF() * Float2Pi;
 
-   asteroid->setPosAng(pos, ang);
+   asteroid->setPosAng(getPos(), ang);
 
    asteroid->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
 }
@@ -350,13 +451,54 @@ void AsteroidSpawn::renderDock()
 }
 
 
+/////
+// Lua interface
+/**
+  *  @luaclass AsteroidSpawn
+  *  @brief Spawns \link Asteroid Asteroids \endlink at regular intervals.
+  *  @geom  The geometry of AsteroidSpawns is a single point.
+  */
+//               Fn name    Param profiles         Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_METHODS_TABLE(AsteroidSpawn, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(AsteroidSpawn, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *AsteroidSpawn::luaClassName = "AsteroidSpawn";
+REGISTER_LUA_SUBCLASS(AsteroidSpawn, ItemSpawn);
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
+// C++ constructor
 CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
+   initialize();
+}
+
+
+// Lua constructor
+CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
+{
+   initialize();
+}
+
+
+// Destructor
+CircleSpawn::~CircleSpawn()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
+}
+
+
+void CircleSpawn::initialize()
+{
    mObjectTypeNumber = CircleSpawnTypeNumber;
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -380,16 +522,20 @@ S32 CircleSpawn::getDefaultRespawnTime()
 }
 
 
-void CircleSpawn::spawn(Game *game, const Point &pos)
+void CircleSpawn::spawn()
 {
+   Parent::spawn();
+
+   Game *game = getGame();
+
    for(S32 i = 0; i < 10; i++)
    {
       Circle *circle = new Circle();   // Create a new Circle
-      F32 ang = TNL::Random::readF() * Float2Pi;
+      F32 ang = TNL::Random::readF() * FloatTau;
 
-      circle->setPosAng(pos, ang);
+      circle->setPosAng(getPos(), ang);
 
-      circle->addToGame(game, game->getGameObjDatabase());              // And add it to the list of game objects
+      circle->addToGame(game, game->getGameObjDatabase());     // And add it to the list of game objects
    }
 }
 
@@ -419,7 +565,7 @@ void CircleSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabl
 
    glPushMatrix();
       glTranslate(pos);
-      glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
+      glScale(1 / currentScale);    // Make item draw at constant size, regardless of zoom
       renderCircleSpawn(Point(0,0));
    glPopMatrix();   
 #endif
@@ -431,6 +577,25 @@ void CircleSpawn::renderDock()
    renderCircleSpawn(getPos());
 }
 
+
+/////
+// Lua interface
+/**
+  *  @luaclass CircleSpawn
+  *  @brief Spawns \link Circle Circles \endlink at regular intervals.
+  *  @geom  The geometry of CircleSpawns is a single point.
+  */
+//               Fn name    Param profiles         Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_METHODS_TABLE(CircleSpawn, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(CircleSpawn, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *CircleSpawn::luaClassName = "CircleSpawn";
+REGISTER_LUA_SUBCLASS(CircleSpawn, ItemSpawn);
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -487,7 +652,7 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 
    glPushMatrix();
       glTranslatef(pos.x + 1, pos.y, 0);
-      glScalef(0.4f/currentScale, 0.4f/currentScale, 1);
+      glScalef(0.4f / currentScale, 0.4f / currentScale, 1);
       Color color = getColor();  // To avoid taking address of temporary
       renderFlag(0, 0, &color);
 
@@ -509,8 +674,8 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 1)
       return false;
 
-   setTeam(atoi(argv[0]));                                           // Read team
-   return Parent::processArguments(argc - 1, argv + 1, game);        // then read the rest of the args
+   setTeam(atoi(argv[0]));                                     // Read team
+   return Parent::processArguments(argc - 1, argv + 1, game);  // then read the rest of the args
 }
 
 

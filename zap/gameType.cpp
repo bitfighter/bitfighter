@@ -723,14 +723,6 @@ void GameType::idle_server(U32 deltaT)
    }
 
 
-   // Spawn items (that are not ships)
-   for(S32 i = 0; i < mItemSpawnPoints.size(); i++)
-      if(mItemSpawnPoints[i]->updateTimer(deltaT))
-      {
-         mItemSpawnPoints[i]->spawn(mGame, mItemSpawnPoints[i]->getPos());    // Spawn item
-         mItemSpawnPoints[i]->resetTimer();                                   // Reset the spawn timer
-      }
-
    //if(mTestTimer.update(deltaT))
    //{
    //   Worm *worm = new Worm();
@@ -4195,13 +4187,6 @@ S32 GameType::getFlagSpawnCount() const
 void GameType::addFlagSpawn(FlagSpawn flagSpawn)
 {
    mFlagSpawnPoints.push_back(flagSpawn);
-}
-
-
-void GameType::addItemSpawn(ItemSpawn *spawn)
-{
-   mItemSpawnPoints.push_back(boost::shared_ptr<ItemSpawn>(spawn));
-   logprintf("spawn time: %d", mItemSpawnPoints.last()->getPeriod());
 }
 
 
