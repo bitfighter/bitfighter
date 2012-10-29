@@ -304,7 +304,7 @@ void ItemSpawn::renderDock()                                                    
 //               Fn name    Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getSpawnTime, ARRAYDEF({{          END }}), 1 ) \
-   METHOD(CLASS, setSpawnTime, ARRAYDEF({{ INT_GE0, END }}), 1 ) \
+   METHOD(CLASS, setSpawnTime, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
    METHOD(CLASS, spawnNow,     ARRAYDEF({{          END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE_NEW(ItemSpawn, LUA_METHODS);
@@ -317,22 +317,39 @@ const char *ItemSpawn::luaClassName = "ItemSpawn";
 REGISTER_LUA_SUBCLASS(ItemSpawn, BfObject);
 
 
+/**
+  *  @luafunc time ItemSpawn::getSpawnTime()
+  *  @brief   Gets the item's spawn time.
+  *  @return   \e time: Number representing spawn time in seconds.
+  */
 S32 ItemSpawn::lua_getSpawnTime(lua_State *L)
 {
-   return returnInt(L, mSpawnTime);
+   return returnFloat(L, mSpawnTime / 1000.0f);
 }
 
 
+/**
+  *  @luafunc ItemSpawn::setSpawnTime(time)
+  *  @brief   Sets time between item emission events.
+  *  @descr   Note that setting the spawn time also resets the timer, so that the next item will be spawned after \e time seconds.
+  *  @param   \e time: Number representing spawn time in seconds.
+  */
 S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
 
-   mSpawnTime = getInt(L, 1);
+   mSpawnTime = getFloat(L, 1) * 1000;
+   mTimer.reset(mSpawnTime);
 
    return 0;
 }
 
 
+/**
+  *  @luafunc ItemSpawn::spawnNow()
+  *  @brief   Tell %ItemSpawn to spawn an item immediately.
+  *  @descr   This method also resets the spawn timer.
+  */
 S32 ItemSpawn::lua_spawnNow(lua_State *L)
 {
    if(!getGame())
