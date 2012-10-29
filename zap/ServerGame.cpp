@@ -602,7 +602,7 @@ void ServerGame::addPolyWall(PolyWall *polyWall, GridDatabase *unused)
    WallRec wallRec(polyWall);
    getGameType()->addWall(wallRec, this);
 
-   polyWall->onAddedToGame(this);
+   //polyWall->onAddedToGame(this);
 }
 
 
