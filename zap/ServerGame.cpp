@@ -613,7 +613,7 @@ void ServerGame::addWallItem(WallItem *wallItem, GridDatabase *unused)
    WallRec wallRec(wallItem);
    getGameType()->addWall(wallRec, this);
 
-   wallItem->onAddedToGame(this);
+   //wallItem->onAddedToGame(this);
 }
 
 
