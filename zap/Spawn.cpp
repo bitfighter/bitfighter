@@ -280,9 +280,9 @@ void ItemSpawn::spawn()
 }
 
 
-void ItemSpawn::idle(U32 deltaTime)
+void ItemSpawn::idle(IdleCallPath path)
 {
-   if(mTimer.update(deltaTime))
+   if(mTimer.update(mCurrentMove.time))
       spawn();
 }
 

@@ -66,9 +66,6 @@ private:
    Timer mShutdownTimer;
    GameConnection *mShutdownOriginator;   // Who started the shutdown?
 
-   Vector<ItemSpawn *> mItemSpawnPoints;  // List of spawn points for asteroids, circles, etc.
-
-
    bool mDedicated;
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!

@@ -123,7 +123,7 @@ public:
    virtual ~ItemSpawn();                     // Destructor
 
    virtual void spawn();                     // All ItemSpawns will use this to spawn things
-   void idle(U32 deltaTime);
+   void idle(IdleCallPath path);
 
    // These methods exist solely to make ItemSpawn instantiable so it can be instantiated by Lua... even though it never will
    virtual const char *getClassName() const;
