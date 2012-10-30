@@ -32,6 +32,8 @@
 
 #include "Spawn.h"
 #include "game.h"
+#include "gameType.h"
+#include "NexusGame.h"           // For FlagSpawn::spawn()
 
 #include "stringUtils.h"         // For itos()
 #include "gameObjectRender.h"    // For renderSquareItem(), renderFlag(), drawCircle()
@@ -617,22 +619,46 @@ REGISTER_LUA_SUBCLASS(CircleSpawn, ItemSpawn);
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
+// C++ constructor
 FlagSpawn::FlagSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
-   mObjectTypeNumber = FlagSpawnTypeNumber;
+   initialize();
 }
 
 
+// Lua constructor
+FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
+{
+   initialize();
+}
+
+
+// Destructor
 FlagSpawn::~FlagSpawn()
 {
    // Do nothing
 }
 
 
+void FlagSpawn::initialize()
+{
+   mObjectTypeNumber = FlagSpawnTypeNumber;
+}
+
+
 FlagSpawn *FlagSpawn::clone() const
 {
    return new FlagSpawn(*this);
+}
+
+
+void FlagSpawn::spawn()
+{
+   Parent::spawn();     // Resets timer
+   GameType *gameType = getGame()->getGameType();
+
+   if(gameType->getGameTypeId() == NexusGame)
+      NexusGameType::releaseFlag(getGame(), getPos());
 }
 
 

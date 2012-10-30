@@ -100,6 +100,8 @@ public:
    void onGhostAvailable(GhostConnection *connection);
    void idle(BfObject::IdleCallPath path, U32 deltaT);
 
+   static void releaseFlag(Game *game, const Point &pos, const Point &startVel = Point(0,0), S32 count = 1);
+
 #ifndef ZAP_DEDICATED
    void renderInterfaceOverlay(bool scoreboardVisible);
 #endif

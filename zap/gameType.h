@@ -173,7 +173,7 @@ private:
    S32 mMinRecPlayers;         // Recommended min players for this level
    S32 mMaxRecPlayers;         // Recommended max players for this level
 
-   Vector<FlagSpawn> mFlagSpawnPoints;                        // List of non-team specific spawn points for flags
+   Vector<FlagSpawn *> mFlagSpawnPoints;         // List of non-team specific spawn points for flags
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
@@ -299,10 +299,10 @@ public:
    const Vector<WallRec> *getBarrierList();
 
    const FlagSpawn *getFlagSpawn(S32 index) const;
-   const Vector<FlagSpawn> *getFlagSpawns() const;
+   const Vector<FlagSpawn *> *getFlagSpawns() const;
    S32 getFlagSpawnCount() const;
 
-   void addFlagSpawn(FlagSpawn flagSpawn);
+   void addFlagSpawn(FlagSpawn *flagSpawn);
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)

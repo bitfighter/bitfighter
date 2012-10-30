@@ -4168,11 +4168,11 @@ const Vector<WallRec> *GameType::getBarrierList()
 
 const FlagSpawn *GameType::getFlagSpawn(S32 index) const
 {
-   return &mFlagSpawnPoints[index];
+   return mFlagSpawnPoints[index];
 }
 
 
-const Vector<FlagSpawn> *GameType::getFlagSpawns() const
+const Vector<FlagSpawn *> *GameType::getFlagSpawns() const
 {
    return &mFlagSpawnPoints;
 }
@@ -4184,7 +4184,7 @@ S32 GameType::getFlagSpawnCount() const
 }
 
 
-void GameType::addFlagSpawn(FlagSpawn flagSpawn)
+void GameType::addFlagSpawn(FlagSpawn *flagSpawn)
 {
    mFlagSpawnPoints.push_back(flagSpawn);
 }

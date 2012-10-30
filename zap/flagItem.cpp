@@ -156,7 +156,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    GameType *gt = game->getGameType();
    if(gt)
    {
-      FlagSpawn spawn = FlagSpawn(mInitialPos, time);
+      FlagSpawn *spawn = new FlagSpawn(mInitialPos, time);
 
       if(isTeamFlagSpawn(game, getTeam()))
       {
@@ -166,6 +166,8 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
       }
       else                                                                        
          gt->addFlagSpawn(spawn);
+
+      spawn->addToGame(game, game->getGameObjDatabase());
    }
 
    return true;
@@ -240,7 +242,7 @@ void FlagItem::mountToShip(Ship *theShip)
 
 
 // Only called from from sendHome()
-const Vector<FlagSpawn> *FlagItem::getSpawnPoints()
+const Vector<FlagSpawn *> *FlagItem::getSpawnPoints()
 {
    Game *game = getGame();
    GameType *gt = game->getGameType();
@@ -263,7 +265,7 @@ void FlagItem::sendHome()
 
    Vector<const FlagSpawn *> spawnPoints;
    for(S32 i = 0; i < getSpawnPoints()->size(); i++)
-      spawnPoints.push_back(&getSpawnPoints()->get(i));
+      spawnPoints.push_back(getSpawnPoints()->get(i));
 
    Game *game = getGame();
    GameType *gt = game->getGameType();

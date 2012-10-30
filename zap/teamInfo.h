@@ -100,7 +100,7 @@ private:
    F32 mRating; 
 
    Vector<Point> mItemSpawnPoints;
-   Vector<FlagSpawn> mFlagSpawns;      // List of places for team flags to spawn
+   Vector<FlagSpawn *> mFlagSpawns;    // List of places for team flags to spawn
 
 public:
    Team();              // Constructor
@@ -115,8 +115,9 @@ public:
    Point getSpawnPoint(S32 index) const;
    void addSpawnPoint(Point point);
 
-   void addFlagSpawn(FlagSpawn flagSpawn);
-   const Vector<FlagSpawn> *getFlagSpawns() const;
+   void addFlagSpawn(FlagSpawn *flagSpawn);
+   const Vector<FlagSpawn *> *getFlagSpawns() const;
+   void removeFlagSpawn(FlagSpawn *flagSpawn);
   
    StringTableEntry getName();
 

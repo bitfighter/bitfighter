@@ -230,19 +230,26 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class FlagSpawn : public AbstractSpawn
+class FlagSpawn : public ItemSpawn
 {
-   typedef AbstractSpawn Parent;
+   typedef ItemSpawn Parent;
+
+private:
+   void initialize();
 
 public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
-   FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor (no lua constructor)
-   virtual ~FlagSpawn();
+   FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
+   FlagSpawn(lua_State *L);                                                 // Lua constructor
+   virtual ~FlagSpawn();                                                    // Destructor
+
    FlagSpawn *clone() const;
 
    bool updateTimer(S32 deltaT);
    void resetTimer();
+
+   void spawn();
 
    const char *getEditorHelpString();
    const char *getPrettyNamePlural();

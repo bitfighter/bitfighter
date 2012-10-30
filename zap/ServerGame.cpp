@@ -536,7 +536,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
    
          S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
    
-         FlagSpawn spawn = FlagSpawn(p, time);
+         FlagSpawn *spawn = new FlagSpawn(p, time);
    
          // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
          // TeamFlagGame is CTF.
@@ -545,6 +545,8 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
             ((Team *)getTeam(teamIndex))->addFlagSpawn(spawn);
          else
             getGameType()->addFlagSpawn(spawn);                                                   // ...then put it in the non-team list
+
+         addToGame(spawn);
       }
    }
    else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]      // TODO: Move this to AsteroidSpawn class?

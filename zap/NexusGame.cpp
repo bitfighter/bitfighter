@@ -401,9 +401,9 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
 }
 
 
-// Runs on the server
+// Runs on the server, static method
 // If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
-void releaseFlag(Game *game, Point pos, Point startVel, S32 count = 0)
+void NexusGameType::releaseFlag(Game *game, const Point &pos, const Point &startVel, S32 count)
 {
    F32 th = TNL::Random::readF() * Float2Pi;
    F32 f = (TNL::Random::readF() * 2 - 1) * 100;
@@ -416,9 +416,9 @@ void releaseFlag(Game *game, Point pos, Point startVel, S32 count = 0)
       newFlag->changeFlagCount(count);
       newFlag->addToGame(game, game->getGameObjDatabase());
    }
-   else
+   else     // count == 0 or 1... this is default condition
    {
-      FlagItem *newFlag = new FlagItem(pos, vel, true);
+      FlagItem *newFlag = new FlagItem(pos, vel, true);        // <== why emit FlagItem and not NexusFlagItem?
       newFlag->addToGame(game, game->getGameObjDatabase());
    }
 }
@@ -492,18 +492,6 @@ void NexusGameType::idle_server(U32 deltaT)
          closeNexus(mNexusChangeAtTime);
       else
          openNexus(mNexusChangeAtTime);
-   }
-
-   // Advance all flagSpawn timers and see if it's time for a new flag
-   for(S32 i = 0; i < getFlagSpawnCount(); i++)
-   {
-      FlagSpawn *flagSpawn = const_cast<FlagSpawn *>(getFlagSpawn(i));    // We need to get a modifiable pointer so we can update the timer
-
-      if(flagSpawn->updateTimer(deltaT))
-      {
-         releaseFlag(getGame(), getFlagSpawn(i)->getPos(), Point(0,0));   // Release a flag
-         flagSpawn->resetTimer();                                         // Reset the timer
-      }
    }
 }
 
@@ -860,12 +848,12 @@ void NexusFlagItem::dropFlags(U32 flags)
          // By dividing and subtracting, it works by using integer divide, subtracting from "flags" left, and the last loop is (i == 1), dropping exact amount using only limited FlagItems
          U32 thisFlagDropped = flags / i;
          flags -= thisFlagDropped;
-         releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel(), thisFlagDropped);
+         NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel(), thisFlagDropped);
       }
    }
    else
       for(U32 i = 0; i < flags; i++)
-         releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
+         NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
 }

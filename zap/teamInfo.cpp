@@ -185,15 +185,26 @@ void Team::addSpawnPoint(Point point)
 }
 
 
-void Team::addFlagSpawn(FlagSpawn flagSpawn)
+void Team::addFlagSpawn(FlagSpawn *flagSpawn)
 {
    mFlagSpawns.push_back(flagSpawn);
 }
 
 
-const Vector<FlagSpawn> *Team::getFlagSpawns() const
+const Vector<FlagSpawn *> *Team::getFlagSpawns() const
 {
    return &mFlagSpawns;
+}
+
+
+void Team::removeFlagSpawn(FlagSpawn *flagSpawn)
+{
+   for(S32 i = 0; i < mFlagSpawns.size(); i++)
+      if(mFlagSpawns[i] == flagSpawn)
+      {
+         mFlagSpawns.erase_fast(i);
+         return;
+      }
 }
 
 

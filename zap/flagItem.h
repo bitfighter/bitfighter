@@ -48,7 +48,7 @@ private:
 
    SafePtr<GoalZone> mZone;            // GoalZone currently holding the flag, NULL if not in a zone
 
-   const Vector<FlagSpawn> *getSpawnPoints();
+   const Vector<FlagSpawn *> *getSpawnPoints();
 
 protected:
    enum MaskBits {
