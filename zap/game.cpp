@@ -687,7 +687,6 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          gt->addToGame(this, database);
       }
 
-
       obj[LevelLoader::MaxArgLen] = '\0';
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
 
@@ -706,24 +705,27 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
 
          bool validArgs = object->processArguments(argc - 1, argv + 1, this);
 
-         // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
-         // The only time this code is run on the client is when loading into the editor.
-
-         if(!isServer())
-            object->markAsGhost();
-
          if(validArgs)
          {
+            // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+            // The only time this code is run on the client is when loading into the editor.
+            if(!isServer())
+               object->markAsGhost();
+
             if(object.isValid())  // processArguments might delete this object (teleporter) (Wat thinks this will always be true if validArgs is true)
             {
                object->setUserAssignedId(id);
                object->addToGame(this, database);
             }
+            else
+            {
+               TNLAssert(false, "Is wat right?  (see comment above)");
+            }
          }
          else
          {
             logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
-            object->destroySelf();
+            delete object;
          }
       }
    }
