@@ -405,7 +405,7 @@ void NexusGameType::onGhostAvailable(GhostConnection *theConnection)
 // If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
 void NexusGameType::releaseFlag(Game *game, const Point &pos, const Point &startVel, S32 count)
 {
-   F32 th = TNL::Random::readF() * Float2Pi;
+   F32 th = TNL::Random::readF() * FloatTau;
    F32 f = (TNL::Random::readF() * 2 - 1) * 100;
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
