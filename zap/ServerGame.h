@@ -157,8 +157,6 @@ public:
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 
-   void addToGame(BfObject *object);
-
    void onConnectedToMaster();
 
    void startAllBots();                         // Loop through all our bots and run thier main() functions

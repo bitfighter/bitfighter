@@ -1944,19 +1944,9 @@ void ClientGame::render()
 
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database)
 {
-   if(!stricmp(argv[0], "Spawn") || !stricmp(argv[0], "FlagSpawn") || !stricmp(argv[0], "AsteroidSpawn") || !stricmp(argv[0], "CircleSpawn"))
+   if(!stricmp(argv[0], "Spawn"))
    {
-      BfObject *newObject;
-
-      if(!stricmp(argv[0], "Spawn"))
-         newObject = new Spawn();
-      else if(!stricmp(argv[0], "FlagSpawn"))
-         newObject = new FlagSpawn();
-      else if(!stricmp(argv[0], "AsteroidSpawn")) 
-         newObject = new AsteroidSpawn();
-      else //if(!stricmp(argv[0], "CircleSpawn"))  // using only "else" to prevent warning about possible uninitalized newObject
-         newObject = new CircleSpawn();
-
+      BfObject *newObject = new Spawn();
 
       bool validArgs = newObject->processArguments(argc - 1, argv + 1, this);
 

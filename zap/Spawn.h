@@ -177,6 +177,9 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
+   TNL_DECLARE_CLASS(AsteroidSpawn);
+
+
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(AsteroidSpawn);
 
@@ -218,6 +221,9 @@ public:
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
+   TNL_DECLARE_CLASS(CircleSpawn);
+
+
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CircleSpawn);
 
@@ -237,6 +243,8 @@ private:
    void initialize();
 
 public:
+   TNL_DECLARE_CLASS(FlagSpawn);
+
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
@@ -249,6 +257,8 @@ public:
    void resetTimer();
 
    void spawn();
+
+   void setTeam(S32 team);    // Overrides method in BfObject 
 
    const char *getEditorHelpString();
    const char *getPrettyNamePlural();

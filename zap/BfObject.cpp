@@ -440,6 +440,7 @@ S32 BfObject::getTeam() const
 }
 
 
+// Overridden by FlagSpawn
 void BfObject::setTeam(S32 team)
 {
    mTeam = team;

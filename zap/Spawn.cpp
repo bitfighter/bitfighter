@@ -81,6 +81,7 @@ F32 AbstractSpawn::getEditorRadius(F32 currentScale)
 }
 
 
+// Looking for <x> <y> {spawn-time}
 bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
@@ -369,6 +370,8 @@ S32 ItemSpawn::lua_spawnNow(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+TNL_IMPLEMENT_CLASS(AsteroidSpawn);
+
 // Constructor
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
@@ -492,6 +495,8 @@ REGISTER_LUA_SUBCLASS(AsteroidSpawn, ItemSpawn);
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+TNL_IMPLEMENT_CLASS(CircleSpawn);
 
 // C++ constructor
 CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
@@ -619,6 +624,11 @@ REGISTER_LUA_SUBCLASS(CircleSpawn, ItemSpawn);
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+//TNL_IMPLEMENT_CLASS(FlagSpawn);
+TNL::NetClassRep* FlagSpawn::getClassRep() const { return &FlagSpawn::dynClassRep; }
+TNL::NetClassRepInstance<FlagSpawn> FlagSpawn::dynClassRep("FlagSpawn", 0, TNL::NetClassTypeNone, 0);  //static
+
+
 // C++ constructor
 FlagSpawn::FlagSpawn(const Point &pos, S32 time) : Parent(pos, time)
 {
@@ -646,6 +656,17 @@ void FlagSpawn::initialize()
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
+// FlagSpawn <team> <x> <y> {spawn time}
+bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 3)
+      return false;
+
+   setTeam(atoi(argv[0]));
+   
+   return Parent::processArguments(argc - 1, argv + 1, game);     // then read the rest of the args
+}
+
 
 FlagSpawn *FlagSpawn::clone() const
 {
@@ -659,6 +680,26 @@ void FlagSpawn::spawn()
 
    if(getGame()->getGameType()->getGameTypeId() == NexusGame)
       NexusGameType::releaseFlag(getGame(), getPos());
+}
+
+
+void FlagSpawn::setTeam(S32 team)
+{
+   // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only TeamFlagGame is CTF.
+   Game *game = getGame();
+
+   if(!game || !game->isServer())      // Game might be NULL when firing up the editor
+      return;
+   
+   // Server only from here down...
+   S32 teamIndex = getTeam();
+   S32 teamCount = game->getTeamCount();
+   GameType *gameType = game->getGameType();
+
+   if(gameType->isTeamFlagGame() && (teamIndex >= 0 && teamIndex < teamCount) )     // If we can't find a valid team...
+      ((Team *)game->getTeam(teamIndex))->addFlagSpawn(this);
+   else
+      gameType->addFlagSpawn(this);                                                 // ...then put it in the non-team list
 }
 
 
@@ -709,16 +750,6 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 void FlagSpawn::renderDock()
 {
    renderEditor(1, false);
-}
-
-
-bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
-{
-   if(argc < 1)
-      return false;
-
-   setTeam(atoi(argv[0]));                                     // Read team
-   return Parent::processArguments(argc - 1, argv + 1, game);  // then read the rest of the args
 }
 
 

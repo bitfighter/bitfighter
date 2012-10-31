@@ -525,48 +525,6 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
                ((Team *)getTeam(i))->addSpawnPoint(p);
       }
    }
-   else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
-   {
-      if(argc >= 4)
-      {
-         S32 teamIndex = atoi(argv[1]);
-         Point p;
-         p.read(argv + 2);
-         p *= getGridSize();
-   
-         S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::DEFAULT_RESPAWN_TIME;
-   
-         FlagSpawn *spawn = new FlagSpawn(p, time);
-   
-         // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
-         // TeamFlagGame is CTF.
-   
-         if(getGameType()->isTeamFlagGame() && (teamIndex >= 0 && teamIndex < getTeamCount()) )   // If we can't find a valid team...
-            ((Team *)getTeam(teamIndex))->addFlagSpawn(spawn);
-         else
-            getGameType()->addFlagSpawn(spawn);                                                   // ...then put it in the non-team list
-
-         addToGame(spawn);
-      }
-   }
-   else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]      // TODO: Move this to AsteroidSpawn class?
-   {
-      AsteroidSpawn *spawn = new AsteroidSpawn();
-
-      if(spawn->processArguments(argc - 1, argv + 1, this))   // processArguments doesn't like "AsteroidSpawn" as first arg
-         addToGame(spawn);
-      else
-         delete spawn;
-   }
-   else if(!stricmp(argv[0], "CircleSpawn"))      // CircleSpawn <x> <y> [timer]      // TODO: Move this to CircleSpawn class?
-   {
-      CircleSpawn *spawn = new CircleSpawn();
-
-      if(spawn->processArguments(argc - 1, argv + 1, this))
-        addToGame(spawn);
-      else
-         delete spawn;
-   }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {
       // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
@@ -594,12 +552,6 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
       return false;
 
    return true;
-}
-
-
-void ServerGame::addToGame(BfObject *object)
-{
-   object->addToGame(this, this->getGameObjDatabase());
 }
 
 
