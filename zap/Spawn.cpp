@@ -636,13 +636,14 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 // Destructor
 FlagSpawn::~FlagSpawn()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
 void FlagSpawn::initialize()
 {
    mObjectTypeNumber = FlagSpawnTypeNumber;
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -728,6 +729,31 @@ string FlagSpawn::toString(F32 gridSize) const
    size_t firstarg = str1.find(' ');
    return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
 }
+
+
+/////
+// Lua interface
+/**
+  *  @luaclass FlagSpawn
+  *  @brief Spawns \link FlagItem Flags \endlink at regular intervals during %Nexus games, serves as starting point for flags and soccer balls in other games.
+  *  @descr During Nexus games, %FlagSpawn acts like any other ItemSpawn, emitting flags at regular intervals.  During games that use flags (such as ZoneControl),
+  *         FlagSpawns mark locations where flags can be returned to when flags are "sent home".  In Soccer games, marks the location that the 
+  *         \link SoccerBallItem SoccerBall \endlink is returned to after a goal is scored.
+
+  *  Note that in flag games, any place a flag starts will become a %FlagSpawn, and in Soccer, the location the SoccerBall starts will become a %FlagSpawn.
+  *  @geom  The geometry of FlagSpawns is a single point.
+  */
+//               Fn name    Param profiles         Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_METHODS_TABLE(FlagSpawn, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(FlagSpawn, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *FlagSpawn::luaClassName = "FlagSpawn";
+REGISTER_LUA_SUBCLASS(FlagSpawn, ItemSpawn);
 
 
 };    // namespace

@@ -135,7 +135,6 @@ public:
    ///// Lua interface
    LUAW_DECLARE_ABSTRACT_CLASS(ItemSpawn);
 
-
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
@@ -266,6 +265,13 @@ public:
 
    bool processArguments(S32 argc, const char **argv, Game *game);
    string toString(F32 gridSize) const;
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(FlagSpawn);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 
