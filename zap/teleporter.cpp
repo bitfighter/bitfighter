@@ -285,8 +285,10 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
          if(tel->getVert(0).distSquared(pos) < 1)     // i.e These are really close!  Must be the same!
          {
             tel->addDest(dest);
-            destroySelf();    // Since this is really part of a different teleporter, delete this one
-            return true;      // There will only be one!
+
+            // See http://www.parashift.com/c++-faq-lite/delete-this.html for thoughts on delete this here
+            delete this;    // Since this is really part of a different teleporter, delete this one 
+            return true;    // There will only be one!
          }
       }
 
