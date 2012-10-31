@@ -655,9 +655,8 @@ FlagSpawn *FlagSpawn::clone() const
 void FlagSpawn::spawn()
 {
    Parent::spawn();     // Resets timer
-   GameType *gameType = getGame()->getGameType();
 
-   if(gameType->getGameTypeId() == NexusGame)
+   if(getGame()->getGameType()->getGameTypeId() == NexusGame)
       NexusGameType::releaseFlag(getGame(), getPos());
 }
 
