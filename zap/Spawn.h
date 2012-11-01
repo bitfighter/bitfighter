@@ -84,6 +84,9 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class Spawn : public AbstractSpawn
 {
    typedef AbstractSpawn Parent;
@@ -107,6 +110,8 @@ public:
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
+
+   TNL_DECLARE_CLASS(Spawn);
 };
 
 

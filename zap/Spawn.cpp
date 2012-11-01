@@ -48,6 +48,8 @@ namespace Zap
    EditorAttributeMenuUI *AbstractSpawn::mAttributeMenuUI = NULL;
 #endif
 
+// TODO: Move all time related stuff down to ItemSpawn
+
 AbstractSpawn::AbstractSpawn(const Point &pos, S32 time)
 {
    setPos(pos);
@@ -183,6 +185,10 @@ string AbstractSpawn::getAttributeString()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+// Standard ship spawn point
+
+TNL_IMPLEMENT_CLASS(Spawn);
+
 // Constructor
 Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
 {
@@ -203,6 +209,7 @@ Spawn *Spawn::clone() const
 }
 
 
+// Spawn <team> <x> <y>
 bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 3)

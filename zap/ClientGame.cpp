@@ -1944,21 +1944,7 @@ void ClientGame::render()
 
 bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database)
 {
-   if(!stricmp(argv[0], "Spawn"))
-   {
-      BfObject *newObject = new Spawn();
-
-      bool validArgs = newObject->processArguments(argc - 1, argv + 1, this);
-
-      if(validArgs)
-         newObject->addToGame(this, database);
-      else
-      {
-         logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
-         delete newObject;
-      }
-   }
-   else if(!stricmp(argv[0], "BarrierMaker"))
+   if(!stricmp(argv[0], "BarrierMaker"))
    {
       if(argc >= 2)
       {
