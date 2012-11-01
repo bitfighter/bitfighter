@@ -678,6 +678,15 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
+string FlagSpawn::toString(F32 gridSize) const
+{
+   // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- Need to insert the team into the string we get from AbstractSpawn()
+   string str1 = Parent::toString(gridSize);
+   size_t firstarg = str1.find(' ');
+   return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
+}
+
+
 FlagSpawn *FlagSpawn::clone() const
 {
    return new FlagSpawn(*this);
@@ -740,15 +749,6 @@ void FlagSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 void FlagSpawn::renderDock()
 {
    renderEditor(1, false);
-}
-
-
-string FlagSpawn::toString(F32 gridSize) const
-{
-   // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- squeezing in team number from AbstractSpawn::toString
-   string str1 = Parent::toString(gridSize);
-   size_t firstarg = str1.find(' ');
-   return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
 }
 
 
