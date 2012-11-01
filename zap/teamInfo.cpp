@@ -167,47 +167,6 @@ void Team::setName(StringTableEntry name)
 }
 
 
-S32 Team::getSpawnPointCount() const
-{
-   return mItemSpawnPoints.size();
-}
-
-
-Point Team::getSpawnPoint(S32 index) const
-{
-   return mItemSpawnPoints[index];
-}
-
-
-void Team::addSpawnPoint(Point point)
-{
-   mItemSpawnPoints.push_back(point);
-}
-
-
-void Team::addFlagSpawn(FlagSpawn *flagSpawn)
-{
-   mFlagSpawns.push_back(flagSpawn);
-}
-
-
-const Vector<FlagSpawn *> *Team::getFlagSpawns() const
-{
-   return &mFlagSpawns;
-}
-
-
-void Team::removeFlagSpawn(FlagSpawn *flagSpawn)
-{
-   for(S32 i = 0; i < mFlagSpawns.size(); i++)
-      if(mFlagSpawns[i] == flagSpawn)
-      {
-         mFlagSpawns.erase_fast(i);
-         return;
-      }
-}
-
-
 StringTableEntry Team::getName()
 {
    return mName;

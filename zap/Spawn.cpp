@@ -632,7 +632,7 @@ REGISTER_LUA_SUBCLASS(CircleSpawn, ItemSpawn);
 ////////////////////////////////////////
 
 //TNL_IMPLEMENT_CLASS(FlagSpawn);
-TNL::NetClassRep* FlagSpawn::getClassRep() const { return &FlagSpawn::dynClassRep; }
+TNL::NetClassRep* FlagSpawn::getClassRep() const { TNL_DEBUGBREAK(); return &FlagSpawn::dynClassRep; }
 TNL::NetClassRepInstance<FlagSpawn> FlagSpawn::dynClassRep("FlagSpawn", 0, TNL::NetClassTypeNone, 0);  //static
 
 
@@ -687,26 +687,6 @@ void FlagSpawn::spawn()
 
    if(getGame()->getGameType()->getGameTypeId() == NexusGame)
       NexusGameType::releaseFlag(getGame(), getPos());
-}
-
-
-void FlagSpawn::setTeam(S32 team)
-{
-   // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only TeamFlagGame is CTF.
-   Game *game = getGame();
-
-   if(!game || !game->isServer())      // Game might be NULL when firing up the editor
-      return;
-   
-   // Server only from here down...
-   S32 teamIndex = getTeam();
-   S32 teamCount = game->getTeamCount();
-   GameType *gameType = game->getGameType();
-
-   if(gameType->isTeamFlagGame() && (teamIndex >= 0 && teamIndex < teamCount) )     // If we can't find a valid team...
-      ((Team *)game->getTeam(teamIndex))->addFlagSpawn(this);
-   else
-      gameType->addFlagSpawn(this);                                                 // ...then put it in the non-team list
 }
 
 

@@ -358,7 +358,7 @@ public:
 
    // Team related
    S32 getTeam() const;
-   virtual void setTeam(S32 team);
+   void setTeam(S32 team);
    void setTeam(lua_State *L, S32 stackIndex);
    void setGeom(lua_State *L, S32 stackIndex);
 

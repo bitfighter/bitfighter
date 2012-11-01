@@ -263,8 +263,6 @@ public:
 
    void spawn();
 
-   void setTeam(S32 team);    // Overrides method in BfObject 
-
    const char *getEditorHelpString();
    const char *getPrettyNamePlural();
    const char *getOnDockName();

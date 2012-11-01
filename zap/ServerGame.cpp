@@ -509,23 +509,7 @@ StringTableEntry ServerGame::getCurrentLevelTypeName()
 
 bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database)
 {
-   if(!stricmp(argv[0], "Spawn"))
-   {
-      if(argc >= 4)
-      {
-         S32 teamIndex = atoi(argv[1]);
-         Point p;
-         p.read(argv + 2);
-         p *= getGridSize();
-
-         if(teamIndex >= 0 && teamIndex < getTeamCount())   // Normal teams; ignore if invalid
-            ((Team *)getTeam(teamIndex))->addSpawnPoint(p);
-         else if(teamIndex == -1)                           // Neutral spawn point, add to all teams
-            for(S32 i = 0; i < getTeamCount(); i++)
-               ((Team *)getTeam(i))->addSpawnPoint(p);
-      }
-   }
-   else if(!stricmp(argv[0], "BarrierMaker"))
+   if(!stricmp(argv[0], "BarrierMaker"))
    {
       // Use WallItem's ProcessGeometry method to read the points; this will let us put us all our error handling
       // and geom processing in our place.

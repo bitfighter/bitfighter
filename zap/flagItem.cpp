@@ -132,6 +132,7 @@ void FlagItem::changeFlagCount(U32 change) { TNLAssert(false, "Should never be c
 U32 FlagItem::getFlagCount()               { return 1; }
 
 
+// Returns true if this flagSpawn is only associated with a particular team
 static bool isTeamFlagSpawn(Game *game, S32 team)
 {
    return game->getGameType()->isTeamFlagGame() && team >= 0 && team < game->getTeamCount();
@@ -150,25 +151,11 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 
    S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  Only important in Nexus games for now.
 
-   mInitialPos = getActualPos();
+   mInitialPos = getActualPos();                   // Save the starting location of this flag
 
-   // Now add the flag starting point to the list of flag spawn points
-   GameType *gt = game->getGameType();
-   if(gt)
-   {
-      FlagSpawn *spawn = new FlagSpawn(mInitialPos, time);
-
-      if(isTeamFlagSpawn(game, getTeam()))
-      {
-         Team *team = dynamic_cast<Team *>(game->getTeam(getTeam()));
-         if(team)
-            team->addFlagSpawn(spawn);
-      }
-      else                                                                        
-         gt->addFlagSpawn(spawn);
-
-      spawn->addToGame(game, game->getGameObjDatabase());
-   }
+   // Create a spawn at the flag's location
+   FlagSpawn *spawn = new FlagSpawn(mInitialPos, time);
+   spawn->addToGame(game, game->getGameObjDatabase());
 
    return true;
 }
@@ -241,32 +228,39 @@ void FlagItem::mountToShip(Ship *theShip)
 }
 
 
-// Only called from from sendHome()
-const Vector<FlagSpawn *> *FlagItem::getSpawnPoints()
-{
-   Game *game = getGame();
-   GameType *gt = game->getGameType();
-
-   TNLAssert(gt, "Invalid gameType!");
-
-   if(isTeamFlagSpawn(game, getTeam()))    
-      return ((Team *)(game->getTeam(getTeam())))->getFlagSpawns();
-   else             
-      return gt->getFlagSpawns();
-}
-
-
 void FlagItem::sendHome()
 {
    // Now that we have flag spawn points, we'll simply redefine "initial pos" as a random selection of the flag spawn points
    // Everything else should remain as it was
 
-   // First, make a temp list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
+   // First, make a list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
+   Vector<AbstractSpawn *> spawnPoints = getGame()->getGameType()->getSpawnPoints(FlagSpawnTypeNumber, getTeam());
+   removeOccupiedSpawnPoints(spawnPoints);
 
-   Vector<const FlagSpawn *> spawnPoints;
-   for(S32 i = 0; i < getSpawnPoints()->size(); i++)
-      spawnPoints.push_back(getSpawnPoints()->get(i));
 
+   if(spawnPoints.size() == 0)      // Protect from crash if this happens, which it shouldn't, but has
+   {
+      TNLAssert(false, "No flag spawn points!");
+      logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
+         ((ServerGame *)getGame())->getCurrentLevelFileName().getString(), getTeam());
+   }
+   else
+   {
+      S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
+      mInitialPos = spawnPoints[spawnIndex]->getPos();
+   }
+
+   setPosVelAng(mInitialPos, Point(0,0), 0);
+
+   mIsAtHome = true;
+   setMaskBits(PositionMask);
+   updateExtentInDatabase();
+}
+
+
+// Removes occupied spawns from spawnPoints list
+void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) // Modifies spawnPoints
+{
    Game *game = getGame();
    GameType *gt = game->getGameType();
 
@@ -282,30 +276,11 @@ void FlagItem::sendHome()
          for(S32 j = 0; j < spawnPoints.size(); j++)
             if(spawnPoints[j]->getPos() == flag->mInitialPos)
             {
-               spawnPoints.erase(j);
+               spawnPoints.erase_fast(j);
                break;
             }
       }
    }
-
-   if(spawnPoints.size() == 0)      // Protect from crash if this happens, which it shouldn't, but has
-   {
-      TNLAssert(false, "No flag spawn points!");
-      logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
-         ((ServerGame *)getGame())->getCurrentLevelFileName().getString(), getTeam());
-      //mInitialPos = Point(0,0);      --> Leave mInitialPos as it was... it will probably be better than (0,0)
-   }
-   else
-   {
-      S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-      mInitialPos = spawnPoints[spawnIndex]->getPos();
-   }
-
-   setPosVelAng(mInitialPos, Point(0,0), 0);
-
-   mIsAtHome = true;
-   setMaskBits(PositionMask);
-   updateExtentInDatabase();
 }
 
 

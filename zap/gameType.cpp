@@ -1433,20 +1433,43 @@ void GameType::spawnRobot(Robot *robot)
 }
 
 
+// Get a list of all spawns that belong to the specified team (when that is relevant)
+Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)
+{
+   Game *game = getGame();
+   bool checkTeam = isTeamFlagGame();
+
+   Vector<AbstractSpawn *> spawnPoints;
+
+   const Vector<DatabaseObject *> *objects = game->getGameObjDatabase()->findObjects_fast();
+
+   for(S32 i = 0; i < objects->size(); i++)
+   {
+      AbstractSpawn *spawn = static_cast<AbstractSpawn *>(objects->get(i));
+
+      if(objects->get(i)->getObjectTypeNumber() == typeNumber && (!checkTeam || teamIndex == spawn->getTeam()))
+         spawnPoints.push_back(spawn);
+   }
+
+   return spawnPoints;
+}
+
+
+
 Point GameType::getSpawnPoint(S32 teamIndex)
 {
    // Invalid team id
    if(teamIndex < 0 || teamIndex >= mGame->getTeamCount())
       return Point(0,0);
 
-   Team *team = (Team *)mGame->getTeam(teamIndex);
+   Vector<AbstractSpawn *> spawns = getSpawnPoints(ShipSpawnTypeNumber, teamIndex);
 
    // If team has no spawn points, we'll just have them spawn at 0,0
-   if(team->getSpawnPointCount() == 0)
+   if(spawns.size() == 0)
       return Point(0,0);
 
-   S32 spawnIndex = TNL::Random::readI() % team->getSpawnPointCount();    // Pick random spawn point
-   return team->getSpawnPoint(spawnIndex);
+   S32 spawnIndex = TNL::Random::readI() % spawns.size();    // Pick random spawn point
+   return spawns[spawnIndex]->getPos();
 }
 
 

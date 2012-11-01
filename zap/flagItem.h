@@ -35,7 +35,8 @@ namespace Zap
 ////////////////////////////////////////
 
 
-class FlagSpawn;
+// Forward declarations
+class AbstractSpawn;
 class GoalZone;
 
 class FlagItem : public MountableItem
@@ -48,7 +49,8 @@ private:
 
    SafePtr<GoalZone> mZone;            // GoalZone currently holding the flag, NULL if not in a zone
 
-   const Vector<FlagSpawn *> *getSpawnPoints();
+   void removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints);
+
 
 protected:
    enum MaskBits {

@@ -237,6 +237,9 @@ public:
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
 
+   Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex);
+
+
    // Info about the level itself
    bool hasFlagSpawns() const;      
    bool hasPredeployedFlags() const;

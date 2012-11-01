@@ -110,14 +110,6 @@ public:
 
    void setName(const char *name);
    void setName(StringTableEntry name);
-
-   S32 getSpawnPointCount() const;
-   Point getSpawnPoint(S32 index) const;
-   void addSpawnPoint(Point point);
-
-   void addFlagSpawn(FlagSpawn *flagSpawn);
-   const Vector<FlagSpawn *> *getFlagSpawns() const;
-   void removeFlagSpawn(FlagSpawn *flagSpawn);
   
    StringTableEntry getName();
 
