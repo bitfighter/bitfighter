@@ -378,19 +378,6 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 }
 
 
-//// Runs on client & server?
-//void SoccerBallItem::onItemDropped()
-//{
-//   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
-//   {
-//      this->setActualPos(mMount->getActualPos()); 
-//      this->setActualVel(mMount->getActualVel() * 1.5);
-//   }   
-//   
-//   Parent::onItemDropped();
-//}
-
-
 void SoccerBallItem::renderItem(const Point &pos)
 {
    renderSoccerBall(pos);
