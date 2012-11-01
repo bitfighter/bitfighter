@@ -338,11 +338,8 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 
    initialPos = getActualPos();
 
+   // Add a spawn point at the ball's starting location
    FlagSpawn *spawn = new FlagSpawn(initialPos, 0);
-
-   // Add the ball's starting point to the list of flag spawn points
-   gameType->addFlagSpawn(spawn);
-
    spawn->addToGame(game, game->getGameObjDatabase());
 
    return true;
@@ -511,10 +508,10 @@ void SoccerBallItem::sendHome()
    // In soccer game, we use flagSpawn points to designate where the soccer ball should spawn.
    // We'll simply redefine "initial pos" as a random selection of the flag spawn points
 
-   const Vector<FlagSpawn *> *spawnPoints = getGame()->getGameType()->getFlagSpawns();
+   Vector<AbstractSpawn *> spawnPoints = getGame()->getGameType()->getSpawnPoints(FlagSpawnTypeNumber);
 
-   S32 spawnIndex = TNL::Random::readI() % spawnPoints->size();
-   initialPos = spawnPoints->get(spawnIndex)->getPos();
+   S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
+   initialPos = spawnPoints[spawnIndex]->getPos();
 
    setPosVelAng(initialPos, Point(0,0), 0);
 

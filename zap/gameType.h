@@ -126,11 +126,15 @@ class GameType : public NetObject
 {
    typedef NetObject Parent;
 
+   static const S32 TeamNotSpecified = -99999;
+
 private:
    Game *mGame;
-   Point getSpawnPoint(S32 team);        // Picks a spawn point for ship or robot
 
    Vector<SafePtr<SpyBug> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
+
+   Point getSpawnPoint(S32 team);        // Pick a spawn point for ship or robot
+
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
@@ -172,8 +176,6 @@ private:
 
    S32 mMinRecPlayers;         // Recommended min players for this level
    S32 mMaxRecPlayers;         // Recommended max players for this level
-
-   Vector<FlagSpawn *> mFlagSpawnPoints;         // List of non-team specific spawn points for flags
 
    Vector<SafePtr<MoveItem> > mCacheResendItem;  // Speed up c2sResendItemStatus
 
@@ -237,7 +239,7 @@ public:
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
 
-   Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex);
+   Vector<AbstractSpawn *> getSpawnPoints(TypeNumber typeNumber, S32 teamIndex = TeamNotSpecified);
 
 
    // Info about the level itself
@@ -300,12 +302,6 @@ public:
 
 
    const Vector<WallRec> *getBarrierList();
-
-   const FlagSpawn *getFlagSpawn(S32 index) const;
-   const Vector<FlagSpawn *> *getFlagSpawns() const;
-   S32 getFlagSpawnCount() const;
-
-   void addFlagSpawn(FlagSpawn *flagSpawn);
 
    Rect mViewBoundsWhileLoading;    // Show these view bounds while loading the map
    S32 mObjectsExpected;            // Count of objects we expect to get with this level (for display purposes only)

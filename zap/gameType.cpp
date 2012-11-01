@@ -1337,7 +1337,7 @@ void GameType::onLevelLoaded()
 
    mLevelHasLoadoutZone      = gridDatabase->hasObjectOfType(LoadoutZoneTypeNumber);
    mLevelHasPredeployedFlags = gridDatabase->hasObjectOfType(FlagTypeNumber);
-   mLevelHasFlagSpawns       = mFlagSpawnPoints.size();
+   mLevelHasFlagSpawns       = gridDatabase->hasObjectOfType(FlagSpawnTypeNumber);
 
    TNLAssert(dynamic_cast<ServerGame *>(mGame), "Wrong game here!");
    static_cast<ServerGame *>(mGame)->startAllBots();           // Cycle through all our bots and start them up
@@ -1434,9 +1434,9 @@ void GameType::spawnRobot(Robot *robot)
 
 
 // Get a list of all spawns that belong to the specified team (when that is relevant)
-Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)
+Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)    // teamIndex is optional
 {
-   bool checkTeam = isTeamFlagGame();     // Do we need to limit ourselves to items on the passed team?
+   bool checkTeam = isTeamFlagGame() && teamIndex != TeamNotSpecified;   // Only find items on the passed team?
 
    Vector<AbstractSpawn *> spawnPoints;
 
@@ -1457,7 +1457,7 @@ Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 team
 }
 
 
-
+// Pick a random ship spawn point for the specified team
 Point GameType::getSpawnPoint(S32 teamIndex)
 {
    // Invalid team id
@@ -4188,30 +4188,6 @@ U32 GameType::getLowerRightCornerScoreboardOffsetFromBottom() const
 const Vector<WallRec> *GameType::getBarrierList()
 {
    return &mWalls;
-}
-
-
-const FlagSpawn *GameType::getFlagSpawn(S32 index) const
-{
-   return mFlagSpawnPoints[index];
-}
-
-
-const Vector<FlagSpawn *> *GameType::getFlagSpawns() const
-{
-   return &mFlagSpawnPoints;
-}
-
-
-S32 GameType::getFlagSpawnCount() const
-{
-   return mFlagSpawnPoints.size();
-}
-
-
-void GameType::addFlagSpawn(FlagSpawn *flagSpawn)
-{
-   mFlagSpawnPoints.push_back(flagSpawn);
 }
 
 
