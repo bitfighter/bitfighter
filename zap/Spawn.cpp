@@ -637,9 +637,12 @@ TNL::NetClassRepInstance<FlagSpawn> FlagSpawn::dynClassRep("FlagSpawn", 0, TNL::
 
 
 // C++ constructor
-FlagSpawn::FlagSpawn(const Point &pos, S32 time) : Parent(pos, time)
+FlagSpawn::FlagSpawn(const Point &pos, S32 time, S32 teamIndex) : Parent(pos, time)
 {
    initialize();
+
+   if(teamIndex != TeamNotSpecified)
+      setTeam(teamIndex);
 }
 
 

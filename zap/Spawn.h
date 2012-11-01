@@ -237,8 +237,11 @@ public:
    static const LuaFunctionProfile functionArgs[];
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+static const S32 TeamNotSpecified = -99999;
 
 class FlagSpawn : public ItemSpawn
 {
@@ -252,9 +255,9 @@ public:
 
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
-   FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
-   FlagSpawn(lua_State *L);                                                 // Lua constructor
-   virtual ~FlagSpawn();                                                    // Destructor
+   FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME, S32 team = TeamNotSpecified);  // C++ constructor
+   FlagSpawn(lua_State *L);                                                                              // Lua constructor
+   virtual ~FlagSpawn();                                                                                 // Destructor
 
    FlagSpawn *clone() const;
 

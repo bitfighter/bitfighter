@@ -154,7 +154,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
    mInitialPos = getActualPos();                   // Save the starting location of this flag
 
    // Create a spawn at the flag's location
-   FlagSpawn *spawn = new FlagSpawn(mInitialPos, time);
+   FlagSpawn *spawn = new FlagSpawn(mInitialPos, time, getTeam());
    spawn->addToGame(game, game->getGameObjDatabase());
 
    return true;
