@@ -1436,19 +1436,21 @@ void GameType::spawnRobot(Robot *robot)
 // Get a list of all spawns that belong to the specified team (when that is relevant)
 Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)
 {
-   Game *game = getGame();
-   bool checkTeam = isTeamFlagGame();
+   bool checkTeam = isTeamFlagGame();     // Do we need to limit ourselves to items on the passed team?
 
    Vector<AbstractSpawn *> spawnPoints;
 
-   const Vector<DatabaseObject *> *objects = game->getGameObjDatabase()->findObjects_fast();
+   const Vector<DatabaseObject *> *objects = getGame()->getGameObjDatabase()->findObjects_fast();
 
    for(S32 i = 0; i < objects->size(); i++)
    {
-      AbstractSpawn *spawn = static_cast<AbstractSpawn *>(objects->get(i));
+      if(objects->get(i)->getObjectTypeNumber() == typeNumber)
+      {
+         AbstractSpawn *spawn = static_cast<AbstractSpawn *>(objects->get(i));
 
-      if(objects->get(i)->getObjectTypeNumber() == typeNumber && (!checkTeam || teamIndex == spawn->getTeam()))
-         spawnPoints.push_back(spawn);
+         if(!checkTeam || spawn->getTeam() == teamIndex || spawn->getTeam() == TEAM_NEUTRAL)
+            spawnPoints.push_back(spawn);
+      }
    }
 
    return spawnPoints;
