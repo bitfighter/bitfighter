@@ -804,12 +804,6 @@ string Game::toString()
 }
 
 
-void Game::addToGame(BfObject *object)
-{
-   // Do nothing, for now
-}
-
-
 // Only occurs in scripts; could be in editor or on server
 void Game::onReadTeamChangeParam(S32 argc, const char **argv)
 {

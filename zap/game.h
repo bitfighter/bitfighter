@@ -263,8 +263,6 @@ public:
    void clearAddTarget();
    static Game *getAddTarget();
 
-   virtual void addToGame(BfObject *object);      // Experimental new way of adding items to game... maybe will replace old?
-
    ClientInfo *findClientInfo(const StringTableEntry &name);      // Find client by name
    
    Rect getWorldExtents();

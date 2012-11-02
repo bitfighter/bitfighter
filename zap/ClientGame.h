@@ -237,9 +237,6 @@ public:
    void addPolyWall(PolyWall *polyWall, GridDatabase *database);                          // Add polyWall item to game
    void addWallItem(WallItem *wallItem, GridDatabase *database);                          // Add wallItem item to game
 
-   void addToGame(BfObject *object);
-
-
    void setSelectedEngineeredObject(U32 objectType);
 };
 

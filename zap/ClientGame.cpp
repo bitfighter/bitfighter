@@ -2027,12 +2027,6 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 }
 
 
-void ClientGame::addToGame(BfObject *object)
-{
-   TNLAssert(false,"???");
-}
-
-
 // Add polywall item to game
 void ClientGame::addPolyWall(PolyWall *polyWall, GridDatabase *database)
 {
