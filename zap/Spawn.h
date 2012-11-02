@@ -91,9 +91,14 @@ class Spawn : public AbstractSpawn
 {
    typedef AbstractSpawn Parent;
 
+private:
+   void initialize();
+
 public:
-   Spawn(const Point &pos = Point());  // C++ constructor (no lua constructor)
-   virtual ~Spawn();
+   Spawn(const Point &pos = Point(0,0));  // C++ constructor
+   Spawn(lua_State *L);                   // Lua constructor
+   virtual ~Spawn();                      // Destructor
+
    Spawn *clone() const;
 
    const char *getEditorHelpString();
@@ -112,6 +117,13 @@ public:
    void renderDock();
 
    TNL_DECLARE_CLASS(Spawn);
+
+   ///// Lua interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Spawn);
+
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 

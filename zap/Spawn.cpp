@@ -189,17 +189,31 @@ string AbstractSpawn::getAttributeString()
 
 TNL_IMPLEMENT_CLASS(Spawn);
 
-// Constructor
+// C++ constructor
 Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
 {
+   initialize();
+}
+
+
+// Lua constructor
+Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
+{
+   initialize();
+}
+
+
+void Spawn::initialize()
+{
    mObjectTypeNumber = ShipSpawnTypeNumber;
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 Spawn::~Spawn()
 {
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -263,6 +277,26 @@ void Spawn::renderDock()
 {
    renderEditor(1, false);
 }
+
+
+/////
+// Lua interface
+/**
+  *  @luaclass Spawn
+  *  @brief Marks locations where ships and robots should spawn.
+  *  @geom  The geometry of Spawns is a single point.
+  */
+//               Fn name    Param profiles         Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_METHODS_TABLE(Spawn, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Spawn, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *Spawn::luaClassName = "Spawn";
+REGISTER_LUA_SUBCLASS(Spawn, BfObject);
 
 
 ////////////////////////////////////////
