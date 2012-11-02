@@ -429,21 +429,12 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
       setRenderVel(getActualVel() * accelFraction);
    }
 
-
    Parent::idle(path);
-
-   // If crash into something, the ball will hit first, so we want to make sure it has an up-to-date velocity vector
-   //if(isMounted())
-   //if(mMount)      //client side NULL when the soccer is mounted to far away ship.
-   //   setActualVel(mMount->getActualVel());
 }
 
 
 void SoccerBallItem::damageObject(DamageInfo *theInfo)
 {
-   //if(mMount != NULL)
-   //   onItemDropped();
-  
    computeImpulseDirection(theInfo);
 
    if(theInfo->damagingObject)
