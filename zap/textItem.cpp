@@ -76,6 +76,12 @@ TextItem *TextItem::clone() const
 }
 
 
+string TextItem::getAttributeString()
+{
+   return "Text: " + mText;
+}
+
+
 const char *TextItem::getInstructionMsg()
 {
    return "[Enter] to edit text";

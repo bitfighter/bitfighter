@@ -45,9 +45,6 @@ private:
    F32 mSize;              // Text size
    string mText;           // Text itself
 
-   // How are this item's vertices labeled in the editor? -- these can be private
-   const char *getInstructionMsg();
-
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 #endif
@@ -114,6 +111,8 @@ public:
    const char *getPrettyNamePlural();
    const char *getOnDockName();
    const char *getOnScreenName();
+   string getAttributeString();
+   const char *getInstructionMsg();
    bool hasTeam();
    bool canBeHostile();
    bool canBeNeutral();

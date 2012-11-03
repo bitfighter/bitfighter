@@ -309,6 +309,9 @@ const char *EditorObject::getOnScreenName()
 // Not all editor objects will implement this
 const char *EditorObject::getInstructionMsg()
 {
+   if(getAttributeString() != "")
+      return "[Enter] to edit attributes";
+
    return "";
 }
 

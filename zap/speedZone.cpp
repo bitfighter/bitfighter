@@ -301,12 +301,6 @@ string SpeedZone::toString(F32 gridSize) const
 }
 
 
-const char *SpeedZone::getInstructionMsg()
-{
-   return "[Enter] to edit attributes";
-}
-
-
 #ifndef ZAP_DEDICATED
 
 EditorAttributeMenuUI *SpeedZone::getAttributeMenu()
