@@ -887,19 +887,11 @@ void LuaScriptRunner::setEnums(lua_State *L)
       EVENT_TABLE
 #  undef EVENT
 
-
-
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);
    setEnum(EngineeredTeleporterEntrance);
    setEnum(EngineeredTeleporterExit);
-
-   // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
-   lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
-   lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
-
-
-
+   
 
    //////////////////// TODO: Delete the above, and rely on the below
 
@@ -962,6 +954,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  undef ENGR_OBJ
       (char*)NULL);
 
+
+   // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
+   lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
+   lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
 }
 
 #undef setEnumName
