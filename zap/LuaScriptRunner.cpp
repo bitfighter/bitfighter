@@ -843,7 +843,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 
 
 
-#define setEnum(name)             { lua_pushinteger(L, name);               lua_setglobal(L, #name); }
+#define setEnum(name)             { lua_pushinteger(L, name);   lua_setglobal(L, #name); }
 
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
@@ -858,15 +858,13 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
 
    // Module enums -- push all, using enum name as the Lua name
-#  define MODULE_ITEM(value, b, c, d, e, f, g, h, i)  lua_pushinteger(L, value);  \
-                                                      lua_setglobal  (L, #value); 
+#  define MODULE_ITEM(name, b, c, d, e, f, g, h, i)  setEnum(name); 
       MODULE_ITEM_TABLE
 #  undef EVENT
 
 
    // Weapon enums -- push all, using enum name as the Lua name
-#  define WEAPON_ITEM(value, b, c, d, e, f, g, h, i, j, k, l)  lua_pushinteger(L, value);  \
-                                                               lua_setglobal  (L, #value); 
+#  define WEAPON_ITEM(name, b, c, d, e, f, g, h, i, j, k, l)  setEnum(name) 
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
 
@@ -877,8 +875,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    (char*)NULL);  // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
 
    // Game Types
-#  define GAME_TYPE_ITEM(name, b, c)  lua_pushinteger(L, name); \
-                                      lua_setglobal  (L, #name);
+#  define GAME_TYPE_ITEM(name, b, c)  setEnum(name);
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
 
