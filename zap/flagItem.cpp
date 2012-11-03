@@ -55,6 +55,18 @@ FlagItem::FlagItem(const Point &pos, bool collidable, float radius, float mass) 
 }
 
 
+void FlagItem::initialize()
+{
+   mIsAtHome = true;    // All flags start off at home!
+
+   mNetFlags.set(Ghostable);
+   mObjectTypeNumber = FlagTypeNumber;
+   setZone(NULL);
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
 // Alternate constructor, currently used by dropping flags in hunterGame
 FlagItem::FlagItem(const Point &pos, const Point &vel, bool useDropDelay) : Parent(pos, true, (F32)Ship::CollisionRadius, 4)
 {
@@ -76,18 +88,6 @@ FlagItem::~FlagItem()
 FlagItem *FlagItem::clone() const
 {
    return new FlagItem(*this);
-}
-
-
-void FlagItem::initialize()
-{
-   mIsAtHome = true;    // All flags start off at home!
-
-   mNetFlags.set(Ghostable);
-   mObjectTypeNumber = FlagTypeNumber;
-   setZone(NULL);
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
