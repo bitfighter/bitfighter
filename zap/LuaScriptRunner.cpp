@@ -887,6 +887,8 @@ void LuaScriptRunner::setEnums(lua_State *L)
       EVENT_TABLE
 #  undef EVENT
 
+
+
    setEnum(EngineeredTurret);
    setEnum(EngineeredForceField);
    setEnum(EngineeredTeleporterEntrance);
@@ -950,6 +952,14 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  define EVENT(value, luaEnumName, c) luaEnumName, true, EventManager::value,
          EVENT_TABLE
    #  undef EVENT
+      (char*)NULL);
+
+
+   // Engineerable objects
+   add_enum_to_lua(L, "EngineerBuildObject",
+   #  define ENGR_OBJ(value, luaEnumName) luaEnumName, true, value,
+         ENGINEER_BUILD_OBJECTS_TABLE
+   #  undef ENGR_OBJ
       (char*)NULL);
 
 }

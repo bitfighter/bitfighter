@@ -37,14 +37,22 @@ class MountableItem;
 class GridDatabase;
 
 // Things you can build with Engineer
-enum EngineerBuildObjects
-{
-   EngineeredTurret,
-   EngineeredForceField,
-   EngineeredTeleporterEntrance,
-   EngineeredTeleporterExit,
-   EngineeredItemCount
+
+//          Enum                 Name in Lua  
+#define ENGINEER_BUILD_OBJECTS_TABLE \
+   ENGR_OBJ(EngineeredTurret,             "Turret"              ) \
+   ENGR_OBJ(EngineeredForceField,         "ForceFieldProjector" ) \
+   ENGR_OBJ(EngineeredTeleporterEntrance, "Teleporter"          ) \
+   ENGR_OBJ(EngineeredTeleporterExit,     "TelerporterExit"     ) \
+
+// Define an enum from the first values in EVENT_TABLE
+enum EngineerBuildObjects {
+#define ENGR_OBJ(a, b) a,
+    ENGINEER_BUILD_OBJECTS_TABLE
+#undef ENGR_OBJ
+    EngineeredItemCount
 };
+
 
 // These are events used with engineering an object over the client/server protocols
 enum EngineerResponseEvents {
