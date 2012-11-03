@@ -841,7 +841,6 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
       return false;
    }
 
-   logprintf("%s", code);
    return true;
 }
 
@@ -863,7 +862,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // Module enums -- push all, using enum name as the Lua name
 #  define MODULE_ITEM(name, b, c, d, e, f, g, h, i)  setEnum(name); 
       MODULE_ITEM_TABLE
-#  undef EVENT
+#  undef MODULE_ITEM
 
 
    // Old school
@@ -908,6 +907,14 @@ void LuaScriptRunner::setEnums(lua_State *L)
    #  define TYPE_NUMBER(value, shareWithLua, luaEnumName)   luaEnumName, shareWithLua, value,
           TYPE_NUMBER_TABLE
    #  undef TYPE_NUMBER
+      (char*)NULL); 
+
+
+   // Module enums -- push all, using enum name as the Lua name
+   add_enum_to_lua(L, "Module",
+   #  define MODULE_ITEM(value, luaEnumName, c, d, e, f, g, h, i)  luaEnumName, true, value,
+         MODULE_ITEM_TABLE
+   #  undef MODULE_ITEM
       (char*)NULL); 
 
 
