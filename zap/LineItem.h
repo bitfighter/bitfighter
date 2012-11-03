@@ -44,8 +44,8 @@ private:
    S32 mWidth;    
 
 public:
-   LineItem();                   // Constructor
-   virtual ~LineItem();          // Destructor
+   LineItem(lua_State *L = NULL);   // Combined C++ / Lua constructor
+   virtual ~LineItem();             // Destructor
    LineItem *clone() const;
 
    virtual void render();
@@ -90,6 +90,13 @@ public:
    static const S32 MAX_LINE_WIDTH = 255;
 
    TNL_DECLARE_CLASS(LineItem);
+
+   ///// Lua Interface
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(LineItem);
+
+	static const char *luaClassName;
+	static const luaL_reg luaMethods[];
+   static const LuaFunctionProfile functionArgs[];
 };
 
 

@@ -49,19 +49,21 @@ TNL_IMPLEMENT_NETOBJECT(LineItem);
    const S32 LineItem::MAX_LINE_WIDTH;
 #endif
 
-// Constructor
-LineItem::LineItem()
+// Combined C++ / Lua constructor
+LineItem::LineItem(lua_State *L)
 { 
    mNetFlags.set(Ghostable);
-   mObjectTypeNumber = LineTypeNumber;
    setNewGeometry(geomPolyLine);
+   mObjectTypeNumber = LineTypeNumber;
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
 // Destructor
 LineItem::~LineItem()
 { 
-   // Do nothing
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -248,13 +250,38 @@ void LineItem::changeWidth(S32 amt)
 }
 
 
-const char *LineItem::getOnScreenName()     { return "Line";       }
-const char *LineItem::getPrettyNamePlural() { return "Line Items"; }
-const char *LineItem::getOnDockName()       { return "LineItem";   }
+const char *LineItem::getOnScreenName()     { return "Line";      }
+const char *LineItem::getPrettyNamePlural() { return "LineItems"; }
+const char *LineItem::getOnDockName()       { return "LineItem";  }
 const char *LineItem::getEditorHelpString() { return "Draws a line on the map.  Visible only to team, or to all if neutral."; }
 
 bool LineItem::hasTeam()      { return true; }
 bool LineItem::canBeHostile() { return true; }
 bool LineItem::canBeNeutral() { return true; }
+
+
+/////
+// Lua interface
+
+/**
+  *  @luaclass LineItem
+  *  @brief    Decorative line visible to one or all teams.  Has no specific game function.
+  *  @descr    If a %LineItem is assigned to a team, it will only be visible to players on that team.  If
+  *            the %LineItem is neutral (the default), it will be visible to all players regardless of team.
+  *  @geom     The geometry of a %LineItem is a polyline (i.e. 2 or more points)
+  */
+//               Fn name       Param profiles  Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+   //METHOD(CLASS, getWidth,  ARRAYDEF({{          END }}), 1 ) \
+   //METHOD(CLASS, setWidth,  ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+
+GENERATE_LUA_METHODS_TABLE(LineItem, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(LineItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
+
+const char *LineItem::luaClassName = "LineItem";
+REGISTER_LUA_SUBCLASS(LineItem, BfObject);
 
 };
