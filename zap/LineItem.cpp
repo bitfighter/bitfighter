@@ -267,7 +267,7 @@ bool LineItem::canBeNeutral() { return true; }
   *  @luaclass LineItem
   *  @brief    Decorative line visible to one or all teams.  Has no specific game function.
   *  @descr    If a %LineItem is assigned to a team, it will only be visible to players on that team.  If
-  *            the %LineItem is neutral (the default), it will be visible to all players regardless of team.
+  *            the %LineItem is neutral (team == NeutralTeamIndx, the default), it will be visible to all players regardless of team.
   *  @geom     The geometry of a %LineItem is a polyline (i.e. 2 or more points)
   */
 //               Fn name       Param profiles  Profile count                           
