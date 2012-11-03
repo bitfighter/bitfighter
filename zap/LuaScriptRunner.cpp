@@ -898,6 +898,9 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
 
 
+
+   //////////////////// TODO: Delete the above, and rely on the below
+
    // Note for casting of NULL below:
    // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
    // New way
