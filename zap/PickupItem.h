@@ -67,9 +67,6 @@ public:
    U32 getRepopDelay();
    void setRepopDelay(U32 delay);
 
-   virtual const char *getInstructionMsg();
-
-
 #ifndef ZAP_DEDICATED
    // These four methods are all that's needed to add an editable attribute to a class...
    EditorAttributeMenuUI *getAttributeMenu();

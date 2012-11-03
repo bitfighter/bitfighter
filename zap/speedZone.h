@@ -51,9 +51,6 @@ private:
 
    void computeExtent();                                            // Bounding box for quick collision-possibility elimination
 
-   // How are things labeled in the editor? 
-   const char *getInstructionMsg();
-
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for attribute editing; since it's static, don't bother with smart pointer
 #endif

@@ -107,12 +107,6 @@ void PickupItem::setRepopDelay(U32 delay)
 }
 
 
-const char *PickupItem::getInstructionMsg()
-{
-   return "Press Enter to change regen time";
-}
-
-
 bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 2)
