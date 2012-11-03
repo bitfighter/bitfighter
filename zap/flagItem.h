@@ -44,7 +44,7 @@ class FlagItem : public MountableItem
    typedef MountableItem Parent;
 
 private:
-   Point mInitialPos;                 // Where flag was "born"
+   Point mInitialPos;                  // Where flag was "born"
    bool mIsAtHome;
 
    SafePtr<GoalZone> mZone;            // GoalZone currently holding the flag, NULL if not in a zone
