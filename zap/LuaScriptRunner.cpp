@@ -795,52 +795,55 @@ S32 LuaScriptRunner::getRandomNumber(lua_State *L)
 //
 bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 {
-    // NOTE: Here's the Lua code we're building and executing to define the
-    //       enum.
-    //
-    // <tname> = setmetatable( {}, { 
-    //      __index = { 
-    //          <name1> = <value1>, 
-    //          }, 
-    //          ... 
-    //      },
-    //      __newindex = function(table, key, value)
-    //          error(\"Attempt to modify read-only table\")
-    //      end,
-    //      __metatable = false
-    // });
+   // NOTE: Here's the Lua code we're building and executing to define the
+   //       enum.
+   //
+   // <tname> = setmetatable( {}, { 
+   //      __index = { 
+   //          <name1> = <value1>, 
+   //          }, 
+   //          ... 
+   //      },
+   //      __newindex = function(table, key, value)
+   //          error(\"Attempt to modify read-only table\")
+   //      end,
+   //      __metatable = false
+   // });
 
-    va_list args;
-    stringstream code;
-    char* ename;
-    int evalue;
+   va_list args;
+   stringstream code;
+   char* ename;
+   S32 evalue;
+   bool include;
     
-    code << tname << " = setmetatable({}, {";
-    code << "__index = {";
+   code << tname << " = setmetatable({}, {";
+   code << "__index = {";
 
-    // Iterate over the variadic arguments adding the enum values.
-    va_start(args, tname);
-    while((ename = va_arg(args, char*)) != NULL)
-    {
-        evalue = va_arg(args, int);
-        code << ename << "=" << evalue << ",";
-    } 
-    va_end(args);
+   // Iterate over the variadic arguments adding the enum values.
+   va_start(args, tname);
+   while((ename = va_arg(args, char*)) != NULL)
+   {
+      include = va_arg(args, bool);
+      evalue = va_arg(args, S32);
+      code << ename << "=" << evalue << ",";
+   } 
+   va_end(args);
 
-    code << "},";
-    code << "__newindex = function(table, key, value) error(\"Attempt to modify read-only table\") end,";
-    code << "__metatable = false} )";
+   code << "},";
+   code << "__newindex = function(table, key, value) error(\"Attempt to modify read-only table\") end,";
+   code << "__metatable = false} )";
 
-    // Execute lua code
-    if ( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
-    {
-        fprintf(stderr, "%s\n\n%s\n", code.str().c_str(),lua_tostring(L, -1));
-        lua_pop(L, 1);
-        return false;
-    }
-    return true;
+   // Execute lua code
+   if ( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
+   {
+      fprintf(stderr, "%s\n\n%s\n", code.str().c_str(), lua_tostring(L, -1));
+      lua_pop(L, 1);
+      return false;
+   }
+
+   logprintf("%s", code);
+   return true;
 }
-
 
 
 #define setEnum(name)             { lua_pushinteger(L, name);   lua_setglobal(L, #name); }
@@ -863,16 +866,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #  undef EVENT
 
 
-   // Weapon enums -- push all, using enum name as the Lua name
+   // Old school
 #  define WEAPON_ITEM(name, b, c, d, e, f, g, h, i, j, k, l)  setEnum(name) 
       WEAPON_ITEM_TABLE
 #  undef WEAPON_ITEM
-
-   add_enum_to_lua( L, "Weapons",
-#  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, value,
-      WEAPON_ITEM_TABLE
-#  undef WEAPON_ITEM
-   (char*)NULL);  // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
 
    // Game Types
 #  define GAME_TYPE_ITEM(name, b, c)  setEnum(name);
@@ -880,11 +877,10 @@ void LuaScriptRunner::setEnums(lua_State *L)
 #  undef GAME_TYPE_ITEM
 
    // Scoring Events
-#  define SCORING_EVENT_ITEM(name)  lua_pushinteger(L, GameType::name); \
-                                    lua_setglobal  (L, #name);
+#  define SCORING_EVENT_ITEM(name, b)  lua_pushinteger(L, GameType::name); \
+                                       lua_setglobal  (L, #name);
       SCORING_EVENT_TABLE
 #  undef SCORING_EVENT_ITEM
-
 
    // Event handler events
 #  define EVENT(name, b, c) lua_pushinteger(L, EventManager::name); \
@@ -900,6 +896,52 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
+
+
+
+   // Note for casting of NULL below:
+   // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
+   // New way
+
+   // Object types -- only push those with shareWithLua set to true
+   add_enum_to_lua(L, "ObjectType",
+   #  define TYPE_NUMBER(value, shareWithLua, luaEnumName)   luaEnumName, shareWithLua, value,
+          TYPE_NUMBER_TABLE
+   #  undef TYPE_NUMBER
+      (char*)NULL); 
+
+
+   // Weapons
+   add_enum_to_lua(L, "Weapon",
+   #  define WEAPON_ITEM(value, b, luaEnumName, d, e, f, g, h, i, j, k, l)  luaEnumName, true, value,
+         WEAPON_ITEM_TABLE
+   #  undef WEAPON_ITEM
+      (char*)NULL);  
+
+
+   // Game Types
+   add_enum_to_lua(L, "GameType",
+   #  define GAME_TYPE_ITEM(value, luaEnumName, c)  luaEnumName, true, value,
+          GAME_TYPE_TABLE
+   #  undef GAME_TYPE_ITEM
+      (char*)NULL);  
+
+
+   // Scoring Events
+   add_enum_to_lua(L, "ScoringEvent",
+   #  define SCORING_EVENT_ITEM(value, luaEnumName)  luaEnumName, true, GameType::value,
+         SCORING_EVENT_TABLE
+   #  undef SCORING_EVENT_ITEM
+      (char*)NULL);
+
+
+   // Event handler events
+   add_enum_to_lua(L, "Event",
+   #  define EVENT(value, luaEnumName, c) luaEnumName, true, EventManager::value,
+         EVENT_TABLE
+   #  undef EVENT
+      (char*)NULL);
+
 }
 
 #undef setEnumName
