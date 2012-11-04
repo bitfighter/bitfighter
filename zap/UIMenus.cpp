@@ -1266,7 +1266,8 @@ void OptionsMenuUserInterface::toggleDisplayMode()
    settings->getIniSettings()->oldDisplayMode = settings->getIniSettings()->displayMode;     // Save current setting
 
    // When we're in the editor, and we toggle views, we'll skip one of the fullscreen modes, as they essentially do the same thing in that UI
-   if(getGame()->getUIManager()->getCurrentUI()->usesEditorScreenMode())
+   bool editorScreenMode = getGame()->getUIManager()->getCurrentUI()->usesEditorScreenMode();
+   if(editorScreenMode)
    {
       if(isFullScreen(settings->getIniSettings()->displayMode))
          settings->getIniSettings()->displayMode = DISPLAY_MODE_WINDOWED;
@@ -1285,7 +1286,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       settings->getIniSettings()->displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
    }
 
-   VideoSystem::actualizeScreenMode(settings, false, usesEditorScreenMode());
+   VideoSystem::actualizeScreenMode(settings, false, editorScreenMode);
 }
 
 

@@ -823,9 +823,10 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
    va_start(args, tname);
    while((ename = va_arg(args, char*)) != NULL)
    {
-      include = va_arg(args, bool);
+      include = va_arg(args, S32);
       evalue = va_arg(args, S32);
-      code << ename << "=" << evalue << ",";
+      if(include)
+         code << ename << "=" << evalue << ",";
    } 
    va_end(args);
 
