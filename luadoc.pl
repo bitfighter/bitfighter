@@ -277,8 +277,8 @@ foreach my $file (@files) {
             $enumDescr = $descrColumn != -1 ? $words[$descrColumn] : "";
 
             # Clean up descr -- remove leading and traling non-word characters... i.e. junk
-            $enumDescr =~ s|^\W+||;      
-            $enumDescr =~ s|\W+$||;    
+            $enumDescr =~ s|^\W+"||;      
+            $enumDescr =~ s|"\W+$||;    
 
             # Suppress any words that might trigger linking
             $enumDescr =~ s|\s(\w+)| %\1|g;
