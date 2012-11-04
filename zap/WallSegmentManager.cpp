@@ -160,7 +160,7 @@ void WallSegmentManager::rebuildEdges()
 {
    mWallEdgePoints.clear();
 
-   // Run clipper
+   // Run clipper --> fills mWallEdgePoints from mWallSegments
    clipAllWallEdges(mWallSegments, mWallEdgePoints);    
 
    deleteEdges();
