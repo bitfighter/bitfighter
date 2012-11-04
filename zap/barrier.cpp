@@ -324,8 +324,8 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    crossVec.normalize(width * 0.5f);
 
    cornerPoints.push_back(start + crossVec);
-   cornerPoints.push_back(end + crossVec);
-   cornerPoints.push_back(end - crossVec);
+   cornerPoints.push_back(end   + crossVec);
+   cornerPoints.push_back(end   - crossVec);
    cornerPoints.push_back(start - crossVec);
 }
 
