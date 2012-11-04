@@ -478,7 +478,6 @@ static F32 getWallEditorRadius(F32 currentScale)
 }
 
 
-// Only called from editor
 void WallItem::onGeomChanged()
 {
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges
@@ -486,7 +485,8 @@ void WallItem::onGeomChanged()
 
    GridDatabase *db = getDatabase();
 
-   db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
+   if(db)
+      db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
    Parent::onGeomChanged();
 }
 
