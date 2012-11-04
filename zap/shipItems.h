@@ -33,7 +33,12 @@ using namespace TNL;
 
 namespace Zap
 {
-//   drain gets multiplied by milliseconds
+/**
+ * @luaenum Module(1, 7)
+ * The Module enum can be used to represent different module types.
+ */
+
+//   Drain gets multiplied by milliseconds
 //               enum           name,     drain, cost,       type,               has2,   2cost,  menu name,             menu help text (renders in cyan)
 #define MODULE_ITEM_TABLE \
    MODULE_ITEM(ModuleShield,  "Shield",      33,     0, ModulePrimaryUseActive,  false,     0, "Shield Generator",      ""                              ) \

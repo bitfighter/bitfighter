@@ -28,6 +28,10 @@
 
 namespace Zap
 {     
+/**
+ * @luaenum GameType(1,2)
+ * The GameType enum represets the different types of game.
+ */
 //                 Enum               GameType              GameType Name                      
 #define GAME_TYPE_TABLE \
    GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch"         ) \

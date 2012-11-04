@@ -38,16 +38,21 @@ class GridDatabase;
 
 // Things you can build with Engineer
 
-//          Enum                 Name in Lua  
+/**
+ * @luaenum EngineerBuildObject(1,2)
+ * The EngineerBuildObject enum represents different things you can build with the engineer module.
+ */
+
+//                Enum                   Enum in Lua           Nice name for docs
 #define ENGINEER_BUILD_OBJECTS_TABLE \
-   ENGR_OBJ(EngineeredTurret,             "Turret"              ) \
-   ENGR_OBJ(EngineeredForceField,         "ForceFieldProjector" ) \
-   ENGR_OBJ(EngineeredTeleporterEntrance, "Teleporter"          ) \
-   ENGR_OBJ(EngineeredTeleporterExit,     "TelerporterExit"     ) \
+   ENGR_OBJ(EngineeredTurret,             "Turret",              "Turret"               ) \
+   ENGR_OBJ(EngineeredForceField,         "ForceFieldProjector", "Force Field Projector") \
+   ENGR_OBJ(EngineeredTeleporterEntrance, "Teleporter",          "Teleporter"           ) \
+   ENGR_OBJ(EngineeredTeleporterExit,     "TelerporterExit",     "Teleporter exit point") \
 
 // Define an enum from the first values in EVENT_TABLE
 enum EngineerBuildObjects {
-#define ENGR_OBJ(a, b) a,
+#define ENGR_OBJ(a, b, c) a,
     ENGINEER_BUILD_OBJECTS_TABLE
 #undef ENGR_OBJ
     EngineeredItemCount

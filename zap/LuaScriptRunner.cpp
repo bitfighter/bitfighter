@@ -939,7 +939,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
       (char*)NULL);
 
 
-   // Event handler events
+   // Event handler events -- not sure if we need this one
    add_enum_to_lua(L, "Event",
    #  define EVENT(value, luaEnumName, c) luaEnumName, true, EventManager::value,
          EVENT_TABLE
@@ -949,7 +949,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Engineerable objects
    add_enum_to_lua(L, "EngineerBuildObject",
-   #  define ENGR_OBJ(value, luaEnumName) luaEnumName, true, value,
+   #  define ENGR_OBJ(value, luaEnumName, c) luaEnumName, true, value,
          ENGINEER_BUILD_OBJECTS_TABLE
    #  undef ENGR_OBJ
       (char*)NULL);

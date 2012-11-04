@@ -42,6 +42,11 @@ class Zone;
 
 class EventManager
 {
+/**
+ * @luaenum Event(1,1)
+ * The Event enum represents different events that the game fires that scripts might want to handle.
+ */
+
 // See http://stackoverflow.com/questions/6635851/real-world-use-of-x-macros
 //          Enum                 Name               Lua event handler 
 #define EVENT_TABLE \

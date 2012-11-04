@@ -93,6 +93,10 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+/**
+ * @luaenum ScoringEvent(1,1)
+ * The ScoringEvent enum represents different actions that change the score.
+ */
 #define SCORING_EVENT_TABLE \
    SCORING_EVENT_ITEM(KillEnemy,               "KillEnemy")               /* all games                                 */ \
    SCORING_EVENT_ITEM(KillSelf,                "KillSelf")                /* all games                                 */ \

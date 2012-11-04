@@ -251,8 +251,8 @@ foreach my $file (@files) {
       #  *  @{
       #  *  @section Weapon
       #  * __Weapon__
-      #  * * %Weapon.Phaser
-      #  * * %Weapon.Bouncer
+      #  * * %Weapon.%Phaser
+      #  * * %Weapon.%Bouncer
       #  @} 
 
       if($collectingEnum) {
@@ -267,9 +267,14 @@ foreach my $file (@files) {
 
          next if $collectingEnum == 1;    # Skip lines until we hit a #define
 
+         # If we're here, collectingEnum == 2, and we're processing an enum definition line
+         $line =~ s|/\*.*?\*/||g;         # Remove embedded comments
+         next if($line =~ m|^\W*\\$|);    # Skip any lines that have no \w chars, as long as they end in a backslash
+
+
          # Skip blank lines, or those that look like they are starting with a comment
          unless( $line =~ m|^\s*$| or $line =~ m|^\s*//| or $line =~ m|\s*/\*| ) {
-            my @words = split(/,/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple, "Triple", "Triple",    ...
+            my @words = split(/\s*,\s*/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple, "Triple", "Triple",    ...
 
             # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
             next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");     
@@ -277,8 +282,9 @@ foreach my $file (@files) {
             $enumDescr = $descrColumn != -1 ? $words[$descrColumn] : "";
 
             # Clean up descr -- remove leading and traling non-word characters... i.e. junk
-            $enumDescr =~ s|^\W+"||;      
-            $enumDescr =~ s|"\W+$||;    
+            $enumDescr =~ s|^\W*"||;         # Remove leading junk
+            $enumDescr =~ s|"\W*$||;         # Remove trailing junk
+
 
             # Suppress any words that might trigger linking
             $enumDescr =~ s|\s(\w+)| %\1|g;
@@ -286,6 +292,8 @@ foreach my $file (@files) {
 
             my $enumval = $words[$enumColumn];
             $enumval =~ s|[\s"\)\\]*||g;         # Strip out quotes and whitespace and other junk
+
+            # next unless $enumval;      # Skip empty enumvals... should never happen, but does
 
             push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " \%" . $enumDescr."<br>\n");    # Produces:  * * %Weapon.Triple  Triple
             # no next here, always want to do the termination check below
