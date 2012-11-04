@@ -43,6 +43,7 @@ foreach my $file (@files) {
    my $collectingLongComment = 0;
    my $collectingMainPage = 0;
    my $collectingEnum = 0;
+   my $descrColumn = 0;
    my $encounteredDoxygenCmd = 0;      # Gets set to 1 the first time we encounter a @cmd in a file
 
    my $luafile = $file =~ m|\.lua$|;   # Are we processing a .lua file?
@@ -50,6 +51,7 @@ foreach my $file (@files) {
    my $enumColumn;
    my $enumIgnoreColumn;
    my $enumName;
+   my $enumDescr;
 
    my @methods = ();
    my @comments = ();
@@ -142,13 +144,15 @@ foreach my $file (@files) {
 
          # Check for some special custom tags...
 
-         # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1)"
-         #                            $1        $2           $3  <== $3 will not appear in all lines
-         if( $line =~ m|\@luaenum\s+(\w+)\s*\((\d+)\s*,?\s*(\d+)?\)| ) {
+         # Check the regexes here: http://www.regexe.com
+         # Handle Lua enum defs: "@luaenum ObjType(2)" or "@luaenum ObjType(2,1,4)"  1, 2, or 3 nums are ok
+         #                            $1        $2           $4           $6  
+         if( $line =~ m|\@luaenum\s+(\w+)\s*\((\d+)\s*(,\s*(\d+)\s*(,\s*(\d+))?)?\s*\)| ) {
             $collectingEnum = 1;
             $enumName = $1;
             $enumColumn = $2;
-            $enumIgnoreColumn = $3 eq "" ? -1 : $3;
+            $descrColumn      = $4 eq "" ? -1 : $4;      # Optional
+            $enumIgnoreColumn = $6 eq "" ? -1 : $6;      # Optional
             $encounteredDoxygenCmd = 1;
 
             push(@enums, "/**\n\@defgroup $enumName"."Enum $enumName\n");
@@ -157,7 +161,6 @@ foreach my $file (@files) {
          }
 
          if( $line =~ m|\@luafunc\s+(.*)$| ) {     # Line looks like:  * @luafunc  retval BfObject::getClassID(p1, p2); retval and p1/p2 are optional
-
             # In C++ code, we use "::" to separate classes from functions (class::func); in Lua, we use "." (class.func).
             my $sep = ($file =~ m|\.lua$|) ? "[.:]" : "::";
 
@@ -266,15 +269,25 @@ foreach my $file (@files) {
 
          # Skip blank lines, or those that look like they are starting with a comment
          unless( $line =~ m|^\s*$| or $line =~ m|^\s*//| or $line =~ m|\s*/\*| ) {
-            my @words = split(/,/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple,     "Triple",      "Triple",    ...
+            my @words = split(/,/, $line);   # Line looks like this:  WEAPON_ITEM(WeaponTriple, "Triple", "Triple",    ...
 
             # Skip items marked as not to be shared with Lua... see #define TYPE_NUMBER_TABLE for example
             next if($enumIgnoreColumn != -1 && $words[$enumIgnoreColumn] eq "false");     
 
+            $enumDescr = $descrColumn != -1 ? $words[$descrColumn] : "";
+
+            # Clean up descr -- remove leading and traling non-word characters... i.e. junk
+            $enumDescr =~ s|^\W+||;      
+            $enumDescr =~ s|\W+$||;    
+
+            # Suppress any words that might trigger linking
+            $enumDescr =~ s|\s(\w+)| %\1|g;
+
+
             my $enumval = $words[$enumColumn];
             $enumval =~ s|[\s"\)\\]*||g;         # Strip out quotes and whitespace and other junk
 
-            push(@enums, " * * \%" . $enumName . "." . $enumval . "\n");    # Produces:  * * %Weapon.Triple
+            push(@enums, " * * \%" . $enumName . ".\%" . $enumval . " \%" . $enumDescr."<br>\n");    # Produces:  * * %Weapon.Triple  Triple
             # no next here, always want to do the termination check below
          }
 

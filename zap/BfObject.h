@@ -47,7 +47,7 @@ class Game;
 class ClientInfo;
 
 /**
- * @luaenum ObjType(2, 1)
+ * @luaenum ObjType(2, 3, 1)
  * The ObjType enum can be used to represent different kinds of objects.
  */
 // We're limited to 255 values in this table, as type number is commonly passed as a U8.
@@ -55,54 +55,54 @@ class ClientInfo;
 // those values that we don't want to share.
 //
 //                                         Make available      
-//                   Enum                   to scripts?        Available to scripts as:  
+//                   Enum:                  to scripts?        Available to scripts as:      Descr. in documentation:
 #define TYPE_NUMBER_TABLE \
-   TYPE_NUMBER( BarrierTypeNumber,             true,              "BarrierType"             ) \
-   TYPE_NUMBER( PlayerShipTypeNumber,          true,              "ShipType"                ) \
-   TYPE_NUMBER( LineTypeNumber,                true,              "LineType"                ) \
-   TYPE_NUMBER( ResourceItemTypeNumber,        true,              "ResourceItemType"        ) \
-   TYPE_NUMBER( TextItemTypeNumber,            true,              "TextItemType"            ) \
-   TYPE_NUMBER( LoadoutZoneTypeNumber,         true,              "LoadoutZoneType"         ) \
-   TYPE_NUMBER( TestItemTypeNumber,            true,              "TestItemType"            ) \
-   TYPE_NUMBER( FlagTypeNumber,                true,              "FlagType"                ) \
-   TYPE_NUMBER( BulletTypeNumber,              true,              "BulletType"              ) \
-   TYPE_NUMBER( BurstTypeNumber,               true,              "BurstType"               ) \
-   TYPE_NUMBER( MineTypeNumber,                true,              "MineType"                ) \
-   TYPE_NUMBER( NexusTypeNumber,               true,              "NexusType"               ) \
-   TYPE_NUMBER( BotNavMeshZoneTypeNumber,      true,              "BotNavMeshZoneType"      ) \
-   TYPE_NUMBER( RobotShipTypeNumber,           true,              "RobotType"               ) \
-   TYPE_NUMBER( TeleporterTypeNumber,          true,              "TeleporterType"          ) \
-   TYPE_NUMBER( GoalZoneTypeNumber,            true,              "GoalZoneType"            ) \
-   TYPE_NUMBER( AsteroidTypeNumber,            true,              "AsteroidType"            ) \
-   TYPE_NUMBER( RepairItemTypeNumber,          true,              "RepairItemType"          ) \
-   TYPE_NUMBER( EnergyItemTypeNumber,          true,              "EnergyItemType"          ) \
-   TYPE_NUMBER( SoccerBallItemTypeNumber,      true,              "SoccerBallItemType"      ) \
-   TYPE_NUMBER( WormTypeNumber,                true,              "WormType"                ) \
-   TYPE_NUMBER( TurretTypeNumber,              true,              "TurretType"              ) \
-   TYPE_NUMBER( ForceFieldTypeNumber,          true,              "ForceFieldType"          ) \
-   TYPE_NUMBER( ForceFieldProjectorTypeNumber, true,              "ForceFieldProjectorType" ) \
-   TYPE_NUMBER( SpeedZoneTypeNumber,           true,              "SpeedZoneType"           ) \
-   TYPE_NUMBER( PolyWallTypeNumber,            true,              "PolyWallType"            ) \
-   TYPE_NUMBER( ShipSpawnTypeNumber,           true,              "ShipSpawnType"           ) \
-   TYPE_NUMBER( FlagSpawnTypeNumber,           true,              "FlagSpawnType"           ) \
-   TYPE_NUMBER( AsteroidSpawnTypeNumber,       true,              "AsteroidSpawnType"       ) \
-   TYPE_NUMBER( CircleSpawnTypeNumber,         true,              "CircleSpawnType"         ) \
-   TYPE_NUMBER( WallItemTypeNumber,            true,              "WallItemType"            ) \
-   TYPE_NUMBER( WallEdgeTypeNumber,            true,              "WallEdgeType"            ) \
-   TYPE_NUMBER( WallSegmentTypeNumber,         true,              "WallSegmentType"         ) \
-   TYPE_NUMBER( SlipZoneTypeNumber,            true,              "SlipZoneType"            ) \
-   TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBugType"              ) \
-   TYPE_NUMBER( CoreTypeNumber,                true,              "CoreType"                ) \
-   TYPE_NUMBER( ZoneTypeNumber,                true,              "ZoneType"                ) \
-   TYPE_NUMBER( CircleTypeNumber,              true,              "CircleType"              ) \
-   TYPE_NUMBER( SeekerTypeNumber,              true,              "SeekerType"              ) \
-   TYPE_NUMBER( DeletedTypeNumber,             false,             "DeletedType"             ) \
-   TYPE_NUMBER( UnknownTypeNumber,             false,             "UnknownType"             ) \
+   TYPE_NUMBER( BarrierTypeNumber,             true,              "BarrierType",             "Barrier"             ) \
+   TYPE_NUMBER( PlayerShipTypeNumber,          true,              "ShipType",                "Ship"                ) \
+   TYPE_NUMBER( LineTypeNumber,                true,              "LineType",                "LineItem"            ) \
+   TYPE_NUMBER( ResourceItemTypeNumber,        true,              "ResourceItemType",        "ResourceItem"        ) \
+   TYPE_NUMBER( TextItemTypeNumber,            true,              "TextItemType",            "TextItem"            ) \
+   TYPE_NUMBER( LoadoutZoneTypeNumber,         true,              "LoadoutZoneType",         "LoadoutZone"         ) \
+   TYPE_NUMBER( TestItemTypeNumber,            true,              "TestItemType",            "TestItem"            ) \
+   TYPE_NUMBER( FlagTypeNumber,                true,              "FlagType",                "Flag"                ) \
+   TYPE_NUMBER( BulletTypeNumber,              true,              "BulletType",              "Bullet"              ) \
+   TYPE_NUMBER( BurstTypeNumber,               true,              "BurstType",               "Burst"               ) \
+   TYPE_NUMBER( MineTypeNumber,                true,              "MineType",                "Mine"                ) \
+   TYPE_NUMBER( NexusTypeNumber,               true,              "NexusType",               "Nexus"               ) \
+   TYPE_NUMBER( BotNavMeshZoneTypeNumber,      true,              "BotNavMeshZoneType",      "BotNavMeshZone"      ) \
+   TYPE_NUMBER( RobotShipTypeNumber,           true,              "RobotType",               "Robot"               ) \
+   TYPE_NUMBER( TeleporterTypeNumber,          true,              "TeleporterType",          "Teleporter"          ) \
+   TYPE_NUMBER( GoalZoneTypeNumber,            true,              "GoalZoneType",            "GoalZone"            ) \
+   TYPE_NUMBER( AsteroidTypeNumber,            true,              "AsteroidType",            "Asteroid"            ) \
+   TYPE_NUMBER( RepairItemTypeNumber,          true,              "RepairItemType",          "RepairItem"          ) \
+   TYPE_NUMBER( EnergyItemTypeNumber,          true,              "EnergyItemType",          "EnergyItem"          ) \
+   TYPE_NUMBER( SoccerBallItemTypeNumber,      true,              "SoccerBallItemType",      "SoccerBallItem"      ) \
+   TYPE_NUMBER( WormTypeNumber,                true,              "WormType",                "Worm"                ) \
+   TYPE_NUMBER( TurretTypeNumber,              true,              "TurretType",              "Turret"              ) \
+   TYPE_NUMBER( ForceFieldTypeNumber,          true,              "ForceFieldType",          "ForceField"          ) \
+   TYPE_NUMBER( ForceFieldProjectorTypeNumber, true,              "ForceFieldProjectorType", "ForceFieldProjector" ) \
+   TYPE_NUMBER( SpeedZoneTypeNumber,           true,              "SpeedZoneType",           "SpeedZone"           ) \
+   TYPE_NUMBER( PolyWallTypeNumber,            true,              "PolyWallType",            "PolyWall"            ) \
+   TYPE_NUMBER( ShipSpawnTypeNumber,           true,              "ShipSpawnType",           "ShipSpawn"           ) \
+   TYPE_NUMBER( FlagSpawnTypeNumber,           true,              "FlagSpawnType",           "FlagSpawn"           ) \
+   TYPE_NUMBER( AsteroidSpawnTypeNumber,       true,              "AsteroidSpawnType",       "AsteroidSpawn"       ) \
+   TYPE_NUMBER( CircleSpawnTypeNumber,         true,              "CircleSpawnType",         "CircleSpawn"         ) \
+   TYPE_NUMBER( WallItemTypeNumber,            true,              "WallItemType",            "WallItem"            ) \
+   TYPE_NUMBER( WallEdgeTypeNumber,            true,              "WallEdgeType",            "WallEdge"            ) \
+   TYPE_NUMBER( WallSegmentTypeNumber,         true,              "WallSegmentType",         "WallSegment"         ) \
+   TYPE_NUMBER( SlipZoneTypeNumber,            true,              "SlipZoneType",            "SlipZone"            ) \
+   TYPE_NUMBER( SpyBugTypeNumber,              true,              "SpyBugType",              "SpyBug"              ) \
+   TYPE_NUMBER( CoreTypeNumber,                true,              "CoreType",                "Core"                ) \
+   TYPE_NUMBER( ZoneTypeNumber,                true,              "ZoneType",                "Zone"                ) \
+   TYPE_NUMBER( CircleTypeNumber,              true,              "CircleType",              "Circle"              ) \
+   TYPE_NUMBER( SeekerTypeNumber,              true,              "SeekerType",              "Seeker"              ) \
+   TYPE_NUMBER( DeletedTypeNumber,             false,             "DeletedType",             "Deleted Item"        ) \
+   TYPE_NUMBER( UnknownTypeNumber,             false,             "UnknownType",             "Unknown Item Type"   ) \
 
 
 // Define an enum from the first values in TYPE_NUMBER_TABLE
 enum TypeNumber {
-#define TYPE_NUMBER(a, b, c) a,
+#define TYPE_NUMBER(enumItem, b, c, d) enumItem,
     TYPE_NUMBER_TABLE
 #undef TYPE_NUMBER
     TypesNumbers

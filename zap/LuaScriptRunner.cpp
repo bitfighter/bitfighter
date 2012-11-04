@@ -851,9 +851,9 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 void LuaScriptRunner::setEnums(lua_State *L)
 {
    // Object types -- only push those with shareWithLua set to true
-#  define TYPE_NUMBER(value, shareWithLua, name)   if(shareWithLua)  {           \
-                                                      lua_pushinteger(L, value); \
-                                                      lua_setglobal  (L, name);  \
+#  define TYPE_NUMBER(value, shareWithLua, name, d)   if(shareWithLua)  {           \
+                                                         lua_pushinteger(L, value); \
+                                                         lua_setglobal  (L, name);  \
                                                    }
        TYPE_NUMBER_TABLE
 #  undef TYPE_NUMBER
@@ -901,7 +901,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Object types -- only push those with shareWithLua set to true
    add_enum_to_lua(L, "ObjectType",
-   #  define TYPE_NUMBER(value, shareWithLua, luaEnumName)   luaEnumName, shareWithLua, value,
+   #  define TYPE_NUMBER(value, shareWithLua, luaEnumName, d)   luaEnumName, shareWithLua, value,
           TYPE_NUMBER_TABLE
    #  undef TYPE_NUMBER
       (char*)NULL); 
@@ -955,6 +955,8 @@ void LuaScriptRunner::setEnums(lua_State *L)
       (char*)NULL);
 
 
+   // Create a table at level run time that has team, indexed by name?
+   // Team.blue, Team.red, Team.neutral, etc.
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
