@@ -150,10 +150,10 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    F32 w = abs(width);
 
-   mWidth = w;        // Must be positive to avoid problem with bufferBarrierForBotZone
-   w = w * 0.5f + 1;  // Divide by 2 to avoid double size extents, add 1 to avoid rounding errors
+   mWidth = w;                      // Must be positive to avoid problem with bufferBarrierForBotZone
+   w = w * 0.5f + 1;                // Divide by 2 to avoid double size extents, add 1 to avoid rounding errors
 
-   if(points.size() == 2)     // It's a regular segment, need to make a little larger to accomodate width
+   if(points.size() == 2)           // It's a regular segment, need to make a little larger to accomodate width
       extent.expand(Point(w, w));
 
 
