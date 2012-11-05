@@ -113,7 +113,7 @@ void WallRec::constructWalls(Game *game) const
    {
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
-      Barrier::constructBarrierEndPoints(&vec, width, barrierEnds);
+      constructBarrierEndPoints(&vec, width, barrierEnds);
 
       Vector<Point> pts;
       // Then add individual segments to the game
@@ -184,26 +184,11 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
          expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills mRenderFillGeometry with 4 points
    }
 
-   getCollisionPoly(mRenderOutlineGeometry);                   // Outline is the same for both barrier geometries
-   computeBufferForBotZone(mBufferedObjectPointsForBotZone);   // Computes a special buffered wall that makes computing bot zones easier
-}
+   // Outline is the same for regular walls and polywalls
+   getCollisionPoly(mRenderOutlineGeometry);                   
 
-
-// Combines multiple barriers into a single complex polygon... fills solution
-bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution)
-{
-   Vector<const Vector<Point> *> inputPolygons;
-   Vector<Point> points;
-
-   for(S32 i = 0; i < barriers.size(); i++)
-   {
-      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
-         continue;
-
-      inputPolygons.push_back(static_cast<Barrier*>(barriers[i])->getCollisionPolyPtr());
-   }
-
-   return mergePolys(inputPolygons, solution);
+   // Compute a special buffered wall that makes computing bot zones easier
+   computeBufferForBotZone(mPoints, mWidth, mSolid, mBufferedObjectPointsForBotZone);   
 }
 
 
@@ -233,101 +218,6 @@ bool Barrier::collide(BfObject *otherObject)
    return true;
 }
 
-
-// Takes a list of vertices and converts them into a list of lines representing the edges of an object
-void Barrier::resetEdges(const Vector<Point> &corners, Vector<Point> &edges)   // static
-{
-   edges.clear();
-
-   S32 last = corners.size() - 1;             
-   for(S32 i = 0; i < corners.size(); i++)
-   {
-      edges.push_back(corners[last]);
-      edges.push_back(corners[i]);
-      last = i;
-   }
-}
-
-
-// Given the points in vec, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
-// for better rendering).  Set extendAmt to 0 to see why it's needed.
-// Populates barrierEnds with the results.
-void Barrier::constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds)    // static
-{
-   barrierEnds.clear();       // Local static vector
-
-   if(vec->size() <= 1)       // Protect against bad data
-      return;
-
-   bool loop = (vec->first() == vec->last());      // Does our barrier form a closed loop?
-
-   Vector<Point> edgeVector;
-   for(S32 i = 0; i < vec->size() - 1; i++)
-   {
-      Point e = vec->get(i+1) - vec->get(i);
-      e.normalize();
-      edgeVector.push_back(e);
-   }
-
-   Point lastEdge = edgeVector[edgeVector.size() - 1];
-   Vector<F32> extend;
-
-   for(S32 i = 0; i < edgeVector.size(); i++)
-   {
-      Point curEdge = edgeVector[i];
-      double cosTheta = curEdge.dot(lastEdge);
-
-      // Do some bounds checking.  Crazy, I know, but trust me, it's worth it!
-      if (cosTheta > 1.0)
-         cosTheta = 1.0;
-      else if(cosTheta < -1.0)  
-         cosTheta = -1.0;
-
-      cosTheta = abs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
-      
-      F32 extendAmt = width * 0.5f * F32(tan( acos(cosTheta) / 2 ));
-      if(extendAmt > 0.01f)
-         extendAmt -= 0.01f;
-      extend.push_back(extendAmt);
-   
-      lastEdge = curEdge;
-   }
-
-   F32 first = extend[0];
-   extend.push_back(first);
-
-   for(S32 i = 0; i < edgeVector.size(); i++)
-   {
-      F32 extendBack = extend[i];
-      F32 extendForward = extend[i+1];
-      if(i == 0 && !loop)
-         extendBack = 0;
-      if(i == edgeVector.size() - 1 && !loop)
-         extendForward = 0;
-
-      Point start = vec->get(i) - edgeVector[i] * extendBack;
-      Point end = vec->get(i+1) + edgeVector[i] * extendForward;
-
-      barrierEnds.push_back(start);
-      barrierEnds.push_back(end);
-   }
-}
-
-
-// Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
-void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints)   // static
-{
-   cornerPoints.clear();
-
-   Point dir = end - start;
-   Point crossVec(dir.y, -dir.x);
-   crossVec.normalize(width * 0.5f);
-
-   cornerPoints.push_back(start + crossVec);
-   cornerPoints.push_back(end   + crossVec);
-   cornerPoints.push_back(end   - crossVec);
-   cornerPoints.push_back(start - crossVec);
-}
 
 
 // Server only
@@ -381,11 +271,24 @@ void Barrier::computeBufferForBotZone(const Vector<Point> points, F32 width, boo
 }
 
 
+// Merges wall outlines together, client only
+// This is used for barriers and polywalls
+void Barrier::prepareRenderingGeometry(Game *game)    // static
+{
+   mRenderLineSegments.clear();
+
+   Vector<DatabaseObject *> barrierList;
+
+   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList);
+
+   clipRenderLinesToPoly(barrierList, mRenderLineSegments);
+}
+
+
 // Clears out overlapping barrier lines for better rendering appearance, modifies lineSegmentPoints.
 // This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets 
 // refined as each additional intersecting barrier gets processed.
-// static method
-void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints)
+void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints)  
 {
    Vector<Vector<Point> > solution;
 
@@ -395,17 +298,21 @@ void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList,
 }
 
 
-// Merges wall outlines together, client only
-// This is used for barriers and polywalls
-void Barrier::prepareRenderingGeometry(Game *game)
+// Combines multiple barriers into a single complex polygon... fills solution
+bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution)
 {
-   mRenderLineSegments.clear();
+   Vector<const Vector<Point> *> inputPolygons;
+   Vector<Point> points;
 
-   Vector<DatabaseObject *> barrierList;
+   for(S32 i = 0; i < barriers.size(); i++)
+   {
+      if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
+         continue;
 
-   game->getGameObjDatabase()->findObjects((TestFunc)isWallType, barrierList);
+      inputPolygons.push_back(static_cast<Barrier *>(barriers[i])->getCollisionPolyPtr());
+   }
 
-   clipRenderLinesToPoly(barrierList, mRenderLineSegments);
+   return mergePolys(inputPolygons, solution);
 }
 
 
@@ -422,8 +329,8 @@ void Barrier::render(S32 layerIndex)
 }
 
 
-// static 
-void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)
+// Render all edges for all barriers... faster to do it all at once than try to sort out whose edges are whose
+void Barrier::renderEdges(S32 layerIndex, const Color &outlineColor)  // static
 {
    if(layerIndex == 1)
       renderWallEdges(&mRenderLineSegments, outlineColor);
@@ -517,7 +424,7 @@ void WallItem::render()
 void WallItem::processEndPoints()
 {
 #ifndef ZAP_DEDICATED
-   Barrier::constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);     // Fills extendedEndPoints
+   constructBarrierEndPoints(getOutline(), (F32)getWidth(), extendedEndPoints);     // Fills extendedEndPoints
 #endif
 }
 
@@ -927,7 +834,7 @@ static S32 instanceCounter = 0;
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
 { 
    // Calculate segment corners by expanding the extended end points into a rectangle
-   Barrier::expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
+   expandCenterlineToOutline(start, end, width, mCorners);  // ==> Fills mCorners 
    init(gridDatabase, owner);
 }
 
@@ -997,7 +904,7 @@ void WallSegment::invalidate()
 // Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
 void WallSegment::resetEdges()
 {
-   Barrier::resetEdges(mCorners, mEdges);
+   cornersToEdges(mCorners, mEdges);
 }
 
 

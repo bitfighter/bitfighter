@@ -198,6 +198,20 @@ private:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Wall related methods
+
+void constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds);
+
+// Takes a list of vertices and converts them into a list of lines representing the edges of an object
+void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges);
+
+// Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
+void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
+
+
 };
 #endif // _GEOM_UTILS_
 

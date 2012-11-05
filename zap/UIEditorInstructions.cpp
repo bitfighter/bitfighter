@@ -384,7 +384,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
      
       // Extend end points --> populates extendedEndPoints
       Vector<Point> extendedEndPoints;
-      Barrier::constructBarrierEndPoints(&points, width, extendedEndPoints);
+      constructBarrierEndPoints(&points, width, extendedEndPoints);
 
        Vector<WallSegment *> wallSegments;
 

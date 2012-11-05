@@ -55,7 +55,7 @@
 #include "../clipper/clipper.hpp"
 
 extern "C" {
-#include "../Triangle/triangle.h"      // For Triangle!
+#  include "../Triangle/triangle.h"      // For Triangle!
 }
 
 #include <math.h>
@@ -1459,6 +1459,107 @@ Triangulate::TriangleData::~TriangleData()
    if(triangleList)
       free(triangleList);
 }
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Takes a list of vertices representing corners and converts them into a list of lines representing the edges of an object
+// Basically, taking a vector like A-B-C-D and converting it to A-B-B-C-C-D
+void cornersToEdges(const Vector<Point> &corners, Vector<Point> &edges)  
+{
+   edges.clear();
+
+   S32 last = corners.size() - 1;             
+   for(S32 i = 0; i < corners.size(); i++)
+   {
+      edges.push_back(corners[last]);
+      edges.push_back(corners[i]);
+      last = i;
+   }
+}
+
+
+// Given the points in points, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
+// for better rendering).  Set extendAmt to 0 to see why it's needed.
+// Populates barrierEnds with the results.
+void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Point> &barrierEnds)
+{
+   barrierEnds.clear();       // Local static vector
+
+   if(points->size() <= 1)    // Protect against bad data
+      return;
+
+   bool loop = (points->first() == points->last());      // Does our barrier form a closed loop?
+
+   Vector<Point> edgeVector;
+   for(S32 i = 0; i < points->size() - 1; i++)
+   {
+      Point e = points->get(i+1) - points->get(i);
+      e.normalize();
+      edgeVector.push_back(e);
+   }
+
+   Point lastEdge = edgeVector[edgeVector.size() - 1];
+   Vector<F32> extend;
+
+   for(S32 i = 0; i < edgeVector.size(); i++)
+   {
+      Point curEdge = edgeVector[i];
+      double cosTheta = curEdge.dot(lastEdge);
+
+      // Do some bounds checking.  Crazy, I know, but trust me, it's worth it!
+      if (cosTheta > 1.0)
+         cosTheta = 1.0;
+      else if(cosTheta < -1.0)  
+         cosTheta = -1.0;
+
+      cosTheta = abs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
+      
+      F32 extendAmt = width * 0.5f * F32(tan( acos(cosTheta) / 2 ));
+      if(extendAmt > 0.01f)
+         extendAmt -= 0.01f;
+      extend.push_back(extendAmt);
+   
+      lastEdge = curEdge;
+   }
+
+   F32 first = extend[0];
+   extend.push_back(first);
+
+   for(S32 i = 0; i < edgeVector.size(); i++)
+   {
+      F32 extendBack = extend[i];
+      F32 extendForward = extend[i+1];
+      if(i == 0 && !loop)
+         extendBack = 0;
+      if(i == edgeVector.size() - 1 && !loop)
+         extendForward = 0;
+
+      Point start = points->get(i)   - edgeVector[i] * extendBack;
+      Point end   = points->get(i+1) + edgeVector[i] * extendForward;
+
+      barrierEnds.push_back(start);
+      barrierEnds.push_back(end);
+   }
+}
+
+
+// Takes a segment and "puffs its width out" to a rectangle of a specified width, filling cornerPoints.  Does not extend endpoints.
+void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints)  
+{
+   cornerPoints.clear();
+
+   Point dir = end - start;
+   Point crossVec(dir.y, -dir.x);
+   crossVec.normalize(width * 0.5f);
+
+   cornerPoints.push_back(start + crossVec);
+   cornerPoints.push_back(end   + crossVec);
+   cornerPoints.push_back(end   - crossVec);
+   cornerPoints.push_back(start - crossVec);
+}
+
 
 
 };

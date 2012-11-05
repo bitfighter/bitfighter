@@ -50,34 +50,34 @@ private:
 
    // Takes a segment and "puffs it out" to a polygon for bot zone generation.
    // This polygon is the width of the barrier plus the ship's collision radius added to the outside
-   void computeBufferForBotZone(Vector<Point> &zonePoints);
+   static void computeBufferForBotZone(const Vector<Point> points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints);
 
 public:
    // Constructor
    Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
 
-   Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
+   Vector<Point> mPoints;  // The points of the barrier --> if only two, first will be start, second end of an old-school segment
 
-   bool mSolid;      // True if this represents a polywall
+   bool mSolid;            // True if this represents a polywall
 
    // By precomputing and storing, we should ease the rendering cost
-   Vector<Point> mRenderFillGeometry;     // Actual geometry used for rendering fill
-   Vector<Point> mRenderOutlineGeometry;  // Actual geometry used for rendering outline
+   Vector<Point> mRenderFillGeometry;        // Actual geometry used for rendering fill
+   Vector<Point> mRenderOutlineGeometry;     // Actual geometry used for rendering outline
 
    F32 mWidth;
 
    static const S32 MIN_BARRIER_WIDTH = 1;         // Clipper doesn't much like 0 width walls
    static const S32 MAX_BARRIER_WIDTH = 2500;      // Geowar has walls at least 350 units wide, so going lower will break at least one level
 
-   static const S32 DEFAULT_BARRIER_WIDTH = 50; ///< The default width of the barrier in game units
+   static const S32 DEFAULT_BARRIER_WIDTH = 50;    // The default width of the barrier in game units
 
-   static Vector<Point> mRenderLineSegments;    ///< The clipped line segments representing this barrier.
-   Vector<Point> mBotZoneBufferLineSegments;    ///< The line segments representing a buffered barrier.
+   static Vector<Point> mRenderLineSegments;       // The clipped line segments representing this barrier
+   Vector<Point> mBotZoneBufferLineSegments;       // The line segments representing a buffered barrier
 
    void render(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
    static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
 
-   /// Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
+   // Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
    S32 getRenderSortValue();
 
    // Returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment
@@ -87,23 +87,17 @@ public:
    // Collide always returns true for Barrier objects
    bool collide(BfObject *otherObject);
 
-   // Takes a list of vertices and converts them into a list of lines representing the edges of an object
-   static void resetEdges(const Vector<Point> &corners, Vector<Point> &edges);
-
-   // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
-   static void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
 
    const Vector<Point> *getBufferForBotZone();
-
-   // Combines multiple barriers into a single complex polygon
-   static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
 
    // Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints
    static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);
 
-   static void constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds);
+   // Combine multiple barriers into a single complex polygon
+   static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
 
-   // Clean up edge geometry and get barriers ready for proper rendering
+
+
    static void prepareRenderingGeometry(Game *game);
 
    TNL_DECLARE_CLASS(Barrier);
