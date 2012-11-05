@@ -441,8 +441,8 @@ const char *WallItem::getOnDockName()       { return "Wall";  }
 const char *WallItem::getPrettyNamePlural() { return "Walls"; }
 const char *WallItem::getEditorHelpString() { return "Walls define the general form of your level."; }
 
-string WallItem::getAttributeString() { return "Width: " + itos(getWidth()); }
-const char *WallItem::getInstructionMsg() { return "[+] and [-] to change"; }
+string WallItem::getAttributeString()     { return "Width: " + itos(getWidth()); }
+const char *WallItem::getInstructionMsg() { return "[+] and [-] to change";      }
 
 
 bool WallItem::hasTeam()      { return false; }
