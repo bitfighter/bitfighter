@@ -159,7 +159,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    setExtent(extent);
 
-    mSolid = solid;
+   mSolid = solid;
 
    if(mSolid)  // Polywall
    {
