@@ -148,15 +148,14 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    Rect extent(points);
 
-   width = abs(width);
+   F32 w = abs(width);
 
-   mWidth = width;            // Must be positive to avoid problem with bufferBarrierForBotZone
-   width = width * 0.5f + 1;  // Divide by 2 to avoid double size extents, add 1 to avoid rounding errors
+   mWidth = w;        // Must be positive to avoid problem with bufferBarrierForBotZone
+   w = w * 0.5f + 1;  // Divide by 2 to avoid double size extents, add 1 to avoid rounding errors
 
    if(points.size() == 2)     // It's a regular segment, need to make a little larger to accomodate width
-      extent.expand(Point(width, width));
+      extent.expand(Point(w, w));
 
-   // Use mWidth, not width, for anything below this
 
    setExtent(extent);
 
@@ -924,7 +923,7 @@ void WallSegment::setSelected(bool selected)
 
 
 const Vector<Point> *WallSegment::getCorners()                { return &mCorners; }
-const Vector<Point> *WallSegment::getEdges()                  { return &mEdges;   }
+const Vector<Point> *WallSegment::getEdges()                  { return &mEdges; }
 const Vector<Point> *WallSegment::getTriangulatedFillPoints() { return &mTriangulatedFillPoints; }
 
 
