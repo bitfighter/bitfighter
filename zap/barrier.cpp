@@ -163,7 +163,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)  // Polywall
    {
-      if (isWoundClockwise(mPoints))         // All walls must be CCW to clip correctly
+      if(isWoundClockwise(mPoints))         // All walls must be CCW to clip correctly
          mPoints.reverse();
 
       Triangulate::Process(mPoints, mRenderFillGeometry);
