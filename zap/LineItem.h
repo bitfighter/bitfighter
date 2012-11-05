@@ -52,7 +52,6 @@ public:
    S32 getRenderSortValue();
 
    bool processArguments(S32 argc, const char **argv, Game *game);   // Create objects from parameters stored in level file
-   bool processGeometry(S32 argc, const char **argv, Game *game);    // Processes the geometry for this and child objects
    void onAddedToGame(Game *theGame);
    void computeExtent();                                             // Bounding box for quick collision-possibility elimination
 

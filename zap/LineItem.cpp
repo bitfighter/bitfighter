@@ -124,21 +124,15 @@ S32 LineItem::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-// Entry looks like: LineItem 0 1  10 10  11 11  12 15
+// LineItem <team> <width> <x> <y> ...
 bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 6)
       return false;
 
-   setTeam(atoi(argv[0]));
-
-   return processGeometry(argc - 0, &argv[0], game);
-}
-
-
-bool LineItem::processGeometry(S32 argc, const char **argv, Game *game)
-{
+   setTeam (atoi(argv[0]));
    setWidth(atoi(argv[1]));
+
    readGeom(argc, argv, 2, game->getGridSize());
 
    computeExtent();

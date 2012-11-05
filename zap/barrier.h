@@ -132,11 +132,12 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class WallItem : public LineItem
+class WallItem : public CentroidObject
 {
-   typedef LineItem Parent;
+   typedef CentroidObject Parent;
 
 private:
+   S32 mWidth;
    void checkIfHasBeenAddedToTheGame();
 
 public:

@@ -351,7 +351,7 @@ S32 Barrier::getRenderSortValue()
 WallItem::WallItem(lua_State *L)
 {
    mObjectTypeNumber = WallItemTypeNumber;
-   setWidth(Barrier::DEFAULT_BARRIER_WIDTH);
+   mWidth = Barrier::DEFAULT_BARRIER_WIDTH;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -367,6 +367,29 @@ WallItem::~WallItem()
 WallItem *WallItem::clone() const
 {
    return new WallItem(*this);
+}
+
+
+// Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
+// BarrierMaker <width> <x> <y> <x> <y> ...
+bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc < 6)         // "BarrierMaker" keyword, width, and two or more x,y pairs
+      return false;
+
+   setWidth(atoi(argv[0]));
+
+   readGeom(argc, argv, 1, game->getGridSize());
+
+   updateExtentInDatabase();
+
+   return true;
+}
+
+
+string WallItem::toString(F32 gridSize) const
+{
+   return "BarrierMaker " + itos(getWidth()) + " " + geomToString(gridSize);
 }
 
 
@@ -463,12 +486,6 @@ F32 WallItem::getEditorRadius(F32 currentScale)
 }
 
 
-string WallItem::toString(F32 gridSize) const
-{
-   return "BarrierMaker " + itos(getWidth()) + " " + geomToString(gridSize);
-}
-
-
 void WallItem::scale(const Point &center, F32 scale)
 {
    Parent::scale(center, scale);
@@ -482,13 +499,19 @@ void WallItem::scale(const Point &center, F32 scale)
 // Needed to provide a valid signature
 S32 WallItem::getWidth() const
 {
-   return Parent::getWidth();
+   return mWidth;
 }
 
 
 void WallItem::setWidth(S32 width) 
 {         
-   Parent::setWidth(width, Barrier::MIN_BARRIER_WIDTH, Barrier::MAX_BARRIER_WIDTH);
+   if(width < Barrier::MIN_BARRIER_WIDTH)
+      width = Barrier::MIN_BARRIER_WIDTH;
+
+   else if(width > Barrier::MAX_BARRIER_WIDTH)
+      width = Barrier::MAX_BARRIER_WIDTH; 
+
+   mWidth = width; 
 }
 
 
@@ -498,16 +521,6 @@ void WallItem::setSelected(bool selected)
    
    // Find the associated segment(s) and mark them as selected (or not)
    setWallSelected(getDatabase(), getSerialNumber(), selected);
-}
-
-
-// Client (i.e. editor) only; walls processed in ServerGame::processPseudoItem() on server
-bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
-{
-   if(argc < 6)         // Need "BarrierMaker" keyword, width, and two or more x,y pairs
-      return false;
-
-   return processGeometry(argc, argv, game);
 }
 
 
