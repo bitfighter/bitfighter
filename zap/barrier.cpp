@@ -923,22 +923,9 @@ void WallSegment::setSelected(bool selected)
 }
 
 
-const Vector<Point> *WallSegment::getCorners()
-{
-   return &mCorners;
-}
-
-
-const Vector<Point> *WallSegment::getEdges()
-{
-   return &mEdges;
-}
-
-
-const Vector<Point> *WallSegment::getTriangulatedFillPoints()
-{
-   return &mTriangulatedFillPoints;
-}
+const Vector<Point> *WallSegment::getCorners()                { return &mCorners; }
+const Vector<Point> *WallSegment::getEdges()                  { return &mEdges;   }
+const Vector<Point> *WallSegment::getTriangulatedFillPoints() { return &mTriangulatedFillPoints; }
 
 
 bool WallSegment::getCollisionPoly(Vector<Point> &polyPoints) const
