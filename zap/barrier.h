@@ -58,10 +58,11 @@ public:
 
    Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
 
-   bool mSolid;
+   bool mSolid;      // True if this represents a polywall
+
    // By precomputing and storing, we should ease the rendering cost
-   Vector<Point> mRenderFillGeometry; ///< Actual geometry used for rendering fill.
-   Vector<Point> mRenderOutlineGeometry; ///< Actual geometry used for rendering outline.
+   Vector<Point> mRenderFillGeometry;     // Actual geometry used for rendering fill
+   Vector<Point> mRenderOutlineGeometry;  // Actual geometry used for rendering outline
 
    F32 mWidth;
 
@@ -73,18 +74,17 @@ public:
    static Vector<Point> mRenderLineSegments;    ///< The clipped line segments representing this barrier.
    Vector<Point> mBotZoneBufferLineSegments;    ///< The line segments representing a buffered barrier.
 
-   /// Renders barrier fill
    void render(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
    static void renderEdges(S32 layerIndex, const Color &outlineColor);    // Renders all edges in one pass
 
    /// Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
    S32 getRenderSortValue();
 
-   /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
+   // Returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    const Vector<Point> *getCollisionPolyPtr() const;
 
-   /// collide always returns true for Barrier objects.
+   // Collide always returns true for Barrier objects
    bool collide(BfObject *otherObject);
 
    // Takes a list of vertices and converts them into a list of lines representing the edges of an object
@@ -98,7 +98,7 @@ public:
    // Combines multiple barriers into a single complex polygon
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vector<Point> > &solution);
 
-   /// Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
+   // Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints
    static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);
 
    static void constructBarrierEndPoints(const Vector<Point> *vec, F32 width, Vector<Point> &barrierEnds);
