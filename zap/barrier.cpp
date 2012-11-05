@@ -828,8 +828,6 @@ bool WallEdge::getCollisionCircle(U32 stateIndex, Point &point, float &radius) c
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static S32 instanceCounter = 0;
-
 // Regular constructor
 WallSegment::WallSegment(GridDatabase *gridDatabase, const Point &start, const Point &end, F32 width, S32 owner) 
 { 
@@ -870,9 +868,6 @@ void WallSegment::init(GridDatabase *database, S32 owner)
    /////
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallSegmentTypeNumber;
-
-   logprintf("Creating wallSegment");
-   instanceCounter++;
 }
 
 
@@ -882,9 +877,6 @@ WallSegment::~WallSegment()
    // Make sure object is out of the database
    if(getDatabase())
       getDatabase()->removeFromDatabase(this); 
-
-   instanceCounter--;
-   logprintf("Wallsegment instances outstanding: %d", instanceCounter);
 }
 
 
