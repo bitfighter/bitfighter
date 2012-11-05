@@ -53,6 +53,9 @@ private:
    void computeBufferForBotZone(Vector<Point> &zonePoints);
 
 public:
+   // Constructor
+   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
+
    Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
 
    bool mSolid;
@@ -69,9 +72,6 @@ public:
 
    static Vector<Point> mRenderLineSegments;    ///< The clipped line segments representing this barrier.
    Vector<Point> mBotZoneBufferLineSegments;    ///< The line segments representing a buffered barrier.
-
-   /// Barrier constructor
-   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = DEFAULT_BARRIER_WIDTH, bool solid = false);
 
    /// Renders barrier fill
    void render(S32 layerIndex);                                           // Renders barrier fill barrier-by-barrier
