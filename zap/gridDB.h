@@ -115,9 +115,6 @@ private:
    void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
    void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery = false);
 
-   void removeFromSpatialPortionOfDatabase(DatabaseObject *theObject);
-   void removeFromNonSpatialPortionOfDatabase(DatabaseObject *theObject);
-
    void fillBins(const Rect &extents, IntRect &bins);          // Helper function -- translates extents into bins to search
 
 protected:
@@ -171,7 +168,6 @@ public:
    void copyObjects(const GridDatabase *source);
 
 
-
    bool testTypes(const Vector<U8> &types, U8 objectType) const;
 
 
@@ -188,6 +184,7 @@ public:
 
 
    virtual void removeFromDatabase(DatabaseObject *theObject);
+   void removeFromDatabase(const Vector<DatabaseObject *> &objects);
    virtual void removeEverythingFromDatabase();
 
    S32 getObjectCount();                          // Return the number of objects currently in the database

@@ -181,21 +181,14 @@ void GridDatabase::removeEverythingFromDatabase()
 }
 
 
-void GridDatabase::removeFromDatabase(DatabaseObject *theObject)
+void GridDatabase::removeFromDatabase(DatabaseObject *object)
 {
-   removeFromSpatialPortionOfDatabase(theObject);
-   removeFromNonSpatialPortionOfDatabase(theObject);
-}
-
-
-void GridDatabase::removeFromSpatialPortionOfDatabase(DatabaseObject *theObject)
-{
-   TNLAssert(theObject->mDatabase == this || theObject->mDatabase == NULL, "Trying to remove Object from wrong database");
-   if(theObject->mDatabase != this)
+   TNLAssert(object->mDatabase == this || object->mDatabase == NULL, "Trying to remove Object from wrong database");
+   if(object->mDatabase != this)
       return;
 
-   const Rect &extents = theObject->mExtent;
-   theObject->mDatabase = NULL;
+   const Rect &extents = object->mExtent;
+   object->mDatabase = NULL;
 
    static IntRect bins;
    fillBins(extents, bins);
@@ -206,7 +199,7 @@ void GridDatabase::removeFromSpatialPortionOfDatabase(DatabaseObject *theObject)
       {
          for(BucketEntry **walk = &mBuckets[x & BucketMask][y & BucketMask]; *walk; walk = &((*walk)->nextInBucket))
          {
-            if((*walk)->theObject == theObject)
+            if((*walk)->theObject == object)
             {
                BucketEntry *rem = *walk;
                *walk = rem->nextInBucket;
@@ -216,18 +209,21 @@ void GridDatabase::removeFromSpatialPortionOfDatabase(DatabaseObject *theObject)
          }
       }
    }
-}
 
-
-void GridDatabase::removeFromNonSpatialPortionOfDatabase(DatabaseObject *theObject)
-{
    // Working backwards makes clear() go faster, and should have little effect on the case of removing an arbitrary object
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
-      if(mAllObjects[i] == theObject)
+      if(mAllObjects[i] == object)
       {
          mAllObjects.erase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
          break;
       }
+}
+
+
+void GridDatabase::removeFromDatabase(const Vector<DatabaseObject *> &objects)
+{
+   for(S32 i = 0; i < objects.size(); i++)
+      removeFromDatabase(objects[i]);
 }
 
 
