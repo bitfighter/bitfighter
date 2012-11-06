@@ -688,7 +688,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
       }
 
       obj[LevelLoader::MaxArgLen] = '\0';
-      TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
+      TNL::Object *theObject = TNL::Object::create(obj);                // Create an object of the type specified on the line
 
       SafePtr<BfObject> object  = dynamic_cast<BfObject *>(theObject);  // Force our new object to be a BfObject
       BfObject *eObject = dynamic_cast<BfObject *>(theObject);
@@ -698,36 +698,32 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
       {
          logprintf(LogConsumer::LogLevelError, "Unknown object type \"%s\" in level \"%s\"", obj, levelFileName.c_str());
          delete theObject;
+         return;
       }
-      else  // object was valid
+
+      // Object was valid
+      bool validArgs = object->processArguments(argc - 1, argv + 1, this);
+
+      // ProcessArguments() might delete this object (this happens with multi-dest teleporters), so isValid() could be false
+      // even when the object is entirely legit
+      if(validArgs && object.isValid())  
       {
+         object->setUserAssignedId(id);
+         object->addToGame(this, database);
+
          computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
 
-         bool validArgs = object->processArguments(argc - 1, argv + 1, this);
-
-         if(validArgs)
-         {
-            // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
-            // The only time this code is run on the client is when loading into the editor.
-            if(!isServer())
-               object->markAsGhost();
-
-            if(object.isValid())  // processArguments might delete this object (teleporter) (Wat thinks this will always be true if validArgs is true)
-            {
-               object->setUserAssignedId(id);
-               object->addToGame(this, database);
-            }
-            else
-            {
-               TNLAssert(false, "Is wat right?  (see comment above)");   // this has triggered... wat is wrong, not sure why
-               delete object;
-            }
-         }
-         else
-         {
+         // Mark the item as being a ghost (client copy of a server object) so that the object will not trigger server-side tests
+         // The only time this code is run on the client is when loading into the editor.
+         if(!isServer())
+            object->markAsGhost();
+      }
+      else
+      {
+         if(!validArgs)
             logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
-            delete object;
-         }
+
+         delete object;
       }
    }
 }
