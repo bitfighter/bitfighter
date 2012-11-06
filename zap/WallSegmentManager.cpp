@@ -54,7 +54,6 @@ WallSegmentManager::WallSegmentManager()
 // Destructor
 WallSegmentManager::~WallSegmentManager()
 {
-   //deleteSegments();
    //deleteEdges();
 
    delete mWallEdgeDatabase;
@@ -161,7 +160,7 @@ void WallSegmentManager::rebuildEdges()
    mWallEdgePoints.clear();
 
    // Run clipper --> fills mWallEdgePoints from mWallSegments
-   clipAllWallEdges(mWallSegments, mWallEdgePoints);    
+   clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
 
    deleteEdges();
    mWallEdges.resize(mWallEdgePoints.size() / 2);
@@ -178,7 +177,7 @@ void WallSegmentManager::rebuildEdges()
 // Delete all segments, then find all walls and build a new set of segments
 void WallSegmentManager::buildAllWallSegmentEdgesAndPoints(GridDatabase *database)
 {
-   deleteSegments();
+   mWallSegmentDatabase->removeEverythingFromDatabase();
 
    fillVector.clear();
    database->findObjects((TestFunc)isWallType, fillVector);
@@ -204,19 +203,22 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
    BfObject *wall = static_cast<BfObject *>(wallDbObject);     // Wall we're deleting and rebuilding
 
-   S32 count = mWallSegments.size(); 
+   S32 count = mWallSegmentDatabase->getObjectCount();
 
    // Loop through all the walls, and, for each, see if any of the engineered objects we were given are mounted to it
    for(S32 i = 0; i < count; i++)
-      if(mWallSegments[i]->getOwner() == wall->getSerialNumber())       // Segment belongs to wall
-         for(S32 j = 0; j < engrObjects.size(); j++)                    // Loop through all engineered objects checking the mount seg
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      if(wallSegment->getOwner() == wall->getSerialNumber())       // Segment belongs to wall
+         for(S32 j = 0; j < engrObjects.size(); j++)               // Loop through all engineered objects checking the mount seg
          {
             EngineeredItem *engrObj = static_cast<EngineeredItem *>(engrObjects[j]);
 
             // Does FF start or end on this segment?
-            if(engrObj->getMountSegment() == mWallSegments[i] || engrObj->getEndSegment() == mWallSegments[i])
+            if(engrObj->getMountSegment() == wallSegment || engrObj->getEndSegment() == wallSegment)
                toBeRemounted.push_back(engrObj);
          }
+   }
 
    // Get rid of any existing segments that correspond to our wall; we'll be building new ones
    deleteSegments(wall->getSerialNumber());
@@ -225,10 +227,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
    // Polywalls will have one segment; it will have the same geometry as the polywall itself
    if(wall->getObjectTypeNumber() == PolyWallTypeNumber)
-   {
       WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
-      mWallSegments.push_back(newSegment);
-   }
 
    // Traditional walls will be represented by a series of rectangles, each representing a "puffed out" pair of sequential vertices
    else     
@@ -241,14 +240,12 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       {
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
                                                    (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
-
          if(i == 0)
             allSegExtent.set(newSegment->getExtent());
          else
             allSegExtent.unionRect(newSegment->getExtent());
-
-         mWallSegments.push_back(newSegment);          // And add it to our master segment list
       }
+
       wall->setExtent(allSegExtent);      // A wall's extent is the union of the extents of all its segments.  Makes sense, right?
    }
 
@@ -261,13 +258,18 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
 
 // Used above and from instructions
-void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges)
+void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSegments, Vector<Point> &wallEdges)
 {
    Vector<const Vector<Point> *> inputPolygons;
    Vector<Vector<Point> > solution;
 
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      inputPolygons.push_back(wallSegments[i]->getCorners());
+   S32 count = mWallSegmentDatabase->getObjectCount();
+
+   for(S32 i = 0; i < count; i++)
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      inputPolygons.push_back(wallSegment->getCorners());
+   }
 
    mergePolys(inputPolygons, solution);      // Merged wall segments are placed in solution
 
@@ -306,7 +308,6 @@ void WallSegmentManager::clear()
 {
    mWallEdgeDatabase->removeEverythingFromDatabase();
    mWallSegmentDatabase->removeEverythingFromDatabase();
-   //deleteSegments();
    //deleteEdges();
 
    mWallEdgePoints.clear();
@@ -315,38 +316,47 @@ void WallSegmentManager::clear()
 
 void WallSegmentManager::clearSelected()
 {
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-      mWallSegments[i]->setSelected(false);
+   S32 count = mWallSegmentDatabase->getObjectCount();
+
+   for(S32 i = 0; i < count; i++)
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      wallSegment->setSelected(false);
+   }
 }
 
 
 void WallSegmentManager::setSelected(S32 owner, bool selected)
 {
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-      if(mWallSegments[i]->getOwner() == owner)
-         mWallSegments[i]->setSelected(selected);
+   S32 count = mWallSegmentDatabase->getObjectCount();
+
+   for(S32 i = 0; i < count; i++)
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      if(wallSegment->getOwner() == owner)
+         wallSegment->setSelected(selected);
+   }
 }
 
 
 void WallSegmentManager::rebuildSelectedOutline()
 {
-   Vector<WallSegment *> selectedSegments;
+   Vector<DatabaseObject *> selectedSegments;      // Use DatabaseObject here to match the args for clipAllWallEdges()
 
-   for(S32 i = 0; i < mWallSegments.size(); i++)
-      if(mWallSegments[i]->isSelected())
-         selectedSegments.push_back(mWallSegments[i]);
+   S32 count = mWallSegmentDatabase->getObjectCount();
+
+   for(S32 i = 0; i < count; i++)
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      if(wallSegment->isSelected())
+         selectedSegments.push_back(wallSegment);
+   }
 
    // If no walls are selected we can skip a lot of work, butx removing this check will not change the result
    if(selectedSegments.size() == 0)          
       mSelectedWallEdgePoints.clear();    
    else
-      clipAllWallEdges(selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
-}
-
-
-void WallSegmentManager::deleteSegments()
-{
-   mWallSegments.deleteAndClear();
+      clipAllWallEdges(&selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
 }
 
 
@@ -359,15 +369,18 @@ void WallSegmentManager::deleteEdges()
 // Delete all wall segments owned by specified owner
 void WallSegmentManager::deleteSegments(S32 owner)
 {
-   S32 count = mWallSegments.size();
+   S32 count = mWallSegmentDatabase->getObjectCount();
+
+   Vector<DatabaseObject *> toBeDeleted;     // Use DatabaseObject to match args for removeFromDatabase
 
    for(S32 i = 0; i < count; i++)
-      if(mWallSegments[i]->getOwner() == owner)
-      {
-         mWallSegments.deleteAndErase_fast(i);   // Destructor will remove segment from database; order of segments isn't important
-         i--;
-         count--;
-      }
+   {
+      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      if(wallSegment->getOwner() == owner)
+         toBeDeleted.push_back(wallSegment);
+   }
+
+   mWallSegmentDatabase->removeFromDatabase(toBeDeleted);
 }
 
 
@@ -383,34 +396,46 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    Color fillColor = previewMode ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
+   S32 count = mWallSegmentDatabase->getObjectCount();
 
    if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
    {
       // Render walls that have been moved first (i.e. render their shadows)
       glColor(.1);
       if(moved)
-         for(S32 i = 0; i < mWallSegments.size(); i++)
-            if(mWallSegments[i]->isSelected())     
-               mWallSegments[i]->renderFill(Point(0,0));
+      {
+         for(S32 i = 0; i < count; i++)
+         {
+            WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+            if(wallSegment->isSelected())     
+               wallSegment->renderFill(Point(0,0));
+         }
+      }
 
       // hack for now
       if(alpha < 1)
-         glColor(.67f, .67f, .67f);
+         glColor(Colors::gray67);
       else
          glColor(fillColor * alpha);
 
-      for(S32 i = 0; i < mWallSegments.size(); i++)
-         if(!moved || !mWallSegments[i]->isSelected())         
-            mWallSegments[i]->renderFill(selectedItemOffset);              // renderFill ignores offset for unselected walls
+      for(S32 i = 0; i < count; i++)
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+         if(!moved || !wallSegment->isSelected())         
+            wallSegment->renderFill(selectedItemOffset);                   // RenderFill ignores offset for unselected walls
+      }
 
       renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());  // Render wall outlines with unselected walls
    }
    else  // Render selected/moving walls last so they appear on top; this is pass 2, 
    {
       glColor(fillColor * alpha);
-      for(S32 i = 0; i < mWallSegments.size(); i++)
-         if(mWallSegments[i]->isSelected())  
-            mWallSegments[i]->renderFill(selectedItemOffset);
+      for(S32 i = 0; i < count; i++)
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+         if(wallSegment->isSelected())  
+            wallSegment->renderFill(selectedItemOffset);
+      }
 
       // Render wall outlines for selected walls only
       renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, settings->getWallOutlineColor());      

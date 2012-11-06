@@ -386,7 +386,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       Vector<Point> extendedEndPoints;
       constructBarrierEndPoints(&points, width, extendedEndPoints);
 
-       Vector<WallSegment *> wallSegments;
+       Vector<DatabaseObject *> wallSegments;      
 
       // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
       for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
@@ -398,11 +398,14 @@ void EditorInstructionsUserInterface::renderPageWalls()
       }
 
       Vector<Point> edges;
-      mWallSegmentManager.clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
+      mWallSegmentManager.clipAllWallEdges(&wallSegments, edges);      // Remove interior wall outline fragments
 
       glColor(EDITOR_WALL_FILL_COLOR);
       for(S32 i = 0; i < wallSegments.size(); i++)
-         wallSegments[i]->renderFill(Point(0,0));
+      {
+         WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments[i]);
+         wallSegment->renderFill(Point(0,0));
+      }
 
       renderWallEdges(&edges, getGame()->getSettings()->getWallOutlineColor());
 
