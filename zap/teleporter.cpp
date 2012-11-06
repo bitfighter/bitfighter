@@ -266,10 +266,10 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
    pos.read(argv);
    dest.read(argv + 2);
 
-   pos *= game->getGridSize();
+   pos  *= game->getGridSize();
    dest *= game->getGridSize();
 
-   setVert(pos, 0);
+   setVert(pos,  0);
    setVert(dest, 1);
 
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter.
