@@ -106,15 +106,17 @@ class WallSegmentManager;
 class GridDatabase
 {
 private:
-
-   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
-   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
-
-   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery = false);
    static U32 mQueryId;
    static U32 mCountGridDatabase;
 
    WallSegmentManager *mWallSegmentManager;    
+
+   void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
+   void findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins);
+   void findObjects(TestFunc testFunc, Vector<DatabaseObject *> &fillVector, const Rect *extents, const IntRect *bins, bool sameQuery = false);
+
+   void removeFromSpatialPortionOfDatabase(DatabaseObject *theObject);
+   void removeFromNonSpatialPortionOfDatabase(DatabaseObject *theObject);
 
    void fillBins(const Rect &extents, IntRect &bins);          // Helper function -- translates extents into bins to search
 

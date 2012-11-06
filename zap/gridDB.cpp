@@ -183,6 +183,13 @@ void GridDatabase::removeEverythingFromDatabase()
 
 void GridDatabase::removeFromDatabase(DatabaseObject *theObject)
 {
+   removeFromSpatialPortionOfDatabase(theObject);
+   removeFromNonSpatialPortionOfDatabase(theObject);
+}
+
+
+void GridDatabase::removeFromSpatialPortionOfDatabase(DatabaseObject *theObject)
+{
    TNLAssert(theObject->mDatabase == this || theObject->mDatabase == NULL, "Trying to remove Object from wrong database");
    if(theObject->mDatabase != this)
       return;
@@ -209,8 +216,11 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject)
          }
       }
    }
+}
 
-   // Remove the object to our non-spatial "database" as well
+
+void GridDatabase::removeFromNonSpatialPortionOfDatabase(DatabaseObject *theObject)
+{
    // Working backwards makes clear() go faster, and should have little effect on the case of removing an arbitrary object
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == theObject)
