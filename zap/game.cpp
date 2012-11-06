@@ -719,7 +719,8 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
             }
             else
             {
-               TNLAssert(false, "Is wat right?  (see comment above)");
+               TNLAssert(false, "Is wat right?  (see comment above)");   // this has triggered... wat is wrong, not sure why
+               delete object;
             }
          }
          else
