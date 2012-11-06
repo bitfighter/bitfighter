@@ -54,8 +54,6 @@ WallSegmentManager::WallSegmentManager()
 // Destructor
 WallSegmentManager::~WallSegmentManager()
 {
-   //deleteEdges();
-
    delete mWallEdgeDatabase;
    mWallEdgeDatabase = NULL;
 
@@ -162,15 +160,11 @@ void WallSegmentManager::rebuildEdges()
    // Run clipper --> fills mWallEdgePoints from mWallSegments
    clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
 
-   deleteEdges();
-   mWallEdges.resize(mWallEdgePoints.size() / 2);
+   mWallEdgeDatabase->removeEverythingFromDatabase();
 
    // Add clipped wallEdges to the spatial database
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
-   {
       WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1], mWallEdgeDatabase);    // Create the edge object
-      mWallEdges[i/2] = newEdge;
-   }
 }
 
 
@@ -308,7 +302,6 @@ void WallSegmentManager::clear()
 {
    mWallEdgeDatabase->removeEverythingFromDatabase();
    mWallSegmentDatabase->removeEverythingFromDatabase();
-   //deleteEdges();
 
    mWallEdgePoints.clear();
 }
@@ -357,12 +350,6 @@ void WallSegmentManager::rebuildSelectedOutline()
       mSelectedWallEdgePoints.clear();    
    else
       clipAllWallEdges(&selectedSegments, mSelectedWallEdgePoints);    // Populate edgePoints from segments
-}
-
-
-void WallSegmentManager::deleteEdges()
-{
-   mWallEdges.deleteAndClear();
 }
 
 

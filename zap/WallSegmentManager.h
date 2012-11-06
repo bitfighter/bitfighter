@@ -67,8 +67,6 @@ public:
    void finishedChangingWalls(GridDatabase *editorDatabase,  S32 changedWallSerialNumber);
    void finishedChangingWalls(GridDatabase *editorDatabase);
 
-   //Vector<WallSegment *> mWallSegments;      
-   Vector<WallEdge *> mWallEdges;               // For mounting forcefields/turrets
    Vector<Point> mWallEdgePoints;               // For rendering
    Vector<Point> mSelectedWallEdgePoints;       // Also for rendering
 
@@ -80,7 +78,6 @@ public:
    void setSelected(S32 owner, bool selected);
    void rebuildSelectedOutline();
 
-   void deleteEdges();
    void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void updateAllMountedItems(GridDatabase *database);

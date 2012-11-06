@@ -1425,7 +1425,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
       // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
       if(snapToWallCorners)   
-         checkCornersForSnap(p, wallSegmentManager->mWallEdges, minDist, snapPoint);
+         checkCornersForSnap(p, wallSegmentManager->getWallEdgeDatabase()->findObjects_fast(), minDist, snapPoint);
    }
 
    return snapPoint;
@@ -1452,20 +1452,20 @@ static bool checkPoint(const Point &clickPoint, const Point &point, F32 &minDist
 }
 
 
-S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint)
+S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint)
 {
-   S32 vertFound = NONE;
    const Point *vert;
 
-   for(S32 i = 0; i < edges.size(); i++)
+   for(S32 i = 0; i < edges->size(); i++)
       for(S32 j = 0; j < 1; j++)
       {
-         vert = (j == 0) ? edges[i]->getStart() : edges[i]->getEnd();
+         WallEdge *edge = static_cast<WallEdge *>(edges->get(i));
+         vert = (j == 0) ? edge->getStart() : edge->getEnd();
          if(checkPoint(clickPoint, *vert, minDist, snapPoint))
-            vertFound = i;
+            return i;
       }
 
-   return vertFound;
+   return NONE;
 }
 
 

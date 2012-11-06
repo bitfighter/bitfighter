@@ -382,7 +382,7 @@ public:
    void onBeforeRunScriptFromConsole();
    void onAfterRunScriptFromConsole();
 
-   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<WallEdge *> &edges, F32 &minDist, Point &snapPoint);
+   S32 checkCornersForSnap(const Point &clickPoint,  const Vector<DatabaseObject *> *edges, F32 &minDist, Point &snapPoint);
 
    void deleteItem(S32 itemIndex, bool batchMode = false);
 
