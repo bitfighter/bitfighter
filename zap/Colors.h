@@ -47,6 +47,7 @@ namespace Colors
    const Color gray20(0.20);
    const Color gray40(0.40);
    const Color gray50(0.50);
+   const Color gray67(0.67);
    const Color gray70(0.70);
    const Color gray75(0.75);
    const Color gray80(0.80);
