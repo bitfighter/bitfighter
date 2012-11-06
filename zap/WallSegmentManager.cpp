@@ -257,11 +257,11 @@ void WallSegmentManager::clipAllWallEdges(const Vector<DatabaseObject *> *wallSe
    Vector<const Vector<Point> *> inputPolygons;
    Vector<Vector<Point> > solution;
 
-   S32 count = mWallSegmentDatabase->getObjectCount();
+   S32 count = wallSegments->size();
 
    for(S32 i = 0; i < count; i++)
    {
-      WallSegment *wallSegment = static_cast<WallSegment *>(mWallSegmentDatabase->getObjectByIndex(i));
+      WallSegment *wallSegment = static_cast<WallSegment *>(wallSegments->get(i));
       inputPolygons.push_back(wallSegment->getCorners());
    }
 
