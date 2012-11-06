@@ -158,6 +158,7 @@ public:
    void processEndPoints();  
 
    void render();
+   void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
    // Some properties about the item that will be needed in the editor
    const char *getEditorHelpString();

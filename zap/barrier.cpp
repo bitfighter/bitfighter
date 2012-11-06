@@ -353,6 +353,8 @@ WallItem::WallItem(lua_State *L)
    mObjectTypeNumber = WallItemTypeNumber;
    mWidth = Barrier::DEFAULT_BARRIER_WIDTH;
 
+   setNewGeometry(geomPolyLine);
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
@@ -377,9 +379,9 @@ bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
    if(argc < 6)         // "BarrierMaker" keyword, width, and two or more x,y pairs
       return false;
 
-   setWidth(atoi(argv[0]));
+   setWidth(atoi(argv[1]));
 
-   readGeom(argc, argv, 1, game->getGridSize());
+   readGeom(argc, argv, 2, game->getGridSize());
 
    updateExtentInDatabase();
 
@@ -441,6 +443,19 @@ void WallItem::render()
 {
    // Do nothing
 }
+
+
+void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
+{
+#ifndef ZAP_DEDICATED
+   if(!isSelected() && !isLitUp())
+      glColor(getEditorRenderColor());
+
+   renderLine(getOutline());
+   renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
+#endif
+}
+
 
 
 void WallItem::processEndPoints()
@@ -506,12 +521,13 @@ S32 WallItem::getWidth() const
 void WallItem::setWidth(S32 width) 
 {         
    if(width < Barrier::MIN_BARRIER_WIDTH)
-      width = Barrier::MIN_BARRIER_WIDTH;
+      mWidth = Barrier::MIN_BARRIER_WIDTH;
 
    else if(width > Barrier::MAX_BARRIER_WIDTH)
-      width = Barrier::MAX_BARRIER_WIDTH; 
+      mWidth = Barrier::MAX_BARRIER_WIDTH; 
 
-   mWidth = width; 
+   else
+      mWidth = width; 
 }
 
 
