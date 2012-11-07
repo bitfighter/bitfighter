@@ -1514,7 +1514,7 @@ void constructBarrierEndPoints(const Vector<Point> *points, F32 width, Vector<Po
       else if(cosTheta < -1.0)  
          cosTheta = -1.0;
 
-      cosTheta = abs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
+      cosTheta = fabs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
       
       F32 extendAmt = width * 0.5f * F32(tan( acos(cosTheta) / 2 ));
       if(extendAmt > 0.01f)
