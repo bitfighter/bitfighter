@@ -723,7 +723,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
          if(!validArgs)
             logprintf(LogConsumer::LogLevelError, "Invalid arguments in object \"%s\" in level \"%s\"", obj, levelFileName.c_str());
 
-         delete object;
+         delete object.getPointer();
       }
    }
 }
