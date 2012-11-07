@@ -92,7 +92,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
 
       if(lua_isnil(L, 1))     // Function returned nil, return false
       {
-         clearStack(L);        // In case there's other junk on there
+         clearStack(L);       // In case there's other junk on there
          return false;
       }
 
