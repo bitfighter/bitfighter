@@ -138,6 +138,7 @@ class WallItem : public CentroidObject
 
 private:
    S32 mWidth;
+   bool mAlreadyAdded;
    void checkIfHasBeenAddedToTheGame();
 
 public:
@@ -211,6 +212,7 @@ class PolyWall : public PolygonObject
    typedef PolygonObject Parent;
 
 private:
+   bool mAlreadyAdded;
    void checkIfHasBeenAddedToTheGame();
 
 public:

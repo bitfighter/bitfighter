@@ -674,8 +674,19 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Load the items
    LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
 
-   if(!levelGen.runScript())     // Error reporting handled within
-      return;
+   bool error = levelGen.runScript();      // Error reporting handled within
+
+   // Even if we had an error, continue on so we can process what does work -- this will make it more consistent with how the script will perform in-game.
+   // Though perhaps we should show an error to the user...
+   
+   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+
+   ui->reset();
+   ui->setTitle("SCRIPT ERROR");
+   ui->setMessage(2, "The levelgen script you ran threw an error.");
+   ui->setMessage(4, "See the console (press [/]) or the logfile for details.");
+   getUIManager()->activate(ui);
+
 
    // Process new items that need it (walls need processing so that they can render properly).
    // Items that need no extra processing will be kept as-is.
@@ -2304,12 +2315,12 @@ void EditorUserInterface::pasteSelection()
 }
 
 
-// Expand or contract selection by scale
+// Expand or contract selection by scale (i.e. resize)
 void EditorUserInterface::scaleSelection(F32 scale)
 {
    GridDatabase *database = getDatabase();
 
-   if(!anyItemsSelected(database) || scale < .01 || scale == 1)    // Apply some sanity checks
+   if(!anyItemsSelected(database) || scale < .01 || scale == 1)    // Apply some sanity checks; limits here are arbitrary
       return;
 
    saveUndoState();
@@ -2322,15 +2333,28 @@ void EditorUserInterface::scaleSelection(F32 scale)
    if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGame()->getGridSize())    // If walls get too big, they'll bog down the db
       return;
 
-   const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
+   bool modifiedWalls;
+   WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
+
+   wallSegmentManager->beginBatchGeomUpdate();
+
+   const Vector<DatabaseObject *> *objList = database->findObjects_fast();
 
    for(S32 i = 0; i < objList->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
       if(obj->isSelected())
+      {
          obj->scale(ctr, scale);
+         obj->onGeomChanged();
+
+         if(isWallType(obj->getObjectTypeNumber()))
+            modifiedWalls = true;
+      }
    }
+
+   wallSegmentManager->endBatchGeomUpdate(database, modifiedWalls);
 
    setNeedToSave(true);
    autoSave();

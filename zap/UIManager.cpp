@@ -577,9 +577,12 @@ void UIManager::clearPrevUIs()
 // Have to pass ui to avoid stack overflow when trying to render UIs two-levels deep
 void UIManager::renderPrevUI(const UserInterface *ui)
 {
-   for(S32 i = mPrevUIs.size() - 1; i > 0; i--)    // NOT >= 0!
-      if(mPrevUIs[i] == ui)
-         mPrevUIs[i-1]->render();
+   if(mPrevUIs.size() > 0)
+      mPrevUIs.last()->render();
+
+   //for(S32 i = mPrevUIs.size() - 1; i > 0; i--)    // NOT >= 0!
+   //   if(mPrevUIs[i] == ui)
+   //      mPrevUIs[i-1]->render();
 }
 
 
