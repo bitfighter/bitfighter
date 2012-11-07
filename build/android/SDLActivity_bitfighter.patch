@@ -1,6 +1,6 @@
---- SDLActivity.java.SDL	2012-08-30 11:15:50.710047939 -0600
-+++ SDLActivity.java	2012-10-02 02:11:20.689592382 -0600
-@@ -20,6 +20,7 @@ import android.hardware.*;
+--- SDLActivity.java.SDL	2012-11-06 18:52:36.218747531 -0700
++++ SDLActivity.java	2012-11-06 23:35:52.898702646 -0700
+@@ -24,6 +24,7 @@ import android.hardware.*;
  import android.content.*;
  
  import java.lang.*;
@@ -8,7 +8,7 @@
  
  
  /**
-@@ -51,9 +52,10 @@ public class SDLActivity extends Activit
+@@ -57,9 +58,10 @@ public class SDLActivity extends Activit
      // Load the .so
      static {
          System.loadLibrary("SDL2");

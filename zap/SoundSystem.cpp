@@ -1203,6 +1203,11 @@ void SoundSystem::playPrevTrack()
    // Do nothing
 }
 
+bool SoundSystem::isMusicPlaying()
+{
+   return false;
+}
+
 
 };
 
