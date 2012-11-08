@@ -244,19 +244,19 @@ bool LuaScriptRunner::loadScript()
 
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
 
-   if(!error)
+   if(error)
    {
-      // This is good... we want to be here.  There was no error!  Yay!
+      logError("%s -- Aborting.", lua_tostring(L, -1));
+
+      lua_pop(L, -1);       // Remove error message from stack
+
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-      return true;
+      return false;
    }
 
-   logError("%s -- Aborting.", lua_tostring(L, -1));
-
-   lua_pop(L, -1);       // Remove error message from stack
-
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-   return false;
+
+   return true;
 }
 
 
