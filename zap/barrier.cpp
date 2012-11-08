@@ -616,11 +616,9 @@ S32 WallItem::setWidth(lua_State *L)
 
 void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
 {
-   lua_getfield(L, LUA_ENVIRONINDEX, "plugin");
-   bool isPlugin = !lua_isnil(L, -1);
-   lua_pop(L, 1);    // Remove the value we just added from the stack
+   ScriptContext context = getScriptContext(L);
 
-   if(mAlreadyAdded && !isPlugin)
+   if(mAlreadyAdded && context == PluginContext)
    {
       const char *msg = "Can't modify a wall that's already been added to a game!";
       logprintf(LogConsumer::LogError, msg);
