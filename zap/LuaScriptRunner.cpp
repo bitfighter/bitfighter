@@ -246,6 +246,7 @@ bool LuaScriptRunner::loadScript()
 
    if(!error)
    {
+      // This is good... we want to be here.  There was no error!  Yay!
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
       return true;
    }
