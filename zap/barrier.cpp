@@ -616,18 +616,21 @@ S32 WallItem::setWidth(lua_State *L)
 
 void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
 {
-   ScriptContext context = getScriptContext(L);
-
-   if(mAlreadyAdded && context == PluginContext)
+   if(mAlreadyAdded)
    {
-      const char *msg = "Can't modify a wall that's already been added to a game!";
-      logprintf(LogConsumer::LogError, msg);
-      throw LuaException(msg);
+      ScriptContext context = getScriptContext(L);
+
+      if(context != PluginContext)     // Plugins can alter walls that are already in-game... levelgens cannot
+      {
+         const char *msg = "Can't modify a wall that's already been added to a game!";
+         logprintf(LogConsumer::LogError, msg);
+         throw LuaException(msg);
+      }
    }
 }
 
 
-// Lua method overrides.  Because walls are... special.
+// Some Lua method overrides.  Because walls are... special.
 
 S32 WallItem::setLoc(lua_State *L)
 {

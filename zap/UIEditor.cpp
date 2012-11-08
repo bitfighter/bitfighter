@@ -674,18 +674,21 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    // Load the items
    LuaLevelGenerator levelGen(name, args, getGame()->getGridSize(), database, getGame());
 
-   bool error = levelGen.runScript();      // Error reporting handled within
+   bool error = !levelGen.runScript();      // Error reporting handled within
 
-   // Even if we had an error, continue on so we can process what does work -- this will make it more consistent with how the script will perform in-game.
-   // Though perhaps we should show an error to the user...
-   
-   ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
+   if(error)
+   {
+      ErrorMessageUserInterface *ui = getUIManager()->getErrorMsgUserInterface();
 
-   ui->reset();
-   ui->setTitle("SCRIPT ERROR");
-   ui->setMessage(2, "The levelgen script you ran threw an error.");
-   ui->setMessage(4, "See the console (press [/]) or the logfile for details.");
-   getUIManager()->activate(ui);
+      ui->reset();
+      ui->setTitle("SCRIPT ERROR");
+      ui->setMessage(2, "The levelgen script you ran threw an error.");
+      ui->setMessage(4, "See the console (press [/]) or the logfile for details.");
+      getUIManager()->activate(ui);
+   }
+
+   // Even if we had an error, continue on so we can process what does work -- this will make it more consistent with how the script will 
+   // perform in-game.  Though perhaps we should show an error to the user...
 
 
    // Process new items that need it (walls need processing so that they can render properly).

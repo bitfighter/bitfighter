@@ -261,7 +261,7 @@ bool LuaScriptRunner::loadScript()
 
 
 // Don't forget to update the eventManager after running a robot's main function!
-// return false if failed
+// Returns false if failed
 bool LuaScriptRunner::runMain()
 {
    return runMain(mScriptArgs);
