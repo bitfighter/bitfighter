@@ -545,7 +545,7 @@ void WallItem::setSelected(bool selected)
 // Here to provide a valid signature in WallItem
 void WallItem::addToGame(Game *game, GridDatabase *database)
 {
-   checkIfHasBeenAddedToTheGame();
+   //checkIfHasBeenAddedToTheGame(NULL);
 
    Parent::addToGame(game, database);
 
@@ -604,7 +604,7 @@ S32 WallItem::getWidth(lua_State *L)
   */
 S32 WallItem::setWidth(lua_State *L)     
 { 
-   checkIfHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame(L);
 
    checkArgList(L, functionArgs, "WallItem", "setWidth");
 
@@ -614,9 +614,13 @@ S32 WallItem::setWidth(lua_State *L)
 }
 
 
-void WallItem::checkIfHasBeenAddedToTheGame()
+void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
 {
-   if(mAlreadyAdded)
+   lua_getfield(L, LUA_ENVIRONINDEX, "plugin");
+   bool isPlugin = !lua_isnil(L, -1);
+   lua_pop(L, 1);    // Remove the value we just added from the stack
+
+   if(mAlreadyAdded && !isPlugin)
    {
       const char *msg = "Can't modify a wall that's already been added to a game!";
       logprintf(LogConsumer::LogError, msg);
@@ -629,14 +633,14 @@ void WallItem::checkIfHasBeenAddedToTheGame()
 
 S32 WallItem::setLoc(lua_State *L)
 {
-   checkIfHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame(L);
    return Parent::setLoc(L);
 }
 
 
 S32 WallItem::setGeom(lua_State *L)
 {
-   checkIfHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame(L);
    return Parent::setGeom(L);
 }
 
@@ -824,8 +828,6 @@ S32 PolyWall::setGeom(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static S32 edgeCounter = 0;
-
 // Constructor
 WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database) 
 { 
@@ -836,8 +838,6 @@ WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database)
 
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallEdgeTypeNumber;
-
-   edgeCounter++; logprintf("Creating wallEdge...");
 }
 
 
@@ -846,9 +846,6 @@ WallEdge::~WallEdge()
 {
     // Make sure object is out of the database
    removeFromDatabase(); 
-
-   edgeCounter--;
-   logprintf("Wall edge instances outstanding: %d", edgeCounter);
 }
 
 

@@ -739,6 +739,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
 static void showPluginError(const ClientGame *game, const char *msg)
 {
    Vector<StringTableEntry> messages;
+   messages.push_back("");
    messages.push_back(string("This plugin encountered an error ") + msg + ".");
    messages.push_back("It has probably been misconfigured.");
    messages.push_back("");
@@ -784,6 +785,7 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    if(!mPluginRunner->prepareEnvironment() || !mPluginRunner->loadScript()) 
    {
       showPluginError(getGame(), "during loading");
+      mPluginRunner.reset();
       return;
    }
 
@@ -794,18 +796,21 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
    if(!plugin->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
    {
       onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
+      mPluginRunner.reset();
       return;     
    }
 
    if(error)
    {
       showPluginError(getGame(), "configuring its options menu.");
+      mPluginRunner.reset();
       return;
    }
 
    if(menuItems.size() == 0)                       // No menu items?  Let's run the script directly!
    {
       onPluginMenuClosed(Vector<string>());        // We'll use whatever args we already have
+      mPluginRunner.reset();
       return;
    }
 
@@ -844,9 +849,28 @@ void EditorUserInterface::onPluginMenuClosed(const Vector<string> &args)
 
    mPluginMenuValues[key] = args;
 
-   mPluginRunner->runMain(args);
+   if(!mPluginRunner->runMain(args))
+      showErrorRunningPluginMessage();
+
    rebuildEverything(getDatabase());
+
+   mPluginRunner.reset();
 }
+
+
+void EditorUserInterface::showErrorRunningPluginMessage()
+{
+   string pluginDir = getGame()->getSettings()->getFolderManager()->pluginDir;
+
+   Vector<StringTableEntry> messages;
+   messages.push_back("");
+   messages.push_back("");
+   messages.push_back("Error running plugin.");
+   messages.push_back("See the console (press [/]) or the logfile for details.");
+
+   getGame()->displayMessageBox("Plugin Error", "Press any key to return to the editor", messages);
+}
+
 
 
 void EditorUserInterface::showCouldNotFindScriptMessage(const string &scriptName)
@@ -870,6 +894,7 @@ static bool TeamListToString(string &output, Vector<bool> teamVector)
    string teamList;
    bool hasError = false;
    char buf[16];
+
    // Make sure each team has a spawn point
    for(S32 i = 0; i < (S32)teamVector.size(); i++)
       if(!teamVector[i])

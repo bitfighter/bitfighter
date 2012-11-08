@@ -125,8 +125,7 @@ protected:
    void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
 
-
-   // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
+// Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".
 // Basically sets the "bot", "levelgen", and "plugin" vars.
 template <class T>
 void setSelf(lua_State *L, T *self, const char *name)

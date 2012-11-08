@@ -139,7 +139,7 @@ class WallItem : public CentroidObject
 private:
    S32 mWidth;
    bool mAlreadyAdded;
-   void checkIfHasBeenAddedToTheGame();
+   void checkIfHasBeenAddedToTheGame(lua_State *L);
 
 public:
    WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
