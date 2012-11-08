@@ -56,7 +56,6 @@ typedef const char* ClassName;
 typedef map <ClassName, const LuaFunctionProfile *> ArgMap;      // Map of class name and arguments list, for documentation
 typedef pair<ClassName, vector<ClassName> > Node;
 
-
 class LuaBase
 {
 
@@ -97,12 +96,20 @@ public:
    };
 
 public:
+   enum ScriptContext {
+      RobotContext,
+      LevelgenContext,
+      PluginContext,
+      ConsoleContext,
+      ScriptContextCount,
+      UnknownContext
+   };
+
    LuaBase();     // Constuctor
    ~LuaBase();    // Destructor
 
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
    static void setfield (lua_State *L, const char *key, F32 value);
-
 
    // This doesn't really need to be virtual, but something here does, to allow dynamic_casting to occur... I picked
    // this one pretty much arbitrarily...  it won't be overridden.
@@ -149,6 +156,11 @@ public:
    static const char *getCheckedString(lua_State *L, S32 index, const char *methodName);
 
    static const char *getString(lua_State *L, S32 index, const char *defaultVal);
+
+   /////
+   // Script context
+   static ScriptContext getScriptContext(lua_State *L);
+   static void setScriptContext(lua_State *L, ScriptContext context);
 
    /////
    // Documenting and help

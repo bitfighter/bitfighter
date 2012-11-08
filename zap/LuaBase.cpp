@@ -751,6 +751,29 @@ void LuaBase::printLooseFunctions()
 }
 
 
+#define SCRIPT_CONTEXT_KEY "running_script_context"
+
+LuaBase::ScriptContext LuaBase::getScriptContext(lua_State *L)
+{
+   lua_getfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);
+   S32 context = lua_tointeger(L, -1);
+   lua_pop(L, 1);    // Remove the value we just added from the stack
+
+   // Bounds checking
+   if(context < 0 || context > ScriptContextCount)
+      return UnknownContext;
+
+   return (ScriptContext)context;
+}
+
+
+void LuaBase::setScriptContext(lua_State *L, ScriptContext context)
+{
+   lua_pushinteger(L, context);
+   lua_setfield(L, LUA_REGISTRYINDEX, SCRIPT_CONTEXT_KEY);     // Pops the int we just pushed from the stack
+}
+
+
 };
 
 
