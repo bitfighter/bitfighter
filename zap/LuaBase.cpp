@@ -407,7 +407,6 @@ bool LuaBase::dumpStack(lua_State* L, const char *msg)
  }
 
 
-
 // Pop integer off stack, check its type, do bounds checking, and return it
 lua_Integer LuaBase::getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
 {
