@@ -58,6 +58,28 @@ using namespace Zap;
 #define luaW_setregistry(L, s) \
      lua_setfield(L, LUA_REGISTRYINDEX, s)
 
+
+#if LUA_VERSION_NUM == 502
+#define luaL_reg luaL_Reg
+inline int luaL_register(lua_State* L, const char* name, const luaL_Reg table[])
+{
+    if (name)
+    {
+        luaL_newlibtable(L, table);
+        lua_pushvalue(L, -1);
+        lua_setglobal(L, name);
+    }
+    luaL_setfuncs(L, table, 0);
+    return 1;
+}
+
+inline int luaL_typerror(lua_State* L, int narg, const char* tname)
+{
+    const char *msg = lua_pushfstring((L), "%s expected, got %s", (tname), luaL_typename((L), (narg)));
+    return luaL_argerror((L), (narg), msg);
+}
+#endif
+
 #define LUAW_POSTCTOR_KEY "__postctor"
 #define LUAW_EXTENDS_KEY  "__extends"
 #define LUAW_STORAGE_KEY  "__storage"
@@ -66,8 +88,18 @@ using namespace Zap;
 #define LUAW_WRAPPER_KEY  "LuaWrapper"
 
 
+// A simple utility function to adjust a given index
+// Useful for when a parameter index needs to be adjusted
+// after pushing or popping things off the stack
+inline int luaW_correctindex(lua_State* L, int index, int correction)
+{
+    return index < 0 ? index - correction : index;
+}
+
+
 // Forward declaration
 template <class T> class LuaProxy;
+
 
 
 // These are the default allocator and deallocator. If you would prefer an
@@ -151,21 +183,31 @@ luaW_Userdata luaW_cast(const luaW_Userdata& obj)
     return luaW_Userdata(static_cast<U*>(static_cast<T*>(obj.data)), LuaWrapper<U>::cast);
 }
 
+template <typename T>
+inline void luaW_wrapperfield(lua_State* L, const char* field)
+{
+    luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... LuaWrapper
+    lua_getfield(L, -1, field); // ... LuaWrapper LuaWrapper.field
+    lua_remove(L, -2); // ... LuaWrapper LuaWrapper.field
+}
+
 // Analogous to lua_is(boolean|string|*)
 //
 // Returns 1 if the value at the given acceptable index is of type T (or if
 // strict is false, convertable to type T) and 0 otherwise.
+//
+// Stack should have two elements: a userdata and a function name (e.g. -- <userdata> 'getRad')
 template <typename T>
 bool luaW_is(lua_State *L, int index, bool strict = false)
 {
     bool equal = false;// lua_isnil(L, index);
-// Here we have stack: userdata, 'getRad'
     if (!equal && lua_isuserdata(L, index) && lua_getmetatable(L, index))
     {
         // ... ud ... udmt
         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... ud ... udmt Tmt
 
         equal = lua_rawequal(L, -1, -2);     // Compare udmt and Tmt
+
         if (!equal && !strict)
         {
             lua_getfield(L, -2, LUAW_EXTENDS_KEY); // ... ud ... udmt Tmt udmt.extends
@@ -273,8 +315,8 @@ bool luaW_hold(lua_State* L, T* obj);
 // Analogous to lua_push(boolean|string|*)
 //
 // Pushes a userdata of type T onto the stack. If this object already exists in
-// the Lua environment, it will assign the existing store to it. Otherwise, a
-// new storage table will be created for it.
+// the Lua environment, it will assign the existing storage table to it.
+// Otherwise, a new storage table will be created for it.
 template <typename T>
 void luaW_push(lua_State* L, T* obj)
 {
@@ -383,16 +425,24 @@ bool luaW_hold(lua_State* L, T* obj)
 //
 // This function takes the index of the identifier for an object rather than
 // the object itself. This is because needs to be able to run after the object
-// has already been deallocated.
+// has already been deallocated. A wrapper is provided for when it is more
+// convenient to pass in the object directly.
 template <typename T>
 void luaW_release(lua_State* L, int index)
 {
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... id ... LuaWrapper
-    lua_getfield(L, -1, LUAW_HOLDS_KEY); // ... id ... LuaWrapper LuaWrapper.holds
-    lua_pushvalue(L, (index>0) ? index : index-2); // ... id ... LuaWrapper LuaWrapper.holds id
-    lua_pushnil(L); // ... id ... LuaWrapper LuaWrapper.holds id nil
-    lua_settable(L, -3); // ... id ... LuaWrapper LuaWrapper.holds
-    lua_pop(L, 2); // ... id ...
+    luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // ... id ... holds
+    lua_pushvalue(L, luaW_correctindex(L, index, 1)); // ... id ... holds id
+    lua_pushnil(L); // ... id ... holds id nil
+    lua_settable(L, -3); // ... id ... holds
+    lua_pop(L, 1); // ... id ...
+}
+
+template <typename T>
+void luaW_release(lua_State* L, T* obj)
+{
+    LuaWrapper<T>::identifier(L, obj); // ... id
+    luaW_release<T>(L, -1); // ... id
+    lua_pop(L, 1); // ...
 }
 
 // When luaW_clean is called on an object, values stored on it's Lua store
@@ -400,16 +450,24 @@ void luaW_release(lua_State* L, int index)
 //
 // This function takes the index of the identifier for an object rather than
 // the object itself. This is because needs to be able to run after the object
-// has already been deallocated.
+// has already been deallocated. A wrapper is provided for when it is more
+// convenient to pass in the object directly
 template <typename T>
 void luaW_clean(lua_State* L, int index)
 {
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... id ... LuaWrapper
-    lua_getfield(L, -1, LUAW_STORAGE_KEY); // ... id ... LuaWrapper LuaWrapper.storage
-    lua_pushvalue(L, (index>0) ? index : index-2); // ... id ... LuaWrapper LuaWrapper.storage id
-    lua_pushnil(L); // ... id ... LuaWrapper LuaWrapper.storage id nil
-    lua_settable(L, -3);  // ... id ... LuaWrapper LuaWrapper.store
-    lua_pop(L, 2); // ... id ...
+    luaW_wrapperfield<T>(L, LUAW_STORAGE_KEY); // ... id ... storage
+    lua_pushvalue(L, luaW_correctindex(L, index, 1)); // ... id ... storage id
+    lua_pushnil(L); // ... id ... storage id nil
+    lua_settable(L, -3);  // ... id ... store
+    lua_pop(L, 1); // ... id ...
+}
+
+template <typename T>
+void luaW_clean(lua_State* L, T* obj)
+{
+    LuaWrapper<T>::identifier(L, obj); // ... id
+    luaW_clean<T>(L, -1); // ... id
+    lua_pop(L, 1); // ...
 }
 
 // This function is called from Lua, not C++
@@ -524,22 +582,21 @@ int luaW_build(lua_State* L)
 // individual userdata can be treated as a table, and can hold thier own
 // values.
 template <typename T>
-int luaW__index(lua_State* L)
+int luaW_index(lua_State* L)
 {
     // obj key
     T* obj = luaW_to<T>(L, 1);
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // obj key LuaWrapper
-    lua_getfield(L, -1, LUAW_STORAGE_KEY); // obj key LuaWrapper LuaWrapper.storage
-    LuaWrapper<T>::identifier(L, obj); // obj key LuaWrapper LuaWrapper.storage id
-    lua_rawget(L, -2); // obj key LuaWrapper LuaWrapper.storage store
+    luaW_wrapperfield<T>(L, LUAW_STORAGE_KEY); // obj key storage
+    LuaWrapper<T>::identifier(L, obj); // obj key storage id
+    lua_gettable(L, -2); // obj key storage store
     if (!lua_isnoneornil(L, -1))
     {
-        lua_pushvalue(L, -4); // obj key LuaWrapper LuaWrapper.storage store key
-        lua_gettable(L, -2); // obj key LuaWrapper LuaWrapper.storage store store[k]
+        lua_pushvalue(L, -3); // obj key storage store key
+        lua_gettable(L, -2); // obj key storage store store[k]
     }
     else
     {
-        lua_pop(L, 3); // obj key
+        lua_pop(L, 2); // obj key
         lua_getmetatable(L, -2); // obj key mt
         lua_pushvalue(L, -2); // obj key mt k
         lua_gettable(L, -2); // obj key mt mt[k]
@@ -555,19 +612,18 @@ int luaW__index(lua_State* L)
 // individual userdata can be treated as a table, and can hold thier own
 // values.
 template <typename T>
-int luaW__newindex(lua_State* L)
+int luaW_newindex(lua_State* L)
 {
     // obj key value
     T* obj = luaW_to<T>(L, 1);
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // obj key value LuaWrapper
-    lua_getfield(L, -1, LUAW_STORAGE_KEY); // obj key value LuaWrapper LuaWrapper.storage
-    LuaWrapper<T>::identifier(L, obj); // obj key value LuaWrapper LuaWrapper.storage id
-    lua_rawget(L, -2); // obj key value LuaWrapper LuaWrapper.storage store
+    luaW_wrapperfield<T>(L, LUAW_STORAGE_KEY); // obj key value storage
+    LuaWrapper<T>::identifier(L, obj); // obj key value storage id
+    lua_gettable(L, -2); // obj key value storage store
     if (!lua_isnoneornil(L, -1))
     {
-        lua_pushvalue(L, -5); // obj key value LuaWrapper LuaWrapper.storage store key
-        lua_pushvalue(L, -5); // obj key value LuaWrapper LuaWrapper.storage store key value
-        lua_rawset(L, -3); // obj key value LuaWrapper LuaWrapper.storage store
+        lua_pushvalue(L, -4); // obj key value storage store key
+        lua_pushvalue(L, -4); // obj key value storage store key value
+        lua_settable(L, -3); // obj key value storage store
     }
     return 0;
 }
@@ -578,7 +634,7 @@ int luaW__newindex(lua_State* L)
 // count is decremented and if this is the final reference to the userdata its
 // environment table is nil'd and pointer deleted with the destructor callback.
 template <typename T>
-int luaW__gc(lua_State* L)
+int luaW_gc(lua_State* L)
 {
     // See if object is a proxy, which it most likely will be
     LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
@@ -598,21 +654,20 @@ int luaW__gc(lua_State* L)
     TNLAssert(obj, "Obj is NULL!");
     // If obj is NULL here, it may have been deleted from the C++ side already
     LuaWrapper<T>::identifier(L, obj); // obj id
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // obj id LuaWrapper
-    lua_getfield(L, -1, LUAW_COUNT_KEY); // obj id LuaWrapper LuaWrapper.counts
-    LuaWrapper<T>::identifier(L, obj); // obj id LuaWrapper LuaWrapper.counts id
-    lua_gettable(L, -2); // obj id LuaWrapper LuaWrapper.counts count
-    int count = (int) lua_tointeger(L, -1);
-    lua_pushvalue(L, 2); // obj id LuaWrapper LuaWrapper.counts count id
-    lua_pushinteger(L, --count); // obj id LuaWrapper LuaWrapper.counts count id count-1
-    lua_settable(L, -4); // obj id LuaWrapper LuaWrapper.counts count
+    luaW_wrapperfield<T>(L, LUAW_COUNT_KEY); // obj id counts
+    lua_pushvalue(L, 2); // obj id counts id
+    lua_gettable(L, -2); // obj id counts count
+    int count = lua_tointeger(L, -1) - 1;
+    lua_pushvalue(L, 2); // obj id counts count id
+    lua_pushinteger(L, count); // obj id counts count id count-1
+    lua_settable(L, -4); // obj id counts count
 
-    if (obj && count == 0)
+    if (obj && 0 == count)
     {
-        lua_getfield(L, 3, LUAW_HOLDS_KEY); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds
-        lua_pushvalue(L, 2); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds id
-        lua_gettable(L, -2); // obj id LuaWrapper LuaWrapper.counts LuaWrapper.holds hold
-        if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator && !proxy->isDefunct())
+        luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // obj id counts count holds
+        lua_pushvalue(L, 2); // obj id counts count holds id
+        lua_gettable(L, -2); // obj id counts count holds hold
+        if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator)
         {
             LuaWrapper<T>::deallocator(L, obj);
         }
@@ -662,7 +717,7 @@ void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, c
 #endif
         { NULL, NULL }
     };
-    const luaL_reg defaultmetatable[] = { { "__index", luaW__index<T> }, { "__newindex", luaW__newindex<T> }, { "__gc", luaW__gc<T> }, { NULL, NULL } };
+    const luaL_reg defaultmetatable[] = { { "__index", luaW_index<T> }, { "__newindex", luaW_newindex<T> }, { "__gc", luaW_gc<T> }, { NULL, NULL } };
     const luaL_reg emptytable[] = { { NULL, NULL } };
 
     table = table ? table : emptytable;
@@ -673,13 +728,13 @@ void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, c
     if (lua_isnil(L, -1))
     {
         lua_newtable(L); // nil {}
-        luaW_setregistry(L, LUAW_WRAPPER_KEY); // nil
-        luaW_getregistry(L, LUAW_WRAPPER_KEY); // nil LuaWrapper
+        lua_pushvalue(L, -1); // nil {} {}
+        luaW_setregistry(L, LUAW_WRAPPER_KEY); // nil LuaWrapper
         lua_newtable(L); // nil LuaWrapper {}
         lua_setfield(L, -2, LUAW_COUNT_KEY); // nil LuaWrapper
-        lua_newtable(L); // nil LuaWrapper {}
+        lua_newtable(L); // LuaWrapper nil {}
         lua_setfield(L, -2, LUAW_STORAGE_KEY); // nil LuaWrapper
-        lua_newtable(L); // nil LuaWrapper {}
+        lua_newtable(L); // LuaWrapper {}
         lua_setfield(L, -2, LUAW_HOLDS_KEY); // nil LuaWrapper
         lua_pop(L, 1); // nil
     }
@@ -748,6 +803,11 @@ void luaW_extend(lua_State* L)
 
 #undef luaW_getregistry
 #undef luaW_setregistry
+
+
+#if LUA_VERSION_NUM == 502
+#undef luaL_reg
+#endif
 
 extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
                            const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);

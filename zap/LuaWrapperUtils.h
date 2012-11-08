@@ -19,11 +19,6 @@
 
 #include "LuaWrapper.hpp"
 
-inline int luaU_correctindex(lua_State* L, int index, int correction)
-{
-    return index < 0 ? index - correction : index;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // A set if enum helper functions and macros
@@ -31,22 +26,28 @@ inline int luaU_correctindex(lua_State* L, int index, int correction)
 //
 
 template <typename T>
-void luaU_pushenum(lua_State* L, int index, const char* key, T value)
+void luaU_setenum(lua_State* L, int index, const char* key, T value)
 {
-    lua_pushnumber(L, value);
-    lua_setfield(L, luaU_correctindex(L, index, 1), key);
+    lua_pushnumber(L, static_cast<int>(value));
+    lua_setfield(L, luaW_correctindex(L, index, 1), key);
 }
 
 template <typename T>
 T luaU_toenum(lua_State* L, int index)
 {
-    return (T)lua_tointeger(L, index);
+    return static_cast<T>(lua_tointeger(L, index));
+}
+
+template <typename T>
+void luaU_pushenum(lua_State* L, T value)
+{
+    lua_pushnumber(L, static_cast<int>(value));
 }
 
 template <typename T>
 T luaU_checkenum(lua_State* L, int index)
 {
-    return (T)luaL_checkinteger(L, index);
+    return static_cast<T>(luaL_checkinteger(L, index));
 }
 
 template <typename T>
@@ -62,6 +63,10 @@ T* luaU_checkornil(lua_State* L, int index, bool strict = false)
 //
 // A set of templated luaL_check and lua_push functions for use in the getters
 // and setters below
+//
+// It is often useful to override luaU_check, luaU_to and/or luaU_push to
+// operate on your own simple types rather than register your type with
+// LuaWrapper, especially with small objects.
 //
 
 template <typename U> U luaU_check(lua_State* L, int index);
@@ -109,10 +114,19 @@ inline U luaU_getfield(lua_State* L, int index, const char* field)
 }
 
 template <typename U>
+inline U luaU_checkfield(lua_State* L, int index, const char* field)
+{
+    lua_getfield(L, index, field);
+    U val = luaU_check<U>(L, -1);
+    lua_pop(L, 1);
+    return val;
+}
+
+template <typename U>
 inline void luaU_setfield(lua_State* L, int index, const char* field, U val)
 {
     luaU_push<U>(L, val);
-    lua_setfield(L, luaU_correctindex(L, index, 1), field);
+    lua_setfield(L, luaW_correctindex(L, index, 1), field);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,6 +154,7 @@ inline void luaU_setfield(lua_State* L, int index, const char* field, U val)
 //     { "GetBar", luaU_get<Foo, bool, &Widget::GetBar> },
 //     { "SetBar", luaU_set<Foo, bool, &Widget::SetBar> },
 //     { "Bar", luaU_getset<Foo, bool, &Widget::GetBar, &Widget::SetBar> },
+//     { NULL, NULL }
 // }
 //
 // Getters and setters must have the following signatures:
@@ -212,12 +227,31 @@ int luaU_set(lua_State* L)
     return 0;
 }
 
-template <typename T, typename U, U* T::*Member>
+template <typename T, typename U, U* T::*Member, bool release = false>
 int luaU_set(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
     if (obj)
-        obj->*Member = luaU_checkornil<U>(L, 2);
+    {
+        U* member = luaU_checkornil<U>(L, 2);
+        obj->*Member = member;
+        if (member && release)
+            luaW_release<U>(L, member);
+    }
+    return 0;
+}
+
+template <typename T, typename U, const U* T::*Member, bool release = false>
+int luaU_set(lua_State* L)
+{
+    T* obj = luaW_check<T>(L, 1);
+    if (obj)
+    {
+        U* member = luaU_checkornil<U>(L, 2);
+        obj->*Member = member;
+        if (member && release)
+            luaW_release<U>(L, member);
+    }
     return 0;
 }
 
@@ -239,12 +273,17 @@ int luaU_set(lua_State* L)
     return 0;
 }
 
-template <typename T, typename U, void (T::*Setter)(U*)>
+template <typename T, typename U, void (T::*Setter)(U*), bool release = false>
 int luaU_set(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
     if (obj)
-        (obj->*Setter)(luaU_checkornil<U>(L, 2));
+    {
+        U* member = luaU_checkornil<U>(L, 2);
+        (obj->*Setter)(member);
+        if (member && release)
+            luaW_release<U>(L, member);
+    }
     return 0;
 }
 
@@ -264,13 +303,16 @@ int luaU_getset(lua_State* L)
     }
 }
 
-template <typename T, typename U, U* T::*Member>
+template <typename T, typename U, U* T::*Member, bool release = false>
 int luaU_getset(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
     if (obj && lua_gettop(L) >= 2)
     {
-        obj->*Member = luaU_checkornil<U>(L, 2);
+        U* member = luaU_checkornil<U>(L, 2);
+        obj->*Member = member;
+        if (member && release)
+            luaW_release<U>(L, member);
         return 0;
     }
     else
@@ -328,13 +370,16 @@ int luaU_getset(lua_State* L)
     }
 }
 
-template <typename T, typename U, U* (T::*Getter)() const, void (T::*Setter)(U*)>
+template <typename T, typename U, U* (T::*Getter)() const, void (T::*Setter)(U*), bool release = false>
 int luaU_getset(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
     if (obj && lua_gettop(L) >= 2)
     {
-        (obj->*Setter)(luaU_checkornil<U>(L, 2));
+        U* member = luaU_checkornil<U>(L, 2);
+        (obj->*Setter)(member);
+        if (member && release)
+            luaW_release<U>(L, member);
         return 0;
     }
     else
@@ -343,6 +388,62 @@ int luaU_getset(lua_State* L)
         return 1;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// luaU_func is a special macro that expands into a simple function wrapper.
+// Unlike the getter setters above, you merely need to name the function you
+// would like to wrap. 
+//
+// For example, 
+//
+// struct Foo
+// {
+//     int DoSomething(int, const char*);
+// };
+//
+// static luaL_reg Foo_Metatable[] =
+// {
+//     { "DoSomething", luaU_func(&Foo::DoSomething) },
+//     { NULL, NULL }
+// }
+//
+// This macro will expand based on the function signature of Foo::DoSomething
+// In this example, it would expand into the following wrapper:
+//
+//     luaU_push(luaW_check<T>(L, 1)->DoSomething(luaU_check<int>(L, 2), luaU_check<const char*>(L, 3)));
+//     return 1;
+//
+// This macro and it's underlying templates are somewhat experimental and some
+// refinements are probably needed.  There are cases where it does not
+// currently work and I expect some changes can be made to refine its behavior.
+//
+
+#define luaU_func(...) &luaU_FuncWrapper<decltype(__VA_ARGS__),__VA_ARGS__>::call
+
+template<int... ints> struct luaU_IntPack {};
+template<int start, int count, int... tail> struct luaU_MakeIntRangeType { typedef typename luaU_MakeIntRangeType<start, count-1, start+count-1, tail...>::type type; };
+template<int start, int... tail> struct luaU_MakeIntRangeType<start, 0, tail...> { typedef luaU_IntPack<tail...> type; };
+template<int start, int count> inline typename luaU_MakeIntRangeType<start, count>::type luaU_makeIntRange() { return typename luaU_MakeIntRangeType<start, count>::type(); }
+template<class MemFunPtrType, MemFunPtrType MemberFunc> struct luaU_FuncWrapper;
+
+template<class T, class ReturnType, class... Args, ReturnType(T::*MemberFunc)(Args...)>
+struct luaU_FuncWrapper<ReturnType(T::*)(Args...), MemberFunc>
+{
+public:
+    static int call(lua_State* L)
+    {
+        return callImpl(L,luaU_makeIntRange<2,sizeof...(Args)>());
+    }
+
+private:
+    template<int... indices>
+    static int callImpl(lua_State* L, luaU_IntPack<indices...>)
+    {
+        luaU_push<ReturnType>(L, (luaW_check<T>(L, 1)->*MemberFunc)(luaU_check<Args>(L, indices)...));
+        return 1;
+    }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
