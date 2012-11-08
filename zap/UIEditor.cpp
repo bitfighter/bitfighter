@@ -4707,8 +4707,8 @@ void quitEditorCallback(ClientGame *game, U32 unused)
       ui->reset();
       ui->setInstr("Press [Y] to save, [N] to quit [ESC] to cancel");
       ui->setTitle("SAVE YOUR EDITS?");
-      ui->setMessage(1, "You have not saved your edits to the level.");
-      ui->setMessage(3, "Do you want to?");
+      ui->setMessage(2, "You have not saved your edits to the level.");
+      ui->setMessage(4, "Do you want to?");
       ui->registerYesFunction(saveLevelCallback);
       ui->registerNoFunction(backToMainMenuCallback);
 
