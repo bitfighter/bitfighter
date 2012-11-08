@@ -166,7 +166,7 @@ public:
 
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
-   bool loadAndRunGlobalFunction(lua_State *L, const char *key);
+   bool loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context);
 
    void logError(const char *format, ...);
 

@@ -306,7 +306,7 @@ bool LuaLevelGenerator::prepareEnvironment()
    if(!LuaScriptRunner::prepareEnvironment())
       return false;
 
-   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, LevelgenContext) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
       return false;
 
    setSelf(L, this, "levelgen");

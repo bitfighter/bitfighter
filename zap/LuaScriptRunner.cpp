@@ -161,11 +161,13 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
-bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key)
+bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
    setEnvironment();                            // Set the environment for the code
    S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                 -- <<empty stack>>
+
+   setScriptContext(L, context);
 
    if(err != 0)
    {

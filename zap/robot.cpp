@@ -202,7 +202,7 @@ bool Robot::prepareEnvironment()
       // Push a pointer to this Robot to the Lua stack, then set the name of this pointer in the protected environment.  
       // This is the name that we'll use to refer to this robot from our Lua code.  
 
-      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY))
+      if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, RobotContext) || !loadAndRunGlobalFunction(L, ROBOT_HELPER_FUNCTIONS_KEY, RobotContext))
          return false;
 
       setSelf(L, this, "bot");

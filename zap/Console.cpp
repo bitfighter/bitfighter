@@ -89,7 +89,7 @@ bool Console::prepareEnvironment()
    if(!Parent::prepareEnvironment())
       return false;
 
-   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY))
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, ConsoleContext) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, ConsoleContext))
       return false;
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
