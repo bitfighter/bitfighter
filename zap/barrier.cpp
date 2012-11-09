@@ -545,8 +545,6 @@ void WallItem::setSelected(bool selected)
 // Here to provide a valid signature in WallItem
 void WallItem::addToGame(Game *game, GridDatabase *database)
 {
-   //checkIfHasBeenAddedToTheGame(NULL);
-
    Parent::addToGame(game, database);
 
    // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
@@ -751,8 +749,6 @@ void PolyWall::onGeomChanged()
 
 void PolyWall::addToGame(Game *game, GridDatabase *database)
 {
-   checkIfHasBeenAddedToTheGame();
-
    Parent::addToGame(game, database);
 
    // Convert the wallItem in to a wallRec, an abbreviated form of wall that represents both regular walls and polywalls, and 
@@ -798,14 +794,20 @@ const char *PolyWall::luaClassName = "PolyWall";
 REGISTER_LUA_SUBCLASS(PolyWall, BfObject);
 
 
-void PolyWall::checkIfHasBeenAddedToTheGame()
+void PolyWall::checkIfHasBeenAddedToTheGame(lua_State *L)
 {
    if(mAlreadyAdded)
    {
-      const char *msg = "Can't modify a PolyWall that's already been added to a game!";
-      logprintf(LogConsumer::LogError, msg);
-      throw LuaException(msg);
+      ScriptContext context = getScriptContext(L);
+
+      if(context != PluginContext)     // Plugins can alter walls that are already in-game... levelgens cannot
+      {
+         const char *msg = "Can't modify a PolyWall that's already been added to a game!";
+         logprintf(LogConsumer::LogError, msg);
+         throw LuaException(msg);
+      }
    }
+
 }
 
 
@@ -813,14 +815,14 @@ void PolyWall::checkIfHasBeenAddedToTheGame()
 
 S32 PolyWall::setLoc(lua_State *L)
 {
-   checkIfHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame(L);
    return Parent::setLoc(L);
 }
 
 
 S32 PolyWall::setGeom(lua_State *L)
 {
-   checkIfHasBeenAddedToTheGame();
+   checkIfHasBeenAddedToTheGame(L);
    return Parent::setGeom(L);
 }
 

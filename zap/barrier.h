@@ -213,7 +213,7 @@ class PolyWall : public PolygonObject
 
 private:
    bool mAlreadyAdded;
-   void checkIfHasBeenAddedToTheGame();
+   void checkIfHasBeenAddedToTheGame(lua_State *L);
 
 public:
    PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
