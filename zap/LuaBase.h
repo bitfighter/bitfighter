@@ -97,10 +97,10 @@ public:
 
 public:
    enum ScriptContext {
-      RobotContext,
-      LevelgenContext,
-      PluginContext,
-      ConsoleContext,
+      RobotContext,        // When a robot is running (usually during the init phase)
+      LevelgenContext,     // When a levelgen is running (usually during the init phase)
+      PluginContext,       // When a plugin runs
+      ConsoleContext,      // For code running from the console
       ScriptContextCount,
       UnknownContext
    };

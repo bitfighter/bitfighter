@@ -173,7 +173,7 @@ bool Robot::start()
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
-   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent, true);
+   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent, RobotContext, true);
 
    mSubscriptions[EventManager::TickEvent] = true;
 
@@ -720,7 +720,7 @@ const char *Robot::luaClassName = "Robot";
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
 
-S32 Robot::subscribe(lua_State *L)   { return doSubscribe(L);   }
+S32 Robot::subscribe(lua_State *L)   { return doSubscribe(L, RobotContext);   }
 S32 Robot::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 

@@ -28,7 +28,8 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
-#include "lua.h"
+#include "LuaBase.h"    // For ScriptContext def
+//#include "lua.h"
 
 using namespace TNL;
 
@@ -39,6 +40,8 @@ class Robot;
 class Ship;
 class LuaPlayerInfo;
 class Zone;
+
+struct Subscription; 
 
 class EventManager
 {
@@ -82,8 +85,9 @@ private:
    void removeFromPendingSubscribeList(const char *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(const char *subscriber, EventType eventType);
 
-   void handleEventFiringError(lua_State *L, const char *subscriber, EventType eventType, const char *errorMsg);
-
+   void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
+   void fire(lua_State *L, S32 argCount, LuaBase::ScriptContext context);
+      
    bool mIsPaused;
    S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
    static bool mConstructed;
@@ -97,15 +101,15 @@ public:
    static EventManager *get();         // Provide access to the single EventManager instance
    bool suppressEvents(EventType eventType);
 
-   static Vector<const char *> subscriptions[EventTypes];
-   static Vector<const char *> pendingSubscriptions[EventTypes];
+   static Vector<Subscription> subscriptions[EventTypes];
+   static Vector<Subscription> pendingSubscriptions[EventTypes];
    static Vector<const char *> pendingUnsubscriptions[EventTypes];
    static bool anyPending;
 
-   void subscribe(const char *subscriber, EventType eventType, bool failSilently = false);
+   void subscribe(const char *subscriber, EventType eventType, LuaBase::ScriptContext context, bool failSilently = false);
    void unsubscribe(const char *subscriber, EventType eventType);
-   void unsubscribeImmediate(const char *, EventType eventType);     // Used when bot dies, and we know there won't be subscription conflicts
-   void update();                                                    // Act on events sitting in the pending lists
+   void unsubscribeImmediate(const char *, EventType eventType);    // Used when bot dies, and we know there won't be subscription conflicts
+   void update();                                                   // Act on events sitting in the pending lists
 
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);

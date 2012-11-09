@@ -369,7 +369,7 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
 };
 
 
-S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L);   }
+S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L, LevelgenContext);   }
 S32 LuaLevelGenerator::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 

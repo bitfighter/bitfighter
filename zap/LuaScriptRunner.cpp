@@ -592,13 +592,13 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 
 
 // These will be implemented by children classes, and will funnel back to the doSubscribe and doUnscubscribe methods below
-S32 LuaScriptRunner::doSubscribe(lua_State *L)   
+S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)   
 { 
    lua_Integer eventType = getInt(L, -1);
 
    if(!mSubscriptions[eventType])
    {
-      EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType);
+      EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType, context);
       mSubscriptions[eventType] = true;
    }
 
