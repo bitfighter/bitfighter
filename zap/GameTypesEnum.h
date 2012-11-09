@@ -32,22 +32,22 @@ namespace Zap
  * @luaenum GameType(1,2)
  * The GameType enum represets the different types of game.
  */
-//                 Enum               GameType              GameType Name                      
+//                 Enum               GameType             LuaEnum     GameType Name                      
 #define GAME_TYPE_TABLE \
-   GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch"         ) \
-   GAME_TYPE_ITEM( CTFGame,         "CTFGameType",         "Capture the Flag" ) \
-   GAME_TYPE_ITEM( HTFGame,         "CoreGameType",        "Hold the Flag"    ) \
-   GAME_TYPE_ITEM( NexusGame,       "HTFGameType",         "Nexus"            ) \
-   GAME_TYPE_ITEM( RabbitGame,      "NexusGameType",       "Rabbit"           ) \
-   GAME_TYPE_ITEM( RetrieveGame,    "RabbitGameType",      "Retrieve"         ) \
-   GAME_TYPE_ITEM( SoccerGame,      "RetrieveGameType",    "Soccer"           ) \
-   GAME_TYPE_ITEM( ZoneControlGame, "SoccerGameType",      "Zone Control"     ) \
-   GAME_TYPE_ITEM( CoreGame,        "ZoneControlGameType", "Core"             ) \
+   GAME_TYPE_ITEM( BitmatchGame,    "GameType",            "Bitmatch", "Bitmatch"         ) \
+   GAME_TYPE_ITEM( CTFGame,         "CTFGameType",         "CTF",      "Capture the Flag" ) \
+   GAME_TYPE_ITEM( HTFGame,         "CoreGameType",        "HTF",      "Hold the Flag"    ) \
+   GAME_TYPE_ITEM( NexusGame,       "HTFGameType",         "Nexus",    "Nexus"            ) \
+   GAME_TYPE_ITEM( RabbitGame,      "NexusGameType",       "Rabbit",   "Rabbit"           ) \
+   GAME_TYPE_ITEM( RetrieveGame,    "RabbitGameType",      "Retrieve", "Retrieve"         ) \
+   GAME_TYPE_ITEM( SoccerGame,      "RetrieveGameType",    "Soccer",   "Soccer"           ) \
+   GAME_TYPE_ITEM( ZoneControlGame, "SoccerGameType",      "ZC",       "Zone Control"     ) \
+   GAME_TYPE_ITEM( CoreGame,        "ZoneControlGameType", "Core",     "Core"             ) \
 
 
    // Define an enum from the first column of GAME_TYPE_TABLE
    enum GameTypeId {
-#  define GAME_TYPE_ITEM(enumValue, b, c) enumValue,
+#  define GAME_TYPE_ITEM(enumValue, b, c, d) enumValue,
        GAME_TYPE_TABLE
 #  undef GAME_TYPE_ITEM
        NoGameType,

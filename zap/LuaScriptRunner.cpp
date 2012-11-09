@@ -854,48 +854,48 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
 {
-   // Object types -- only push those with shareWithLua set to true
-#  define TYPE_NUMBER(value, shareWithLua, name, d)   if(shareWithLua)  {           \
-                                                         lua_pushinteger(L, value); \
-                                                         lua_setglobal  (L, name);  \
-                                                   }
-       TYPE_NUMBER_TABLE
-#  undef TYPE_NUMBER
-
-
-   // Module enums -- push all, using enum name as the Lua name
-#  define MODULE_ITEM(name, b, c, d, e, f, g, h, i)  setEnum(name); 
-      MODULE_ITEM_TABLE
-#  undef MODULE_ITEM
-
-
-   // Old school
-#  define WEAPON_ITEM(name, b, c, d, e, f, g, h, i, j, k, l)  setEnum(name) 
-      WEAPON_ITEM_TABLE
-#  undef WEAPON_ITEM
-
-   // Game Types
-#  define GAME_TYPE_ITEM(name, b, c)  setEnum(name);
-       GAME_TYPE_TABLE
-#  undef GAME_TYPE_ITEM
-
-   // Scoring Events
-#  define SCORING_EVENT_ITEM(name, b)  lua_pushinteger(L, GameType::name); \
-                                       lua_setglobal  (L, #name);
-      SCORING_EVENT_TABLE
-#  undef SCORING_EVENT_ITEM
-
-   // Event handler events
-#  define EVENT(name, b, c) lua_pushinteger(L, EventManager::name); \
-                            lua_setglobal  (L, #name);
-      EVENT_TABLE
-#  undef EVENT
-
-   setEnum(EngineeredTurret);
-   setEnum(EngineeredForceField);
-   setEnum(EngineeredTeleporterEntrance);
-   setEnum(EngineeredTeleporterExit);
-   
+//   // Object types -- only push those with shareWithLua set to true
+//#  define TYPE_NUMBER(value, shareWithLua, name, d)   if(shareWithLua)  {           \
+//                                                         lua_pushinteger(L, value); \
+//                                                         lua_setglobal  (L, name);  \
+//                                                   }
+//       TYPE_NUMBER_TABLE
+//#  undef TYPE_NUMBER
+//
+//
+//   // Module enums -- push all, using enum name as the Lua name
+//#  define MODULE_ITEM(name, b, c, d, e, f, g, h, i)  setEnum(name); 
+//      MODULE_ITEM_TABLE
+//#  undef MODULE_ITEM
+//
+//
+//   // Old school
+//#  define WEAPON_ITEM(name, b, c, d, e, f, g, h, i, j, k, l)  setEnum(name) 
+//      WEAPON_ITEM_TABLE
+//#  undef WEAPON_ITEM
+//
+//   // Game Types
+//#  define GAME_TYPE_ITEM(name, b, c)  setEnum(name);
+//       GAME_TYPE_TABLE
+//#  undef GAME_TYPE_ITEM
+//
+//   // Scoring Events
+//#  define SCORING_EVENT_ITEM(name, b)  lua_pushinteger(L, GameType::name); \
+//                                       lua_setglobal  (L, #name);
+//      SCORING_EVENT_TABLE
+//#  undef SCORING_EVENT_ITEM
+//
+//   // Event handler events
+//#  define EVENT(name, b, c) lua_pushinteger(L, EventManager::name); \
+//                            lua_setglobal  (L, #name);
+//      EVENT_TABLE
+//#  undef EVENT
+//
+//   setEnum(EngineeredTurret);
+//   setEnum(EngineeredForceField);
+//   setEnum(EngineeredTeleporterEntrance);
+//   setEnum(EngineeredTeleporterExit);
+//   
 
    //////////////////// TODO: Delete the above, and rely on the below
 
@@ -904,7 +904,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // New way
 
    // Object types -- only push those with shareWithLua set to true
-   add_enum_to_lua(L, "ObjectType",
+   add_enum_to_lua(L, "ObjType",
    #  define TYPE_NUMBER(value, shareWithLua, luaEnumName, d)   luaEnumName, shareWithLua, value,
           TYPE_NUMBER_TABLE
    #  undef TYPE_NUMBER
@@ -929,7 +929,7 @@ void LuaScriptRunner::setEnums(lua_State *L)
 
    // Game Types
    add_enum_to_lua(L, "GameType",
-   #  define GAME_TYPE_ITEM(value, luaEnumName, c)  luaEnumName, true, value,
+   #  define GAME_TYPE_ITEM(value, b, luaEnumName, d)  luaEnumName, true, value,
           GAME_TYPE_TABLE
    #  undef GAME_TYPE_ITEM
       (char*)NULL);  
@@ -962,8 +962,9 @@ void LuaScriptRunner::setEnums(lua_State *L)
    // Create a table at level run time that has team, indexed by name?
    // Team.blue, Team.red, Team.neutral, etc.
    // A few other misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
-   lua_pushinteger(L, 0);  lua_setglobal(L, "NeutralTeamIndx");
-   lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
+   add_enum_to_lua(L, "Team", "Neutral", true, (TEAM_NEUTRAL + 1),
+                              "Hostile", true, (TEAM_HOSTILE + 1),
+                              (char*)NULL);
 }
 
 #undef setEnumName
