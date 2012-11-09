@@ -79,10 +79,10 @@ IniSettings::IniSettings()
    alwaysStartInKeyboardMode = false;
    echoVoice = false;
 
-   sfxVolLevel = 1.0;                 // SFX volume (0 = silent, 1 = full bore)
-   musicVolLevel = 1.0;               // Music volume (range as above)
+   sfxVolLevel       = 1.0;           // SFX volume (0 = silent, 1 = full bore)
+   musicVolLevel     = 1.0;           // Music volume (range as above)
    voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
-   alertsVolLevel = 1.0;              // Audio alerts volume (when in dedicated server mode only, range as above)
+   alertsVolLevel    = 1.0;           // Audio alerts volume (when in dedicated server mode only, range as above)
 
    sfxSet = sfxModernSet;             // Start off with our modern sounds
 
