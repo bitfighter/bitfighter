@@ -40,8 +40,8 @@
 #include "GameSettings.h"
 
 #ifndef ZAP_DEDICATED
-#include "Joystick.h"
-#include "quickChatHelper.h"
+#  include "Joystick.h"
+#  include "quickChatHelper.h"
 #endif
 
 #include "stringUtils.h"
