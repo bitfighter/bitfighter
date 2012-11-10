@@ -513,6 +513,14 @@ string dir;
          ButtonInfo buttonInfo;
 
          buttonInfo.button = stringToJoystickButton(buttonKeyNames[i]);
+
+         // Our button was not detected properly (misspelling?)
+         if(buttonInfo.button == ButtonUnknown)
+         {
+            logprintf("Button not found: %s", buttonKeyNames[i].c_str());
+            continue;
+         }
+
          buttonInfo.label = buttonInfoMap["Label"];
          buttonInfo.color = stringToColor(buttonInfoMap["Color"]);
          buttonInfo.buttonShape = buttonLabelToButtonShape(buttonInfoMap["Shape"]);
