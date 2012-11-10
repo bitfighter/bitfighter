@@ -1878,7 +1878,6 @@ void ClientGame::renderNormal()
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
-
    // Normally a big no-no, we'll access the server's bot zones directly if we are running locally so we can visualize them without bogging
    // the game down with the normal process of transmitting zones from server to client.  The result is that we can only see zones on our local
    // server.
