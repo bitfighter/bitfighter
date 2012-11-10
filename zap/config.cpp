@@ -887,31 +887,44 @@ static void writeDefaultQuickChatMessages(CIniFile *ini, IniSettings *iniSetting
          return;
    }
 
-   ini->addSection("QuickChatMessages");
-   if(ini->numSectionComments("QuickChatMessages") == 0)
+   const char *section = "QuickChatMessages";
+
+   ini->addSection(section);
+   if(ini->numSectionComments(section) == 0)
    {
-      ini->sectionComment("QuickChatMessages", "----------------");
-      ini->sectionComment("QuickChatMessages", " The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the way the messages are");
-      ini->sectionComment("QuickChatMessages", " displayed in the QuickChat menu, so make sure you are familiar with that before you start modifying these items.");
-      ini->sectionComment("QuickChatMessages", " Messages are grouped, and each group has a Caption (short name shown on screen), a Key (the shortcut key used to select");
-      ini->sectionComment("QuickChatMessages", " the group), and a Button (a shortcut button used when in joystick mode).  If the Button is \"Undefined key\", then that");
-      ini->sectionComment("QuickChatMessages", " item will not be shown in joystick mode, unless the ShowKeyboardKeysInStickMode setting is true.  Groups can be defined ");
-      ini->sectionComment("QuickChatMessages", " in any order, but will be displayed sorted by [section] name.  Groups are designated by the [QuickChatMessagesGroupXXX]");
-      ini->sectionComment("QuickChatMessages", " sections, where XXX is a unique suffix, usually a number.");
-      ini->sectionComment("QuickChatMessages", " ");
-      ini->sectionComment("QuickChatMessages", " Each group can have one or more messages, as specified by the [QuickChatMessagesGroupXXX_MessageYYY] sections, where XXX");
-      ini->sectionComment("QuickChatMessages", " is the unique group suffix, and YYY is a unique message suffix.  Again, messages can be defined in any order, and will");
-      ini->sectionComment("QuickChatMessages", " appear sorted by their [section] name.  Key, Button, and Caption serve the same purposes as in the group definitions.");
-      ini->sectionComment("QuickChatMessages", " Message is the actual message text that is sent, and MessageType should be either \"Team\" or \"Global\", depending on which");
-      ini->sectionComment("QuickChatMessages", " users the message should be sent to.  You can mix Team and Global messages in the same section, but it may be less");
-      ini->sectionComment("QuickChatMessages", " confusing not to do so.");
-      ini->sectionComment("QuickChatMessages", " ");
-      ini->sectionComment("QuickChatMessages", " Messages can also be added to the top-tier of items, by specifying a section like [QuickChat_MessageZZZ].");
-      ini->sectionComment("QuickChatMessages", " ");
-      ini->sectionComment("QuickChatMessages", " Note that no quotes are required around Messages or Captions, and if included, they will be sent as part");
-      ini->sectionComment("QuickChatMessages", " of the message.  Also, if you bullocks things up too badly, simply delete all QuickChatMessage sections,");
-      ini->sectionComment("QuickChatMessages", " and they will be regenerated the next time you run the game (though your modifications will be lost).");
-      ini->sectionComment("QuickChatMessages", "----------------");
+      addComment("----------------");
+      addComment(" The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the");
+      addComment(" way the messages are displayed in the QuickChat menu, so make sure you are familiar with that before");
+      addComment(" you start modifying these items. Messages are grouped, and each group has a Caption (short name");
+      addComment(" shown on screen), a Key (the shortcut key used to select the group), and a Button (a shortcut button");
+      addComment(" used when in joystick mode).  If the Button is \"Undefined key\", then that item will not be shown");
+      addComment(" in joystick mode, unless the ShowKeyboardKeysInStickMode setting is true.  Groups can be defined in");
+      addComment(" any order, but will be displayed sorted by [section] name.  Groups are designated by the");
+      addComment(" [QuickChatMessagesGroupXXX] sections, where XXX is a unique suffix, usually a number.");
+      addComment(" ");
+      addComment(" Each group can have one or more messages, as specified by the [QuickChatMessagesGroupXXX_MessageYYY]");
+      addComment(" sections, where XXX is the unique group suffix, and YYY is a unique message suffix.  Again, messages");
+      addComment(" can be defined in any order, and will appear sorted by their [section] name.  Key, Button, and");
+      addComment(" Caption serve the same purposes as in the group definitions. Message is the actual message text that");
+      addComment(" is sent, and MessageType should be either \"Team\" or \"Global\", depending on which users the");
+      addComment(" message should be sent to.  You can mix Team and Global messages in the same section, but it may be");
+      addComment(" less confusing not to do so.");
+      addComment(" ");
+      addComment(" Messages can also be added to the top-tier of items, by specifying a section like");
+      addComment(" [QuickChat_MessageZZZ].");
+      addComment(" ");
+      addComment(" Note that no quotes are required around Messages or Captions, and if included, they will be sent as");
+      addComment(" part of the message. Also, if you bullocks things up too badly, simply delete all QuickChatMessage");
+      addComment(" sections, and they will be regenerated the next time you run the game (though your modifications");
+      addComment(" will be lost).");
+      addComment(" ");
+      addComment(" Note that you can also use the QuickChat functionality to create shortcuts to commonly run /commands");
+      addComment(" by setting the MessageType to \"Command\".  For example, if you define a QuickChat message to be");
+      addComment(" \"addbots 2\" (without quotes, and without a slash), and the MessageType to \"Command\" (also");
+      addComment(" without quotes), 2 robots will be added to the game when you press the appropriate keys.  You can");
+      addComment(" use this functionality to assign commonly used commands to joystick buttons or short keyboard");
+      addComment(" sequences.");
+      addComment("----------------");
    }
 
    ini->SetValue("QuickChatMessagesGroup1", "Key", InputCodeManager::inputCodeToString(KEY_G));
