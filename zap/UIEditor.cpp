@@ -4252,6 +4252,13 @@ void EditorUserInterface::onKeyUp(InputCode inputCode)
       case KEY_SPACE:
          mSnapContext = FULL_SNAPPING;
          break;
+      case KEY_SHIFT:
+         // Check if space is down... if so, modify snapping accordingly
+         // This is a little special-casey, but it is, after all, a special case.
+         if(InputCodeManager::getState(KEY_SPACE) && mSnapContext == NO_SNAPPING)
+            mSnapContext = NO_GRID_SNAPPING;
+         break;
+
       case KEY_TAB:
          mPreviewMode = false;
          break;

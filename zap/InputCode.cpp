@@ -344,10 +344,23 @@ static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, K
 
 string InputCodeManager::makeInputString(InputCode inputCode)
 {
-   for(S32 i = 0; i < S32(ARRAYSIZE(modifiers)); i++)
-      if(inputCode == modifiers[i])
-         return "";
+   InputCode baseKey = KEY_NONE;
 
+   // First, find the base key
+   for(S32 i = 0; i < MAX_INPUT_CODES; i++)
+   {
+      InputCode code = (InputCode) i;
+
+      if(isKeyboardKey(code) && !isModifier(code) && getState(code))
+      {
+         baseKey = code;
+         break;
+      }
+   }
+
+   if(baseKey == KEY_NONE)
+      return "";
+      
    string inputString = "";
    string joiner = "+";
 
@@ -355,7 +368,7 @@ string InputCodeManager::makeInputString(InputCode inputCode)
       if(getState(modifiers[i]))
          inputString += inputCodeToString(modifiers[i]) + joiner;
    
-   inputString += inputCodeToString(inputCode);
+   inputString += inputCodeToString(baseKey);
    return inputString;
 }
 
@@ -1730,6 +1743,18 @@ bool InputCodeManager::isControllerButton(InputCode inputCode)
 bool InputCodeManager::isKeypadKey(InputCode inputCode)
 {
    return inputCode >= KEY_KEYPAD0 && inputCode <= KEY_KEYPAD_EQUALS;
+}
+
+
+bool InputCodeManager::isKeyboardKey(InputCode inputCode)
+{
+   return inputCode >= KEY_0 && inputCode <= KEY_KEYPAD_EQUALS;
+}
+
+
+bool InputCodeManager::isModifier(InputCode inputCode)
+{
+   return inputCode >= KEY_SHIFT && inputCode <= KEY_SUPER;
 }
 
 

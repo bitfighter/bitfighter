@@ -33,6 +33,7 @@
 
 // These are many (all?) the keys that SDL can detect.
 enum InputCode {
+   // Beginning of keyboard keys
    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, // Keyboard input
    KEY_6, KEY_7, KEY_8, KEY_9, KEY_A, KEY_B,
    KEY_C, KEY_D, KEY_E, KEY_F, KEY_G, KEY_H,
@@ -60,6 +61,7 @@ enum InputCode {
 
    // And these are pseudo modifers, that may represent multiple events
    // (e.g. KEY_SHIFT means KEY_LSHIFT or KEY_RSHIFT)
+   // Keep these together
    KEY_SHIFT,   KEY_CTRL,   KEY_ALT,   KEY_META,  KEY_SUPER,
 
    // Some keys in SDL that were not in GLUT
@@ -100,6 +102,7 @@ enum InputCode {
    KEY_KEYPAD_PERIOD, KEY_KEYPAD_DIVIDE, KEY_KEYPAD_MULTIPLY,
    KEY_KEYPAD_MINUS, KEY_KEYPAD_PLUS, KEY_KEYPAD_ENTER, KEY_KEYPAD_EQUALS,
    
+   // End of keyboard keys
 
    // Keep these together -- InputCodeManager::isMouseAction() depends on order and togetherness
    MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_RIGHT,    // Mouse buttons
