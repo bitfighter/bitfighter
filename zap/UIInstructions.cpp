@@ -232,7 +232,7 @@ static ControlString controlsGamepad[] = {
          { "Toggle map view",       InputCodeManager::BINDING_CMDRMAP },
          { "Drop flag",             InputCodeManager::BINDING_DROPITEM },
          { "Show scoreboard",       InputCodeManager::BINDING_SCRBRD },
-         { NULL, InputCodeManager::BINDING_NONE },
+         { NULL, InputCodeManager::BINDING_NONE }, // End col 1
 
          { "Cycle current weapon",  InputCodeManager::BINDING_ADVWEAP },
          { "Select weapon 1",       InputCodeManager::BINDING_SELWEAP1 },
@@ -243,7 +243,7 @@ static ControlString controlsGamepad[] = {
          { "Chat to team",          InputCodeManager::BINDING_TEAMCHAT },
          { "Chat to everyone",      InputCodeManager::BINDING_GLOBCHAT },
          { "Record voice chat",     InputCodeManager::BINDING_TOGVOICE },
-         { NULL, InputCodeManager::BINDING_NONE },
+         { NULL, InputCodeManager::BINDING_NONE }, // End col 2
       };
 
 
