@@ -66,7 +66,7 @@ static const char *pageHeaders[] = {
    "LEVEL COMMANDS",
    "ADMIN COMMANDS",
    "DEBUG COMMANDS",
-   "SCRIPTING CONSOLE"
+   //"SCRIPTING CONSOLE"
 };
 
 
@@ -164,9 +164,9 @@ void InstructionsUserInterface::render()
          renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);     // Debug commands
          break;
 
-      case InstructionScriptingConsole:
-         renderConsoleCommands("Open the console by pressing [Ctrl-/] in game", consoleCommands1);   // Scripting console
-         break;
+      //case InstructionScriptingConsole:
+      //   renderConsoleCommands("Open the console by pressing [Ctrl-/] in game", consoleCommands1);   // Scripting console
+      //   break;
 
       // When adding page, be sure to add item to pageHeaders array and InstructionPages enum
    }

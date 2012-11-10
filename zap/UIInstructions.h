@@ -76,7 +76,7 @@ public:
       InstructionLevelCommands,
       InstructionAdminCommands,
       InstructionDebugCommands,
-      InstructionScriptingConsole,
+      //InstructionScriptingConsole,
       InstructionMaxPages
    };
 
