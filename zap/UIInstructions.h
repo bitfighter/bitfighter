@@ -72,6 +72,7 @@ public:
       InstructionGameObjects3,
       InstructionGameIndicators,
       InstructionAdvancedCommands,
+      InstructionSoundCommands,
       InstructionLevelCommands,
       InstructionAdminCommands,
       InstructionDebugCommands,

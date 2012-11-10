@@ -42,14 +42,40 @@
 #include "JoystickRender.h"
 #include "CoreGame.h"         // For coreItem rendering
 
+#include "tnlAssert.h"
+
 #include "OpenglUtils.h"
 
 namespace Zap
 {
 
+
+// This must be kept aligned with enum IntructionPages
+static const char *pageHeaders[] = {
+   "CONTROLS",
+   "LOADOUT SELECTION",
+   "MODULES",
+   "WEAPON PROJECTILES",
+   "SPY BUGS",
+   "GAME OBJECTS",
+   "MORE GAME OBJECTS",
+   "MORE GAME OBJECTS",
+   "GAME INDICATORS",
+   "ADVANCED COMMANDS",
+   "SOUND AND MUSIC",
+   "LEVEL COMMANDS",
+   "ADMIN COMMANDS",
+   "DEBUG COMMANDS",
+   "SCRIPTING CONSOLE"
+};
+
+
 // Constructor
 InstructionsUserInterface::InstructionsUserInterface(ClientGame *game) : Parent(game)
 {
+   // Quick sanity check...
+   TNLAssert(ARRAYSIZE(pageHeaders) == InstructionMaxPages, "pageHeaders not aligned with enum IntructionPages!!!");
+
    setMenuID(InstructionsUI);
    
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
@@ -67,29 +93,14 @@ void InstructionsUserInterface::onActivate()
 }
 
 
-// This must be kept aligned with enum IntructionPages
-static const char *pageHeaders[] = {
-   "CONTROLS",
-   "LOADOUT SELECTION",
-   "MODULES",
-   "WEAPON PROJECTILES",
-   "SPY BUGS",
-   "GAME OBJECTS",
-   "MORE GAME OBJECTS",
-   "MORE GAME OBJECTS",
-   "GAME INDICATORS",
-   "ADVANCED COMMANDS",
-   "LEVEL COMMANDS",
-   "ADMIN COMMANDS",
-   "DEBUG COMMANDS",
-   "SCRIPTING CONSOLE"
-};
+static const S32 FIRST_COMMAND_PAGE = InstructionsUserInterface::InstructionAdvancedCommands;
+static const S32 FIRST_OBJ_PAGE     = InstructionsUserInterface::InstructionWeaponProjectiles;
 
 
 static ControlStringsEditor consoleCommands1[] = {
    { "a = Asteroid.new()", "Create an asteroid and set it to the variable 'a'" },
-   { "a:setVel(100, 0)", "Set the asteroid's velocity to move slowly to the right" },
-   { "a:addToGame()", "Insert the asteroid into the currently running game" },
+   { "a:setVel(100, 0)",   "Set the asteroid's velocity to move slowly to the right" },
+   { "a:addToGame()",      "Insert the asteroid into the currently running game" },
    { "", "" },      // End of list
 };
 
@@ -102,7 +113,7 @@ void InstructionsUserInterface::render()
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
 
    glColor(0.7f);
-   drawHorizLine(0, 800, 31);
+   drawHorizLine(0, 800, 32);
    drawHorizLine(0, 800, 569);
 
    switch(mCurPage)
@@ -117,35 +128,42 @@ void InstructionsUserInterface::render()
          renderModulesPage();
          break;
       case InstructionWeaponProjectiles:
-         renderPageObjectDesc(0);
+         renderPageObjectDesc(InstructionWeaponProjectiles - FIRST_OBJ_PAGE);
          break;
       case InstructionSpyBugs:
-         renderPageObjectDesc(1);
+         renderPageObjectDesc(InstructionSpyBugs - FIRST_OBJ_PAGE);
          break;
       case InstructionGameObjects1:
-         renderPageObjectDesc(2);
+         renderPageObjectDesc(InstructionGameObjects1 - FIRST_OBJ_PAGE);
          break;
       case InstructionGameObjects2:
-         renderPageObjectDesc(3);
+         renderPageObjectDesc(InstructionGameObjects2 - FIRST_OBJ_PAGE);
          break;
       case InstructionGameObjects3:
-         renderPageObjectDesc(4);
+         renderPageObjectDesc(InstructionGameObjects3 - FIRST_OBJ_PAGE);
          break;
       case InstructionGameIndicators:
          renderPageGameIndicators();
          break;
       case InstructionAdvancedCommands:
-         renderPageCommands(0);
+         renderPageCommands(InstructionAdvancedCommands - FIRST_COMMAND_PAGE, 
+                            "Tip: Define QuickChat items to quickly enter commands (see INI for details)");
+         break;
+      case InstructionSoundCommands:
+         renderPageCommands(InstructionSoundCommands - FIRST_COMMAND_PAGE);     // Sound control commands
          break;
       case InstructionLevelCommands:
-         renderPageCommands(1, "Level change permissions are required to use these commands");     // Level control commands
+         renderPageCommands(InstructionLevelCommands - FIRST_COMMAND_PAGE, 
+                            "Level change permissions are required to use these commands");  
          break;
       case InstructionAdminCommands:
-         renderPageCommands(2, "Admin permissions are required to use these commands");            // Admin commands
+         renderPageCommands(InstructionAdminCommands - FIRST_COMMAND_PAGE, 
+                            "Admin permissions are required to use these commands");            // Admin commands
          break;
       case InstructionDebugCommands:
-         renderPageCommands(3);     // Debug commands
+         renderPageCommands(InstructionDebugCommands - FIRST_COMMAND_PAGE);     // Debug commands
          break;
+
       case InstructionScriptingConsole:
          renderConsoleCommands("Open the console by pressing [Ctrl-/] in game", consoleCommands1);   // Scripting console
          break;
@@ -964,7 +982,6 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
    ypos += 28;
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;
-
    if(strcmp(msg, ""))
    {
       drawString(cmdCol, ypos, instrSize, msg);

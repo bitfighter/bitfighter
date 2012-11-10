@@ -49,6 +49,7 @@ enum ArgTypes {
 
 enum HelpCategories {
    ADV_COMMANDS,
+   SOUND_COMMANDS,
    LEVEL_COMMANDS,
    ADMIN_COMMANDS,
    DEBUG_COMMANDS,
