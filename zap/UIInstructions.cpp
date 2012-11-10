@@ -56,7 +56,7 @@ static const char *pageHeaders[] = {
    "LOADOUT SELECTION",
    "MODULES",
    "WEAPON PROJECTILES",
-   "SPY BUGS & MINES",
+   "MINES & SPY BUGS",
    "GAME OBJECTS",
    "MORE GAME OBJECTS",
    "MORE GAME OBJECTS",
