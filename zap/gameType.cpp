@@ -785,6 +785,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
+// Client only
 void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod) const
 {
    if(!target)
