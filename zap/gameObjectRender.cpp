@@ -59,12 +59,24 @@ const float gShapeLineWidth = 2.0f;
 
 void drawHorizLine(S32 x1, S32 x2, S32 y)
 {
+   drawHorizLine((F32)x1, (F32)x2, (F32)y);
+}
+
+
+void drawVertLine(S32 x, S32 y1, S32 y2)
+{
+   drawVertLine((F32)x, (F32)y1, (F32)y2);
+}
+
+
+void drawHorizLine(F32 x1, F32 x2, F32 y)
+{
    F32 vertices[] = { x1, y,   x2, y };
    renderVertexArray(vertices, 2, GL_LINES);
 }
 
 
-void drawVertLine(S32 x, S32 y1, S32 y2)
+void drawVertLine(F32 x, F32 y1, F32 y2)
 {
    F32 vertices[] = { x, y1,   x, y2 };
    renderVertexArray(vertices, 2, GL_LINES);
@@ -2413,19 +2425,34 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 
 void renderDeveloperBadge(F32 x, F32 y, F32 rad)
 {
-   F32 rm2 = rad - 2;
-   F32 rm26 = rm2 * .666f;
+   F32 r3  = rad * 0.333f;
+   F32 r23 = rad * 0.666f;
 
+   // Render cells
    glColor(Colors::green80);
-   glPointSize(rad * 0.4f);
-   F32 vertices[] = {
-         x, y - rm26,
-         x + rm26, y,
-         x -rm26, y + rm26,
-         x, y + rm26,
-         x + rm26, y + rm26
-   };
-   renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_POINTS);
+
+   drawSquare(Point(x,       y - r23), r3, true);
+   drawSquare(Point(x + r23, y      ), r3, true);
+   drawSquare(Point(x - r23, y + r23), r3, true);
+   drawSquare(Point(x,       y + r23), r3, true);
+   drawSquare(Point(x + r23, y + r23), r3, true);
+
+   // Render grid atop our cells
+   glColor(Colors::gray20);
+
+   glLineWidth(1);
+   
+   drawHorizLine(x - rad, x + rad, y - rad);
+   drawHorizLine(x - rad, x + rad, y - r3);
+   drawHorizLine(x - rad, x + rad, y + r3);
+   drawHorizLine(x - rad, x + rad, y + rad);
+
+   drawVertLine(x - rad, y - rad, y + rad);
+   drawVertLine(x - r3,  y - rad, y + rad);
+   drawVertLine(x + r3,  y - rad, y + rad);
+   drawVertLine(x + rad, y - rad, y + rad);
+
+   glLineWidth(gDefaultLineWidth);
 }
 
 

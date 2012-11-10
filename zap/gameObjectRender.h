@@ -100,7 +100,9 @@ extern void renderVertex(char style, const Point &v, S32 number, S32 size, F32 s
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);
-extern void drawVertLine(S32 x, S32 y1, S32 y2);
+extern void drawVertLine (S32 x,  S32 y1, S32 y2);
+extern void drawHorizLine(F32 x1, F32 x2, F32 y);
+extern void drawVertLine (F32 x,  F32 y1, F32 y2);
 
 extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *letterColor, char letter);
 
