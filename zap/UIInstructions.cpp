@@ -420,12 +420,14 @@ void InstructionsUserInterface::renderPage2()
    gap = 40;
 
    glColor(Colors::yellow);
-   for(U32 i = 0; i < ARRAYSIZE(loadoutInstructions2); i++)
+   drawCenteredString(y, 20, loadoutInstructions2[0]);
+   y += gap;
+
+   gap = 26;
+   for(U32 i = 1; i < ARRAYSIZE(loadoutInstructions2); i++)
    {
-      drawCenteredString(y, 20, loadoutInstructions2[i]);
+      drawCenteredString_highlightKeys(y, 20, loadoutInstructions2[i], Colors::cyan, Colors::magenta);
       y += gap;
-      glColor(Colors::cyan);
-      gap = 26;
    }
 }
 
@@ -434,8 +436,6 @@ static const char *indicatorPageHeadings[] = {
    "PLAYER INDICATORS",
    "BADGES / ACHIEVEMENTS"
 };
-
-
 
 
 

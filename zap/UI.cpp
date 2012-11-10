@@ -25,6 +25,7 @@
 #include "tnl.h"
 
 using namespace TNL;
+using namespace std;
 
 #include "UI.h"
 #include "move.h"
@@ -373,6 +374,36 @@ S32 UserInterface::drawCenteredString(S32 y, S32 size, const char *string)
 {
    return drawCenteredString(gScreenInfo.getGameCanvasWidth() / 2, y, size, string);
 }
+
+
+// For now, not very fault tolerant...  assumes well balanced []
+void UserInterface::drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor)
+{
+   S32 len = getStringWidth(size, str.c_str());
+   S32 x = gScreenInfo.getGameCanvasWidth() / 2 - len / 2;
+
+   size_t keyStart, keyEnd = 0;
+   S32 pos = 0;
+
+   keyStart = str.find("[");
+   while(keyStart != string::npos)
+   {
+      glColor(bodyColor);
+      x += drawStringAndGetWidth(x, y, size, str.substr(pos, keyStart - pos).c_str());
+
+      keyEnd = str.find("]", keyStart) + 1;     // + 1 to include the "]" itself
+      glColor(keyColor);
+      x += drawStringAndGetWidth(x, y, size, str.substr(keyStart, keyEnd - keyStart).c_str());
+      pos = keyEnd;
+
+      keyStart = str.find("[", pos);
+   }
+   
+   // Draw any remaining bits of our string
+   glColor(bodyColor);
+   drawString(x, y, size, str.substr(keyEnd).c_str());
+}
+
 
 
 extern void drawHorizLine(S32 x1, S32 x2, S32 y);

@@ -27,7 +27,7 @@
 #define _UI_H_
 
 #ifdef ZAP_DEDICATED
-#error "UI.h shouldn't be included in dedicated build"
+#  error "UI.h shouldn't be included in dedicated build"
 #endif
 
 #include "UIManager.h"
@@ -43,9 +43,9 @@
 #include "tnlLog.h"
 
 #ifdef TNL_OS_MOBILE
-#include "SDL_opengles.h"
+#  include "SDL_opengles.h"
 #else
-#include "SDL_opengl.h"
+#  include "SDL_opengl.h"
 #endif
 
 #include <string>
@@ -204,6 +204,9 @@ public:
    static F32 drawCenteredString(F32 x, F32 y, F32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, S32 size, const char *format, ...);
    static S32 drawCenteredStringf(S32 x, S32 y, S32 size, const char *format, ...);
+
+   static void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const Color &bodyColor, const Color &keyColor);
+
 
    static S32 drawCenteredUnderlinedString(S32 y, S32 size, const char *string);
 
