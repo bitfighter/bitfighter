@@ -540,7 +540,7 @@ bool Teleporter::collide(BfObject *otherObject)
 bool Teleporter::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 {
    center = getVert(0);
-   radius = TELEPORTER_RADIUS;// / 2;
+   radius = TELEPORTER_RADIUS;
    return true;
 }
 
@@ -553,7 +553,7 @@ bool Teleporter::getCollisionPoly(Vector<Point> &polyPoints) const
 
 void Teleporter::computeExtent()
 {
-   setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS));
+   setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS * 2));
 }
 
 
