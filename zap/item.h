@@ -87,6 +87,7 @@ public:
    virtual Rect calcExtents(); 
 
    // LuaItem interface
+
    LUAW_DECLARE_CLASS(Item);
 
 	static const char *luaClassName;

@@ -54,14 +54,14 @@ GeomObject::~GeomObject()
 
 
 // mGeometry will be deleted in destructor
-void GeomObject::setNewGeometry(GeomType geomType)
+void GeomObject::setNewGeometry(GeomType geomType, F32 radius)
 {
    TNLAssert(!mGeometry.getGeometry(), "This object already has a geometry!");
 
    switch(geomType)
    {
       case geomPoint:
-         mGeometry.setGeometry(new PointGeometry());
+         mGeometry.setGeometry(new PointGeometry(radius));
          return;
 
       case geomSimpleLine:
@@ -204,7 +204,7 @@ Point GeomObject::getPos() const
 void GeomObject::setPos(const Point &pos)
 {
    setVert(pos, 0);  
-   setExtent(Rect(pos, 10));     // Why 10?  Just a random small number?  We use 0 and 1 elsewhere 
+   setExtent(calcExtents());
 }
 
 

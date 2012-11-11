@@ -46,7 +46,7 @@ namespace Zap
 bool Item::mInitial;
 
 // Constructor
-Item::Item(F32 radius) : Parent()
+Item::Item(F32 radius) : Parent(radius)
 {
    mRadius = radius;
    setPos(Point(0,0));
@@ -68,7 +68,7 @@ Item::~Item()
 void Item::setPos(const Point &p)
 {
    Parent::setPos(p);
-   setExtent(Rect(p, mRadius));
+   //setExtent(Rect(p, mRadius));
 }
 
 

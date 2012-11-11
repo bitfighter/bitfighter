@@ -58,12 +58,13 @@ class PointGeometry : public Geometry
 private:
    bool mPosIsSelected;
    Point mPoint;
+   F32 mRadius;
 
    virtual Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
 
 public:
-   PointGeometry();                             // Constructor
+   PointGeometry(F32 radius);                   // Constructor
    ~PointGeometry();                            // Destructor
 
    GeomType getGeomType();

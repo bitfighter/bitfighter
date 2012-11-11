@@ -33,6 +33,11 @@
 
 #include <map>
 
+
+
+#include "soccerGame.h"  // TODO: delete this line
+
+
 namespace Zap
 {
 
@@ -719,34 +724,10 @@ bool DatabaseObject::getCollisionPoly(Vector<Point> &polyPoints) const
 }
 
 
-bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius) const
+bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 {
    return false;
 }
-
-
-Rect DatabaseObject::getBounds(U32 stateIndex) const
-{
-   Rect ret;
-   Point p;
-   float radius;
-   Vector<Point> bounds;
-
-   if(getCollisionPoly(bounds))
-   {
-      ret.min = ret.max = bounds[0];
-      for(S32 i = 1; i < bounds.size(); i++)
-         ret.unionPoint(bounds[i]);
-   }
-   else if(getCollisionCircle(stateIndex, p, radius))
-   {
-      ret.max = p + Point(radius, radius);
-      ret.min = p - Point(radius, radius);
-   }
-
-   return ret;
-}
-
 
 
 bool DatabaseObject::isCollisionEnabled()
@@ -787,6 +768,13 @@ void DatabaseObject::setExtent(const Rect &extents)
    //last = lastx;
 
    GridDatabase *gridDB = getDatabase();
+
+      //if(static_cast<SoccerBallItem *>(this)->getGame() && getObjectTypeNumber() == SoccerBallItemTypeNumber && !static_cast<SoccerBallItem *>(this)->getGame()->isServer())
+
+   if(static_cast<TestItem *>(this)->getGame() && getObjectTypeNumber() == TestItemTypeNumber && !static_cast<TestItem *>(this)->getGame()->isServer())
+   {
+      logprintf("%s", extents.toString().c_str());
+   }
 
    if(gridDB)
    {

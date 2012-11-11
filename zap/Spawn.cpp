@@ -77,6 +77,13 @@ void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
 }
 
 
+// In game radius -- these are never displayed or interacted with; radius doesn't matter
+F32 AbstractSpawn::getRadius()
+{
+   return 1;      
+}
+
+
 F32 AbstractSpawn::getEditorRadius(F32 currentScale)
 {
    return 12;     // Constant size, regardless of zoom

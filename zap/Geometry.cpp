@@ -314,9 +314,10 @@ void Geometry::offset(const Point &offset)
 ////////////////////////////////////////
 
 // Constructor
-PointGeometry::PointGeometry()
+PointGeometry::PointGeometry(F32 radius)
 {
    mPosIsSelected = false;
+   mRadius = radius;
 }
 
 
@@ -470,10 +471,9 @@ void PointGeometry::setGeom(const Vector<Point> &points)
 }
 
 
-
 Rect PointGeometry::calcExtents()
 {
-   return Rect(mPoint, 1);
+   return Rect(mPoint, mRadius);
 }
 
 

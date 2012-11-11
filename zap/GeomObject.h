@@ -67,7 +67,7 @@ public:
    GeomObject();                          // Constructor
    virtual ~GeomObject();                 // Destructor
 
-   void setNewGeometry(GeomType geomType);
+   void setNewGeometry(GeomType geomType, F32 radius = 0);
 
    GeomType getGeomType();
 
@@ -106,8 +106,6 @@ public:
 
    void reverseWinding();     
 
-   Rect getBounds(U32 stateIndex) const;
-                                                    
    virtual Rect calcExtents();
 
    void disableTriangulation();

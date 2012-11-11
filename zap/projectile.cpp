@@ -63,17 +63,10 @@ Projectile::Projectile(lua_State *L)
 }
 
 
-// Destructor
-Projectile::~Projectile()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
-}
-
-
 void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter)
 {
    mObjectTypeNumber = BulletTypeNumber;
-   setNewGeometry(geomPoint);
+   setNewGeometry(geomPoint, getRadius());
 
    mNetFlags.set(Ghostable);
    setPos(pos);
@@ -105,6 +98,13 @@ void Projectile::initialize(WeaponType type, const Point &pos, const Point &vel,
    mWeaponType = type;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+Projectile::~Projectile()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -360,6 +360,12 @@ void Projectile::idle(BfObject::IdleCallPath path)
 }
 
 
+F32 Projectile::getRadius()
+{
+   return 10;     // Or so...  currently only used for inserting objects into database and for Lua on the odd chance someone asks
+}
+
+
 // Gets run when projectile suffers damage, like from a burst going off
 void Projectile::damageObject(DamageInfo *info)
 {
@@ -448,7 +454,7 @@ REGISTER_LUA_SUBCLASS(Projectile, BfObject);
   */
 S32 Projectile::getRad(lua_State *L)    
 { 
-   return returnInt(L, 10);         // TODO: Wrong!!  Radius of item (returns number)
+   return returnFloat(L, getRadius());
 } 
 
 

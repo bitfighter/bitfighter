@@ -61,6 +61,8 @@ protected:
 
    Point mVelocity;
 
+   virtual F32 getRadius();
+
 public:
    U32 mTimeRemaining;
    ProjectileType mType;
@@ -171,12 +173,9 @@ private:
    void initialize(const Point &pos, Ship *planter);
 
 public:
-   enum Constants
-   {
-      ArmedMask = BurstProjectile::FirstFreeMask,
-      SensorRadius     = 50,
-   };
+   static const S32 ArmedMask = BurstProjectile::FirstFreeMask;
 
+   static const S32 SensorRadius = 50;
    static const S32 InnerBlastRadius = 100;
    static const S32 OuterBlastRadius = 250;
 

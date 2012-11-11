@@ -452,6 +452,9 @@ public:
    const char *getOnScreenName();
    Worm *clone() const;
 
+   F32 getRadius();
+
+
    void render();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();

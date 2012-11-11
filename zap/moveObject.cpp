@@ -907,7 +907,7 @@ void MoveItem::idle(BfObject::IdleCallPath path)
       updateInterpolation();
 
 
-   updateExtentInDatabase();
+   //updateExtentInDatabase();
 }
 
 
@@ -1900,6 +1900,13 @@ Worm *Worm::clone() const
 {
    return new Worm(*this);
 }
+
+
+F32 Worm::getRadius()
+{
+   return WORM_RADIUS;
+}
+
 
 
 void Worm::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)

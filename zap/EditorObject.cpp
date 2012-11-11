@@ -63,9 +63,10 @@ static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in e
 
 
 // Constructor
-PointObject::PointObject()
+PointObject::PointObject(F32 radius)
 {
-   setNewGeometry(geomPoint);
+   mRadius = radius;
+   setNewGeometry(geomPoint, radius);
 }
 
 
@@ -83,5 +84,9 @@ void PointObject::prepareForDock(ClientGame *game, const Point &point, S32 teamI
    Parent::prepareForDock(game, point, teamIndex);
 #endif
 }
+
+
+F32 PointObject::getRadius() { return mRadius; }
+
 
 };

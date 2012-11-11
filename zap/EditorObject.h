@@ -45,11 +45,15 @@ class PointObject : public BfObject
 {
    typedef BfObject Parent;
 
+private:
+   F32 mRadius;
+
 public:
-   PointObject();             // Constructor
-   virtual ~PointObject();    // Destructor
+   PointObject(F32 radius = 1);   // Constructor
+   virtual ~PointObject();        // Destructor
 
    void prepareForDock(ClientGame *game, const Point &point, S32 teamIndex);
+   F32 getRadius();
 };
 
 

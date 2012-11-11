@@ -73,6 +73,7 @@ public:
 
    virtual string toString(F32 gridSize) const;
 
+   F32 getRadius();
    F32 getEditorRadius(F32 currentScale);
 
    bool updateTimer(U32 deltaT);
