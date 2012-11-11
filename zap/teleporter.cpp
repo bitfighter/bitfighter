@@ -645,7 +645,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          Ship *s = static_cast<Ship *>(foundObjects[i]);
-         if((pos - s->getActualPos()).len() < TeleporterTriggerRadius)
+         if((pos - s->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))
          {
             isTriggered = true;
             timeout = mTeleporterDelay;    // Temporarily disable teleporter
