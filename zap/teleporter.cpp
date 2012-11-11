@@ -365,7 +365,7 @@ bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb
       {
          // If they intersect, then bad deployment position
          if(foundObjectBounds.size() != 0)
-            if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, TELEPORTER_RADIUS * TELEPORTER_RADIUS, outPoint))
+            if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, sq(TELEPORTER_RADIUS), outPoint))
                return false;
       }
       // Try the collision circle if no poly bounds were found
@@ -401,10 +401,10 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
          stream->writeInt(mTeleporterDelay, 32);
 
       if(mTeleporterDelay != 0 && stream->writeFlag(timeout != 0))
-         stream->writeInt(timeout, 32);  // a player might join while this teleporter is in the middle of delay.
+         stream->writeInt(timeout, 32);                     // A player might join while this teleporter is in the middle of delay
    }
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
-      stream->write(mLastDest);     // Where ship is going
+      stream->write(mLastDest);                             // Where ship is going
 
    // If we're not destroyed and health has changed
    if(!stream->writeFlag(mHasExploded))
@@ -430,7 +430,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
-      mDestManager.resize(count);         // Prepare the list for multiple additions
+      mDestManager.resize(count);      // Prepare the list for multiple additions
 
       for(U32 i = 0; i < count; i++)
          mDestManager.read(i, stream);
@@ -443,7 +443,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       if(mTeleporterDelay != 0 && stream->readFlag())
          timeout = stream->readInt(32);
    }
-   else if(stream->readFlag())
+   else if(stream->readFlag())         // TeleportMask
    {
       S32 dest;
       stream->read(&dest);
@@ -630,50 +630,42 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
-   if(mDestManager.getDestCount() > 0)
+   if(mDestManager.getDestCount() > 0)    // Ignore 0-dest teleporters
    {
       // Check for players within range.  If found, send them to dest.
-      Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS * 2);
+      Rect queryRect(getVert(0), (F32)TeleporterTriggerRadius * 2);     
 
       foundObjects.clear();
       findObjects((TestFunc)isShipType, foundObjects, queryRect);
 
       // First see if we're triggered...
-      bool isTriggered = false;
       Point pos = getVert(0);
+
+      mLastDest = -1;
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          Ship *ship = static_cast<Ship *>(foundObjects[i]);
-         if((pos - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius + ship->getRadius()))
-         {
-            isTriggered = true;
+
+         if((pos - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))  // Center of ship is inside TeleporterTriggerRadius?
+         {   
             timeout = mTeleporterDelay;    // Temporarily disable teleporter
-            break;
-         }
-      }
 
-      if(isTriggered)
-      {   
-         // We've triggered the teleporter.  Relocate any ships within range.
-         for(S32 i = 0; i < foundObjects.size(); i++)
-         {
-            Ship *ship = static_cast<Ship *>(foundObjects[i]);
-            if((pos - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))
-            {
+            // If we have multiple ships entering teleporter on the same frame, they all go to the same dest
+            if(mLastDest == -1)
                mLastDest = mDestManager.getRandomDest();
-               Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
-               ship->setActualPos(newPos, true);
-               setMaskBits(TeleportMask);
 
-               if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
-                  ship->getClientInfo()->getStatistics()->mTeleport++;
+            Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
+            ship->setActualPos(newPos, true);
+            setMaskBits(TeleportMask);
 
-               // See if we've teleported onto a loadout zone
-               BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
-               if(zone)
-                  zone->collide(ship);
-            }
+            if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
+               ship->getClientInfo()->getStatistics()->mTeleport++;
+
+            // See if we've teleported onto a loadout zone
+            BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
+            if(zone)
+               zone->collide(ship);
          }
       }
    }
