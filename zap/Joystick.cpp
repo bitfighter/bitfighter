@@ -517,7 +517,10 @@ string dir;
          // Our button was not detected properly (misspelling?)
          if(buttonInfo.button == ButtonUnknown)
          {
-            logprintf("Button not found: %s", buttonKeyNames[i].c_str());
+            string message = "Joystick preset button not found: " + buttonKeyNames[i];
+            settings->addConfigurationError(message);
+            logprintf(message.c_str());
+
             continue;
          }
 
