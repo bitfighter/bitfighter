@@ -414,7 +414,7 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
    }
 
    // The following block will add some friction to the soccer ball
-   else
+   else if(getActualVel().lenSquared() > 0)
    {
       F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
    
