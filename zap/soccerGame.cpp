@@ -55,7 +55,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 {
 #ifndef ZAP_DEDICATED
 
-   S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
+   // Before calling this RPC, we subtracted gFirstTeamNumber, so we need to add it back here...
+   S32 teamIndexAdjusted = (S32) teamIndex + GameType::gFirstTeamNumber;      
    string msg;
    SoundSystem::playSoundEffect(SFXFlagCapture);
 
