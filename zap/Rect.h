@@ -63,7 +63,7 @@ public:
    Rect();                                      // Constuctor
    Rect(const Point &p1, const Point &p2);      // Constuctor
    Rect(F32 x1, F32 y1, F32 x2, F32 y2);        // Constuctor
-   Rect(const Point &p, member_type size);      // Constuctor, takes point and "radius"
+   Rect(const Point &p, member_type size);      // Constuctor, takes centerpoint and "diameter"
 
    Rect(const Vector<Point> &p);                // Construct as a bounding box around multiple points
 

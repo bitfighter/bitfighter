@@ -145,7 +145,7 @@ void Rect::set(const Rect &r)
    max.y = r.max.y;
 }
 
-// Takes point and "radius"
+// Takes centerpoint and "diameter"
 void Rect::set(const Point &p, member_type size)
 {
    F32 sizeDiv2 = size * 0.5;
