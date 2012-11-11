@@ -73,9 +73,10 @@ Rect::Rect(F32 x1, F32 y1, F32 x2, F32 y2)
    set(Point(x1, y1), Point(x2, y2));
 }
 
-Rect::Rect(const Point &p, member_type size)
+// Takes centerpoint and "diameter"
+Rect::Rect(const Point &p, member_type diameter)
 {
-   set(p, size);
+   set(p, diameter);
 }
 
 // Construct as a bounding box around multiple points
@@ -146,13 +147,13 @@ void Rect::set(const Rect &r)
 }
 
 // Takes centerpoint and "diameter"
-void Rect::set(const Point &p, member_type size)
+void Rect::set(const Point &p, member_type diameter)
 {
-   F32 sizeDiv2 = size * 0.5;
-   min.x = p.x - sizeDiv2;
-   max.x = p.x + sizeDiv2;
-   min.y = p.y - sizeDiv2;
-   max.y = p.y + sizeDiv2;
+   F32 radius = diameter * 0.5;
+   min.x = p.x - radius;
+   max.x = p.x + radius;
+   min.y = p.y - radius;
+   max.y = p.y + radius;
 }
 
 // Rect contains the point
