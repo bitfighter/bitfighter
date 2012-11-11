@@ -202,7 +202,7 @@ function main()
    globalMsg("IT SURE IS NEAT TO HAVE YOU DROP BY")
    globalMsg("WHAT IS YOUR PROBLEM?")
    
-   subscribe(MsgReceivedEvent)
-   unsubscribe(TickEvent)
+   subscribe(Event.MsgReceived)
+   unsubscribe(Event.Tick)
 end
 
