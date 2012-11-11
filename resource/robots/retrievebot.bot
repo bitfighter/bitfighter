@@ -37,6 +37,8 @@ function main()
 end
 
 
+items = { }
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- This is called by the robot's idle routine each tick.  
@@ -46,19 +48,20 @@ function onTick()
    -- Do we have the flag?
    if( (not haveFlag) and bot:hasFlag()) then   -- Just got the flag
 
-      targetType = GoalZoneType                 -- Set new destination
+      targetType = ObjType.GoalZone             -- Set new destination
       haveFlag = true
       team = bot:getTeamIndx()
 
    elseif(haveFlag and not bot:hasFlag()) then  -- Just lost flag
 
-      targetType = FlagType
+      targetType = ObjType.Flag
       haveFlag = false
       team = nil
 
    end
 
-   local targets = bot:findGlobalItems(targetType)
+   table.clear(items)
+   local targets = bot:findGlobalItems(items, targetType)
    local target = findClosest(targets, team)    
 
    if(target == nil) then                   -- Check for nil

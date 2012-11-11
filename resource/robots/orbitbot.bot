@@ -36,7 +36,7 @@ end
 function onTick(deltaTime)
 
     if(targetItem == nil) then
-        targetItem = findClosest(findGlobalItems(TestItemType))
+        targetItem = findClosest(findGlobalItems(ObjType.TestItem))
     end
 
     if(targetItem == nil) then return end
