@@ -79,7 +79,13 @@ A timer object that can be used to schedule arbitrary events to be executed at s
 etc...
 
 
+@section debugging Debugging Tips
 
+Any of your scripts can print a stack trace to see how you got to a particular execution point.  This can be very helpful if there are several conditions under which a function can be called.
+
+\code
+logprint(debug.traceback())
+\endcode
 
 
 
