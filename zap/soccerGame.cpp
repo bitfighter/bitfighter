@@ -210,13 +210,6 @@ bool SoccerGameType::onFire(Ship *ship)
 void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    TNLAssert(!isGhost(), "Should run on server only!");
-
-   //static StringTableEntry dropString("%e0 dropped the ball!");
-
-   //Vector<StringTableEntry> e;
-   //e.push_back(ship->getClientInfo()->getName());
-
-   //broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
 
 
