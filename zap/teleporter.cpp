@@ -170,7 +170,7 @@ void DestManager::setOwner(Teleporter *owner)
 
 TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
-static Vector<DatabaseObject *> foundObjects;
+static Vector<DatabaseObject *> foundObjects;      // Reusable container
 
 // Combined default C++/Lua constructor
 Teleporter::Teleporter(lua_State *L)
