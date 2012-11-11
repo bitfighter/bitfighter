@@ -154,6 +154,8 @@ private:
 
    Vector<Vector<U8> > mLoadoutPresets;
 
+   Vector<string> mConfigurationErrors;
+
 public:
    GameSettings();    // Constructor
    ~GameSettings();   // Destructor
@@ -242,6 +244,9 @@ public:
 
    bool getLoadoutPreset(S32 index, Vector<U8> &preset);
    void setLoadoutPreset(S32 index, const Vector<U8> &preset);
+
+   void addConfigurationError(const string &errorMessage);
+   Vector<string> getConfigurationErrors();
 
    // Other methods
    void saveLevelChangePassword(const string &serverName, const string &password);

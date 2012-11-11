@@ -1145,6 +1145,25 @@ int main(int argc, char **argv)
          launchUpdater(argv[0], settings->getForceUpdate());  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
 #endif   // USE_BFUP
 
+      // Now show any error messages from start-up
+      Vector<string> configurationErrors = settings->getConfigurationErrors();
+      if(configurationErrors.size() > 0)
+         for(S32 i = 0; i < gClientGames.size(); i++)
+         {
+            UIManager *uiManager = gClientGames[i]->getUIManager();
+            ErrorMessageUserInterface *ui = uiManager->getErrorMsgUserInterface();
+
+            ui->reset();
+            ui->setTitle("CONFIGURATION ERROR");
+            for(S32 i = 0; i < configurationErrors.size(); i++)
+            {
+               string message = itos(i + 1) + ". " + configurationErrors[i];
+               ui->setMessage(i + 2, message);
+            }
+
+            uiManager->activate(ui);
+         }
+
 #endif   // !ZAP_DEDICATED
 
 #if defined(USE_HIDING_CONSOLE) && !defined(TNL_DEBUG)

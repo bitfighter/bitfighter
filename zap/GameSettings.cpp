@@ -473,6 +473,18 @@ void GameSettings::setLoadoutPreset(S32 index, const Vector<U8> &preset)
 }
 
 
+void GameSettings::addConfigurationError(const string &errorMessage)
+{
+   mConfigurationErrors.push_back(errorMessage);
+}
+
+
+Vector<string> GameSettings::getConfigurationErrors()
+{
+   return mConfigurationErrors;
+}
+
+
 void GameSettings::saveLevelChangePassword(const string &serverName, const string &password)
 {
    gINI.SetValue("SavedLevelChangePasswords", serverName, password, true);

@@ -1146,6 +1146,7 @@ void ClientGame::onConnectionTerminated(const Address &serverAddress, NetConnect
          }
 
          getUIManager()->activate(ui);
+         break;
    }
 
 }
