@@ -513,7 +513,8 @@ void GameUserInterface::renderLostConnectionMessage()
                               "We may have lost contact with the server...", 
                               "",
                               " You can't play until the connection has been re-established ", 
-                              "" };
+                              "",
+                              "Trying to reconnect now..."};
 
       renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 5, -30);
    }
