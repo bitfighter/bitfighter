@@ -644,18 +644,18 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
-         Ship *s = static_cast<Ship *>(foundObjects[i]);
-         if((pos - s->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))
+         Ship *ship = static_cast<Ship *>(foundObjects[i]);
+         if((pos - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius + ship->getRadius()))
          {
             isTriggered = true;
             timeout = mTeleporterDelay;    // Temporarily disable teleporter
-            // break; <=== maybe, need to test
+            break;
          }
       }
 
       if(isTriggered)
       {   
-         // We've triggered the teleporter.  Relocate ship.
+         // We've triggered the teleporter.  Relocate any ships within range.
          for(S32 i = 0; i < foundObjects.size(); i++)
          {
             Ship *ship = static_cast<Ship *>(foundObjects[i]);
