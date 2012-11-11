@@ -398,7 +398,6 @@ void SoccerBallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEn
 }
 
 
-
 void SoccerBallItem::idle(BfObject::IdleCallPath path)
 {
    if(mSendHomeTimer.update(mCurrentMove.time))
