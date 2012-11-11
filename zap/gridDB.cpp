@@ -769,13 +769,6 @@ void DatabaseObject::setExtent(const Rect &extents)
 
    GridDatabase *gridDB = getDatabase();
 
-      //if(static_cast<SoccerBallItem *>(this)->getGame() && getObjectTypeNumber() == SoccerBallItemTypeNumber && !static_cast<SoccerBallItem *>(this)->getGame()->isServer())
-
-   if(static_cast<TestItem *>(this)->getGame() && getObjectTypeNumber() == TestItemTypeNumber && !static_cast<TestItem *>(this)->getGame()->isServer())
-   {
-      logprintf("%s", extents.toString().c_str());
-   }
-
    if(gridDB)
    {
       // Remove from the extents database for current extents...
