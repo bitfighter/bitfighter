@@ -485,11 +485,8 @@ S32 Projectile::getWeapon(lua_State *L)
 
 TNL_IMPLEMENT_NETOBJECT(Burst);
 
-const F32 BurstRadius = 7;
-const F32 BurstMass = 1;
-
 // Constructor -- used when burst is fired
-Burst::Burst(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(pos, true, BurstRadius, BurstMass)
+Burst::Burst(const Point &pos, const Point &vel, BfObject *shooter, F32 radius) : MoveItem(pos, true, radius, BurstMass)
 {
    initialize(pos, vel, shooter);
 }
@@ -499,13 +496,6 @@ Burst::Burst(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(p
 Burst::Burst(lua_State *L)
 {
    initialize(Point(0,0), Point(0,0), NULL);
-}
-
-
-// Destructor
-Burst::~Burst()
-{
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -538,6 +528,13 @@ void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+}
+
+
+// Destructor
+Burst::~Burst()
+{
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -746,14 +743,14 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor -- used when mine is planted
-Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter)
+Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, SensorRadius)
 {
    initialize(pos, planter);
 }
 
 
 // Combined Lua / C++ default constructor -- used in Lua and editor
-Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
+Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, SensorRadius)
 {
    initialize(Point(0,0), NULL);
 }

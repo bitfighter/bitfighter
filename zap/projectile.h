@@ -109,6 +109,9 @@ public:
 };
 
 
+static const F32 BurstRadius = 7;
+static const F32 BurstMass = 1;
+
 // Basic burst object, and the base clase used for both mines and spybugs
 class Burst : public MoveItem
 {
@@ -118,9 +121,9 @@ private:
    void initialize(const Point &pos, const Point &vel, BfObject *shooter);
 
 public:
-   Burst(const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when burst is fired
-   Burst(lua_State *L = NULL);                                    // Combined Lua / C++ default constructor -- used in Lua only at the moment
-   ~Burst();                                                      // Destructor
+   Burst(const Point &pos, const Point &vel, BfObject *shooter, F32 radius = BurstRadius);  // Constructor -- used when burst is fired
+   Burst(lua_State *L = NULL);                                                              // Combined Lua / C++ default constructor
+   ~Burst();                                                                                // Destructor
 
    enum Constants
    {
@@ -175,7 +178,7 @@ private:
 public:
    static const S32 ArmedMask = Burst::FirstFreeMask;
 
-   static const S32 SensorRadius = 50;
+   static const S32 SensorRadius = 50;          // Radius of outer circle when mine is rendered
    static const S32 InnerBlastRadius = 100;
    static const S32 OuterBlastRadius = 250;
 
