@@ -553,7 +553,7 @@ bool Teleporter::getCollisionPoly(Vector<Point> &polyPoints) const
 
 void Teleporter::computeExtent()
 {
-   setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS * 2));
+   setExtent(Rect(getVert(0), (F32)TELEPORTER_RADIUS * 2));    // This Rect constructor takes a diameter, not a radius
 }
 
 
