@@ -700,7 +700,7 @@ void MoveObject::updateInterpolation()
          Point deltaP = getActualPos() - getRenderPos();
          F32 distance = deltaP.len();
 
-         if(!distance)
+         if(distance == 0)
             goto interpDone;
 
          deltaP.normalize();
