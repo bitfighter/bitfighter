@@ -3170,11 +3170,11 @@ void EditorUserInterface::changeBarrierWidth(S32 amt)
       saveUndoState(); 
 
    fillVector2.clear();    // fillVector gets modified in some child function, so use our secondary reusable container
-   getDatabase()->findObjects((TestFunc)isLineItemType, fillVector2);
+   getDatabase()->findObjects((TestFunc)isWallItemType, fillVector2);
 
    for(S32 i = 0; i < fillVector2.size(); i++)
    {
-      LineItem *obj = dynamic_cast<LineItem *>(fillVector2[i]);   // Walls are a subclass of LineItem, so this will work for both
+      WallItem *obj = static_cast<WallItem *>(fillVector2[i]);
       if(obj->isSelected())
          obj->changeWidth(amt);     
    }

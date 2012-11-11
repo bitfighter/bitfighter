@@ -410,6 +410,23 @@ static F32 getWallEditorRadius(F32 currentScale)
 }
 
 
+void WallItem::changeWidth(S32 amt)
+{
+   S32 width = mWidth;
+
+   if(amt > 0)
+      width += amt - (S32) width % amt;    // Handles rounding
+   else
+   {
+      amt *= -1;
+      width -= ((S32) width % amt) ? (S32) width % amt : amt;      // Dirty, ugly thing
+   }
+
+   setWidth(width);
+   onGeomChanged();
+}
+
+
 void WallItem::onGeomChanged()
 {
    // Fill extendedEndPoints from the vertices of our wall's centerline, or from PolyWall edges

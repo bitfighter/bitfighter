@@ -158,6 +158,8 @@ public:
 
    void processEndPoints();  
 
+   void changeWidth(S32 amt);
+
    void render();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
