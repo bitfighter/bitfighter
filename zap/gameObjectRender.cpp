@@ -274,8 +274,12 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
 // Draw an n-sided polygon
 void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
+   static const S32 MaxSides = 32;
+
+   TNLAssert(sides <= MaxSides, "Too many sides!");
+
    // There is no polygon greater than 12 (I think) so I choose 32 sides to be safe
-   static F32 polygonVertexArray[32 * 2];  // 2 data points per vertex (x,y)
+   static F32 polygonVertexArray[MaxSides * 2];  // 2 data points per vertex (x,y)
 
    F32 theta = 0;
    F32 dTheta = FloatTau / sides;
