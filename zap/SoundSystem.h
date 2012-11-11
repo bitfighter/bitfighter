@@ -140,6 +140,9 @@ enum SFXProfiles
    SFXCoreExplode,
    SFXCorePanelExplode,
 
+   // Seekers
+   SFXSeekerFire,
+
    // Other noises
    SFXAchievementEarned,
 

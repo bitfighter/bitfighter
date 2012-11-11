@@ -1545,8 +1545,9 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
    else if(!exploded && !isCollisionEnabled() && getActualVel().lenSquared() != 0)
       enableCollision();
 
-   if(stream->readFlag())
-      SoundSystem::playSoundEffect(SFXBurst, getPos(), getVel());
+   if(stream->readFlag())     // InitialMask --> seeker was just created
+      SoundSystem::playSoundEffect(SFXSeekerFire, getPos(), getVel());
+
 }
 
 

@@ -44,7 +44,6 @@ namespace Zap {
 //
 // Must keep this aligned with SFXProfiles!!
 //
-
 //   fileName     isRelative gainScale isLooping  fullGainDistance  zeroGainDistance
 static SFXProfile sfxProfilesModern[] = {
  // Utility sounds
@@ -118,8 +117,11 @@ static SFXProfile sfxProfilesModern[] = {
  {  "core_explode.wav",          false, 1.0f,  false, 300, 1000 },
  {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
 
+ // Seekers
+ {  "seeker_fire.wav",         true,  1.0f, false, 150, 600 },
+
  // Other
- {  "achievement_earned.wav",  true,  1.0f, false, 0,   0 },
+ {  "achievement_earned.wav",  true,  1.0f, false,   0,   0 },
 
  {  NULL, false, 0, false, 0, 0 },
 };
@@ -200,8 +202,11 @@ static SFXProfile sfxProfilesClassic[] = {
  {  "core_explode.wav",          false, 1.0f,  false, 300, 1000 },
  {  "core_panel_explode.wav",    false, 2.0f,  false, 300, 1000 },
 
+  // Seekers
+ {  "seeker_fire.wav",         true,  1.0f, false, 150, 600 },
+
  // Other
- {  "achievement_earned.wav",  true,  1.0f, false, 0,   0 },
+ {  "achievement_earned.wav",  true,  1.0f, false,   0,   0 },
 
  {  NULL, false, 0, false, 0, 0 },
 };
@@ -237,7 +242,8 @@ Timer SoundSystem::mMusicFadeTimer;
 // Constructor
 SoundSystem::SoundSystem()
 {
-   // Do nothing
+   TNLAssert(NumSFXBuffers == ARRAYSIZE(sfxProfilesModern),  "SFX out of alignment!");
+   TNLAssert(NumSFXBuffers == ARRAYSIZE(sfxProfilesClassic), "SFX out of alignment!");
 }
 
 
