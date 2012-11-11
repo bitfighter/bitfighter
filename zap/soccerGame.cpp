@@ -412,9 +412,8 @@ void SoccerBallItem::idle(BfObject::IdleCallPath path)
       setActualVel(getActualVel() * accelFraction);
       setRenderVel(getActualVel() * accelFraction);
    }
-
-   // The following block will add some friction to the soccer ball
-   else if(getActualVel().lenSquared() > 0)
+   
+   else if(getActualVel().lenSquared() > 0)  // Add some friction to the soccer ball
    {
       F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
    
