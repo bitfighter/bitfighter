@@ -83,7 +83,7 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
          (new Projectile(weapon, firePos, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponBurst:                                         // 0.9 to fix firing through barriers
-         (new BurstProjectile(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
+         (new Burst(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponMine:
          (new Mine(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());

@@ -110,7 +110,7 @@ public:
 
 
 // Basic burst object, and the base clase used for both mines and spybugs
-class BurstProjectile : public MoveItem
+class Burst : public MoveItem
 {
    typedef MoveItem Parent;
 
@@ -118,9 +118,9 @@ private:
    void initialize(const Point &pos, const Point &vel, BfObject *shooter);
 
 public:
-   BurstProjectile(const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when burst is fired
-   BurstProjectile(lua_State *L = NULL);                                    // Combined Lua / C++ default constructor -- used in Lua only at the moment
-   ~BurstProjectile();                                                      // Destructor
+   Burst(const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when burst is fired
+   Burst(lua_State *L = NULL);                                    // Combined Lua / C++ default constructor -- used in Lua only at the moment
+   ~Burst();                                                      // Destructor
 
    enum Constants
    {
@@ -149,10 +149,10 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   TNL_DECLARE_CLASS(BurstProjectile);
+   TNL_DECLARE_CLASS(Burst);
 
    //// Lua interface
-   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(BurstProjectile);
+   LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Burst);
 
    static const char *luaClassName;
    static const luaL_reg luaMethods[];
@@ -165,15 +165,15 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Mine : public BurstProjectile
+class Mine : public Burst
 {
-   typedef BurstProjectile Parent;
+   typedef Burst Parent;
 
 private:
    void initialize(const Point &pos, Ship *planter);
 
 public:
-   static const S32 ArmedMask = BurstProjectile::FirstFreeMask;
+   static const S32 ArmedMask = Burst::FirstFreeMask;
 
    static const S32 SensorRadius = 50;
    static const S32 InnerBlastRadius = 100;
@@ -226,9 +226,9 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class SpyBug : public BurstProjectile
+class SpyBug : public Burst
 {
-   typedef BurstProjectile Parent;
+   typedef Burst Parent;
 
 private:
    void initialize(const Point &pos, Ship *owner);

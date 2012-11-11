@@ -1906,7 +1906,7 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(typeNumber == BulletTypeNumber)
       weaponType = static_cast<Projectile *>(damager)->mWeaponType;
    else if(typeNumber == BurstTypeNumber || typeNumber == MineTypeNumber || typeNumber == SpyBugTypeNumber)
-      weaponType = static_cast<BurstProjectile *>(damager)->mWeaponType;
+      weaponType = static_cast<Burst *>(damager)->mWeaponType;
    else if(typeNumber == SeekerTypeNumber)
       weaponType = static_cast<Seeker *>(damager)->mWeaponType;
    else
@@ -1981,7 +1981,7 @@ void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *client
          if(killerObject->getObjectTypeNumber() == BulletTypeNumber)
             shooter = static_cast<Projectile *>(killerObject)->mShooter;
          if(killerObject->getObjectTypeNumber() == BurstTypeNumber)
-            shooter = static_cast<BurstProjectile *>(killerObject)->mShooter;
+            shooter = static_cast<Burst *>(killerObject)->mShooter;
          if(killerObject->getObjectTypeNumber() == SeekerTypeNumber)
             shooter = static_cast<Seeker *>(killerObject)->mShooter;
 
@@ -2701,11 +2701,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    clientGame->getGameObjDatabase()->findObjects((TestFunc)isGrenadeType, fillVector);
 
    for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      BurstProjectile *gp = static_cast<BurstProjectile *>(fillVector[i]);
-
-      gp->mIsOwnedByLocalClient = false;
-   }
+      static_cast<Burst *>(fillVector[i])->mIsOwnedByLocalClient = false;
 #endif
 }
 

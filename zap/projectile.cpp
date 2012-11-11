@@ -483,33 +483,33 @@ S32 Projectile::getWeapon(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_NETOBJECT(BurstProjectile);
+TNL_IMPLEMENT_NETOBJECT(Burst);
 
-const F32 BurstProjectile_Radius = 7;
-const F32 BurstProjectile_Mass = 1;
+const F32 BurstRadius = 7;
+const F32 BurstMass = 1;
 
 // Constructor -- used when burst is fired
-BurstProjectile::BurstProjectile(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(pos, true, BurstProjectile_Radius, BurstProjectile_Mass)
+Burst::Burst(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(pos, true, BurstRadius, BurstMass)
 {
    initialize(pos, vel, shooter);
 }
 
 
 // Combined Lua / C++ default constructor -- used in Lua only at the moment
-BurstProjectile::BurstProjectile(lua_State *L)
+Burst::Burst(lua_State *L)
 {
    initialize(Point(0,0), Point(0,0), NULL);
 }
 
 
 // Destructor
-BurstProjectile::~BurstProjectile()
+Burst::~Burst()
 {
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
-void BurstProjectile::initialize(const Point &pos, const Point &vel, BfObject *shooter)
+void Burst::initialize(const Point &pos, const Point &vel, BfObject *shooter)
 {
    mObjectTypeNumber = BurstTypeNumber;
    mWeaponType = WeaponBurst;
@@ -542,7 +542,7 @@ void BurstProjectile::initialize(const Point &pos, const Point &vel, BfObject *s
 
 
 // Runs on client and server
-void BurstProjectile::idle(IdleCallPath path)
+void Burst::idle(IdleCallPath path)
 {
    bool collisionDisabled = false;
    GameConnection *gc = NULL;
@@ -591,7 +591,7 @@ void BurstProjectile::idle(IdleCallPath path)
 }
 
 
-U32 BurstProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 Burst::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
 
@@ -601,21 +601,21 @@ U32 BurstProjectile::packUpdate(GhostConnection *connection, U32 updateMask, Bit
 }
 
 
-void BurstProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
+void Burst::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
-   TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
+   TNLAssert(connection, "Invalid connection to server in Burst//projectile.cpp");
 
    if(stream->readFlag())
       doExplosion(getActualPos());
 
    if(stream->readFlag())
-      SoundSystem::playSoundEffect(SFXBurstProjectile, getActualPos(), getActualVel());
+      SoundSystem::playSoundEffect(SFXBurst, getActualPos(), getActualVel());
 }
 
 
-void BurstProjectile::damageObject(DamageInfo *theInfo)
+void Burst::damageObject(DamageInfo *theInfo)
 {
    // If we're being damaged by another burst, explode...
    if(theInfo->damageType == DamageTypeArea || theInfo->damagingObject->getObjectTypeNumber() == SeekerTypeNumber)
@@ -630,7 +630,7 @@ void BurstProjectile::damageObject(DamageInfo *theInfo)
 }
 
 
-void BurstProjectile::doExplosion(const Point &pos)
+void Burst::doExplosion(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    if(isGhost())
@@ -647,7 +647,7 @@ void BurstProjectile::doExplosion(const Point &pos)
 
 // Also used for mines and spybugs
 // Server only
-void BurstProjectile::explode(const Point &pos)
+void Burst::explode(const Point &pos)
 {
    if(exploded) return;
 
@@ -674,17 +674,17 @@ void BurstProjectile::explode(const Point &pos)
 }
 
 
-bool BurstProjectile::collide(BfObject *otherObj)
+bool Burst::collide(BfObject *otherObj)
 {
    return true;
 }
 
 
-bool BurstProjectile::canAddToEditor() { return false; }      // No bursts in the editor
+bool Burst::canAddToEditor() { return false; }      // No bursts in the editor
 
 
 
-void BurstProjectile::renderItem(const Point &pos)
+void Burst::renderItem(const Point &pos)
 {
    if(exploded)
       return;
@@ -708,17 +708,17 @@ void BurstProjectile::renderItem(const Point &pos)
 #define LUA_METHODS(CLASS, METHOD) \
    METHOD(CLASS, getWeapon, ARRAYDEF({{ END }}), 1 ) \
 
-GENERATE_LUA_METHODS_TABLE(BurstProjectile, LUA_METHODS);
-GENERATE_LUA_FUNARGS_TABLE(BurstProjectile, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Burst, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(Burst, LUA_METHODS);
 
 #undef LUA_METHODS
 
 
-const char *BurstProjectile::luaClassName = "Burst";
-REGISTER_LUA_SUBCLASS(BurstProjectile, MoveObject);
+const char *Burst::luaClassName = "Burst";
+REGISTER_LUA_SUBCLASS(Burst, MoveObject);
 
 
-S32 BurstProjectile::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 Burst::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 
 ////////////////////////////////////////
@@ -746,14 +746,14 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor -- used when mine is planted
-Mine::Mine(const Point &pos, Ship *planter) : BurstProjectile(pos, Point(0,0), planter)
+Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter)
 {
    initialize(pos, planter);
 }
 
 
 // Combined Lua / C++ default constructor -- used in Lua and editor
-Mine::Mine(lua_State *L) : BurstProjectile(Point(0,0), Point(0,0), NULL)
+Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
 {
    initialize(Point(0,0), NULL);
 }
@@ -992,7 +992,7 @@ const LuaFunctionProfile Mine::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *Mine::luaClassName = "Mine";
-REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
+REGISTER_LUA_SUBCLASS(Mine, Burst);
 
 
 //////////////////////////////////
@@ -1001,14 +1001,14 @@ REGISTER_LUA_SUBCLASS(Mine, BurstProjectile);
 TNL_IMPLEMENT_NETOBJECT(SpyBug);
 
 // Constructor -- used when SpyBug is deployed
-SpyBug::SpyBug(const Point &pos, Ship *planter) : BurstProjectile(pos, Point(0,0), planter)
+SpyBug::SpyBug(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter)
 {
    initialize(pos, planter);
 }
 
 
 // Combined Lua / C++ default constructor -- used in Lua and editor
-SpyBug::SpyBug(lua_State *L)  : BurstProjectile(Point(0,0), Point(0,0), NULL)
+SpyBug::SpyBug(lua_State *L)  : Burst(Point(0,0), Point(0,0), NULL)
 {
    initialize(Point(0,0), NULL);
 }
@@ -1020,7 +1020,7 @@ void SpyBug::initialize(const Point &pos, Ship *planter)
    mWeaponType = WeaponSpyBug;
 
    if(!planter)
-      setTeam(TEAM_NEUTRAL);     // BurstProjectile will set this to TEAM_HOSTILE
+      setTeam(TEAM_NEUTRAL);     // Burst will set this to TEAM_HOSTILE
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1246,7 +1246,7 @@ const LuaFunctionProfile SpyBug::functionArgs[] = { { NULL, { }, 0 } };
 
 
 const char *SpyBug::luaClassName = "SpyBugItem";
-REGISTER_LUA_SUBCLASS(SpyBug, BurstProjectile);
+REGISTER_LUA_SUBCLASS(SpyBug, Burst);
 
 
 ////////////////////////////////////////
@@ -1536,7 +1536,7 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    Parent::unpackUpdate(connection, stream);
 
-   TNLAssert(connection, "Invalid connection to server in BurstProjectile//projectile.cpp");
+   TNLAssert(connection, "Invalid connection to server in Burst//projectile.cpp");
 
    bool wasExploded = exploded;
    exploded = stream->readFlag();
@@ -1549,7 +1549,7 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
       enableCollision();
 
    if(stream->readFlag())
-      SoundSystem::playSoundEffect(SFXBurstProjectile, getPos(), getVel());
+      SoundSystem::playSoundEffect(SFXBurst, getPos(), getVel());
 }
 
 
