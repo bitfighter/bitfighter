@@ -585,10 +585,8 @@ void renderAimVector()
 void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
                       const Vector<Point> *dests, U32 trackerCount)
 {
-   enum {
-      NumColors = 6,
-      MaxParticles = 100,
-   };
+   const S32 NumColors = 6;
+   const S32 MaxParticles = 100;
 
    // Object to hold data on each swirling particle+trail
    struct Tracker

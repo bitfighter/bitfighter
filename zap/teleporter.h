@@ -92,7 +92,7 @@ public:
       TeleporterExplosionTime = 1000,
    };
 
-   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
+   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter -- is this actually a radius, or a diameter?!?
 
 private:
    S32 mLastDest;    // Destination of last ship through
