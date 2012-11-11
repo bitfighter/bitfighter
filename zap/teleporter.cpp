@@ -633,7 +633,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    if(mDestManager.getDestCount() > 0)
    {
       // Check for players within range.  If found, send them to dest.
-      Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS);
+      Rect queryRect(getVert(0), (F32)TELEPORTER_RADIUS * 2);
 
       foundObjects.clear();
       findObjects((TestFunc)isShipType, foundObjects, queryRect);
