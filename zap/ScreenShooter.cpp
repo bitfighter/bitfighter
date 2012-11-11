@@ -84,6 +84,7 @@ void ScreenShooter::resizeViewportToCanvas(UIManager *uiManager)
    glScissor(0, 0, width, height);
 
    // Now render a frame to draw our new viewport to the back buffer
+   glClear(GL_COLOR_BUFFER_BIT);   // Not sure why this is needed
    uiManager->renderCurrent();
 }
 
@@ -145,7 +146,7 @@ void ScreenShooter::saveScreenshot(UIManager *uiManager, GameSettings *settings)
    // We default to resizing the opengl viewport to the standard canvas size, unless we're
    // in the editor or our window is smaller than the canvas size
    bool doResize = uiManager->getCurrentUI()->getMenuID() != EditorUI &&
-         gScreenInfo.getWindowWidth() >= gScreenInfo.getGameCanvasWidth();
+         gScreenInfo.getWindowWidth() > gScreenInfo.getGameCanvasWidth();
 
    // Change opengl viewport temporarily to have consistent screenshot sizes
    if(doResize)
