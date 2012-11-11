@@ -2273,27 +2273,28 @@ void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask)
 }
 
 
-void drawSquare(const Point &pos, F32 size, bool filled)
+// Pos is the square's center
+void drawSquare(const Point &pos, F32 radius, bool filled)
 {
-   UserInterface::drawRect(pos.x - size, pos.y - size, pos.x + size, pos.y + size, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+   UserInterface::drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
 }
 
 
-void drawSquare(const Point &pos, S32 size, bool filled)
+void drawSquare(const Point &pos, S32 radius, bool filled)
 {
-    drawSquare(pos, F32(size), filled);
+    drawSquare(pos, F32(radius), filled);
 }
 
 
-void drawFilledSquare(const Point &pos, F32 size)
+void drawFilledSquare(const Point &pos, F32 radius)
 {
-    drawSquare(pos, size, true);
+    drawSquare(pos, radius, true);
 }
 
 
-void drawFilledSquare(const Point &pos, S32 size)
+void drawFilledSquare(const Point &pos, S32 radius)
 {
-    drawSquare(pos, F32(size), true);
+    drawSquare(pos, F32(radius), true);
 }
 
 
