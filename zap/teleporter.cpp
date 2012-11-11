@@ -683,7 +683,6 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 void Teleporter::render()
 {
 #ifndef ZAP_DEDICATED
-
    // Render at a different radius depending on if a ship has just gone into the teleport
    // and we are waiting for the teleport timeout to expire
    F32 radiusFraction;
