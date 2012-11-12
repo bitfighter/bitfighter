@@ -1197,9 +1197,12 @@ void BfObject::controlMoveReplayComplete()
 void BfObject::writeCompressedVelocity(const Point &vel, U32 max, BitStream *stream)
 {
    U32 len = U32(vel.len());
+
+   // Write a flag designating 0; 0 is 0, rounding errors highly undesireable
    if(stream->writeFlag(len == 0))
       return;
 
+   // Write actual x and y components as floats
    if(stream->writeFlag(len > max))
    {
       stream->write(vel.x);
@@ -1207,10 +1210,9 @@ void BfObject::writeCompressedVelocity(const Point &vel, U32 max, BitStream *str
    }
    else
    {
+      // Write a length and angle
       F32 theta = atan2(vel.y, vel.x);
 
-      //RDW This needs to be writeSignedFloat.
-      //Otherwise, it keeps dropping negative thetas.
       stream->writeSignedFloat(theta * FloatInverse2Pi, 10);
       stream->writeRangedU32(len, 0, max);
    }
@@ -1231,8 +1233,6 @@ void BfObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
    }
    else
    {
-      //RDW This needs to be readSignedFloat.
-      //See above.
       F32 theta = stream->readSignedFloat(10) * Float2Pi;
       F32 magnitude = (F32)stream->readRangedU32(0, max);
       vel.set(cos(theta) * magnitude, sin(theta) * magnitude);
