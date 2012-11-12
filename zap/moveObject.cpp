@@ -957,7 +957,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setActualVel(pt);
 
       positionChanged = true;
-      interpolate = !stream->readFlag();
+      interpolate = !stream->readFlag();     // WarpPositionMask
    }
 
    if(positionChanged)
@@ -969,6 +969,7 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
       else
       {
+         // Not interpolating here... just warp the object to its reported location
          mInterpolating = false;
 
          setRenderPos(getActualPos());
@@ -2102,7 +2103,6 @@ U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(!stream->writeFlag(hasExploded))
          stream->writeInt(mTailLength, 5);
    }
-
 
    return retMask;
 }
