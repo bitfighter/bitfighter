@@ -235,7 +235,7 @@ void ClientGame::joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
    //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
    //{
-   //   gClientGame = gClientGame2;
+   //   gClientGame = gClientGame2;-*-
    //   joinGame(remoteAddress, isFromMaster, local);
    //   gClientGame = gClientGame1;
    //}
@@ -255,7 +255,7 @@ void ClientGame::closeConnectionToGameServer()
 
    getUIManager()->getHostMenuUserInterface()->levelLoadDisplayDisplay = false;
 
-   clearClientList();      // Get rid of any ClientInfos we have for remote players
+   onGameOver();  
 }
 
 
@@ -534,7 +534,7 @@ void ClientGame::idle(U32 timeDelta)
 
    computeWorldObjectExtents();
 
-   if(!mInCommanderMap && mCommanderZoomDelta != 0)                        // Zooming into normal view
+   if(!mInCommanderMap && mCommanderZoomDelta != 0)               // Zooming into normal view
    {
       if(timeDelta > mCommanderZoomDelta)
          mCommanderZoomDelta = 0;
@@ -714,6 +714,19 @@ void ClientGame::onPlayerQuit(const StringTableEntry &name)
 
    if(getUIMode() == TeamShuffleMode)
       mUIManager->getGameUserInterface()->getTeamShuffleHelper(this)->onPlayerQuit();
+}
+
+
+// Gets run when game is really and truly over, after post-game scoreboard is displayed.  Over.
+void ClientGame::onGameOver()
+{
+   clearClientList();                   // Erase all info we have about fellow clients
+
+   if(getUIMode() == TeamShuffleMode)   // Exit Shuffle helper to keep things from getting too crashy
+      enterMode(PlayMode);             
+
+   // Kill any objects lingering in the database, such as forcefields
+   getGameObjDatabase()->removeEverythingFromDatabase();    
 }
 
 

@@ -1820,7 +1820,7 @@ void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 
 
 // Gets run when game is really and truly over, after post-game scoreboard is displayed.  Over.
-// Some keywords to help find this function again: level over, change level, game over
+// Some keywords to help find this function again: level over, change level, game over, onGameOver
 // Client only
 void GameConnection::onEndGhosting()
 {
@@ -1828,11 +1828,7 @@ void GameConnection::onEndGhosting()
    TNLAssert(isConnectionToServer() && mClientGame, "when else is this called?");
    
    Parent::onEndGhosting();
-   mClientGame->clearClientList();                   // Erase all info we have about fellow clients
-
-   if(mClientGame->getUIMode() == TeamShuffleMode)   // Exit Shuffle helper to keep things from getting too crashy
-      mClientGame->enterMode(PlayMode);             
-
+   mClientGame->onGameOver();
 #endif
 }
 
