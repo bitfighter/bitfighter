@@ -536,7 +536,6 @@ void EngineeredItem::computeBufferForBotZone(Vector<Point> &zonePoints)
 }
 
 
-
 void EngineeredItem::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
