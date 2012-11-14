@@ -329,7 +329,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
          if(mGameMusicList[i] == mMenuMusicFile)
          {
             mMenuMusicValid = true;
-            mGameMusicList.erase(i);
+            mGameMusicList.erase_fast(i);
             break;
          }
       }
@@ -340,7 +340,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
          if(mGameMusicList[i] == mCreditsMusicFile)
          {
             mCreditsMusicValid = true;
-            mGameMusicList.erase(i);
+            mGameMusicList.erase_fast(i);
             break;
          }
       }
