@@ -14,6 +14,7 @@
 #include "IniFile.h"
 #include "ScreenInfo.h"
 #include "Joystick.h"
+#include "Cursor.h"
 #include "ClientGame.h"
 #include "InputCode.h"     // For InputCodeManager def
 #include "ScreenShooter.h"
@@ -278,7 +279,21 @@ void Event::onEvent(ClientGame *game, SDL_Event* event)
 
                // Released all keys when we lose focus.  No more stickies!
                InputCodeManager::resetStates();
+
+               // Workaround for SDL2 issue where the cursor disappears completely if you
+               // CMD + TAB to another application and come back again
+#ifdef TNL_OS_MAC_OSX
+               Cursor::disableCursor();
+               Cursor::enableCursor();
+#endif
                break;
+
+#ifdef TNL_OS_MAC_OSX
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+               Cursor::disableCursor();
+               Cursor::enableCursor();
+               break;
+#endif
 
             default:
                break;
