@@ -79,14 +79,19 @@ const char *SaveException::what() const throw ()
 
 // Collection of useful string things
 
-string ExtractDirectory( const string& path )
+string extractDirectory(const string &path )
 {
   return path.substr( 0, path.find_last_of( '\\' ) + 1 );
 }
 
-string ExtractFilename( const string& path )
+string extractFilename(const string &path )
 {
   return path.substr( path.find_last_of( '\\' ) + 1 );
+}
+
+string extractExtension(const string &path )
+{
+  return path.substr( path.find_last_of( '.' ) + 1 );
 }
 
 
@@ -420,7 +425,7 @@ bool makeSureFolderExists(const string &folder)
 
 
 // Read files from folder
-bool getFilesFromFolder(const string &dir, Vector<string> &files, const string &extension)
+bool getFilesFromFolder(const string &dir, Vector<string> &files, const string extensions[], S32 extensionCount)
 {
    DIR *dp;
    struct dirent *dirp;
@@ -431,10 +436,20 @@ bool getFilesFromFolder(const string &dir, Vector<string> &files, const string &
    while ((dirp = readdir(dp)) != NULL)
    {
       string name = string(dirp->d_name);
-      if (extension.length() > 0) {
-         if(name.length() > extension.length() + 1 &&  // +1 -> include the dot '.'
-               name.substr(name.length() - extension.length(), extension.length()) == extension)
-            files.push_back(name);
+
+      if(extensionCount > 0) 
+      {
+         string extension = lcase(extractExtension(name));
+
+         for(S32 i = 0; i < extensionCount; i++)
+         {
+            if(name.length() > extensions[i].length() + 1)  // +1 -> include the dot '.'
+            {
+               string ext = lcase(extractExtension(extensions[i]));
+               if(ext == extension)
+                  files.push_back(name);
+            }
+         }
       }
       else
          if (name.length() > 2)  // quick hack to not include . and ..

@@ -929,7 +929,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 // This block is Windows only, so it can do all sorts of icky stuff...
 void launchUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
 {
-   string updaterPath = ExtractDirectory(bitfighterExecutablePathAndFilename) + "\\updater";
+   string updaterPath = extractDirectory(bitfighterExecutablePathAndFilename) + "\\updater";
    string updaterFileName = updaterPath + "\\bfup.exe";
 
    S32 buildVersion = forceUpdate ? 0 : BUILD_VERSION;

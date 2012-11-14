@@ -227,7 +227,7 @@ Section "Install"
   File /r "..\..\..\resource\sfx\*.wav"
 
   SetOutPath "$DOCUMENTS\Bitfighter\music"
-  File /r "..\..\..\resource\music\*.ogg"
+  File /r "..\..\..\resource\music\*.*"
   
   SetOutPath "$DOCUMENTS\Bitfighter\editor_plugins"
   File /r "..\..\..\resource\editor_plugins\*.*"

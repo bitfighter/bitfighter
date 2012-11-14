@@ -569,8 +569,9 @@ Vector<string> GameSettings::getLevelList(const string &levelDir, bool ignoreCmd
       levelList = mCmdLineParams[CmdLineParams::LEVEL_LIST];
    else
    {
-      // Build our level list by looking at the filesystem  
-      if(!getFilesFromFolder(levelDir, levelList, "level"))    // True if error reading level...  print message... or just PANIC!!
+      // Build our level list by looking at the filesystem 
+      const string extList[] = {"level"};
+      if(!getFilesFromFolder(levelDir, levelList, extList, ARRAYSIZE(extList)))    // Returns true if error 
       {
          logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", levelDir.c_str());
          return levelList;    // empty

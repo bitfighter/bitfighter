@@ -1,0 +1,17 @@
+Meun Music by Chris Neal: 
+menu.ogg         Silhouette Strings - Basses     http://www.looperman.com/loops/detail/55994
+
+Game Music by Andreas Viklund:
+alt_jag_vill.xm  Allt jag vill         http://modarchive.org/index.php?request=view_by_moduleid&query=34315
+av_letme.xm      Let me in             http://modarchive.org/index.php?request=view_by_moduleid&query=34322
+av_invis.xm      Invisible [TSEC]      http://modarchive.org/index.php?request=view_by_moduleid&query=34319
+av_ktb.xm        Kick the beat [TSEC]  http://modarchive.org/index.php?request=view_by_moduleid&query=34320
+feelings.xm      Feelings              http://modarchive.org/index.php?request=view_by_moduleid&query=41763
+dreams.xm        Dreams                http://modarchive.org/index.php?request=view_by_moduleid&query=40503
+dreams3.xm       Dreams 3              http://modarchive.org/index.php?request=view_by_moduleid&query=40518
+faraway.xm       Faraway               http://modarchive.org/index.php?request=view_by_moduleid&query=41378
+tsec-hot.xm      History of Time       http://modarchive.org/index.php?request=view_by_moduleid&query=64378
+av_adr.xm        A.D.R (Lagoona rmx)   http://modarchive.org/index.php?request=view_by_moduleid&query=34314
+
+Credits Music extracted from Die Walkure, composed by Richard Wagner, performed by the United States Marine Band
+      http://musopen.org/music/piece/488

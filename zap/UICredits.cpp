@@ -73,6 +73,8 @@ static const char *gameCredits[] = {
    "Jonathan Hansen",
    "-",
    "Music:",
+   "Andreas Viklund",
+   "Chris Neal",
    "vovk50",
    "United States Marine Band",
    "-",
