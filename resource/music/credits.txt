@@ -12,3 +12,6 @@ dreams3.xm       Dreams 3              http://modarchive.org/index.php?request=v
 faraway.xm       Faraway               http://modarchive.org/index.php?request=view_by_moduleid&query=41378
 tsec-hot.xm      History of Time       http://modarchive.org/index.php?request=view_by_moduleid&query=64378
 av_adr.xm        A.D.R (Lagoona rmx)   http://modarchive.org/index.php?request=view_by_moduleid&query=34314
+
+Credits Music extracted from Die Walkure, composed by Richard Wagner, performed by the United States Marine Band
+      http://musopen.org/music/piece/488
