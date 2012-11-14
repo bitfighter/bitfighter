@@ -891,7 +891,7 @@ void setupLogging(const string &logDir)
 // Function to handle one-time update tasks
 // Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
 // IniSettings.version, and the new version is in BUILD_VERSION.
-void checkIfThisIsAnUpdate(GameSettings *settings)
+void checkIfThisIsAnUpdate(FolderManager *folderManager, GameSettings *settings)
 {
    if(settings->getIniSettings()->version == BUILD_VERSION && false)
       return;
@@ -920,6 +920,14 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 #ifdef TNL_OS_MAC_OSX
       settings->getIniSettings()->useFakeFullscreen = true;
 #endif
+   }
+
+   // Upgrading to 018
+   if(previousVersion < 4538)
+   {
+      // Remove game.ogg from music folder, if it exists...
+      if(remove(joindir(folderManager->sfxDir, "game.ogg").c_str()) != 0)
+         logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
    }
 
 
@@ -1107,7 +1115,7 @@ int main(int argc, char **argv)
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
-   checkIfThisIsAnUpdate(settings);             // Make any adjustments needed when we run for the first time after an upgrade
+   checkIfThisIsAnUpdate(folderManager, settings);  // Make any adjustments needed when we run for the first time after an upgrade
 
 
    if(settings->isDedicatedServer())
