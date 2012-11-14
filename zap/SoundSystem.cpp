@@ -321,7 +321,7 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
       logprintf(LogConsumer::LogWarning, "Could not read music files from folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else if(mGameMusicList.size() == 0)
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
-   else     // Got some music!
+   else     // Got us some music!
    {
       // Remove the menu music from the file list
       for(S32 i = 0; i < mGameMusicList.size(); i++)
