@@ -900,12 +900,14 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    gINI.deleteHeaderComments();
    gINI.deleteAllSectionComments();
 
+   U32 previousVersion = settings->getIniSettings()->version;     // For readability
+
    // version specific changes
    // 016:
-   if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
+   if(previousVersion < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
 
-   if(settings->getIniSettings()->version < 3737)
+   if(previousVersion < 3737)
    {
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
       gINI.addSection("EditorPlugins");
@@ -913,12 +915,14 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    }
 
    // 017a:
-   if(settings->getIniSettings()->version < 4262)
+   if(previousVersion < 4262)
    {
 #ifdef TNL_OS_MAC_OSX
       settings->getIniSettings()->useFakeFullscreen = true;
 #endif
    }
+
+
 }
 
 
