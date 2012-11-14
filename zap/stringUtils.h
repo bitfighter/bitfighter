@@ -55,9 +55,9 @@ struct SaveException : public exception
 
 // Collection of useful string things
 
-string ExtractDirectory(const string& path);
-
-string ExtractFilename(const string& path);
+string extractDirectory(const string &path);
+string extractFilename(const string &path);
+string extractExtension(const string &path);
 
 string itos(S32 i);
 string itos(U32 i);
@@ -95,7 +95,7 @@ bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 // File utils
 bool fileExists(const string &path);               // Does file exist?
 bool makeSureFolderExists(const string &dir);      // Like the man said: Make sure folder exists
-bool getFilesFromFolder(const string& dir, Vector<string>& files, const string& extension = "");
+bool getFilesFromFolder(const string &dir, Vector<string> &files, const string extensions[] = 0, S32 extensionCount = 0);
 bool safeFilename(const char *str);
 
 
