@@ -126,7 +126,7 @@ void MoveObject::onAddedToGame(Game *game)
 
 #ifndef ZAP_DEDICATED
    if(isGhost())     // Client only
-      this->setControllingClient(static_cast<ClientGame *>(game)->getConnectionToServer());
+      setControllingClient(static_cast<ClientGame *>(game)->getConnectionToServer());
 #endif
 }
 
