@@ -953,13 +953,13 @@ void launchWindowsUpdater(string bitfighterExecutablePathAndFilename, bool force
 #endif
 
 
-void checkOnlineUpdate(GameSettings *settings)
+void checkOnlineUpdate(string exePath, GameSettings *settings)
 {
    // Windows only
 #ifdef USE_BFUP
    // Spawn external updater tool to check for new version of Bitfighter
    if(settings->getIniSettings()->useUpdater)
-      launchWindowsUpdater(argv[0], settings->getForceUpdate());
+      launchWindowsUpdater(exePath, settings->getForceUpdate());
 #endif   // USE_BFUP
 
    // Mac OSX only
@@ -1131,7 +1131,7 @@ int main(int argc, char **argv)
    loadSettingsFromINI(&gINI, settings);
 
    // Time to check if there is an online update (for any relevant platforms)
-   checkOnlineUpdate(settings);
+   checkOnlineUpdate(argv[0], settings);
 
    // Make any adjustments needed when we run for the first time after an upgrade
    checkIfThisIsAnUpdate(settings);
