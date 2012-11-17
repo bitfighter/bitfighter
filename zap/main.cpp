@@ -888,46 +888,12 @@ void setupLogging(const string &logDir)
 }
 
 
-// Function to handle one-time update tasks
-// Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
-// IniSettings.version, and the new version is in BUILD_VERSION.
-void checkIfThisIsAnUpdate(GameSettings *settings)
-{
-   if(settings->getIniSettings()->version == BUILD_VERSION && false)
-      return;
-
-   // Wipe out all comments; they will be replaced with any updates
-   gINI.deleteHeaderComments();
-   gINI.deleteAllSectionComments();
-
-   // version specific changes
-   // 016:
-   if(settings->getIniSettings()->version < 1840 && settings->getIniSettings()->maxBots == 127)
-      settings->getIniSettings()->maxBots = 10;
-
-   if(settings->getIniSettings()->version < 3737)
-   {
-      settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
-      gINI.addSection("EditorPlugins");
-      gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+;|draw_arcs.lua|Make curves!");
-   }
-
-   // 017a:
-   if(settings->getIniSettings()->version < 4262)
-   {
-#ifdef TNL_OS_MAC_OSX
-      settings->getIniSettings()->useFakeFullscreen = true;
-#endif
-   }
-}
-
-
 #ifdef USE_BFUP
 #include <direct.h>
 #include <stdlib.h>
 
 // This block is Windows only, so it can do all sorts of icky stuff...
-void launchUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
+void launchWindowsUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
 {
    string updaterPath = extractDirectory(bitfighterExecutablePathAndFilename) + "\\updater";
    string updaterFileName = updaterPath + "\\bfup.exe";
@@ -985,6 +951,82 @@ void launchUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
       logprintf(LogConsumer::LogError, "Could not launch updater, returned error: %s", msg.c_str());
 }
 #endif
+
+
+void checkOnlineUpdate(GameSettings *settings)
+{
+   // Windows only
+#ifdef USE_BFUP
+   // Spawn external updater tool to check for new version of Bitfighter
+   if(settings->getIniSettings()->useUpdater)
+      launchWindowsUpdater(argv[0], settings->getForceUpdate());
+#endif   // USE_BFUP
+
+   // Mac OSX only
+#ifdef TNL_OS_MAC_OSX
+   checkForUpdates();  // From Directory.h
+#endif
+
+}
+
+
+// Function to handle one-time update tasks
+// Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
+// IniSettings.version, and the new version is in BUILD_VERSION.
+void checkIfThisIsAnUpdate(GameSettings *settings)
+{
+   U32 iniVersion = settings->getIniSettings()->version;
+
+   // If we're at the same version as our INI, no need to update anything
+   if(iniVersion == BUILD_VERSION)
+      return;
+
+   logprintf("Bitfighter was recently updated.  Migrating user preferences...");
+
+   // Wipe out all comments; they will be automatically replaced with any updates
+   gINI.deleteHeaderComments();
+   gINI.deleteAllSectionComments();
+
+   // Now for the version specific changes.  This can only grow larger!
+   // See version.h for short history of roughly what version corresponds to a game release
+
+   // 016:
+   if(iniVersion < 1840 && settings->getIniSettings()->maxBots == 127)
+      settings->getIniSettings()->maxBots = 10;
+
+   if(iniVersion < 3737)
+   {
+      // Master server changed
+      settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
+
+      // We added editor plugins
+      gINI.addSection("EditorPlugins");
+      gINI.SetValue("EditorPlugins", "Plugin1", "Ctrl+;|draw_arcs.lua|Make curves!");
+   }
+
+   // 017:
+   if(iniVersion < 4262)
+   {
+#ifdef TNL_OS_MAC_OSX
+      settings->getIniSettings()->useFakeFullscreen = true;
+#endif
+   }
+
+   // 018
+   if(iniVersion < 5890)  // roughly.  TODO: change to correct version when about to release
+   {
+   }
+
+
+   // Now copy over resources to user's preference directory.
+   // This may be different for each platform
+#ifdef TNL_OS_MAC_OSX
+      // Copy some initialisation files
+      prepareFirstLaunch();
+#endif
+
+}
+
 
 };  // namespace Zap
 
@@ -1064,14 +1106,11 @@ int main(int argc, char **argv)
 
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
-   
+
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
    // Move to the application bundle's path (RDW)
    moveToAppPath();
-   // Copy some initialisation files
-   prepareFirstLaunch();
-   // Check for a new version via Sparkle
-   checkForUpdates();
+
    // Set default -rootdatadir and -sfxdir if they are not set
    setDefaultPaths(argVector);
 #endif
@@ -1080,20 +1119,28 @@ int main(int argc, char **argv)
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
+
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
 
+   InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
+
+   // Load our INI
+   gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
+   loadSettingsFromINI(&gINI, settings);
+
+   // Time to check if there is an online update (for any relevant platforms)
+   checkOnlineUpdate(settings);
+
+   // Make any adjustments needed when we run for the first time after an upgrade
+   checkIfThisIsAnUpdate(settings);
+
+   // Load Lua stuff
    LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
    LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
 
 
-   // Load the INI file
-   gINI.SetPath(joindir(folderManager->iniDir, "bitfighter.ini"));
-
-   InputCodeManager::initializeKeyNames();      // Used by loadSettingsFromINI()
-
-   loadSettingsFromINI(&gINI, settings);        // Read INI
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
 
    Ship::computeMaxFireDelay();                 // Look over weapon info and get some ranges, which we'll need before we start sending data
@@ -1103,7 +1150,6 @@ int main(int argc, char **argv)
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
-   checkIfThisIsAnUpdate(settings);             // Make any adjustments needed when we run for the first time after an upgrade
 
 
    if(settings->isDedicatedServer())
@@ -1139,11 +1185,6 @@ int main(int argc, char **argv)
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
-
-#ifdef USE_BFUP
-      if(settings->getIniSettings()->useUpdater)
-         launchUpdater(argv[0], settings->getForceUpdate());  // Spawn external updater tool to check for new version of Bitfighter -- Windows only
-#endif   // USE_BFUP
 
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();
