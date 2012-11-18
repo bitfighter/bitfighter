@@ -2361,7 +2361,7 @@ void EditorUserInterface::scaleSelection(F32 scale)
    if(scale > 1 && min.distanceTo(max) * scale  > 50 * getGame()->getGridSize())    // If walls get too big, they'll bog down the db
       return;
 
-   bool modifiedWalls;
+   bool modifiedWalls = false;
    WallSegmentManager *wallSegmentManager = database->getWallSegmentManager();
 
    wallSegmentManager->beginBatchGeomUpdate();
