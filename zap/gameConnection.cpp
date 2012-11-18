@@ -202,9 +202,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cPlayerSpawnDelayed, (), (), NetClassGroupGa
 }
 
 
+// User has pressed a key or taken some action to undelay their spawn, or a msg has been reieved from server to undelay this client
+// Server only, got here from c2sPlayerSpawnUndelayed(), or maybe when returnToGameTimer went off after being set here
 void GameConnection::undelaySpawn()
 {
-   ClientInfo *clientInfo = getClientInfo();
+   FullClientInfo *clientInfo = static_cast<FullClientInfo *>(getClientInfo());
 
    // Already spawn undelayed, ignore command
    if(!clientInfo->isSpawnDelayed())
@@ -212,24 +214,38 @@ void GameConnection::undelaySpawn()
 
    resetTimeSinceLastMove();
 
-   clientInfo->setSpawnDelayed(false);
-   mServerGame->unsuspendGame(false);     // Does nothing if game isn't suspended
+   if(clientInfo->hasReturnToGamePenalty())
+   {
+      clientInfo->resetReturnToGameTimer();
+      clientInfo->setHasReturnToGamePenalty(false);
+      return;
+   }
 
-   mServerGame->getGameType()->spawnShip(clientInfo);
+
+   if(!clientInfo->getReturnToGameTime())
+   {
+      mServerGame->unsuspendGame(false);        // Does nothing if game isn't suspended
+      mServerGame->getGameType()->spawnShip(clientInfo);
+
+      clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
+   }
 }
 
 
+// Client has just woken up and is ready to play.  They have requested to be undelayed.
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    undelaySpawn();
 }
 
 
+// Client requests that the server to spawn delay them... only called from /idle command
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    ClientInfo *clientInfo = getClientInfo();
-
-   clientInfo->setSpawnDelayed(true);
+   clientInfo->setSpawnDelayed(true);           // ClientInfo here is a FullClientInfo
+   static_cast<FullClientInfo *>(clientInfo)->setHasReturnToGamePenalty(true);
+   
 
    // If we've just died, this will keep a second copy of ourselves from appearing
    clientInfo->respawnTimer.clear();
@@ -1558,6 +1574,9 @@ void GameConnection::updateTimers(U32 timeDelta)
       mVoteTime = 0;
    else
       mVoteTime -= timeDelta;
+
+   if(mClientInfo->updateReturnToGameTimer(timeDelta))     // Time to spawn a delayed player!
+       undelaySpawn();
 }
 
 

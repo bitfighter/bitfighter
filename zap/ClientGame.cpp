@@ -149,7 +149,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
    //}
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
-   mSpawnUndelayTimer.setPeriod(SPAWN_UNDELAY_TIMER_DELAY);
 
    mDebugShowShipCoords = false;
    mDebugShowMeshZones = false;
@@ -327,30 +326,6 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
    mSpawnDelayed = spawnDelayed;
 
    if(!mSpawnDelayed)
-   //{
-   //   // If the player is busy in some other UI, there is nothing to do here -- spawn will be undelayed when
-   //   // they return to the game.  If the player is in game, however, we'll show them a message.
-   //   // Spawn will be automatically undelayed when user reactivates gameUI by pressing any key.
-   //   UIManager *uiManager = getUIManager();
-
-   //   // Check if we're in the gameUI, and make sure a helper menu isn't open and we're not chatting
-   //   if(uiManager->getCurrentUI()->getMenuID() == GameUI && !uiManager->getGameUserInterface()->isHelperActive() && 
-   //                                                          !uiManager->getGameUserInterface()->isChatting())
-   //   {
-   //      ErrorMessageUserInterface *errUI = uiManager->getErrorMsgUserInterface();
-
-   //      errUI->reset();
-   //      errUI->setPresentation(1);
-   //      errUI->setTitle("");
-   //      errUI->setMessage(1, "PRESS ANY");
-   //      errUI->setMessage(2, "KEY TO");
-   //      errUI->setMessage(3, "RESPAWN");
-   //      errUI->setInstr("");
-
-   //      errUI->activate();
-   //   }
-   //}
-   //else
       unsuspendGame();
 }
 
@@ -361,25 +336,30 @@ bool ClientGame::isSpawnDelayed()
 }
 
 
+// User has pressed a key, finishd composing that most eloquent of chat messages, or taken some other action to undelay their spawn
 void ClientGame::undelaySpawn()
 {
-   if(isSpawnDelayed() && mSpawnUndelayTimer.getCurrent() == 0)
-   {
-      getConnectionToServer()->c2sPlayerSpawnUndelayed();
-      setSpawnDelayed(false);
-   }
+   if(!isSpawnDelayed())                        // Already undelayed, nothing to do
+      return;
+
+   if(mClientInfo->getReturnToGameTime() > 0)   // Waiting for post /idle rejoin timer to wind down, nothing to do
+      return;
+
+   getConnectionToServer()->c2sPlayerSpawnUndelayed();
+   mClientInfo->resetReturnToGameTimer();
 }
 
 
+// Tells the server to spawn delay us... server may incur a penalty when we unspawn
 void ClientGame::requestSpawnDelayed()
 {
    getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
 }
 
 
-Timer &ClientGame::getSpawnUndelayTimer()
+U32 ClientGame::getReturnToGameDelay()
 {
-   return mSpawnUndelayTimer;
+   return mClientInfo->getReturnToGameTime();
 }
 
 
@@ -633,7 +613,7 @@ void ClientGame::idle(U32 timeDelta)
       mScreenSaverTimer.reset();
    }
 
-   mSpawnUndelayTimer.update(timeDelta);
+   mClientInfo->updateReturnToGameTimer(timeDelta);
 
    mUIManager->idle(timeDelta);
 }

@@ -78,6 +78,8 @@ protected:
    Int<BADGE_COUNT> mBadges;
    Game *mGame;
 
+   Timer mReturnToGameTimer;
+
 public:
    ClientInfo();           // Constructor
    virtual ~ClientInfo();  // Destructor
@@ -103,7 +105,6 @@ public:
    void setNeedToCheckAuthenticationWithMaster(bool needToCheck);
    bool getNeedToCheckAuthenticationWithMaster();
 
-   bool shouldDelaySpawn();
    bool isSpawnDelayed();              // Returns true if spawn has actually been delayed   
    virtual void setSpawnDelayed(bool spawnDelayed) = 0;
 
@@ -156,6 +157,10 @@ public:
 
    Nonce *getId();
 
+   U32 getReturnToGameTime();
+   bool updateReturnToGameTimer(U32 timeDelta);
+   void resetReturnToGameTimer();
+
    virtual SoundEffect *getVoiceSFX() = 0;
    virtual VoiceDecoder *getVoiceDecoder() = 0;
 
@@ -174,10 +179,11 @@ class FullClientInfo : public ClientInfo
 
 private:
    GameConnection *mClientConnection;
+   bool mHasReturnToGamePenalty;
    
 public:
-   FullClientInfo(Game *game, GameConnection *clientConnection, bool isRobot);     // Constructor
-   virtual ~FullClientInfo();                                          // Destructor
+   FullClientInfo(Game *game, GameConnection *clientConnection, bool isRobot);   // Constructor
+   virtual ~FullClientInfo();                                                    // Destructor
 
    // WARNING!! mClientConnection can be NULL on client and server's robots
    GameConnection *getConnection();
@@ -186,6 +192,9 @@ public:
    void setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> badges);
 
    void setSpawnDelayed(bool spawnDelayed);
+   bool shouldDelaySpawn();
+   void setHasReturnToGamePenalty(bool hasPenalty);
+   bool hasReturnToGamePenalty();
 
    void setRating(F32 rating);
    F32 getRating();

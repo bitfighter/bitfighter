@@ -58,6 +58,12 @@ ClientInfo::ClientInfo()
    mIsBusy = false;
    mIsEngineeringTeleporter = false;
    mShipSystemsDisabled = false;
+
+   // After canceling /idle command, this is the delay penalty
+   static const U32 SPAWN_UNDELAY_TIMER_DELAY = 5000;    // 5 secs
+
+   mReturnToGameTimer.clear();
+   mReturnToGameTimer.setPeriod(SPAWN_UNDELAY_TIMER_DELAY);
 }
 
 
@@ -139,13 +145,6 @@ void ClientInfo::setNeedToCheckAuthenticationWithMaster(bool needToCheck)
 bool ClientInfo::getNeedToCheckAuthenticationWithMaster()
 {
    return mNeedToCheckAuthenticationWithMaster;
-}
-
-
-// Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
-bool ClientInfo::shouldDelaySpawn()
-{
-   return mIsRobot ? false : getConnection()->getTimeSinceLastMove() > GameConnection::SPAWN_DELAY_TIME;    // 20 secs -- includes time between games
 }
 
 
@@ -436,6 +435,12 @@ Nonce *ClientInfo::getId()
 }
 
 
+// Methods to provide access to mReturnToGameTimer
+U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }
+bool ClientInfo::updateReturnToGameTimer(U32 timeDelta) { return mReturnToGameTimer.update(timeDelta); }
+void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTimer.reset();           }
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -445,6 +450,7 @@ FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, bool 
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
    mGame = game;
+   mHasReturnToGamePenalty = false;
 }
 
 
@@ -484,19 +490,48 @@ F32 FullClientInfo::getRating()
 }
 
 
+void FullClientInfo::setHasReturnToGamePenalty(bool hasPenalty)
+{
+   mHasReturnToGamePenalty = hasPenalty;
+}
+
+
+// Check if player is "on hold" due to inactivity; bots are never on hold.  Server only!
+bool FullClientInfo::shouldDelaySpawn()
+{
+   if(mIsRobot)         // Robots are never spawn-delayed
+      return false;
+
+   return getConnection()->getTimeSinceLastMove() > GameConnection::SPAWN_DELAY_TIME;    // 20 secs -- includes time between games
+}
+
+
+bool FullClientInfo::hasReturnToGamePenalty()
+{
+   return mHasReturnToGamePenalty;
+}
+
+
 // Server only -- RemoteClientInfo has a client-side override
 void FullClientInfo::setSpawnDelayed(bool spawnDelayed)
 {
-   if(spawnDelayed == mSpawnDelayed)
+   if(spawnDelayed == mSpawnDelayed)                     // Already in requested state -- nothing to do
       return;
 
-   if(spawnDelayed && !mSpawnDelayed)
-      getConnection()->s2cPlayerSpawnDelayed();    // Tell client their spawn has been delayed
+   if(!spawnDelayed && mReturnToGameTimer.getCurrent())  // Already waiting to unspawn... hold your horses!
+      return;
 
-   mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);
-   // Clients that joins mid game will get this SpawnDelayed set in GameType::s2cAddClient
+   if(spawnDelayed)                                      // Tell client their spawn has been delayed
+      getConnection()->s2cPlayerSpawnDelayed();          
+   else if(mHasReturnToGamePenalty)                      // Not so fast there, Chief... you still have to wait!
+   {
+      mReturnToGameTimer.reset();
+      mHasReturnToGamePenalty = false;
+      return;
+   }
 
    mSpawnDelayed = spawnDelayed;
+   mGame->getGameType()->s2cSetIsSpawnDelayed(mName, spawnDelayed);  // Notify other clients
 }
 
 
@@ -591,7 +626,6 @@ void RemoteClientInfo::setConnection(GameConnection *conn)
 }
 
 
-// game is only needed for signature compatibility
 void RemoteClientInfo::setSpawnDelayed(bool spawnDelayed)
 {
    mSpawnDelayed = spawnDelayed;

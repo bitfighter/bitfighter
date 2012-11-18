@@ -1397,6 +1397,7 @@ void ServerGame::idle(U32 timeDelta)
    computeWorldObjectExtents();
 
    U32 botControlTickelapsed = botControlTickTimer.getElapsed();
+
    if(botControlTickTimer.update(timeDelta))
    {
       // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before

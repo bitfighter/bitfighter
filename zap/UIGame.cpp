@@ -491,10 +491,10 @@ void GameUserInterface::renderSuspendedMessage()
                            "RESPAWN",
                            "" };
 
-   if(getGame()->getSpawnUndelayTimer().getCurrent() != 0)
+   if(getGame()->getReturnToGameDelay() != 0)
    {
       waitMsg[2] = "IN " +
-                   ftos(ceil(F32(getGame()->getSpawnUndelayTimer().getCurrent()) / 1000.f)) +
+                   ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) +
                    " SECONDS";
       renderMessageBox("", "", waitMsg, 5, -30, 2);
    }
@@ -1592,9 +1592,7 @@ void GameUserInterface::deleteCurrentLevelHandler(const Vector<string> &words)
 
 void GameUserInterface::idleHandler(const Vector<string> &words)
 {
-   ClientGame *game = getGame();
-   game->requestSpawnDelayed();
-   game->getSpawnUndelayTimer().reset();
+   getGame()->requestSpawnDelayed();
 }
 
 

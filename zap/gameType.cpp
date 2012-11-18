@@ -1358,16 +1358,15 @@ void GameType::onAddedToGame(Game *game)
 }
 
 
+// Spawn a ship or a bot... returns true if ship/bot was spawned, false if it was not
 // Server only! (overridden in NexusGame)
-// Note: Bots also use this to spawn
 bool GameType::spawnShip(ClientInfo *clientInfo)
 {
-   TNLAssert(clientInfo, "clientInfo == NULL");
    // Check if player is "on hold" due to inactivity; if so, delay spawn and alert client.  Never delays bots.
    // Note, if we know that this is the beginning of a new level, we can save a wee bit of bandwidth by passing
    // NULL as first arg to setSpawnDelayed(), but we don't check this currently, and it's probably not worth doing
    // if it's not apparent.  isInitialUpdate() might work for this purpose.  Will require some testing.
-   if(clientInfo->shouldDelaySpawn())
+   if(static_cast<FullClientInfo *>(clientInfo)->shouldDelaySpawn())
    {
       clientInfo->setSpawnDelayed(true);
       return false;
@@ -3946,7 +3945,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetIsSpawnDelayed, (StringTableEntry na
    if(!clientInfo)
       return;
 
-   clientInfo->setSpawnDelayed(idle);
+   clientInfo->setSpawnDelayed(idle);        // Track other players delay status.  ClientInfo here is a RemoteClientInfo.
 #endif
 }
 

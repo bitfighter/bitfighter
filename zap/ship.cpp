@@ -1194,9 +1194,11 @@ void Ship::damageObject(DamageInfo *theInfo)
 void Ship::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
+   
+   if(isGhost())        // Client
+      static_cast<ClientGame *>(game)->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
 
-   // From here on down, server only
-   if(!isGhost())
+   else                 // Server
    {
       mRespawnTime = getGame()->getCurrentTime();
       EventManager::get()->fireEvent(EventManager::ShipSpawnedEvent, this);
