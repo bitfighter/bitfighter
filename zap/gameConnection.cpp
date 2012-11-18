@@ -217,7 +217,7 @@ void GameConnection::undelaySpawn()
    if(clientInfo->hasReturnToGamePenalty())
    {
       clientInfo->resetReturnToGameTimer();
-      clientInfo->setHasReturnToGamePenalty(false);
+      clientInfo->setHasReturnToGamePenalty(false);   // Once the timer gets set, the penalty can be lifted
       return;
    }
 
@@ -243,8 +243,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerSpawnUndelayed, (), (), NetClassGroup
 TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
 {
    ClientInfo *clientInfo = getClientInfo();
-   clientInfo->setSpawnDelayed(true);           // ClientInfo here is a FullClientInfo
-   static_cast<FullClientInfo *>(clientInfo)->setHasReturnToGamePenalty(true);
+   clientInfo->setSpawnDelayed(true);           
+   
+   static_cast<FullClientInfo *>(clientInfo)->setHasReturnToGamePenalty(true);   // Client will have to wait to rejoin the game
    
 
    // If we've just died, this will keep a second copy of ourselves from appearing
