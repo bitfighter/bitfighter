@@ -447,9 +447,10 @@ void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTi
 // Constructor
 FullClientInfo::FullClientInfo(Game *game, GameConnection *gameConnection, bool isRobot) : ClientInfo()
 {
+   mGame = game;
    mClientConnection = gameConnection;
    mIsRobot = isRobot;
-   mGame = game;
+
    mHasReturnToGamePenalty = false;
 }
 
