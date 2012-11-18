@@ -155,14 +155,17 @@ void WallSegmentManager::recomputeAllWallGeometry(GridDatabase *gameDatabase)
 // cannot be associated with their source segment, so we'll need to rely on other tricks to find an associated wall when needed.
 void WallSegmentManager::rebuildEdges()
 {
+   // Data flow in this method: wallSegments -> wallEdgePoints -> wallEdges
+
    mWallEdgePoints.clear();
 
    // Run clipper --> fills mWallEdgePoints from mWallSegments
    clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
 
-   mWallEdgeDatabase->removeEverythingFromDatabase();
+   mWallEdgeDatabase->removeEverythingFromDatabase();  //XXXX <---- THIS CAUSES THE CRASH
 
-   // Add clipped wallEdges to the spatial database
+   // Add clipped wallEdges to the spatial database -- when creating a new WallEdge, it will be added to the
+   // specified database, and will be deleted by the database when it is ultimately removed
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
       WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1], mWallEdgeDatabase);    // Create the edge object
 }
