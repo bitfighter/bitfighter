@@ -435,7 +435,8 @@ Nonce *ClientInfo::getId()
 }
 
 
-// Methods to provide access to mReturnToGameTimer
+// Methods to provide access to mReturnToGameTimer -- this is used on the server to enforce a post /idle delay
+// and used on the client to display the (approximate) time left in that delay.
 U32  ClientInfo::getReturnToGameTime()                  { return mReturnToGameTimer.getCurrent();      }
 bool ClientInfo::updateReturnToGameTimer(U32 timeDelta) { return mReturnToGameTimer.update(timeDelta); }
 void ClientInfo::resetReturnToGameTimer()               {        mReturnToGameTimer.reset();           }
