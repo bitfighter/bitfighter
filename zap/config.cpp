@@ -1900,6 +1900,8 @@ void FolderManager::resolveDirs(GameSettings *settings)
 
    folderManager->rootDataDir = rootDataDir;
 
+   // Note that we generally rely on Bitfighter being run from its install folder for these paths to be right... at least in Windows
+
    // rootDataDir used to specify the following folders
    folderManager->robotDir      = resolutionHelper(cmdLineDirs.robotDir,      rootDataDir, "robots");
    folderManager->pluginDir     = resolutionHelper(cmdLineDirs.pluginDir,     rootDataDir, "editor_plugins");
