@@ -436,6 +436,7 @@ void WallItem::onGeomChanged()
 
    if(db)
       db->getWallSegmentManager()->onWallGeomChanged(db, this, isSelected(), getSerialNumber());
+
    Parent::onGeomChanged();
 }
 
