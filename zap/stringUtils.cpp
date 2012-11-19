@@ -81,12 +81,13 @@ const char *SaveException::what() const throw ()
 
 string extractDirectory(const string &path )
 {
-  return path.substr( 0, path.find_last_of( '\\' ) + 1 );
+   // Works on Windows and Linux/Mac!  (just don't have a path with a backslash on Linux/Mac)
+  return path.substr( 0, path.find_last_of( "\\/" )); // Paths should never end with the slash
 }
 
 string extractFilename(const string &path )
 {
-  return path.substr( path.find_last_of( '\\' ) + 1 );
+  return path.substr( path.find_last_of( "\\/" ) + 1 );
 }
 
 string extractExtension(const string &path )
@@ -175,12 +176,12 @@ string replaceString(const string &strString, const string &from, const string &
 {
    string str = strString;    // Make working copy
 
-    size_t start_pos = 0;
-    while((start_pos = str.find(from, start_pos)) != string::npos) 
-    {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length();      // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
+   string::size_type start_pos = 0;
+   while((start_pos = str.find(from, start_pos)) != string::npos)
+   {
+      str.replace(start_pos, from.length(), to);
+      start_pos += to.length();      // In case 'to' contains 'from', like replacing 'x' with 'yx'
+   }
 
    return str;
 }
