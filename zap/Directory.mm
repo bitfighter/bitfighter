@@ -52,82 +52,29 @@ void moveToAppPath()
     [pool release];
 }
 
-void prepareFirstLaunch()
+
+void prepareFirstLaunchMac()
 {
 #ifdef TNL_OS_MAC_OSX
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSFileManager *fm = [NSFileManager defaultManager];
-    BOOL copyResources = NO;
 
     NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
     NSString *fullAppSupportPath = [NSString stringWithFormat:@"%@/%@", [appSupportPaths objectAtIndex:0], bundleName];
-
-    //First check if ~/Library/Application Support/Bitfighter exists
-    BOOL isDirectory = NO;
-    if (([fm fileExistsAtPath:fullAppSupportPath isDirectory:&isDirectory] && isDirectory) == NO)
-        copyResources = YES;
-    
-    //Then check whether we are performing an update
-    NSString *currentVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString *trackingVersion = [userDefaults stringForKey:@"BitfighterVersion"];
-
-    if (trackingVersion == nil || [trackingVersion isEqualToString:currentVersion] == NO) {
-        // update the tracking version with the new one
-        [userDefaults setObject:currentVersion forKey:@"BitfighterVersion"];
-        [userDefaults synchronize];
-        copyResources = YES;
-    }
-
-    if (copyResources) {
-        //Create directories
-        NSString *screenshotsPath = [fullAppSupportPath stringByAppendingPathComponent:@"screenshots"];
-        if ([fm respondsToSelector:@selector(createDirectoryAtPath:withIntermediateDirectories:attributes:error:)])
-        {
-            [fm createDirectoryAtPath:fullAppSupportPath
-          withIntermediateDirectories:YES
-                           attributes:nil
-                                error:NULL];
-            [fm createDirectoryAtPath:screenshotsPath
-          withIntermediateDirectories:YES
-                           attributes:nil
-                                error:NULL];
-        }
-        else
-        {
-            [fm createDirectoryAtPath:fullAppSupportPath attributes:nil];
-            [fm createDirectoryAtPath:screenshotsPath attributes:nil];
-        }
         
-        //Copy resources
-        NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
-        NSArray *pathsToCreate = [NSArray arrayWithObjects:@"levels",@"robots",@"scripts",@"editor_plugins",@"music",nil];
-        for (int i = 0; i < [pathsToCreate count]; i++)
-        {
-            NSString *path = [pathsToCreate objectAtIndex:i];
-            if ([fm respondsToSelector:@selector(copyItemAtPath:toPath:error:)])
-                [fm copyItemAtPath:[resourcePath stringByAppendingPathComponent:path]
-                            toPath:[fullAppSupportPath stringByAppendingPathComponent:path]
-                             error:NULL];
-            else
-                [fm copyPath:[resourcePath stringByAppendingPathComponent:path]
-                      toPath:[fullAppSupportPath stringByAppendingPathComponent:path]
-                     handler:nil];
-        }
-        
-        //Link preferences
-        NSArray *documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *prefencesPath = [[documentsPath objectAtIndex:0] stringByAppendingPathComponent:@"Bitfighter Settings"];
-        if ([fm respondsToSelector:@selector(createSymbolicLinkAtPath:withDestinationPath:error:)])
-            [fm createSymbolicLinkAtPath:prefencesPath withDestinationPath:fullAppSupportPath error:NULL];
-        else
-            [fm createSymbolicLinkAtPath:prefencesPath pathContent:fullAppSupportPath];
-    }
+    //Link preferences
+    NSArray *documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *prefencesPath = [[documentsPath objectAtIndex:0] stringByAppendingPathComponent:@"Bitfighter Settings"];
+    if ([fm respondsToSelector:@selector(createSymbolicLinkAtPath:withDestinationPath:error:)])
+        [fm createSymbolicLinkAtPath:prefencesPath withDestinationPath:fullAppSupportPath error:NULL];
+    else
+        [fm createSymbolicLinkAtPath:prefencesPath pathContent:fullAppSupportPath];
 
     [pool release];
 #endif
 }
+
 
 void checkForUpdates()
 {
@@ -140,33 +87,53 @@ void checkForUpdates()
 #endif
 }
 
-void setDefaultPaths(Vector<string> &argv)
+
+// Used for setting -rootdatadir; corresponds to the location from which most 
+// resources will be loaded
+void getUserDataPath(std::string &fillPath)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
+    
 #ifdef TNL_OS_MAC_OSX
-    if (argv.contains("-rootdatadir") == NO) {
-        argv.push_back("-rootdatadir");
-        NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-        NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
-        argv.push_back([[NSString stringWithFormat:@"%@/%@", [appSupportPaths objectAtIndex:0], bundleName] UTF8String]);
-    }
-    if (argv.contains("-sfxdir") == NO) {
-        argv.push_back("-sfxdir");
-        argv.push_back([[NSString stringWithFormat:@"%@/sfx",[[NSBundle mainBundle] resourcePath]] UTF8String]);
-    }
-#else
-    // On iOS there are no command line paramenters
-    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
-    NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    argv.push_back("-rootdatadir");
-    argv.push_back([resourcePath UTF8String]); //read-only
-    argv.push_back("-inidir");
-    argv.push_back([[documentPaths objectAtIndex:0] UTF8String]); //read-write
-    argv.push_back("-sfxdir");
-    argv.push_back([[NSString stringWithFormat:@"%@/sfx", resourcePath] UTF8String]); //read-only
-    NSLog(@"Loading from %@", resourcePath);
+    // OSX used the Application Support directory
+    NSArray *appSupportPaths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+    NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
+    fillPath = std::string([[NSString stringWithFormat:@"%@/%@", [appSupportPaths objectAtIndex:0], bundleName] UTF8String]);
+#else // TNL_OS_IOS
+    // iOS uses the resources straight from the bundle
+    getAppResourcePath(fillPath);  
 #endif
-
+    
     [pool release];
+}
+
+
+// Used for setting -sfxdir; corresponds to the path of the app's bundled resources
+void getAppResourcePath(std::string &fillPath)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+#ifdef TNL_OS_MAC_OSX
+    fillPath = std::string([[NSString stringWithFormat:@"%@",[[NSBundle mainBundle] resourcePath]] UTF8String]);
+#else // TNL_OS_IOS
+    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+    fillPath = std::string([resourcePath UTF8String]);
+#endif
+    
+    [pool release];
+}
+
+
+// Used for setting -inidir
+void getDocumentsPath(std::string &fillPath)
+{
+   // Only needed for iOS (we need some read/write directory)
+#ifdef TNL_OS_IOS
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    NSArray *documentPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    fillPath = std::string([[documentPaths objectAtIndex:0] UTF8String]);
+     
+    [pool release];
+#endif
 }

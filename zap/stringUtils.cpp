@@ -395,6 +395,15 @@ void s_fprintf(FILE *stream, const char *format, ...)
 }
 
 
+string getFileSeparator()
+{
+#ifdef TNL_OS_WIN32
+   return "\\";
+#else
+   return "/";
+#endif
+}
+
 // Returns true if file or folder exists
 // Ok, not strictly a string util, but do we really want a fileutils just for this??
 bool fileExists(const string &path)
@@ -475,6 +484,55 @@ bool safeFilename(const char *str)
       chr = str[i];
    }
    return true;
+}
+
+
+bool copyFile(const string &sourceFilename, const string &destFilename)
+{
+   bool success = true;
+
+   // Yay for C!
+   FILE *sourceFile = fopen(sourceFilename.c_str(), "rb");  // Use binary 'b'
+   FILE *destFile = fopen(destFilename.c_str(), "wb");      // This will overwrite!
+
+   if(sourceFile != NULL && destFile != NULL)
+   {
+      U8 buffer[8192];  // XXX Big enough for efficiency?
+      std::size_t readChunk;
+
+      while((readChunk = fread(buffer, 1, sizeof buffer, sourceFile)) > 0)
+      {
+         std::size_t writtenChunk = fwrite(buffer, 1, readChunk, destFile);
+
+         // Error writing file
+         if(writtenChunk < 0)
+            success = false;
+
+         // Error writing file, Disk probably full
+         else if(writtenChunk < readChunk)
+            success = false;
+
+         if(!success)
+            break;
+      }
+   }
+   else
+      success = false;
+
+   if(sourceFile)
+      fclose(sourceFile);
+   if(destFile)
+      fclose(destFile);
+
+   return success;
+}
+
+
+bool copyFileToDir(const string &sourceFilename, const string &destDir)
+{
+   string destFilename = destDir + getFileSeparator() + extractFilename(sourceFilename);
+
+   return copyFile(sourceFilename, destFilename);
 }
 
 

@@ -37,10 +37,13 @@ namespace TNL
     template <typename> class Vector;
 }
 
+// This header is an interface for Objective-c++ calls on the Apple platform (see Directory.mm)
 void moveToAppPath();
-void prepareFirstLaunch();
+void prepareFirstLaunchMac();
 void checkForUpdates();
-void setDefaultPaths(TNL::Vector<std::string> &argv);
+void getAppResourcePath(std::string &fillPath);
+void getUserDataPath(std::string &fillPath);
+void getDocumentsPath(std::string &fillPath);
 
 #endif
 

@@ -158,7 +158,6 @@ using namespace TNL;
 #  include <unistd.h>
 #endif
 
-
 #ifdef __MINGW32__
 #undef main
 #endif
@@ -966,7 +965,188 @@ void checkOnlineUpdate(string exePath, GameSettings *settings)
 #ifdef TNL_OS_MAC_OSX
    checkForUpdates();  // From Directory.h
 #endif
+}
 
+
+// Change this for packaging.  Can be done in package processing scripts using sed
+// We probably need to migrate to a build system sometime...
+#ifdef TNL_OS_LINUX
+#include "../config.h"
+#endif
+
+
+// This function returns the path where the game resources have been installed into the system
+// before being copied to the user's data path
+string getInstalledDataDir()
+{
+   string path;
+
+#if defined(TNL_OS_LINUX)
+   // In Linux, the data dir can be anywhere!  Usually in something like /usr/share/bitfighter
+   // or /usr/local/share/bitfighter
+#ifdef LINUX_DATA_DIR
+   path = string(LINUX_DATA_DIR) + "/bitfighter";
+#else
+   // We'll default to the directory the executable is in
+   char buffer[1024];
+   readlink("/proc/self/exe", buffer, sizeof(buffer));
+   path = extractDirectory(string(buffer));
+#endif
+
+#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+   getAppResourcePath(path);  // Directory.h
+
+#elif defined(TNL_OS_WIN32)
+   // On Windows, the installed data dir is always where the executable is
+   char buffer[MAX_PATH];
+   GetModuleFileName(NULL, buffer, MAX_PATH);
+   path = extractDirectory(string(buffer));
+
+#else
+#  error "Path needs to be defined for this platform"
+#endif
+
+   return path;
+}
+
+
+// Make sure we're in a sane working directory.  Mostly for preparation in copying
+// resources, if needed, but also for properly running standalone builds
+void normalizeWorkingDirectory()
+{
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+   // Move to the application bundle's path (RDW)
+   moveToAppPath();  // Directory.h
+#else
+   // Move to the installed data directory
+   chdir(getInstalledDataDir().c_str());
+#endif
+}
+
+
+// This function returns the path from where game resources are loaded
+string getUserDataDir()
+{
+   string path;
+
+#if defined(TNL_OS_LINUX)
+   path = string(SDL_getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
+
+#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+   getUserDataPath(path);  // Directory.h
+
+#elif defined(TNL_OS_WIN32)
+   path = string(SDL_getenv("APPDATA")) + "\\Bitfighter";
+
+#else
+#  error "Path needs to be defined for this platform"
+#endif
+
+   return path;
+}
+
+
+void setDefaultPaths(Vector<string> &argv)
+{
+   // If we don't already have -rootdatadir specified on the command line
+   if(!argv.contains("-rootdatadir"))
+   {
+      argv.push_back("-rootdatadir");
+      argv.push_back(getUserDataDir());
+   }
+
+   // Same with -sfxdir
+   if(!argv.contains("-sfxdir"))
+   {
+      argv.push_back("-sfxdir");
+      argv.push_back(getInstalledDataDir() + getFileSeparator() + "sfx");
+   }
+
+   // iOS needs the INI in an editable location
+#ifdef TNL_OS_IOS
+   string fillPath;
+   getDocumentsPath(fillPath);  // From Directory.h
+
+   argv.push_back("-inidir");
+   argv.push_back(fillPath);
+#endif
+}
+
+
+void copyResources()
+{
+   // Just in case - no resource copying on mobile!
+#if defined(TNL_OS_MOBILE)
+   return;
+#endif
+
+   printf("Copying resources");
+
+   // Everything but sfx
+   Vector<string> dirArray;
+   dirArray.push_back("levels");
+   dirArray.push_back("robots");
+   dirArray.push_back("scripts");
+   dirArray.push_back("editor_plugins");
+   dirArray.push_back("music");
+
+   string userDataDir = getUserDataDir();
+   string installDataDir = getInstalledDataDir();
+   string fileSeparator = getFileSeparator();
+
+   for(S32 i = 0; i < dirArray.size(); i++)
+   {
+      // Make sure each resource folder exists
+      string userResourceDir = userDataDir + fileSeparator + dirArray[i];
+
+      printf("Setting up folder: %s\n", userResourceDir.c_str());
+      if(!makeSureFolderExists(userResourceDir))
+      {
+         printf("Resource directory creation failed: %s\n", userResourceDir.c_str());
+         return;
+      }
+
+      // Now copy all files.  First find all files in the installed data directory for this
+      // Resource dir
+      string installedResourceDir = installDataDir + fileSeparator + dirArray[i];
+
+      Vector<string> fillFiles;
+      getFilesFromFolder(installedResourceDir, fillFiles);
+
+      for(S32 i = 0; i < fillFiles.size(); i++)
+      {
+         string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
+         printf("Attempting to copy file: %s\n", sourceFile.c_str());
+         if(!copyFileToDir(sourceFile, userResourceDir))
+         {
+            printf("File copy failed.  File: %s to directory: %s\n", fillFiles[i].c_str(), userResourceDir.c_str());
+            return;
+         }
+      }
+   }
+}
+
+
+// Initial set-up actions taken if we discover this is the first time the game has been
+// run by this user
+void prepareFirstLaunch()
+{
+   string userDataDir = getUserDataDir();
+
+   // Create our user data directory if it doesn't exist
+   if(!makeSureFolderExists(userDataDir))
+   {
+      printf("User data directory creation failed: %s\n", userDataDir.c_str());
+      return;
+   }
+
+   // Now copy resources from installed data directory to the newly created user data directory
+   copyResources();
+
+   // Do some other platform specific things
+#ifdef TNL_OS_MAC_OSX
+   prepareFirstLaunchMac();
+#endif
 }
 
 
@@ -975,10 +1155,11 @@ void checkOnlineUpdate(string exePath, GameSettings *settings)
 // IniSettings.version, and the new version is in BUILD_VERSION.
 void checkIfThisIsAnUpdate(GameSettings *settings)
 {
-   U32 iniVersion = settings->getIniSettings()->version;
+   // Previous version is what the INI currently says
+   U32 previousVersion = settings->getIniSettings()->version;
 
    // If we're at the same version as our INI, no need to update anything
-   if(iniVersion == BUILD_VERSION)
+   if(previousVersion == BUILD_VERSION)
       return;
 
    logprintf("Bitfighter was recently updated.  Migrating user preferences...");
@@ -991,10 +1172,10 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    // See version.h for short history of roughly what version corresponds to a game release
 
    // 016:
-   if(iniVersion < 1840 && settings->getIniSettings()->maxBots == 127)
+   if(previousVersion < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
 
-   if(iniVersion < 3737)
+   if(previousVersion < 3737)
    {
       // Master server changed
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
@@ -1005,7 +1186,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    }
 
    // 017:
-   if(iniVersion < 4262)
+   if(previousVersion < 4262)
    {
 #ifdef TNL_OS_MAC_OSX
       settings->getIniSettings()->useFakeFullscreen = true;
@@ -1013,18 +1194,31 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    }
 
    // 018
-   if(iniVersion < 5890)  // roughly.  TODO: change to correct version when about to release
+   if(previousVersion < 5890)  // roughly.  TODO: change to correct version when about to release
    {
+      FolderManager *folderManager = settings->getFolderManager();
+
+      // Remove game.ogg from music folder, if it exists...
+      if(remove(joindir(folderManager->musicDir, "game.ogg").c_str()) != 0)
+         logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
    }
 
+   // Now copy over resources to user's preference directory.  This will overwrite the previous
+   // resources with same names
+   copyResources();
+}
 
-   // Now copy over resources to user's preference directory.
-   // This may be different for each platform
-#ifdef TNL_OS_MAC_OSX
-      // Copy some initialisation files
-      prepareFirstLaunch();
+
+bool standaloneDetected()
+{
+   bool isStandalone = false;
+
+   // If we did a debug compile, default standalone mode
+#ifdef TNL_DEBUG
+   isStandalone = true;  // XXX Comment this out to test resource copying in debug build
 #endif
 
+   return isStandalone;
 }
 
 
@@ -1106,19 +1300,39 @@ int main(int argc, char **argv)
 
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
-   
-#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   // Move to the application bundle's path (RDW)
-   moveToAppPath();
 
-   // Set default -rootdatadir and -sfxdir if they are not set
-   setDefaultPaths(argVector);
-#endif
+   printf("=> install data dir: %s\n", getInstalledDataDir().c_str());
+   printf("=> user data dir: %s\n", getUserDataDir().c_str());
+
+   bool isFirstLaunchEver = false;  // Is this the first time we've run for this user?
+
+   // We change our current directory to be useful, usually to the location the executable resides
+   normalizeWorkingDirectory();
+
+   // Set default -rootdatadir, -sfxdir, and others if they are not set already, unless
+   // we're in standalone mode.  This allows use to have default environment setups on
+   // each platform
+   if(!standaloneDetected())
+   {
+      // Copy resources to user data if it doesn't exist
+      if(!fileExists(getUserDataDir()))
+      {
+         isFirstLaunchEver = true;
+
+         prepareFirstLaunch();
+      }
+
+      // Set the default paths
+      setDefaultPaths(argVector);
+   }
+   else
+      printf("Standalone run detected\n");
 
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
 
    FolderManager *folderManager = settings->getFolderManager();
+
    // Before we go any further, we should get our log files in order.  We know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging(folderManager->logDir);
@@ -1133,7 +1347,9 @@ int main(int argc, char **argv)
    checkOnlineUpdate(argv[0], settings);
 
    // Make any adjustments needed when we run for the first time after an upgrade
-   checkIfThisIsAnUpdate(settings);
+   // Skip if this is the first run
+   if(!isFirstLaunchEver)
+      checkIfThisIsAnUpdate(settings);
 
    // Load Lua stuff
    LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
@@ -1165,7 +1381,8 @@ int main(int argc, char **argv)
       Joystick::initJoystick(settings);           // Initialize joystick system
 
 #ifdef TNL_OS_MAC_OSX
-      moveToAppPath();        // On OS X, make sure we're in the right directory
+      // On OS X, make sure we're in the right directory (again)
+      moveToAppPath();
 #endif
 
       VideoSystem::init();                // Initialize video and window system
@@ -1184,7 +1401,6 @@ int main(int argc, char **argv)
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
 
       gConsole.initialize();     // Initialize console *after* the screen mode has been actualized
-
 
       // Now show any error messages from start-up
       Vector<string> configurationErrors = settings->getConfigurationErrors();
