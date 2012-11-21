@@ -1215,7 +1215,9 @@ bool standaloneDetected()
 
    // If we did a debug compile, default standalone mode
 #ifdef TNL_DEBUG
-   isStandalone = true;  // XXX Comment this out to test resource copying in debug build
+#  ifndef TNL_OS_MAC_OSX  // Mac is always non-standalone
+   isStandalone = true;   // XXX Comment this out to test resource copying in debug build
+#  endif
 #endif
 
    return isStandalone;
