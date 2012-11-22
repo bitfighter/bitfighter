@@ -164,6 +164,8 @@ void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 
 void GridDatabase::removeEverythingFromDatabase()
 {
+   mAllObjects.deleteAndClear();
+
    for(S32 x = 0; x < BucketRowCount; x++)
    {
       for(S32 y = 0; y < BucketRowCount; y++)
@@ -178,8 +180,6 @@ void GridDatabase::removeEverythingFromDatabase()
          mBuckets[x & BucketMask][y & BucketMask] = NULL;
       }
    }
-
-   mAllObjects.deleteAndClear();
 
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
