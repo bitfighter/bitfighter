@@ -32,7 +32,7 @@
 #ifdef TNL_OS_MAC_OSX
 #import <Cocoa/Cocoa.h>
 #import "SUUpdater.h"
-#define SPARKLE_APPCAST_URL @"http://127.0.0.1" //TODO: specify right url to appcast
+#define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php"
 #else
 #import <Foundation/Foundation.h>
 #endif
