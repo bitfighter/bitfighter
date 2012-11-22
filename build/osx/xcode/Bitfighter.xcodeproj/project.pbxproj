@@ -2557,6 +2557,7 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				9462BEAA11D7D28B00791A0B /* CopyFiles */,
+				73911163165E87D20096A6C4 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -2580,7 +2581,6 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -2672,6 +2672,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\npkgdmg=\"${BUILT_PRODUCTS_DIR}/../../../tools/pkg-dmg\"\n\ndsstore=bitfighter.dsstore\nbackground=bf_dmg_background.png\n\n## Get the Bitfighter version to put into the package name\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}-MacOSX-32bit-Universal\"\n\n## Remove old DMG if found\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\n## Copy application to temporary folder\nrsync -av \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}/\"\n\n## Strip unnecessary architectures from libraries before packaging, as well as remove\n## any header files\n# First find if we are doing x86_64\ntemp_test=`file ${BUILT_PRODUCTS_DIR}/${app_name}.app/Contents/MacOS/${app_name} | grep -o x86_64`\nlipo_flag=\"-remove\"\n\nif [ ! -z \"$temp_test\" ]; then\n  lipo_flag=\"-extract\"\n  final_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}-MacOSX-64bit-Intel\"\n  echo \"stripping all but x86_64\"\nfi\n\n# Go to the frameworks directory\npushd \"${to_package_dir}/${app_name}.app/Contents/Frameworks/\"\n\n# Do the strip!\nfor fw_dir in `ls -d *.framework`\ndo\n  # echo \"$fw_dir\"\n  fw_name=\"${fw_dir%\\.framework}\"\n  # echo \"$fw_name\"\n  pushd \"$fw_dir/Versions/A\"\n  cp \"$fw_name\" \"$fw_name\".orig\n  lipo \"$fw_name\".orig \"$lipo_flag\" x86_64 -output \"$fw_name\"\n  rm \"$fw_name\".orig\n  popd\ndone\n\n# Now clean up the headers\nfind . -type f -name '*.h' -exec rm -f {} \\;\n\npopd\n\n## Finally package application in a DMG\n\"$pkgdmg\" --target \"${final_dmg}\" --source \"${to_package_dir}\" --volname ${app_name} --copy ${dsstore}:/.DS_Store --mkdir /.background --copy ${background}:/.background --symlink /Applications:/Applications\n\n## Clean-up\n#rm -r \"${to_package_dir}\"";
+		};
+		73911163165E87D20096A6C4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "## This script will automatically update the plist when building the application\n# Parse out our versions\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\nbuildVersion=$( grep 'BUILD_VERSION' ../../../zap/version.h |cut -f3 -d' ' | sed 's/\"//g' )\n\n# This is the full path to our plist file\ninfoplist=\"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH\"\n\n# Update the plist with our versions\ndefaults write \"${infoplist%.plist}\" CFBundleShortVersionString \"${version}\"\ndefaults write \"${infoplist%.plist}\" CFBundleVersion \"${buildVersion}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
