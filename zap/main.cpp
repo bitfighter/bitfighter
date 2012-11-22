@@ -1099,7 +1099,7 @@ void copyResources()
       // Make sure each resource folder exists
       string userResourceDir = userDataDir + fileSeparator + dirArray[i];
 
-      printf("Setting up folder: %s\n", userResourceDir.c_str());
+//      printf("Setting up folder: %s\n", userResourceDir.c_str());
       if(!makeSureFolderExists(userResourceDir))
       {
          printf("Resource directory creation failed: %s\n", userResourceDir.c_str());
@@ -1116,7 +1116,7 @@ void copyResources()
       for(S32 i = 0; i < fillFiles.size(); i++)
       {
          string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
-         printf("Attempting to copy file: %s\n", sourceFile.c_str());
+//         printf("Attempting to copy file: %s\n", sourceFile.c_str());
          if(!copyFileToDir(sourceFile, userResourceDir))
          {
             printf("File copy failed.  File: %s to directory: %s\n", fillFiles[i].c_str(), userResourceDir.c_str());
@@ -1215,7 +1215,8 @@ bool standaloneDetected()
 
    // If we did a debug compile, default standalone mode
 #ifdef TNL_DEBUG
-#  ifndef TNL_OS_MAC_OSX  // Mac is always non-standalone
+   // Standalone unavailable on Mac and mobile platforms
+#  if !defined(TNL_OS_MAC_OSX) && !defined(TNL_OS_MOBILE)
    isStandalone = true;   // XXX Comment this out to test resource copying in debug build
 #  endif
 #endif
@@ -1303,8 +1304,8 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-   printf("=> install data dir: %s\n", getInstalledDataDir().c_str());
-   printf("=> user data dir: %s\n", getUserDataDir().c_str());
+//   printf("=> install data dir: %s\n", getInstalledDataDir().c_str());
+//   printf("=> user data dir: %s\n", getUserDataDir().c_str());
 
    bool isFirstLaunchEver = false;  // Is this the first time we've run for this user?
 
