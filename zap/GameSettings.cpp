@@ -691,6 +691,16 @@ void GameSettings::readCmdLineParams(const Vector<string> &argv)
       string arg = argv[argPtr];
       argPtr++;      // Advance argPtr to location of first parameter argument
 
+      // Mac adds on a 'Process Serial Number' to every application launched from a .app bundle
+      // we should just ignore it and not exit the game
+#ifdef TNL_OS_MAC_OSX
+      if(arg.find("-psn") != string::npos)
+      {
+         printf("Ignoring cmd line parameter: %s\n", arg.c_str());
+         continue;
+      }
+#endif
+
       // Scan through the possible params
       for(U32 i = 0; i < ARRAYSIZE(paramDefs); i++)
       {
