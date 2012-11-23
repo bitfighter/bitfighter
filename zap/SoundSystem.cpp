@@ -327,17 +327,6 @@ void SoundSystem::init(sfxSets sfxSet, const string &sfxDir, const string &music
       logprintf(LogConsumer::LogWarning, "No music files found in folder \"%s\".  Game will proceed without music", musicDir.c_str());
    else     // Got us some music!
    {
-      // Remove things that aren't music from the file list (using a very partial list of things that aren't music)
-      for(S32 i = 0; i < mGameMusicList.size(); i++)
-      {
-
-         if(mGameMusicList[i] == mCreditsMusicFile)
-         {
-            mGameMusicList.erase_fast(i);
-            i--;
-         }
-      }
-
       // Remove the menu music from the file list
       for(S32 i = 0; i < mGameMusicList.size(); i++)
       {
