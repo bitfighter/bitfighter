@@ -983,8 +983,8 @@ string getInstalledDataDir()
 
 #if defined(TNL_OS_LINUX)
    // In Linux, the data dir can be anywhere!  Usually in something like /usr/share/bitfighter
-   // or /usr/local/share/bitfighter
-#ifdef LINUX_DATA_DIR
+   // or /usr/local/share/bitfighter.  Ignore if compiling DEBUG
+#if defined(LINUX_DATA_DIR) && !defined(TNL_DEBUG)
    path = string(LINUX_DATA_DIR) + "/bitfighter";
 #else
    // We'll default to the directory the executable is in
