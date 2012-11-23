@@ -46,7 +46,7 @@ items = { }     -- Global variable, reusable container for findGlobalItems.  Reu
                 -- table before reusing it!
 function shieldSelf()
     table.clear(items)
-    findItems(items, ObjType.Bullet, ObjType.Asteroid, ObjType.Mine)
+    findItems(items, ObjType.Bullet, ObjType.Seeker, ObjType.Asteroid, ObjType.Mine)
 
     local distToShieldAt = botRadius * 2 + (1 - difficulty) * 100
     if (items ~= nil) then
