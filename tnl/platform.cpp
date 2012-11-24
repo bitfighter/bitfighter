@@ -330,6 +330,12 @@ bool Platform::AlertRetry(const char *windowTitle, const char *message)
 
 #else // osx and linux
 
+bool Platform::checkHeap()
+{
+   // Not implemented on POSIX yet
+   return true;
+}
+
 void Platform::debugBreak()
 {
    kill(getpid(), SIGTRAP);
