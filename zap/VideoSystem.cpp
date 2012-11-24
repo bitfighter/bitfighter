@@ -253,6 +253,10 @@ S32 VideoSystem::getWindowPositionCoord(bool getX)
       XQueryTree(windowManagerInfo.info.x11.display, windowManagerInfo.info.x11.wmwindow,
               &rootIgnore, &parent, &childrenIgnore, &childrenCountIgnore);
 
+      // Free any children returned
+      if (childrenIgnore)
+         XFree(childrenIgnore);
+
       // Get Window attributes
       XGetWindowAttributes(windowManagerInfo.info.x11.display, parent, &xAttributes);
 
