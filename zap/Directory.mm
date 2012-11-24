@@ -32,7 +32,13 @@
 #ifdef TNL_OS_MAC_OSX
 #import <Cocoa/Cocoa.h>
 #import "SUUpdater.h"
+// Here we add a GET parameter if we're running on older OSX.  This way we
+// can serve up a different download URL
+#ifdef __x86_64__
 #define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php"
+#else
+#define SPARKLE_APPCAST_URL @"http://bitfighter.org/files/getDownloadUrl.php?legacy=1"
+#endif
 #else
 #import <Foundation/Foundation.h>
 #endif
@@ -82,7 +88,6 @@ void checkForUpdates()
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SUUpdater* updater = [SUUpdater sharedUpdater];
     [updater setFeedURL:[NSURL URLWithString:SPARKLE_APPCAST_URL]];
-    [updater setSendsSystemProfile:YES];
     [updater checkForUpdatesInBackground];
     [pool release];
 #endif

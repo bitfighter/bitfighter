@@ -985,8 +985,8 @@ string getInstalledDataDir()
 
 #if defined(TNL_OS_LINUX)
    // In Linux, the data dir can be anywhere!  Usually in something like /usr/share/bitfighter
-   // or /usr/local/share/bitfighter
-#ifdef LINUX_DATA_DIR
+   // or /usr/local/share/bitfighter.  Ignore if compiling DEBUG
+#if defined(LINUX_DATA_DIR) && !defined(TNL_DEBUG)
    path = string(LINUX_DATA_DIR) + "/bitfighter";
 #else
    // We'll default to the directory the executable is in
@@ -1101,7 +1101,7 @@ void copyResources()
       // Make sure each resource folder exists
       string userResourceDir = userDataDir + fileSeparator + dirArray[i];
 
-      printf("Setting up folder: %s\n", userResourceDir.c_str());
+//      printf("Setting up folder: %s\n", userResourceDir.c_str());
       if(!makeSureFolderExists(userResourceDir))
       {
          printf("Resource directory creation failed: %s\n", userResourceDir.c_str());
@@ -1118,7 +1118,7 @@ void copyResources()
       for(S32 i = 0; i < fillFiles.size(); i++)
       {
          string sourceFile = installedResourceDir + fileSeparator + fillFiles[i];
-         printf("Attempting to copy file: %s\n", sourceFile.c_str());
+//         printf("Attempting to copy file: %s\n", sourceFile.c_str());
          if(!copyFileToDir(sourceFile, userResourceDir))
          {
             printf("File copy failed.  File: %s to directory: %s\n", fillFiles[i].c_str(), userResourceDir.c_str());
@@ -1211,18 +1211,32 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 }
 
 
-bool standaloneDetected()
+static bool standaloneDetected()
 {
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_MOBILE)
+   return false;   // Standalone unavailable on Mac and mobile platforms
+#else
+
    bool isStandalone = false;
 
    // If we did a debug compile, default standalone mode
 #ifdef TNL_DEBUG
-#  ifndef TNL_OS_MAC_OSX  // Mac is always non-standalone
    isStandalone = true;   // XXX Comment this out to test resource copying in debug build
-#  endif
 #endif
 
+   FILE *fp;
+   if(fileExists("bitfighter.ini"))       // Check if bitfighter.ini exists locally
+   {
+      fp = fopen("bitfighter.ini", "a");  // if this file can be open as append mode, we can use this local one to load and save our configuration.
+      if(fp)
+      {
+         fclose(fp);
+         isStandalone = true;
+      }
+   }
+
    return isStandalone;
+#endif
 }
 
 
@@ -1305,8 +1319,8 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-   printf("=> install data dir: %s\n", getInstalledDataDir().c_str());
-   printf("=> user data dir: %s\n", getUserDataDir().c_str());
+//   printf("=> install data dir: %s\n", getInstalledDataDir().c_str());
+//   printf("=> user data dir: %s\n", getUserDataDir().c_str());
 
    bool isFirstLaunchEver = false;  // Is this the first time we've run for this user?
 
