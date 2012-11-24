@@ -130,6 +130,28 @@ void getAppResourcePath(std::string &fillPath)
 }
 
 
+void getBundlePath(std::string &fillPath)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+    fillPath = std::string([bundlePath UTF8String]);
+    
+    [pool release];
+}
+
+
+void getExecutablePath(std::string &fillPath)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    NSString *executablePath = [[NSBundle mainBundle] executablePath];
+    fillPath = std::string([executablePath UTF8String]);
+    
+    [pool release];
+}
+
+
 // Used for setting -inidir
 void getDocumentsPath(std::string &fillPath)
 {
