@@ -240,7 +240,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object)
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == object)
       {
-         mAllObjects.erase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
+         mAllObjects.deleteAndErase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
          break;
       }
 }
