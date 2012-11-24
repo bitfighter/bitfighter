@@ -1209,8 +1209,12 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
 }
 
 
-bool standaloneDetected()
+static bool standaloneDetected()
 {
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_MOBILE)
+   return false;   // Standalone unavailable on Mac and mobile platforms
+#else
+
    bool isStandalone = false;
 
    // If we did a debug compile, default standalone mode
@@ -1221,7 +1225,19 @@ bool standaloneDetected()
 #  endif
 #endif
 
+   FILE *fp;
+   if(fileExists("bitfighter.ini"))       // Check if bitfighter.ini exists locally
+   {
+      fp = fopen("bitfighter.ini", "a");  // if this file can be open as append mode, we can use this local one to load and save our configuration.
+      if(fp)
+      {
+         fclose(fp);
+         isStandalone = true;
+      }
+   }
+
    return isStandalone;
+#endif
 }
 
 
