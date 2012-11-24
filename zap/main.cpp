@@ -1235,6 +1235,11 @@ static bool standaloneDetected()
       }
    }
 
+   // Or, if no INI, specify it will be a standalone install with a predefined file
+   // This way an INI can still be built from scratch and we won't have to distribute one
+   if(fileExists(".standalone"))
+      isStandalone = true;
+
    return isStandalone;
 #endif
 }
