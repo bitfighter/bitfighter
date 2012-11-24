@@ -104,6 +104,7 @@ class WallSegmentManager;
 class GridDatabase
 {
 private:
+   U32 mDatabaseId;
    static U32 mQueryId;
    static U32 mCountGridDatabase;
 

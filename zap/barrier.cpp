@@ -850,12 +850,10 @@ S32 PolyWall::setGeom(lua_State *L)
 ////////////////////////////////////////
 
 // Constructor
-WallEdge::WallEdge(const Point &start, const Point &end, GridDatabase *database) 
+WallEdge::WallEdge(const Point &start, const Point &end) 
 { 
    mStart = start; 
-   mEnd = end; 
-
-   addToDatabase(database, Rect(start, end));
+   mEnd   = end; 
 
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallEdgeTypeNumber;

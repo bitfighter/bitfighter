@@ -263,13 +263,12 @@ void EditorUserInterface::populateDock()
 }
 
 
-// Destructor -- unwind things in an orderly fashion
+// Destructor -- unwind things in an orderly fashion.  Note that mLevelGenDatabase will clear itself as the referenced object is deleted.
 EditorUserInterface::~EditorUserInterface()
 {
    clearDatabase(getDatabase());
 
    mDockItems.clear();
-   mLevelGenDatabase.removeEverythingFromDatabase();
    mClipboard.clear();
 
    delete mNewItem;
@@ -361,6 +360,7 @@ void EditorUserInterface::clearSnapEnviornment()
 
 void EditorUserInterface::undo(bool addToRedoStack)
 {
+   TNL_CHECK_HEAP();
    if(!undoAvailable())
       return;
 
@@ -386,6 +386,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
+   TNL_CHECK_HEAP();
 }
    
 
@@ -452,6 +453,7 @@ void EditorUserInterface::redo()
 
 void EditorUserInterface::rebuildEverything(GridDatabase *database)
 {
+   TNL_CHECK_HEAP();
    database->getWallSegmentManager()->recomputeAllWallGeometry(database);
    resnapAllEngineeredItems(database);
 

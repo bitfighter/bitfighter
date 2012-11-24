@@ -45,6 +45,12 @@ U32 GridDatabase::mQueryId = 0;
 ClassChunker<GridDatabase::BucketEntry> *GridDatabase::mChunker = NULL;
 U32 GridDatabase::mCountGridDatabase = 0;
 
+static U32 getNextId() 
+{
+   static U32 nextId = 0;
+   return nextId++;
+}
+
 // Constructor
 GridDatabase::GridDatabase(bool createWallSegmentManager)
 {
@@ -61,6 +67,8 @@ GridDatabase::GridDatabase(bool createWallSegmentManager)
       mWallSegmentManager = new WallSegmentManager();    // Gets deleted in destructor
    else
       mWallSegmentManager = NULL;
+
+   mDatabaseId = getNextId();
 }
 
 
@@ -79,7 +87,7 @@ GridDatabase::~GridDatabase()
 {
    removeEverythingFromDatabase();
 
-   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "running GridDatabase Destructor without initalizing?");
+   TNLAssert(mChunker != NULL || mCountGridDatabase != 0, "Running GridDatabase destructor without initalizing?");
 
    if(mWallSegmentManager)
       delete mWallSegmentManager;
@@ -88,6 +96,8 @@ GridDatabase::~GridDatabase()
 
    if(mCountGridDatabase == 0)
       delete mChunker;
+
+   logprintf("Deleting database %d", mDatabaseId);
 }
 
 
@@ -164,8 +174,6 @@ void GridDatabase::addToDatabase(const Vector<DatabaseObject *> &objects)
 
 void GridDatabase::removeEverythingFromDatabase()
 {
-   mAllObjects.deleteAndClear();
-
    for(S32 x = 0; x < BucketRowCount; x++)
    {
       for(S32 y = 0; y < BucketRowCount; y++)
@@ -180,6 +188,19 @@ void GridDatabase::removeEverythingFromDatabase()
          mBuckets[x & BucketMask][y & BucketMask] = NULL;
       }
    }
+
+   bool xxx = true;
+   for(U32 i = 0; i < mAllObjects.size(); i++)  // Always crashes with type number 32, WallSegment
+   {
+      logprintf("gridDb: %d, %p, %d", i, mAllObjects.get(i), mAllObjects.get(i)->getObjectTypeNumber());
+      if(mAllObjects.get(i)->getObjectTypeNumber() == 32)
+         xxx = false;
+   }
+
+   if(xxx)
+      mAllObjects.deleteAndClear();
+   else
+      mAllObjects.clear();
 
    if(mWallSegmentManager)
       mWallSegmentManager->clear();

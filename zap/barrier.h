@@ -325,7 +325,7 @@ private:
    Point mStart, mEnd;
 
 public:
-   WallEdge(const Point &start, const Point &end, GridDatabase *database);
+   WallEdge(const Point &start, const Point &end);
    virtual ~WallEdge();
 
    Point *getStart();

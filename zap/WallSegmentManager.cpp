@@ -29,8 +29,8 @@
 #include "game.h"
 
 #ifndef ZAP_DEDICATED 
-#   include "UI.h"
-#   include "OpenglUtils.h"
+#  include "UI.h"
+#  include "OpenglUtils.h"
 #endif
 
 
@@ -47,18 +47,18 @@ WallSegmentManager::WallSegmentManager()
 {
    // These deleted in the destructor
    mWallSegmentDatabase = new GridDatabase(false);      
-   mWallEdgeDatabase = new GridDatabase(false);
+   mWallEdgeDatabase    = new GridDatabase(false);
 }
 
 
 // Destructor
 WallSegmentManager::~WallSegmentManager()
 {
-   delete mWallEdgeDatabase;
-   mWallEdgeDatabase = NULL;
-
    delete mWallSegmentDatabase;
    mWallSegmentDatabase = NULL;
+
+   delete mWallEdgeDatabase;
+   mWallEdgeDatabase = NULL;
 }
 
 
@@ -158,16 +158,17 @@ void WallSegmentManager::rebuildEdges()
    // Data flow in this method: wallSegments -> wallEdgePoints -> wallEdges
 
    mWallEdgePoints.clear();
-
    // Run clipper --> fills mWallEdgePoints from mWallSegments
    clipAllWallEdges(mWallSegmentDatabase->findObjects_fast(), mWallEdgePoints);    
-
    mWallEdgeDatabase->removeEverythingFromDatabase();  //XXXX <---- THIS CAUSES THE CRASH
 
-   // Add clipped wallEdges to the spatial database -- when creating a new WallEdge, it will be added to the
-   // specified database, and will be deleted by the database when it is ultimately removed
+   // Create a WallEdge object from the clipped wall geometry.  We'll add it to the WallEdgeDatabase, which will 
+   // delete the object when it is ulitmately removed.
    for(S32 i = 0; i < mWallEdgePoints.size(); i+=2)
-      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1], mWallEdgeDatabase);    // Create the edge object
+   {
+      WallEdge *newEdge = new WallEdge(mWallEdgePoints[i], mWallEdgePoints[i+1]);                  // Create the edge object
+      newEdge->addToDatabase(mWallEdgeDatabase, Rect(mWallEdgePoints[i], mWallEdgePoints[i+1]));   // And add it to the database
+   }
 }
 
 
@@ -222,7 +223,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
 
    Rect allSegExtent;
 
-   // Polywalls will have one segment; it will have the same geometry as the polywall itself
+   // Polywalls will have one segment; it will have the same geometry as the polywall itself.
+   // The WallSegment constructor will add it to the specified database.
    if(wall->getObjectTypeNumber() == PolyWallTypeNumber)
       WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
 
@@ -235,8 +237,9 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       // Create a WallSegment for each sequential pair of vertices
       for(S32 i = 0; i < wallItem->extendedEndPoints.size(); i += 2)
       {
+         // Create the segment; the WallSegment constructor will add it to the specified database
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
-                                                   (F32)wallItem->getWidth(), wallItem->getSerialNumber());    // Create the segment
+                                                   (F32)wallItem->getWidth(), wallItem->getSerialNumber());   
          if(i == 0)
             allSegExtent.set(newSegment->getExtent());
          else

@@ -102,6 +102,9 @@ public:
 
    static GridDatabase *getBotZoneDatabase();
 
+   static void createBotZoneDatabase();
+   static void deleteBotZoneDatabase();
+
    Point getCenter();      // Return center of zone
 
    // More precise boundary for precise collision detection

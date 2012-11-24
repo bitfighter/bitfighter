@@ -124,7 +124,7 @@ static Game *mObjectAddTarget = NULL;
 
 
 // Constructor
-Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())      //? was without new
+Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
    mSettings = settings;
 

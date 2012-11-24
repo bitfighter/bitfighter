@@ -1005,7 +1005,7 @@ SpyBug::SpyBug(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter
 
 
 // Combined Lua / C++ default constructor -- used in Lua and editor
-SpyBug::SpyBug(lua_State *L)  : Burst(Point(0,0), Point(0,0), NULL)
+SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
 {
    initialize(Point(0,0), NULL);
 }
