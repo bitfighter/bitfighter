@@ -1219,10 +1219,7 @@ static bool standaloneDetected()
 
    // If we did a debug compile, default standalone mode
 #ifdef TNL_DEBUG
-   // Standalone unavailable on Mac and mobile platforms
-#  if !defined(TNL_OS_MAC_OSX) && !defined(TNL_OS_MOBILE)
    isStandalone = true;   // XXX Comment this out to test resource copying in debug build
-#  endif
 #endif
 
    FILE *fp;
