@@ -300,7 +300,7 @@ void seedRandomNumberGenerator(string name)
 
    S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
 
-   unsigned char buf[totalByteCount];
+   unsigned char buf[totalByteCount] = {0};  // Should be initialized for libtomcrypt
 
    // Bytes from the time
    buf[0] = U8(seconds);
@@ -990,7 +990,7 @@ string getInstalledDataDir()
    path = string(LINUX_DATA_DIR) + "/bitfighter";
 #else
    // We'll default to the directory the executable is in
-   char buffer[1024];
+   char buffer[1024] = {0};
    readlink("/proc/self/exe", buffer, sizeof(buffer));
    path = extractDirectory(string(buffer));
 #endif
@@ -1000,7 +1000,7 @@ string getInstalledDataDir()
 
 #elif defined(TNL_OS_WIN32)
    // On Windows, the installed data dir is always where the executable is
-   char buffer[MAX_PATH];
+   char buffer[MAX_PATH] = {0};
    GetModuleFileName(NULL, buffer, MAX_PATH);
    path = extractDirectory(string(buffer));
 
