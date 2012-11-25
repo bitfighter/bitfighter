@@ -154,9 +154,9 @@ void VideoSystem::init()
    // with a finely crafted 16x16 icon, then scale it up to 32x32 with no interpolation.
    // It will look crappy at 32x32, but good at 16x16, and that's all that really matters.
 
-#if SDL_VERSION_ATLEAST(2,0,0)
+   // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
    SDL_Surface *icon = SDL_LoadBMP("bficon.bmp");
-
+#if SDL_VERSION_ATLEAST(2,0,0)
    if(icon != NULL)
    {
       // flag must be non-zero to enable color key
@@ -167,14 +167,15 @@ void VideoSystem::init()
    // Set window and icon title here so window will be created with proper name later
    SDL_WM_SetCaption(WINDOW_TITLE.c_str(), WINDOW_TITLE.c_str());
 
-   // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
-   SDL_Surface *image = SDL_LoadBMP("bficon.bmp");
-   if(image != NULL)
+   if(icon != NULL)
    {
-      SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format, 0, 0, 0));
-      SDL_WM_SetIcon(image,NULL);
+      SDL_SetColorKey(icon, SDL_SRCCOLORKEY, SDL_MapRGB(icon->format, 0, 0, 0));
+      SDL_WM_SetIcon(icon,NULL);
    }
 #endif
+
+   if(icon != NULL)
+      SDL_FreeSurface(icon);
 
    // We will set the resolution, position, and flags in actualizeScreenMode()
 }

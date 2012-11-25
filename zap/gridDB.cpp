@@ -177,24 +177,7 @@ void GridDatabase::removeEverythingFromDatabase()
       }
    }
 
-   bool xxx = true;
-   for(U32 i = 0; i < mAllObjects.size(); i++)  // Always crashes with type number 32, WallSegment
-   {
-      if(mAllObjects.get(i)->getObjectTypeNumber() == 32)
-      {
-         xxx = false;
-         //TNLAssert(false, "");
-      }
-   }
-
-      if(true || xxx)
-         mAllObjects.deleteAndClear();
-   else
-   {
-      mAllObjects.clear();
-      if(mWallSegmentManager)
-         TNLAssert(false, "argh!");
-   }
+   mAllObjects.deleteAndClear();
 
    if(mWallSegmentManager)
       mWallSegmentManager->clear();

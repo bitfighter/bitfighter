@@ -127,12 +127,13 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    mWasTesting = false;
 
-   clearSnapEnviornment();
+   clearSnapEnvironment();
 
    mHitItem = NULL;
    mHitVertex = NONE;
    mDockItemHit = NULL;
    mEdgeHit = NONE;
+   mouseIgnore = false;
 
    mEditorDatabase = boost::shared_ptr<GridDatabase>(new GridDatabase());
 
@@ -351,7 +352,7 @@ void EditorUserInterface::autoSave()
 }
 
 
-void EditorUserInterface::clearSnapEnviornment()
+void EditorUserInterface::clearSnapEnvironment()
 {
    mSnapObject = NULL;
    mSnapVertexIndex = NONE;
@@ -364,7 +365,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    if(!undoAvailable())
       return;
 
-   clearSnapEnviornment();
+   clearSnapEnvironment();
 
    if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
    {
@@ -394,7 +395,7 @@ void EditorUserInterface::redo()
 {
    if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
    {
-      clearSnapEnviornment();
+      clearSnapEnvironment();
 
       mLastUndoIndex++;
 
@@ -535,7 +536,7 @@ void EditorUserInterface::cleanUp()
    clearDatabase(mLoadTarget);
    game->clearTeams();
    
-   clearSnapEnviornment();
+   clearSnapEnvironment();
    
    mAddingVertex = false;
    clearLevelGenItems();
@@ -3021,7 +3022,7 @@ void EditorUserInterface::findSnapVertex()
    if(mDraggingObjects)    // Don't change snap vertex once we're dragging
       return;
 
-   clearSnapEnviornment();
+   clearSnapEnvironment();
 
    Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
 
@@ -3129,7 +3130,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                deleted = true;
 
                geomChanged = true;
-               clearSnapEnviornment();
+               clearSnapEnvironment();
             }
          }
 
@@ -3157,10 +3158,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       setNeedToSave(true);
       autoSave();
 
-      mHitItem = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
-      mHitVertex = NONE;
-
-      doneDeleteing();
+      doneDeleting();
    }
 }
 
@@ -3456,7 +3454,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
       database->removeFromDatabase(obj);
 
    if(!batchMode)
-      doneDeleteing();
+      doneDeleting();
 }
 
 
@@ -3470,10 +3468,10 @@ void EditorUserInterface::doneDeleteingWalls()
 }
 
 
-void EditorUserInterface::doneDeleteing()
+void EditorUserInterface::doneDeleting()
 {
    // Reset a bunch of things
-   clearSnapEnviornment();
+   clearSnapEnvironment();
    validateLevel();
    onMouseMoved();   // Reset cursor  
 }
@@ -4357,7 +4355,7 @@ void EditorUserInterface::onFinishedDragging()
          if(deletedWall)
             doneDeleteingWalls();
 
-         doneDeleteing();
+         doneDeleting();
 
          return;
       }

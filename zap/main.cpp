@@ -300,7 +300,7 @@ void seedRandomNumberGenerator(string name)
 
    S32 nameBytes = min((S32)name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
 
-   unsigned char buf[totalByteCount];
+   unsigned char buf[totalByteCount] = {0};  // Should be initialized for libtomcrypt
 
    // Bytes from the time
    buf[0] = U8(seconds);
@@ -970,6 +970,32 @@ void checkOnlineUpdate(string exePath, GameSettings *settings)
 }
 
 
+// This function returns the directory of this running executable
+string getExecutableDir()
+{
+   string path;
+
+#if defined(TNL_OS_LINUX)
+   char buffer[1024] = {0};
+   readlink("/proc/self/exe", buffer, sizeof(buffer));
+   path = extractDirectory(string(buffer));
+
+#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+   getExecutablePath(path);  // Directory.h
+
+#elif defined(TNL_OS_WIN32)
+   char buffer[MAX_PATH] = {0};
+   GetModuleFileName(NULL, buffer, MAX_PATH);
+   path = extractDirectory(string(buffer));
+
+#else
+#  error "Path needs to be defined for this platform"
+#endif
+
+   return path;
+}
+
+
 // Change this for packaging.  Can be done in package processing scripts using sed
 // We probably need to migrate to a build system sometime...
 #ifdef TNL_OS_LINUX
@@ -990,9 +1016,7 @@ string getInstalledDataDir()
    path = string(LINUX_DATA_DIR) + "/bitfighter";
 #else
    // We'll default to the directory the executable is in
-   char buffer[1024];
-   readlink("/proc/self/exe", buffer, sizeof(buffer));
-   path = extractDirectory(string(buffer));
+   path = getExecutableDir();
 #endif
 
 #elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
@@ -1000,9 +1024,7 @@ string getInstalledDataDir()
 
 #elif defined(TNL_OS_WIN32)
    // On Windows, the installed data dir is always where the executable is
-   char buffer[MAX_PATH];
-   GetModuleFileName(NULL, buffer, MAX_PATH);
-   path = extractDirectory(string(buffer));
+   path = getExecutableDir();
 
 #else
 #  error "Path needs to be defined for this platform"
@@ -1012,16 +1034,16 @@ string getInstalledDataDir()
 }
 
 
-// Make sure we're in a sane working directory.  Mostly for preparation in copying
-// resources, if needed, but also for properly running standalone builds
+// Make sure we're in a sane working directory.  Mostly for properly running standalone builds
 void normalizeWorkingDirectory()
 {
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
    // Move to the application bundle's path (RDW)
    moveToAppPath();  // Directory.h
 #else
-   // Move to the installed data directory
-   chdir(getInstalledDataDir().c_str());
+   // Move to the executable directory.  Good for Windows.  Not so good for Linux since it
+   // usually has the executable placed far from the installed resources
+   chdir(getExecutableDir().c_str());
 #endif
 }
 
@@ -1234,6 +1256,11 @@ static bool standaloneDetected()
          isStandalone = true;
       }
    }
+
+   // Or, if no INI, specify it will be a standalone install with a predefined file
+   // This way an INI can still be built from scratch and we won't have to distribute one
+   if(fileExists(".standalone"))
+      isStandalone = true;
 
    return isStandalone;
 #endif
