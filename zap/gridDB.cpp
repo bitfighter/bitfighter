@@ -24,19 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "gridDB.h"
-#include "BfObject.h"
 #include "moveObject.h"    // For def of ActualState
-#include "EditorObject.h"  // For def of EditorObject
 #include "WallSegmentManager.h"
-
-#include "boost/shared_ptr.hpp"
-
-#include <map>
-
-
-
-#include "soccerGame.h"  // TODO: delete this line
-
 
 namespace Zap
 {
@@ -96,8 +85,6 @@ GridDatabase::~GridDatabase()
 
    if(mCountGridDatabase == 0)
       delete mChunker;
-
-   logprintf("Deleting database %d", mDatabaseId);
 }
 
 
@@ -138,10 +125,11 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 
 void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
-   TNLAssert(theObject->mDatabase != this, "Already added to database, trying to add to same database again");
-   TNLAssert(!theObject->mDatabase, "Already added to database, trying to add to different database");
-   TNLAssert(theObject->mExtent == extents, "extents does not equal");
-   if(theObject->mDatabase)
+   TNLAssert(theObject->mDatabase != this,  "Already added to database, trying to add to same database again!");
+   TNLAssert(!theObject->mDatabase,         "Already added to database, trying to add to different database!");
+   TNLAssert(theObject->mExtent == extents, "Extents not equal!");
+
+   if(theObject->mDatabase)      // Should never happen
       return;
 
    theObject->mDatabase = this;
@@ -192,15 +180,21 @@ void GridDatabase::removeEverythingFromDatabase()
    bool xxx = true;
    for(U32 i = 0; i < mAllObjects.size(); i++)  // Always crashes with type number 32, WallSegment
    {
-      logprintf("gridDb: %d, %p, %d", i, mAllObjects.get(i), mAllObjects.get(i)->getObjectTypeNumber());
       if(mAllObjects.get(i)->getObjectTypeNumber() == 32)
+      {
          xxx = false;
+         //TNLAssert(false, "");
+      }
    }
 
-   if(xxx)
-      mAllObjects.deleteAndClear();
+      if(true || xxx)
+         mAllObjects.deleteAndClear();
    else
+   {
       mAllObjects.clear();
+      if(mWallSegmentManager)
+         TNLAssert(false, "argh!");
+   }
 
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
@@ -240,7 +234,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object)
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == object)
       {
-         mAllObjects.erase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
+         mAllObjects.deleteAndErase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
          break;
       }
 }

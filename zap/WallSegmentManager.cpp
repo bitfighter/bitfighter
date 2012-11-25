@@ -218,7 +218,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
          }
    }
 
-   // Get rid of any existing segments that correspond to our wall; we'll be building new ones
+   // Get rid of any segments that correspond to our wall; we'll be building new ones
    deleteSegments(wall->getSerialNumber());
 
    Rect allSegExtent;
@@ -239,7 +239,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
       {
          // Create the segment; the WallSegment constructor will add it to the specified database
          WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, wallItem->extendedEndPoints[i], wallItem->extendedEndPoints[i+1], 
-                                                   (F32)wallItem->getWidth(), wallItem->getSerialNumber());   
+                                                   (F32)wallItem->getWidth(), wallItem->getSerialNumber());
+
          if(i == 0)
             allSegExtent.set(newSegment->getExtent());
          else
@@ -250,8 +251,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
    }
 
    // Remount all turrets & forcefields mounted on or terminating on any of the wall segments we deleted and potentially recreated
-   for(S32 j = 0; j < toBeRemounted.size(); j++)  
-      toBeRemounted[j]->mountToWall(toBeRemounted[j]->getVert(0), database->getWallSegmentManager());
+   for(S32 i = 0; i < toBeRemounted.size(); i++)  
+      toBeRemounted[i]->mountToWall(toBeRemounted[i]->getVert(0), database->getWallSegmentManager());
 
 #endif
 }
