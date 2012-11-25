@@ -544,14 +544,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       s2cSetIsAdmin(true);                         // Tell client they have been granted access
 
       if(mSettings->getIniSettings()->allowAdminMapUpload)
-         s2rSendableFlags(ServerFlagAllowUpload);                      // Enable level uploads
+         s2rSendableFlags(ServerFlagAllowUpload);                 // Enable level uploads
 
       GameType *gameType = mServerGame->getGameType();
 
       if(gameType)
          gameType->s2cClientBecameAdmin(mClientInfo->getName());  // Announce change to world
    }
-   else if(!mClientInfo->isLevelChanger() && !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass)) // If level change password is blank, it should already been granted to all clients
+
+   // If level change password is blank, it should already been granted to all clients
+   else if(!mClientInfo->isLevelChanger() && !strcmp(md5.getSaltedHashFromString(levChangePW).c_str(), pass)) 
    {
       logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientInfo->getName().getString());
       mWrongPasswordCount = 0;
@@ -772,6 +774,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                clientInfo->setIsLevelChanger(false);
                if(conn)
                   conn->s2cSetIsLevelChanger(false, false);
+
+               // Announce the change
+               mServerGame->getGameType()->s2cClientLostLevelChange(clientInfo->getName());  
             }
          }
       }
@@ -900,7 +905,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    if(clientInfo->isLevelChanger() && !granted)
       mClientGame->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
-   clientInfo->setIsLevelChanger(granted);
+   clientInfo->setIsLevelChanger(granted);  // (simple set)
 
    setGotPermissionsReply(true);
 

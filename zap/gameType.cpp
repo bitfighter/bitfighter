@@ -2740,7 +2740,6 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
    // Record that fact in our local copy of info about them
    clientInfo->setIsLevelChanger(true);
 
-
    // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
    // saw a different message.
    TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
@@ -2750,6 +2749,24 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
       clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
 #endif
 }
+
+
+// Announce that a player is a LOSER!!! (of permission to change levels)
+GAMETYPE_RPC_S2C(GameType, s2cClientLostLevelChange, (StringTableEntry name), (name))
+{
+#ifndef ZAP_DEDICATED
+   // Get a RemoteClientInfo representing the client that just became a non-level changer
+   ClientInfo *clientInfo = mGame->findClientInfo(name);      
+   if(!clientInfo)
+      return;
+
+   // Record that fact in our local copy of info about them
+   clientInfo->setIsLevelChanger(false);
+
+   // No need to show a message...
+#endif
+}
+
 
 // Runs after the server knows that the client is available and addressable via the getGhostIndex()
 // Server only, obviously
