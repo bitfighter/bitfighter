@@ -917,7 +917,7 @@ void WallSegment::init(GridDatabase *database, S32 owner)
    // Recompute the edges based on our new corner points
    resetEdges();                                            
 
-   // Add item to database, set its extents.  Roughly equivalent to addToDatabase(database, Rect(corners))
+   // Add item to database, set its extents
    addToDatabase(database, Rect(mCorners));
    
    // Drawing filled wall requires that points be triangluated
