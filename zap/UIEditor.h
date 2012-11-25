@@ -132,7 +132,7 @@ private:
    bool mJustInsertedVertex;
    bool mRedoingAnUndo;
 
-   void clearSnapEnviornment();
+   void clearSnapEnvironment();
 
    static const U32 UNDO_STATES = 128;
    void deleteUndoState();             // Removes most recent undo state from stack
@@ -389,7 +389,7 @@ public:
 
    // Helpers for doing batch deletes
    void doneDeleteingWalls(); 
-   void doneDeleteing();
+   void doneDeleting();
 
    // Run a script, and put resulting objects in database
    void runScript(GridDatabase *database, const FolderManager *folderManager, const string &scriptName, const Vector<string> &args);
