@@ -2221,7 +2221,7 @@ bool EditorUserInterface::anyItemsSelected(GridDatabase *database)
 // Find all objects in bounds, populate points passed in min & max
 void EditorUserInterface::computeSelectionMinMax(GridDatabase *database, Point &min, Point &max)
 {
-   min.set(F32_MAX, F32_MAX);
+   min.set( F32_MAX,  F32_MAX);
    max.set(-F32_MAX, -F32_MAX);
 
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
