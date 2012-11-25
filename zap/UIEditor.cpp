@@ -2176,7 +2176,6 @@ If wall thickness is changed, steps 3-5 need to be repeated
 */
 
 
-// TODO: Move this method to EditorObjectDatabase!!
 // Mark all objects in database as unselected
 void EditorUserInterface::clearSelection(GridDatabase *database)
 {
@@ -2190,7 +2189,6 @@ void EditorUserInterface::clearSelection(GridDatabase *database)
 }
 
 
-// TODO: Move this method to EditorObjectDatabase!!
 // Mark everything as selected
 void EditorUserInterface::selectAll(GridDatabase *database)
 {
@@ -2204,8 +2202,6 @@ void EditorUserInterface::selectAll(GridDatabase *database)
 }
 
 
-
-// TODO: Move this method to EditorObjectDatabase!!
 bool EditorUserInterface::anyItemsSelected(GridDatabase *database)
 {
    const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
