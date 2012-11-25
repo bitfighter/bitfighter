@@ -2694,14 +2694,9 @@ bool EditorUserInterface::checkForWallHit(const Point &point, DatabaseObject *ob
 
       // Note, if we get to here, we have a problem.
 
-      //logprintf("Found seg: %s", wallSegment->getExtent().toString().c_str());
-
-      //TNLAssert(false, "Should have found a wall.  Either the extents are wrong again, or the walls and their segments are out of sync.");
-
       // This code does a less efficient but more thorough job finding a wall that matches the segment we hit... if the above assert
       // keeps going off, and we can't fix it, this code here should take care of the problem.  But using it is an admission of failure.
 
-//      GridDatabase *editorDb = getDatabase();
       const Vector<DatabaseObject *> *objList = getDatabase()->findObjects_fast();
 
       for(S32 i = 0; i < objList->size(); i++)
