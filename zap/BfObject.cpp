@@ -275,11 +275,6 @@ EditorObject::EditorObject()
 }
 
 
-EditorObject::~EditorObject()
-{
-   // Do nothing
-}
-
 // Destructor
 EditorObject::~EditorObject()
 {
