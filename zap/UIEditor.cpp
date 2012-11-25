@@ -4606,6 +4606,9 @@ void EditorUserInterface::testLevelStart()
 
       mWasTesting = true;
 
+      // Shouldn't need to do this, but it will clear out forcefields lingering from level load
+      getGame()->getGameObjDatabase()->removeEverythingFromDatabase();     
+
       Vector<string> levelList;
       levelList.push_back(mEditFileName);
       initHostGame(getGame()->getSettings(), levelList, true, false);
