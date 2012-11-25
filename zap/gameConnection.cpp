@@ -564,7 +564,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSubmitPassword, (StringPtr pass), (pass),
       sendLevelList();                       // Send client the level list
 
       // Announce change to world
-      mServerGame->getGameType()->s2cClientBecameLevelChanger(mClientInfo->getName());  
+      mServerGame->getGameType()->s2cClientBecameLevelChanger(mClientInfo->getName(), true);  
    }
    else
    {
@@ -776,7 +776,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                   conn->s2cSetIsLevelChanger(false, false);
 
                // Announce the change
-               mServerGame->getGameType()->s2cClientLostLevelChange(clientInfo->getName());  
+               mServerGame->getGameType()->s2cClientBecameLevelChanger(clientInfo->getName(), false);  
             }
          }
       }

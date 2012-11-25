@@ -2729,7 +2729,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
 
 
 // Announce a new player has permission to change levels
-GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name), (name))
+GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name, bool isLevelChanger), (name, isLevelChanger))
 {
 #ifndef ZAP_DEDICATED
    // Get a RemoteClientInfo representing the client that just became a level changer
@@ -2738,32 +2738,18 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
       return;
 
    // Record that fact in our local copy of info about them
-   clientInfo->setIsLevelChanger(true);
+   clientInfo->setIsLevelChanger(isLevelChanger);
 
-   // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
-   // saw a different message.
-   TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
-   ClientGame *clientGame = static_cast<ClientGame *>(mGame);
+   if(isLevelChanger)
+   {
+      // Now display a message to the local client, unless they were the ones who were granted the privs, in which case they already
+      // saw a different message.
+      TNLAssert(dynamic_cast<ClientGame *>(mGame) != NULL, "Not a ClientGame"); // If this asserts, need to revert to dynamic_cast with NULL check
+      ClientGame *clientGame = static_cast<ClientGame *>(mGame);
 
-   if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
-      clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
-#endif
-}
-
-
-// Announce that a player is a LOSER!!! (of permission to change levels)
-GAMETYPE_RPC_S2C(GameType, s2cClientLostLevelChange, (StringTableEntry name), (name))
-{
-#ifndef ZAP_DEDICATED
-   // Get a RemoteClientInfo representing the client that just became a non-level changer
-   ClientInfo *clientInfo = mGame->findClientInfo(name);      
-   if(!clientInfo)
-      return;
-
-   // Record that fact in our local copy of info about them
-   clientInfo->setIsLevelChanger(false);
-
-   // No need to show a message...
+      if(clientGame->getClientInfo()->getName() != name)    // Don't show message to self
+         clientGame->displayMessage(Colors::cyan, "%s can now change levels.", name.getString());
+   }
 #endif
 }
 

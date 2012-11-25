@@ -491,8 +491,7 @@ public:
    TNL_DECLARE_RPC(s2cClientJoinedTeam, (StringTableEntry clientName, RangedU32<0, MAX_TEAMS> teamIndex, bool showMessage));
 
    TNL_DECLARE_RPC(s2cClientBecameAdmin,        (StringTableEntry clientName));
-   TNL_DECLARE_RPC(s2cClientBecameLevelChanger, (StringTableEntry clientName));
-   TNL_DECLARE_RPC(s2cClientLostLevelChange,    (StringTableEntry clientName));
+   TNL_DECLARE_RPC(s2cClientBecameLevelChanger, (StringTableEntry clientName, bool isLevelChanger));
 
    TNL_DECLARE_RPC(s2cSyncMessagesComplete, (U32 sequence));
    TNL_DECLARE_RPC(c2sSyncMessagesComplete, (U32 sequence));
