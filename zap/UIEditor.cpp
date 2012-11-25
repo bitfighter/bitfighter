@@ -1424,7 +1424,7 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
       // Turrets & forcefields: Snap to a wall edge as first (and only) choice, regardless of whether snapping is on or off
       if(isEngineeredType(mSnapObject->getObjectTypeNumber()))
       {
-         EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject);
+         EngineeredItem *engrObj = dynamic_cast<EngineeredItem *>(mSnapObject.getPointer());
          return engrObj->mountToWall(snapPointToLevelGrid(p), wallSegmentManager);
       }
    }

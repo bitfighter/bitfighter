@@ -220,11 +220,12 @@ private:
    void findHitItemOnDock();     // Sets mDockItemHit
 
    void findSnapVertex();
-   BfObject *mSnapObject;
    S32 mSnapVertexIndex;
 
    S32 mEdgeHit;
    S32 mHitVertex;
+
+   SafePtr<BfObject> mSnapObject;
    SafePtr<BfObject> mHitItem;
    SafePtr<BfObject> mDockItemHit;
 
