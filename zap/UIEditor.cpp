@@ -133,6 +133,7 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    mHitVertex = NONE;
    mDockItemHit = NULL;
    mEdgeHit = NONE;
+   mouseIgnore = false;
 
    mEditorDatabase = boost::shared_ptr<GridDatabase>(new GridDatabase());
 
@@ -3157,9 +3158,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       setNeedToSave(true);
       autoSave();
 
-      mHitItem = NULL;     // In case we just deleted a lit item; not sure if really needed, as we do this above
-      mHitVertex = NONE;
-
       doneDeleting();
    }
 }
@@ -3473,6 +3471,9 @@ void EditorUserInterface::doneDeleteingWalls()
 void EditorUserInterface::doneDeleting()
 {
    // Reset a bunch of things
+   mHitItem = NULL;     // In case we just deleted a lit item
+   mHitVertex = NONE;
+
    clearSnapEnvironment();
    validateLevel();
    onMouseMoved();   // Reset cursor  
