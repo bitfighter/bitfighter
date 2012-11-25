@@ -189,18 +189,7 @@ void GridDatabase::removeEverythingFromDatabase()
       }
    }
 
-   bool xxx = true;
-   for(U32 i = 0; i < mAllObjects.size(); i++)  // Always crashes with type number 32, WallSegment
-   {
-      logprintf("gridDb: %d, %p, %d", i, mAllObjects.get(i), mAllObjects.get(i)->getObjectTypeNumber());
-      if(mAllObjects.get(i)->getObjectTypeNumber() == 32)
-         xxx = false;
-   }
-
-   if(xxx)
-      mAllObjects.deleteAndClear();
-   else
-      mAllObjects.clear();
+   mAllObjects.deleteAndClear();
 
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
