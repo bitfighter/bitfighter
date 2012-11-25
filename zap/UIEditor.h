@@ -226,7 +226,7 @@ private:
 
    S32 mEdgeHit;
    S32 mHitVertex;
-   BfObject *mHitItem;
+   SafePtr<BfObject> mHitItem;
    BfObject *mDockItemHit;
 
    void computeSelectionMinMax(GridDatabase *database, Point &min, Point &max);

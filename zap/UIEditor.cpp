@@ -3471,9 +3471,6 @@ void EditorUserInterface::doneDeleteingWalls()
 void EditorUserInterface::doneDeleting()
 {
    // Reset a bunch of things
-   mHitItem = NULL;     // In case we just deleted a lit item
-   mHitVertex = NONE;
-
    clearSnapEnvironment();
    validateLevel();
    onMouseMoved();   // Reset cursor  
