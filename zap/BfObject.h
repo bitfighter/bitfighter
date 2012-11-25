@@ -180,6 +180,7 @@ private:
 
 public:
    EditorObject();      // Constructor
+   virtual ~EditorObject();
 
    // Messages and such for the editor
    virtual const char *getOnScreenName();
