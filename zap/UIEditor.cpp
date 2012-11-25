@@ -3855,11 +3855,11 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    }
    else if(inputString == "T")                // Teleporter
       insertNewItem(TeleporterTypeNumber);
-   else if(inputString == "P")                // Speed Zone
+   else if(inputString == "P")                // SpeedZone
       insertNewItem(SpeedZoneTypeNumber);
    else if(inputString == "G")                // Spawn
       insertNewItem(ShipSpawnTypeNumber);
-   else if(inputString == "Ctrl+B")           // Spy Bug
+   else if(inputString == "Ctrl+B")           // Spybug
       insertNewItem(SpyBugTypeNumber);
    else if(inputString == "B")                // Repair
       insertNewItem(RepairItemTypeNumber);
@@ -3867,7 +3867,7 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
       insertNewItem(TurretTypeNumber);
    else if(inputString == "M")                // Mine
       insertNewItem(MineTypeNumber);
-   else if(inputString == "F")                // Force Field
+   else if(inputString == "F")                // Forcefield
       insertNewItem(ForceFieldProjectorTypeNumber);
    else if(inputString == "Backspace" || inputString == "Del" || inputString == "Keypad .")     // Keypad . is the keypad's del key
       deleteSelection(false);
