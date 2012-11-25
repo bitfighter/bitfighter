@@ -148,7 +148,6 @@ private:
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
-   BfObject *mNewItem;
    TeamManager *mTeamManager;
 
    F32 mCurrentScale;
@@ -187,7 +186,6 @@ private:
 
    boost::shared_ptr<EditorPlugin> mPluginRunner;
 
-   BfObject *mDraggingDockItem;
    Vector<string> mLevelErrorMsgs, mLevelWarnings;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
@@ -212,7 +210,7 @@ public:
 private:
    // Sets mHitItem and mEdgeHit -- findHitItemAndEdge calls one or more of the associated helper functions below
    void findHitItemAndEdge();                         
-   bool checkForVertexHit(BfObject *object);     
+   bool checkForVertexHit(BfObject *object);
    bool checkForEdgeHit(const Point &point, BfObject *object);        
    bool checkForWallHit(const Point &point, DatabaseObject *wallSegment);
    bool checkForPolygonHit(const Point &point, BfObject *object);    
@@ -225,8 +223,12 @@ private:
    S32 mEdgeHit;
    S32 mHitVertex;
 
+
+   SafePtr<BfObject> mNewItem;
    SafePtr<BfObject> mSnapObject;
    SafePtr<BfObject> mHitItem;
+
+   SafePtr<BfObject> mDraggingDockItem;
    SafePtr<BfObject> mDockItemHit;
 
    void computeSelectionMinMax(GridDatabase *database, Point &min, Point &max);
