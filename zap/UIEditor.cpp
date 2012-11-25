@@ -361,7 +361,6 @@ void EditorUserInterface::clearSnapEnvironment()
 
 void EditorUserInterface::undo(bool addToRedoStack)
 {
-   TNL_CHECK_HEAP();
    if(!undoAvailable())
       return;
 
@@ -387,7 +386,6 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mLastUndoStateWasBarrierWidthChange = false;
    validateLevel();
-   TNL_CHECK_HEAP();
 }
    
 
@@ -454,7 +452,6 @@ void EditorUserInterface::redo()
 
 void EditorUserInterface::rebuildEverything(GridDatabase *database)
 {
-   TNL_CHECK_HEAP();
    database->getWallSegmentManager()->recomputeAllWallGeometry(database);
    resnapAllEngineeredItems(database);
 
