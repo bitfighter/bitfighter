@@ -272,6 +272,12 @@ EditorObject::EditorObject()
    mSelected = false; 
 }
 
+// Destructor
+EditorObject::~EditorObject()
+{
+   // Do nothing
+}
+
 
 void EditorObject::onItemDragging()  { /* Do nothing */ }
 void EditorObject::onAttrsChanging() { /* Do nothing */ }
