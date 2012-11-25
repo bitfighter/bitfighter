@@ -91,7 +91,7 @@ bool Engineerable::isEngineered()
 void Engineerable::setResource(MountableItem *resource)
 {
    mResource = resource;
-   mResource->removeFromDatabase();
+   mResource->removeFromDatabase(false);     // Don't want to delete this item -- we'll need it later in releaseResource()
 }
 
 

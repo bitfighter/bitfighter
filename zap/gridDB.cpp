@@ -184,7 +184,7 @@ void GridDatabase::removeEverythingFromDatabase()
 }
 
 
-void GridDatabase::removeFromDatabase(DatabaseObject *object)
+void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
 {
    TNLAssert(object->mDatabase == this || object->mDatabase == NULL, "Trying to remove Object from wrong database");
    if(object->mDatabase != this)
@@ -217,16 +217,12 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object)
    for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
       if(mAllObjects[i] == object)
       {
-         mAllObjects.deleteAndErase(i);      // Remember: mAllObjects is sorted, so we can't use erase_fast
+         if(deleteObject)
+            delete mAllObjects[i];      
+
+         mAllObjects.erase(i);            // Remember: mAllObjects is sorted, so we can't use erase_fast
          break;
       }
-}
-
-
-void GridDatabase::removeFromDatabase(const Vector<DatabaseObject *> &objects)
-{
-   for(S32 i = 0; i < objects.size(); i++)
-      removeFromDatabase(objects[i]);
 }
 
 
@@ -701,12 +697,12 @@ bool DatabaseObject::isDeleted()
 }
 
 
-void DatabaseObject::removeFromDatabase()
+void DatabaseObject::removeFromDatabase(bool deleteObject)
 {
    if(!mDatabase)
       return;
 
-   getDatabase()->removeFromDatabase(this);
+   getDatabase()->removeFromDatabase(this, deleteObject);
 }
 
 

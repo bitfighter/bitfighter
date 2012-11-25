@@ -383,7 +383,7 @@ public:
    void assignNewSerialNumber();
    S32 getSerialNumber();
 
-   virtual void removeFromGame();
+   virtual void removeFromGame(bool deleteObject);
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
    virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?

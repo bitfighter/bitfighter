@@ -424,7 +424,8 @@ BfObject::BfObject()
 // Destructor
 BfObject::~BfObject()
 {
-   removeFromGame();
+   removeFromDatabase(false);
+   mGame = NULL;
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
@@ -513,9 +514,10 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
 }
 
 
-void BfObject::removeFromGame()
+// Removes object from game, but DOES NOT DELETE IT
+void BfObject::removeFromGame(bool deleteObject)
 {
-   removeFromDatabase();
+   removeFromDatabase(deleteObject);
    mGame = NULL;
 }
 

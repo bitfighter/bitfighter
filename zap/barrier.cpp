@@ -864,7 +864,7 @@ WallEdge::WallEdge(const Point &start, const Point &end)
 WallEdge::~WallEdge()
 {
     // Make sure object is out of the database
-   removeFromDatabase(); 
+   removeFromDatabase(false); 
 }
 
 
@@ -936,9 +936,9 @@ void WallSegment::init(GridDatabase *database, S32 owner)
 // Destructor
 WallSegment::~WallSegment()
 { 
-   // Make sure object is out of the database
+   // Make sure object is out of the database -- but don't delete it since we're destructing
    if(getDatabase())
-      getDatabase()->removeFromDatabase(this); 
+      getDatabase()->removeFromDatabase(this, false); 
 }
 
 

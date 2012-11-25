@@ -77,7 +77,7 @@ BotNavMeshZone::BotNavMeshZone(S32 id)
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
 {
-   removeFromDatabase();
+   removeFromDatabase(false);
 }
 
 

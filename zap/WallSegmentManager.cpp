@@ -374,7 +374,8 @@ void WallSegmentManager::deleteSegments(S32 owner)
          toBeDeleted.push_back(wallSegment);
    }
 
-   mWallSegmentDatabase->removeFromDatabase(toBeDeleted);
+   for(S32 i = 0; i < toBeDeleted.size(); i++)
+      mWallSegmentDatabase->removeFromDatabase(toBeDeleted[i], true);
 }
 
 

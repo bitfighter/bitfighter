@@ -86,7 +86,7 @@ public:
    void addToDatabase(GridDatabase *database);
    void addToDatabase(GridDatabase *database, const Rect &extent);
 
-   void removeFromDatabase();
+   void removeFromDatabase(bool deleteObject);
 
    U8 getObjectTypeNumber();
 
@@ -182,8 +182,7 @@ public:
    void addToDatabase(const Vector<DatabaseObject *> &objects);
 
 
-   virtual void removeFromDatabase(DatabaseObject *theObject);
-   void removeFromDatabase(const Vector<DatabaseObject *> &objects);
+   virtual void removeFromDatabase(DatabaseObject *theObject, bool deleteObject);
    virtual void removeEverythingFromDatabase();
 
    S32 getObjectCount();                          // Return the number of objects currently in the database

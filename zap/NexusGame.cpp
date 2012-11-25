@@ -756,7 +756,7 @@ void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
    }
 
    flag->setCollideable(false);
-   flag->removeFromDatabase();
+   flag->removeFromDatabase(false);    // Could be true and remove deleteObject() call line?
    flag->deleteObject();
 }
 
@@ -870,7 +870,7 @@ void NexusFlagItem::onMountDestroyed()
 
    // Now delete the flag itself
    dismount();
-   removeFromDatabase();
+   removeFromDatabase(false);    // Could be true and remove deleteObject() call line?
    deleteObject();
 }
 

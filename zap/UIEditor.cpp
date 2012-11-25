@@ -267,7 +267,7 @@ void EditorUserInterface::populateDock()
 // Destructor -- unwind things in an orderly fashion.  Note that mLevelGenDatabase will clear itself as the referenced object is deleted.
 EditorUserInterface::~EditorUserInterface()
 {
-   clearDatabase(getDatabase());
+   //clearDatabase(getDatabase());  --> will happen as a matter of course when mEditorDatabase is deleted as part of destructing this UI
 
    mDockItems.clear();
    mClipboard.clear();
@@ -530,7 +530,8 @@ void EditorUserInterface::cleanUp()
    mDockItems.clear();     // Free a little more -- dock will be rebuilt when editor restarts
    
    mLoadTarget = getDatabase();
-   clearDatabase(mLoadTarget);
+   mLoadTarget->removeEverythingFromDatabase();    // Deletes all objects   was clearDatabase(mLoadTarget);
+
    game->clearTeams();
    
    clearSnapEnvironment();
@@ -620,7 +621,7 @@ void EditorUserInterface::copyScriptItemsToEditor()
    {
       BfObject *obj = static_cast<BfObject *>(tempList[i]);
 
-      obj->removeFromGame();
+      obj->removeFromGame(false);     // False ==> do not delete object
       addToEditor(obj);
    }
       
@@ -701,7 +702,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
       BfObject *obj = dynamic_cast<BfObject *>(fillVector[i]);
 
       if(obj->getVertCount() < 2)      // Invalid item; delete  --> aren't 1 point walls already excluded, making this check redundant?
-         database->removeFromDatabase(obj);
+         database->removeFromDatabase(obj, true);
 
       if(obj->getObjectTypeNumber() != PolyWallTypeNumber)
          dynamic_cast<WallItem *>(obj)->processEndPoints();
@@ -716,7 +717,7 @@ void EditorUserInterface::runScript(GridDatabase *database, const FolderManager 
    {
       Teleporter *teleporter = static_cast<Teleporter *>(fillVector[i]);
       if(teleporter->getDestCount() == 0)
-         database->removeFromDatabase(teleporter);
+         database->removeFromDatabase(teleporter, true);
       else
       {
          for(S32 i = 1; i < teleporter->getDestCount(); i++)
@@ -2250,14 +2251,14 @@ void EditorUserInterface::computeSelectionMinMax(GridDatabase *database, Point &
 
 
 // TODO: Move to GridDatabase
-void EditorUserInterface::clearDatabase(GridDatabase *database)
-{
-   fillVector.clear();
-   database->findObjects(fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-      database->removeFromDatabase(fillVector[i]);
-}
+//void EditorUserInterface::clearDatabase(GridDatabase *database)
+//{
+//   fillVector.clear();
+//   database->findObjects(fillVector);
+//
+//   for(S32 i = 0; i < fillVector.size(); i++)
+//      database->removeFromDatabase(fillVector[i], true);
+//}
 
 
 // Copy selection to the clipboard
@@ -3426,13 +3427,13 @@ void EditorUserInterface::deleteItem(S32 itemIndex, bool batchMode)
    {
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager->deleteSegments(obj->getSerialNumber());          // Delete the segments associated with the wall
-      database->removeFromDatabase(obj);
+      database->removeFromDatabase(obj, true);
 
       if(!batchMode)
          doneDeleteingWalls();
    }
    else
-      database->removeFromDatabase(obj);
+      database->removeFromDatabase(obj, true);
 
    if(!batchMode)
       doneDeleting();

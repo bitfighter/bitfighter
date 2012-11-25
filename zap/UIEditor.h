@@ -279,8 +279,6 @@ public:
 
    GridDatabase *getDatabase();      // Need external access to this in one static function
 
-   void clearDatabase(GridDatabase *database);
-
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
