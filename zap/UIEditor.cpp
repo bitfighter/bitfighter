@@ -4592,7 +4592,7 @@ void EditorUserInterface::testLevel()
 void EditorUserInterface::testLevelStart()
 {
    string tmpFileName = mEditFileName;
-   mEditFileName = "editor.tmp";
+   mEditFileName = "editor.tmp";       // Temp file where we'll save current level while testing
 
    Cursor::disableCursor();            // Turn off cursor
    bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
@@ -4607,7 +4607,7 @@ void EditorUserInterface::testLevelStart()
       mWasTesting = true;
 
       Vector<string> levelList;
-      levelList.push_back("editor.tmp");
+      levelList.push_back(mEditFileName);
       initHostGame(getGame()->getSettings(), levelList, true, false);
    }
 
