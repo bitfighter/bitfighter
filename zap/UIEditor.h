@@ -175,7 +175,6 @@ private:
    void renderReferenceShip();
    void renderDragSelectBox();      // Render box when selecting a group of items
    void renderDockItems();          // Render all items on the dock
-   void renderHelpMessage();        // Render help messages at bottom of screen
    void renderSaveMessage();
    void renderWarnings();
 
@@ -227,7 +226,7 @@ private:
    S32 mEdgeHit;
    S32 mHitVertex;
    SafePtr<BfObject> mHitItem;
-   BfObject *mDockItemHit;
+   SafePtr<BfObject> mDockItemHit;
 
    void computeSelectionMinMax(GridDatabase *database, Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock

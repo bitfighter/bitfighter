@@ -126,20 +126,20 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
    setMenuID(EditorUI);
 
    mWasTesting = false;
+   mouseIgnore = false;
 
    clearSnapEnvironment();
 
-   mHitItem = NULL;
-   mHitVertex = NONE;
+   mHitItem     = NULL;
+   mNewItem     = NULL;
    mDockItemHit = NULL;
-   mEdgeHit = NONE;
-   mouseIgnore = false;
+
+   mHitVertex = NONE;
+   mEdgeHit   = NONE;
 
    mEditorDatabase = boost::shared_ptr<GridDatabase>(new GridDatabase());
 
    setNeedToSave(false);
-
-   mNewItem = NULL;
 
    mTeamManager = new TeamManager;
 
@@ -1944,6 +1944,9 @@ void EditorUserInterface::render()
       renderDockItems();
       renderInfoPanel();
       renderItemInfoPanel();
+
+      if(mouseOnDock() && mDockItemHit)
+         mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
    }
 
    renderDragSelectBox();
@@ -1954,7 +1957,6 @@ void EditorUserInterface::render()
       drawFourArrows(mScrollWithMouseLocation);
    }
 
-   renderHelpMessage();    // Also highlights dock item we're hovering over
    renderSaveMessage();
    renderWarnings();
 
@@ -2100,19 +2102,6 @@ static void renderDockItemLabel(const Point &pos, const char *label)
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2;
    glColor(Colors::white);
    UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
-}
-
-
-// Render help messages at bottom of screen
-void EditorUserInterface::renderHelpMessage()
-{
-   if(!mouseOnDock() || mPreviewMode)  // Help messages only shown when hovering over dock item, and only when dock is visible
-      return;
-
-   if(!mDockItemHit)
-      return;
-
-   mDockItemHit->setLitUp(true);       // Will trigger a selection highlight to appear around dock item
 }
 
 
@@ -3939,7 +3928,7 @@ void EditorUserInterface::onMouseClicked_left()
    if(mouseOnDock())    // On the dock?  Did we hit something to start dragging off the dock?
    {
       clearSelection(getDatabase());
-      mDraggingDockItem = mDockItemHit;
+      mDraggingDockItem = mDockItemHit;      // Could be NULL
 
       if(mDraggingDockItem)
          SDL_SetCursor(Cursor::getSpray());
