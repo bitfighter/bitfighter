@@ -4602,8 +4602,6 @@ void EditorUserInterface::testLevelStart()
 
    if(saveLevel(true, false))
    {
-      mEditFileName = tmpFileName;     // Restore the level name
-
       mWasTesting = true;
 
       // Shouldn't need to do this, but it will clear out forcefields lingering from level load
@@ -4611,6 +4609,7 @@ void EditorUserInterface::testLevelStart()
 
       Vector<string> levelList;
       levelList.push_back(mEditFileName);
+      mEditFileName = tmpFileName;              // Restore the level name
       initHostGame(getGame()->getSettings(), levelList, true, false);
    }
 
