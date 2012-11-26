@@ -139,6 +139,7 @@ using namespace TNL;
 #include "InputCode.h"     // initializeKeyNames()
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
+#include "BotNavMeshZone.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -1054,7 +1055,7 @@ string getUserDataDir()
    string path;
 
 #if defined(TNL_OS_LINUX)
-   path = string(SDL_getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
+   path = string(getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
 
 #elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
    getUserDataPath(path);  // Directory.h
