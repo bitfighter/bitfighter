@@ -506,6 +506,7 @@ void FXTrail::render()
 
          default:
             TNLAssert(false, "No such profile!");
+            break;
       }
 
       fxTrailColorArray[(4*i) + 0] = r - rFade * t;
