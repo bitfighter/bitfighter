@@ -1061,7 +1061,7 @@ string getUserDataDir()
    getUserDataPath(path);  // Directory.h
 
 #elif defined(TNL_OS_WIN32)
-   path = string(SDL_getenv("APPDATA")) + "\\Bitfighter";
+   path = string(getenv("APPDATA")) + "\\Bitfighter";
 
 #else
 #  error "Path needs to be defined for this platform"
