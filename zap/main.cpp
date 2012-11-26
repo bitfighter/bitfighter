@@ -1410,7 +1410,7 @@ int main(int argc, char **argv)
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
-
+   BotNavMeshZone::createBotZoneDatabase();
 
    if(settings->isDedicatedServer())
       initHostGame(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
@@ -1441,8 +1441,6 @@ int main(int argc, char **argv)
 #endif
 
       Zap::Cursor::init();
-
-      BotNavMeshZone::createBotZoneDatabase();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
