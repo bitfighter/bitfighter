@@ -4595,16 +4595,13 @@ void EditorUserInterface::testLevel()
 
 void EditorUserInterface::testLevelStart()
 {
-   string tmpFileName = mEditFileName;
-   mEditFileName = "editor.tmp";       // Temp file where we'll save current level while testing
+   static const string TestFileName = "editor.tmp";   // Temp file where we'll save current level while testing
 
-   Cursor::disableCursor();            // Turn off cursor
-   bool nts = mNeedToSave;             // Save these parameters because they are normally reset when a level is saved.
-   S32 auul = mAllUndoneUndoLevel;     // Since we're only saving a temp copy, we really shouldn't reset them...
+   Cursor::disableCursor();                           // Turn off cursor
 
-   mEditorGameType = getGame()->getGameType();     // Sock our current gametype away, will use it when we reenter the editor
+   mEditorGameType = getGame()->getGameType();        // Sock our current gametype away, will use it when we reenter the editor
 
-   if(saveLevel(true, false))
+   if(doSaveLevel(TestFileName, true))
    {
       mWasTesting = true;
 
@@ -4612,13 +4609,9 @@ void EditorUserInterface::testLevelStart()
       getGame()->getGameObjDatabase()->removeEverythingFromDatabase();     
 
       Vector<string> levelList;
-      levelList.push_back(mEditFileName);
-      mEditFileName = tmpFileName;              // Restore the level name
+      levelList.push_back(TestFileName);
       initHostGame(getGame()->getSettings(), levelList, true, false);
    }
-
-   mNeedToSave = nts;                  // Restore saved parameters
-   mAllUndoneUndoLevel = auul;
 }
 
 
