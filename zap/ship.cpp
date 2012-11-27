@@ -1065,6 +1065,7 @@ void Ship::processModules()
 }
 
 
+// Runs on client and server
 void Ship::rechargeEnergy()
 {
    U32 timeInMilliSeconds = mCurrentMove.time;
@@ -1075,26 +1076,26 @@ void Ship::rechargeEnergy()
       // Base recharge rate
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
 
-      // Apply energy recharge modifier for the zone the player is in
-      BfObject *object = isInZone(LoadoutZoneTypeNumber);
-      S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
+      //// Apply energy recharge modifier for the zone the player is in
+      //BfObject *object = isInZone(LoadoutZoneTypeNumber);
+      //S32 currentLoadoutZoneTeam = object ? object->getTeam() : NO_TEAM;
 
-      if(currentLoadoutZoneTeam == TEAM_HOSTILE)
-         mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
+      //if(currentLoadoutZoneTeam == TEAM_HOSTILE)
+      //   mEnergy += EnergyRechargeRateInHostileLoadoutZoneModifier * timeInMilliSeconds;
 
-      else if(currentLoadoutZoneTeam == TEAM_NEUTRAL)
-         mEnergy += EnergyRechargeRateInNeutralLoadoutZoneModifier * timeInMilliSeconds;
+      //else if(currentLoadoutZoneTeam == TEAM_NEUTRAL)
+      //   mEnergy += EnergyRechargeRateInNeutralLoadoutZoneModifier * timeInMilliSeconds;
 
-      else if(currentLoadoutZoneTeam == getTeam())
-         mEnergy += EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;
+      //else if(currentLoadoutZoneTeam == getTeam())
+      //   mEnergy += EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;
 
-      else if(currentLoadoutZoneTeam != NO_TEAM)
-         mEnergy += EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInMilliSeconds;
+      //else if(currentLoadoutZoneTeam != NO_TEAM)
+      //   mEnergy += EnergyRechargeRateInEnemyLoadoutZoneModifier * timeInMilliSeconds;
 
       // Recharge energy very fast if we're completely idle for a given amount of time, unless
       // we're in a hostile loadout zone
-      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() ||
-            currentLoadoutZoneTeam == TEAM_HOSTILE)
+      if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() /*||
+            currentLoadoutZoneTeam == TEAM_HOSTILE*/)
          mIdleRechargeCycleTimer.reset();
       else
          mIdleRechargeCycleTimer.update(timeInMilliSeconds);
@@ -1104,8 +1105,8 @@ void Ship::rechargeEnergy()
    }
 
    // Movement penalty
-   if (mCurrentMove.x != 0 || mCurrentMove.y != 0)
-      mEnergy += EnergyRechargeRateMovementModifier * timeInMilliSeconds;
+   //if (mCurrentMove.x != 0 || mCurrentMove.y != 0)
+   //   mEnergy += EnergyRechargeRateMovementModifier * timeInMilliSeconds;
 
    // Handle energy falling below 0
    if(mEnergy <= 0)
