@@ -84,7 +84,7 @@ void GeomObject::setNewGeometry(GeomType geomType, F32 radius)
 
 
 // Basic definitions
-GeomType GeomObject::getGeomType()              {   return mGeometry.getGeometry()->getGeomType();   }
+GeomType GeomObject::getGeomType() const        {   return mGeometry.getGeometry()->getGeomType();   }
 Point    GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);  }
 
 bool GeomObject::deleteVert(S32 vertIndex)               
@@ -153,8 +153,8 @@ void GeomObject::unselectVerts()             {   mGeometry.getGeometry()->unsele
 bool GeomObject::vertSelected(S32 vertIndex) {   return mGeometry.getGeometry()->vertSelected(vertIndex);   }
 
 // Geometric calculations
-Point GeomObject::getCentroid()     {   return mGeometry.getGeometry()->getCentroid();     }
-F32   GeomObject::getLabelAngle()   {   return mGeometry.getGeometry()->getLabelAngle();   }
+Point GeomObject::getCentroid()   const {   return mGeometry.getGeometry()->getCentroid();     }
+F32   GeomObject::getLabelAngle() const {   return mGeometry.getGeometry()->getLabelAngle();   }
       
 
 // Geometry operations
@@ -194,11 +194,8 @@ Rect GeomObject::calcExtents() {  return mGeometry.getGeometry()->calcExtents();
 void GeomObject::disableTriangulation() {   mGeometry.getGeometry()->disableTriangulation();   }
 
 
-
-Point GeomObject::getPos() const
-{
-   return getVert(0);
-}
+Point GeomObject::getPos()       const { return getVert(0); }
+Point GeomObject::getRenderPos() const { return getPos();   }
 
 
 void GeomObject::setPos(const Point &pos)

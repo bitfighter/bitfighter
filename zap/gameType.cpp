@@ -800,24 +800,36 @@ void GameType::renderObjectiveArrow(const BfObject *target, const Color *c, F32 
    if(!ship)
       return;
 
-   //Rect r = target->getBounds(RenderState);
-   Rect r = target->getExtent();
-   Point nearestPoint = ship->getPos();
+   Point targetPoint;
 
-   if(r.max.x < nearestPoint.x)
-      nearestPoint.x = r.max.x;
-   if(r.min.x > nearestPoint.x)
-      nearestPoint.x = r.min.x;
-   if(r.max.y < nearestPoint.y)
-      nearestPoint.y = r.max.y;
-   if(r.min.y > nearestPoint.y)
-      nearestPoint.y = r.min.y;
+   // Handle different geometry types a bit differently.
+   // Note that for simpleLine objects, we will point at the origin point; this will usually be correct, but is somewhat moot as
+   // we don't currently draw objective arrows towards any simpleLine objects.  If we did, this might fail for TextItems.
+   GeomType geomType = target->getGeomType();
+   if(geomType == geomPoint || geomType == geomSimpleLine) 
+   {
+      targetPoint = target->getRenderPos();
+   }
+   else if(geomType == geomPolyLine || geomType == geomPolygon)
+   {
+      Rect r = target->getExtent();
+      targetPoint = ship->getPos();
 
-   renderObjectiveArrow(&nearestPoint, c, alphaMod);
+      if(r.max.x < targetPoint.x)
+         targetPoint.x = r.max.x;
+      if(r.min.x > targetPoint.x)
+         targetPoint.x = r.min.x;
+      if(r.max.y < targetPoint.y)
+         targetPoint.y = r.max.y;
+      if(r.min.y > targetPoint.y)
+         targetPoint.y = r.min.y;
+   }
+
+   renderObjectiveArrow(targetPoint, c, alphaMod);
 }
 
 
-void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outlineColor, F32 alphaMod) const
+void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outlineColor, F32 alphaMod) const
 {
    ClientGame *game = static_cast<ClientGame *>(mGame);
 
@@ -831,7 +843,7 @@ void GameType::renderObjectiveArrow(const Point *nearestPoint, const Color *outl
    if(!co)
       return;
 
-   Point rp = game->worldToScreenPoint(nearestPoint);
+   Point rp = game->worldToScreenPoint(&nearestPoint);
    Point center(400, 300);
    Point arrowDir = rp - center;
 

@@ -67,7 +67,7 @@ public:
    PointGeometry(F32 radius);                   // Constructor
    ~PointGeometry();                            // Destructor
 
-   GeomType getGeomType();
+   GeomType getGeomType() const;
 
    S32 getVertCount() const;
    S32 getMinVertCount() const;
@@ -87,8 +87,8 @@ public:
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill() const;
-   Point getCentroid();
-   F32 getLabelAngle();
+   Point getCentroid() const;
+   F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream);
@@ -114,7 +114,7 @@ public:
    SimpleLineGeometry();           // Constructor
    virtual ~SimpleLineGeometry();  // Destructor
 
-   GeomType getGeomType();
+   GeomType getGeomType() const;
 
    Point getVert(S32 index) const;
    void setVert(const Point &pos, S32 index);
@@ -137,8 +137,8 @@ public:
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill() const;
-   Point getCentroid();
-   F32 getLabelAngle();
+   Point getCentroid() const;
+   F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
@@ -174,7 +174,7 @@ public:
    PolylineGeometry();    // Constructor
    ~PolylineGeometry();   // Destructor
 
-   virtual GeomType getGeomType();
+   virtual GeomType getGeomType() const;
 
    Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
@@ -197,8 +197,8 @@ public:
 
    const Vector<Point> *getOutline() const;
    virtual const Vector<Point> *getFill() const;
-   virtual Point getCentroid();
-   virtual F32 getLabelAngle();
+   virtual Point getCentroid() const;
+   virtual F32 getLabelAngle() const;
 
    void packGeom(GhostConnection *connection, BitStream *stream);
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
@@ -227,11 +227,11 @@ private:
 public:
    PolygonGeometry();      // Constructor
 
-   GeomType getGeomType();
+   GeomType getGeomType() const;
 
    const Vector<Point> *getFill() const;
-   Point getCentroid();
-   F32 getLabelAngle();
+   Point getCentroid() const;
+   F32 getLabelAngle() const;
 
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 

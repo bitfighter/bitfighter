@@ -677,7 +677,7 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
-      renderObjectiveArrow(&mYardSaleWaypoints[i].pos, &Colors::white);
+      renderObjectiveArrow(mYardSaleWaypoints[i].pos, &Colors::white);
 
    for(S32 i = 0; i < mNexus.size(); i++)
       renderObjectiveArrow(mNexus[i].getPointer(), mNexusIsOpen ? &gNexusOpenColor : &gNexusClosedColor);

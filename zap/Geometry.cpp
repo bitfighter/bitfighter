@@ -53,7 +53,7 @@ Geometry::~Geometry()
 }
 
 
-GeomType Geometry::getGeomType()
+GeomType Geometry::getGeomType() const
 {
    TNLAssert(false, "Not implemented");
    return geomNone;
@@ -185,14 +185,14 @@ const Vector<Point> *Geometry::getFill() const
 }
 
 
-Point Geometry::getCentroid()
+Point Geometry::getCentroid() const
 {
    TNLAssert(false, "Not implemented");
    return Point();
 }
 
 
-F32 Geometry::getLabelAngle()
+F32 Geometry::getLabelAngle() const
 {
    TNLAssert(false, "Not implemented");
    return 0;
@@ -328,7 +328,7 @@ PointGeometry::~PointGeometry()
 }
 
 
-GeomType PointGeometry::getGeomType()
+GeomType PointGeometry::getGeomType() const
 {
    return geomPoint;
 }
@@ -432,13 +432,13 @@ const Vector<Point> *PointGeometry::getFill() const
 }
 
 
-Point PointGeometry::getCentroid()
+Point PointGeometry::getCentroid() const
 {
    return mPoint;
 }
 
 
-F32 PointGeometry::getLabelAngle()
+F32 PointGeometry::getLabelAngle() const
 {
    return 0;
 }
@@ -510,7 +510,7 @@ SimpleLineGeometry::~SimpleLineGeometry()
 }
 
 
-GeomType SimpleLineGeometry::getGeomType()
+GeomType SimpleLineGeometry::getGeomType() const
 {
    return geomSimpleLine;
 }
@@ -627,13 +627,13 @@ const Vector<Point> *SimpleLineGeometry::getFill() const
 }
 
 
-Point SimpleLineGeometry::getCentroid()
+Point SimpleLineGeometry::getCentroid() const
 {
    return (mFromPos + mToPos) / 2; // Returns midpoint of line
 }
 
 
-F32 SimpleLineGeometry::getLabelAngle()
+F32 SimpleLineGeometry::getLabelAngle() const
 {
    return mFromPos.angleTo(mToPos);
 }
@@ -713,7 +713,7 @@ PolylineGeometry::~PolylineGeometry()
 }
 
 
-GeomType PolylineGeometry::getGeomType()
+GeomType PolylineGeometry::getGeomType() const
 {
    return geomPolyLine;
 }
@@ -873,13 +873,13 @@ const Vector<Point> *PolylineGeometry::getFill() const
 }
 
 
-Point PolylineGeometry::getCentroid()
+Point PolylineGeometry::getCentroid() const
 {
    return mCentroid;;
 }
 
 
-F32 PolylineGeometry::getLabelAngle()
+F32 PolylineGeometry::getLabelAngle() const
 {
    return 0;
 }
@@ -998,7 +998,7 @@ PolygonGeometry::PolygonGeometry() : PolylineGeometry()
 }
 
 
-GeomType PolygonGeometry::getGeomType()
+GeomType PolygonGeometry::getGeomType() const
 {
    return geomPolygon;
 }
@@ -1011,14 +1011,14 @@ const Vector<Point> *PolygonGeometry::getFill() const
 }
 
 
-Point PolygonGeometry::getCentroid()
+Point PolygonGeometry::getCentroid() const
 {
    TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
    return Parent::getCentroid();
 }
 
 
-F32 PolygonGeometry::getLabelAngle()
+F32 PolygonGeometry::getLabelAngle() const
 {
    TNLAssert(!mTriangluationDisabled, "Triangluation disabled!");
    return mLabelAngle;

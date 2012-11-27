@@ -60,9 +60,7 @@ public:
    Geometry();           // Constructor
    virtual ~Geometry();  // Destructor
 
-   //virtual Geometry *newCopy(const Geometry &geom);
-
-   virtual GeomType getGeomType();
+   virtual GeomType getGeomType() const;
 
    virtual Point getVert(S32 index) const;
    virtual void setVert(const Point &pos, S32 index);
@@ -85,8 +83,8 @@ public:
 
    virtual const Vector<Point> *getOutline() const;
    virtual const Vector<Point> *getFill() const;
-   virtual Point getCentroid();
-   virtual F32 getLabelAngle();
+   virtual Point getCentroid() const;
+   virtual F32 getLabelAngle() const;
                                                             
    virtual void packGeom(GhostConnection *connection, BitStream *stream);
    virtual void unpackGeom(GhostConnection *connection, BitStream *stream);

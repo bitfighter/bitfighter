@@ -448,7 +448,7 @@ public:
 #ifndef ZAP_DEDICATED
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
    void renderObjectiveArrow(const BfObject *target, const Color *c, F32 alphaMod = 1.0f) const;
-   void renderObjectiveArrow(const Point *p, const Color *c, F32 alphaMod = 1.0f) const;
+   void renderObjectiveArrow(const Point &p, const Color *c, F32 alphaMod = 1.0f) const;
 #endif
 
    void addTime(U32 time);          // Extend the game by time (in ms)

@@ -69,7 +69,7 @@ public:
 
    void setNewGeometry(GeomType geomType, F32 radius = 0);
 
-   GeomType getGeomType();
+   GeomType getGeomType() const;
 
    virtual Point getVert(S32 index) const;               // Overridden by MoveObject
    virtual void setVert(const Point &pos, S32 index);    // Overridden by MoveObject
@@ -98,8 +98,8 @@ public:
    void offset(const Point &offset);                      // Offset object by a certain amount
 
    // Getting parts of the geometry
-   Point getCentroid();
-   F32 getLabelAngle();
+   Point getCentroid() const;
+   F32 getLabelAngle() const;
 
    const Vector<Point> *getOutline() const;
    const Vector<Point> *getFill()    const;
@@ -125,6 +125,8 @@ public:
    virtual void setExtent(const Rect &extentRect) = 0;
 
    virtual Point getPos() const;
+   virtual Point getRenderPos() const;
+
    virtual void setPos(const Point &pos);
 
    virtual void setGeom(const Vector<Point> &points);
