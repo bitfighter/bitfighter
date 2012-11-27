@@ -602,7 +602,6 @@ void DiagnosticUserInterface::render()
          ypos += textsize + gap;
       }
 
-
       ypos += textsize + gap;
       
 
