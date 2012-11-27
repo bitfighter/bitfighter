@@ -139,6 +139,7 @@ using namespace TNL;
 #include "InputCode.h"     // initializeKeyNames()
 #include "ClientInfo.h"
 #include "Console.h"       // For access to console
+#include "BotNavMeshZone.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -1054,13 +1055,13 @@ string getUserDataDir()
    string path;
 
 #if defined(TNL_OS_LINUX)
-   path = string(SDL_getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
+   path = string(getenv("HOME")) + "/.bitfighter";  // TODO: migrate to XDG standards?  Too much work for now!
 
 #elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
    getUserDataPath(path);  // Directory.h
 
 #elif defined(TNL_OS_WIN32)
-   path = string(SDL_getenv("APPDATA")) + "\\Bitfighter";
+   path = string(getenv("APPDATA")) + "\\Bitfighter";
 
 #else
 #  error "Path needs to be defined for this platform"
@@ -1410,7 +1411,7 @@ int main(int argc, char **argv)
    SoundSystem::init(settings->getIniSettings()->sfxSet, folderManager->sfxDir, 
                      folderManager->musicDir, settings->getIniSettings()->getMusicVolLevel());  // Even dedicated server needs sound these days
    
-
+   BotNavMeshZone::createBotZoneDatabase();
 
    if(settings->isDedicatedServer())
       initHostGame(settings, settings->getLevelList(), false, true);     // Figure out what levels we'll be playing with, and start hosting  
@@ -1441,8 +1442,6 @@ int main(int argc, char **argv)
 #endif
 
       Zap::Cursor::init();
-
-      BotNavMeshZone::createBotZoneDatabase();
 
       settings->getIniSettings()->oldDisplayMode = DISPLAY_MODE_UNKNOWN;   // We don't know what the old one was
       VideoSystem::actualizeScreenMode(settings, false, false);            // Create a display window
