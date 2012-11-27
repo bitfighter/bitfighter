@@ -1064,6 +1064,7 @@ void Ship::processModules()
    }
 }
 
+
 void Ship::rechargeEnergy()
 {
    U32 timeInMilliSeconds = mCurrentMove.time;
