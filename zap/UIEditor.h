@@ -140,8 +140,6 @@ private:
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
 
-   void autoSave();                    // Hope for the best, prepare for the worst
-
    Vector<boost::shared_ptr<BfObject> > mClipboard;    // Items on clipboard
 
    bool mLastUndoStateWasBarrierWidthChange;
@@ -260,10 +258,12 @@ private:
    GridDatabase mLevelGenDatabase;     // Database for inserting objects when running a levelgen script in the editor
    void translateSelectedItems(GridDatabase *database, const Point &offset);
 
-
    void render();
    void renderObjects(GridDatabase *database, RenderModes renderMode, bool isLevelgenOverlay);
    void renderWalls(GridDatabase *database, const Point &offset, bool selected, bool isLevelGenDatabase);
+
+   void autoSave();                    // Hope for the best, prepare for the worst
+   bool doSaveLevel(const string &saveName, bool showFailMessages);
 
 protected:
    void onActivate();
@@ -291,6 +291,9 @@ public:
    void removeUndoState();    // Remove and discard the most recently saved undo state 
 
    Vector<string> mGameTypeArgs;
+
+   bool saveLevel(bool showFailMessages, bool showSuccessMessages);   // Public because called from callbacks
+
 
    F32 getCurrentScale();
    Point getCurrentOffset();
@@ -366,7 +369,6 @@ public:
 
    void changeBarrierWidth(S32 amt);   // Increase selected wall thickness by amt
 
-   bool saveLevel(bool showFailMessages, bool showSuccessMessages, bool autosave = false);
    void testLevel();
    void testLevelStart();
    void setSaveMessage(string msg, bool savedOK);
