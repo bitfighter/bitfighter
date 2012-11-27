@@ -579,9 +579,30 @@ void DiagnosticUserInterface::render()
 
       ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms /%2.0f%%", 
-                                  getGame()->getSettings()->getSimulatedLag(), getGame()->getSettings()->getSimulatedLoss() * 100);
-      ypos += textsize + gap;
+      GameConnection *conn = getGame()->getConnectionToServer();
+
+      if(conn)
+      {
+         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%", 
+                                     conn->getSimulatedSendLatency(), 
+                                     conn->getSimulatedSendPacketLoss() * 100);
+
+         ypos += textsize + gap;
+
+         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Rcv. Lag/Pkt. Loss:", "%dms/%2.0f%%", 
+                                     conn->getSimulatedReceiveLatency(), 
+                                     conn->getSimulatedReceivePacketLoss() * 100);
+      }
+      else     // No connection? Use settings in settings.
+      {
+         drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Send Lag/Pkt. Loss:", "%dms/%2.0f%%", 
+                                     settings->getSimulatedLag(), 
+                                     settings->getSimulatedLoss() * 100);
+
+         ypos += textsize + gap;
+      }
+
+
       ypos += textsize + gap;
       
 

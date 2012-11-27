@@ -489,10 +489,24 @@ public:
       { mPingRetryCount = pingRetryCount; mPingTimeout = msPerPing; }
    
    /// Simulates a network situation with a percentage random packet loss and a connection one way latency as specified.
-   void setSimulatedNetParams(F32 sendLoss, U32 sendLatency, F32 receiveLoss, U32 receiveLatency)
-      { mSimulatedSendPacketLoss = sendLoss; mSimulatedSendLatency = sendLatency; mSimulatedReceivePacketLoss = receiveLoss; mSimulatedReceiveLatency = receiveLatency;}
-   void setSimulatedNetParams(F32 packetLoss, U32 latency)
-      { mSimulatedReceivePacketLoss = mSimulatedSendPacketLoss = packetLoss; mSimulatedReceiveLatency = latency / 2; mSimulatedSendLatency = (latency + 1) / 2;}
+   void setSimulatedNetParams(F32 sendLoss, U32 sendLatency, F32 receiveLoss, U32 receiveLatency) { 
+      mSimulatedSendPacketLoss = sendLoss; 
+      mSimulatedSendLatency = sendLatency; 
+      mSimulatedReceivePacketLoss = receiveLoss; 
+      mSimulatedReceiveLatency = receiveLatency;
+   }
+
+   void setSimulatedNetParams(F32 packetLoss, U32 latency) { 
+      mSimulatedReceivePacketLoss = mSimulatedSendPacketLoss = packetLoss; 
+      mSimulatedReceiveLatency = latency / 2; 
+      mSimulatedSendLatency = (latency + 1) / 2;
+   }
+
+   U32 getSimulatedSendLatency()       { return mSimulatedSendLatency;       }
+   U32 getSimulatedReceiveLatency()    { return mSimulatedReceiveLatency;    }
+   F32 getSimulatedSendPacketLoss()    { return mSimulatedSendPacketLoss;    }
+   F32 getSimulatedReceivePacketLoss() { return mSimulatedReceivePacketLoss; }
+
 
    /// Specifies that this NetConnection instance is a connection to a "server."
    void setIsConnectionToServer() { mTypeFlags.set(ConnectionToServer); }
