@@ -1670,15 +1670,17 @@ void GameUserInterface::maxFpsHandler(const Vector<string> &words)
 void GameUserInterface::lagHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   U32 sendLag = words.size() > 1 ? atoi(words[1].c_str()) : 0;
+   U32 sendLag  = words.size() > 1 ? atoi(words[1].c_str()) : 0;
    F32 sendLoss = words.size() > 2 ? atof(words[2].c_str()) : 0;
+
    U32 receiveLag;
    F32 receiveLoss = sendLoss;
 
+   static const S32 MaxLag = 5000;
 
-   if(sendLag > 5000)
+   if(sendLag > MaxLag)
    {
-      game->displayErrorMessage("!!! ReSendceive lag too high or invalid");
+      game->displayErrorMessage("!!! Send lag too high or invalid");
       return;
    }
    if(sendLoss < 0 || sendLoss > 100)         // Percent range
@@ -1697,7 +1699,7 @@ void GameUserInterface::lagHandler(const Vector<string> &words)
          game->displayErrorMessage("!!! Receive packet loss must be between 0 and 100 percent");
          return;
       }
-      if(receiveLag > 5000)
+      if(receiveLag > MaxLag)
       {
          game->displayErrorMessage("!!! Receive lag too high or invalid");
          return;
