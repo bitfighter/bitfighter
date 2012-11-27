@@ -181,7 +181,7 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
          renderObjectiveArrow(mGoals[i], mGoals[i]->getColor());
    }
    if(mBall.isValid())
-      renderObjectiveArrow(mBall, getTeamColor(-1));
+      renderObjectiveArrow(mBall, getTeamColor(TEAM_NEUTRAL));
 #endif
 }
 
