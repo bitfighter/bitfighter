@@ -60,6 +60,7 @@ private:
    Vector<DatabaseObject *> mZones1;    // A list of zones the ship is currently in
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
+   bool mFastRecharge;
 
    SafePtr<Teleporter> mEngineeredTeleporter;
 

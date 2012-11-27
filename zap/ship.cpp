@@ -117,6 +117,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 {
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
+   mFastRecharge = false;
 
    // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
@@ -613,6 +614,9 @@ void Ship::idle(BfObject::IdleCallPath path)
       processMove(RenderState);
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
+
+      mIdleRechargeCycleTimer.update(mCurrentMove.time);
+      mFastRecharge = mIdleRechargeCycleTimer.getCurrent() == 0;
    }
    else
    {
@@ -712,11 +716,11 @@ void Ship::idle(BfObject::IdleCallPath path)
       path == BfObject::ClientIdleControlMain       ||
       path == BfObject::ClientIdleControlReplay       )
    {
-      // Process weapons and modules on controlled object objects
-      // This handles all the energy reductions as well
+      // Process weapons and modules on controlled objects; handles all the energy reductions as well
       processWeaponFire();
       processModules();
       rechargeEnergy();
+
       if(path == BfObject::ServerIdleControlFromClient && mModulePrimaryActive[ModuleRepair])
          repairTargets();
    }
@@ -1097,10 +1101,8 @@ void Ship::rechargeEnergy()
       if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() /*||
             currentLoadoutZoneTeam == TEAM_HOSTILE*/)
          mIdleRechargeCycleTimer.reset();
-      else
-         mIdleRechargeCycleTimer.update(timeInMilliSeconds);
 
-      if(mIdleRechargeCycleTimer.getCurrent() == 0)
+      if(mFastRecharge)
          mEnergy += EnergyRechargeRateIdleRechargeCycle * timeInMilliSeconds;
    }
 
@@ -1335,6 +1337,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(updateMask & ChangeTeamMask))    // A player with admin can change robots teams
       writeThisTeam(stream);
 
+   stream->writeFlag(mFastRecharge);
 
    if(stream->writeFlag(updateMask & LoadoutMask))       // Module configuration
    {
@@ -1436,6 +1439,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())        // Team changed (ChangeTeamMask)
       readThisTeam(stream);
+
+   mFastRecharge = stream->readFlag();
 
    if(stream->readFlag())        // New module configuration
    {
