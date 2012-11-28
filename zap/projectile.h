@@ -309,7 +309,7 @@ private:
    bool exploded;
    bool mBounced;
 
-   void initialize(const Point &pos, const Point &vel, BfObject *shooter);
+   void initialize(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);
    void acquireTarget();
    void emitMovementSparks();
 
@@ -319,7 +319,7 @@ private:
 
 
 public:
-   Seeker(const Point &pos, const Point &vel, BfObject *shooter);    // Constructor
+   Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);    // Constructor
    Seeker(lua_State *L = NULL);                                      // Combined Lua / C++ default constructor
    ~Seeker();                                                        // Destructor
 
