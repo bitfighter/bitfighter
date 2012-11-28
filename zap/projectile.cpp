@@ -1536,6 +1536,8 @@ U32 Seeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
 
    stream->writeFlag(exploded);
    stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+   if(stream->writeFlag(updateMask & PositionMask))
+      stream->writeSignedFloat(getActualAngle() * FloatInversePi, 8);  // 8 bits good enough?
    return ret;
 }
 
@@ -1559,6 +1561,8 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // InitialMask --> seeker was just created
       SoundSystem::playSoundEffect(SFXSeekerFire, getPos(), getVel());
 
+   if(stream->readFlag())     // PositionMask --> for angle changes since they are not handled in MoveItem
+      setActualAngle(stream->readSignedFloat(8) * FloatPi);
 }
 
 
@@ -1696,7 +1700,7 @@ void Seeker::renderItem(const Point &pos)
       return;
 
    F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
-   renderSeeker(pos, getActualVel().ATAN2(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
+   renderSeeker(pos, getActualAngle(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
 #endif
 }
 
