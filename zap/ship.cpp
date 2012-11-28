@@ -320,8 +320,8 @@ void Ship::setActualPos(Point p, bool warp)
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
-   const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
-   const F32 ARMOR_SPEED_PENALTY_FACT = 1;
+   static const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
+   static const F32 ARMOR_SPEED_PENALTY_FACT = 1;
 
    copyMoveState(stateIndex, LastProcessState);
    setAngle(stateIndex, mCurrentMove.angle);
@@ -336,10 +336,9 @@ void Ship::processMove(U32 stateIndex)
    Point requestVel(mCurrentMove.x, mCurrentMove.y);
 
    // If going above this speed, you cannot change course
-   const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-   if(getVel(stateIndex).lenSquared() > MAX_CONTROLLABLE_SPEED * MAX_CONTROLLABLE_SPEED)
+   static const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
+   if(getVel(stateIndex).lenSquared() > sq(MAX_CONTROLLABLE_SPEED))
       requestVel.set(0,0);
-
 
    requestVel *= maxVel;
    F32 len = requestVel.len();
@@ -571,15 +570,15 @@ void Ship::controlMoveReplayComplete()
    // and the server position after client-side prediction has
    // been run
    Point delta = getActualPos() - getRenderPos();
-   F32 deltaLen = delta.len();
+   F32 deltaLenSq = delta.lenSquared();
 
    // If the delta is either very small, or greater than the
    // max interpolation threshold, just warp to the new position
-   if(deltaLen <= 0.5 || deltaLen > MaxControlObjectInterpDistance)
+   if(deltaLenSq <= sq(0.5) || deltaLenSq > sq(MaxControlObjectInterpDistance))
    {
 #ifndef ZAP_DEDICATED
       // If it's a large delta, get rid of the movement trails
-      if(deltaLen > MaxControlObjectInterpDistance)
+      if(deltaLenSq > sq(MaxControlObjectInterpDistance))
          for(S32 i=0; i<TrailCount; i++)
             mTrail[i].reset();
 #endif
@@ -641,8 +640,8 @@ void Ship::idle(BfObject::IdleCallPath path)
          // differently in the lowest mantissa bits.  So normalize
          // after each update the position and velocity, so that
          // the control state update will not differ from client to server.
-         const F32 ShipVarNormalizeMultiplier = 128;
-         const F32 ShipVarNormalizeFraction = 1 / ShipVarNormalizeMultiplier;
+         static const F32 ShipVarNormalizeMultiplier = 128;
+         static const F32 ShipVarNormalizeFraction = 0.0078125; // 1/ShipVarNormalizeMultiplier
 
          Point p;
          
@@ -1156,9 +1155,9 @@ void Ship::damageObject(DamageInfo *theInfo)
          // Except for bouncers - they do a little more damage
          Projectile* projectile = dynamic_cast<Projectile*>(theInfo->damagingObject);
          if(projectile && projectile->mWeaponType == WeaponBounce)
-            damageAmount /= 1.3333f;  // Bouncers do 3/4 damage
+            damageAmount *= 0.75;  // Bouncers do 3/4 damage
          else
-            damageAmount /= 2;        // Everything else does 1/2
+            damageAmount *= 0.5;        // Everything else does 1/2
       }
    }
 
@@ -2000,7 +1999,7 @@ void Ship::emitMovementSparks()
    //U32 deltaT = mCurrentMove.time;
 
    static const F32 TOO_SLOW_FOR_SPARKS = 0.1f;
-   if(hasExploded || getActualVel().len() < TOO_SLOW_FOR_SPARKS)
+   if(hasExploded || getActualVel().lenSquared() < sq(TOO_SLOW_FOR_SPARKS))
       return;
 
    bool boostActive = isModulePrimaryActive(ModuleBoost);
@@ -2328,7 +2327,7 @@ void Ship::render(S32 layerIndex)
    {
       static const U32 blinkStartTime = 1500;
       static const U32 blinkCycleDuration = 300;
-      static const U32 blinkDuration = blinkCycleDuration / 2;       // Time shield is yellow or green during
+      static const U32 blinkDuration = blinkCycleDuration * 0.5;       // Time shield is yellow or green during
 
       if(mSpawnShield.getCurrent() > blinkStartTime || mSpawnShield.getCurrent() % blinkCycleDuration > blinkDuration)
          glColor(Colors::green65);  
