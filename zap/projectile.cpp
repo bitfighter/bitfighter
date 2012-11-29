@@ -1255,16 +1255,16 @@ TNL_IMPLEMENT_NETOBJECT(Seeker);
 const F32 Seeker_Radius = 4;
 const F32 Seeker_Mass = 1;
 
-Seeker::Seeker(const Point &pos, const Point &vel, BfObject *shooter) : MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
+Seeker::Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter) : MoveItem(pos, true, Seeker_Radius, Seeker_Mass)
 {
-   initialize(pos, vel, shooter);
+   initialize(pos, vel, angle, shooter);
 }
 
 
 // Combined Lua / C++ default constructor
 Seeker::Seeker(lua_State *L)
 {
-   initialize(Point(0,0), Point(0,0), NULL);
+   initialize(Point(0,0), Point(0,0), 0, NULL);
 }
 
 
@@ -1275,13 +1275,13 @@ Seeker::~Seeker()
 }
 
 
-void Seeker::initialize(const Point &pos, const Point &vel, BfObject *shooter)
+void Seeker::initialize(const Point &pos, const Point &vel, F32 angle, BfObject *shooter)
 {
    mObjectTypeNumber = SeekerTypeNumber;
 
    mNetFlags.set(Ghostable);
 
-   setPosVelAng(pos, vel, vel.ATAN2());
+   setPosVelAng(pos, vel, angle);
    mWeaponType = WeaponSeeker;
 
    updateExtentInDatabase();
@@ -1360,7 +1360,7 @@ void Seeker::idle(IdleCallPath path)
    {
       // First, remove target if it is too far away.  Next tick we'll search for a new one.
       Point delta = mAcquiredTarget->getPos() - getActualPos();
-      if(delta.lenSquared() > TargetAcquisitionRadius * TargetAcquisitionRadius)
+      if(delta.lenSquared() > sq(TargetAcquisitionRadius))
          mAcquiredTarget = NULL;
 
       // Else turn towards target
@@ -1378,7 +1378,10 @@ void Seeker::idle(IdleCallPath path)
          // Find the angle to the target as well as the current velocity angle
          // atan2 already normalizes these to be between -pi and pi
          F32 angleToTarget = delta.ATAN2();
-         F32 currentAngle = getVel().ATAN2();
+         F32 currentAngle = getActualAngle();
+
+         // Set our new angle towards the target for now
+         F32 newAngle = currentAngle;
 
          // Find the difference between the target angle and the angle of current travel
          // Normalize it to be between -pi and pi
@@ -1391,9 +1394,15 @@ void Seeker::idle(IdleCallPath path)
          if(fabs(difference) > maxTickAngle)
          {
             if(difference > 0)
+            {
                newVelocity.setAngle(currentAngle + maxTickAngle);
+               newAngle = (currentAngle + maxTickAngle);
+            }
             else
+            {
                newVelocity.setAngle(currentAngle - maxTickAngle);
+               newAngle = (currentAngle - maxTickAngle);
+            }
          }
 
          // Get current speed
@@ -1415,10 +1424,12 @@ void Seeker::idle(IdleCallPath path)
 
          newVelocity.normalize(speed);
          setActualVel(newVelocity);
+         setActualAngle(newAngle);
       }
    }
 
-   mAcquiredTarget = NULL;
+   // Force re-acquire to test for closer targets
+   mAcquiredTarget = NULL;  // This seems inefficent to set to NULL each tick
 }
 
 
@@ -1426,7 +1437,7 @@ void Seeker::idle(IdleCallPath path)
 // Will consider targets within TargetAcquisitionRadius in a outward cone with spread TargetSearchAngle
 void Seeker::acquireTarget()
 {
-   F32 ourAngle = getActualVel().ATAN2();
+   F32 ourAngle = getActualAngle();
 
    // Used for wall detection
    static Vector<DatabaseObject *> localFillVector;
@@ -1463,7 +1474,7 @@ void Seeker::acquireTarget()
 
       // See if object is within our "cone of vision"
       F32 ang = normalizeAngle(getPos().angleTo(foundObject->getPos()) - ourAngle);
-      if(ang > TargetSearchAngle / 2 || ang < -TargetSearchAngle / 2)
+      if(ang > TargetSearchAngle * 0.5f || ang < -TargetSearchAngle * 0.5f)
          continue;
 
       // Finally make sure there are no collideable objects in the way (like walls, forcefields)
@@ -1525,6 +1536,8 @@ U32 Seeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
 
    stream->writeFlag(exploded);
    stream->writeFlag((updateMask & InitialMask) && (getGame()->getCurrentTime() - getCreationTime() < 500));
+   if(stream->writeFlag(updateMask & PositionMask))
+      stream->writeSignedFloat(getActualAngle() * FloatInversePi, 8);  // 8 bits good enough?
    return ret;
 }
 
@@ -1548,6 +1561,8 @@ void Seeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // InitialMask --> seeker was just created
       SoundSystem::playSoundEffect(SFXSeekerFire, getPos(), getVel());
 
+   if(stream->readFlag())     // PositionMask --> for angle changes since they are not handled in MoveItem
+      setActualAngle(stream->readSignedFloat(8) * FloatPi);
 }
 
 
@@ -1639,7 +1654,7 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
    if(otherObj->getObjectTypeNumber() == SeekerTypeNumber)  // Do they bounce or explode?
    {
       Seeker *other = static_cast<Seeker *>(otherObj);
-      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > MAX_VEL_TO_BOUNCE * MAX_VEL_TO_BOUNCE)
+      if(!isGhost() && stateIndex == ActualState && getVel().distSquared(other->getVel()) > sq(MAX_VEL_TO_BOUNCE))
       {
          // They explode
          handleCollision(other, getActualPos());
@@ -1685,7 +1700,7 @@ void Seeker::renderItem(const Point &pos)
       return;
 
    F32 startLiveTime = (F32) GameWeapon::weaponInfo[mWeaponType].projLiveTime;
-   renderSeeker(pos, getActualVel().ATAN2(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
+   renderSeeker(pos, getActualAngle(), getActualVel().len(), (startLiveTime - F32(getGame()->getCurrentTime() - getCreationTime())));
 #endif
 }
 

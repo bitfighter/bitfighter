@@ -92,7 +92,7 @@ void GameWeapon::createWeaponProjectiles(WeaponType weapon, const Point &dir, co
          (new SpyBug(firePos, static_cast<Ship *>(shooter)))->addToGame(game, game->getGameObjDatabase());
          break;
       case WeaponSeeker:
-         (new Seeker(shooterPos + dir * shooterRadius * 0.9f, projVel, shooter))->addToGame(game, game->getGameObjDatabase());
+         (new Seeker(shooterPos + dir * shooterRadius * 0.9f, projVel, dir.ATAN2(), shooter))->addToGame(game, game->getGameObjDatabase());
          break;
       default:
          break;

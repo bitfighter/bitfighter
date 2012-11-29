@@ -33,10 +33,13 @@ end
 -- This is called by the robot's idle routine each tick.
 -- This function must be present for the robot to work!
 
+items = { }
+
 function onTick(deltaTime)
 
     if(targetItem == nil) then
-        targetItem = findClosest(findGlobalItems(ObjType.TestItem))
+        table.clear(items)
+        targetItem = findClosest(findGlobalItems(items, ObjType.TestItem))
     end
 
     if(targetItem == nil) then return end
