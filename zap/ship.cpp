@@ -118,6 +118,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
    mFastRecharge = false;
+   mEnergyDifference = 0;
 
    // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
@@ -270,6 +271,7 @@ S32 Ship::getMaxEnergy()
 }
 
 
+// Used when a ship picks up an energy object
 void Ship::changeEnergy(S32 deltaEnergy)
 {
    mEnergy = max(0, min(static_cast<int>(EnergyMax), mEnergy + deltaEnergy));
@@ -624,10 +626,35 @@ void Ship::idle(BfObject::IdleCallPath path)
                getControllingClient() &&  getControllingClient()->lostContact())
          return;  // If we're out-of-touch, don't move the ship... moving won't actually hurt, but this seems somehow better
 
+      if(path == BfObject::ClientIdleControlMain)
+      {
+         mIdleRechargeCycleTimer.update(mCurrentMove.time);
+         mFastRecharge = mIdleRechargeCycleTimer.getCurrent() == 0;
+         //logprintf("Fast? %s", mFastRecharge ? "Yes" : "NO");
+
+         S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy() - mEnergy;
+         logprintf("energy diff = %d, %d -- %d", actDiff, mEnergyDifference, mEnergyDifference - actDiff);
+
+         // Nudge energy closer to what the server tells us our energy should be, spread out over 1 sec
+         if(mCurrentMove.time > 1000)
+         {
+            mEnergy = mEnergy + mEnergyDifference;
+            mEnergyDifference = 0;
+         }
+         else
+         {
+            //logprintf("Ship %d", mEnergyDifference);
+            mEnergy += (F32)mEnergyDifference * ((F32)mCurrentMove.time / 10000.0f);
+            mEnergyDifference -= (F32)mEnergyDifference * ((F32)mCurrentMove.time / 10000.0f);
+         }
+
+      }
+
 
       // Apply impulse vector and reset it
       setActualVel(getActualVel() + mImpulseVector);
       mImpulseVector.set(0,0);
+
 
       // For all other cases, advance the actual state of the
       // object with the current move.
@@ -717,8 +744,11 @@ void Ship::idle(BfObject::IdleCallPath path)
    {
       // Process weapons and modules on controlled objects; handles all the energy reductions as well
       processWeaponFire();
-      processModules();
-      rechargeEnergy();
+      if(path != ClientIdleControlReplay)
+      {
+         processModules();
+         rechargeEnergy();
+      }
 
       if(path == BfObject::ServerIdleControlFromClient && mModulePrimaryActive[ModuleRepair])
          repairTargets();
@@ -967,7 +997,7 @@ void Ship::processModules()
          mEnergy -= energyUsed;
 
          // Exclude passive modules
-         if (energyUsed != 0)
+         if(energyUsed != 0)
             primaryActivationCount += 1;
 
          if(getClientInfo())
@@ -1018,21 +1048,21 @@ void Ship::processModules()
    }
 
    // Only toggle cooldown if no primary components are active
-   if (primaryActivationCount == 0)
+   if(primaryActivationCount == 0)
       mCooldownNeeded = mEnergy <= EnergyCooldownThreshold;
 
    // Offset recharge bonus when using modules in a friendly zone
-   if (primaryActivationCount > 0)
-   {
-      // This assumes the neutral and friendly bonuses are equal
-      BfObject *object = isInZone(LoadoutZoneTypeNumber);
-      S32 currentZoneTeam = object ? object->getTeam() : NO_TEAM;
-      if (currentZoneTeam == TEAM_NEUTRAL || currentZoneTeam == getTeam())
-         mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;            
-   }
+   //if (primaryActivationCount > 0)
+   //{
+   //   // This assumes the neutral and friendly bonuses are equal
+   //   BfObject *object = isInZone(LoadoutZoneTypeNumber);
+   //   S32 currentZoneTeam = object ? object->getTeam() : NO_TEAM;
+   //   if (currentZoneTeam == TEAM_NEUTRAL || currentZoneTeam == getTeam())
+   //      mEnergy -= EnergyRechargeRateInFriendlyLoadoutZoneModifier * timeInMilliSeconds;            
+   //}
 
    // Reduce total energy consumption when more than one module is used
-   if (primaryActivationCount > 1)
+   if(primaryActivationCount > 1)
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
 
    // Do logic triggered when module primary component state changes
@@ -1294,8 +1324,10 @@ void Ship::readControlState(BitStream *stream)
    stream->read(&y);
    Parent::setActualVel(Point(x, y));
 
-   mEnergy = stream->readRangedU32(0, EnergyMax);
-   mFastRecharge = stream->readFlag();
+   int serverReportedEnergy = stream->readRangedU32(0, EnergyMax);
+   mEnergyDifference = serverReportedEnergy - mEnergy;   // This was the difference at (lag) seconds ago
+  // logprintf("re = %d, le = %d,  diff = %d", e, mEnergy, mEnergyDifference);
+   bool rrrmFastRecharge = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));

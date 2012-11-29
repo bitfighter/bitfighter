@@ -41,6 +41,9 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
+
+#include "ClientInfo.h"    // TODO: delete this (here for testing only)
+
 #include "OpenglUtils.h"
 
 //#include "pictureloader.h"
@@ -1684,7 +1687,7 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
 }
 
 
-void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
+void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold, S32 serverEnergy)
 {
    const S32 GAUGE_WIDTH = 200;
    const S32 GUAGE_HEIGHT = 20;
@@ -1722,6 +1725,19 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 
    glColor(Colors::yellow);
    drawVertLine(hMargin + cutoffx, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+
+   if(serverEnergy != -1)
+   {
+      S32 p = F32(serverEnergy) / S32(maxEnergy) * GAUGE_WIDTH;
+      glColor(Colors::red);
+      drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+
+      S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
+      p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
+      glColor(Colors::magenta);
+      drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+
+   }
 }
 
 

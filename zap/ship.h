@@ -149,6 +149,8 @@ public:
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
+   S32 mEnergyDifference;     // Difference between what the client thinks its energy is and what the server tells it it is
+
    bool mCooldownNeeded;
    Point mImpulseVector;
 
