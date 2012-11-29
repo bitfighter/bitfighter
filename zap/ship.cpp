@@ -1100,7 +1100,10 @@ void Ship::rechargeEnergy()
       // we're in a hostile loadout zone
       if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() /*||
             currentLoadoutZoneTeam == TEAM_HOSTILE*/)
+      {
          mIdleRechargeCycleTimer.reset();
+         mFastRecharge = false;
+      }
 
       if(mFastRecharge)
          mEnergy += EnergyRechargeRateIdleRechargeCycle * timeInMilliSeconds;
@@ -1270,6 +1273,7 @@ void Ship::writeControlState(BitStream *stream)
    stream->write(getActualVel().y);
 
    stream->writeRangedU32(mEnergy, 0, EnergyMax);
+   stream->writeFlag(mFastRecharge);
    stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative.
       stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
@@ -1292,6 +1296,8 @@ void Ship::readControlState(BitStream *stream)
    Parent::setActualVel(Point(x, y));
 
    mEnergy = stream->readRangedU32(0, EnergyMax);
+   mFastRecharge = stream->readFlag();
+
    mCooldownNeeded = stream->readFlag();
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
    if(mFireTimer > S32(MaxFireDelay))
@@ -1336,8 +1342,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(stream->writeFlag(updateMask & ChangeTeamMask))    // A player with admin can change robots teams
       writeThisTeam(stream);
-
-   stream->writeFlag(mFastRecharge);
 
    if(stream->writeFlag(updateMask & LoadoutMask))       // Module configuration
    {
@@ -1439,8 +1443,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(stream->readFlag())        // Team changed (ChangeTeamMask)
       readThisTeam(stream);
-
-   mFastRecharge = stream->readFlag();
 
    if(stream->readFlag())        // New module configuration
    {
