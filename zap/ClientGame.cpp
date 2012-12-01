@@ -552,7 +552,9 @@ void ClientGame::idle(U32 timeDelta)
       BfObject *controlObject = mConnectionToServer->getControlObject();
 
       // Don't saturate server with moves...
-      if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
+      if(theMove->time < 6)     // Why 6?  Can this be related to some other factor?
+         prevTimeDelta += timeDelta;
+      else
       { 
          // Limited MaxPendingMoves only allows sending a few moves at a time. 
          // Changing MaxPendingMoves may break compatibility with old version server/client.
@@ -562,8 +564,6 @@ void ClientGame::idle(U32 timeDelta)
          mConnectionToServer->addPendingMove(theMove);
          prevTimeDelta = 0;
       }
-      else
-         prevTimeDelta += timeDelta;
      
       theMove->time = timeDelta;
       theMove->prepare();           // Pack and unpack the move for consistent rounding errors
