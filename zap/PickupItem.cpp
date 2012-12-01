@@ -27,6 +27,7 @@
 #include "gameType.h"
 #include "gameConnection.h"
 #include "ClientInfo.h"
+#include "ClientGame.h"
 #include "game.h"
 
 
@@ -211,15 +212,7 @@ EditorAttributeMenuUI *PickupItem::getAttributeMenu()
    // Lazily initialize this -- if we're in the game, we'll never need this to be instantiated
    if(!mAttributeMenuUI)
    {
-      // Should be:
-      // ClientGame *clientGame = static_cast<ClientGame *>(getGame());
-      // but...
-      // error C2440: 'static_cast' : cannot convert from 'Zap::Game *' to 'Zap::ClientGame *'
-      // Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast  
-      // so...
-      ClientGame *clientGame = (ClientGame *)getGame();
-
-      mAttributeMenuUI = new EditorAttributeMenuUI(clientGame);
+      mAttributeMenuUI = new EditorAttributeMenuUI(static_cast<ClientGame *>(getGame()));
 
       // Value doesn't matter (set to 99 here), as it will be clobbered when startEditingAttrs() is called
       CounterMenuItem *menuItem = new CounterMenuItem("Regen Time:", 99, 1, 0, 100, "secs", "No regen", 
@@ -465,16 +458,17 @@ EnergyItem *EnergyItem::clone() const
 }
 
 
+static const S32 EnergyItemFillip = Ship::EnergyMax / 2;
+
 // Runs on server, returns true if we're doing the pickup, false otherwise
 bool EnergyItem::pickup(Ship *theShip)
 {
    S32 energy = theShip->getEnergy();
-   S32 maxEnergy = theShip->getMaxEnergy();
 
-   if(energy >= maxEnergy)                // Energy?  We don't need no stinkin' energy!!
+   if(energy >= Ship::EnergyMax)             // Energy?  We don't need no stinkin' energy!!
       return false;
 
-   theShip->changeEnergy(maxEnergy / 2);  // Bump up energy by 50%, changeEnergy() sets energy delta
+   theShip->changeEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
 
    return true;
 }
@@ -484,6 +478,15 @@ bool EnergyItem::pickup(Ship *theShip)
 void EnergyItem::onClientPickup()
 {
    SoundSystem::playSoundEffect(SFXShipHeal, getPos());
+
+   ClientGame *clientGame = static_cast<ClientGame *>(getGame());   
+
+   Ship *ship = NULL;
+   if(clientGame->getConnectionToServer()->getControlObject())
+      ship = static_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
+
+   if(ship)
+      ship->changeEnergy(EnergyItemFillip);
 }
 
 

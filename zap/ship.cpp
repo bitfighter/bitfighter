@@ -274,18 +274,6 @@ S32 Ship::getMaxEnergy()
 void Ship::changeEnergy(S32 deltaEnergy)
 {
    mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
-
-   if(getGame()->isServer())
-   {
-      // Update client
-      GameConnection *cc = getControllingClient();
-
-      if(cc)
-      {
-         RangedU32<0, EnergyMax> energy = max(0, min(EnergyMax, deltaEnergy));
-         cc->s2cBoostEnergy(energy);
-      }
-   }
 }
 
 
@@ -534,6 +522,10 @@ ShipModule Ship::getModule(U32 indx)
 
 void Ship::processWeaponFire()
 {
+if(!getGame()->isServer() && mFireTimer != 0)
+   logprintf("Firetimer: %d", mFireTimer);
+
+   // Can only fire when mFireTimer <= 0
    if(mFireTimer > 0)
       mFireTimer -= S32(mCurrentMove.time);
 
@@ -546,12 +538,15 @@ void Ship::processWeaponFire()
 
    GameType *gameType = getGame()->getGameType();
 
-   if(mCurrentMove.fire && gameType && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
+   //             player is firing            player's ship is still largely functional
+   if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
       while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
       {
          mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
+if(!getGame()->isServer())
+UserInterface::playBoop();
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
 
          if(getClientInfo())

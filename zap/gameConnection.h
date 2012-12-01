@@ -213,8 +213,6 @@ public:
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
    TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, ());
 
-   // Energy management
-   TNL_DECLARE_RPC(s2cBoostEnergy, (RangedU32<0,Ship::EnergyMax>));
 
    // Player using engineer module
    TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> objectType));
