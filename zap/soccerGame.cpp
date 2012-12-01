@@ -196,16 +196,6 @@ bool SoccerGameType::canBeTeamGame()       const { return true;  }
 bool SoccerGameType::canBeIndividualGame() const { return true;  }
 
 
-// Runs when ship fires, return true or false on whether firing should proceed
-bool SoccerGameType::onFire(Ship *ship) 
-{ 
-   if(!Parent::onFire(ship))
-      return false;
-
-   return true;
-}
-
-
 // Runs on server only, and only when player deliberately drops ball... gets run when dropping resurce item
 void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
 {

@@ -4173,12 +4173,6 @@ bool GameType::isCarryingItems(Ship *ship)
 }
 
 
-bool GameType::onFire(Ship *ship)
-{
-   return true;
-}
-
-
 bool GameType::isSpawnWithLoadoutGame()
 {
    return false;

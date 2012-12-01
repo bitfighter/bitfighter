@@ -277,9 +277,6 @@ public:
 
    virtual bool isCarryingItems(Ship *ship);     // Nexus game will override this
 
-   // Some games may place restrictions on when players can fire or use modules
-   virtual bool onFire(Ship *ship);
-
    virtual bool isSpawnWithLoadoutGame();  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);

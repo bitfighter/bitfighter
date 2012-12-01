@@ -522,9 +522,6 @@ ShipModule Ship::getModule(U32 indx)
 
 void Ship::processWeaponFire()
 {
-if(!getGame()->isServer() && mFireTimer != 0)
-   logprintf("Firetimer: %d", mFireTimer);
-
    // Can only fire when mFireTimer <= 0
    if(mFireTimer > 0)
       mFireTimer -= S32(mCurrentMove.time);
@@ -542,7 +539,7 @@ if(!getGame()->isServer() && mFireTimer != 0)
    if(gameType && mCurrentMove.fire && (!getClientInfo() || !getClientInfo()->isShipSystemsDisabled()))
    {
       // In a while loop, to catch up the firing rate for low Frame Per Second
-      while(mFireTimer <= 0 && gameType->onFire(this) && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
+      while(mFireTimer <= 0 && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
       {
          mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
 if(!getGame()->isServer())
@@ -561,6 +558,7 @@ UserInterface::playBoop();
          }
 
          mFireTimer += S32(GameWeapon::weaponInfo[curWeapon].fireDelay);
+         TNLAssert(mFireTimer > 0, "???");      // DEL THIS LINE
 
          // If we've fired, Spawn Shield turns off
          if(mSpawnShield.getCurrent() != 0)
@@ -731,9 +729,9 @@ void Ship::idle(BfObject::IdleCallPath path)
       path == BfObject::ClientIdleControlReplay       )
    {
       // Process weapons and modules on controlled objects; handles all the energy reductions as well
-      processWeaponFire();
       if(path != ClientIdleControlReplay)
       {
+         processWeaponFire();
          processModules();
          rechargeEnergy();
       }
@@ -1292,7 +1290,7 @@ void Ship::writeControlState(BitStream *stream)
    //stream->writeRangedU32(mEnergy, 0, EnergyMax);
    //stream->writeFlag(mFastRecharge);
    stream->writeFlag(mCooldownNeeded);
-   if(mFireTimer < 0)   // mFireTimer could be negative.
+   if(mFireTimer < 0)   // mFireTimer could be negative
       stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
    else
       stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
@@ -1316,9 +1314,9 @@ void Ship::readControlState(BitStream *stream)
    //bool rrrmFastRecharge = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
-   mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
-   if(mFireTimer > S32(MaxFireDelay))
-      mFireTimer =  S32(MaxFireDelay) - mFireTimer;
+   int xmFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
+   //if(mFireTimer > S32(MaxFireDelay))
+   //   mFireTimer =  S32(MaxFireDelay) - mFireTimer;
 
    U32 previousWeaponIndex = mActiveWeaponIndx;
    mActiveWeaponIndx = stream->readRangedU32(0, WeaponCount);
