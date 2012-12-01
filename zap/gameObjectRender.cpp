@@ -605,7 +605,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
                       const Vector<Point> *dests, U32 trackerCount)
 {
    const S32 NumColors = 6;
-   const S32 MaxParticles = 100;
+   const U32 MaxParticles = 100;
 
    // Object to hold data on each swirling particle+trail
    struct Tracker
@@ -663,7 +663,7 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
    if(!trackerInit)
    {
       trackerInit = true;
-      for(S32 i = 0; i < MaxParticles; i++)
+      for(U32 i = 0; i < MaxParticles; i++)
       {
          Tracker &t = particles[i];
 

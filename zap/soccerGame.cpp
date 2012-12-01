@@ -301,8 +301,6 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
    S32 argc = 0;
    const char *argv[16];
 
-   GameType *gameType = game->getGameType();
-
    for(S32 i = 0; i < argc2; i++)      // The idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
       char firstChar = argv2[i][0];    // First character of arg

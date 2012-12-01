@@ -854,51 +854,6 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
 // Set scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 void LuaScriptRunner::setEnums(lua_State *L)
 {
-//   // Object types -- only push those with shareWithLua set to true
-//#  define TYPE_NUMBER(value, shareWithLua, name, d)   if(shareWithLua)  {           \
-//                                                         lua_pushinteger(L, value); \
-//                                                         lua_setglobal  (L, name);  \
-//                                                   }
-//       TYPE_NUMBER_TABLE
-//#  undef TYPE_NUMBER
-//
-//
-//   // Module enums -- push all, using enum name as the Lua name
-//#  define MODULE_ITEM(name, b, c, d, e, f, g, h, i)  setEnum(name); 
-//      MODULE_ITEM_TABLE
-//#  undef MODULE_ITEM
-//
-//
-//   // Old school
-//#  define WEAPON_ITEM(name, b, c, d, e, f, g, h, i, j, k, l)  setEnum(name) 
-//      WEAPON_ITEM_TABLE
-//#  undef WEAPON_ITEM
-//
-//   // Game Types
-//#  define GAME_TYPE_ITEM(name, b, c)  setEnum(name);
-//       GAME_TYPE_TABLE
-//#  undef GAME_TYPE_ITEM
-//
-//   // Scoring Events
-//#  define SCORING_EVENT_ITEM(name, b)  lua_pushinteger(L, GameType::name); \
-//                                       lua_setglobal  (L, #name);
-//      SCORING_EVENT_TABLE
-//#  undef SCORING_EVENT_ITEM
-//
-//   // Event handler events
-//#  define EVENT(name, b, c) lua_pushinteger(L, EventManager::name); \
-//                            lua_setglobal  (L, #name);
-//      EVENT_TABLE
-//#  undef EVENT
-//
-//   setEnum(EngineeredTurret);
-//   setEnum(EngineeredForceField);
-//   setEnum(EngineeredTeleporterEntrance);
-//   setEnum(EngineeredTeleporterExit);
-//   
-
-   //////////////////// TODO: Delete the above, and rely on the below
-
    // Note for casting of NULL below:
    // Need to tell the compiler what size we are inputting to prevent possible problems with different compilers, sizeof(NULL) not always the same as sizeof(void*)
    // New way

@@ -265,9 +265,7 @@ bool LineItem::canBeNeutral() { return true; }
   *  @geom     The geometry of a %LineItem is a polyline (i.e. 2 or more points)
   */
 //               Fn name       Param profiles  Profile count                           
-#define LUA_METHODS(CLASS, METHOD) \
-   //METHOD(CLASS, getWidth,  ARRAYDEF({{          END }}), 1 ) \
-   //METHOD(CLASS, setWidth,  ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
+#define LUA_METHODS(CLASS, METHOD)
 
 GENERATE_LUA_METHODS_TABLE(LineItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(LineItem, LUA_METHODS);

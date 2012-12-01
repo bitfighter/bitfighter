@@ -132,13 +132,6 @@ void FlagItem::changeFlagCount(U32 change) { TNLAssert(false, "Should never be c
 U32 FlagItem::getFlagCount()               { return 1; }
 
 
-// Returns true if this flagSpawn is only associated with a particular team
-static bool isTeamFlagSpawn(Game *game, S32 team)
-{
-   return game->getGameType()->isTeamFlagGame() && team >= 0 && team < game->getTeamCount();
-}
-
-
 bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 {
    if(argc < 3)         // FlagItem <team> <x> <y> {time}
