@@ -99,9 +99,9 @@ enum SFXProfiles
 
    // Ship noises
    SFXShipExplode,
-   SFXShipHeal,
+   SFXShipHeal,      // Ship picked up a health pack or energy item
    SFXShipBoost,
-   SFXShipHit,    // Ship is hit by a projectile
+   SFXShipHit,       // Ship is hit by a projectile
 
    SFXBounceWall,
    SFXBounceObject,
