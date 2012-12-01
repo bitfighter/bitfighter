@@ -92,7 +92,7 @@
 #define SHOW_SERVER_SITUATION
 
 #if !defined(TNL_DEBUG) && defined(SHOW_SERVER_SITUATION)
-#  error Don't define SHOW_SERVER_SITUATION on release build!
+#  error "Don't define SHOW_SERVER_SITUATION on release build!"
 #endif
 
 
