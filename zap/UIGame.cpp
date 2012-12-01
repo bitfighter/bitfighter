@@ -794,7 +794,7 @@ void GameUserInterface::onMouseMoved()
       Point p = getGame()->worldToScreenPoint( &o );
 
       mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
-                                 mMousePoint.x + gScreenInfo.getGameCanvasWidth() / 2 - p.x);
+                                 mMousePoint.x + gScreenInfo.getGameCanvasWidth()  / 2 - p.x);
    }
 
    else     // Ship is at center of the screen
@@ -934,7 +934,7 @@ void GameUserInterface::activateModule(S32 index)
    mModPrimaryActivated[index] = true;
 
    // If the module secondary double-tap timer hasn't run out, activate the secondary component
-   if (mModuleDoubleTapTimer[index].getCurrent() != 0)
+   if(mModuleDoubleTapTimer[index].getCurrent() != 0)
       mModSecondaryActivated[index] = true;
 
    // Now reset the double-tap timer since we've just activate this module
