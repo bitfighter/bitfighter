@@ -112,7 +112,7 @@ extern void drawCircle(F32 x, F32 y, F32 radius);
 
 //////////
 // Some things for rendering on screen display
-void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold, S32 serverEnergy);
+void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
 
 extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
 extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);

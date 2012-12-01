@@ -160,7 +160,7 @@ using namespace TNL;
 #endif
 
 #ifdef __MINGW32__
-#undef main
+#  undef main
 #endif
 
 

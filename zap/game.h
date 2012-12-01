@@ -83,6 +83,20 @@
 /// for choosing from a list of LAN and master server queried servers.
 ///
 
+
+
+
+// Uncomment the following line to show server data in the game window.  This will allow you to see how lag affects various
+// game items.  Note that in most cases this will only work when you are hosting the game yourself.  DO NOT ship code with
+// this option enabled, as it will likely cause crashes in some situations.
+#define SHOW_SERVER_SITUATION
+
+#if !defined(TNL_DEBUG) && defined(SHOW_SERVER_SITUATION)
+#  error Don't define SHOW_SERVER_SITUATION on release build!
+#endif
+
+
+
 using namespace std;
 
 namespace Zap

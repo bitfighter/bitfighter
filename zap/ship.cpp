@@ -118,7 +118,6 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
    mFastRecharge = false;
-   mEnergyDifference = 0;
 
    // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
@@ -274,7 +273,19 @@ S32 Ship::getMaxEnergy()
 // Used when a ship picks up an energy object
 void Ship::changeEnergy(S32 deltaEnergy)
 {
-   mEnergy = max(0, min(static_cast<int>(EnergyMax), mEnergy + deltaEnergy));
+   mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
+
+   if(getGame()->isServer())
+   {
+      // Update client
+      GameConnection *cc = getControllingClient();
+
+      if(cc)
+      {
+         RangedU32<0, EnergyMax> energy = max(0, min(EnergyMax, deltaEnergy));
+         cc->s2cBoostEnergy(energy);
+      }
+   }
 }
 
 
@@ -630,24 +641,6 @@ void Ship::idle(BfObject::IdleCallPath path)
       {
          mIdleRechargeCycleTimer.update(mCurrentMove.time);
          mFastRecharge = mIdleRechargeCycleTimer.getCurrent() == 0;
-         //logprintf("Fast? %s", mFastRecharge ? "Yes" : "NO");
-
-         S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy() - mEnergy;
-         logprintf("energy diff = %d, %d -- %d", actDiff, mEnergyDifference, mEnergyDifference - actDiff);
-
-         // Nudge energy closer to what the server tells us our energy should be, spread out over 1 sec
-         if(mCurrentMove.time > 1000)
-         {
-            mEnergy = mEnergy + mEnergyDifference;
-            mEnergyDifference = 0;
-         }
-         else
-         {
-            //logprintf("Ship %d", mEnergyDifference);
-            mEnergy += (F32)mEnergyDifference * ((F32)mCurrentMove.time / 10000.0f);
-            mEnergyDifference -= (F32)mEnergyDifference * ((F32)mCurrentMove.time / 10000.0f);
-         }
-
       }
 
 
@@ -927,7 +920,7 @@ void Ship::processModules()
 
       // Set loaded module states to 'on' if detected as so,
       // unless modules are disabled or we need to cooldown
-      if (!mCooldownNeeded && getClientInfo() && !getClientInfo()->isShipSystemsDisabled())
+      if(!mCooldownNeeded && getClientInfo() && !getClientInfo()->isShipSystemsDisabled())
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
@@ -1301,8 +1294,8 @@ void Ship::writeControlState(BitStream *stream)
    stream->write(getActualVel().x);
    stream->write(getActualVel().y);
 
-   stream->writeRangedU32(mEnergy, 0, EnergyMax);
-   stream->writeFlag(mFastRecharge);
+   //stream->writeRangedU32(mEnergy, 0, EnergyMax);
+   //stream->writeFlag(mFastRecharge);
    stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative.
       stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
@@ -1324,10 +1317,8 @@ void Ship::readControlState(BitStream *stream)
    stream->read(&y);
    Parent::setActualVel(Point(x, y));
 
-   int serverReportedEnergy = stream->readRangedU32(0, EnergyMax);
-   mEnergyDifference = serverReportedEnergy - mEnergy;   // This was the difference at (lag) seconds ago
-  // logprintf("re = %d, le = %d,  diff = %d", e, mEnergy, mEnergyDifference);
-   bool rrrmFastRecharge = stream->readFlag();
+   //int serverReportedEnergy = stream->readRangedU32(0, EnergyMax);
+   //bool rrrmFastRecharge = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
    mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));

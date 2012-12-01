@@ -33,6 +33,8 @@
 #include "SoundSystem.h"               // For NumSFXBuffers
 #include "SharedConstants.h"           // For BADGE_COUNT constant
 
+#include "ship.h"                      // For Ship::EnergyMax
+
 #include "tnlNetConnection.h"
 #include "Timer.h"
 #include <time.h>
@@ -211,6 +213,9 @@ public:
    TNL_DECLARE_RPC(c2sPlayerSpawnUndelayed, ());
    TNL_DECLARE_RPC(c2sPlayerRequestSpawnDelayed, ());
 
+   // Energy management
+   TNL_DECLARE_RPC(s2cBoostEnergy, (RangedU32<0,Ship::EnergyMax>));
+
    // Player using engineer module
    TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> objectType));
    TNL_DECLARE_RPC(c2sEngineerInterrupted, (RangedU32<0,EngineeredItemCount> objectType));
@@ -263,7 +268,7 @@ public:
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
    TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
-  
+
    TNL_DECLARE_RPC(s2cSetIsBusy, (StringTableEntry name, bool isBusy));
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool isBusy));

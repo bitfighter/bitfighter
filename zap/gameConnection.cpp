@@ -260,6 +260,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClass
 }
 
 
+// Ship has received some extra energy!  Hooray!
+TNL_IMPLEMENT_RPC(GameConnection, s2cBoostEnergy, (RangedU32<0,Ship::EnergyMax> energy), (energy), NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 0)
+{
+   ClientInfo *clientInfo = getClientInfo();
+
+   Ship *ship = static_cast<Ship *>(getControlObject());
+   if(ship)
+      ship->changeEnergy(energy);
+}
+
+
 // Old server side /getmap command, now unused, may be removed
 // 1. client send /getmap command
 // 2. server send map if allowed

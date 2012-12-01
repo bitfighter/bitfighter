@@ -105,8 +105,9 @@ public:
    static const S32 RepairRadius = 65;
    static const U32 SpawnShieldTime = 5000;        // Time spawn shields are active
    static const U32 SpawnShieldFlashTime = 1500;   // Time at which shields start to flash
-   static const S32 PulseMaxVelocity = 2500; // Maximum speed of Pulse
-   static const S32 PulseMinVelocity = 1000; // Minimum speed of Pulse
+   static const S32 PulseMaxVelocity = 2500;       // Maximum speed of Pulse
+   static const S32 PulseMinVelocity = 1000;       // Minimum speed of Pulse
+   static const S32 EnergyMax = 100000;            // Energy when fully charged   TODO: Make this lower resolution
 
    enum {
       MaxVelocity = 450,        // points per second
@@ -119,7 +120,6 @@ public:
       ExplosionFadeTime = 300,
       MaxControlObjectInterpDistance = 200,
       TrailCount = 2,
-      EnergyMax = 100000,
 
       // The following are all measured in units of energy/millisecond
       EnergyRechargeRate = 8,
@@ -143,13 +143,10 @@ public:
       WarpFadeInTime = 500,
    };
 
-
-
    S32 mFireTimer;
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
-   S32 mEnergyDifference;     // Difference between what the client thinks its energy is and what the server tells it it is
 
    bool mCooldownNeeded;
    Point mImpulseVector;

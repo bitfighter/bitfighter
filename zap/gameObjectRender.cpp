@@ -405,6 +405,18 @@ void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive
       drawCircle(0, 0, shieldRadius);
    }
 
+#ifdef SHOW_SERVER_SITUATION
+   if(static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject()) &&
+      static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->isModulePrimaryActive(ModuleShield))
+   {
+      F32 shieldRadius = radius;
+
+      glColor(Colors::green, alpha);
+      drawCircle(0, 0, shieldRadius);
+   }
+#endif
+
+
    // Sensor
    if(sensorActive)
    {
@@ -1687,7 +1699,7 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
 }
 
 
-void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold, S32 serverEnergy)
+void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 {
    const S32 GAUGE_WIDTH = 200;
    const S32 GUAGE_HEIGHT = 20;
@@ -1726,18 +1738,12 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold, S32 ser
    glColor(Colors::yellow);
    drawVertLine(hMargin + cutoffx, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
 
-   if(serverEnergy != -1)
-   {
-      S32 p = F32(serverEnergy) / S32(maxEnergy) * GAUGE_WIDTH;
-      glColor(Colors::red);
-      drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
-
-      S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
-      p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
-      glColor(Colors::magenta);
-      drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
-
-   }
+#ifdef SHOW_SERVER_SITUATION
+   S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
+   S32 p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
+   glColor(Colors::magenta);
+   drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+#endif
 }
 
 
