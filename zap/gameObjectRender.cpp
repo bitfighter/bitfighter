@@ -1739,10 +1739,13 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
    drawVertLine(hMargin + cutoffx, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
 
 #ifdef SHOW_SERVER_SITUATION
-   S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
-   S32 p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
-   glColor(Colors::magenta);
-   drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+   if((gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
+   {
+      S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
+      S32 p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
+      glColor(Colors::magenta);
+      drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+   }
 #endif
 }
 
