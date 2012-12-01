@@ -562,7 +562,6 @@ void Ship::processWeaponFire()
          }
 
          mFireTimer += S32(GameWeapon::weaponInfo[curWeapon].fireDelay);
-         TNLAssert(mFireTimer > 0, "???");      // DEL THIS LINE
 
          // If we've fired, Spawn Shield turns off
          if(mSpawnShield.getCurrent() != 0)
