@@ -542,8 +542,12 @@ void Ship::processWeaponFire()
       while(mFireTimer <= 0 && mEnergy >= GameWeapon::weaponInfo[curWeapon].minEnergy)
       {
          mEnergy -= GameWeapon::weaponInfo[curWeapon].drainEnergy;      // Drain energy
-if(!getGame()->isServer())
-UserInterface::playBoop();
+#ifdef SHOW_SERVER_SITUATION
+         // Make a noise when the client thinks we've shot -- ideally, there should be one boop per shot, delayed by about half
+         // of whatever /lag is set to.
+         if(!getGame()->isServer())
+            UserInterface::playBoop();
+#endif
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
 
          if(getClientInfo())
