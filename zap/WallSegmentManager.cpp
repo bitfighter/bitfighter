@@ -226,7 +226,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(GridDatabase *database, 
    // Polywalls will have one segment; it will have the same geometry as the polywall itself.
    // The WallSegment constructor will add it to the specified database.
    if(wall->getObjectTypeNumber() == PolyWallTypeNumber)
-      WallSegment *newSegment = new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
+      new WallSegment(mWallSegmentDatabase, *wall->getOutline(), wall->getSerialNumber());
 
    // Traditional walls will be represented by a series of rectangles, each representing a "puffed out" pair of sequential vertices
    else     

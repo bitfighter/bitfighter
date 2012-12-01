@@ -82,16 +82,12 @@ Color gTeamChatColor(Colors::green);
 extern Color gCmdChatColor;
 
 
-// Some constants related to display of in-game chat and status messages
-static const S32 DisplayMessageTimeout = 3000;      // How long to display them (ms)
-
 // Sizes and other things to help with positioning
 static const S32 CHAT_Y_POS = 500;
 static const S32 SRV_MSG_FONT_SIZE = 14;
 static const S32 SRV_MSG_FONT_GAP = 4;
 static const S32 CHAT_FONT_SIZE = 12;
 static const S32 CHAT_FONT_GAP = 3;
-static const S32 CHAT_MULTILINE_INDENT = 12;       // How much subsequent lines of long chat messages are indented
 static const S32 CHAT_WRAP_WIDTH = 700;            // Max width of chat messages displayed in-game
 static const S32 SRV_MSG_WRAP_WIDTH = 750;
 
@@ -1676,7 +1672,7 @@ void GameUserInterface::lagHandler(const Vector<string> &words)
    U32 receiveLag;
    F32 receiveLoss = sendLoss;
 
-   static const S32 MaxLag = 5000;
+   static const U32 MaxLag = 5000;
 
    if(sendLag > MaxLag)
    {
@@ -2522,13 +2518,13 @@ bool GameUserInterface::processChatModeKey(InputCode inputCode)
          Vector<string> *candidates = getCandidateList(getGame(), first, arg);     // Could return NULL
 
          // If the command string has quotes in it, use the last space up to the first quote
-         size_t lastChar = string::npos;
+         std::size_t lastChar = string::npos;
          if(entry->find_first_of("\"") != string::npos)
             lastChar = entry->find_first_of("\"");
 
          string appender = " ";
 
-         size_t pos = entry->find_last_of(' ', lastChar);
+         std::size_t pos = entry->find_last_of(' ', lastChar);
 
          if(pos == string::npos)                         // String does not contain a space, requires special handling
          {
@@ -3753,11 +3749,11 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
    bool inside = false;
 
-   size_t startPos, endPos;
+   std::size_t startPos, endPos;
 
    inside = false;
 
-   for(size_t i = 0; i < s.length(); i++)
+   for(std::size_t i = 0; i < s.length(); i++)
    {
       if(s[i] == '%')
       {
