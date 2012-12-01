@@ -914,9 +914,8 @@ void Ship::processModules()
       if(getGame()->getModuleInfo(mModule[i])->getPrimaryUseType() == ModulePrimaryUsePassive)
          mModulePrimaryActive[mModule[i]] = true;         // needs to be true to allow stats counting
 
-      // Set loaded module states to 'on' if detected as so,
-      // unless modules are disabled or we need to cooldown
-      if(!mCooldownNeeded && getClientInfo() && !getClientInfo()->isShipSystemsDisabled())
+      // Set loaded module states to 'on' if detected as so, unless modules are disabled or we need to cooldown
+      if(!mCooldownNeeded && (!getClientInfo() || (getClientInfo() && !getClientInfo()->isShipSystemsDisabled())))
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
