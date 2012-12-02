@@ -134,7 +134,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
 #endif
 
-   mClientInfo = clientInfo;
+   mClientInfo = clientInfo;     // Will be NULL if being created by TNL
 
    setTeam(team);
    mass = 1.0;            // Ship's mass, not used
