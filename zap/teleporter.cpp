@@ -405,7 +405,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    }
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
    {
-      TNLAssert(U32(mLastDest) < U32(mDestManager.getDestCount()), "packUpdate out of range teleporter number")
+      TNLAssert(U32(mLastDest) < U32(mDestManager.getDestCount()), "packUpdate out of range teleporter number");
       stream->write(mLastDest);                             // Where ship is going
    }
 
@@ -452,7 +452,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&dest);
 
 #ifndef ZAP_DEDICATED
-      TNLAssert(U32(dest) < U32(mDestManager.getDestCount()), "unpackUpdate out of range teleporter number")
+      TNLAssert(U32(dest) < U32(mDestManager.getDestCount()), "unpackUpdate out of range teleporter number");
       if(U32(dest) < U32(mDestManager.getDestCount()))
       {
          TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
