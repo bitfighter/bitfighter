@@ -406,7 +406,7 @@ void renderActiveModules(F32 alpha, F32 radius, U32 sensorTime, bool cloakActive
    }
 
 #ifdef SHOW_SERVER_SITUATION
-   if(static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject()) &&
+   if(gServerGame && static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject()) &&
       static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->isModulePrimaryActive(ModuleShield))
    {
       F32 shieldRadius = radius;
@@ -1739,7 +1739,7 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
    drawVertLine(hMargin + cutoffx, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
 
 #ifdef SHOW_SERVER_SITUATION
-   if((gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
+   if((gServerGame && gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
    {
       S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
       S32 p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
