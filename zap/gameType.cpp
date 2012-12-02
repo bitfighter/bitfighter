@@ -1190,10 +1190,7 @@ void GameType::achievementAchieved(U8 achievement, const StringTableEntry &playe
       // everyone can see the badge in the scoreboard
       ClientInfo *clientInfo = mGame->findClientInfo(playerName);
       if(clientInfo)
-      {
-         clientInfo->setAuthenticated(clientInfo->isAuthenticated(),
-               clientInfo->getBadges() | BIT(achievement));
-      }
+         clientInfo->setAuthenticated(clientInfo->isAuthenticated(), clientInfo->getBadges() | BIT(achievement));
    }
 }
 
