@@ -919,6 +919,7 @@ void Ship::processModules()
       {
          if(mCurrentMove.modulePrimary[i])
             mModulePrimaryActive[mModule[i]] = true;
+
          if(mCurrentMove.moduleSecondary[i])
             mModuleSecondaryActive[mModule[i]] = true;
       }
