@@ -653,9 +653,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
    if(mGameType.isValid())
       for(S32 i = 0; i < getClientCount(); i++)
       {
-         ClientInfo *clientInfo = getClientInfo(i);
-         // Robots could be added when level have "Robot" line, or a global levelgen adds "Robots"
-         //TNLAssert(!clientInfo->isRobot(), "We have bots here!!  Who knew?   Please add a comment noting this.  Otherwise, add a note that there are no bots here and remove this assert!");
+         ClientInfo *clientInfo = getClientInfo(i);   // Could be a robot when level have "Robot" line, or a levelgen adds one
+         
          mGameType->serverAddClient(clientInfo);
 
          GameConnection *connection = clientInfo->getConnection();
