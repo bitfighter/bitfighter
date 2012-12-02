@@ -492,10 +492,10 @@ void GameUserInterface::renderSuspendedMessage()
       waitMsg[2] = "IN " +
                    ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) +
                    " SECONDS";
-      renderMessageBox("", "", waitMsg, 5, -30, 2);
+      renderMessageBox("", "", waitMsg, ARRAYSIZE(waitMsg), -30, 2);
    }
    else
-      renderMessageBox("", "", readyMsg, 5, -30, 2);
+      renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), -30, 2);
 }
 
 
