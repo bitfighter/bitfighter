@@ -1262,6 +1262,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool isBusy), (isBusy), NetClas
       if(clientInfo->isRobot())
          continue;
 
+      // No need to notify player that they themselves are busy... is there?
+      if(clientInfo == mClientInfo)
+         continue;
+
       clientInfo->getConnection()->s2cSetIsBusy(mClientInfo->getName(), isBusy);
    }
 
