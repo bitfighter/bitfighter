@@ -226,10 +226,10 @@ void GameConnection::undelaySpawn()
 
    if(!clientInfo->getReturnToGameTime())
    {
+      clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
+
       mServerGame->unsuspendGame(false);        // Does nothing if game isn't suspended
       mServerGame->getGameType()->spawnShip(clientInfo);
-
-      clientInfo->setSpawnDelayed(false);       // ClientInfo here is a FullClientInfo
    }
 }
 

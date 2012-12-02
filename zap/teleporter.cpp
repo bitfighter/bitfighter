@@ -404,7 +404,10 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
          stream->writeInt(timeout, 32);                     // A player might join while this teleporter is in the middle of delay
    }
    else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
+   {
+      TNLAssert(U32(mLastDest) < U32(mDestManager.getDestCount()), "packUpdate out of range teleporter number")
       stream->write(mLastDest);                             // Where ship is going
+   }
 
    // If we're not destroyed and health has changed
    if(!stream->writeFlag(mHasExploded))
@@ -449,10 +452,14 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&dest);
 
 #ifndef ZAP_DEDICATED
-      TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
-      static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
+      TNLAssert(U32(dest) < U32(mDestManager.getDestCount()), "unpackUpdate out of range teleporter number")
+      if(U32(dest) < U32(mDestManager.getDestCount()))
+      {
+         TNLAssert(dynamic_cast<ClientGame *>(getGame()) != NULL, "Not a ClientGame");
+         static_cast<ClientGame *>(getGame())->emitTeleportInEffect(mDestManager.getDest(dest), 0);
 
-      SoundSystem::playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
+         SoundSystem::playSoundEffect(SFXTeleportIn, mDestManager.getDest(dest));
+      }
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
@@ -641,7 +648,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
       // First see if we're triggered...
       Point pos = getVert(0);
 
-      mLastDest = -1;
+      S32 lastDest = -1;
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
@@ -652,8 +659,8 @@ void Teleporter::idle(BfObject::IdleCallPath path)
             timeout = mTeleporterDelay;    // Temporarily disable teleporter
 
             // If we have multiple ships entering teleporter on the same frame, they all go to the same dest
-            if(mLastDest == -1)
-               mLastDest = mDestManager.getRandomDest();
+            if(lastDest == -1)
+               mLastDest = lastDest = mDestManager.getRandomDest();
 
             Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
             ship->setActualPos(newPos, true);
@@ -828,7 +835,7 @@ void Teleporter::onGeomChanged()
 
    // Update the dest manager.  We need this for rendering in preview mode.
    mDestManager.setDest(0, getVert(1));
-}	
+}   
 
 
 const char *Teleporter::getOnScreenName()     { return "Teleport";    }
