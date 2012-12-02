@@ -1675,6 +1675,7 @@ bool Seeker::collided(BfObject *otherObj, U32 stateIndex)
          Point p = getPos(stateIndex) - ship->getPos(stateIndex);
          p.normalize(getVel(stateIndex).len());
          setVel(stateIndex, p);
+         setAngle(stateIndex, p.ATAN2());
          mBounced = true;
          return true;
       }
