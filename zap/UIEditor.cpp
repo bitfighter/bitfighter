@@ -272,7 +272,7 @@ EditorUserInterface::~EditorUserInterface()
    mDockItems.clear();
    mClipboard.clear();
 
-   delete mNewItem;
+   delete mNewItem.getPointer();
    delete mTeamManager;
 }
 
@@ -3902,7 +3902,7 @@ void EditorUserInterface::onMouseClicked_left()
    {
       if(mNewItem->getVertCount() < 2)
       {
-         delete mNewItem;
+         delete mNewItem.getPointer();
          removeUndoState();
       }
       else
