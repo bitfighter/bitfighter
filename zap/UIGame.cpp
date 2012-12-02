@@ -487,15 +487,16 @@ void GameUserInterface::renderSuspendedMessage()
                            "RESPAWN",
                            "" };
 
+   static const S32 DisplayStyle = 2;
+   static const S32 VertOffset = -30;
+
    if(getGame()->getReturnToGameDelay() != 0)
    {
-      waitMsg[2] = "IN " +
-                   ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) +
-                   " SECONDS";
-      renderMessageBox("", "", waitMsg, ARRAYSIZE(waitMsg), -30, 2);
+      waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) + " SECONDS";
+      renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }
    else
-      renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), -30, 2);
+      renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
 }
 
 
