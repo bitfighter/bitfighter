@@ -274,6 +274,7 @@ public:
       mAuthenticated = false;
       mIsIgnoredFromList = false;
       mIsMasterAdmin = false;
+      mLoggingStatus = "Not_Connected";
    }
 
    /// Destructor removes the connection from the doubly linked list of server connections
@@ -283,7 +284,11 @@ public:
       mPrev->mNext = mNext;
       mNext->mPrev = mPrev;
 
-      if(mIsGameServer)
+      if(mLoggingStatus)
+      {
+         logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(), getNetAddress().toString(), mLoggingStatus);
+      }
+      else if(mIsGameServer)
       {
          // SERVER_DISCONNECT | timestamp | player/server name
          logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
@@ -1135,8 +1140,12 @@ public:
    // Must match MasterServerConnection::writeConnectRequest()!!
    bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
+      mLoggingStatus = "Something failed in readConnectRequest";
       if(!Parent::readConnectRequest(bstream, reason))
+      {
+         mLoggingStatus = "Parent::readConnectRequest failed";
          return false;
+      }
 
       // Note that if player is hosting a game interactively (i.e. with host option on main menu), they
       // will create two connections here, one for the host, and one for the client instance.
@@ -1144,12 +1153,16 @@ public:
 
       bstream->read(&mCMProtocolVersion);    // Version of protocol we'll use with the client
       if(mCMProtocolVersion < 4 || mCMProtocolVersion > MASTER_PROTOCOL_VERSION) // check for unsupported version
+      {
+         mLoggingStatus = "Bad version";
          return false;
+      }
 
       bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
       bstream->read(&mClientBuild);          // Client's build number
 
       mIsGameServer = bstream->readFlag();
+      mLoggingStatus = NULL;
 
       // If it's a game server, read status info...
       if(mIsGameServer)

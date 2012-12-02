@@ -1378,6 +1378,8 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    // Note, if we know that this is the beginning of a new level, we can save a wee bit of bandwidth by passing
    // NULL as first arg to setSpawnDelayed(), but we don't check this currently, and it's probably not worth doing
    // if it's not apparent.  isInitialUpdate() might work for this purpose.  Will require some testing.
+   if(clientInfo->isSpawnDelayed())
+      return false;
    if(static_cast<FullClientInfo *>(clientInfo)->shouldDelaySpawn())
    {
       clientInfo->setSpawnDelayed(true);

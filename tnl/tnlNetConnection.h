@@ -198,7 +198,7 @@ class NetConnection : public Object
    };
    /// Constants controlling the behavior of pings and timeouts
    enum DefaultPingConstants {
-      AdaptiveInitialPingTimeout = 60000,
+      AdaptiveInitialPingTimeout = 25000,
       AdaptivePingRetryCount = 4,
       DefaultPingTimeout = 5000,  ///< Default milliseconds to wait before sending a ping packet.
       DefaultPingRetryCount = 10, ///< Default number of unacknowledged pings to send before timing out.

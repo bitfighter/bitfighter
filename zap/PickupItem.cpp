@@ -27,12 +27,12 @@
 #include "gameType.h"
 #include "gameConnection.h"
 #include "ClientInfo.h"
-#include "ClientGame.h"
 #include "game.h"
 
 
 #ifndef ZAP_DEDICATED
 #  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
+#  include "ClientGame.h"
 #endif
 
 #include "gameObjectRender.h"
@@ -479,6 +479,7 @@ void EnergyItem::onClientPickup()
 {
    SoundSystem::playSoundEffect(SFXShipHeal, getPos());
 
+#ifndef ZAP_DEDICATED
    ClientGame *clientGame = static_cast<ClientGame *>(getGame());   
 
    Ship *ship = NULL;
@@ -487,6 +488,7 @@ void EnergyItem::onClientPickup()
 
    if(ship)
       ship->changeEnergy(EnergyItemFillip);
+#endif
 }
 
 

@@ -966,7 +966,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(!startedInHelper && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
    {
       getGame()->undelaySpawn();
-      return true;
+      if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
+         return true;
    }
 
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
