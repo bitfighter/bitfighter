@@ -476,16 +476,16 @@ if(mGotControlUpdate)
 void GameUserInterface::renderSuspendedMessage()
 {
    static string waitMsg[] = { "", 
-                           "CAN RESPAWN",
-                           "",
-                           "",
-                           "" };
+                               "CAN RESPAWN",
+                               "",
+                               "",
+                               "" };
 
    static string readyMsg[] = { "", 
-                           "PRESS ANY",
-                           "KEY TO",
-                           "RESPAWN",
-                           "" };
+                                "PRESS ANY",
+                                "KEY TO",
+                                "RESPAWN",
+                                "" };
 
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
