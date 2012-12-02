@@ -346,7 +346,7 @@ void ClientGame::undelaySpawn()
       return;
 
    getConnectionToServer()->c2sPlayerSpawnUndelayed();
-   mClientInfo->resetReturnToGameTimer();
+   //mClientInfo->resetReturnToGameTimer();
 }
 
 
