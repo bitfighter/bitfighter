@@ -476,7 +476,7 @@ if(mGotControlUpdate)
 void GameUserInterface::renderSuspendedMessage()
 {
    static string waitMsg[] = { "", 
-                               "CAN RESPAWN",
+                               "WILL RESPAWN",
                                "",
                                "",
                                "" };
