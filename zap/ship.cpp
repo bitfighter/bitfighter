@@ -202,6 +202,30 @@ void Ship::initialize(const Point &pos)
 }
 
 
+bool Ship::processArguments(S32 argc, const char **argv, Game *game)
+{
+   if(argc != 3)
+      return false;
+
+   Point pos;
+   pos.read(argv + 1);
+   pos *= game->getGridSize();
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      setPos(i, pos);
+      setAngle(i, 0);
+   }
+
+   return true;
+}
+
+
+string Ship::toString(F32 gridSize) const
+{
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+}
+
+
 void Ship::setDefaultLoadout()
 {
     // Set initial module and weapon selections
