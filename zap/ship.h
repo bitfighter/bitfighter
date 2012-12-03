@@ -100,6 +100,9 @@ protected:
    void initialize(const Point &pos);     // Some initialization code needed by both bots and ships
    void initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool isRobot);
 
+   bool processArguments(S32 argc, const char **argv, Game *game);
+   string toString(F32 gridSize) const;
+
 public:
    static const S32 CollisionRadius = 24;
    static const S32 RepairRadius = 65;
@@ -314,8 +317,6 @@ public:
    S32 getMountedItems(lua_State *L);
    S32 getCurrLoadout(lua_State *L);
    S32 getReqLoadout(lua_State *L);
-
-   const char *getClassName() const;
 
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 };

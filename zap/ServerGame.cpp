@@ -918,8 +918,8 @@ void ServerGame::suspendIfNoActivePlayers()
 // Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
 inline string getPathFromFilename(const string &filename)
 {
-   size_t pos1 = filename.rfind("/");
-   size_t pos2 = filename.rfind("\\");
+   std::size_t pos1 = filename.rfind("/");
+   std::size_t pos2 = filename.rfind("\\");
 
    if(pos1 == string::npos)
       pos1 = 0;
