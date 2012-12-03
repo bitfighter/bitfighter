@@ -2682,6 +2682,8 @@ void GameUserInterface::issueChat()
 {
    TNLAssert(mCurrentChatType != NoChat, "Not in chat mode!");
 
+   bool shouldUndelaySpawn = true;
+
    if(!mLineEditor.isEmpty())
    {
       // Check if chat buffer holds a message or a command
@@ -2692,10 +2694,10 @@ void GameUserInterface::issueChat()
             gameType->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
       }
       else    // It's a command
-         runCommand(mLineEditor.c_str());
+         shouldUndelaySpawn = runCommand(mLineEditor.c_str());
    }
 
-   cancelChat();     // Hide chat display
+   cancelChat(shouldUndelaySpawn);     // Hide chat display
 }
 
 
@@ -2725,29 +2727,31 @@ void GameUserInterface::clearLevelInfoDisplayTimer()
 
 // Process a command entered at the chat prompt
 // Returns true if command was handled (even if it was bogus); returning false will cause command to be passed on to the server
-// Runs on client
-void GameUserInterface::runCommand(const char *input)
+// Runs on client; returns true unless we don't want to undelay a delayed spawn when command is entered
+bool GameUserInterface::runCommand(const char *input)
 {
    Vector<string> words = parseStringx(input);  // yes
 
    if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command.
-      return;
+      return true;
 
    GameConnection *gc = getGame()->getConnectionToServer();
    if(!gc)
    {
       displayErrorMessage("!!! Not connected to server");
-      return;
+      return true;
    }
 
    for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
       if(lcase(words[0]) == chatCmds[i].cmdName)
       {
          (this->*(chatCmds[i].cmdCallback))(words);
-         return;
+         return true;  // TODO: return false in the case of /idle while spawnDelayed
       }
 
    serverCommandHandler(words);     // Command unknown to client, will pass it on to server
+
+   return true;
 }
 
 
@@ -2804,13 +2808,15 @@ void GameUserInterface::setVolume(VolumeType volType, const Vector<string> &word
 }
 
 
-void GameUserInterface::cancelChat()
+// undelaySpawn defaults to true
+void GameUserInterface::cancelChat(bool undelaySpawn)
 {
    mLineEditor.clear();
    mCurrentChatType = NoChat;
    setBusyChatting(false);
 
-   getGame()->undelaySpawn();
+   if(undelaySpawn)
+      getGame()->undelaySpawn();
 }
 
 
