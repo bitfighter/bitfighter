@@ -111,8 +111,18 @@ extern ScreenInfo gScreenInfo;
 ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Game(bindAddress, settings)
 {
    mUserInterfaceData = new UserInterfaceData();
-   mInCommanderMap = false;
+
+   mInCommanderMap        = false;
    mRequestedSpawnDelayed = false;
+   mIsWaitingForSpawn     = false;
+   mSpawnDelayed          = false;
+   mGameIsRunning         = true;      // Only matters when game is suspended
+   mSeenTimeOutMessage    = false;
+
+   // Some debugging settings
+   mDebugShowShipCoords   = false;
+   mDebugShowMeshZones    = false;
+
    mCommanderZoomDelta = 0;
 
    mRemoteLevelDownloadFilename = "downloaded.level";
@@ -121,10 +131,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mClientInfo = new FullClientInfo(this, NULL, false);  // Will be deleted in destructor
 
-   mSpawnDelayed = false;
-   mGameIsRunning = true;                    // Only matters when game is suspended
-
-   mSeenTimeOutMessage = false;
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -151,8 +157,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 
-   mDebugShowShipCoords = false;
-   mDebugShowMeshZones = false;
 }
 
 
@@ -329,15 +333,13 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
    if(!mSpawnDelayed)
    {
       unsuspendGame();
+
       mRequestedSpawnDelayed = false;
+      mIsWaitingForSpawn     = false;
    }
 }
 
 
-bool ClientGame::isSpawnDelayed()
-{
-   return mSpawnDelayed;
-}
 
 
 // User has pressed a key, finishd composing that most eloquent of chat messages, or taken some other action to undelay their spawn
@@ -350,16 +352,17 @@ void ClientGame::undelaySpawn()
       return;
 
    getConnectionToServer()->c2sPlayerSpawnUndelayed();
+   mIsWaitingForSpawn = true;
 
    if(mRequestedSpawnDelayed)
       mClientInfo->resetReturnToGameTimer();
 }
 
 
-bool ClientGame::requestedSpawnDelayed()    
-{ 
-   return mRequestedSpawnDelayed; 
-}
+// Provide access to these annoying bools
+bool ClientGame::requestedSpawnDelayed()  { return mRequestedSpawnDelayed; }
+bool ClientGame::isWaitingForSpawn()      { return mIsWaitingForSpawn;     }
+bool ClientGame::isSpawnDelayed()         { return mSpawnDelayed;          }
 
 
 // Tells the server to spawn delay us... server may incur a penalty when we unspawn

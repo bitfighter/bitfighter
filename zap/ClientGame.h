@@ -64,6 +64,7 @@ private:
 
    U32 mCommanderZoomDelta;
    bool mRequestedSpawnDelayed;                 // True if player used /idle command
+   bool mIsWaitingForSpawn;                     // True once client has initiated unspawn procedure
 
    Timer mScreenSaverTimer;
    void supressScreensaver();
@@ -108,7 +109,8 @@ public:
 
    bool hasValidControlObject();
    bool isConnectedToServer();
-   bool requestedSpawnDelayed() ;
+   bool requestedSpawnDelayed();
+   bool isWaitingForSpawn();
 
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);
