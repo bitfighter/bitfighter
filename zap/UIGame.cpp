@@ -408,7 +408,7 @@ void GameUserInterface::render()
 
    getGame()->render();
 
-   if(getGame()->isSuspended()  || getGame()->isSpawnDelayed())
+   if(getGame()->isSuspended() || getGame()->isSpawnDelayed())
    {
       renderChatMsgs();
       renderCurrentChat();
@@ -490,7 +490,7 @@ void GameUserInterface::renderSuspendedMessage()
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
-   if(getGame()->getReturnToGameDelay() != 0)
+   if(getGame()->requestedSpawnDelayed())
    {
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);

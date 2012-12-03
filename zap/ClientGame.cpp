@@ -112,6 +112,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 {
    mUserInterfaceData = new UserInterfaceData();
    mInCommanderMap = false;
+   mRequestedSpawnDelayed = false;
    mCommanderZoomDelta = 0;
 
    mRemoteLevelDownloadFilename = "downloaded.level";
@@ -326,7 +327,10 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
    mSpawnDelayed = spawnDelayed;
 
    if(!mSpawnDelayed)
+   {
       unsuspendGame();
+      mRequestedSpawnDelayed = false;
+   }
 }
 
 
@@ -346,7 +350,15 @@ void ClientGame::undelaySpawn()
       return;
 
    getConnectionToServer()->c2sPlayerSpawnUndelayed();
-   //mClientInfo->resetReturnToGameTimer();
+
+   if(mRequestedSpawnDelayed)
+      mClientInfo->resetReturnToGameTimer();
+}
+
+
+bool ClientGame::requestedSpawnDelayed()    
+{ 
+   return mRequestedSpawnDelayed; 
 }
 
 
@@ -354,6 +366,7 @@ void ClientGame::undelaySpawn()
 void ClientGame::requestSpawnDelayed()
 {
    getConnectionToServer()->c2sPlayerRequestSpawnDelayed();
+   mRequestedSpawnDelayed = true;
 }
 
 

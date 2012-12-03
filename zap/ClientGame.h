@@ -63,6 +63,7 @@ private:
    bool mInCommanderMap;
 
    U32 mCommanderZoomDelta;
+   bool mRequestedSpawnDelayed;                 // True if player used /idle command
 
    Timer mScreenSaverTimer;
    void supressScreensaver();
@@ -107,6 +108,7 @@ public:
 
    bool hasValidControlObject();
    bool isConnectedToServer();
+   bool requestedSpawnDelayed() ;
 
    GameConnection *getConnectionToServer();
    void setConnectionToServer(GameConnection *connection);
