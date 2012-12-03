@@ -1590,6 +1590,10 @@ void GameUserInterface::deleteCurrentLevelHandler(const Vector<string> &words)
 
 void GameUserInterface::idleHandler(const Vector<string> &words)
 {
+   // No sense entering idle if you're already delayed in some capactiy... just sit tight!
+   if(getGame()->isSpawnDelayed())
+      return;
+
    getGame()->requestSpawnDelayed();
 }
 
