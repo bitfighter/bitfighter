@@ -340,8 +340,6 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
 }
 
 
-
-
 // User has pressed a key, finishd composing that most eloquent of chat messages, or taken some other action to undelay their spawn
 void ClientGame::undelaySpawn()
 {
