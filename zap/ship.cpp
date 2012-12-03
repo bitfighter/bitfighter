@@ -1115,7 +1115,12 @@ void Ship::deploySpybug()
    // Double check the requirements... we don't want no monkey business
    if(mEnergy < deploymentEnergy || mSpyBugPlacementTimer.getCurrent() > 0)
    {
-      // Problem! -- send message to client to recredit their energy
+      // Problem! -- send message to client to recredit their energy.  This is a very rare circumstance.
+      GameConnection *cc = getControllingClient();
+
+      if(cc)
+         cc->s2cRecreditEnergy(deploymentEnergy);
+
       return;
    }
 
@@ -1128,6 +1133,15 @@ void Ship::deploySpybug()
 
    if(getClientInfo())
       getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
+}
+
+
+// Occasionally the server will need to recredit energy erroneously deducted from client
+void Ship::recreditEnergy(S32 energy)
+{
+   mEnergy += energy;
+   if(mEnergy > EnergyMax)
+      mEnergy = EnergyMax;
 }
 
 
