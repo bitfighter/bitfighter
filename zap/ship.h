@@ -233,6 +233,8 @@ public:
    F32 getSensorZoomFraction();
    Point getAimVector();
 
+   void deploySpybug();
+
    void getLoadout(Vector<U8> &loadout);    // Fills loadout
    bool setLoadout(const Vector<U8> &loadout, bool silent = false);
    bool isLoadoutSameAsCurrent(const Vector<U8> &loadout);

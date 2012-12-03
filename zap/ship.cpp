@@ -1019,21 +1019,17 @@ void Ship::processModules()
 
          // Sensor module needs to place a spybug
          if(i == ModuleSensor &&  
-               mSpyBugPlacementTimer.getCurrent() == 0 &&      // Prevent placement too fast
-               mEnergy > moduleInfo->getPrimaryPerUseCost())   // Have enough energy
+               mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
+               mEnergy > moduleInfo->getPrimaryPerUseCost() &&   // Have enough energy
+               isGhost())                                        // Is happening on client side
          {
+            GameConnection *cc = getControllingClient();
 
-            // Energy deduction happens on client and server, but the rest is server only
-            mEnergy -= moduleInfo->getPrimaryPerUseCost();
-            mSpyBugPlacementTimer.reset();
-
-            if(!isGhost())
+            if(cc)
             {
-               Point direction = getAimVector();
-               GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
-                                                getActualVel(), 0, CollisionRadius - 2, this);
-               if(getClientInfo())
-                  getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
+               mSpyBugPlacementTimer.reset();
+               mEnergy -= moduleInfo->getPrimaryPerUseCost();
+               cc->c2sDeploySpybug();
             }
          }
       }
@@ -1086,12 +1082,7 @@ void Ship::processModules()
    {
       if(mModulePrimaryActive[i] != wasModulePrimaryActive[i])
       {
-         if(i == ModuleSensor)
-         {
-            if(mSpyBugPlacementTimer.getCurrent() == 0)
-               mSpyBugPlacementTimer.reset();
-         }
-         else if(i == ModuleCloak)
+         if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
 
          setMaskBits(ModulePrimaryMask);
@@ -1111,6 +1102,32 @@ void Ship::processModules()
          setMaskBits(ModuleSecondaryMask);
       }
    }
+}
+
+
+// Runs on server only, at the request of c2sDeploySpybug
+void Ship::deploySpybug()
+{
+   const ModuleInfo *moduleInfo = getGame()->getModuleInfo(ModuleSensor);     // Spybug is attached to this module
+
+   S32 deploymentEnergy = moduleInfo->getPrimaryPerUseCost();
+
+   // Double check the requirements... we don't want no monkey business
+   if(mEnergy < deploymentEnergy || mSpyBugPlacementTimer.getCurrent() > 0)
+   {
+      // Problem! -- send message to client to recredit their energy
+      return;
+   }
+
+   mEnergy -= deploymentEnergy;                             
+   mSpyBugPlacementTimer.reset();
+
+   Point direction = getAimVector();
+   GameWeapon::createWeaponProjectiles(WeaponSpyBug, direction, getActualPos(),
+                                    getActualVel(), 0, CollisionRadius - 2, this);
+
+   if(getClientInfo())
+      getClientInfo()->getStatistics()->countShot(WeaponSpyBug);
 }
 
 

@@ -318,9 +318,9 @@ public:
    void resetLevelInfoDisplayTimer();     // 6 seconds
    void clearLevelInfoDisplayTimer();
 
-   void runCommand(const char *input);
+   bool runCommand(const char *input);
    void issueChat();                // Send chat message (either Team or Global)
-   void cancelChat();
+   void cancelChat(bool undelaySpawn = true);
 
    void shutdownInitiated(U16 time, const StringTableEntry &who, const StringPtr &why, bool initiator);
    void cancelShutdown();

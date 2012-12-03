@@ -938,6 +938,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sReleaseCommanderMap, (), (),
 }
 
 
+TNL_IMPLEMENT_RPC(GameConnection, c2sDeploySpybug, (), (), NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 0)
+{
+   Ship *ship = mClientInfo->getShip();
+   if(ship)
+      ship->deploySpybug();
+}
+
+
 // Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U8> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
 {
