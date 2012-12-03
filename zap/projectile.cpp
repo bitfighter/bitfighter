@@ -743,14 +743,14 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor -- used when mine is planted
-Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, SensorRadius)
+Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, BurstRadius)
 {
    initialize(pos, planter);
 }
 
 
 // Combined Lua / C++ default constructor -- used in Lua and editor
-Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, SensorRadius)
+Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
 {
    initialize(Point(0,0), NULL);
 }
