@@ -1584,6 +1584,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          hasExploded = false;
          playSpawnEffect = stream->readFlag();    // Prevent spawn effect every time the robot goes into scope
          shipwarped = true;
+
          if(stream->readFlag())
             mSpawnShield.reset((stream->readInt(4) + 1) * SpawnShieldTime / 16);
          else
