@@ -97,21 +97,25 @@ static SFXProfile sfxProfilesModern[] = {
  {  "flag_snatch.wav",     true,  0.45f, false, 0,   0 },
 
  // Teleport noises
- {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
- {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
- {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
- {  "gofast.wav",          true, 1.0,    false, 200, 500 },    // Heard inside the ship
+ {  "teleport_in.wav",      false, 1.0,   false, 200, 500 },
+ {  "teleport_out.wav",     false, 1.0,   false, 200, 500 },
+ {  "teleport_explode.wav", false, 1.0,   false, 200, 500 },    // SFXTeleportExploding
+ 
 
- // Forcefield noises
- {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
- {  "forcefield_down.wav", false,  0.7f,  false, 150, 600 },
-
- // UI noises
- {  "boop.wav",            true,  0.4f,  false, 150, 600 },
- {  "comm_up.wav",         true,  0.4f,  false, 150, 600 },
- {  "comm_down.wav",       true,  0.4f,  false, 150, 600 },
- {  "boop.wav",            true,  0.25f, false, 150, 600 },
-
+ // GoFast noises
+ {  "gofast.wav",           false, 1.0,   false, 200, 500 },    // Heard outside the ship
+ {  "gofast.wav",           true, 1.0,    false, 200, 500 },    // Heard inside the ship
+                            
+ // Forcefield noises       
+ {  "forcefield_up.wav",    false,  0.7f,  false, 150, 600 },
+ {  "forcefield_down.wav",  false,  0.7f,  false, 150, 600 },
+                            
+ // UI noises               
+ {  "boop.wav",             true,  0.4f,  false, 150, 600 },
+ {  "comm_up.wav",          true,  0.4f,  false, 150, 600 },
+ {  "comm_down.wav",        true,  0.4f,  false, 150, 600 },
+ {  "boop.wav",             true,  0.25f, false, 150, 600 },
+                            
  // Core-related noises
  {  "core_heartbeat.wav",        false, 1.0f,  false, 150, 1000 },
  {  "core_explode.wav",          false, 1.0f,  false, 300, 1000 },
@@ -183,7 +187,9 @@ static SFXProfile sfxProfilesClassic[] = {
  // Teleport noises
  {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
+ {  "teleport_explode.wav", false, 1.0,   false, 200, 500 },    // SFXTeleportExploding
 
+ // GoFast noises
  {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
  {  "gofast.wav",          true, 1.0,   false, 200, 500 },     // Heard inside the ship
 

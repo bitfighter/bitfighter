@@ -121,7 +121,9 @@ enum SFXProfiles
    // Teleport noises
    SFXTeleportIn,
    SFXTeleportOut,
+   SFXTeleportExploding,
 
+   // GoFast noises
    SFXGoFastOutside,
    SFXGoFastInside,
 

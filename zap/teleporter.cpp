@@ -466,14 +466,14 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       timeout = mTeleporterDelay;
    }
 
-   // mHasExploded
-   if(stream->readFlag())
+   if(stream->readFlag())     // mHasExploded
    {
       if(!mHasExploded)
       {
          mHasExploded = true;
          disableCollision();
          mExplosionTimer.reset(TeleporterExplosionTime);
+         SoundSystem::playSoundEffect(SFXTeleportExploding, getVert(0));
          mFinalExplosionTriggered = false;
       }
    }
