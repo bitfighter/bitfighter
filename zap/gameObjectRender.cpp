@@ -1463,7 +1463,7 @@ void renderSeeker(const Point &pos, F32 angleRadians, F32 speed, U32 timeRemaini
       renderVertexArray(outerFlame, 3, GL_LINE_STRIP);
 
       // The body of the seeker
-      glColor4f(1.0, 0, 0.35, 1.0);  // A redder magenta
+      glColor4f(1, 0, 0.35f, 1);  // A redder magenta
       F32 vertices[] = {
             -8, -4,
             -8,  4,
@@ -1485,13 +1485,13 @@ void renderMine(const Point &pos, bool armed, bool visible)
       glColor(Colors::gray50);
       drawCircle(pos, Mine::SensorRadius);
       mod = 0.8f;
-      vis = 1.0;
+      vis = 1.0f;
    }
    else           // Invisible enemy mine
    {
       glLineWidth(gLineWidth1);
-      mod = 0.8f;
-      vis = .18;
+      mod = 0.80f;
+      vis = 0.18f;
    }
 
    TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
@@ -1954,7 +1954,7 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
       if(panelHealth[i] == 0)          // Panel is dead
       {
          Color c = *coreColor;
-         glColor(c * 0.2);
+         glColor(c * 0.2f);
       }
       else
          glColor(baseColor);
