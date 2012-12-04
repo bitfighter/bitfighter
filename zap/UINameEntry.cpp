@@ -322,10 +322,10 @@ void PasswordEntryUserInterface::render()
       TNLAssert(glIsEnabled(GL_BLEND), "Why is blending off here?");
 
       F32 vertices[] = {
-            0, 0,
-            canvasWidth, 0,
-            canvasWidth, canvasHeight,
-            0, canvasHeight
+            0,                 0,
+            (F32)canvasWidth,  0,
+            (F32)canvasWidth, (F32)canvasHeight,
+            0,                (F32)canvasHeight
       };
       renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
    }

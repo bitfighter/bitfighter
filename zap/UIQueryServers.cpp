@@ -687,8 +687,8 @@ void QueryServersUserInterface::render()
       // Horizontal divider between game list and chat window
       glColor(Colors::white);
       F32 vertices[] = {
-            horizMargin, dividerPos,
-            canvasWidth - horizMargin, dividerPos
+            (F32)horizMargin,               (F32)dividerPos,
+            (F32)canvasWidth - horizMargin, (F32)dividerPos
       };
       renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_LINES);
 
@@ -834,10 +834,10 @@ void QueryServersUserInterface::renderTopBanner()
    // Top banner
    glColor(Colors::richGreen);
    F32 vertices[] = {
-         0, 0,
-         canvasWidth, 0,
-         canvasWidth, BANNER_HEIGHT,
-         0, BANNER_HEIGHT
+         0,                0,
+         (F32)canvasWidth, 0,
+         (F32)canvasWidth, (F32)BANNER_HEIGHT,
+         0,                (F32)BANNER_HEIGHT
    };
    renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
