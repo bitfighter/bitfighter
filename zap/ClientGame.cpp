@@ -1922,7 +1922,7 @@ void ClientGame::renderNormal()
 
    // Render current ship's energy
    if(ship)
-      renderEnergyGuage(ship->mEnergy, Ship::EnergyMax, Ship::EnergyCooldownThreshold);    
+      renderEnergyGuage(ship->mEnergy);    
 
    //renderOverlayMap();     // Draw a floating overlay map
 }

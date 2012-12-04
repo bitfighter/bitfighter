@@ -1699,44 +1699,49 @@ void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideCol
 }
 
 
-void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
+void renderEnergyGuage(S32 energy)
 {
    const S32 GAUGE_WIDTH = 200;
    const S32 GUAGE_HEIGHT = 20;
+   const S32 SAFTEY_LINE_EXTEND = 4;      // How far the safety line extends above/below the main bar
+
+   // Coorinates of upper left corner of main guage bar
+   const F32 xul = F32(                                    UserInterface::horizMargin);
+   const F32 yul = F32(gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - GUAGE_HEIGHT);
+
+   F32 full = F32(energy) / F32(Ship::EnergyMax) * GAUGE_WIDTH;
+
+   // Main bar outline
+   F32 vertices[] = {
+         xul,        yul,
+         xul,        yul + GUAGE_HEIGHT,
+         xul + full, yul + GUAGE_HEIGHT,
+         xul + full, yul,
+   };
 
    // For readability
-   const S32 hMargin = UserInterface::horizMargin;
-   const S32 vMargin = UserInterface::vertMargin;
+   const Color blue = Colors::blue;
+   const Color cyan = Colors::cyan;
 
-   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-
-   F32 full = F32(energy) / F32(maxEnergy) * GAUGE_WIDTH;
-
-   // Guage fill
-   F32 vertices[] = {
-         F32(hMargin),        F32(canvasHeight - vMargin - GUAGE_HEIGHT),
-         F32(hMargin),        F32(canvasHeight - vMargin),
-         F32(hMargin + full), F32(canvasHeight - vMargin),
-         F32(hMargin + full), F32(canvasHeight - vMargin - GUAGE_HEIGHT),
-   };
-   F32 colors[] = {
-         0, 0, 1, 1,   // Colors::blue
-         0, 0, 1, 1,
-         0, 1, 1, 1,   // Colors::cyan
-         0, 1, 1, 1
+   // Create blue-cyan fade
+   static const F32 colors[] = {
+         blue.r, blue.g, blue.b, 1,   // Fade from
+         blue.r, blue.g, blue.b, 1,
+         cyan.r, cyan.g, cyan.b, 1,   // Fade to
+         cyan.r, cyan.g, cyan.b, 1,
    };
    renderColorVertexArray(vertices, colors, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 
    // Guage outline
    glColor(Colors::white);
-   drawVertLine(hMargin, canvasHeight - vMargin - GUAGE_HEIGHT, canvasHeight - vMargin);
-   drawVertLine(hMargin + GAUGE_WIDTH, canvasHeight - vMargin - GUAGE_HEIGHT, canvasHeight - vMargin);
+   drawVertLine(xul,               yul, yul + GUAGE_HEIGHT);
+   drawVertLine(xul + GAUGE_WIDTH, yul, yul + GUAGE_HEIGHT);
 
    // Show safety line
-   S32 cutoffx = cooldownThreshold * GAUGE_WIDTH / maxEnergy;
+   S32 cutoffx = Ship::EnergyCooldownThreshold * GAUGE_WIDTH / Ship::EnergyMax;
 
    glColor(Colors::yellow);
-   drawVertLine(hMargin + cutoffx, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+   drawVertLine(xul + cutoffx, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
 
 #ifdef SHOW_SERVER_SITUATION
    if((gServerGame && gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
@@ -1744,20 +1749,9 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
       S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
       S32 p = F32(actDiff) / S32(maxEnergy) * GAUGE_WIDTH;
       glColor(Colors::magenta);
-      drawVertLine(hMargin + p, canvasHeight - vMargin - 23, canvasHeight - vMargin + 4);
+      drawVertLine(xul + p, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
    }
 #endif
-}
-
-
-// Render the actual lightning bolt
-void renderEnergySymbol(const Color *overrideColor, F32 alpha)
-{
-   // Yellow lightning bolt
-   glColor(overrideColor == NULL ? Colors::orange67 : *overrideColor, alpha);
-
-   static S16 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
-   renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GL_LINE_LOOP);
 }
 
 
@@ -1766,29 +1760,37 @@ void renderEnergySymbol(const Point &pos, F32 scaleFactor)
    glPushMatrix();
       glTranslate(pos);
       glScale(scaleFactor);
-      renderEnergySymbol(0, 1);
+      renderEnergySymbol();
    glPopMatrix();
 }
 
 
-void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha)
+// Render the actual lightning bolt glyph at 0,0
+void renderEnergySymbol()
+{
+   // Yellow lightning bolt
+   glColor(Colors::orange67, 1);
+
+   static S16 energySymbolPoints[] = { 20,-20,  3,-2,  12,5,  -20,20,  -2,3,  -12,-5 };
+   renderVertexArray(energySymbolPoints, ARRAYSIZE(energySymbolPoints) / 2, GL_LINE_LOOP);
+}
+
+
+void renderEnergyItem(const Point &pos, bool forEditor)
 {
    F32 scaleFactor = forEditor ? .45f : 1;    // Resize for editor
 
    glPushMatrix();
       glTranslate(pos);
 
-      // Scale down the symbol a little so it fits in the box
-      glScale(scaleFactor * .7f);
-      renderEnergySymbol(overrideColor, alpha);
-
-      // Scale back up to where we were
-      glScale(1 / .7f);
-
       S32 size = 18;
       glColor(Colors::white);
       drawSquare(Point(0,0), size, false);
       glLineWidth(gDefaultLineWidth);
+
+      // Scale down the symbol a little so it fits in the box
+      glScale(scaleFactor * .7f);
+      renderEnergySymbol();
 
    glPopMatrix();
 }
@@ -1796,7 +1798,7 @@ void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideCol
 
 void renderEnergyItem(const Point &pos)
 {
-   renderEnergyItem(pos, false, NULL, 1);
+   renderEnergyItem(pos, false);
 }
 
 

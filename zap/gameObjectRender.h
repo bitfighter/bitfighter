@@ -112,7 +112,7 @@ extern void drawCircle(F32 x, F32 y, F32 radius);
 
 //////////
 // Some things for rendering on screen display
-void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
+void renderEnergyGuage(S32 energy);
 
 extern F32 renderCenteredString(const Point &pos, S32 size, const char *string);
 extern F32 renderCenteredString(const Point &pos, F32 size, const char *string);
@@ -200,9 +200,9 @@ extern void renderEnergyItem(const Point &pos);
 extern void renderWallFill(const Vector<Point> *points, bool polyWall);
 extern void renderWallFill(const Vector<Point> *points, const Point &offset, bool polyWall);
 
-extern void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
-extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // Render lightning bolt symbol
-extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
+extern void renderEnergyItem(const Point &pos, bool forEditor);
+extern void renderEnergySymbol();                                   // Render lightning bolt symbol
+extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);  // Another signature
 
 // Wall rendering
 void renderWallEdges(const Vector<Point> *edges, const Color &outlineColor, F32 alpha = 1.0);
