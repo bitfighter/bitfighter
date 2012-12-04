@@ -1974,8 +1974,8 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
          };
 
          F32 colors[] = {
-               0.2, 0.2, 0.2, 1, // Colors::gray20
-               0, 0, 0, 1,       // Colors::black
+               0.2f, 0.2f, 0.2f, 1,    // Colors::gray20
+               0,    0,    0,    1,    // Colors::black
          };
 
          renderColorVertexArray(vertices2, colors, 2, GL_LINES);
