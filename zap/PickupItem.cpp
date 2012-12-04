@@ -458,7 +458,6 @@ EnergyItem *EnergyItem::clone() const
 }
 
 
-static const S32 EnergyItemFillip = Ship::EnergyMax / 2;
 
 // Runs on server, returns true if we're doing the pickup, false otherwise
 bool EnergyItem::pickup(Ship *theShip)
@@ -468,7 +467,15 @@ bool EnergyItem::pickup(Ship *theShip)
    if(energy >= Ship::EnergyMax)             // Energy?  We don't need no stinkin' energy!!
       return false;
 
+   static const S32 EnergyItemFillip = Ship::EnergyMax / 2;
+
+   // Credit the ship 
    theShip->changeEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
+
+   // And tell the client to do the same.  Note that we are handling energy with a s2c because it is possible to be
+   // traveling so fast that the EnergyItem goes out of scope before there is a chance to use the pack/unpack mechanims
+   // to get the energy credit to the client.  s2c will work regardless.
+   theShip->getControllingClient()->s2cCreditEnergy(EnergyItemFillip);
 
    return true;
 }
@@ -478,17 +485,6 @@ bool EnergyItem::pickup(Ship *theShip)
 void EnergyItem::onClientPickup()
 {
    SoundSystem::playSoundEffect(SFXShipHeal, getPos());
-
-#ifndef ZAP_DEDICATED
-   ClientGame *clientGame = static_cast<ClientGame *>(getGame());   
-
-   Ship *ship = NULL;
-   if(clientGame->getConnectionToServer()->getControlObject())
-      ship = static_cast<Ship *>(clientGame->getConnectionToServer()->getControlObject());
-
-   if(ship)
-      ship->changeEnergy(EnergyItemFillip);
-#endif
 }
 
 
