@@ -99,7 +99,7 @@ static SFXProfile sfxProfilesModern[] = {
  // Teleport noises
  {  "teleport_in.wav",      false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",     false, 1.0,   false, 200, 500 },
- {  "teleport_explode.wav", false, 1.0,   false, 200, 500 },    // SFXTeleportExploding
+ {  "teleport_explode.wav", false, 4.0,   false, 200, 500 },    // SFXTeleportExploding
  
 
  // GoFast noises
@@ -187,7 +187,7 @@ static SFXProfile sfxProfilesClassic[] = {
  // Teleport noises
  {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
- {  "teleport_explode.wav", false, 1.0,   false, 200, 500 },    // SFXTeleportExploding
+ {  "teleport_explode.wav", false, 4.0,   false, 200, 500 },    // SFXTeleportExploding
 
  // GoFast noises
  {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
