@@ -207,7 +207,6 @@ public:
    S32 getEnergy();
    F32 getEnergyFraction();     // Only used by bots
    S32 getMaxEnergy();
-   void changeEnergy(S32 deltaEnergy);
 
    void onGhostRemove();
 

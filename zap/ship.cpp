@@ -294,13 +294,6 @@ S32 Ship::getMaxEnergy()
 }
 
 
-// Used when a ship picks up an energy object
-void Ship::changeEnergy(S32 deltaEnergy)
-{
-   mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
-}
-
-
 bool Ship::isModulePrimaryActive(ShipModule mod)
 {
    return mModulePrimaryActive[mod];
@@ -1140,8 +1133,11 @@ void Ship::deploySpybug()
 void Ship::creditEnergy(S32 energy)
 {
    mEnergy += energy;
+
    if(mEnergy > EnergyMax)
       mEnergy = EnergyMax;
+
+   //mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
 }
 
 

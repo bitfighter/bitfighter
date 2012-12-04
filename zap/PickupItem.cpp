@@ -470,7 +470,7 @@ bool EnergyItem::pickup(Ship *theShip)
    static const S32 EnergyItemFillip = Ship::EnergyMax / 2;
 
    // Credit the ship 
-   theShip->changeEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
+   theShip->creditEnergy(EnergyItemFillip);  // Bump up energy by 50%, changeEnergy() sets energy delta
 
    // And tell the client to do the same.  Note that we are handling energy with a s2c because it is possible to be
    // traveling so fast that the EnergyItem goes out of scope before there is a chance to use the pack/unpack mechanims
