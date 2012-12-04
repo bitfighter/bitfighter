@@ -228,7 +228,7 @@ public:
    bool isCarryingItem(U8 objectType);
    MountableItem *unmountItem(U8 objectType);
 
-   void recreditEnergy(S32 energy);
+   void creditEnergy(S32 energy);
 
    void setEngineeredTeleporter(Teleporter *teleporter);
    Teleporter *getEngineeredTeleporter();

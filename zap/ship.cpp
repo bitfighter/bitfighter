@@ -1119,7 +1119,7 @@ void Ship::deploySpybug()
       GameConnection *cc = getControllingClient();
 
       if(cc)
-         cc->s2cRecreditEnergy(deploymentEnergy);
+         cc->s2cCreditEnergy(deploymentEnergy);
 
       return;
    }
@@ -1137,7 +1137,7 @@ void Ship::deploySpybug()
 
 
 // Occasionally the server will need to recredit energy erroneously deducted from client
-void Ship::recreditEnergy(S32 energy)
+void Ship::creditEnergy(S32 energy)
 {
    mEnergy += energy;
    if(mEnergy > EnergyMax)
