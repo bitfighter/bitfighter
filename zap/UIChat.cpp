@@ -415,8 +415,8 @@ void ChatUserInterface::setRenderUnderlyingUI(bool render)
 }
 
 
-static const S32 VERT_FOOTER_SIZE = 20;
-static const S32 MENU_TITLE_SIZE = 30;
+static const S32 VERT_FOOTER_SIZE   = 20;
+static const S32 MENU_TITLE_SIZE    = 30;
 static const S32 TITLE_SUBTITLE_GAP = 5;
 static const S32 MENU_SUBTITLE_SIZE = 18;
 
