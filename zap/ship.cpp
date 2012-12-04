@@ -1151,7 +1151,9 @@ void Ship::rechargeEnergy()
    U32 timeInMilliSeconds = mCurrentMove.time;
 
    // Energy will not recharge if spawn shield is up
-   if(mSpawnShield.getCurrent() == 0)
+   if(mSpawnShield.getCurrent() != 0)     
+      mIdleRechargeCycleTimer.reset();    // Fast recharge timer doesn't really get going until after spawn shield is down
+   else
    {
       // Base recharge rate
       mEnergy += EnergyRechargeRate * timeInMilliSeconds;
