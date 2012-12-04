@@ -520,7 +520,8 @@ void Teleporter::onDestroyed()
    if(mEngineeringShip && mEngineeringShip->getEngineeredTeleporter() == this && mEngineeringShip->getClientInfo())
    {
       mEngineeringShip->getClientInfo()->sTeleporterCleanup();
-      if(!mEngineeringShip->getClientInfo()->isRobot())   // tell client to hide engineer menu.
+
+      if(!mEngineeringShip->getClientInfo()->isRobot())     // If they're not a bot, tell client to hide engineer menu
       {
          static const StringTableEntry Your_Teleporter_Got_Destroyed("Your teleporter got destroyed");
          mEngineeringShip->getClientInfo()->getConnection()->s2cDisplayErrorMessage(Your_Teleporter_Got_Destroyed);
