@@ -435,17 +435,14 @@ void DiagnosticUserInterface::render()
       hpos += drawStringAndGetWidth(hpos, ypos, textsize, " | ");
 
       glColor(Colors::yellow);
-      hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Input strings: ");
+      hpos += drawStringAndGetWidth(hpos, ypos, textsize, "Input string: ");
 
       glColor(Colors::magenta);
-      for(U32 i = 0; i < MAX_INPUT_CODES; i++)
-         if(InputCodeManager::getState((InputCode) i))
-         {
-            string in = InputCodeManager::makeInputString(InputCode(i));
 
-            if(in != "")
-               hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", in.c_str() ) + 5;
-         }
+      string in = InputCodeManager::getCurrentInputString();
+
+      if(in != "")
+         hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", in.c_str() ) + 5;
 
       if(joystickDetected)
       {

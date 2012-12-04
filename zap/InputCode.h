@@ -64,6 +64,7 @@ public:
       JOYSTICK_STICK_2
    };
 
+
    enum BindingName {
       BINDING_SELWEAP1,    // Name def depends on these being in this order from here...
       BINDING_SELWEAP2,
@@ -135,8 +136,7 @@ private:
    bool checkIfBindingsHaveKeypad();
 
 public:
-   // Ensure that specified modifer is the only one actually pressed... i.e. if Ctrl and Alt were down, checkModifier(KEY_CTRL) would be false
-   static string makeInputString(InputCode inputCode);
+   static string getCurrentInputString();
 
    static bool checkModifier(InputCode mod1);            
    static bool checkModifier(InputCode mod1, InputCode mod2);            
