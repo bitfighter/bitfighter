@@ -117,7 +117,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 {
    mObjectTypeNumber = PlayerShipTypeNumber;
    mFireTimer = 0;
-   mFastRecharge = false;
+   mFastRecharging = false;
 
    // Set up module secondary delay timer
    for(S32 i = 0; i < ModuleCount; i++)
@@ -125,7 +125,7 @@ void Ship::initialize(ClientInfo *clientInfo, S32 team, const Point &pos, bool i
 
    mSpyBugPlacementTimer.setPeriod(SpyBugPlacementTimerDelay);
    mSensorEquipZoomTimer.setPeriod(SensorZoomTime);
-   mIdleRechargeCycleTimer.reset(IdleRechargeCycleTimerDelay, IdleRechargeCycleTimerDelay);
+   mFastRechargeTimer.reset(IdleRechargeCycleTimerDelay, IdleRechargeCycleTimerDelay);
 
    mNetFlags.set(Ghostable);
 
@@ -647,8 +647,8 @@ void Ship::idle(BfObject::IdleCallPath path)
       if(getActualVel().lenSquared() != 0 || getActualPos() != getRenderPos())
          setMaskBits(PositionMask);
 
-      mIdleRechargeCycleTimer.update(mCurrentMove.time);
-      mFastRecharge = mIdleRechargeCycleTimer.getCurrent() == 0;
+      mFastRechargeTimer.update(mCurrentMove.time);
+      mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
    }
    else
    {
@@ -659,8 +659,8 @@ void Ship::idle(BfObject::IdleCallPath path)
 
       if(path == BfObject::ClientIdleControlMain)
       {
-         mIdleRechargeCycleTimer.update(mCurrentMove.time);
-         mFastRecharge = mIdleRechargeCycleTimer.getCurrent() == 0;
+         mFastRechargeTimer.update(mCurrentMove.time);
+         mFastRecharging = mFastRechargeTimer.getCurrent() == 0;
       }
 
 
@@ -1152,7 +1152,7 @@ void Ship::rechargeEnergy()
 
    // Energy will not recharge if spawn shield is up
    if(mSpawnShield.getCurrent() != 0)     
-      mIdleRechargeCycleTimer.reset();    // Fast recharge timer doesn't really get going until after spawn shield is down
+      mFastRechargeTimer.reset();    // Fast recharge timer doesn't really get going until after spawn shield is down
    else
    {
       // Base recharge rate
@@ -1179,11 +1179,11 @@ void Ship::rechargeEnergy()
       if(mCurrentMove.x != 0 || mCurrentMove.y != 0 || mCurrentMove.fire || mCurrentMove.isAnyModActive() /*||
             currentLoadoutZoneTeam == TEAM_HOSTILE*/)
       {
-         mIdleRechargeCycleTimer.reset();
-         mFastRecharge = false;
+         mFastRechargeTimer.reset();
+         mFastRecharging = false;
       }
 
-      if(mFastRecharge)
+      if(mFastRecharging)
          mEnergy += EnergyRechargeRateIdleRechargeCycle * timeInMilliSeconds;
    }
 
@@ -1351,7 +1351,7 @@ void Ship::writeControlState(BitStream *stream)
    stream->write(getActualVel().y);
 
    //stream->writeRangedU32(mEnergy, 0, EnergyMax);
-   //stream->writeFlag(mFastRecharge);
+   //stream->writeFlag(mFastRecharging);
    stream->writeFlag(mCooldownNeeded);
    if(mFireTimer < 0)   // mFireTimer could be negative
       stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
@@ -1374,7 +1374,7 @@ void Ship::readControlState(BitStream *stream)
    Parent::setActualVel(Point(x, y));
 
    //int serverReportedEnergy = stream->readRangedU32(0, EnergyMax);
-   //bool rrrmFastRecharge = stream->readFlag();
+   //bool rrrmFastRecharging = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
    int xmFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));

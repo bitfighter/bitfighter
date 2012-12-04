@@ -60,7 +60,7 @@ private:
    Vector<DatabaseObject *> mZones1;    // A list of zones the ship is currently in
    Vector<DatabaseObject *> mZones2;
    bool mZones1IsCurrent;
-   bool mFastRecharge;
+   bool mFastRecharging;
 
    SafePtr<Teleporter> mEngineeredTeleporter;
 
@@ -175,7 +175,7 @@ public:
    Timer mSpawnShield;
    Timer mModuleSecondaryTimer[ModuleCount];  // Timer to prevent accidentally firing in quick succession
    Timer mSpyBugPlacementTimer;
-   Timer mIdleRechargeCycleTimer;
+   Timer mFastRechargeTimer;
    static const U32 ModuleSecondaryTimerDelay = 500;
    static const U32 SpyBugPlacementTimerDelay = 800;
    static const U32 IdleRechargeCycleTimerDelay = 2000;
