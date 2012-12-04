@@ -369,6 +369,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
 // Runs on server
 // Only run after canCreateObjectAtLocation, which checks for errors and sets mDeployPosition
+// Return true if everything went well, false otherwise.  Caller will manage energy credits and debits.
 bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 objectType)
 {
    // Do some basic crash-proofing sanity checks first
@@ -417,30 +418,27 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
       default:
          return false;
    }
-
-
+   
    Engineerable *engineerable = dynamic_cast<Engineerable *>(deployedObject);
 
-   if((!deployedObject || !engineerable) && !clientInfo->isRobot())              // Something went wrong
+   if((!deployedObject || !engineerable) && !clientInfo->isRobot())  // Something went wrong
    {
-      clientInfo->getConnection()->s2cDisplayErrorMessage("Error deploying object.");
+      GameConnection *conn = clientInfo->getConnection();
+      conn->s2cDisplayErrorMessage("Error deploying object.");
       delete deployedObject;
       return false;
    }
 
-   ship->engineerBuildObject();     // Deducts energy
+   // It worked!  Object depolyed!
+   engineerable->computeExtent();      // Recomputes extents
 
    deployedObject->setOwner(clientInfo);
-
-   engineerable->computeExtent();   // Recomputes extents
-
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
-
-   engineerable->onConstructed();
 
    MountableItem *resource = ship->unmountItem(ResourceItemTypeNumber);
 
    engineerable->setResource(resource);
+   engineerable->onConstructed();
    engineerable->setEngineered(true);
 
    return true;

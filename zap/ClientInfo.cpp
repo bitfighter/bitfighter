@@ -299,8 +299,8 @@ LuaPlayerInfo *ClientInfo::getPlayerInfo()
 bool ClientInfo::sEngineerDeployObject(U32 objectType)
 {
    Ship *ship = getShip();
-   if(!ship)                                          // Not a good sign...
-      return false;                                   // ...bail
+   if(!ship)                                    // Not a good sign...
+      return false;                             // ...bail
 
    GameType *gameType = ship->getGame()->getGameType();
 
@@ -361,10 +361,18 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
 
       gameType->broadcastMessage(GameConnection::ColorAqua, SFXNone, msg, e);
 
+      // Finally, deduct energy cost
+      S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+      ship->creditEnergy(-energyCost);    // Deduct energy from engineer
+
       return true;
    }
 
-   // Else... fail silently?
+   // Else deployment failed and we need to credit some energy back to the client
+   S32 energyCost = Game::getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost();
+   getConnection()->s2cCreditEnergy(energyCost);  
+
+   // And depart quietly
    return false;
 }
 

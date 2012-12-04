@@ -306,12 +306,6 @@ bool Ship::isModuleSecondaryActive(ShipModule mod)
 }
 
 
-void Ship::engineerBuildObject() 
-{ 
-   mEnergy -= getGame()->getModuleInfo(ModuleEngineer)->getPrimaryPerUseCost(); 
-}
-
-
 void Ship::activateModulePrimary(U32 index)
 {
    mCurrentMove.modulePrimary[index] = true;
@@ -1129,15 +1123,10 @@ void Ship::deploySpybug()
 }
 
 
-// Occasionally the server will need to recredit energy erroneously deducted from client
-void Ship::creditEnergy(S32 energy)
+// Energy can be negative!
+void Ship::creditEnergy(S32 deltaEnergy)
 {
-   mEnergy += energy;
-
-   if(mEnergy > EnergyMax)
-      mEnergy = EnergyMax;
-
-   //mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
+   mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy));
 }
 
 

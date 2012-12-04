@@ -213,8 +213,6 @@ public:
    bool isModulePrimaryActive(ShipModule mod);
    bool isModuleSecondaryActive(ShipModule mod);
 
-   void engineerBuildObject();
-
    bool hasModule(ShipModule mod);
 
    bool isDestroyed();
@@ -227,7 +225,7 @@ public:
    bool isCarryingItem(U8 objectType);
    MountableItem *unmountItem(U8 objectType);
 
-   void creditEnergy(S32 energy);
+   void creditEnergy(S32 deltaEnergy);
 
    void setEngineeredTeleporter(Teleporter *teleporter);
    Teleporter *getEngineeredTeleporter();
