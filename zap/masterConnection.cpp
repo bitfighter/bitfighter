@@ -283,6 +283,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
          {
             clientInfo->setAuthenticated(true, badges);
 
+            // TODO: Try broadcasting authenication status to clients here... might fix unresolved 018 bug
+
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
             for(S32 j = 0; j < mGame->getClientCount(); j++)
             {
