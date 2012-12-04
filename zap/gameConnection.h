@@ -215,9 +215,9 @@ public:
 
 
    // Player using engineer module
-   TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredItemCount> objectType));
-   TNL_DECLARE_RPC(c2sEngineerInterrupted, (RangedU32<0,EngineeredItemCount> objectType));
-   TNL_DECLARE_RPC(s2cEngineerResponseEvent, (RangedU32<0,EngineerEventCount> event));
+   TNL_DECLARE_RPC(c2sEngineerDeployObject,  (RangedU32<0,EngineeredItemCount> objectType));
+   TNL_DECLARE_RPC(c2sEngineerInterrupted,   (RangedU32<0,EngineeredItemCount> objectType));
+   TNL_DECLARE_RPC(s2cEngineerResponseEvent, (RangedU32<0,EngineerEventCount>  event));
 
    TNL_DECLARE_RPC(s2cDisableWeaponsAndModules, (bool disable));
 
