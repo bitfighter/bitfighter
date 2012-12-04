@@ -647,12 +647,12 @@ void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, 
          { 0, 1, 0 },
       },
       {  // 3 -> "Dead" tracker gray
-         { 0.20, 0.20, 0.20 },
-         { 0.50, 0.50, 0.50 },
-         { 0.75, 0.75, 0.75 },
-         { 0.30, 0.30, 0.30 },
-         { 0.50, 0.50, 0.50 },
-         { 0.15, 0.15, 0.15 },
+         { 0.20f, 0.20f, 0.20f },
+         { 0.50f, 0.50f, 0.50f },
+         { 0.75f, 0.75f, 0.75f },
+         { 0.30f, 0.30f, 0.30f },
+         { 0.50f, 0.50f, 0.50f },
+         { 0.15f, 0.15f, 0.15f },
       }
    };
 
@@ -1714,10 +1714,10 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 
    // Guage fill
    F32 vertices[] = {
-         hMargin, canvasHeight - vMargin - GUAGE_HEIGHT,
-         hMargin, canvasHeight - vMargin,
-         hMargin + full, canvasHeight - vMargin,
-         hMargin + full, canvasHeight - vMargin - GUAGE_HEIGHT,
+         F32(hMargin),        F32(canvasHeight - vMargin - GUAGE_HEIGHT),
+         F32(hMargin),        F32(canvasHeight - vMargin),
+         F32(hMargin + full), F32(canvasHeight - vMargin),
+         F32(hMargin + full), F32(canvasHeight - vMargin - GUAGE_HEIGHT),
    };
    F32 colors[] = {
          0, 0, 1, 1,   // Colors::blue
