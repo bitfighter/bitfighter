@@ -240,7 +240,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 }
 
 
-// The master server has looked at our name and password, and determined if we're in the database properly.  Here's it's reply:
+// The master server has looked at our name and password, and determined if we're in the database properly.  Here's its reply:
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, 
                                     (RangedU32<0, AuthenticationStatusCount> authStatus, Int<BADGE_COUNT> badges, StringPtr correctedName))
 {
