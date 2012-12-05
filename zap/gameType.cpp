@@ -2474,7 +2474,7 @@ void GameType::changeClientTeam(ClientInfo *client, S32 team)
 }
 
 
-// A player (either us or a remote player) has joined the game.  This will be called for all players (including us) when changing levels.
+// A player (either us or a remote player) has joined the game.  This will also be called for all players (including us) when changing levels.
 // This suggests that RemoteClientInfos are not retained from game to game, but are generated anew.
 // ** Note that this method is essentially a mechanism for passing clientInfos from server to client. **
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
