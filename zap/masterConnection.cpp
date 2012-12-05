@@ -282,7 +282,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
       {
          if(status == AuthenticationStatusAuthenticatedName)
          {
-            clientInfo->setAuthenticated(true, badges);
+            clientInfo->setAuthenticated(true, badges);     // Broadcasts status to other clients
 
             // Auto-rename other non-authenticated clients to avoid stealing the authenticated name
             for(S32 j = 0; j < mGame->getClientCount(); j++)

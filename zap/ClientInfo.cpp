@@ -477,10 +477,6 @@ void FullClientInfo::setAuthenticated(bool isAuthenticated, Int<BADGE_COUNT> bad
    Parent::setAuthenticated(isAuthenticated, badges);
 
    // Broadcast new connection status to all clients, except the client that is authenticated.  Presumably they already know.  
-   //  ===> This may now be wrong <=== It does seem a little roundabout to use the game server to communicate
-   // between the FullClientInfo and the RemoteClientInfo on each client; we could contact the RemoteClientInfo directly and
-   // then not send a message to the client being authenticated below.  But I think this is cleaner architecturally, and this
-   // message is not sent often.
    if(mClientConnection && mClientConnection->isConnectionToClient())      
       for(S32 i = 0; i < gServerGame->getClientCount(); i++)
          if(gServerGame->getClientInfo(i)->getName() != mName && gServerGame->getClientInfo(i)->getConnection())

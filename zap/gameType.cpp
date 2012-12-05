@@ -1888,7 +1888,7 @@ void GameType::serverAddClient(ClientInfo *clientInfo)
    clientInfo->setTeamIndex(minTeamIndex);   // Add new player to their assigned team
 
    // This message gets sent to all clients, even the client being added, though they presumably know most of this stuff already
-   // This clientInfo belongs to the server
+   // This clientInfo belongs to the server; has no badge info for client...
    s2cAddClient(clientInfo->getName(), clientInfo->isAuthenticated(), clientInfo->getBadges(), false, clientInfo->isAdmin(), 
                 clientInfo->isLevelChanger(), clientInfo->isRobot(), clientInfo->isSpawnDelayed(), clientInfo->isBusy(), true, true);
 
