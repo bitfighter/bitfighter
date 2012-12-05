@@ -1766,8 +1766,8 @@ void GameConnection::onConnectionEstablished_client()
 
 void GameConnection::onConnectionEstablished_server()
 {
-   setConnectionSpeed(2);  // high speed, most servers often have a lot of bandwidth available.
-   mServerGame->addClient(mClientInfo);  // <== TODO: When client is joining game, we send them this client info.  Which doesn't have our badge info on it.  Why not?
+   setConnectionSpeed(2);                 // High speed, most servers have sufficient bandwidth
+   mServerGame->addClient(mClientInfo);   // This clientInfo was created by the server... it has no badge data yet
    setGhostFrom(true);
    setGhostTo(false);
    activateGhosting();
