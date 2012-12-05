@@ -1743,7 +1743,7 @@ void renderEnergyGuage(S32 energy)
    glColor(Colors::yellow);
    drawVertLine(xul + cutoffx, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
 
-//#ifdef SHOW_SERVER_SITUATION
+#ifdef SHOW_SERVER_SITUATION
    if((gServerGame && gServerGame->getClientInfo(0)->getConnection()->getControlObject()))
    {
       S32 actDiff = static_cast<Ship *>(gServerGame->getClientInfo(0)->getConnection()->getControlObject())->getEnergy();
@@ -1751,7 +1751,7 @@ void renderEnergyGuage(S32 energy)
       glColor(Colors::magenta);
       drawVertLine(xul + p, yul - SAFTEY_LINE_EXTEND - 1, yul + GUAGE_HEIGHT + SAFTEY_LINE_EXTEND);
    }
-//#endif
+#endif
 }
 
 
