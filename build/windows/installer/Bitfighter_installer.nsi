@@ -199,7 +199,7 @@ Section "Install"
   File "..\..\..\exe\Bitfighter.exe"
   File "..\..\..\exe\joystick_presets.ini"
   
-  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
+  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
 
   File "..\..\..\lib\OpenAL32.dll"
   File "..\..\..\lib\ALURE32.dll"
@@ -227,20 +227,20 @@ Section "Install"
   SetOutPath "$INSTDIR\sfx"
   File /r "..\..\..\resource\sfx\*.wav"
 
-  SetOutPath "$DOCUMENTS\Bitfighter\music"
+  SetOutPath "$INSTDIR\music"
   File /r "..\..\..\resource\music\*.*"
   
-  SetOutPath "$DOCUMENTS\Bitfighter\editor_plugins"
+  SetOutPath "$INSTDIR\editor_plugins"
   File /r "..\..\..\resource\editor_plugins\*.*"
   
-  SetOutPath "$DOCUMENTS\Bitfighter\scripts"
+  SetOutPath "$INSTDIR\scripts"
   File /r "..\..\..\resource\scripts\*.lua"
 
-  SetOutPath "$DOCUMENTS\Bitfighter\levels"
+  SetOutPath $INSTDIR\levels"
   File /r "..\..\..\resource\levels\*.level"  
   File /r "..\..\..\resource\levels\*.levelgen"
 
-  SetOutPath "$DOCUMENTS\Bitfighter\robots"
+  SetOutPath "$INSTDIR\robots"
   File /r "..\..\..\resource\robots\*.bot" 
 
   
