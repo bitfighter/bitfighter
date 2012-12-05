@@ -890,14 +890,41 @@ void setupLogging(const string &logDir)
 }
 
 
+// TODO: Move this to tnlPlatform.h
+// This function returns the directory of this running executable
+string getExecutableDir()
+{
+   string path;
+
+#if defined(TNL_OS_LINUX)
+   char buffer[1024] = {0};
+   readlink("/proc/self/exe", buffer, sizeof(buffer));
+   path = extractDirectory(string(buffer));
+
+#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
+   getExecutablePath(path);  // Directory.h
+
+#elif defined(TNL_OS_WIN32)
+   char buffer[MAX_PATH] = {0};
+   GetModuleFileName(NULL, buffer, MAX_PATH);
+   path = extractDirectory(string(buffer));
+
+#else
+#  error "Path needs to be defined for this platform"
+#endif
+
+   return path;
+}
+
+
 #ifdef USE_BFUP
-#include <direct.h>
-#include <stdlib.h>
+#  include <direct.h>
+#  include <stdlib.h>
 
 // This block is Windows only, so it can do all sorts of icky stuff...
-void launchWindowsUpdater(string bitfighterExecutablePathAndFilename, bool forceUpdate)
+void launchWindowsUpdater(bool forceUpdate)
 {
-   string updaterPath = extractDirectory(bitfighterExecutablePathAndFilename) + "\\updater";
+   string updaterPath = getExecutableDir() + "\\updater";
    string updaterFileName = updaterPath + "\\bfup.exe";
 
    S32 buildVersion = forceUpdate ? 0 : BUILD_VERSION;
@@ -955,45 +982,19 @@ void launchWindowsUpdater(string bitfighterExecutablePathAndFilename, bool force
 #endif
 
 
-void checkOnlineUpdate(string exePath, GameSettings *settings)
+void checkOnlineUpdate(GameSettings *settings)
 {
    // Windows only
 #ifdef USE_BFUP
    // Spawn external updater tool to check for new version of Bitfighter
    if(settings->getIniSettings()->useUpdater)
-      launchWindowsUpdater(exePath, settings->getForceUpdate());
+      launchWindowsUpdater(settings->getForceUpdate());
 #endif   // USE_BFUP
 
    // Mac OSX only
 #ifdef TNL_OS_MAC_OSX
    checkForUpdates();  // From Directory.h
 #endif
-}
-
-
-// This function returns the directory of this running executable
-string getExecutableDir()
-{
-   string path;
-
-#if defined(TNL_OS_LINUX)
-   char buffer[1024] = {0};
-   readlink("/proc/self/exe", buffer, sizeof(buffer));
-   path = extractDirectory(string(buffer));
-
-#elif defined(TNL_OS_MAC_OSX) || defined(TNL_OS_IOS)
-   getExecutablePath(path);  // Directory.h
-
-#elif defined(TNL_OS_WIN32)
-   char buffer[MAX_PATH] = {0};
-   GetModuleFileName(NULL, buffer, MAX_PATH);
-   path = extractDirectory(string(buffer));
-
-#else
-#  error "Path needs to be defined for this platform"
-#endif
-
-   return path;
 }
 
 
@@ -1390,7 +1391,7 @@ int main(int argc, char **argv)
    loadSettingsFromINI(&gINI, settings);
 
    // Time to check if there is an online update (for any relevant platforms)
-   checkOnlineUpdate(argv[0], settings);
+   checkOnlineUpdate(settings);
 
    // Make any adjustments needed when we run for the first time after an upgrade
    // Skip if this is the first run
