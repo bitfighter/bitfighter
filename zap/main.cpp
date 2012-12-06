@@ -143,6 +143,7 @@ using namespace TNL;
 
 #include <math.h>
 #include <stdarg.h>
+#include <sys/stat.h>
 
 #ifdef WIN32
 // For writeToConsole()
@@ -1220,13 +1221,17 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    }
 
    // 018
-   if(previousVersion < 5890)  // roughly.  TODO: change to correct version when about to release
+   if(previousVersion < 6058)  // or so...
    {
       FolderManager *folderManager = settings->getFolderManager();
 
-      // Remove game.ogg from music folder, if it exists...
-      if(remove(joindir(folderManager->musicDir, "game.ogg").c_str()) != 0)
-         logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
+      const char *offendingFile = joindir(folderManager->musicDir, "game.ogg").c_str();
+      
+      // Remove game.ogg  from music folder, if it exists...
+      struct stat statbuff;
+      if(stat(offendingFile, &statbuff) == 0)
+         if(remove(offendingFile) != 0)
+            logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
    }
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
