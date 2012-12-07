@@ -36,17 +36,17 @@ namespace Zap
 // Constructor
 LineEditor::LineEditor(U32 maxLength, string value)
 {
-   mMaxLen = maxLength;
-   mLine = value;
-   mFilter = allAsciiFilter;
-   mPrompt = "";
-   mMasked = false;
+   mMaxLen     = maxLength;
+   mLine       = value;
+   mFilter     = allAsciiFilter;
+   mPrompt     = "";
+   mMasked     = false;
    mMatchIndex = -1;
 }
 
 LineEditor::~LineEditor()
 {
-   ;
+   // Do nothing
 }
 
 U32 LineEditor::length()
