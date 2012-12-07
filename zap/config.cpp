@@ -111,7 +111,7 @@ IniSettings::IniSettings()
    maxBots = 10;
    botsBalanceTeams = false;
    minBalancedPlayers = 6;
-   enableServerVoiceChat = false;
+   enableServerVoiceChat = true;
    serverPassword = "";               // Passwords empty by default
    adminPassword = "";
    levelChangePassword = "";
