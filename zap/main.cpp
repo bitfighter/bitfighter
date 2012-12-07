@@ -1100,7 +1100,7 @@ void setDefaultPaths(Vector<string> &argv)
 }
 
 
-void copyResources()
+void copyResourcesToUserData()
 {
    // Just in case - no resource copying on mobile!
 #if defined(TNL_OS_MOBILE)
@@ -1168,7 +1168,7 @@ void prepareFirstLaunch()
    }
 
    // Now copy resources from installed data directory to the newly created user data directory
-   copyResources();
+   copyResourcesToUserData();
 
    // Do some other platform specific things
 #ifdef TNL_OS_MAC_OSX
@@ -1180,7 +1180,7 @@ void prepareFirstLaunch()
 // Function to handle one-time update tasks
 // Use this when upgrading, and changing something like the name of an INI parameter.  The old version is stored in
 // IniSettings.version, and the new version is in BUILD_VERSION.
-void checkIfThisIsAnUpdate(GameSettings *settings)
+void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
 {
    // Previous version is what the INI currently says
    U32 previousVersion = settings->getIniSettings()->version;
@@ -1235,8 +1235,9 @@ void checkIfThisIsAnUpdate(GameSettings *settings)
    }
 
    // Now copy over resources to user's preference directory.  This will overwrite the previous
-   // resources with same names
-   copyResources();
+   // resources with same names.  Dont do this if it is a standalone bundle
+   if(!isStandalone)
+      copyResourcesToUserData();
 }
 
 
@@ -1353,18 +1354,16 @@ int main(int argc, char **argv)
    for(S32 i = 1; i < argc; i++)
       argVector.push_back(argv[i]);
 
-//   printf("=> install data dir: %s\n", getInstalledDataDir().c_str());
-//   printf("=> user data dir: %s\n", getUserDataDir().c_str());
-
-   bool isFirstLaunchEver = false;  // Is this the first time we've run for this user?
-
    // We change our current directory to be useful, usually to the location the executable resides
    normalizeWorkingDirectory();
+
+   bool isStandalone = standaloneDetected();
+   bool isFirstLaunchEver = false;  // Is this the first time we've run for this user?
 
    // Set default -rootdatadir, -sfxdir, and others if they are not set already, unless
    // we're in standalone mode.  This allows use to have default environment setups on
    // each platform
-   if(!standaloneDetected())
+   if(!isStandalone)
    {
       // Copy resources to user data if it doesn't exist
       if(!fileExists(getUserDataDir()))
@@ -1401,7 +1400,7 @@ int main(int argc, char **argv)
    // Make any adjustments needed when we run for the first time after an upgrade
    // Skip if this is the first run
    if(!isFirstLaunchEver)
-      checkIfThisIsAnUpdate(settings);
+      checkIfThisIsAnUpdate(settings, isStandalone);
 
    // Load Lua stuff
    LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
