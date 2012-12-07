@@ -1107,7 +1107,7 @@ void copyResources()
    return;
 #endif
 
-   printf("Copying resources");
+   printf("Copying resources\n");
 
    // Everything but sfx
    Vector<string> dirArray;
