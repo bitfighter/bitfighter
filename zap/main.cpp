@@ -983,18 +983,19 @@ void launchWindowsUpdater(bool forceUpdate)
 #endif
 
 
-void checkOnlineUpdate(GameSettings *settings)
+void checkOnlineUpdate(GameSettings *settings, bool isStandalone)
 {
    // Windows only
 #ifdef USE_BFUP
    // Spawn external updater tool to check for new version of Bitfighter
-   if(settings->getIniSettings()->useUpdater)
+   if(!isStandalone && settings->getIniSettings()->useUpdater)
       launchWindowsUpdater(settings->getForceUpdate());
 #endif   // USE_BFUP
 
    // Mac OSX only
 #ifdef TNL_OS_MAC_OSX
-   checkForUpdates();  // From Directory.h
+   if(!isStandalone)
+      checkForUpdates();  // From Directory.h
 #endif
 }
 
@@ -1395,7 +1396,7 @@ int main(int argc, char **argv)
    loadSettingsFromINI(&gINI, settings);
 
    // Time to check if there is an online update (for any relevant platforms)
-   checkOnlineUpdate(settings);
+   checkOnlineUpdate(settings, isStandalone);
 
    // Make any adjustments needed when we run for the first time after an upgrade
    // Skip if this is the first run
