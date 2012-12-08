@@ -100,7 +100,7 @@ public:
    static void drawCursorAngle(S32 x, S32 y, S32 fontSize, S32 startingWidth, F32 angle);
 
    // For tab expansion 
-   void completePartial(const Vector<string> *candidates, const string &partial, size_t replacePos, const string &appender);
+   void completePartial(const Vector<string> *candidates, const string &partial, std::size_t replacePos, const string &appender);
 
    S32 getMaxLen();
 
