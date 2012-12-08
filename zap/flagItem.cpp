@@ -261,7 +261,7 @@ void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) /
    for(S32 i = 0; i < gt->mFlags.size(); i++)
    {
       FlagItem *flag = gt->mFlags[i];
-      if(flag->isAtHome() && (flag->getTeam() < 0 || flag->getTeam() == getTeam() || !gt->hasTeamSpawns()))
+      if(flag->isAtHome() && (flag->getTeam() < 0 || flag->getTeam() == getTeam() || !gt->isTeamGame()))
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other

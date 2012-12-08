@@ -503,7 +503,6 @@ const char *RabbitGameType::getShortName()         const { return "Rab"; }
 const char *RabbitGameType::getInstructionString() const { return "Grab the flag and hold it for as long as you can!"; }
 
 bool RabbitGameType::isFlagGame()          const { return true; }
-bool RabbitGameType::hasTeamSpawns()       const { return true;  }
 bool RabbitGameType::canBeTeamGame()       const { return true;  }
 bool RabbitGameType::canBeIndividualGame() const { return true;  }
 

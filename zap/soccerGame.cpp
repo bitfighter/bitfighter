@@ -191,7 +191,6 @@ GameTypeId SoccerGameType::getGameTypeId() const { return SoccerGame; }
 const char *SoccerGameType::getShortName()      const { return "S"; }
 const char *SoccerGameType::getInstructionString() const { return "Push the ball into the opposing team's goal!"; } 
 
-bool SoccerGameType::hasTeamSpawns()       const { return true;  }      // Needs to be true so that ship only spawns at own spawnpoints
 bool SoccerGameType::canBeTeamGame()       const { return true;  }
 bool SoccerGameType::canBeIndividualGame() const { return true;  }
 

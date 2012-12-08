@@ -76,12 +76,9 @@ public:
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
-   bool hasTeamSpawns();
-
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;
    const char *getInstructionString() const;
-   bool hasTeamSpawns() const;
    bool isTeamGame() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;

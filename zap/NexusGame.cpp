@@ -630,7 +630,6 @@ const char *NexusGameType::getShortName()         const { return "N"; }
 const char *NexusGameType::getInstructionString() const { return "Collect flags from opposing players and bring them to the Nexus!"; }
 
 bool NexusGameType::isFlagGame()          const { return true;  } // Well, technically not, but we'll pervert flags as we load the level
-bool NexusGameType::hasTeamSpawns()       const { return true;  } // Ditto... Can be team game.  This honors the team spawns
 bool NexusGameType::canBeTeamGame()       const { return true;  }
 bool NexusGameType::canBeIndividualGame() const { return true;  }
 

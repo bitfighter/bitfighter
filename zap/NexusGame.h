@@ -115,7 +115,6 @@ public:
 
    // Info about this game type:
    bool isFlagGame() const;
-   bool hasTeamSpawns() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 

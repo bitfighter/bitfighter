@@ -97,7 +97,6 @@ public:
    const char *getInstructionString() const;
 
    bool isFlagGame() const;
-   bool hasTeamSpawns() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 

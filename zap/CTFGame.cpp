@@ -276,7 +276,6 @@ const char *CTFGameType::getInstructionString() const { return "Take the opposin
 
 
 bool CTFGameType::isFlagGame()          const { return true; }
-bool CTFGameType::hasTeamSpawns()       const { return true; }
 bool CTFGameType::isTeamGame()          const { return true; }
 bool CTFGameType::canBeTeamGame()       const { return true; }
 bool CTFGameType::canBeIndividualGame() const { return false; }

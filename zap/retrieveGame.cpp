@@ -399,7 +399,6 @@ GameTypeId RetrieveGameType::getGameTypeId() const { return RetrieveGame; }
 const char *RetrieveGameType::getShortName()         const { return "Ret"; }
 const char *RetrieveGameType::getInstructionString() const { return "Find all the flags, and bring them to your capture zones!"; }
 
-bool RetrieveGameType::hasTeamSpawns()       const { return true;  }
 bool RetrieveGameType::isTeamGame()          const { return true;  }
 bool RetrieveGameType::canBeTeamGame()       const { return true;  }
 bool RetrieveGameType::canBeIndividualGame() const { return false; }
