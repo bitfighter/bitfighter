@@ -1,4 +1,4 @@
-  @echo off
+@echo off
 
 REM Check to make sure we have the proper arguments
 
