@@ -55,7 +55,7 @@ public:
    const char *getInstructionString() const;
    
    bool isFlagGame() const; 
-   bool isTeamFlagGame() const;    // Teams matter with our flags in this game
+   bool hasTeamSpawns() const;  
    bool isTeamGame() const;
    bool canBeTeamGame()  const;
    bool canBeIndividualGame() const;

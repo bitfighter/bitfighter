@@ -1011,8 +1011,6 @@ void EditorUserInterface::validateLevel()
 
    if(foundFlags && !gameType->isFlagGame())
       mLevelWarnings.push_back("WARNING: This game type does not use flags.");
-   else if(foundTeamFlags && !gameType->isTeamFlagGame())
-      mLevelWarnings.push_back("WARNING: This game type does not use team flags.");
 
    // Check for team flag spawns on games with no team flags
    if(foundTeamFlagSpawns && !foundTeamFlags)

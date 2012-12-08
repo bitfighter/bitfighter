@@ -69,7 +69,7 @@ public:
    const char *getShortName() const;
    virtual const char *getInstructionString() const;
 
-   bool isTeamFlagGame() const;
+   bool hasTeamSpawns() const;
    bool canBeTeamGame() const;
    bool canBeIndividualGame() const;
 

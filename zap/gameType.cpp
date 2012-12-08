@@ -1448,7 +1448,7 @@ void GameType::spawnRobot(Robot *robot)
 // Get a list of all spawns that belong to the specified team (when that is relevant)
 Vector<AbstractSpawn *> GameType::getSpawnPoints(TypeNumber typeNumber, S32 teamIndex)    // teamIndex is optional
 {
-   bool checkTeam = isTeamFlagGame() && teamIndex != TeamNotSpecified;   // Only find items on the passed team
+   bool checkTeam = hasTeamSpawns() && teamIndex != TeamNotSpecified;   // Only find items on the passed team
 
    Vector<AbstractSpawn *> spawnPoints;
 
@@ -4000,7 +4000,7 @@ const char *GameType::getInstructionString() const { return "Blast as many ships
 
 
 bool GameType::isFlagGame()          const { return false; }
-bool GameType::isTeamFlagGame()      const { return true;  }
+bool GameType::hasTeamSpawns()       const { return true;  }
 bool GameType::canBeTeamGame()       const { return true;  }
 bool GameType::canBeIndividualGame() const { return true;  }
 

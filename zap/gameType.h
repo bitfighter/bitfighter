@@ -272,7 +272,7 @@ public:
    void addWall(const WallRec &barrier, Game *game);
 
    virtual bool isFlagGame() const;      // Does game use flags?
-   virtual bool isTeamFlagGame() const;  // Does flag-team orientation matter?  Only false in HunterGame.
+   virtual bool hasTeamSpawns() const;  
    virtual S32 getFlagCount();     // Return the number of game-significant flags
 
    virtual bool isCarryingItems(Ship *ship);     // Nexus game will override this
