@@ -243,6 +243,15 @@ EditorTeam::EditorTeam()
 }
 
 
+// Constructor II
+EditorTeam::EditorTeam(const TeamPreset &preset)
+{
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
+   mNameEditor.setString(preset.name);
+   mColor = Color(preset.r, preset.g, preset.b);
+}
+
+
 // Destructor
 EditorTeam::~EditorTeam()
 {

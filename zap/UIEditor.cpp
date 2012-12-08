@@ -502,9 +502,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
    if(getTeamCount() == 0)
    {
-      EditorTeam *team = new EditorTeam;
-      team->setName(gTeamPresets[0].name);
-      team->setColor(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
+      EditorTeam *team = new EditorTeam(gTeamPresets[0]);
 
       getGame()->addTeam(team);
    }

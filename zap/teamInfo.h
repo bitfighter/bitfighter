@@ -29,6 +29,7 @@
 #include "luaGameInfo.h"      // For LuaObject def
 #include "Spawn.h"            // For FlagSpawn def
 #include "lineEditor.h"
+#include "TeamPreset.h"       // For TeamPreset def
 #include "tnl.h"
 
 
@@ -46,7 +47,7 @@ static const S32 MAX_NAME_LEN = 256;
 
 class AbstractTeam
 {
-private:
+protected:
    Color mColor;
 
 public:
@@ -144,8 +145,9 @@ private:
    LineEditor mNameEditor;
 
 public:
-   EditorTeam();           // Constructor
-   virtual ~EditorTeam();  // Destructor
+   EditorTeam();                          // Constructor
+   EditorTeam(const TeamPreset &preset);  // Constructor II
+   virtual ~EditorTeam();                 // Destructor
 
    LineEditor *getLineEditor();
    void setName(const char *name);

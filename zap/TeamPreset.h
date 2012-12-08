@@ -23,50 +23,26 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _UITEAMDEFMENU_H_
-#define _UITEAMDEFMENU_H_
+#ifndef _UITEAMPRESET_H_
+#define _UITEAMPRESET_H_
 
-#include "UI.h"
-#include "input.h"
-#include "Timer.h"
+#include "../tnl/tnlTypes.h"
 
 namespace Zap
 {
 
 using namespace std;
 
-
-class TeamDefUserInterface : public UserInterface
+struct TeamPreset
 {
-   typedef UserInterface Parent;
-
-private:
-   Timer errorMsgTimer;
-   string errorMsg;
-   
-   S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
-
-   bool mEditing;              // true if editing selectedIndex, false if not
-
-public:
-   TeamDefUserInterface(ClientGame *game);     // Constructor
-   const char *mMenuTitle;
-   const char *mMenuSubTitle;
-   Color mMenuSubTitleColor;
-   const char *mMenuFooter;
-
-   void render();              // Draw the menu
-   void idle(U32 timeDelta);
-   bool onKeyDown(InputCode inputCode);
-   void onTextInput(char ascii);
-   void onMouseMoved();
-
-   void onActivate();
-   void onEscape();
+   const char *name;    // Team's name, as seen in save file
+   F32 r;
+   F32 g;
+   F32 b;
 };
+
+
 
 };
 
 #endif
-

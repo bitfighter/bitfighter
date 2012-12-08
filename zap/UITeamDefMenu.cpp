@@ -36,6 +36,8 @@
 #include "ScreenInfo.h"
 #include "ClientGame.h"
 #include "Cursor.h"
+#include "TeamPreset.h"    // For TeamPreset def
+
 
 #include "SDL.h"
 #include "OpenglUtils.h"
@@ -58,6 +60,7 @@ TeamPreset gTeamPresets[] = {
    { "LightBlue", .45f, .875f,   1 },
    { "Ruby",      .67f,    0,    0 },
 };
+
 
 // Other ideas
 //Team Blue 0 0 1
@@ -304,9 +307,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
 
       S32 presetIndex = teamCount % GameType::MAX_TEAMS;
 
-      EditorTeam *team = new EditorTeam;
-      team->setName(gTeamPresets[presetIndex].name);
-      team->setColor(gTeamPresets[presetIndex].r, gTeamPresets[presetIndex].g, gTeamPresets[presetIndex].b);
+      EditorTeam *team = new EditorTeam(gTeamPresets[presetIndex]);
       ui->addTeam(team, teamCount);
 
       selectedIndex++;
@@ -357,9 +358,7 @@ bool TeamDefUserInterface::onKeyDown(InputCode inputCode)
          ui->clearTeams();
          for(U32 i = 0; i < count; i++)
          {
-            EditorTeam *team = new EditorTeam;
-            team->setName(gTeamPresets[i].name);
-            team->setColor(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
+            EditorTeam *team = new EditorTeam(gTeamPresets[i]);
             ui->addTeam(team);
          }
       }
