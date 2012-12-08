@@ -237,9 +237,9 @@ void Team::incrementBotCount()
 ////////////////////////////////////////
 
 // Constructor
-EditorTeam::EditorTeam() : mNameEditor(LineEditor(MAX_TEAM_NAME_LENGTH))
+EditorTeam::EditorTeam()
 {
-   // Do nothing
+   mNameEditor.mMaxLen = MAX_TEAM_NAME_LENGTH;
 }
 
 
