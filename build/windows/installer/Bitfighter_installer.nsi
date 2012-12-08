@@ -134,7 +134,7 @@ Section "Install"
   SetOutPath "$INSTDIR\scripts"
   File /r "..\..\..\resource\scripts\*.lua"
 
-  SetOutPath $INSTDIR\levels"
+  SetOutPath "$INSTDIR\levels"
   File /r "..\..\..\resource\levels\*.level"  
   File /r "..\..\..\resource\levels\*.levelgen"
 
