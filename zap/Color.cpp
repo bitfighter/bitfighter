@@ -69,18 +69,18 @@ Color::Color(U32 rgbInt)
 
 void Color::read(const char **argv) 
 { 
-   r = (float) atof(argv[0]); 
-   g = (float) atof(argv[1]); 
-   b = (float) atof(argv[2]); 
+   r = (F32) atof(argv[0]); 
+   g = (F32) atof(argv[1]); 
+   b = (F32) atof(argv[2]); 
 
 }
 
 void Color::interp(float t, const Color &c1, const Color &c2)
 {
    float oneMinusT = 1.0f - t;
-   r = c1.r * t + c2.r * oneMinusT;
-   g = c1.g * t + c2.g * oneMinusT;
-   b = c1.b * t + c2.b * oneMinusT;
+   r = c1.r * t  +  c2.r * oneMinusT;
+   g = c1.g * t  +  c2.g * oneMinusT;
+   b = c1.b * t  +  c2.b * oneMinusT;
 }
 
 //void set(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
