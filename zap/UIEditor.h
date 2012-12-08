@@ -146,7 +146,7 @@ private:
 
    string mEditFileName;            // Manipulate with get/setLevelFileName
 
-   TeamManager *mTeamManager;
+   TeamManager mTeamManager;
 
    F32 mCurrentScale;
    Point mCurrentOffset;            // Coords of UR corner of screen

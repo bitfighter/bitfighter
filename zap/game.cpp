@@ -144,16 +144,13 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 
    mNameToAddressThread = NULL;
 
-   mTeamManager = new TeamManager;                    // Gets deleted in destructor 
-   mActiveTeamManager = mTeamManager;
+   mActiveTeamManager = &mTeamManager;
 }
 
 
 // Destructor
 Game::~Game()
 {
-   delete mTeamManager;
-
    if(mNameToAddressThread)
       delete mNameToAddressThread;
 }

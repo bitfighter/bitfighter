@@ -38,6 +38,8 @@
 #include "GameTypesEnum.h"
 #include "GameSettings.h"
 
+#include "teamInfo.h"            // For ClassManager
+
 #include "tnlNetObject.h"
 #include "tnlTypes.h"
 #include "tnlThread.h"
@@ -167,7 +169,6 @@ public:
 /// managing the passage of time as well as rendering.
 
 class ClientRef;
-class TeamManager;
 class ClientInfo;
 class PolyWall;
 class WallItem;
@@ -237,7 +238,7 @@ protected:
    // should not be updated directly, but rather by notifying the server, and having the server notify us.
    Vector<RefPtr<ClientInfo> > mClientInfos;
 
-   TeamManager *mTeamManager;
+   TeamManager mTeamManager;
 
    virtual AbstractTeam *getNewTeam() = 0;
 

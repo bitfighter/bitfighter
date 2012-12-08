@@ -141,8 +141,6 @@ EditorUserInterface::EditorUserInterface(ClientGame *game) : Parent(game)
 
    setNeedToSave(false);
 
-   mTeamManager = new TeamManager;
-
    mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.resize(UNDO_STATES);     // Create slots for all our undos... also creates a ton of empty dbs.  Maybe we should be using pointers?
@@ -273,7 +271,6 @@ EditorUserInterface::~EditorUserInterface()
    mClipboard.clear();
 
    delete mNewItem.getPointer();
-   delete mTeamManager;
 }
 
 
@@ -1222,7 +1219,7 @@ void EditorUserInterface::onActivate()
 
    mGameTypeArgs.clear();
 
-   getGame()->setActiveTeamManager(mTeamManager);
+   getGame()->setActiveTeamManager(&mTeamManager);
 
    loadLevel();
    setCurrentTeam(0);
@@ -1284,7 +1281,7 @@ void EditorUserInterface::onReactivate()     // Run when user re-enters the edit
 
    getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
 
-   getGame()->setActiveTeamManager(mTeamManager);
+   getGame()->setActiveTeamManager(&mTeamManager);
 
    if(mCurrentTeam >= getTeamCount())
       mCurrentTeam = 0;
