@@ -144,29 +144,40 @@ Section "Install"
 
 
   CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
+
+  !ifndef PORTABLE
   
-  ; Store installation folder
-  WriteRegStr HKCU "Software\Bitfighter" "" $INSTDIR
-  WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "DisplayName" "Bitfighter (remove only)"
-  WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "UninstallString" '"$INSTDIR\uninstall-bitfighter.exe"'
+    ; Store installation folder
+    WriteRegStr HKCU "Software\Bitfighter" "" $INSTDIR
+    WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "DisplayName" "Bitfighter (remove only)"
+    WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "UninstallString" '"$INSTDIR\uninstall-bitfighter.exe"'
 
-  ; Create uninstaller
-  WriteUninstaller "$INSTDIR\uninstall-bitfighter.exe"
-  SetOutPath $SMPROGRAMS\Bitfighter
-  WriteINIStr "$SMPROGRAMS\Bitfighter\Bitfighter Home Page.url" "InternetShortcut" "URL" "http://www.bitfighter.org/"
-  CreateShortCut "$SMPROGRAMS\Bitfighter\Uninstall Bitfighter.lnk" "$INSTDIR\uninstall-bitfighter.exe"
-  SetOutPath $INSTDIR
-  CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
-   
-   MessageBox MB_YESNO|MB_ICONQUESTION "Bitfighter has been installed.  Would you like to add a desktop icon for Bitfighter?" IDNO NoDesktopIcon
-      SetOutPath $INSTDIR
-      CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
-   NoDesktopIcon:
+    ; Create uninstaller
+    WriteUninstaller "$INSTDIR\uninstall-bitfighter.exe"
+    SetOutPath $SMPROGRAMS\Bitfighter
+    WriteINIStr "$SMPROGRAMS\Bitfighter\Bitfighter Home Page.url" "InternetShortcut" "URL" "http://www.bitfighter.org/"
+    CreateShortCut "$SMPROGRAMS\Bitfighter\Uninstall Bitfighter.lnk" "$INSTDIR\uninstall-bitfighter.exe"
+    SetOutPath $INSTDIR
+    CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
+
+    call MigrateUserData
      
-   SetOutPath $INSTDIR
+     MessageBox MB_YESNO|MB_ICONQUESTION "Bitfighter has been installed.  Would you like to add a desktop icon for Bitfighter?" IDNO NoDesktopIcon
+        SetOutPath $INSTDIR
+        CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
+     NoDesktopIcon:
+       
+     SetOutPath $INSTDIR
+
+  !endif
+
+SectionEnd
 
 
-  ; Migrate old settings folder, if it exists
+; Migrate old settings folder, if it exists
+; Put in a function so as to not screw up our progress bar... in NSIS, functions are excluded from progress bars
+Function MigrateUserData
+  
   ${If} ${FileExists} `$DOCUMENTS\Bitfighter\*.*`
     ${AndIf} ${FileExists} `$DOCUMENTS\Bitfighter\bitfighter.ini`
     ${AndIf} ${FileExists} `$DOCUMENTS\Bitfighter\robots\*.*`
@@ -174,9 +185,7 @@ Section "Install"
         StrCpy $switch_overwrite 0
         !insertmacro MoveFolder "$DOCUMENTS\Bitfighter" "$APPDATA\Bitfighter" "*.*"
   ${EndIf}
-
-SectionEnd
-
+FunctionEnd    
 
 ;--------------------------------
 ;Uninstaller Section
