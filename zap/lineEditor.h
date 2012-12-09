@@ -43,9 +43,13 @@ namespace Zap
 class LineEditor
 {
 private:
+   // Don't put another string after this or you'll get a weird memory bug that will
+   // drain precious hours of your life away trying to figure out...
    string mLine;
-   string mPrompt;
+
    bool mMasked;
+
+   string mPrompt;
 
    static Timer mBlinkTimer;
 
