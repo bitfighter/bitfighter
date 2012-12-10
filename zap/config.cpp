@@ -1861,19 +1861,20 @@ FolderManager::FolderManager()
 // Constructor
 FolderManager::FolderManager(const string &levelDir,    const string &robotDir,  const string &sfxDir,        const string &musicDir, 
                              const string &iniDir,      const string &logDir,    const string &screenshotDir, const string &luaDir,
-                             const string &rootDataDir, const string &pluginDir)
+                             const string &rootDataDir, const string &pluginDir) :
+               levelDir      (levelDir),
+               robotDir      (robotDir),
+               sfxDir        (sfxDir),
+               musicDir      (musicDir),
+               iniDir        (iniDir),
+               logDir        (logDir),
+               screenshotDir (screenshotDir),
+               luaDir        (luaDir),
+               rootDataDir   (rootDataDir),
+               pluginDir     (pluginDir)
 {
-   this->levelDir      = levelDir;
-   this->robotDir      = robotDir;
-   this->sfxDir        = sfxDir;
-   this->musicDir      = musicDir;
-   this->iniDir        = iniDir;
-   this->logDir        = logDir;
-   this->screenshotDir = screenshotDir;
-   this->luaDir        = luaDir;
-   this->rootDataDir   = rootDataDir;
-   this->pluginDir     = pluginDir;
-}
+   // Do nothing (more)
+}                
 
 
 static string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
