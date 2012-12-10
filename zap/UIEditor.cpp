@@ -4592,7 +4592,9 @@ void EditorUserInterface::testLevelStart()
 
    mEditorGameType = getGame()->getGameType();        // Sock our current gametype away, will use it when we reenter the editor
 
-   if(doSaveLevel(TestFileName, true))
+   if(!doSaveLevel(TestFileName, true))
+      getGame()->getUIManager()->reactivatePrevUI();  // Saving failed, can't test, reactivate editor
+   else
    {
       mWasTesting = true;
 
