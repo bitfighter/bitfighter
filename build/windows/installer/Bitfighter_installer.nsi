@@ -20,6 +20,8 @@ Name    "Bitfighter"                               ; App name
 
 SetCompressor /SOLID lzma
 
+Icon "..\..\..\zap\zap_win_icon.ico"
+
 VIProductVersion "1.1.1.1"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "Bitfighter"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Fast, fun, frenetic!"
