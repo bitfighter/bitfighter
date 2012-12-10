@@ -20,6 +20,14 @@ Name    "Bitfighter"                               ; App name
 
 SetCompressor /SOLID lzma
 
+VIProductVersion "1.1.1.1"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "Bitfighter"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Fast, fun, frenetic!"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Bitfighter Industries"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "Bitfighter Space Combat Game"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${curVersion}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "GPL"
+
 
 ;Default installation folder
 !ifdef PORTABLE
