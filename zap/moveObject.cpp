@@ -632,7 +632,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       Ship *ship = NULL;
       Asteroid *asteroid = NULL;
 
-      if(this->getObjectTypeNumber() == AsteroidTypeNumber)
+      if(getObjectTypeNumber() == AsteroidTypeNumber)
          asteroid = static_cast<Asteroid*>(this);
 
       if(isShipType(moveObjectThatWasHit->getObjectTypeNumber()))
@@ -643,7 +643,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       {
          if(moveObjectThatWasHit->getObjectTypeNumber() == AsteroidTypeNumber)
             asteroid = static_cast<Asteroid*>(moveObjectThatWasHit);
-         if(isShipType(this->getObjectTypeNumber()))
+         if(isShipType(getObjectTypeNumber()))
             ship = static_cast<Ship*>(this);
       }
 
@@ -2162,7 +2162,7 @@ static const F32 TEST_ITEM_MASS = 4;
 TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
    checkArgList(L, functionArgs, "TestItem", "constructor");
-   this->setPos(getPointOrXY(L, 1));
+   setPos(getPointOrXY(L, 1));
    
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
@@ -2268,7 +2268,7 @@ ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0, 0), true,
    (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    checkArgList(L, functionArgs, "ResourceItem", "constructor");
-   this->setPos(getPointOrXY(L, 1));
+   setPos(getPointOrXY(L, 1));
    
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;
@@ -2354,8 +2354,8 @@ void ResourceItem::onItemDropped()
 {
    if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
    {
-      this->setActualPos(mMount->getActualPos()); 
-      this->setActualVel(mMount->getActualVel() * 1.5);
+      setActualPos(mMount->getActualPos()); 
+      setActualVel(mMount->getActualVel() * 1.5);
    }   
    
    Parent::onItemDropped();
