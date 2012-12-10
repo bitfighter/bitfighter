@@ -2161,8 +2161,8 @@ static const F32 TEST_ITEM_MASS = 4;
 // Combined Lua / C++ default constructor
 TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
-   checkArgList(L, functionArgs, "TestItem", "constructor");
-   setPos(getPointOrXY(L, 1));
+   if(L && checkArgList(L, functionArgs, "TestItem", "constructor") == 1)
+      setPos(getPointOrXY(L, 1));
    
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
@@ -2264,11 +2264,10 @@ TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 static const F32 RESOURCE_ITEM_MASS = 1;
 
 // Combined Lua / C++ default constructor
-ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0, 0), true,
-   (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
+ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
-   checkArgList(L, functionArgs, "ResourceItem", "constructor");
-   setPos(getPointOrXY(L, 1));
+   if(L && checkArgList(L, functionArgs, "ResourceItem", "constructor") == 1)
+      setPos(getPointOrXY(L, 1));
    
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;
