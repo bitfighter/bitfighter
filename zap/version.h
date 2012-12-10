@@ -35,12 +35,14 @@
 // 017, 017a = 35
 // 018 = 36
 
-#define BUILD_VERSION 6059         // Version of the game according to hg, will be unique every release (must be int)
-// 016  = 3737                     // Get from "hg summary"
-// 017  = 4252
-// 017a = 4265
-// 017b = 4537
-// 018  = 6059
+#define VERSION_016  3737
+#define VERSION_017  4252
+#define VERSION_017a 4265
+#define VERSION_017b 4537
+#define VERSION_018  6059
+
+#define BUILD_VERSION VERSION_018  // Version of the game according to hg, will be unique every release (must be int)
+                                   // Get from "hg summary"
 
 #define ZAP_GAME_RELEASE "018"     // Change this with every release -- for display purposes only, string,
                                    // will also be used for name of installer on windows, so be careful with spaces  

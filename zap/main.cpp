@@ -1202,7 +1202,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    if(previousVersion < 1840 && settings->getIniSettings()->maxBots == 127)
       settings->getIniSettings()->maxBots = 10;
 
-   if(previousVersion < 3737)
+   if(previousVersion < VERSION_016)
    {
       // Master server changed
       settings->getIniSettings()->masterAddress = MASTER_SERVER_LIST_ADDRESS;
@@ -1213,15 +1213,14 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    }
 
    // 017:
-   if(previousVersion < 4262)
+   if(previousVersion < VERSION_017a)
    {
 #ifdef TNL_OS_MAC_OSX
       settings->getIniSettings()->useFakeFullscreen = true;
 #endif
    }
 
-   // 018
-   if(previousVersion < 6058)  // or so...
+   if(previousVersion < VERSION_018)  
    {
       FolderManager *folderManager = settings->getFolderManager();
 
@@ -1229,7 +1228,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       
       // Remove game.ogg  from music folder, if it exists...
       struct stat statbuff;
-      if(stat(offendingFile, &statbuff) == 0)
+      if(stat(offendingFile, &statbuff) == 0)      // Check if exists
          if(remove(offendingFile) != 0)
             logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
    }
@@ -1240,7 +1239,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
       copyResourcesToUserData();
 }
 
-
+ 
 static bool standaloneDetected()
 {
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_MOBILE)
