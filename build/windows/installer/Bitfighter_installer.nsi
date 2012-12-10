@@ -20,7 +20,7 @@ Name    "Bitfighter"                               ; App name
 
 SetCompressor /SOLID lzma
 
-Icon "..\..\..\zap\zap_win_icon.ico"    ; Give installer Bitfighter icon.  Do we really want this?
+;Icon "..\..\..\zap\zap_win_icon.ico"    ; Give installer Bitfighter icon.  Do we really want this?
 
 VIProductVersion "1.1.1.1"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "Bitfighter"
