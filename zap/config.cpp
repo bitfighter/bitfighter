@@ -176,7 +176,7 @@ IniSettings::IniSettings()
 
    logStats = false;          // Log statistics into local sqlite database
 
-   version = U32_MAX;         // Default to high version to avoid triggering upgrade checks
+   version = BUILD_VERSION;   // Default to current version to avoid triggering upgrade checks on fresh install
 
    oldGoalFlash = true;
 }
