@@ -875,8 +875,8 @@ void createClientGame(GameSettings *settings)
 void setupLogging(const string &logDir)
 {
    // Specify which events each logfile will listen for
-   S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
-   S32 consoleEvents = LogConsumer::AllErrorTypes |LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
+   S32 events        = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::LogConnection;
+   S32 consoleEvents = LogConsumer::AllErrorTypes | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage | LogConsumer::ConsoleMsg;
 
    gMainLog.init(joindir(logDir, "bitfighter.log"), "w");
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
