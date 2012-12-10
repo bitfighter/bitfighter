@@ -2158,10 +2158,12 @@ TNL_IMPLEMENT_NETOBJECT(TestItem);
 
 static const F32 TEST_ITEM_MASS = 4;
 
-
 // Combined Lua / C++ default constructor
-TestItem::TestItem(lua_State *L) : Parent(Point(0,0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
+TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
+   checkArgList(L, functionArgs, "TestItem", "constructor");
+   this->setPos(getPointOrXY(L, 1));
+   
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
 
@@ -2238,11 +2240,17 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
 // Lua interface
 
 /**
+ *  @luafunc  TestItem::TestItem()
+ *  @luafunc  TestItem::TestItem(geom)
  *  @luaclass TestItem
  *  @brief    Large bouncy ball type item.
  */
 const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile TestItem::functionArgs[] = { { NULL, { }, 0 } };
+
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { GEOM, END }}), 2 ) \
+   
+GENERATE_LUA_FUNARGS_TABLE(TestItem, LUA_METHODS);
 
 const char *TestItem::luaClassName = "TestItem";
 REGISTER_LUA_SUBCLASS(TestItem, MoveObject);
@@ -2256,8 +2264,12 @@ TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 static const F32 RESOURCE_ITEM_MASS = 1;
 
 // Combined Lua / C++ default constructor
-ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
+ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0, 0), true,
+   (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
+   checkArgList(L, functionArgs, "ResourceItem", "constructor");
+   this->setPos(getPointOrXY(L, 1));
+   
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;
 
@@ -2354,13 +2366,18 @@ void ResourceItem::onItemDropped()
 // Lua interface
 
 /**
+ *  @luafunc  ResourceItem::ResourceItem()
+ *  @luafunc  ResourceItem::ResourceItem(geom)
  *  @luaclass ResourceItem
  *  @brief    Small bouncy ball type item.  In levels where Engineer module is allowed, ResourceItems can be collected and transformed
  *            into other items.
  */
 const luaL_reg           ResourceItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile ResourceItem::functionArgs[] = { { NULL, { }, 0 } };
 
+#define LUA_METHODS(CLASS, METHOD) \
+   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { GEOM, END }}), 2 ) \
+   
+GENERATE_LUA_FUNARGS_TABLE(ResourceItem, LUA_METHODS);
 
 const char *ResourceItem::luaClassName = "ResourceItem";
 REGISTER_LUA_SUBCLASS(ResourceItem, MountableItem);
