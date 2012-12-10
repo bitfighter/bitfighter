@@ -12,7 +12,7 @@
 ;Name and file
 Name    "Bitfighter"                               ; App name
 !ifdef PORTABLE
-  OutFile "Bitfighter-Portable-${curVersion}.exe"   ; Name of the installer file to write
+  OutFile "Bitfighter-Portable-${curVersion}.exe"    ; Name of the installer file to write
 !else
   OutFile "Bitfighter-Installer-${curVersion}.exe"   ; Name of the installer file to write
 !endif
@@ -22,7 +22,10 @@ SetCompressor /SOLID lzma
 
 
 ;Default installation folder
-!ifndef PORTABLE
+!ifdef PORTABLE
+  RequestExecutionLevel user    ; Don't escalate for portable install
+
+!else  
   
   InstallDir "$PROGRAMFILES\Bitfighter"
 
