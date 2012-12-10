@@ -1376,8 +1376,8 @@ int main(int argc, char **argv)
       // Set the default paths
       setDefaultPaths(argVector);
    }
-   else
-      printf("Standalone run detected\n");
+   //else
+   //   printf("Standalone run detected\n");
 
    settings->readCmdLineParams(argVector);      // Read cmd line params, needed to resolve folder locations
    settings->resolveDirs();                     // Figures out where all our folders are (except leveldir)
