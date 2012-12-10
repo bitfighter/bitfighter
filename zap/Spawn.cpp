@@ -389,7 +389,7 @@ S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
 
-   mSpawnTime = getFloat(L, 1) * 1000;
+   mSpawnTime = S32(getFloat(L, 1) * 1000);
    mTimer.reset(mSpawnTime);
 
    return 0;

@@ -333,7 +333,7 @@ void Event::onKeyDown(ClientGame *game, SDL_Event *event)
       gScreenInfo.setCanvasMousePos((S32)pos->x, (S32)pos->y, game->getSettings()->getIniSettings()->displayMode);
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-      SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
+      SDL_WarpMouseInWindow(gScreenInfo.sdlWindow, (S32)gScreenInfo.getWindowMousePos()->x, (S32)gScreenInfo.getWindowMousePos()->y);
 #else
       SDL_WarpMouse(gScreenInfo.getWindowMousePos()->x, gScreenInfo.getWindowMousePos()->y);
 #endif

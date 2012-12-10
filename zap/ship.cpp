@@ -2287,7 +2287,7 @@ void Ship::render(S32 layerIndex)
       if(clientInfo->isEngineeringTeleporter())
       {
          renderTeleporterOutline(Point(cos(getRenderAngle()), sin(getRenderAngle())) * (Ship::CollisionRadius + Teleporter::TELEPORTER_RADIUS),
-               Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
+               (F32)Teleporter::TELEPORTER_RADIUS, Colors::richGreen);
       }
 
       glLineWidth(gDefaultLineWidth);
@@ -2399,7 +2399,7 @@ void Ship::render(S32 layerIndex)
    {
       static const U32 blinkStartTime = 1500;
       static const U32 blinkCycleDuration = 300;
-      static const U32 blinkDuration = blinkCycleDuration * 0.5;       // Time shield is yellow or green during
+      static const U32 blinkDuration = blinkCycleDuration * 0.5f;       // Time shield is yellow or green during
 
       if(mSpawnShield.getCurrent() > blinkStartTime || mSpawnShield.getCurrent() % blinkCycleDuration > blinkDuration)
          glColor(Colors::green65);  
