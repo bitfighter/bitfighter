@@ -174,9 +174,9 @@ IniSettings::IniSettings()
 
    logLevelError = true;
 
-   logStats = false;            // Log statistics into local sqlite database
+   logStats = false;          // Log statistics into local sqlite database
 
-   version = 0;
+   version = U32_MAX;         // Default to high version to avoid triggering upgrade checks
 
    oldGoalFlash = true;
 }
