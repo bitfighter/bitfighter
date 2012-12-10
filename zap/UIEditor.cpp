@@ -509,8 +509,6 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 }
 
 
-
-
 void EditorUserInterface::cleanUp()
 {
    ClientGame *game = getGame();
