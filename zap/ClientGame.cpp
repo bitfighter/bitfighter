@@ -509,6 +509,8 @@ void ClientGame::idle(U32 timeDelta)
 
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
 
+   mClientInfo->updateReturnToGameTimer(timeDelta);
+
    if(isSuspended())
    {
       mNetInterface->processConnections();
@@ -626,8 +628,6 @@ void ClientGame::idle(U32 timeDelta)
       supressScreensaver();
       mScreenSaverTimer.reset();
    }
-
-   mClientInfo->updateReturnToGameTimer(timeDelta);
 
    mUIManager->idle(timeDelta);
 }

@@ -213,6 +213,7 @@ void GameConnection::undelaySpawn()
       return;
 
    resetTimeSinceLastMove();
+   mServerGame->unsuspendGame(true);
 
    // Check if there is a penalty being applied to client (e.g. there is a 5 sec penalty for using the /idle command).
    // If so, start the timer clear the penalty flag, and leave.  We'll be back here again after the timer goes off.
