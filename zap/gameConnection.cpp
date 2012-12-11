@@ -1865,6 +1865,16 @@ void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 }
 
 
+// Gets run when game is just beginning, before objects are sent to client.
+// Some keywords to help find this function again: start, onGameStart, onGameBegin
+// Client only
+void GameConnection::onStartGhosting()
+{
+   // Shouldn't need to do this, but it will clear out forcefields lingering from level load
+   mClientGame->getGameObjDatabase()->removeEverythingFromDatabase();     
+}
+
+
 // Gets run when game is really and truly over, after post-game scoreboard is displayed.  Over.
 // Some keywords to help find this function again: level over, change level, game over, onGameOver
 // Client only

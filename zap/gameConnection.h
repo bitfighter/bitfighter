@@ -190,6 +190,7 @@ public:
    bool wantsScoreboardUpdates();
    void setWantsScoreboardUpdates(bool wantsUpdates);
 
+   virtual void onStartGhosting();  // Gets run when game starts
    virtual void onEndGhosting();    // Gets run when game is over
 
 
