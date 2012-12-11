@@ -490,13 +490,20 @@ void GameUserInterface::renderSuspendedMessage()
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
+   dimUnderlyingUI(getGame()->getUIFadeFactor());        // Fade what's below
+
    if(getGame()->requestedSpawnDelayed() && getGame()->isWaitingForSpawn())
    {
+      //dimUnderlyingUI(1);                                   // Completely obscure what's below
+
       waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }
    else
+   {
+
       renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
+   }
 }
 
 

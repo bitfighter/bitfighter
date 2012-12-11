@@ -131,6 +131,8 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mClientInfo = new FullClientInfo(this, NULL, false);  // Will be deleted in destructor
 
+   mTimeToSuspend.setPeriod(2000);           // Time for screen to fade when going /idle
+
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -357,6 +359,13 @@ void ClientGame::undelaySpawn()
 }
 
 
+F32 ClientGame::getUIFadeFactor()
+{
+   return 1 - mTimeToSuspend.getFraction();     
+}
+
+
+
 // Provide access to these annoying bools
 bool ClientGame::requestedSpawnDelayed()  { return mRequestedSpawnDelayed; }
 bool ClientGame::isWaitingForSpawn()      { return mIsWaitingForSpawn;     }
@@ -525,6 +534,9 @@ void ClientGame::idle(U32 timeDelta)
 
       return;
    }
+
+   if(mTimeToSuspend.update(timeDelta))
+      mGameSuspended = true;
 
    mCurrentTime += timeDelta;
 
@@ -1273,14 +1285,15 @@ string ClientGame::getHashedServerPassword()
 
 void ClientGame::suspendGame(bool gameIsRunning)
 {
-   mGameSuspended = true;
    mGameIsRunning = gameIsRunning;
+   mTimeToSuspend.reset();
 }
 
 
 void ClientGame::unsuspendGame()
 {
    mGameSuspended = false;
+   mTimeToSuspend.clear();
 }
 
 

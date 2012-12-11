@@ -813,9 +813,9 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
 }
 
 
-void UserInterface::dimUnderlyingUI()
+void UserInterface::dimUnderlyingUI(F32 amount)
 {
-   glColor(Colors::black, 0.75); 
+   glColor(Colors::black, amount); 
 
    TNLAssert(glIsEnabled(GL_BLEND), "Blending should be enabled here!");
 
