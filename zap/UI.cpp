@@ -160,10 +160,10 @@ void UserInterface::onReactivate()        { /* Do nothing */ }
 void UserInterface::onDisplayModeChange() { /* Do nothing */ }
 
 
-void UserInterface::onDeactivate(bool prevUIUsesEditorScreenMode) 
+void UserInterface::onDeactivate(bool nextUIUsesEditorScreenMode)
 {
-   if(prevUIUsesEditorScreenMode != usesEditorScreenMode())
-      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, usesEditorScreenMode());
+   if(nextUIUsesEditorScreenMode != usesEditorScreenMode())
+      VideoSystem::actualizeScreenMode(getGame()->getSettings(), true, nextUIUsesEditorScreenMode);
 }
 
 
