@@ -645,7 +645,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
       getClientInfo(i)->resetLoadout(levelHasLoadoutZone);
   
 
-
    // Now add players to the gameType, from highest rating to lowest in an attempt to create ratings-based teams
    // Sorting also puts idle players at the end of the list, regardless of their rating
    mClientInfos.sort(AddOrderSort);

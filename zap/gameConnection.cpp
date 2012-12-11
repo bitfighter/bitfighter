@@ -250,7 +250,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClass
    
    static_cast<FullClientInfo *>(clientInfo)->setHasReturnToGamePenalty(true);   // Client will have to wait to rejoin the game
    
-
    // If we've just died, this will keep a second copy of ourselves from appearing
    clientInfo->respawnTimer.clear();
 
@@ -258,6 +257,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sPlayerRequestSpawnDelayed, (), (), NetClass
    Ship *ship = clientInfo->getShip();
    if(ship)
       ship->kill();
+
+   mServerGame->suspendIfNoActivePlayers();
 }
 
 
