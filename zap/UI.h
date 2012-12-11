@@ -111,7 +111,7 @@ public:
    virtual void render();
    virtual void idle(U32 timeDelta);
    virtual void onActivate();
-   virtual void onDeactivate(bool usesEditorScreenMode);
+   virtual void onDeactivate(bool nextUIUsesEditorScreenMode);
    virtual void onReactivate();
    virtual void onDisplayModeChange();
 

@@ -614,7 +614,7 @@ void UIManager::activate(UserInterface *ui, bool save)  // save defaults to true
 
    // Deactivate the UI we're no longer using
    if(mCurrentInterface)             
-     mCurrentInterface->onDeactivate(mCurrentInterface->usesEditorScreenMode());
+     mCurrentInterface->onDeactivate(ui->usesEditorScreenMode());
 
    mLastUI = mCurrentInterface;
    mLastWasLower = false;
