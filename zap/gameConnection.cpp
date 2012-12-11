@@ -1870,6 +1870,7 @@ void GameConnection::setWantsScoreboardUpdates(bool wantsUpdates)
 // Client only
 void GameConnection::onStartGhosting()
 {
+   Parent::onStartGhosting();
    // Shouldn't need to do this, but it will clear out forcefields lingering from level load
    mClientGame->getGameObjDatabase()->removeEverythingFromDatabase();     
 }
