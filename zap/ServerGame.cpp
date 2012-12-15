@@ -899,8 +899,6 @@ void ServerGame::suspendIfNoActivePlayers()
          return;
    }
 
-   // No active players at the moment... mark game as suspended, and alert players
-   mGameSuspended = true;
 
    if(getPlayerCount() == 0)
       suspendGame();
@@ -909,7 +907,9 @@ void ServerGame::suspendIfNoActivePlayers()
       // Alert any connected players
       for(S32 i = 0; i < getClientCount(); i++)
          if(!getClientInfo(i)->isRobot())  
-            getClientInfo(i)->getConnection()->s2cSuspendGame(false);          
+            getClientInfo(i)->getConnection()->s2cSuspendGame(false);
+
+      mTimeToSuspend.reset();
    }
 }
 
@@ -1105,6 +1105,8 @@ bool ServerGame::isServer()
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    processSimulatedStutter(timeDelta);
    processVoting(timeDelta);
 

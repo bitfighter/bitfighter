@@ -65,7 +65,6 @@ private:
    U32 mCommanderZoomDelta;
    bool mRequestedSpawnDelayed;                 // True if player used /idle command
    bool mIsWaitingForSpawn;                     // True once client has initiated unspawn procedure
-   Timer mTimeToSuspend;                        // Countdown to suspend to allow our fade animation to play out
 
    Timer mScreenSaverTimer;
    void supressScreensaver();

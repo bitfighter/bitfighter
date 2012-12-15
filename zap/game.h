@@ -206,6 +206,10 @@ protected:
    Rect mWorldExtents;                    // Extents of everything
    string mLevelFileHash;                 // MD5 hash of level file
 
+   Timer mTimeToSuspend;                  // Countdown to suspend to allow our fade animation to play out
+
+   virtual void idle(U32 timeDelta);      // Only called from ServerGame::idle() and ClientGame::idle()
+
    virtual void cleanUp();
    
    struct DeleteRef
@@ -329,7 +333,6 @@ public:
 
    U32 getCurrentTime();
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)
-   virtual void idle(U32 timeDelta) = 0;
 
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();

@@ -131,8 +131,6 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    mClientInfo = new FullClientInfo(this, NULL, false);  // Will be deleted in destructor
 
-   mTimeToSuspend.setPeriod(2000);           // Time for screen to fade when going /idle
-
 
    // Create some random stars
    for(U32 i = 0; i < NumStars; i++)
@@ -515,6 +513,8 @@ U32 prevTimeDelta = 0;
 
 void ClientGame::idle(U32 timeDelta)
 {
+   Parent::idle(timeDelta);
+
    mNetInterface->checkIncomingPackets();
 
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
@@ -536,8 +536,6 @@ void ClientGame::idle(U32 timeDelta)
       return;
    }
 
-   if(mTimeToSuspend.update(timeDelta))
-      mGameSuspended = true;
 
    mCurrentTime += timeDelta;
 
@@ -1295,6 +1293,7 @@ void ClientGame::unsuspendGame()
 {
    mGameSuspended = false;
    mTimeToSuspend.clear();
+   FXManager::clearSparks();
 }
 
 

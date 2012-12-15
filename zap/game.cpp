@@ -145,6 +145,9 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
    mNameToAddressThread = NULL;
 
    mActiveTeamManager = &mTeamManager;
+
+   mTimeToSuspend.setPeriod(2000);           // Time for screen to fade when going /idle on client, time for things to settle down on server
+
 }
 
 
@@ -943,6 +946,15 @@ void Game::checkConnectionToMaster(U32 timeDelta)
          mNextMasterTryTime -= timeDelta;
    }
 }
+
+
+// Called by both ClientGame::idle and ServerGame::idle
+void Game::idle(U32 timeDelta)
+{
+   if(mTimeToSuspend.update(timeDelta))
+      mGameSuspended = true;
+}
+
 
 Game::DeleteRef::DeleteRef(BfObject *o, U32 d)
 {
