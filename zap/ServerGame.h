@@ -81,6 +81,7 @@ private:
 
    void updateStatusOnMaster();           // Give master a status report for this server
    void processVoting(U32 timeDelta);     // Manage any ongoing votes
+   void processSimulatedStutter(U32 timeDelta);
 
 
    void resetAllClientTeams();            // Resets all player team assignments

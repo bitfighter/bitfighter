@@ -1105,30 +1105,7 @@ bool ServerGame::isServer()
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
-   // Simulate CPU stutter without impacting gClientGame
-   if(mSettings->getSimulatedStutter() > 0)
-   {
-      if(mStutterTimer.getCurrent() > 0)      
-      {
-         if(mStutterTimer.update(timeDelta))
-            mStutterSleepTimer.reset();               // Go to sleep
-      }
-      else     // We're sleeping
-      {
-         if(mStutterSleepTimer.update(timeDelta))     // Wake up!
-         {
-            mStutterTimer.reset();
-            timeDelta += mAccumulatedSleepTime;       // Give serverGame credit for time we slept
-            mAccumulatedSleepTime = 0;
-         }
-         else
-         {
-            mAccumulatedSleepTime += timeDelta;
-            return;
-         }
-      }
-   }
-
+   processSimulatedStutter(timeDelta);
    processVoting(timeDelta);
 
    if(mSendLevelInfoDelayCount.update(timeDelta) && mSendLevelInfoDelayNetInfo.isValid() && this->getConnectionToMaster())
@@ -1234,6 +1211,34 @@ void ServerGame::idle(U32 timeDelta)
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   }
+}
+
+
+void ServerGame::processSimulatedStutter(U32 timeDelta)
+{
+   // Simulate CPU stutter without impacting gClientGame
+   if(mSettings->getSimulatedStutter() > 0)
+   {
+      if(mStutterTimer.getCurrent() > 0)      
+      {
+         if(mStutterTimer.update(timeDelta))
+            mStutterSleepTimer.reset();               // Go to sleep
+      }
+      else     // We're sleeping
+      {
+         if(mStutterSleepTimer.update(timeDelta))     // Wake up!
+         {
+            mStutterTimer.reset();
+            timeDelta += mAccumulatedSleepTime;       // Give serverGame credit for time we slept
+            mAccumulatedSleepTime = 0;
+         }
+         else
+         {
+            mAccumulatedSleepTime += timeDelta;
+            return;
+         }
+      }
    }
 }
 
