@@ -331,6 +331,7 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
       return;
 
    mSpawnDelayed = spawnDelayed;
+   mTimeToSuspend.reset();
 
    if(!mSpawnDelayed)
    {
