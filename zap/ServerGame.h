@@ -80,6 +80,8 @@ private:
    Vector<string> mSentHashes;            // Hashes of levels already sent to master
 
    void updateStatusOnMaster();           // Give master a status report for this server
+   void processVoting(U32 timeDelta);     // Manage any ongoing votes
+
 
    void resetAllClientTeams();            // Resets all player team assignments
 

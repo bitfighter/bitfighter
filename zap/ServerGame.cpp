@@ -1129,6 +1129,117 @@ void ServerGame::idle(U32 timeDelta)
       }
    }
 
+   processVoting(timeDelta);
+
+   if(mSendLevelInfoDelayCount.update(timeDelta) && mSendLevelInfoDelayNetInfo.isValid() && this->getConnectionToMaster())
+   {
+      this->getConnectionToMaster()->postNetEvent(mSendLevelInfoDelayNetInfo);
+      mSendLevelInfoDelayNetInfo = NULL; // we can now let it free memory
+   }
+
+   // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
+   // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
+   // connect.  A little hacky, but works!
+      /*if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
+         suspendGame();
+   */
+   if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen
+      timeDelta = 100;
+
+   mNetInterface->checkIncomingPackets();
+   checkConnectionToMaster(timeDelta);                   // Connect to master server if not connected
+
+   mSettings->getBanList()->updateKickList(timeDelta);   // Unban players who's bans have expired
+
+   // Periodically update our status on the master, so they know what we're doing...
+   if(mMasterUpdateTimer.update(timeDelta))
+      updateStatusOnMaster();
+
+   mNetInterface->processConnections();
+
+   // If we have a data transfer going on, process it
+   if(!dataSender.isDone())
+      dataSender.sendNextLine();
+
+   // Play any sounds server might have made... (this is only for special alerts such as player joined or left)
+   if(isDedicated())   // Non-dedicated servers will process sound in client side
+      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
+
+   if(mGameSuspended)     // If game is suspended, we need do nothing more
+      return;
+
+
+   mCurrentTime += timeDelta;
+
+   for(S32 i = 0; i < getClientCount(); i++)
+   {
+      ClientInfo *clientInfo = getClientInfo(i);
+
+      if(!clientInfo->isRobot())
+      {
+         GameConnection *conn = clientInfo->getConnection();
+         TNLAssert(conn, "clientInfo->getConnection() shouldn't be NULL");
+
+         conn->updateTimers(timeDelta);
+      }
+   }
+
+   // Compute new world extents -- these might change if a ship flies far away, for example...
+   // In practice, we could probably just set it and forget it when we load a level.
+   // Compute it here to save recomputing it for every robot and other method that relies on it.
+   computeWorldObjectExtents();
+
+   U32 botControlTickelapsed = botControlTickTimer.getElapsed();
+
+   if(botControlTickTimer.update(timeDelta))
+   {
+      // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
+      clearBotMoves();
+
+      // Fire TickEvent, in case anyone is listening
+      EventManager::get()->fireEvent(EventManager::TickEvent, botControlTickelapsed + timeDelta);
+
+      botControlTickTimer.reset();
+   }
+
+   const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
+
+   // Visit each game object, handling moves and running its idle method
+   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+   {
+      TNLAssert(dynamic_cast<BfObject *>((*gameObjects)[i]), "Bad cast!");
+      BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+
+      if(obj->isDeleted())
+         continue;
+
+      // Here is where the time gets set for all the various object moves
+      Move thisMove = obj->getCurrentMove();
+      thisMove.time = timeDelta;
+
+      // Give the object its move, then have it idle
+      obj->setCurrentMove(thisMove);
+      obj->idle(BfObject::ServerIdleMainLoop);
+   }
+
+   if(mGameType)
+      mGameType->idle(BfObject::ServerIdleMainLoop, timeDelta);
+
+   processDeleteList(timeDelta);
+
+   // Load a new level if the time is out on the current one
+   if(mLevelSwitchTimer.update(timeDelta))
+   {
+      // Normalize ratings for this game
+      getGameType()->updateRatings();
+      cycleLevel(mNextLevel);
+      mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   }
+}
+
+
+void ServerGame::processVoting(U32 timeDelta)
+{
    if(mVoteTimer != 0)
    {
       if(timeDelta < mVoteTimer)  // voting continue
@@ -1297,112 +1408,6 @@ void ServerGame::idle(U32 timeDelta)
             }
          }
       }
-   }
-
-
-   if(mSendLevelInfoDelayCount.update(timeDelta) && mSendLevelInfoDelayNetInfo.isValid() && this->getConnectionToMaster())
-   {
-      this->getConnectionToMaster()->postNetEvent(mSendLevelInfoDelayNetInfo);
-      mSendLevelInfoDelayNetInfo = NULL; // we can now let it free memory
-   }
-
-   // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
-   // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
-   // connect.  A little hacky, but works!
-      /*if(getPlayerCount() == 0 && !mGameSuspended && mCurrentTime != 0)
-         suspendGame();
-   */
-   if(timeDelta > 2000)   // Prevents timeDelta from going too high, usually when after the server was frozen
-      timeDelta = 100;
-
-   mNetInterface->checkIncomingPackets();
-   checkConnectionToMaster(timeDelta);                   // Connect to master server if not connected
-
-   mSettings->getBanList()->updateKickList(timeDelta);   // Unban players who's bans have expired
-
-   // Periodically update our status on the master, so they know what we're doing...
-   if(mMasterUpdateTimer.update(timeDelta))
-      updateStatusOnMaster();
-
-   mNetInterface->processConnections();
-
-   // If we have a data transfer going on, process it
-   if(!dataSender.isDone())
-      dataSender.sendNextLine();
-
-   // Play any sounds server might have made... (this is only for special alerts such as player joined or left)
-   if(isDedicated())   // Non-dedicated servers will process sound in client side
-      SoundSystem::processAudio(mSettings->getIniSettings()->alertsVolLevel);    // No music or voice on server!
-
-   if(mGameSuspended)     // If game is suspended, we need do nothing more
-      return;
-
-
-   mCurrentTime += timeDelta;
-
-   for(S32 i = 0; i < getClientCount(); i++)
-   {
-      ClientInfo *clientInfo = getClientInfo(i);
-
-      if(!clientInfo->isRobot())
-      {
-         GameConnection *conn = clientInfo->getConnection();
-         TNLAssert(conn, "clientInfo->getConnection() shouldn't be NULL");
-
-         conn->updateTimers(timeDelta);
-      }
-   }
-
-   // Compute new world extents -- these might change if a ship flies far away, for example...
-   // In practice, we could probably just set it and forget it when we load a level.
-   // Compute it here to save recomputing it for every robot and other method that relies on it.
-   computeWorldObjectExtents();
-
-   U32 botControlTickelapsed = botControlTickTimer.getElapsed();
-
-   if(botControlTickTimer.update(timeDelta))
-   {
-      // Clear all old bot moves, so that if the bot does nothing, it doesn't just continue with what it was doing before
-      clearBotMoves();
-
-      // Fire TickEvent, in case anyone is listening
-      EventManager::get()->fireEvent(EventManager::TickEvent, botControlTickelapsed + timeDelta);
-
-      botControlTickTimer.reset();
-   }
-
-   const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
-
-   // Visit each game object, handling moves and running its idle method
-   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
-   {
-      TNLAssert(dynamic_cast<BfObject *>((*gameObjects)[i]), "Bad cast!");
-      BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
-
-      if(obj->isDeleted())
-         continue;
-
-      // Here is where the time gets set for all the various object moves
-      Move thisMove = obj->getCurrentMove();
-      thisMove.time = timeDelta;
-
-      // Give the object its move, then have it idle
-      obj->setCurrentMove(thisMove);
-      obj->idle(BfObject::ServerIdleMainLoop);
-   }
-
-   if(mGameType)
-      mGameType->idle(BfObject::ServerIdleMainLoop, timeDelta);
-
-   processDeleteList(timeDelta);
-
-   // Load a new level if the time is out on the current one
-   if(mLevelSwitchTimer.update(timeDelta))
-   {
-      // Normalize ratings for this game
-      getGameType()->updateRatings();
-      cycleLevel(mNextLevel);
-      mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
    }
 }
 
