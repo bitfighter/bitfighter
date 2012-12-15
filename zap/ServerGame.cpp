@@ -1322,43 +1322,7 @@ void ServerGame::idle(U32 timeDelta)
 
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
-   {
-      MasterServerConnection *masterConn = getConnectionToMaster();
-
-      static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here.
-      static GameTypeId prevCurrentLevelType;
-      static S32 prevRobotCount;
-      static S32 prevPlayerCount;
-
-      if(masterConn && masterConn->isEstablished())
-      {
-         // Only update if something is different
-         if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || 
-            prevRobotCount != getRobotCount()             || prevPlayerCount != getPlayerCount())
-         {
-            prevCurrentLevelName = getCurrentLevelName();
-            prevCurrentLevelType = getCurrentLevelType();
-            prevRobotCount = getRobotCount();
-            prevPlayerCount = getPlayerCount();
-
-            masterConn->updateServerStatus(getCurrentLevelName(), 
-                                           getCurrentLevelTypeName(), 
-                                           getRobotCount(), 
-                                           getPlayerCount(), 
-                                           mSettings->getMaxPlayers(), 
-                                           mInfoFlags);
-
-            mMasterUpdateTimer.reset(UpdateServerStatusTime);
-         }
-         else
-            mMasterUpdateTimer.reset(CheckServerStatusTime);
-      }
-      else
-      {
-         prevPlayerCount = -1;   //Not sure if needed, but if disconnected, we need to update to master.
-         mMasterUpdateTimer.reset(CheckServerStatusTime);
-      }
-   }
+      updateStatusOnMaster();
 
    mNetInterface->processConnections();
 
@@ -1439,6 +1403,47 @@ void ServerGame::idle(U32 timeDelta)
       getGameType()->updateRatings();
       cycleLevel(mNextLevel);
       mNextLevel = getSettings()->getIniSettings()->randomLevels ? +RANDOM_LEVEL : +NEXT_LEVEL;
+   }
+}
+
+
+// Inform master of how things are hanging on this game server
+void ServerGame::updateStatusOnMaster()
+{
+   MasterServerConnection *masterConn = getConnectionToMaster();
+
+   static StringTableEntry prevCurrentLevelName;      // Using static, so it holds the value when it comes back here
+   static GameTypeId prevCurrentLevelType;
+   static S32 prevRobotCount;
+   static S32 prevPlayerCount;
+
+   if(masterConn && masterConn->isEstablished())
+   {
+      // Only update if something is different
+      if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || 
+         prevRobotCount       != getRobotCount()       || prevPlayerCount      != getPlayerCount())
+      {
+         prevCurrentLevelName = getCurrentLevelName();
+         prevCurrentLevelType = getCurrentLevelType();
+         prevRobotCount       = getRobotCount();
+         prevPlayerCount      = getPlayerCount();
+
+         masterConn->updateServerStatus(getCurrentLevelName(), 
+                                        getCurrentLevelTypeName(), 
+                                        getRobotCount(), 
+                                        getPlayerCount(), 
+                                        mSettings->getMaxPlayers(), 
+                                        mInfoFlags);
+
+         mMasterUpdateTimer.reset(UpdateServerStatusTime);
+      }
+      else
+         mMasterUpdateTimer.reset(CheckServerStatusTime);
+   }
+   else
+   {
+      prevPlayerCount = -1;   // Not sure if needed, but if we're disconnected, we need to update to master when we reconnect
+      mMasterUpdateTimer.reset(CheckServerStatusTime);
    }
 }
 
