@@ -329,14 +329,17 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
       return;
 
    mSpawnDelayed = spawnDelayed;
-   mTimeToSuspend.reset();
 
-   if(!mSpawnDelayed)
+   if(spawnDelayed)
+      mTimeToSuspend.reset();
+   else
    {
       unsuspendGame();
 
       mRequestedSpawnDelayed = false;
       mIsWaitingForSpawn     = false;
+
+      FXManager::clearSparks();
    }
 }
 
@@ -1293,7 +1296,6 @@ void ClientGame::unsuspendGame()
 {
    mGameSuspended = false;
    mTimeToSuspend.clear();
-   FXManager::clearSparks();
 }
 
 
