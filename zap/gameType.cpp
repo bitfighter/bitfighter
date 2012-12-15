@@ -1945,13 +1945,13 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 // Handle scoring when ship is killed
 void GameType::controlObjectForClientKilled(ClientInfo *victim, BfObject *clientObject, BfObject *killerObject)
 {
-   if(isGameOver())  // Avoid flooding messages on game over.
+   if(isGameOver())  // Avoid flooding messages on game over
       return;
 
    ClientInfo *killer = killerObject ? killerObject->getOwner() : NULL;
 
    if(!victim)
-      return;   // do nothing, it is probably a "Ship 0 0 0" in a level, where that Ship don't have a ClientInfo
+      return;        // Do nothing; it's probably a "Ship 0 0 0" in a level, where there is no ClientInfo
 
    victim->getStatistics()->addDeath();
 
