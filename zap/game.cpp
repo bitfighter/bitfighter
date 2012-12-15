@@ -224,6 +224,12 @@ bool Game::isSuspended()
 }
 
 
+bool Game::isOrIsAboutToBeSuspended()
+{
+   return mGameSuspended || mTimeToSuspend.getCurrent() > 0;
+}
+
+
 Robot *Game::getBot(S32 index)
 {
    return mRobots[index];
