@@ -1417,6 +1417,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(!stream->writeFlag(hasExploded))
    {
+      // Note that RespawnMask is only used by Robots -- can this be refactored out of Ship.cpp?
       if(stream->writeFlag(updateMask & (RespawnMask | SpawnShieldMask)))
       {
          stream->writeFlag((updateMask & RespawnMask) != 0 && getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
