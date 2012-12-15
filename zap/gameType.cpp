@@ -1377,6 +1377,7 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    // if it's not apparent.  isInitialUpdate() might work for this purpose.  Will require some testing.
    if(clientInfo->isSpawnDelayed())
       return false;
+
    if(static_cast<FullClientInfo *>(clientInfo)->shouldDelaySpawn())
    {
       clientInfo->setSpawnDelayed(true);
