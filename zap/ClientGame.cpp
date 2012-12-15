@@ -341,7 +341,7 @@ void ClientGame::setSpawnDelayed(bool spawnDelayed)
 }
 
 
-// User has pressed a key, finishd composing that most eloquent of chat messages, or taken some other action to undelay their spawn
+// User has pressed a key, finished composing that most eloquent of chat messages, or taken some other action to undelay their spawn
 void ClientGame::undelaySpawn()
 {
    if(!isSpawnDelayed())                        // Already undelayed, nothing to do
