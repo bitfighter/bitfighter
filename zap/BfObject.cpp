@@ -273,7 +273,6 @@ EditorObject::EditorObject()
    mLitUp = false; 
    mSelected = false; 
    mVertexLitUp = 0;
-   mUserDefinedItemId = 0;
 }
 
 
