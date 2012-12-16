@@ -1378,6 +1378,9 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
    if(clientInfo->isSpawnDelayed())
       return false;
 
+   //if(mGame->isOrIsAboutToBeSuspended())
+   //   return false;
+
    if(static_cast<FullClientInfo *>(clientInfo)->shouldDelaySpawn())
    {
       clientInfo->setSpawnDelayed(true);
