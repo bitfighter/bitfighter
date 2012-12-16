@@ -43,6 +43,8 @@
 #include "PickupItem.h"          // For getItem function below
 #include "soccerGame.h"          // For getItem function below
 
+#include "stringUtils.h"         // For itos
+
 #include "LuaScriptRunner.h"     // For LuaObject def and returnInt method
 #include "lua.h"                 // For push prototype
 
@@ -384,20 +386,6 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 }
 
 
-// User assigned id, if any
-S32 EditorObject::getUserDefinedItemId()
-{
-   return mUserDefinedItemId;
-}
-
-
-void EditorObject::setUserDefinedItemId(S32 itemId)
-{
-   mUserDefinedItemId = itemId;
-}
-
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -410,6 +398,7 @@ BfObject::BfObject()
    mObjectTypeNumber = UnknownTypeNumber;
 
    assignNewSerialNumber();
+   mUserAssignedId = 0;
 
    mTeam = -1;
    mDisableCollisionCount = 0;
@@ -619,8 +608,17 @@ void BfObject::initializeEditor()
 
 string BfObject::toString(F32) const
 {
-   TNLAssert(false, "This object not be serialized");
+   TNLAssert(false, "This object cannot be serialized");
    return "";
+}
+
+
+string BfObject::appendId(const string &objName) const
+{
+   if(mUserAssignedId <= 0)
+      return objName;
+
+   return objName + "!" + itos(mUserAssignedId);
 }
 
 

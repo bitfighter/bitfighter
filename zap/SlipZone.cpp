@@ -136,7 +136,7 @@ const char *SlipZone::getOnScreenName()
 
 string SlipZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + ftos(slipAmount, 3) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + ftos(slipAmount, 3) + " " + geomToString(gridSize);
 }
 
 

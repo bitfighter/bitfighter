@@ -292,7 +292,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 // Editor
 string SpeedZone::toString(F32 gridSize) const
 {
-   string out = string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpeed);
+   string out = string(appendId(getClassName())) + " " + geomToString(gridSize) + " " + itos(mSpeed);
    if(mSnapLocation)
       out += " SnapEnabled";
    if(mRotateSpeed != 0)

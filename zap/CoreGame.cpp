@@ -948,7 +948,7 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string CoreItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
 }
 
 

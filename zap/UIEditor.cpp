@@ -1783,7 +1783,7 @@ void EditorUserInterface::renderTextEntryOverlay()
             {
                BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-               if(obj->getUserDefinedItemId() == id && !obj->isSelected())
+               if(obj->getUserAssignedId() == id && !obj->isSelected())
                {
                   errorFound = true;
                   break;
@@ -3655,8 +3655,8 @@ void EditorUserInterface::onTextInput(char ascii)
 
       BfObject *selectedObj = static_cast<BfObject *>(objList->get(selected));
 
-      mEntryBox = getNewEntryBox(selectedObj->getUserDefinedItemId() <= 0 ? "" : itos(selectedObj->getUserDefinedItemId()),
-                                 "Item ID:", 10, LineEditor::digitsOnlyFilter);
+      U32 id = selectedObj->getUserAssignedId();
+      mEntryBox = getNewEntryBox( id == 0 ? "" : itos(id), "Item ID:", 10, LineEditor::digitsOnlyFilter);
       entryMode = EntryID;
    }
 }
@@ -4103,9 +4103,9 @@ bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
             if(obj->isSelected())             // Should only be one
             {
                U16 id = atoi(mEntryBox.c_str());
-               if(obj->getUserDefinedItemId() != (S32)id)     // Did the id actually change?
+               if(obj->getUserAssignedId() != (S32)id)     // Did the id actually change?
                {
-                  obj->setUserDefinedItemId(id);
+                  obj->setUserAssignedId(id);
                   mAllUndoneUndoLevel = -1;        // If so, it can't be undone
                }
                break;

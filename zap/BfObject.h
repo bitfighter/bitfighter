@@ -176,7 +176,6 @@ private:
    bool mSelected;            // True if item is selected                                                                     
    bool mLitUp;               // True if user is hovering over the item and it's "lit up"                                     
    S32 mVertexLitUp;          // Only one vertex should be lit up at a given time -- could this be an attribute of the editor?
-   S32 mUserDefinedItemId;    // Item's unique id... 0 if there is none
 
 public:
    EditorObject();            // Constructor
@@ -217,10 +216,6 @@ public:
    // Keep track which vertex, if any is lit up in the currently selected item
    bool isVertexLitUp(S32 vertexIndex);
    void setVertexLitUp(S32 vertexIndex);
-
-   // Manage user-assigned IDs -- intended for use by scripts to identify user-designated items
-   S32 getUserDefinedItemId();
-   void setUserDefinedItemId(S32 itemId);
 };
 
 ////////////////////////////////////////
@@ -387,6 +382,7 @@ public:
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
    virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
+   string appendId(const string &objName) const;
 
    void onPointsChanged();
    void updateExtentInDatabase();

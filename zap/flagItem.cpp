@@ -156,7 +156,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string FlagItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 

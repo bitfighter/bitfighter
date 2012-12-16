@@ -143,7 +143,7 @@ bool LoadoutZone::canBeNeutral() { return true; }
 
 string LoadoutZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 

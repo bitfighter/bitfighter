@@ -156,7 +156,7 @@ bool GoalZone::canBeNeutral() { return true; }
 
 string GoalZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 

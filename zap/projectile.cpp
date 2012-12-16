@@ -784,7 +784,7 @@ Mine *Mine::clone() const
 // ProcessArguments() used is the one in item
 string Mine::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToString(gridSize);
 }
 
 
@@ -1057,7 +1057,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv, Game *game)
 // ProcessArguments() used is the one in item
 string SpyBug::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 

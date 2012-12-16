@@ -324,7 +324,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(Teleporter, s2cClearDestinations, (), (),
 
 string Teleporter::toString(F32 gridSize) const
 {
-   string out = string(getClassName()) + " " + geomToString(gridSize);
+   string out = string(appendId(getClassName())) + " " + geomToString(gridSize);
    if(mTeleporterDelay != TeleporterDelay)
       out += " Delay=" + ftos(mTeleporterDelay / 1000.f, 3);
    return out;

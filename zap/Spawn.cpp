@@ -115,7 +115,7 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 string AbstractSpawn::toString(F32 gridSize) const
 {
    // <<spawn class name>> <x> <y> <spawn timer>
-   return string(getClassName()) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
+   return string(appendId(getClassName())) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
 }
 
 
@@ -248,7 +248,7 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 string Spawn::toString(F32 gridSize) const
 {
    // Spawn <team> <x> <y> 
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
 }
 
 

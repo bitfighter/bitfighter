@@ -545,7 +545,7 @@ void EngineeredItem::onAddedToGame(Game *game)
 
 string EngineeredItem::toString(F32 gridSize) const
 {
-   return string(Object::getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + itos(mHealRate);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + itos(mHealRate);
 }
 
 
@@ -1762,7 +1762,7 @@ bool Turret::processArguments(S32 argc2, const char **argv2, Game *game)
 
 string Turret::toString(F32 gridSize) const
 {
-   string out = EngineeredItem::toString(gridSize);
+   string out = Parent::toString(gridSize);
    if(mWeaponFireType != WeaponTurret)
       out = out + " " + writeLevelString((string("W=") + GameWeapon::weaponInfo[mWeaponFireType].name.getString()).c_str());
    return out;

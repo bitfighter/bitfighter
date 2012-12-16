@@ -227,7 +227,7 @@ void TextItem::setGeom(const Point &pos, const Point &dest)
 
 string TextItem::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
 }
 
 

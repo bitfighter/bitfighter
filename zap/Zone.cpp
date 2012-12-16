@@ -125,7 +125,7 @@ bool Zone::canBeNeutral() { return false; }
 
 string Zone::toString(F32 gridSize) const
 {
-   return string("Zone " + geomToString(gridSize));
+   return appendId("Zone") + " " + geomToString(gridSize);
 }
 
 

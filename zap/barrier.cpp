@@ -392,7 +392,7 @@ bool WallItem::processArguments(S32 argc, const char **argv, Game *game)
 
 string WallItem::toString(F32 gridSize) const
 {
-   return "BarrierMaker " + itos(getWidth()) + " " + geomToString(gridSize);
+   return appendId("BarrierMaker") + " " + itos(getWidth()) + " " + geomToString(gridSize);
 }
 
 
@@ -727,7 +727,7 @@ bool PolyWall::processArguments(S32 argc, const char **argv, Game *game)
 
 string PolyWall::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToString(gridSize);
 }
 
 

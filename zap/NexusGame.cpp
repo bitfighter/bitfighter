@@ -1035,7 +1035,7 @@ bool NexusZone::canBeNeutral() { return false; }
 
 string NexusZone::toString(F32 gridSize) const
 {
-   return string(getClassName()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToString(gridSize);
 }
 
 
