@@ -1449,7 +1449,7 @@ bool Asteroid::collide(BfObject *otherObject)
    if(hasExploded)
       return false;
 
-   if(isGhost())   //client only, to try to prevent asteroids desync...
+   if(isGhost())   // Client only, to try to prevent asteroids desync...
    {
       if(isShipType(otherObject->getObjectTypeNumber()))
       {
@@ -1604,9 +1604,10 @@ S32 Asteroid::getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_
 /**
  *  @luafunc Asteroid::getSizeCount()
  *  @brief   Returns size index of smallest asteroid.
+ *  @descr   Remember, bigger indices mean smaller asteroids.
  *  @return  \e int - Index of the %asteroid's smallest size.
  */
-S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1);             }
+S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 
 ////////////////////////////////////////
