@@ -238,7 +238,7 @@ bool isZoneType(U8 x)      // Zones a ship could be in
 {
    return 
          x == NexusTypeNumber || x == GoalZoneTypeNumber || x == LoadoutZoneTypeNumber ||
-         x == ZoneTypeNumber  || x == SlipZoneTypeNumber; 
+         x == ZoneTypeNumber  || x == SlipZoneTypeNumber || x == ZoneTypeNumber; 
 }
 
 
