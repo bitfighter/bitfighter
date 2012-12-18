@@ -142,6 +142,7 @@ public:
    void setPos(const Point &pos);
 
    void setPosVelAng(const Point &pos, const Point &vel, F32 ang);
+   virtual void setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang);
 
    F32 getMass();
    void setMass(F32 mass);
@@ -313,6 +314,7 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(BfObject *otherObject);
    void setPosAng(Point pos, F32 ang);
+   void setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang);
 
    // Asteroid does not collide to another asteroid
    TestFunc collideTypes();
@@ -384,7 +386,9 @@ public:
    void renderItem(const Point &pos);
    bool getCollisionPoly(Vector<Point> &polyPoints) const;
    bool collide(BfObject *otherObject);
+
    void setPosAng(Point pos, F32 ang);
+   void setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang);
 
    void idle(BfObject::IdleCallPath path);
 

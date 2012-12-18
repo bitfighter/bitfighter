@@ -100,7 +100,7 @@ bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
    else if(!Parent::processArguments(argc, argv, game))
       return false;
 
-   setPosVelAng(getPos(), Point(0,0), 0);
+   setInitialPosVelAng(getPos(), Point(0,0), 0);
       
    updateExtentInDatabase();
 
@@ -213,6 +213,13 @@ void MoveObject::setPos(const Point &pos)
    setRenderPos(pos);
    Parent::setVert(pos, 0);      // Kind of hacky... need to get this point into the geom object, need to avoid stack overflow TODO: Can get rid of this?
    updateExtentInDatabase();
+}
+
+
+// This is overridden by Asteroids and Circles
+void MoveObject::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang)
+{
+   setPosVelAng(pos, vel, ang);
 }
 
 
@@ -1240,6 +1247,7 @@ static const S32 ASTEROID_INITIAL_SIZELEFT = 3;
 static const F32 ASTEROID_MASS_LAST_SIZE = 1;
 static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
 
+
 F32 Asteroid::getAsteroidRadius(S32 size_left)
 {
    return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
@@ -1263,17 +1271,11 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), true, getAsteroidRadius(AS
    mDesign = TNL::Random::readI(0, ASTEROID_DESIGNS - 1);
 
    // Give the asteroids some intial motion in a random direction
-   F32 randomAng = TNL::Random::readF() * Float2Pi;
-
-   Point vel = Point(asteroidVel * cos(randomAng), asteroidVel * sin(randomAng));
-
-   for(U32 i = 0; i < MoveStateCount; i++)
-      setVel(i, vel);
+   setPosAng(Point(0,0), TNL::Random::readF() * FloatTau);
 
    mKillString = "crashed into an asteroid";
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
-
 }
 
 
@@ -1358,9 +1360,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    setRadius(getAsteroidRadius(mSizeLeft));
    setMass(getAsteroidMass(mSizeLeft));
 
-   F32 ang = TNL::Random::readF() * Float2Pi;      // Sync
-   //F32 vel = asteroidVel;
-
+   F32 ang = TNL::Random::readF() * FloatTau;      // Sync
    setPosAng(getActualPos(), ang);
 
    Asteroid *newItem = new Asteroid();
@@ -1383,6 +1383,13 @@ void Asteroid::setPosAng(Point pos, F32 ang)
 {
    Point vel = Point(asteroidVel * cos(ang), asteroidVel * sin(ang));
    setPosVelAng(pos, vel, ang);
+}
+
+
+void Asteroid::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang)
+{
+   // Don't clobber velocity set in the constructor -- ignore passed vel and use what we've already got
+   setPosVelAng(pos, getActualVel(), ang);
 }
 
 
@@ -1612,13 +1619,8 @@ Circle::Circle(lua_State *L) : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRC
    mObjectTypeNumber = CircleTypeNumber;
    hasExploded = false;
 
-   // Give the asteroids some intial motion in a random direction
-   F32 randomAng = TNL::Random::readF() * Float2Pi;
-
-   Point vel = Point(CIRCLE_VEL * cos(randomAng), CIRCLE_VEL * sin(randomAng));
-
-   for(U32 i = 0; i < MoveStateCount; i++)
-      setVel(i, vel);
+   // Give the circle some intial motion in a random direction
+   setPosAng(Point(0,0), TNL::Random::readF() * FloatTau);
 
    mKillString = "crashed into an circle";
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -1718,6 +1720,13 @@ void Circle::damageObject(DamageInfo *theInfo)
    deleteObject(500);
    setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
    return;
+}
+
+
+void Circle::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang)
+{
+   // Don't clobber velocity set in the constructor -- ignore passed vel and use what we've already got
+   setPosVelAng(pos, getActualVel(), ang);
 }
 
 
