@@ -1595,18 +1595,18 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
 /**
  *  @luafunc Asteroid::getSizeIndex()
  *  @brief   Get %s asteroids current size index.
- *  @descr   Index 0 represents the %asteroid's initial size.  After it has been broken once, it's size index will be 1, and so on.
- *           This method will always return an integer between 0 and the value returned by the %getSizeCount() method.
+ *  @descr   Index 1 represents the %asteroid's initial size.  After it has been broken once, it's size index will be 2, and so on.
+ *           This method will always return an integer between 1 and the value returned by the %getSizeCount() method (inclusive).
  *  @return  \e int - Index corresponding to the %asteroid's current size.
  */
-S32 Asteroid::getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft); }
+S32 Asteroid::getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft + 1); }
 
 /**
  *  @luafunc Asteroid::getSizeCount()
  *  @brief   Returns size index of smallest asteroid.
  *  @return  \e int - Index of the %asteroid's smallest size.
  */
-S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT);             }
+S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1);             }
 
 
 ////////////////////////////////////////
