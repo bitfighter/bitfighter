@@ -783,19 +783,20 @@ void Ship::checkForSpeedzones()
 
 
 // Get list of zones ship is currently in
- Vector<DatabaseObject *> *Ship::getCurrZoneList()
- {
-    return mZones1IsCurrent ? &mZones1 : &mZones2;
- }
+Vector<DatabaseObject *> *Ship::getCurrZoneList()
+{
+   return mZones1IsCurrent ? &mZones1 : &mZones2;
+}
 
 
- // Get list of zones ship was in last tick
- Vector<DatabaseObject *> *Ship::getPrevZoneList()
- {
-    return mZones1IsCurrent ? &mZones2 : &mZones1;
- }
+// Get list of zones ship was in last tick
+Vector<DatabaseObject *> *Ship::getPrevZoneList()
+{
+   return mZones1IsCurrent ? &mZones2 : &mZones1;
+}
  
 
+// Server only
 void Ship::checkForZones()
 {
    Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
