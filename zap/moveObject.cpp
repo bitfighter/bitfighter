@@ -1234,34 +1234,45 @@ S32 MountableItem::isOnShip(lua_State *L)
    return returnBool(L, mIsMounted);
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+VelocityItem::VelocityItem(const Point &pos, F32 speed, F32 radius, F32 mass) : Parent(pos, true, radius, mass)
+{
+   mInherentSpeed = speed;
+
+   // Give the objects some intial motion in a random direction
+   setPosAng(pos, TNL::Random::readF() * FloatTau);
+}
+
+
+void VelocityItem::setPosAng(Point pos, F32 ang)
+{
+   Point vel = Point(mInherentSpeed * cos(ang), mInherentSpeed * sin(ang));
+   setPosVelAng(pos, vel, ang);
+}
+
+
+// Called by ProcessArgs, after object has been constructed
+void VelocityItem::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang)
+{
+   // Don't clobber velocity set in the constructor -- ignore passed vel and use what we've already got
+   setPosVelAng(pos, getActualVel(), ang);
+}
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 
-static F32 asteroidVel = 250;
-
-static const S32 ASTEROID_INITIAL_SIZELEFT = 3;
-
-static const F32 ASTEROID_MASS_LAST_SIZE = 1;
+static const S32 ASTEROID_INITIAL_SIZELEFT            = 3;
+static const F32 ASTEROID_MASS_LAST_SIZE              = 1;
 static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
-
-
-F32 Asteroid::getAsteroidRadius(S32 size_left)
-{
-   return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
-}
-
-
-F32 Asteroid::getAsteroidMass(S32 size_left)
-{
-   return ASTEROID_MASS_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
-}
-
+static const F32 ASTEROID_SPEED                       = 250;
 
 // Combined Lua / C++ default constructor
-Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), true, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
+Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
 {
    mSizeLeft = ASTEROID_INITIAL_SIZELEFT;  // higher = bigger
 
@@ -1269,9 +1280,6 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), true, getAsteroidRadius(AS
    mObjectTypeNumber = AsteroidTypeNumber;
    hasExploded = false;
    mDesign = TNL::Random::readI(0, ASTEROID_DESIGNS - 1);
-
-   // Give the asteroids some intial motion in a random direction
-   setPosAng(Point(0,0), TNL::Random::readF() * FloatTau);
 
    mKillString = "crashed into an asteroid";
 
@@ -1295,6 +1303,18 @@ Asteroid *Asteroid::clone() const
 U32 Asteroid::getDesignCount()
 {
    return ASTEROID_DESIGNS;
+}
+
+
+F32 Asteroid::getAsteroidRadius(S32 size_left)
+{
+   return ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
+}
+
+
+F32 Asteroid::getAsteroidMass(S32 size_left)
+{
+   return ASTEROID_MASS_LAST_SIZE / 2 * F32(1 << size_left);  // doubles for each size left
 }
 
 
@@ -1376,20 +1396,6 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    newItem->setPosAng(getActualPos(), ang2);
 
    newItem->addToGame(getGame(), getGame()->getGameObjDatabase());    // And add it to the list of game objects
-}
-
-
-void Asteroid::setPosAng(Point pos, F32 ang)
-{
-   Point vel = Point(asteroidVel * cos(ang), asteroidVel * sin(ang));
-   setPosVelAng(pos, vel, ang);
-}
-
-
-void Asteroid::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang)
-{
-   // Don't clobber velocity set in the constructor -- ignore passed vel and use what we've already got
-   setPosVelAng(pos, getActualVel(), ang);
 }
 
 
@@ -1608,19 +1614,15 @@ S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_
 
 TNL_IMPLEMENT_NETOBJECT(Circle);
 
-static F32 CIRCLE_VEL = 250;
-
-static const F32 CIRCLE_MASS = 4;
+static const F32 CIRCLE_SPEED = 250;
+static const F32 CIRCLE_MASS  = 4;
 
 // Combined Lua / C++ default constructor
-Circle::Circle(lua_State *L) : Parent(Point(0,0), true, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
+Circle::Circle(lua_State *L) : Parent(Point(0,0), CIRCLE_SPEED, (F32)CIRCLE_RADIUS, CIRCLE_MASS)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CircleTypeNumber;
    hasExploded = false;
-
-   // Give the circle some intial motion in a random direction
-   setPosAng(Point(0,0), TNL::Random::readF() * FloatTau);
 
    mKillString = "crashed into an circle";
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -1668,7 +1670,7 @@ void Circle::idle(BfObject::IdleCallPath path)
       Point v = getActualVel();
       v += closest->getActualPos() - getActualPos();
 
-      v.normalize(CIRCLE_VEL);
+      v.normalize(CIRCLE_SPEED);
 
       setActualVel(v);
    }
@@ -1720,20 +1722,6 @@ void Circle::damageObject(DamageInfo *theInfo)
    deleteObject(500);
    setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
    return;
-}
-
-
-void Circle::setInitialPosVelAng(const Point &pos, const Point &vel, F32 ang)
-{
-   // Don't clobber velocity set in the constructor -- ignore passed vel and use what we've already got
-   setPosVelAng(pos, getActualVel(), ang);
-}
-
-
-void Circle::setPosAng(Point pos, F32 ang)
-{
-   Point vel = Point(CIRCLE_VEL * cos(ang), CIRCLE_VEL * sin(ang));
-   setPosVelAng(pos, vel, ang);
 }
 
 
