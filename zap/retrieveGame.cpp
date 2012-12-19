@@ -65,7 +65,7 @@ void RetrieveGameType::addFlag(FlagItem *flag)
 }
 
 
-void RetrieveGameType::addZone(GoalZone *zone)
+void RetrieveGameType::addGoalZone(GoalZone *zone)
 {
    mZones.push_back(zone);
 }

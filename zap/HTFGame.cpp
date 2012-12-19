@@ -68,7 +68,7 @@ void HTFGameType::addFlag(FlagItem *flag)
 }
 
 
-void HTFGameType::addZone(GoalZone *zone)
+void HTFGameType::addGoalZone(GoalZone *zone)
 {
    mZones.push_back(zone);
 }

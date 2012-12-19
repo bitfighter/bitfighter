@@ -4408,7 +4408,7 @@ void GameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 }
 
 
-void GameType::addZone(GoalZone *zone)
+void GameType::addGoalZone(GoalZone *zone)
 {
    // Do nothing
 }

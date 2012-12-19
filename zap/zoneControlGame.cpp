@@ -107,7 +107,7 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
    }
 }
 
-void ZoneControlGameType::addZone(GoalZone *z)
+void ZoneControlGameType::addGoalZone(GoalZone *z)
 {
    mZones.push_back(z);
 }

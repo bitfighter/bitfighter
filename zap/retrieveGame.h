@@ -45,7 +45,7 @@ public:
    void addFlag(FlagItem *flag);
 
 
-   void addZone(GoalZone *zone);
+   void addGoalZone(GoalZone *zone);
 
 
    bool isFlagGame() const;

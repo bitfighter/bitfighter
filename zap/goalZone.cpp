@@ -197,7 +197,7 @@ void GoalZone::onAddedToGame(Game *theGame)
    if(!gameType)                 // Sam has observed this under extreme network packet loss
       return;
 
-   gameType->addZone(this);
+   gameType->addGoalZone(this);
 }
 
 

@@ -48,7 +48,7 @@ public:
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item);
-   void addZone(GoalZone *zone);
+   void addGoalZone(GoalZone *zone);
 
    void addFlag(FlagItem *flag);     // Server only
 

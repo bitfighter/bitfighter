@@ -110,7 +110,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 }
 
 
-void SoccerGameType::addZone(GoalZone *theZone)
+void SoccerGameType::addGoalZone(GoalZone *theZone)
 {
    mGoals.push_back(theZone);
 }

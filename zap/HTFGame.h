@@ -51,7 +51,7 @@ public:
    void addFlag(FlagItem *flag);
 
 
-   void addZone(GoalZone *zone);
+   void addGoalZone(GoalZone *zone);
 
 
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
