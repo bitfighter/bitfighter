@@ -46,9 +46,7 @@ LoadoutZone::LoadoutZone(lua_State *L)
    mObjectTypeNumber = LoadoutZoneTypeNumber;
 
    if(!L)   // C+ constructor, use default params
-   {
       setTeam(0);
-   }
 
    else     // Coming from Lua -- grab params from L
    {
