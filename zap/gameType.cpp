@@ -4396,34 +4396,12 @@ void GameType::addFlag(FlagItem *flag)
 }
 
 
-void GameType::itemDropped(Ship *ship, MoveItem *item)
-{
-   // Do nothing
-}
-
-
-void GameType::shipTouchFlag(Ship *ship, FlagItem *flag)
-{
-   // Do nothing
-}
-
-
-void GameType::addGoalZone(GoalZone *zone)
-{
-   // Do nothing
-}
-
-
-void GameType::shipTouchZone(Ship *ship, GoalZone *zone)
-{
-   // Do nothing
-}
-
-
-void GameType::majorScoringEventOcurred(S32 team)
-{
-  // Do nothing
-}
+// These methods will be overridden by some game types
+void GameType::itemDropped(Ship *ship, MoveItem *item)   { /* Do nothing */ }
+void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
+void GameType::addGoalZone(GoalZone *zone)               { /* Do nothing */ }
+void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
+void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }
 
 };
 
