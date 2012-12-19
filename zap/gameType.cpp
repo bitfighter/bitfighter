@@ -3991,6 +3991,8 @@ Game *GameType::getGame() const
 }
 
 
+// This is called when a Zone item is added to the game by ServerGame::processPseudoItem().  Only called for Zones, not for the various
+// children classes.
 void GameType::addZone(Zone *zone)
 {
    // Do nothing... for the moment
