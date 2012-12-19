@@ -119,26 +119,32 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    if(z->getTeam() == s->getTeam() || s->carryingFlag() == NO_FLAG)
       return;
 
-   S32 oldTeam = z->getTeam();
-   if(oldTeam >= 0)    // Zone is being captured from another team
+   static Vector<StringTableEntry> e;
+   e.clear();
+
+   static const S32 MAX_ZONES_TO_NOTIFY = 50;   // Don't display messages when too many zones -- the flood of messages will get annoying!
+   const S32 oldTeam = z->getTeam();
+
+   if(oldTeam >= 0)                             // Zone is being captured from another team
    {
-      if(mZones.size() <= 50)  // Don't display message when too many zones -- the flood of messages will get annoying!
+      if(mZones.size() <= MAX_ZONES_TO_NOTIFY)  
       {
          static StringTableEntry takeString("%e0 captured a zone from team %e1!");
-         Vector<StringTableEntry> e;
+         
          e.push_back(s->getClientInfo()->getName());
          e.push_back(getGame()->getTeamName(oldTeam));
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
       }
+
       updateScore(z->getTeam(), UncaptureZone);      // Inherently team-only event, no?
    }
    else                 // Zone is neutral (i.e. NOT captured from another team)
    {
-      if(mZones.size() <= 50)
+      if(mZones.size() <= MAX_ZONES_TO_NOTIFY)
       {
          static StringTableEntry takeString("%e0 captured an unclaimed zone!");
-         Vector<StringTableEntry> e;
+
          e.push_back(s->getClientInfo()->getName());
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
@@ -159,7 +165,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    // Team DOES control all zones.  Broadcast a message, flash zones, and create hoopla!
    static StringTableEntry tdString("Team %e0 scored a touchdown!");
-   Vector<StringTableEntry> e;
+   e.clear();
    e.push_back(getGame()->getTeamName(s->getTeam()));
 
    
