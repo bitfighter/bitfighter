@@ -113,6 +113,12 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
+string Zone::toString(F32 gridSize) const
+{
+   return appendId("Zone") + " " + geomToString(gridSize);
+}
+
+
 const char *Zone::getOnScreenName()     { return "Zone";  }
 const char *Zone::getOnDockName()       { return "Zone";  }
 const char *Zone::getPrettyNamePlural() { return "Zones"; }
@@ -121,12 +127,6 @@ const char *Zone::getEditorHelpString() { return "Generic area, does not appear 
 bool Zone::hasTeam()      { return false; }
 bool Zone::canBeHostile() { return false; }
 bool Zone::canBeNeutral() { return false; }
-
-
-string Zone::toString(F32 gridSize) const
-{
-   return appendId("Zone") + " " + geomToString(gridSize);
-}
 
 
 // More precise boundary for precise collision detection
