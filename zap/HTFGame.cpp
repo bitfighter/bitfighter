@@ -279,6 +279,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
          for(S32 j = 0; j < goalZones->size(); j++)
          {
             GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(j));
+
             // Find our zones that have no flags
             if(goalZone->getTeam() != team)
                continue;
