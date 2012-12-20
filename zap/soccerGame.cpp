@@ -110,12 +110,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
 }
 
 
-void SoccerGameType::addGoalZone(GoalZone *theZone)
-{
-   mGoals.push_back(theZone);
-}
-
-
 void SoccerGameType::setBall(SoccerBallItem *theBall)
 {
    mBall = theBall;
@@ -175,11 +169,16 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    S32 team = ship->getTeam();
 
-   for(S32 i = 0; i < mGoals.size(); i++)
+   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+
+   for(S32 i = 0; i < zones->size(); i++)
    {
-      if(mGoals[i]->getTeam() != team)
-         renderObjectiveArrow(mGoals[i], mGoals[i]->getColor());
+      GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
+
+      if(zone->getTeam() != team)
+         renderObjectiveArrow(zone, zone->getColor());
    }
+
    if(mBall.isValid())
       renderObjectiveArrow(mBall, getTeamColor(TEAM_NEUTRAL));
 #endif

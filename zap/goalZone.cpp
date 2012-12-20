@@ -191,13 +191,6 @@ void GoalZone::onAddedToGame(Game *theGame)
 
    if(!isGhost())
       setScopeAlways();
-
-   GameType *gameType = theGame->getGameType();
-      
-   if(!gameType)                 // Sam has observed this under extreme network packet loss
-      return;
-
-   gameType->addGoalZone(this);
 }
 
 

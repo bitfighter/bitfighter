@@ -470,7 +470,6 @@ public:
    virtual void itemDropped(Ship *ship, MoveItem *item);
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
 
-   virtual void addGoalZone(GoalZone *zone);
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
 
    void queryItemsOfInterest();
