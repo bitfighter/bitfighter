@@ -37,8 +37,6 @@ class HTFGameType : public GameType
    static StringTableEntry aString;
    static StringTableEntry theString;
 
-   Vector<GoalZone *> mZones;
-
    enum {
       ScoreTime = 5000,    // Time flag is in your zone to get points for your team
    };
@@ -51,15 +49,10 @@ public:
    void addFlag(FlagItem *flag);
 
 
-   void addGoalZone(GoalZone *zone);
-
-
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 
-
    void itemDropped(Ship *ship, MoveItem *item);
-
 
    void shipTouchZone(Ship *s, GoalZone *z);
 

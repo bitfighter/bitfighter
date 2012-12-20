@@ -68,12 +68,6 @@ void HTFGameType::addFlag(FlagItem *flag)
 }
 
 
-void HTFGameType::addGoalZone(GoalZone *zone)
-{
-   mZones.push_back(zone);
-}
-
-
 // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
 void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
@@ -276,14 +270,17 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    bool uFlag = false;
    S32 team = ship->getTeam();
 
+   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+
    for(S32 i = 0; i < mFlags.size(); i++)
    {
       if(mFlags[i].isValid() && mFlags[i]->getMount() == ship)
       {
-         for(S32 j = 0; j < mZones.size(); j++)
+         for(S32 j = 0; j < goalZones->size(); j++)
          {
+            GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(j));
             // Find our zones that have no flags
-            if(mZones[j]->getTeam() != team)
+            if(goalZone->getTeam() != team)
                continue;
 
             S32 k;
@@ -291,11 +288,11 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
             {
                if(!mFlags[k].isValid())
                   continue;
-               if(mFlags[k]->getZone() == mZones[j])
+               if(mFlags[k]->getZone() == goalZone)
                   break;
             }
             if(k == mFlags.size())
-               renderObjectiveArrow(mZones[j], mZones[j]->getColor());
+               renderObjectiveArrow(goalZone, goalZone->getColor());
          }
          uFlag = true;
          break;
@@ -310,6 +307,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       if(!mFlags[i]->isMounted() && !uFlag)
       {
          GoalZone *goalZone = mFlags[i]->getZone();
+
          if(goalZone && goalZone->getTeam() != team)
             renderObjectiveArrow(mFlags[i], goalZone->getColor());
          else if(!goalZone)
