@@ -677,6 +677,14 @@ S32 GridDatabase::getObjectCount()
 }
 
 
+// Return count of objects of specified type.  Only supports GoalZones at the moment.
+S32 GridDatabase::getObjectCount(U8 typeNumber)
+{
+   TNLAssert(typeNumber == GoalZoneTypeNumber, "Function only supports GoalZones at the moment!");
+   return mGoalZones.size();
+}
+
+
 bool GridDatabase::hasObjectOfType(U8 typeNumber)
 {
    if(typeNumber == GoalZoneTypeNumber)
