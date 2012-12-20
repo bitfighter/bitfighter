@@ -1964,7 +1964,7 @@ void ClientGame::render()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database)
+bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {
@@ -2034,7 +2034,10 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
       bool validArgs = zone->processArguments(argc - 1, argv + 1, this);
 
       if(validArgs)
+      {
+         zone->setUserAssignedId(id);
          zone->addToGame(this, database);
+      }
       else
       {
          logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());

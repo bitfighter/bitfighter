@@ -316,7 +316,7 @@ public:
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
 
-   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database) = 0;
+   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id) = 0;
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database) = 0;     
 

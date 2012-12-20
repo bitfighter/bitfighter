@@ -665,7 +665,7 @@ void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabas
    {
       // Do nothing here -- all the action is in the if statement
    }
-   else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database))
+   else if(getGameType() && processPseudoItem(argc, argv, levelFileName, database, id))
    {
       // Do nothing here -- all the action is in the if statement
    }

@@ -238,7 +238,7 @@ public:
    void unsuspendGame();
 
    // For loading levels in editor
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database);
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id);
    void addPolyWall(PolyWall *polyWall, GridDatabase *database);                          // Add polyWall item to game
    void addWallItem(WallItem *wallItem, GridDatabase *database);                          // Add wallItem item to game
 
