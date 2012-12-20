@@ -293,7 +293,7 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
                   break;
             }
             if(k == mFlags.size())
-               renderObjectiveArrow(goalZone, goalZone->getColor());
+               renderObjectiveArrow(goalZone);
          }
          uFlag = true;
          break;
@@ -312,13 +312,13 @@ void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
          if(goalZone && goalZone->getTeam() != team)
             renderObjectiveArrow(mFlags[i], goalZone->getColor());
          else if(!goalZone)
-            renderObjectiveArrow(mFlags[i], getTeamColor(-1));
+            renderObjectiveArrow(mFlags[i], getTeamColor(TEAM_NEUTRAL));
       }
       else
       {
          Ship *mount = mFlags[i]->getMount();
          if(mount && mount != ship)
-            renderObjectiveArrow(mount, mount->getColor());
+            renderObjectiveArrow(mount);
       }
    }
 #endif

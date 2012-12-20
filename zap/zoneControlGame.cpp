@@ -284,7 +284,7 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
          TNLAssert(zone, "There was a !zone check here before, not sure what it was for!");
 
          if(zone->getTeam() != ship->getTeam())
-            renderObjectiveArrow(zone, zone->getColor());
+            renderObjectiveArrow(zone);
       }
    }
    else
@@ -297,10 +297,10 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
          else if(mFlags[i]->getTeam() == TEAM_NEUTRAL || mFlags[i]->getTeam() == ship->getTeam() || mFlags[i]->isMounted())
          {
             if(!mFlags[i]->isMounted())
-               renderObjectiveArrow(mFlags[i], mFlags[i]->getColor());
+               renderObjectiveArrow(mFlags[i]);
             else
                if(mFlags[i]->getMount())
-                  renderObjectiveArrow(mFlags[i]->getMount(), mFlags[i]->getMount()->getColor());
+                  renderObjectiveArrow(mFlags[i]->getMount());
          }
       }
 

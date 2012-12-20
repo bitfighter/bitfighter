@@ -87,7 +87,7 @@ void CoreGameType::renderInterfaceOverlay(bool scoreboardVisible)
          mCores.erase(i);
       else
          if(coreItem->getTeam() != ship->getTeam())
-            renderObjectiveArrow(coreItem, coreItem->getColor());
+            renderObjectiveArrow(coreItem);
    }
 #endif
 }

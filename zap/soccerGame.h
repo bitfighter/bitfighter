@@ -125,6 +125,9 @@ public:
    void renderDock();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
 
+   const Color *getColor() const;
+
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 

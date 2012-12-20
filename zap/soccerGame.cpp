@@ -176,11 +176,11 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
       GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
 
       if(zone->getTeam() != team)
-         renderObjectiveArrow(zone, zone->getColor());
+         renderObjectiveArrow(zone);
    }
 
    if(mBall.isValid())
-      renderObjectiveArrow(mBall, getTeamColor(TEAM_NEUTRAL));
+      renderObjectiveArrow(mBall);
 #endif
 }
 
@@ -370,6 +370,12 @@ const char *SoccerBallItem::getEditorHelpString() { return "Soccer ball, can onl
 bool SoccerBallItem::hasTeam()      { return false; }
 bool SoccerBallItem::canBeHostile() { return false; }
 bool SoccerBallItem::canBeNeutral() { return false; }
+
+
+const Color *SoccerBallItem::getColor() const
+{ 
+   return getGame()->getTeamColor(TEAM_NEUTRAL);
+}
 
 
 void SoccerBallItem::renderDock()
