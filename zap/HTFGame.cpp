@@ -259,6 +259,7 @@ void HTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    }
 }
 
+
 void HTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
 #ifndef ZAP_DEDICATED
