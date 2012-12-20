@@ -100,6 +100,7 @@ public:
 ////////////////////////////////////////
 
 class WallSegmentManager;
+class GoalZone;
 
 class GridDatabase
 {
@@ -116,8 +117,8 @@ private:
 
    void fillBins(const Rect &extents, IntRect &bins);          // Helper function -- translates extents into bins to search
 
-protected:
    Vector<DatabaseObject *> mAllObjects;
+   Vector<DatabaseObject *> mGoalZones;
 
 public:
    enum {
@@ -154,6 +155,7 @@ public:
 
    void findObjects(Vector<DatabaseObject *> &fillVector);     // Returns all objects in the database
    const Vector<DatabaseObject *> *findObjects_fast() const;   // Faster than above, but results can't be modified
+   const Vector<DatabaseObject *> *findObjects_fast(U8 typeNumber) const;   // Currently only works with goalZones, may be expanded in the future
 
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector);
    void findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, const Rect &extents);

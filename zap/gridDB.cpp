@@ -111,10 +111,12 @@ static void sortObjects(Vector<DatabaseObject *> &objects)
 }
 
 
+// Fill this database with objects from existing database
 void GridDatabase::copyObjects(const GridDatabase *source)
 {
-   // Fill copy with objects from existing database
+   // Preallocate some memory to make copying a little more efficient
    mAllObjects.reserve(source->mAllObjects.size());
+   mGoalZones.reserve (source->mGoalZones.size());
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
       addToDatabase(source->mAllObjects[i]->clone(), source->mAllObjects[i]->getExtent());
@@ -148,6 +150,10 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 
    // Add the object to our non-spatial "database" as well
    mAllObjects.push_back(theObject);
+
+   if(theObject->getObjectTypeNumber() == GoalZoneTypeNumber)
+      mGoalZones.push_back(theObject);
+
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
@@ -177,8 +183,9 @@ void GridDatabase::removeEverythingFromDatabase()
       }
    }
 
+   mGoalZones.clear();
    mAllObjects.deleteAndClear();
-
+   
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
 }
@@ -213,16 +220,25 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       }
    }
 
-   // Working backwards makes clear() go faster, and should have little effect on the case of removing an arbitrary object
-   for(S32 i = mAllObjects.size() - 1; i >= 0 ; i--)
+   // Find and delete object from our non-spatial databases
+   for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i] == object)
       {
          if(deleteObject)
             delete mAllObjects[i];      
 
-         mAllObjects.erase(i);            // Remember: mAllObjects is sorted, so we can't use erase_fast
+         mAllObjects.erase(i);            // mAllObjects is sorted, so we can't use erase_fast
          break;
       }
+
+
+   if(object->getObjectTypeNumber() == GoalZoneTypeNumber)
+      for(S32 i = 0; i < mGoalZones.size(); i++)
+         if(mGoalZones[i] == object)
+         {
+            mGoalZones.erase_fast(i);     // mGoalZones is not sorted, so erase_fast is just fine
+            break;
+         }
 }
 
 
@@ -239,6 +255,14 @@ void GridDatabase::findObjects(Vector<DatabaseObject *> &fillVector)
 const Vector<DatabaseObject *> *GridDatabase::findObjects_fast() const
 {
    return &mAllObjects;
+}
+
+
+// Faster than above, but results can't be modified, and only works with GoalZones at the moment
+const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) const
+{
+   TNLAssert(typeNumber == GoalZoneTypeNumber, "Function only supports GoalZones at the moment!");
+   return &mGoalZones;
 }
 
 
@@ -277,6 +301,13 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 // Find all objects in database of type typeNumber
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector)
 {
+   if(typeNumber == GoalZoneTypeNumber)
+   {
+      for(S32 i = 0; i < mAllObjects.size(); i++)
+         fillVector.push_back(mAllObjects[i]);
+      return;
+   }
+
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
          fillVector.push_back(mAllObjects[i]);
@@ -648,6 +679,9 @@ S32 GridDatabase::getObjectCount()
 
 bool GridDatabase::hasObjectOfType(U8 typeNumber)
 {
+   if(typeNumber == GoalZoneTypeNumber)
+      return mGoalZones.size() > 0;
+
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
          return true;
