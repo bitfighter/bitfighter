@@ -37,16 +37,9 @@ class RetrieveGameType : public GameType
 private:
    typedef GameType Parent;
 
-protected:
-   Vector<GoalZone *> mZones;
-
 public:
    // Server only
    void addFlag(FlagItem *flag);
-
-
-   void addGoalZone(GoalZone *zone);
-
 
    bool isFlagGame() const;
 

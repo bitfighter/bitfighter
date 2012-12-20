@@ -65,12 +65,6 @@ void RetrieveGameType::addFlag(FlagItem *flag)
 }
 
 
-void RetrieveGameType::addGoalZone(GoalZone *zone)
-{
-   mZones.push_back(zone);
-}
-
-
 // Note -- neutral or enemy-to-all robots can't pick up the flag!!!
 void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
@@ -284,25 +278,29 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
    bool uFlag = false;
    S32 team = ship->getTeam();
 
+   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+
    for(S32 i = 0; i < mFlags.size(); i++)
    {
       if(mFlags[i].isValid() && mFlags[i]->getMount() == ship)
       {
-         for(S32 j = 0; j < mZones.size(); j++)
+         for(S32 j = 0; j < goalZones->size(); j++)
          {
+            GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(j));
+
             // See if this is one of our zones and that it doesn't have a flag in it.
-            if(mZones[j]->getTeam() != team)
+            if(goalZone->getTeam() != team)
                continue;
             S32 k;
             for(k = 0; k < mFlags.size(); k++)
             {
                if(!mFlags[k].isValid())
                   continue;
-               if(mFlags[k]->getZone() == mZones[j])
+               if(mFlags[k]->getZone() == goalZone)
                   break;
             }
             if(k == mFlags.size())
-               renderObjectiveArrow(mZones[j], mZones[j]->getColor());
+               renderObjectiveArrow(goalZone, goalZone->getColor());
          }
          uFlag = true;
          break;
