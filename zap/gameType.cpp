@@ -3991,11 +3991,12 @@ Game *GameType::getGame() const
 }
 
 
-// This is called when a Zone item is added to the game by ServerGame::processPseudoItem().  Only called for Zones, not for the various
-// children classes.
-void GameType::addZone(Zone *zone)
+// This is called when a Zone item is added to the game by ServerGame::processPseudoItem().  Only called for Zones, but using BfObject so
+// we don't need to include Zone.h.
+// Server only.
+void GameType::addZone(BfObject *zone)
 {
-   // Do nothing... for the moment
+   zone->addToDatabase(getGame()->getGameObjDatabase());
 }
 
 

@@ -225,7 +225,7 @@ public:
    void broadcastTimeSyncSignal();                     // Send remaining time to all clients
    void broadcastNewRemainingTime();                   // Send remaining time to all clients after time has been updated
 
-   void addZone(Zone *zone);
+   void addZone(BfObject *zone);
 
    const char *getGameTypeName() const;   
 

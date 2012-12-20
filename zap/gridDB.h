@@ -177,8 +177,7 @@ public:
 
    WallSegmentManager *getWallSegmentManager() const;      
 
-   
-   virtual void addToDatabase(DatabaseObject *theObject, const Rect &extents);
+   void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    void addToDatabase(const Vector<DatabaseObject *> &objects);
 
 
