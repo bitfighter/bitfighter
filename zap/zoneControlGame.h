@@ -36,8 +36,6 @@ class ZoneControlGameType : public GameType
 private:
    typedef GameType Parent;
 
-   Vector<GoalZone*> mZones;
-
    // Zone Controller badge
    bool mZcBadgeAchievable;
    ClientInfo *mPossibleZcBadgeAchiever;
@@ -48,7 +46,6 @@ public:
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, MoveItem *item);
-   void addGoalZone(GoalZone *zone);
 
    void addFlag(FlagItem *flag);     // Server only
 

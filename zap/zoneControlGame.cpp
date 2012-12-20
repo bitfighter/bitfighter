@@ -107,10 +107,6 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
    }
 }
 
-void ZoneControlGameType::addGoalZone(GoalZone *z)
-{
-   mZones.push_back(z);
-}
 
 // Ship enters a goal zone.  What happens?
 void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
@@ -124,10 +120,11 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    static const S32 MAX_ZONES_TO_NOTIFY = 50;   // Don't display messages when too many zones -- the flood of messages will get annoying!
    const S32 oldTeam = z->getTeam();
+   const S32 zoneCount = getGame()->getGameObjDatabase()->getObjectCount(GoalZoneTypeNumber);
 
    if(oldTeam >= 0)                             // Zone is being captured from another team
    {
-      if(mZones.size() <= MAX_ZONES_TO_NOTIFY)  
+      if(zoneCount <= MAX_ZONES_TO_NOTIFY)  
       {
          static StringTableEntry takeString("%e0 captured a zone from team %e1!");
          
@@ -141,7 +138,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    }
    else                 // Zone is neutral (i.e. NOT captured from another team)
    {
-      if(mZones.size() <= MAX_ZONES_TO_NOTIFY)
+      if(zoneCount <= MAX_ZONES_TO_NOTIFY)
       {
          static StringTableEntry takeString("%e0 captured an unclaimed zone!");
 
@@ -157,11 +154,13 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    z->setTeam(s->getTeam());                             // Assign zone to capturing team
    s->getClientInfo()->getStatistics()->mFlagScore++;    // Record the capture
 
+   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
 
-   // Check to see if team now controls all zones...
-   for(S32 i = 0; i < mZones.size(); i++)
-      if(mZones[i]->getTeam() != s->getTeam())     // ...no?...
-         return;                                   // ...then bail
+
+   // Does team control all zones? ...
+   for(S32 i = 0; i < zoneCount; i++)
+      if(static_cast<GoalZone *>(zones->get(i))->getTeam() != s->getTeam())   // ...no?...
+         return;                                                              // ...then bail
 
    // Team DOES control all zones.  Broadcast a message, flash zones, and create hoopla!
    static StringTableEntry tdString("Team %e0 scored a touchdown!");
@@ -189,11 +188,11 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    if(mZcBadgeAchievable)
    {
       if(mPossibleZcBadgeAchiever == NULL)
-         mPossibleZcBadgeAchiever = mZones[0]->getCapturer();
+         mPossibleZcBadgeAchiever = static_cast<GoalZone *>(zones->first())->getCapturer();
 
-      for(S32 i = 0; i < mZones.size(); i++)
+      for(S32 i = 0; i < zoneCount; i++)
       {
-         if(mZones[i]->getCapturer() != mPossibleZcBadgeAchiever)
+         if(static_cast<GoalZone *>(zones->get(i))->getCapturer() != mPossibleZcBadgeAchiever)
          {
             mZcBadgeAchievable = false;
             break;
@@ -202,10 +201,12 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    }
 
    // Reset zones to neutral
-   for(S32 i = 0; i < mZones.size(); i++)
+   for(S32 i = 0; i < zoneCount; i++)
    {
-      mZones[i]->setTeam(-1);
-      mZones[i]->setCapturer(NULL);
+      GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
+
+      zone->setTeam(-1);
+      zone->setCapturer(NULL);
    }
 
    // Return the flag to spawn point
@@ -270,15 +271,20 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    bool localClientHasFlag = (ship->getFlagCount() != 0);
 
+   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const S32 zoneCount = zones->size();
+
    if(localClientHasFlag)
    {
-      // Show all the goalZones to go to.
-      for(S32 i = 0; i < mZones.size(); i++)
+      // Show all the GoalZones to go to
+      for(S32 i = 0; i < zoneCount; i++)
       {
-         if(!mZones[i])
-            mZones.erase(i);
-         else if(mZones[i]->getTeam() != ship->getTeam())
-            renderObjectiveArrow(mZones[i], mZones[i]->getColor(), 1.0f);
+         GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
+
+         TNLAssert(zone, "There was a !zone check here before, not sure what it was for!");
+
+         if(zone->getTeam() != ship->getTeam())
+            renderObjectiveArrow(zone, zone->getColor());
       }
    }
    else
@@ -312,20 +318,24 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       // Show all zones the ship holding flag can go to
       if(whichTeamHasFlag != -1)
-         for(S32 i = 0; i < mZones.size(); i++)
+         for(S32 i = 0; i < zoneCount; i++)
          {
-            if(!mZones[i])
-               mZones.erase(i);
-            else if(mZones[i]->getTeam() != whichTeamHasFlag)
-               renderObjectiveArrow(mZones[i], mZones[i]->getColor(), 0.4f);
-            //      Zone recently changed hands        &&    Zone is not neutral               &&   Zone is not local player's team 
-            else if(mZones[i]->didRecentlyChangeTeam() && mZones[i]->getTeam() != TEAM_NEUTRAL && mZones[i]->getTeam() != ship->getTeam())
+            GoalZone *zone = static_cast<GoalZone *>(zones->get(i));
+
+            TNLAssert(zone, "There was a !zone check here before, not sure what it was for!");
+
+            if(zone->getTeam() != whichTeamHasFlag)
+               renderObjectiveArrow(zone, zone->getColor(), 0.4f);
+
+            //      Zone recently changed hands   &&        Zone is not neutral      &&  Zone is not local player's team 
+            else if(zone->didRecentlyChangeTeam() && zone->getTeam() != TEAM_NEUTRAL && zone->getTeam() != ship->getTeam())
             {
                // Render a blinky arrow for a recently captured zone
-               Color c = mZones[i]->getColor();
-               if(mZones[i]->isFlashing())
+               Color c = zone->getColor();
+
+               if(zone->isFlashing())
                   c *= 0.7f;
-               renderObjectiveArrow(mZones[i], &c);
+               renderObjectiveArrow(zone, &c);
             }
          }
    }
@@ -430,6 +440,8 @@ void ZoneControlGameType::onGameOver()
 {
    Parent::onGameOver();
 
+   const S32 zoneCount = getGame()->getGameObjDatabase()->getObjectCount(GoalZoneTypeNumber);
+
    // Let's see if anyone got the Zone Controller badge
    if(mZcBadgeAchievable &&                                       // Badge is still achievable (hasn't been forbidden by rules in shipTouchZone() )
       mPossibleZcBadgeAchiever &&
@@ -437,8 +449,8 @@ void ZoneControlGameType::onGameOver()
       getGame()->getPlayerCount() >= 4 &&                         // Game must have 4+ human players
       getGame()->getAuthenticatedPlayerCount() >= 2 &&            // Two of whom must be authenticated
       getLeadingScore() == getWinningScore() &&                   // Game must go the full score (no expired time)
-      mZones.size() >= 3 &&                                       // There must be at least 3 zones
-      getWinningScore() >= 3 * mZones.size() &&                   // The player must capture them all at least 3 times
+      zoneCount >= 3 &&                                           // There must be at least 3 zones
+      getWinningScore() >= 3 * zoneCount &&                       // The player must capture them all at least 3 times
       !mPossibleZcBadgeAchiever->hasBadge(BADGE_ZONE_CONTROLLER)) // Player doesn't already have the badge
    {
       achievementAchieved(BADGE_ZONE_CONTROLLER, mPossibleZcBadgeAchiever->getName());
