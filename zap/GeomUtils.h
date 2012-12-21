@@ -95,8 +95,8 @@ bool circleCircleIntersect(const Point &center1, F32 radius1, const Point &cente
 
 bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end);  // This is four times faster than the Detailed one.
-bool polygonIntersectsSegmentDetailed(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, float &collisionTime, Point &normal);
-bool circleIntersectsSegment(Point center, float radius, Point start, Point end, float &collisionTime);
+bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, float &collisionTime, Point &normal);
+bool circleIntersectsSegment(Point center, F32 radius, Point start, Point end, float &collisionTime);
 
 Point findCentroid(const Vector<Point> &polyPoints);
 F32 area(const Vector<Point> &polyPoints);

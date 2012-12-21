@@ -408,9 +408,9 @@ bool CoreItem::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 }
 
 
-bool CoreItem::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *CoreItem::getCollisionPoly() const
 {
-   return false;
+   return NULL;
 }
 
 

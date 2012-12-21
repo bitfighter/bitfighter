@@ -92,7 +92,7 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;          // More precise boundary for precise collision detection
+   const Vector<Point> *getCollisionPoly() const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
    bool collided(BfObject *s, U32 stateIndex);
    void idle(BfObject::IdleCallPath path);

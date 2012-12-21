@@ -73,7 +73,7 @@ public:
 
    void setTeam(S32 team);
    void onAddedToGame(Game *theGame);
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);
    
    bool isFlashing();

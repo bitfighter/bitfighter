@@ -417,17 +417,14 @@ BfObject *Ship::isInZone(U8 zoneTypeNumber)
 
    // Extents overlap...  now check for actual overlap
 
-   Vector<Point> polyPoints;
-
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       BfObject *zone = static_cast<BfObject *>(fillVector[i]);
 
       // Get points that define the zone boundaries
-      polyPoints.clear();
-      zone->getCollisionPoly(polyPoints);
+      const Vector<Point> *polyPoints = zone->getCollisionPoly();
 
-      if( polyPoints.size() != 0 && PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
+      if( polyPoints->size() != 0 && PolygonContains2(polyPoints->address(), polyPoints->size(), getActualPos()) )
          return zone;
    }
    return NULL;
@@ -813,14 +810,12 @@ void Ship::checkForZones()
    findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
 
    // Extents overlap...  now check for actual overlap
-   Vector<Point> polyPoints;
-
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       // Get points that define the zone boundaries
-      fillVector[i]->getCollisionPoly(polyPoints);
+      const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
 
-      if(PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()))
+      if(PolygonContains2(polyPoints->address(), polyPoints->size(), getActualPos()))
          currZoneList->push_back(fillVector[i]);
    }
 

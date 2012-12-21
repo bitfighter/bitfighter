@@ -194,10 +194,9 @@ void GoalZone::onAddedToGame(Game *theGame)
 }
 
 
-bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *GoalZone::getCollisionPoly() const
 {
-   polyPoints = *getOutline();
-   return true;
+   return getOutline();
 }
 
 

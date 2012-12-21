@@ -214,7 +214,7 @@ public:
    void render();
    void renderDock();
 
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);
 
    // These services are used, but provided solely by parent

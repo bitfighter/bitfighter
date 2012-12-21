@@ -49,7 +49,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);
    void onAddedToGame(Game *theGame);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;     // More precise boundary for precise collision detection
+   const Vector<Point> *getCollisionPoly() const;     // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

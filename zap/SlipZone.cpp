@@ -149,10 +149,9 @@ void SlipZone::onAddedToGame(Game *theGame)
 }
 
 
-bool SlipZone::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *SlipZone::getCollisionPoly() const
 {
-   polyPoints = *getOutline();
-   return true;
+   return getOutline();
 }
 
 

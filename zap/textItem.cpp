@@ -299,9 +299,9 @@ Rect TextItem::calcExtents()
 }
 
 
-bool TextItem::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *TextItem::getCollisionPoly() const
 {
-   return false;
+   return NULL;
 }
 
 

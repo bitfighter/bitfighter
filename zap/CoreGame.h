@@ -154,7 +154,7 @@ public:
 
    static F32 getCoreAngle(U32 time);
    void renderItem(const Point &pos);
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);
 

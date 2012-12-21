@@ -62,7 +62,7 @@ public:
 
    // By precomputing and storing, we should ease the rendering cost
    Vector<Point> mRenderFillGeometry;        // Actual geometry used for rendering fill
-   Vector<Point> mRenderOutlineGeometry;     // Actual geometry used for rendering outline
+   const Vector<Point> *mRenderOutlineGeometry;     // Actual geometry used for rendering outline
 
    F32 mWidth;
 
@@ -81,8 +81,7 @@ public:
    S32 getRenderSortValue();
 
    // Returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
-   const Vector<Point> *getCollisionPolyPtr() const;
+   const Vector<Point> *getCollisionPoly() const;
 
    // Collide always returns true for Barrier objects
    bool collide(BfObject *otherObject);
@@ -307,7 +306,7 @@ public:
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 };
 
@@ -323,6 +322,7 @@ class WallEdge : public DatabaseObject
 {
 private:
    Point mStart, mEnd;
+   Vector<Point> mPoints;
 
 public:
    WallEdge(const Point &start, const Point &end);
@@ -334,7 +334,7 @@ public:
    // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
    // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
    // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) const;
 };
 

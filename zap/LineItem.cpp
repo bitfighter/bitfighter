@@ -163,9 +163,9 @@ void LineItem::computeExtent()
 }
 
 
-bool LineItem::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *LineItem::getCollisionPoly() const
 {
-   return false;
+   return NULL;
 }
 
 

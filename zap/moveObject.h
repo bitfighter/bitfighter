@@ -330,7 +330,7 @@ public:
    static F32 getAsteroidMass(S32 size_left);
 
    void renderItem(const Point &pos);
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *otherObject);
 
    // Asteroid does not collide to another asteroid
@@ -401,7 +401,7 @@ public:
    static const S32 CIRCLE_RADIUS = 10;
 
    void renderItem(const Point &pos);
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *otherObject);
 
    void idle(BfObject::IdleCallPath path);
@@ -447,6 +447,7 @@ private:
    bool hasExploded;
    F32 mAngle;
    Timer mDirTimer;
+   Vector<Point> mPolyPoints;
 
    static const S32 maxTailLength = 28;
 
@@ -479,7 +480,7 @@ public:
 
    F32 getEditorRadius(F32 currentScale);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
    bool collide(BfObject *otherObject);
    void setPosAng(Point pos, F32 ang);
@@ -512,7 +513,7 @@ public:
 
    void renderItem(const Point &pos);
    void damageObject(DamageInfo *theInfo);
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
 
 
    TNL_DECLARE_CLASS(TestItem);

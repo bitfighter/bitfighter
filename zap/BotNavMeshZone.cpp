@@ -142,10 +142,9 @@ void BotNavMeshZone::addToZoneDatabase()
 
 
 // More precise boundary for precise collision detection
-bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *BotNavMeshZone::getCollisionPoly() const
 {
-   polyPoints = *getOutline();
-   return true;
+   return getOutline();
 }
 
 

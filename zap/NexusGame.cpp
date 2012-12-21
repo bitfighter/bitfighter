@@ -1091,10 +1091,9 @@ void NexusZone::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled
 }
 
 
-bool NexusZone::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *NexusZone::getCollisionPoly() const
 {
-   polyPoints = *getOutline();
-   return true;
+   return getOutline();
 }
 
 

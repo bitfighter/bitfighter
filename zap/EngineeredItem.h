@@ -189,6 +189,8 @@ class ForceField : public BfObject
 
 private:
    Point mStart, mEnd;
+   Vector<Point> mOutline;    
+
    Timer mDownTimer;
    bool mFieldUp;
 
@@ -214,10 +216,11 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
 
-   void getGeom(Vector<Point> &geom) const;
-   static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
+   const Vector<Point> *getOutline();
+
+   static Vector<Point> computeGeom(const Point &start, const Point &end, F32 scaleFact = 1);
    static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, 
                                  Point &end, DatabaseObject **collObj);
 
@@ -256,7 +259,7 @@ public:
 
    ForceFieldProjector *clone() const;
    
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
    
    static void getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
@@ -341,7 +344,7 @@ public:
    void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints) const;
    static void getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
    
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
 
    F32 getEditorRadius(F32 currentScale);
 

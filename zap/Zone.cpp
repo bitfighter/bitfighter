@@ -130,10 +130,9 @@ bool Zone::canBeNeutral() { return false; }
 
 
 // More precise boundary for precise collision detection
-bool Zone::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *Zone::getCollisionPoly() const
 {
-   polyPoints = *getOutline();
-   return true;
+   return getOutline();
 }
 
 

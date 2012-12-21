@@ -2085,8 +2085,7 @@ void renderForceFieldProjector(const Vector<Point> *geom, const Color *color, bo
 
 void renderForceField(Point start, Point end, const Color *color, bool fieldUp, F32 scaleFact)
 {
-   Vector<Point> geom;
-   ForceField::getGeom(start, end, geom, scaleFact);
+   Vector<Point> geom = ForceField::computeGeom(start, end, scaleFact);
 
    F32 ForceFieldBrightness = 0.25;
 

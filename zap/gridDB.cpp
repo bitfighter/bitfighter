@@ -547,18 +547,17 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool 
       if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
 
-      static Vector<Point> poly;
-      poly.clear();
+      const Vector<Point> *poly = fillVector[i]->getCollisionPoly();
 
       F32 radius, ct;
 
-      if(fillVector[i]->getCollisionPoly(poly))
+      if(poly)
       {
-         if(poly.size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+         if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
             continue;
 
          Point normal;
-         if(polygonIntersectsSegmentDetailed(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
+         if(polygonIntersectsSegmentDetailed(&poly->first(), poly->size(), format, rayStart, rayEnd, ct, normal))
          {
             if(ct < collisionTime)
             {
@@ -610,19 +609,18 @@ DatabaseObject *GridDatabase::findObjectLOS(TestFunc testFunc, U32 stateIndex, b
       if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
 
-      static Vector<Point> poly;
-      poly.clear();
+      const Vector<Point> *poly = fillVector[i]->getCollisionPoly();
 
       F32 radius;
       float ct;
 
-      if(fillVector[i]->getCollisionPoly(poly))
+      if(poly)
       {
-         if(poly.size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+         if(poly->size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
             continue;
 
          Point normal;
-         if(polygonIntersectsSegmentDetailed(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
+         if(polygonIntersectsSegmentDetailed(&poly->get(0), poly->size(), format, rayStart, rayEnd, ct, normal))
          {
             if(ct < collisionTime)
             {
@@ -754,9 +752,9 @@ bool DatabaseObject::isDatabasable()
 }
 
 
-bool DatabaseObject::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *DatabaseObject::getCollisionPoly() const
 {
-   return false;
+   return NULL;
 }
 
 

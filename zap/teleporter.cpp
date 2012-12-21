@@ -347,7 +347,6 @@ bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb
    foundObjects.clear();
    gb->findObjects((TestFunc) isCollideableType, foundObjects, queryRect);
 
-   Vector<Point> foundObjectBounds;
    Point foundObjectCenter;
    F32 foundObjectRadius;
 
@@ -360,12 +359,12 @@ bool Teleporter::checkDeploymentPosition(const Point &position, GridDatabase *gb
          continue;
 
       // Now calculate bounds
-      foundObjectBounds.clear();
-      if(bfObject->getCollisionPoly(foundObjectBounds))
+      const Vector<Point> *foundObjectBounds = bfObject->getCollisionPoly();
+      if(foundObjectBounds)
       {
          // If they intersect, then bad deployment position
-         if(foundObjectBounds.size() != 0)
-            if(polygonCircleIntersect(foundObjectBounds.address(), foundObjectBounds.size(), position, sq(TELEPORTER_RADIUS), outPoint))
+         if(foundObjectBounds->size() != 0)
+            if(polygonCircleIntersect(foundObjectBounds->address(), foundObjectBounds->size(), position, sq(TELEPORTER_RADIUS), outPoint))
                return false;
       }
       // Try the collision circle if no poly bounds were found
@@ -553,9 +552,9 @@ bool Teleporter::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 }
 
 
-bool Teleporter::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *Teleporter::getCollisionPoly() const
 {
-   return false;
+   return NULL;
 }
 
 

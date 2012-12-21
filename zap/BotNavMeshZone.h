@@ -108,7 +108,7 @@ public:
    Point getCenter();      // Return center of zone
 
    // More precise boundary for precise collision detection
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
+   const Vector<Point> *getCollisionPoly() const;
 
    // Only gets run on the server, never on client
    //bool collide(BfObject *hitObject);

@@ -56,9 +56,9 @@ namespace Zap
    EditorAttributeMenuUI *EngineeredItem::mAttributeMenuUI = NULL;
 #endif
 
-static bool forceFieldEdgesIntersectPoints(const Vector<Point> &points, const Vector<Point> forceField)
+static bool forceFieldEdgesIntersectPoints(const Vector<Point> *points, const Vector<Point> forceField)
 {
-   return polygonIntersectsSegment(points, forceField[0], forceField[1]) || polygonIntersectsSegment(points, forceField[2], forceField[3]);
+   return polygonIntersectsSegment(*points, forceField[0], forceField[1]) || polygonIntersectsSegment(*points, forceField[2], forceField[3]);
 }
 
 
@@ -220,21 +220,16 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    Rect queryRect(forceFieldStart, forceFieldEnd);
    queryRect.expand(Point(5,5));    // Just a touch bigger than the bare minimum
 
-   Vector<Point> candidateForceFieldGeom;
-   ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
+   Vector<Point> candidateForceFieldGeom = ForceField::computeGeom(forceFieldStart, forceFieldEnd);
 
    fillVector.clear();
    gameObjectDatabase->findObjects(ForceFieldProjectorTypeNumber, fillVector, queryRect);
-
-   Vector<Point> ffpGeom;     // Geom of any projectors we find
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       ForceFieldProjector *ffp = static_cast<ForceFieldProjector *>(fillVector[i]);
 
-      ffpGeom.clear();
-      ffp->getCollisionPoly(ffpGeom);
-      if(forceFieldEdgesIntersectPoints(ffpGeom, candidateForceFieldGeom))
+      if(forceFieldEdgesIntersectPoints(ffp->getCollisionPoly(), candidateForceFieldGeom))
       {
          collision = true;
          break;
@@ -252,7 +247,6 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
       // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
       Point start, end;
-      Vector<Point> ffGeom;
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -260,10 +254,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
 
          proj->getForceFieldStartAndEndPoints(start, end);
 
-         ffGeom.clear();
-         ForceField::getGeom(start, end, ffGeom);
-
-         if(forceFieldEdgesIntersectPoints(candidateForceFieldGeom, ffGeom))
+         if(forceFieldEdgesIntersectPoints(&candidateForceFieldGeom, ForceField::computeGeom(start, end)))
          {
             collision = true;
             break;
@@ -308,17 +299,13 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    // Search for wall segments within query
    gameObjectDatabase->findObjects(isWallType, fillVector, queryRect);
 
-   Vector<Point> currentPoly;
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       // Exclude the end segment from our search
       if(terminatingWallObject && terminatingWallObject == fillVector[i])
          continue;
 
-      currentPoly.clear();
-      fillVector[i]->getCollisionPoly(currentPoly);
-
-      if(polygonsIntersect(currentPoly, collisionPoly))
+      if(polygonsIntersect(*fillVector[i]->getCollisionPoly(), collisionPoly))
       {
          wallTooClose = true;
          break;
@@ -347,10 +334,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
       if(turret->isEngineered())
          continue;
 
-      currentPoly.clear();
-      turret->getCollisionPoly(currentPoly);
-
-      if(polygonsIntersect(currentPoly, collisionPoly))
+      if(polygonsIntersect(*turret->getCollisionPoly(), collisionPoly))
       {
          turretInTheWay = true;
          break;
@@ -458,7 +442,6 @@ string EngineerModuleDeployer::getErrorMessage()
 // Constructor
 EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Engineerable(), mAnchorNormal(anchorNormal)
 {
-   setPos(anchorPoint);
    mHealth = 1.0f;
    setTeam(team);
    mOriginalTeam = team;
@@ -522,15 +505,10 @@ F32 EngineeredItem::getSelectionOffsetMagnitude()
 // Server only
 void EngineeredItem::computeBufferForBotZone(Vector<Point> &zonePoints)
 {
-   Vector<Point> inputPoints;
-
-   getCollisionPoly(inputPoints);
-
-   if(isWoundClockwise(inputPoints))
-      inputPoints.reverse();
+   TNLAssert(!isWoundClockwise(*getCollisionPoly()), "Points need to be wound clockwise!");
 
    // Fill zonePoints
-   offsetPolygon(&inputPoints, zonePoints, (F32)BotNavMeshZone::BufferRadius);
+   offsetPolygon(getCollisionPoly(), zonePoints, (F32)BotNavMeshZone::BufferRadius);
 }
 
 
@@ -799,10 +777,8 @@ F32 EngineeredItem::getHealth()
 
 void EngineeredItem::computeExtent()
 {
-   Vector<Point> v;
-   getCollisionPoly(v);
-
-   setExtent(Rect(v));
+   const Vector<Point> *p = getCollisionPoly();
+   setExtent(Rect(*p));
 }
 
 
@@ -845,6 +821,7 @@ void EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal,
 void EngineeredItem::setPos(Point p)
 {
    Parent::setPos(p);
+   computeObjectGeometry();
    computeExtent();           // Sets extent based on actual geometry of object
 }
 
@@ -906,10 +883,7 @@ bool EngineeredItem::checkDeploymentPosition(const Vector<Point> &thisBounds, Gr
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Vector<Point> foundObjectBounds;
-      static_cast<BfObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
-
-      if(polygonsIntersect(thisBounds, foundObjectBounds))     // Do they intersect?
+      if( polygonsIntersect(thisBounds, *static_cast<BfObject *>(foundObjects[i])->getCollisionPoly()) )     // Do they intersect?
          return false;     // Bad location
    }
    return true;            // Good location
@@ -1312,9 +1286,11 @@ void ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, co
    Point cross(normal.y, -normal.x);
    cross.normalize((F32)PROJECTOR_HALF_WIDTH);
 
-   geom.push_back(anchor + cross);
    geom.push_back(getForceFieldStartPoint(anchor, normal));
    geom.push_back(anchor - cross);
+   geom.push_back(anchor + cross);
+
+   TNLAssert(!isWoundClockwise(geom), "Go the other way!");
 }
 
 
@@ -1373,11 +1349,10 @@ void ForceFieldProjector::onEnabled()
 }
 
 
-bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *ForceFieldProjector::getCollisionPoly() const
 {
    TNLAssert(mCollisionPolyPoints.size() != 0, "mCollisionPolyPoints.size() shouldn't be zero");
-   polyPoints = mCollisionPolyPoints;
-   return true;
+   return &mCollisionPolyPoints;
 }
 
 
@@ -1448,9 +1423,7 @@ void ForceFieldProjector::findForceFieldEnd()
    else
       setEndSegment(NULL);
 
-   Vector<Point> geom;
-   ForceField::getGeom(start, forceFieldEnd, geom, scale);    
-   setExtent(Rect(geom));
+   setExtent(Rect(ForceField::computeGeom(start, forceFieldEnd, scale)));
 }
 
 
@@ -1490,6 +1463,8 @@ ForceField::ForceField(S32 team, Point start, Point end)
    setTeam(team);
    mStart = start;
    mEnd = end;
+
+   mOutline = computeGeom(mStart, mEnd);
 
    Rect extent(mStart, mEnd);
    extent.expand(Point(5,5));
@@ -1536,12 +1511,13 @@ bool ForceField::collide(BfObject *hitObject)
 // Returns true if two forcefields intersect
 bool ForceField::intersects(ForceField *forceField)
 {
-   Vector<Point> thisGeom, thatGeom;
+   return polygonsIntersect(mOutline, *forceField->getOutline());
+}
 
-   getGeom(thisGeom);
-   forceField->getGeom(thatGeom);
 
-   return polygonsIntersect(thisGeom, thatGeom);
+const Vector<Point> *ForceField::getOutline()
+{
+   return &mOutline;
 }
 
 
@@ -1608,8 +1584,10 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 const F32 ForceField::ForceFieldHalfWidth = 2.5;
 
 // static
-void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &geom, F32 scaleFact)
+Vector<Point> ForceField::computeGeom(const Point &start, const Point &end, F32 scaleFact)
 {
+   Vector<Point> geom;
+   geom.reserve(4);
 
    Point normal(end.y - start.y, start.x - end.x);
    normal.normalize(ForceFieldHalfWidth * scaleFact);
@@ -1618,13 +1596,8 @@ void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &ge
    geom.push_back(end + normal);
    geom.push_back(end - normal);
    geom.push_back(start - normal);
-}
 
-
-// Non-static version
-void ForceField::getGeom(Vector<Point> &geom) const
-{
-   getGeom(mStart, mEnd, geom);
+   return geom;
 }
 
 
@@ -1649,10 +1622,9 @@ bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const P
 }
 
 
-bool ForceField::getCollisionPoly(Vector<Point> &points) const
+const Vector<Point> *ForceField::getCollisionPoly() const
 {
-   getGeom(points);
-   return true;
+   return &mOutline;
 }
 
 
@@ -1780,17 +1752,19 @@ void Turret::getObjectGeometry(const Point &anchor, const Point &normal, Vector<
 void Turret::getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
 {
    Point cross(normal.y, -normal.x);
+
    polyPoints.push_back(anchor + cross * 25);
    polyPoints.push_back(anchor + cross * 10 + Point(normal) * 45);
    polyPoints.push_back(anchor - cross * 10 + Point(normal) * 45);
    polyPoints.push_back(anchor - cross * 25);
+
+   TNLAssert(!isWoundClockwise(polyPoints), "Go the other way!");
 }
 
 
-bool Turret::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *Turret::getCollisionPoly() const
 {
-   polyPoints = mCollisionPolyPoints;
-   return true;
+   return &mCollisionPolyPoints;
 }
 
 

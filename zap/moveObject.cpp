@@ -462,7 +462,6 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
    F32 collisionFraction;
 
    BfObject *collisionObject = NULL;
-   Vector<Point> poly;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -471,13 +470,13 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
       if(!foundObject->isCollisionEnabled())
          continue;
 
-      poly.clear();
+      const Vector<Point> *poly = foundObject->getCollisionPoly();
 
-      if(foundObject->getCollisionPoly(poly))
+      if(poly)
       {
          Point cp;
 
-         if(PolygonSweptCircleIntersect(&poly[0], poly.size(), getPos(stateIndex),
+         if(PolygonSweptCircleIntersect(&poly->first(), poly->size(), getPos(stateIndex),
                                         delta, mRadius, cp, collisionFraction))
          {
             if(cp != getPos(stateIndex))   // Avoid getting stuck inside polygon wall
@@ -1343,7 +1342,7 @@ F32 Asteroid::getEditorRadius(F32 currentScale)
 }
 
 
-bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *Asteroid::getCollisionPoly() const
 {
    //for(S32 i = 0; i < ASTEROID_POINTS; i++)
    //{
@@ -1353,7 +1352,7 @@ bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints) const
    //   polyPoints.push_back(p);
    //}
 
-   return false;  // No Collision Poly, that may help reduce lag with client and server  <== Why?
+   return NULL;  // No Collision Poly, that may help reduce lag with client and server  <== Why?
 }
 
 
@@ -1710,9 +1709,9 @@ F32 Circle::getEditorRadius(F32 currentScale)
 }
 
 
-bool Circle::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *Circle::getCollisionPoly() const
 {
-   return false;
+   return NULL;
 }
 
 
@@ -1935,24 +1934,12 @@ bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius) const
 }
 
 
-bool Worm::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *Worm::getCollisionPoly() const
 {
-   S32 i = mHeadIndex;
-   for(S32 count = 0; count < mTailLength; count++)
-   {
-      polyPoints.push_back(mPoints[i]);
-      i--;
-      if(i < 0)
-         i = maxTailLength - 1;
-   }
-   for(S32 count = 0; count < mTailLength; count++)
-   {
-      polyPoints.push_back(mPoints[i]);
-      i++;
-      if(i >= maxTailLength)
-         i = 0;
-   }
-   return polyPoints.size() != 0;  // false with zero points
+   if(mPolyPoints.size() > 0)
+      return &mPolyPoints;
+   else
+      return NULL;
 }
 
 bool Worm::collide(BfObject *otherObject)
@@ -1978,9 +1965,7 @@ void Worm::setPosAng(Point pos, F32 ang)
    else
       setMaskBits(TailPointPartsMask << mHeadIndex);
 
-   Vector<Point> p;
-   getCollisionPoly(p);
-   setExtent(p);
+   setExtent(*getCollisionPoly());
 }
 
 
@@ -2037,7 +2022,7 @@ void Worm::idle(BfObject::IdleCallPath path)
          queryRect.expand(Point(radius, radius));
          fillVector.clear();
          findObjects((TestFunc) isCollideableTypeWorm, fillVector, queryRect);
-         Vector<Point> poly;
+         
          collisionTime = 1;
 
          pos1 = mPoints[mHeadIndex] - p * 0.01f;
@@ -2049,13 +2034,12 @@ void Worm::idle(BfObject::IdleCallPath path)
             if(!foundObject->isCollisionEnabled())
                continue;
 
-            poly.clear();
-            if(foundObject->getCollisionPoly(poly))
+            const Vector<Point> *poly = foundObject->getCollisionPoly();
+            if(poly)
             {
                Point cp;
                F32 collisionFraction;
-               if(PolygonSweptCircleIntersect(&poly[0], poly.size(), pos1,
-                  p, radius, cp, collisionFraction))
+               if(PolygonSweptCircleIntersect(&poly->first(), poly->size(), pos1, p, radius, cp, collisionFraction))
                {
                   if(cp != pos1 && collisionTime > collisionFraction)   // Avoid getting stuck inside polygon wall
                   {
@@ -2072,10 +2056,29 @@ void Worm::idle(BfObject::IdleCallPath path)
       } while(retryCount < 5 && collisionTime < 0.25f);
 
       setPosAng(p * collisionTime + pos1, mAngle);
-      mDirTimer.reset(TNL::Random::readI(300,400));
+      mDirTimer.reset(TNL::Random::readI(300, 400));
    }
 
    Parent::idle(path);
+
+   // Recompute mPolyPoints
+   S32 i = mHeadIndex;
+   mPolyPoints.clear();
+
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      mPolyPoints.push_back(mPoints[i]);
+      i--;
+      if(i < 0)
+         i = maxTailLength - 1;
+   }
+   for(S32 count = 0; count < mTailLength; count++)
+   {
+      mPolyPoints.push_back(mPoints[i]);
+      i++;
+      if(i >= maxTailLength)
+         i = 0;
+   }
 }
 
 
@@ -2143,9 +2146,7 @@ void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 
-   Vector<Point> p;
-   getCollisionPoly(p);
-   setExtent(p);
+   setExtent(*getCollisionPoly());
 #endif
 }
 
@@ -2223,7 +2224,7 @@ void TestItem::damageObject(DamageInfo *theInfo)
 }
 
 
-bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *TestItem::getCollisionPoly() const
 {
    //for(S32 i = 0; i < 8; i++)    // 8 so that first point gets repeated!  Needed?  Maybe not
    //{
@@ -2232,7 +2233,7 @@ bool TestItem::getCollisionPoly(Vector<Point> &polyPoints) const
    //}
 
    // Override parent so getCollisionCircle is used instead
-   return false;
+   return NULL;
 }
 
 /////

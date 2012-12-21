@@ -349,8 +349,8 @@ bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 
 // Check to see if segment start-end intersects poly
 // Assumes a polygon in format A-B-C-D if format is true, A-B, C-D, E-F if format is false
-bool polygonIntersectsSegmentDetailed(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
-                          float &collisionTime, Point &normal)
+bool polygonIntersectsSegmentDetailed(const Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end,
+                                      F32 &collisionTime, Point &normal)
 {
    Point v1 = poly[vertexCount - 1];
    Point v2, dv;

@@ -144,8 +144,8 @@ public:
    void onDestroyed();
    bool collide(BfObject *otherObject);
 
+   const Vector<Point> *getCollisionPoly() const;
    bool getCollisionCircle(U32 state, Point &center, F32 &radius) const;
-   bool getCollisionPoly(Vector<Point> &polyPoints) const;
 
    void idle(BfObject::IdleCallPath path);
    void render();

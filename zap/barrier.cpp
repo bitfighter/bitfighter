@@ -184,7 +184,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    }
 
    // Outline is the same for regular walls and polywalls
-   getCollisionPoly(mRenderOutlineGeometry);                   
+   mRenderOutlineGeometry = getCollisionPoly();                   
 
    // Compute a special buffered wall that makes computing bot zones easier
    computeBufferForBotZone(mPoints, mWidth, mSolid, mBufferedObjectPointsForBotZone);   
@@ -192,18 +192,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
 
 // Processes mPoints and fills polyPoints 
-bool Barrier::getCollisionPoly(Vector<Point> &polyPoints) const
-{
-   if(mSolid)
-      polyPoints = mPoints;
-   else
-      polyPoints = mRenderFillGeometry;
-
-   return true;
-}
-
-
-const Vector<Point> *Barrier::getCollisionPolyPtr() const
+const Vector<Point> *Barrier::getCollisionPoly() const
 {
    if(mSolid)
       return &mPoints;
@@ -216,7 +205,6 @@ bool Barrier::collide(BfObject *otherObject)
 {
    return true;
 }
-
 
 
 // Server only
@@ -308,7 +296,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, Vector<Vec
       if(barriers[i]->getObjectTypeNumber() != BarrierTypeNumber)
          continue;
 
-      inputPolygons.push_back(static_cast<Barrier *>(barriers[i])->getCollisionPolyPtr());
+      inputPolygons.push_back(static_cast<Barrier *>(barriers[i])->getCollisionPoly());
    }
 
    return mergePolys(inputPolygons, solution);
@@ -854,6 +842,9 @@ WallEdge::WallEdge(const Point &start, const Point &end)
 { 
    mStart = start; 
    mEnd   = end; 
+   mPoints.reserve(2);
+   mPoints.push_back(start);
+   mPoints.push_back(end);
 
    // Set some things required by DatabaseObject
    mObjectTypeNumber = WallEdgeTypeNumber;
@@ -872,12 +863,9 @@ Point *WallEdge::getStart() { return &mStart; }
 Point *WallEdge::getEnd()   { return &mEnd;   }
 
 
-bool WallEdge::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *WallEdge::getCollisionPoly() const
 {
-   polyPoints.resize(2);
-   polyPoints[0] = mStart;
-   polyPoints[1] = mEnd;
-   return true;
+   return &mPoints;
 }
 
 
@@ -990,10 +978,9 @@ const Vector<Point> *WallSegment::getEdges()                  { return &mEdges; 
 const Vector<Point> *WallSegment::getTriangulatedFillPoints() { return &mTriangulatedFillPoints; }
 
 
-bool WallSegment::getCollisionPoly(Vector<Point> &polyPoints) const
+const Vector<Point> *WallSegment::getCollisionPoly() const
 {
-   polyPoints = mEdges;
-   return true;
+   return &mEdges;
 }
 
 
