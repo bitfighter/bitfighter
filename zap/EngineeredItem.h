@@ -98,7 +98,7 @@ public:
    virtual void onEnabled();
    virtual bool isTurret();
 
-   virtual void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;
+   virtual Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
 
    void setPos(Point p);
 
@@ -246,7 +246,7 @@ private:
 
    void initialize();
 
-   void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const;  
+   Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;  
 
    F32 getSelectionOffsetMagnitude();
 
@@ -261,7 +261,7 @@ public:
    
    const Vector<Point> *getCollisionPoly() const;
    
-   static void getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom);
+   static Vector<Point> getForceFieldProjectorGeometry(const Point &anchor, const Point &normal);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
 
    // Get info about the forcfield that might be projected from this projector
@@ -341,8 +341,8 @@ public:
    static const S32 AimMask = Parent::FirstFreeMask;
 
 
-   void getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints) const;
-   static void getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
+   Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
+   static Vector<Point> getTurretGeometry(const Point &anchor, const Point &normal);
    
    const Vector<Point> *getCollisionPoly() const;
 

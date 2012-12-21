@@ -2060,11 +2060,10 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
 }
 
 
+// Only used by instructions... in-game uses the other signature
 void renderForceFieldProjector(Point pos, Point normal, const Color *color, bool enabled)
 {
-   Vector<Point> geom;
-   ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal, geom);      // fills geom from pos and normal
-
+   Vector<Point> geom = ForceFieldProjector::getForceFieldProjectorGeometry(pos, normal);
    renderForceFieldProjector(&geom, color, enabled);
 }
 

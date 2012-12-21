@@ -175,11 +175,11 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    switch(objectType)
    {
       case EngineeredTurret:
-         Turret::getTurretGeometry(mDeployPosition, mDeployNormal, bounds);   
+         bounds = Turret::getTurretGeometry(mDeployPosition, mDeployNormal);   
          goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
       case EngineeredForceField:
-         ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal, bounds);
+         bounds = ForceFieldProjector::getForceFieldProjectorGeometry(mDeployPosition, mDeployNormal);
          goodDeploymentPosition = EngineeredItem::checkDeploymentPosition(bounds, gameObjectDatabase);
          break;
       case EngineeredTeleporterEntrance:
@@ -491,7 +491,7 @@ bool EngineeredItem::processArguments(S32 argc, const char **argv, Game *game)
 
 void EngineeredItem::computeObjectGeometry()
 {
-   getObjectGeometry(getPos(), mAnchorNormal, mCollisionPolyPoints);
+   mCollisionPolyPoints = getObjectGeometry(getPos(), mAnchorNormal);
 }
 
 
@@ -567,7 +567,7 @@ void EngineeredItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 void EngineeredItem::onGeomChanged()
 {
-   getObjectGeometry(getPos(), mAnchorNormal, mCollisionPolyPoints);     // Recompute collision poly
+   mCollisionPolyPoints = getObjectGeometry(getPos(), mAnchorNormal);     // Recompute collision poly
    Parent::onGeomChanged();
 }
 
@@ -812,9 +812,12 @@ bool EngineeredItem::isTurret()
 }
 
 
-void EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const
+Vector<Point> EngineeredItem::getObjectGeometry(const Point &anchor, const Point &normal) const
 {
    TNLAssert(false, "function not implemented!");
+
+   Vector<Point> dummy;
+   return dummy;
 }
 
 
@@ -1271,17 +1274,19 @@ F32 ForceFieldProjector::getSelectionOffsetMagnitude()
 }
 
 
-void ForceFieldProjector::getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const
+Vector<Point> ForceFieldProjector::getObjectGeometry(const Point &anchor, const Point &normal) const
 {
-   geom.clear();
-   getForceFieldProjectorGeometry(anchor, normal, geom);
+   return getForceFieldProjectorGeometry(anchor, normal);
 }
 
 
 // static method
-void ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom)
+Vector<Point> ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, const Point &normal)
 {
    static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
+
+   Vector<Point> geom;
+   geom.reserve(3);
 
    Point cross(normal.y, -normal.x);
    cross.normalize((F32)PROJECTOR_HALF_WIDTH);
@@ -1291,6 +1296,8 @@ void ForceFieldProjector::getForceFieldProjectorGeometry(const Point &anchor, co
    geom.push_back(anchor + cross);
 
    TNLAssert(!isWoundClockwise(geom), "Go the other way!");
+
+   return geom;
 }
 
 
@@ -1741,17 +1748,19 @@ string Turret::toString(F32 gridSize) const
 }
 
 
-void Turret::getObjectGeometry(const Point &anchor, const Point &normal, Vector<Point> &geom) const
+Vector<Point> Turret::getObjectGeometry(const Point &anchor, const Point &normal) const
 {
-   geom.clear();
-   getTurretGeometry(anchor, normal, geom);
+   return getTurretGeometry(anchor, normal);
 }
 
 
 // static method
-void Turret::getTurretGeometry(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
+Vector<Point> Turret::getTurretGeometry(const Point &anchor, const Point &normal)
 {
    Point cross(normal.y, -normal.x);
+
+   Vector<Point> polyPoints;
+   polyPoints.reserve(4);
 
    polyPoints.push_back(anchor + cross * 25);
    polyPoints.push_back(anchor + cross * 10 + Point(normal) * 45);
@@ -1759,6 +1768,8 @@ void Turret::getTurretGeometry(const Point &anchor, const Point &normal, Vector<
    polyPoints.push_back(anchor - cross * 25);
 
    TNLAssert(!isWoundClockwise(polyPoints), "Go the other way!");
+
+   return polyPoints;
 }
 
 
