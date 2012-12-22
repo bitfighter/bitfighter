@@ -367,12 +367,12 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
    // Find all zones...
    fillVector.clear();
-   getGame()->getGameObjDatabase()->findObjects(GoalZoneTypeNumber, fillVector);
+   const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
 
    // ...and make sure they're not flashing...
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < goalZones->size(); i++)
    {
-      GoalZone *goalZone = static_cast<GoalZone *>(fillVector[i]);
+      GoalZone *goalZone = static_cast<GoalZone *>(goalZones->get(i));
       if(goalZone)
          goalZone->setFlashCount(0);
    }
