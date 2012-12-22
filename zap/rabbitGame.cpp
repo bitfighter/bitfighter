@@ -257,10 +257,10 @@ const Color *RabbitGameType::getShipColor(Ship *ship)
 
 const Color *RabbitGameType::getTeamColor(S32 team) const
 {
-   if(team != -1 || getGame()->getTeamCount() != 1)
+   if(team != TEAM_NEUTRAL || isTeamGame())
       return Parent::getTeamColor(team);
 
-   return &Colors::orange50;      // orange neutral team, so the neutral flag is orange.
+   return &Colors::orange50;      // Orange neutral team, so the neutral flag is orange
 }
 
 
