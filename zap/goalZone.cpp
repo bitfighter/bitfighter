@@ -49,6 +49,7 @@ GoalZone::GoalZone(lua_State *L)
    mObjectTypeNumber = GoalZoneTypeNumber;
 
    mFlashCount = 0;
+
    mHasFlag = false;
    mScore = 1;             // For now...  may someday let GoalZones have different scoring values
    mCapturer = NULL;
