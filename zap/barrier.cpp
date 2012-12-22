@@ -194,13 +194,8 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 // Processes mPoints and fills polyPoints 
 const Vector<Point> *Barrier::getCollisionPoly() const
 {
-   logprintf("%p, %p", this, mPoints);
    if(mSolid)
-   {
-      if(mPoints.size() > 4)   // TODO: Delete
-            int x = 0;
       return &mPoints;
-   }
    else
       return &mRenderFillGeometry;
 }
