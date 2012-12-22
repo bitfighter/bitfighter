@@ -65,7 +65,7 @@ protected:
    S32 mHealRate;             // Rate at which items will heal themselves, defaults to 0;  Heals at 10% per mHealRate seconds.
    Timer mHealTimer;          // Timer for tracking mHealRate
 
-   Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client
+   Vector<Point> mCollisionPolyPoints;    // Used on server, also used for rendering on client -- computed when item is added to game
    void computeObjectGeometry();          // Populates mCollisionPolyPoints
 
    void findMountPoint(Game *game, const Point &pos);     // Figure out where to mount this item during construction
