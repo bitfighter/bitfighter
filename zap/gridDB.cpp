@@ -303,8 +303,8 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 {
    if(typeNumber == GoalZoneTypeNumber)
    {
-      for(S32 i = 0; i < mAllObjects.size(); i++)
-         fillVector.push_back(mAllObjects[i]);
+      for(S32 i = 0; i < mGoalZones.size(); i++)
+         fillVector.push_back(mGoalZones[i]);
       return;
    }
 
