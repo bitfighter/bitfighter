@@ -194,7 +194,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 // Processes mPoints and fills polyPoints 
 const Vector<Point> *Barrier::getCollisionPoly() const
 {
-   logprintf("%p, %p", this, &mPoints);
+   logprintf("%p, %p", this, mPoints);
    if(mSolid)
    {
       if(mPoints.size() > 4)   // TODO: Delete
@@ -220,7 +220,7 @@ const Vector<Point> *Barrier::getBufferForBotZone()
 
 
 // Server only
-void Barrier::computeBufferForBotZone(const Vector<Point> points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints)  // static
+void Barrier::computeBufferForBotZone(const Vector<Point> &points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints)  // static
 {
    // Use a clipper library to buffer polywalls; should be counter-clockwise by here
    if(isPolywall)

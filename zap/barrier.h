@@ -50,7 +50,7 @@ private:
 
    // Takes a segment and "puffs it out" to a polygon for bot zone generation.
    // This polygon is the width of the barrier plus the ship's collision radius added to the outside
-   static void computeBufferForBotZone(const Vector<Point> points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints);
+   static void computeBufferForBotZone(const Vector<Point> &points, F32 width, bool isPolywall, Vector<Point> &bufferedPoints);
 
 public:
    // Constructor
