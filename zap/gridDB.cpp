@@ -301,6 +301,8 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 // Find all objects in database of type typeNumber
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector)
 {
+   // If the user is looking for GoalZones, it will be faster to use our list of GoalZones rather than cycling through the entire item list.
+   // At the moment, however, all requests for GoalZones seem to use the findObjects_fast method, so this is here mainly as a reference.
    if(typeNumber == GoalZoneTypeNumber)
    {
       for(S32 i = 0; i < mGoalZones.size(); i++)
