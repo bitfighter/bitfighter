@@ -958,7 +958,7 @@ void BfObject::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector, 
 }
 
 
-BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd,
+BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
                                       float &collisionTime, Point &collisionNormal)
 {
    GridDatabase *gridDB = getDatabase();
@@ -972,7 +972,7 @@ BfObject *BfObject::findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart,
 }
 
 
-BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, Point rayStart, Point rayEnd,
+BfObject *BfObject::findObjectLOS(TestFunc objectTypeTest, U32 stateIndex, const Point &rayStart, const Point &rayEnd,
                                       float &collisionTime, Point &collisionNormal)
 {
    GridDatabase *gridDB = getDatabase();

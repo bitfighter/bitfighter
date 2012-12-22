@@ -284,8 +284,8 @@ public:
       FirstFreeMask = BIT(2)
    };
 
-   BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
-   BfObject *findObjectLOS(TestFunc, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
+   BfObject *findObjectLOS(U8 typeNumber, U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal);
+   BfObject *findObjectLOS(TestFunc,      U32 stateIndex, const Point &start, const Point &end, float &collisionTime, Point &normal);
 
    bool controllingClientIsValid();                   // Checks if controllingClient is valid
    SafePtr<GameConnection> getControllingClient();
