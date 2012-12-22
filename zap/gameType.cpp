@@ -1819,14 +1819,14 @@ bool GameType::makeSureTeamCountIsNotZero()
 }
 
 
-const Color *GameType::getTeamColor(BfObject *theObject)
+const Color *GameType::getTeamColor(BfObject *theObject) const
 {
-   return getTeamColor(theObject->getTeam());
+   return getTeamColor(theObject->getTeam(), theObject->getObjectTypeNumber());
 }
 
 
 // This method can be overridden by other game types that handle colors differently
-const Color *GameType::getTeamColor(S32 teamIndex) const
+const Color *GameType::getTeamColor(S32 teamIndex, U8 objTypeNumber) const
 {
    return mGame->getTeamColor(teamIndex);
 }
@@ -1835,7 +1835,7 @@ const Color *GameType::getTeamColor(S32 teamIndex) const
 // TODO: can be replaced by getTeamColor?
 const Color *GameType::getShipColor(Ship *s)
 {
-   return getTeamColor(s->getTeam());
+   return getTeamColor(s->getTeam(), PlayerShipTypeNumber);
 }
 
 

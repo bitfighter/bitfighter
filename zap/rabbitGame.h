@@ -82,7 +82,7 @@ public:
    void onFlagDismounted();
 
    const Color *getShipColor(Ship *s);
-   const Color *getTeamColor(S32 team) const;
+   const Color *getTeamColor(S32 team, U8 objTypeNumber = UnknownTypeNumber) const;
 
    void onFlagHeld(Ship *ship);
    void onFlaggerDead(Ship *killerShip);

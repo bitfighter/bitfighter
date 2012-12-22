@@ -470,7 +470,9 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 
 const Color *BfObject::getColor() const
 { 
-   return mGame->getTeamColor(mTeam);
+   // Here we call gameType, which in turn (usually) calls game.  But we need to do this because some gameTypes, such as Rabbit,
+   // handle team color assignment in a non-standard manner.
+   return mGame->getGameType()->getTeamColor(mTeam, mObjectTypeNumber);
 }
 
 

@@ -459,8 +459,9 @@ public:
    bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
    virtual const Color *getShipColor(Ship *s);        // Get the color of a ship
-   virtual const Color *getTeamColor(S32 team) const; // Get the color of a team, based on index
-   const Color *getTeamColor(BfObject *theObject);  // Get the color of a team, based on object
+   virtual const Color *getTeamColor(S32 team, U8 objTypeNum = UnknownTypeNumber) const; // Get the color of a team, based on index
+
+   const Color *getTeamColor(BfObject *object) const; // Get the color of a team, based on object
 
    //S32 getTeam(const StringTableEntry &playerName);   // Given a player's name, return their team
 

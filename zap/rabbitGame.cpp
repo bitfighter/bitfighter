@@ -255,12 +255,13 @@ const Color *RabbitGameType::getShipColor(Ship *ship)
 }
 
 
-const Color *RabbitGameType::getTeamColor(S32 team) const
+const Color *RabbitGameType::getTeamColor(S32 team, U8 objTypeNumber) const
 {
-   if(team != TEAM_NEUTRAL || isTeamGame())
-      return Parent::getTeamColor(team);
+   // Neutral flags are orange in Rabbit... everything else gets normal color (except ships, which are handled elsewhere)
+   if(objTypeNumber == FlagTypeNumber && team == TEAM_NEUTRAL)
+      return &Colors::orange50;  
 
-   return &Colors::orange50;      // Orange neutral team, so the neutral flag is orange
+   return Parent::getTeamColor(team, objTypeNumber);
 }
 
 

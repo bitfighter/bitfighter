@@ -403,7 +403,7 @@ S32 TeamManager::getTeamCount()
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
-const Color *TeamManager::getTeamColor(S32 index)
+const Color *TeamManager::getTeamColor(S32 index) const
 {
    if(index == TEAM_NEUTRAL)
       return &gNeutralTeamColor;

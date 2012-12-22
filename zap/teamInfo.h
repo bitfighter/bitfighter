@@ -188,7 +188,7 @@ private:
 public:
    ~TeamManager();      // Destructor
 
-   const Color *getTeamColor(S32 index);
+   const Color *getTeamColor(S32 index) const;
    S32 getTeamCount();
 
    AbstractTeam *getTeam(S32 teamIndex);
