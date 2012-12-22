@@ -28,15 +28,15 @@
 
 #include "BfObject.h"
 #include "item.h"
-#include "moveObject.h"    // For MoveItem
+#include "moveObject.h"       // For MoveItem def
 #include "barrier.h"
 #include "LuaWrapper.h"
 #include "Engineerable.h"
+#include "TeamConstants.h"    // For TEAM_NEUTRAL constant
 
 
 namespace Zap
 {
-
 
 class EngineeredItem : public Item, public Engineerable
 {
@@ -81,8 +81,8 @@ protected:
    };
 
 public:
-   EngineeredItem(S32 team = -1, const Point &anchorPoint = Point(0,0), const Point &anchorNormal = Point(0,0));  // Constructor
-   ~EngineeredItem();                                                                                             // Destructor
+   EngineeredItem(S32 team = TEAM_NEUTRAL, const Point &anchorPoint = Point(0,0), const Point &anchorNormal = Point(1,0));  // Constructor
+   ~EngineeredItem();                                                                                                       // Destructor
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 
@@ -176,7 +176,6 @@ public:
 
    // Some overrides
    S32 setGeom(lua_State *L);
-
 };
 
 
@@ -238,6 +237,8 @@ public:
 
 class ForceFieldProjector : public EngineeredItem
 {
+   typedef EngineeredItem Parent;
+
 private:
    typedef EngineeredItem Parent;
    SafePtr<ForceField> mField;

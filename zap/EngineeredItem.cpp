@@ -116,6 +116,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, U32 objectType, Point &
 
          F32 collisionTime;
 
+         // Computes collisionTime and deployNormal -- deployNormal will have been normalized to length of 1
          BfObject *hitObject = ship->findObjectLOS((TestFunc)isWallType, ActualState, startPoint, endPoint,
                                                      collisionTime, deployNormal);
 
@@ -162,7 +163,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(GridDatabase *gameObjectD
    if(mErrorMessage != "")
       return false;
 
-   if(!findDeployPoint(ship, objectType, mDeployPosition, mDeployNormal))
+   if(!findDeployPoint(ship, objectType, mDeployPosition, mDeployNormal))     // Computes mDeployPosition and mDeployNormal
    {
       mErrorMessage = "!!! Could not find a suitable wall for mounting the item";
       return false;
@@ -515,6 +516,8 @@ void EngineeredItem::computeBufferForBotZone(Vector<Point> &zonePoints)
 void EngineeredItem::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
+
+   computeObjectGeometry();
 
    if(mHealth != 0)
       onEnabled();
@@ -1211,7 +1214,7 @@ S32 EngineeredItem::setGeom(lua_State *L)
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
 // Combined Lua / C++ default constructor
-ForceFieldProjector::ForceFieldProjector(lua_State *L)
+ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
    initialize();
 
@@ -1465,7 +1468,7 @@ S32 ForceFieldProjector::getLoc(lua_State *L)
 
 TNL_IMPLEMENT_NETOBJECT(ForceField);
 
-ForceField::ForceField(S32 team, Point start, Point end)
+ForceField::ForceField(S32 team, Point start, Point end) 
 {
    setTeam(team);
    mStart = start;
@@ -1661,7 +1664,7 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 
 
 // Combined Lua / C++ default constructor
-Turret::Turret(lua_State *L)
+Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
    initialize();
 
@@ -1671,7 +1674,7 @@ Turret::Turret(lua_State *L)
 
 
 // Constructor for when turret is built with engineer
-Turret::Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal) : EngineeredItem(team, anchorPoint, anchorNormal)
+Turret::Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal) : Parent(team, anchorPoint, anchorNormal)
 {
    initialize();
 }

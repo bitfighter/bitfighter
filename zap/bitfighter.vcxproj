@@ -394,6 +394,7 @@
     <ClInclude Include="SlipZone.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="stringUtils.h" />
+    <ClInclude Include="TeamConstants.h" />
     <ClInclude Include="TeamPreset.h" />
     <ClInclude Include="TeamShuffleHelper.h" />
     <ClInclude Include="UIAbstractInstructions.h" />
