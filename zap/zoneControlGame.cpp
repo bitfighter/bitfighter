@@ -120,7 +120,9 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
    static const S32 MAX_ZONES_TO_NOTIFY = 50;   // Don't display messages when too many zones -- the flood of messages will get annoying!
    const S32 oldTeam = z->getTeam();
-   const S32 zoneCount = getGame()->getGameObjDatabase()->getObjectCount(GoalZoneTypeNumber);
+
+   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   S32 zoneCount = zones->size();
 
    if(oldTeam >= 0)                             // Zone is being captured from another team
    {
@@ -153,9 +155,6 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    z->setCapturer(s->getClientInfo());                   // Assign zone to capturing player
    z->setTeam(s->getTeam());                             // Assign zone to capturing team
    s->getClientInfo()->getStatistics()->mFlagScore++;    // Record the capture
-
-   const Vector<DatabaseObject *> *zones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
-
 
    // Does team control all zones? ...
    for(S32 i = 0; i < zoneCount; i++)
