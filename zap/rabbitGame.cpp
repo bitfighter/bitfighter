@@ -225,21 +225,32 @@ const Color *RabbitGameType::getShipColor(Ship *ship)
    return &Colors::white;
 #else
 
-   if(getGame()->getTeamCount() != 1)
+   // In team game, use team color
+   if(isTeamGame())
       return Parent::getShipColor(ship);
 
    GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
 
-   if(!gc)
-      return &Colors::white;     // Something's gone wrong!
+   if(gc)
+   {
+      BfObject *object = gc->getControlObject();
 
-   BfObject *object = gc->getControlObject();
-   if(!object || !isShipType(object->getObjectTypeNumber()))
-      return  &Colors::white;    // Something's gone wrong!
+      if(object && isShipType(object->getObjectTypeNumber()))
+      {
+         Ship *localShip = static_cast<Ship *>(gc->getControlObject());
 
-   Ship *localShip = static_cast<Ship *>(gc->getControlObject());
+         if(ship == localShip)                              // Players always appear green to themselves
+            return &Colors::green;
 
-   return (ship == localShip || (!shipHasFlag(ship) && !shipHasFlag(localShip))) ? &Colors::green : &Colors::red;
+         if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
+            return &Colors::red;
+
+         return &Colors::green;                             // All others are green
+      }
+   }
+
+   return &Colors::white;     // Something's gone wrong!
+
 #endif
 }
 
