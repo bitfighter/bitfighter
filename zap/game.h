@@ -287,7 +287,7 @@ public:
 
    virtual bool isTestServer();                                   // Overridden in ServerGame
 
-   virtual const Color *getTeamColor(S32 teamId) const;           // ClientGame will override
+   virtual const Color *getTeamColor(S32 teamId) const;
 
    static const ModuleInfo *getModuleInfo(ShipModule module);
    
