@@ -1135,11 +1135,14 @@ void MountableItem::mountToShip(Ship *ship)
    if(mMount.isValid() && mMount == ship)    // Already mounted on ship!  Nothing to do!
       return;
 
+   if(!ship)
+      return;
+
    if(mMount.isValid())                      // Mounted on something else; dismount!
       dismount();
 
-   if(ship)
-      ship->addMountedItem(this);
+   ship->addMountedItem(this);
+   mMount = ship;
 
    mIsMounted = true;
    setMaskBits(MountMask);
