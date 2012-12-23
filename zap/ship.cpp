@@ -1389,7 +1389,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          if(mMountedItems[i].isValid())
          {
             S32 index = connection->getGhostIndex(mMountedItems[i]);
-            if(index != -1)
+            if(index != -1)      // This will skip any items that haven't yet been created on the client
             {
                stream->writeFlag(true);
                stream->writeInt(index, GhostConnection::GhostIdBitSize);
