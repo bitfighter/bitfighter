@@ -1144,7 +1144,7 @@ void MountableItem::mountToShip(Ship *ship)
    mIsMounted = true;
    setMaskBits(MountMask);
 
-    if(!isGhost()) 
+    if(!isGhost()) // i.e. if this is the server
     {
        TNLAssert(getGame(), "NULL game!");
        getGame()->getGameType()->onFlagMounted(ship->getTeam());
