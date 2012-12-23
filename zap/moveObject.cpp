@@ -1099,15 +1099,8 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 // Client & server, called via different paths
 void MountableItem::dismount()
 {
-   if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
-   {
-      for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
-         if(mMount->mMountedItems[i].getPointer() == this)
-         {
-            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
-            break;
-         }
-   }
+   if(mMount.isValid())                   // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
+      mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
 
    if(isGhost())     // Client only; on server, we may have come from onItemDropped()
       onItemDropped();
@@ -1135,19 +1128,18 @@ void MountableItem::onMountDestroyed()
 // unpackUpdate() in the case of all clients
 //
 // theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
-void MountableItem::mountToShip(Ship *theShip)     
+void MountableItem::mountToShip(Ship *ship)     
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
 
-   if(mMount.isValid() && mMount == theShip)    // Already mounted on ship!  Nothing to do!
+   if(mMount.isValid() && mMount == ship)    // Already mounted on ship!  Nothing to do!
       return;
 
-   if(mMount.isValid())                         // Mounted on something else; dismount!
+   if(mMount.isValid())                      // Mounted on something else; dismount!
       dismount();
 
-   mMount = theShip;
-   if(theShip)
-      theShip->mMountedItems.push_back(this);
+   if(ship)
+      ship->addMountedItem(this);
 
    mIsMounted = true;
    setMaskBits(MountMask);
@@ -1155,7 +1147,7 @@ void MountableItem::mountToShip(Ship *theShip)
     if(!isGhost()) 
     {
        TNLAssert(getGame(), "NULL game!");
-       getGame()->getGameType()->onFlagMounted(theShip->getTeam());
+       getGame()->getGameType()->onFlagMounted(ship->getTeam());
     }
 }
 

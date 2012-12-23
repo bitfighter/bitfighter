@@ -217,65 +217,35 @@ bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 }
 
 
-// Works for ships and robots!  --> or does it?  Was a template, but it wasn't working for regular ships, haven't tested with robots
-// Client only
-const Color *RabbitGameType::getShipColor(Ship *ship)
+const Color *RabbitGameType::getTeamColor(const BfObject *object) const
 {
-#ifdef ZAP_DEDICATED
-   return &Colors::white;
-#else
-
-   // In team game, use team color
-   if(isTeamGame())
-      return Parent::getShipColor(ship);
-
-   GameConnection *gc = static_cast<ClientGame *>(getGame())->getConnectionToServer();
-
-   if(gc)
-   {
-      BfObject *object = gc->getControlObject();
-
-      if(object && isShipType(object->getObjectTypeNumber()))
-      {
-         Ship *localShip = static_cast<Ship *>(gc->getControlObject());
-
-         if(ship == localShip)                              // Players always appear green to themselves
-            return &Colors::green;
-
-         if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
-            return &Colors::red;
-
-         return &Colors::green;                             // All others are green
-      }
-   }
-
-   return &Colors::white;     // Something's gone wrong!
-
-#endif
-}
-
-
-const Color *RabbitGameType::getTeamColor(S32 team, U8 objTypeNumber) const
-{
-   // Neutral flags are orange in Rabbit... everything else gets normal color (except ships, which are handled elsewhere)
-   if(objTypeNumber == FlagTypeNumber && team == TEAM_NEUTRAL)
+   // Neutral flags are orange in Rabbit
+   if(object->getObjectTypeNumber() == FlagTypeNumber && object->getTeam() == TEAM_NEUTRAL)
       return &Colors::orange50;  
 
-   return Parent::getTeamColor(team, objTypeNumber);
+   // In team game, ships use team color
+   if(object->getObjectTypeNumber() == PlayerShipTypeNumber && !isTeamGame())
+   {
+      Ship *localShip = static_cast<ClientGame *>(getGame())->getLocalShip();
+      
+      if(object == localShip)                            // Players always appear green to themselves
+         return &Colors::green;
+
+      const Ship *ship = static_cast<const Ship *>(object);
+
+      if(shipHasFlag(ship) || shipHasFlag(localShip))    // If a ship has the flag, it's red; if we have the flag, others are red
+         return &Colors::red;
+
+      return &Colors::green;                             // All others are green
+   }
+
+   return Parent::getTeamColor(object);
 }
 
 
-bool RabbitGameType::shipHasFlag(Ship *ship)
+bool RabbitGameType::shipHasFlag(const Ship *ship) const
 {
-   if(!ship)
-      return false;
-
-   for (S32 k = 0; k < ship->mMountedItems.size(); k++)
-   {
-      if(ship->mMountedItems[k].getPointer()->getObjectTypeNumber() == FlagTypeNumber)
-         return true;
-   }
-   return false;
+   return ship && ship->isCarryingItem(FlagTypeNumber);
 }
 
 
@@ -355,17 +325,18 @@ void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObjec
 void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
    // See if the ship is already carrying a flag - can only carry one at a time
-   if(ship->carryingFlag() != NO_FLAG)
+   if(ship->isCarryingItem(FlagTypeNumber))
       return;
 
-   if(flag->getTeam() != ship->getTeam() && flag->getTeam() != -1)
+   if(flag->getTeam() != ship->getTeam() && flag->getTeam() != TEAM_NEUTRAL)
       return;
 
    if(!ship->getClientInfo())
-      return;
+            return;
 
-   if(!isGameOver())  // Avoid flooding messages on game over.
+   if(!isGameOver())  // Avoid flooding messages when game is over
       s2cRabbitMessage(RabbitMsgGrab, ship->getClientInfo()->getName());
+
    flag->mTimer.reset(mFlagScoreTimer);
 
    flag->mountToShip(ship);

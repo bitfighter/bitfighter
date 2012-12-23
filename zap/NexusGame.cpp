@@ -224,32 +224,59 @@ void NexusGameType::addNexus(NexusZone *nexus)
    mNexus.push_back(nexus);
 }
 
-
-bool NexusGameType::isCarryingItems(Ship *ship)
+// Count flags on a ship.  This function assumes that all carried flags are NexusFlags, each of which can represent multiple flags
+// (see getFlagCount()).  This code will support a ship having several flags, but in practice, each ship will have exactly one.
+static S32 getMountedFlagCount(Ship *ship)
 {
-   if(ship->mMountedItems.size() > 1)     // Currently impossible, but in future may be possible
-      return true;
-   if(ship->mMountedItems.size() == 0)    // Should never happen
-      return false;
+   S32 flagCount = 0;
+   S32 itemCount = ship->getMountedItemCount();
 
-   MoveItem *item = ship->mMountedItems[0];   // Currently, ship always has a NexusFlagItem... this is it
-   if(!item)                                  // Null when a player drop flag and get destroyed at the same time
-      return false;  
+   for(S32 i = 0; i < itemCount; i++)
+   {
+      MountableItem *mountedItem = ship->getMountedItem(i);
 
-   return ( ((NexusFlagItem *) item)->getFlagCount() > 0 );    
+      if(mountedItem->getObjectTypeNumber() == FlagTypeNumber)      // All flags are NexusFlags here!
+      {
+         NexusFlagItem *flag = static_cast<NexusFlagItem *>(mountedItem);
+         flagCount += flag->getFlagCount();
+      }
+   }
+
+   return flagCount;
 }
 
 
-// Cycle through mounted items and find the first one (last one, actually) that's a FlagItem.
+// Currently only used when determining if there is something to drop
+bool NexusGameType::isCarryingItems(Ship *ship)
+{
+   S32 itemCount = ship->getMountedItemCount();
+
+   for(S32 i = 0; i < itemCount; i++)
+   {
+      MountableItem *mountedItem = ship->getMountedItem(i);
+      if(!mountedItem)        // Could be null when a player drop their flags and gets destroyed at the same time
+         continue;
+
+      if(mountedItem->getObjectTypeNumber() == FlagTypeNumber)      
+      {
+         FlagItem *flag = static_cast<FlagItem *>(mountedItem);
+         if(flag->getFlagCount() > 0)
+            return true;
+      }
+      else     // Must be carrying something other than a flag.  Maybe we could drop that!
+         return true;
+   }
+
+   return false;
+}
+
+
+// Cycle through mounted items and find the first one that's a FlagItem.
 // In practice, this will always be a NexusFlagItem... I think...
-// Returns NULL if it can't find one.
+// Returns NULL if it can't find a flag.
 static FlagItem *findFirstFlag(Ship *ship)
 {
-   for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
-      if(ship->mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber)
-         return static_cast<FlagItem *>(ship->mMountedItems[i].getPointer());
-
-   return NULL;
+   return static_cast<FlagItem *>(ship->getMountedItem(ship->getFlagIndex()));
 }
 
 
@@ -352,23 +379,23 @@ TNL_IMPLEMENT_NETOBJECT_RPC(NexusZone, s2cFlagsReturned, (), (), NetClassGroupGa
 
 // The nexus is open.  A ship has entered it.  Now what?
 // Runs on server only
-void NexusGameType::shipTouchNexus(Ship *theShip, NexusZone *theNexus)
+void NexusGameType::shipTouchNexus(Ship *ship, NexusZone *theNexus)
 {
-   FlagItem *theFlag = findFirstFlag(theShip);
+   FlagItem *flag = findFirstFlag(ship);
 
-   if(!theFlag)      // Just in case!
+   if(!flag)      // findFirstFlag can return NULL
       return;
 
-   updateScore(theShip, ReturnFlagsToNexus, theFlag->getFlagCount());
+   updateScore(ship, ReturnFlagsToNexus, flag->getFlagCount());
 
-   S32 flagsReturned = theFlag->getFlagCount();
-   ClientInfo *scorer = theShip->getClientInfo();
+   S32 flagsReturned = flag->getFlagCount();
+   ClientInfo *scorer = ship->getClientInfo();
 
    if(flagsReturned > 0 && scorer)
    {
       if(!isGameOver())  // Avoid flooding messages on game over.
-         s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), theFlag->getFlagCount(), 
-                      getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
+         s2cNexusMessage(NexusMsgScore, scorer->getName().getString(), flag->getFlagCount(), 
+                      getEventScore(TeamScore, ReturnFlagsToNexus, flag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
 
       // See if this event qualifies for an achievement
@@ -383,7 +410,7 @@ void NexusGameType::shipTouchNexus(Ship *theShip, NexusZone *theNexus)
       }
    }
 
-   theFlag->changeFlagCount(0);
+   flag->changeFlagCount(0);
 }
 
 
@@ -686,11 +713,10 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 //////////  END Client only code
 
-
-
+// Server only
 void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject)
 {
-   if(isGameOver())  // Avoid flooding messages on game over.
+   if(isGameOver())  // Avoid flooding messages when game is over
       return;
 
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
@@ -700,63 +726,56 @@ void NexusGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObject
 
    Ship *ship = static_cast<Ship *>(clientObject);
 
-   // Check for yard sale  (is this when the flags a player is carrying go drifting about??)
-   for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
+   // Check for yard sale  (i.e. tons of flags released at same time)
+   S32 flagCount = getMountedFlagCount(ship);
+
+   static const S32 YARD_SALE_THRESHOLD = 8;
+
+   if(flagCount >= YARD_SALE_THRESHOLD)
    {
-      if(ship->mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber)
-      {
-         FlagItem *flag = static_cast<NexusFlagItem *>(ship->mMountedItems[i].getPointer());
+      Point pos = ship->getActualPos();
 
-         if(flag->getFlagCount() >= YardSaleCount)
-         {
-            Point pos = flag->getActualPos();
-
-            s2cAddYardSaleWaypoint(pos.x, pos.y);
-            if(!isGameOver())  // Avoid flooding messages on game over.
-               s2cNexusMessage(NexusMsgYardSale, ship->getClientInfo()->getName().getString(), 0, 0);
-         }
-
-         return;
-      }
+      // Notify the clients
+      s2cAddYardSaleWaypoint(pos.x, pos.y);
+      s2cNexusMessage(NexusMsgYardSale, ship->getClientInfo()->getName().getString(), 0, 0);
    }
 }
 
 
-void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
+void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *touchedFlag)
 {
    // Don't mount to ship, instead increase current mounted NexusFlag
    //    flagCount, and remove collided flag from game
-   for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
+
+   FlagItem *shipFlag = findFirstFlag(ship);
+
+   TNLAssert(shipFlag, "Expected to find a flag on this ship!");
+
+   if(!shipFlag)      // findFirstFlag can return NULL... but probably won't
+      return;
+
+   U32 shipFlagCount = shipFlag->getFlagCount();
+
+   if(touchedFlag)
+      shipFlagCount += touchedFlag->getFlagCount();
+   else
+      shipFlagCount++;
+
+   shipFlag->changeFlagCount(shipFlagCount);
+
+
+   // Now that the touchedFlag has been absorbed intot the ship, remove it from the game
+   touchedFlag->removeFromDatabase(true); 
+
+
+   if(mNexusIsOpen)
    {
-      if(ship->mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber)
-      {
-         FlagItem *shipFlag = static_cast<FlagItem *>(ship->mMountedItems[i].getPointer());
+      // Check if ship is sitting on an open Nexus (can use static_cast because we already know the type, even though it could be NULL)
+      NexusZone *nexus = static_cast<NexusZone *>(ship->isInZone(NexusTypeNumber));
 
-         U32 flagCount = shipFlag->getFlagCount();
-
-         if(flag)
-            flagCount += flag->getFlagCount();
-         else
-            flagCount += 1;
-
-         shipFlag->changeFlagCount(flagCount);
-
-         if(mNexusIsOpen)
-         {
-            // Check if ship is sitting on an open Nexus (can use static_cast because we already know the type, even though it could be NULL)
-            NexusZone *nexus = static_cast<NexusZone *>(ship->isInZone(NexusTypeNumber));
-
-            if(nexus)         
-               shipTouchNexus(ship, nexus);
-         }
-
-         break;
-      }
-   }
-
-   flag->setCollideable(false);
-   flag->removeFromDatabase(false);    // Could be true and remove deleteObject() call line?
-   flag->deleteObject();
+      if(nexus)         
+         shipTouchNexus(ship, nexus);
+   }   
 }
 
 
@@ -869,8 +888,7 @@ void NexusFlagItem::onMountDestroyed()
 
    // Now delete the flag itself
    dismount();
-   removeFromDatabase(false);    // Could be true and remove deleteObject() call line?
-   deleteObject();
+   removeFromDatabase(true);   
 }
 
 

@@ -93,6 +93,8 @@ protected:
    bool mModulePrimaryActive[ModuleCount];       // Is the primary component of the module active at this moment?
    bool mModuleSecondaryActive[ModuleCount];     // Is the secondary component of the module active?
 
+   Vector<SafePtr<MountableItem> > mMountedItems;    
+
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
    Point mSpawnPoint;                     // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
@@ -192,8 +194,7 @@ public:
    F32 mass;            // Mass of ship, not used
    bool hasExploded;
 
-   Vector<SafePtr<MountableItem> > mMountedItems;    // TODO: Make these protected
-   Vector<SafePtr<BfObject> > mRepairTargets;
+   Vector<SafePtr<BfObject> > mRepairTargets;            // TODO: Make this protected
 
    virtual void render(S32 layerIndex);
    void calcThrustComponents(F32 *thrust);
@@ -208,6 +209,21 @@ public:
    F32 getEnergyFraction();     // Only used by bots
    S32 getMaxEnergy();
 
+   // Related to mounting and carrying items
+   S32 getMountedItemCount() const;
+
+   bool isCarryingItem(U8 objectType) const;
+   MountableItem *unmountItem(U8 objectType);
+
+   MountableItem *getMountedItem(S32 index) const;
+   void addMountedItem(MountableItem *item);
+   void removeMountedItem(MountableItem *item);
+
+   S32 getFlagIndex();     // Returns index of first flag, or NO_FLAG if ship has no flags
+   S32 getFlagCount();     // Returns the number of flags ship is carrying
+
+
+
    void onGhostRemove();
 
    bool isModulePrimaryActive(ShipModule mod);
@@ -218,12 +234,6 @@ public:
    bool isDestroyed();
    bool isItemMounted();    // <== unused
    bool isVisible(bool viewerHasSensor);
-
-   S32 carryingFlag();     // Returns index of first flag, or NO_FLAG if ship has no flags
-   S32 getFlagCount();     // Returns the number of flags ship is carrying
-
-   bool isCarryingItem(U8 objectType);
-   MountableItem *unmountItem(U8 objectType);
 
    void creditEnergy(S32 deltaEnergy);
 

@@ -72,7 +72,7 @@ void HTFGameType::addFlag(FlagItem *flag)
 void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
    // See if the ship is already carrying a flag - can only carry one at a time
-   if(theShip->carryingFlag() != NO_FLAG)
+   if(theShip->isCarryingItem(FlagTypeNumber))
       return;
 
    // Can only pick up flags on your team or neutral
@@ -167,12 +167,12 @@ void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
          return;
 
    // Ok, it's an empty zone on our team... See if this ship is carrying a flag
-   S32 flagIndex = s->carryingFlag();
+   S32 flagIndex = s->getFlagIndex();
    if(flagIndex == NO_FLAG)
       return;
 
    // Ok, the ship has a flag and it's on the ship...
-   MoveItem *item = s->mMountedItems[flagIndex];
+   MoveItem *item = s->getMountedItem(flagIndex);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {

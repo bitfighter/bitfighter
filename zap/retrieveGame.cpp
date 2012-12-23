@@ -69,11 +69,11 @@ void RetrieveGameType::addFlag(FlagItem *flag)
 void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
    // See if the ship is already carrying a flag - can only carry one at a time
-   if(theShip->carryingFlag() != NO_FLAG)
+   if(theShip->isCarryingItem(FlagTypeNumber))
       return;
 
    // Can only pick up flags on your team or neutral
-   if(theFlag->getTeam() != -1 && theShip->getTeam() != theFlag->getTeam())
+   if(theFlag->getTeam() != TEAM_NEUTRAL && theShip->getTeam() != theFlag->getTeam())
       return;
 
    S32 flagIndex;
@@ -82,7 +82,7 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       if(mFlags[flagIndex] == theFlag)
          break;
 
-   // See if this flag is already in a flag zone owned by the ship's team
+   // See if this flag is already in a capture zone owned by the ship's team
    if(theFlag->getZone() != NULL && theFlag->getZone()->getTeam() == theShip->getTeam())
       return;
 
@@ -155,13 +155,13 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
          return;
 
    // Ok, it's an empty zone on our team: See if this ship is carrying a flag...
-   S32 flagIndex = s->carryingFlag();
+   S32 flagIndex = s->getFlagIndex();
 
    if(flagIndex == NO_FLAG)
       return;
 
    // Ok, the ship has a flag and it's on the ship and we're in an empty zone
-   MoveItem *item = s->mMountedItems[flagIndex];
+   MoveItem *item = s->getMountedItem(flagIndex);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {

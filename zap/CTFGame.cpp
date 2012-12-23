@@ -77,11 +77,13 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       else     // Flag is at home
       {
          // Check if this client has an enemy flag mounted
-         for(S32 i = 0; i < theShip->mMountedItems.size(); i++)
+         for(S32 i = 0; i < theShip->getMountedItemCount(); i++)
          {
-            if(theShip->mMountedItems[i].getPointer()->getObjectTypeNumber() == FlagTypeNumber)
+            MountableItem *mountedItem = theShip->getMountedItem(i);
+
+            if(mountedItem && mountedItem->getObjectTypeNumber() == FlagTypeNumber)
             {
-               FlagItem *mountedFlag = static_cast<FlagItem *>(theShip->mMountedItems[i].getPointer());
+               FlagItem *mountedFlag = static_cast<FlagItem *>(mountedItem);
                static StringTableEntry capString("%e0 captured the %e1 flag!");
 
                Vector<StringTableEntry> e;
@@ -104,7 +106,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // Make sure we don't already have a flag mounted... this will never happen in an ordinary game
       // But you can only carry one flag in CTF
-      if(theShip->carryingFlag() == NO_FLAG)
+      if(theShip->isCarryingItem(FlagTypeNumber))
       {
          // Alert the clients
          static StringTableEntry takeString("%e0 took the %e1 flag!");

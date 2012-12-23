@@ -257,6 +257,8 @@ public:
    virtual void onMountDestroyed();
    virtual void onItemDropped();
 
+   //virtual S32 getItemCount();      // Some mounted items (like flags in Nexus Game) could represent more than 1 (or 0) items!
+
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(MountableItem);

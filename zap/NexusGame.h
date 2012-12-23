@@ -127,7 +127,6 @@ public:
       DefaultNexusReturnDelay = 60000,
       DefaultNexusCapDelay = 15000,
       YardSaleWaypointTime = 5000,
-      YardSaleCount = 8,
    };
 
    // Message types

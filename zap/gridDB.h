@@ -88,7 +88,7 @@ public:
 
    void removeFromDatabase(bool deleteObject);
 
-   U8 getObjectTypeNumber();
+   U8 getObjectTypeNumber() const;
 
    virtual bool isDatabasable();    // Can this item actually be inserted into a database?
 

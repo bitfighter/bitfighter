@@ -118,6 +118,7 @@ public:
    ClientInfo *getClientInfo();
 
    ClientInfo *getLocalRemoteClientInfo();
+   Ship *getLocalShip();
 
    string getLoginPassword() const;
    void setLoginPassword(const string &loginPassword);

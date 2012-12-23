@@ -1723,7 +1723,7 @@ bool Ship::isVisible(bool viewerHasSensor)
 
 
 // Returns index of first flag mounted on ship, or NO_FLAG if there aren't any
-S32 Ship::carryingFlag()
+S32 Ship::getFlagIndex()
 {
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeNumber() == FlagTypeNumber))
@@ -1745,11 +1745,12 @@ S32 Ship::getFlagCount()
 }
 
 
-bool Ship::isCarryingItem(U8 objectType)
+bool Ship::isCarryingItem(U8 objectType) const
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeNumber() == objectType)
          return true;
+
    return false;
 }
 
@@ -2383,7 +2384,7 @@ void Ship::render(S32 layerIndex)
    }
 
 
-   renderShip(mShapeType, gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime(),
+   renderShip(mShapeType, gameType->getTeamColor(this), alpha, thrusts, mHealth, mRadius, clientGame->getCurrentTime(),
               isModulePrimaryActive(ModuleCloak), isModulePrimaryActive(ModuleShield), showSensorIndicator,
               isModulePrimaryActive(ModuleRepair) && mHealth < 1, hasModule(ModuleArmor));
 
@@ -2417,6 +2418,39 @@ void Ship::render(S32 layerIndex)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItemAlpha(getRenderPos(), alpha);
 #endif
+}
+
+
+S32 Ship::getMountedItemCount() const
+{
+   return mMountedItems.size();
+}
+
+
+MountableItem *Ship::getMountedItem(S32 index) const
+{
+   if(index < 0 || index >= mMountedItems.size())
+      return NULL;
+
+   return mMountedItems[index];    
+}
+
+
+void Ship::addMountedItem(MountableItem *item)
+{
+   mMountedItems.push_back(item);
+}
+
+
+// Supposes mountedItems are not repeated, and list is unordered
+void Ship::removeMountedItem(MountableItem *item)
+{
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i] == item)
+      {
+         mMountedItems.erase_fast(i);
+         return;
+      }
 }
 
 

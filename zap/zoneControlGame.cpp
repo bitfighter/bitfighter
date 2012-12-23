@@ -63,7 +63,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    static StringTableEntry takeString("%e0 of team %e1 has the flag!");
 
    // A ship can only carry one flag in ZC.  If it already has one, there's nothing to do.
-   if(theShip->carryingFlag() != NO_FLAG)
+   if(theShip->isCarryingItem(FlagTypeNumber))
       return;
 
    // Can only pick up flags on your team or neutral
@@ -112,7 +112,7 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 {
    // Zone already belongs to team, or ship has no flag.  In either case, do nothing.
-   if(z->getTeam() == s->getTeam() || s->carryingFlag() == NO_FLAG)
+   if(z->getTeam() == s->getTeam() || s->isCarryingItem(FlagTypeNumber))
       return;
 
    static Vector<StringTableEntry> e;
@@ -209,13 +209,13 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    }
 
    // Return the flag to spawn point
-   for(S32 i = 0; i < s->mMountedItems.size(); i++)
+   for(S32 i = 0; i < s->getMountedItemCount(); i++)
    {
-      MoveItem *theItem = s->mMountedItems[i];
-      if(theItem->getObjectTypeNumber() != FlagTypeNumber)
+      MountableItem *item = s->getMountedItem(i);
+      if(item->getObjectTypeNumber() != FlagTypeNumber)
          continue;
 
-      FlagItem *mountedFlag = static_cast<FlagItem *>(theItem);
+      FlagItem *mountedFlag = static_cast<FlagItem *>(item);
 
       mountedFlag->dismount();
       mountedFlag->sendHome();

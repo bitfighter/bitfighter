@@ -323,6 +323,17 @@ ClientInfo *ClientGame::getLocalRemoteClientInfo()
 }
 
 
+Ship *ClientGame::getLocalShip()
+{
+   GameConnection *gc = getConnectionToServer();
+
+   if(gc)
+      return static_cast<Ship *>(gc->getControlObject());
+
+   return NULL;
+}
+
+
 void ClientGame::setSpawnDelayed(bool spawnDelayed)
 {
    if(mSpawnDelayed && spawnDelayed)    // Yes, yes, we heard you the first time!

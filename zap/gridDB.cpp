@@ -772,7 +772,7 @@ bool DatabaseObject::isCollisionEnabled()
 }
 
 
-U8 DatabaseObject::getObjectTypeNumber()
+U8 DatabaseObject::getObjectTypeNumber() const
 {
    return mObjectTypeNumber;
 }

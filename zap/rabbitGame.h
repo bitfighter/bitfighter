@@ -75,14 +75,13 @@ public:
 
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
-   bool shipHasFlag(Ship *ship);
+   bool shipHasFlag(const Ship *ship) const;
 
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);
    void onFlagDismounted();
 
-   const Color *getShipColor(Ship *s);
-   const Color *getTeamColor(S32 team, U8 objTypeNumber = UnknownTypeNumber) const;
+   const Color *getTeamColor(const BfObject *object) const;
 
    void onFlagHeld(Ship *ship);
    void onFlaggerDead(Ship *killerShip);

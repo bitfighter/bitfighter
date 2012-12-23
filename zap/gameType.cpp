@@ -1819,27 +1819,21 @@ bool GameType::makeSureTeamCountIsNotZero()
 }
 
 
-const Color *GameType::getTeamColor(BfObject *theObject) const
+// This method can be overridden by other game types that handle colors differently
+const Color *GameType::getTeamColor(const BfObject *object) const
 {
-   return getTeamColor(theObject->getTeam(), theObject->getObjectTypeNumber());
+   return getTeamColor(object->getTeam());
 }
 
 
 // This method can be overridden by other game types that handle colors differently
-const Color *GameType::getTeamColor(S32 teamIndex, U8 objTypeNumber) const
+const Color *GameType::getTeamColor(S32 teamIndex) const
 {
    return mGame->getTeamColor(teamIndex);
 }
 
 
-// TODO: can be replaced by getTeamColor?
-const Color *GameType::getShipColor(Ship *s)
-{
-   return getTeamColor(s->getTeam(), PlayerShipTypeNumber);
-}
-
-
-// Run on the server.
+// Runs on the server.
 // Adds a new client to the game when a player or bot joins, or when a level cycles.
 // Note that when a new game starts, players will be added in order from
 // strongest to weakest.  Bots will be added to their predefined teams, or if that is invalid, to the lowest ranked team.
@@ -3733,9 +3727,9 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
    Ship *ship = static_cast<Ship *>(controlObject);
 
-   S32 count = ship->mMountedItems.size();
+   S32 count = ship->getMountedItemCount();
    for(S32 i = count - 1; i >= 0; i--)
-      ship->mMountedItems[i]->onItemDropped();
+      ship->getMountedItem(i)->onItemDropped();
 }
 
 
@@ -4182,7 +4176,7 @@ S32 GameType::getFlagCount()
 
 bool GameType::isCarryingItems(Ship *ship)
 {
-   return ship->mMountedItems.size() > 0;
+   return ship->getMountedItemCount() > 0;
 }
 
 
