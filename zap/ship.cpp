@@ -1764,6 +1764,15 @@ MountableItem *Ship::unmountItem(U8 objectType)
 }
 
 
+// Dismount all objects of specified type
+void Ship::dismountAll(U8 objectType)
+{
+   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
+      if(mMountedItems[i]->getObjectTypeNumber() == objectType)
+         mMountedItems[i]->dismount();
+}
+
+
 WeaponType Ship::getSelectedWeapon()
 {
    return mWeapon[mActiveWeaponIndx];
@@ -1841,9 +1850,7 @@ bool Ship::setLoadout(const Vector<U8> &loadout, bool silent)
 
    if(!hasModule(ModuleEngineer))         // We don't have engineer, so drop any resources we may be carrying
    {
-      for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-         if(mMountedItems[i]->getObjectTypeNumber() == ResourceItemTypeNumber)
-            mMountedItems[i]->dismount();
+      dismountAll(ResourceItemTypeNumber);
 
       if(getClientInfo())
       {
