@@ -787,6 +787,8 @@ bool NexusGameType::spawnShip(ClientInfo *clientInfo)
 
    Ship *ship = clientInfo->getShip();
 
+   TNLAssert(ship, "Why NULL ship??");
+
    NexusFlagItem *newFlag = new NexusFlagItem(ship->getActualPos());
    newFlag->addToGame(getGame(), getGame()->getGameObjDatabase());
    newFlag->mountToShip(ship);    // mountToShip() can handle NULL
