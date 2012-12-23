@@ -232,7 +232,6 @@ public:
    bool hasModule(ShipModule mod);
 
    bool isDestroyed();
-   bool isItemMounted();    // <== unused
    bool isVisible(bool viewerHasSensor);
 
    void creditEnergy(S32 deltaEnergy);
