@@ -839,9 +839,9 @@ void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
    if(mIsMounted && mFlagCount > 0)
    {
       if     (mFlagCount >= 40) glColor(Colors::paleRed, alpha);   // like, rad!
-      else if(mFlagCount >= 20) glColor(Colors::yellow, alpha);    // cool!
-      else if(mFlagCount >= 10) glColor(Colors::green, alpha);     // ok, I guess
-      else                      glColor(Colors::white, alpha);     // lame
+      else if(mFlagCount >= 20) glColor(Colors::yellow,  alpha);   // cool!
+      else if(mFlagCount >= 10) glColor(Colors::green,   alpha);   // ok, I guess
+      else                      glColor(Colors::white,   alpha);   // lame
 
       UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }
