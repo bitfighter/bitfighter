@@ -405,7 +405,7 @@ void ClientInfo::sEngineerDeploymentInterrupted(U32 objectType)
 {
    if(objectType == EngineeredTeleporterExit)
    {
-      getShip()->destroyTeleporter();
+      getShip()->destroyPartiallyDeployedTeleporter();
       sTeleporterCleanup();
    }
 }

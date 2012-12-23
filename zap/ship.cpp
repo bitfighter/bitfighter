@@ -1854,7 +1854,7 @@ bool Ship::setLoadout(const Vector<U8> &loadout, bool silent)
 
       if(getClientInfo())
       {
-         destroyTeleporter();
+         destroyPartiallyDeployedTeleporter();
          getClientInfo()->sTeleporterCleanup();
       }
    }
@@ -2002,20 +2002,21 @@ void Ship::kill()
    // Handle if in the middle of building a teleport
    if(!isGhost())   // Server only
    {
-      destroyTeleporter();
+      destroyPartiallyDeployedTeleporter();
       if(getClientInfo())
          getClientInfo()->sTeleporterCleanup();
    }
 }
 
+
 // Server only
-void Ship::destroyTeleporter()
+void Ship::destroyPartiallyDeployedTeleporter()
 {
    if(mEngineeredTeleporter.isValid())
    {
       Teleporter *t = mEngineeredTeleporter;
       mEngineeredTeleporter = NULL;
-      t->onDestroyed();  // setting NULL first to avoid "Your teleporter got destroyed" message.
+      t->onDestroyed();       // Set to NULL first to avoid "Your teleporter got destroyed" message
    }
 }
 

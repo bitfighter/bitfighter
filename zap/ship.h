@@ -282,7 +282,7 @@ public:
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();
 
-   void destroyTeleporter();
+   void destroyPartiallyDeployedTeleporter();
 
    virtual void damageObject(DamageInfo *theInfo);
 
