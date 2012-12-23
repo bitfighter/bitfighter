@@ -1703,12 +1703,6 @@ bool Ship::isDestroyed()
 }
 
 
-bool Ship::isItemMounted() 
-{ 
-   return mMountedItems.size() != 0; 
-}
-
-
 bool Ship::isVisible(bool viewerHasSensor) 
 {
    if(viewerHasSensor || !isModulePrimaryActive(ModuleCloak))
