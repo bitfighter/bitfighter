@@ -212,9 +212,12 @@ void FlagItem::idle(BfObject::IdleCallPath path)
 }
 
 
-void FlagItem::mountToShip(Ship *theShip)
+void FlagItem::mountToShip(Ship *ship)
 {
-   Parent::mountToShip(theShip);
+   if(!ship)
+      return;
+
+   Parent::mountToShip(ship);
 
    if(mIsMounted)    // Will be true unless something went wrong in mountToShip
       mIsAtHome = false;
