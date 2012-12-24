@@ -372,7 +372,7 @@ void Robot::kill()
 
    // Dump mounted items
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      if(mMountedItems[i].isValid())  // server quitting can make an object invalid.
+      if(mMountedItems[i].isValid())            // Server quitting can make an object invalid
          mMountedItems[i]->onMountDestroyed();
 }
 
