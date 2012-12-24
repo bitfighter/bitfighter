@@ -304,14 +304,13 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 
    StringTableEntry *ste;
 
-   if(flagCount > 1)
+   if(flagCount == 1)
+      ste = &dropOneString;
+   else
    {
       ste = &dropManyString;
       e.push_back(itos(flagCount).c_str());
    }
-   else
-      ste = &dropOneString;
-
       
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
 }
