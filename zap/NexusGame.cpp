@@ -297,17 +297,22 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
       return;
 
    Vector<StringTableEntry> e;
-
    e.push_back(ship->getClientInfo()->getName());
-   if(flagCount > 1)
-      e.push_back(itos(flagCount).c_str());
-
 
    static StringTableEntry dropOneString( "%e0 dropped a flag!");
    static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
 
-   StringTableEntry *ste = (flagCount > 1) ? &dropManyString : &dropOneString;
+   StringTableEntry *ste;
 
+   if(flagCount > 1)
+   {
+      ste = &dropManyString;
+      e.push_back(itos(flagCount).c_str());
+   }
+   else
+      ste = &dropOneString;
+
+      
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
 }
 
