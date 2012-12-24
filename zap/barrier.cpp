@@ -903,7 +903,9 @@ WallSegment::WallSegment(GridDatabase *gridDatabase, const Vector<Point> &points
 void WallSegment::init(GridDatabase *database, S32 owner)
 {
    // Recompute the edges based on our new corner points
-   resetEdges();                                            
+   resetEdges();   
+
+   mObjectTypeNumber = WallSegmentTypeNumber;
 
    // Add item to database, set its extents
    addToDatabase(database, Rect(mCorners));
@@ -914,10 +916,6 @@ void WallSegment::init(GridDatabase *database, S32 owner)
    mOwner = owner; 
    invalid = false; 
    mSelected = false;
-
-   /////
-   // Set some things required by DatabaseObject
-   mObjectTypeNumber = WallSegmentTypeNumber;
 }
 
 
