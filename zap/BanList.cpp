@@ -250,6 +250,7 @@ Vector<string> BanList::banListToString()
 
 void BanList::loadBanList(const Vector<string> &banItemList)
 {
+   serverBanList.clear();  // Clear old list for /loadini command.
    for(S32 i = 0; i < banItemList.size(); i++)
       if(!processBanListLine(banItemList[i]))
          logprintf("Ban list item on line %d is malformed: %s", i+1, banItemList[i].c_str());
