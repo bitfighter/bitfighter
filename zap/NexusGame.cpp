@@ -883,7 +883,7 @@ void NexusFlagItem::dropFlags(U32 flags)
       }
    }
    else     // Normal situation
-      for(U32 i = 0; i < flags; i++)
+      for(S32 i = 0; i < flags; i++)
          NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
