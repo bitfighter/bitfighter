@@ -445,7 +445,7 @@ void NexusGameType::releaseFlag(Game *game, const Point &pos, const Point &start
    vel += startVel;
 
 
-   FlagItem *newFlag = new NexusFlagItem(pos, vel, true);
+   FlagItem *newFlag = new FlagItem(pos, vel, true);
 
    if(count > 1)
       newFlag->changeFlagCount(count);
