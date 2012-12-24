@@ -876,8 +876,10 @@ void NexusFlagItem::dropFlags(U32 flags)
          // By dividing and subtracting, it works by using integer divide, subtracting from "flags" left, 
          // and the last loop is (i == 1), dropping exact amount using only limited FlagItems
          U32 thisFlagDropped = flags / i;
-         flags -= thisFlagDropped;
+
          NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel(), thisFlagDropped);
+
+         flags -= thisFlagDropped;
       }
    }
    else
