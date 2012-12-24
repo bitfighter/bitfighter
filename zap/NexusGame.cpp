@@ -901,15 +901,17 @@ void NexusFlagItem::onMountDestroyed()
 
 void NexusFlagItem::onItemDropped()
 {
-   if(!isGhost())
+   if(!isGhost())    // i.e. Server only
    {
       GameType *gameType = getGame()->getGameType();
-      if(!gameType)                 // Crashed here once, don't know why, so I added the check
+      if(!gameType)        // Crashed here once, don't know why, so I added the check
          return;
 
       gameType->itemDropped(mMount, this);      // Sends messages; no flags actually dropped here
    }
-   dropFlags(mFlagCount);          // Only dropping the flags we're carrying, not the "extra" one that comes when we die
+
+   // Client and server
+   dropFlags(mFlagCount);  // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
 
 
