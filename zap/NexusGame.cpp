@@ -867,7 +867,7 @@ void NexusFlagItem::dropFlags(U32 flags)
    if(isGhost())
       return;
 
-   static const U32 MAX_DROP_FLAGS = 200;
+   static const U32 MAX_DROP_FLAGS = 200;    // If we drop too many flags, things just get bogged down.  This limit is rarely hit.
 
    if(flags > MAX_DROP_FLAGS)
    {
