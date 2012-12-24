@@ -299,7 +299,7 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
    Vector<StringTableEntry> e;
    e.push_back(ship->getClientInfo()->getName());
 
-   static StringTableEntry dropOneString( "%e0 dropped a flag!");
+   static StringTableEntry dropOneString(  "%e0 dropped a flag!");
    static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
 
    StringTableEntry *ste;
