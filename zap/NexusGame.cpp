@@ -290,7 +290,7 @@ void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 
    U32 flagCount = flag->getFlagCount();
 
-   if(flagCount == 0)  // This is needed if you drop your flags, then pick up a different item type (like resource item), and drop it
+   if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
       return;
 
    if(!ship->getClientInfo())
