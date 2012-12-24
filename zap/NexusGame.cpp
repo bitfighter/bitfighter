@@ -865,7 +865,8 @@ void NexusFlagItem::dropFlags(U32 flags)
    if(!mMount.isValid())
       return;
 
-   if(isGhost())  //avoid problem with adding flag to client, when it doesn't really exist on server.
+   // This is server only, folks -- avoid problem with adding flag on client, when it doesn't really exist on server
+   if(isGhost())
       return;
 
    if(flags > MAX_DROP_FLAGS)
@@ -901,17 +902,16 @@ void NexusFlagItem::onMountDestroyed()
 
 void NexusFlagItem::onItemDropped()
 {
-   if(!isGhost())    // i.e. Server only
-   {
-      GameType *gameType = getGame()->getGameType();
-      if(!gameType)        // Crashed here once, don't know why, so I added the check
-         return;
+   if(isGhost())    
+      return;
 
-      gameType->itemDropped(mMount, this);      // Sends messages; no flags actually dropped here
-   }
+   // Server only
+   GameType *gameType = getGame()->getGameType();
+   if(!gameType)        // Crashed here once, don't know why, so I added the check
+      return;
 
-   // Client and server
-   dropFlags(mFlagCount);  // Only dropping the flags we're carrying, not the "extra" one that comes when we die
+   gameType->itemDropped(mMount, this);   // Sends messages; no flags actually dropped here
+   dropFlags(mFlagCount);                 // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
 
 
