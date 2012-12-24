@@ -444,17 +444,13 @@ void NexusGameType::releaseFlag(Game *game, const Point &pos, const Point &start
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
 
+
+   FlagItem *newFlag = new NexusFlagItem(pos, vel, true);
+
    if(count > 1)
-   {
-      NexusFlagItem *newFlag = new NexusFlagItem(pos, vel, true);
       newFlag->changeFlagCount(count);
-      newFlag->addToGame(game, game->getGameObjDatabase());
-   }
-   else     // count == 0 or 1... this is default condition
-   {
-      FlagItem *newFlag = new FlagItem(pos, vel, true);        // <== why emit FlagItem and not NexusFlagItem?
-      newFlag->addToGame(game, game->getGameObjDatabase());
-   }
+
+   newFlag->addToGame(game, game->getGameObjDatabase());
 }
 
 
@@ -885,7 +881,7 @@ void NexusFlagItem::dropFlags(U32 flags)
       }
    }
    else     // Normal situation
-      for(S32 i = 0; i < flags; i++)
+      for(U32 i = 0; i < flags; i++)
          NexusGameType::releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
