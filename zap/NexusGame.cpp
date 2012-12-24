@@ -46,8 +46,6 @@
 namespace Zap
 {
 
-const U32 MAX_DROP_FLAGS = 200;
-
 TNL_IMPLEMENT_NETOBJECT(NexusGameType);
 
 
@@ -868,6 +866,8 @@ void NexusFlagItem::dropFlags(U32 flags)
    // This is server only, folks -- avoids problem with adding flag on client when it doesn't really exist on server
    if(isGhost())
       return;
+
+   static const U32 MAX_DROP_FLAGS = 200;
 
    if(flags > MAX_DROP_FLAGS)
    {
