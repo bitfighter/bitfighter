@@ -221,15 +221,17 @@ bool Robot::prepareEnvironment()
 static string getNextName()
 {
    static const string botNames[] = {
-      "Addison", "Alexis", "Amelia", "Audrey", "Chloe", "Claire", "Elizabeth", "Ella", 
-      "Emily", "Emma", "Evelyn" "Gabriella", "Hailey", "Hannah", "Isabella", "Layla", 
-      "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe" 
+      "Addison", "Alexis", "Amelia", "Audrey", "Chloe", "Claire", "Elizabeth", "Ella",
+      "Emily", "Emma", "Evelyn", "Gabriella", "Hailey", "Hannah", "Isabella", "Layla",
+      "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe"
    };
 
-   static S32 nameIndex = -1;
-   nameIndex++;
+   static const S32 size = ARRAYSIZE(botNames);
 
-   return botNames[nameIndex % ARRAYSIZE(botNames)];
+   static S32 nameIndex = -1;
+   nameIndex = (nameIndex + 1) % size;  // Rollover list if needed
+
+   return botNames[nameIndex];
 }
 
 
