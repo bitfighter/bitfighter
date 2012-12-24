@@ -129,7 +129,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    TNLAssert(theObject->mDatabase != this,  "Already added to database, trying to add to same database again!");
    TNLAssert(!theObject->mDatabase,         "Already added to database, trying to add to different database!");
-   TNLAssert(theObject->mExtent == extents, "Extents not equal!");
+   TNLAssert(theObject->mExtent == extents, "Extents not equal!");  // <== if this never trips, should we just use mExtent rather than passing extens?
 
    if(theObject->mDatabase)      // Should never happen
       return;
