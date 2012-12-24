@@ -865,7 +865,7 @@ void NexusFlagItem::dropFlags(U32 flags)
    if(!mMount.isValid())
       return;
 
-   // This is server only, folks -- avoid problem with adding flag on client, when it doesn't really exist on server
+   // This is server only, folks -- avoids problem with adding flag on client when it doesn't really exist on server
    if(isGhost())
       return;
 
