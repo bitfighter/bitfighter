@@ -258,7 +258,7 @@ string Robot::runGetName()
       if(!lua_isstring(L, -1))
       {
          string name = getNextName();
-         logError("Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
+         logprintf(LogConsumer::LogWarning, "Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
 
          lua_pop(L, 1);          // Remove thing that wasn't a name from the stack
          TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
