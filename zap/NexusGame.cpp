@@ -280,7 +280,8 @@ static FlagItem *findFirstFlag(Ship *ship)
 }
 
 
-// The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items
+// The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items.
+// This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
 void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 {
    if(item->getObjectTypeNumber() != FlagTypeNumber)
