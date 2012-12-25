@@ -501,10 +501,8 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
       }
       else
       {
-         F32 myRadius;
-         F32 otherRadius;
-         Point myPos;
-         Point shipPos;
+         F32   myRadius, otherRadius;
+         Point myPos,    shipPos;
 
          getCollisionCircle(stateIndex, myPos, myRadius);
          if(foundObject->getCollisionCircle(stateIndex, shipPos, otherRadius))
