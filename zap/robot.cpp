@@ -513,15 +513,17 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
    thisPoints.push_back(pointEdge2);
    thisPoints.push_back(pointEdge1);
 
-   Vector<Point> otherPoints;
    Rect queryRect(thisPoints);
 
    fillVector.clear();
    findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
-      if(fillVector[i]->getCollisionPoly() && polygonsIntersect(thisPoints, otherPoints))
+   {
+      const Vector<Point> *otherPoints = fillVector[i]->getCollisionPoly();
+      if(otherPoints && polygonsIntersect(thisPoints, *otherPoints))
          return false;
+   }
 
    return true;
 }
