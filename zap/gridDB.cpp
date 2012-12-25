@@ -224,9 +224,6 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i] == object)
       {
-         if(deleteObject)
-            delete mAllObjects[i];      
-
          mAllObjects.erase(i);            // mAllObjects is sorted, so we can't use erase_fast
          break;
       }
@@ -239,6 +236,9 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
             mGoalZones.erase_fast(i);     // mGoalZones is not sorted, so erase_fast is just fine
             break;
          }
+
+   if(deleteObject)
+      delete object;      
 }
 
 
