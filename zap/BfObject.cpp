@@ -202,7 +202,7 @@ bool isFlagCollideableType(U8 x)
 bool isFlagOrShipCollideableType(U8 x)
 {
    return
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber    || ForceFieldTypeNumber ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber    || x == ForceFieldTypeNumber ||
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
 }
 

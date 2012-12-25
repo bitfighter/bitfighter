@@ -787,6 +787,7 @@ NexusFlagItem::NexusFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem
    mFlagCount = 0;
 
    setActualVel(vel);
+   setActualPos(pos);
    if(useDropDelay)
       mDroppedTimer.reset(DROP_DELAY);
 }
