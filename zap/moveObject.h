@@ -488,6 +488,7 @@ public:
    void setPosAng(Point pos, F32 ang);
 
    void damageObject(DamageInfo *theInfo);
+   void onAddedToGame(Game *game);
    void idle(BfObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

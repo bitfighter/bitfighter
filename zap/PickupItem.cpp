@@ -66,6 +66,12 @@ PickupItem::~PickupItem()
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
+void PickupItem::onAddedToGame(Game *game)
+{
+   Parent::onAddedToGame(game);
+   if(game->isServer())      // At the moment, PickupItem::idle does nothing for client side
+      linkToIdleList(&game->idlingObjects);
+}
 
 void PickupItem::idle(BfObject::IdleCallPath path)
 {
@@ -85,6 +91,7 @@ void PickupItem::idle(BfObject::IdleCallPath path)
          }
       }
    }
+   // else ... check onAddedToGame to enable client side idle()
 
    //updateExtent();    ==> Taking this out... why do we need it for a non-moving object?  CE 8/23/11
 }
