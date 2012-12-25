@@ -240,6 +240,7 @@ static S32 getMountedFlagCount(Ship *ship)
       }
    }
 
+   TNLAssert(flagCount == itemCount, "Miscalculation!");
    return flagCount;
 }
 

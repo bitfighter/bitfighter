@@ -215,11 +215,13 @@ static void loadForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 {
    // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
+   iniSettings->alwaysPingList.clear();
    parseString(ini->GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000"), iniSettings->alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
    // In case the master server fails, we can use this list to try to find some game servers. 
    //parseString(ini->GetValue("ForeignServers", "ForeignServerList"), prevServerListFromMaster, ',');
+   iniSettings->prevServerListFromMaster.clear();
    ini->GetAllValues("RecentForeignServers", iniSettings->prevServerListFromMaster);
 }
 
@@ -348,6 +350,7 @@ static void writeForeignServerInfo(CIniFile *ini, IniSettings *iniSettings)
 // valnames in first, but what the heck...
 void loadLevelSkipList(CIniFile *ini, GameSettings *settings)
 {
+   settings->getLevelSkipList()->clear();
    ini->GetAllValues("LevelSkipList", *settings->getLevelSkipList());
 }
 

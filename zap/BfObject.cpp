@@ -202,7 +202,7 @@ bool isFlagCollideableType(U8 x)
 bool isFlagOrShipCollideableType(U8 x)
 {
    return
-         x == BarrierTypeNumber    || x == PolyWallTypeNumber    || ForceFieldTypeNumber ||
+         x == BarrierTypeNumber    || x == PolyWallTypeNumber    || x == ForceFieldTypeNumber ||
          x == PlayerShipTypeNumber || x == RobotShipTypeNumber;
 }
 
@@ -238,7 +238,7 @@ bool isZoneType(U8 x)      // Zones a ship could be in
 {
    return 
          x == NexusTypeNumber || x == GoalZoneTypeNumber || x == LoadoutZoneTypeNumber ||
-         x == ZoneTypeNumber  || x == SlipZoneTypeNumber || x == ZoneTypeNumber; 
+         x == SlipZoneTypeNumber || x == ZoneTypeNumber;
 }
 
 
@@ -499,6 +499,7 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
 
    setCreationTime(game->getCurrentTime());
    onAddedToGame(game);
+   linkToIdleList(&game->idlingObjects);
 }
 
 
@@ -507,6 +508,7 @@ void BfObject::removeFromGame(bool deleteObject)
 {
    removeFromDatabase(deleteObject);
    mGame = NULL;
+   unlinkFromIdleList();
 }
 
 
@@ -1123,7 +1125,7 @@ bool BfObject::isDestroyed()
 
 void BfObject::idle(IdleCallPath path)
 {
-   // Do nothing
+   unlinkFromIdleList(); // Free CPU for any objects that did not override us
 }
 
 

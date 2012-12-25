@@ -609,12 +609,10 @@ void ClientGame::idle(U32 timeDelta)
       theMove->time = timeDelta;
       theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
-      const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
-
-      for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+      // Visit each game object, handling moves and running its idle method
+      for(BfObject *obj = idlingObjects.nextList, *objNext; obj != NULL; obj = objNext)
       {
-         TNLAssert(dynamic_cast<BfObject *>((*gameObjects)[i]), "Bad cast!");
-         BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+         objNext = obj->nextList; // Just in case this object is deleted inside idle function
 
          if(obj->isDeleted())
             continue;

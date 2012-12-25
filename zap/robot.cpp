@@ -221,15 +221,17 @@ bool Robot::prepareEnvironment()
 static string getNextName()
 {
    static const string botNames[] = {
-      "Addison", "Alexis", "Amelia", "Audrey", "Chloe", "Claire", "Elizabeth", "Ella", 
-      "Emily", "Emma", "Evelyn" "Gabriella", "Hailey", "Hannah", "Isabella", "Layla", 
-      "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe" 
+      "Addison", "Alexis", "Amelia", "Audrey", "Chloe", "Claire", "Elizabeth", "Ella",
+      "Emily", "Emma", "Evelyn", "Gabriella", "Hailey", "Hannah", "Isabella", "Layla",
+      "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe"
    };
 
-   static S32 nameIndex = -1;
-   nameIndex++;
+   static const S32 size = ARRAYSIZE(botNames);
 
-   return botNames[nameIndex % ARRAYSIZE(botNames)];
+   static S32 nameIndex = -1;
+   nameIndex = (nameIndex + 1) % size;  // Rollover list if needed
+
+   return botNames[nameIndex];
 }
 
 
@@ -258,7 +260,7 @@ string Robot::runGetName()
       if(!lua_isstring(L, -1))
       {
          string name = getNextName();
-         logError("Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
+         logprintf(LogConsumer::LogWarning, "Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
 
          lua_pop(L, 1);          // Remove thing that wasn't a name from the stack
          TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");

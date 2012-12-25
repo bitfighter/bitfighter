@@ -240,7 +240,6 @@ class ForceFieldProjector : public EngineeredItem
    typedef EngineeredItem Parent;
 
 private:
-   typedef EngineeredItem Parent;
    SafePtr<ForceField> mField;
    WallSegment *mForceFieldEndSegment;
    Point forceFieldEnd;
