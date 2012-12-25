@@ -599,7 +599,6 @@ void ClientGame::idle(U32 timeDelta)
       theMove->prepare();           // Pack and unpack the move for consistent rounding errors
 
       // Visit each game object, handling moves and running its idle method
-      BfObject *currentObject = idlingObjects.nextList;
       for(BfObject *obj = idlingObjects.nextList, *objNext; obj != NULL; obj = objNext)
       {
          objNext = obj->nextList; // Just in case this object is deleted inside idle function
