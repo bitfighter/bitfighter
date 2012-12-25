@@ -501,6 +501,7 @@ void BfObject::addToGame(Game *game, GridDatabase *database)
 
    setCreationTime(game->getCurrentTime());
    onAddedToGame(game);
+   linkToIdleList(&game->idlingObjects);
 }
 
 
@@ -509,6 +510,7 @@ void BfObject::removeFromGame(bool deleteObject)
 {
    removeFromDatabase(deleteObject);
    mGame = NULL;
+   unlinkFromIdleList();
 }
 
 
@@ -1125,7 +1127,7 @@ bool BfObject::isDestroyed()
 
 void BfObject::idle(IdleCallPath path)
 {
-   // Do nothing
+   unlinkFromIdleList(); // Free CPU for any objects that did not override us
 }
 
 

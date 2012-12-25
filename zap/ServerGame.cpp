@@ -1189,13 +1189,11 @@ void ServerGame::idle(U32 timeDelta)
       botControlTickTimer.reset();
    }
 
-   const Vector<DatabaseObject *> *gameObjects = mGameObjDatabase->findObjects_fast();
-
    // Visit each game object, handling moves and running its idle method
-   for(S32 i = gameObjects->size() - 1; i >= 0; i--)
+   BfObject *currentObject = idlingObjects.nextList;
+   for(BfObject *obj = idlingObjects.nextList, *objNext; obj != NULL; obj = objNext)
    {
-      TNLAssert(dynamic_cast<BfObject *>((*gameObjects)[i]), "Bad cast!");
-      BfObject *obj = static_cast<BfObject *>((*gameObjects)[i]);
+      objNext = obj->nextList; // Just in case this object is deleted inside idle function
 
       if(obj->isDeleted())
          continue;

@@ -875,10 +875,39 @@ DatabaseObject *DatabaseObject::clone() const
 }
 
 
-};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// idleLinkedList: Used by both BfObject and Game, move this struct elsewhere?
+idleLinkedList::idleLinkedList() {prevList = NULL; nextList = NULL;}
+idleLinkedList::idleLinkedList(const idleLinkedList &t) {prevList = NULL; nextList = NULL; if(t.prevList) linkToIdleList((idleLinkedList *) &t); }
+idleLinkedList::~idleLinkedList() {unlinkFromIdleList();}
+void idleLinkedList::linkToIdleList(idleLinkedList *list)
+{
+   if(!prevList)
+   {
+      nextList = list->nextList;
+      prevList = list;
+      list->nextList = (BfObject*) this;
+      if(nextList)
+         nextList->prevList = this;
+   }
+}
+void idleLinkedList::unlinkFromIdleList()
+{
+   if(prevList)
+      prevList->nextList = nextList;
+   if(nextList)
+   {
+      nextList->prevList = prevList;
+      nextList = NULL;
+   }
+   prevList = NULL;
+}
+
+
+};
 
 // Reusable container for searching gridDatabases
 // Has to be outside of Zap namespace seems to help with debugging showing what's inside fillVector  (debugger forgets to add Zap::)

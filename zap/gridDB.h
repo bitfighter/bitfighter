@@ -192,11 +192,24 @@ public:
    DatabaseObject *getObjectByIndex(S32 index);   // Kind of hacky, kind of useful
 };
 
+class BfObject;
+struct idleLinkedList // used by "Game" and "BfObject"
+{
+   idleLinkedList *prevList;
+   BfObject *nextList;
+   idleLinkedList();
+	idleLinkedList(const idleLinkedList &t);
+   ~idleLinkedList();
+   void linkToIdleList(idleLinkedList *list);
+   void unlinkFromIdleList();
+};
+
+
 };
 
 
 // Reusable container for searching gridDatabases
-// putting it outside of Zap namespace seems to help with debugging showing whats inside fillVector  (debugger forgets to add Zap::)
+// putting it outside of Zap namespace seems to help with visual C++ debugging showing whats inside fillVector  (debugger forgets to add Zap::)
 extern Vector<Zap::DatabaseObject *> fillVector;
 extern Vector<Zap::DatabaseObject *> fillVector2;
 

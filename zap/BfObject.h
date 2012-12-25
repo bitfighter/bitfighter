@@ -226,7 +226,7 @@ class EditorAttributeMenuUI;
 class WallSegment;
 class ClientInfo;
 
-class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaObject
+class BfObject : public DatabaseObject, public NetObject, public EditorObject, public LuaObject, public idleLinkedList
 {
    typedef NetObject Parent;
 
@@ -429,8 +429,8 @@ public:
    // Top level Lua methods
    LUAW_DECLARE_CLASS(BfObject);
 
-	static const char *luaClassName;
-	static const luaL_reg luaMethods[];
+   static const char *luaClassName;
+   static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
    S32 getClassID(lua_State *L);
