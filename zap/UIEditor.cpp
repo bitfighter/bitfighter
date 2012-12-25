@@ -4598,6 +4598,9 @@ void EditorUserInterface::testLevelStart()
    {
       mWasTesting = true;
 
+      if(getGame()->idlingObjects.nextList)           // to avoid Asteroids and a few other objects getting moved in editor...
+         getGame()->idlingObjects.unlinkFromIdleList();
+
       Vector<string> levelList;
       levelList.push_back(TestFileName);
       initHostGame(getGame()->getSettings(), levelList, true, false);
