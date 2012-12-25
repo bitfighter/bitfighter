@@ -49,7 +49,7 @@ FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::Collision
 
 
 // Alternate constructor, currently used by NexusFlag
-FlagItem::FlagItem(const Point &pos, bool collidable, float radius, float mass) : Parent(Point(0,0), collidable, radius, mass)
+FlagItem::FlagItem(const Point &pos, bool collidable, float radius, float mass) : Parent(pos, collidable, radius, mass)
 {
    initialize();
 }
