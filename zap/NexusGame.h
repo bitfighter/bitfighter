@@ -165,8 +165,8 @@ protected:
    };
 
 public:
-   NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);    // Constructor
-   ~NexusFlagItem();                                                                         // Destructor
+   NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), S32 count = 0, bool useDropDelay = false);    // Constructor
+   ~NexusFlagItem();                                                                                        // Destructor
 
    void renderItem(const Point &pos);
    void renderItemAlpha(const Point &pos, F32 alpha);

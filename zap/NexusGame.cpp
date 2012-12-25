@@ -444,12 +444,7 @@ void NexusGameType::releaseFlag(Game *game, const Point &pos, const Point &start
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
 
-
-   FlagItem *newFlag = new FlagItem(pos, vel, true);
-
-   if(count > 1)
-      newFlag->changeFlagCount(count);
-
+   NexusFlagItem *newFlag = new NexusFlagItem(pos, vel, count, true);
    newFlag->addToGame(game, game->getGameObjDatabase());
 }
 
@@ -804,13 +799,9 @@ bool NexusGameType::spawnShip(ClientInfo *clientInfo)
 TNL_IMPLEMENT_NETOBJECT(NexusFlagItem);
 
 // C++ constructor
-NexusFlagItem::NexusFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, (F32)Ship::CollisionRadius, 4)  // radius was 30, which had problem with sticking to wall when drop too close to walls
+NexusFlagItem::NexusFlagItem(Point pos, Point vel, S32 count, bool useDropDelay) : FlagItem(pos, vel, useDropDelay)
 {
-   mFlagCount = 0;
-
-   setActualVel(vel);
-   if(useDropDelay)
-      mDroppedTimer.reset(DROP_DELAY);
+   mFlagCount = count;
 }
 
 
