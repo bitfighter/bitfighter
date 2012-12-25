@@ -330,6 +330,11 @@ void ItemSpawn::spawn()
    resetTimer();     // Reset the spawn timer
 }
 
+void ItemSpawn::onAddedToGame(Game *game)
+{
+   Parent::onAddedToGame(game);
+   linkToIdleList(&game->idlingObjects);
+}
 
 void ItemSpawn::idle(IdleCallPath path)
 {

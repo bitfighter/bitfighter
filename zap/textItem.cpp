@@ -314,7 +314,7 @@ bool TextItem::collide(BfObject *hitObject)
 
 void TextItem::idle(BfObject::IdleCallPath path)
 {
-   // Laze about, read a book, take a nap, whatever
+   // Want to idle here? add this line in "onAddedToGame": linkToIdleList(&game->idlingObjects);
 }
 
 

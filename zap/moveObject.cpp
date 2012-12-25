@@ -123,6 +123,7 @@ void MoveObject::idle(BfObject::IdleCallPath path)
 void MoveObject::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
+   linkToIdleList(&game->idlingObjects);
 
 #ifndef ZAP_DEDICATED
    if(isGhost())     // Client only
@@ -1986,6 +1987,12 @@ static bool isCollideableTypeWorm(U8 x)
          x == BarrierTypeNumber || x == PolyWallTypeNumber   ||
          x == TurretTypeNumber  || x == ForceFieldTypeNumber ||
          x == ForceFieldProjectorTypeNumber;
+}
+
+void Worm::onAddedToGame(Game *game)
+{
+   Parent::onAddedToGame(game);
+   linkToIdleList(&game->idlingObjects);
 }
 
 void Worm::idle(BfObject::IdleCallPath path)
