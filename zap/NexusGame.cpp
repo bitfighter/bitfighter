@@ -760,9 +760,11 @@ void NexusGameType::shipTouchFlag(Ship *ship, FlagItem *touchedFlag)
    shipFlag->changeFlagCount(shipFlagCount);
 
 
-   // Now that the touchedFlag has been absorbed intot the ship, remove it from the game
-   touchedFlag->removeFromDatabase(true); 
-
+   // Now that the touchedFlag has been absorbed into the ship, remove it from the game.  Be sure to use deleteObject, as having the database
+   // delete the object directly leads to memory corruption errors.
+   touchedFlag->removeFromDatabase(false);
+   touchedFlag->setCollideable(false);
+   touchedFlag->deleteObject();
 
    if(mNexusIsOpen)
    {
@@ -888,7 +890,8 @@ void NexusFlagItem::onMountDestroyed()
 
    // Now delete the flag itself
    dismount();
-   removeFromDatabase(true);   
+   removeFromDatabase(false);   
+   deleteObject();
 }
 
 
