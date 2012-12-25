@@ -799,7 +799,7 @@ bool NexusGameType::spawnShip(ClientInfo *clientInfo)
 TNL_IMPLEMENT_NETOBJECT(NexusFlagItem);
 
 // C++ constructor
-NexusFlagItem::NexusFlagItem(Point pos, Point vel, S32 count, bool useDropDelay) : FlagItem(pos, vel, useDropDelay)
+NexusFlagItem::NexusFlagItem(Point pos, Point vel, S32 count, bool useDropDelay) : Parent(pos, vel, useDropDelay)
 {
    mFlagCount = count;
 }
