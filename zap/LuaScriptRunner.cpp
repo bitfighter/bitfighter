@@ -572,7 +572,34 @@ void LuaScriptRunner::setModulePath()
 // Advance timers by deltaT
 void LuaScriptRunner::tickTimer(U32 deltaT)
 {
-   TNLAssert(false, "Not (yet) implemented!");
+   //TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+
+   //bool ok = retrieveFunction("_tickTimer");       // Push timer function onto stack            -- function 
+   //TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
+
+   //if(!ok)
+   //{      
+   //   logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+   //   logError("Function _tickTimer() could not be found!  Terminating script.");
+
+   //   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+   //   return;
+   //}
+
+   //luaW_push<Robot>(L, this);
+   //lua_pushnumber(L, deltaT);                   // Pass the time elapsed since we were last here   -- function, object, time
+   //S32 error = lua_pcall(L, 2, 0, 0);           // Pass two objects, expect none in return         -- <<empty stack>>
+
+   //if(error != 0)
+   //{
+   //   logError("Robot error running _tickTimer(): %s.  Shutting robot down.", lua_tostring(L, -1));
+   //   lua_pop(L, 1);    // Remove error message from stack
+
+   //   deleteObject();   // Add bot to delete list, where it will be deleted in the proper manner
+   //}
+
+   //TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
 
 
