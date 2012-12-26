@@ -1266,7 +1266,7 @@ REGISTER_LUA_CLASS(BfObject);
  * See \ref ObjTypeEnum for a list of possible return values.
  * @return The object's ClassId
 */
-S32 BfObject::getClassID(lua_State *L)  
+S32 BfObject::getClassId(lua_State *L)  
 { 
    return returnInt  (L, mObjectTypeNumber); 
 }
