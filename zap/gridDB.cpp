@@ -524,6 +524,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex,
    return findObjectLOS(typeNumber, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
 
+
 // Format is a passthrough to polygonLineIntersect().  Will be true for most items, false for walls in editor.
 DatabaseObject *GridDatabase::findObjectLOS(U8 typeNumber, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd,
