@@ -433,7 +433,8 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 getClassID(lua_State *L);
+   S32 getClassId(lua_State *L);
+   S32 getId(lua_State *L);
 
    // Get/set object's position
    virtual S32 getLoc(lua_State *L);

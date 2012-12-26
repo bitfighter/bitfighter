@@ -1237,7 +1237,8 @@ void BfObject::writeThisTeam(BitStream *stream)
 // Lua interface
 //               Fn name         Param profiles     Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, getClassID,     ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, getClassId,     ARRAYDEF({{            END }               }), 1 ) \
+   METHOD(CLASS, getId,          ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, getLoc,         ARRAYDEF({{            END }               }), 1 ) \
    METHOD(CLASS, setLoc,         ARRAYDEF({{ PT,        END }               }), 1 ) \
    METHOD(CLASS, getTeamIndx,    ARRAYDEF({{            END }               }), 1 ) \
@@ -1258,7 +1259,7 @@ REGISTER_LUA_CLASS(BfObject);
 
 
 /**
- * @luafunc  classId BfObject::getClassID()
+ * @luafunc  classId BfObject::getClassId()
  * @brief    Gets an object's ClassId.
  * @code     classId = obj:getClassId()
  * @endcode
@@ -1268,6 +1269,19 @@ REGISTER_LUA_CLASS(BfObject);
 S32 BfObject::getClassID(lua_State *L)  
 { 
    return returnInt  (L, mObjectTypeNumber); 
+}
+
+
+/**
+ * @luafunc  int BfObject::getId()
+ * @brief    Gets an object's user assigned id.
+ * @descr    Users can assign an id to elements in the editor with the ! or # keys.  Use this function to obtain this id.  If the user has
+ *           not assigned an object an id, %getId() will return 0.
+ * @return The object's id
+*/
+S32 BfObject::getId(lua_State *L)  
+{ 
+   return returnInt  (L, mUserAssignedId); 
 }
 
 
@@ -1301,7 +1315,8 @@ S32 BfObject::getTeamIndx(lua_State *L)
  * @luafunc  BfObject::setTeam(teamIndex)
  * @brief    Assigns the object to a team.
  * @param    teamIndex - Index of the team the object should be assigned to.
- * @descr    Use the special team constants to make an item neutral or hostile.  Will have no effect on items that are inherently teamless (such as a NexusZone).
+ * @descr    Use the special team constants to make an item neutral or hostile.  Will have no effect on items 
+ *           that are inherently teamless (such as a NexusZone).
  * @note     Remember that in Lua, indices start with 1!
 */
 S32 BfObject::setTeam(lua_State *L) 
