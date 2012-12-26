@@ -242,7 +242,7 @@ S32 EditorPlugin::getGridSize(lua_State *L)
  * @luafunc    EditorPlugin::addLevelLine(levelLine)
  * @brief      Adds an object to the editor by passing a line from a level file.
  * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
- *             add it to the game using %BfObject's \link BfObject::addToGame() addToGame() \endlink method.
+ *             add it to the game using the editorPlugin:addItem() method.
  * @param      levelLine - string containing the line of levelcode.
 */
 S32 EditorPlugin::addLevelLine(lua_State *L)
