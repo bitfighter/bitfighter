@@ -50,6 +50,7 @@ using namespace TNL;
 namespace Zap
 {
 
+class DatabaseObject;
 class BfObject;
 class LuaPlayerInfo;
 class Ship;
@@ -123,6 +124,8 @@ protected:
    virtual void tickTimer(U32 deltaT);          // Advance script timers
 
    void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
+
+   S32 findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects);
 
 
 // Sets a var in the script's environment to give access to the caller's "this" obj, with the var name "name".

@@ -143,8 +143,10 @@ public:
    // Navigation
    S32 getWaypoint(lua_State *L);
 
+   // Finding stuff
    S32 findItems(lua_State *L);
    S32 findGlobalItems(lua_State *L);
+   S32 findObjectById(lua_State *L);
 
    // Bad dudes
    S32 findClosestEnemy(lua_State *L);

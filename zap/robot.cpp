@@ -701,6 +701,7 @@ U16 Robot::findClosestZone(const Point &point)
                                                                                              \
    METHOD(CLASS,  findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS,  findObjectById,       ARRAYDEF({{ INT, END }}), 1 )                        \
    METHOD(CLASS,  findClosestEnemy,     ARRAYDEF({{              END }, { NUM,  END }}), 2 ) \
                                                                                              \
    METHOD(CLASS,  getFiringSolution,    ARRAYDEF({{ BFOBJ, END }}), 1 )                      \
@@ -1248,6 +1249,26 @@ S32 Robot::findGlobalItems(lua_State *L)
    checkArgList(L, functionArgs, "Robot", "findGlobalItems");
 
    return doFindItems(L, "Robot:findGlobalItems");
+}
+
+
+/**
+ * @luafunc    Robot::findObjectById(id)
+ * @brief      Returns an object with the given id, or nil if none exists.
+ * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen, 
+ *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.  
+ *             Currently, all objects that have not been explicitly assigned an id have an id of 0.
+ *
+ * Note that ids can be assigned in the editor using the ! or # keys.
+ *
+ * @param      id - int id to search for.
+ * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
+*/
+S32 Robot::findObjectById(lua_State *L)
+{
+   checkArgList(L, functionArgs, "Robot", "findObjectById");
+
+   return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
 }
 
 

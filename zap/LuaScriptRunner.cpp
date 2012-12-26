@@ -618,6 +618,25 @@ int LuaScriptRunner::luaPanicked(lua_State *L)
 }
 
 
+// Called by various children classes
+S32 LuaScriptRunner::findObjectById(lua_State *L, const Vector<DatabaseObject *> *objects)
+{
+   static const char *methodName = "Levelgen:findObjectById()";
+   checkArgCount(L, 1, methodName);
+
+   S32 id = getInt(L, 1);
+
+   for(S32 i = 0; i < objects->size(); i++)
+   {
+      BfObject *bfObject = static_cast<BfObject *>(objects->get(i));
+      if(bfObject->getUserAssignedId() == id)
+         return returnBfObject(L, bfObject);
+   }
+
+   return returnNil(L);
+}
+
+
 // These will be implemented by children classes, and will funnel back to the doSubscribe and doUnscubscribe methods below
 S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)   
 { 

@@ -303,21 +303,7 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
 */
 S32 LuaLevelGenerator::findObjectById(lua_State *L)
 {
-   static const char *methodName = "Levelgen:findObjectById()";
-   checkArgCount(L, 1, methodName);
-
-   S32 id = getInt(L, 1);
-
-   const Vector<DatabaseObject *> *objects = mGame->getGameObjDatabase()->findObjects_fast();
-
-   for(S32 i = 0; i < objects->size(); i++)
-   {
-      BfObject *bfObject = static_cast<BfObject *>(objects->get(i));
-      if(bfObject->getUserAssignedId() == id)
-         return returnBfObject(L, bfObject);
-   }
-
-   return returnNil(L);
+   return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
 }
 
 
