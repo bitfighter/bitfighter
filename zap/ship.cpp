@@ -1262,7 +1262,10 @@ void Ship::onAddedToGame(Game *game)
    Parent::onAddedToGame(game);
 #ifndef ZAP_DEDICATED
    if(isGhost())        // Client
-      static_cast<ClientGame *>(game)->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
+   {
+      if(getClientInfo() == static_cast<ClientGame *>(game)->getLocalRemoteClientInfo())
+         static_cast<ClientGame *>(game)->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
+   }
 
    else                 // Server
 #endif
