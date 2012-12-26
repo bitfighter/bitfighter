@@ -1277,7 +1277,7 @@ S32 BfObject::getClassId(lua_State *L)
  * @brief    Gets an object's user assigned id.
  * @descr    Users can assign an id to elements in the editor with the ! or # keys.  Use this function to obtain this id.  If the user has
  *           not assigned an object an id, %getId() will return 0.
- * @return The object's id
+ * @return \e int - The object's id.
 */
 S32 BfObject::getId(lua_State *L)  
 { 
@@ -1289,7 +1289,7 @@ S32 BfObject::getId(lua_State *L)
  * @luafunc  Point BfObject::getLoc()
  * @brief    Gets an object's position.
  * @descr    For objects that are not points (such as a LoadoutZone), will return the object's centroid.
- * @return   A Point representing the object's location
+ * @return   A \e point representing the object's location.
 */
 S32 BfObject::getLoc(lua_State *L)      
 { 
@@ -1303,7 +1303,7 @@ S32 BfObject::getLoc(lua_State *L)
  * @descr    Many BfObjects (such as \link TestItem TestItems\endlink) are never part of any particular team.  For these objects, 
  *             this method will return NeutralTeamIndx.
  * @note     Remember that in Lua, indices start with 1!
- * @return   \e int - Team index of the object
+ * @return   \e int - Team index of the object.
 */
 S32 BfObject::getTeamIndx(lua_State *L)
 { 
@@ -1330,6 +1330,7 @@ S32 BfObject::setTeam(lua_State *L)
 /**
  * @luafunc  BfObject::setLoc(pos)
  * @brief    Set the object's location.
+ * @descr    To set the full geometry of a more complex object, see the setGeom() method.
  * @param    pos - Point (or coordinate pair) representing the location of the object. 
  */
 S32 BfObject::setLoc(lua_State *L)
