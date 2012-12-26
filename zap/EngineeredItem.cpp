@@ -451,6 +451,8 @@ EngineeredItem::EngineeredItem(S32 team, const Point &anchorPoint, const Point &
    mMountSeg = NULL;
    mSnapped = false;
 
+   Parent::setPos(anchorPoint);  // Must be parent, or else... TNLAssert!!!
+
    mRadius = 7;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
