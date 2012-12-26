@@ -85,7 +85,7 @@ end
 -- Does not fire if object is on the same team or if there is something in the way.
 -- Returns whether it fired or not.
 function fireAtObject(obj, weapon)
-    local classId = obj:getClassID()
+    local classId = obj:getClassId()
 
     if(classId == ObjType.Turret or classId == ObjType.ForceFieldProjector) then
      if(obj:getHealth() < .1) then
