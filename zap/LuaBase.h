@@ -49,6 +49,7 @@ namespace Zap
 class Ship;
 class LuaPlayerInfo;
 class MenuItem;
+class BfObject;
 struct LuaFunctionProfile;    // Defined below
 
 
@@ -134,6 +135,7 @@ public:
    static S32 returnPoints(lua_State *L, const Vector<Point> *);
    static S32 returnMenuItem(lua_State *L, MenuItem *menuItem);
    static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
+   static S32 returnBfObject(lua_State *L, BfObject *bfObject);
 
    static S32 returnPlayerInfo(lua_State *L, Ship *ship);
    static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);

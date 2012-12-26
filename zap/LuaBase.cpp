@@ -34,6 +34,7 @@
 #include "ship.h"             // For access to Ship's push function
 #include "playerInfo.h"       // For access to PlayerInfo's push function
 #include "ClientInfo.h"       // For one minor use below
+#include "BfObject.h"         // Required for returnBfObject()
 
 
 namespace Zap
@@ -603,6 +604,18 @@ S32 LuaBase::returnShip(lua_State *L, Ship *ship)
    if(ship)
    {
       ship->push(L);
+      return 1;
+   }
+
+   return returnNil(L);
+}
+
+
+S32 LuaBase::returnBfObject(lua_State *L, BfObject *bfObject)
+{
+   if(bfObject)
+   {
+      bfObject->push(L);
       return 1;
    }
 

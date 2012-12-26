@@ -289,6 +289,38 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
 }
 
 
+/**
+ * @luafunc    Levelgen::findObjectById(id)
+ * @brief      Returns an object with the given id, or nil if none exists.
+ * @descr      Finds an object with the specified user-assigned id.  If there are multiple objects with the same id (shouldn't happen, 
+ *             but could, especially if the passed id is 0), this method will return the first object it finds with the given id.  
+ *             Currently, all objects that have not been explicitly assigned an id have an id of 0.
+ *
+ * Note that ids can be assigned in the editor using the ! or # keys.
+ *
+ * @param      id - int id to search for.
+ * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
+*/
+S32 LuaLevelGenerator::findObjectById(lua_State *L)
+{
+   static const char *methodName = "Levelgen:findObjectById()";
+   checkArgCount(L, 1, methodName);
+
+   S32 id = getInt(L, 1);
+
+   const Vector<DatabaseObject *> *objects = mGame->getGameObjDatabase()->findObjects_fast();
+
+   for(S32 i = 0; i < objects->size(); i++)
+   {
+      BfObject *bfObject = static_cast<BfObject *>(objects->get(i));
+      if(bfObject->getUserAssignedId() == id)
+         return returnBfObject(L, bfObject);
+   }
+
+   return returnNil(L);
+}
+
+
 S32 LuaLevelGenerator::getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);
@@ -353,6 +385,8 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
    { "addWall",          luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addWall>          },
    { "addItem",          luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addItem>          },
    { "addLevelLine",     luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::addLevelLine>     },
+
+   { "findObjectById",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::findObjectById>   },
                                                                                                 
    { "getGridSize",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getGridSize>      },
    { "getPlayerCount",   luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::getPlayerCount>   },
@@ -360,7 +394,6 @@ const luaL_reg LuaLevelGenerator::luaMethods[] =
    { "pointCanSeePoint", luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::pointCanSeePoint> },
 
    { "globalMsg",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::globalMsg>        },
-
 
    { "subscribe",        luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::subscribe>        },
    { "unsubscribe",      luaW_doMethod<LuaLevelGenerator, &LuaLevelGenerator::unsubscribe>      },

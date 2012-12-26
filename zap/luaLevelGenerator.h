@@ -83,6 +83,7 @@ public:
    virtual S32 setGameTime(lua_State *L);       // Set the time for this level
    virtual S32 pointCanSeePoint(lua_State *L);  // Returns if a point has LOS to another point, given what's on the map so far
 
+   S32 findObjectById(lua_State *L);            // Retrieve object with the specified id
 
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
