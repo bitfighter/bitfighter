@@ -757,7 +757,7 @@ bool DatabaseObject::isDatabasable()
 const Vector<Point> *DatabaseObject::getCollisionPoly() const
 {
    return NULL;
-}
+}  
 
 
 bool DatabaseObject::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
