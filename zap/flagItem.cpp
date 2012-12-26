@@ -206,9 +206,6 @@ void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void FlagItem::idle(BfObject::IdleCallPath path)
 {
    Parent::idle(path);
-
-   if(isGhost()) 
-      return;
 }
 
 

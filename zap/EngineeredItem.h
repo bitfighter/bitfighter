@@ -209,6 +209,7 @@ public:
    ForceField(S32 team = -1, Point start = Point(), Point end = Point());
    bool collide(BfObject *hitObject);
    bool intersects(ForceField *forceField);     // Return true if forcefields intersect
+   void onAddedToGame(Game *theGame);
    void idle(BfObject::IdleCallPath path);
 
 

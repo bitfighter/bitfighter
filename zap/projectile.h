@@ -82,6 +82,8 @@ public:
 
    void handleCollision(BfObject *theObject, Point collisionPoint);
 
+   void onAddedToGame(Game *game);
+
    void idle(BfObject::IdleCallPath path);
    void damageObject(DamageInfo *info);
    void explode(BfObject *hitObject, Point p);

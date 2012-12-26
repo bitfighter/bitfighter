@@ -280,6 +280,9 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
 
    preparePoints();
 
+   if(mRotateSpeed != 0)
+      linkToIdleList(&game->idlingObjects);
+
    return true;
 }
 

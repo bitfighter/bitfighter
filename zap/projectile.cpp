@@ -213,6 +213,11 @@ void Projectile::handleCollision(BfObject *hitObject, Point collisionPoint)
    explode(hitObject, collisionPoint);
 }
 
+void Projectile::onAddedToGame(Game *game)
+{
+   Parent::onAddedToGame(game);
+   linkToIdleList(&game->idlingObjects);
+}
 
 void Projectile::idle(BfObject::IdleCallPath path)
 {
