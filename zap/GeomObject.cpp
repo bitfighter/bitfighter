@@ -87,11 +87,11 @@ void GeomObject::setNewGeometry(GeomType geomType, F32 radius)
 GeomType GeomObject::getGeomType() const        {   return mGeometry.getGeometry()->getGeomType();   }
 Point    GeomObject::getVert(S32 index) const   {   return mGeometry.getVert(index);                 }
 
-bool GeomObject::deleteVert(S32 vertIndex)               
+bool GeomObject::deleteVert(S32 vertIndex)
 {   
    if(mGeometry.getGeometry()->deleteVert(vertIndex))
    {
-      onPointsChanged();  
+      onPointsChanged();
       return true;
    }
 
