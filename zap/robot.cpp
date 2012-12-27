@@ -1173,7 +1173,31 @@ S32 Robot::teamMsg(lua_State *L)
 }
 
 
-// Return list of all items of specified type within normal visible range... does no screening at this point
+/**
+  *   @luafunc Robot::findObjects(table, itemType, ...)
+  *   @brief   Finds all items of the specified type within ship's area of vision.
+  *   @descr   Can specify multiple types.  The \e table argument is optional, but bots that call this function frequently will perform
+  *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
+  *            incurring the overhead of construction and destruction of a new one.
+  *
+  *   If a table is not provided, the function will create a table and return it on the stack.
+  *
+  *   <i>Note that although this function is part of the Robot object, it can (and should) be called without a direct bot: reference.</i>  
+  *   See the example below.
+  *
+  *   @param  table - (Optional) Reusable table into which results can be written.
+  *   @param  itemType - One or more itemTypes specifying what types of objects to find.
+  *   @return resultsTable - Will either be a reference back to the passed \e table, or a new table if one was not provided.
+  *
+  *   @code items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
+  *                         -- any functions, it will have global scope.
+  *
+  *         function countObjects(objType, ...)   -- Pass one or more object types
+  *           table.clear(items)                  -- Remove any items in table from previous use
+  *           findObjects(items, objType, ...)    -- Put all items of specified type(s) into items table, no bot reference
+  *           print(#items)                       -- Print the number of items found to the console
+  *         end
+  */
 S32 Robot::findObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "findObjects");
