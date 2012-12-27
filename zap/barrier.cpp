@@ -813,7 +813,6 @@ void PolyWall::checkIfHasBeenAddedToTheGame(lua_State *L)
          throw LuaException(msg);
       }
    }
-
 }
 
 
