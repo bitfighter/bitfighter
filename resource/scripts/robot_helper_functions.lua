@@ -90,7 +90,7 @@ function globalMsg(...)
 end
 
 function findObjects(...)
-  return bot:findGlobalObjects(...)
+  return bot:findObjects(...)
 end
 
 function findGlobalObjects(...)
