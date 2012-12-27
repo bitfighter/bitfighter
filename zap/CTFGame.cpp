@@ -106,7 +106,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // Make sure we don't already have a flag mounted... this will never happen in an ordinary game
       // But you can only carry one flag in CTF
-      if(theShip->isCarryingItem(FlagTypeNumber))
+      if(!theShip->isCarryingItem(FlagTypeNumber))
       {
          // Alert the clients
          static StringTableEntry takeString("%e0 took the %e1 flag!");
