@@ -67,6 +67,8 @@ public:
    bool runScript();      
    string getScriptName();
 
+   void tickTimer(U32 deltaT);
+
    virtual const char *getErrorMessagePrefix();
 
    static Lunar<LuaLevelGenerator>::RegType methods[];

@@ -1171,6 +1171,10 @@ void ServerGame::idle(U32 timeDelta)
       }
    }
 
+   // Tick levelgen timers
+   for(S32 i = 0; i < mLevelGens.size(); i++)
+      mLevelGens[i]->tickTimer(timeDelta);
+
    // Compute new world extents -- these might change if a ship flies far away, for example...
    // In practice, we could probably just set it and forget it when we load a level.
    // Compute it here to save recomputing it for every robot and other method that relies on it.
