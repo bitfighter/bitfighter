@@ -248,7 +248,7 @@ private:
    S32 mTeam;
 
    S32 mSerialNumber;         // Autoincremented serial number  
-   U32 mUserAssignedId;       // Id assigned to some objects in the editor
+   S32 mUserAssignedId;       // Id assigned to some objects in the editor
 
 protected:
    Move mLastMove;      // The move for the previous update
@@ -273,8 +273,8 @@ public:
 
    void deleteObject(U32 deleteTimeInterval = 0);
    
-   void setUserAssignedId(U32 id);
-   U32 getUserAssignedId();
+   void setUserAssignedId(S32 id);
+   S32 getUserAssignedId();
 
    StringTableEntry getKillString();
 

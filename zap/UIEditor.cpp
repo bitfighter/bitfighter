@@ -4100,13 +4100,13 @@ bool EditorUserInterface::textEntryInputCodeHandler(InputCode inputCode)
          {
             BfObject *obj = static_cast<BfObject *>(objList->get(i));
 
-            if(obj->isSelected())             // Should only be one
+            if(obj->isSelected())               // Should only be one
             {
                U16 id = atoi(mEntryBox.c_str());
                if(obj->getUserAssignedId() != (S32)id)     // Did the id actually change?
                {
                   obj->setUserAssignedId(id);
-                  mAllUndoneUndoLevel = -1;        // If so, it can't be undone
+                  mAllUndoneUndoLevel = -1;     // If so, it can't be undone
                }
                break;
             }

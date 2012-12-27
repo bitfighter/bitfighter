@@ -155,7 +155,7 @@ public:
    bool loadLevel(const string &fileName);            // Load a level
    void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
 
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id);
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
    void addPolyWall(PolyWall *polyWall, GridDatabase *database);
    void addWallItem(WallItem *wallItem, GridDatabase *database);
 

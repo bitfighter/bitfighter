@@ -258,7 +258,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 
 
 // Let someone else do the work!
-void LuaLevelGenerator::processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
+void LuaLevelGenerator::processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
    mGame->processLevelLoadLine(argc, id, argv, database, levelFileName);
 }

@@ -96,7 +96,7 @@ public:
    S32 teamMsg(lua_State *L);
 
    // Implement LevelLoader abstract method
-   void processLevelLoadLine(int argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);
+   void processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);
 
    //// Lua interface
    LUAW_DECLARE_CLASS(LuaLevelGenerator);

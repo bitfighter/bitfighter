@@ -168,6 +168,7 @@ void Item::renderItem(const Point &pos)
 #endif
 }
 
+
 void Item::render()
 {
    renderItem(getPos());

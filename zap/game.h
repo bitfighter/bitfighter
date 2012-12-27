@@ -314,11 +314,11 @@ public:
    void deleteAllBots();                          // Delete 'em all, let God sort 'em out!
 
 
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
+   virtual void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
    string toString();
 
-   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id) = 0;
+   virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database) = 0;     
 

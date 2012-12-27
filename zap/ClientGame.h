@@ -74,6 +74,7 @@ private:
    string mRemoteLevelDownloadFilename;
 
    bool mDebugShowShipCoords;       // Show coords on ship?
+   bool mDebugShowObjectIds;        // Show object ids?
    bool mDebugShowMeshZones;        // Show bot nav mesh zones?
 
    Vector<string> mMuteList;        // List of players we aren't listening to anymore because they've annoyed us!
@@ -146,6 +147,8 @@ public:
    void renderCommander();    // Render game in commander's map mode
    void renderSuspended();    // Render suspended game
 
+   void renderObjectIds(const Vector<BfObject *> &objects);
+
    void renderOverlayMap();   // Render the overlay map in normal play mode
    void resetZoomDelta();
    void clearZoomDelta();
@@ -155,6 +158,9 @@ public:
 
    bool isShowingDebugShipCoords() const;     // Show coords on ship?
    void toggleShowingShipCoords();
+
+   bool isShowingDebugObjectIds() const;      // Show object ids?
+   void toggleShowingObjectIds();
 
    bool isShowingDebugMeshZones()  const;     // Show bot nav mesh zones?
    void toggleShowingMeshZones();
@@ -239,7 +245,7 @@ public:
    void unsuspendGame();
 
    // For loading levels in editor
-   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id);
+   bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
    void addPolyWall(PolyWall *polyWall, GridDatabase *database);                          // Add polyWall item to game
    void addWallItem(WallItem *wallItem, GridDatabase *database);                          // Add wallItem item to game
 

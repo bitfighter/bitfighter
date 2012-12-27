@@ -611,7 +611,7 @@ void Game::resetLevelInfo()
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
 // Used by ServerGame and the editor
-void Game::processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName)
+void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
 {
    S32 strlenCmd = (S32) strlen(argv[0]);
 

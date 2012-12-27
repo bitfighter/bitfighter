@@ -2314,8 +2314,8 @@ void Ship::render(S32 layerIndex)
 
       F32 vertices[] = {
             -20, -15,
-            0, 25,
-            20, -15
+              0,  25,
+             20, -15
       };
       renderVertexArray(vertices, ARRAYSIZE(vertices) / 2, GL_TRIANGLE_FAN);
 

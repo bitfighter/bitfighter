@@ -233,7 +233,7 @@ stateLineParseDone:
       id[idLen] = 0;    // Make sure our id string is null terminated
       try
       {
-         processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv, database, levelFileName);
+         processLevelLoadLine(argc, atoi(id), (const char **) argv, database, levelFileName);
       }
       catch(LevelLoadException &e)
       {

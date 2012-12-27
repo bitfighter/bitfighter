@@ -173,6 +173,8 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
          logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
          return;
       }
+
+      setNewGeometry(geomPolygon);
    }
    else     // Normal wall
    {
@@ -181,10 +183,14 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
       if(mPoints.size() == 2 && mWidth != 0)                   // It's a regular segment, so apply width
          expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills mRenderFillGeometry with 4 points
+
+      setNewGeometry(geomPolyLine);
    }
 
    // Outline is the same for regular walls and polywalls
-   mRenderOutlineGeometry = getCollisionPoly();                   
+   mRenderOutlineGeometry = getCollisionPoly(); 
+
+   GeomObject::setGeom(*mRenderOutlineGeometry);
 
    // Compute a special buffered wall that makes computing bot zones easier
    computeBufferForBotZone(mPoints, mWidth, mSolid, mBufferedObjectPointsForBotZone);   
@@ -830,7 +836,6 @@ S32 PolyWall::setGeom(lua_State *L)
    checkIfHasBeenAddedToTheGame(L);
    return Parent::setGeom(L);
 }
-
 
 
 ////////////////////////////////////////

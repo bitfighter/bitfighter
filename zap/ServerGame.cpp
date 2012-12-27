@@ -507,7 +507,7 @@ StringTableEntry ServerGame::getCurrentLevelTypeName()
 }
 
 
-bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id)
+bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {

@@ -56,7 +56,7 @@ public:
    void parseLevelLine(const char *line, GridDatabase *database, const string &levelFileName);
 
    // Implementers of this class need to provide the following implementations:
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv, GridDatabase *database, const string &levelFileName) = 0;
+   virtual void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName) = 0;
    virtual void setGameTime(F32 time) = 0;
 };
 

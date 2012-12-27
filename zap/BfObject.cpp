@@ -390,6 +390,15 @@ F32 EditorObject::getEditorRadius(F32 currentScale)
 
 // BfObject - the declarations are in GameObject.h
 
+
+static S32 getNextDefaultId() 
+{
+   static S32 nextId = 0;
+   nextId--;
+   return nextId;
+}
+
+
 // Constructor
 BfObject::BfObject()
 {
@@ -397,7 +406,7 @@ BfObject::BfObject()
    mObjectTypeNumber = UnknownTypeNumber;
 
    assignNewSerialNumber();
-   mUserAssignedId = 0;
+   mUserAssignedId = getNextDefaultId();
 
    mTeam = -1;
    mDisableCollisionCount = 0;
@@ -616,7 +625,7 @@ string BfObject::toString(F32) const
 
 string BfObject::appendId(const string &objName) const
 {
-   if(mUserAssignedId <= 0)
+   if(mUserAssignedId <= 0)      // Ignore machine-assigned default ids
       return objName;
 
    return objName + "!" + itos(mUserAssignedId);
@@ -742,13 +751,15 @@ void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
 }
 
 
-void BfObject::setUserAssignedId(U32 id)
+// Passing 0 will have no effect on existing id
+void BfObject::setUserAssignedId(S32 id)
 {
-   mUserAssignedId = id;
+   if(id != 0)
+      mUserAssignedId = id;
 }
 
 
-U32 BfObject::getUserAssignedId()
+S32 BfObject::getUserAssignedId()
 {
    return mUserAssignedId;
 }
@@ -1276,7 +1287,7 @@ S32 BfObject::getClassId(lua_State *L)
  * @luafunc  int BfObject::getId()
  * @brief    Gets an object's user assigned id.
  * @descr    Users can assign an id to elements in the editor with the ! or # keys.  Use this function to obtain this id.  If the user has
- *           not assigned an object an id, %getId() will return 0.
+ *           not assigned an object an id, %getId() will return a negative id that will remain consistent throught the game.
  * @return \e int - The object's id.
 */
 S32 BfObject::getId(lua_State *L)  

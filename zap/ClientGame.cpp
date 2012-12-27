@@ -121,6 +121,7 @@ ClientGame::ClientGame(const Address &bindAddress, GameSettings *settings) : Gam
 
    // Some debugging settings
    mDebugShowShipCoords   = false;
+   mDebugShowObjectIds    = false;
    mDebugShowMeshZones    = false;
 
    mCommanderZoomDelta = 0;
@@ -1361,28 +1362,15 @@ void ClientGame::supressScreensaver()
 }
 
 
-bool ClientGame::isShowingDebugShipCoords() const
-{
-   return mDebugShowShipCoords;
-}
+bool ClientGame::isShowingDebugShipCoords() const { return mDebugShowShipCoords;                  }
+void ClientGame::toggleShowingShipCoords()        { mDebugShowShipCoords = !mDebugShowShipCoords; }
 
-
-void ClientGame::toggleShowingShipCoords()
-{
-   mDebugShowShipCoords = !mDebugShowShipCoords;
-}
-
-
-bool ClientGame::isShowingDebugMeshZones() const
-{
-   return mDebugShowMeshZones;
-}
-
-
-void ClientGame::toggleShowingMeshZones()
-{
-   mDebugShowMeshZones = !mDebugShowMeshZones;
-}
+bool ClientGame::isShowingDebugObjectIds()  const { return mDebugShowObjectIds;                   }
+void ClientGame::toggleShowingObjectIds()         { mDebugShowObjectIds = !mDebugShowObjectIds;   }
+  
+  
+bool ClientGame::isShowingDebugMeshZones()  const { return mDebugShowMeshZones;                   }
+void ClientGame::toggleShowingMeshZones()         { mDebugShowMeshZones = !mDebugShowMeshZones;   }
 
 
 Ship *ClientGame::findShip(const StringTableEntry &clientName)
@@ -1681,14 +1669,16 @@ void ClientGame::renderCommander()
 
    renderObjects.clear();
 
+   // Copy rawRenderObjects into renderObjects
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(static_cast<BfObject *>(rawRenderObjects[i]));
 
+   // Add extra bots if we're showing them
    if(gServerGame && showDebugBots)
       for(S32 i = 0; i < getBotCount(); i++)
          renderObjects.push_back(getBot(i));
 
-   // If we're drawing bot zones, get them now
+   // If we're drawing bot zones, get them now (put them in the renderZones vector)
    if(mDebugShowMeshZones)
       populateRenderZones();
 
@@ -1760,9 +1750,11 @@ void ClientGame::renderCommander()
          renderZones[i]->render(1);
 
    for(S32 i = 0; i < renderObjects.size(); i++)
+   {
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
  //     if(!(renderObjects[i]->getObjectTypeMask() & SpyBugType && playerTeam != renderObjects[i]->getTeam()))
          renderObjects[i]->render(1);
+   }
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
@@ -1946,7 +1938,11 @@ void ClientGame::renderNormal()
 
    // Render current ship's energy
    if(ship)
-      renderEnergyGuage(ship->mEnergy);    
+      renderEnergyGuage(ship->mEnergy);   
+
+
+   if(mDebugShowObjectIds)
+      renderObjectIds(renderObjects);
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
@@ -1970,10 +1966,17 @@ void ClientGame::render()
 }
 
 
+void ClientGame::renderObjectIds(const Vector<BfObject *> &objects)
+{
+   for(S32 i = 0; i < objects.size(); i++)
+      UserInterface::drawStringf(objects[i]->getPos().x, objects[i]->getPos().y, 13, "!%d", objects[i]->getUserAssignedId());
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, U32 id)
+bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id)
 {
    if(!stricmp(argv[0], "BarrierMaker"))
    {

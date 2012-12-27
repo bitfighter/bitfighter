@@ -395,6 +395,7 @@ public:
    void kickPlayerHandler(const Vector<string> &words);
    void submitPassHandler(const Vector<string> &words);
    void showCoordsHandler(const Vector<string> &words);
+   void showIdsHandler(const Vector<string> &words);
    void showZonesHandler(const Vector<string> &words);
    void showPathsHandler(const Vector<string> &words);
    void pauseBotsHandler(const Vector<string> &words);

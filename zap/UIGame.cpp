@@ -1493,6 +1493,13 @@ void GameUserInterface::showCoordsHandler(const Vector<string> &words)
 }
 
 
+void GameUserInterface::showIdsHandler(const Vector<string> &words)
+{
+   ClientGame *game = getGame();
+   game->toggleShowingObjectIds();
+}
+
+
 void GameUserInterface::showZonesHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
@@ -2252,6 +2259,7 @@ CommandInfo chatCmds[] = {
 
    { "showcoords", &GameUserInterface::showCoordsHandler,    {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show ship coordinates" },
    { "showzones",  &GameUserInterface::showZonesHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show bot nav mesh zones" },
+   { "showids",    &GameUserInterface::showIdsHandler,       {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show object ids" },
    { "showpaths",  &GameUserInterface::showPathsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show robot paths" },
    { "showbots",   &GameUserInterface::showBotsHandler,      {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Show all robots" },
    { "pausebots",  &GameUserInterface::pauseBotsHandler,     {  },        0, DEBUG_COMMANDS, 0,  1, {  },         "Pause all bots. Reissue to start again" },
