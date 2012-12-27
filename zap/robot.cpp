@@ -459,39 +459,6 @@ F32 Robot::getAnglePt(Point point)
 }
 
 
-// Return coords of nearest ship... and experimental robot routine
-bool Robot::findNearestShip(Point &loc)
-{
-   Vector<DatabaseObject *> foundObjects;
-   Point closest;
-
-   Point pos = getActualPos();
-   Point extend(2000, 2000);
-   Rect r(pos - extend, pos + extend);
-
-   findObjects((TestFunc)isShipType, foundObjects, r);
-
-   if(!foundObjects.size())
-      return false;
-
-   F32 dist = F32_MAX;
-   bool found = false;
-
-   for(S32 i = 0; i < foundObjects.size(); i++)
-   {
-      Ship *ship = static_cast<Ship *>(foundObjects[i]);
-      F32 d = ship->getPos().distanceTo(pos);
-      if(d < dist && d > 0)      // d == 0 means we're comparing to ourselves
-      {
-         dist = d;
-         loc = ship->getPos();
-         found = true;
-      }
-   }
-   return found;
-}
-
-
 bool Robot::canSeePoint(Point point, bool wallOnly)
 {
    Point difference = point - getActualPos();
@@ -516,7 +483,7 @@ bool Robot::canSeePoint(Point point, bool wallOnly)
    Rect queryRect(thisPoints);
 
    fillVector.clear();
-   findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
+   mGame->getGameObjDatabase()->findObjects(wallOnly ? (TestFunc)isWallType : (TestFunc)isCollideableType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -699,8 +666,8 @@ U16 Robot::findClosestZone(const Point &point)
    METHOD(CLASS,  globalMsg,            ARRAYDEF({{ STR, END }}), 1 )                        \
    METHOD(CLASS,  teamMsg,              ARRAYDEF({{ STR, END }}), 1 )                        \
                                                                                              \
-   METHOD(CLASS,  findItems,            ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
-   METHOD(CLASS,  findGlobalItems,      ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS,  findObjects,          ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
+   METHOD(CLASS,  findGlobalObjects,    ARRAYDEF({{ TABLE, INTS, END }, { INTS, END }}), 2 ) \
    METHOD(CLASS,  findObjectById,       ARRAYDEF({{ INT, END }}), 1 )                        \
    METHOD(CLASS,  findClosestEnemy,     ARRAYDEF({{              END }, { NUM,  END }}), 2 ) \
                                                                                              \
@@ -1207,20 +1174,20 @@ S32 Robot::teamMsg(lua_State *L)
 
 
 // Return list of all items of specified type within normal visible range... does no screening at this point
-S32 Robot::findItems(lua_State *L)
+S32 Robot::findObjects(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "findItems");
+   checkArgList(L, functionArgs, "Robot", "findObjects");
 
    Point pos = getActualPos();
    Rect queryRect(pos, pos);
    queryRect.expand(getGame()->computePlayerVisArea(this));  
 
-   return doFindItems(L, "Robot:findItems", &queryRect);
+   return doFindObjects(L, "Robot:findObjects", &queryRect);
 }
 
 
 /**
-  *   @luafunc Robot::findGlobalItems(table, itemType, ...)
+  *   @luafunc Robot::findGlobalObjects(table, itemType, ...)
   *   @brief   Finds all items of the specified type anywhere on the level.
   *   @descr   Can specify multiple types.  The \e table argument is optional, but bots that call this function frequently will perform
   *            better if they provide a reusable table in which found objects can be stored.  By providing a table, you will avoid
@@ -1235,20 +1202,20 @@ S32 Robot::findItems(lua_State *L)
   *   @param  itemType - One or more itemTypes specifying what types of objects to find.
   *   @return resultsTable - Will either be a reference back to the passed \e table, or a new table if one was not provided.
   *
-  *   @code items = { }     -- Reusable container for findGlobalItems.  Because it is defined outside
+  *   @code items = { }     -- Reusable container for findGlobalObjects.  Because it is defined outside
   *                         -- any functions, it will have global scope.
   *
-  *         function countObjects(objType, ...)      -- Pass one or more object types
-  *           table.clear(items)                     -- Remove any items in table from previous use
-  *           findGlobalItems(items, objType, ...)   -- Put all items of specified type(s) into items table, no bot reference
-  *           print(#items)                          -- Print the number of items found to the console
+  *         function countObjects(objType, ...)       -- Pass one or more object types
+  *           table.clear(items)                      -- Remove any items in table from previous use
+  *           findGlobalObjects(items, objType, ...)  -- Put all items of specified type(s) into items table, no bot reference
+  *           print(#items)                           -- Print the number of items found to the console
   *         end
   */
-S32 Robot::findGlobalItems(lua_State *L)
+S32 Robot::findGlobalObjects(lua_State *L)
 {
-   checkArgList(L, functionArgs, "Robot", "findGlobalItems");
+   checkArgList(L, functionArgs, "Robot", "findGlobalObjects");
 
-   return doFindItems(L, "Robot:findGlobalItems");
+   return doFindObjects(L, "Robot:findGlobalObjects");
 }
 
 
@@ -1273,7 +1240,7 @@ S32 Robot::findObjectById(lua_State *L)
 
 
 // If scope is NULL, we find all items
-S32 Robot::doFindItems(lua_State *L, const char *methodName, Rect *scope)
+S32 Robot::doFindObjects(lua_State *L, const char *methodName, Rect *scope)
 {
    fillVector.clear();
    static Vector<U8> types;

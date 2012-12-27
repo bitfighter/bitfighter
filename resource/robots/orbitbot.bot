@@ -39,7 +39,7 @@ function onTick(deltaTime)
 
     if(targetItem == nil) then
         table.clear(items)
-        targetItem = findClosest(findGlobalItems(items, ObjType.TestItem))
+        targetItem = findClosest(findGlobalObjects(items, ObjType.TestItem))
     end
 
     if(targetItem == nil) then return end

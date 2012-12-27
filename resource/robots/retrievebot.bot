@@ -61,7 +61,7 @@ function onTick()
    end
 
    table.clear(items)
-   local targets = bot:findGlobalItems(items, targetType)
+   local targets = bot:findGlobalObjects(items, targetType)
    local target = findClosest(targets, team)    
 
    if(target == nil) then                   -- Check for nil

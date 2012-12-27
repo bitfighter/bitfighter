@@ -89,12 +89,12 @@ function globalMsg(...)
    return bot:globalMsg(...)
 end
 
-function findItems(...)
-  return bot:findGlobalItems(...)
+function findObjects(...)
+  return bot:findGlobalObjects(...)
 end
 
-function findGlobalItems(...)
-  return bot:findGlobalItems(...)
+function findGlobalObjects(...)
+  return bot:findGlobalObjects(...)
 end
 
 function getFiringSolution(...)

@@ -70,7 +70,7 @@ private:
 
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
-   S32 doFindItems(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
+   S32 doFindObjects(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
 
 public:
    Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
@@ -96,9 +96,6 @@ public:
 
    // Some informational functions
    F32 getAnglePt(Point point);
-
-   // External robot functions
-   bool findNearestShip(Point &loc);   // Return location of nearest known ship within a given area
 
    bool isRobot();
 
@@ -144,8 +141,8 @@ public:
    S32 getWaypoint(lua_State *L);
 
    // Finding stuff
-   S32 findItems(lua_State *L);
-   S32 findGlobalItems(lua_State *L);
+   S32 findObjects(lua_State *L);
+   S32 findGlobalObjects(lua_State *L);
    S32 findObjectById(lua_State *L);
 
    // Bad dudes
