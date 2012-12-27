@@ -71,7 +71,7 @@ end
 -- This will be called every tick... updates timers
 --
 function _tickTimer(self, deltaT)
-   Timer:_tick(deltaT)     -- Really should only be called once for all bots
+   Timer:_tick(deltaT)     -- Really should only be called once for all bots/levelgens
 end
 
 
