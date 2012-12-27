@@ -815,7 +815,7 @@ Vector<Point> CoreItem::getRepairLocations(const Point &repairOrigin)
 void CoreItem::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
-    linkToIdleList(&theGame->idlingObjects);
+   linkToIdleList(&theGame->idlingObjects);
 
    // Make cores always visible
    if(!isGhost())
