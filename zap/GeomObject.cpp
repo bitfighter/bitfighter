@@ -53,7 +53,7 @@ GeomObject::~GeomObject()
 };
 
 
-// mGeometry will be deleted in destructor
+// mGeometry will be deleted in destructor; radius default to 0
 void GeomObject::setNewGeometry(GeomType geomType, F32 radius)
 {
    TNLAssert(!mGeometry.getGeometry(), "This object already has a geometry!");
@@ -299,11 +299,6 @@ const Vector<Point> *GeometryContainer::getFill() const
 {
    return mGeometry->getFill();
 }
-
-
-
-
-
 
 
 Point GeometryContainer::getVert(S32 index) const   
