@@ -1934,15 +1934,14 @@ void ClientGame::renderNormal()
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
+   if(mDebugShowObjectIds)
+      renderObjectIds(renderObjects);
+
    glPopMatrix();
 
    // Render current ship's energy
    if(ship)
       renderEnergyGuage(ship->mEnergy);   
-
-
-   if(mDebugShowObjectIds)
-      renderObjectIds(renderObjects);
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
