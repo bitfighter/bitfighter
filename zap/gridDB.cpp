@@ -862,7 +862,6 @@ void DatabaseObject::setExtent(const Rect &extents)
                gridDB->mBuckets[x & gridDB->BucketMask][y & gridDB->BucketMask] = be;
             }
       }
-
    }
 
    mExtent.set(extents);
