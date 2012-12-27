@@ -1496,14 +1496,17 @@ void GameUserInterface::showCoordsHandler(const Vector<string> &words)
 void GameUserInterface::showIdsHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   game->toggleShowingObjectIds();
+   if(!(gServerGame && gServerGame->isTestServer()))
+      game->displayErrorMessage("!!! Ids can only be displayed on a test server");
+   else
+      game->toggleShowingObjectIds();
 }
 
 
 void GameUserInterface::showZonesHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!(gServerGame))// && gServerGame->isTestServer()))  sam: problem with not being able to test from editor due to editor crashing and loading improperly...
+   if(!gServerGame)
       game->displayErrorMessage("!!! Zones can only be displayed on a local host");
    else
       game->toggleShowingMeshZones();
