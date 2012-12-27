@@ -147,7 +147,7 @@ public:
    void renderCommander();    // Render game in commander's map mode
    void renderSuspended();    // Render suspended game
 
-   void renderObjectIds(const Vector<BfObject *> &objects);
+   void renderObjectIds();
 
    void renderOverlayMap();   // Render the overlay map in normal play mode
    void resetZoomDelta();

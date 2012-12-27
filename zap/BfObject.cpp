@@ -752,9 +752,9 @@ void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
 
 
 // Passing 0 will have no effect on existing id
-void BfObject::setUserAssignedId(S32 id)
+void BfObject::setUserAssignedId(S32 id, bool permitZero)
 {
-   if(id != 0)
+   if(permitZero || id != 0)
       mUserAssignedId = id;
 }
 

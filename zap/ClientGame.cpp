@@ -1937,7 +1937,7 @@ void ClientGame::renderNormal()
    // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
    // the result is that we can only see zones on our local server.
    if(mDebugShowObjectIds)
-      renderObjectIds(renderObjects);
+      renderObjectIds();
 
    glPopMatrix();
 
@@ -1967,10 +1967,20 @@ void ClientGame::render()
 }
 
 
-void ClientGame::renderObjectIds(const Vector<BfObject *> &objects)
+// Show server-side object ids... using illegal reachover to obtain them!
+void ClientGame::renderObjectIds()
 {
-   for(S32 i = 0; i < objects.size(); i++)
-      UserInterface::drawStringf(objects[i]->getPos().x, objects[i]->getPos().y, 13, "!%d", objects[i]->getUserAssignedId());
+   TNLAssert(gServerGame, "Will crash on non server!");
+   if(!gServerGame)
+      return;
+
+   const Vector<DatabaseObject *> *objects = gServerGame->getGameObjDatabase()->findObjects_fast();
+
+   for(S32 i = 0; i < objects->size(); i++)
+   {
+      BfObject *obj = static_cast<BfObject *>(objects->get(i));
+      UserInterface::drawStringf(obj->getPos().x, obj->getPos().y, 13, "[%d]", obj->getUserAssignedId());
+   }
 }
 
 
@@ -2048,7 +2058,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(validArgs)
       {
-         zone->setUserAssignedId(id);
+         zone->setUserAssignedId(id, false);
          zone->addToGame(this, database);
       }
       else

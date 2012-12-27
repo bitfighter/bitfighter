@@ -714,7 +714,7 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       // even when the object is entirely legit
       if(validArgs && object.isValid())  
       {
-         object->setUserAssignedId(id);
+         object->setUserAssignedId(id, false);
          object->addToGame(this, database);
 
          computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code

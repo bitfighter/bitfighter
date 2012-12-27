@@ -530,7 +530,7 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       if(zone->processArguments(argc - 1, argv + 1, this))
       {
-         zone->setUserAssignedId(id);
+         zone->setUserAssignedId(id, false);
          getGameType()->addZone(zone);
       }
       else
