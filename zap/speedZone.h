@@ -90,7 +90,7 @@ public:
    bool processArguments(S32 argc, const char **argv, Game *game);  // Create objects from parameters stored in level file
    string toString(F32 gridSize) const;
 
-   void onAddedToGame(Game *theGame);
+   void onAddedToGame(Game *game);
 
    const Vector<Point> *getCollisionPoly() const;          // More precise boundary for precise collision detection
    bool collide(BfObject *hitObject);

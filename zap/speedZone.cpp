@@ -206,9 +206,11 @@ S32 SpeedZone::getRenderSortValue()
 
 
 // Runs on server and client
-void SpeedZone::onAddedToGame(Game *theGame)
+void SpeedZone::onAddedToGame(Game *game)
 {
-   Parent::onAddedToGame(theGame);
+   Parent::onAddedToGame(game);
+
+   linkToIdleList(&game->idlingObjects);
 
    if(!isGhost())
       setScopeAlways();    // Runs on server
