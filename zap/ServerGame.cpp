@@ -1176,7 +1176,7 @@ void ServerGame::idle(U32 timeDelta)
    // Compute it here to save recomputing it for every robot and other method that relies on it.
    computeWorldObjectExtents();
 
-   U32 botControlTickelapsed = botControlTickTimer.getElapsed();
+   U32 botControlTickElapsed = botControlTickTimer.getElapsed();
 
    if(botControlTickTimer.update(timeDelta))
    {
@@ -1184,7 +1184,7 @@ void ServerGame::idle(U32 timeDelta)
       clearBotMoves();
 
       // Fire TickEvent, in case anyone is listening
-      EventManager::get()->fireEvent(EventManager::TickEvent, botControlTickelapsed + timeDelta);
+      EventManager::get()->fireEvent(EventManager::TickEvent, botControlTickElapsed + timeDelta);
 
       botControlTickTimer.reset();
    }
