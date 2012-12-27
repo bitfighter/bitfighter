@@ -1934,6 +1934,8 @@ void ClientGame::renderNormal()
 
    getUIManager()->getGameUserInterface()->renderEngineeredItemDeploymentMarker(ship);
 
+   // Again, we'll be accessing the server's data directly so we can see server-side item ids directly on the client.  Again,
+   // the result is that we can only see zones on our local server.
    if(mDebugShowObjectIds)
       renderObjectIds(renderObjects);
 
