@@ -84,7 +84,7 @@ public:
       FirstFreeMask = Parent::FirstFreeMask << 4,
 
       TeleporterTriggerRadius = 50,
-      TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used
+      TeleporterCooldown = 1500,             // Time teleporter remains idle after it has been used
       TeleporterExpandTime = 1350,
       TeleportInExpandTime = 750,
       TeleportInRadius = 120,
@@ -101,6 +101,8 @@ private:
    F32 mStartingHealth;
 
    Timer mExplosionTimer;
+   Timer mTeleportCooldown;
+
    bool mFinalExplosionTriggered;
 
    DestManager mDestManager;
@@ -117,10 +119,9 @@ public:
 
    Teleporter *clone() const;
 
-   U32 timeout;
    U32 mTime;
 
-   U32 mTeleporterDelay;
+   U32 mTeleporterCooldown;
 
    // Destination management
    S32 getDestCount();

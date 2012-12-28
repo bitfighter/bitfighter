@@ -26,6 +26,7 @@
 #include "teleporter.h"
 
 using namespace TNL;
+
 #include "loadoutZone.h"          // For when ship teleports onto a loadout zone
 #include "gameLoader.h"
 #include "gameObjectRender.h"
@@ -193,14 +194,13 @@ Teleporter::~Teleporter()
 }
 
 
-void Teleporter:: initialize(const Point &pos, const Point &dest, Ship *engineeringShip)
+void Teleporter::initialize(const Point &pos, const Point &dest, Ship *engineeringShip)
 {
    mObjectTypeNumber = TeleporterTypeNumber;
    mNetFlags.set(Ghostable);
 
-   timeout = 0;
    mTime = 0;
-   mTeleporterDelay = TeleporterDelay;
+   mTeleporterCooldown = TeleporterCooldown;    // Teleporters can have non-standard cooldown periods
    setTeam(TEAM_NEUTRAL);
 
    setVert(pos, 0);
@@ -247,7 +247,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       if((firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z'))  // starts with a letter
       {
          if(!strnicmp(argv2[i], "Delay=", 6))
-            mTeleporterDelay = U32(atof(&argv2[i][6]) * 1000);
+            mTeleporterCooldown = U32(atof(&argv2[i][6]) * 1000);
       }
       else
       {
@@ -326,8 +326,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(Teleporter, s2cClearDestinations, (), (),
 string Teleporter::toString(F32 gridSize) const
 {
    string out = string(appendId(getClassName())) + " " + geomToString(gridSize);
-   if(mTeleporterDelay != TeleporterDelay)
-      out += " Delay=" + ftos(mTeleporterDelay / 1000.f, 3);
+   if(mTeleporterCooldown != TeleporterCooldown)
+      out += " Delay=" + ftos(mTeleporterCooldown / 1000.f, 3);
    return out;
 }
 
@@ -397,16 +397,16 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       for(S32 i = 0; i < dests; i++)
          getDest(i).write(stream);
 
-      if(stream->writeFlag(mTeleporterDelay != TeleporterDelay))  // Most teleporter will have default timing
-         stream->writeInt(mTeleporterDelay, 32);
+      if(stream->writeFlag(mTeleporterCooldown != TeleporterCooldown))  // Most teleporter will have default timing
+         stream->writeInt(mTeleporterCooldown, 32);
 
-      if(mTeleporterDelay != 0 && stream->writeFlag(timeout != 0))
-         stream->writeInt(timeout, 32);                     // A player might join while this teleporter is in the middle of delay
+      if(mTeleporterCooldown != 0 && stream->writeFlag(mTeleportCooldown.getCurrent() != 0))
+         stream->writeInt(mTeleportCooldown.getCurrent(), 32);    // A player might join while this teleporter is in the middle of cooldown  // TODO: Make this a rangedInt
    }
-   else if(stream->writeFlag(updateMask & TeleportMask))    // Basically, this gets triggered if a ship passes through
+   else if(stream->writeFlag(updateMask & TeleportMask))          // Basically, this gets triggered if a ship passes through
    {
       TNLAssert(U32(mLastDest) < U32(mDestManager.getDestCount()), "packUpdate out of range teleporter number");
-      stream->write(mLastDest);                             // Where ship is going
+      stream->write(mLastDest);                                   // Where ship is going
    }
 
    // If we're not destroyed and health has changed
@@ -433,7 +433,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mEngineered = stream->readFlag();
 
       count = stream->readInt(16);
-      mDestManager.resize(count);      // Prepare the list for multiple additions
+      mDestManager.resize(count);         // Prepare the list for multiple additions
 
       for(U32 i = 0; i < count; i++)
          mDestManager.read(i, stream);
@@ -441,10 +441,10 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
       computeExtent();
 
       if(stream->readFlag())
-         mTeleporterDelay = stream->readInt(32);
+         mTeleporterCooldown = stream->readInt(32);
 
-      if(mTeleporterDelay != 0 && stream->readFlag())
-         timeout = stream->readInt(32);
+      if(mTeleporterCooldown != 0 && stream->readFlag())
+         mTeleportCooldown.reset(stream->readInt(32));
    }
    else if(stream->readFlag())         // TeleportMask
    {
@@ -463,7 +463,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       SoundSystem::playSoundEffect(SFXTeleportOut, getVert(0));
 #endif
-      timeout = mTeleporterDelay;
+      mTeleportCooldown.reset(mTeleporterCooldown);
    }
 
    if(stream->readFlag())     // mHasExploded
@@ -622,14 +622,9 @@ void Teleporter::idle(BfObject::IdleCallPath path)
          mExplosionTimer.update(deltaT);
    }
 
-   // Deal with our timeout...  could rewrite with a timer!
-   if(timeout > deltaT)
-   {
-      timeout -= deltaT;
+   // Is teleport in cooldown mode?  If so, amscray!
+   if(mTeleportCooldown.getCurrent() > 0 && !mTeleportCooldown.update(deltaT))
       return;
-   }
-   else
-      timeout = 0;
 
    // Server only from here on down
    if(path != BfObject::ServerIdleMainLoop)
@@ -654,7 +649,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
 
          if((pos - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))  // Center of ship is inside TeleporterTriggerRadius?
          {   
-            timeout = mTeleporterDelay;    // Temporarily disable teleporter
+            mTeleportCooldown.reset(mTeleporterCooldown);    // Temporarily disable teleporter
 
             // If we have multiple ships entering teleporter on the same frame, they all go to the same dest
             if(lastDest == -1)
@@ -685,19 +680,21 @@ void Teleporter::render()
    F32 radiusFraction;
    if(!mHasExploded)
    {
-      if(timeout == 0)
+      U32 cooldown = mTeleportCooldown.getCurrent();
+
+      if(cooldown == 0)
          radiusFraction = 1;
 
-      else if(timeout > TeleporterExpandTime - TeleporterDelay + mTeleporterDelay)
-         radiusFraction = F32(timeout - TeleporterExpandTime + TeleporterDelay - mTeleporterDelay) / 
-                          F32(TeleporterDelay - TeleporterExpandTime);
+      else if(cooldown > TeleporterExpandTime - TeleporterCooldown + mTeleporterCooldown)
+         radiusFraction = F32(cooldown - TeleporterExpandTime + TeleporterCooldown - mTeleporterCooldown) / 
+                          F32(TeleporterCooldown - TeleporterExpandTime);
 
-      else if(mTeleporterDelay < TeleporterExpandTime)
-         radiusFraction = F32(mTeleporterDelay - timeout + TeleporterExpandTime - TeleporterDelay) / 
-                          F32(mTeleporterDelay + TeleporterExpandTime - TeleporterDelay);
+      else if(mTeleporterCooldown < TeleporterExpandTime)
+         radiusFraction = F32(mTeleporterCooldown - cooldown + TeleporterExpandTime - TeleporterCooldown) / 
+                          F32(mTeleporterCooldown + TeleporterExpandTime - TeleporterCooldown);
 
-      else if(timeout < TeleporterExpandTime)
-         radiusFraction = F32(TeleporterExpandTime - timeout) / 
+      else if(cooldown < TeleporterExpandTime)
+         radiusFraction = F32(TeleporterExpandTime - cooldown) / 
                           F32(TeleporterExpandTime);
       else
          radiusFraction = 0;
