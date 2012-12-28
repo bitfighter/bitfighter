@@ -920,7 +920,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       Point n;
 
       // No damage through walls or forcefields
-      if(findObjectLOS((TestFunc)isWallOrForcefieldType, ActualState, pos, objPos, t, n))
+      if(findObjectLOS((TestFunc)isWallType, ActualState, pos, objPos, t, n))
          continue;
 
       // Figure the impulse and damage
