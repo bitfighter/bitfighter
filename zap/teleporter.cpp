@@ -619,10 +619,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    {
       // Update Explosion Timer
       if(mHasExploded)
-      {
-         if(mExplosionTimer.getCurrent() != 0)
-            mExplosionTimer.update(deltaT);
-      }
+         mExplosionTimer.update(deltaT);
    }
 
    // Deal with our timeout...  could rewrite with a timer!
