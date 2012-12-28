@@ -1249,7 +1249,7 @@ void Ship::damageObject(DamageInfo *theInfo)
       if(projectile)
          getClientInfo()->getStatistics()->countHitBy(projectile->mWeaponType);
  
-      else if(mHealth == 0 && dynamic_cast<Asteroid *>(theInfo->damagingObject))
+      else if(mHealth == 0 && theInfo->damagingObject->getObjectTypeNumber() == AsteroidTypeNumber)
          getClientInfo()->getStatistics()->mCrashedIntoAsteroid++;
    }
 }
