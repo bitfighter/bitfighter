@@ -875,7 +875,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
    GameType *gameType = getGame()->getGameType();
 
    // Check for players within range.  If so, blast them to little tiny bits!
-   // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance
+   // Those within innerRad get full force of the damage.  Those within outerRad get damage proportional to distance.
    Rect queryRect(pos, pos);
    queryRect.expand(Point(outerRad, outerRad));
 
