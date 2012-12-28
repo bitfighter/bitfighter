@@ -865,8 +865,11 @@ void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "
 
 void MoveItem::setActualPos(const Point &pos)
 {
-   setPos(ActualState, pos);
-   setMaskBits(WarpPositionMask | PositionMask);
+   if(pos != getActualPos())
+   {
+      setPos(ActualState, pos);
+      setMaskBits(WarpPositionMask | PositionMask);
+   }
 }
 
 
