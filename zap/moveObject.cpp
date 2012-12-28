@@ -1033,7 +1033,8 @@ void MountableItem::idle(BfObject::IdleCallPath path)
          if(!isGhost())    // Server only
             dismount();
       }
-      else     // Mount is still ok -- update item's position to match that of mount
+      // TODO: Tie item's pos to mount on client so we don't need to send position all the time.   019
+      else     // Mount is still ok -- update item's position to match that of mount  
       {
          setActualPos(mMount->getActualPos());
          setRenderPos(mMount->getRenderPos());
