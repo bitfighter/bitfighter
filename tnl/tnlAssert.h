@@ -88,11 +88,31 @@ public:
    #define TNLAssertV(x, y) { if (!bool(x)) { TNL::Assert::processAssert(__FILE__, __LINE__,  avar y); TNL_DEBUGBREAK(); } }
 
 #else
-   // Tricky way of making sure asserts are completely compiled out
-   #define TNLAssert(x, y) \
-      do { (void) sizeof ((x)); } while (0)
-   #define TNLAssertV(x, y) \
-      do { (void) sizeof ((x)); } while (0)
+   /**
+      Tricky way of making sure asserts are completely compiled
+
+      However, GCC 4.5 and older cannot do compile-time asserts in a global scope so we
+      have to just substitute an empty block
+
+      Example that breaks with older GCC:
+
+      If you call a TNLVector method with an TNLAssert in it and the vector is in the global
+      scope, you will get weird linker errors.  This happened when using the [] operator
+      on the global fillVector we use in the gridDB
+    */
+   // This is the workaround for older GCC
+   #if defined(__GNUC__) && ((__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 6)))
+      #define disableAssert(x) { }
+
+   // This assert is properly compiled out
+   #else
+      #define disableAssert(x) \
+         do { (void) sizeof ((x)); } while (0)
+   #endif
+
+   #define TNLAssert(x, y)  disableAssert(x)
+   #define TNLAssertV(x, y) disableAssert(x)
+
 #endif
 
 };
