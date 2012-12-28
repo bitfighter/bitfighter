@@ -275,6 +275,8 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
    mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
 
+   mSendHomeTimer.setPeriod(1500);     // Ball will linger in goal for 1500 ms before being sent home
+
    const F32 NO_DRAG = 0.0;
    mDragFactor = NO_DRAG;
 
@@ -526,8 +528,7 @@ bool SoccerBallItem::collide(BfObject *hitObject)
          if(gameType && gameType->getGameTypeId() == SoccerGame)
             static_cast<SoccerGameType *>(gameType)->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->getScore());
 
-         static const S32 POST_SCORE_HIATUS = 1500;
-         mSendHomeTimer.reset(POST_SCORE_HIATUS);
+         mSendHomeTimer.reset();
       }
       return false;
    }
