@@ -230,7 +230,6 @@ protected:
    bool mIsMounted;
    SafePtr<Ship> mMount;
 
-   static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
    Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
 
 public:

@@ -1001,6 +1001,7 @@ bool MoveItem::collide(BfObject *otherObject)
 MountableItem::MountableItem(const Point &pos, bool collideable, float radius, float mass) : Parent(pos, collideable, radius, mass)
 {
    mIsMounted = false;
+   mDroppedTimer.setPeriod(500);    // 500ms --> Time until we can pick the item up after it's been dropped
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1108,7 +1109,6 @@ void MountableItem::dismount()
    if(isGhost())     // Client only; on server, we may have come from onItemDropped()
       onItemDropped();
 
-
    mMount = NULL;
    mIsMounted = false;
    setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
@@ -1175,7 +1175,7 @@ void MountableItem::onItemDropped()
       dismount();
    }
 
-   mDroppedTimer.reset(DROP_DELAY);
+   mDroppedTimer.reset();
 }
 
 

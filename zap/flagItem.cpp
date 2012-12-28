@@ -74,7 +74,7 @@ FlagItem::FlagItem(const Point &pos, const Point &vel, bool useDropDelay) : Pare
 
    setActualVel(vel);
    if(useDropDelay)
-      mDroppedTimer.reset(DROP_DELAY);
+      mDroppedTimer.reset();
 }
 
 
