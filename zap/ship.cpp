@@ -1255,6 +1255,13 @@ void Ship::damageObject(DamageInfo *theInfo)
 }
 
 
+// Returns true if ship represents local player
+bool Ship::isLocalPlayerShip(ClientGame *game)
+{
+   return getClientInfo() == game->getLocalRemoteClientInfo();
+}
+
+
 // Runs when ship spawns -- runs on client and server
 // Gets run on client every time ship spawns, gets run on server once per level
 void Ship::onAddedToGame(Game *game)
@@ -1263,8 +1270,9 @@ void Ship::onAddedToGame(Game *game)
 #ifndef ZAP_DEDICATED
    if(isGhost())        // Client
    {
-      if(getClientInfo() == static_cast<ClientGame *>(game)->getLocalRemoteClientInfo())
-         static_cast<ClientGame *>(game)->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
+      ClientGame *game = static_cast<ClientGame *>(game);
+      if(isLocalPlayerShip(game))
+         game->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
    }
 
    else                 // Server
@@ -1538,9 +1546,10 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       if(!hasEngineerModule)  // can't engineer without this module
       {
-         TNLAssert(dynamic_cast<ClientGame*>(getGame()), "ClientGame NULL");
+         TNLAssert(getGame()->isServer()), "Not a client game!");
+
          ClientGame *game = static_cast<ClientGame*>(getGame());
-         if(getClientInfo() == game->getLocalRemoteClientInfo())  // If this ship is ours, quit engineer menu.
+         if(isLocalPlayerShip(game))  // If this ship is ours, quit engineer menu.
             game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
       }
    }
@@ -1559,7 +1568,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       TNLAssert(dynamic_cast<ClientGame*>(getGame()), "ClientGame NULL");
       ClientGame *game = static_cast<ClientGame*>(getGame());
-      if(getClientInfo() == game->getLocalRemoteClientInfo())  // If this ship is ours, quit engineer menu.
+      if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu
          game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
    }
    else

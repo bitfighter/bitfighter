@@ -71,6 +71,8 @@ private:
    void checkForSpeedzones();    
    void checkForZones();
 
+   bool isLocalPlayerShip(ClientGame *game);       // Returns true if ship represents local player
+
    Vector<DatabaseObject *> *getCurrZoneList();    // Get list of zones ship is currently in
    Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
 
