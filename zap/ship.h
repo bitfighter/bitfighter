@@ -71,9 +71,9 @@ private:
    void checkForSpeedzones();    
    void checkForZones();
    void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
-
+#ifndef ZAP_DEDICATED
    bool isLocalPlayerShip(ClientGame *game);       // Returns true if ship represents local player
-
+#endif
    Vector<DatabaseObject *> *getCurrZoneList();    // Get list of zones ship is currently in
    Vector<DatabaseObject *> *getPrevZoneList();    // Get list of zones ship was in last tick
 

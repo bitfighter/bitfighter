@@ -1262,13 +1262,13 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
 }
 
-
+#ifndef ZAP_DEDICATED
 // Returns true if ship represents local player
 bool Ship::isLocalPlayerShip(ClientGame *game)
 {
    return getClientInfo() == game->getLocalRemoteClientInfo();
 }
-
+#endif
 
 // Runs when ship spawns -- runs on client and server
 // Gets run on client every time ship spawns, gets run on server once per level
