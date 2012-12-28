@@ -1095,14 +1095,19 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-// Client & server, called via different paths
+// Client & server, called via different paths.  Note we come through here on initial unpack for mountItem, for better or worse.  When
+// we do, mMount is NULL.
 void MountableItem::dismount()
 {
    if(mMount.isValid())                   // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
+   {
       mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
+      setPos(mMount->getActualPos());
+   }
 
    if(isGhost())     // Client only; on server, we may have come from onItemDropped()
       onItemDropped();
+
 
    mMount = NULL;
    mIsMounted = false;
