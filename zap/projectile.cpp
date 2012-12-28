@@ -659,13 +659,13 @@ void Burst::explode(const Point &pos)
    setMaskBits(ExplodedMask);
 
    DamageInfo info;
-   info.collisionPoint       = pos;
-   info.damagingObject       = this;
-   info.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;
-   info.damageType           = DamageTypeArea;
-   info.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
+   damageInfo.collisionPoint       = pos;    // Location of burst at time of explosion
+   damageInfo.damagingObject       = this;
+   damageInfo.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;
+   damageInfo.damageType           = DamageTypeArea;
+   damageInfo.damageSelfMultiplier = GameWeapon::weaponInfo[mWeaponType].damageSelfMultiplier;
 
-   S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, info);
+   S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, (TestFunc)isDamageableType, damageInfo);
 
    if(getOwner())
       for(S32 i = 0; i < hits; i++)
