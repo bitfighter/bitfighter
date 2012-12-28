@@ -40,11 +40,11 @@ class Console
 public:
    // Do nothing
    void output(const char *s, ...) {}
-   bool onKeyDown(char ascii) {}
-   bool onKeyDown(InputCode inputCode) {}
-   bool isVisible() {}
+   bool onKeyDown(char ascii) { return false; }
+   bool onKeyDown(InputCode inputCode) { return false; }
+   bool isVisible() { return false; }
    void show() {}
-   bool isOk() {}
+   bool isOk() { return false; }
    void toggleVisibility() {}
    void initialize() {}
    void onScreenModeChanged() {}
