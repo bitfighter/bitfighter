@@ -617,16 +617,16 @@ void Burst::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-void Burst::damageObject(DamageInfo *theInfo)
+void Burst::damageObject(DamageInfo *damageInfo)
 {
    // If we're being damaged by another burst, explode...
-   if(theInfo->damageType == DamageTypeArea || theInfo->damagingObject->getObjectTypeNumber() == SeekerTypeNumber)
+   if(damageInfo->damageType == DamageTypeArea || damageInfo->damagingObject->getObjectTypeNumber() == SeekerTypeNumber)
    {
       explode(getActualPos());
       return;
    }
 
-   computeImpulseDirection(theInfo);
+   computeImpulseDirection(damageInfo);
 
    setMaskBits(PositionMask);
 }

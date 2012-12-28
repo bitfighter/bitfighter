@@ -775,11 +775,11 @@ void MoveObject::onGeomChanged()
 }
 
 
-void MoveObject::computeImpulseDirection(DamageInfo *theInfo)
+void MoveObject::computeImpulseDirection(DamageInfo *damageInfo)
 {
    // Compute impulse direction
-   Point dv = theInfo->impulseVector - getActualVel();
-   Point iv = getActualPos() - theInfo->collisionPoint;
+   Point dv = damageInfo->impulseVector - getActualVel();
+   Point iv = getActualPos() - damageInfo->collisionPoint;
    iv.normalize();
    setActualVel(getActualVel() + iv * dv.dot(iv) * 0.3f / mMass);
 }
