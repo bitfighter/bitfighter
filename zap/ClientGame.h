@@ -84,6 +84,7 @@ private:
    bool mGameIsRunning;             // True if a suspended game is being played without us, false if it's full stop for everyone
 
    bool mSeenTimeOutMessage;
+   bool mSpawnDelayed;
 
 
    // ClientGame has two ClientInfos for the local player; mClientInfo is a FullClientInfo, which contains a rich array of information
@@ -95,9 +96,9 @@ private:
 
    S32 findClientIndex(const StringTableEntry &name);
 
-   AbstractTeam *getNewTeam();
+   void renderObjectIds();
 
-   bool mSpawnDelayed;
+   AbstractTeam *getNewTeam();
 
 public:
    ClientGame(const Address &bindAddress, GameSettings *settings);
@@ -146,8 +147,6 @@ public:
    void renderNormal();       // Render game in normal play mode
    void renderCommander();    // Render game in commander's map mode
    void renderSuspended();    // Render suspended game
-
-   void renderObjectIds();
 
    void renderOverlayMap();   // Render the overlay map in normal play mode
    void resetZoomDelta();

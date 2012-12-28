@@ -1979,7 +1979,19 @@ void ClientGame::renderObjectIds()
    for(S32 i = 0; i < objects->size(); i++)
    {
       BfObject *obj = static_cast<BfObject *>(objects->get(i));
-      UserInterface::drawStringf(obj->getPos().x, obj->getPos().y, 13, "[%d]", obj->getUserAssignedId());
+      static const S32 height = 13;
+
+      S32 id = obj->getUserAssignedId();
+      S32 width = UserInterface::getStringWidthf(height, "[%d]", id);
+
+      F32 x = obj->getPos().x;
+      F32 y = obj->getPos().y;
+
+      glColor(Colors::black);
+      UserInterface::drawFilledRect(x - 1, y - 1, x + width + 1, y + height + 1);
+
+      glColor(Colors::gray70);
+      UserInterface::drawStringf(x, y, height, "[%d]", id);
    }
 }
 
