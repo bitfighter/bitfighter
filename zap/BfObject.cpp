@@ -904,7 +904,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       if(delta.len() > outerRad)
          continue;
 
-      // Can one damage another?
+      // Check if this pair of objects can damage one another
       if(gameType && !gameType->objectCanDamageObject(info.damagingObject, foundObject))
          continue;
 
