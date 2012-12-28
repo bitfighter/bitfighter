@@ -57,8 +57,6 @@ namespace TNL
  */
 const char* avar(const char *in_msg, ...);
 
-#ifdef TNL_ENABLE_ASSERTS
-
 /// Assert functions for validating proper program state.
 class Assert
 {
@@ -67,6 +65,8 @@ public:
    static bool processingAssert();
 };
 
+
+#ifdef TNL_ENABLE_ASSERTS
 
    /**
       Assert that the statement x is true, otherwise halt.
