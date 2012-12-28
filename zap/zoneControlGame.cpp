@@ -112,7 +112,7 @@ void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 {
    // Zone already belongs to team, or ship has no flag.  In either case, do nothing.
-   if(z->getTeam() == s->getTeam() || s->isCarryingItem(FlagTypeNumber))
+   if(z->getTeam() == s->getTeam() || !s->isCarryingItem(FlagTypeNumber))
       return;
 
    static Vector<StringTableEntry> e;
