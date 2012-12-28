@@ -1043,7 +1043,6 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       updateExtentInDatabase();
    }
 
-
    // Runs on client and server, but only has meaning on server
    mDroppedTimer.update(mCurrentMove.time);
 }
