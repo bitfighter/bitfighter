@@ -658,7 +658,7 @@ void Burst::explode(const Point &pos)
    exploded = true;
    setMaskBits(ExplodedMask);
 
-   DamageInfo info;
+   DamageInfo damageInfo;
    damageInfo.collisionPoint       = pos;    // Location of burst at time of explosion
    damageInfo.damagingObject       = this;
    damageInfo.damageAmount         = GameWeapon::weaponInfo[mWeaponType].damageAmount;

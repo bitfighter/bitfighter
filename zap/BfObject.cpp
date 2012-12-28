@@ -882,7 +882,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
    fillVector.clear();
    findObjects(objectTypeTest, fillVector, queryRect);
 
-   // Ghosts can't do damage
+   // No damage calculated on the client
    if(isGhost())
       info.damageAmount = 0;
 
