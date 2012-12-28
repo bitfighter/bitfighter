@@ -897,7 +897,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
          continue;
 
       // Check the actual distance against our outer radius.  Recall that we got a list of potential
-      // collision objects based on a square area, but actual collisions will be based on true distance
+      // collision objects based on a square area, but actual collisions will be based on true distance.
       Point objPos = foundObject->getPos();
       Point delta = objPos - pos;
 
