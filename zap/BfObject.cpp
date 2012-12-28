@@ -244,8 +244,8 @@ bool isVisibleOnCmdrsMapWithSensorType(U8 x)     // Weapons visible on commander
 bool isZoneType(U8 x)      // Zones a ship could be in
 {
    return 
-         x == NexusTypeNumber || x == GoalZoneTypeNumber || x == LoadoutZoneTypeNumber ||
-         x == SlipZoneTypeNumber || x == ZoneTypeNumber;
+         x == LoadoutZoneTypeNumber || x == GoalZoneTypeNumber   || x == NexusTypeNumber  ||
+         x == ZoneTypeNumber        || x == SlipZoneTypeNumber;
 }
 
 
@@ -930,7 +930,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       localInfo.impulseVector  = delta;
       localInfo.impulseVector.normalize();
 
-      localInfo.collisionPoint  = objPos;
+      //localInfo.collisionPoint  = objPos;
       localInfo.collisionPoint -= info.impulseVector;
 
       // Reuse t from above to represent interpolation based on distance
