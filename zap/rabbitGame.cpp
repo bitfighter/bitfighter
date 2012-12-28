@@ -226,7 +226,7 @@ const Color *RabbitGameType::getTeamColor(const BfObject *object) const
    // In team game, ships use team color
    if(object->getObjectTypeNumber() == PlayerShipTypeNumber && !isTeamGame())
    {
-      Ship *localShip = static_cast<ClientGame *>(getGame())->getLocalShip();
+      Ship *localShip = static_cast<ClientGame *>(getGame())->getLocalShip(); // (getLocalShip can return NULL)
       
       if(object == localShip)                            // Players always appear green to themselves
          return &Colors::green;
