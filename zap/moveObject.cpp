@@ -1086,7 +1086,7 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          Ship *ship = NULL;
          
          if(stream->readFlag())
-            ship = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
+            ship = static_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
 
          mountToShip(ship);
       }
