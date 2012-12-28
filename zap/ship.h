@@ -70,6 +70,7 @@ private:
    // Idle helpers
    void checkForSpeedzones();    
    void checkForZones();
+   void getZonesShipIsIn(Vector<DatabaseObject *> *zoneList);     // Fill zoneList with a list of all zones that the ship is currently in
 
    bool isLocalPlayerShip(ClientGame *game);       // Returns true if ship represents local player
 

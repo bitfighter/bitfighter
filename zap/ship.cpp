@@ -799,25 +799,7 @@ void Ship::checkForZones()
    Vector<DatabaseObject *> *currZoneList = getCurrZoneList();
    Vector<DatabaseObject *> *prevZoneList = getPrevZoneList();
 
-   // Use this boolean as a cheap way of making the current zone list be the previous out without copying
-   mZones1IsCurrent = !mZones1IsCurrent;     
-
-   currZoneList->clear();
-
-   Rect rect(getActualPos(), getActualPos());            // Center of ship
-
-   fillVector.clear();                             
-   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
-
-   // Extents overlap...  now check for actual overlap
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      // Get points that define the zone boundaries
-      const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
-
-      if(PolygonContains2(polyPoints->address(), polyPoints->size(), getActualPos()))
-         currZoneList->push_back(fillVector[i]);
-   }
+   getZonesShipIsIn(currZoneList);     // Fill currZoneList with a list of all zones ship is currently in
 
    // Now compare currZoneList with prevZoneList to figure out if ship entered or exited any zones
    for(S32 i = 0; i < currZoneList->size(); i++)
@@ -830,7 +812,33 @@ void Ship::checkForZones()
 }
 
 
-static Vector<DatabaseObject *> foundObjects;
+// Fill zoneList with a list of all zones that the ship is currently in
+// Server only
+void Ship::getZonesShipIsIn(Vector<DatabaseObject *> *zoneList)
+{
+   // Use this boolean as a cheap way of making the current zone list be the previous out without copying
+   mZones1IsCurrent = !mZones1IsCurrent;     
+
+   zoneList->clear();
+
+   Rect rect(getActualPos(), getActualPos());      // Center of ship
+
+   fillVector.clear();                             
+   findObjects((TestFunc)isZoneType, fillVector, rect);  // Find all zones the ship might be in
+
+   // Extents overlap...  now check for actual overlap
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Get points that define the zone boundaries
+      const Vector<Point> *polyPoints = fillVector[i]->getCollisionPoly();
+
+      if(PolygonContains2(polyPoints->address(), polyPoints->size(), getActualPos()))
+         zoneList->push_back(fillVector[i]);
+   }
+}
+
+
+static Vector<DatabaseObject *> foundObjects;      // Reusable container
 
 // Returns true if we found a suitable target
 void Ship::findRepairTargets()
@@ -1270,9 +1278,9 @@ void Ship::onAddedToGame(Game *game)
 #ifndef ZAP_DEDICATED
    if(isGhost())        // Client
    {
-      ClientGame *game = static_cast<ClientGame *>(game);
-      if(isLocalPlayerShip(game))
-         game->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
+      ClientGame *clientGame = static_cast<ClientGame *>(game);
+      if(isLocalPlayerShip(clientGame))
+         clientGame->setSpawnDelayed(false);    // Server tells us we're undelayed by spawning our ship
    }
 
    else                 // Server
@@ -1487,6 +1495,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
 
+   TNLAssert(!getGame()->isServer(), "We are expecting a ClientGame here!");
+
    if(isInitialUpdate())
    {
       wasInitialUpdate = true;
@@ -1546,8 +1556,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       if(!hasEngineerModule)  // can't engineer without this module
       {
-         TNLAssert(getGame()->isServer()), "Not a client game!");
-
          ClientGame *game = static_cast<ClientGame*>(getGame());
          if(isLocalPlayerShip(game))  // If this ship is ours, quit engineer menu.
             game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
@@ -1566,7 +1574,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
             emitShipExplosion(getRenderPos());    // Boom!
       }
 
-      TNLAssert(dynamic_cast<ClientGame*>(getGame()), "ClientGame NULL");
       ClientGame *game = static_cast<ClientGame*>(getGame());
       if(isLocalPlayerShip(game))   // If this ship is ours, quit engineer menu
          game->getUIManager()->getGameUserInterface()->quitEngineerHelper();
@@ -1994,14 +2001,24 @@ void Ship::kill(DamageInfo *theInfo)
 
 void Ship::kill()
 {
-   if(!isGhost())
+   if(!isGhost())    // Server only
    {
+      if(getOwner())
+         getLoadout(getOwner()->mOldLoadout);      // Save current loadout in getOwner()->mOldLoadout
+
+      // Fire some events, starting with ShipKilledEvent
       EventManager::get()->fireEvent(EventManager::ShipKilledEvent, this);
 
-      if(getOwner())
-         getLoadout(getOwner()->mOldLoadout);
+      // Fire the ShipLeftZoneEvent for every zone the ship is in
+      Vector<DatabaseObject *> *zoneList = &foundObjects;   // Reuse our reusable container
+
+      getZonesShipIsIn(zoneList);
+   
+      for(S32 i = 0; i < zoneList->size(); i++)
+         EventManager::get()->fireEvent(EventManager::ShipLeftZoneEvent, this, static_cast<Zone *>(zoneList->get(i)));
    }
 
+   // Client and server
    deleteObject(KillDeleteDelay);
    hasExploded = true;
    setMaskBits(ExplodedMask);
