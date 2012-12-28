@@ -912,6 +912,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       F32 t;
       Point n;
 
+      // No damage through walls, but this appears to allow damage through forcefields
       if(findObjectLOS((TestFunc)isWallType, ActualState, pos, objPos, t, n))
          continue;
 
