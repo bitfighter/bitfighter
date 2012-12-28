@@ -158,6 +158,13 @@ bool isWallType(U8 x)
 }
 
 
+bool isWallOrForcefieldType(U8 x)
+{
+   return
+      isWallType(x) || x == ForceFieldTypeNumber;
+}
+
+
 bool isWallItemType(U8 x)
 {
    return x == WallItemTypeNumber;
@@ -912,8 +919,8 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
       F32 t;
       Point n;
 
-      // No damage through walls, but this appears to allow damage through forcefields
-      if(findObjectLOS((TestFunc)isWallType, ActualState, pos, objPos, t, n))
+      // No damage through walls or forcefields
+      if(findObjectLOS((TestFunc)isWallOrForcefieldType, ActualState, pos, objPos, t, n))
          continue;
 
       // Figure the impulse and damage
