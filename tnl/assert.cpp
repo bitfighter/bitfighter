@@ -81,6 +81,11 @@ bool Assert::processingAssert()
    return processing;
 }
 
+#else
+
+void Assert::processAssert(const char *filename, U32 lineNumber, const char  *message) { }
+bool Assert::processingAssert() { return false; }
+
 #endif
 
 //--------------------------------------

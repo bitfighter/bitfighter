@@ -219,6 +219,7 @@ bool RabbitGameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
 
 const Color *RabbitGameType::getTeamColor(const BfObject *object) const
 {
+#ifndef ZAP_DEDICATED
    // Neutral flags are orange in Rabbit
    if(object->getObjectTypeNumber() == FlagTypeNumber && object->getTeam() == TEAM_NEUTRAL)
       return &Colors::orange50;  
@@ -238,6 +239,7 @@ const Color *RabbitGameType::getTeamColor(const BfObject *object) const
 
       return &Colors::green;                             // All others are green
    }
+#endif
 
    return Parent::getTeamColor(object);
 }
