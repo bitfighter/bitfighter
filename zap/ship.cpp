@@ -1377,7 +1377,7 @@ void Ship::readControlState(BitStream *stream)
    //bool rrrmFastRecharging = stream->readFlag();
 
    mCooldownNeeded = stream->readFlag();
-   int xmFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
+   //int xmFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
    //if(mFireTimer > S32(MaxFireDelay))
    //   mFireTimer =  S32(MaxFireDelay) - mFireTimer;
 
