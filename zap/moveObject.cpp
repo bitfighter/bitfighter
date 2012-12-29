@@ -1104,13 +1104,13 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void MountableItem::dismount()
 {
    if(mMount.isValid())                   // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
-   {
       mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
-      //setPos(mMount->getActualPos());   //<== uncommenting fixes stay behind flag bug, but breaks flag-go-home after zc touchdown et al
-   }
 
    if(isGhost())     // Client only; on server, we may have come from onItemDropped()
       onItemDropped();
+   else
+      setPos(mMount->getActualPos());   
+
 
    mMount = NULL;
    mIsMounted = false;
