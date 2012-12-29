@@ -630,6 +630,7 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
+
    if(mDestManager.getDestCount() > 0)    // Ignore 0-dest teleporters
    {
       // Check for players within range.  If found, send them to dest.
@@ -638,34 +639,48 @@ void Teleporter::idle(BfObject::IdleCallPath path)
       foundObjects.clear();
       findObjects((TestFunc)isShipType, foundObjects, queryRect);
 
-      // First see if we're triggered...
-      Point pos = getVert(0);
-
+      // First see if we've triggered the teleport...
+      Point teleportCenter = getVert(0);
+      bool isTriggered = false;
       S32 lastDest = -1;
 
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          Ship *ship = static_cast<Ship *>(foundObjects[i]);
 
-         if((pos - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))  // Center of ship is inside TeleporterTriggerRadius?
+         // Check if the center of ship is inside TeleporterTriggerRadius -- this lets ships slightly overlap teleporter before being transported
+         if((teleportCenter - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))  
          {   
+            isTriggered = true;
             mTeleportCooldown.reset(mTeleporterCooldown);    // Temporarily disable teleporter
+            break;
+         }
+      }
 
-            // If we have multiple ships entering teleporter on the same frame, they all go to the same dest
-            if(lastDest == -1)
-               mLastDest = lastDest = mDestManager.getRandomDest();
+      if(isTriggered)                        // We've triggered the teleporter.  Relocate any ships within range.
+      {   
+         for(S32 i = 0; i < foundObjects.size(); i++)
+         {
+            Ship *ship = static_cast<Ship *>(foundObjects[i]);
+            if((teleportCenter - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))   // Any ships touching teleport should be teleported
+            {
+               // If we have multiple ships entering teleporter on the same frame, they all go to the same dest; or if some are camped out nearby, 
+               // they might get sucked in too!  This is, apparently, desireable behavior.
+               if(lastDest == -1)
+                  mLastDest = lastDest = mDestManager.getRandomDest();
 
-            Point newPos = ship->getActualPos() - pos + mDestManager.getDest(mLastDest);
-            ship->setActualPos(newPos, true);
-            setMaskBits(TeleportMask);
+               Point newPos = ship->getActualPos() - teleportCenter + mDestManager.getDest(mLastDest);
+               ship->setActualPos(newPos, true);
+               setMaskBits(TeleportMask);
 
-            if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
-               ship->getClientInfo()->getStatistics()->mTeleport++;
+               if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
+                  ship->getClientInfo()->getStatistics()->mTeleport++;
 
-            // See if we've teleported onto a loadout zone
-            BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
-            if(zone)
-               zone->collide(ship);
+               // See if we've teleported onto a loadout zone  ///////////////////// TODO: Check for loadout or nexus zones?????????
+               BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
+               if(zone)
+                  zone->collide(ship);
+            }
          }
       }
    }
