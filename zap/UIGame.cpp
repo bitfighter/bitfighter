@@ -1485,6 +1485,7 @@ void GameUserInterface::submitPassHandler(const Vector<string> &words)
    conn->submitPassword(words[1].c_str());
 }
 
+
 /////
 // Debugging command handlers
 
