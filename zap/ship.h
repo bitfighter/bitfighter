@@ -109,7 +109,7 @@ protected:
    string toString(F32 gridSize) const;
 
 public:
-   static const S32 CollisionRadius = 24;
+   static const S32 CollisionRadius = 24;          // This is the ship's radius
    static const S32 RepairRadius = 65;
    static const U32 SpawnShieldTime = 5000;        // Time spawn shields are active
    static const U32 SpawnShieldFlashTime = 1500;   // Time at which shields start to flash

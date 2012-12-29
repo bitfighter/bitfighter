@@ -631,10 +631,15 @@ void Teleporter::idle(BfObject::IdleCallPath path)
       return;
 
 
+   static const F32 TRIGGER_RADIUS  = F32(TELEPORTER_RADIUS - Ship::CollisionRadius);
+   static const F32 TELEPORT_RADIUS = F32(TELEPORTER_RADIUS + Ship::CollisionRadius);
+
+
    if(mDestManager.getDestCount() > 0)    // Ignore 0-dest teleporters
    {
-      // Check for players within range.  If found, send them to dest.
-      Rect queryRect(getVert(0), (F32)TeleporterTriggerRadius * 2);     
+      // Check for players within a square box around the teleporter.  Not all these ships will teleport; the actual determination is made
+      // via a circle, and will be checked below.
+      Rect queryRect(getVert(0), TRIGGER_RADIUS * 2);     
 
       foundObjects.clear();
       findObjects((TestFunc)isShipType, foundObjects, queryRect);
@@ -648,8 +653,10 @@ void Teleporter::idle(BfObject::IdleCallPath path)
       {
          Ship *ship = static_cast<Ship *>(foundObjects[i]);
 
-         // Check if the center of ship is inside TeleporterTriggerRadius -- this lets ships slightly overlap teleporter before being transported
-         if((teleportCenter - ship->getActualPos()).lenSquared() < sq(TeleporterTriggerRadius))  
+         // Check if the center of the ship is closer than TRIGGER_RADIUS -- this is equivalent to testing if
+         // the ship is entirely within the outer radius of the teleporter.  Therefore, ships can almost entirely 
+         // overlap the teleporter before being transported.
+         if((teleportCenter - ship->getActualPos()).lenSquared() < sq(TRIGGER_RADIUS))  
          {   
             isTriggered = true;
             mTeleportCooldown.reset(mTeleporterCooldown);    // Temporarily disable teleporter
@@ -657,12 +664,12 @@ void Teleporter::idle(BfObject::IdleCallPath path)
          }
       }
 
-      if(isTriggered)                        // We've triggered the teleporter.  Relocate any ships within range.
+      if(isTriggered)      // We've triggered the teleporter.  Relocate any ships within range.  Any ship touching teleport will be teleported.
       {   
          for(S32 i = 0; i < foundObjects.size(); i++)
          {
             Ship *ship = static_cast<Ship *>(foundObjects[i]);
-            if((teleportCenter - ship->getRenderPos()).lenSquared() < sq(TELEPORTER_RADIUS + ship->getRadius()))   // Any ships touching teleport should be teleported
+            if((teleportCenter - ship->getRenderPos()).lenSquared() < sq(TELEPORT_RADIUS))
             {
                // If we have multiple ships entering teleporter on the same frame, they all go to the same dest; or if some are camped out nearby, 
                // they might get sucked in too!  This is, apparently, desireable behavior.
