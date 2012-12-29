@@ -64,8 +64,20 @@ private:
 
    SafePtr<Teleporter> mEngineeredTeleporter;
 
-   // Find objects of specified type that may be under the ship, and put them in fillVector
-   void findObjectsUnderShip(U8 typeNumber);
+   // Find objects of specified type that may be under the ship, and put them in fillVector.  This is a private helper
+   // for isInZone() and isInAnyZone().
+   template <typename T>
+   void findObjectsUnderShip(T typeNumberOrFunction)
+   {
+      Rect rect(getActualPos(), getActualPos());
+      rect.expand(Point(CollisionRadius, CollisionRadius));
+
+      fillVector.clear();           // This vector will hold any matching zones
+      findObjects(typeNumberOrFunction, fillVector, rect);
+   }
+
+
+   BfObject *doIsInZone(const Vector<DatabaseObject *> &objects); // Private helper for isInZone() and isInAnyZone()
 
    // Idle helpers
    void checkForSpeedzones();    
@@ -300,8 +312,9 @@ public:
 
    bool isRobot();
 
-   BfObject *isInZone(U8 zoneType);           // Return whether the ship is currently in a zone of the specified type, and which one
-   //BfObject *isInZone(BfObject *zone);
+   BfObject *isInZone(U8 zoneType);    // Return whether the ship is currently in a zone of the specified type, and which one
+   BfObject *isInAnyZone();            // Return whether the ship is currently in any zone, and which one
+
    DatabaseObject *isOnObject(U8 objectType); // Returns the object in question if this ship is on an object of type objectType
 
    bool isOnObject(BfObject *object);         // Return whether or not ship is sitting on a particular object

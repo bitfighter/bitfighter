@@ -683,8 +683,8 @@ void Teleporter::idle(BfObject::IdleCallPath path)
                if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
                   ship->getClientInfo()->getStatistics()->mTeleport++;
 
-               // See if we've teleported onto a loadout zone  ///////////////////// TODO: Check for loadout or nexus zones?????????
-               BfObject *zone = ship->isInZone(LoadoutZoneTypeNumber);
+               // See if we've teleported onto a zone of some sort
+               BfObject *zone = ship->isInAnyZone();
                if(zone)
                   zone->collide(ship);
             }

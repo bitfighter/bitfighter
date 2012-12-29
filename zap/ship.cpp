@@ -380,17 +380,6 @@ void Ship::processMove(U32 stateIndex)
 }
 
 
-// Find objects of specified type that may be under the ship, and put them in fillVector
-void Ship::findObjectsUnderShip(U8 type)
-{
-   Rect rect(getActualPos(), getActualPos());
-   rect.expand(Point(CollisionRadius, CollisionRadius));
-
-   fillVector.clear();           // This vector will hold any matching zones
-   findObjects(type, fillVector, rect);
-}
-
-
 // Returns the zone in question if this ship is in a zone of type zoneType
 // Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
 /* //// BUG: always returns NULL on client side, needed to avoid jumpy energy drain on hostile loadout, and slip zone, when lagging in someone server.
@@ -406,20 +395,37 @@ BfObject *Ship::isInZone(U8 zoneTypeNumber)
 }
 */
 
-// Returns the zone in question if this ship is in a zone of type zoneType
-// Note: If you are in multiple zones of type zoneTypeNumber, and aribtrary one will be returned, and the level designer will be flogged
+
+// Returns the zone in question if this ship is in any zone.
+// If ship is in multiple zones, an aribtrary one will be returned, and the level designer will be flogged.
+
+BfObject *Ship::isInAnyZone()
+{
+   findObjectsUnderShip((TestFunc)isZoneType);  // Fills fillVector
+   return doIsInZone(fillVector);
+}
+
+
+// Returns the zone in question if this ship is in a zone of type zoneType.
+// If ship is in multiple zones of type zoneTypeNumber, an aribtrary one will be returned, and the level designer will be flogged.
 BfObject *Ship::isInZone(U8 zoneTypeNumber)
 {
-   findObjectsUnderShip(zoneTypeNumber);
+   findObjectsUnderShip(zoneTypeNumber);        // Fills fillVector
+   return doIsInZone(fillVector);
+}
 
-   if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
+
+// Private helper for isInZone() and isInAnyZone() -- these fill fillVector, and we operate on it below
+BfObject *Ship::doIsInZone(const Vector<DatabaseObject *> &objects)
+{
+   if(objects.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
 
    // Extents overlap...  now check for actual overlap
 
-   for(S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < objects.size(); i++)
    {
-      BfObject *zone = static_cast<BfObject *>(fillVector[i]);
+      BfObject *zone = static_cast<BfObject *>(objects[i]);
 
       // Get points that define the zone boundaries
       const Vector<Point> *polyPoints = zone->getCollisionPoly();
