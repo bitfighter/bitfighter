@@ -1485,7 +1485,10 @@ void GameUserInterface::submitPassHandler(const Vector<string> &words)
    conn->submitPassword(words[1].c_str());
 }
 
+/////
+// Debugging command handlers
 
+// Can work on any server, confers no advantage
 void GameUserInterface::showCoordsHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
@@ -1493,23 +1496,36 @@ void GameUserInterface::showCoordsHandler(const Vector<string> &words)
 }
 
 
+// Also lets players see invisible objects; uses illegal reachover and only works with local server
 void GameUserInterface::showIdsHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!(gServerGame && gServerGame->isTestServer()))
-      game->displayErrorMessage("!!! Ids can only be displayed on a test server");
-   else
+
+   if(game->isLocalTestServer("!!! Ids can only be displayed on a test server"))
       game->toggleShowingObjectIds();
 }
 
 
+// Could possibly reveal out-of-scope turrets and forcefields and such; in any case uses illegal reachover and only works with local server
 void GameUserInterface::showZonesHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!gServerGame)
-      game->displayErrorMessage("!!! Zones can only be displayed on a local host");
-   else
+
+   if(game->isLocalTestServer("!!! Zones can only be displayed on a local host"))
       game->toggleShowingMeshZones();
+}
+
+
+// Will work on any server, but offers advantage of being able to see out-of-scope bots; increases network traffic somewhat
+void GameUserInterface::showBotsHandler(const Vector<string> &words)
+{
+   ClientGame *game = getGame();
+
+   if(game->isLocalTestServer("!!! Robots can only be displayed on a test server"))
+   {
+      if(game->getGameType())
+         game->getGameType()->c2sShowBots();
+   }
 }
 
 
@@ -1518,39 +1534,42 @@ extern bool showDebugBots;  // in game.cpp
 void GameUserInterface::showPathsHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!(gServerGame && gServerGame->isTestServer())) 
-      game->displayErrorMessage("!!! Robots can only be shown on a test server");
-   else
+
+   if(game->isLocalTestServer("!!! Robots can only be shown on a test server")) 
       showDebugBots = !showDebugBots;
 }
 
 
+// Will only work on local server; may confer some advantage, use is apparent to all players when bots are frozen
 void GameUserInterface::pauseBotsHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!(gServerGame && gServerGame->isTestServer())) 
-      game->displayErrorMessage("!!! Robots can only be frozen on a test server");
-   else
+
+   if(game->isLocalTestServer("!!! Robots can only be frozen on a test server")) 
       EventManager::get()->togglePauseStatus();
 }
 
 
+// Will only work on local server; may confer some advantage, use is apparent to all players when bots are frozen
 void GameUserInterface::stepBotsHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
-   if(!(gServerGame && gServerGame->isTestServer())) 
-      game->displayErrorMessage("!!! Robots can only be stepped on a test server");
-   else
+
+   if(game->isLocalTestServer("!!! Robots can only be stepped on a test server")) 
    {
       S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
       EventManager::get()->addSteps(steps);
    }
 }
 
+// End debugging command handlers
+/////
+
 
 void GameUserInterface::setAdminPassHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to set the admin password"))
       game->changePassword(GameConnection::AdminPassword, words, true);
 }
@@ -1559,6 +1578,7 @@ void GameUserInterface::setAdminPassHandler(const Vector<string> &words)
 void GameUserInterface::setServerPassHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to set the server password"))
       game->changePassword(GameConnection::ServerPassword, words, false);
 }
@@ -1567,6 +1587,7 @@ void GameUserInterface::setServerPassHandler(const Vector<string> &words)
 void GameUserInterface::setLevPassHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to set the level change password"))
       game->changePassword(GameConnection::LevelChangePassword, words, false);
 }
@@ -1575,6 +1596,7 @@ void GameUserInterface::setLevPassHandler(const Vector<string> &words)
 void GameUserInterface::setServerNameHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to set the server name"))
       game->changeServerParam(GameConnection::ServerName, words);
 }
@@ -1583,6 +1605,7 @@ void GameUserInterface::setServerNameHandler(const Vector<string> &words)
 void GameUserInterface::setServerDescrHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to set the server description"))
       game->changeServerParam(GameConnection::ServerDescr, words);
 }
@@ -1591,6 +1614,7 @@ void GameUserInterface::setServerDescrHandler(const Vector<string> &words)
 void GameUserInterface::setLevelDirHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
+
    if(game->hasAdmin("!!! You don't have permission to set the leveldir param"))
       game->changeServerParam(GameConnection::LevelDir, words);
 }
@@ -2008,14 +2032,6 @@ void GameUserInterface::kickBotsHandler(const Vector<string> &words)
       if(game->getGameType())
          game->getGameType()->c2sKickBots();
    }
-}
-
-
-void GameUserInterface::showBotsHandler(const Vector<string> &words)
-{
-   ClientGame *game = getGame();
-   if(game->getGameType())
-      game->getGameType()->c2sShowBots();
 }
 
 

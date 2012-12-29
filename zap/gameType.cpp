@@ -3234,6 +3234,9 @@ GAMETYPE_RPC_C2S(GameType, c2sKickBots, (), ())
 
 GAMETYPE_RPC_C2S(GameType, c2sShowBots, (), ())
 {
+   if(!getGame()->isTestServer())   // Error message for this condition already displayed on client; this is just a quick hack check
+      return;
+
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
 
