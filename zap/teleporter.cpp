@@ -634,7 +634,6 @@ void Teleporter::idle(BfObject::IdleCallPath path)
    static const F32 TRIGGER_RADIUS  = F32(TELEPORTER_RADIUS - Ship::CollisionRadius);
    static const F32 TELEPORT_RADIUS = F32(TELEPORTER_RADIUS + Ship::CollisionRadius);
 
-
    if(mDestManager.getDestCount() > 0)    // Ignore 0-dest teleporters
    {
       // Check for players within a square box around the teleporter.  Not all these ships will teleport; the actual determination is made
