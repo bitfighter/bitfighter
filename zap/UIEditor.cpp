@@ -2885,8 +2885,9 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   // Update coordinates of dragged item
-   translateSelectedItems(getDatabase(), mSnapDelta - lastSnapDelta);
+   // Update coordinates of dragged item -- unless it's an engineered item, in which case its coordinates have already been updated
+   if(!isEngineeredType(mSnapObject->getObjectTypeNumber()))
+      translateSelectedItems(getDatabase(), mSnapDelta - lastSnapDelta);
 }
 
 
