@@ -784,26 +784,27 @@ void shutdownBitfighter()
 
 void setupLogging(IniSettings *iniSettings)
 {
+   //                           Logging type               Setting where whether we log this type is stored
    gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, iniSettings->logConnectionProtocol);
-   gMainLog.setMsgType(LogConsumer::LogNetConnection, iniSettings->logNetConnection);
-   gMainLog.setMsgType(LogConsumer::LogEventConnection, iniSettings->logEventConnection);
-   gMainLog.setMsgType(LogConsumer::LogGhostConnection, iniSettings->logGhostConnection);
+   gMainLog.setMsgType(LogConsumer::LogNetConnection,      iniSettings->logNetConnection);
+   gMainLog.setMsgType(LogConsumer::LogEventConnection,    iniSettings->logEventConnection);
+   gMainLog.setMsgType(LogConsumer::LogGhostConnection,    iniSettings->logGhostConnection);
 
-   gMainLog.setMsgType(LogConsumer::LogNetInterface, iniSettings->logNetInterface);
-   gMainLog.setMsgType(LogConsumer::LogPlatform, iniSettings->logPlatform);
-   gMainLog.setMsgType(LogConsumer::LogNetBase, iniSettings->logNetBase);
-   gMainLog.setMsgType(LogConsumer::LogUDP, iniSettings->logUDP);
+   gMainLog.setMsgType(LogConsumer::LogNetInterface,       iniSettings->logNetInterface);
+   gMainLog.setMsgType(LogConsumer::LogPlatform,           iniSettings->logPlatform);
+   gMainLog.setMsgType(LogConsumer::LogNetBase,            iniSettings->logNetBase);
+   gMainLog.setMsgType(LogConsumer::LogUDP,                iniSettings->logUDP);
 
-   gMainLog.setMsgType(LogConsumer::LogFatalError, iniSettings->logFatalError); 
-   gMainLog.setMsgType(LogConsumer::LogError, iniSettings->logError); 
-   gMainLog.setMsgType(LogConsumer::LogWarning, iniSettings->logWarning); 
-   gMainLog.setMsgType(LogConsumer::ConfigurationError, iniSettings->logConfigurationError);
-   gMainLog.setMsgType(LogConsumer::LogConnection, iniSettings->logConnection); 
-   gMainLog.setMsgType(LogConsumer::LogLevelLoaded, iniSettings->logLevelLoaded); 
+   gMainLog.setMsgType(LogConsumer::LogFatalError,         iniSettings->logFatalError); 
+   gMainLog.setMsgType(LogConsumer::LogError,              iniSettings->logError); 
+   gMainLog.setMsgType(LogConsumer::LogWarning,            iniSettings->logWarning); 
+   gMainLog.setMsgType(LogConsumer::ConfigurationError,    iniSettings->logConfigurationError);
+   gMainLog.setMsgType(LogConsumer::LogConnection,         iniSettings->logConnection); 
+   gMainLog.setMsgType(LogConsumer::LogLevelLoaded,        iniSettings->logLevelLoaded); 
    gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, iniSettings->logLuaObjectLifecycle); 
-   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator, iniSettings->luaLevelGenerator); 
-   gMainLog.setMsgType(LogConsumer::LuaBotMessage, iniSettings->luaBotMessage); 
-   gMainLog.setMsgType(LogConsumer::ServerFilter, iniSettings->serverFilter); 
+   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator,     iniSettings->luaLevelGenerator); 
+   gMainLog.setMsgType(LogConsumer::LuaBotMessage,         iniSettings->luaBotMessage); 
+   gMainLog.setMsgType(LogConsumer::ServerFilter,          iniSettings->serverFilter); 
 }
 
 
