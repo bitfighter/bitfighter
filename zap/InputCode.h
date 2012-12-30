@@ -136,7 +136,7 @@ private:
    bool checkIfBindingsHaveKeypad();
 
 public:
-   static string getCurrentInputString();
+   static string getCurrentInputString(InputCode inputCode);
 
    static bool checkModifier(InputCode mod1);            
    static bool checkModifier(InputCode mod1, InputCode mod2);            

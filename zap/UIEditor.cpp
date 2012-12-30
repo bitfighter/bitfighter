@@ -3675,7 +3675,8 @@ bool EditorUserInterface::onKeyDown(InputCode inputCode)
    if(gConsole.isVisible())
       return false;
 
-   string inputString = InputCodeManager::getCurrentInputString();
+   string inputString = InputCodeManager::getCurrentInputString(inputCode);
+
 
    // TODO: Make this stuff work like the attribute entry stuff; use a real menu and not this ad-hoc code
    // This is where we handle entering things like rotation angle and other data that requires a special entry box.

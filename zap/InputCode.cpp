@@ -345,12 +345,14 @@ static const InputCode modifiers[] = { KEY_CTRL, KEY_ALT, KEY_SHIFT, KEY_META, K
 
 // At any given time, for any combination of keys being pressed, there will be an official "input string" that looks a bit like [Ctrl+T] or whatever.  
 // This may be different than the keys actually being pressed.  For example, if the A and B keys are down, the inputString will be [A].
+// In the event that two keys are both down, we'll prefer the one passed in inputCode, if possible.
 // This generally works well most of the time, but may need to be cleaned up if it generates erroneous or misleading input strings.
-string InputCodeManager::getCurrentInputString()
+string InputCodeManager::getCurrentInputString(InputCode inputCode)
 {
    InputCode baseKey = KEY_NONE;
 
-   // First, find the base key -- this will be the first non-modifier key we find, assuming the standard modifier-key combination
+   // First, find the base key -- this will be the last non-modifier key we find, or one where the base key is the same as inputCode,
+   // assuming the standard modifier-key combination
    for(S32 i = 0; i < MAX_INPUT_CODES; i++)
    {
       InputCode code = (InputCode) i;
@@ -358,7 +360,11 @@ string InputCodeManager::getCurrentInputString()
       if(isKeyboardKey(code) && !isModifier(code) && getState(code))
       {
          baseKey = code;
-         break;
+
+         if(code == inputCode)
+            break;
+
+         // Othewise, keep looking
       }
    }
 

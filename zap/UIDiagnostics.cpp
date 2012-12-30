@@ -439,7 +439,7 @@ void DiagnosticUserInterface::render()
 
       glColor(Colors::magenta);
 
-      string in = InputCodeManager::getCurrentInputString();
+      string in = InputCodeManager::getCurrentInputString(KEY_NONE);
 
       if(in != "")
          hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", in.c_str() ) + 5;
