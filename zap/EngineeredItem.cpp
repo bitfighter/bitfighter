@@ -1047,13 +1047,8 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
                                (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    if(mountEdge)
-   {
-      Point p;
-      p.interp(0, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
-
-      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), p,   
-                        (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
-   }
+      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), anchor,   
+                     (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    // Can find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location while the
    // segment is some distance away
