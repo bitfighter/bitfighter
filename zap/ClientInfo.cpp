@@ -377,27 +377,32 @@ bool ClientInfo::sEngineerDeployObject(U32 objectType)
 }
 
 
-void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter)
+void ClientInfo::setEngineeringTeleporter(bool isEngineeringTeleporter1)
 {
+   if(isEngineeringTeleporter() == isEngineeringTeleporter1)
+      return;
+
+   setIsEngineeringTeleporter(isEngineeringTeleporter1);
+
    // Tell everyone that a particular client is engineering a teleport
    for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
       GameType *gameType = mGame->getGameType();
 
       if(gameType)
-         gameType->s2cSetPlayerEngineeringTeleporter(mName, isEngineeringTeleporter);
+         gameType->s2cSetPlayerEngineeringTeleporter(mName, isEngineeringTeleporter1);
    }
 }
 
 
 void ClientInfo::sDisableShipSystems(bool disable)
 {
+   // We only need to tell the one client
+   if(!isRobot() && isShipSystemsDisabled() != disable)  // only send if different
+      getConnection()->s2cDisableWeaponsAndModules(disable);
+
    // Server's ClientInfo
    setShipSystemsDisabled(disable);
-
-   // We only need to tell the one client
-   if(!isRobot())
-      getConnection()->s2cDisableWeaponsAndModules(disable);
 }
 
 

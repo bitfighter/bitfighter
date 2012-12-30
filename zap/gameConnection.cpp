@@ -490,7 +490,12 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisableWeaponsAndModules, (bool disable), (
 {
 #ifndef ZAP_DEDICATED
    // For whatever reason mClientInfo here isn't what is grabbed in the Ship:: class
-   mClientGame->findClientInfo(mClientInfo->getName())->setShipSystemsDisabled(disable);
+   ClientInfo *clientInfo = mClientGame->findClientInfo(mClientInfo->getName()); // But this could be NULL on level change/restart
+   if(!clientInfo)
+      clientInfo = mClientInfo;
+   TNLAssert(clientInfo, "NULL ClientInfo");
+   if(clientInfo)
+      clientInfo->setShipSystemsDisabled(disable);
 #endif
 }
 
