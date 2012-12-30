@@ -1008,6 +1008,8 @@ const Vector<Point> *EngineeredItem::getBufferForBotZone()
 }
 
 
+static const F32 MAX_SNAP_DISTANCE = 100.0f;    // Max distance to look for a mount point
+
 // Figure out where to mount this item during construction; mountToWall() is similar, but used in editor.  
 // findDeployPoint() is version used during deployment of engineerered item.
 void EngineeredItem::findMountPoint(Game *game, const Point &pos)
@@ -1015,7 +1017,7 @@ void EngineeredItem::findMountPoint(Game *game, const Point &pos)
    Point normal, anchor;
 
    // Anchor objects to the correct point
-   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, (F32)MAX_SNAP_DISTANCE, true, anchor, normal))
+   if(!findAnchorPointAndNormal(game->getGameObjDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
    {
       setPos(pos);               // Found no mount point, but for editor, needs to set the position
       mAnchorNormal.set(1,0);
@@ -1044,14 +1046,14 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    // it indirectly by snapping again, this time to a segment in our WallSegment database.  By using the snap point we found initially, that will
    // ensure the segment we find is associated with the edge found in the first pass.
    mountEdge = findAnchorPointAndNormal(wallSegmentManager->getWallEdgeDatabase(), pos, 
-                               (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
+                               MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
    if(mountEdge)
-      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), anchor,   
-                     (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
+      mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), anchor,    // <== Note different database than above!
+                                 MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
 
-   // Can find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location while the
-   // segment is some distance away
+   // It is possible to find an edge but not a segment while a wall is being dragged -- the edge remains in it's original location 
+   // while the segment is being dragged around, some distance away
    if(mountSeg)   // Found a segment we can mount to
    {
       setPos(anchor);
