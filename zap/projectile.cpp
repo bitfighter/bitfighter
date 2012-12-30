@@ -817,7 +817,7 @@ void Mine::idle(IdleCallPath path)
 
       F32 radius;
       Point ipos;
-      if(foundObject->getCollisionCircle(RenderState, ipos, radius))
+      if(foundObject->getCollisionCircle(ActualState, ipos, radius))
       {
          if((ipos - pos).len() < (radius + SensorRadius))
          {
