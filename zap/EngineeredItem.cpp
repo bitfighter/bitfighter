@@ -97,6 +97,9 @@ void Engineerable::setResource(MountableItem *resource)
 
 void Engineerable::releaseResource(const Point &releasePos, GridDatabase *database)
 {
+   if(!mResource) {
+	   return;
+   }
    mResource->addToDatabase(database);
    mResource->setPosVelAng(releasePos, Point(), 0);               // Reset velocity of resource item to 0,0
 }
