@@ -2777,6 +2777,14 @@ void EditorUserInterface::onMouseMoved()
 }
 
 
+// During the snapping process, when an engineered item is snapped to the wall, it is translated over to its new position.  This
+// function looks at an object and determines if it has already been translated or not.
+static bool alreadyTranslated(BfObject *object)
+{
+   return isEngineeredType(object->getObjectTypeNumber()) && static_cast<EngineeredItem *>(object)->isSnapped();
+}
+
+
 void EditorUserInterface::onMouseDragged()
 {
    if(InputCodeManager::getState(MOUSE_MIDDLE) && mMousePos != mScrollWithMouseLocation)
@@ -2885,8 +2893,8 @@ void EditorUserInterface::onMouseDragged()
    else  // larger items
       mSnapDelta = snapPoint(getDatabase(), convertCanvasToLevelCoord(mMousePos) + mMoveOrigin - mMouseDownPos) - mMoveOrigin;
 
-   // Update coordinates of dragged item -- unless it's an engineered item, in which case its coordinates have already been updated
-   if(!isEngineeredType(mSnapObject->getObjectTypeNumber()))
+   // Update coordinates of dragged item -- unless it's a snapped engineered item, in which case its coordinates have already been updated
+   if(!alreadyTranslated(mSnapObject.getPointer()))
       translateSelectedItems(getDatabase(), mSnapDelta - lastSnapDelta);
 }
 

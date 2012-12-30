@@ -679,10 +679,16 @@ void EngineeredItem::setEndSegment(WallSegment *endSegment)
 }
 
 
-// Only called from editor
+// setSnapped() / isSnapped() only called from editor
 void EngineeredItem::setSnapped(bool snapped)
 {
    mSnapped = snapped;
+}
+
+
+bool EngineeredItem::isSnapped()
+{
+   return mSnapped;
 }
 
 
@@ -1043,7 +1049,7 @@ Point EngineeredItem::mountToWall(const Point &pos, WallSegmentManager *wallSegm
    if(mountEdge)
    {
       Point p;
-      p.interp(.1f, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
+      p.interp(0, pos, anchor);    // Backing off just a bit makes things much less spazzy.  10% seems to work well.
 
       mountSeg = findAnchorPointAndNormal(wallSegmentManager->getWallSegmentDatabase(), p,   
                         (F32)EngineeredItem::MAX_SNAP_DISTANCE, false, (TestFunc)isWallType, anchor, nrml);
