@@ -1036,8 +1036,8 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       // TODO: Tie item's pos to mount on client so we don't need to send position all the time.   019
       else     // Mount is still ok -- update item's position to match that of mount  
       {
-         setActualPos(mMount->getActualPos());
-         setRenderPos(mMount->getRenderPos());
+         //setActualPos(mMount->getActualPos());  // This calls setMaskBits on something that does nothing visible, it only waste network bandwidth
+         //setRenderPos(mMount->getRenderPos());
       }
 
       updateExtentInDatabase();
@@ -1095,6 +1095,7 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
       else
          dismount();
+      mIsMounted = isMounted;
    }
 }
 

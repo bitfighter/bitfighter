@@ -1596,6 +1596,14 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 }
 
 
+static void performScopeQueryOnShip(Ship *ship, GameConnection *conn)
+{
+   for(S32 i = ship->getMountedItemCount() - 1; i >= 0; i--)  // Dismount them, while we still have position and velocity.
+      if(ship->getMountedItem(i))
+         conn->objectInScope(ship->getMountedItem(i));
+}
+
+
 // Runs only on server, I think
 void GameType::performScopeQuery(GhostConnection *connection)
 {
@@ -1613,7 +1621,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
    // Make sure the "always-in-scope" objects are actually in scope
    for(S32 i = 0; i < scopeAlwaysList.size(); i++)
       if(!scopeAlwaysList[i].isNull())
-         conn->objectInScope(scopeAlwaysList[i]);
+         if(scopeAlwaysList[i]->getObjectTypeNumber() != FlagTypeNumber || !((MountableItem*)(((SafePtr<BfObject> *)&scopeAlwaysList[i])->getPointer()))->isMounted())
+            conn->objectInScope(scopeAlwaysList[i]);
 
    // readyForRegularGhosts is set once all the RPCs from the GameType
    // have been received and acknowledged by the client
@@ -1642,7 +1651,11 @@ void GameType::performScopeQuery(GhostConnection *connection)
          sameQuery = true;
 
          for(S32 j = 0; j < fillVector.size(); j++)
+         {
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
+            if(isShipType(fillVector[j]->getObjectTypeNumber()))
+               performScopeQueryOnShip((Ship*)fillVector[j], conn);
+         }
       }
    }
 }
@@ -1725,8 +1738,12 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
 
    // Set object-in-scope for all objects found above
    for(S32 i = 0; i < fillVector.size(); i++)
+   {
       connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
-   
+      if(isShipType(fillVector[i]->getObjectTypeNumber()))
+         performScopeQueryOnShip((Ship*)fillVector[i], connection);
+   }
+
    // Make bots visible if showAllBots has been activated
    if(mShowAllBots && connection->isInCommanderMap())
       for(S32 i = 0; i < mGame->getBotCount(); i++)

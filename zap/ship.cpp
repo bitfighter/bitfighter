@@ -109,6 +109,9 @@ Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
 // Destructor
 Ship::~Ship()
 {
+   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)  // Dismount them, while we still have position and velocity.
+      if(mMountedItems[i]) // can be NULL if quitting the server
+         mMountedItems[i]->onMountDestroyed();
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
