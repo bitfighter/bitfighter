@@ -507,9 +507,6 @@ void Teleporter::damageObject(DamageInfo *theInfo)
 
 void Teleporter::onDestroyed()
 {
-   if(!mResource.isValid())      // Not engineered, shouldn't be destroyed!
-      return;
-
    mHasExploded = true;
 
    releaseResource(getVert(0), getGame()->getGameObjDatabase());
