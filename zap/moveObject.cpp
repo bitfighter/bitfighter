@@ -1033,6 +1033,7 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       // TODO: Seems like we shouldn't need to be doing this check... if mount dies, it should run dismount.  So it seems to me.
       if(mMount.isNull() || mMount->hasExploded)   // Mount has been killed... dismount!
       {
+         // TODO: I think these lines can be removed -- the only time I could get this to trigger was when starting up a nexus level
          if(!isGhost())    // Server only
             dismount();
       }
