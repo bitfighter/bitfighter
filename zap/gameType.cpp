@@ -38,6 +38,7 @@
 #include "ClientInfo.h"
 #include "ServerGame.h"
 #include "robot.h"
+#include "loadoutZone.h"      // For LoadoutZone
 
 
 #ifndef ZAP_DEDICATED
@@ -1426,6 +1427,17 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
       {
          // Still using old loadout because we haven't entered a loadout zone yet...
          setClientShipLoadout(clientInfo, clientInfo->mOldLoadout, true); 
+
+         // Unless we're actually spawning onto a loadout zone
+         Vector<DatabaseObject *> loadoutZones;
+         getGame()->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
+         LoadoutZone *zone;
+         for(S32 i = 0; i < loadoutZones.size(); i++) {
+            zone = static_cast<LoadoutZone*>(loadoutZones.get(i));
+            if (newShip->isOnObject(zone)) {
+               zone->collide(newShip);
+            }
+         } 
       }
 
       clientInfo->mOldLoadout.clear();
