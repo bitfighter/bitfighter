@@ -591,6 +591,8 @@ bool Teleporter::collide(BfObject *otherObject)
          }
       }
 
+      mTeleportCooldown.reset(mTeleporterCooldown);      // Teleport needs to wait a bit before being usable again
+
       return true;
    }
 
