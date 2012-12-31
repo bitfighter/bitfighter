@@ -1035,7 +1035,10 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       {
          // TODO: I think these lines can be removed -- the only time I could get this to trigger was when starting up a nexus level
          if(!isGhost())    // Server only
-            dismount();
+         {
+            TNLAssert(false, "Dismounting should be handled when object dies!  Can we get rid of this??");
+            dismount();   // And even then it seems to only be on the client because this never gets run as far as I can see!
+         }
       }
       // TODO: Tie item's pos to mount on client so we don't need to send position all the time.   019
       else     // Mount is still ok -- update item's position to match that of mount  
