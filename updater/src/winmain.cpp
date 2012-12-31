@@ -342,9 +342,10 @@ BOOL KillProcessByName(const char *processToKill)
 		return( FALSE );
 	}
 
+   // Remember, more than one instance of Bitfighter might be running.  They all must die!
 	do{
       //if(!wcscmp(pe32.szExeFile,szProcessToKill)){    //<-- needed in debug mode, for some reason...
-		if(!strcmp(pe32.szExeFile,processToKill)){    //  checks if process at current position has the name of to be killed app
+		if(!stricmp(pe32.szExeFile,processToKill)){    //  checks if process at current position has the name of to be killed app
 			hProcess = OpenProcess(PROCESS_TERMINATE,0, pe32.th32ProcessID);  // gets handle to process
 			TerminateProcess(hProcess,0);   // Terminate process by handle
 			CloseHandle(hProcess);  // close the handle

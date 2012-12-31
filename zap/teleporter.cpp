@@ -543,6 +543,9 @@ bool Teleporter::collide(BfObject *otherObject)
       if(mDestManager.getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
          return false;
 
+      if(mHasExploded)                          // Destroyed teleports don't work so well anymore...
+         return false;
+
       // First see if we've triggered the teleport...
       Point teleportCenter = getVert(0);
 
@@ -584,6 +587,8 @@ bool Teleporter::collide(BfObject *otherObject)
                zone->collide(ship);
          }
       }
+
+      mTeleportCooldown.reset(mTeleporterCooldown);      // Teleport needs to wait a bit before being usable again
 
       return true;
    }
