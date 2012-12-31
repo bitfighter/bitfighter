@@ -1013,6 +1013,8 @@ MountableItem::MountableItem(const Point &pos, bool collideable, float radius, f
 // Destructor
 MountableItem::~MountableItem()
 {
+   if(mMount.isValid())
+      mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things (mostly for server side)
    LUAW_DESTRUCTOR_CLEANUP;
 }
  
