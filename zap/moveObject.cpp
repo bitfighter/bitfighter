@@ -1022,12 +1022,13 @@ void MountableItem::idle(BfObject::IdleCallPath path)
    if(!isInDatabase())
       return;
 
-   // If item is mounted, it does nothing; all updates are tied to the mount.  If item is not mounted, it will idle normally.
-   if(!mIsMounted)    
+   // Unmounted items idle normally.  Mounted ones are handled specially below.
+   if(!mIsMounted)   // Unmounted item 
       Parent::idle(path);
 
-   else
+   else              // Mounted item
    {
+      // TODO: Seems like we shouldn't need to be doing this check... if mount dies, it should run dismount.  So it seems to me.
       if(mMount.isNull() || mMount->hasExploded)   // Mount has been killed... dismount!
       {
          if(!isGhost())    // Server only
