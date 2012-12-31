@@ -1037,7 +1037,8 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       else     // Mount is still ok -- update item's position to match that of mount  
       {
          //setActualPos(mMount->getActualPos());  // This calls setMaskBits on something that does nothing visible, it only waste network bandwidth
-         //setRenderPos(mMount->getRenderPos());
+         MoveObject::setActualPos(mMount->getActualPos());  // Bypass MoveItem::setActualPos's setMaskBits, Needed, or else it breaks Robots finding flags on ship.
+         setRenderPos(mMount->getRenderPos());
       }
 
       updateExtentInDatabase();
@@ -1109,7 +1110,7 @@ void MountableItem::dismount()
 
    if(isGhost())     // Client only; on server, we may have come from onItemDropped()
       onItemDropped();
-   else
+   else if(mMount.isValid())
       setPos(mMount->getActualPos());   
 
 
