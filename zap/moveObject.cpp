@@ -1024,32 +1024,18 @@ void MountableItem::idle(BfObject::IdleCallPath path)
    if(!isInDatabase())
       return;
 
-   // Unmounted items idle normally.  Mounted ones are handled specially below.
-   if(!mIsMounted)   // Unmounted item 
-      Parent::idle(path);
-
-   else              // Mounted item
+   if(mIsMounted)
    {
-      // TODO: Seems like we shouldn't need to be doing this check... if mount dies, it should run dismount.  So it seems to me.
-      if(mMount.isNull() || mMount->hasExploded)   // Mount has been killed... dismount!
-      {
-         // TODO: I think these lines can be removed -- the only time I could get this to trigger was when starting up a nexus level
-         if(!isGhost())    // Server only
-         {
-            TNLAssert(false, "Dismounting should be handled when object dies!  Can we get rid of this??");
-            dismount();   // And even then it seems to only be on the client because this never gets run as far as I can see!
-         }
-      }
-      // TODO: Tie item's pos to mount on client so we don't need to send position all the time.   019
-      else     // Mount is still ok -- update item's position to match that of mount  
-      {
-         //setActualPos(mMount->getActualPos());  // This calls setMaskBits on something that does nothing visible, it only waste network bandwidth
-         MoveObject::setActualPos(mMount->getActualPos());  // Bypass MoveItem::setActualPos's setMaskBits, Needed, or else it breaks Robots finding flags on ship.
-         setRenderPos(mMount->getRenderPos());
-      }
+      // We can probably delete these assertions after we are confident they never fire
+      TNLAssert(mMount, "If mMounted is set, mMount should never be NULL!");
+      TNLAssert(!mMount->hasExploded, "When mount explodes, it must unmount any items it is carrying!");
 
-      updateExtentInDatabase();
+      //updateExtentInDatabase();
+      setExtent(mMount->getExtent());     // Update this object's location in the database
    }
+
+   else     // Item is not mounted, idle normally   
+       Parent::idle(path);
 
    // Runs on client and server, but only has meaning on server
    mDroppedTimer.update(mCurrentMove.time);
@@ -1210,8 +1196,7 @@ void MountableItem::dismount(bool mountWasKilled)
 }
 
 
-
-void MountableItem::setMountedMask()  { setMaskBits(MountMask);    }
+void MountableItem::setMountedMask()  { setMaskBits(MountMask); }
 
 bool MountableItem::isMounted() { return mIsMounted; }
 Ship *MountableItem::getMount() { return mMount;     }
