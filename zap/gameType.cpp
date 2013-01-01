@@ -3768,11 +3768,8 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // no need to use RPCGuaranteedOrdered
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCGuaranteed, RPCToGhostParent, 0)
 {
-   //GameConnection *source = (GameConnection *) getRPCSourceConnection();  // not used
-
    if(mCacheResendItem.size() == 0)
       mCacheResendItem.resize(1024);
 
@@ -3798,9 +3795,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
          for(S32 j = 0; j < 1024; j += 256)
          {
             if(mCacheResendItem[S32(itemId & 255) | j].isNull())
-            {
                mCacheResendItem[S32(itemId & 255) | j].set(item);
-            }
+
             return;
          }
          mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0, 3) * 256)].set(item);
