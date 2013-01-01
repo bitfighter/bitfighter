@@ -939,7 +939,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    {
       ((GameConnection *) connection)->writeCompressedPoint(getActualPos(), stream);
       writeCompressedVelocity(getActualVel(), VEL_POINT_SEND_BITS, stream);
-      stream->writeFlag(updateMask & WarpPositionMask);
+      stream->writeFlag(updateMask & WarpPositionMask);     // WarpPositionMask
    }
 
    return retMask;
@@ -1173,10 +1173,14 @@ void MountableItem::dismount(bool mountWasKilled)
    Ship *ship = mMount;
 
    if(mMount.isValid())                   // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
-   {
       mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
-      setPos(mMount->getActualPos());     // Update the position.  If mMount is invalid, we'll just have to wait for a message from the server to set the pos.
-   }
+
+
+   // On the server, we need to update the position of the mounted object to match the position of the ship carrying it.  
+   // On client, we'll wait for a message from the server to set the pos, which may have already happened by the time
+   // this code is executed.
+   if(!isGhost())
+      setPos(mMount->getActualPos());  
 
    mMount = NULL;
    mIsMounted = false;

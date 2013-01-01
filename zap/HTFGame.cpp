@@ -153,63 +153,51 @@ void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
       }
-
-      //updateWhichTeamsHaveFlags();  This was never historically part of htf
    }
 }
 
 
-void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
+void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 {
-   // See if this is an opposing team's zone
-   if(s->getTeam() != z->getTeam())
+   // Is this our zone?
+   if(ship->getTeam() != zone->getTeam())
       return;
 
-   // See if this zone already has a flag in it...
+   // Does it already have a flag in it?
    for(S32 i = 0; i < mFlags.size(); i++)
-      if(mFlags[i]->getZone() == z)
+      if(mFlags[i]->getZone() == zone)
          return;
 
-   // Ok, it's an empty zone on our team... See if this ship is carrying a flag
-   S32 flagIndex = s->getFlagIndex();
+   // Is the ship carrying a flag?
+   S32 flagIndex = ship->getFlagIndex();
    if(flagIndex == NO_FLAG)
       return;
 
    // Ok, the ship has a flag and it's on the ship...
-   MoveItem *item = s->getMountedItem(flagIndex);
+   FlagItem *mountedFlag = static_cast<FlagItem *>(ship->getMountedItem(flagIndex));
 
-   if(item->getObjectTypeNumber() == FlagTypeNumber)
-   {
-      FlagItem *mountedFlag = static_cast<FlagItem *>(item);
+   static StringTableEntry capString("%e0 retrieved %e1 flag.  Team %e2 holds %e1 flag!");
 
-      static StringTableEntry capString("%e0 retrieved %e1 flag.  Team %e2 holds %e1 flag!");
+   Vector<StringTableEntry> e;
+   e.push_back(ship->getClientInfo()->getName());
 
-      Vector<StringTableEntry> e;
-      e.push_back(s->getClientInfo()->getName());
+   if(mFlags.size() == 1)
+      e.push_back(theString);
+   else
+      e.push_back(aString);
 
-      if(mFlags.size() == 1)
-         e.push_back(theString);
-      else
-         e.push_back(aString);
+   e.push_back(getGame()->getTeamName(ship->getTeam()));
 
-      e.push_back(getGame()->getTeamName(s->getTeam()));
+   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
+   mountedFlag->dismount(false);
 
-      mountedFlag->dismount(false);
+   mountedFlag->setZone(zone);                                 // Assign zone to the flag
+   mountedFlag->mTimer.reset(ScoreTime);                       // Start countdown 'til scorin' time!  // TODO: Should this timer be on the zone instead?
+   mountedFlag->setActualPos(zone->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
-      S32 flagIndex;
-      for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
-         if(mFlags[flagIndex] == mountedFlag)
-            break;
-
-      mFlags[flagIndex]->setZone(z);                           // Assign zone to the flag
-      mFlags[flagIndex]->mTimer.reset(ScoreTime);              // Start countdown 'til scorin' time!
-      mountedFlag->setActualPos(z->getExtent().getCenter());   // Put flag smartly in center of capture zone
-
-      updateScore(s, ReturnFlagToZone);
-      s->getClientInfo()->getStatistics()->mFlagScore++;
-   }
+   updateScore(ship, ReturnFlagToZone);
+   ship->getClientInfo()->getStatistics()->mFlagScore++;
 }
 
 
