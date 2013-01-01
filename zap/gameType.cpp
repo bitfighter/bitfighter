@@ -3761,7 +3761,7 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
    S32 count = ship->getMountedItemCount();
    for(S32 i = count - 1; i >= 0; i--)
-      ship->getMountedItem(i)->onItemDropped();
+      ship->getMountedItem(i)->dismount(false);
 }
 
 
@@ -4057,6 +4057,7 @@ bool GameType::doTeamHasFlag(S32 teamIndex) const
 }
 
 
+// Server only
 void GameType::updateWhichTeamsHaveFlags()
 {
    getGame()->clearTeamHasFlagList();
@@ -4077,11 +4078,6 @@ void GameType::onFlagMounted(S32 teamIndex)
    // Do nothing
 }
 
-
-void GameType::onFlagDismounted()
-{
-   // Do nothing
-}
 
 
 // Notify the clients when flag status changes... only called by some GameTypes

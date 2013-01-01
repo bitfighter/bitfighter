@@ -229,6 +229,8 @@ public:
 
    bool isCarryingItem(U8 objectType) const;
    MountableItem *unmountItem(U8 objectType);
+
+   void dismountAll();                          // Dismount all objects of any type
    void dismountAll(U8 objectType);             // Dismount all objects of specified type
 
    MountableItem *getMountedItem(S32 index) const;

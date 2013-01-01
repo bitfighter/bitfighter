@@ -92,7 +92,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-               mountedFlag->dismount();
+               mountedFlag->dismount(false);
                mountedFlag->sendHome();
 
                updateScore(theShip, CaptureFlag);
@@ -120,24 +120,6 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          clientInfo->getStatistics()->mFlagPickup++;
       }
-   }
-}
-
-
-class FlagItem;
-
-void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
-{
-   if(item->getObjectTypeNumber() == FlagTypeNumber)
-   {
-      FlagItem *flag = static_cast<FlagItem *>(item);
-      static StringTableEntry dropString("%e0 dropped the %e1 flag!");
-
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
-      e.push_back(getGame()->getTeamName(flag->getTeam()));
-
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
 }
 
@@ -211,9 +193,26 @@ void CTFGameType::onFlagMounted(S32 teamIndex)
 }
 
 
-void CTFGameType::onFlagDismounted()
+class FlagItem;
+
+
+void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   updateWhichTeamsHaveFlags();
+   TNLAssert(getGame()->isServer(), "Server only method!");
+   
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(item);
+      static StringTableEntry dropString("%e0 dropped the %e1 flag!");
+
+      Vector<StringTableEntry> e;
+      e.push_back(ship->getClientInfo()->getName());
+      e.push_back(getGame()->getTeamName(flag->getTeam()));
+
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+
+      updateWhichTeamsHaveFlags();  // --> server only method
+   }
 }
 
 

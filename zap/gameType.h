@@ -238,7 +238,6 @@ public:
    virtual bool teamHasFlag(S32 teamIndex) const;
 
    virtual void onFlagMounted(S32 teamIndex);         // A flag was picked up by a ship on the specified team
-   virtual void onFlagDismounted();                   // A flag was dropped by a ship
 
    S32 getWinningScore() const;
    void setWinningScore(S32 score);
@@ -469,7 +468,7 @@ public:
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag);
-   virtual void itemDropped(Ship *ship, MoveItem *item);
+   virtual void itemDropped(Ship *ship, MoveItem *item);    // TODO: Make this a mountableItem instead of MoveItem
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);

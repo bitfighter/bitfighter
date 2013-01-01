@@ -99,9 +99,7 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)  // Dismount them first
-      if(mMountedItems[i]) // can be NULL if quitting the server
-         mMountedItems[i]->onMountDestroyed();
+   dismountAll();
 
    setOwner(NULL);
 
@@ -376,10 +374,7 @@ void Robot::kill()
 
    disableCollision();
 
-   // Dump mounted items
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      if(mMountedItems[i].isValid())            // Server quitting can make an object invalid
-         mMountedItems[i]->onMountDestroyed();
+   dismountAll();
 }
 
 
@@ -1461,7 +1456,7 @@ S32 Robot::dropItem(lua_State *L)
 
    S32 count = mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
-      mMountedItems[i]->onItemDropped();
+      mMountedItems[i]->dismount(false);
 
    return 0;
 }

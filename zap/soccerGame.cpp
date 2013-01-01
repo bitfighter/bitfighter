@@ -194,13 +194,6 @@ bool SoccerGameType::canBeTeamGame()       const { return true;  }
 bool SoccerGameType::canBeIndividualGame() const { return true;  }
 
 
-// Runs on server only, and only when player deliberately drops ball... gets run when dropping resurce item
-void SoccerGameType::itemDropped(Ship *ship, MoveItem *item)
-{
-   TNLAssert(!isGhost(), "Should run on server only!");
-}
-
-
 // What does a particular scoring event score?
 S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {

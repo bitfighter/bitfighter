@@ -282,36 +282,38 @@ static FlagItem *findFirstFlag(Ship *ship)
 // This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
 void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   if(item->getObjectTypeNumber() != FlagTypeNumber)
-      return;
+   TNLAssert(getGame()->isServer(), "Server only method!");
 
-   FlagItem *flag = static_cast<FlagItem *>(item);
-
-   U32 flagCount = flag->getFlagCount();
-
-   if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
-      return;
-
-   if(!ship->getClientInfo())
-      return;
-
-   Vector<StringTableEntry> e;
-   e.push_back(ship->getClientInfo()->getName());
-
-   static StringTableEntry dropOneString(  "%e0 dropped a flag!");
-   static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
-
-   StringTableEntry *ste;
-
-   if(flagCount == 1)
-      ste = &dropOneString;
-   else
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      ste = &dropManyString;
-      e.push_back(itos(flagCount).c_str());
-   }
+      FlagItem *flag = static_cast<FlagItem *>(item);
+
+      U32 flagCount = flag->getFlagCount();
+
+      if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
+         return;
+
+      if(!ship->getClientInfo())
+         return;
+
+      Vector<StringTableEntry> e;
+      e.push_back(ship->getClientInfo()->getName());
+
+      static StringTableEntry dropOneString(  "%e0 dropped a flag!");
+      static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
+
+      StringTableEntry *ste;
+
+      if(flagCount == 1)
+         ste = &dropOneString;
+      else
+      {
+         ste = &dropManyString;
+         e.push_back(itos(flagCount).c_str());
+      }
       
-   broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+   }
 }
 
 
@@ -881,32 +883,33 @@ void NexusFlagItem::dropFlags(U32 flags)
 }
 
 
-void NexusFlagItem::onMountDestroyed()
+void NexusFlagItem::dismount(bool mountWasKilled)
 {
-   if(mMount && mMount->getClientInfo())
-      mMount->getClientInfo()->getStatistics()->mFlagDrop += mFlagCount + 1;
+   if(mountWasKilled)
+   {
+      // Should getting shot up count as a flag drop event for statistics purposes?
+      if(mMount && mMount->getClientInfo())
+         mMount->getClientInfo()->getStatistics()->mFlagDrop += mFlagCount + 1;
 
-   dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
+      dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
 
-   // Now delete the flag itself
-   dismount();
-   removeFromDatabase(false);   
-   deleteObject();
-}
+      // Now delete the flag itself
+      removeFromDatabase(false);   
+      deleteObject();
+   }
+   else
+   {
+      if(isGhost())    
+         return;
 
+      // Server only
+      GameType *gameType = getGame()->getGameType();
+      if(!gameType)        // Crashed here once, don't know why, so I added the check
+         return;
 
-void NexusFlagItem::onItemDropped()
-{
-   if(isGhost())    
-      return;
-
-   // Server only
-   GameType *gameType = getGame()->getGameType();
-   if(!gameType)        // Crashed here once, don't know why, so I added the check
-      return;
-
-   gameType->itemDropped(mMount, this);   // Sends messages; no flags actually dropped here
-   dropFlags(mFlagCount);                 // Only dropping the flags we're carrying, not the "extra" one that comes when we die
+      gameType->itemDropped(mMount, this);   // Sends messages; no flags actually dropped here; server only method
+      dropFlags(mFlagCount);                 // Only dropping the flags we're carrying, not the "extra" one that comes when we die
+   }
 }
 
 

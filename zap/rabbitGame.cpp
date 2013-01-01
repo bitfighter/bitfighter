@@ -360,35 +360,27 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 }
 
 
-void RabbitGameType::onFlagDismounted()
-{
-   updateWhichTeamsHaveFlags();
-}
-
-
 void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
 {
+   TNLAssert(getGame()->isServer(), "Server only method!");
 
-   if(item->getObjectTypeNumber() != FlagTypeNumber)
-      return;
-
-   FlagItem *flag = static_cast<FlagItem *>(item);
-
-   if(ship->getClientInfo())
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      flag->mTimer.reset(mFlagReturnTimer);
-      if(!isGameOver())  // Avoid flooding messages on game over.
-         s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
 
-      Point vel = ship->getActualVel();
+      FlagItem *flag = static_cast<FlagItem *>(item);
 
-      //// Add a random vector to the flag
-      //F32 th = TNL::Random::readF() * Float2Pi;
-      //F32 f = (TNL::Random::readF() * 2 - 1) * 100;
-      //Point dvel(cos(th) * f, sin(th) * f);
-      //vel += dvel;
+      if(ship->getClientInfo())
+      {
+         flag->mTimer.reset(mFlagReturnTimer);
+         if(!isGameOver())  // Avoid flooding messages on game over.
+            s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
 
-      flag->setActualVel(vel);
+         Point vel = ship->getActualVel();
+
+         flag->setActualVel(vel);
+      }
+
+      updateWhichTeamsHaveFlags();
    }
 }
 

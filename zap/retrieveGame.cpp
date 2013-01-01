@@ -127,19 +127,22 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   if(item->getObjectTypeNumber() != FlagTypeNumber)
-      return;
+   TNLAssert(getGame()->isServer(), "Server only method!");
 
-   if(ship->getClientInfo())
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      static StringTableEntry dropString("%e0 dropped a flag!");
-      Vector<StringTableEntry> e;
+      if(ship->getClientInfo())
+      {
+         static StringTableEntry dropString("%e0 dropped a flag!");
+         Vector<StringTableEntry> e;
 
-      e.push_back(ship->getClientInfo()->getName());
+         e.push_back(ship->getClientInfo()->getName());
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      }
    }
 }
+
 
 
 // The ship has entered a drop zone, either friend or foe
@@ -175,7 +178,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
-      mountedFlag->dismount();
+      mountedFlag->dismount(false);
 
       S32 flagIndex;
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)

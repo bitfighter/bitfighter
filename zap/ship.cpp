@@ -109,9 +109,8 @@ Ship::Ship(lua_State *L) : MoveObject(Point(0,0), (F32)CollisionRadius)
 // Destructor
 Ship::~Ship()
 {
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)  // Dismount them, while we still have position and velocity.
-      if(mMountedItems[i]) // can be NULL if quitting the server
-         mMountedItems[i]->onMountDestroyed();
+   dismountAll();
+
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
@@ -1784,11 +1783,21 @@ MountableItem *Ship::unmountItem(U8 objectType)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          MountableItem *item = mMountedItems[i];
-         item->dismount();
+         item->dismount(false);
          return item;
       }
 
    return NULL;
+}
+
+
+// Dismount all objects of any type -- runs on client and server
+void Ship::dismountAll()
+{
+   // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
+   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)       
+      if(mMountedItems[i].isValid())               // Can be NULL when quitting the server
+         mMountedItems[i]->dismount(true);
 }
 
 
@@ -1797,7 +1806,7 @@ void Ship::dismountAll(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
-         mMountedItems[i]->dismount();
+         mMountedItems[i]->dismount(false);
 }
 
 
@@ -2033,9 +2042,8 @@ void Ship::kill()
    setMaskBits(ExplodedMask);
    disableCollision();
 
-   // Handle any mounted items
-   for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      mMountedItems[i]->onMountDestroyed();
+   // Jettison any mounted items
+   dismountAll();
 
    // Handle if in the middle of building a teleport
    if(!isGhost())   // Server only

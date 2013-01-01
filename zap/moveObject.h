@@ -106,10 +106,11 @@ public:
 
    bool isMoveObject();
 
-   Point getRenderPos() const;
-   Point getActualPos() const;
-   Point getRenderVel() const;      // Distance/sec
-   Point getActualVel() const;      // Distance/sec
+   // These methods will be overridden by MountableItem
+   virtual Point getRenderPos() const;
+   virtual Point getActualPos() const;
+   virtual Point getRenderVel() const;      // Distance/sec
+   virtual Point getActualVel() const;      // Distance/sec
 
    F32 getRenderAngle() const;
    F32 getActualAngle() const;
@@ -245,7 +246,7 @@ public:
 
    // Mounting related functions
    Ship *getMount();
-   virtual void dismount();
+   virtual void dismount(bool mountWasKilled);
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();
@@ -253,11 +254,10 @@ public:
    bool isMounted();
    virtual bool isItemThatMakesYouVisibleWhileCloaked();      // NexusFlagItem overrides to false
 
-   virtual void onMountDestroyed();
-   virtual void onItemDropped();
-
-   //virtual S32 getItemCount();      // Some mounted items (like flags in Nexus Game) could represent more than 1 (or 0) items!
-
+   Point getRenderPos() const;
+   Point getActualPos() const;
+   Point getRenderVel() const;      // Distance/sec
+   Point getActualVel() const;      // Distance/sec
 
    ///// Lua interface
    LUAW_DECLARE_CLASS(MountableItem);
@@ -556,7 +556,7 @@ public:
    void renderItemAlpha(const Point &pos, F32 alpha);
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
-   void onItemDropped();
+   void dismount(bool mountWasKilled);
 
    TNL_DECLARE_CLASS(ResourceItem);
 

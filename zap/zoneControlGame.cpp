@@ -92,18 +92,21 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   // Only continue if we're dropping a flag
-   if(item->getObjectTypeNumber() != FlagTypeNumber)
-      return;
+   TNLAssert(getGame()->isServer(), "Server only method!");
 
-   if(ship->getClientInfo())
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      static StringTableEntry dropString("%e0 dropped the flag!");
+      if(ship->getClientInfo())
+      {
+         static StringTableEntry dropString("%e0 dropped the flag!");
 
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getClientInfo()->getName());
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      }
+
+      updateWhichTeamsHaveFlags();
    }
 }
 
@@ -217,7 +220,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       FlagItem *mountedFlag = static_cast<FlagItem *>(item);
 
-      mountedFlag->dismount();
+      mountedFlag->dismount(false);
       mountedFlag->sendHome();
    }
 }
@@ -352,12 +355,6 @@ void ZoneControlGameType::onFlagMounted(S32 teamIndex)
 {
    getGame()->setTeamHasFlag(teamIndex, true);
    notifyClientsWhoHasTheFlag();
-}
-
-
-void ZoneControlGameType::onFlagDismounted()
-{
-   updateWhichTeamsHaveFlags();
 }
 
 

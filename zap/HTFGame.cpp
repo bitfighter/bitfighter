@@ -135,22 +135,26 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   if(item->getObjectTypeNumber() != FlagTypeNumber)
-      return;
+   TNLAssert(getGame()->isServer(), "Server only method!");
 
-   if(ship->getClientInfo())
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      static StringTableEntry dropString("%e0 dropped %e1 flag!");
+      if(ship->getClientInfo())
+      {
+         static StringTableEntry dropString("%e0 dropped %e1 flag!");
 
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getClientInfo()->getName());
 
-      if(mFlags.size() == 1)
-         e.push_back(theString);
-      else
-         e.push_back(aString);
+         if(mFlags.size() == 1)
+            e.push_back(theString);
+         else
+            e.push_back(aString);
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      }
+
+      //updateWhichTeamsHaveFlags();  This was never historically part of htf
    }
 }
 
@@ -192,7 +196,7 @@ void HTFGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-      mountedFlag->dismount();
+      mountedFlag->dismount(false);
 
       S32 flagIndex;
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)

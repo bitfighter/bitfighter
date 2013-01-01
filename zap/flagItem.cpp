@@ -368,16 +368,14 @@ bool FlagItem::collide(BfObject *hitObject)
 }
 
 
-void FlagItem::dismount()
+void FlagItem::dismount(bool mountWasKilled)
 {
-   Parent::dismount();
+   Ship *ship = mMount;   
+   Parent::dismount(mountWasKilled);
 
-   // On server, we need to check who still has a flag and update the clients accordingly
-   if(!isGhost())
-   {
-      TNLAssert(getGame(), "NULL game!");
-      getGame()->getGameType()->onFlagDismounted();   // Must run AFTER mount info is cleared
-   }
+   // Should getting shot up count as a flag drop event for statistics purposes?
+   if(ship && ship->getClientInfo())
+      ship->getClientInfo()->getStatistics()->mFlagDrop++;
 }
 
 
@@ -390,15 +388,6 @@ TestFunc FlagItem::collideTypes()
 bool FlagItem::isAtHome()
 {
    return mIsAtHome;
-}
-
-
-void FlagItem::onMountDestroyed()
-{
-   if(mMount && mMount->getClientInfo())
-      mMount->getClientInfo()->getStatistics()->mFlagDrop++;
-
-   onItemDropped();
 }
 
 

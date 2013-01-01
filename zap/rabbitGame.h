@@ -79,7 +79,6 @@ public:
 
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);
-   void onFlagDismounted();
 
    const Color *getTeamColor(const BfObject *object) const;
 

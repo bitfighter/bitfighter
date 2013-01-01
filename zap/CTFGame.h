@@ -48,7 +48,6 @@ public:
 
    bool teamHasFlag(S32 teamIndex) const;
    void onFlagMounted(S32 teamIndex);
-   void onFlagDismounted();
 
    GameTypeId getGameTypeId() const;
    const char *getShortName() const;

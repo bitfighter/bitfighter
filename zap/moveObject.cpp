@@ -998,7 +998,7 @@ bool MoveItem::collide(BfObject *otherObject)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
+// Class of things that can be mounted on ships, such as Flags and ResourceItems
 
 // Constructor
 MountableItem::MountableItem(const Point &pos, bool collideable, float radius, float mass) : Parent(pos, collideable, radius, mass)
@@ -1098,28 +1098,10 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mountToShip(ship);
       }
       else
-         dismount();
+         dismount(false);
+
       mIsMounted = isMounted;
    }
-}
-
-
-// Client & server, called via different paths.  Note we come through here on initial unpack for mountItem, for better or worse.  When
-// we do, mMount is NULL.
-void MountableItem::dismount()
-{
-   if(mMount.isValid())                   // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
-      mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
-
-   if(isGhost())     // Client only; on server, we may have come from onItemDropped()
-      onItemDropped();
-   else if(mMount.isValid())
-      setPos(mMount->getActualPos());   
-
-
-   mMount = NULL;
-   mIsMounted = false;
-   setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
 }
 
 
@@ -1127,12 +1109,6 @@ bool MountableItem::collide(BfObject *otherObject)
 {
    // Mounted items do not collide
    return !mIsMounted && Parent::collide(otherObject);
-}
-
-
-void MountableItem::onMountDestroyed()
-{
-   dismount();
 }
 
 
@@ -1151,7 +1127,7 @@ void MountableItem::mountToShip(Ship *ship)
       return;
 
    if(mMount.isValid())                      // Mounted on something else; dismount!
-      dismount();
+      dismount(false);
 
    ship->addMountedItem(this);
    mMount = ship;
@@ -1167,24 +1143,36 @@ void MountableItem::mountToShip(Ship *ship)
 }
 
 
-// Runs on client & server, via different code paths
-void MountableItem::onItemDropped()
+// Client & server; Note we come through here on initial unpack for mountItem, for better or worse.  When
+// we do, mMount is NULL.
+void MountableItem::dismount(bool mountWasKilled)
 {
+   Ship *ship = mMount;
+
+   if(mMount.isValid())                   // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
+   {
+      mMount->removeMountedItem(this);    // Remove mounted item from our mount's list of mounted things
+      setPos(mMount->getActualPos());     // Update the position.  If mMount is invalid, we'll just have to wait for a message from the server to set the pos.
+   }
+
+   mMount = NULL;
+   mIsMounted = false;
+   setMaskBits(MountMask | PositionMask | WarpPositionMask);    // Tell packUpdate() to send item location
+
+
    if(!getGame())    // Can happen on game startup
       return;
 
-   GameType *gt = getGame()->getGameType();
-   if(!gt || !mMount.isValid())
-      return;
-
-   if(!isGhost())    // Server only; on client calls onItemDropped from dismount
+   if(getGame()->isServer())
    {
-      gt->itemDropped(mMount, this);
-      dismount();
+      GameType *gt = getGame()->getGameType();
+      if(gt)
+         gt->itemDropped(ship, this);      // Server-only method
    }
 
    mDroppedTimer.reset();
 }
+
 
 
 void MountableItem::setMountedMask()  { setMaskBits(MountMask);    }
@@ -1244,6 +1232,7 @@ S32 MountableItem::isOnShip(lua_State *L)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
+// VelocityItem -- class of items with more-or-less constant velocity; currently Asteroid and Circle are children classes
 
 VelocityItem::VelocityItem(const Point &pos, F32 speed, F32 radius, F32 mass) : Parent(pos, true, radius, mass)
 {
@@ -2364,15 +2353,13 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
 }
 
 
-void ResourceItem::onItemDropped()
+void ResourceItem::dismount(bool mountWasKilled)
 {
-   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
-   {
-      setActualPos(mMount->getActualPos()); 
-      setActualVel(mMount->getActualVel() * 1.5);
-   }   
-   
-   Parent::onItemDropped();
+   Ship *ship = mMount;
+   Parent::dismount(mountWasKilled);
+
+   if(!isGhost() && ship)   // Server only, to prevent desync
+      setActualVel(ship->getActualVel() * 1.5);
 }
 
 
