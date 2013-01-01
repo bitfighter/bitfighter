@@ -1608,11 +1608,14 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 }
 
 
-static void performScopeQueryOnShip(Ship *ship, GameConnection *conn)
+static void markAllMountedItemsAsBeingInScope(Ship *ship, GameConnection *conn)
 {
-   for(S32 i = ship->getMountedItemCount() - 1; i >= 0; i--)  // Dismount them, while we still have position and velocity.
+   for(S32 i = 0; i < ship->getMountedItemCount(); i++)  
+   {
+      TNLAssert(ship->getMountedItem(i), "When would this item be NULL?  Do we really need to check this?");
       if(ship->getMountedItem(i))
          conn->objectInScope(ship->getMountedItem(i));
+   }
 }
 
 
@@ -1654,7 +1657,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
       else if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
          Point pos = sb->getActualPos();
-         Point scopeRange(gSpyBugRange, gSpyBugRange);
+         Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
          Rect queryRect(pos, pos);
          queryRect.expand(scopeRange);
 
@@ -1666,7 +1669,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          {
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
             if(isShipType(fillVector[j]->getObjectTypeNumber()))
-               performScopeQueryOnShip((Ship*)fillVector[j], conn);
+               markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[j]), conn);
          }
       }
    }
@@ -1753,7 +1756,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
-         performScopeQueryOnShip((Ship*)fillVector[i], connection);
+         markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[i]), connection);
    }
 
    // Make bots visible if showAllBots has been activated

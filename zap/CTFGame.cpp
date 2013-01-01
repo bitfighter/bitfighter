@@ -132,6 +132,8 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
    S32 uTeam = scopeObject->getTeam();
 
+   // Scan all the flags and mark any that are at home or parked in a zone as being in scope; for those that are mounted,
+   // if the mount is on our team, mark both the mount and the flag as being in scope
    for(S32 i = 0; i < mFlags.size(); i++)
    {
       if(mFlags[i]->isAtHome() || mFlags[i]->getZone())
