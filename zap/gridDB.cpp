@@ -117,6 +117,9 @@ void GridDatabase::copyObjects(const GridDatabase *source)
    // Preallocate some memory to make copying a little more efficient
    mAllObjects.reserve(source->mAllObjects.size());
    mGoalZones.reserve (source->mGoalZones.size());
+   mFlags.reserve     (source->mFlags.size());
+   mSpyBugs.reserve   (source->mSpyBugs.size());
+
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
       addToDatabase(source->mAllObjects[i]->clone(), source->mAllObjects[i]->getExtent());
@@ -151,9 +154,14 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    // Add the object to our non-spatial "database" as well
    mAllObjects.push_back(theObject);
 
-   if(theObject->getObjectTypeNumber() == GoalZoneTypeNumber)
+   U8 type = theObject->getObjectTypeNumber();
+   if(type == GoalZoneTypeNumber)
       mGoalZones.push_back(theObject);
-
+   else if(type == FlagTypeNumber)
+      mFlags.push_back(theObject);
+   else if(type == SpyBugTypeNumber)
+      mSpyBugs.push_back(theObject);
+   
    //sortObjects(mAllObjects);  // problem: Barriers in-game don't have mGeometry (it is NULL)
 }
 
@@ -183,11 +191,27 @@ void GridDatabase::removeEverythingFromDatabase()
       }
    }
 
+   // Clear out our specialty lists -- since objects are also in mAllObjects, they'll be deleted below
    mGoalZones.clear();
+   mFlags.clear();
+   mSpyBugs.clear();
+
    mAllObjects.deleteAndClear();
    
    if(mWallSegmentManager)
       mWallSegmentManager->clear();
+}
+
+
+// Don't use this with a sorted list!
+static void eraseObject_fast(Vector<DatabaseObject *> *objects, DatabaseObject *objectToDelete)
+{
+   for(S32 i = 0; i < objects->size(); i++)
+      if(objects->get(i) == objectToDelete)
+      {
+         objects->erase_fast(i);     
+         return;
+      }
 }
 
 
@@ -229,13 +253,14 @@ void GridDatabase::removeFromDatabase(DatabaseObject *object, bool deleteObject)
       }
 
 
-   if(object->getObjectTypeNumber() == GoalZoneTypeNumber)
-      for(S32 i = 0; i < mGoalZones.size(); i++)
-         if(mGoalZones[i] == object)
-         {
-            mGoalZones.erase_fast(i);     // mGoalZones is not sorted, so erase_fast is just fine
-            break;
-         }
+   U8 type = object->getObjectTypeNumber();
+
+   if(type == GoalZoneTypeNumber)
+      eraseObject_fast(&mGoalZones, object);
+   else if(type == FlagTypeNumber)
+      eraseObject_fast(&mFlags, object);
+   else if(type == SpyBugTypeNumber)
+      eraseObject_fast(&mSpyBugs, object);
 
    if(deleteObject)
       delete object;      
@@ -258,11 +283,19 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast() const
 }
 
 
-// Faster than above, but results can't be modified, and only works with GoalZones at the moment
+// Faster than above, but results can't be modified, and only works with selected types at the moment
 const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) const
 {
-   TNLAssert(typeNumber == GoalZoneTypeNumber, "Function only supports GoalZones at the moment!");
-   return &mGoalZones;
+   if(typeNumber == GoalZoneTypeNumber)
+      return &mGoalZones;
+
+   if(typeNumber == FlagTypeNumber)
+      return &mFlags;
+
+   if(typeNumber == SpyBugTypeNumber)
+      return &mSpyBugs;
+
+   TNLAssert(false, "This type not currently supported!  Sorry dude!");
 }
 
 
@@ -301,14 +334,30 @@ void GridDatabase::findObjects(Vector<U8> typeNumbers, Vector<DatabaseObject *> 
 // Find all objects in database of type typeNumber
 void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVector)
 {
-   // If the user is looking for GoalZones, it will be faster to use our list of GoalZones rather than cycling through the entire item list.
-   // At the moment, however, all requests for GoalZones seem to use the findObjects_fast method, so this is here mainly as a reference.
-   if(typeNumber == GoalZoneTypeNumber)
-   {
-      for(S32 i = 0; i < mGoalZones.size(); i++)
-         fillVector.push_back(mGoalZones[i]);
-      return;
-   }
+   // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
+   TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
+             "Uncomment the appropriate block below; it will perform better!");
+
+   //if(typeNumber == GoalZoneTypeNumber)
+   //{
+   //   for(S32 i = 0; i < mGoalZones.size(); i++)
+   //      fillVector.push_back(mGoalZones[i]);
+   //   return;
+   //}
+
+   //if(typeNumber == FlagTypeNumber)
+   //{
+   //   for(S32 i = 0; i < mFlags.size(); i++)
+   //      fillVector.push_back(mFlags[i]);
+   //   return;
+   //}
+
+   //if(typeNumber == SpyBugTypeNumber)
+   //{
+   //   for(S32 i = 0; i < mSpyBugs.size(); i++)
+   //      fillVector.push_back(mSpyBugs[i]);
+   //   return;
+   //}
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
@@ -678,11 +727,19 @@ S32 GridDatabase::getObjectCount()
 }
 
 
-// Return count of objects of specified type.  Only supports GoalZones at the moment.
+// Return count of objects of specified type.  Only supports certain types at the moment.
 S32 GridDatabase::getObjectCount(U8 typeNumber)
 {
-   TNLAssert(typeNumber == GoalZoneTypeNumber, "Function only supports GoalZones at the moment!");
-   return mGoalZones.size();
+   if(typeNumber == GoalZoneTypeNumber)
+      return mGoalZones.size();
+
+   if(typeNumber == FlagTypeNumber)
+      return mFlags.size();
+
+   if(typeNumber == SpyBugTypeNumber)
+      return mSpyBugs.size();
+
+   TNLAssert(false, "Unsupported type!");
 }
 
 
@@ -690,6 +747,12 @@ bool GridDatabase::hasObjectOfType(U8 typeNumber)
 {
    if(typeNumber == GoalZoneTypeNumber)
       return mGoalZones.size() > 0;
+
+   if(typeNumber == FlagTypeNumber)
+      return mFlags.size() > 0;
+
+   if(typeNumber == SpyBugTypeNumber)
+      return mSpyBugs.size() > 0;
 
    for(S32 i = 0; i < mAllObjects.size(); i++)
       if(mAllObjects[i]->getObjectTypeNumber() == typeNumber)
