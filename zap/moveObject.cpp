@@ -1026,8 +1026,9 @@ void MountableItem::idle(BfObject::IdleCallPath path)
 
    if(mIsMounted)
    {
-      // We can probably delete these assertions after we are confident they never fire
-      TNLAssert(mMount, "If mMounted is set, mMount should never be NULL!");
+      if(!mMount)    // We might not have a mount here if we're creating a ship holding a Nexus flag, and the flag is sent before the ship
+         return;
+
       TNLAssert(!mMount->hasExploded, "When mount explodes, it must unmount any items it is carrying!");
 
       //updateExtentInDatabase();
