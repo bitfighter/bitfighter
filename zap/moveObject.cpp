@@ -1056,7 +1056,7 @@ void MountableItem::render()
 
 Point MountableItem::getActualPos() const 
 { 
-   if(mIsMounted)
+   if(mMount)
       return mMount->getActualPos();
    return Parent::getActualPos();
 }
@@ -1064,7 +1064,7 @@ Point MountableItem::getActualPos() const
 
 Point MountableItem::getRenderPos() const 
 { 
-   if(mIsMounted)
+   if(mMount)
       return mMount->getRenderPos();
    return Parent::getRenderPos();
 }
@@ -1072,7 +1072,7 @@ Point MountableItem::getRenderPos() const
 
 Point MountableItem::getActualVel() const 
 { 
-   if(mIsMounted)
+   if(mMount)
       return mMount->getActualVel();
    return Parent::getActualVel();
 }

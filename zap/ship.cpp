@@ -1524,8 +1524,12 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       while(stream->readFlag())
       {
          S32 index = stream->readInt(GhostConnection::GhostIdBitSize);
-         MountableItem *item = static_cast<MountableItem *>(connection->resolveGhost(index));
-         item->mountToShip(this);
+         NetObject *netObj = connection->resolveGhost(index);
+         if(netObj) // could be NULL
+         {
+            MountableItem *item = static_cast<MountableItem *>(netObj);
+            item->mountToShip(this);
+         }
       }
 
    }  // initial update
