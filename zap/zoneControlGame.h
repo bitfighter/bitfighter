@@ -61,8 +61,6 @@ public:
    bool canBeIndividualGame() const;
 
    void onFlagMounted(S32 teamIndex);
-   void onFlagDismounted();
-
 
    void renderInterfaceOverlay(bool scoreboardVisible);
    bool teamHasFlag(S32 teamIndex) const;
