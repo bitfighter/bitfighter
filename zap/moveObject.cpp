@@ -1063,6 +1063,38 @@ void MountableItem::render()
 }
 
 
+Point MountableItem::getActualPos() const 
+{ 
+   if(mIsMounted)
+      return mMount->getActualPos();
+   return Parent::getActualPos();
+}
+
+
+Point MountableItem::getRenderPos() const 
+{ 
+   if(mIsMounted)
+      return mMount->getRenderPos();
+   return Parent::getRenderPos();
+}
+
+
+Point MountableItem::getActualVel() const 
+{ 
+   if(mIsMounted)
+      return mMount->getActualVel();
+   return Parent::getActualVel();
+}
+
+
+Point MountableItem::getRenderVel() const 
+{ 
+   if(mIsMounted)
+      return mMount->getRenderVel();
+   return Parent::getRenderVel();
+}
+
+
 U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
