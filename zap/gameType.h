@@ -279,8 +279,6 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retrieve, HTF, CTF)
-
    static void printRules();             // Dump game-rule info
 
    bool levelHasLoadoutZone();           // Does the level have a loadout zone?
