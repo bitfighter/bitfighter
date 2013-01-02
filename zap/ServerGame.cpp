@@ -319,7 +319,6 @@ bool ServerGame::onlyClientIs(GameConnection *client)
 }
 
 
-
 // Control whether we're in shut down mode or not
 void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason)
 {
@@ -355,8 +354,8 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
    S32 cur = 0;
    S32 startingCur = 0;
 
-   bool foundGameType = false;
-   bool foundLevelName = false;
+   bool foundGameType   = false;
+   bool foundLevelName  = false;
    bool foundMinPlayers = false;
    bool foundMaxPlayers = false;
 
