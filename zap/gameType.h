@@ -446,8 +446,6 @@ public:
    string validateLoadout(const Vector<U8> &loadout);
    void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent = false);
 
-
-   bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 
    virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object

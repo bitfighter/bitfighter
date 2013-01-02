@@ -1805,14 +1805,6 @@ void GameType::queryItemsOfInterest()
 }
 
 
-// Team in range?    Currently not used.
-// Could use it for processArguments, but out of range will be UNKNOWN name and should not cause any errors.
-bool GameType::checkTeamRange(S32 team)
-{
-   return (team < mGame->getTeamCount() && team >= -2);
-}
-
-
 // Zero teams will crash, returns true if we had to add a default team
 bool GameType::makeSureTeamCountIsNotZero()
 {
