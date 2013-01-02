@@ -1122,7 +1122,7 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mountToShip(ship);
       }
       else
-         dismount(false);
+         dismount();
 
       mIsMounted = isMounted;
       updateExtentInDatabase();
@@ -1152,7 +1152,7 @@ void MountableItem::mountToShip(Ship *ship)
       return;
 
    if(mMount.isValid())                      // Mounted on something else; dismount!
-      dismount(false);
+      dismount();
 
    ship->addMountedItem(this);
    mMount = ship;
@@ -1170,7 +1170,7 @@ void MountableItem::mountToShip(Ship *ship)
 
 // Client & server; Note we come through here on initial unpack for mountItem, for better or worse.  When
 // we do, mMount is NULL.
-void MountableItem::dismount(bool mountWasKilled)
+void MountableItem::dismount(Dismount_Mode dismountMode)
 {
    Ship *ship = mMount;
 
@@ -1193,7 +1193,7 @@ void MountableItem::dismount(bool mountWasKilled)
    if(!getGame())    // Can happen on game startup
       return;
 
-   if(getGame()->isServer())
+   if(dismountMode != DISMOUNT_IGNORE_GAME_TYPE && getGame()->isServer())
    {
       GameType *gt = getGame()->getGameType();
       if(gt)
@@ -2382,10 +2382,10 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
 }
 
 
-void ResourceItem::dismount(bool mountWasKilled)
+void ResourceItem::dismount(Dismount_Mode dismountMode)
 {
    Ship *ship = mMount;
-   Parent::dismount(mountWasKilled);
+   Parent::dismount(dismountMode);
 
    if(!isGhost() && ship)   // Server only, to prevent desync
       setActualVel(ship->getActualVel() * 1.5);

@@ -178,7 +178,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
-      mountedFlag->dismount(false);
+      mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
 
       S32 flagIndex;
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)

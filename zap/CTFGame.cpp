@@ -92,7 +92,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-               mountedFlag->dismount(false);
+               mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
                mountedFlag->sendHome();
 
                updateScore(theShip, CaptureFlag);

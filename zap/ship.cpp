@@ -1787,7 +1787,7 @@ MountableItem *Ship::unmountItem(U8 objectType)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          MountableItem *item = mMountedItems[i];
-         item->dismount(false);
+         item->dismount();
          return item;
       }
 
@@ -1801,7 +1801,7 @@ void Ship::dismountAll()
    // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)       
       if(mMountedItems[i].isValid())               // Can be NULL when quitting the server
-         mMountedItems[i]->dismount(true);
+         mMountedItems[i]->dismount(MountableItem::DISMOUNT_MOUNT_WAS_KILLED);
 }
 
 
@@ -1810,7 +1810,7 @@ void Ship::dismountAll(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
-         mMountedItems[i]->dismount(false);
+         mMountedItems[i]->dismount();
 }
 
 

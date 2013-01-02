@@ -368,10 +368,10 @@ bool FlagItem::collide(BfObject *hitObject)
 }
 
 
-void FlagItem::dismount(bool mountWasKilled)
+void FlagItem::dismount(Dismount_Mode dismountMode)
 {
    Ship *ship = mMount;    // mMount will be set to NULL in Parent::dismount() -- grab it while we can
-   Parent::dismount(mountWasKilled);
+   Parent::dismount(dismountMode);
 
    // Should getting shot up count as a flag drop event for statistics purposes?
    if(ship && ship->getClientInfo())
