@@ -116,9 +116,9 @@ void GridDatabase::copyObjects(const GridDatabase *source)
 {
    // Preallocate some memory to make copying a little more efficient
    mAllObjects.reserve(source->mAllObjects.size());
-   mGoalZones.reserve (source->mGoalZones.size());
-   mFlags.reserve     (source->mFlags.size());
-   mSpyBugs.reserve   (source->mSpyBugs.size());
+   mGoalZones .reserve(source->mGoalZones.size());
+   mFlags     .reserve(source->mFlags.size());
+   mSpyBugs   .reserve(source->mSpyBugs.size());
 
 
    for(S32 i = 0; i < source->mAllObjects.size(); i++)
