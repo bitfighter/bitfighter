@@ -971,6 +971,7 @@ Game::DeleteRef::DeleteRef(BfObject *o, U32 d)
 
 void Game::addToDeleteList(BfObject *theObject, U32 delay)
 {
+   TNLAssert(!theObject->isGhost(), "Can't delete ghosting Object");
    mPendingDeleteObjects.push_back(DeleteRef(theObject, delay));
 }
 

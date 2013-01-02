@@ -865,7 +865,7 @@ void MoveItem::renderItemAlpha(const Point &pos, F32 alpha) { TNLAssert(false, "
 
 void MoveItem::setActualPos(const Point &pos)
 {
-   if(pos != getActualPos())
+   if(pos != MoveObject::getActualPos()) // Skip MountableItem, for client side
    {
       setPos(ActualState, pos);
       setMaskBits(WarpPositionMask | PositionMask);
@@ -982,8 +982,8 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Not interpolating here... just warp the object to its reported location
          mInterpolating = false;
 
-         setRenderPos(getActualPos());
-         setRenderVel(getActualVel());
+         setRenderPos(MoveObject::getActualPos()); // Skip MountableItem, for client side
+         setRenderVel(MoveObject::getActualVel());
          setRenderAngle(getActualAngle());
       }
    }
@@ -1029,7 +1029,8 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       if(!mMount)    // We might not have a mount here if we're creating a ship holding a Nexus flag, and the flag is sent before the ship
          return;
 
-      TNLAssert(!mMount->hasExploded, "When mount explodes, it must unmount any items it is carrying!");
+      TNLAssert(!mMount->hasExploded || mMount->isGhost(), "When mount explodes, it must unmount any items it is carrying!");
+                // Note on Assert:  Client side could still have it still mounted due to possible lag...
 
       //updateExtentInDatabase();
       setExtent(mMount->getExtent());     // Update this object's location in the database
@@ -1124,6 +1125,7 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          dismount(false);
 
       mIsMounted = isMounted;
+      updateExtentInDatabase();
    }
 }
 
@@ -1183,7 +1185,8 @@ void MountableItem::dismount(bool mountWasKilled)
       setPos(mMount->getActualPos());  
 
    mMount = NULL;
-   mIsMounted = false;
+   if(!isGhost())
+      mIsMounted = false; // For client, wait to set this in unpackUpdate
    setMaskBits(MountMask | PositionMask | WarpPositionMask);    // Tell packUpdate() to send item location
 
 

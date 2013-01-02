@@ -1525,7 +1525,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       {
          S32 index = stream->readInt(GhostConnection::GhostIdBitSize);
          NetObject *netObj = connection->resolveGhost(index);
-         if(netObj) // could be NULL
+         if(netObj) // can be NULL?
          {
             MountableItem *item = static_cast<MountableItem *>(netObj);
             item->mountToShip(this);
