@@ -336,7 +336,7 @@ void GridDatabase::findObjects(U8 typeNumber, Vector<DatabaseObject *> &fillVect
 {
    // If the user is looking for a type we maintain a list for, it will be faster to use that list than to cycle through the general item list.
    TNLAssert(typeNumber != GoalZoneTypeNumber && typeNumber != FlagTypeNumber && typeNumber != SpyBugTypeNumber, 
-             "Uncomment the appropriate block below; it will perform better!");
+             "Can use findObjects_fast()?  If not, uncomment the appropriate block below; it will perform better!");
 
    //if(typeNumber == GoalZoneTypeNumber)
    //{
