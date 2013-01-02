@@ -1315,29 +1315,6 @@ bool GameType::isTeamGame() const
 }
 
 
-// Find all spubugs in the game, and store them for future reference
-// server only
-void GameType::catalogSpybugs()
-{
-   Vector<DatabaseObject *> spyBugs;
-   mSpyBugs.clear();
-
-   // Find all spybugs in the game, load them into mSpyBugs
-   mGame->getGameObjDatabase()->findObjects(SpyBugTypeNumber, spyBugs);
-
-   mSpyBugs.resize(spyBugs.size());
-   for(S32 i = 0; i < spyBugs.size(); i++)
-      mSpyBugs[i] = static_cast<SpyBug *>(spyBugs[i]); // convert to SafePtr
-}
-
-
-void GameType::addSpyBug(SpyBug *spybug)
-{
-   TNLAssert(!isGhost(), "Spybug non-Ghost / ServerGame only, currently useless for client?");
-   mSpyBugs.push_back(spybug); // convert to SafePtr
-}
-
-
 // Only runs on server
 void GameType::addWall(const WallRec &wall, Game *game)
 {
@@ -1349,8 +1326,6 @@ void GameType::addWall(const WallRec &wall, Game *game)
 // Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
 void GameType::onLevelLoaded()
 {
-   catalogSpybugs();
-
    GridDatabase *gridDatabase =  mGame->getGameObjDatabase();
 
    mLevelHasLoadoutZone      = gridDatabase->hasObjectOfType(LoadoutZoneTypeNumber);
@@ -1649,16 +1624,20 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    // What does the spy bug see?
    bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
-   for(S32 i = mSpyBugs.size()-1; i >= 0; i--)
+
+
+   const Vector<DatabaseObject *> *spyBugs = mGame->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
+   
+   for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
-      SpyBug *sb = mSpyBugs[i].getPointer();
-      if(!sb)  // SpyBug is destroyed?
-         mSpyBugs.erase_fast(i);
-      else if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
+      SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
+
+      if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
          Point pos = sb->getActualPos();
-         Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
          Rect queryRect(pos, pos);
+
+         Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
          queryRect.expand(scopeRange);
 
          fillVector.clear();

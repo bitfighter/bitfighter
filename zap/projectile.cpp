@@ -1031,9 +1031,6 @@ void SpyBug::initialize(const Point &pos, Ship *planter)
 // Destructor
 SpyBug::~SpyBug()
 {
-   if(getGame() && getGame()->isServer() && getGame()->getGameType())
-      getGame()->getGameType()->catalogSpybugs();
-
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
@@ -1073,10 +1070,6 @@ void SpyBug::onAddedToGame(Game *theGame)
 
    if(!isGhost())
       setScopeAlways();
-
-   GameType *gt = getGame()->getGameType();
-   if(gt && !isGhost())  // non-Ghost / ServerGame only, currently useless for client
-      gt->addSpyBug(this);
 }
 
 

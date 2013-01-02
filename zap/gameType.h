@@ -135,10 +135,7 @@ class GameType : public NetObject
 private:
    Game *mGame;
 
-   Vector<SafePtr<SpyBug> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
-
    Point getSpawnPoint(S32 team);        // Pick a spawn point for ship or robot
-
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
@@ -264,9 +261,6 @@ public:
    S32 getLeadingPlayer() const;
    S32 getSecondLeadingPlayerScore() const;
    S32 getSecondLeadingPlayer() const;
-
-   void catalogSpybugs();           // Build a list of spybugs in the game
-   void addSpyBug(SpyBug *spybug);
 
    void addWall(const WallRec &barrier, Game *game);
 
