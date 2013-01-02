@@ -4061,9 +4061,15 @@ void GameType::updateWhichTeamsHaveFlags()
 {
    getGame()->clearTeamHasFlagList();
 
-   for(S32 i = 0; i < mFlags.size(); i++)
-      if(mFlags[i] && mFlags[i]->isMounted() && mFlags[i]->getMount())
-         getGame()->setTeamHasFlag(mFlags[i]->getMount()->getTeam(), true);
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+
+   for(S32 i = 0; i < flags->size(); i++)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+      if(flag->isMounted() && flag->getMount())
+         getGame()->setTeamHasFlag(flag->getMount()->getTeam(), true);
+   }
 
    notifyClientsWhoHasTheFlag();
 }
@@ -4197,7 +4203,7 @@ S32 GameType::getSecondLeadingPlayer() const
 
 S32 GameType::getFlagCount()
 {
-   return mFlags.size();
+   return getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber);
 }
 
 
@@ -4420,7 +4426,7 @@ bool GameType::isDatabasable()
 
 void GameType::addFlag(FlagItem *flag)
 {
-   mFlags.push_back(flag);
+   // Do nothing -- flags are now tracked by the database
 }
 
 

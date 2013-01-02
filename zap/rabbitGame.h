@@ -71,8 +71,6 @@ public:
    void itemDropped(Ship *ship, MoveItem *item);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
-   S32 getFlagCount();
-
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);
    bool shipHasFlag(const Ship *ship) const;

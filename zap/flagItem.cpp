@@ -254,14 +254,15 @@ void FlagItem::sendHome()
 // Removes occupied spawns from spawnPoints list
 void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) // Modifies spawnPoints
 {
-   Game *game = getGame();
-   GameType *gt = game->getGameType();
+   bool isTeamGame = getGame()->getGameType()->isTeamGame();
+
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
    // Now remove the occupied spots from our list of potential spawns
-   for(S32 i = 0; i < gt->mFlags.size(); i++)
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      FlagItem *flag = gt->mFlags[i];
-      if(flag->isAtHome() && (flag->getTeam() < 0 || flag->getTeam() == getTeam() || !gt->isTeamGame()))
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+      if(flag->isAtHome() && (flag->getTeam() <= TEAM_NEUTRAL || flag->getTeam() == getTeam() || !isTeamGame))
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
