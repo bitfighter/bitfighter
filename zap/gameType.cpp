@@ -636,15 +636,15 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 // Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified  (static)
 const char *GameType::validateGameType(const char *gameTypeName)
 {
+   if(!stricmp(gameTypeName, "HuntersGameType"))
+       return "NexusGameType";
+
    for(S32 i = 0; gameTypeClassNames[i]; i++)    // Repeat until we hit NULL
-      if(strcmp(gameTypeClassNames[i], gameTypeName) == 0)
+      if(stricmp(gameTypeClassNames[i], gameTypeName) == 0)
          return gameTypeClassNames[i];
 
-
-   const S32 DEFAULT_GAME_TYPE_INDEX = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
-
-   // If we get to here, no valid game type was specified, so we'll return the default
-   return gameTypeClassNames[DEFAULT_GAME_TYPE_INDEX];
+   // If we get to here, no valid game type was specified, so we'll return the default (Bitmatch)
+   return gameTypeClassNames[0];
 }
 
 

@@ -372,12 +372,10 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 
             if(list.size() >= 1 && list[0].find("GameType") != string::npos)
             {
-               // Convert legacy Hunters game
-               if(!stricmp(list[0].c_str(), "HuntersGameType"))
-                  list[0] = "NexusGameType";
+               // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
+               TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(list[0].c_str()));
 
-               TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
-               GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
+               GameType *gt = dynamic_cast<GameType *>(theObject); 
                if(gt)
                {
                   levelInfo.mLevelType = gt->getGameTypeId();

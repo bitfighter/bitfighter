@@ -639,14 +639,9 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       }
 
       // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-      TNL::Object *theObject;
-      if(!strcmp(argv[0], "HuntersGameType"))
-         theObject = new NexusGameType();
-      else
-         theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
+      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
 
-      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a BfObject
-
+      GameType *gt = dynamic_cast<GameType *>(theObject);
       if(gt)
       {
          bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
