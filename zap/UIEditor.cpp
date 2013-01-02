@@ -913,16 +913,37 @@ static bool TeamListToString(string &output, Vector<bool> teamVector)
    return false;
 }
 
+
+static bool hasTeamFlags(GridDatabase *database)
+{
+   const Vector<DatabaseObject *> *flags = database->findObjects_fast(FlagTypeNumber);
+
+   for (S32 i = 0; i < fillVector.size(); i++)
+      if(static_cast<FlagItem *>(flags->get(i))->getTeam() > TEAM_NEUTRAL)
+         return false;
+
+   return false;     
+}
+
+
+static bool hasTeamSpawns(GridDatabase *database)
+{
+   fillVector.clear();
+   database->findObjects(FlagSpawnTypeNumber, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      if(dynamic_cast<FlagSpawn *>(fillVector[i])->getTeam() >= 0)
+         return true;
+
+   return false;
+}
+
+
 void EditorUserInterface::validateLevel()
 {
    mLevelErrorMsgs.clear();
    mLevelWarnings.clear();
 
-   bool foundSoccerBall = false;
-   bool foundNexus = false;
-   bool foundFlags = false;
-   bool foundTeamFlags = false;
-   bool foundTeamFlagSpawns = false;
    bool foundNeutralSpawn = false;
 
    Vector<bool> foundSpawn;
@@ -940,6 +961,7 @@ void EditorUserInterface::validateLevel()
       
    fillVector.clear();
    gridDatabase->findObjects(ShipSpawnTypeNumber, fillVector);
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Spawn *spawn = static_cast<Spawn *>(fillVector[i]);
@@ -947,44 +969,16 @@ void EditorUserInterface::validateLevel()
 
       if(team == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
-      else if(U32(team) < U32(foundSpawn.size()))
+      else if(team > TEAM_NEUTRAL && team < teamCount)
          foundSpawn[team] = true;
    }
 
-   fillVector.clear();
-   gridDatabase->findObjects(SoccerBallItemTypeNumber, fillVector);
-   if(fillVector.size() > 0)
-      foundSoccerBall = true;
+   bool foundSoccerBall = gridDatabase->hasObjectOfType(SoccerBallItemTypeNumber);
+   bool foundNexus      = gridDatabase->hasObjectOfType(NexusTypeNumber);
+   bool foundFlags      = gridDatabase->hasObjectOfType(FlagTypeNumber);
 
-   fillVector.clear();
-   gridDatabase->findObjects(NexusTypeNumber, fillVector);
-   if(fillVector.size() > 0)
-      foundNexus = true;
-
-   fillVector.clear();
-   gridDatabase->findObjects(FlagTypeNumber, fillVector);
-   for (S32 i = 0; i < fillVector.size(); i++)
-   {
-      foundFlags = true;
-      FlagItem *flag = dynamic_cast<FlagItem *>(fillVector[i]);
-      if(flag->getTeam() >= 0)
-      {
-         foundTeamFlags = true;
-         break;
-      }
-   }
-
-   fillVector.clear();
-   gridDatabase->findObjects(FlagSpawnTypeNumber, fillVector);
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
-      if(flagSpawn->getTeam() >= 0)
-      {
-         foundTeamFlagSpawns = true;
-         break;
-      }
-   }
+   bool foundTeamFlags      = hasTeamFlags (gridDatabase);
+   bool foundTeamFlagSpawns = hasTeamSpawns(gridDatabase);
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
@@ -1016,7 +1010,6 @@ void EditorUserInterface::validateLevel()
       if(TeamListToString(teamList, foundSpawn))     // Compose error message
          mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teamList);
    }
-
 
 
    if(gameType->getGameTypeId() == CoreGame)
