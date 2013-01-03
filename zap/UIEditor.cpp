@@ -918,7 +918,7 @@ static bool hasTeamFlags(GridDatabase *database)
 {
    const Vector<DatabaseObject *> *flags = database->findObjects_fast(FlagTypeNumber);
 
-   for (S32 i = 0; i < fillVector.size(); i++)
+   for(S32 i = 0; i < flags->size(); i++)
       if(static_cast<FlagItem *>(flags->get(i))->getTeam() > TEAM_NEUTRAL)
          return false;
 
