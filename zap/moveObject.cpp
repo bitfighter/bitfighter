@@ -1056,6 +1056,8 @@ void MountableItem::render()
 // so any that we send will likely be ok.  The results of Parent::getActualPos() are as good as any.
 Point MountableItem::getActualPos() const 
 { 
+   if(mIsMounted && !mMount)//{P{P
+      int x = 0;
    if(mIsMounted && mMount)   
       return mMount->getActualPos();
    return Parent::getActualPos();
@@ -1064,6 +1066,9 @@ Point MountableItem::getActualPos() const
 
 Point MountableItem::getRenderPos() const 
 { 
+      if(mIsMounted && !mMount)//{P{P
+      int x = 0;
+
    if(mIsMounted && mMount)
       return mMount->getRenderPos();
    return Parent::getRenderPos();
@@ -1072,6 +1077,9 @@ Point MountableItem::getRenderPos() const
 
 Point MountableItem::getActualVel() const 
 { 
+      if(mIsMounted && !mMount)//{P{P
+      int x = 0;
+
    if(mIsMounted && mMount)
       return mMount->getActualVel();
    return Parent::getActualVel();
@@ -1080,6 +1088,9 @@ Point MountableItem::getActualVel() const
 
 Point MountableItem::getRenderVel() const 
 { 
+      if(mIsMounted && !mMount)  //{P{P
+      int x = 0;
+
    if(mIsMounted && mMount)
       return mMount->getRenderVel();
    return Parent::getRenderVel();
