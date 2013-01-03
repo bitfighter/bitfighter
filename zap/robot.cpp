@@ -99,8 +99,7 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-   dismountAll();
-
+   // Items will be dismounted in Ship (Parent) destructor
    setOwner(NULL);
 
    if(isGhost())
@@ -127,8 +126,6 @@ Robot::~Robot()
    delete mPlayerInfo;
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
-
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
