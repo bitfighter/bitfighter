@@ -30,7 +30,7 @@
 #include "../zap/WeaponInfo.h"
 
 #ifdef BF_WRITE_TO_MYSQL
-#include "mysql++.h"
+#  include "mysql++.h"
 using namespace mysqlpp;
 #endif
 
@@ -42,6 +42,7 @@ using namespace TNL;
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
 {
+   // Do nothing
 }
 
 
@@ -88,12 +89,12 @@ static string sanitize(const string &value)
 
 
 #ifndef BF_WRITE_TO_MYSQL     // Stats not going to mySQL
-class SimpleResult{
-public:
-   S32 insert_id() { return 0; }
-};
+   class SimpleResult{
+   public:
+      S32 insert_id() { return 0; }
+   };
 
-#define Exception std::exception
+#  define Exception std::exception
 #endif
 
 

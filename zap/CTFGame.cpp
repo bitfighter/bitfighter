@@ -132,17 +132,24 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
    S32 uTeam = scopeObject->getTeam();
 
-   for(S32 i = 0; i < mFlags.size(); i++)
+   // Scan all the flags and mark any that are at home or parked in a zone as being in scope; for those that are mounted,
+   // if the mount is on our team, mark both the mount and the flag as being in scope
+
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      if(mFlags[i]->isAtHome() || mFlags[i]->getZone())
-         connection->objectInScope(mFlags[i]);
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+      if(flag->isAtHome() || flag->getZone())
+         connection->objectInScope(flag);
       else
       {
-         Ship *mount = mFlags[i]->getMount();
+         Ship *mount = flag->getMount();
          if(mount && mount->getTeam() == uTeam)
          {
             connection->objectInScope(mount);
-            connection->objectInScope(mFlags[i]);
+            connection->objectInScope(flag);
          }
       }
    }
@@ -162,19 +169,20 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
       return;
 
-   for(S32 i = 0; i < mFlags.size(); i++)
-   {
-      if(!mFlags[i].isValid())
-         continue;
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-      if(mFlags[i]->isMounted())
+   for(S32 i = 0; i < flags->size(); i++)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+      if(flag->isMounted())
       {
-         Ship *mount = mFlags[i]->getMount();
+         Ship *mount = flag->getMount();
          if(mount)
             renderObjectiveArrow(mount);
       }
       else
-         renderObjectiveArrow(mFlags[i]);
+         renderObjectiveArrow(flag);
    }
 #endif
 }

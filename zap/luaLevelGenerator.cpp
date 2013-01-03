@@ -156,6 +156,7 @@ static Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
 }
 
 
+// TODO: Move this up to one of the higher level lua support classes
 Point LuaLevelGenerator::getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
 {
    lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
@@ -172,7 +173,30 @@ Point LuaLevelGenerator::getPointFromTable(lua_State *L, int tableIndex, int key
 }
 
 
-// Deprecated
+// Let someone else do the work!
+void LuaLevelGenerator::processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
+{
+   mGame->processLevelLoadLine(argc, id, argv, database, levelFileName);
+}
+
+
+///// Initialize levelgen specific stuff
+bool LuaLevelGenerator::prepareEnvironment()
+{
+   if(!LuaScriptRunner::prepareEnvironment())
+      return false;
+
+   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, LevelgenContext) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
+      return false;
+
+   setSelf(L, this, "levelgen");
+
+   return true;
+}
+
+
+// Deprecated 
+// TODO: Needs documentation
 S32 LuaLevelGenerator::addWall(lua_State *L)
 {
    static const char *methodName = "LevelGeneratorEditor:addWall()";
@@ -209,6 +233,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 // Simply grabs parameters from the Lua stack, and passes them off to processLevelLoadLine().  Unfortunately,
 // this involves packing everything into an array of char strings, which is frightfully prone to programmer
 // error and buffer overflows and such...
+// TODO: Needs documentation
 S32 LuaLevelGenerator::addItem(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addItem()";
@@ -257,20 +282,13 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 }
 
 
-// Let someone else do the work!
-void LuaLevelGenerator::processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)
-{
-   mGame->processLevelLoadLine(argc, id, argv, database, levelFileName);
-}
-
-
 /**
  * @luafunc    Levelgen::addLevelLine(levelLine)
  * @brief      Adds an object to the editor by passing a line from a level file.
  * @deprecated This method is deprecated and will be removed in the future.  As an alternative, construct a BfObject directly and 
  *             add it to the game using the addItem() method.
  * @param      levelLine - string containing the line of levelcode.
-*/
+ */
 S32 LuaLevelGenerator::addLevelLine(lua_State *L)
 {
    static const char *methodName = "LevelGenerator:addLevelLine()";
@@ -284,7 +302,11 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
 }
 
 
-// Set the duration of this level
+/**
+ * @luafunc    Levelgen::setGameTime(timeInMinutes)
+ * @brief      Sets the time remaining in the current game to the specified value
+ * @param      num timeInMinutes - Time, in minutes, that the game should continue.  Can be fractional.
+ */
 S32 LuaLevelGenerator::setGameTime(lua_State *L)
 {
    static const char *methodName = "Levelgen:setGameTime()";
@@ -298,6 +320,13 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
 }
 
 
+/**
+ * @luafunc Levelgen::pointCanSeePoint(object1, object2)
+ * @brief   Returns true if the two specified objects can see one another.
+ * @param   \e BfObject object1 - First object.
+ * @param   \e BfObject object2 - Second object.
+ * @return  \e bool - True if objects have LOS from one to the other.
+ */
 S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 {
    static const char *methodName = "Levelgen:pointCanSeePoint()";
@@ -313,7 +342,15 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 }
 
 
-// Write a message to the server logfile
+/**
+ * @luafunc    Levelgen::logprint(text)
+ * @brief      Writes a line of text to the console and the system log.
+ * @descr      Function can be called without Levelgen: prefix;  For example:
+ *  \code
+ *    logprint("Hello world!")
+ *  \endcode
+ * @param      \e string text - Message to write.
+ */
 S32 LuaLevelGenerator::logprint(lua_State *L)
 {
    static const char *methodName = "Levelgen:logprint()";
@@ -335,41 +372,41 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
  *
  * @param      id - int id to search for.
  * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
-*/
+ */
 S32 LuaLevelGenerator::findObjectById(lua_State *L)
 {
    return LuaScriptRunner::findObjectById(L, mGame->getGameObjDatabase()->findObjects_fast());
 }
 
 
+/**
+ * @luafunc Levelgen::getGridSize()
+ * @brief   Returns current gridSize setting.
+ * @descr   Note that non-default gridSizes are rare in modern level design.
+ * @return  \e num - Current gridSize.
+ */
 S32 LuaLevelGenerator::getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);
 }
 
 
+/**
+ * @luafunc Levelgen::getPlayerCount()
+ * @brief   Returns current number of players.
+ * @return  \e int - Current number of players.
+ */
 S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
 {
    return returnInt(L, gServerGame ? gServerGame->getPlayerCount() : 1 );
 }
 
 
-///// Initialize levelgen specific stuff
-bool LuaLevelGenerator::prepareEnvironment()
-{
-   if(!LuaScriptRunner::prepareEnvironment())
-      return false;
-
-   if(!loadAndRunGlobalFunction(L, LUA_HELPER_FUNCTIONS_KEY, LevelgenContext) || !loadAndRunGlobalFunction(L, LEVELGEN_HELPER_FUNCTIONS_KEY, LevelgenContext))
-      return false;
-
-   setSelf(L, this, "levelgen");
-
-   return true;
-}
-
-
-// Send message to all players
+/**
+ * @luafunc Levelgen::globalMsg(message)
+ * @brief   Broadcast a message to all players.
+ * @param   \e string message - Message to broadcast.
+ */
 S32 LuaLevelGenerator::globalMsg(lua_State *L)
 {
    static const char *methodName = "Levelgen:globalMsg()";

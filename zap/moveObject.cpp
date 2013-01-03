@@ -930,10 +930,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 {
    U32 retMask = 0;
    if(stream->writeFlag(updateMask & InitialMask))
-   {
-      // Send id in inital packet
-      stream->writeRangedU32(getItemId(), 0, U16_MAX);
-   }
+      stream->writeRangedU32(getItemId(), 0, U16_MAX);      // Send id in inital packet
 
    if(stream->writeFlag(updateMask & PositionMask))
    {
@@ -948,7 +945,7 @@ U32 MoveItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   bool interpolate = false;
+   bool warpToNewPosition = false;
    bool positionChanged = false;
 
    mInitial = stream->readFlag();
@@ -967,12 +964,12 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       setActualVel(pt);
 
       positionChanged = true;
-      interpolate = !stream->readFlag();     // WarpPositionMask
+      warpToNewPosition = !stream->readFlag();     // WarpPositionMask
    }
 
    if(positionChanged)
    {
-      if(interpolate)
+      if(warpToNewPosition)
       {
          mInterpolating = true;
          move(connection->getOneWayTime() * 0.001f, ActualState, false);
@@ -1055,9 +1052,12 @@ void MountableItem::render()
 }
 
 
+// When starting up a Nexus level, we can get here with a mounted flag that still has the mount set to NULL.  That will
+// break getActualPos() and friends if we don't check for mMount being NULL.  In this situation, there is no "right" position
+// so any that we send will likely be ok.  The results of Parent::getActualPos() are as good as any.
 Point MountableItem::getActualPos() const 
 { 
-   if(mMount)
+   if(mIsMounted && mMount)   
       return mMount->getActualPos();
    return Parent::getActualPos();
 }
@@ -1065,7 +1065,7 @@ Point MountableItem::getActualPos() const
 
 Point MountableItem::getRenderPos() const 
 { 
-   if(mMount)
+   if(mIsMounted && mMount)
       return mMount->getRenderPos();
    return Parent::getRenderPos();
 }
@@ -1073,7 +1073,7 @@ Point MountableItem::getRenderPos() const
 
 Point MountableItem::getActualVel() const 
 { 
-   if(mMount)
+   if(mIsMounted && mMount)
       return mMount->getActualVel();
    return Parent::getActualVel();
 }
@@ -1081,7 +1081,7 @@ Point MountableItem::getActualVel() const
 
 Point MountableItem::getRenderVel() const 
 { 
-   if(mIsMounted)
+   if(mIsMounted && mMount)
       return mMount->getRenderVel();
    return Parent::getRenderVel();
 }
@@ -1089,7 +1089,7 @@ Point MountableItem::getRenderVel() const
 
 U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+   U32 retMask = 0;
 
    if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
    {
@@ -1101,14 +1101,14 @@ U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitSt
          retMask |= MountMask;
    }
 
+   retMask |= Parent::packUpdate(connection, updateMask, stream);
+
    return retMask;
 }
 
 
 void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);
-
    if(stream->readFlag())     // MountMask
    {
       bool isMounted = stream->readFlag();
@@ -1127,6 +1127,8 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mIsMounted = isMounted;
       updateExtentInDatabase();
    }
+
+   Parent::unpackUpdate(connection, stream);
 }
 
 
@@ -2384,7 +2386,7 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
 
 void ResourceItem::dismount(Dismount_Mode dismountMode)
 {
-   Ship *ship = mMount;
+   Ship *ship = mMount;       // Parent::dismount will set mMount to NULL, so grab a copy here while we can
    Parent::dismount(dismountMode);
 
    if(!isGhost() && ship)   // Server only, to prevent desync

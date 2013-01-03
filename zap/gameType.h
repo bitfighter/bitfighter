@@ -135,10 +135,7 @@ class GameType : public NetObject
 private:
    Game *mGame;
 
-   Vector<SafePtr<SpyBug> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
-
    Point getSpawnPoint(S32 team);        // Pick a spawn point for ship or robot
-
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
@@ -265,9 +262,6 @@ public:
    S32 getSecondLeadingPlayerScore() const;
    S32 getSecondLeadingPlayer() const;
 
-   void catalogSpybugs();           // Build a list of spybugs in the game
-   void addSpyBug(SpyBug *spybug);
-
    void addWall(const WallRec &barrier, Game *game);
 
    virtual bool isFlagGame() const;      // Does game use flags?
@@ -278,8 +272,6 @@ public:
    virtual bool isSpawnWithLoadoutGame();  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
-
-   Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retrieve, HTF, CTF)
 
    static void printRules();             // Dump game-rule info
 
@@ -454,8 +446,6 @@ public:
    string validateLoadout(const Vector<U8> &loadout);
    void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent = false);
 
-
-   bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 
    virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object

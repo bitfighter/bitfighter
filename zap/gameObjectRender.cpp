@@ -909,7 +909,7 @@ void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentS
    Color col(color);        // Make a copy we can alter
    glColor(col * 0.45f);    // Slightly different color than that used for ships
 
-   F32 range = gSpyBugRange * currentScale;
+   F32 range = SpyBug::SPY_BUG_RANGE * currentScale;
 
    UserInterface::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
 }

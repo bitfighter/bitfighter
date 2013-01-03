@@ -234,24 +234,24 @@ void ZoneControlGameType::performProxyScopeQuery(BfObject *scopeObject, ClientIn
    GameConnection *connection = clientInfo->getConnection();
 
    S32 uTeam = scopeObject->getTeam();
-   for(S32 i=0; i < mFlags.size(); i++)
-      if(!mFlags[i].isValid())
-         mFlags.erase(i);
+
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   for(S32 i = 0; i < flags->size(); i++)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+      if(flag->isAtHome())
+         connection->objectInScope(flag);
       else
       {
-         FlagItem *flag = mFlags[i];
-         if(flag->isAtHome())
-            connection->objectInScope(flag);
-         else
+         Ship *mount = flag->getMount();
+         if(mount && mount->getTeam() == uTeam)
          {
-            Ship *mount = flag->getMount();
-            if(mount && mount->getTeam() == uTeam)
-            {
-               connection->objectInScope(mount);
-               connection->objectInScope(flag);
-            }
+            connection->objectInScope(mount);
+            connection->objectInScope(flag);
          }
       }
+   }
 }
 
 
@@ -291,18 +291,19 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
    else
    {
+      const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
       // Show all flags that can be picked up or is on the ship
-      for(S32 i = 0; i < mFlags.size(); i++)
+      for(S32 i = 0; i < flags->size(); i++)
       {
-         if(!mFlags[i])
-            mFlags.erase(i);
-         else if(mFlags[i]->getTeam() == TEAM_NEUTRAL || mFlags[i]->getTeam() == ship->getTeam() || mFlags[i]->isMounted())
+         FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+         if(flag->getTeam() == TEAM_NEUTRAL || flag->getTeam() == ship->getTeam() || flag->isMounted())
          {
-            if(!mFlags[i]->isMounted())
-               renderObjectiveArrow(mFlags[i]);
+            if(!flag->isMounted())
+               renderObjectiveArrow(flag);
             else
-               if(mFlags[i]->getMount())
-                  renderObjectiveArrow(mFlags[i]->getMount());
+               if(flag->getMount())
+                  renderObjectiveArrow(flag->getMount());
          }
       }
 

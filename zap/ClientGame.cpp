@@ -1724,13 +1724,12 @@ void ClientGame::renderCommander()
             }
          }
 
-         fillVector.clear();
-         mGameObjDatabase->findObjects(SpyBugTypeNumber, fillVector);
+         const Vector<DatabaseObject *> *spyBugs = mGameObjDatabase->findObjects_fast(SpyBugTypeNumber);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
-         for(S32 i = 0; i < fillVector.size(); i++)
+         for(S32 i = 0; i < spyBugs->size(); i++)
          {
-            SpyBug *sb = static_cast<SpyBug *>(fillVector[i]);
+            SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
 
             if(sb->isVisibleToPlayer(playerTeam, getGameType()->isTeamGame()))
             {
