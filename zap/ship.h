@@ -217,7 +217,7 @@ public:
    // Constructor
    Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
    Ship(lua_State *L = NULL);                                                      // Combined Lua / C++ default constructor
-   ~Ship();                                                                        // Destructor
+   virtual ~Ship();                                                                        // Destructor
 
    F32 getHealth();
    S32 getEnergy();
