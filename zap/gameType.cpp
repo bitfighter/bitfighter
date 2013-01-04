@@ -3735,7 +3735,7 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
    S32 count = ship->getMountedItemCount();
    for(S32 i = count - 1; i >= 0; i--)
-      ship->getMountedItem(i)->dismount();
+      ship->getMountedItem(i)->dismount(MountableItem::DISMOUNT_NORMAL);
 }
 
 

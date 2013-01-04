@@ -1784,7 +1784,7 @@ MountableItem *Ship::unmountItem(U8 objectType)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          MountableItem *item = mMountedItems[i];
-         item->dismount();
+         item->dismount(MountableItem::DISMOUNT_NORMAL);
          return item;
       }
 
@@ -1807,7 +1807,7 @@ void Ship::dismountAll(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
-         mMountedItems[i]->dismount();
+         mMountedItems[i]->dismount(MountableItem::DISMOUNT_NORMAL);
 }
 
 
