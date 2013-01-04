@@ -1184,11 +1184,13 @@ void MountableItem::dismount(Dismount_Mode dismountMode)
    // On client, we'll wait for a message from the server to set the pos, which may have already happened by the time
    // this code is executed.
    if(!isGhost())
+   {
       setPos(mMount->getActualPos());  
+      mIsMounted = false;     // For client, wait to set this in unpackUpdate
+   }
 
    mMount = NULL;
-   if(!isGhost())
-      mIsMounted = false; // For client, wait to set this in unpackUpdate
+      
    setMaskBits(MountMask | PositionMask | WarpPositionMask);    // Tell packUpdate() to send item location
 
 
