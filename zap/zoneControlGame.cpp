@@ -220,7 +220,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       FlagItem *mountedFlag = static_cast<FlagItem *>(item);
 
-      mountedFlag->dismount(false);
+      mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
       mountedFlag->sendHome();
    }
 }

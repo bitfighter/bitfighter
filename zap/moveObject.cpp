@@ -979,8 +979,8 @@ void MoveItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          // Not interpolating here... just warp the object to its reported location
          mInterpolating = false;
 
-         setRenderPos(getActualPos());
-         setRenderVel(getActualVel());
+         setRenderPos(MoveObject::getActualPos()); // Skip MountableItem, for client side
+         setRenderVel(MoveObject::getActualVel());
          setRenderAngle(getActualAngle());
       }
    }
@@ -1026,7 +1026,8 @@ void MountableItem::idle(BfObject::IdleCallPath path)
       if(!mMount)    // We might not have a mount here if we're creating a ship holding a Nexus flag, and the flag is sent before the ship
          return;
 
-      TNLAssert(!mMount->hasExploded, "When mount explodes, it must unmount any items it is carrying!");
+      TNLAssert(!mMount->hasExploded || mMount->isGhost(), "When mount explodes, it must unmount any items it is carrying!");
+                // Note on Assert:  Client side could still have it still mounted due to possible lag...
 
       //updateExtentInDatabase();
       setExtent(mMount->getExtent());     // Update this object's location in the database
@@ -1122,9 +1123,10 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mountToShip(ship);
       }
       else
-         dismount(false);
+         dismount();
 
       mIsMounted = isMounted;
+      updateExtentInDatabase();
    }
    Parent::unpackUpdate(connection, stream);
 }
@@ -1152,7 +1154,7 @@ void MountableItem::mountToShip(Ship *ship)
       return;
 
    if(mMount.isValid())                      // Mounted on something else; dismount!
-      dismount(false);
+      dismount();
 
    ship->addMountedItem(this);
    mMount = ship;
@@ -1170,7 +1172,7 @@ void MountableItem::mountToShip(Ship *ship)
 
 // Client & server; Note we come through here on initial unpack for mountItem, for better or worse.  When
 // we do, mMount is NULL.
-void MountableItem::dismount(bool mountWasKilled)
+void MountableItem::dismount(Dismount_Mode dismountMode)
 {
    Ship *ship = mMount;
 
@@ -1185,14 +1187,15 @@ void MountableItem::dismount(bool mountWasKilled)
       setPos(mMount->getActualPos());  
 
    mMount = NULL;
-   mIsMounted = false;
+   if(!isGhost())
+      mIsMounted = false; // For client, wait to set this in unpackUpdate
    setMaskBits(MountMask | PositionMask | WarpPositionMask);    // Tell packUpdate() to send item location
 
 
    if(!getGame())    // Can happen on game startup
       return;
 
-   if(getGame()->isServer())
+   if(dismountMode != DISMOUNT_IGNORE_GAME_TYPE && getGame()->isServer())
    {
       GameType *gt = getGame()->getGameType();
       if(gt)
@@ -2381,10 +2384,10 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
 }
 
 
-void ResourceItem::dismount(bool mountWasKilled)
+void ResourceItem::dismount(Dismount_Mode dismountMode)
 {
    Ship *ship = mMount;       // Parent::dismount will set mMount to NULL, so grab a copy here while we can
-   Parent::dismount(mountWasKilled);
+   Parent::dismount(dismountMode);
 
    if(!isGhost() && ship)   // Server only, to prevent desync
       setActualVel(ship->getActualVel() * 1.5);
