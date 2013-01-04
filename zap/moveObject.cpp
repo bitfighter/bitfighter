@@ -1199,7 +1199,7 @@ void MountableItem::dismount(Dismount_Mode dismountMode)
    {
       GameType *gt = getGame()->getGameType();
       if(gt)
-         gt->itemDropped(ship, this);      // Server-only method
+         gt->itemDropped(ship, this);      // Server-only method; generally broadcasts message and things like that
    }
 
    mDroppedTimer.reset();
