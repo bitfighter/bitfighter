@@ -636,15 +636,15 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 // Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified  (static)
 const char *GameType::validateGameType(const char *gameTypeName)
 {
+   if(!stricmp(gameTypeName, "HuntersGameType"))
+       return "NexusGameType";
+
    for(S32 i = 0; gameTypeClassNames[i]; i++)    // Repeat until we hit NULL
-      if(strcmp(gameTypeClassNames[i], gameTypeName) == 0)
+      if(stricmp(gameTypeClassNames[i], gameTypeName) == 0)
          return gameTypeClassNames[i];
 
-
-   const S32 DEFAULT_GAME_TYPE_INDEX = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
-
-   // If we get to here, no valid game type was specified, so we'll return the default
-   return gameTypeClassNames[DEFAULT_GAME_TYPE_INDEX];
+   // If we get to here, no valid game type was specified, so we'll return the default (Bitmatch)
+   return gameTypeClassNames[0];
 }
 
 
@@ -1315,29 +1315,6 @@ bool GameType::isTeamGame() const
 }
 
 
-// Find all spubugs in the game, and store them for future reference
-// server only
-void GameType::catalogSpybugs()
-{
-   Vector<DatabaseObject *> spyBugs;
-   mSpyBugs.clear();
-
-   // Find all spybugs in the game, load them into mSpyBugs
-   mGame->getGameObjDatabase()->findObjects(SpyBugTypeNumber, spyBugs);
-
-   mSpyBugs.resize(spyBugs.size());
-   for(S32 i = 0; i < spyBugs.size(); i++)
-      mSpyBugs[i] = static_cast<SpyBug *>(spyBugs[i]); // convert to SafePtr
-}
-
-
-void GameType::addSpyBug(SpyBug *spybug)
-{
-   TNLAssert(!isGhost(), "Spybug non-Ghost / ServerGame only, currently useless for client?");
-   mSpyBugs.push_back(spybug); // convert to SafePtr
-}
-
-
 // Only runs on server
 void GameType::addWall(const WallRec &wall, Game *game)
 {
@@ -1349,8 +1326,6 @@ void GameType::addWall(const WallRec &wall, Game *game)
 // Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
 void GameType::onLevelLoaded()
 {
-   catalogSpybugs();
-
    GridDatabase *gridDatabase =  mGame->getGameObjDatabase();
 
    mLevelHasLoadoutZone      = gridDatabase->hasObjectOfType(LoadoutZoneTypeNumber);
@@ -1608,11 +1583,14 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 }
 
 
-static void performScopeQueryOnShip(Ship *ship, GameConnection *conn)
+static void markAllMountedItemsAsBeingInScope(Ship *ship, GameConnection *conn)
 {
-   for(S32 i = ship->getMountedItemCount() - 1; i >= 0; i--)  // Dismount them, while we still have position and velocity.
+   for(S32 i = 0; i < ship->getMountedItemCount(); i++)  
+   {
+      TNLAssert(ship->getMountedItem(i), "When would this item be NULL?  Do we really need to check this?");
       if(ship->getMountedItem(i))
          conn->objectInScope(ship->getMountedItem(i));
+   }
 }
 
 
@@ -1646,16 +1624,20 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    // What does the spy bug see?
    bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
-   for(S32 i = mSpyBugs.size()-1; i >= 0; i--)
+
+
+   const Vector<DatabaseObject *> *spyBugs = mGame->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
+   
+   for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
-      SpyBug *sb = mSpyBugs[i].getPointer();
-      if(!sb)  // SpyBug is destroyed?
-         mSpyBugs.erase_fast(i);
-      else if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
+      SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
+
+      if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
          Point pos = sb->getActualPos();
-         Point scopeRange(gSpyBugRange, gSpyBugRange);
          Rect queryRect(pos, pos);
+
+         Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
          queryRect.expand(scopeRange);
 
          fillVector.clear();
@@ -1666,7 +1648,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          {
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
             if(isShipType(fillVector[j]->getObjectTypeNumber()))
-               performScopeQueryOnShip((Ship*)fillVector[j], conn);
+               markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[j]), conn);
          }
       }
    }
@@ -1753,7 +1735,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
-         performScopeQueryOnShip((Ship*)fillVector[i], connection);
+         markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[i]), connection);
    }
 
    // Make bots visible if showAllBots has been activated
@@ -1820,14 +1802,6 @@ void GameType::queryItemsOfInterest()
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
    }
-}
-
-
-// Team in range?    Currently not used.
-// Could use it for processArguments, but out of range will be UNKNOWN name and should not cause any errors.
-bool GameType::checkTeamRange(S32 team)
-{
-   return (team < mGame->getTeamCount() && team >= -2);
 }
 
 
@@ -3765,11 +3739,8 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // no need to use RPCGuaranteedOrdered
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCGuaranteed, RPCToGhostParent, 0)
 {
-   //GameConnection *source = (GameConnection *) getRPCSourceConnection();  // not used
-
    if(mCacheResendItem.size() == 0)
       mCacheResendItem.resize(1024);
 
@@ -3795,9 +3766,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
          for(S32 j = 0; j < 1024; j += 256)
          {
             if(mCacheResendItem[S32(itemId & 255) | j].isNull())
-            {
                mCacheResendItem[S32(itemId & 255) | j].set(item);
-            }
+
             return;
          }
          mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0, 3) * 256)].set(item);
@@ -4062,9 +4032,15 @@ void GameType::updateWhichTeamsHaveFlags()
 {
    getGame()->clearTeamHasFlagList();
 
-   for(S32 i = 0; i < mFlags.size(); i++)
-      if(mFlags[i] && mFlags[i]->isMounted() && mFlags[i]->getMount())
-         getGame()->setTeamHasFlag(mFlags[i]->getMount()->getTeam(), true);
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+
+   for(S32 i = 0; i < flags->size(); i++)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+      if(flag->isMounted() && flag->getMount())
+         getGame()->setTeamHasFlag(flag->getMount()->getTeam(), true);
+   }
 
    notifyClientsWhoHasTheFlag();
 }
@@ -4198,7 +4174,7 @@ S32 GameType::getSecondLeadingPlayer() const
 
 S32 GameType::getFlagCount()
 {
-   return mFlags.size();
+   return getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber);
 }
 
 
@@ -4421,7 +4397,7 @@ bool GameType::isDatabasable()
 
 void GameType::addFlag(FlagItem *flag)
 {
-   mFlags.push_back(flag);
+   // Do nothing -- flags are now tracked by the database
 }
 
 

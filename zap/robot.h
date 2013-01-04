@@ -74,7 +74,7 @@ private:
 
 public:
    Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
-   ~Robot();                        // Destructor
+   virtual ~Robot();                // Destructor
 
    bool initialize(Point &pos);
 

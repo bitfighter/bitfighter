@@ -139,8 +139,6 @@ bool isAnyObjectType(U8 x);
 
 typedef bool (*TestFunc)(U8);
 
-const S32 gSpyBugRange = 300;                // How far can a spy bug see?
-
 class Game;
 class GameConnection;
 class Color;
