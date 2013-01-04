@@ -465,7 +465,7 @@ void GhostConnection::readPacket(BitStream *bstream)
          if(mLocalGhosts[index])
          {
             mLocalGhosts[index]->onGhostRemove();
-            delete mLocalGhosts[index];
+            mLocalGhosts[index]->decRef();  // This deletes the object if needed
             mLocalGhosts[index] = NULL;
          }
       }
@@ -492,6 +492,7 @@ void GhostConnection::readPacket(BitStream *bstream)
             }
             obj->mOwningConnection = this;
             obj->mNetFlags = NetObject::IsGhost;
+            obj->incRef(); // This is to disallow others delete our object
 
             // object gets initial update before adding to the manager
 
@@ -775,7 +776,7 @@ void GhostConnection::deleteLocalGhosts()
       if(mLocalGhosts[i])
       {
          mLocalGhosts[i]->onGhostRemove();
-         delete mLocalGhosts[i];
+         mLocalGhosts[i]->decRef(); // This deletes the object
          mLocalGhosts[i] = NULL;
       }
    }

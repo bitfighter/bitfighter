@@ -1453,7 +1453,7 @@ S32 Robot::dropItem(lua_State *L)
 
    S32 count = mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
-      mMountedItems[i]->dismount(false);
+      mMountedItems[i]->dismount(MountableItem::DISMOUNT_NORMAL);
 
    return 0;
 }

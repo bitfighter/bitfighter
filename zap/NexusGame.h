@@ -171,7 +171,7 @@ public:
    void renderItem(const Point &pos);
    void renderItemAlpha(const Point &pos, F32 alpha);
 
-   void dismount(bool mountWasKilled);
+   void dismount(Dismount_Mode dismountMode);
 
    bool isItemThatMakesYouVisibleWhileCloaked();
 

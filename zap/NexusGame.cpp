@@ -883,9 +883,12 @@ void NexusFlagItem::dropFlags(U32 flags)
 }
 
 
-void NexusFlagItem::dismount(bool mountWasKilled)
+void NexusFlagItem::dismount(Dismount_Mode dismountMode)
 {
-   if(mountWasKilled)
+   if(isGhost())      // Server only
+      return;
+  
+   if(dismountMode == DISMOUNT_MOUNT_WAS_KILLED)
    {
       // Should getting shot up count as a flag drop event for statistics purposes?
       if(mMount && mMount->getClientInfo())
@@ -899,10 +902,6 @@ void NexusFlagItem::dismount(bool mountWasKilled)
    }
    else
    {
-      if(isGhost())    
-         return;
-
-      // Server only
       GameType *gameType = getGame()->getGameType();
       if(!gameType)        // Crashed here once, don't know why, so I added the check
          return;

@@ -163,7 +163,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
                        (getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
-      mountedFlag->dismount(false);
+      mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
 
       const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
       S32 flagIndex = flags->getIndex(mountedFlag);
