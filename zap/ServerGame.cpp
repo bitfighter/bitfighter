@@ -521,21 +521,21 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
          addPolyWall(&polywall, NULL);
 
    }
-   else if(!stricmp(argv[0], "Zone")) 
-   {
-      Zone *zone = new Zone();
+   //else if(!stricmp(argv[0], "Zone")) 
+   //{
+   //   Zone *zone = new Zone();
 
-      if(zone->processArguments(argc - 1, argv + 1, this))
-      {
-         zone->setUserAssignedId(id, false);
-         getGameType()->addZone(zone);
-      }
-      else
-      {
-         logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
-         delete zone;
-      }
-   }
+   //   if(zone->processArguments(argc - 1, argv + 1, this))
+   //   {
+   //      zone->setUserAssignedId(id, false);
+   //      getGameType()->addZone(zone);
+   //   }
+   //   else
+   //   {
+   //      logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
+   //      delete zone;
+   //   }
+   //}
 
    else 
       return false;

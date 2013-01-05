@@ -2072,7 +2072,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
 
       EditorUserInterface::robots.push_back(robot);
    }
-   else if(!stricmp(argv[0], "Zone")) 
+   /*else if(!stricmp(argv[0], "Zone")) 
    {
       Zone *zone = new Zone();
 
@@ -2088,7 +2088,7 @@ bool ClientGame::processPseudoItem(S32 argc, const char **argv, const string &le
          logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
          delete zone;
       }
-   }
+   }*/
       
    else 
       return false;

@@ -82,6 +82,9 @@ void AbstractMessageUserInterface::setPresentation(S32 presentationId)
 void AbstractMessageUserInterface::reset()
 {
    mPresentationId = 0;
+
+   for(S32 i = 0; i < MAX_LINES; i++)
+      mMessage[i] = "";
 }
 
 
@@ -121,9 +124,6 @@ void ErrorMessageUserInterface::reset()
 
    mTitle = "WE HAVE A PROBLEM";          // Default title
    mInstr = "Hit any key to continue";
-
-   for(S32 i = 0; i < MAX_LINES; i++)
-      mMessage[i] = "";
 }
 
 

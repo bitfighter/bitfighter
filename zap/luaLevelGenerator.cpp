@@ -88,7 +88,7 @@ static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 // Advance timers by deltaT
 void LuaLevelGenerator::tickTimer(U32 deltaT)
 {
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   TNLAssert(lua_gettop(L) <= 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
    bool ok = retrieveFunction("_tickTimer");       // Push timer function onto stack            -- function 
    TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
