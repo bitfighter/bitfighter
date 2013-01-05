@@ -369,7 +369,7 @@ bool FlagItem::collide(BfObject *hitObject)
 }
 
 
-void FlagItem::dismount(Dismount_Mode dismountMode)
+void FlagItem::dismount(DismountMode dismountMode)
 {
    Ship *ship = mMount;    // mMount will be set to NULL in Parent::dismount() -- grab it while we can
    Parent::dismount(dismountMode);

@@ -90,7 +90,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
+void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
    TNLAssert(isServer(), "Server only method!");
 

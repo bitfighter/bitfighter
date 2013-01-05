@@ -1172,7 +1172,7 @@ void MountableItem::mountToShip(Ship *ship)
 
 // Client & server; Note we come through here on initial unpack for mountItem, for better or worse.  When
 // we do, mMount is NULL.
-void MountableItem::dismount(Dismount_Mode dismountMode)
+void MountableItem::dismount(DismountMode dismountMode)
 {
    Ship *ship = mMount;
 
@@ -2387,7 +2387,7 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
 }
 
 
-void ResourceItem::dismount(Dismount_Mode dismountMode)
+void ResourceItem::dismount(DismountMode dismountMode)
 {
    Ship *ship = mMount;       // Parent::dismount will set mMount to NULL, so grab a copy here while we can
    Parent::dismount(dismountMode);

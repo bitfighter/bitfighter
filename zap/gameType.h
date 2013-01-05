@@ -458,7 +458,7 @@ public:
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag);
-   virtual void itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode);    // TODO: Make this a mountableItem instead of MoveItem
+   virtual void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);    // TODO: Make this a mountableItem instead of MoveItem
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);

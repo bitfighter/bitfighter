@@ -107,7 +107,7 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
+void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
 

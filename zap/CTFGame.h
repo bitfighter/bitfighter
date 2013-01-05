@@ -42,7 +42,7 @@ private:
 public:
    void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
    void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
    void renderInterfaceOverlay(bool scoreboardVisible);
 

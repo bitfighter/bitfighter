@@ -81,7 +81,7 @@ public:
    virtual void sendHome();
 
    virtual bool collide(BfObject *hitObject);
-   void dismount(Dismount_Mode dismountMode);
+   void dismount(DismountMode dismountMode);
 
    TestFunc collideTypes();
 

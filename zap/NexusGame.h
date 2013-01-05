@@ -80,7 +80,7 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isCarryingItems(Ship *ship);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
 
    void openNexus(S32 timeNexusOpened);
    void closeNexus(S32 timeNexusClosed);
@@ -171,7 +171,7 @@ public:
    void renderItem(const Point &pos);
    void renderItemAlpha(const Point &pos, F32 alpha);
 
-   void dismount(Dismount_Mode dismountMode);
+   void dismount(DismountMode dismountMode);
 
    bool isItemThatMakesYouVisibleWhileCloaked();
 

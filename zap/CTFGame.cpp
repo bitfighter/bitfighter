@@ -204,7 +204,7 @@ void CTFGameType::onFlagMounted(S32 teamIndex)
 class FlagItem;
 
 
-void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
+void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
    

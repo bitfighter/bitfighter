@@ -280,7 +280,7 @@ static FlagItem *findFirstFlag(Ship *ship)
 
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items.
 // This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
-void NexusGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
+void NexusGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
 
@@ -883,7 +883,7 @@ void NexusFlagItem::dropFlags(U32 flags)
 }
 
 
-void NexusFlagItem::dismount(Dismount_Mode dismountMode)
+void NexusFlagItem::dismount(DismountMode dismountMode)
 {
    if(isGhost())      // Server only
       return;

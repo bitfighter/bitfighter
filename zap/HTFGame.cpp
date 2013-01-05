@@ -116,7 +116,7 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void HTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
+void HTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
 

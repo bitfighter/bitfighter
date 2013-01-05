@@ -45,7 +45,7 @@ public:
 
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
 
    void addFlag(FlagItem *flag);     // Server only
 
