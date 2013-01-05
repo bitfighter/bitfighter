@@ -483,7 +483,6 @@ void drawTime(S32 x, S32 y, S32 size, S32 timeInMs, const char *prefixString)
 
 
 
-#ifndef ZAP_DEDICATED
 S32 getStringWidth(S32 size, const char *string)
 {
    return OpenglUtils::getStringLength((const unsigned char *) string) * size / 120;
@@ -494,20 +493,6 @@ F32 getStringWidth(F32 size, const char *string)
 {
    return F32( OpenglUtils::getStringLength((const unsigned char *) string) ) * size / 120.f;
 }
-
-#else
-
-S32 getStringWidth(S32 size, const char *string)
-{
-   return 1;
-}
-
-
-F32 getStringWidth(F32 size, const char *string)
-{
-   return 1;
-}
-#endif
 
 
 F32 getStringWidthf(F32 size, const char *format, ...)

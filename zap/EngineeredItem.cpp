@@ -1595,6 +1595,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mEnd.x);
       stream->read(&mEnd.y);
       readThisTeam(stream);
+      mOutline = computeGeom(mStart, mEnd);
 
       Rect extent(mStart, mEnd);
       extent.expand(Point(5,5));
