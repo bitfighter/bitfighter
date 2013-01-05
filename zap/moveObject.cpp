@@ -1197,6 +1197,7 @@ void MountableItem::dismount(Dismount_Mode dismountMode)
    if(!getGame())    // Can happen on game startup
       return;
 
+   // Notify the GameType so it can do any special handling that it might require
    if(dismountMode != DISMOUNT_IGNORE_GAME_TYPE && getGame()->isServer())
    {
       GameType *gt = getGame()->getGameType();
