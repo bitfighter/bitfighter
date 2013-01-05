@@ -198,6 +198,7 @@
     <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="LuaBase.cpp" />
     <ClCompile Include="LuaScriptRunner.cpp" />
+    <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="OpenglUtils.cpp" />
     <ClCompile Include="PickupItem.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
@@ -339,6 +340,7 @@
     <ClInclude Include="LuaScriptRunner.h" />
     <ClInclude Include="LuaWrapper.h" />
     <ClInclude Include="LuaWrapperUtils.h" />
+    <ClInclude Include="MathUtils.h" />
     <ClInclude Include="OpenglUtils.h" />
     <ClInclude Include="PickupItem.h" />
     <ClInclude Include="quickChatHelper.h" />

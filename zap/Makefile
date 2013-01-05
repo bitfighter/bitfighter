@@ -1,4 +1,4 @@
-# Bitfighter Makefile
+\# Bitfighter Makefile
 #######################################
 # 
 # Configuration
@@ -96,6 +96,7 @@ OBJECTS_SHARED=\
    LuaScriptRunner.o\
    main.o\
    masterConnection.o\
+   MathUtils.o\
    md5wrapper.o\
    move.o\
    moveObject.o\

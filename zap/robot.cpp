@@ -41,11 +41,11 @@
 //#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 
+#include "MathUtils.h"           // For findLowestRootIninterval()
+
 #ifndef ZAP_DEDICATED
 #  include "OpenglUtils.h"
 #endif
-
-#include <math.h>
 
 
 #define hypot _hypot    // Kill some warnings
@@ -1362,7 +1362,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
    Point d = target->getPos() - aimPos;
 
    F32 t;      // t is set in next statement
-   if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
+   if(!findLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
       return false;
 
    Point leadPos = target->getPos() + Vs * t;

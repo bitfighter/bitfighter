@@ -48,6 +48,7 @@
 #include "tnlLog.h"
 
 #include "GeomUtils.h"
+#include "MathUtils.h"                    // For findLowestRootInInterval()
 #include "Point.h"
 #include "Rect.h"
 #include "../recast/Recast.h"
@@ -88,10 +89,6 @@ bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &in
 }
 */
 
-#define MIN(x,y) (((x) < (y)) ? (x) : (y))
-#define MAX(x,y) (((x) > (y)) ? (x) : (y))
-
-#define sq(a) ((a) * (a))
 
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle)
 {
@@ -419,7 +416,7 @@ bool circleIntersectsSegment(Point center, float radius, Point start, Point end,
    float b = -2 * d.dot(v);
    float c = d.dot(d) - radius * radius;
 
-   return FindLowestRootInInterval(a, b, c, 1, collisionTime);
+   return findLowestRootInInterval(a, b, c, 1, collisionTime);
 }
 
 
@@ -642,53 +639,6 @@ bool zonesTouch(const Vector<Point> *zone1, const Vector<Point> *zone2, F32 scal
 }
 
 
-void Swap(F32 &f1, F32 &f2)
-{
-   F32 temp = f1;
-   f1 = f2;
-   f2 = temp;
-}
-
-
-// Solve the equation inA * x^2 + inB * x + inC == 0 for the lowest x in [0, inUpperBound].
-// Returns true if there is such a solution and returns the solution in outX
-bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX)
-{
-   // Check if a solution exists
-   F32 determinant = inB * inB - 4.0f * inA * inC;
-   if (determinant < 0.0f)
-      return false;
-
-   // The standard way of doing this is by computing: x = (-b +/- Sqrt(b^2 - 4 a c)) / 2 a
-   // is not numerically stable when a is close to zero.
-   // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
-   F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
-
-   // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
-   F32 x1 = q / inA;
-   F32 x2 = inC / q;
-
-   // Order the results
-   if (x2 < x1)
-      Swap(x1, x2);
-
-   // Check if x1 is a solution
-   if (x1 >= 0.0f && x1 <= inUpperBound)
-   {
-      outX = x1;
-      return true;
-   }
-
-   // Check if x2 is a solution
-   if (x2 >= 0.0f && x2 <= inUpperBound)
-   {
-      outX = x2;
-      return true;
-   }
-
-   return false;
-}
-
 // Checks intersection between a polygon an moving circle at inBegin + t * inDelta with radius^2 = inA * t^2 + inB * t + inC, t in [0, 1]
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
 bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
@@ -705,7 +655,7 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
       F32 a1 = inA - inDelta.lenSquared();
       F32 b1 = inB + 2.0f * inDelta.dot(bv1);
       F32 c1 = inC - bv1.lenSquared();
-      if (FindLowestRootInInterval(a1, b1, c1, upper_bound, t))
+      if (findLowestRootInInterval(a1, b1, c1, upper_bound, t))
          if(inDelta.dot((*v1) - inBegin) > 0)
          {
             // We have a collision
@@ -722,7 +672,7 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
       F32 a2 = v1v2_len_sq * a1 + v1v2_dot_delta * v1v2_dot_delta;
       F32 b2 = v1v2_len_sq * b1 - 2.0f * v1v2_dot_bv1 * v1v2_dot_delta;
       F32 c2 = v1v2_len_sq * c1 + v1v2_dot_bv1 * v1v2_dot_bv1;
-      if (FindLowestRootInInterval(a2, b2, c2, upper_bound, t))
+      if (findLowestRootInInterval(a2, b2, c2, upper_bound, t))
       {
          // Check if the intersection point is on the edge
          F32 f = t * v1v2_dot_delta - v1v2_dot_bv1;

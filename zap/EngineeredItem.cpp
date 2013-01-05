@@ -38,13 +38,15 @@
 
 
 #ifndef ZAP_DEDICATED
-#  include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
-#  include "ClientGame.h"          // for accessing client's spark manager
+#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
+#  include "ClientGame.h"        // for accessing client's spark manager
 #endif
 
 
 #include "Colors.h"
 #include "stringUtils.h"
+#include "MathUtils.h"           // For findLowestRootIninterval()
+
 
 #include <math.h>
 
@@ -1924,7 +1926,7 @@ void Turret::idle(IdleCallPath path)
 
 // This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
+      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getPos() + Vs * t;

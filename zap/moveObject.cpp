@@ -45,7 +45,8 @@
 
 #include "LuaWrapper.h"
 
-#include <math.h>
+#include "MathUtils.h"           // For findLowestRootIninterval()
+
 
 namespace Zap
 {
@@ -318,7 +319,7 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 
    F32 t;
 
-   bool result = FindLowestRootInInterval(a, b, c, 100000, t);
+   bool result = findLowestRootInInterval(a, b, c, 100000, t);
 
    return result ? t : -1;
 }
@@ -536,7 +537,7 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
                   F32 b = 2 * p.dot(v);
                   F32 c = p.dot(p) - R * R;
                   F32 t;
-                  if(FindLowestRootInInterval(a, b, c, collisionTime, t))
+                  if(findLowestRootInInterval(a, b, c, collisionTime, t))
                   {
                      bool collide1 = collide(foundObject);
                      bool collide2 = foundObject->collide(this);
@@ -2419,4 +2420,3 @@ REGISTER_LUA_SUBCLASS(ResourceItem, MountableItem);
 
 
 };
-
