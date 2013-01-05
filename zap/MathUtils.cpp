@@ -28,7 +28,6 @@
 
 
 #include "MathUtils.h"
-#include <math.h>
 
 namespace Zap {
 

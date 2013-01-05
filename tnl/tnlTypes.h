@@ -226,6 +226,8 @@ static const F32 FloatHalfPi = F32(0.5 * 3.14159265358979323846);    ///< Consta
 static const F32 Float2InversePi = F32(2.0 / 3.14159265358979323846);///< Constant float 2 / PI
 static const F32 FloatInverse2Pi = F32(0.5 / 3.14159265358979323846);///< Constant float 1 / 2PI
 
+static const F32 FloatInverse360 = F32(1.0 / 360.0);                 ///< Constant float 1 / 360
+
 static const F32 FloatSqrt2 = F32(1.41421356237309504880f);          ///< Constant float sqrt(2)
 static const F32 FloatSqrtHalf = F32(0.7071067811865475244008443f);  ///< Constant float sqrt(0.5)
 

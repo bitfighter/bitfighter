@@ -28,6 +28,7 @@
 #define _MATH_UTILS_
 
 #include "tnlTypes.h"
+#include <cmath>
 
 
 using namespace TNL;
@@ -44,7 +45,7 @@ using namespace TNL;
 
 // Some angle conversion helpers:
 #define RADIANS_TO_DEGREES  (360.0f * FloatInverse2Pi)
-#define DEGREES_TO_RADIANS  (1 / RADIANS_TO_DEGREES)
+#define DEGREES_TO_RADIANS  (FloatInverse360 * Float2Pi)
 
 
 namespace Zap {
