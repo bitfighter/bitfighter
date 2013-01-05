@@ -282,37 +282,40 @@ static FlagItem *findFirstFlag(Ship *ship)
 // This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
 void NexusGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
+   Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      FlagItem *flag = static_cast<FlagItem *>(item);
-
-      U32 flagCount = flag->getFlagCount();
-
-      if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
-         return;
-
-      if(!ship->getClientInfo())
-         return;
-
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
-
-      static StringTableEntry dropOneString(  "%e0 dropped a flag!");
-      static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
-
-      StringTableEntry *ste;
-
-      if(flagCount == 1)
-         ste = &dropOneString;
-      else
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
       {
-         ste = &dropManyString;
-         e.push_back(itos(flagCount).c_str());
-      }
+         FlagItem *flag = static_cast<FlagItem *>(item);
+
+         U32 flagCount = flag->getFlagCount();
+
+         if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
+            return;
+
+         if(!ship->getClientInfo())
+            return;
+
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getClientInfo()->getName());
+
+         static StringTableEntry dropOneString(  "%e0 dropped a flag!");
+         static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
+
+         StringTableEntry *ste;
+
+         if(flagCount == 1)
+            ste = &dropOneString;
+         else
+         {
+            ste = &dropManyString;
+            e.push_back(itos(flagCount).c_str());
+         }
       
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+      }
    }
 }
 

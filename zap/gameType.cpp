@@ -4034,7 +4034,6 @@ void GameType::updateWhichTeamsHaveFlags()
 
    const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-
    for(S32 i = 0; i < flags->size(); i++)
    {
       FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
@@ -4401,9 +4400,16 @@ void GameType::addFlag(FlagItem *flag)
 }
 
 
-// These methods will be overridden by some game types
-void GameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)   { /* Do nothing */ }
+// Runs only on server
+void GameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)   
+{ 
+   TNLAssert(isServer(), "Should not run on client!");
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
+      updateWhichTeamsHaveFlags();
+}
 
+
+// These methods will be overridden by some game types
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
 void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }

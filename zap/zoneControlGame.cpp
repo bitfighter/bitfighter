@@ -92,21 +92,22 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
 void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(isServer(), "Server only method!");
+   Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(ship->getClientInfo())
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
       {
-         static StringTableEntry dropString("%e0 dropped the flag!");
+         if(ship->getClientInfo())
+         {
+            static StringTableEntry dropString("%e0 dropped the flag!");
 
-         Vector<StringTableEntry> e;
-         e.push_back(ship->getClientInfo()->getName());
+            Vector<StringTableEntry> e;
+            e.push_back(ship->getClientInfo()->getName());
 
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+            broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         }
       }
-
-      updateWhichTeamsHaveFlags();
    }
 }
 

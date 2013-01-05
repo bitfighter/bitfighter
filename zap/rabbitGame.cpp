@@ -352,25 +352,27 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 
 void RabbitGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(isServer(), "Server only method!");
+Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-
-      FlagItem *flag = static_cast<FlagItem *>(item);
-
-      if(ship->getClientInfo())
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
       {
-         flag->mTimer.reset(mFlagReturnTimer);
-         if(!isGameOver())  // Avoid flooding messages on game over.
-            s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
+         FlagItem *flag = static_cast<FlagItem *>(item);
 
-         Point vel = ship->getActualVel();
+         if(ship->getClientInfo())
+         {
+            flag->mTimer.reset(mFlagReturnTimer);
+            if(!isGameOver())  // Avoid flooding messages on game over.
+               s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
 
-         flag->setActualVel(vel);
+            Point vel = ship->getActualVel();
+
+            flag->setActualVel(vel);
+         }
+
+         updateWhichTeamsHaveFlags();
       }
-
-      updateWhichTeamsHaveFlags();
    }
 }
 

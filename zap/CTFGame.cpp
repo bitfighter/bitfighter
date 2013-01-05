@@ -206,20 +206,23 @@ class FlagItem;
 
 void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
-   
+   Parent::itemDropped(ship, item, dismountMode);
+
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      FlagItem *flag = static_cast<FlagItem *>(item);
-      static StringTableEntry dropString("%e0 dropped the %e1 flag!");
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      {
+         FlagItem *flag = static_cast<FlagItem *>(item);
+         static StringTableEntry dropString("%e0 dropped the %e1 flag!");
 
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
-      e.push_back(getGame()->getTeamName(flag->getTeam()));
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getClientInfo()->getName());
+         e.push_back(getGame()->getTeamName(flag->getTeam()));
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 
-      updateWhichTeamsHaveFlags();  // --> server only method
+         updateWhichTeamsHaveFlags();  // --> server only method
+      }
    }
 }
 
