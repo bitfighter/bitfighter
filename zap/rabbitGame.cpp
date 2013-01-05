@@ -352,7 +352,7 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 
 void RabbitGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-Parent::itemDropped(ship, item, dismountMode);
+   Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
@@ -370,8 +370,6 @@ Parent::itemDropped(ship, item, dismountMode);
 
             flag->setActualVel(vel);
          }
-
-         updateWhichTeamsHaveFlags();
       }
    }
 }
