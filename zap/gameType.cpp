@@ -3987,15 +3987,6 @@ Game *GameType::getGame() const
 }
 
 
-// This is called when a Zone item is added to the game by ServerGame::processPseudoItem().  Only called for Zones, but using BfObject so
-// we don't need to include Zone.h.
-// Server only.
-void GameType::addZone(BfObject *zone)
-{
-   zone->addToDatabase(getGame()->getGameObjDatabase());
-}
-
-
 GameTypeId GameType::getGameTypeId() const { return BitmatchGame; }
 
 const char *GameType::getShortName()         const { return "BM";       }

@@ -67,6 +67,8 @@ public:
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    virtual void renderDock();
 
+   TNL_DECLARE_CLASS(Zone);
+
    //// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(Zone);
 
