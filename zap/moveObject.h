@@ -252,7 +252,7 @@ public:
       DISMOUNT_MOUNT_WAS_KILLED,
       DISMOUNT_IGNORE_GAME_TYPE,
    };
-   virtual void dismount(Dismount_Mode dismountMode = DISMOUNT_NORMAL);
+   virtual void dismount(Dismount_Mode dismountMode);
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();
