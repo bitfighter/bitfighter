@@ -283,11 +283,11 @@ void UserInterface::renderUnboxedMessageBox(const char *title, const char *instr
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   const S32 titleSize = 30;              // Size of title
-   const S32 titleGap = titleSize / 3;    // Spacing between title and first line of text
-   const S32 textSize = 36;               // Size of text and instructions
-   const S32 textGap = textSize / 3;      // Spacing between text lines
-   const S32 instrGap = 15;               // Gap between last line of text and instruction line
+   static const S32 titleSize = 30;              // Size of title
+   static const S32 titleGap = titleSize / 3;    // Spacing between title and first line of text
+   static const S32 textSize = 36;               // Size of text and instructions
+   static const S32 textGap = textSize / 3;      // Spacing between text lines
+   static const S32 instrGap = 15;               // Gap between last line of text and instruction line
 
    S32 actualLines = 0;
    for(S32 i = 0; i < msgLines; i++)
