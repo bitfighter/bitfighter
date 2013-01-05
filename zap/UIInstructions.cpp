@@ -451,7 +451,7 @@ static S32 renderScoreboardMarks(S32 y, S32 textSize)
       { "  ",  "ChumpChange",  "Player is idle and is not currently playing" }
    };
 
-   S32 markWidth = UserInterface::getStringWidth(symbolSize, scoreboardMarks[0][0]);
+   S32 markWidth = getStringWidth(symbolSize, scoreboardMarks[0][0]);
 
    for(U32 i = 0; i < ARRAYSIZE(scoreboardMarks); i++)
    {
@@ -459,7 +459,7 @@ static S32 renderScoreboardMarks(S32 y, S32 textSize)
 
       // Draw the mark
       glColor(Colors::cyan);
-      UserInterface::drawString(x, y + vertAdjustFact, symbolSize, scoreboardMarks[i][0]);
+      drawString(x, y + vertAdjustFact, symbolSize, scoreboardMarks[i][0]);
       x += markWidth;
 
       // Draw sample nickname
@@ -468,12 +468,12 @@ static S32 renderScoreboardMarks(S32 y, S32 textSize)
       else
          glColor(Colors::standardPlayerScoreboardColor);
 
-      UserInterface::drawString(x, y, textSize, scoreboardMarks[i][1]);
+      drawString(x, y, textSize, scoreboardMarks[i][1]);
 
       // Draw description
       x = 250;
       glColor(Colors::yellow);
-      UserInterface::drawString(x, y, textSize, scoreboardMarks[i][2]);
+      drawString(x, y, textSize, scoreboardMarks[i][2]);
       y += 26;
    }
 
@@ -497,25 +497,25 @@ static S32 renderScoreboardMarks(S32 y, S32 textSize)
          case 0:
          {
             glColor(Colors::white);
-            S32 width = UserInterface::getStringWidth(textSize, name.c_str());
+            S32 width = getStringWidth(textSize, name.c_str());
             drawHorizLine(x, x + width, y + textSize + 3);
             break;
          }
 
          case 1:
             name = "<<" + name + ">>";
-            x -= UserInterface::getStringWidth(textSize, "<<");
+            x -= getStringWidth(textSize, "<<");
             break;
       }
 
       // Draw name
       glColor(Colors::standardPlayerScoreboardColor);
-      UserInterface::drawString(x, y, textSize, name.c_str());
+      drawString(x, y, textSize, name.c_str());
 
       // Draw description
       x = 250;
       glColor(Colors::yellow);
-      UserInterface::drawString(x, y, textSize, otherIndicators[i][1]);
+      drawString(x, y, textSize, otherIndicators[i][1]);
       y += 26;
    }
 
@@ -531,13 +531,13 @@ static void renderBadgeLine(S32 y, S32 textSize, MeritBadges badge, S32 radius, 
    x += radius + 10;
 
    glColor(Colors::yellow);
-   x += UserInterface::drawStringAndGetWidth(x, y, textSize, name);
+   x += drawStringAndGetWidth(x, y, textSize, name);
 
    glColor(Colors::cyan);
-   x += UserInterface::drawStringAndGetWidth(x, y, textSize, " - ");
+   x += drawStringAndGetWidth(x, y, textSize, " - ");
 
    glColor(Colors::white);
-   UserInterface::drawString(x, y, textSize, descr);
+   drawString(x, y, textSize, descr);
 }
 
 
@@ -552,7 +552,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 {
    // Heading
    glColor(Colors::cyan);
-   UserInterface::drawCenteredString(y, descSize, indicatorPageHeadings[1]);
+   drawCenteredString(y, descSize, indicatorPageHeadings[1]);
    y += 26;
 
    static const char *badgeHeadingDescription[] = {
@@ -562,7 +562,7 @@ static S32 renderBadges(S32 y, S32 textSize, S32 descSize)
 
    // Description
    glColor(Colors::green);
-   UserInterface::drawCenteredString(y, textSize, badgeHeadingDescription[0]);
+   drawCenteredString(y, textSize, badgeHeadingDescription[0]);
    y += 40;
 
    S32 radius = descSize / 2;

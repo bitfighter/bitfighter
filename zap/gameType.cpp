@@ -899,7 +899,7 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outl
 //   Point cen = rp - arrowDir * 12;
 
    // Try labelling the objective arrows... kind of lame.
-   //UserInterface::drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
+   //drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
 
    // Add an icon to the objective arrow...  kind of lame.
    //renderSmallFlag(cen, c, alpha);

@@ -48,20 +48,21 @@
 #include "teleporter.h"
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>   // For ARRAYSIZE
+#  include <windows.h>   // For ARRAYSIZE
 #endif
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "OpenglUtils.h"
-#include "sparkManager.h"
-#include "UI.h"
-#include "UIMenus.h"
-#include "UIGame.h"
+#  include "ClientGame.h"
+#  include "OpenglUtils.h"
+#  include "sparkManager.h"
+#  include "UI.h"
+#  include "UIMenus.h"
+#  include "UIGame.h"
 #endif
 
+#include "MathUtils.h"  // For radiansToDegrees
+
 #include <stdio.h>
-#include <math.h>
 
 #define hypot _hypot    // Kill some warnings
 
@@ -2322,12 +2323,12 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gLineWidth1);
 
       glColor(Colors::white, textAlpha);
-      UserInterface::drawStringc(0, 30 + textSize, textSize, str.c_str());
+      drawStringc(0, 30 + textSize, textSize, str.c_str());
 
       // Underline name if player is authenticated
       if(clientInfo->isAuthenticated())
       {
-         S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
+         S32 xoff = getStringWidth(textSize, str.c_str()) / 2;
          drawHorizLine(-xoff, xoff, 33 + textSize);
       }
 

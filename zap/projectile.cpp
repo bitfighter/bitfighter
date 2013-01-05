@@ -735,9 +735,9 @@ static void drawLetter(char letter, const Point &pos, const Color &color, F32 al
       vertOffset = 10;
 
    glColor(color, alpha);
-   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
+   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
 
-   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
 #endif
 }
 

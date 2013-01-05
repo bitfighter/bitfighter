@@ -101,7 +101,7 @@ void EngineerHelper::render()
       drawMenuBorderLine(yPos, engineerMenuHeaderColor);
 
       glColor(engineerMenuHeaderColor);
-      UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
+      drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
       yPos += fontSize + 10;
 
       GameSettings *settings = getGame()->getSettings();
@@ -130,10 +130,10 @@ void EngineerHelper::render()
          }
 
          glColor(0.1, 1.0, 0.1);     
-         S32 x = UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
+         S32 x = drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
 
          glColor(.2, .8, .8);    
-         UserInterface::drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
+         drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
 
          yPos += fontSize + 7;
       }
@@ -149,9 +149,9 @@ void EngineerHelper::render()
    {
       S32 xPos = UserInterface::horizMargin;
       glColor(Colors::green);
-      UserInterface::drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
+      drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
       yPos += fontSize + 7;
-      UserInterface::drawString(xPos, yPos, fontSize, mEngineerCostructionItemInfos[mSelectedItem].mInstruction);
+      drawString(xPos, yPos, fontSize, mEngineerCostructionItemInfos[mSelectedItem].mInstruction);
    }
 }
 

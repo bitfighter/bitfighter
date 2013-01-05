@@ -685,22 +685,22 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
    glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
 
    if(mNexusIsOpen && mNexusOpenTime == 0)
-      UserInterface::drawStringfr(x, y - size, size, "Nexus never closes");
+      drawStringfr(x, y - size, size, "Nexus never closes");
    else if(!mNexusIsOpen && mNexusClosedTime == 0)
-      UserInterface::drawStringfr(x, y - size, size, "Nexus never opens");
+      drawStringfr(x, y - size, size, "Nexus never opens");
    else if(!mNexusIsOpen && mNexusChangeAtTime <= 0)
-      UserInterface::drawStringfr(x, y - size, size, "Nexus closed until end of game");
+      drawStringfr(x, y - size, size, "Nexus closed until end of game");
    else if(!isGameOver())
    {
-      static const U32 w00     = UserInterface::getStringWidth(size, "00:00");
-      static const U32 wCloses = UserInterface::getStringWidth(size, "Nexus closes: ");
-      static const U32 wOpens  = UserInterface::getStringWidth(size, "Nexus opens: ");
+      static const U32 w00     = getStringWidth(size, "00:00");
+      static const U32 wCloses = getStringWidth(size, "Nexus closes: ");
+      static const U32 wOpens  = getStringWidth(size, "Nexus opens: ");
 
       S32 w = w00 + (mNexusIsOpen ? wCloses : wOpens);
 
       S32 timeLeft = min(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
 
-      UserInterface::drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
+      drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
    }
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
@@ -844,7 +844,7 @@ void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
       else if(mFlagCount >= 10) glColor(Colors::green,   alpha);   // ok, I guess
       else                      glColor(Colors::white,   alpha);   // lame
 
-      UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
+      drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }
 #endif
 }

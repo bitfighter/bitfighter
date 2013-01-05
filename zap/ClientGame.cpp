@@ -1584,13 +1584,13 @@ void ClientGame::renderSuspended()
    S32 textGap = 5;
    S32 ypos = gScreenInfo.getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);
 
-   UserInterface::drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
+   drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
    ypos += textHeight + textGap;
-   UserInterface::drawCenteredString(ypos, textHeight, "When another player joins, the game will start automatically.");
+   drawCenteredString(ypos, textHeight, "When another player joins, the game will start automatically.");
    ypos += textHeight + textGap;
-   UserInterface::drawCenteredString(ypos, textHeight, "When the game restarts, the level will be reset.");
+   drawCenteredString(ypos, textHeight, "When the game restarts, the level will be reset.");
    ypos += 2 * (textHeight + textGap);
-   UserInterface::drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
+   drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
 }
 
 
@@ -1719,7 +1719,7 @@ void ClientGame::renderCommander()
                   Point visExt = computePlayerVisArea(otherShip);
 
                   glColor(teamColor * zoomFrac * 0.35f);
-                  UserInterface::drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y);
+                  drawFilledRect(p.x - visExt.x, p.y - visExt.y, p.x + visExt.x, p.y + visExt.y);
                }
             }
          }
@@ -1992,16 +1992,16 @@ void ClientGame::renderObjectIds()
       static const S32 height = 13;
 
       S32 id = obj->getUserAssignedId();
-      S32 width = UserInterface::getStringWidthf(height, "[%d]", id);
+      S32 width = getStringWidthf(height, "[%d]", id);
 
       F32 x = obj->getPos().x;
       F32 y = obj->getPos().y;
 
       glColor(Colors::black);
-      UserInterface::drawFilledRect(x - 1, y - 1, x + width + 1, y + height + 1);
+      drawFilledRect(x - 1, y - 1, x + width + 1, y + height + 1);
 
       glColor(Colors::gray70);
-      UserInterface::drawStringf(x, y, height, "[%d]", id);
+      drawStringf(x, y, height, "[%d]", id);
    }
 }
 

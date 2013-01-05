@@ -246,7 +246,7 @@ void CreditsScroller::render()
    // Draw the credits text, section by section, line by line
    for(S32 i = 0; i < mCredits.size(); i++)
       for(S32 j = 0; j < mCredits[i].lines.size(); j++)
-         UserInterface::drawCenteredString(S32(mCredits[i].pos) + CreditSpace * (j), 25, mCredits[i].lines[j]);
+         drawCenteredString(S32(mCredits[i].pos) + CreditSpace * (j), 25, mCredits[i].lines[j]);
 
    glColor(Colors::black);
    F32 vertices[] = {

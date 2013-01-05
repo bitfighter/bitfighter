@@ -189,13 +189,13 @@ const Color *MenuItem::getColor(bool isSelected)
 void MenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(*getColor(isSelected));
-   UserInterface::drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
+   drawCenteredStringf(xpos, ypos, textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
 }
 
 
 S32 MenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringWidthf(textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
+   return getStringWidthf(textsize, "%s%s", getPrompt().c_str(), mDisplayValAppendage);
 }
 
 
@@ -401,14 +401,14 @@ string ToggleMenuItem::getOptionText()
 
 void ToggleMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
-                                         getPrompt().c_str(), getOptionText().c_str());
+   drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
+                          getPrompt().c_str(), getOptionText().c_str());
 }
 
 
 S32 ToggleMenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
+   return getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -786,14 +786,14 @@ string CounterMenuItem::getOptionText()
 
 void CounterMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
-   UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
-                                         getPrompt().c_str(), getOptionText().c_str());
+   drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), *getValueColor(isSelected), 
+                          getPrompt().c_str(), getOptionText().c_str());
 }
 
 
 S32 CounterMenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
+   return getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 
@@ -1079,13 +1079,13 @@ string PlayerMenuItem::getOptionText()
 void PlayerMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(*getColor(isSelected));
-   UserInterface::drawCenteredString(xpos, ypos, textsize, getOptionText().c_str());
+   drawCenteredString(xpos, ypos, textsize, getOptionText().c_str());
 }
 
 
 S32 PlayerMenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringWidth(textsize, getOptionText().c_str());
+   return getStringWidth(textsize, getOptionText().c_str());
 }
 
 
@@ -1130,13 +1130,13 @@ string TeamMenuItem::getOptionText()
 void TeamMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(*getColor(isSelected));
-   UserInterface::drawCenteredStringf(xpos, ypos, textsize, getOptionText().c_str());
+   drawCenteredStringf(xpos, ypos, textsize, getOptionText().c_str());
 }
 
 
 S32 TeamMenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringWidth(textsize, getOptionText().c_str());
+   return getStringWidth(textsize, getOptionText().c_str());
 }
 
 
@@ -1196,8 +1196,8 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
    else
       textColor.set(Colors::cyan);
 
-   S32 xpos2 = UserInterface::drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, 
-                                                     getPrompt().c_str(), getOptionText().c_str());
+   S32 xpos2 = drawCenteredStringPair(xpos, ypos, textsize, *getColor(isSelected), textColor, 
+                                      getPrompt().c_str(), getOptionText().c_str());
 
    glColor(Colors::red);      // Cursor is always red
    if(isSelected)
@@ -1207,7 +1207,7 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
 
 S32 TextEntryMenuItem::getWidth(S32 textsize)
 {
-   return UserInterface::getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
+   return getStringPairWidth(textsize, getPrompt().c_str(), getOptionText().c_str());
 }
 
 

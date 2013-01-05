@@ -42,7 +42,17 @@ using namespace TNL;
 #define sq(a) ((a) * (a))
 
 
+// Some angle conversion helpers:
+#define RADIANS_TO_DEGREES  (360.0f * FloatInverse2Pi)
+#define DEGREES_TO_RADIANS  (1 / RADIANS_TO_DEGREES)
+
+
 namespace Zap {
+
+inline F32 radiansToDegrees(F32 angle) { return angle * RADIANS_TO_DEGREES; }
+inline F32 degreesToRadians(F32 angle) { return angle * DEGREES_TO_RADIANS; }
+inline F32 radiansToUnit(F32 angle)    { return angle * FloatInverse2Pi; }
+inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
 
 bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 

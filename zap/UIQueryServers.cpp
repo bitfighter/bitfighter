@@ -602,14 +602,14 @@ S32 QueryServersUserInterface::getSelectedIndex()
 static void renderDedicatedIcon()
 {
    // Add a "D"
-   UserInterface::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
+   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
 }
 
 
 static void renderTestIcon()
 {
    // Add a "T"
-   UserInterface::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
+   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
 }
 
 
@@ -1292,19 +1292,19 @@ static S32 QSORT_CALLBACK compareFuncName(const void *a, const void *b)
 static S32 QSORT_CALLBACK compareFuncPing(const void *a, const void *b)
 {
    return S32(((QueryServersUserInterface::ServerRef *) a)->pingTime -
-          ((QueryServersUserInterface::ServerRef *) b)->pingTime);
+              ((QueryServersUserInterface::ServerRef *) b)->pingTime);
 }
 
 
 static S32 QSORT_CALLBACK compareFuncPlayers(const void *a, const void *b)
 {
    S32 pc = S32(((QueryServersUserInterface::ServerRef *) a)->playerCount -
-          ((QueryServersUserInterface::ServerRef *) b)->playerCount);
+                ((QueryServersUserInterface::ServerRef *) b)->playerCount);
    if(pc)
       return pc;
 
    return S32(((QueryServersUserInterface::ServerRef *) a)->maxPlayers -
-          ((QueryServersUserInterface::ServerRef *) b)->maxPlayers);
+              ((QueryServersUserInterface::ServerRef *) b)->maxPlayers);
 }
 
 
@@ -1432,7 +1432,7 @@ Button::Button(ClientGame *game, S32 x, S32 y, S32 textSize, S32 padding, const 
 
 bool Button::isMouseOver(F32 mouseX, F32 mouseY)
 {
-   return(mouseX >= mX && mouseX <= mX + mPadding * 2 + UserInterface::getStringWidth(mTextSize, mLabel) &&
+   return(mouseX >= mX && mouseX <= mX + mPadding * 2 + getStringWidth(mTextSize, mLabel) &&
           mouseY >= mY && mouseY <= mY + mTextSize + mPadding * 2);
 }
 
@@ -1455,7 +1455,7 @@ void Button::render(F32 mouseX, F32 mouseY)
    if(!isActive())
       return;
 
-   S32 labelLen = UserInterface::getStringWidth(mTextSize, mLabel);
+   S32 labelLen = getStringWidth(mTextSize, mLabel);
 
    Color color;
 
@@ -1467,8 +1467,8 @@ void Button::render(F32 mouseX, F32 mouseY)
    else
       color = mFgColor;    
 
-   UserInterface::drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, mBgColor, color);
-   UserInterface::drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
+   drawFilledRect(mX, mY, mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2, mBgColor, color);
+   drawString(mX + mPadding, mY + mPadding, mTextSize, mLabel);
 }
  
 

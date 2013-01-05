@@ -27,6 +27,9 @@
 #define _MOVE_H_
 
 #include "Point.h"
+
+//#include "MathUtils.h"           // For RADIANS_TO_DEGREES def
+
 #include "../tnl/tnlLog.h"
 #include "../tnl/tnlTypes.h"
 #include "../tnl/tnlBitStream.h"
@@ -39,17 +42,6 @@ const S32 ShipWeaponCount = 3;
 
 namespace Zap
 {
-
-// Some angle conversion functions:
-
-const F32 radiansToDegreesConversion = 360.0f * FloatInverse2Pi;
-const F32 degreesToRadiansConversion = 1 / radiansToDegreesConversion;
-
-inline F32 radiansToDegrees(F32 angle) { return angle * radiansToDegreesConversion; }
-inline F32 degreesToRadians(F32 angle) { return angle * degreesToRadiansConversion; }
-inline F32 radiansToUnit(F32 angle)    { return angle * FloatInverse2Pi; }
-inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
-
 
 // Can represent a move by a human player or a robot
 class Move 

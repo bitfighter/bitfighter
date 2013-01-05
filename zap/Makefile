@@ -108,6 +108,7 @@ OBJECTS_SHARED=\
    projectile.o\
    rabbitGame.o\
    Rect.o\
+   RenderUtils.o\
    retrieveGame.o\
    robot.o\
    ScreenInfo.o\

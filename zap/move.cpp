@@ -24,10 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "move.h"
-#include <math.h>
+#include "MathUtils.h"     // For radiansToUnit() def
 
 #ifdef TNL_OS_WIN32
-#  include <windows.h>   // For ARRAYSIZE
+#  include <windows.h>     // For ARRAYSIZE
 #endif
 
 namespace Zap

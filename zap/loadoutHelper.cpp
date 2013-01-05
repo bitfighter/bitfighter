@@ -135,7 +135,7 @@ void LoadoutHelper::render()
    drawMenuBorderLine(yPos, loadoutMenuHeaderColor);
 
    glColor(loadoutMenuHeaderColor);
-   UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, helpStr);
+   drawString(UserInterface::horizMargin, yPos, fontSize, helpStr);
    yPos += fontSize + 10;
 
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
@@ -185,11 +185,11 @@ void LoadoutHelper::render()
             glColor(0.1f, 1.0, 0.1f);      // Color of not-yet selected item
 
          S32 xPos = UserInterface::horizMargin + 50;
-         xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
+         xPos += drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
          if(!selected)
             glColor(.2f, .8f, .8f);        // Color of help message
 
-         UserInterface::drawString(xPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
+         drawString(xPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
 
          yPos += fontSize + 7;
       }

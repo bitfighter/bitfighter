@@ -691,13 +691,13 @@ S32 gLoadoutIndicatorHeight = fontSize + gapSize * 2;
 
 static S32 renderIndicator(S32 xPos, const char *name)
 {
-   S32 width = UserInterface::getStringWidth(fontSize, name);
+   S32 width = getStringWidth(fontSize, name);
 
-   UserInterface::drawHollowRect(xPos, UserInterface::vertMargin, 
-                                 xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
+   drawHollowRect(xPos, UserInterface::vertMargin, 
+                        xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
 
    // Add the weapon or module name
-   UserInterface::drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, name);
+   drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, name);
 
    return width + 2 * gapSize;
 }
@@ -3770,7 +3770,7 @@ static string getSubstVarVal(ClientGame *game, const string &var)
 // Add it to the list, will be displayed in render()
 void ChatMessageDisplayer::onChatMessageRecieved(const Color &msgColor, const string &msg)
 {
-   Vector<string> lines = UserInterface::wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
+   Vector<string> lines = wrapString(substitueVars(msg), mWrapWidth, mFontSize, "      ");
 
    // All lines from this message will share a groupId.  We'll use that to expire the group as a whole.
    for(S32 i = 0; i < lines.size(); i++)
@@ -3903,7 +3903,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible)
       else
          glColor(mMessages[index].color);       // Bright
 
-      UserInterface::drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+      drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
 
       y -= lineHeight;
    }

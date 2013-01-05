@@ -162,7 +162,7 @@ void FXManager::TextEffect::render()
    glPushMatrix();
    glTranslate(pos);
    glScale(size);
-   UserInterface::drawStringc(0, 0, 12, text.c_str(), false);
+   drawStringc(0, 0, 12, text.c_str(), false);
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
 }
