@@ -28,6 +28,7 @@
 #define _MATH_UTILS_
 
 #include "tnlTypes.h"
+#include <cmath>
 
 
 using namespace TNL;
