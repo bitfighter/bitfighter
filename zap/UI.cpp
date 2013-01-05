@@ -117,8 +117,6 @@ void UserInterface::activate()
 
 void UserInterface::reactivate()
 {
-   //comingFrom = current;
-   //current = this;
    onReactivate();
 }
 
