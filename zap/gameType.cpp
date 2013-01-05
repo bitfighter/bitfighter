@@ -4054,7 +4054,6 @@ void GameType::onFlagMounted(S32 teamIndex)
 }
 
 
-
 // Notify the clients when flag status changes... only called by some GameTypes
 // Server only!
 void GameType::notifyClientsWhoHasTheFlag()
