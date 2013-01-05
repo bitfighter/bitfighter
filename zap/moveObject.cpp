@@ -476,8 +476,6 @@ BfObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Poi
 
       if(poly)
       {
-         if(poly->size() > 4)   // TODO: Delete
-            int x = 0;
          Point cp;
 
          if(PolygonSweptCircleIntersect(&poly->first(), poly->size(), getPos(stateIndex),
