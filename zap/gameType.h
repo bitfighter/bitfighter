@@ -262,12 +262,12 @@ public:
 
    void addWall(const WallRec &barrier, Game *game);
 
-   virtual bool isFlagGame() const;      // Does game use flags?
-   virtual S32 getFlagCount();     // Return the number of game-significant flags
+   virtual bool isFlagGame() const; // Does game use flags?
+   virtual S32 getFlagCount();      // Return the number of game-significant flags
 
-   virtual bool isCarryingItems(Ship *ship);     // Nexus game will override this
+   virtual bool isCarryingItems(Ship *ship); // Nexus game will override this
 
-   virtual bool isSpawnWithLoadoutGame();  // We do not spawn with our loadout, but instead need to pass through a loadout zone
+   virtual bool isSpawnWithLoadoutGame();    // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
