@@ -1393,7 +1393,7 @@ Ship *ClientGame::findShip(const StringTableEntry &clientName)
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Ship *ship = static_cast<Ship *>(fillVector[i]);
-      if(ship->getClientInfo() && ship->getClientInfo()->getName() == clientName)
+      if(ship->getClientInfo() && ship->getClientInfo()->getName() == clientName)  // Due to spybug scoping ships when not ready yet, we might not have ClientInfo yet
          return ship;
    }
 
