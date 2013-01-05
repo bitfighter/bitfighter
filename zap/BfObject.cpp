@@ -484,10 +484,6 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 }
 
 
-bool BfObject::isClient() const { return  isGhost(); }
-bool BfObject::isServer() const { return !isGhost(); }
-
-
 const Color *BfObject::getColor() const
 { 
    return mGame->getGameType()->getTeamColor(this);

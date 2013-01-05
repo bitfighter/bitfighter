@@ -352,7 +352,7 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 
 void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
+   TNLAssert(isServer(), "Server only method!");
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {

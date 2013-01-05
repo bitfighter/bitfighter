@@ -255,9 +255,6 @@ protected:
    StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
    Game *mGame;
 
-   bool isClient() const;
-   bool isServer() const;
-
 public:
    BfObject();                // Constructor
    virtual ~BfObject();       // Destructor
