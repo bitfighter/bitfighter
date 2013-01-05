@@ -220,8 +220,6 @@ void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismoun
          e.push_back(getGame()->getTeamName(flag->getTeam()));
 
          broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
-
-         updateWhichTeamsHaveFlags();  // --> server only method
       }
    }
 }
