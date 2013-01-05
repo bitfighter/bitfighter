@@ -116,7 +116,7 @@ void HTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void HTFGameType::itemDropped(Ship *ship, MoveItem *item)
+void HTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
 
@@ -174,7 +174,7 @@ void HTFGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 
    broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-   mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
+   mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
 
    mountedFlag->setZone(zone);                                 // Assign zone to the flag
    mountedFlag->mTimer.reset(ScoreTime);                       // Start countdown 'til scorin' time!  // TODO: Should this timer be on the zone instead?

@@ -350,7 +350,7 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 }
 
 
-void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
+void RabbitGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
 {
    TNLAssert(isServer(), "Server only method!");
 

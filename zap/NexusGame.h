@@ -80,7 +80,7 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isCarryingItems(Ship *ship);
-   void itemDropped(Ship *ship, MoveItem *item);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode);
 
    void openNexus(S32 timeNexusOpened);
    void closeNexus(S32 timeNexusClosed);

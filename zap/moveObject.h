@@ -248,9 +248,9 @@ public:
    Ship *getMount();
    enum Dismount_Mode
    {
-      DISMOUNT_NORMAL,
-      DISMOUNT_MOUNT_WAS_KILLED,
-      DISMOUNT_IGNORE_GAME_TYPE,
+      DISMOUNT_NORMAL,              // Item was dismounted under normal circumstances
+      DISMOUNT_MOUNT_WAS_KILLED,    // Item was dismounted due to death of mount
+      DISMOUNT_SILENT,              // Item was dismounted, do not make an announcement
    };
    virtual void dismount(Dismount_Mode dismountMode);
 

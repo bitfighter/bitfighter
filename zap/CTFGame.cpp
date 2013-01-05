@@ -92,7 +92,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-               mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
+               mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
                mountedFlag->sendHome();
 
                updateScore(theShip, CaptureFlag);
@@ -204,7 +204,7 @@ void CTFGameType::onFlagMounted(S32 teamIndex)
 class FlagItem;
 
 
-void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
+void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
    

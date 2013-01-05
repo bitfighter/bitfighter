@@ -68,7 +68,7 @@ public:
    void idle(BfObject::IdleCallPath path, U32 deltaT);
 
    void addFlag(FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);

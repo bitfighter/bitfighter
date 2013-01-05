@@ -1123,7 +1123,7 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mountToShip(ship);
       }
       else
-         dismount();
+         dismount(DISMOUNT_NORMAL);
 
       mIsMounted = isMounted;
       updateExtentInDatabase();
@@ -1154,7 +1154,7 @@ void MountableItem::mountToShip(Ship *ship)
       return;
 
    if(mMount.isValid())                      // Mounted on something else; dismount!
-      dismount();
+      dismount(DISMOUNT_NORMAL);
 
    ship->addMountedItem(this);
    mMount = ship;
@@ -1198,11 +1198,11 @@ void MountableItem::dismount(Dismount_Mode dismountMode)
       return;
 
    // Notify the GameType so it can do any special handling that it might require
-   if(dismountMode != DISMOUNT_IGNORE_GAME_TYPE && getGame()->isServer())
+   if(isServer())
    {
       GameType *gt = getGame()->getGameType();
       if(gt)
-         gt->itemDropped(ship, this);      // Server-only method; generally broadcasts message and things like that
+         gt->itemDropped(ship, this, dismountMode);      // Server-only method; generally broadcasts message and things like that
    }
 
    mDroppedTimer.reset();

@@ -90,9 +90,9 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item)
+void ZoneControlGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
+   TNLAssert(isServer(), "Server only method!");
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
@@ -220,7 +220,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       FlagItem *mountedFlag = static_cast<FlagItem *>(item);
 
-      mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
+      mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
       mountedFlag->sendHome();
    }
 }

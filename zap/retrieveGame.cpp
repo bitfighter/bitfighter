@@ -107,7 +107,7 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
+void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::Dismount_Mode dismountMode)
 {
    TNLAssert(getGame()->isServer(), "Server only method!");
 
@@ -163,7 +163,7 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
                        (getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
-      mountedFlag->dismount(MountableItem::DISMOUNT_IGNORE_GAME_TYPE);
+      mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
 
       const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
       S32 flagIndex = flags->getIndex(mountedFlag);
