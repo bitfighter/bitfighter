@@ -561,7 +561,7 @@ void Ship::processWeaponFire()
 #ifdef SHOW_SERVER_SITUATION
          // Make a noise when the client thinks we've shot -- ideally, there should be one boop per shot, delayed by about half
          // of whatever /lag is set to.
-         if(!getGame()->isServer())
+         if(isClient())
             UserInterface::playBoop();
 #endif
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
@@ -569,7 +569,7 @@ void Ship::processWeaponFire()
          if(getClientInfo())
             getClientInfo()->getStatistics()->countShot(curWeapon);
 
-         if(!isGhost())    // i.e. server only
+         if(isServer())  
          {
             Point dir = getAimVector();
 
@@ -1020,7 +1020,7 @@ void Ship::processModules()
          if(i == ModuleSensor &&  
                mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
                mEnergy > moduleInfo->getPrimaryPerUseCost() &&   // Have enough energy
-               isGhost())                                        // Is happening on client side
+               isClient())                                       // Is happening on client side
          {
             GameConnection *cc = getControllingClient();
 
@@ -1284,7 +1284,7 @@ void Ship::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
 #ifndef ZAP_DEDICATED
-   if(isGhost())        // Client
+   if(isClient())       // Client
    {
       ClientGame *clientGame = static_cast<ClientGame *>(game);
       if(isLocalPlayerShip(clientGame))
@@ -1503,7 +1503,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
 
-   TNLAssert(!getGame()->isServer(), "We are expecting a ClientGame here!");
+   TNLAssert(isClient(), "We are expecting a ClientGame here!");
 
    if(isInitialUpdate())
    {
@@ -2007,7 +2007,7 @@ bool Ship::stringToLoadout(string loadoutStr, Vector<U8> &loadout)
 
 void Ship::kill(DamageInfo *theInfo)
 {
-   if(isGhost())     // Server only, please...
+   if(isClient())     // Server only, please...
       return;
 
    GameType *gt = getGame()->getGameType();
@@ -2020,7 +2020,7 @@ void Ship::kill(DamageInfo *theInfo)
 
 void Ship::kill()
 {
-   if(!isGhost())    // Server only
+   if(isServer())    // Server only
    {
       if(getOwner())
          getLoadout(getOwner()->mOldLoadout);      // Save current loadout in getOwner()->mOldLoadout
@@ -2047,7 +2047,7 @@ void Ship::kill()
    dismountAll();
 
    // Handle if in the middle of building a teleport
-   if(!isGhost())   // Server only
+   if(isServer())   // Server only
    {
       destroyPartiallyDeployedTeleporter();
       if(getClientInfo())

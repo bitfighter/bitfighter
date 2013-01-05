@@ -894,7 +894,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
    findObjects(objectTypeTest, fillVector, queryRect);
 
    // No damage calculated on the client
-   if(isGhost())
+   if(isClient())
       info.damageAmount = 0;
 
    S32 shipsHit = 0;

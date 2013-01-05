@@ -337,7 +337,7 @@ bool FlagItem::collide(BfObject *hitObject)
       return true;
 
    // No other collision detection happens on the client -- From here on out, it's server only!
-   if(isGhost())
+   if(isClient())
       return false;
 
    bool isShip = isShipType(hitObject->getObjectTypeNumber());
