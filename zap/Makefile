@@ -1,4 +1,4 @@
-\# Bitfighter Makefile
+# Bitfighter Makefile
 #######################################
 # 
 # Configuration
