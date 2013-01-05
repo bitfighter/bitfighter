@@ -4045,7 +4045,7 @@ void GameType::updateWhichTeamsHaveFlags()
 }
 
 
-// A flag was either mounted or dismounted from a ship -- in some GameTypes we need to notifiy the clients so they can 
+// A flag was mounted on a ship -- in some GameTypes we need to notifiy the clients so they can 
 // update their displays to show who has the flag.  Will be overridden in some GameTypes.
 // Server only!
 void GameType::onFlagMounted(S32 teamIndex)
