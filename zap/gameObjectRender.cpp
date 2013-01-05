@@ -1409,7 +1409,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
       const int outerR = 3;
       const int dist = 10;
 
-#define dr(x) (float) x * FloatTau / 360     // degreesToRadians()
+#define dr(x) degreesToRadians(x)
 
       glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
       glColor(pi->projColors[1]);
