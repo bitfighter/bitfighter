@@ -423,7 +423,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    deployedObject->setOwner(clientInfo);
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
 
-   MountableItem *resource = ship->unmountItem(ResourceItemTypeNumber);
+   MountableItem *resource = ship->dismountFirst(ResourceItemTypeNumber);
 
    engineerable->setResource(resource);
    engineerable->onConstructed();

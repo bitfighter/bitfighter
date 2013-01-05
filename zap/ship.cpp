@@ -1778,7 +1778,7 @@ bool Ship::isCarryingItem(U8 objectType) const
 
 
 // Dismounts first object found of specified type, and returns the object.  If no objects of specified type found, will return NULL.
-MountableItem *Ship::unmountItem(U8 objectType)
+MountableItem *Ship::dismountFirst(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
