@@ -1792,7 +1792,7 @@ MountableItem *Ship::unmountItem(U8 objectType)
 }
 
 
-// Dismount all objects of any type -- runs on client and server
+// Dismount all objects of any type -- runs on client and server.  Only runs when carrier was killed.
 void Ship::dismountAll()
 {
    // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
@@ -1802,7 +1802,7 @@ void Ship::dismountAll()
 }
 
 
-// Dismount all objects of specified type
+// Dismount all objects of specified type.  Currently only used when loadout no longer includes engineer and ship drops all ResourceItems.
 void Ship::dismountAll(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
