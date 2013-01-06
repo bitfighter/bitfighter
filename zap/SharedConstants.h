@@ -69,7 +69,8 @@ enum MeritBadges {
 };
 
 enum ServerInfoFlags {
-   TestModeFlag = BIT(0),
+   TestModeFlag  = BIT(0),       // If server is testing a level from the editor
+   DebugModeFlag = BIT(1),       // If player is using a debug build (i.e. is probably a dev testing something)
 };
 
 #endif

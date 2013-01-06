@@ -104,11 +104,15 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    hostingModePhase = ServerGame::NotHosting;
 
-   mInfoFlags = 0;                  // Currently only used to specify test mode
+   mInfoFlags = 0;                  // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
 
    if(testMode)
-      mInfoFlags = TestModeFlag;
+      mInfoFlags |= TestModeFlag;
+
+#ifdef TNL_DEBUG
+   mInfoFlags |= DebugModeFlag;
+#endif
 
    mTestMode = testMode;
 
