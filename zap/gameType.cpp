@@ -3538,7 +3538,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 //Send an announcement
 
-GAMETYPE_RPC_C2S(GameType,c2sSendAnnouncement,(string message),(message))
+GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
 {
 	GameConnection *source = (GameConnection *)getRPCSourceConnection();
 	
