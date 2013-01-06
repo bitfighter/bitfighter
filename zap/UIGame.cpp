@@ -1987,8 +1987,8 @@ void GameUserInterface::announceHandler(const Vector<string> &words)
 	ClientGame *game = getGame();
 	if(game->hasAdmin("!!! You need to be an admin to use /announce"))
    {
-		string s = "Announcement:";		
-		for(S32 i = 0; i < words.size(); i++)
+		string s = "";		
+		for(S32 i = 1; i < words.size(); i++)
 			s = s + words[i];
 	
 		ClientInfo* clientInfo = game->getClientInfo();
