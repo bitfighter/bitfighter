@@ -826,17 +826,17 @@ public:
       if(!mIsGameServer)
          return;
 
-      // Update only if anything is different
+      // Only update if anything has changed
       if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   || 
          mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
       {
          mLevelName = levelName;
          mLevelType = levelType;
 
-         mNumBots = botCount;
+         mNumBots     = botCount;
          mPlayerCount = playerCount;
-         mMaxPlayers = maxPlayers;
-         mInfoFlags = infoFlags;
+         mMaxPlayers  = maxPlayers;
+         mInfoFlags   = infoFlags;
 
          // Check to ensure we're not getting flooded with these requests
          checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
