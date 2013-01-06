@@ -1088,7 +1088,7 @@ Point MountableItem::getRenderVel() const
 
 U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 retMask = 0;
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
    if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
    {
@@ -1100,14 +1100,13 @@ U32 MountableItem::packUpdate(GhostConnection *connection, U32 updateMask, BitSt
          retMask |= MountMask;
    }
 
-   retMask |= Parent::packUpdate(connection, updateMask, stream);
-
    return retMask;
 }
 
 
 void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
+   Parent::unpackUpdate(connection, stream);   // Moving this to end of unpackUpdate breaks version 018... wait till we move to 019?
 
    if(stream->readFlag())     // MountMask
    {
@@ -1127,7 +1126,6 @@ void MountableItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mIsMounted = isMounted;
       updateExtentInDatabase();
    }
-   Parent::unpackUpdate(connection, stream);
 }
 
 

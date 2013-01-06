@@ -1037,6 +1037,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\MathUtils.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\move.cpp"
 			>
 		</File>
@@ -1090,6 +1094,10 @@
 		</File>
 		<File
 			RelativePath=".\Rect.h"
+			>
+		</File>
+		<File
+			RelativePath=".\RenderUtils.cpp"
 			>
 		</File>
 		<File

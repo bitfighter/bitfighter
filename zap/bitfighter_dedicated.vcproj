@@ -839,6 +839,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\MathUtils.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\move.cpp"
 			>
 		</File>

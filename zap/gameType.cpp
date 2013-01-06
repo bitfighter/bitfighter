@@ -1598,9 +1598,12 @@ void GameType::performScopeQuery(GhostConnection *connection)
    //TNLAssert(gc, "Invalid GameConnection in gameType.cpp!");
    //TNLAssert(co, "Invalid ControlObject in gameType.cpp!");
 
-   const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
-
    conn->objectInScope(this);   // Put GameType in scope, always
+
+   if(!conn->isReadyForRegularGhosts()) // This may prevent scoping any ships until after ClientInfo is all received on client side. (spy bugs scopes ships)
+      return;
+
+   const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
 
    // Make sure the "always-in-scope" objects are actually in scope
    for(S32 i = 0; i < scopeAlwaysList.size(); i++)
