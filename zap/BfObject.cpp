@@ -428,6 +428,10 @@ BfObject::BfObject()
 // Destructor
 BfObject::~BfObject()
 {
+   // Restore type number so database can fully remove item
+   if(mObjectTypeNumber == DeletedTypeNumber)
+      mObjectTypeNumber = mOriginalTypeNumber;
+   
    removeFromDatabase(false);
    mGame = NULL;
    LUAW_DESTRUCTOR_CLEANUP;
@@ -749,6 +753,7 @@ ClientInfo *BfObject::getOwner()
 
 void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
 {
+   mOriginalTypeNumber = mObjectTypeNumber;
    mObjectTypeNumber = DeletedTypeNumber;
 
    if(!mGame)                    // Not in a game
