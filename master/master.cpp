@@ -1222,7 +1222,7 @@ public:
 
          switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
          {
-            case WrongPassword: reason = ReasonBadLogin; return false;
+            case WrongPassword:   reason = ReasonBadLogin;        return false;
             case InvalidUsername: reason = ReasonInvalidUsername; return false;
             case UnknownStatus: // make JSON delay write, to reduce chances of see the newly joined player as unauthenticated
             {
