@@ -50,7 +50,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\mysql++</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\boost;..\libtomcrypt;..\mysql++</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
