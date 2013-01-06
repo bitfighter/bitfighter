@@ -472,10 +472,13 @@ if(mGotControlUpdate)
 #endif
 }
 
-void GameUserInterface::renderAnnouncement(const string& message){
-	Timer timer(10000);
-	while(timer.getCurrent() > 0){
-		Vector<string> lines = wrapString(message,SRV_MSG_WRAP_WIDTH,SRV_MSG_FONT_SIZE," ");
+void GameUserInterface::renderAnnouncement(const string& message)
+{
+	Timer timer(10000);     // 10 seconds
+
+	while(timer.getCurrent() > 0)
+   {
+		Vector<string> lines = wrapString(message, SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, " ");
 		U32 lineHeight = SRV_MSG_FONT_SIZE + SRV_MSG_FONT_GAP;
 	
 		bool helperActive = (mHelper != NULL);
