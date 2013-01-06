@@ -63,14 +63,12 @@ private:
 
 public:
    static HighScores highScores;    // Cached high scores
-private:
 
+private:
    Int<BADGE_COUNT> mBadges;
    Int<BADGE_COUNT> getBadges();
 
-protected:
 public:
-
    /// @name Linked List
    ///
    /// The server stores its connections on a linked list.
