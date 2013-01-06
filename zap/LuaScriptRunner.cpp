@@ -295,8 +295,8 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 
    catch(LuaException &e)
    {
+      // logError will print the message, dump a stack trace, and clear the stack
       logError("Error encountered while attempting to run script's main() function: %s.  Aborting script.", e.what());
-      LuaObject::clearStack(L);
       return false;
    }
 
@@ -503,12 +503,16 @@ void LuaScriptRunner::printStackTrace(lua_State *L)
 
    for(S32 level = 0; level < MAX_TRACE_LEN; level++)
    {
+	   if(level == 0)
+		   logprintf("==== Stack trace ====");
+
 	   string str = getStackTraceLine(L, level);
 	   if(str == "")
+      {
+         if(level == 0)
+            logprintf("  <EMPTY>");
 		   break;
-
-	   if(level == 0)
-		   logprintf("Stack trace:");
+      }
 
 	   logprintf("  %s", str.c_str());
    }

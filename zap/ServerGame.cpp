@@ -1022,6 +1022,13 @@ void ServerGame::runLevelGenScript(const string &scriptName)
 }
 
 
+// Add a misbehaved levelgen to the kill list
+void ServerGame::deleteLevelGen(LuaLevelGenerator *levelgen)
+{
+   mLevelGenDeleteList.push_back(levelgen);
+}
+
+
 void ServerGame::addClient(ClientInfo *clientInfo)
 {
    TNLAssert(!clientInfo->isRobot(), "This only gets called for players");
@@ -1175,6 +1182,14 @@ void ServerGame::idle(U32 timeDelta)
    // Tick levelgen timers
    for(S32 i = 0; i < mLevelGens.size(); i++)
       mLevelGens[i]->tickTimer(timeDelta);
+
+   // Check for any levelgens that must die
+   for(S32 i = 0; i < mLevelGenDeleteList.size(); i++)
+   {
+      S32 index = mLevelGens.getIndex(mLevelGenDeleteList[i]);
+      if(index != -1)
+         mLevelGens.deleteAndErase_fast(index);
+   }
 
    // Compute new world extents -- these might change if a ship flies far away, for example...
    // In practice, we could probably just set it and forget it when we load a level.

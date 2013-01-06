@@ -110,12 +110,13 @@ void LuaLevelGenerator::tickTimer(U32 deltaT)
    if(error != 0)
    {
       logError("Levelgen error running _tickTimer(): %s.", lua_tostring(L, -1));
-      lua_pop(L, 1);    // Remove error message from stack
+      clearStack(L);
 
-      //deleteObject();   // Add bot to delete list, where it will be deleted in the proper manner
+      TNLAssert(mGame->isServer(), "Expected this only to run on server!");
+      static_cast<ServerGame *>(mGame)->deleteLevelGen(this);
    }
 
-   TNLAssert(lua_gettop(L) <= 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
 
 
