@@ -1678,7 +1678,7 @@ int main(int argc, const char **argv)
    gDatabaseAccessThread.start();  // start a thread that handles some of slow task with database.
 
     // And until infinity, process whatever comes our way.
-   for(;;)     // To infinity and beyond!!
+   while(true)     // To infinity and beyond!!
    {
       gNetInterface->checkIncomingPackets();
       gNetInterface->processConnections();
@@ -1721,10 +1721,11 @@ int main(int argc, const char **argv)
          }
       }
 
-      // using delayed leave, to avoid repeating and flooding join / leave messages.
+      // Using delayed leave, to avoid repeating and flooding join / leave messages
       for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
       {
          MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];
+
          if(!c || c->mLeaveGlobalChatTimer == 0)
             MasterServerConnection::gLeaveChatTimerList.erase(i);
          else
@@ -1738,12 +1739,12 @@ int main(int argc, const char **argv)
                MasterServerConnection::gLeaveChatTimerList.erase(i);
             }
          }
-
       }
 
       gDatabaseAccessThread.runAtMainThread();
 
       Platform::sleep(5);
    }
+
    return 0;
 }
