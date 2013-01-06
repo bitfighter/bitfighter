@@ -100,6 +100,18 @@ const StringTableEntry ClientInfo::getName()
 }
 
 
+// An 8 bit bitmask to send to master on connection
+const U8 ClientInfo::getPlayerFlagstoSendToMaster() const
+{
+   U8 bitmask = 0;
+
+#ifdef TNL_DEBUG
+   bitmask |= ClientDebugModeFlag;
+#endif
+
+   return bitmask;
+}
+
 void ClientInfo::setName(const StringTableEntry &name)
 {
    mName = name;

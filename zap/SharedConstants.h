@@ -73,5 +73,9 @@ enum ServerInfoFlags {
    DebugModeFlag = BIT(1),       // If player is using a debug build (i.e. is probably a dev testing something)
 };
 
+enum ClientInfoFlags {
+   ClientDebugModeFlag = BIT(0)  // If player is using a debug build (i.e. is probably a dev testing something)
+};
+
 #endif
 

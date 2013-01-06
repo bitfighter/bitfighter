@@ -1210,8 +1210,12 @@ public:
 
          bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
 
-               // Read debug status of the client    <<<< raptor >>>>
-////////////////////      mIsDebugClient = bstream->readFlag();
+         // Read client flags -- only the first is currently used
+         if(mCMProtocolVersion >= 6)
+         {
+            U8 flags = bstream->readInt(8);
+            mIsDebugClient = flags & ClientDebugModeFlag;
+         }
             
          mPlayerId.read(bstream);
 

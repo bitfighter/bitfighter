@@ -436,12 +436,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(clientInfo->getName().getString());          // User's nickname
       bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
 
-      // Write debug status of the client   <<<< raptor >>>>
-////////////////////#ifdef TNL_DEBUG
-////////////////////      bstream->writeFlag(true);
-////////////////////#else
-////////////////////      bstream->writeFlag(false);
-////////////////////#endif
+      // Starting with MASTER_PROTOCOL_VERSION 6 we will write an 8 bit set of flags
+      if(MASTER_PROTOCOL_VERSION >= 6)    // TODO: Remove this check
+         bstream->writeInt(clientInfo->getPlayerFlagstoSendToMaster(), 8);
 
       clientInfo->getId()->write(bstream);
 #endif

@@ -90,6 +90,9 @@ public:
    const StringTableEntry getName();
    void setName(const StringTableEntry &name);
 
+   const U8 getPlayerFlagstoSendToMaster() const;
+
+
    S32 getScore();
    void setScore(S32 score);
    void addScore(S32 score);
