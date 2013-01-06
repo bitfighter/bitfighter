@@ -1144,16 +1144,7 @@ const char *LevelInfo::getLevelTypeName()
 // Called when ClientGame and ServerGame are destructed, and new levels are loaded on the server
 void Game::cleanUp()
 {
-   // Delete any game objects that may exist  --> not sure this will be needed when we're using shared_ptr
-   // sam: should be deleted to properly get removed from server's database and to remove client's net objects.
-   // wat: can we just run mGameObjDatabase->removeEverythingFromDatabase()?
-   // sam: how about mGameObjDatabase->removeAndDeleteEverythingFromDatabase()?
-   fillVector.clear();
-   mGameObjDatabase->findObjects(fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-      mGameObjDatabase->removeFromDatabase(fillVector[i], true);
-
+   mGameObjDatabase->removeEverythingFromDatabase();
    mActiveTeamManager->clearTeams();
 
    while(idlingObjects.nextList != NULL)  // Remove any remainder objects idling that wasn't in gridDB
