@@ -3538,7 +3538,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 //Send an announcement
 
-GAMETYPE_RPC_C2S(GameType, c2sSendAnnouncement, (string message), (message))
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
 {
 	GameConnection *source = (GameConnection *)getRPCSourceConnection();
 	
@@ -3662,7 +3662,7 @@ extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 
 
-GAMETYPE_RPC_S2C(GameType, s2cDisplayAnnouncement, (string message), (message))
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
 {
 	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
 	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
