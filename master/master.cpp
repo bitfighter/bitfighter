@@ -1703,7 +1703,7 @@ int main(int argc, const char **argv)
          gNeedToWriteStatusDelayed = 0;
       }
 
-      for(S32 i = MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
+      for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)
       {
          GameConnectRequest *request = MasterServerConnection::gConnectList[i];
          if(currentTime - request->requestTime > 5000) // 5 seconds
