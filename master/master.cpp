@@ -1064,7 +1064,10 @@ public:
 
       for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if(walk->mPlayerOrServerName == playerNick)
+         {
             walk->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database.
+            break;
+         }
    }
 
 
