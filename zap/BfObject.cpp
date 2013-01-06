@@ -428,7 +428,10 @@ BfObject::BfObject()
 // Destructor
 BfObject::~BfObject()
 {
-   // Restore type number so database can fully remove item
+   // Restore type number so database can fully remove item.  In some cases, we change an item's type number to DeletedTypeNumber to 
+   // prevent it from showing up in a database search.  This has the unfortunate side effect of also preventing it from being properly
+   // removed from the database.  So, before we run removeFromDatabase, we'll check to see if the type number has been altered, and, if
+   // so, we'll restore the original.  This is not a great solution to the problem, but works for now.
    if(mObjectTypeNumber == DeletedTypeNumber)
       mObjectTypeNumber = mOriginalTypeNumber;
    
