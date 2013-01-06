@@ -475,7 +475,7 @@ if(mGotControlUpdate)
 void GameUserInterface::renderAnnouncement(const string& message){
 	Timer timer(10000);
 	while(timer.getCurrent() > 0){
-		Vector<string> lines = UserInterface::wrapString(message,SRV_MSG_WRAP_WIDTH,SRV_MSG_FONT_SIZE," ");
+		Vector<string> lines = wrapString(message,SRV_MSG_WRAP_WIDTH,SRV_MSG_FONT_SIZE," ");
 		U32 lineHeight = SRV_MSG_FONT_SIZE + SRV_MSG_FONT_GAP;
 	
 		bool helperActive = (mHelper != NULL);
@@ -483,16 +483,16 @@ void GameUserInterface::renderAnnouncement(const string& message){
 		if(mMessageDisplayMode == ShortTimeout)
 		 	mChatMessageDisplayer1.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
 		else if(mMessageDisplayMode == ShortFixed)
-	      		mChatMessageDisplayer2.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+         mChatMessageDisplayer2.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
 		else
-	   		mChatMessageDisplayer3.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+         mChatMessageDisplayer3.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
 
 		mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, 			   		helperActive);
 	
 		U32 y = CHAT_Y_POS;
 		for(int i = 0; i < lines.size(); i++){
 			glColor(Colors::red);       
-    			UserInterface::drawString(UserInterface::horizMargin, y, SRV_MSG_FONT_SIZE,lines[lines.size() - 1 - i].c_str());
+    			drawString(UserInterface::horizMargin, y, SRV_MSG_FONT_SIZE,lines[lines.size() - 1 - i].c_str());
     			y += lineHeight;
 		}
 		timer.update(1);
@@ -503,7 +503,7 @@ void GameUserInterface::renderSuspendedMessage()
 {
    static string waitMsg[] = { "", 
                                "WILL RESPAWN",
-                               "",
+                               "IN BLAH BLAH SECONDS",
                                "",
                                "" };
 
@@ -522,14 +522,11 @@ void GameUserInterface::renderSuspendedMessage()
    {
       //dimUnderlyingUI(1);                                   // Completely obscure what's below
 
-      waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.f)) + " SECONDS";
+      waitMsg[2] = "IN " + ftos(ceil(F32(getGame()->getReturnToGameDelay()) / 1000.0f)) + " SECONDS";
       renderMessageBox("", "", waitMsg,  ARRAYSIZE(waitMsg),  VertOffset, DisplayStyle);
    }
    else
-   {
-
       renderMessageBox("", "", readyMsg, ARRAYSIZE(readyMsg), VertOffset, DisplayStyle);
-   }
 }
 
 
@@ -1985,22 +1982,20 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
    return true;
 }
 
-void GameUserInterface::announceHandler(const Vector<string> &words){
+void GameUserInterface::announceHandler(const Vector<string> &words)
+{
 	ClientGame *game = getGame();
-	if(game->hasAdmin("!!!You need to be an admin!!!")){
+	if(game->hasAdmin("!!! You need to be an admin to use /announce"))
+   {
 		string s = "Announcement:";		
-		for(S32 i = 0; i < words.size(); i++){
+		for(S32 i = 0; i < words.size(); i++)
 			s = s + words[i];
-		}
-		
 	
 		ClientInfo* clientInfo = game->getClientInfo();
 		GameType* gt = game->getGameType();
 					
-		if(gt){
+		if(gt)
 			gt->c2sSendAnnouncement(s);
-		}
-					
 	}
 }
 

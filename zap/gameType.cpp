@@ -3538,19 +3538,21 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 //Send an announcement
 
-GAMETYPE_RPC_C2S(GameType,c2sSendAnnouncement,(string message),(message)){
-	GameConnection* source = (GameConnection *)getRPCSourceConnection();
+GAMETYPE_RPC_C2S(GameType,c2sSendAnnouncement,(string message),(message))
+{
+	GameConnection *source = (GameConnection *)getRPCSourceConnection();
 	
-	for(S32 i = 0; i < mGame->getClientCount(); i++){
-		ClientInfo* clientInfo = mGame->getClientInfo(i);
+	for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+		ClientInfo *clientInfo = mGame->getClientInfo(i);
 		
 		if(clientInfo->isRobot())
 			continue;
 
-			RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,s2cDisplayAnnouncement,(message));
+		RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message));
 			
-			source->postNetEvent(theEvent);
-			clientInfo->getConnection()->postNetEvent(theEvent);
+		source->postNetEvent(theEvent);
+		clientInfo->getConnection()->postNetEvent(theEvent);
 	}
 }
 
@@ -3660,12 +3662,12 @@ extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 
 
-GAMETYPE_RPC_S2C(GameType, s2cDisplayAnnouncement,(string message),(message)){
+GAMETYPE_RPC_S2C(GameType, s2cDisplayAnnouncement, (string message), (message))
+{
 	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
 	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
 
 	gameUI->renderAnnouncement(message);
-
 }
 
 
