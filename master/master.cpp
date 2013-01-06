@@ -1058,14 +1058,15 @@ public:
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
    {
-      if(achievementId > BADGE_COUNT) // out of range badges
+      if(achievementId > BADGE_COUNT)  // Check for out of range badges
          return;
+
       writeAchievementToDb(achievementId, playerNick);
 
       for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if(walk->mPlayerOrServerName == playerNick)
          {
-            walk->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database.
+            walk->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database
             break;
          }
    }
