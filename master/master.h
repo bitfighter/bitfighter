@@ -133,6 +133,8 @@ public:
    Nonce mPlayerId;                            ///< (Hopefully) unique ID of this player
 
    bool mAuthenticated;                        ///< True if user was authenticated, false if not
+   bool mIsDebugClient;                        ///< True if client is running from a debug build
+
    StringTableEntry mServerDescr;              ///< Server description
    bool isInGlobalChat;
 

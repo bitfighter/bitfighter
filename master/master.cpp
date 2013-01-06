@@ -269,6 +269,7 @@ public:
       setIsAdaptive();
       isInGlobalChat = false;
       mAuthenticated = false;
+      mIsDebugClient = false;
       mIsIgnoredFromList = false;
       mIsMasterAdmin = false;
       mLoggingStatus = "Not_Connected";
@@ -606,6 +607,18 @@ public:
    }
 
 
+   static bool listClient(MasterServerConnection *client)
+   {
+      if(client->mIsIgnoredFromList)     // Skip clients with ignored flag set
+         return false;
+
+      if(client->mIsDebugClient)         // Skip clients running in debug mode
+         return false;
+
+      return true;
+   }
+
+
    // Write a current count of clients/servers for display on a website, using JSON format
    // This gets updated whenever we gain or lose a server, at most every REWRITE_TIME ms
    void MasterServerConnection::writeClientServerList_JSON()
@@ -641,7 +654,7 @@ public:
          first = true;
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            if(!walk->mIsIgnoredFromList)
+            if(listClient(walk))
             {
                fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
                first = false;
@@ -653,7 +666,7 @@ public:
          first = true;
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            if(!walk->mIsIgnoredFromList)
+            if(listClient(walk))
             {
                fprintf(f, "%s%s", first ? "":", ", walk->mAuthenticated ? "true" : "false");
                first = false;
@@ -1196,7 +1209,9 @@ public:
          mPlayerOrServerName = cleanName(readstr).c_str();
 
          bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
-         //string password = readstr;
+
+               // Read debug status of the client    <<<< raptor >>>>
+////////////////////      mIsDebugClient = bstream->readFlag();
             
          mPlayerId.read(bstream);
 

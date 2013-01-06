@@ -436,6 +436,13 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(clientInfo->getName().getString());          // User's nickname
       bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
 
+      // Write debug status of the client   <<<< raptor >>>>
+////////////////////#ifdef TNL_DEBUG
+////////////////////      bstream->writeFlag(true);
+////////////////////#else
+////////////////////      bstream->writeFlag(false);
+////////////////////#endif
+
       clientInfo->getId()->write(bstream);
 #endif
    }
