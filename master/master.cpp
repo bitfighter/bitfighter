@@ -1355,6 +1355,7 @@ public:
          {
             bool droppedServer = false;
             Address addr(&message.getString()[12]);
+
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
                if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 || addr.port == walk->getNetAddress().port))
                {
@@ -1362,8 +1363,10 @@ public:
                   m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
                   droppedServer = true;
                }
+
             if(!droppedServer)
                m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
+
             return;
          }
          else if(mIsMasterAdmin && !stricmp(message.getString(), "/bringbackservers"))
@@ -1402,7 +1405,7 @@ public:
                {
                   walk->mIsIgnoredFromList = true;
                   m2cSendChat(walk->mPlayerOrServerName, true, "player now hidden");
-                  c2mLeaveGlobalChat_remote(); // also mute and delist that player.
+                  c2mLeaveGlobalChat_remote();  // Also mute and delist the player
                   found = true;
                }
             gListAddressHide.push_back(addr);
