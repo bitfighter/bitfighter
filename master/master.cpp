@@ -1703,25 +1703,30 @@ int main(int argc, const char **argv)
          gNeedToWriteStatusDelayed = 0;
       }
 
+      // Cycle through all our connections, checking if any have timed out
       for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)
       {
          GameConnectRequest *request = MasterServerConnection::gConnectList[i];
-         if(currentTime - request->requestTime > 5000) // 5 seconds
+
+         if(currentTime - request->requestTime > 5000)   // 5 seconds
          {
             if(request->initiator.isValid())
             {
                ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterRequestTimedOut, (U32) strlen(MasterRequestTimedOut) + 1);
+
                request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
                request->initiator->removeConnectRequest(request);
             }
+
             if(request->host.isValid())
                request->host->removeConnectRequest(request);
+
             MasterServerConnection::gConnectList.erase_fast(i);
             delete request;
          }
       }
 
-      // Using delayed leave, to avoid repeating and flooding join / leave messages
+      // Process any delayed disconnects; we use this to avoid repeating and flooding join / leave messages
       for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
       {
          MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];
@@ -1733,9 +1738,13 @@ int main(int argc, const char **argv)
             if(currentTime - c->mLeaveGlobalChatTimer > 1000)
             {
                c->isInGlobalChat = false;
-               for(MasterServerConnection *walk = MasterServerConnection::gClientList.mNext; walk != &MasterServerConnection::gClientList; walk = walk->mNext)
+
+               MasterServerConnection *head = &MasterServerConnection::gClientList;
+
+               for(MasterServerConnection *walk = head->mNext; walk != head; walk = walk->mNext)
                   if (walk != c && walk->isInGlobalChat)
                      walk->m2cPlayerLeftGlobalChat(c->mPlayerOrServerName);
+
                MasterServerConnection::gLeaveChatTimerList.erase(i);
             }
          }
