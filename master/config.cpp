@@ -134,7 +134,7 @@ void loadSettingsFromINI(CIniFile *ini)
 
    for(S32 i = 0; i < keys.size(); i++)
    {
-      U32 build_version = (U32) stoi(keys[i]);
+      U32 build_version = (U32)Zap::stoi(keys[i]);    // Avoid conflicts with std::stoi() which is defined for VC++ 10
       string message = ini->GetValue("motd_clients", keys[i], defaultMessage);
 
       gMOTDClientMap.insert(pair<U32, string>(build_version, message));
