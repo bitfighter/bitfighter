@@ -610,7 +610,7 @@ public:
 
 
    // Write a current count of clients/servers for display on a website, using JSON format
-   // This gets updated whenver we gain or lose a server, at most every REWRITE_TIME ms
+   // This gets updated whenever we gain or lose a server, at most every REWRITE_TIME ms
    void MasterServerConnection::writeClientServerList_JSON()
    {
       if(gJasonOutFile == "")
