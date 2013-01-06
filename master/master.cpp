@@ -1216,7 +1216,7 @@ public:
          // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
          // so we pause waiting for database instead of fully connecting yet.
 
-         for(S32 i=0; i < gListAddressHide.size(); i++)
+         for(S32 i = 0; i < gListAddressHide.size(); i++)
             if(getNetAddress().isEqualAddress(gListAddressHide[i]))
                mIsIgnoredFromList = true;
 
