@@ -472,6 +472,32 @@ if(mGotControlUpdate)
 #endif
 }
 
+void GameUserInterface::renderAnnouncement(const string& message){
+	Timer timer(10000);
+	while(timer.getCurrent() > 0){
+		Vector<string> lines = UserInterface::wrapString(message,SRV_MSG_WRAP_WIDTH,SRV_MSG_FONT_SIZE," ");
+		U32 lineHeight = SRV_MSG_FONT_SIZE + SRV_MSG_FONT_GAP;
+	
+		bool helperActive = (mHelper != NULL);
+		
+		if(mMessageDisplayMode == ShortTimeout)
+		 	mChatMessageDisplayer1.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+		else if(mMessageDisplayMode == ShortFixed)
+	      		mChatMessageDisplayer2.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+		else
+	   		mChatMessageDisplayer3.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+
+		mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, 			   		helperActive);
+	
+		U32 y = CHAT_Y_POS;
+		for(int i = 0; i < lines.size(); i++){
+			glColor(Colors::red);       
+    			UserInterface::drawString(UserInterface::horizMargin, y, SRV_MSG_FONT_SIZE,lines[lines.size() - 1 - i].c_str());
+    			y += lineHeight;
+		}
+		timer.update(1);
+	}
+}
 
 void GameUserInterface::renderSuspendedMessage()
 {
@@ -1959,6 +1985,24 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
    return true;
 }
 
+void GameUserInterface::announceHandler(const Vector<string> &words){
+	ClientGame *game = getGame();
+	if(game->hasAdmin("!!!You need to be an admin!!!")){
+		string s = "Announcement:";		
+		for(S32 i = 0; i < words.size(); i++){
+			s = s + words[i];
+		}
+		
+	
+		ClientInfo* clientInfo = game->getClientInfo();
+		GameType* gt = game->getGameType();
+					
+		if(gt){
+			gt->c2sSendAnnouncement(s);
+		}
+					
+	}
+}
 
 void GameUserInterface::addBotHandler(const Vector<string> &words)
 {
@@ -2233,6 +2277,7 @@ void GameUserInterface::serverCommandHandler(const Vector<string> &words)
 
 CommandInfo chatCmds[] = {   
    //  cmdName          cmdCallback                 cmdArgInfo cmdArgCount   helpCategory helpGroup lines,  helpArgString            helpTextString
+   	
    { "password",&GameUserInterface::submitPassHandler,{ STR },       1,      ADV_COMMANDS,     0,     1,    {"<password>"},         "Request admin or level change permissions"  },
    { "servvol", &GameUserInterface::servVolHandler,   { xINT },      1,      ADV_COMMANDS,     0,     1,    {"<0-10>"},             "Set volume of server"  },
    { "getmap",  &GameUserInterface::getMapHandler,    { STR },       1,      ADV_COMMANDS,     1,     1,    {"[file]"},             "Save currently playing level in [file], if allowed" },
@@ -2260,6 +2305,7 @@ CommandInfo chatCmds[] = {
    { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
    { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
+   {"announce",	    &GameUserInterface::announceHandler,		{ STR },	  1, ADMIN_COMMANDS,  0,  1,    {"<ANNOUNCEMENT>"},    "The admin announces an important message"   }, 
 
    { "kick",               &GameUserInterface::kickPlayerHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
    { "ban",                &GameUserInterface::banPlayerHandler,          { NAME, xINT }, 2, ADMIN_COMMANDS,  0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },

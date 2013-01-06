@@ -3536,6 +3536,24 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 }
 
 
+//Send an announcement
+
+GAMETYPE_RPC_C2S(GameType,c2sSendAnnouncement,(string message),(message)){
+	GameConnection* source = (GameConnection *)getRPCSourceConnection();
+	
+	for(S32 i = 0; i < mGame->getClientCount(); i++){
+		ClientInfo* clientInfo = mGame->getClientInfo(i);
+		
+		if(clientInfo->isRobot())
+			continue;
+
+			RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,s2cDisplayAnnouncement,(message));
+			
+			source->postNetEvent(theEvent);
+			clientInfo->getConnection()->postNetEvent(theEvent);
+	}
+}
+
 // Send a private message
 GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr message), (toName, message))
 {
@@ -3640,6 +3658,16 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
+
+
+GAMETYPE_RPC_S2C(GameType, s2cDisplayAnnouncement,(string message),(message)){
+	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
+	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
+
+	gameUI->renderAnnouncement(message);
+
+}
+
 
 // Server sends message to the client for display using StringPtr
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
