@@ -115,62 +115,60 @@ static const char *sanitizeForJson(const char *value)
 
    // Return if no escaping needed
    if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
-   {
       return value;
-   }
 
    // If any of the above exist then do some escaping
    for(const char* c=value; *c != 0; ++c)
    {
       switch(*c)
       {
-      // For JSON
-      case '\"':
-         result += "\\\"";
-         break;
-      case '\\':
-         result += "\\\\";
-         break;
-      case '\b':
-         result += "\\b";
-         break;
-      case '\f':
-         result += "\\f";
-         break;
-      case '\n':
-         result += "\\n";
-         break;
-      case '\r':
-         result += "\\r";
-         break;
-      case '\t':
-         result += "\\t";
-         break;
+         // For JSON
+         case '\"':
+            result += "\\\"";
+            break;
+         case '\\':
+            result += "\\\\";
+            break;
+         case '\b':
+            result += "\\b";
+            break;
+         case '\f':
+            result += "\\f";
+            break;
+         case '\n':
+            result += "\\n";
+            break;
+         case '\r':
+            result += "\\r";
+            break;
+         case '\t':
+            result += "\\t";
+            break;
 
-      // For html markup entities
-      case '&':
-         result += "&amp;";
-         break;
-      case '<':
-         result += "&lt;";
-         break;
-      case '>':
-         result += "&gt;";
-         break;
-      default:
-         if( isControlCharacter( *c ) )
-         {
-            // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
-            // However, some day we might want to support this, so we'll leave the code in place.
-            //std::ostringstream oss;
-            //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
-            //result += oss.str();
+         // For html markup entities
+         case '&':
+            result += "&amp;";
+            break;
+         case '<':
+            result += "&lt;";
+            break;
+         case '>':
+            result += "&gt;";
+            break;
+         default:
+            if( isControlCharacter( *c ) )
+            {
+               // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
+               // However, some day we might want to support this, so we'll leave the code in place.
+               //std::ostringstream oss;
+               //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
+               //result += oss.str();
+            }
+            else
+               result += *c;
+
+            break;
          }
-         else
-            result += *c;
-
-         break;
-      }
    }
 
    return result.c_str();
