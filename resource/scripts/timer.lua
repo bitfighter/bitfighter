@@ -110,6 +110,7 @@ function Timer:scheduleOnce(event, deltaT)
    if type(event) ~= 'function' then
       error("Expected function in Timer:scheduleOnce()!")
    end
+   
    local record = {event = event, time = self.time + deltaT }
    self:_insert(record)
 end
