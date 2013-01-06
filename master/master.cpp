@@ -114,13 +114,13 @@ static const char *sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if (strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
    {
       return value;
    }
 
    // If any of the above exist then do some escaping
-   for (const char* c=value; *c != 0; ++c)
+   for(const char* c=value; *c != 0; ++c)
    {
       switch(*c)
       {
@@ -158,7 +158,7 @@ static const char *sanitizeForJson(const char *value)
          result += "&gt;";
          break;
       default:
-         if ( isControlCharacter( *c ) )
+         if( isControlCharacter( *c ) )
          {
             // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
             // However, some day we might want to support this, so we'll leave the code in place.
@@ -167,9 +167,8 @@ static const char *sanitizeForJson(const char *value)
             //result += oss.str();
          }
          else
-         {
             result += *c;
-         }
+
          break;
       }
    }
