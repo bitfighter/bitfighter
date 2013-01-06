@@ -1091,7 +1091,7 @@ public:
       if(highScores.isBuzy)
       {
          bool exists = false;
-            for(S32 i=0; i < highScores.waitingClients.size(); i++)
+            for(S32 i = 0; i < highScores.waitingClients.size(); i++)
                if(highScores.waitingClients[i] == this)
                   exists = true;
          if(!exists)
