@@ -1187,7 +1187,7 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
    U32 previousVersion = settings->getIniSettings()->version;
 
    // If we're at the same version as our INI, no need to update anything
-   if(previousVersion == BUILD_VERSION)
+   if(previousVersion >= BUILD_VERSION)
       return;
 
    logprintf("Bitfighter was recently updated.  Migrating user preferences...");
