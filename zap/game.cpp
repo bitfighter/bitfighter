@@ -141,6 +141,7 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
+   mDoAnonymousMasterConnection = false;
 
    mNameToAddressThread = NULL;
 
@@ -301,9 +302,10 @@ void Game::resetMasterConnectTimer()
 }
 
 
-void Game::setReadyToConnectToMaster(bool ready)
+void Game::setReadyToConnectToMaster(bool ready, bool doAnonymous)
 {
    mReadyToConnectToMaster = ready;
+   mDoAnonymousMasterConnection = doAnonymous;
 }
 
 
@@ -932,6 +934,11 @@ void Game::checkConnectionToMaster(U32 timeDelta)
                {
                   TNLAssert(!mConnectionToMaster.isValid(), "Already have connection to master!");
                   mConnectionToMaster = new MasterServerConnection(this);
+
+                  // Are we doing an anonymous connection?
+                  if(mDoAnonymousMasterConnection)
+                     mConnectionToMaster->setConnectionType(MasterConnectionTypeAnonymous);
+
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }
    

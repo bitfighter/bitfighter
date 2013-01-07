@@ -59,6 +59,14 @@ MasterServerConnection::MasterServerConnection(Game *game)
    mGame = game;
 
    mCurrentQueryId = 0;
+
+   // Determine connection type based on Game that is running
+   // An anonymous connection can be set with setConnectionType()
+   if(mGame->isServer())
+      mConnectionType = MasterConnectionTypeServer;
+   else
+      mConnectionType = MasterConnectionTypeClient;
+
    setIsConnectionToServer();
    setIsAdaptive();
 }
@@ -386,6 +394,20 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendHighScores, (Vector<St
 #endif
 
 
+// Set if this is to be an anonymous connection only
+void MasterServerConnection::setConnectionType(MasterConnectionType type)
+{
+   mConnectionType = type;
+}
+
+
+// Set if this is to be a anonymous connection only
+MasterConnectionType MasterServerConnection::getConnectionType()
+{
+   return mConnectionType;
+}
+
+
 // Set master server name
 void MasterServerConnection::setMasterName(string name)
 {
@@ -409,7 +431,10 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
 
-   if(bstream->writeFlag(mGame->isServer())) // We're a server, tell the master a little about us
+   // Added in master protocol 6
+   bstream->writeEnum(mConnectionType, MasterConnectionTypeCount);
+
+   if(mConnectionType == MasterConnectionTypeServer)
    {
       ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
@@ -423,8 +448,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
       bstream->writeString(serverGame->getSettings()->getHostName().c_str());       // Server name
       bstream->writeString(serverGame->getSettings()->getHostDescr().c_str());      // Server description
+
    }
-   else     // We're a client
+   else if(mConnectionType == MasterConnectionTypeClient)
    {
 #ifndef ZAP_DEDICATED
       ClientGame *clientGame = (ClientGame *)mGame;
@@ -437,11 +463,14 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(clientGame->getLoginPassword().c_str());     // and whatever password they supplied
 
       // Starting with MASTER_PROTOCOL_VERSION 6 we will write an 8 bit set of flags
-      if(MASTER_PROTOCOL_VERSION >= 6)    // TODO: Remove this check
-         bstream->writeInt(clientInfo->getPlayerFlagstoSendToMaster(), 8);
+      bstream->writeInt(clientInfo->getPlayerFlagstoSendToMaster(), 8);
 
       clientInfo->getId()->write(bstream);
 #endif
+   }
+   else if(mConnectionType == MasterConnectionTypeAnonymous)
+   {
+      // Do nothing.  We're anonymous!
    }
 }
 
@@ -481,6 +510,7 @@ void MasterServerConnection::requestAuthentication(StringTableEntry clientName, 
 {
    s2mRequestAuthentication(clientId.toVector(), clientName);
 }
+
 
 };
 

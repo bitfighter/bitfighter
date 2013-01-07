@@ -154,7 +154,6 @@ private:
 public:
    Address mAddress;
    bool mDone;
-   bool mUsed;
 
    NameToAddressThread(const char *address_string);  // Constructor
    virtual ~NameToAddressThread();                   // Destructor
@@ -201,6 +200,7 @@ protected:
    U32 mNextMasterTryTime;
 
    bool mReadyToConnectToMaster;
+   bool mDoAnonymousMasterConnection;
 
    Vector<Robot *> mRobots;               // Grand master list of all robots in the current game
    Rect mWorldExtents;                    // Extents of everything
@@ -382,7 +382,7 @@ public:
 
    void resetMasterConnectTimer();
 
-   void setReadyToConnectToMaster(bool ready);
+   void setReadyToConnectToMaster(bool ready, bool doAnonymous = false);
 
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  

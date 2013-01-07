@@ -273,6 +273,7 @@ public:
       mIsIgnoredFromList = false;
       mIsMasterAdmin = false;
       mLoggingStatus = "Not_Connected";
+      mConnectionType = MasterConnectionTypeNone;
    }
 
    /// Destructor removes the connection from the doubly linked list of server connections
@@ -286,12 +287,12 @@ public:
       {
          logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(), getNetAddress().toString(), mLoggingStatus);
       }
-      else if(mIsGameServer)
+      else if(mConnectionType == MasterConnectionTypeServer)
       {
          // SERVER_DISCONNECT | timestamp | player/server name
          logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
       }
-      else
+      else if(mConnectionType == MasterConnectionTypeClient)
       {
          // CLIENT_DISCONNECT | timestamp | player name
          logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
@@ -836,7 +837,7 @@ public:
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
    {
       // Only accept updates from game servers
-      if(!mIsGameServer)
+      if(mConnectionType != MasterConnectionTypeServer)
          return;
 
       // Only update if anything has changed
@@ -1151,6 +1152,19 @@ public:
       return name;
    }
 
+
+   void MasterServerConnection::sendMotd()
+   {
+      // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
+      string motdString = "Welcome to Bitfighter!";  // Default msg
+
+      if(gMOTDClientMap[mClientBuild] != "")
+         motdString = gMOTDClientMap[mClientBuild];
+
+      m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
+   }
+
+
    // Must match MasterServerConnection::writeConnectRequest()!!
    bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
@@ -1175,102 +1189,130 @@ public:
       bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
       bstream->read(&mClientBuild);          // Client's build number
 
-      mIsGameServer = bstream->readFlag();
+      // In protocol 6 we've added the concept of a connection type
+      if(mCMProtocolVersion >= 6)
+         mConnectionType = (MasterConnectionType) bstream->readEnum(MasterConnectionTypeCount);
+
+      // Protocol 5 and earlier only sent 1 bit to determine if it was a game server
+      else
+      {
+         if(bstream->readFlag())
+            mConnectionType = MasterConnectionTypeServer;
+         else
+            mConnectionType = MasterConnectionTypeClient;
+      }
+
       mLoggingStatus = NULL;
 
-      // If it's a game server, read status info...
-      if(mIsGameServer)
+      // Now read the bitstream and do other logic according to the connection type
+      switch(mConnectionType)
       {
-         bstream->read(&mNumBots);
-         bstream->read(&mPlayerCount);
-         bstream->read(&mMaxPlayers);
-         bstream->read(&mInfoFlags);
-
-         bstream->readString(readstr);    // Current level name
-         mLevelName = readstr;
-
-         bstream->readString(readstr);    // Current level type (hunters, ctf, soccer, etc.)
-         mLevelType = readstr;
-
-         bstream->readString(readstr);
-         mPlayerOrServerName = cleanName(readstr).c_str();
-
-         bstream->readString(readstr);
-         mServerDescr = readstr;
-
-         linkToServerList();
-      }
-      else     // Not a server? Must be a client
-      {
-         bstream->readString(readstr);          // Client's joystick autodetect string
-         mAutoDetectStr = readstr;
-
-         bstream->readString(readstr);
-         mPlayerOrServerName = cleanName(readstr).c_str();
-
-         bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
-
-         // Read client flags -- only the first is currently used
-         if(mCMProtocolVersion >= 6)
+         // If it's a game server, read status info...
+         case MasterConnectionTypeServer:
          {
-            U8 flags = bstream->readInt(8);
-            mIsDebugClient = flags & ClientDebugModeFlag;
-         }
-            
-         mPlayerId.read(bstream);
+            bstream->read(&mNumBots);
+            bstream->read(&mPlayerCount);
+            bstream->read(&mMaxPlayers);
+            bstream->read(&mInfoFlags);
 
-         // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
-         // possibilities, it most likely will be.
-         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-            if(walk != this && walk->mPlayerId == mPlayerId)
+            bstream->readString(readstr);    // Current level name
+            mLevelName = readstr;
+
+            bstream->readString(readstr);    // Current level type (hunters, ctf, soccer, etc.)
+            mLevelType = readstr;
+
+            bstream->readString(readstr);
+            mPlayerOrServerName = cleanName(readstr).c_str();
+
+            bstream->readString(readstr);
+            mServerDescr = readstr;
+
+            linkToServerList();
+         }
+         break;
+
+         case MasterConnectionTypeClient:
+         {
+            bstream->readString(readstr);          // Client's joystick autodetect string
+            mAutoDetectStr = readstr;
+
+            bstream->readString(readstr);
+            mPlayerOrServerName = cleanName(readstr).c_str();
+
+            bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
+
+            // Read client flags -- only the first is currently used
+            if(mCMProtocolVersion >= 6)
             {
-               logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
-                                                                                             walk->mPlayerOrServerName.getString());
-               disconnect(ReasonDuplicateId, "");
-               reason = ReasonDuplicateId;
-               return false;
+               U8 flags = bstream->readInt(8);
+               mIsDebugClient = flags & ClientDebugModeFlag;
             }
 
-         // Start the authentication by reading database on seperate thread
-         // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
-         // so we pause waiting for database instead of fully connecting yet.
+            mPlayerId.read(bstream);
 
-         for(S32 i = 0; i < gListAddressHide.size(); i++)
-            if(getNetAddress().isEqualAddress(gListAddressHide[i]))
-               mIsIgnoredFromList = true;
+            // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
+            // possibilities, it most likely will be.
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+               if(walk != this && walk->mPlayerId == mPlayerId)
+               {
+                  logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(),
+                                                                                                walk->mPlayerOrServerName.getString());
+                  disconnect(ReasonDuplicateId, "");
+                  reason = ReasonDuplicateId;
+                  return false;
+               }
 
-         switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
-         {
-            case WrongPassword:   reason = ReasonBadLogin;        return false;
-            case InvalidUsername: reason = ReasonInvalidUsername; return false;
-            case UnknownStatus: // make JSON delay write, to reduce chances of see the newly joined player as unauthenticated
+            // Start the authentication by reading database on seperate thread
+            // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
+            // so we pause waiting for database instead of fully connecting yet.
+
+            for(S32 i = 0; i < gListAddressHide.size(); i++)
+               if(getNetAddress().isEqualAddress(gListAddressHide[i]))
+                  mIsIgnoredFromList = true;
+
+            switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
             {
-               bool NeedToWriteStatusPrev = gNeedToWriteStatus;
-               linkToClientList();
-               gNeedToWriteStatus = NeedToWriteStatusPrev; // Don't let linkToClientList set it to true
-               gNeedToWriteStatusDelayed = Platform::getRealMilliseconds();
-               break;
+               case WrongPassword:   reason = ReasonBadLogin;        return false;
+               case InvalidUsername: reason = ReasonInvalidUsername; return false;
+               case UnknownStatus: // make JSON delay write, to reduce chances of see the newly joined player as unauthenticated
+               {
+                  bool NeedToWriteStatusPrev = gNeedToWriteStatus;
+                  linkToClientList();
+                  gNeedToWriteStatus = NeedToWriteStatusPrev; // Don't let linkToClientList set it to true
+                  gNeedToWriteStatusDelayed = Platform::getRealMilliseconds();
+                  break;
+               }
+               default: linkToClientList();
             }
-            default: linkToClientList();
+
+            // If client needs to upgrade, tell them
+            m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion || gLatestReleasedBuildVersion > mClientBuild);
+
+            // Send message of the day
+            sendMotd();
          }
+         break;
+
+         case MasterConnectionTypeAnonymous:
+         {
+            // Do nothing!
+         }
+         break;
+
+         default:
+            break;
       }
 
-      // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
-      string motdString = "Welcome to Bitfighter!";  // Default msg
 
-      if(gMOTDClientMap[mClientBuild] != "")
-         motdString = gMOTDClientMap[mClientBuild];
-
-      m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion || gLatestReleasedBuildVersion > mClientBuild);
-
-
-      // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
-      logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
-                                                   mIsGameServer ? "SERVER_INFO" : "CLIENT_INFO", getTimeStamp().c_str(),
-                                                   mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
-                                                   strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
-      if(!mIsGameServer)  // seems to be just a waste of bandwidth when sending this to servers
-         m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
+      // Log our connection if from client or server
+      if(mConnectionType == MasterConnectionTypeServer || mConnectionType == MasterConnectionTypeClient)
+      {
+         // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
+         logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
+               mConnectionType == MasterConnectionTypeServer ? "SERVER_INFO" : "CLIENT_INFO",
+               getTimeStamp().c_str(), mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
+               strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
+      }
 
       return true;
    }
@@ -1503,7 +1545,7 @@ public:
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mChangeName, (StringTableEntry name))
    {
-      if(mIsGameServer)  // server only, don't want clients to rename yet (client names need to authenticate)
+      if(mConnectionType == MasterConnectionTypeServer)  // server only, don't want clients to rename yet (client names need to authenticate)
       {
          mPlayerOrServerName = name;
          gNeedToWriteStatus = true;  // update server name in ".json"

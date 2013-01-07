@@ -77,5 +77,14 @@ enum ClientInfoFlags {
    ClientDebugModeFlag = BIT(0)  // If player is using a debug build (i.e. is probably a dev testing something)
 };
 
+enum MasterConnectionType {
+   MasterConnectionTypeClient = 0,     // Connection from client
+   MasterConnectionTypeServer = 1,     // Connection from game server
+   MasterConnectionTypeAnonymous = 2,  // Anonymous connection
+   //...                               // Room for one more!
+   MasterConnectionTypeCount = 4,      // Changing this will require updating the master protocol
+   MasterConnectionTypeNone,
+};
+
 #endif
 

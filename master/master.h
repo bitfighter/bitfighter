@@ -68,6 +68,10 @@ private:
    Int<BADGE_COUNT> mBadges;
    Int<BADGE_COUNT> getBadges();
 
+   void sendMotd();
+
+   MasterConnectionType mConnectionType;
+
 public:
    /// @name Linked List
    ///
@@ -100,7 +104,6 @@ public:
    /// @{
 
    ///
-   bool             mIsGameServer;     ///< True if this is a game server.
    U32              mStrikeCount;      ///< Number of "strikes" this connection has... 3 strikes and you're out!
    U32              mLastQueryId;      ///< The last query id for info from this master.
    U32              mLastActivityTime; ///< The last time we got a request or an update from this host.
@@ -269,6 +272,7 @@ public:
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 
 };
+
 
 class GameConnectRequest
 {
