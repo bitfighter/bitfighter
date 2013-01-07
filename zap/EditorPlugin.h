@@ -42,6 +42,9 @@ private:
    LevelLoader *mCaller;
    F32 mGridSize;
 
+protected:
+   void killScript();
+
 public:
    // Constructors
    EditorPlugin();      // Dummy 0-args constructor, here to make boost happy!

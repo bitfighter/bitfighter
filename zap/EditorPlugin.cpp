@@ -198,6 +198,12 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
 }
 
 
+void EditorPlugin::killScript()
+{
+   // Do something?
+}
+
+
 //// Lua methods
 /**
  *  @luaclass EditorPlugin

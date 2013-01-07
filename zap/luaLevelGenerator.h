@@ -52,6 +52,10 @@ private:
 
    Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
 
+
+protected:
+   void killScript();
+
 public:
    LuaLevelGenerator();                // Default constructor
 
