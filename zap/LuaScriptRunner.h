@@ -115,8 +115,6 @@ protected:
    virtual bool prepareEnvironment();
    void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
-   static void printStackTrace(lua_State *L);
-
    static int luaPanicked(lua_State *L);
    virtual void registerClasses();
    void setEnvironment();
@@ -171,7 +169,7 @@ public:
    bool retrieveFunction(const char *functionName);      // Put specified function on top of the stack, if it's defined
    bool retrieveCriticalFunction(const char *funName);   // Same, but with more oomph
 
-   void runCmd(const char *function);
+   bool runCmd(const char *function, S32 returnValues);
 
 
    const char *getScriptId();

@@ -58,7 +58,7 @@ public:
 
    const char *getErrorMessagePrefix();
      
-   bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error);    // Get menu def from the plugin
+   bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems);    // Get menu def from the plugin
 
    // Lua methods
    S32 getGridSize(lua_State *L);

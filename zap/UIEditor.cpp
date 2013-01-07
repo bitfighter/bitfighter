@@ -782,14 +782,8 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    string title;
    Vector<MenuItem *> menuItems;
-   bool error;
 
-   if(!plugin->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
-   {
-      onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
-      mPluginRunner.reset();
-      return;     
-   }
+   bool error = plugin->runGetArgsMenu(title, menuItems);     // Fills menuItems
 
    if(error)
    {
@@ -798,13 +792,16 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   if(menuItems.size() == 0)                       // No menu items?  Let's run the script directly!
+
+   if(menuItems.size() == 0)
    {
-      onPluginMenuClosed(Vector<string>());        // We'll use whatever args we already have
+      onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
       mPluginRunner.reset();
-      return;
+      return;     
    }
 
+
+   // There are menu items!
    // Build a menu from the menuItems returned by the plugin
    mPluginMenu.reset(new PluginMenuUI(getGame(), title));      // Using a smart pointer here, for auto deletion
 

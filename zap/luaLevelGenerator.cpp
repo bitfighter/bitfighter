@@ -92,7 +92,9 @@ void LuaLevelGenerator::tickTimer(U32 deltaT)
    luaW_push<LuaLevelGenerator>(L, this);   // -- this
    lua_pushnumber(L, deltaT);               // -- this, deltaT
 
-   runCmd("_tickTimer");
+   // Note that we don't care if this generates an error... if it does the error handler will
+   // print a nice message, then call killScript().
+   runCmd("_tickTimer", 0);
 }
 
 
