@@ -252,7 +252,7 @@ void drawCenteredString_highlightKeys(S32 y, S32 size, const string &str, const 
    S32 len = getStringWidth(size, str.c_str());
    S32 x = gScreenInfo.getGameCanvasWidth() / 2 - len / 2;
 
-   size_t keyStart, keyEnd = 0;
+   std::size_t keyStart, keyEnd = 0;
    S32 pos = 0;
 
    keyStart = str.find("[");
