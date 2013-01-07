@@ -84,39 +84,17 @@ string LuaLevelGenerator::getScriptName()
 // Used in addItem() below...
 static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 
-
-// Advance timers by deltaT
+// Advance Lua timers by deltaT
 void LuaLevelGenerator::tickTimer(U32 deltaT)
 {
-   TNLAssert(lua_gettop(L) <= 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   clearStack(L);
 
-   bool ok = retrieveFunction("_tickTimer");       // Push timer function onto stack            -- function 
-   TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
+   luaW_push<LuaLevelGenerator>(L, this);   // -- this
+   lua_pushnumber(L, deltaT);               // -- this, deltaT
 
-   if(!ok)
-   {      
-      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-      logError("Function _tickTimer() could not be found!  Terminating script.");
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return;
-   }
-
-   luaW_push<LuaLevelGenerator>(L, this);
-   lua_pushnumber(L, deltaT);                   // Pass the time elapsed since we were last here   -- function, object, time
-   S32 error = lua_pcall(L, 2, 0, 0);           // Pass two objects, expect none in return         -- <<empty stack>>
-
-   if(error != 0)
-   {
-      logError("Levelgen error running _tickTimer(): %s.", lua_tostring(L, -1));
-      clearStack(L);
-
-      TNLAssert(mGame->isServer(), "Expected this only to run on server!");
-      static_cast<ServerGame *>(mGame)->deleteLevelGen(this);
-   }
-
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   // Note that we don't care if this generates an error... if it does the error handler will
+   // print a nice message, then call killScript().
+   runCmd("_tickTimer", 0);
 }
 
 
@@ -193,6 +171,13 @@ bool LuaLevelGenerator::prepareEnvironment()
    setSelf(L, this, "levelgen");
 
    return true;
+}
+
+
+void LuaLevelGenerator::killScript()
+{
+   TNLAssert(mGame->isServer(), "Expected this only to run on server!");
+   static_cast<ServerGame *>(mGame)->deleteLevelGen(this);
 }
 
 

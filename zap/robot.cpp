@@ -293,7 +293,7 @@ void Robot::tickTimer(U32 deltaT)
       logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
       logError("Function _tickTimer() could not be found!  Terminating script.");
 
-      deleteObject();      // Will probably fail for levelgens...
+      deleteObject();
 
       TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 
@@ -352,6 +352,12 @@ void Robot::onAddedToGame(Game *game)
    game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
   
    EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerJoinedEvent, getPlayerInfo());
+}
+
+
+void Robot::killScript()
+{
+   deleteObject();
 }
 
 

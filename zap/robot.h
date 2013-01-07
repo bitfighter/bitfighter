@@ -72,6 +72,9 @@ private:
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
    S32 doFindObjects(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
 
+protected:
+   void killScript();
+
 public:
    Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
    virtual ~Robot();                // Destructor

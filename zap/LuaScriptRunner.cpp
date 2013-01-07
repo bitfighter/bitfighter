@@ -161,6 +161,7 @@ void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
+// Primarily used for loading helper functions
 bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
@@ -318,7 +319,66 @@ bool LuaScriptRunner::retrieveFunction(const char *functionName)
       return true;      // If so, return true
 
    // else
-   lua_pop(L, 1);
+   clearStack(L);
+   return false;
+}
+
+
+bool LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
+{
+   if(!retrieveFunction(functionName))
+   {
+      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
+
+      logError("Function %s() could not be found!  Terminating script.\n"
+               "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.", functionName);
+
+      return false;
+   }
+
+   return true;
+}
+
+
+// Returns true if there was an error, false if everything ran ok
+bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
+{
+   S32 args = lua_gettop(L);                          // -- <<args>>
+
+   // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
+   retrieveCriticalFunction("_stackTracer");          // -- <<args>>, _stackTracer
+   bool ok = retrieveFunction(function);              // -- <<args>>, _stackTracer, function
+   if(!ok)
+   {      
+      logprintf(LogConsumer::LogError, "%s\n"
+                                       "Cannot load method %s()!\n"
+                                       "Terminating script.", 
+                                       getErrorMessagePrefix(), function, lua_tostring(L, -1));
+      killScript();
+      clearStack(L);
+      return true;
+   }
+
+   // Reorder the stack a little
+   lua_insert(L, 1);                                  // -- function, <<args>>, _stackTracer
+   lua_insert(L, 1);                                  // -- _stackTracer, function, <<args>>
+
+   S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
+
+   if(error != 0)
+   {
+      logprintf(LogConsumer::LogError, "%s\n"
+                                       "In method %s():\n"
+                                       "%s.\n", 
+                                       getErrorMessagePrefix(), function, lua_tostring(L, -1));    // Gets stack trace left by _stackTracer
+      killScript();
+      clearStack(L);
+      return true;
+   }
+
+   lua_remove(L, 1);    // Remove _stackTracer           -- <<return values>>
+
+   // Do not clear stack -- caller probably wants <<return values>>
    return false;
 }
 
@@ -476,8 +536,6 @@ void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix)
    // Log the error to the logging system and also to the game console
    logprintf(LogConsumer::LogError, "%s %s", prefix, msg);
 
-   printStackTrace(L);
-
    LuaObject::clearStack(L);
 }
 
@@ -494,28 +552,6 @@ static string getStackTraceLine(lua_State *L, S32 level)
 	dSprintf(str, sizeof(str), "%s(%s:%i)", ar.name, ar.source, ar.currentline);
 
    return str;    // Implicitly converted to string to avoid passing pointer to deleted buffer
-}
-
-
-void LuaScriptRunner::printStackTrace(lua_State *L)
-{
-   const int MAX_TRACE_LEN = 20;
-
-   for(S32 level = 0; level < MAX_TRACE_LEN; level++)
-   {
-	   if(level == 0)
-		   logprintf("==== Stack trace ====");
-
-	   string str = getStackTraceLine(L, level);
-	   if(str == "")
-      {
-         if(level == 0)
-            logprintf("  <EMPTY>");
-		   break;
-      }
-
-	   logprintf("  %s", str.c_str());
-   }
 }
 
 

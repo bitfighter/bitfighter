@@ -115,8 +115,6 @@ protected:
    virtual bool prepareEnvironment();
    void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
-   static void printStackTrace(lua_State *L);
-
    static int luaPanicked(lua_State *L);
    virtual void registerClasses();
    void setEnvironment();
@@ -145,6 +143,9 @@ void setSelf(lua_State *L, T *self, const char *name)
 }
 
 
+protected:
+   virtual void killScript() = 0;
+
 
 public:
    LuaScriptRunner();               // Constructor
@@ -165,7 +166,11 @@ public:
 
    bool loadScript();
 
-   bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
+   bool retrieveFunction(const char *functionName);      // Put specified function on top of the stack, if it's defined
+   bool retrieveCriticalFunction(const char *funName);   // Same, but with more oomph
+
+   bool runCmd(const char *function, S32 returnValues);
+
 
    const char *getScriptId();
    static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
