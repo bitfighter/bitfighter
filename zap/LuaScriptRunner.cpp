@@ -363,7 +363,7 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
    lua_insert(L, 1);                                  // -- function, <<args>>, _stackTracer
    lua_insert(L, 1);                                  // -- _stackTracer, function, <<args>>
 
-   S32 error = lua_pcall(L, args, returnValues, -4);  // -- _stackTracer, <<return values>>
+   S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
 
    if(error != 0)
    {
