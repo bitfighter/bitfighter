@@ -88,9 +88,14 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
       return true;     
    }
 
-   // Empty stack --> no menu items, but no error, either!
-   if(lua_gettop(L) == 0)
-      return false;
+   // We specified that we expect 2 items back; this means that even if the function returns nothing (legit), there
+   // will be 2 nils on the stack.  We'll check the top of the stack -- if that's nil, we'll assume that the script
+   // intended to return no menu items, which is totally legit. 
+   if(lua_isnil(L, 1))
+   {
+      clearStack(L);    // Get rid of the nils
+      return false;     // No error
+   }
 
    // There's something on the stack.  Look for what we expect, throw an exception if we get any guff.
    try
@@ -102,13 +107,13 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
    catch(LuaException &e)
    {
       logError("Error running function getArgsMenu(): %s.  Aborting script.", e.what());
-      LuaObject::clearStack(L);
+      clearStack(L);
       return true;      // Error!
    }
 
-   clearStack(L);
-
+   clearStack(L);       // Probably unnecessary, but let's be thorough here
    return false;        // No error!
+
 #endif
 }
 
