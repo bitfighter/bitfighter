@@ -176,10 +176,6 @@ bool Robot::start()
    string name = runGetName();                                             // Run bot's getName function
    getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
-
-   if(mClientInfo->getName() == "")                          // Make sure bots have a name
-      mClientInfo->setName(getGame()->makeUnique("Robot").c_str());
-
    mHasSpawned = true;
 
    mGame->addToClientList(mClientInfo);
@@ -244,7 +240,12 @@ string Robot::runGetName()
    if(!error)
    {
       if(lua_isstring(L, -1))   // getName should have left a name on the stack
+      {
          name = lua_tostring(L, -1);
+
+         if(name == "")
+            name = getNextName();
+      }
       else
       {
          // If getName is not implemented, or returns nil, this is not an error; it just means we pick a name for the bot
