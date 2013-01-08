@@ -222,12 +222,8 @@ static string getNextName()
       "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe"
    };
 
-   static const S32 size = ARRAYSIZE(botNames);
-
-   static S32 nameIndex = -1;
-   nameIndex = (nameIndex + 1) % size;  // Rollover list if needed
-
-   return botNames[nameIndex];
+   static U8 nameIndex = 0;
+   return botNames[(nameIndex++) % ARRAYSIZE(botNames)];
 }
 
 
@@ -236,46 +232,30 @@ string Robot::runGetName()
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   // Retrieve the bot's getName function, and put it on top of the stack
-   bool ok = retrieveFunction("getName");     
+   // error will only be true if: 1) getName doesn't exist, which should never happen -- getName is stubbed out in robot_helper_functions.lua
+   //                             2) getName generates an error
+   //                             3) something is hopelessly corrupt (see 1)
+   // Note that it is valid for getName to return a nil (or not be implemented in the bot itself) in which case a default name will be chosen.
+   // If error is true, runCmd will terminate bot script by running killScript(), so we don't need to worry about making things too nice.
+   bool error = runCmd("getName", 1);     
 
-   TNLAssert(ok, "getName function not found -- is robot_helper_functions corrupt?");
+   string name = "";
 
-   if(!ok)
+   if(!error)
    {
-      string name = getNextName();
-      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-      logError("Could not find getName function -- using default name \"%s\".", name.c_str());
-      return name;
-   }
-
-   S32 error = lua_pcall(L, 0, 1, 0);    // Passing 0 params, expecting 1 back
-
-   if(error == 0)    // Function returned normally     
-   {
-      if(!lua_isstring(L, -1))
+      if(lua_isstring(L, -1))   // getName should have left a name on the stack
+         name = lua_tostring(L, -1);
+      else
       {
-         string name = getNextName();
-         logprintf(LogConsumer::LogWarning, "Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
+         // If getName is not implemented, or returns nil, this is not an error; it just means we pick a name for the bot
+         if(!lua_isnil(L, -1))
+            logprintf(LogConsumer::LogWarning, "Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
 
-         lua_pop(L, 1);          // Remove thing that wasn't a name from the stack
-         TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-         return name;
+         name = getNextName();
       }
-
-      string name = lua_tostring(L, -1);
-
-      lua_pop(L, 1);
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-      return name;
    }
 
-   // Got an error running getName()
-   string name = getNextName();
-   logError("Error running getName function (%s) -- using default name \"%s\".", lua_tostring(L, -1), name.c_str());
-
-   lua_pop(L, 1);             // Remove error message from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   clearStack(L);
    return name;
 }
 
@@ -285,7 +265,7 @@ void Robot::tickTimer(U32 deltaT)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   bool ok = retrieveFunction("_tickTimer");       // Push timer function onto stack            -- function 
+   bool ok = loadFunction(L, getScriptId(), "_tickTimer");       // Push timer function onto stack       -- function 
    TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
 
    if(!ok)

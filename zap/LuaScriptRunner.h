@@ -166,14 +166,13 @@ public:
 
    bool loadScript();
 
-   bool retrieveFunction(const char *functionName);      // Put specified function on top of the stack, if it's defined
    bool retrieveCriticalFunction(const char *funName);   // Same, but with more oomph
 
    bool runCmd(const char *function, S32 returnValues);
 
 
    const char *getScriptId();
-   static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
+   static bool loadFunction(lua_State *L, const char *scriptId, const char *functionName);
    bool loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context);
 
    void logError(const char *format, ...);

@@ -74,7 +74,7 @@ bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuIte
 
    // First check if function exists... if it does not, there will be no menu items, so we can return false.  
    // This is not an error condition.
-   if(!retrieveFunction("getArgsMenu"))
+   if(!loadFunction(L, getScriptId(), "getArgsMenu"))
       return false;  
 
    // Function exists, and is on the stack.  Clear it away because it will be reloaded by runCmd().

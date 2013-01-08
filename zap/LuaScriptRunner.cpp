@@ -141,24 +141,39 @@ void LuaScriptRunner::setEnvironment()
 }
 
 
-// Retrieve the environment from the registry, and put the requested function from that environment onto the stack
-void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
+// Retrieve the environment from the registry, and put the requested function from that environment onto the stack.  Returns true
+// if it works, false if the specified function could not be found.  If this fails, it will remove the non-function from the stack.
+bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
 {
-   try
-   {
-      lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
-      lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
+   lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
+   lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
+   lua_remove(L, -2);                              // Remove table                                          -- function
 
-      lua_remove(L, -2);                              // Remove table                                          -- function
-   }
+   // Check if the top stack item is indeed a function (as we would expect)
+   if(lua_isfunction(L, -1))
+      return true;      // If so, return true
 
-   catch(LuaException &e)
-   {
-      // TODO: Should be logError()!
-      logprintf(LogConsumer::LogError, "Error accessing %s function: %s.  Aborting script.", functionName, e.what());
-      LuaObject::clearStack(L);
-   }
+   // else
+   clearStack(L);
+   return false;
 }
+
+
+bool LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
+{
+   if(!loadFunction(L, getScriptId(), functionName))
+   {
+      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
+
+      logError("Function %s() could not be found!  Terminating script.\n"
+               "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.", functionName);
+
+      return false;
+   }
+
+   return true;
+}
+
 
 
 // Primarily used for loading helper functions
@@ -275,7 +290,7 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
    try 
    {
       // Retrieve the bot's getName function, and put it on top of the stack
-      bool ok = retrieveFunction("main");     
+      bool ok = loadFunction(L, getScriptId(), "main");     
 
       if(!ok)
       {      
@@ -305,49 +320,14 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 }
 
 
-// Get a function from the currently running script, and place it on top of the stack.  Returns true if it works, false
-// if the specified function could not be found.  If this fails will remove the non-function from the stack.
-bool LuaScriptRunner::retrieveFunction(const char *functionName)
-{
-   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's environment table onto stack  -- table
-   lua_pushstring(L, functionName);                      //                                            -- table, functionName
-   lua_gettable(L, -2);                                  // Push requested function onto the stack     -- table, fn
-   lua_remove(L, lua_gettop(L) - 1);                     // Remove environment table from stack        -- fn
-
-   // Check if the top stack item is indeed a function (as we would expect)
-   if(lua_isfunction(L, -1))
-      return true;      // If so, return true
-
-   // else
-   clearStack(L);
-   return false;
-}
-
-
-bool LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
-{
-   if(!retrieveFunction(functionName))
-   {
-      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
-
-      logError("Function %s() could not be found!  Terminating script.\n"
-               "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.", functionName);
-
-      return false;
-   }
-
-   return true;
-}
-
-
 // Returns true if there was an error, false if everything ran ok
 bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 {
-   S32 args = lua_gettop(L);                          // -- <<args>>
+   S32 args = lua_gettop(L);                             // -- <<args>>
 
    // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
-   retrieveCriticalFunction("_stackTracer");          // -- <<args>>, _stackTracer
-   bool ok = retrieveFunction(function);              // -- <<args>>, _stackTracer, function
+   retrieveCriticalFunction("_stackTracer");             // -- <<args>>, _stackTracer
+   bool ok = loadFunction(L, getScriptId(), function);   // -- <<args>>, _stackTracer, function
    if(!ok)
    {      
       logprintf(LogConsumer::LogError, "%s\n"
