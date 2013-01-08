@@ -32,6 +32,16 @@ int - A number that has no decimal component.  Unlike some languages, Lua does n
 
 @section programming_robots Programming Robots
 
+When the bot is first started, Bitfighter will call the bot's getName() function.  This function should return a string which will be used as the bot's name.  If the function is not implemented, or returns a nil, the bot will be assigned a name.  If getName() returns any other value, an error will be logged, and the script will be terminated.  Once the bot's name has been specified, it cannot be changed.
+
+A very simple getName() function might look like this:
+\code
+function getName()
+     return("Asimov")
+end
+\endcode
+
+
 @section programming_levelgens Programming Levelgens
 
 @section programming_plugins Programming Editor Plugins
