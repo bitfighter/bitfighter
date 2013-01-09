@@ -205,6 +205,9 @@ bool LuaScriptRunner::loadScript()
 {
    static const S32 MAX_CACHE_SIZE = 16;
 
+   // On a dedicated server, we'll always cache our scripts; on a regular server, we'll cache script except when the user is testing
+   // from the editor.  In that case, we'll want to see script changes take place immediately, and we're willing to pay a small
+   // performance penalty on level load to get that.
 #ifdef ZAP_DEDICATED
    bool cacheScripts = true;
 #else
