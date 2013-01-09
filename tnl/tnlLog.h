@@ -168,7 +168,7 @@ struct LogType
    const char *typeName;
    static LogType *current;
 
-#ifdef TNL_ENABLE_LOGGING
+#ifndef TNL_DISABLE_LOGGING
    static void setCurrent(LogType *theType) { current = theType; }
    static LogType *find(const char *name);
 #endif

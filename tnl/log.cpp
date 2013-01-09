@@ -120,7 +120,7 @@ void LogConsumer::logprintf(const char *format, ...)
 }
 
 
-#ifdef TNL_ENABLE_LOGGING
+#ifndef TNL_DISABLE_LOGGING
 
 // All logging should pass through this method -- disabling it via the ifdef should cause logging to not happen, but it's untested
 void LogConsumer::prepareAndLogString(std::string message)
@@ -202,7 +202,7 @@ void StdoutLogConsumer::writeString(const char *string)
 LogType *LogType::linkedList = NULL;
 LogType *LogType::current = NULL;
 
-#ifdef TNL_ENABLE_LOGGING
+#ifndef TNL_DISABLE_LOGGING
 
 LogType *LogType::find(const char *name)
 {
