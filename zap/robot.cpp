@@ -261,37 +261,18 @@ string Robot::runGetName()
 }
 
 
-// Advance timers by deltaT
+// Advance timers by deltaT  -- only difference between this and levelgen version is <Robot>
 void Robot::tickTimer(U32 deltaT)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+   clearStack(L);
 
-   bool ok = loadFunction(L, getScriptId(), "_tickTimer");       // Push timer function onto stack       -- function 
-   TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
+   luaW_push<Robot>(L, this);       // -- this
+   lua_pushnumber(L, deltaT);       // -- this, deltaT
 
-   if(!ok)
-   {      
-      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-      logError("Function _tickTimer() could not be found!  Terminating script.");
-
-      deleteObject();
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return;
-   }
-
-   luaW_push<Robot>(L, this);
-   lua_pushnumber(L, deltaT);                   // Pass the time elapsed since we were last here   -- function, object, time
-   S32 error = lua_pcall(L, 2, 0, 0);           // Pass two objects, expect none in return         -- <<empty stack>>
-
-   if(error != 0)
-   {
-      logError("Robot error running _tickTimer(): %s.  Shutting robot down.", lua_tostring(L, -1));
-      lua_pop(L, 1);    // Remove error message from stack
-
-      deleteObject();   // Add bot to delete list, where it will be deleted in the proper manner
-   }
+   // Note that we don't care if this generates an error... if it does the error handler will
+   // print a nice message, then call killScript().
+   runCmd("_tickTimer", 0);
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
