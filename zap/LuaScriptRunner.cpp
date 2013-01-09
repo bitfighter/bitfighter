@@ -182,7 +182,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
    setEnvironment();                            // Set the environment for the code
-   S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                 -- <<empty stack>>
+   S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                -- <<empty stack>>
 
 
    if(err != 0)
