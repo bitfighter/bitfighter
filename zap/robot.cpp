@@ -278,7 +278,6 @@ void Robot::tickTimer(U32 deltaT)
 }
 
 
-
 // Register our connector types with Lua
 void Robot::registerClasses()
 {
