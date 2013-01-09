@@ -874,7 +874,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
    code << "__metatable = false} )";
 
    // Execute lua code
-   if ( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
+   if( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
    {
       fprintf(stderr, "%s\n\n%s\n", code.str().c_str(), lua_tostring(L, -1));
       lua_pop(L, 1);
