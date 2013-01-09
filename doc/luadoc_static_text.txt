@@ -86,15 +86,22 @@ Timer is a utility class that makes it easier to manage timing periodic or delay
 
 A timer object that can be used to schedule arbitrary events to be executed at some time in the future.  All times are given in milliseconds.
 
-etc...
+See the Timer class for more details.
 
 
 @section debugging Debugging Tips
 
-Any of your scripts can print a stack trace to see how you got to a particular execution point.  This can be very helpful if there are several conditions under which a function can be called.
+Any of your scripts can print a stack trace to see how you got to a particular execution point.  This can be very helpful if there are several conditions under which a function can be called.  
+
+The logprint command will print messages both to the Bitfighter logfile, as well as to the in-game console (which you can turn on with ctrl+/).
+
+Finally, if you detect an unexpected error condition, you can log a message, trigger a stack trace, and terminate the script with Lua's error function.
 
 \code
+logprint("Here's a log message:")
 logprint(debug.traceback())
+
+if target == nil then error("Have a nil target!") end
 \endcode
 
 
