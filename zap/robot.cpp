@@ -261,23 +261,6 @@ string Robot::runGetName()
 }
 
 
-// Advance timers by deltaT  -- only difference between this and levelgen version is <Robot>
-void Robot::tickTimer(U32 deltaT)
-{
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-   clearStack(L);
-
-   luaW_push<Robot>(L, this);       // -- this
-   lua_pushnumber(L, deltaT);       // -- this, deltaT
-
-   // Note that we don't care if this generates an error... if it does the error handler will
-   // print a nice message, then call killScript().
-   runCmd("_tickTimer", 0);
-
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-}
-
-
 // Register our connector types with Lua
 void Robot::registerClasses()
 {
@@ -492,7 +475,7 @@ void Robot::idle(BfObject::IdleCallPath path)
 
       TNLAssert(deltaT != 0, "Time should never be zero!");    
 
-      tickTimer(deltaT);
+      tickTimer<Robot>(deltaT);
 
       Parent::idle(BfObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
    }

@@ -589,13 +589,6 @@ void LuaScriptRunner::setModulePath()
 }
 
 
-// Advance timers by deltaT
-void LuaScriptRunner::tickTimer(U32 deltaT)
-{
-   TNLAssert(false, "Not implemented");
-}
-
-
 // Since all calls to lua are now done in protected mode, via lua_pcall, if we get here, we've probably encountered 
 // a fatal error such as running out of memory.  Best just to shut the whole thing down.
 int LuaScriptRunner::luaPanicked(lua_State *L)

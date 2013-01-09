@@ -119,7 +119,6 @@ protected:
    virtual void registerClasses();
    void setEnvironment();
    static void deleteScript(const char *name);  // Remove saved script from the Lua registry
-   virtual void tickTimer(U32 deltaT);          // Advance script timers
 
    void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
@@ -190,6 +189,22 @@ public:
    S32 doUnsubscribe(lua_State *L);
 
    static const LuaFunctionProfile functionArgs[]; 
+
+   // Consolidate code from bots and levelgens -- this tickTimer works for both!
+   template <class T>
+   void tickTimer(U32 deltaT)          
+   {
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+      clearStack(L);
+
+      luaW_push<T>(L, static_cast<T *>(this));           // -- this
+      lua_pushnumber(L, deltaT);       // -- this, deltaT
+
+      // Note that we don't care if this generates an error... if it does the error handler will
+      // print a nice message, then call killScript().
+      runCmd("_tickTimer", 0);
+   }
+
 };
 
 

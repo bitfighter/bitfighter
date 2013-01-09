@@ -1181,7 +1181,7 @@ void ServerGame::idle(U32 timeDelta)
 
    // Tick levelgen timers
    for(S32 i = 0; i < mLevelGens.size(); i++)
-      mLevelGens[i]->tickTimer(timeDelta);
+      mLevelGens[i]->tickTimer<LuaLevelGenerator>(timeDelta);
 
    // Check for any levelgens that must die
    for(S32 i = 0; i < mLevelGenDeleteList.size(); i++)
