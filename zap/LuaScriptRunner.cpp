@@ -175,15 +175,15 @@ bool LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
 }
 
 
-
 // Primarily used for loading helper functions
 bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
+   setScriptContext(L, context);
+
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
    setEnvironment();                            // Set the environment for the code
    S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                 -- <<empty stack>>
 
-   setScriptContext(L, context);
 
    if(err != 0)
    {
@@ -197,7 +197,6 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 
    return true;
 }
-
 
 
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
