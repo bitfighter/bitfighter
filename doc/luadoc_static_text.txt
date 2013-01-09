@@ -6,6 +6,31 @@
 
 Here is some info about scripting levels and robots in Bitfighter.
 
+All scripts must contain a \e main() function.  There are some subtle differences between how bots and levelgens use this function, but we can ignore those for the moment.  The important thing is the \e main() function is run when the script is loaded, and should contain any configuration code the script requires.  
+
+It is possible to specify a list of arguments to be passed to a robot or levelgen script.  These arguments will be placed in a table called \e arg, which is the standard Lua location for storing command line parameters.
+
+@subsection Robots
+A robot's \e main() function gets run as soon as the bot is added to the game.  In the main function, the bot should subscribe to any events it wants to listen for (though it can always subscribe later).  By default, all bots are subscribed to the \e Tick event, though you can unsbscribe to that event if the bot only responds to events (\e eliza.bot works this way -- in its main function, it subscribes to the \e MsgRecieved event, and unsbscribes to \e Tick.)
+
+@subsection Levelgens
+Levelgens are a little different.  While the entire purupose of a bot is to actively participate in a game, many levelgens will not stick around after the level has been loaded. For a basic levelgen, the entire script might be contained in the main() function -- it might create some items, and do nothing more.
+
+If a level has a levelgen script, its main function is executed as the level is loaded, after all objects defined in the level file have been created.  Therefore a levelgen can act upon those objects, either altering them, deleting them, or by adding completely new objects.
+
+Levelgens can also subscribe to events; their event handlers will be called throughout the game as events are fired.
+
+Unlike robots, levelgens are not automatically subscribed to the \e Tick event.
+
+
+@subsection Editor Plugins
+Plugins run once when called, then exit.  The \e main() function is called.
+
+Since plugins do not linger after being called, they cannot subscribe to or respond to events.
+
+***** Need to describe the menu building system here, and how those args get passed to main(). *****
+
+
 @section datatypes Bitfighter datatypes
 * point - Point is a low-overhead custom structure that represents an xy coordinate pair.  See the \link point point class documentation \endlink for further details.
 
