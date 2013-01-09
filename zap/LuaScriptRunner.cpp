@@ -293,7 +293,7 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 
       if(!ok)
       {      
-         const char *msg = "Function main() could not be found.  This _might_ be OK, but probably isn't.  If it is intentional, please add an empty function called main() to avoid this message.";
+         const char *msg = "Function main() could not be found.  This _might_ be OK, but probably isn't.  If it is intentional, please add an empty function called main() to suppress this message.";
          logError(msg);
          throw LuaException(msg);
       }  
