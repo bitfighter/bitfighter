@@ -296,6 +296,7 @@ const Vector<DatabaseObject *> *GridDatabase::findObjects_fast(U8 typeNumber) co
       return &mSpyBugs;
 
    TNLAssert(false, "This type not currently supported!  Sorry dude!");
+   return NULL;  // this line gets rid of compile warning "Not all control paths return a value"
 }
 
 
@@ -740,6 +741,7 @@ S32 GridDatabase::getObjectCount(U8 typeNumber)
       return mSpyBugs.size();
 
    TNLAssert(false, "Unsupported type!");
+   return 0;
 }
 
 
