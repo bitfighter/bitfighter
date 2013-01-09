@@ -10,7 +10,7 @@ LOCAL_MODULE := tnl
 LOCAL_C_INCLUDES := $(LOCAL_PATH)
 
 # using -DTNL_DEBUG hangs on start-up
-LOCAL_CFLAGS := -DTNL_ENABLE_LOGGING
+LOCAL_CFLAGS := 
 
 # Add your application source files here...
 LOCAL_SRC_FILES := assert.cpp \

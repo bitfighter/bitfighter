@@ -3,7 +3,7 @@
 
 OPTIMIZE=-O2
 DEBUG=-g -DTNL_DEBUG
-CC=g++ $(DEBUG) -DTNL_ENABLE_LOGGING -I../libtomcrypt/src/headers -I../libtomcrypt $(OPTIMIZE)
+CC=g++ $(DEBUG) -I../libtomcrypt/src/headers -I../libtomcrypt $(OPTIMIZE)
 
 
 OBJECTS=\
