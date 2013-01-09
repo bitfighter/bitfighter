@@ -3664,10 +3664,12 @@ extern Color gTeamChatColor;
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
 {
+#ifndef ZAP_DEDICATED
 	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
 	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
 
 	gameUI->renderAnnouncement(message);
+#endif
 }
 
 
