@@ -203,7 +203,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
-   static const S32 MAX_CACHE_SIZE = 2;      // For now -- can be bigger when we know this works
+   static const S32 MAX_CACHE_SIZE = 16;
 
 #ifdef ZAP_DEDICATED
    bool cacheScripts = true;
