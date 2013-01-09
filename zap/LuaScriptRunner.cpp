@@ -286,39 +286,14 @@ bool LuaScriptRunner::runMain()
 }
 
 
+// Takes the passed args, puts them into a Lua table called arg, pushes it on the stack, and runs the "main" function.
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-   try 
-   {
-      // Retrieve the bot's getName function, and put it on top of the stack
-      bool ok = loadFunction(L, getScriptId(), "main");     
 
-      if(!ok)
-      {      
-         const char *msg = "Function main() could not be found.  This _might_ be OK, but probably isn't.  If it is intentional, please add an empty function called main() to suppress this message.";
-         logError(msg);
-         throw LuaException(msg);
-      }  
-
-      setLuaArgs(args);
-
-      S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
-
-      if(error != 0)
-         throw LuaException(lua_tostring(L, -1));
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-   }
-
-   catch(LuaException &e)
-   {
-      // logError will print the message, dump a stack trace, and clear the stack
-      logError("Error encountered while attempting to run script's main() function: %s.  Aborting script.", e.what());
-      return false;
-   }
-
-   return true;
+   setLuaArgs(args);
+   bool error = runCmd("main", 0);
+   return !error;
 }
 
 
@@ -556,6 +531,8 @@ void LuaScriptRunner::registerClasses()
 // By Lua convention, we'll put the name of the script into the 0th element.
 void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 {
+   S32 stackDepth = lua_gettop(L);
+
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId()); // Put script's env table onto the stack  -- ..., env_table
    lua_pushliteral(L, "arg");                         //                                        -- ..., env_table, "arg"
    lua_createtable(L, args.size() + 1, 0);            // Create table with predefined slots     -- ..., env_table, "arg", table
@@ -571,6 +548,8 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
    
    lua_settable(L, -3);                               // Save it: env_table["arg"] = table      -- ..., env_table
    lua_pop(L, 1);                                     // Remove environment table from stack    -- ...
+
+   TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
 }
 
 
