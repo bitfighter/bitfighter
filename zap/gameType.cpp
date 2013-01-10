@@ -3556,6 +3556,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (me
 	}
 }
 
+
 // Send a private message
 GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr message), (toName, message))
 {

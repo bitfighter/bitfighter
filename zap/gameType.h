@@ -541,7 +541,6 @@ public:
    TNL_DECLARE_RPC(c2sSendAnnouncement,(string message));
    TNL_DECLARE_RPC(s2cDisplayAnnouncement,(string message));
 
-
    TNL_DECLARE_RPC(c2sSendChatPM, (StringTableEntry toName, StringPtr message));                        // using /pm command
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat
    TNL_DECLARE_RPC(c2sSendChatSTE, (bool global, StringTableEntry ste));       // Quick-chat
