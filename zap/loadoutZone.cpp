@@ -195,11 +195,9 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
   */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { TEAM_INDX, GEOM, END }}), 2 ) \
 
 GENERATE_LUA_FUNARGS_TABLE(LoadoutZone, LUA_METHODS);
-
-const luaL_reg LoadoutZone::luaMethods[] = { { NULL, NULL } };
+GENERATE_LUA_METHODS_TABLE_NEW(LoadoutZone, LUA_METHODS);
 
 #undef LUA_METHODS
 

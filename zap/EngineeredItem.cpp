@@ -1460,8 +1460,13 @@ void ForceFieldProjector::onGeomChanged()
 // Lua interface
 
 // No custom ForceFieldProjector methods
-const luaL_reg           ForceFieldProjector::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile ForceFieldProjector::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(ForceFieldProjector, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(ForceFieldProjector, LUA_METHODS);
+
+#undef LUA_METHODS
 
 const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
 REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);

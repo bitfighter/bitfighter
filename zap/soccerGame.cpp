@@ -549,8 +549,14 @@ void SoccerBallItem::unpackUpdate(GhostConnection *connection, BitStream *stream
  *  @brief    Target object used in Soccer games
  */
 // No soccerball specific methods!
-const luaL_reg           SoccerBallItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile SoccerBallItem::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(SoccerBallItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(SoccerBallItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 
 const char *SoccerBallItem::luaClassName = "SoccerBallItem";

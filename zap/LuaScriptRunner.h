@@ -221,9 +221,9 @@ const luaL_reg class_::luaMethods[] =              \
 // Generates something like the following:
 // const luaL_reg Teleporter::luaMethods[] =
 // {
-//       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest >    }
-//       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest >    }
-//       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests > }
+//       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest >    },
+//       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest >    },
+//       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests > },
 //       { NULL, NULL }
 // };
 
@@ -252,23 +252,27 @@ const luaL_reg class_::luaMethods[] =                  \
 
 ////////////////////////////////////////
 
-#define LUA_FUNARGS_ITEM(class_, name, profiles, profileCount) \
-{ #name, profiles, profileCount },
+ #define LUA_FUNARGS_ITEM(class_, name, profiles, profileCount) \
+{ #name, {profiles, profileCount } },
+ 
 
 #define GENERATE_LUA_FUNARGS_TABLE(class_, table_)  \
 const LuaFunctionProfile class_::functionArgs[] =   \
 {                                                   \
    table_(class_, LUA_FUNARGS_ITEM)                 \
-   { NULL, { }, 0 }                                 \
+   { NULL, {{{ }}, 0 } }                            \
 }
 
-// Generates something like the following:
+// Generates something like the following (without the comment block, of course!):
 // const LuaFunctionProfile Teleporter::functionArgs[] =
+//    |---------------- LuaFunctionProfile ------------------|     
+//    |- Function name -|-------- LuaFunctionArgList --------|
+//    |                 |-argList -|- # elements in argList -|  
 // {
-//    { "addDest",    {{ PT,  END }}, 1 }
-//    { "delDest",    {{ INT, END }}, 1 }
-//    { "clearDests", {{      END }}, 1 }
-//    { NULL, { }, 0 }
+//    { "addDest",    {{{ PT,  END }},         1             } },
+//    { "delDest",    {{{ INT, END }},         1             } },
+//    { "clearDests", {{{      END }},         1             } },
+//    { NULL, {{{ }}, 0 } }
 // };
 
 ////////////////////////////////////////

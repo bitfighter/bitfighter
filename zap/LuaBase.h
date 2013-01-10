@@ -51,6 +51,7 @@ class LuaPlayerInfo;
 class MenuItem;
 class BfObject;
 struct LuaFunctionProfile;    // Defined below
+struct LuaFunctionArgList;    // Defined below
 
 
 typedef const char* ClassName;
@@ -166,10 +167,12 @@ public:
 
    /////
    // Documenting and help
-   static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos, const char *className, const char *functionName);
+   static S32 checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,   const char *className, const char *functionName);
+   static S32 checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName);
+
    static bool checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos);
 
-   static string prettyPrintParamList(const LuaFunctionProfile *functionInfo);
+   static string prettyPrintParamList(const LuaFunctionArgList &functionInfo);
    static void printFunctions(const ArgMap &argMap, const map<ClassName, unsigned int> &nodeMap, 
                               const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex);
    static void printLooseFunctions();
@@ -185,10 +188,18 @@ public:
 static const int MAX_PROFILE_ARGS = 6;          // Max used so far = 3
 static const int MAX_PROFILES = 4;              // Max used so far = 2
 
-struct LuaFunctionProfile {
-   const char *functionName;
+
+// This is a list of possible arguments for a function, along with the number of arguments actually presented
+struct LuaFunctionArgList {
    LuaBase::LuaArgType argList[MAX_PROFILES][MAX_PROFILE_ARGS];
    const int profileCount;
+};
+
+
+// This is an asociation of a LuaFunctionArgList with the function name it is associated with
+struct LuaFunctionProfile {
+   const char         *functionName;
+   LuaFunctionArgList  functionArgList;   
 };
 
 };

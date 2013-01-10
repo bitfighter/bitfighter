@@ -217,11 +217,9 @@ REGISTER_LUA_CLASS(EditorPlugin);
    METHOD(CLASS, getAllObjects,      ARRAYDEF({{ END }}), 1 ) \
 
 GENERATE_LUA_METHODS_TABLE(EditorPlugin, LUA_METHODS);
+GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
 
 #undef LUA_METHODS
-
-
-const LuaFunctionProfile EditorPlugin::functionArgs[] = { { NULL, { }, 0 } };
 
 
 // These two methods are reproduced here because it is (probably) better to have the plugin object stand on its own rather than

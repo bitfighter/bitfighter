@@ -313,7 +313,7 @@ const luaL_reg LuaLoadout::luaMethods[] =
 
 const LuaFunctionProfile LuaLoadout::functionArgs[] =
 {
-   { NULL, { }, 0 }
+   { NULL, {{{ }}, 0 } }
 };
 
 

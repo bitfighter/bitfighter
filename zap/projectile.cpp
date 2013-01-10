@@ -989,8 +989,13 @@ bool Mine::canAddToEditor() { return true; }
 /////
 // Lua interface
 
-const luaL_reg           Mine::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile Mine::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(Mine, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(Mine, LUA_METHODS);
+
+#undef LUA_METHODS
 
 
 const char *Mine::luaClassName = "Mine";
@@ -1242,9 +1247,14 @@ bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 
 /////
 // Lua interface
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
 
-const luaL_reg           SpyBug::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile SpyBug::functionArgs[] = { { NULL, { }, 0 } };
+GENERATE_LUA_FUNARGS_TABLE(SpyBug, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(SpyBug, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 
 const char *SpyBug::luaClassName = "SpyBugItem";

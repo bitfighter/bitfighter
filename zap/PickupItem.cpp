@@ -429,8 +429,14 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
  */
 
 // Only implements inherited methods
-const luaL_reg           RepairItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile RepairItem::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(RepairItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(RepairItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 
 const char *RepairItem::luaClassName = "RepairItem";
@@ -519,8 +525,13 @@ const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships
  */
 
 // Only implements inherited methods
-const luaL_reg           EnergyItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile EnergyItem::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(EnergyItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(EnergyItem, LUA_METHODS);
+
+#undef LUA_METHODS
 
 
 const char *EnergyItem::luaClassName = "EnergyItem";

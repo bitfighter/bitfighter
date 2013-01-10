@@ -799,8 +799,14 @@ void PolyWall::onAddedToGame(Game *game)
   *
   *  @geom %PolyWall geometry is a typical polygon.
   */
-const luaL_reg           PolyWall::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile PolyWall::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(PolyWall, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(PolyWall, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *PolyWall::luaClassName = "PolyWall";
 REGISTER_LUA_SUBCLASS(PolyWall, BfObject);

@@ -150,9 +150,13 @@ bool Zone::collide(BfObject *hitObject)
   *  @luaclass Zone
   *  @brief Invisible objects, used mainly for generating events.
   */
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
 
-const luaL_reg           Zone::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile Zone::functionArgs[] = { { NULL, { }, 0 } };
+GENERATE_LUA_FUNARGS_TABLE(Zone, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(Zone, LUA_METHODS);
+
+#undef LUA_METHODS
 
 const char *Zone::luaClassName = "Zone";
 REGISTER_LUA_SUBCLASS(Zone, BfObject);

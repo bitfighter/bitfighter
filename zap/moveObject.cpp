@@ -1811,8 +1811,13 @@ void Circle::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit
   *  @descr This is not really a supported object.  Just something we were playing around with.  Do not use this!
   *  @geom  The geometry of %Circle is a single point.
   */
-const luaL_reg           Circle::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile Circle::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(Circle, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(Circle, LUA_METHODS);
+
+#undef LUA_METHODS
 
 
 const char *Circle::luaClassName = "Circle";

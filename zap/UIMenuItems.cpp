@@ -293,8 +293,14 @@ void MenuItem::setUnselectedValueColor(const Color &color) { /* Override in chil
  *
  *  Currently, you cannot instantiate a %MenuItem from Lua, though you can instatiate %MenuItem subclasses.
  */
-const luaL_reg           MenuItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile MenuItem::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(MenuItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(MenuItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *MenuItem::luaClassName = "MenuItem";
 REGISTER_LUA_CLASS(MenuItem);
@@ -584,8 +590,14 @@ string ToggleMenuItem::getValue() const
  *    m = ToggleMenuItem.new("Type", { "BarrierMaker", "LoadoutZone", "GoalZone" }, 1, true, "Type of item to insert")
  *  \endcode
  */
-const luaL_reg           ToggleMenuItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile ToggleMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(ToggleMenuItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(ToggleMenuItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *ToggleMenuItem::luaClassName = "ToggleMenuItem";
 REGISTER_LUA_SUBCLASS(ToggleMenuItem, MenuItem);
@@ -700,9 +712,14 @@ void YesNoMenuItem::setIndex(S32 index)
  *    m = YesNoMenuItem.new("Hostile", 1, "Should this turret be hostile?")
  *  \endcode
  */
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
 
-const luaL_reg           YesNoMenuItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile YesNoMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+GENERATE_LUA_FUNARGS_TABLE(YesNoMenuItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(YesNoMenuItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *YesNoMenuItem::luaClassName = "YesNoMenuItem";
 REGISTER_LUA_SUBCLASS(YesNoMenuItem, ToggleMenuItem);
@@ -927,9 +944,14 @@ void CounterMenuItem::activatedWithShortcutKey()
  *    m = CounterMenuItem.new("Wall Thickness", 50, 1, 1, 50, "grid units", "", "Thickness of wall to be created")
  *  \endcode
  */
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
 
-const luaL_reg           CounterMenuItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile CounterMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+GENERATE_LUA_FUNARGS_TABLE(CounterMenuItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(CounterMenuItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *CounterMenuItem::luaClassName = "CounterMenuItem";
 REGISTER_LUA_SUBCLASS(CounterMenuItem, MenuItem);
@@ -1318,8 +1340,14 @@ void TextEntryMenuItem::setSecret(bool secret)
  *  @luaclass TextEntryMenuItem
  *  @brief    Menu item allowing users to enter a text value.
  */
-const luaL_reg           TextEntryMenuItem::luaMethods[]   = { { NULL, NULL } };
-const LuaFunctionProfile TextEntryMenuItem::functionArgs[] = { { NULL, { }, 0 } };
+//                Fn name                  Param profiles            Profile count                           
+#define LUA_METHODS(CLASS, METHOD) \
+
+GENERATE_LUA_FUNARGS_TABLE(TextEntryMenuItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(TextEntryMenuItem, LUA_METHODS);
+
+#undef LUA_METHODS
+
 
 const char *TextEntryMenuItem::luaClassName = "TextEntryMenuItem";
 REGISTER_LUA_SUBCLASS(TextEntryMenuItem, MenuItem);

@@ -92,12 +92,18 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
    if(!functionInfo)
       return -1;
 
+   return checkArgList(L, functionInfo->functionArgList, className, functionName);
+}
+
+
+S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionArgList &functionArgList, const char *className, const char *functionName)
+{
    S32 stackDepth = lua_gettop(L);
-   S32 profileCount = functionInfo->profileCount;
+   S32 profileCount = functionArgList.profileCount;
 
    for(S32 i = 0; i < profileCount; i++)
    {
-      const LuaBase::LuaArgType *candidateArgList = functionInfo->argList[i];
+      const LuaBase::LuaArgType *candidateArgList = functionArgList.argList[i];
       bool validProfile = true;
       S32 stackPos = 0;
 
@@ -110,7 +116,6 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
             stackPos++;
             ok = checkLuaArgs(L, candidateArgList[j], stackPos);
          }
-
 
          if(!ok)
          {
@@ -125,9 +130,9 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionProfile *functionInfos,
    
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
    char msg[2048];
-   string params = prettyPrintParamList(functionInfo);
+   string params = prettyPrintParamList(functionArgList);
    dSprintf(msg, sizeof(msg), "Could not validate params for function %s::%s(). Expected%s: %s", 
-                              className, functionName, functionInfo->profileCount > 1 ? " one of the following" : "", params.c_str());
+                              className, functionName, functionArgList.profileCount > 1 ? " one of the following" : "", params.c_str());
    logprintf(LogConsumer::LogError, msg);
 
    dumpStack(L, "Current stack state");
@@ -681,21 +686,21 @@ static const char *argTypeNames[] = {
 
 
 // Return a nicely formatted list of acceptable parameter types.  Use a string to avoid dangling pointer.
-string LuaBase::prettyPrintParamList(const Zap::LuaFunctionProfile *functionInfo)
+string LuaBase::prettyPrintParamList(const Zap::LuaFunctionArgList &functionArgList)
 {
    string msg;
 
-   for(S32 i = 0; i < functionInfo->profileCount; i++)
+   for(S32 i = 0; i < functionArgList.profileCount; i++)
    {
       //if(i > 0)
       msg += "\n\t";
 
-      for(S32 j = 0; functionInfo->argList[i][j] != Zap::LuaBase::END; j++)
+      for(S32 j = 0; functionArgList.argList[i][j] != Zap::LuaBase::END; j++)
       {
          if(j > 0)
             msg += ", ";
 
-         msg += argTypeNames[functionInfo->argList[i][j]];
+         msg += argTypeNames[functionArgList.argList[i][j]];
       }
    }
 
@@ -705,24 +710,24 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionProfile *functionInfo
 }
 
 
-static void printMethodList(const LuaFunctionProfile *funProfile, const string &prefix)
-{
-   for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
-      for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
-      {
-         std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
-            
-         for(int k = 0; funProfile[i].argList[j][k] != LuaBase::END; k++)  // Iterate over args within a given profile, appending each to the output line
-         {
-            if(k != 0)
-               line += ", ";
-            line += argTypeNames[funProfile[i].argList[j][k]];   
-         }
-         line += ")";
-
-         printf("%s\n", line.c_str());    // Print the line
-      }
-}
+//static void printMethodList(const functionArgList &funProfile, const string &prefix)
+//{
+//   for(int i = 0; funProfile[i].functionName != NULL; i++)        // Iterate over functions
+//      for(int j = 0; j < funProfile[i].profileCount; j++)         // Iterate over arg profiles for that function, generating one line for each
+//      {
+//         std::string line = prefix + "    --> " + funProfile[i].functionName + "(";
+//            
+//         for(int k = 0; funProfile[i].argList[j][k] != LuaBase::END; k++)  // Iterate over args within a given profile, appending each to the output line
+//         {
+//            if(k != 0)
+//               line += ", ";
+//            line += argTypeNames[funProfile[i].argList[j][k]];   
+//         }
+//         line += ")";
+//
+//         printf("%s\n", line.c_str());    // Print the line
+//      }
+//}
 
 
 // Helper for printDocs(), called from luaW with -luadocs option
@@ -737,7 +742,7 @@ void LuaBase::printFunctions(const ArgMap &argMap, const map<ClassName, unsigned
 
    printf("%s\n", nodeList[nodeIndex].first);  // Print ourselves
       
-   printMethodList(argMap.find(nodeList[nodeIndex].first)->second, "");
+   //printMethodList(argMap.find(nodeList[nodeIndex].first)->second, "");
 
    if(nodeList[nodeIndex].second.size() == 0)
       return;
@@ -759,7 +764,7 @@ void LuaBase::printFunctions(const ArgMap &argMap, const map<ClassName, unsigned
 void LuaBase::printLooseFunctions()
 {
    printf("The following Bitfighter functions are also available:\n");
-   printMethodList(LuaScriptRunner::functionArgs, "");
+   //printMethodList(LuaScriptRunner::functionArgs, "");
 }
 
 
