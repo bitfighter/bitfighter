@@ -149,6 +149,10 @@ private:
       LongFixed,               // Long form: Display MessageStoreCount messages, no timout
       MessageDisplayModes
    };
+	
+   Timer mAnnouncementTimer;
+   string mAnnouncement;
+   bool mIsAnnouncementNew;
 
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
    void renderChatMsgs();
@@ -294,6 +298,7 @@ public:
    void displayErrorMessage(const char *format, ...);
    void displaySuccessMessage(const char *format, ...);
 
+   void setAnnouncement(string announcement);
    void displayMessage(const Color &msgColor, const char *message);
    void displayMessagef(const Color &msgColor, const char *format, ...);
    void onChatMessageRecieved(const Color &msgColor, const char *format, ...);
@@ -311,7 +316,7 @@ public:
    void renderLostConnectionMessage(); 
    void renderSuspendedMessage();
    
-   void renderAnnouncement(const string& message);	//Render the announcement
+   void renderAnnouncement(const string &message);	// Render the announcement
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 

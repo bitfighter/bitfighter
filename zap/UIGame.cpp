@@ -105,20 +105,22 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mServerMessageDisplayer(game, 6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
                   mChatMessageDisplayer1(game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer2(game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
+                  mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
+		  mAnnouncementTimer(0)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
    mHelper = NULL;
    displayInputModeChangeAlert = false;
    mMissionOverlayActive = false;
+   mIsAnnouncementNew = false;
 
    mMessageDisplayMode = ShortTimeout;
 
    setMenuID(GameUI);
    enterMode(PlayMode);          // Also initializes mCurrentUIMode
    mInScoreboardMode = false;
-
+	
    mQuickChatHelper = NULL;
    mLoadoutHelper = NULL;
    mEngineerHelper = NULL;
@@ -151,7 +153,8 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
       mModSecondaryActivated[i] = false;
       mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
-
+   
+   mAnnouncement = "";
    makeCommandCandidateList();
 }
 
@@ -209,6 +212,10 @@ void GameUserInterface::quitEngineerHelper()
       mHelper = NULL;
 }
 
+void GameUserInterface::setAnnouncement(string message){
+	mAnnouncement = message;
+	mIsAnnouncementNew = true;
+}
 
 void GameUserInterface::onActivate()
 {
@@ -326,6 +333,9 @@ void GameUserInterface::idle(U32 timeDelta)
    mWrongModeMsgDisplay.update(timeDelta);
    mProgressBarFadeTimer.update(timeDelta);
    mLevelInfoDisplayTimer.update(timeDelta);
+
+   if(mAnnouncementTimer.getCurrent() > 0)
+	mAnnouncementTimer.update(timeDelta);
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       mModuleDoubleTapTimer[i].update(timeDelta);
@@ -472,35 +482,32 @@ if(mGotControlUpdate)
 #endif
 }
 
-void GameUserInterface::renderAnnouncement(const string& message)
+
+void GameUserInterface::renderAnnouncement(const string &message)
 {
-	Timer timer(10000);     // 10 seconds
-
-	while(timer.getCurrent() > 0)
-   {
-		Vector<string> lines = wrapString(message, SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, " ");
-		U32 lineHeight = SRV_MSG_FONT_SIZE + SRV_MSG_FONT_GAP;
+   Vector<string> lines = wrapString(message, SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, " ");
+   U32 lineHeight = SRV_MSG_FONT_SIZE + SRV_MSG_FONT_GAP;
 	
-		bool helperActive = (mHelper != NULL);
+   bool helperActive = (mHelper != NULL);
 		
-		if(mMessageDisplayMode == ShortTimeout)
-		 	mChatMessageDisplayer1.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
-		else if(mMessageDisplayMode == ShortFixed)
-         mChatMessageDisplayer2.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
-		else
-         mChatMessageDisplayer3.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+   if(mMessageDisplayMode == ShortTimeout)
+ 	   mChatMessageDisplayer1.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+   else if(mMessageDisplayMode == ShortFixed)
+	   mChatMessageDisplayer2.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
+   else
+	   mChatMessageDisplayer3.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
 
-		mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, 			   		helperActive);
+   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, 			   		helperActive);
 	
-		U32 y = CHAT_Y_POS;
-		for(int i = 0; i < lines.size(); i++){
-			glColor(Colors::red);       
-    			drawString(UserInterface::horizMargin, y, SRV_MSG_FONT_SIZE,lines[lines.size() - 1 - i].c_str());
-    			y += lineHeight;
-		}
-		timer.update(1);
-	}
+   U32 y = CHAT_Y_POS;
+   for(S32 i = 0; i < lines.size(); i++)
+   {
+       glColor(Colors::red);       
+       drawString(UserInterface::horizMargin, y, SRV_MSG_FONT_SIZE,lines[lines.size() - 1 - i].c_str());
+       y += lineHeight;
+   }
 }
+
 
 void GameUserInterface::renderSuspendedMessage()
 {
@@ -1985,6 +1992,7 @@ static bool fixupArgs(ClientGame *game, Vector<StringTableEntry> &args)
    return true;
 }
 
+
 void GameUserInterface::announceHandler(const Vector<string> &words)
 {
 	ClientGame *game = getGame();
@@ -2303,7 +2311,7 @@ CommandInfo chatCmds[] = {
    { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
    { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
-   {"announce",	    &GameUserInterface::announceHandler,		{ STR },	  1, ADMIN_COMMANDS,  0,  1,    {"<ANNOUNCEMENT>"},    "The admin announces an important message"   }, 
+   {"announce",	  &GameUserInterface::announceHandler,		    { STR },                  1, ADMIN_COMMANDS,  0,  1,  {"<ANNOUNCEMENT>"},      "The admin announces an important message"   }, 
 
    { "kick",               &GameUserInterface::kickPlayerHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
    { "ban",                &GameUserInterface::banPlayerHandler,          { NAME, xINT }, 2, ADMIN_COMMANDS,  0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
@@ -2339,18 +2347,30 @@ CommandInfo chatCmds[] = {
 void GameUserInterface::renderChatMsgs()
 {
    bool helperActive = (mHelper != NULL);
+   if(mAnnouncement == "")
+   {
+     if(mMessageDisplayMode == ShortTimeout)
+        mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive);
 
-   if(mMessageDisplayMode == ShortTimeout)
-      mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive);
+     else if(mMessageDisplayMode == ShortFixed)
+        mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive);
 
-   else if(mMessageDisplayMode == ShortFixed)
-      mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive);
-
-   else
-      mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive);
+     else
+        mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive);
 
 
-   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive);
+     mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive);
+   }
+    else{
+      renderAnnouncement(mAnnouncement);
+      if(mIsAnnouncementNew){
+        mAnnouncementTimer.setPeriod(10000);
+	mIsAnnouncementNew = false;
+	mAnnouncementTimer.reset();
+      }
+      if(mAnnouncementTimer.getCurrent() == 0)
+	mAnnouncement = "";
+    }
 }
 
 
