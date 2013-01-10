@@ -782,14 +782,8 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
 
    string title;
    Vector<MenuItem *> menuItems;
-   bool error;
 
-   if(!plugin->runGetArgsMenu(title, menuItems, error))     // Fills menuItems, sets error
-   {
-      onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
-      mPluginRunner.reset();
-      return;     
-   }
+   bool error = plugin->runGetArgsMenu(title, menuItems);     // Fills menuItems
 
    if(error)
    {
@@ -798,13 +792,16 @@ void EditorUserInterface::runPlugin(const FolderManager *folderManager, const st
       return;
    }
 
-   if(menuItems.size() == 0)                       // No menu items?  Let's run the script directly!
+
+   if(menuItems.size() == 0)
    {
-      onPluginMenuClosed(Vector<string>());        // We'll use whatever args we already have
+      onPluginMenuClosed(Vector<string>());        // No menu items?  Let's run the script directly!
       mPluginRunner.reset();
-      return;
+      return;     
    }
 
+
+   // There are menu items!
    // Build a menu from the menuItems returned by the plugin
    mPluginMenu.reset(new PluginMenuUI(getGame(), title));      // Using a smart pointer here, for auto deletion
 
@@ -913,16 +910,37 @@ static bool TeamListToString(string &output, Vector<bool> teamVector)
    return false;
 }
 
+
+static bool hasTeamFlags(GridDatabase *database)
+{
+   const Vector<DatabaseObject *> *flags = database->findObjects_fast(FlagTypeNumber);
+
+   for(S32 i = 0; i < flags->size(); i++)
+      if(static_cast<FlagItem *>(flags->get(i))->getTeam() > TEAM_NEUTRAL)
+         return false;
+
+   return false;     
+}
+
+
+static bool hasTeamSpawns(GridDatabase *database)
+{
+   fillVector.clear();
+   database->findObjects(FlagSpawnTypeNumber, fillVector);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+      if(dynamic_cast<FlagSpawn *>(fillVector[i])->getTeam() >= 0)
+         return true;
+
+   return false;
+}
+
+
 void EditorUserInterface::validateLevel()
 {
    mLevelErrorMsgs.clear();
    mLevelWarnings.clear();
 
-   bool foundSoccerBall = false;
-   bool foundNexus = false;
-   bool foundFlags = false;
-   bool foundTeamFlags = false;
-   bool foundTeamFlagSpawns = false;
    bool foundNeutralSpawn = false;
 
    Vector<bool> foundSpawn;
@@ -940,6 +958,7 @@ void EditorUserInterface::validateLevel()
       
    fillVector.clear();
    gridDatabase->findObjects(ShipSpawnTypeNumber, fillVector);
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       Spawn *spawn = static_cast<Spawn *>(fillVector[i]);
@@ -947,44 +966,16 @@ void EditorUserInterface::validateLevel()
 
       if(team == TEAM_NEUTRAL)
          foundNeutralSpawn = true;
-      else if(U32(team) < U32(foundSpawn.size()))
+      else if(team > TEAM_NEUTRAL && team < teamCount)
          foundSpawn[team] = true;
    }
 
-   fillVector.clear();
-   gridDatabase->findObjects(SoccerBallItemTypeNumber, fillVector);
-   if(fillVector.size() > 0)
-      foundSoccerBall = true;
+   bool foundSoccerBall = gridDatabase->hasObjectOfType(SoccerBallItemTypeNumber);
+   bool foundNexus      = gridDatabase->hasObjectOfType(NexusTypeNumber);
+   bool foundFlags      = gridDatabase->hasObjectOfType(FlagTypeNumber);
 
-   fillVector.clear();
-   gridDatabase->findObjects(NexusTypeNumber, fillVector);
-   if(fillVector.size() > 0)
-      foundNexus = true;
-
-   fillVector.clear();
-   gridDatabase->findObjects(FlagTypeNumber, fillVector);
-   for (S32 i = 0; i < fillVector.size(); i++)
-   {
-      foundFlags = true;
-      FlagItem *flag = dynamic_cast<FlagItem *>(fillVector[i]);
-      if(flag->getTeam() >= 0)
-      {
-         foundTeamFlags = true;
-         break;
-      }
-   }
-
-   fillVector.clear();
-   gridDatabase->findObjects(FlagSpawnTypeNumber, fillVector);
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      FlagSpawn *flagSpawn = dynamic_cast<FlagSpawn *>(fillVector[i]);
-      if(flagSpawn->getTeam() >= 0)
-      {
-         foundTeamFlagSpawns = true;
-         break;
-      }
-   }
+   bool foundTeamFlags      = hasTeamFlags (gridDatabase);
+   bool foundTeamFlagSpawns = hasTeamSpawns(gridDatabase);
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
@@ -1016,7 +1007,6 @@ void EditorUserInterface::validateLevel()
       if(TeamListToString(teamList, foundSpawn))     // Compose error message
          mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teamList);
    }
-
 
 
    if(gameType->getGameTypeId() == CoreGame)
@@ -1517,14 +1507,11 @@ static S32 QSORT_CALLBACK sortByTeam(DatabaseObject **a, DatabaseObject **b)
 
 void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
 {
-   fillVector.clear();
-      
-   editorDb->findObjects(SpyBugTypeNumber, fillVector);
+   const Vector<DatabaseObject *> *spyBugs = editorDb->findObjects_fast(SpyBugTypeNumber);
 
-   if(fillVector.size() != 0)
+   if(spyBugs->size() != 0)
    {
       // Use Z Buffer to make use of not drawing overlap visible area of same team SpyBug, but does overlap different team
-      fillVector.sort(sortByTeam);
       glClear(GL_DEPTH_BUFFER_BIT);
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_DEPTH_WRITEMASK);
@@ -1535,21 +1522,20 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
       // This blending works like this, source(SRC) * GL_ONE_MINUS_DST_COLOR + destination(DST) * GL_ONE
       glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);  
 
-      S32 prevTeam = -10;
-
       // Draw spybug visibility ranges first, underneath everything else
-      for(S32 i = 0; i < fillVector.size(); i++)
+      for(S32 i = 0; i < spyBugs->size(); i++)
       {
-         BfObject *editorObj = dynamic_cast<BfObject *>(fillVector[i]);
+         SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
+         F32 translation = 0.05f * sb->getTeam();  // This way, each team ends up with a consistent but unique z-pos
 
-         if(i != 0 && editorObj->getTeam() != prevTeam)
-            glTranslatef(0, 0, 0.05f);
-         prevTeam = editorObj->getTeam();
+         glTranslatef(0, 0, translation);
 
-         Point pos = editorObj->getPos();
+         Point pos = sb->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, editorObj->getColor(), mCurrentScale);
+         renderSpyBugVisibleRange(pos, sb->getColor(), mCurrentScale);
+
+         glTranslatef(0, 0, -translation);         // Reset translation back to where it was
       }
 
       setDefaultBlendFunction();
@@ -2087,7 +2073,7 @@ static void renderDockItemLabel(const Point &pos, const char *label)
    F32 xpos = pos.x;
    F32 ypos = pos.y - DOCK_LABEL_SIZE / 2;
    glColor(Colors::white);
-   UserInterface::drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
+   drawStringc(xpos, ypos + (F32)DOCK_LABEL_SIZE, (F32)DOCK_LABEL_SIZE, label);
 }
 
 

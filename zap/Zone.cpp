@@ -30,6 +30,8 @@
 namespace Zap
 {
 
+TNL_IMPLEMENT_CLASS(Zone);    // Allows classes to be autoconstructed by name
+
 
 // Combined Lua / C++ constructor)
 Zone::Zone(lua_State *L)   

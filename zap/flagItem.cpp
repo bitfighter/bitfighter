@@ -254,14 +254,15 @@ void FlagItem::sendHome()
 // Removes occupied spawns from spawnPoints list
 void FlagItem::removeOccupiedSpawnPoints(Vector<AbstractSpawn *> &spawnPoints) // Modifies spawnPoints
 {
-   Game *game = getGame();
-   GameType *gt = game->getGameType();
+   bool isTeamGame = getGame()->getGameType()->isTeamGame();
+
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
    // Now remove the occupied spots from our list of potential spawns
-   for(S32 i = 0; i < gt->mFlags.size(); i++)
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      FlagItem *flag = gt->mFlags[i];
-      if(flag->isAtHome() && (flag->getTeam() < 0 || flag->getTeam() == getTeam() || !gt->isTeamGame()))
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+      if(flag->isAtHome() && (flag->getTeam() <= TEAM_NEUTRAL || flag->getTeam() == getTeam() || !isTeamGame))
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
@@ -336,7 +337,7 @@ bool FlagItem::collide(BfObject *hitObject)
       return true;
 
    // No other collision detection happens on the client -- From here on out, it's server only!
-   if(isGhost())
+   if(isClient())
       return false;
 
    bool isShip = isShipType(hitObject->getObjectTypeNumber());
@@ -368,10 +369,10 @@ bool FlagItem::collide(BfObject *hitObject)
 }
 
 
-void FlagItem::dismount(bool mountWasKilled)
+void FlagItem::dismount(DismountMode dismountMode)
 {
-   Ship *ship = mMount;   
-   Parent::dismount(mountWasKilled);
+   Ship *ship = mMount;    // mMount will be set to NULL in Parent::dismount() -- grab it while we can
+   Parent::dismount(dismountMode);
 
    // Should getting shot up count as a flag drop event for statistics purposes?
    if(ship && ship->getClientInfo())

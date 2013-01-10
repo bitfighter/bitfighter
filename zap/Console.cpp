@@ -105,6 +105,12 @@ void Console::quit()
 }
 
 
+void Console::killScript()
+{
+   // Do nothing
+}
+
+
 bool Console::isOk()
 {
    return mConsole && L;

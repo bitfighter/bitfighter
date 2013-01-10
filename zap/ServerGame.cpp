@@ -104,11 +104,15 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
 
    hostingModePhase = ServerGame::NotHosting;
 
-   mInfoFlags = 0;                  // Currently only used to specify test mode
+   mInfoFlags = 0;                  // Currently used to specify test mode and debug builds
    mCurrentLevelIndex = 0;
 
    if(testMode)
-      mInfoFlags = TestModeFlag;
+      mInfoFlags |= TestModeFlag;
+
+#ifdef TNL_DEBUG
+   mInfoFlags |= DebugModeFlag;
+#endif
 
    mTestMode = testMode;
 
@@ -319,7 +323,6 @@ bool ServerGame::onlyClientIs(GameConnection *client)
 }
 
 
-
 // Control whether we're in shut down mode or not
 void ServerGame::setShuttingDown(bool shuttingDown, U16 time, GameConnection *who, StringPtr reason)
 {
@@ -355,8 +358,8 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
    S32 cur = 0;
    S32 startingCur = 0;
 
-   bool foundGameType = false;
-   bool foundLevelName = false;
+   bool foundGameType   = false;
+   bool foundLevelName  = false;
    bool foundMinPlayers = false;
    bool foundMaxPlayers = false;
 
@@ -373,12 +376,10 @@ LevelInfo getLevelInfoFromFileChunk(char *chunk, S32 size, LevelInfo &levelInfo)
 
             if(list.size() >= 1 && list[0].find("GameType") != string::npos)
             {
-               // Convert legacy Hunters game
-               if(!stricmp(list[0].c_str(), "HuntersGameType"))
-                  list[0] = "NexusGameType";
+               // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
+               TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(list[0].c_str()));
 
-               TNL::Object *theObject = TNL::Object::create(list[0].c_str());  // Instantiate a gameType object
-               GameType *gt = dynamic_cast<GameType*>(theObject);              // and cast it
+               GameType *gt = dynamic_cast<GameType *>(theObject); 
                if(gt)
                {
                   levelInfo.mLevelType = gt->getGameTypeId();
@@ -524,21 +525,21 @@ bool ServerGame::processPseudoItem(S32 argc, const char **argv, const string &le
          addPolyWall(&polywall, NULL);
 
    }
-   else if(!stricmp(argv[0], "Zone")) 
-   {
-      Zone *zone = new Zone();
+   //else if(!stricmp(argv[0], "Zone")) 
+   //{
+   //   Zone *zone = new Zone();
 
-      if(zone->processArguments(argc - 1, argv + 1, this))
-      {
-         zone->setUserAssignedId(id, false);
-         getGameType()->addZone(zone);
-      }
-      else
-      {
-         logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
-         delete zone;
-      }
-   }
+   //   if(zone->processArguments(argc - 1, argv + 1, this))
+   //   {
+   //      zone->setUserAssignedId(id, false);
+   //      getGameType()->addZone(zone);
+   //   }
+   //   else
+   //   {
+   //      logprintf(LogConsumer::LogWarning, "Invalid arguments in object \"%s\" in level \"%s\"", argv[0], levelFileName.c_str());
+   //      delete zone;
+   //   }
+   //}
 
    else 
       return false;
@@ -1021,6 +1022,13 @@ void ServerGame::runLevelGenScript(const string &scriptName)
 }
 
 
+// Add a misbehaved levelgen to the kill list
+void ServerGame::deleteLevelGen(LuaLevelGenerator *levelgen)
+{
+   mLevelGenDeleteList.push_back(levelgen);
+}
+
+
 void ServerGame::addClient(ClientInfo *clientInfo)
 {
    TNLAssert(!clientInfo->isRobot(), "This only gets called for players");
@@ -1173,7 +1181,15 @@ void ServerGame::idle(U32 timeDelta)
 
    // Tick levelgen timers
    for(S32 i = 0; i < mLevelGens.size(); i++)
-      mLevelGens[i]->tickTimer(timeDelta);
+      mLevelGens[i]->tickTimer<LuaLevelGenerator>(timeDelta);
+
+   // Check for any levelgens that must die
+   for(S32 i = 0; i < mLevelGenDeleteList.size(); i++)
+   {
+      S32 index = mLevelGens.getIndex(mLevelGenDeleteList[i]);
+      if(index != -1)
+         mLevelGens.deleteAndErase_fast(index);
+   }
 
    // Compute new world extents -- these might change if a ship flies far away, for example...
    // In practice, we could probably just set it and forget it when we load a level.

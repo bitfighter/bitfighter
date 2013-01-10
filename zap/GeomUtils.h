@@ -55,9 +55,6 @@
 #include "tnlTypes.h"
 
 // forward declarations
-namespace TNL {
-   template<class T> class Vector;
-};
 namespace ClipperLib {
    struct IntPoint;
    typedef std::vector<IntPoint> Polygon;
@@ -113,9 +110,6 @@ Point shortenSegment(const Point &startPoint, const Point &endPoint, F32 lengthR
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
 Vector<Point> createPolygon(const Point &center, F32 radius, U32 sideCount, F32 angle = 0);
-
-// TODO: Should we create a MathUtils class for this and other useful purely mathematic functions?
-bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 // Returns index of points Vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);

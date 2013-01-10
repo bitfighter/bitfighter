@@ -135,10 +135,7 @@ class GameType : public NetObject
 private:
    Game *mGame;
 
-   Vector<SafePtr<SpyBug> > mSpyBugs;    // List of all spybugs in the game, could be added and destroyed in-game
-
    Point getSpawnPoint(S32 team);        // Pick a spawn point for ship or robot
-
 
    bool mLevelHasLoadoutZone;
    bool mLevelHasPredeployedFlags;
@@ -225,8 +222,6 @@ public:
    void broadcastTimeSyncSignal();                     // Send remaining time to all clients
    void broadcastNewRemainingTime();                   // Send remaining time to all clients after time has been updated
 
-   void addZone(BfObject *zone);
-
    const char *getGameTypeName() const;   
 
    virtual GameTypeId getGameTypeId() const;
@@ -265,21 +260,16 @@ public:
    S32 getSecondLeadingPlayerScore() const;
    S32 getSecondLeadingPlayer() const;
 
-   void catalogSpybugs();           // Build a list of spybugs in the game
-   void addSpyBug(SpyBug *spybug);
-
    void addWall(const WallRec &barrier, Game *game);
 
-   virtual bool isFlagGame() const;      // Does game use flags?
-   virtual S32 getFlagCount();     // Return the number of game-significant flags
+   virtual bool isFlagGame() const; // Does game use flags?
+   virtual S32 getFlagCount();      // Return the number of game-significant flags
 
-   virtual bool isCarryingItems(Ship *ship);     // Nexus game will override this
+   virtual bool isCarryingItems(Ship *ship); // Nexus game will override this
 
-   virtual bool isSpawnWithLoadoutGame();  // We do not spawn with our loadout, but instead need to pass through a loadout zone
+   virtual bool isSpawnWithLoadoutGame();    // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
-
-   Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retrieve, HTF, CTF)
 
    static void printRules();             // Dump game-rule info
 
@@ -454,8 +444,6 @@ public:
    string validateLoadout(const Vector<U8> &loadout);
    void setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &loadout, bool silent = false);
 
-
-   bool checkTeamRange(S32 team);                     // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();                 // Zero teams can cause crashiness
 
    virtual const Color *getTeamColor(const BfObject *object) const; // Get the color of a team, based on object
@@ -468,7 +456,7 @@ public:
 
    // gameType flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *flag);
-   virtual void itemDropped(Ship *ship, MoveItem *item);    // TODO: Make this a mountableItem instead of MoveItem
+   virtual void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);    // TODO: Make this a mountableItem instead of MoveItem
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    virtual void shipTouchZone(Ship *ship, GoalZone *zone);
@@ -549,6 +537,10 @@ public:
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
    void processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, S32 voteType);
+
+   TNL_DECLARE_RPC(c2sSendAnnouncement,(string message));
+   TNL_DECLARE_RPC(s2cDisplayAnnouncement,(string message));
+
 
    TNL_DECLARE_RPC(c2sSendChatPM, (StringTableEntry toName, StringPtr message));                        // using /pm command
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat

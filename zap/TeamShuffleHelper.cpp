@@ -119,7 +119,7 @@ void TeamShuffleHelper::calculateRenderSizes()
    for(S32 i = 0; i < mTeams.size(); i++)
       for(S32 j = 0; j < mTeams[i].size(); j++)
       {
-         S32 width = UserInterface::getStringWidth(TEXT_SIZE, getGame()->Game::getClientInfo(j)->getName().getString());
+         S32 width = getStringWidth(TEXT_SIZE, getGame()->Game::getClientInfo(j)->getName().getString());
 
          if(width > columnWidth)
          {
@@ -162,19 +162,19 @@ void TeamShuffleHelper::render()
          drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, getGame()->getTeamColor(teamIndex), 8);
 
          glColor(getGame()->getTeamColor(teamIndex));
-         UserInterface::drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
+         drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());
 
          drawHorizLine(x + hpad, x + columnWidth - hpad, y + vpad + TEXT_SIZE + 3);
 
          glColor(Colors::white);
          for(S32 k = 0; k < mTeams[teamIndex].size(); k++)
-            UserInterface::drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
+            drawString(x + hpad, y + S32(vpad + (k + 1) * TEXT_SIZE_FACTOR * TEXT_SIZE + 3),
                   TEXT_SIZE, mTeams[teamIndex][k]->getName().getString());
       }
 
    glColor(Colors::green);
 
-   UserInterface::drawCenteredString(gScreenInfo.getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
+   drawCenteredString(gScreenInfo.getGameCanvasHeight() - 80, 20, "[Enter to accept] | [Space to reshuffle] | [Esc to cancel]");
 }
 
 

@@ -328,6 +328,13 @@ public:
    /// isGhost returns true if this object is a ghost of a server object.
    bool isGhost() const;
 
+   /// isClient provides more readable wrapper around isGhost.
+   bool isClient() const;
+
+   /// isServer provides more readable wrapper around isGhost.
+   bool isServer() const;
+
+
    /// isScopeLocal returns true if this object is scoped always to the
    /// local client.
    bool isScopeLocal() const;
@@ -349,6 +356,12 @@ inline bool NetObject::isGhost() const
 {
     return mNetFlags.test(IsGhost);
 }
+
+
+// For readability
+inline bool NetObject::isClient() const { return  isGhost(); }
+inline bool NetObject::isServer() const { return !isGhost(); }
+
 
 inline bool NetObject::isScopeLocal() const
 {

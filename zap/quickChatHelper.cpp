@@ -67,7 +67,7 @@ void QuickChatHelper::render()
    if(!gQuickChatTree.size())
    {
       glColor(gErrorMessageTextColor);
-      UserInterface::drawCenteredString(yPos, fontSize, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
+      drawCenteredString(yPos, fontSize, "Quick Chat messages improperly configured.  Please see bitfighter.ini.");
       return;
    }
 
@@ -98,13 +98,13 @@ void QuickChatHelper::render()
    drawMenuBorderLine(yPos, quickChatMenuHeaderColor);
 
    glColor(quickChatMenuHeaderColor);
-   UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "QuickChat menu");
+   drawString(UserInterface::horizMargin, yPos, fontSize, "QuickChat menu");
    yPos += fontSize + 10;
 
    if(!renderNodes.size())    // Nothing to render, let's go home
    {
       glColor(Colors::red); 
-      UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "No messages here (misconfiguration?)");
+      drawString(UserInterface::horizMargin, yPos, fontSize, "No messages here (misconfiguration?)");
       yPos += fontSize + 7;
    }
    else
@@ -130,7 +130,7 @@ void QuickChatHelper::render()
          }
  
          glColor(color);
-         UserInterface::drawString(UserInterface::horizMargin + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), yPos, fontSize, renderNodes[i].caption.c_str());
+         drawString(UserInterface::horizMargin + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), yPos, fontSize, renderNodes[i].caption.c_str());
          yPos += fontSize + 7;
       }
    }
@@ -138,9 +138,9 @@ void QuickChatHelper::render()
    const S32 fontSizeSm = fontSize - 4;
 
    glColor(gTeamChatColor);
-   UserInterface::drawString(UserInterface::horizMargin + indent, yPos, fontSizeSm, "Team Message");
+   drawString(UserInterface::horizMargin + indent, yPos, fontSizeSm, "Team Message");
    glColor(gGlobalChatColor);
-   UserInterface::drawString(UserInterface::horizMargin + indent + S32(UserInterface::getStringWidth(fontSizeSm, "Team Message ")), yPos, fontSizeSm, "Global Message");
+   drawString(UserInterface::horizMargin + indent + S32(getStringWidth(fontSizeSm, "Team Message ")), yPos, fontSizeSm, "Global Message");
 
    yPos += 12;
 

@@ -119,6 +119,8 @@ private:
 
    Vector<DatabaseObject *> mAllObjects;
    Vector<DatabaseObject *> mGoalZones;
+   Vector<DatabaseObject *> mFlags;
+   Vector<DatabaseObject *> mSpyBugs;
 
 public:
    enum {

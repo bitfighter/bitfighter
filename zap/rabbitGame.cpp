@@ -104,13 +104,6 @@ RabbitGameType::RabbitGameType()
 }
 
 
-
-S32 RabbitGameType::getFlagCount()
-{
-   return mFlags.size();
-}
-
-
 bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 {
    if (argc != 4)
@@ -254,37 +247,34 @@ bool RabbitGameType::shipHasFlag(const Ship *ship) const
 void RabbitGameType::idle(BfObject::IdleCallPath path, U32 deltaT)
 {
    Parent::idle(path, deltaT);
+   
    if(path != BfObject::ServerIdleMainLoop)
       return;
 
-   for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
+   // Server only from here on
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      FlagItem *mRabbitFlag = mFlags[flagIndex];
-      if(!mRabbitFlag)
+      FlagItem *mRabbitFlag = static_cast<FlagItem *>(flags->get(i));
+
+      if(mRabbitFlag->isMounted())
       {
-         TNLAssert(false, "RabbitGameType::idle NULL mFlags");
-         mFlags.erase_fast(flagIndex);
+         if(mRabbitFlag->mTimer.update(deltaT))
+         {
+            onFlagHeld(mRabbitFlag->getMount());
+            mRabbitFlag->mTimer.reset(mFlagScoreTimer);
+         }
       }
       else
       {
-         if(mRabbitFlag->isMounted())
+         if(!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
          {
-            if(mRabbitFlag->mTimer.update(deltaT))
-            {
-               onFlagHeld(mRabbitFlag->getMount());
-               mRabbitFlag->mTimer.reset(mFlagScoreTimer);
-            }
-         }
-         else
-         {
-            if(!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
-            {
-               mRabbitFlag->sendHome();
+            mRabbitFlag->sendHome();
 
-               static StringTableEntry returnString("The carrot has been returned!");
+            static StringTableEntry returnString("The carrot has been returned!");
 
-               broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>());
-            }
+            broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>());
          }
       }
    }
@@ -360,27 +350,27 @@ void RabbitGameType::onFlagMounted(S32 teamIndex)
 }
 
 
-void RabbitGameType::itemDropped(Ship *ship, MoveItem *item)
+void RabbitGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
+   Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-
-      FlagItem *flag = static_cast<FlagItem *>(item);
-
-      if(ship->getClientInfo())
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
       {
-         flag->mTimer.reset(mFlagReturnTimer);
-         if(!isGameOver())  // Avoid flooding messages on game over.
-            s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
+         FlagItem *flag = static_cast<FlagItem *>(item);
 
-         Point vel = ship->getActualVel();
+         if(ship->getClientInfo())
+         {
+            flag->mTimer.reset(mFlagReturnTimer);
+            if(!isGameOver())  // Avoid flooding messages on game over.
+               s2cRabbitMessage(RabbitMsgDrop, ship->getClientInfo()->getName());
 
-         flag->setActualVel(vel);
+            Point vel = ship->getActualVel();
+
+            flag->setActualVel(vel);
+         }
       }
-
-      updateWhichTeamsHaveFlags();
    }
 }
 

@@ -107,6 +107,10 @@ end
 @param   delay - The delay (in ms) when the the event should be run.
 --]]
 function Timer:scheduleOnce(event, deltaT)
+   if type(event) ~= 'function' then
+      error("Expected function in Timer:scheduleOnce()!")
+   end
+   
    local record = {event = event, time = self.time + deltaT }
    self:_insert(record)
 end
@@ -120,6 +124,10 @@ end
 @param   delay - The time (in ms) which \em event repeats.
 --]]
 function Timer:scheduleRepeating(event, deltaT)
+   if type(event) ~= 'function' then
+      error("Expected function in Timer:scheduleRepeating()!")
+   end
+
    local record = {event = event, time = self.time + deltaT, repeating = deltaT}
    self:_insert(record)
 end
@@ -133,6 +141,10 @@ end
 @param   delay - The time (in ms) which \em event repeats.
 --]]
 function Timer:scheduleRepeatWhileTrue(event, deltaT)
+   if type(event) ~= 'function' then
+      error("Expected function in Timer:scheduleRepeatWhileTrue()!")
+   end
+
    local record = {event = event, time = self.time + deltaT, repeatIf = deltaT}
    self:_insert(record)
 end
@@ -143,7 +155,7 @@ end
 @brief   Removes all pending events from the timer queue.
 --]]
 function Timer:clear()
-   self.queue = {}
+   self.queue = {}   
 end
 
 

@@ -198,6 +198,7 @@
     <ClCompile Include="..\zap\Color.cpp" />
     <ClCompile Include="LuaBase.cpp" />
     <ClCompile Include="LuaScriptRunner.cpp" />
+    <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="OpenglUtils.cpp" />
     <ClCompile Include="PickupItem.cpp" />
     <ClCompile Include="quickChatHelper.cpp" />
@@ -243,6 +244,7 @@
     <ClCompile Include="dataConnection.cpp" />
     <ClCompile Include="oglconsole.c" />
     <ClCompile Include="GameSettings.cpp" />
+    <ClCompile Include="RenderUtils.cpp" />
     <ClCompile Include="ServerGame.cpp" />
     <ClCompile Include="shipItems.cpp" />
     <ClCompile Include="ShipShape.cpp" />
@@ -339,6 +341,7 @@
     <ClInclude Include="LuaScriptRunner.h" />
     <ClInclude Include="LuaWrapper.h" />
     <ClInclude Include="LuaWrapperUtils.h" />
+    <ClInclude Include="MathUtils.h" />
     <ClInclude Include="OpenglUtils.h" />
     <ClInclude Include="PickupItem.h" />
     <ClInclude Include="quickChatHelper.h" />
@@ -387,6 +390,7 @@
     <ClInclude Include="dataConnection.h" />
     <ClInclude Include="helperMenu.h" />
     <ClInclude Include="oglconsole.h" />
+    <ClInclude Include="RenderUtils.h" />
     <ClInclude Include="retrieveGame.h" />
     <ClInclude Include="GameSettings.h" />
     <ClInclude Include="ServerGame.h" />

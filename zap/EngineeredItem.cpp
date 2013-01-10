@@ -38,13 +38,15 @@
 
 
 #ifndef ZAP_DEDICATED
-#  include "UIEditorMenus.h"       // For EditorAttributeMenuUI def
-#  include "ClientGame.h"          // for accessing client's spark manager
+#  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
+#  include "ClientGame.h"        // for accessing client's spark manager
 #endif
 
 
 #include "Colors.h"
 #include "stringUtils.h"
+#include "MathUtils.h"           // For findLowestRootIninterval()
+
 
 #include <math.h>
 
@@ -423,7 +425,7 @@ bool EngineerModuleDeployer::deployEngineeredItem(ClientInfo *clientInfo, U32 ob
    deployedObject->setOwner(clientInfo);
    deployedObject->addToGame(ship->getGame(), ship->getGame()->getGameObjDatabase());
 
-   MountableItem *resource = ship->unmountItem(ResourceItemTypeNumber);
+   MountableItem *resource = ship->dismountFirst(ResourceItemTypeNumber);
 
    engineerable->setResource(resource);
    engineerable->onConstructed();
@@ -1598,6 +1600,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mEnd.x);
       stream->read(&mEnd.y);
       readThisTeam(stream);
+      mOutline = computeGeom(mStart, mEnd);
 
       Rect extent(mStart, mEnd);
       extent.expand(Point(5,5));
@@ -1929,7 +1932,7 @@ void Turret::idle(IdleCallPath path)
 
 // This could possibly be combined with Robot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
-      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
+      if(!findLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), GameWeapon::weaponInfo[mWeaponFireType].projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getPos() + Vs * t;

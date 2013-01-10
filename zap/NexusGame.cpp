@@ -280,39 +280,42 @@ static FlagItem *findFirstFlag(Ship *ship)
 
 // The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items.
 // This method doesn't actually do any dropping; it only sends out an appropriate flag-drop message.
-void NexusGameType::itemDropped(Ship *ship, MoveItem *item)
+void NexusGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
+   Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      FlagItem *flag = static_cast<FlagItem *>(item);
-
-      U32 flagCount = flag->getFlagCount();
-
-      if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
-         return;
-
-      if(!ship->getClientInfo())
-         return;
-
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
-
-      static StringTableEntry dropOneString(  "%e0 dropped a flag!");
-      static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
-
-      StringTableEntry *ste;
-
-      if(flagCount == 1)
-         ste = &dropOneString;
-      else
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
       {
-         ste = &dropManyString;
-         e.push_back(itos(flagCount).c_str());
-      }
+         FlagItem *flag = static_cast<FlagItem *>(item);
+
+         U32 flagCount = flag->getFlagCount();
+
+         if(flagCount == 0)  // Needed if you drop your flags, then pick up a different item type (like resource item), and drop it
+            return;
+
+         if(!ship->getClientInfo())
+            return;
+
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getClientInfo()->getName());
+
+         static StringTableEntry dropOneString(  "%e0 dropped a flag!");
+         static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
+
+         StringTableEntry *ste;
+
+         if(flagCount == 1)
+            ste = &dropOneString;
+         else
+         {
+            ste = &dropManyString;
+            e.push_back(itos(flagCount).c_str());
+         }
       
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, *ste, e);
+      }
    }
 }
 
@@ -682,22 +685,22 @@ void NexusGameType::renderInterfaceOverlay(bool scoreboardVisible)
    glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
 
    if(mNexusIsOpen && mNexusOpenTime == 0)
-      UserInterface::drawStringfr(x, y - size, size, "Nexus never closes");
+      drawStringfr(x, y - size, size, "Nexus never closes");
    else if(!mNexusIsOpen && mNexusClosedTime == 0)
-      UserInterface::drawStringfr(x, y - size, size, "Nexus never opens");
+      drawStringfr(x, y - size, size, "Nexus never opens");
    else if(!mNexusIsOpen && mNexusChangeAtTime <= 0)
-      UserInterface::drawStringfr(x, y - size, size, "Nexus closed until end of game");
+      drawStringfr(x, y - size, size, "Nexus closed until end of game");
    else if(!isGameOver())
    {
-      static const U32 w00     = UserInterface::getStringWidth(size, "00:00");
-      static const U32 wCloses = UserInterface::getStringWidth(size, "Nexus closes: ");
-      static const U32 wOpens  = UserInterface::getStringWidth(size, "Nexus opens: ");
+      static const U32 w00     = getStringWidth(size, "00:00");
+      static const U32 wCloses = getStringWidth(size, "Nexus closes: ");
+      static const U32 wOpens  = getStringWidth(size, "Nexus opens: ");
 
       S32 w = w00 + (mNexusIsOpen ? wCloses : wOpens);
 
       S32 timeLeft = min(getNexusTimeLeft() * 1000, (S32)mGameTimer.getCurrent());
 
-      UserInterface::drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
+      drawTime(x - w, y - size, size, timeLeft, mNexusIsOpen ? "Nexus closes: " : "Nexus opens: ");
    }
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
@@ -841,7 +844,7 @@ void NexusFlagItem::renderItemAlpha(const Point &pos, F32 alpha)
       else if(mFlagCount >= 10) glColor(Colors::green,   alpha);   // ok, I guess
       else                      glColor(Colors::white,   alpha);   // lame
 
-      UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
+      drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
    }
 #endif
 }
@@ -883,9 +886,12 @@ void NexusFlagItem::dropFlags(U32 flags)
 }
 
 
-void NexusFlagItem::dismount(bool mountWasKilled)
+void NexusFlagItem::dismount(DismountMode dismountMode)
 {
-   if(mountWasKilled)
+   if(isGhost())      // Server only
+      return;
+  
+   if(dismountMode == DISMOUNT_MOUNT_WAS_KILLED)
    {
       // Should getting shot up count as a flag drop event for statistics purposes?
       if(mMount && mMount->getClientInfo())
@@ -899,16 +905,12 @@ void NexusFlagItem::dismount(bool mountWasKilled)
    }
    else
    {
-      if(isGhost())    
-         return;
-
-      // Server only
       GameType *gameType = getGame()->getGameType();
       if(!gameType)        // Crashed here once, don't know why, so I added the check
          return;
 
-      gameType->itemDropped(mMount, this);   // Sends messages; no flags actually dropped here; server only method
-      dropFlags(mFlagCount);                 // Only dropping the flags we're carrying, not the "extra" one that comes when we die
+      gameType->itemDropped(mMount, this, dismountMode); // Sends messages; no flags actually dropped here; server only method
+      dropFlags(mFlagCount);                             // Only dropping the flags we're carrying, not the "extra" one that comes when we die
    }
 }
 

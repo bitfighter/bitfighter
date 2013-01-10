@@ -428,6 +428,13 @@ BfObject::BfObject()
 // Destructor
 BfObject::~BfObject()
 {
+   // Restore type number so database can fully remove item.  In some cases, we change an item's type number to DeletedTypeNumber to 
+   // prevent it from showing up in a database search.  This has the unfortunate side effect of also preventing it from being properly
+   // removed from the database.  So, before we run removeFromDatabase, we'll check to see if the type number has been altered, and, if
+   // so, we'll restore the original.  This is not a great solution to the problem, but works for now.
+   if(mObjectTypeNumber == DeletedTypeNumber)
+      mObjectTypeNumber = mOriginalTypeNumber;
+   
    removeFromDatabase(false);
    mGame = NULL;
    LUAW_DESTRUCTOR_CLEANUP;
@@ -749,6 +756,7 @@ ClientInfo *BfObject::getOwner()
 
 void BfObject::deleteObject(U32 deleteTimeInterval)  // interval defaults to 0
 {
+   mOriginalTypeNumber = mObjectTypeNumber;
    mObjectTypeNumber = DeletedTypeNumber;
 
    if(!mGame)                    // Not in a game
@@ -890,7 +898,7 @@ S32 BfObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, TestFunc objec
    findObjects(objectTypeTest, fillVector, queryRect);
 
    // No damage calculated on the client
-   if(isGhost())
+   if(isClient())
       info.damageAmount = 0;
 
    S32 shipsHit = 0;
@@ -1333,7 +1341,7 @@ S32 BfObject::getTeamIndx(lua_State *L)
 /**
  * @luafunc  BfObject::setTeam(teamIndex)
  * @brief    Assigns the object to a team.
- * @param    teamIndex - Index of the team the object should be assigned to.
+ * @param    \eint teamIndex - Index of the team the object should be assigned to.
  * @descr    Use the special team constants to make an item neutral or hostile.  Will have no effect on items 
  *           that are inherently teamless (such as a NexusZone).
  * @note     Remember that in Lua, indices start with 1!
@@ -1350,7 +1358,7 @@ S32 BfObject::setTeam(lua_State *L)
  * @luafunc  BfObject::setLoc(pos)
  * @brief    Set the object's location.
  * @descr    To set the full geometry of a more complex object, see the setGeom() method.
- * @param    pos - Point (or coordinate pair) representing the location of the object. 
+ * @param    \e point pos - Point (or coordinate pair) representing the location of the object. 
  */
 S32 BfObject::setLoc(lua_State *L)
 {
@@ -1375,7 +1383,7 @@ S32 BfObject::removeFromGame(lua_State *L)
 /**
  * @luafunc  BfObject::setGeom(geometry)
  * @brief    Sets an object's geometry. 
- * @param    geometry - The object's geometry.  (See \ref datatypes for an explanation of geometry.) 
+ * @param    \e geometry - The object's geometry.  (See \ref datatypes for an explanation of geometry.) 
  * @descr    Note that not all objects support changing geometry if the object has already been added to a game.
  */
 S32 BfObject::setGeom(lua_State *L)

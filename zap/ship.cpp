@@ -48,20 +48,21 @@
 #include "teleporter.h"
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>   // For ARRAYSIZE
+#  include <windows.h>   // For ARRAYSIZE
 #endif
 
 #ifndef ZAP_DEDICATED
-#include "ClientGame.h"
-#include "OpenglUtils.h"
-#include "sparkManager.h"
-#include "UI.h"
-#include "UIMenus.h"
-#include "UIGame.h"
+#  include "ClientGame.h"
+#  include "OpenglUtils.h"
+#  include "sparkManager.h"
+#  include "UI.h"
+#  include "UIMenus.h"
+#  include "UIGame.h"
 #endif
 
+#include "MathUtils.h"  // For radiansToDegrees
+
 #include <stdio.h>
-#include <math.h>
 
 #define hypot _hypot    // Kill some warnings
 
@@ -561,7 +562,7 @@ void Ship::processWeaponFire()
 #ifdef SHOW_SERVER_SITUATION
          // Make a noise when the client thinks we've shot -- ideally, there should be one boop per shot, delayed by about half
          // of whatever /lag is set to.
-         if(!getGame()->isServer())
+         if(isClient())
             UserInterface::playBoop();
 #endif
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);          // Uncloak ship
@@ -569,7 +570,7 @@ void Ship::processWeaponFire()
          if(getClientInfo())
             getClientInfo()->getStatistics()->countShot(curWeapon);
 
-         if(!isGhost())    // i.e. server only
+         if(isServer())  
          {
             Point dir = getAimVector();
 
@@ -1020,7 +1021,7 @@ void Ship::processModules()
          if(i == ModuleSensor &&  
                mSpyBugPlacementTimer.getCurrent() == 0 &&        // Prevent placement too fast
                mEnergy > moduleInfo->getPrimaryPerUseCost() &&   // Have enough energy
-               isGhost())                                        // Is happening on client side
+               isClient())                                       // Is happening on client side
          {
             GameConnection *cc = getControllingClient();
 
@@ -1284,7 +1285,7 @@ void Ship::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
 #ifndef ZAP_DEDICATED
-   if(isGhost())        // Client
+   if(isClient())       // Client
    {
       ClientGame *clientGame = static_cast<ClientGame *>(game);
       if(isLocalPlayerShip(clientGame))
@@ -1503,7 +1504,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
 
-   TNLAssert(!getGame()->isServer(), "We are expecting a ClientGame here!");
+   TNLAssert(isClient(), "We are expecting a ClientGame here!");
 
    if(isInitialUpdate())
    {
@@ -1525,7 +1526,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       {
          S32 index = stream->readInt(GhostConnection::GhostIdBitSize);
          MountableItem *item = static_cast<MountableItem *>(connection->resolveGhost(index));
-         item->mountToShip(this);
+         if(item)                      // Could be NULL if server hasn't yet sent mounted item to us
+            item->mountToShip(this);
       }
 
    }  // initial update
@@ -1777,13 +1779,13 @@ bool Ship::isCarryingItem(U8 objectType) const
 
 
 // Dismounts first object found of specified type, and returns the object.  If no objects of specified type found, will return NULL.
-MountableItem *Ship::unmountItem(U8 objectType)
+MountableItem *Ship::dismountFirst(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
       {
          MountableItem *item = mMountedItems[i];
-         item->dismount(false);
+         item->dismount(MountableItem::DISMOUNT_NORMAL);
          return item;
       }
 
@@ -1791,22 +1793,22 @@ MountableItem *Ship::unmountItem(U8 objectType)
 }
 
 
-// Dismount all objects of any type -- runs on client and server
+// Dismount all objects of any type -- runs on client and server.  Only runs when carrier was killed.
 void Ship::dismountAll()
 {
    // Count down here because as items are dismounted, they will be removed from the mMountedItems vector
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)       
       if(mMountedItems[i].isValid())               // Can be NULL when quitting the server
-         mMountedItems[i]->dismount(true);
+         mMountedItems[i]->dismount(MountableItem::DISMOUNT_MOUNT_WAS_KILLED);
 }
 
 
-// Dismount all objects of specified type
+// Dismount all objects of specified type.  Currently only used when loadout no longer includes engineer and ship drops all ResourceItems.
 void Ship::dismountAll(U8 objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
       if(mMountedItems[i]->getObjectTypeNumber() == objectType)
-         mMountedItems[i]->dismount(false);
+         mMountedItems[i]->dismount(MountableItem::DISMOUNT_NORMAL);
 }
 
 
@@ -2006,7 +2008,7 @@ bool Ship::stringToLoadout(string loadoutStr, Vector<U8> &loadout)
 
 void Ship::kill(DamageInfo *theInfo)
 {
-   if(isGhost())     // Server only, please...
+   if(isClient())     // Server only, please...
       return;
 
    GameType *gt = getGame()->getGameType();
@@ -2019,7 +2021,7 @@ void Ship::kill(DamageInfo *theInfo)
 
 void Ship::kill()
 {
-   if(!isGhost())    // Server only
+   if(isServer())    // Server only
    {
       if(getOwner())
          getLoadout(getOwner()->mOldLoadout);      // Save current loadout in getOwner()->mOldLoadout
@@ -2046,7 +2048,7 @@ void Ship::kill()
    dismountAll();
 
    // Handle if in the middle of building a teleport
-   if(!isGhost())   // Server only
+   if(isServer())   // Server only
    {
       destroyPartiallyDeployedTeleporter();
       if(getClientInfo())
@@ -2321,12 +2323,12 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gLineWidth1);
 
       glColor(Colors::white, textAlpha);
-      UserInterface::drawStringc(0, 30 + textSize, textSize, str.c_str());
+      drawStringc(0, 30 + textSize, textSize, str.c_str());
 
       // Underline name if player is authenticated
       if(clientInfo->isAuthenticated())
       {
-         S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
+         S32 xoff = getStringWidth(textSize, str.c_str()) / 2;
          drawHorizLine(-xoff, xoff, 33 + textSize);
       }
 

@@ -52,7 +52,7 @@ public:
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 
-   void itemDropped(Ship *ship, MoveItem *item);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
 
    void shipTouchZone(Ship *s, GoalZone *z);
 

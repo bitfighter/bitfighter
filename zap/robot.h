@@ -66,15 +66,16 @@ private:
 
    bool mHasSpawned;
 
-   void tickTimer(U32 deltaT);      // Move bot's timer forward
-
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    U16 findClosestZone(const Point &point);          // Finds zone closest to point, used when robots get off the map
    S32 doFindObjects(lua_State *L, const char *methodName, Rect *scope = NULL); // Worker method for various find functions
 
+protected:
+   void killScript();
+
 public:
    Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
-   ~Robot();                        // Destructor
+   virtual ~Robot();                // Destructor
 
    bool initialize(Point &pos);
 

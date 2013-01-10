@@ -92,7 +92,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
                broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-               mountedFlag->dismount(false);
+               mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
                mountedFlag->sendHome();
 
                updateScore(theShip, CaptureFlag);
@@ -132,17 +132,24 @@ void CTFGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clie
    Parent::performProxyScopeQuery(scopeObject, clientInfo);
    S32 uTeam = scopeObject->getTeam();
 
-   for(S32 i = 0; i < mFlags.size(); i++)
+   // Scan all the flags and mark any that are at home or parked in a zone as being in scope; for those that are mounted,
+   // if the mount is on our team, mark both the mount and the flag as being in scope
+
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      if(mFlags[i]->isAtHome() || mFlags[i]->getZone())
-         connection->objectInScope(mFlags[i]);
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+      if(flag->isAtHome() || flag->getZone())
+         connection->objectInScope(flag);
       else
       {
-         Ship *mount = mFlags[i]->getMount();
+         Ship *mount = flag->getMount();
          if(mount && mount->getTeam() == uTeam)
          {
             connection->objectInScope(mount);
-            connection->objectInScope(mFlags[i]);
+            connection->objectInScope(flag);
          }
       }
    }
@@ -162,19 +169,20 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    if(!object || object->getObjectTypeNumber() != PlayerShipTypeNumber)
       return;
 
-   for(S32 i = 0; i < mFlags.size(); i++)
-   {
-      if(!mFlags[i].isValid())
-         continue;
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-      if(mFlags[i]->isMounted())
+   for(S32 i = 0; i < flags->size(); i++)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+      if(flag->isMounted())
       {
-         Ship *mount = mFlags[i]->getMount();
+         Ship *mount = flag->getMount();
          if(mount)
             renderObjectiveArrow(mount);
       }
       else
-         renderObjectiveArrow(mFlags[i]);
+         renderObjectiveArrow(flag);
    }
 #endif
 }
@@ -196,22 +204,23 @@ void CTFGameType::onFlagMounted(S32 teamIndex)
 class FlagItem;
 
 
-void CTFGameType::itemDropped(Ship *ship, MoveItem *item)
+void CTFGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
-   
+   Parent::itemDropped(ship, item, dismountMode);
+
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      FlagItem *flag = static_cast<FlagItem *>(item);
-      static StringTableEntry dropString("%e0 dropped the %e1 flag!");
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
+      {
+         FlagItem *flag = static_cast<FlagItem *>(item);
+         static StringTableEntry dropString("%e0 dropped the %e1 flag!");
 
-      Vector<StringTableEntry> e;
-      e.push_back(ship->getClientInfo()->getName());
-      e.push_back(getGame()->getTeamName(flag->getTeam()));
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getClientInfo()->getName());
+         e.push_back(getGame()->getTeamName(flag->getTeam()));
 
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
-
-      updateWhichTeamsHaveFlags();  // --> server only method
+         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      }
    }
 }
 

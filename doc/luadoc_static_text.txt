@@ -6,6 +6,31 @@
 
 Here is some info about scripting levels and robots in Bitfighter.
 
+All scripts must contain a \e main() function.  There are some subtle differences between how bots and levelgens use this function, but we can ignore those for the moment.  The important thing is the \e main() function is run when the script is loaded, and should contain any configuration code the script requires.  
+
+It is possible to specify a list of arguments to be passed to a robot or levelgen script.  These arguments will be placed in a table called \e arg, which is the standard Lua location for storing command line parameters.
+
+@subsection Robots
+A robot's \e main() function gets run as soon as the bot is added to the game.  In the main function, the bot should subscribe to any events it wants to listen for (though it can always subscribe later).  By default, all bots are subscribed to the \e Tick event, though you can unsbscribe to that event if the bot only responds to events (\e eliza.bot works this way -- in its main function, it subscribes to the \e MsgRecieved event, and unsbscribes to \e Tick.)
+
+@subsection Levelgens
+Levelgens are a little different.  While the entire purupose of a bot is to actively participate in a game, many levelgens will not stick around after the level has been loaded. For a basic levelgen, the entire script might be contained in the main() function -- it might create some items, and do nothing more.
+
+If a level has a levelgen script, its main function is executed as the level is loaded, after all objects defined in the level file have been created.  Therefore a levelgen can act upon those objects, either altering them, deleting them, or by adding completely new objects.
+
+Levelgens can also subscribe to events; their event handlers will be called throughout the game as events are fired.
+
+Unlike robots, levelgens are not automatically subscribed to the \e Tick event.
+
+
+@subsection Editor Plugins
+Plugins run once when called, then exit.  The \e main() function is called.
+
+Since plugins do not linger after being called, they cannot subscribe to or respond to events.
+
+***** Need to describe the menu building system here, and how those args get passed to main(). *****
+
+
 @section datatypes Bitfighter datatypes
 * point - Point is a low-overhead custom structure that represents an xy coordinate pair.  See the \link point point class documentation \endlink for further details.
 
@@ -31,6 +56,16 @@ int - A number that has no decimal component.  Unlike some languages, Lua does n
 @subsection step1 Step 1: Opening the box
 
 @section programming_robots Programming Robots
+
+When the bot is first started, Bitfighter will call the bot's getName() function.  This function should return a string which will be used as the bot's name.  If the function is not implemented, or returns a nil, the bot will be assigned a name.  If getName() returns any other value, an error will be logged, and the script will be terminated.  Once the bot's name has been specified, it cannot be changed.
+
+A very simple getName() function might look like this:
+\code
+function getName()
+     return("Asimov")
+end
+\endcode
+
 
 @section programming_levelgens Programming Levelgens
 
@@ -76,15 +111,22 @@ Timer is a utility class that makes it easier to manage timing periodic or delay
 
 A timer object that can be used to schedule arbitrary events to be executed at some time in the future.  All times are given in milliseconds.
 
-etc...
+See the Timer class for more details.
 
 
 @section debugging Debugging Tips
 
-Any of your scripts can print a stack trace to see how you got to a particular execution point.  This can be very helpful if there are several conditions under which a function can be called.
+Any of your scripts can print a stack trace to see how you got to a particular execution point.  This can be very helpful if there are several conditions under which a function can be called.  
+
+The logprint command will print messages both to the Bitfighter logfile, as well as to the in-game console (which you can turn on with ctrl+/).
+
+Finally, if you detect an unexpected error condition, you can log a message, trigger a stack trace, and terminate the script with Lua's error function.
 
 \code
+logprint("Here's a log message:")
 logprint(debug.traceback())
+
+if target == nil then error("Have a nil target!") end
 \endcode
 
 

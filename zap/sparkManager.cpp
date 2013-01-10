@@ -31,9 +31,8 @@
 #include "ClientGame.h"    // For getCommanderZoomFraction()
 
 #include "OpenglUtils.h"
+#include "MathUtils.h"
 #include "UI.h"
-
-#include <math.h>
 
 using namespace TNL;
 
@@ -107,8 +106,8 @@ void FXManager::emitSpark(const Point &pos, const Point &vel, const Color &color
 }
 
 
-#define dr(x) (float) (x) * FloatTau / 360    // degreesToRadians()
-#define rd(x) (float) (x) * 360 / FloatTau    // radiansToDegrees()
+#define dr(x) degreesToRadians(x)
+#define rd(x) radiansToDegrees(x)
 
 
 void FXManager::DebrisChunk::idle(U32 timeDelta)
@@ -162,7 +161,7 @@ void FXManager::TextEffect::render()
    glPushMatrix();
    glTranslate(pos);
    glScale(size);
-   UserInterface::drawStringc(0, 0, 12, text.c_str(), false);
+   drawStringc(0, 0, 12, text.c_str(), false);
    glPopMatrix();
    //glLineWidth(gDefaultLineWidth);
 }

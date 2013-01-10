@@ -77,6 +77,10 @@ private:
    Timer mStutterSleepTimer;
    U32 mAccumulatedSleepTime;
 
+   Vector<LuaLevelGenerator *> mLevelGens;
+   Vector<LuaLevelGenerator *> mLevelGenDeleteList;
+
+
    Vector<string> mSentHashes;            // Hashes of levels already sent to master
 
    void updateStatusOnMaster();           // Give master a status report for this server
@@ -94,8 +98,6 @@ private:
 
    RefPtr<NetEvent> mSendLevelInfoDelayNetInfo;
    Timer mSendLevelInfoDelayCount;
-
-   Vector<LuaLevelGenerator *> mLevelGens;
 
    void clearBotMoves();
 
@@ -154,6 +156,8 @@ public:
 
    bool loadLevel(const string &fileName);            // Load a level
    void runLevelGenScript(const string &scriptName);  // Run any levelgens specified by the level or in the INI
+   void deleteLevelGen(LuaLevelGenerator *levelgen);   // Add misbehaved levelgen to the kill list
+
 
    bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id);
    void addPolyWall(PolyWall *polyWall, GridDatabase *database);

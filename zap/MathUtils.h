@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------------
 //
-// Bitfighter - A multiplayer vector graphics space game
+// Bitfighter - A multiplayer Vector graphics space game
 // Based on Zap demo released for Torque Network Library by GarageGames.com
 //
 // Derivative work copyright (C) 2008-2009 Chris Eykamp
@@ -23,48 +23,41 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _CTFGAME_H_
-#define _CTFGAME_H_
 
-#include "gameType.h"
+#ifndef _MATH_UTILS_
+#define _MATH_UTILS_
 
-namespace Zap
-{
+#include "tnlTypes.h"
+#include <cmath>
 
-class Ship;
-class FlagItem;
 
-class CTFGameType : public GameType
-{
-private:
-   typedef GameType Parent;
+using namespace TNL;
 
-public:
-   void addFlag(FlagItem *flag);
-   void shipTouchFlag(Ship *ship, FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
-   void performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientInfo);
-   void renderInterfaceOverlay(bool scoreboardVisible);
 
-   bool teamHasFlag(S32 teamIndex) const;
-   void onFlagMounted(S32 teamIndex);
+// Some helpful functions -- these are nominally defined in tommath.h, so only redefine if they are not somehow included here
+#ifndef MIN
+#  define MIN(x,y) (((x) < (y)) ? (x) : (y))
+#  define MAX(x,y) (((x) > (y)) ? (x) : (y))
+#endif
 
-   GameTypeId getGameTypeId() const;
-   const char *getShortName() const;
-   const char *getInstructionString() const;
-   
-   bool isFlagGame() const; 
-   bool isTeamGame() const;
-   bool canBeTeamGame()  const;
-   bool canBeIndividualGame() const;
+#define sq(a) ((a) * (a))
 
-   S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
-   TNL_DECLARE_CLASS(CTFGameType);
-};
+// Some angle conversion helpers:
+#define RADIANS_TO_DEGREES  (360.0f * FloatInverse2Pi)
+#define DEGREES_TO_RADIANS  (FloatInverse360 * Float2Pi)
+
+
+namespace Zap {
+
+inline F32 radiansToDegrees(F32 angle) { return angle * RADIANS_TO_DEGREES; }
+inline F32 degreesToRadians(F32 angle) { return angle * DEGREES_TO_RADIANS; }
+inline F32 radiansToUnit(F32 angle)    { return angle * FloatInverse2Pi; }
+inline F32 unitToRadians(F32 angle)    { return angle * Float2Pi; }
+
+bool findLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 };
 
 
 #endif
-

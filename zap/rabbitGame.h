@@ -68,10 +68,8 @@ public:
    void idle(BfObject::IdleCallPath path, U32 deltaT);
 
    void addFlag(FlagItem *flag);
-   void itemDropped(Ship *ship, MoveItem *item);
+   void itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
-
-   S32 getFlagCount();
 
    bool objectCanDamageObject(BfObject *damager, BfObject *victim);
    void controlObjectForClientKilled(ClientInfo *theClient, BfObject *clientObject, BfObject *killerObject);

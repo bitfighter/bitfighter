@@ -246,7 +246,15 @@ public:
 
    // Mounting related functions
    Ship *getMount();
-   virtual void dismount(bool mountWasKilled);
+
+   // Reasons/modes we might dismount an item
+   enum DismountMode
+   {
+      DISMOUNT_NORMAL,              // Item was dismounted under normal circumstances
+      DISMOUNT_MOUNT_WAS_KILLED,    // Item was dismounted due to death of mount
+      DISMOUNT_SILENT,              // Item was dismounted, do not make an announcement
+   };
+   virtual void dismount(DismountMode dismountMode);
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask();
@@ -556,7 +564,7 @@ public:
    void renderItemAlpha(const Point &pos, F32 alpha);
    bool collide(BfObject *hitObject);
    void damageObject(DamageInfo *theInfo);
-   void dismount(bool mountWasKilled);
+   void dismount(DismountMode dismountMode);;
 
    TNL_DECLARE_CLASS(ResourceItem);
 

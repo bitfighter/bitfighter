@@ -46,18 +46,6 @@ bool RetrieveGameType::isFlagGame() const { return true; }
 // Server only
 void RetrieveGameType::addFlag(FlagItem *flag)
 {
-   //S32 i;
-   //for(i = 0; i < mFlags.size(); i++)  // What is this?
-   //{
-   //   if(mFlags[i] == NULL)
-   //   {
-   //      mFlags[i] = theFlag;
-   //      break;
-   //   }
-   //}
-   //if(i == mFlags.size())
-   //   mFlags.push_back(theFlag);    // Parent::addFlag(flag);
-
    Parent::addFlag(flag);
 
    if(!isGhost())
@@ -76,12 +64,6 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    if(theFlag->getTeam() != TEAM_NEUTRAL && theShip->getTeam() != theFlag->getTeam())
       return;
 
-   S32 flagIndex;
-
-   for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
-      if(mFlags[flagIndex] == theFlag)
-         break;
-
    // See if this flag is already in a capture zone owned by the ship's team
    if(theFlag->getZone() != NULL && theFlag->getZone()->getTeam() == theShip->getTeam())
       return;
@@ -92,7 +74,7 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
    StringTableEntry r = takeString;
 
-   if(mFlags.size() == 1)
+   if(getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1)
       r = oneFlagTakeString;
 
    ClientInfo *clientInfo = theShip->getClientInfo();
@@ -125,24 +107,26 @@ void RetrieveGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item)
+void RetrieveGameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)
 {
-   TNLAssert(getGame()->isServer(), "Server only method!");
+   Parent::itemDropped(ship, item, dismountMode);
 
    if(item->getObjectTypeNumber() == FlagTypeNumber)
    {
-      if(ship->getClientInfo())
+      if(dismountMode != MountableItem::DISMOUNT_SILENT)
       {
-         static StringTableEntry dropString("%e0 dropped a flag!");
-         Vector<StringTableEntry> e;
+         if(ship->getClientInfo())
+         {
+            static StringTableEntry dropString("%e0 dropped a flag!");
+            Vector<StringTableEntry> e;
 
-         e.push_back(ship->getClientInfo()->getName());
+            e.push_back(ship->getClientInfo()->getName());
 
-         broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+            broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+         }
       }
    }
 }
-
 
 
 // The ship has entered a drop zone, either friend or foe
@@ -153,8 +137,10 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       return;
 
    // See if this zone already has a flag in it.  If so, do nothing.
-   for(S32 i = 0; i < mFlags.size(); i++)
-      if(mFlags[i]->getZone() == z)
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+   for(S32 i = 0; i < flags->size(); i++)
+      if(static_cast<FlagItem *>(flags->get(i))->getZone() == z)
          return;
 
    // Ok, it's an empty zone on our team: See if this ship is carrying a flag...
@@ -175,17 +161,16 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       Vector<StringTableEntry> e;
       e.push_back(s->getClientInfo()->getName());
-      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
+      broadcastMessage(GameConnection::ColorNuclearGreen, SFXFlagCapture, 
+                       (getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber) == 1) ? oneFlagCapString : capString, e);
 
       // Drop the flag into the zone
-      mountedFlag->dismount(false);
+      mountedFlag->dismount(MountableItem::DISMOUNT_SILENT);
 
-      S32 flagIndex;
-      for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
-         if(mFlags[flagIndex] == mountedFlag)
-            break;
+      const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+      S32 flagIndex = flags->getIndex(mountedFlag);
 
-      mFlags[flagIndex]->setZone(z);
+      static_cast<FlagItem *>(flags->get(flagIndex))->setZone(z);
       mountedFlag->setActualPos(z->getExtent().getCenter());
 
       // Score the flag...
@@ -194,15 +179,17 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       s->getClientInfo()->getStatistics()->mFlagScore++;
 
       // See if all the flags are owned by one team...
-      for(S32 i = 0; i < mFlags.size(); i++)
+      for(S32 i = 0; i < flags->size(); i++)
       {
-         bool ourFlag = (mFlags[i]->getTeam() == s->getTeam()) || (mFlags[i]->getTeam() == -1);    // Team flag || neutral flag
-         if(ourFlag && (!mFlags[i]->getZone() || mFlags[i]->getZone()->getTeam() != s->getTeam()))
+         FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+         bool ourFlag = (flag->getTeam() == s->getTeam()) || (flag->getTeam() == TEAM_NEUTRAL);
+         if(ourFlag && (!flag->getZone() || flag->getZone()->getTeam() != s->getTeam()))
             return;     // ...if not, we're done
       }
 
       // One team has all the flags
-      if(mFlags.size() != 1)
+      if(flags->size() != 1)
       {
          static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
          e[0] = getGame()->getTeamName(s->getTeam());
@@ -218,13 +205,15 @@ void RetrieveGameType::shipTouchZone(Ship *s, GoalZone *z)
       }
 
       // Return all the flags to their starting locations if need be
-      for(S32 i = 0; i < mFlags.size(); i++)
+      for(S32 i = 0; i < flags->size(); i++)
       {
-         if(mFlags[i]->getTeam() == s->getTeam() || mFlags[i]->getTeam() == -1) // team and neutral flags
+         FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+         if(flag->getTeam() == s->getTeam() || flag->getTeam() == TEAM_NEUTRAL) 
          {
-            mFlags[i]->setZone(NULL);
-            if(!mFlags[i]->isAtHome())
-               mFlags[i]->sendHome();
+            flag->setZone(NULL);
+            if(!flag->isAtHome())
+               flag->sendHome();
          }
       }
    }
@@ -247,17 +236,20 @@ void RetrieveGameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo 
 
    S32 uTeam = scopeObject->getTeam();
 
-   for(S32 i = 0; i < mFlags.size(); i++)
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      if(mFlags[i]->isAtHome() || mFlags[i]->getZone())
-         connection->objectInScope(mFlags[i]);
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+
+      if(flag->isAtHome() || flag->getZone())
+         connection->objectInScope(flag);
       else
       {
-         Ship *mount = mFlags[i]->getMount();
+         Ship *mount = flag->getMount();
          if(mount && mount->getTeam() == uTeam)
          {
             connection->objectInScope(mount);
-            connection->objectInScope(mFlags[i]);
+            connection->objectInScope(flag);
          }
       }
    }
@@ -282,10 +274,11 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
    S32 team = ship->getTeam();
 
    const Vector<DatabaseObject *> *goalZones = getGame()->getGameObjDatabase()->findObjects_fast(GoalZoneTypeNumber);
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
 
-   for(S32 i = 0; i < mFlags.size(); i++)
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      if(mFlags[i].isValid() && mFlags[i]->getMount() == ship)
+      if(static_cast<FlagItem *>(flags->get(i))->getMount() == ship)
       {
          for(S32 j = 0; j < goalZones->size(); j++)
          {
@@ -294,15 +287,16 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
             // See if this is one of our zones and that it doesn't have a flag in it.
             if(goalZone->getTeam() != team)
                continue;
-            S32 k;
-            for(k = 0; k < mFlags.size(); k++)
-            {
-               if(!mFlags[k].isValid())
-                  continue;
-               if(mFlags[k]->getZone() == goalZone)
+
+            bool found = false;
+            for(S32 k = 0; k < flags->size(); k++)
+               if(static_cast<FlagItem *>(flags->get(k))->getZone() == goalZone)
+               {
+                  found = true;
                   break;
-            }
-            if(k == mFlags.size())
+               }
+
+            if(!found)
                renderObjectiveArrow(goalZone);
          }
          uFlag = true;
@@ -310,24 +304,22 @@ void RetrieveGameType::renderInterfaceOverlay(bool scoreboardVisible)
       }
    }
 
-   for(S32 i = 0; i < mFlags.size(); i++)
+   for(S32 i = 0; i < flags->size(); i++)
    {
-      if(!mFlags[i].isValid())
-         continue;
-
-      if(!mFlags[i]->isMounted() && !uFlag)
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+      if(!flag->isMounted() && !uFlag)
       {
-         GoalZone *gz = mFlags[i]->getZone();
+         GoalZone *gz = flag->getZone();
 
          if(gz && gz->getTeam() != team)
-            renderObjectiveArrow(mFlags[i], gz->getColor());
+            renderObjectiveArrow(flag, gz->getColor());
          else if(!gz)
-            renderObjectiveArrow(mFlags[i], getTeamColor(TEAM_NEUTRAL));
+            renderObjectiveArrow(flag, getTeamColor(TEAM_NEUTRAL));
       }
       else
       {
          // Arrow to ship carrying flag
-         Ship *mount = mFlags[i]->getMount();
+         Ship *mount = flag->getMount();
 
          if(mount && mount != ship)
             renderObjectiveArrow(mount);

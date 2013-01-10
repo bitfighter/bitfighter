@@ -141,6 +141,7 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
+   mDoAnonymousMasterConnection = false;
 
    mNameToAddressThread = NULL;
 
@@ -301,9 +302,10 @@ void Game::resetMasterConnectTimer()
 }
 
 
-void Game::setReadyToConnectToMaster(bool ready)
+void Game::setReadyToConnectToMaster(bool ready, bool doAnonymous)
 {
    mReadyToConnectToMaster = ready;
+   mDoAnonymousMasterConnection = doAnonymous;
 }
 
 
@@ -639,14 +641,9 @@ void Game::processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabas
       }
 
       // validateGameType() will return a valid GameType string -- either what's passed in, or the default if something bogus was specified
-      TNL::Object *theObject;
-      if(!strcmp(argv[0], "HuntersGameType"))
-         theObject = new NexusGameType();
-      else
-         theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
+      TNL::Object *theObject = TNL::Object::create(GameType::validateGameType(argv[0]));
 
-      GameType *gt = dynamic_cast<GameType *>(theObject);  // Force our new object to be a BfObject
-
+      GameType *gt = dynamic_cast<GameType *>(theObject);
       if(gt)
       {
          bool validArgs = gt->processArguments(argc - 1, argv + 1, NULL);
@@ -937,6 +934,11 @@ void Game::checkConnectionToMaster(U32 timeDelta)
                {
                   TNLAssert(!mConnectionToMaster.isValid(), "Already have connection to master!");
                   mConnectionToMaster = new MasterServerConnection(this);
+
+                  // Are we doing an anonymous connection?
+                  if(mDoAnonymousMasterConnection)
+                     mConnectionToMaster->setConnectionType(MasterConnectionTypeAnonymous);
+
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }
    
@@ -971,6 +973,7 @@ Game::DeleteRef::DeleteRef(BfObject *o, U32 d)
 
 void Game::addToDeleteList(BfObject *theObject, U32 delay)
 {
+   TNLAssert(!theObject->isGhost(), "Can't delete ghosting Object");
    mPendingDeleteObjects.push_back(DeleteRef(theObject, delay));
 }
 
@@ -1148,16 +1151,7 @@ const char *LevelInfo::getLevelTypeName()
 // Called when ClientGame and ServerGame are destructed, and new levels are loaded on the server
 void Game::cleanUp()
 {
-   // Delete any game objects that may exist  --> not sure this will be needed when we're using shared_ptr
-   // sam: should be deleted to properly get removed from server's database and to remove client's net objects.
-   // wat: can we just run mGameObjDatabase->removeEverythingFromDatabase()?
-   // sam: how about mGameObjDatabase->removeAndDeleteEverythingFromDatabase()?
-   fillVector.clear();
-   mGameObjDatabase->findObjects(fillVector);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-      mGameObjDatabase->removeFromDatabase(fillVector[i], true);
-
+   mGameObjDatabase->removeEverythingFromDatabase();
    mActiveTeamManager->clearTeams();
 
    while(idlingObjects.nextList != NULL)  // Remove any remainder objects idling that wasn't in gridDB

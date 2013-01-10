@@ -50,9 +50,14 @@ private:
    Game *mGame;
    string mMasterName;
 
+   MasterConnectionType mConnectionType;
+
 public:
    MasterServerConnection(Game *game);    // Constructor
    MasterServerConnection();
+
+   void setConnectionType(MasterConnectionType type);
+   MasterConnectionType getConnectionType();
 
    void setMasterName(string name);
    string getMasterName();

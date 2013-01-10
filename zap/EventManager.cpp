@@ -122,9 +122,9 @@ void EventManager::subscribe(const char *subscriber, EventType eventType, LuaBas
    lua_State *L = LuaScriptRunner::getL();
 
    // Make sure the script has the proper event listener
-   LuaScriptRunner::loadFunction(L, subscriber, eventDefs[eventType].function);     // -- function
+   bool ok = LuaScriptRunner::loadFunction(L, subscriber, eventDefs[eventType].function);     // -- function
 
-   if(!lua_isfunction(L, -1))
+   if(!ok)
    {
       if(!failSilently)
          logprintf(LogConsumer::LogError, "Error subscribing to %s event: couldn't find handler function.  Unsubscribing.", 
@@ -269,7 +269,9 @@ void EventManager::fireEvent(EventType eventType)
       try
       {
          // Passing nothing
-         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].scriptId, eventDefs[eventType].function);
+         bool error = LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].scriptId, eventDefs[eventType].function);
+         if(error)
+            throw LuaException("Could not load function!");
 
          fire(L, 0, subscriptions[eventType][i].context);
       }

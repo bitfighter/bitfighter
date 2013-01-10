@@ -217,7 +217,7 @@ public:
    // Constructor
    Ship(ClientInfo *clientInfo, S32 team, const Point &p, bool isRobot = false);   // Standard constructor   
    Ship(lua_State *L = NULL);                                                      // Combined Lua / C++ default constructor
-   ~Ship();                                                                        // Destructor
+   virtual ~Ship();                                                                        // Destructor
 
    F32 getHealth();
    S32 getEnergy();
@@ -228,7 +228,7 @@ public:
    S32 getMountedItemCount() const;
 
    bool isCarryingItem(U8 objectType) const;
-   MountableItem *unmountItem(U8 objectType);
+   MountableItem *dismountFirst(U8 objectType);
 
    void dismountAll();                          // Dismount all objects of any type
    void dismountAll(U8 objectType);             // Dismount all objects of specified type

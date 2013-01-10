@@ -301,6 +301,7 @@ public:
    void resetInputModeChangeAlertDisplayTimer(U32 timeInMs);
 
    void render();                   // Render game screen
+  
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar
    //void renderMessageDisplay();     // Render incoming server msgs
@@ -309,7 +310,8 @@ public:
    void renderShutdownMessage();    // Render an alert if server is shutting down
    void renderLostConnectionMessage(); 
    void renderSuspendedMessage();
-
+   
+   void renderAnnouncement(const string& message);	//Render the announcement
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
@@ -380,6 +382,7 @@ public:
 
 
    // TODO: Move these to ClientGame???  They could really go anywhere!
+   void announceHandler(const Vector<string> &words);
    void mVolHandler(const Vector<string> &args);    
    void sVolHandler(const Vector<string> &args);    
    void vVolHandler(const Vector<string> &args);

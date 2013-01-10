@@ -124,16 +124,16 @@ void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
 
    // RenderedSize will be -1 if the button is not defined
    if(settings->getInputCodeManager()->getInputMode() == InputModeKeyboard || butSize == -1)
-      UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSizeSm, 
-                                 "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
+      drawStringf(UserInterface::horizMargin, yPos, fontSizeSm, 
+                  "Press [%s] to cancel", InputCodeManager::inputCodeToString(KEY_ESCAPE));
    else
    {
       S32 xPos = UserInterface::horizMargin;
-      xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ") + 4;
+      xPos += drawStringAndGetWidth(xPos, yPos, fontSizeSm, "Press ") + 4;
       JoystickRender::renderControllerButton(F32(xPos + 4), F32(yPos), Joystick::SelectedPresetIndex, BUTTON_BACK, false);
       xPos += butSize;
       glColor(color);
-      UserInterface::drawString( xPos, yPos, fontSizeSm, "to cancel");
+      drawString( xPos, yPos, fontSizeSm, "to cancel");
    }
 }
 

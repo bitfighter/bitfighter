@@ -61,59 +61,59 @@ EditorPlugin::~EditorPlugin()
 const char *EditorPlugin::getErrorMessagePrefix() { return "***PLUGIN ERROR***"; }
 
 
-// Run the script's getArgsMenu() function -- return false if function is not present or returns nil, true otherwise
-bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems, bool &error)
+// Run the script's getArgsMenu() function -- return true if error, false if not
+bool EditorPlugin::runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems)
 {
 #ifdef ZAP_DEDICATED
    return false;
 
 #else
-   error = false;
+   // We'll load the functin first to see if it exists, then throw it away.  It will be loaded again when we attempt
+   // to run it.  This is inefficient; however, it makes our architecture cleaner, and it is in a higly performance
+   // insensitive area, so it will probably be ok.
 
+   // First check if function exists... if it does not, there will be no menu items, so we can return false.  
+   // This is not an error condition.
+   if(!loadFunction(L, getScriptId(), "getArgsMenu"))
+      return false;  
+
+   // Function exists, and is on the stack.  Clear it away because it will be reloaded by runCmd().
+   clearStack(L);
+
+   bool error = runCmd("getArgsMenu", 2);      // We're expecting getArgsMenu() to return 2 values
+
+   if(error)        
+   {
+      clearStack(L);
+      return true;     
+   }
+
+   // We specified that we expect 2 items back; this means that even if the function returns nothing (legit), there
+   // will be 2 nils on the stack.  We'll check the top of the stack -- if that's nil, we'll assume that the script
+   // intended to return no menu items, which is totally legit. 
+   if(lua_isnil(L, 1))
+   {
+      clearStack(L);    // Get rid of the nils
+      return false;     // No error
+   }
+
+   // There's something on the stack.  Look for what we expect, throw an exception if we get any guff.
    try
-   {   
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-      bool ok = retrieveFunction("getArgsMenu");     // If not found, it's OK... Not all plugins will have this
-
-      if(!ok)
-      {
-         LuaObject::clearStack(L);
-         return false;     
-      }
-
-      if(lua_pcall(L, 0, 2, 0))     // Passing 0 params, getting 2 back
-      {
-         // This should only happen if the getArgs() function is missing
-         logError("Error running getArgsMenu() -- %s", lua_tostring(L, -1));
-         error = true;
-         return true;
-      }
-
-      if(lua_isnil(L, 1))     // Function returned nil, return false
-      {
-         clearStack(L);       // In case there's other junk on there
-         return false;
-      }
-
+   {
+      // Both will throw if they don't find what they expect
       menuTitle = getCheckedString(L, 1, "getArgsMenu");
-      getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems);
-
-      lua_pop(L, 2);
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return true;
+      getMenuItemVectorFromTable(L, 2, "getArgsMenu", menuItems); // <== fills menuItems with any items it finds
    }
    catch(LuaException &e)
    {
-      logError("Error running %s: %s.  Aborting script.", "function getArgs()", e.what());
-      LuaObject::clearStack(L);
-      error = true;
-      return true;
+      logError("Error running function getArgsMenu(): %s.  Aborting script.", e.what());
+      clearStack(L);
+      return true;      // Error!
    }
 
-   return false;
+   clearStack(L);       // Probably unnecessary, but let's be thorough here
+   return false;        // No error!
+
 #endif
 }
 
@@ -195,6 +195,12 @@ bool EditorPlugin::getMenuItemVectorFromTable(lua_State *L, S32 index, const cha
 
 #endif
    return true;
+}
+
+
+void EditorPlugin::killScript()
+{
+   // Do something?
 }
 
 

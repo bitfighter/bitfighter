@@ -238,7 +238,7 @@ void TextItem::recalcTextSize()
    const F32 dummyTextSize = 120;
 
    F32 lineLen = getVert(0).distanceTo(getVert(1));      // In in-game units
-   F32 strWidth = F32(UserInterface::getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize; 
+   F32 strWidth = F32(getStringWidth(dummyTextSize, mText.c_str())) / dummyTextSize; 
    F32 size = lineLen / strWidth;
 
   setSize(size);
@@ -262,7 +262,7 @@ Rect TextItem::calcExtents()
    // Don't care much about it on the server, as server won't render, and nothing collides with TextItems
 	return(Rect(getVert(0), getVert(1)));
 #else
-   F32 len = UserInterface::getStringWidth(mSize, mText.c_str());
+   F32 len = getStringWidth(mSize, mText.c_str());
    //F32 buf = mSize / 2;     // Provides some room to accomodate descenders on letters like j and g.
 
    F32 angle =  getVert(0).angleTo(getVert(1));

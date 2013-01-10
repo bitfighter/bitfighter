@@ -41,20 +41,17 @@
 //#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 
+#include "MathUtils.h"           // For findLowestRootIninterval()
+
 #ifndef ZAP_DEDICATED
 #  include "OpenglUtils.h"
 #endif
-
-#include <math.h>
 
 
 #define hypot _hypot    // Kill some warnings
 
 namespace Zap
 {
-
-const bool QUIT_ON_SCRIPT_ERROR = true;
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -99,8 +96,7 @@ Robot::Robot(lua_State *L) : Ship(NULL, TEAM_NEUTRAL, Point(0,0), true),
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-   dismountAll();
-
+   // Items will be dismounted in Ship (Parent) destructor
    setOwner(NULL);
 
    if(isGhost())
@@ -127,8 +123,6 @@ Robot::~Robot()
    delete mPlayerInfo;
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
-
-   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
@@ -182,10 +176,6 @@ bool Robot::start()
    string name = runGetName();                                             // Run bot's getName function
    getClientInfo()->setName(getGame()->makeUnique(name.c_str()).c_str());  // Make sure name is unique
 
-
-   if(mClientInfo->getName() == "")                          // Make sure bots have a name
-      mClientInfo->setName(getGame()->makeUnique("Robot").c_str());
-
    mHasSpawned = true;
 
    mGame->addToClientList(mClientInfo);
@@ -228,12 +218,8 @@ static string getNextName()
       "Lillian", "Lucy", "Madison", "Natalie", "Olivia", "Riley", "Samantha", "Zoe"
    };
 
-   static const S32 size = ARRAYSIZE(botNames);
-
-   static S32 nameIndex = -1;
-   nameIndex = (nameIndex + 1) % size;  // Rollover list if needed
-
-   return botNames[nameIndex];
+   static U8 nameIndex = 0;
+   return botNames[(nameIndex++) % ARRAYSIZE(botNames)];
 }
 
 
@@ -242,85 +228,37 @@ string Robot::runGetName()
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   // Retrieve the bot's getName function, and put it on top of the stack
-   bool ok = retrieveFunction("getName");     
+   // error will only be true if: 1) getName doesn't exist, which should never happen -- getName is stubbed out in robot_helper_functions.lua
+   //                             2) getName generates an error
+   //                             3) something is hopelessly corrupt (see 1)
+   // Note that it is valid for getName to return a nil (or not be implemented in the bot itself) in which case a default name will be chosen.
+   // If error is true, runCmd will terminate bot script by running killScript(), so we don't need to worry about making things too nice.
+   bool error = runCmd("getName", 1);     
 
-   TNLAssert(ok, "getName function not found -- is robot_helper_functions corrupt?");
+   string name = "";
 
-   if(!ok)
+   if(!error)
    {
-      string name = getNextName();
-      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-      logError("Could not find getName function -- using default name \"%s\".", name.c_str());
-      return name;
-   }
-
-   S32 error = lua_pcall(L, 0, 1, 0);    // Passing 0 params, expecting 1 back
-
-   if(error == 0)    // Function returned normally     
-   {
-      if(!lua_isstring(L, -1))
+      if(lua_isstring(L, -1))   // getName should have left a name on the stack
       {
-         string name = getNextName();
-         logprintf(LogConsumer::LogWarning, "Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
+         name = lua_tostring(L, -1);
 
-         lua_pop(L, 1);          // Remove thing that wasn't a name from the stack
-         TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-         return name;
+         if(name == "")
+            name = getNextName();
       }
+      else
+      {
+         // If getName is not implemented, or returns nil, this is not an error; it just means we pick a name for the bot
+         if(!lua_isnil(L, -1))
+            logprintf(LogConsumer::LogWarning, "Robot error retrieving name (returned value was not a string).  Using \"%s\".", name.c_str());
 
-      string name = lua_tostring(L, -1);
-
-      lua_pop(L, 1);
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-      return name;
+         name = getNextName();
+      }
    }
 
-   // Got an error running getName()
-   string name = getNextName();
-   logError("Error running getName function (%s) -- using default name \"%s\".", lua_tostring(L, -1), name.c_str());
-
-   lua_pop(L, 1);             // Remove error message from stack
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+   clearStack(L);
    return name;
 }
-
-
-// Advance timers by deltaT
-void Robot::tickTimer(U32 deltaT)
-{
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-
-   bool ok = retrieveFunction("_tickTimer");       // Push timer function onto stack            -- function 
-   TNLAssert(ok, "_tickTimer function not found -- is lua_helper_functions corrupt?");
-
-   if(!ok)
-   {      
-      logError("Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-      logError("Function _tickTimer() could not be found!  Terminating script.");
-
-      deleteObject();      // Will probably fail for levelgens...
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-      return;
-   }
-
-   luaW_push<Robot>(L, this);
-   lua_pushnumber(L, deltaT);                   // Pass the time elapsed since we were last here   -- function, object, time
-   S32 error = lua_pcall(L, 2, 0, 0);           // Pass two objects, expect none in return         -- <<empty stack>>
-
-   if(error != 0)
-   {
-      logError("Robot error running _tickTimer(): %s.  Shutting robot down.", lua_tostring(L, -1));
-      lua_pop(L, 1);    // Remove error message from stack
-
-      deleteObject();   // Add bot to delete list, where it will be deleted in the proper manner
-   }
-
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-}
-
 
 
 // Register our connector types with Lua
@@ -358,6 +296,12 @@ void Robot::onAddedToGame(Game *game)
    game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
   
    EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerJoinedEvent, getPlayerInfo());
+}
+
+
+void Robot::killScript()
+{
+   deleteObject();
 }
 
 
@@ -531,7 +475,7 @@ void Robot::idle(BfObject::IdleCallPath path)
 
       TNLAssert(deltaT != 0, "Time should never be zero!");    
 
-      tickTimer(deltaT);
+      tickTimer<Robot>(deltaT);
 
       Parent::idle(BfObject::ServerIdleControlFromClient);   // Let's say the script is the client  ==> really not sure this is right
    }
@@ -1365,7 +1309,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
    Point d = target->getPos() - aimPos;
 
    F32 t;      // t is set in next statement
-   if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
+   if(!findLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
       return false;
 
    Point leadPos = target->getPos() + Vs * t;
@@ -1456,7 +1400,7 @@ S32 Robot::dropItem(lua_State *L)
 
    S32 count = mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
-      mMountedItems[i]->dismount(false);
+      mMountedItems[i]->dismount(MountableItem::DISMOUNT_NORMAL);
 
    return 0;
 }

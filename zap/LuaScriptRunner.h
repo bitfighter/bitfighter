@@ -115,13 +115,10 @@ protected:
    virtual bool prepareEnvironment();
    void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
-   static void printStackTrace(lua_State *L);
-
    static int luaPanicked(lua_State *L);
    virtual void registerClasses();
    void setEnvironment();
    static void deleteScript(const char *name);  // Remove saved script from the Lua registry
-   virtual void tickTimer(U32 deltaT);          // Advance script timers
 
    void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
 
@@ -145,6 +142,9 @@ void setSelf(lua_State *L, T *self, const char *name)
 }
 
 
+protected:
+   virtual void killScript() = 0;
+
 
 public:
    LuaScriptRunner();               // Constructor
@@ -165,10 +165,13 @@ public:
 
    bool loadScript();
 
-   bool retrieveFunction(const char *functionName);   // Put specified function on top of the stack, if it's defined
+   bool retrieveCriticalFunction(const char *funName);   // Same, but with more oomph
+
+   bool runCmd(const char *function, S32 returnValues);
+
 
    const char *getScriptId();
-   static void loadFunction(lua_State *L, const char *scriptId, const char *functionName);
+   static bool loadFunction(lua_State *L, const char *scriptId, const char *functionName);
    bool loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context);
 
    void logError(const char *format, ...);
@@ -186,6 +189,22 @@ public:
    S32 doUnsubscribe(lua_State *L);
 
    static const LuaFunctionProfile functionArgs[]; 
+
+   // Consolidate code from bots and levelgens -- this tickTimer works for both!
+   template <class T>
+   void tickTimer(U32 deltaT)          
+   {
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
+      clearStack(L);
+
+      luaW_push<T>(L, static_cast<T *>(this));           // -- this
+      lua_pushnumber(L, deltaT);       // -- this, deltaT
+
+      // Note that we don't care if this generates an error... if it does the error handler will
+      // print a nice message, then call killScript().
+      runCmd("_tickTimer", 0);
+   }
+
 };
 
 

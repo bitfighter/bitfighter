@@ -114,64 +114,61 @@ static const char *sanitizeForJson(const char *value)
    result.reserve(maxsize);  // memory management
 
    // Return if no escaping needed
-   if (strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
-   {
+   if(strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
       return value;
-   }
 
    // If any of the above exist then do some escaping
-   for (const char* c=value; *c != 0; ++c)
+   for(const char* c=value; *c != 0; ++c)
    {
       switch(*c)
       {
-      // For JSON
-      case '\"':
-         result += "\\\"";
-         break;
-      case '\\':
-         result += "\\\\";
-         break;
-      case '\b':
-         result += "\\b";
-         break;
-      case '\f':
-         result += "\\f";
-         break;
-      case '\n':
-         result += "\\n";
-         break;
-      case '\r':
-         result += "\\r";
-         break;
-      case '\t':
-         result += "\\t";
-         break;
+         // For JSON
+         case '\"':
+            result += "\\\"";
+            break;
+         case '\\':
+            result += "\\\\";
+            break;
+         case '\b':
+            result += "\\b";
+            break;
+         case '\f':
+            result += "\\f";
+            break;
+         case '\n':
+            result += "\\n";
+            break;
+         case '\r':
+            result += "\\r";
+            break;
+         case '\t':
+            result += "\\t";
+            break;
 
-      // For html markup entities
-      case '&':
-         result += "&amp;";
-         break;
-      case '<':
-         result += "&lt;";
-         break;
-      case '>':
-         result += "&gt;";
-         break;
-      default:
-         if ( isControlCharacter( *c ) )
-         {
-            // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
-            // However, some day we might want to support this, so we'll leave the code in place.
-            //std::ostringstream oss;
-            //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
-            //result += oss.str();
+         // For html markup entities
+         case '&':
+            result += "&amp;";
+            break;
+         case '<':
+            result += "&lt;";
+            break;
+         case '>':
+            result += "&gt;";
+            break;
+         default:
+            if( isControlCharacter( *c ) )
+            {
+               // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
+               // However, some day we might want to support this, so we'll leave the code in place.
+               //std::ostringstream oss;
+               //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
+               //result += oss.str();
+            }
+            else
+               result += *c;
+
+            break;
          }
-         else
-         {
-            result += *c;
-         }
-         break;
-      }
    }
 
    return result.c_str();
@@ -272,9 +269,11 @@ public:
       setIsAdaptive();
       isInGlobalChat = false;
       mAuthenticated = false;
+      mIsDebugClient = false;
       mIsIgnoredFromList = false;
       mIsMasterAdmin = false;
       mLoggingStatus = "Not_Connected";
+      mConnectionType = MasterConnectionTypeNone;
    }
 
    /// Destructor removes the connection from the doubly linked list of server connections
@@ -288,12 +287,12 @@ public:
       {
          logprintf(LogConsumer::LogConnection, "CONNECT_FAILED\t%s\t%s\t%s", getTimeStamp().c_str(), getNetAddress().toString(), mLoggingStatus);
       }
-      else if(mIsGameServer)
+      else if(mConnectionType == MasterConnectionTypeServer)
       {
          // SERVER_DISCONNECT | timestamp | player/server name
          logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
       }
-      else
+      else if(mConnectionType == MasterConnectionTypeClient)
       {
          // CLIENT_DISCONNECT | timestamp | player name
          logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
@@ -609,8 +608,20 @@ public:
    }
 
 
+   static bool listClient(MasterServerConnection *client)
+   {
+      if(client->mIsIgnoredFromList)     // Skip clients with ignored flag set
+         return false;
+
+      if(client->mIsDebugClient)         // Skip clients running in debug mode
+         return false;
+
+      return true;
+   }
+
+
    // Write a current count of clients/servers for display on a website, using JSON format
-   // This gets updated whenver we gain or lose a server, at most every REWRITE_TIME ms
+   // This gets updated whenever we gain or lose a server, at most every REWRITE_TIME ms
    void MasterServerConnection::writeClientServerList_JSON()
    {
       if(gJasonOutFile == "")
@@ -644,7 +655,7 @@ public:
          first = true;
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            if(!walk->mIsIgnoredFromList)
+            if(listClient(walk))
             {
                fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
                first = false;
@@ -656,7 +667,7 @@ public:
          first = true;
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
-            if(!walk->mIsIgnoredFromList)
+            if(listClient(walk))
             {
                fprintf(f, "%s%s", first ? "":", ", walk->mAuthenticated ? "true" : "false");
                first = false;
@@ -826,20 +837,20 @@ public:
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
    {
       // Only accept updates from game servers
-      if(!mIsGameServer)
+      if(mConnectionType != MasterConnectionTypeServer)
          return;
 
-      // Update only if anything is different
+      // Only update if anything has changed
       if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   || 
          mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
       {
          mLevelName = levelName;
          mLevelType = levelType;
 
-         mNumBots = botCount;
+         mNumBots     = botCount;
          mPlayerCount = playerCount;
-         mMaxPlayers = maxPlayers;
-         mInfoFlags = infoFlags;
+         mMaxPlayers  = maxPlayers;
+         mInfoFlags   = infoFlags;
 
          // Check to ensure we're not getting flooded with these requests
          checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
@@ -1061,13 +1072,17 @@ public:
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mAcheivementAchieved, (U8 achievementId, StringTableEntry playerNick))
    {
-      if(achievementId > BADGE_COUNT) // out of range badges
+      if(achievementId > BADGE_COUNT)  // Check for out of range badges
          return;
+
       writeAchievementToDb(achievementId, playerNick);
 
       for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if(walk->mPlayerOrServerName == playerNick)
-            walk->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database.
+         {
+            walk->mBadges = mBadges | BIT(achievementId); // Add to local variable without needing to reload from database
+            break;
+         }
    }
 
 
@@ -1090,7 +1105,7 @@ public:
       if(highScores.isBuzy)
       {
          bool exists = false;
-            for(S32 i=0; i < highScores.waitingClients.size(); i++)
+            for(S32 i = 0; i < highScores.waitingClients.size(); i++)
                if(highScores.waitingClients[i] == this)
                   exists = true;
          if(!exists)
@@ -1137,6 +1152,19 @@ public:
       return name;
    }
 
+
+   void MasterServerConnection::sendMotd()
+   {
+      // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
+      string motdString = "Welcome to Bitfighter!";  // Default msg
+
+      if(gMOTDClientMap[mClientBuild] != "")
+         motdString = gMOTDClientMap[mClientBuild];
+
+      m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
+   }
+
+
    // Must match MasterServerConnection::writeConnectRequest()!!
    bool MasterServerConnection::readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
@@ -1161,96 +1189,130 @@ public:
       bstream->read(&mCSProtocolVersion);    // Protocol this client uses for C-S communication
       bstream->read(&mClientBuild);          // Client's build number
 
-      mIsGameServer = bstream->readFlag();
+      // In protocol 6 we've added the concept of a connection type
+      if(mCMProtocolVersion >= 6)
+         mConnectionType = (MasterConnectionType) bstream->readEnum(MasterConnectionTypeCount);
+
+      // Protocol 5 and earlier only sent 1 bit to determine if it was a game server
+      else
+      {
+         if(bstream->readFlag())
+            mConnectionType = MasterConnectionTypeServer;
+         else
+            mConnectionType = MasterConnectionTypeClient;
+      }
+
       mLoggingStatus = NULL;
 
-      // If it's a game server, read status info...
-      if(mIsGameServer)
+      // Now read the bitstream and do other logic according to the connection type
+      switch(mConnectionType)
       {
-         bstream->read(&mNumBots);
-         bstream->read(&mPlayerCount);
-         bstream->read(&mMaxPlayers);
-         bstream->read(&mInfoFlags);
-
-         bstream->readString(readstr);    // Current level name
-         mLevelName = readstr;
-
-         bstream->readString(readstr);    // Current level type (hunters, ctf, soccer, etc.)
-         mLevelType = readstr;
-
-         bstream->readString(readstr);
-         mPlayerOrServerName = cleanName(readstr).c_str();
-
-         bstream->readString(readstr);
-         mServerDescr = readstr;
-
-         linkToServerList();
-      }
-      else     // Not a server? Must be a client
-      {
-         bstream->readString(readstr);          // Client's joystick autodetect string
-         mAutoDetectStr = readstr;
-
-         bstream->readString(readstr);
-         mPlayerOrServerName = cleanName(readstr).c_str();
-
-         bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
-         //string password = readstr;
-            
-         mPlayerId.read(bstream);
-
-         // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
-         // possibilities, it most likely will be.
-         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-            if(walk != this && walk->mPlayerId == mPlayerId)
-            {
-               logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
-                                                                                             walk->mPlayerOrServerName.getString());
-               disconnect(ReasonDuplicateId, "");
-               reason = ReasonDuplicateId;
-               return false;
-            }
-
-         // Start the authentication by reading database on seperate thread
-         // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
-         // so we pause waiting for database instead of fully connecting yet.
-
-         for(S32 i=0; i < gListAddressHide.size(); i++)
-            if(getNetAddress().isEqualAddress(gListAddressHide[i]))
-               mIsIgnoredFromList = true;
-
-         switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
+         // If it's a game server, read status info...
+         case MasterConnectionTypeServer:
          {
-            case WrongPassword: reason = ReasonBadLogin; return false;
-            case InvalidUsername: reason = ReasonInvalidUsername; return false;
-            case UnknownStatus: // make JSON delay write, to reduce chances of see the newly joined player as unauthenticated
-            {
-               bool NeedToWriteStatusPrev = gNeedToWriteStatus;
-               linkToClientList();
-               gNeedToWriteStatus = NeedToWriteStatusPrev; // Don't let linkToClientList set it to true
-               gNeedToWriteStatusDelayed = Platform::getRealMilliseconds();
-               break;
-            }
-            default: linkToClientList();
+            bstream->read(&mNumBots);
+            bstream->read(&mPlayerCount);
+            bstream->read(&mMaxPlayers);
+            bstream->read(&mInfoFlags);
+
+            bstream->readString(readstr);    // Current level name
+            mLevelName = readstr;
+
+            bstream->readString(readstr);    // Current level type (hunters, ctf, soccer, etc.)
+            mLevelType = readstr;
+
+            bstream->readString(readstr);
+            mPlayerOrServerName = cleanName(readstr).c_str();
+
+            bstream->readString(readstr);
+            mServerDescr = readstr;
+
+            linkToServerList();
          }
+         break;
+
+         case MasterConnectionTypeClient:
+         {
+            bstream->readString(readstr);          // Client's joystick autodetect string
+            mAutoDetectStr = readstr;
+
+            bstream->readString(readstr);
+            mPlayerOrServerName = cleanName(readstr).c_str();
+
+            bstream->readString(readstr); // the last "readstr" for "password" in startAuthentication
+
+            // Read client flags -- only the first is currently used
+            if(mCMProtocolVersion >= 6)
+            {
+               U8 flags = bstream->readInt(8);
+               mIsDebugClient = flags & ClientDebugModeFlag;
+            }
+
+            mPlayerId.read(bstream);
+
+            // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
+            // possibilities, it most likely will be.
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+               if(walk != this && walk->mPlayerId == mPlayerId)
+               {
+                  logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(),
+                                                                                                walk->mPlayerOrServerName.getString());
+                  disconnect(ReasonDuplicateId, "");
+                  reason = ReasonDuplicateId;
+                  return false;
+               }
+
+            // Start the authentication by reading database on seperate thread
+            // On clients 017 and older, they completely ignore any disconnect reason once fully connected,
+            // so we pause waiting for database instead of fully connecting yet.
+
+            for(S32 i = 0; i < gListAddressHide.size(); i++)
+               if(getNetAddress().isEqualAddress(gListAddressHide[i]))
+                  mIsIgnoredFromList = true;
+
+            switch(checkAuthentication(readstr, mCSProtocolVersion <= 35)) // readstr is password
+            {
+               case WrongPassword:   reason = ReasonBadLogin;        return false;
+               case InvalidUsername: reason = ReasonInvalidUsername; return false;
+               case UnknownStatus: // make JSON delay write, to reduce chances of see the newly joined player as unauthenticated
+               {
+                  bool NeedToWriteStatusPrev = gNeedToWriteStatus;
+                  linkToClientList();
+                  gNeedToWriteStatus = NeedToWriteStatusPrev; // Don't let linkToClientList set it to true
+                  gNeedToWriteStatusDelayed = Platform::getRealMilliseconds();
+                  break;
+               }
+               default: linkToClientList();
+            }
+
+            // If client needs to upgrade, tell them
+            m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion || gLatestReleasedBuildVersion > mClientBuild);
+
+            // Send message of the day
+            sendMotd();
+         }
+         break;
+
+         case MasterConnectionTypeAnonymous:
+         {
+            // Do nothing!
+         }
+         break;
+
+         default:
+            break;
       }
 
-      // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
-      string motdString = "Welcome to Bitfighter!";  // Default msg
 
-      if(gMOTDClientMap[mClientBuild] != "")
-         motdString = gMOTDClientMap[mClientBuild];
-
-      m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion || gLatestReleasedBuildVersion > mClientBuild);
-
-
-      // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
-      logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
-                                                   mIsGameServer ? "SERVER_INFO" : "CLIENT_INFO", getTimeStamp().c_str(),
-                                                   mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
-                                                   strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
-      if(!mIsGameServer)  // seems to be just a waste of bandwidth when sending this to servers
-         m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
+      // Log our connection if from client or server
+      if(mConnectionType == MasterConnectionTypeServer || mConnectionType == MasterConnectionTypeClient)
+      {
+         // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
+         logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
+               mConnectionType == MasterConnectionTypeServer ? "SERVER_INFO" : "CLIENT_INFO",
+               getTimeStamp().c_str(), mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
+               strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
+      }
 
       return true;
    }
@@ -1354,6 +1416,7 @@ public:
          {
             bool droppedServer = false;
             Address addr(&message.getString()[12]);
+
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
                if(walk->getNetAddress().isEqualAddress(addr) && (addr.port == 0 || addr.port == walk->getNetAddress().port))
                {
@@ -1361,8 +1424,10 @@ public:
                   m2cSendChat(walk->mPlayerOrServerName, true, "dropped");
                   droppedServer = true;
                }
+
             if(!droppedServer)
                m2cSendChat(mPlayerOrServerName, true, "dropserver: address not found");
+
             return;
          }
          else if(mIsMasterAdmin && !stricmp(message.getString(), "/bringbackservers"))
@@ -1401,7 +1466,7 @@ public:
                {
                   walk->mIsIgnoredFromList = true;
                   m2cSendChat(walk->mPlayerOrServerName, true, "player now hidden");
-                  c2mLeaveGlobalChat_remote(); // also mute and delist that player.
+                  c2mLeaveGlobalChat_remote();  // Also mute and delist the player
                   found = true;
                }
             gListAddressHide.push_back(addr);
@@ -1480,7 +1545,7 @@ public:
 
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mChangeName, (StringTableEntry name))
    {
-      if(mIsGameServer)  // server only, don't want clients to rename yet (client names need to authenticate)
+      if(mConnectionType == MasterConnectionTypeServer)  // server only, don't want clients to rename yet (client names need to authenticate)
       {
          mPlayerOrServerName = name;
          gNeedToWriteStatus = true;  // update server name in ".json"
@@ -1669,7 +1734,7 @@ int main(int argc, const char **argv)
    gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName.c_str(), gMasterPort);
 
    const U32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
-   const U32 REREAD_TIME = 5000;         // How often to we re-read our config file? (in ms)
+   const U32 REREAD_TIME  = 5000;        // How often to we re-read our config file? (in ms)
 
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
@@ -1677,7 +1742,7 @@ int main(int argc, const char **argv)
    gDatabaseAccessThread.start();  // start a thread that handles some of slow task with database.
 
     // And until infinity, process whatever comes our way.
-   for(;;)     // To infinity and beyond!!
+   while(true)     // To infinity and beyond!!
    {
       gNetInterface->checkIncomingPackets();
       gNetInterface->processConnections();
@@ -1702,28 +1767,34 @@ int main(int argc, const char **argv)
          gNeedToWriteStatusDelayed = 0;
       }
 
-      for(S32 i = MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
+      // Cycle through all our connections, checking if any have timed out
+      for(S32 i = MasterServerConnection::gConnectList.size() - 1; i >= 0; i--)
       {
          GameConnectRequest *request = MasterServerConnection::gConnectList[i];
-         if(currentTime - request->requestTime > 5000) // 5 seconds
+
+         if(currentTime - request->requestTime > 5000)   // 5 seconds
          {
             if(request->initiator.isValid())
             {
                ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterRequestTimedOut, (U32) strlen(MasterRequestTimedOut) + 1);
+
                request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
                request->initiator->removeConnectRequest(request);
             }
+
             if(request->host.isValid())
                request->host->removeConnectRequest(request);
+
             MasterServerConnection::gConnectList.erase_fast(i);
             delete request;
          }
       }
 
-      // using delayed leave, to avoid repeating and flooding join / leave messages.
+      // Process any delayed disconnects; we use this to avoid repeating and flooding join / leave messages
       for(S32 i = MasterServerConnection::gLeaveChatTimerList.size() - 1; i >= 0; i--)
       {
          MasterServerConnection *c = MasterServerConnection::gLeaveChatTimerList[i];
+
          if(!c || c->mLeaveGlobalChatTimer == 0)
             MasterServerConnection::gLeaveChatTimerList.erase(i);
          else
@@ -1731,18 +1802,22 @@ int main(int argc, const char **argv)
             if(currentTime - c->mLeaveGlobalChatTimer > 1000)
             {
                c->isInGlobalChat = false;
-               for(MasterServerConnection *walk = MasterServerConnection::gClientList.mNext; walk != &MasterServerConnection::gClientList; walk = walk->mNext)
+
+               MasterServerConnection *head = &MasterServerConnection::gClientList;
+
+               for(MasterServerConnection *walk = head->mNext; walk != head; walk = walk->mNext)
                   if (walk != c && walk->isInGlobalChat)
                      walk->m2cPlayerLeftGlobalChat(c->mPlayerOrServerName);
+
                MasterServerConnection::gLeaveChatTimerList.erase(i);
             }
          }
-
       }
 
       gDatabaseAccessThread.runAtMainThread();
 
       Platform::sleep(5);
    }
+
    return 0;
 }

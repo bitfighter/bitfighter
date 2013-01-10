@@ -141,33 +141,49 @@ void LuaScriptRunner::setEnvironment()
 }
 
 
-// Retrieve the environment from the registry, and put the requested function from that environment onto the stack
-void LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
+// Retrieve the environment from the registry, and put the requested function from that environment onto the stack.  Returns true
+// if it works, false if the specified function could not be found.  If this fails, it will remove the non-function from the stack.
+bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
 {
-   try
-   {
-      lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
-      lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
+   lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
+   lua_getfield(L, -1, functionName);              // And get the requested function from the environment   -- table, function
+   lua_remove(L, -2);                              // Remove table                                          -- function
 
-      lua_remove(L, -2);                              // Remove table                                          -- function
-   }
+   // Check if the top stack item is indeed a function (as we would expect)
+   if(lua_isfunction(L, -1))
+      return true;      // If so, return true
 
-   catch(LuaException &e)
-   {
-      // TODO: Should be logError()!
-      logprintf(LogConsumer::LogError, "Error accessing %s function: %s.  Aborting script.", functionName, e.what());
-      LuaObject::clearStack(L);
-   }
+   // else
+   clearStack(L);
+   return false;
 }
 
 
+bool LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
+{
+   if(!loadFunction(L, getScriptId(), functionName))
+   {
+      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
+
+      logError("Function %s() could not be found!  Terminating script.\n"
+               "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.", functionName);
+
+      return false;
+   }
+
+   return true;
+}
+
+
+// Primarily used for loading helper functions
 bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
+   setScriptContext(L, context);
+
    lua_getfield(L, LUA_REGISTRYINDEX, key);     // Get function out of the registry      -- functionName()
    setEnvironment();                            // Set the environment for the code
-   S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                 -- <<empty stack>>
+   S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                -- <<empty stack>>
 
-   setScriptContext(L, context);
 
    if(err != 0)
    {
@@ -183,13 +199,15 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 }
 
 
-
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
 // defining any globals, and executing any "loose" code not defined in a function.
 bool LuaScriptRunner::loadScript()
 {
-   static const S32 MAX_CACHE_SIZE = 2;      // For now -- can be bigger when we know this works
+   static const S32 MAX_CACHE_SIZE = 16;
 
+   // On a dedicated server, we'll always cache our scripts; on a regular server, we'll cache script except when the user is testing
+   // from the editor.  In that case, we'll want to see script changes take place immediately, and we're willing to pay a small
+   // performance penalty on level load to get that.
 #ifdef ZAP_DEDICATED
    bool cacheScripts = true;
 #else
@@ -268,57 +286,56 @@ bool LuaScriptRunner::runMain()
 }
 
 
+// Takes the passed args, puts them into a Lua table called arg, pushes it on the stack, and runs the "main" function.
 bool LuaScriptRunner::runMain(const Vector<string> &args)
 {
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
-   try 
-   {
-      // Retrieve the bot's getName function, and put it on top of the stack
-      bool ok = retrieveFunction("main");     
 
-      if(!ok)
-      {      
-         const char *msg = "Function main() could not be found.  This _might_ be OK, but probably isn't.  If it is intentional, please add an empty function called main() to avoid this message.";
-         logError(msg);
-         throw LuaException(msg);
-      }  
-
-      setLuaArgs(args);
-
-      S32 error = lua_pcall(L, 0, 0, 0);     // Passing no args, expecting none back
-
-      if(error != 0)
-         throw LuaException(lua_tostring(L, -1));
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-   }
-
-   catch(LuaException &e)
-   {
-      logError("Error encountered while attempting to run script's main() function: %s.  Aborting script.", e.what());
-      LuaObject::clearStack(L);
-      return false;
-   }
-
-   return true;
+   setLuaArgs(args);
+   bool error = runCmd("main", 0);
+   return !error;
 }
 
 
-// Get a function from the currently running script, and place it on top of the stack.  Returns true if it works, false
-// if the specified function could not be found.  If this fails will remove the non-function from the stack.
-bool LuaScriptRunner::retrieveFunction(const char *functionName)
+// Returns true if there was an error, false if everything ran ok
+bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, getScriptId());    // Put script's environment table onto stack  -- table
-   lua_pushstring(L, functionName);                      //                                            -- table, functionName
-   lua_gettable(L, -2);                                  // Push requested function onto the stack     -- table, fn
-   lua_remove(L, lua_gettop(L) - 1);                     // Remove environment table from stack        -- fn
+   S32 args = lua_gettop(L);                             // -- <<args>>
 
-   // Check if the top stack item is indeed a function (as we would expect)
-   if(lua_isfunction(L, -1))
-      return true;      // If so, return true
+   // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
+   retrieveCriticalFunction("_stackTracer");             // -- <<args>>, _stackTracer
+   bool ok = loadFunction(L, getScriptId(), function);   // -- <<args>>, _stackTracer, function
+   if(!ok)
+   {      
+      logprintf(LogConsumer::LogError, "%s\n"
+                                       "Cannot load method %s()!\n"
+                                       "Terminating script.", 
+                                       getErrorMessagePrefix(), function, lua_tostring(L, -1));
+      killScript();
+      clearStack(L);
+      return true;
+   }
 
-   // else
-   lua_pop(L, 1);
+   // Reorder the stack a little
+   lua_insert(L, 1);                                  // -- function, <<args>>, _stackTracer
+   lua_insert(L, 1);                                  // -- _stackTracer, function, <<args>>
+
+   S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
+
+   if(error != 0)
+   {
+      logprintf(LogConsumer::LogError, "%s\n"
+                                       "In method %s():\n"
+                                       "%s.\n", 
+                                       getErrorMessagePrefix(), function, lua_tostring(L, -1));    // Gets stack trace left by _stackTracer
+      killScript();
+      clearStack(L);
+      return true;
+   }
+
+   lua_remove(L, 1);    // Remove _stackTracer           -- <<return values>>
+
+   // Do not clear stack -- caller probably wants <<return values>>
    return false;
 }
 
@@ -476,8 +493,6 @@ void LuaScriptRunner::logErrorHandler(const char *msg, const char *prefix)
    // Log the error to the logging system and also to the game console
    logprintf(LogConsumer::LogError, "%s %s", prefix, msg);
 
-   printStackTrace(L);
-
    LuaObject::clearStack(L);
 }
 
@@ -494,24 +509,6 @@ static string getStackTraceLine(lua_State *L, S32 level)
 	dSprintf(str, sizeof(str), "%s(%s:%i)", ar.name, ar.source, ar.currentline);
 
    return str;    // Implicitly converted to string to avoid passing pointer to deleted buffer
-}
-
-
-void LuaScriptRunner::printStackTrace(lua_State *L)
-{
-   const int MAX_TRACE_LEN = 20;
-
-   for(S32 level = 0; level < MAX_TRACE_LEN; level++)
-   {
-	   string str = getStackTraceLine(L, level);
-	   if(str == "")
-		   break;
-
-	   if(level == 0)
-		   logprintf("Stack trace:");
-
-	   logprintf("  %s", str.c_str());
-   }
 }
 
 
@@ -534,6 +531,8 @@ void LuaScriptRunner::registerClasses()
 // By Lua convention, we'll put the name of the script into the 0th element.
 void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
 {
+   S32 stackDepth = lua_gettop(L);
+
    lua_getfield(L, LUA_REGISTRYINDEX, getScriptId()); // Put script's env table onto the stack  -- ..., env_table
    lua_pushliteral(L, "arg");                         //                                        -- ..., env_table, "arg"
    lua_createtable(L, args.size() + 1, 0);            // Create table with predefined slots     -- ..., env_table, "arg", table
@@ -549,6 +548,8 @@ void LuaScriptRunner::setLuaArgs(const Vector<string> &args)
    
    lua_settable(L, -3);                               // Save it: env_table["arg"] = table      -- ..., env_table
    lua_pop(L, 1);                                     // Remove environment table from stack    -- ...
+
+   TNLAssert(stackDepth == lua_gettop(L), "Stack not properly restored to the state it was in when we got here!");
 }
 
 
@@ -566,13 +567,6 @@ void LuaScriptRunner::setModulePath()
    lua_pop(L, 1);                                           // -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-}
-
-
-// Advance timers by deltaT
-void LuaScriptRunner::tickTimer(U32 deltaT)
-{
-   TNLAssert(false, "Not implemented");
 }
 
 
@@ -862,7 +856,7 @@ bool add_enum_to_lua(lua_State* L, const char* tname, ...)
    code << "__metatable = false} )";
 
    // Execute lua code
-   if ( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
+   if( luaL_loadbuffer(L, code.str().c_str(), code.str().length(), 0) || lua_pcall(L, 0, 0, 0) )
    {
       fprintf(stderr, "%s\n\n%s\n", code.str().c_str(), lua_tostring(L, -1));
       lua_pop(L, 1);

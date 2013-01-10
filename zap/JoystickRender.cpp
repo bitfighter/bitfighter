@@ -151,15 +151,15 @@ void JoystickRender::renderDPad(Point center, F32 radius, bool upActivated, bool
    if(strcmp(msg1, ""))    // That is, != "".  Remember, kids, strcmp returns 0 when strings are identical!
    {
       S32 size = 12;
-      S32 width = UserInterface::getStringWidth(size, msg1);
-      UserInterface::drawString(center.x - width / 2, center.y + 27, size, msg1);
+      S32 width = getStringWidth(size, msg1);
+      drawString(center.x - width / 2, center.y + 27, size, msg1);
    }
 
    if(strcmp(msg2, ""))
    {
       S32 size = 10;
-      S32 width = UserInterface::getStringWidth(size, msg2);
-      UserInterface::drawString(center.x - width / 2, center.y + 42, size, msg2);
+      S32 width = getStringWidth(size, msg2);
+      drawString(center.x - width / 2, center.y + 42, size, msg2);
    }
 }
 
@@ -171,7 +171,7 @@ S32 JoystickRender::getControllerButtonRenderedSize(S32 joystickIndex, InputCode
 {
    // Return keyboard key size, just in case
    if(!InputCodeManager::isControllerButton(inputCode))
-      return UserInterface::getStringWidthf(15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
+      return getStringWidthf(15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
 
    // Get joystick button size
    Joystick::Button button = inputCodeToJoystickButton(inputCode);
@@ -218,7 +218,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
    if(!InputCodeManager::isControllerButton(inputCode))
    {
       // Offset a bit in the x direction.
-      UserInterface::drawStringf(x - 10, y, 15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
+      drawStringf(x - 10, y, 15, "[%s]", InputCodeManager::inputCodeToString(inputCode));
       return;
    }
 
@@ -302,7 +302,7 @@ void JoystickRender::renderControllerButton(F32 x, F32 y, U32 joystickIndex, Inp
          break;
       case Joystick::ButtonSymbolNone:
       default:
-         UserInterface::drawString(location.x - UserInterface::getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
+         drawString(location.x - getStringWidth(labelSize, label) / 2, location.y + 2, labelSize, label);
          break;
    }
 }

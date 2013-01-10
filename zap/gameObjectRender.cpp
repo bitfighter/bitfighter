@@ -41,12 +41,8 @@
 
 #include "UIEditor.h"            // For RenderingStyles enum
 
-
-#include "ClientInfo.h"    // TODO: delete this (here for testing only)
-
+#include "MathUtils.h"           // For converting radians to degrees
 #include "OpenglUtils.h"
-
-//#include "pictureloader.h"
 
 #include <math.h>
 
@@ -240,11 +236,11 @@ void drawFilledRoundedRect(const Point &pos, F32 width, F32 height, const Color 
    drawFilledArc(Point(pos.x + width / 2 - radius, pos.y + height / 2 - radius), radius,            0, FloatHalfPi);
    drawFilledArc(Point(pos.x - width / 2 + radius, pos.y + height / 2 - radius), radius,  FloatHalfPi, FloatPi);
 
-   UserInterface::drawRect(pos.x - width / 2, pos.y - height / 2 + radius, 
-                           pos.x + width / 2, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
+   drawRect(pos.x - width / 2, pos.y - height / 2 + radius, 
+            pos.x + width / 2, pos.y + height / 2 - radius, GL_TRIANGLE_FAN);
 
-   UserInterface::drawRect(pos.x - width / 2 + radius, pos.y - height / 2, 
-                           pos.x + width / 2 - radius, pos.y + height / 2, GL_TRIANGLE_FAN);
+   drawRect(pos.x - width / 2 + radius, pos.y - height / 2, 
+            pos.x + width / 2 - radius, pos.y + height / 2, GL_TRIANGLE_FAN);
 
    glColor(outlineColor);
    drawRoundedRect(pos, width, height, radius);
@@ -545,7 +541,7 @@ void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
    glLineWidth(gLineWidth1);
    glColor(Colors::white, 0.5f * alpha);
 
-   UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
+   drawStringc(0, 30 + (localShip ? 0 : textSize + 3) + textSize, textSize, str.c_str() );
 
    glLineWidth(gDefaultLineWidth);
 }
@@ -909,9 +905,9 @@ void renderSpyBugVisibleRange(const Point &pos, const Color &color, F32 currentS
    Color col(color);        // Make a copy we can alter
    glColor(col * 0.45f);    // Slightly different color than that used for ships
 
-   F32 range = gSpyBugRange * currentScale;
+   F32 range = SpyBug::SPY_BUG_RANGE * currentScale;
 
-   UserInterface::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
+   drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
 }
 
 
@@ -921,7 +917,7 @@ void renderTurretFiringRange(const Point &pos, const Color &color, F32 currentSc
 
    F32 range = Turret::TurretPerceptionDistance * currentScale;
 
-   UserInterface::drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
+   drawRect(pos.x - range, pos.y - range, pos.x + range, pos.y + range, GL_TRIANGLE_FAN);
 }
 
 
@@ -1072,8 +1068,8 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 
 F32 renderCenteredString(const Point &pos, S32 size, const char *string)
 {
-   F32 width = UserInterface::getStringWidth((F32)size, string);
-   UserInterface::drawString((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
+   F32 width = getStringWidth((F32)size, string);
+   drawStringAndGetWidth((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
 
    return width;
 }
@@ -1413,7 +1409,7 @@ void renderProjectile(const Point &pos, U32 type, U32 time)
       const int outerR = 3;
       const int dist = 10;
 
-#define dr(x) (float) x * FloatTau / 360     // degreesToRadians()
+#define dr(x) degreesToRadians(x)
 
       glRotatef( fmod(F32(time) * .15f, 720.f), 0, 0, 1);
       glColor(pi->projColors[1]);
@@ -1634,7 +1630,7 @@ void renderSpyBug(const Point &pos, const Color &teamColor, bool visible, bool d
       }
 
       mod = 1.0;
-      UserInterface::drawString(pos.x - 3, pos.y - 5, 10, "S");
+      drawString(pos.x - 3, pos.y - 5, 10, "S");
    }
    else
    {
@@ -2046,7 +2042,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
       glPushMatrix();
       glTranslate(pos);
          glScale(scaleFactor);
-         glRotatef(pos.angleTo(dir) * radiansToDegreesConversion, 0, 0, 1);
+         glRotatef(pos.angleTo(dir) * RADIANS_TO_DEGREES, 0, 0, 1);
          glTranslatef(-119, -45, 0);      // Determined experimentally
 
          renderBitfighterLogo(0, 1);
@@ -2056,7 +2052,7 @@ void renderTextItem(const Point &pos, const Point &dir, F32 size, const string &
    }
 
    glColor(color);      
-   UserInterface::drawAngleString(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
+   drawAngleString(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
 }
 
 
@@ -2201,7 +2197,7 @@ void renderStaticBitfighterLogo()
 {
    glColor4f(0, 1, 0, 1);
    renderBitfighterLogo(73, 1);
-   UserInterface::drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
+   drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
 }
 
 
@@ -2301,7 +2297,7 @@ void renderBitfighterLogo(const Point &pos, F32 size, U32 letterMask)
 // Pos is the square's center
 void drawSquare(const Point &pos, F32 radius, bool filled)
 {
-   UserInterface::drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
+   drawRect(pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius, filled ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
 }
 
 
@@ -2377,7 +2373,7 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
    {
       glColor(Colors::white, alpha);
       F32 fontsize = 6 / scale;
-      UserInterface::drawStringf(v.x - UserInterface::getStringWidthf(fontsize, "%d", number) / 2, v.y - 3 / scale, fontsize, "%d", number);
+      drawStringf(v.x - getStringWidthf(fontsize, "%d", number) / 2, v.y - 3 / scale, fontsize, "%d", number);
    }
 }
 
@@ -2391,9 +2387,9 @@ static void drawLetter(char letter, const Point &pos, const Color *color, F32 al
       vertOffset = 10;
 
    glColor(color, alpha);
-   F32 xpos = pos.x - UserInterface::getStringWidthf(15, "%c", letter) / 2;
+   F32 xpos = pos.x - getStringWidthf(15, "%c", letter) / 2;
 
-   UserInterface::drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
+   drawStringf(xpos, pos.y - vertOffset, 15, "%c", letter);
 }
 
 
@@ -2439,13 +2435,13 @@ void render25FlagsBadge(F32 x, F32 y, F32 rad)
 
    glColor(Colors::red);
    F32 ts = rad - 3;
-   F32 width = UserInterface::getStringWidth(ts, "25");
+   F32 width = getStringWidth(ts, "25");
    F32 tx = x + .30f * rad;
    F32 ty = y + rad - .40f * rad;
 
    glColor(Colors::yellow);
-   UserInterface::drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0), 
-                                 F32(tx + width / 2.0 + 0.5), F32(ty + (ts + 2.0) / 2.0));
+   drawFilledRect(F32(tx - width / 2.0 - 1.0), F32(ty - (ts + 2.0) / 2.0), 
+                  F32(tx + width / 2.0 + 0.5), F32(ty + (ts + 2.0) / 2.0));
    glColor(Colors::gray20);
    renderCenteredString(Point(tx, ty), ts, "25");
 }

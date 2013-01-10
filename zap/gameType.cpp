@@ -60,12 +60,6 @@
 #include "tnlThread.h"
 #include <math.h>
 
-#ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
-#define max(a,b) ((a) >= (b) ? (a) : (b))
-#endif
-
-
 namespace Zap
 {
 
@@ -636,15 +630,15 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 // Will return a valid GameType string -- either what's passed in, or the default if something bogus was specified  (static)
 const char *GameType::validateGameType(const char *gameTypeName)
 {
+   if(!stricmp(gameTypeName, "HuntersGameType"))
+       return "NexusGameType";
+
    for(S32 i = 0; gameTypeClassNames[i]; i++)    // Repeat until we hit NULL
-      if(strcmp(gameTypeClassNames[i], gameTypeName) == 0)
+      if(stricmp(gameTypeClassNames[i], gameTypeName) == 0)
          return gameTypeClassNames[i];
 
-
-   const S32 DEFAULT_GAME_TYPE_INDEX = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
-
-   // If we get to here, no valid game type was specified, so we'll return the default
-   return gameTypeClassNames[DEFAULT_GAME_TYPE_INDEX];
+   // If we get to here, no valid game type was specified, so we'll return the default (Bitmatch)
+   return gameTypeClassNames[0];
 }
 
 
@@ -905,7 +899,7 @@ void GameType::renderObjectiveArrow(const Point &nearestPoint, const Color *outl
 //   Point cen = rp - arrowDir * 12;
 
    // Try labelling the objective arrows... kind of lame.
-   //UserInterface::drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
+   //drawStringf(cen.x - UserInterface::getStringWidthf(10,"%2.1f", dist/100) / 2, cen.y - 5, 10, "%2.1f", dist/100);
 
    // Add an icon to the objective arrow...  kind of lame.
    //renderSmallFlag(cen, c, alpha);
@@ -1315,29 +1309,6 @@ bool GameType::isTeamGame() const
 }
 
 
-// Find all spubugs in the game, and store them for future reference
-// server only
-void GameType::catalogSpybugs()
-{
-   Vector<DatabaseObject *> spyBugs;
-   mSpyBugs.clear();
-
-   // Find all spybugs in the game, load them into mSpyBugs
-   mGame->getGameObjDatabase()->findObjects(SpyBugTypeNumber, spyBugs);
-
-   mSpyBugs.resize(spyBugs.size());
-   for(S32 i = 0; i < spyBugs.size(); i++)
-      mSpyBugs[i] = static_cast<SpyBug *>(spyBugs[i]); // convert to SafePtr
-}
-
-
-void GameType::addSpyBug(SpyBug *spybug)
-{
-   TNLAssert(!isGhost(), "Spybug non-Ghost / ServerGame only, currently useless for client?");
-   mSpyBugs.push_back(spybug); // convert to SafePtr
-}
-
-
 // Only runs on server
 void GameType::addWall(const WallRec &wall, Game *game)
 {
@@ -1349,8 +1320,6 @@ void GameType::addWall(const WallRec &wall, Game *game)
 // Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
 void GameType::onLevelLoaded()
 {
-   catalogSpybugs();
-
    GridDatabase *gridDatabase =  mGame->getGameObjDatabase();
 
    mLevelHasLoadoutZone      = gridDatabase->hasObjectOfType(LoadoutZoneTypeNumber);
@@ -1608,11 +1577,14 @@ void GameType::setClientShipLoadout(ClientInfo *clientInfo, const Vector<U8> &lo
 }
 
 
-static void performScopeQueryOnShip(Ship *ship, GameConnection *conn)
+static void markAllMountedItemsAsBeingInScope(Ship *ship, GameConnection *conn)
 {
-   for(S32 i = ship->getMountedItemCount() - 1; i >= 0; i--)  // Dismount them, while we still have position and velocity.
+   for(S32 i = 0; i < ship->getMountedItemCount(); i++)  
+   {
+      TNLAssert(ship->getMountedItem(i), "When would this item be NULL?  Do we really need to check this?");
       if(ship->getMountedItem(i))
          conn->objectInScope(ship->getMountedItem(i));
+   }
 }
 
 
@@ -1626,9 +1598,12 @@ void GameType::performScopeQuery(GhostConnection *connection)
    //TNLAssert(gc, "Invalid GameConnection in gameType.cpp!");
    //TNLAssert(co, "Invalid ControlObject in gameType.cpp!");
 
-   const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
-
    conn->objectInScope(this);   // Put GameType in scope, always
+
+   if(!conn->isReadyForRegularGhosts()) // This may prevent scoping any ships until after ClientInfo is all received on client side. (spy bugs scopes ships)
+      return;
+
+   const Vector<SafePtr<BfObject> > &scopeAlwaysList = mGame->getScopeAlwaysList();
 
    // Make sure the "always-in-scope" objects are actually in scope
    for(S32 i = 0; i < scopeAlwaysList.size(); i++)
@@ -1646,16 +1621,20 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    // What does the spy bug see?
    bool sameQuery = false;  // helps speed up by not repeatedly finding same objects
-   for(S32 i = mSpyBugs.size()-1; i >= 0; i--)
+
+
+   const Vector<DatabaseObject *> *spyBugs = mGame->getGameObjDatabase()->findObjects_fast(SpyBugTypeNumber);
+   
+   for(S32 i = spyBugs->size()-1; i >= 0; i--)
    {
-      SpyBug *sb = mSpyBugs[i].getPointer();
-      if(!sb)  // SpyBug is destroyed?
-         mSpyBugs.erase_fast(i);
-      else if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
+      SpyBug *sb = static_cast<SpyBug *>(spyBugs->get(i));
+
+      if(sb->isVisibleToPlayer(clientInfo, isTeamGame()))
       {
          Point pos = sb->getActualPos();
-         Point scopeRange(gSpyBugRange, gSpyBugRange);
          Rect queryRect(pos, pos);
+
+         Point scopeRange(SpyBug::SPY_BUG_RANGE, SpyBug::SPY_BUG_RANGE);
          queryRect.expand(scopeRange);
 
          fillVector.clear();
@@ -1666,7 +1645,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
          {
             connection->objectInScope(static_cast<BfObject *>(fillVector[j]));
             if(isShipType(fillVector[j]->getObjectTypeNumber()))
-               performScopeQueryOnShip((Ship*)fillVector[j], conn);
+               markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[j]), conn);
          }
       }
    }
@@ -1753,7 +1732,7 @@ void GameType::performProxyScopeQuery(BfObject *scopeObject, ClientInfo *clientI
    {
       connection->objectInScope(static_cast<BfObject *>(fillVector[i]));
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
-         performScopeQueryOnShip((Ship*)fillVector[i], connection);
+         markAllMountedItemsAsBeingInScope(static_cast<Ship *>(fillVector[i]), connection);
    }
 
    // Make bots visible if showAllBots has been activated
@@ -1820,14 +1799,6 @@ void GameType::queryItemsOfInterest()
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
    }
-}
-
-
-// Team in range?    Currently not used.
-// Could use it for processArguments, but out of range will be UNKNOWN name and should not cause any errors.
-bool GameType::checkTeamRange(S32 team)
-{
-   return (team < mGame->getTeamCount() && team >= -2);
 }
 
 
@@ -2126,7 +2097,7 @@ void GameType::updateLeadingTeamAndScore()
       S32 score = ((Team *)(mGame->getTeam(i)))->getScore();
       S32 digits = score == 0 ? 1 : (S32(log10(F32(abs(score)))) + ((score < 0 && getGameTypeId() != CoreGame) ? 2 : 1));
 
-      mDigitsNeededToDisplayScore = max(digits, mDigitsNeededToDisplayScore);
+      mDigitsNeededToDisplayScore = MAX(digits, mDigitsNeededToDisplayScore);
 
       if(score > mLeadingTeamScore)
       {
@@ -3565,6 +3536,26 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 }
 
 
+//Send an announcement
+
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
+{
+	GameConnection *source = (GameConnection *)getRPCSourceConnection();
+	
+	for(S32 i = 0; i < mGame->getClientCount(); i++)
+   {
+		ClientInfo *clientInfo = mGame->getClientInfo(i);
+		
+		if(clientInfo->isRobot())
+			continue;
+
+		RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message));
+			
+		source->postNetEvent(theEvent);
+		clientInfo->getConnection()->postNetEvent(theEvent);
+	}
+}
+
 // Send a private message
 GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr message), (toName, message))
 {
@@ -3670,6 +3661,18 @@ void GameType::sendChat(const StringTableEntry &senderName, ClientInfo *senderCl
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 
+
+TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 1)
+{
+#ifndef ZAP_DEDICATED
+	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
+	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
+
+	gameUI->renderAnnouncement(message);
+#endif
+}
+
+
 // Server sends message to the client for display using StringPtr
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
 {
@@ -3761,15 +3764,12 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
    S32 count = ship->getMountedItemCount();
    for(S32 i = count - 1; i >= 0; i--)
-      ship->getMountedItem(i)->dismount(false);
+      ship->getMountedItem(i)->dismount(MountableItem::DISMOUNT_NORMAL);
 }
 
 
-//GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))  // no need to use RPCGuaranteedOrdered
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId), NetClassGroupGameMask, RPCGuaranteed, RPCToGhostParent, 0)
 {
-   //GameConnection *source = (GameConnection *) getRPCSourceConnection();  // not used
-
    if(mCacheResendItem.size() == 0)
       mCacheResendItem.resize(1024);
 
@@ -3795,9 +3795,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sResendItemStatus, (U16 itemId), (itemId
          for(S32 j = 0; j < 1024; j += 256)
          {
             if(mCacheResendItem[S32(itemId & 255) | j].isNull())
-            {
                mCacheResendItem[S32(itemId & 255) | j].set(item);
-            }
+
             return;
          }
          mCacheResendItem[S32(itemId & 255) | (TNL::Random::readI(0, 3) * 256)].set(item);
@@ -4023,15 +4022,6 @@ Game *GameType::getGame() const
 }
 
 
-// This is called when a Zone item is added to the game by ServerGame::processPseudoItem().  Only called for Zones, but using BfObject so
-// we don't need to include Zone.h.
-// Server only.
-void GameType::addZone(BfObject *zone)
-{
-   zone->addToDatabase(getGame()->getGameObjDatabase());
-}
-
-
 GameTypeId GameType::getGameTypeId() const { return BitmatchGame; }
 
 const char *GameType::getShortName()         const { return "BM";       }
@@ -4062,22 +4052,26 @@ void GameType::updateWhichTeamsHaveFlags()
 {
    getGame()->clearTeamHasFlagList();
 
-   for(S32 i = 0; i < mFlags.size(); i++)
-      if(mFlags[i] && mFlags[i]->isMounted() && mFlags[i]->getMount())
-         getGame()->setTeamHasFlag(mFlags[i]->getMount()->getTeam(), true);
+   const Vector<DatabaseObject *> *flags = getGame()->getGameObjDatabase()->findObjects_fast(FlagTypeNumber);
+
+   for(S32 i = 0; i < flags->size(); i++)
+   {
+      FlagItem *flag = static_cast<FlagItem *>(flags->get(i));
+      if(flag->isMounted() && flag->getMount())
+         getGame()->setTeamHasFlag(flag->getMount()->getTeam(), true);
+   }
 
    notifyClientsWhoHasTheFlag();
 }
 
 
-// A flag was either mounted or dismounted from a ship -- in some GameTypes we need to notifiy the clients so they can 
+// A flag was mounted on a ship -- in some GameTypes we need to notifiy the clients so they can 
 // update their displays to show who has the flag.  Will be overridden in some GameTypes.
 // Server only!
 void GameType::onFlagMounted(S32 teamIndex)
 {
    // Do nothing
 }
-
 
 
 // Notify the clients when flag status changes... only called by some GameTypes
@@ -4198,7 +4192,7 @@ S32 GameType::getSecondLeadingPlayer() const
 
 S32 GameType::getFlagCount()
 {
-   return mFlags.size();
+   return getGame()->getGameObjDatabase()->getObjectCount(FlagTypeNumber);
 }
 
 
@@ -4421,12 +4415,20 @@ bool GameType::isDatabasable()
 
 void GameType::addFlag(FlagItem *flag)
 {
-   mFlags.push_back(flag);
+   // Do nothing -- flags are now tracked by the database
+}
+
+
+// Runs only on server
+void GameType::itemDropped(Ship *ship, MoveItem *item, MountableItem::DismountMode dismountMode)   
+{ 
+   TNLAssert(isServer(), "Should not run on client!");
+   if(item->getObjectTypeNumber() == FlagTypeNumber)
+      updateWhichTeamsHaveFlags();
 }
 
 
 // These methods will be overridden by some game types
-void GameType::itemDropped(Ship *ship, MoveItem *item)   { /* Do nothing */ }
 void GameType::shipTouchFlag(Ship *ship, FlagItem *flag) { /* Do nothing */ }
 void GameType::shipTouchZone(Ship *ship, GoalZone *zone) { /* Do nothing */ }
 void GameType::majorScoringEventOcurred(S32 team)        { /* Do nothing */ }

@@ -74,6 +74,9 @@ class Console: public LuaScriptRunner
 private:
    OGLCONSOLE_Console mConsole;
 
+protected:
+   void killScript();
+
 public:
    Console();     // Constructor
    ~Console();    // Destructor
