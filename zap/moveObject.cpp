@@ -2201,7 +2201,10 @@ static const F32 TEST_ITEM_MASS = 4;
 // Combined Lua / C++ default constructor
 TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
-   if(L && checkArgList(L, functionArgs, "TestItem", "constructor") == 1)
+   // These are the signatures we'll accept for Lua to construct this object
+   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+
+   if(L && checkArgList(L, constructorArgList, "TestItem", "constructor") == 1)
       setPos(getPointOrXY(L, 1));
    
    mNetFlags.set(Ghostable);
@@ -2288,7 +2291,6 @@ const Vector<Point> *TestItem::getCollisionPoly() const
 const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
 
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { GEOM, END }}), 2 ) \
    
 GENERATE_LUA_FUNARGS_TABLE(TestItem, LUA_METHODS);
 
@@ -2306,7 +2308,10 @@ static const F32 RESOURCE_ITEM_MASS = 1;
 // Combined Lua / C++ default constructor
 ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
-   if(L && checkArgList(L, functionArgs, "ResourceItem", "constructor") == 1)
+   // These are the signatures we'll accept for Lua to construct this object
+   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+
+   if(L && checkArgList(L, constructorArgList, "ResourceItem", "constructor") == 1)
       setPos(getPointOrXY(L, 1));
    
    mNetFlags.set(Ghostable);
@@ -2412,7 +2417,6 @@ void ResourceItem::dismount(DismountMode dismountMode)
 const luaL_reg           ResourceItem::luaMethods[]   = { { NULL, NULL } };
 
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, constructor, ARRAYDEF({{ END }, { GEOM, END }}), 2 ) \
    
 GENERATE_LUA_FUNARGS_TABLE(ResourceItem, LUA_METHODS);
 
