@@ -20,7 +20,7 @@
 OPTIMIZE=-O2
 DEBUG=-g -DTNL_DEBUG
 INCLUDES=-I../tnl -I../openal -I../Triangle -I../recast -I../clipper -I../alure -I../libspeex -I../boost
-CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -Wall $(OPTIMIZE)
+CC=gcc $(DEBUG) $(INCLUDES) -Wall $(OPTIMIZE)
 THREADLIB= -lpthread
 EXEFILE=bitfighter
 
