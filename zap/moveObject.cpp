@@ -2288,11 +2288,10 @@ const Vector<Point> *TestItem::getCollisionPoly() const
  *  @luaclass TestItem
  *  @brief    Large bouncy ball type item.
  */
-const luaL_reg           TestItem::luaMethods[]   = { { NULL, NULL } };
-
 #define LUA_METHODS(CLASS, METHOD) \
    
 GENERATE_LUA_FUNARGS_TABLE(TestItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(TestItem, LUA_METHODS);
 
 const char *TestItem::luaClassName = "TestItem";
 REGISTER_LUA_SUBCLASS(TestItem, MoveObject);
@@ -2414,11 +2413,10 @@ void ResourceItem::dismount(DismountMode dismountMode)
  *  @brief    Small bouncy ball type item.  In levels where Engineer module is allowed, ResourceItems can be collected and transformed
  *            into other items.
  */
-const luaL_reg           ResourceItem::luaMethods[]   = { { NULL, NULL } };
-
 #define LUA_METHODS(CLASS, METHOD) \
    
 GENERATE_LUA_FUNARGS_TABLE(ResourceItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE_NEW(ResourceItem, LUA_METHODS);
 
 const char *ResourceItem::luaClassName = "ResourceItem";
 REGISTER_LUA_SUBCLASS(ResourceItem, MountableItem);
