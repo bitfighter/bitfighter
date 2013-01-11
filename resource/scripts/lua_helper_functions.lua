@@ -54,7 +54,8 @@ include("geometry")   -- Load geometry functions into Geom namespace; call with 
 include("timer")
 include("list")
 
-
+-- Hookup our supercharged stacktrace util
+_stackTracer = include("stack_trace_plus").stacktrace
 
 
 arg = arg or { }  -- Make sure arg is defined before we ban globals
