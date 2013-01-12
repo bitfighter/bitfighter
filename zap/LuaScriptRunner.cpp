@@ -300,7 +300,7 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 // Returns true if there was an error, false if everything ran ok
 bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 {
-   S32 args = lua_gettop(L);                             // -- <<args>>
+   S32 args = lua_gettop(L);  // Number of args on stack    -- <<args>>
 
    // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
    retrieveCriticalFunction("_stackTracer");             // -- <<args>>, _stackTracer
@@ -317,8 +317,8 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
    }
 
    // Reorder the stack a little
-   lua_insert(L, 1);                                  // -- function, <<args>>, _stackTracer
-   lua_insert(L, 1);                                  // -- _stackTracer, function, <<args>>
+   lua_insert(L, 1);                                         // -- function, <<args>>, _stackTracer
+   lua_insert(L, 1);                                         // -- _stackTracer, function, <<args>>
 
    S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
 
