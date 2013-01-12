@@ -301,43 +301,38 @@ bool LuaScriptRunner::runMain(const Vector<string> &args)
 // Returns true if there was an error, false if everything ran ok
 bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 {
-   S32 args = lua_gettop(L);  // Number of args on stack    -- <<args>>
-
-   // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
-   retrieveCriticalFunction("_stackTracer");             // -- <<args>>, _stackTracer
-   bool ok = loadFunction(L, getScriptId(), function);   // -- <<args>>, _stackTracer, function
-   if(!ok)
-   {      
-      logprintf(LogConsumer::LogError, "%s\n"
-                                       "Cannot load method %s()!\n"
-                                       "Terminating script.", 
-                                       getErrorMessagePrefix(), function, lua_tostring(L, -1));
-      killScript();
-      clearStack(L);
-      return true;
-   }
-
-   // Reorder the stack a little
-   lua_insert(L, 1);                                         // -- function, <<args>>, _stackTracer
-   lua_insert(L, 1);                                         // -- _stackTracer, function, <<args>>
-
-   S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
-
-   if(error != 0)
+   try 
    {
-      logprintf(LogConsumer::LogError, "%s\n"
-                                       "In method %s():\n"
-                                       "%s.\n", 
-                                       getErrorMessagePrefix(), function, lua_tostring(L, -1));    // Gets stack trace left by _stackTracer
+      S32 args = lua_gettop(L);  // Number of args on stack    -- <<args>>
+
+      // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
+      retrieveCriticalFunction("_stackTracer");             // -- <<args>>, _stackTracer
+      bool ok = loadFunction(L, getScriptId(), function);   // -- <<args>>, _stackTracer, function
+      if(!ok)
+         throw LuaException("Cannot load method" + string(function) +"()!\n");
+
+      // Reorder the stack a little
+      lua_insert(L, 1);                                         // -- function, <<args>>, _stackTracer
+      lua_insert(L, 1);                                         // -- _stackTracer, function, <<args>>
+
+      S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
+      if(error)
+         throw LuaException("In method" + string(function) +"():\n" + string(lua_tostring(L, -1)));
+
+      lua_remove(L, 1);    // Remove _stackTracer                  -- <<return values>>
+
+      // Do not clear stack -- caller probably wants <<return values>>
+      return false;
+   }
+
+   catch(LuaException &e)
+   {
+      logprintf(LogConsumer::LogError, "%s\n%s\nTerminating script", getErrorMessagePrefix(), e.msg.c_str());
+
       killScript();
       clearStack(L);
       return true;
    }
-
-   lua_remove(L, 1);    // Remove _stackTracer           -- <<return values>>
-
-   // Do not clear stack -- caller probably wants <<return values>>
-   return false;
 }
 
 
