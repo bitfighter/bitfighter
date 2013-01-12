@@ -108,7 +108,7 @@ Robot::~Robot()
    // Server only from here on down
    if(getGame())  // can be NULL if this robot was never added to game (bad / missing robot file)
    {
-      EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerLeftEvent, getPlayerInfo());
+      EventManager::get()->fireEvent(this, EventManager::PlayerLeftEvent, getPlayerInfo());
 
       if(getGame()->getGameType())
          getGame()->getGameType()->serverRemoveClient(mClientInfo);
@@ -172,7 +172,7 @@ bool Robot::start()
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message
-   EventManager::get()->subscribe(getScriptId(), EventManager::TickEvent, RobotContext, true);
+   EventManager::get()->subscribe(this, EventManager::TickEvent, RobotContext, true);
 
    mSubscriptions[EventManager::TickEvent] = true;
 
@@ -298,7 +298,7 @@ void Robot::onAddedToGame(Game *game)
 
    game->addBot(this);        // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
   
-   EventManager::get()->fireEvent(getScriptId(), EventManager::PlayerJoinedEvent, getPlayerInfo());
+   EventManager::get()->fireEvent(this, EventManager::PlayerJoinedEvent, getPlayerInfo());
 }
 
 
@@ -1092,7 +1092,7 @@ S32 Robot::globalMsg(lua_State *L)
       gt->sendChatFromRobot(true, message, getClientInfo());
 
       // Fire our event handler
-      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, getPlayerInfo(), true);
+      EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, getPlayerInfo(), true);
    }
 
    return 0;
@@ -1112,7 +1112,7 @@ S32 Robot::teamMsg(lua_State *L)
       gt->sendChatFromRobot(false, message, getClientInfo());
 
       // Fire our event handler
-      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, getPlayerInfo(), false);
+      EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, getPlayerInfo(), false);
    }
 
    return 0;

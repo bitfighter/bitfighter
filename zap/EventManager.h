@@ -38,6 +38,7 @@ namespace Zap
 class Robot;
 class Ship;
 class LuaPlayerInfo;
+class LuaScriptRunner;
 class Zone;
 
 struct Subscription; 
@@ -76,13 +77,13 @@ enum EventType {
 
 private:
    // Some helper functions
-   bool isSubscribed(const char *subscriber, EventType eventType);
-   bool isPendingSubscribed(const char *subscriber, EventType eventType);
-   bool isPendingUnsubscribed(const char *subscriber, EventType eventType);
+   bool isSubscribed         (LuaScriptRunner *subscriber, EventType eventType);
+   bool isPendingSubscribed  (LuaScriptRunner *subscriber, EventType eventType);
+   bool isPendingUnsubscribed(LuaScriptRunner *subscriber, EventType eventType);
 
-   void removeFromSubscribedList(const char *subscriber, EventType eventType);
-   void removeFromPendingSubscribeList(const char *subscriber, EventType eventType);
-   void removeFromPendingUnsubscribeList(const char *subscriber, EventType eventType);
+   void removeFromSubscribedList        (LuaScriptRunner *subscriber, EventType eventType);
+   void removeFromPendingSubscribeList  (LuaScriptRunner *subscriber, EventType eventType);
+   void removeFromPendingUnsubscribeList(LuaScriptRunner *subscriber, EventType eventType);
 
    void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
    void fire(lua_State *L, S32 argCount, LuaBase::ScriptContext context);
@@ -100,22 +101,24 @@ public:
    static EventManager *get();         // Provide access to the single EventManager instance
    bool suppressEvents(EventType eventType);
 
-   static Vector<Subscription> subscriptions[EventTypes];
-   static Vector<Subscription> pendingSubscriptions[EventTypes];
-   static Vector<const char *> pendingUnsubscriptions[EventTypes];
+   //static Vector<Subscription> subscriptions[EventTypes];
+   //static Vector<Subscription> pendingSubscriptions[EventTypes];
+   //static Vector<pendingUnsubscriptions *> pendingUnsubscriptions[EventTypes];
    static bool anyPending;
 
-   void subscribe(const char *subscriber, EventType eventType, LuaBase::ScriptContext context, bool failSilently = false);
-   void unsubscribe(const char *subscriber, EventType eventType);
-   void unsubscribeImmediate(const char *, EventType eventType);    // Used when bot dies, and we know there won't be subscription conflicts
-   void update();                                                   // Act on events sitting in the pending lists
+   void subscribe  (LuaScriptRunner *subscriber, EventType eventType, LuaBase::ScriptContext context, bool failSilently = false);
+   void unsubscribe(LuaScriptRunner *subscriber, EventType eventType);
+
+    // Used when bot dies, and we know there won't be subscription conflicts
+   void unsubscribeImmediate(LuaScriptRunner *subscriber, EventType eventType); 
+   void update();                                                      // Act on events sitting in the pending lists
 
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, U32 deltaT);      // Tick
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
-   void fireEvent(const char *callerId, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
-   void fireEvent(const char *callerId, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
+   void fireEvent(LuaScriptRunner *subscriber, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
+   void fireEvent(LuaScriptRunner *subscriber, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
    void fireEvent(EventType eventType, Ship *ship, Zone *zone);      // ShipEnteredZoneEvent, ShipLeftZoneEvent
 
    // Allow the pausing of event firing for debugging purposes

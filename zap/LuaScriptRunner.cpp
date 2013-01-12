@@ -91,7 +91,7 @@ LuaScriptRunner::~LuaScriptRunner()
    // send an event to a dead bot, after all...
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       if(mSubscriptions[i])
-         EventManager::get()->unsubscribeImmediate(getScriptId(), (EventManager::EventType)i);
+         EventManager::get()->unsubscribeImmediate(this, (EventManager::EventType)i);
 
    // And delete the script's environment table from the Lua instance
    deleteScript(getScriptId());
@@ -611,7 +611,7 @@ S32 LuaScriptRunner::doSubscribe(lua_State *L, ScriptContext context)
 
    if(!mSubscriptions[eventType])
    {
-      EventManager::get()->subscribe(getScriptId(), (EventManager::EventType)eventType, context);
+      EventManager::get()->subscribe(this, (EventManager::EventType)eventType, context);
       mSubscriptions[eventType] = true;
    }
 
@@ -627,7 +627,7 @@ S32 LuaScriptRunner::doUnsubscribe(lua_State *L)
 
    if(mSubscriptions[eventType])
    {
-      EventManager::get()->unsubscribe(getScriptId(), (EventManager::EventType)eventType);
+      EventManager::get()->unsubscribe(this, (EventManager::EventType)eventType);
       mSubscriptions[eventType] = false;
    }
 

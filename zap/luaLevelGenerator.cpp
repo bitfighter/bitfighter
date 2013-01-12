@@ -394,7 +394,7 @@ S32 LuaLevelGenerator::globalMsg(lua_State *L)
       gt->sendChatFromController(message);
 
       // Fire our event handler
-      EventManager::get()->fireEvent(getScriptId(), EventManager::MsgReceivedEvent, message, NULL, true);
+      EventManager::get()->fireEvent(this, EventManager::MsgReceivedEvent, message, NULL, true);
    }
 
    return 0;
