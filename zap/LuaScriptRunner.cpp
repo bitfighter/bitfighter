@@ -182,7 +182,6 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
    setEnvironment();                            // Set the environment for the code
    S32 err = lua_pcall(L, 0, 0, 0);             // Run it                                -- <<empty stack>>
 
-
    if(err != 0)
    {
       logError("Failed to load startup functions %s: %s", key, lua_tostring(L, -1));
