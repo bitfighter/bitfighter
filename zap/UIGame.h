@@ -150,7 +150,6 @@ private:
       MessageDisplayModes
    };
 	
-   Timer mAnnouncementTimer;
    string mAnnouncement;
    bool mIsAnnouncementNew;
 
@@ -273,6 +272,8 @@ private:
    ChatMessageDisplayer mChatMessageDisplayer1;    // Short form, message expire
    ChatMessageDisplayer mChatMessageDisplayer2;    // Short form, messages do not expire
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
+
+   Timer mAnnouncementTimer;
 
    void dropItem();                       // User presses drop item key
 

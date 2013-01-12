@@ -106,7 +106,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mChatMessageDisplayer1(game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer2(game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-		  mAnnouncementTimer(0)
+                  mAnnouncementTimer(0)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
@@ -2002,7 +2002,6 @@ void GameUserInterface::announceHandler(const Vector<string> &words)
 		for(S32 i = 1; i < words.size(); i++)
 			s = s + words[i];
 	
-		ClientInfo* clientInfo = game->getClientInfo();
 		GameType* gt = game->getGameType();
 					
 		if(gt)
