@@ -142,18 +142,6 @@ void LuaScriptRunner::setEnvironment()
 }
 
 
-void LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
-{
-   if(!loadFunction(L, getScriptId(), functionName))
-   {
-      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
-
-      throw LuaException("Function " + string(functionName) + "() could not be found!  Terminating script.\n"
-                         "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
-   }
-}
-
-
 // Retrieve the environment from the registry, and put the requested function from that environment onto the stack.  Returns true
 // if it works, false if the specified function could not be found.  If this fails, it will remove the non-function from the stack.
 // Remember that not every failure to load a function is a problem; some functions are expected but optional.
@@ -302,9 +290,12 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
       S32 args = lua_gettop(L);  // Number of args on stack    -- <<args>>
 
       // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
-      retrieveCriticalFunction("_stackTracer");             // -- <<args>>, _stackTracer
-      bool ok = loadFunction(L, getScriptId(), function);   // -- <<args>>, _stackTracer, function
-      if(!ok)
+      // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
+      if(!loadFunction(L, getScriptId(), "_stackTracer"))       // -- <<args>>, _stackTracer
+         throw LuaException("Method _stackTracer() could not be found!\n"
+                            "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+
+      if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
          throw LuaException("Cannot load method" + string(function) +"()!\n");
 
       // Reorder the stack a little

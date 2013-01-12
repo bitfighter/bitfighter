@@ -164,7 +164,6 @@ public:
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
 
    bool loadScript();
-   void retrieveCriticalFunction(const char *funName);   // Same, but with more oomph
 
    bool runCmd(const char *function, S32 returnValues);
 
