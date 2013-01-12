@@ -29,7 +29,6 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "LuaBase.h"    // For ScriptContext def
-//#include "lua.h"
 
 using namespace TNL;
 
