@@ -123,6 +123,8 @@ Robot::~Robot()
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
 
+   // Even though a similar line gets called when parent classes are destructed, we need this here to set our very own personal copy
+   // of luaProxy as defunct.  Each "level" of an object has their own private lauProxy object that needs to be individually marked.
    LUAW_DESTRUCTOR_CLEANUP;
 }
 
