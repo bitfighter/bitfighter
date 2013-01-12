@@ -156,6 +156,7 @@ void LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
 
 // Retrieve the environment from the registry, and put the requested function from that environment onto the stack.  Returns true
 // if it works, false if the specified function could not be found.  If this fails, it will remove the non-function from the stack.
+// Remember that not every failure to load a function is a problem; some functions are expected but optional.
 bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
 {
    lua_getfield(L, LUA_REGISTRYINDEX, scriptId);   // Push REGISTRY[scriptId] onto the stack                -- table
@@ -164,7 +165,7 @@ bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 
    // Check if the top stack item is indeed a function (as we would expect)
    if(lua_isfunction(L, -1))
-      return true;      // If so, return true
+      return true;      // If so, return true, leaving the function on top of the stack
 
    // else
    clearStack(L);
