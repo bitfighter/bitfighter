@@ -97,7 +97,8 @@ LuaScriptRunner::~LuaScriptRunner()
    deleteScript(getScriptId());
 }
 
- const char *LuaScriptRunner::getErrorMessagePrefix() { return "SCRIPT"; }
+
+const char *LuaScriptRunner::getErrorMessagePrefix() { return "SCRIPT"; }
 
 
 // Static method setting static vars
