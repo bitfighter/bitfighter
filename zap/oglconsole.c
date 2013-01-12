@@ -1,19 +1,8 @@
 /* oglconsole -- gpl license here */
 
-/* This strategy seems to offer the convenience of zero-configuration, but
- * obviously it also offers defining GLHEADERINCLUDE */
-//#ifdef GLHEADERINCLUDE
-//#  include GLHEADERINCLUDE
-//#else
-//#  ifdef __MACH__
-//#    include <OpenGL/gl.h>
-//#  else
-//#    include <GL/gl.h>
-//#  endif
-//#endif
 
 #ifdef WIN32
-#   define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen and vsnprintf
+#  define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen and vsnprintf
 #endif 
 
 
@@ -74,10 +63,6 @@
 
 #define CHAR_COLS (128/CHAR_PIXEL_W)
 #define CHAR_ROWS (64/CHAR_PIXEL_H)
-
-/* This is how long the animation should take to make the transition between
- * "hidden" and "visible" console visibility modes (expressed in milliseconds) */
-#define SLIDE_MS 500    // <=== unused
 
 /* If we don't know how to retrieve the time then we can just use a number of
  * frames to divide up the time it takes to transition between "hidden" and
@@ -1071,45 +1056,6 @@ void OGLCONSOLE_HideConsole()
       userConsole->visibility = -SLIDE_STEPS;
 }  
 
-
-//#define SHOW_CONSOLE_KEY '`'
-//#define HIDE_CONSOLE_KEY '`'
-
-
-/* This function tries to handle the incoming SDL event. In the future there may
- * be non-SDL analogs for input systems such as GLUT. Returns true if the event
- * was handled by the console. If console is hidden, no events are handled. */
-#ifdef OGLCONSOLE_USE_SDL
-#include "SDL.h"
-#define KEY_BACKSPACE   SDLK_BACKSPACE
-#define KEY_DELETE      SDLK_DELETE
-#define KEY_RETURN      SDLK_RETURN
-#define KEY_UP          SDLK_UP
-#define KEY_DOWN        SDLK_DOWN
-#define KEY_LEFT        SDLK_LEFT
-#define KEY_RIGHT       SDLK_RIGHT
-#define KEY_PAGEUP      SDLK_PAGEUP
-#define KEY_PAGEDOWN    SDLK_PAGEDOWN
-#define KMOD_SHIFT      (KMOD_LSHIFT|KMOD_RSHIFT)
-#endif
-#ifdef OGLCONSOLE_USE_GLFW
-#include <GL/glfw.h>
-#define KEY_BACKSPACE   GLFW_KEY_BACKSPACE
-#define KEY_DELETE      GLFW_KEY_DEL
-#define KEY_RETURN      GLFW_KEY_ENTER
-#define KEY_UP          GLFW_KEY_UP
-#define KEY_DOWN        GLFW_KEY_DOWN
-#define KEY_LEFT        GLFW_KEY_LEFT
-#define KEY_RIGHT       GLFW_KEY_RIGHT
-#define KEY_PAGEUP      GLFW_KEY_PAGEUP
-#define KEY_PAGEDOWN    GLFW_KEY_PAGEDOWN
-#define KMOD_LSHIFT     1
-#define KMOD_RSHIFT     2
-#define KMOD_SHIFT      (KMOD_LSHIFT|KMOD_RSHIFT)
-#endif
-
-// Start Bitfighter specific block
-
 #include "InputCodeEnum.h"
 
 #define KEY_RETURN      KEY_ENTER
@@ -1144,9 +1090,6 @@ void putCursorAtEndOfLine(_OGLCONSOLE_Console *userConsole)
    userConsole->inputCursorPos = getCurrentLineLength(userConsole);
 }
 
-// End Bitfighter specific block
-
-
 
 int OGLCONSOLE_KeyEvent(int sym, int mod)
 {
@@ -1155,9 +1098,6 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     {
         if (sym == SHOW_CONSOLE_KEY)
         {  
-            // TODO: Fetch values from OS?
-            // TODO: Expose them to the program
-            //SDL_EnableKeyRepeat(250, 30);
             OGLCONSOLE_ShowConsole();
             return 1;
         }
@@ -1170,9 +1110,6 @@ int OGLCONSOLE_KeyEvent(int sym, int mod)
     {
         /* Tell console to slide into closing */
         OGLCONSOLE_HideConsole();
-
-        /* Disable key repeat */
-        //SDL_EnableKeyRepeat(0, 0);
 
         return 1;
     }
