@@ -438,7 +438,10 @@ S32 LuaLevelGenerator::subscribe(lua_State *L)   { return doSubscribe(L, Levelge
 S32 LuaLevelGenerator::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 
-const LuaFunctionProfile LuaLevelGenerator::functionArgs[] = { NULL, {{{ }}, 0 } };
+const LuaFunctionProfile LuaLevelGenerator::functionArgs[] =
+{
+      { NULL, {{{ }}, 0 } }
+};
 
 REGISTER_LUA_CLASS(LuaLevelGenerator);
 
