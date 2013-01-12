@@ -99,7 +99,7 @@ Robot::~Robot()
    // Items will be dismounted in Ship (Parent) destructor
    setOwner(NULL);
 
-   if(isGhost())
+   if(isClient())
    {
       delete mPlayerInfo;     // On the server, mPlayerInfo will be deleted below, after event is fired
       return;
@@ -115,7 +115,6 @@ Robot::~Robot()
 
       getGame()->removeBot(this);
       logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot %s terminated (%d bots left)", mScriptName.c_str(), getGame()->getRobotCount());
-
    }
 
    mPlayerInfo->setDefunct();
@@ -123,6 +122,8 @@ Robot::~Robot()
    delete mPlayerInfo;
    if(mClientInfo.isValid())
       delete mClientInfo.getPointer();
+
+   LUAW_DESTRUCTOR_CLEANUP;
 }
 
 
