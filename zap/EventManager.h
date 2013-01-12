@@ -86,7 +86,7 @@ private:
    void removeFromPendingUnsubscribeList(LuaScriptRunner *subscriber, EventType eventType);
 
    void handleEventFiringError(lua_State *L, const Subscription &subscriber, EventType eventType, const char *errorMsg);
-   void fire(lua_State *L, S32 argCount, LuaBase::ScriptContext context);
+   bool fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, LuaBase::ScriptContext context);
       
    bool mIsPaused;
    S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
@@ -117,9 +117,9 @@ public:
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, U32 deltaT);      // Tick
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
-   void fireEvent(LuaScriptRunner *subscriber, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
-   void fireEvent(LuaScriptRunner *subscriber, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
-   void fireEvent(EventType eventType, Ship *ship, Zone *zone);      // ShipEnteredZoneEvent, ShipLeftZoneEvent
+   void fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global);  // MsgReceived
+   void fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo);  // PlayerJoined, PlayerLeft
+   void fireEvent(EventType eventType, Ship *ship, Zone *zone); // ShipEnteredZoneEvent, ShipLeftZoneEvent
 
    // Allow the pausing of event firing for debugging purposes
    void setPaused(bool isPaused);

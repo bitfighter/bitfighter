@@ -265,23 +265,7 @@ void EventManager::fireEvent(EventType eventType)
    lua_State *L = LuaScriptRunner::getL();
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
-   {
-      try
-      {
-         // Passing nothing
-         bool error = LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].subscriber->getScriptId(), eventDefs[eventType].function);
-         if(error)
-            throw LuaException("Could not load function!");
-
-         fire(L, 0, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
-      {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaObject::clearStack(L);
-         return;
-      }
-   }
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
 }
 
 
@@ -298,20 +282,8 @@ void EventManager::fireEvent(EventType eventType, U32 deltaT)
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      try   
-      {
-         // Passing time
-         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].subscriber->getScriptId(), eventDefs[eventType].function);
-         lua_pushinteger(L, deltaT);
-
-         fire(L, 1, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
-      {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaObject::clearStack(L);
-         return;
-      }
+      lua_pushinteger(L, deltaT);   // -- deltaT
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
    }
 }
 
@@ -326,27 +298,15 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      try
-      {
-         // Passing ship
-         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].subscriber->getScriptId(), eventDefs[eventType].function);
-         ship->push(L);
-
-         fire(L, 1, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
-      {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaObject::clearStack(L);
-         return;
-      }
+      ship->push(L);                // -- ship
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
    }
 }
 
 
 // Note that player can be NULL, in which case we'll pass nil to the listeners
 // callerId will be NULL when player sends message
-void EventManager::fireEvent(LuaScriptRunner *subscriber, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
+void EventManager::fireEvent(LuaScriptRunner *sender, EventType eventType, const char *message, LuaPlayerInfo *playerInfo, bool global)
 {
    if(suppressEvents(eventType))   
       return;
@@ -355,36 +315,25 @@ void EventManager::fireEvent(LuaScriptRunner *subscriber, EventType eventType, c
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      if(subscriber && subscriber == subscriptions[eventType][i].subscriber)    // Don't alert bot about own message!
+      if(sender == subscriptions[eventType][i].subscriber)    // Don't alert sender about own message!
          continue;
 
-      try
-      {
-         // Passing msg, player, isGlobal
-         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].subscriber->getScriptId(), eventDefs[eventType].function);
-         lua_pushstring(L, message);
+      lua_pushstring(L, message);   // -- message
 
-         if(player)
-            player->push(L);
-         else
-            lua_pushnil(L);
+      if(playerInfo)
+         playerInfo->push(L);       // -- message, playerInfo
+      else
+         lua_pushnil(L);            
 
-         lua_pushboolean(L, global);
+      lua_pushboolean(L, global);   // -- message, player, isGlobal
 
-         fire(L, 3, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
-      {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaObject::clearStack(L);
-         return;
-      }
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
    }
 }
 
 
 // onPlayerJoined, onPlayerLeft
-void EventManager::fireEvent(LuaScriptRunner *subscriber, EventType eventType, LuaPlayerInfo *player)
+void EventManager::fireEvent(LuaScriptRunner *player, EventType eventType, LuaPlayerInfo *playerInfo)
 {
    if(suppressEvents(eventType))   
       return;
@@ -393,23 +342,11 @@ void EventManager::fireEvent(LuaScriptRunner *subscriber, EventType eventType, L
 
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
-      if(subscriber == subscriptions[eventType][i].subscriber)    // Don't trouble bot with own joinage or leavage!
+      if(player == subscriptions[eventType][i].subscriber)    // Don't trouble player with own joinage or leavage!
          continue;
 
-      try   
-      {
-         // Passing player
-         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].subscriber->getScriptId(), eventDefs[eventType].function);
-         player->push(L);
-
-         fire(L, 1, subscriptions[eventType][i].context);
-      }
-      catch(LuaException &e)
-      {
-         handleEventFiringError(L, subscriptions[eventType][i], eventType, e.what());
-         LuaObject::clearStack(L);
-         return;
-      }
+      playerInfo->push(L);          // -- playerInfo
+      fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
    }
 }
 
@@ -427,13 +364,12 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
       try   
       {
          // Passing ship, zone, zoneType, zoneId
-         LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].subscriber->getScriptId(), eventDefs[eventType].function);
-         ship->push(L);
-         zone->push(L);
-         lua_pushinteger(L, zone->getObjectTypeNumber());
-         lua_pushinteger(L, zone->getUserAssignedId());
+         ship->push(L);                                     // -- ship
+         zone->push(L);                                     // -- ship, zone   
+         lua_pushinteger(L, zone->getObjectTypeNumber());   // -- ship, zone, zone->objTypeNumber
+         lua_pushinteger(L, zone->getUserAssignedId());     // -- ship, zone, zone->objTypeNumber, zone->id
 
-         fire(L, 4, subscriptions[eventType][i].context);
+         fire(L, subscriptions[eventType][i].subscriber, eventDefs[eventType].function, subscriptions[eventType][i].context);
       }
       catch(LuaException &e)
       {
@@ -445,17 +381,12 @@ void EventManager::fireEvent(EventType eventType, Ship *ship, Zone *zone)
 }
 
 
-// Actually fire the event, called by one fo the fireEvent() methods above
-void EventManager::fire(lua_State *L, S32 argCount, LuaBase::ScriptContext context)
+// Actually fire the event, called by one of the fireEvent() methods above
+// Returns true if there was an error, false if everything ran ok
+bool EventManager::fire(lua_State *L, LuaScriptRunner *scriptRunner, const char *function, LuaBase::ScriptContext context)
 {
-   //LuaScriptRunner::loadFunction(L, subscriptions[eventType][i].scriptId, eventDefs[eventType].function);
-   //ship->push(L);
-
    LuaBase::setScriptContext(L, context);
-   // runCmd(scriptId, function, 0);
-   
-   if(lua_pcall(L, argCount, 0, 0) != 0)
-      throw LuaException(lua_tostring(L, -1));
+   return scriptRunner->runCmd(function, 0);
 }
 
 
