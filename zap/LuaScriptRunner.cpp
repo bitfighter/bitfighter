@@ -142,6 +142,18 @@ void LuaScriptRunner::setEnvironment()
 }
 
 
+void LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
+{
+   if(!loadFunction(L, getScriptId(), functionName))
+   {
+      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
+
+      throw LuaException("Function " + string(functionName) + "() could not be found!  Terminating script.\n"
+                         "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+   }
+}
+
+
 // Retrieve the environment from the registry, and put the requested function from that environment onto the stack.  Returns true
 // if it works, false if the specified function could not be found.  If this fails, it will remove the non-function from the stack.
 bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const char *functionName)
@@ -157,22 +169,6 @@ bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
    // else
    clearStack(L);
    return false;
-}
-
-
-bool LuaScriptRunner::retrieveCriticalFunction(const char *functionName)
-{
-   if(!loadFunction(L, getScriptId(), functionName))
-   {
-      TNLAssert(false, "Critical function not found -- is the lua environment corrupt?");
-
-      logError("Function %s() could not be found!  Terminating script.\n"
-               "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.", functionName);
-
-      return false;
-   }
-
-   return true;
 }
 
 
