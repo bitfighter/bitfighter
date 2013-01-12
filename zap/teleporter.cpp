@@ -84,6 +84,7 @@ S32 DestManager::getRandomDest() const
 
 void DestManager::addDest(const Point &dest)
 {
+   TNLAssert(mOwner, "We need an owner here!");
    mDests.push_back(dest);
 
    if(mDests.size() == 1)      // Just added the first dest
