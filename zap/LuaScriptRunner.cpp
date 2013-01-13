@@ -161,7 +161,7 @@ bool LuaScriptRunner::loadFunction(lua_State *L, const char *scriptId, const cha
 }
 
 
-// Primarily used for loading helper functions
+// Only used for loading helper functions
 bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, ScriptContext context)
 {
    setScriptContext(L, context);
@@ -174,9 +174,7 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
    {
       logError("Failed to load startup functions %s: %s", key, lua_tostring(L, -1));
 
-      lua_pop(L, -1);             // Remove error message from stack
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
+      clearStack(L);
       return false;
    }
 
