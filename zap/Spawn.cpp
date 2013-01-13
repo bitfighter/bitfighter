@@ -206,7 +206,16 @@ Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
 // Lua constructor
 Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
 {
+   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, TEAM_INDX, END }}, 3 };
+   S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
    initialize();
+   if(L && profile == 1)
+      setPos(getPointOrXY(L, 1));
+   else if(L && profile == 2)
+   {
+      setPos(getPointOrXY(L, 1));
+      setTeam(getInt(L, 2));
+   }
 }
 
 
@@ -289,6 +298,9 @@ void Spawn::renderDock()
 /////
 // Lua interface
 /**
+  *  @luaconst Spawn::Spawn()
+  *  @luaconst Spawn::Spawn(geom)
+  *  @luaconst Spawn::Spawn(geom, team)
   *  @luaclass Spawn
   *  @brief Marks locations where ships and robots should spawn.
   *  @geom  The geometry of Spawns is a single point.
@@ -435,6 +447,22 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
 AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, INT, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "AsteroidSpawn", "constructor");
+      initialize();
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         // I've got no idea why this works and getInt(L, 2) doesn't XXXXX what if geom is a point, not an x,y pair?
+         mSpawnTime = S32(getInt(L, 3) * 1000);
+         mTimer.reset(mSpawnTime);
+      }
+   }
 }
 
 
@@ -529,6 +557,9 @@ void AsteroidSpawn::renderDock()
 /////
 // Lua interface
 /**
+  *  @luaconst AsteroidSpawn::AsteroidSpawn()
+  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom)
+  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom, time)
   *  @luaclass AsteroidSpawn
   *  @brief Spawns \link Asteroid Asteroids \endlink at regular intervals.
   *  @geom  The geometry of AsteroidSpawns is a single point.
@@ -562,6 +593,21 @@ CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
 CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, INT, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "CircleSpawn", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         // I've got no idea why this works and getInt(L, 2) doesn't.   XXXXX what if geom is a point, not an x,y pair?
+         mSpawnTime = S32(getInt(L, 3) * 1000);
+         mTimer.reset(mSpawnTime);
+      }
+   }
 }
 
 
@@ -658,6 +704,9 @@ void CircleSpawn::renderDock()
 /////
 // Lua interface
 /**
+  *  @luaconst CircleSpawn::CircleSpawn()
+  *  @luaconst CircleSpawn::CircleSpawn(geom)
+  *  @luaconst CircleSpawn::CircleSpawn(geom, time)
   *  @luaclass CircleSpawn
   *  @brief Spawns \link Circle Circles \endlink at regular intervals.
   *  @geom  The geometry of CircleSpawns is a single point.

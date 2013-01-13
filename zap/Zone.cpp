@@ -26,6 +26,7 @@
 #include "Zone.h"
 #include "game.h"
 #include "stringUtils.h"
+#include "Geometry.h"
 
 namespace Zap
 {
