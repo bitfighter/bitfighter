@@ -859,6 +859,11 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
              consoleCursor = C->lines + lineQueueIndex * C->textWidth;
          }
          
+         /* \r seems to make the console print some kind of random garbage.  So 
+          * let's not print it! */
+         if(*outputCursor == '\r') { outputCursor++; continue; }    
+
+
          /* If we encounter a newline character, we set the newline flag, which
           * tells the console to advance one line before it prints the next
           * character. The reason we do it this way is to defer line-advancement,
