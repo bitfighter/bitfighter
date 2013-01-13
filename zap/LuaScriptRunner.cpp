@@ -197,7 +197,7 @@ void LuaScriptRunner::pushStackTracer()
    // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
    if(!loadFunction(L, getScriptId(), "_stackTracer"))       
       throw LuaException("Method _stackTracer() could not be found!\n"
-                           "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+                         "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
 }
 
 
