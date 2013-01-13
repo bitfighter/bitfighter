@@ -552,21 +552,6 @@ void OGLCONSOLE_Quit()
     userConsole = NULL;
 }
 
-/* THESE TWO FUNCTIONS EditConsole() and FocusConsole...
-
- * function is intended for use by applications which create MORE THAN ONE
- * console, since every newly created console is automatically selected for
- * programmer input ('programmer input' refers to calling any function which
- * does not specify a console explicitly in its parameter list. the console
- * which is 'engaged' by 'programmer input' at the time of calling one of these
- * functions is the console that function will operate on */
-
-/* This routine selects a console to receive keyboard interaction from the user */
-void OGLCONSOLE_FocusConsole(OGLCONSOLE_Console console) { userConsole = C; }
-
-/* This routine selects a console to be the target of modification commands from
- * the programmer */
-void OGLCONSOLE_EditConsole(OGLCONSOLE_Console console) { programConsole = C; }
 
 /* Show or hide a console */
 void OGLCONSOLE_SetVisibility(int visible)
@@ -577,12 +562,6 @@ void OGLCONSOLE_SetVisibility(int visible)
 int OGLCONSOLE_GetVisibility()
 {
 	return userConsole->visibility;
-}
-
-/* Get current configuration information about a console */
-void OGLCONSOLE_Info()
-{
-    puts("TODO: print some console info here");
 }
 
 /* This routine is meant for applications with a single console, if you use
@@ -998,15 +977,6 @@ void OGLCONSOLE_YankHistory(_OGLCONSOLE_Console *console)
         console->historyScrollIndex = -1;
     }
 }
-
-void OGLCONSOLE_SetInputLine(const char *inputLine)
-{
-    int n = strlen(inputLine);
-    strcpy(programConsole->inputLine, inputLine);
-    programConsole->inputLineLength = n;
-    programConsole->inputCursorPos = n;
-}
-
 
 void OGLCONSOLE_ShowConsole()
 {

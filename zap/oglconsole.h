@@ -52,12 +52,6 @@ void OGLCONSOLE_EnterKey(void(*cbfun)(OGLCONSOLE_Console console, char *cmd));
 int OGLCONSOLE_KeyEvent(int key, int mod);
 int OGLCONSOLE_CharEvent(int unicode);
 
-/* Sets the current console for receiving user input */
-void OGLCONSOLE_FocusConsole(OGLCONSOLE_Console console);
-
-/* Sets the current console for making options changes to */
-void OGLCONSOLE_EditConsole(OGLCONSOLE_Console console);
-
 /* Sets the dimensions of the console in lines and columns of characters. */
 void OGLCONSOLE_SetDimensions(int width, int height);
 
