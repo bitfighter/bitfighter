@@ -267,7 +267,7 @@ bool LuaScriptRunner::loadScript()
    catch(LuaException &e)
    {
       // We can't load the script as requested.  Sorry!
-      logError("%s", e.msg);                                // Also clears the stack
+      logError("%s", e.msg.c_str());                                // Also clears the stack
       return false;
    }
 }
@@ -355,7 +355,7 @@ bool LuaScriptRunner::startLua()
    catch(const LuaException &e)
    {
       // Lua just isn't going to work out for this session.
-      logprintf(LogConsumer::LogError, "=====FATAL LUA ERROR=====\n%s\n=========================", e.msg);
+      logprintf(LogConsumer::LogError, "=====FATAL LUA ERROR=====\n%s\n=========================", e.msg.c_str());
       lua_close(L);
       L = NULL;
       return false;
