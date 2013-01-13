@@ -766,7 +766,7 @@ void GameSettings::onFinishedLoading()
 
    // Some parameters can be specified both on the cmd line and in the INI... in those cases, the cmd line version takes precedence
    //                                First choice (cmdLine)             Second choice (INI)                  Third choice (fallback)
-   mServerPassword      = *choose( getString(SERVER_PASSWORD),       mIniSettings.serverPassword );
+   mServerPassword         = *choose( getString(SERVER_PASSWORD),       mIniSettings.serverPassword );
 
    // Admin and level change passwords have special overrides that force them to be blank... handle those below
    if(getSpecified(NO_ADMIN_PASSWORD))
@@ -787,14 +787,14 @@ void GameSettings::onFinishedLoading()
    cmdLineVal = getString(LOGIN_NAME);
    mPlayerNameSpecifiedOnCmdLine = (cmdLineVal!= "");
 
-   //                              Cmd Line value                     User must set manually in INI            Saved in INI based on last entry       
-   mPlayerName          = *choose( cmdLineVal,                        mIniSettings.name,                       mIniSettings.lastName);
-   mPlayerPassword      = *choose( getString(LOGIN_PASSWORD),         mIniSettings.password,                   mIniSettings.lastPassword);
+   //                                 Cmd Line value                    User must set manually in INI            Saved in INI based on last entry       
+   mPlayerName             = *choose( cmdLineVal,                       mIniSettings.name,                       mIniSettings.lastName);
+   mPlayerPassword         = *choose( getString(LOGIN_PASSWORD),        mIniSettings.password,                   mIniSettings.lastPassword);
 
    cmdLineVal = getString(MASTER_ADDRESS);
    mMasterServerSpecifiedOnCmdLine = (cmdLineVal != "");
 
-   masterAddressList    = *choose( getString(MASTER_ADDRESS),          getIniSettings()->masterAddress );    // The INI will always have a value
+   masterAddressList       = *choose( getString(MASTER_ADDRESS),        getIniSettings()->masterAddress );    // The INI will always have a value
 
    parseString(masterAddressList, mMasterServerList, ',');        // Move the list of master servers into mMasterServerList
 
