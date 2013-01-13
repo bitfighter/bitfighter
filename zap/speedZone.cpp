@@ -63,9 +63,6 @@ TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 // Combined C++/Lua constructor
 SpeedZone::SpeedZone(lua_State *L)
 {
-   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, NUM, END }}, 3 };
-   S32 profile = checkArgList(L, constructorArgList, "SpeedZone", "constructor");
-   
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = SpeedZoneTypeNumber;
 
@@ -75,13 +72,19 @@ SpeedZone::SpeedZone(lua_State *L)
    mUnpackInit = 0;           // Some form of counter, to know that it is a rotating speed zone
 
    preparePoints();           // If this is constructed by Lua, we need to have some default geometry in place
-   
-   if(L && profile == 1)
-      setPos(getPointOrXY(L, 1));
-   else if(L && profile == 2)
+
+   if(L)
    {
-      setPos(getPointOrXY(L, 1));
-      setSpeed(getInt(L, 2));
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, NUM, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "SpeedZone", "constructor");
+
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         setSpeed(getInt(L, 2));
+      }
    }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

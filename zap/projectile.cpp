@@ -1017,16 +1017,15 @@ SpyBug::SpyBug(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter
 // Combined Lua / C++ default constructor -- used in Lua and editor
 SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
 {
+   initialize(Point(0,0), NULL);
+
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "SpyBug", "constructor");
       
-      if(profile == 0)
-         initialize(Point(0,0), NULL);
-      else if(profile == 1)
+      if(profile == 1)
       {
-         initialize(Point(0,0), NULL);
          setPos(getPointOrXY(L, 1));
          setTeam(getInt(L, 2));
       }

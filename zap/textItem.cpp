@@ -53,22 +53,25 @@ EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 // Combined Lua / C++ constructor
 TextItem::TextItem(lua_State *L)
 {
-   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, STR, END }}, 2 };
-   S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
-   
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TextItemTypeNumber;
 
    // Some default values
    mSize = 20;
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
-   
-   if(L && profile == 1)
+   if(L)
    {
-      setPos(getPointOrXY(L, 1));
-      setText(getString(L, 2));
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, STR, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
+   
+      if(profile == 1)
+      {
+         setPos(getPointOrXY(L, 1));
+         setText(getString(L, 2));
+      }
    }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
