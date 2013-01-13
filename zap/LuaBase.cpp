@@ -184,7 +184,7 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
          return lua_isboolean(L, stackPos);
 
       case PT:
-         if(lua_isvec(L, stackPos))
+         if(lua_ispoint(L, stackPos))
             return true;
          else if(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))
          {
@@ -196,10 +196,10 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
 
       // GEOM: A series of points, numbers, or a table containing a series of points or numbers
       case GEOM:
-         if(lua_isvec(L, stackPos))             // Series of Points
+         if(lua_ispoint(L, stackPos))             // Series of Points
          {
             stackPos++;
-            while(stackPos < stackDepth && lua_isvec(L, stackPos))
+            while(stackPos < stackDepth && lua_ispoint(L, stackPos))
                stackPos++;
 
             return true;
@@ -308,7 +308,7 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
 // Pop a point object off stack, or grab two numbers and create a point from them
 Point LuaBase::getPointOrXY(lua_State *L, S32 index)
 {
-   if(lua_isvec(L, index))
+   if(lua_ispoint(L, index))
    {
       const F32 *vec = lua_tovec(L, index);
       return Point(vec[0], vec[1]);
@@ -328,10 +328,10 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
    Vector<Point> points;
    S32 stackDepth = lua_gettop(L);
 
-   if(lua_isvec(L, index))          // List of points
+   if(lua_ispoint(L, index))          // List of points
    {
       S32 offset = 0;
-      while(index + offset <= stackDepth && lua_isvec(L, index + offset))
+      while(index + offset <= stackDepth && lua_ispoint(L, index + offset))
       {
          const F32 *vec = lua_tovec(L, index + offset);
          points.push_back(Point(vec[0], vec[1]));

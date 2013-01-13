@@ -273,7 +273,7 @@ LUA_API void lua_setallocf (lua_State *L, lua_Alloc f, void *ud);
 #define lua_isthread(L,n)	(lua_type(L, (n)) == LUA_TTHREAD)
 #define lua_isnone(L,n)		(lua_type(L, (n)) == LUA_TNONE)
 #define lua_isnoneornil(L, n)	(lua_type(L, (n)) <= 0)
-#define lua_isvec(L, n)		(lua_type(L, (n)) == LUA_TVEC)	/* LUA-VEC */
+#define lua_ispoint(L, n)		(lua_type(L, (n)) == LUA_TVEC)	/* LUA-VEC --> BF renamed lua_isvec to lua_ispoint */
 
 #define lua_pushliteral(L, s)	\
 	lua_pushlstring(L, "" s, (sizeof(s)/sizeof(char))-1)

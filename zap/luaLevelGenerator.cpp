@@ -109,7 +109,7 @@ S32 getIntegerFromTable(lua_State *L, int tableIndex, int key)
 // Pop a vec object off stack, check its type, and return it
 static Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
 {
-   if(!lua_isvec(L, index))
+   if(!lua_ispoint(L, index))
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
