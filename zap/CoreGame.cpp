@@ -287,6 +287,25 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
 
    mKillString = "crashed into a core";    // TODO: Really needed?
 
+
+   // Read some params from our L, if we have it
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }, { GEOM, TEAM_INDX, INT, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "CoreItem", "constructor");
+      if(profile == 1)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+      }
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+         setStartingHealth(getInt(L, 3));
+      }
+   }
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
