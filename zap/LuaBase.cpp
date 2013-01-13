@@ -70,9 +70,6 @@ void LuaBase::checkArgCount(lua_State *L, S32 argsWanted, const char *methodName
 }
 
 
-#define lua_isnumberpair(L, pos) \
-   (lua_isnumber(L, (pos)) && lua_isnumber(L, (pos) + 1))
-
 // === Centralized Parameter Checking ===
 // Returns index of matching parameter profile; throws error if it can't find one.  If you get a valid profile index back,
 // you can blindly convert the stack items with the confidence you'll get what you want; no further type checking is required.
@@ -112,7 +109,7 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionArgList &functionArgLis
          bool ok = false;
 
          if(stackPos < stackDepth)
-         {
+         {  
             stackPos++;
             ok = checkLuaArgs(L, candidateArgList[j], stackPos);
          }
@@ -186,11 +183,6 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
       case PT:
          if(lua_ispoint(L, stackPos))
             return true;
-         else if(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))
-         {
-            stackPos++;
-            return true;
-         }
          
          return false;
 
@@ -204,17 +196,8 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
 
             return true;
          }
-         else if(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))     // Series of numbers -- look for x,y pairs
-         {
-            stackPos += 2;
-            while(stackPos + 1 <= stackDepth && lua_isnumberpair(L, stackPos))
-               stackPos += 2;
-            stackPos--;
-
-            return true;
-         }
          else if lua_istable(L, stackPos)    // We have a table: should either contain an array of points or numbers
-            return true;     // for now...
+            return true;     // for now...  // TODO: Check!
 
          return false;
 
@@ -336,18 +319,6 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
          const F32 *vec = lua_tovec(L, index + offset);
          points.push_back(Point(vec[0], vec[1]));
          offset++;
-      }
-   }
-   else if(lua_isnumber(L, index))  // List of coords
-   {
-      S32 offset = 0;
-      while(index + offset + 1 <= stackDepth && lua_isnumberpair(L, index + offset))
-      {
-         F32 x = getFloat(L, index + offset);
-         F32 y = getFloat(L, index + offset + 1);
-
-         points.push_back(Point(x, y));
-         offset += 2;
       }
    }
    else if(lua_istable(L, index))
