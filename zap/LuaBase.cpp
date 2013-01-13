@@ -190,8 +190,7 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
       case GEOM:
          if(lua_ispoint(L, stackPos))             // Series of Points
          {
-            stackPos++;
-            while(stackPos < stackDepth && lua_ispoint(L, stackPos))
+            while(stackPos + 1 < stackDepth && lua_ispoint(L, stackPos + 1))
                stackPos++;
 
             return true;
