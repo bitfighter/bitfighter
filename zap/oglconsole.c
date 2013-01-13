@@ -944,39 +944,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
    }
 }
 
-/* Mono-Console Users: print text to the console; multi-console users use
- * Output() */
-void OGLCONSOLE_Print(const char *s, ...)
-{
-    va_list argument;
-    char output[MAX_CONSOLE_OUTPUT_LENGTH];
 
-    /* Acrue arguments in argument list */
-    va_start(argument, s);
-    vsnprintf(output, MAX_CONSOLE_OUTPUT_LENGTH, s, argument);
-    va_end(argument);
-
-    /* TODO: Find some way to pass the va_list arguments to OGLCONSOLE_Output
-     * so that we don't waste extra time with the "%s" bullshit */
-    OGLCONSOLE_Output((OGLCONSOLE_Console)userConsole, "%s", output);
-}
-
-#if 0
-/* Multi-Console Users: print text to a specific console; mono-console users use
- * Print() */
-void OGLCONSOLE_Output(OGLCONSOLE_Console console, char *s)
-{
-    /* TODO: Chop up output to wrap text */
-
-    /* TODO: Add auto-scroll (the commented out code here is a failed attempt,
-     * my brain is too scattered to do it) */
-    /* If the console isn't scrolled up, then we move the scroll point */
-/*    if (C->lineQueueIndex - C->lineScrollIndex == C->textHeight)
-        if (++C->lineScrollIndex - C->lineScrollIndex >= MAX_LINE_COUNT)
-            C->lineScrollIndex = 0;*/
-
-}
-#endif
 
 /* Internal encapsulation of the act for adding a command the user executed to
  * their command history for that particular console */

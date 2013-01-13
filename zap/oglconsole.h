@@ -41,8 +41,6 @@ void OGLCONSOLE_setCursor(int drawCursor);
 /* Handle resize window events */
 void OGLCONSOLE_Reshape();
 
-/* Print to the console */
-void OGLCONSOLE_Print(const char *s, ...);
 void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...);
 
 /* Register a callback with the console */
