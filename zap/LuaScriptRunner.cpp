@@ -236,7 +236,7 @@ bool LuaScriptRunner::loadScript()
    if(lua_gettop(L) == 0)     // Script compile error?
    {
       logError("Error compiling script -- aborting.");
-         return false;
+      return false;
    }
 
    // So, however we got here, the script we want to run is now sitting on top of the stack
@@ -244,15 +244,12 @@ bool LuaScriptRunner::loadScript()
 
    setEnvironment();
 
+   // We won't use our stack trace util here because compile errors don't produce interesting traces.
    S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
 
    if(error)
    {
-      logError("%s -- Aborting.", lua_tostring(L, -1));
-
-      lua_pop(L, -1);       // Remove error message from stack
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+      logError("%s -- Aborting.", lua_tostring(L, -1));     // Also clears the stack
       return false;
    }
 
@@ -409,6 +406,13 @@ bool LuaScriptRunner::loadCompileSaveScript(const char *filename, const char *re
 // Load script and place on top of the stack
 bool LuaScriptRunner::loadCompileScript(const char *filename)
 {
+   // luaL_loadfile: Loads a file as a Lua chunk. This function uses lua_load to load the chunk in the file named filename. 
+   // If filename is NULL, then it loads from the standard input. The first line in the file is ignored if it starts with a #.
+   // Returns:
+   // 0: no errors;
+   // LUA_ERRSYNTAX: syntax error during pre-compilation;  [[ err == 3 ]]
+   // LUA_ERRMEM: memory allocation error.  [[ err == 4 ]]
+
    S32 err = luaL_loadfile(L, filename);     
 
    if(err == 0)
