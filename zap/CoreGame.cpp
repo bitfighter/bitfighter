@@ -271,6 +271,11 @@ const F32 CoreItem::DamageReductionRatio = 1000.0f;
 
 const F32 CoreItem::PANEL_ANGLE = FloatTau / (F32) CORE_PANELS;
 
+/**
+ * @luaconst CoreItem::CoreItem()
+ * @luaconst CoreItem::CoreItem(geom, team)
+ * @luaconst CoreItem::CoreItem(geom, team, health)
+ */
 // Combined Lua / C++ default constructor
 CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))    
 {
@@ -279,16 +284,33 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
 
    mHasExploded = false;
-
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
    mCurrentExplosionNumber = 0;
-
    mPanelGeom.isValid = false;
 
    mKillString = "crashed into a core";    // TODO: Really needed?
 
 
    // Read some params from our L, if we have it
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }, { PT, TEAM_INDX, INT, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "CoreItem", "constructor");
+      if(profile == 1)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+      }
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+         setStartingHealth(getInt(L, 3));
+      }
+   }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }, { GEOM, TEAM_INDX, INT, END }}, 3 };
@@ -305,8 +327,6 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
          setStartingHealth(getInt(L, 3));
       }
    }
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 

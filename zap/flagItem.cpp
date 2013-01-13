@@ -40,7 +40,11 @@ namespace Zap
 {
 
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
-
+/**
+  *  @luaconst  FlagItem::FlagItem()
+  *  @luaconst  FlagItem::FlagItem(geom)
+  *  @luaconst  FlagItem::FlagItem(geom, team)
+  */
 // Combined Lua / C++ default constructor
 FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
 {
@@ -48,7 +52,7 @@ FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::Collision
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, TEAM_INDX, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "FlagItem", "constructor");
       if(profile == 1)
       {
@@ -411,9 +415,6 @@ bool FlagItem::isAtHome()
 // Lua interface
 
 /**
-  *  @luaconst  FlagItem::FlagItem()
-  *  @luaconst  FlagItem::FlagItem(geom)
-  *  @luaconst  FlagItem::FlagItem(geom, team)
   *  @luaclass FlagItem
   *  @brief    Flags are used in many games, such as Nexus and Capture The Flag (CTF).
   *  @geom     The geometry of a %FlagItem is a point.

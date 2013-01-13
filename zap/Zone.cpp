@@ -45,7 +45,7 @@ Zone::Zone(lua_State *L)
       if(profile == 1)
          setGeom(L, 1);
    }
- 
+
    setTeam(TEAM_NEUTRAL);
    mObjectTypeNumber = ZoneTypeNumber;
 
@@ -158,7 +158,9 @@ bool Zone::collide(BfObject *hitObject)
 /////
 // Lua interface
 
-/**
+/** 
+  *  @luaconst Zone::Zone()
+  *  @luaconst Zone::Zone(geom)
   *  @luaclass Zone
   *  @brief Invisible objects, used mainly for generating events.
   */

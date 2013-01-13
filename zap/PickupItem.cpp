@@ -28,7 +28,7 @@
 #include "gameConnection.h"
 #include "ClientInfo.h"
 #include "game.h"
-
+#include "LuaWrapper.h"
 
 #ifndef ZAP_DEDICATED
 #  include "UIEditorMenus.h"     // For EditorAttributeMenuUI def
@@ -448,10 +448,27 @@ REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 ////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
-
-
+/**
+ *   @luaconst EnergyItem::EnergyItem()
+ *   @luaconst EnergyItem::EnergyItem(geom)
+ *   @luaconst EnergyItem::EnergyItem(geom, time)
+ */
 EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Combined Lua / C++ default constructor
 {
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "EnergyItem", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         lua_remove(L, 1);
+         setRegenTime(L);
+      }
+   }
+   
    mObjectTypeNumber = EnergyItemTypeNumber;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;

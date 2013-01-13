@@ -443,14 +443,18 @@ AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
    initialize();
 }
 
-
+/**
+  *  @luaconst AsteroidSpawn::AsteroidSpawn()
+  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom)
+  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom, time)
+  */
 AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, INT, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "AsteroidSpawn", "constructor");
       initialize();
       if(profile == 1)
@@ -556,9 +560,6 @@ void AsteroidSpawn::renderDock()
 /////
 // Lua interface
 /**
-  *  @luaconst AsteroidSpawn::AsteroidSpawn()
-  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom)
-  *  @luaconst AsteroidSpawn::AsteroidSpawn(geom, time)
   *  @luaclass AsteroidSpawn
   *  @brief Spawns \link Asteroid Asteroids \endlink at regular intervals.
   *  @geom  The geometry of AsteroidSpawns is a single point.
@@ -600,7 +601,7 @@ CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, INT, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "CircleSpawn", "constructor");
 
       if(profile == 1)
@@ -709,6 +710,9 @@ void CircleSpawn::renderDock()
 /////
 // Lua interface
 /**
+  *  @luaconst CircleSpawn::CircleSpawn()
+  *  @luaconst CircleSpawn::CircleSpawn(geom)
+  *  @luaconst CircleSpawn::CircleSpawn(geom, time)
   *  @luaclass CircleSpawn
   *  @brief Spawns \link Circle Circles \endlink at regular intervals.
   *  @geom  The geometry of CircleSpawns is a single point.

@@ -1299,6 +1299,10 @@ static const F32 ASTEROID_MASS_LAST_SIZE              = 1;
 static const F32 ASTEROID_RADIUS_MULTIPLYER_LAST_SIZE = 89 * 0.2f;
 static const F32 ASTEROID_SPEED                       = 250;
 
+/**
+ *   @luafunc Asteroid::Asteroid()
+ *   @luafunc Asteroid::Asteroid(geom)
+ */
 // Combined Lua / C++ default constructor
 Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroidRadius(ASTEROID_INITIAL_SIZELEFT), getAsteroidMass(ASTEROID_INITIAL_SIZELEFT))
 {
@@ -1313,7 +1317,7 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroi
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Asteroid", "constructor");
       if(profile == 1)
       {
@@ -1611,8 +1615,6 @@ string Asteroid::getAttributeString()
 // Lua interface
 
 /**
- *   @luafunc Asteroid::Asteroid()
- *   @luafunc Asteroid::Asteroid(geom)
  *   @luaclass Asteroid
  *   @brief    Just like the arcade game!  Yo!
  */
