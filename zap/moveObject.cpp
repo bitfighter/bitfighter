@@ -2320,7 +2320,7 @@ static const F32 RESOURCE_ITEM_MASS = 1;
 ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
    // These are the signatures we'll accept for Lua to construct this object
-   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+   static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
 
    if(L && checkArgList(L, constructorArgList, "ResourceItem", "constructor") == 1)
       setPos(getPointOrXY(L, 1));
