@@ -37,6 +37,15 @@ TNL_IMPLEMENT_CLASS(Zone);    // Allows classes to be autoconstructed by name
 // Combined Lua / C++ constructor)
 Zone::Zone(lua_State *L)   
 {
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "Zone", "constructor");
+         
+      if(profile == 1)
+         setGeom(L, 1);
+   }
+ 
    setTeam(TEAM_NEUTRAL);
    mObjectTypeNumber = ZoneTypeNumber;
 

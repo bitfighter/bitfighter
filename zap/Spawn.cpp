@@ -458,8 +458,7 @@ AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
-         // I've got no idea why this works and getInt(L, 2) doesn't XXXXX what if geom is a point, not an x,y pair?
-         mSpawnTime = S32(getInt(L, 3) * 1000);
+         mSpawnTime = S32(getInt(L, 2) * 1000);
          mTimer.reset(mSpawnTime);
       }
    }
@@ -603,8 +602,7 @@ CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
-         // I've got no idea why this works and getInt(L, 2) doesn't.   XXXXX what if geom is a point, not an x,y pair?
-         mSpawnTime = S32(getInt(L, 3) * 1000);
+         mSpawnTime = S32(getInt(L, 2) * 1000);
          mTimer.reset(mSpawnTime);
       }
    }
