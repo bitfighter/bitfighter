@@ -589,6 +589,11 @@ CircleSpawn::CircleSpawn(const Point &pos, S32 time) : Parent(pos, time)
 
 
 // Lua constructor
+/**
+  *  @luaconst CircleSpawn::CircleSpawn()
+  *  @luaconst CircleSpawn::CircleSpawn(geom)
+  *  @luaconst CircleSpawn::CircleSpawn(geom, time)
+  */
 CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
@@ -597,8 +602,10 @@ CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, INT, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "CircleSpawn", "constructor");
+
       if(profile == 1)
          setPos(getPointOrXY(L, 1));
+
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
@@ -702,9 +709,6 @@ void CircleSpawn::renderDock()
 /////
 // Lua interface
 /**
-  *  @luaconst CircleSpawn::CircleSpawn()
-  *  @luaconst CircleSpawn::CircleSpawn(geom)
-  *  @luaconst CircleSpawn::CircleSpawn(geom, time)
   *  @luaclass CircleSpawn
   *  @brief Spawns \link Circle Circles \endlink at regular intervals.
   *  @geom  The geometry of CircleSpawns is a single point.
