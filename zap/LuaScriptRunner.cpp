@@ -329,7 +329,7 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
       return false;
    }
 
-   catch(LuaException &e)
+   catch(const LuaException &e)
    {
       logprintf(LogConsumer::LogError, "%s\n%s\nTerminating script", getErrorMessagePrefix(), e.msg.c_str());
 
