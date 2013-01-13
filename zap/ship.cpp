@@ -1706,14 +1706,8 @@ F32 Ship::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSk
 static F32 getAngleDiff(F32 a, F32 b)
 {
    // Figure out the shortest path from a to b...
-   // Restrict them to the range 0-360
-   while(a<0)   a+=360;
-   while(a>360) a-=360;
-
-   while(b<0)   b+=360;
-   while(b>360) b-=360;
-
-   return  (fabs(b-a) > 180) ? 360-(b-a) : b-a;
+   // Returns between -180 and 180.
+   return fmod(b - a + 180.f, 360.f) - 180.f;
 }
 
 
