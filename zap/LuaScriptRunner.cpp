@@ -183,7 +183,8 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 
 
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
-// defining any globals, and executing any "loose" code not defined in a function.
+// defining any globals, and executing any "loose" code not defined in a function.  If we're going to get any compile errors, they'll
+// show up here.
 bool LuaScriptRunner::loadScript()
 {
    static const S32 MAX_CACHE_SIZE = 16;
