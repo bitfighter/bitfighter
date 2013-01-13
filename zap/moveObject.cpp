@@ -1310,6 +1310,16 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroi
    mDesign = TNL::Random::readI(0, ASTEROID_DESIGNS - 1);
 
    mKillString = "crashed into an asteroid";
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "Asteroid", "constructor");
+      if(profile == 1)
+      {
+         setPos(getPointOrXY(L, 1));
+      }
+   }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -1601,6 +1611,8 @@ string Asteroid::getAttributeString()
 // Lua interface
 
 /**
+ *   @luafunc Asteroid::Asteroid()
+ *   @luafunc Asteroid::Asteroid(geom)
  *   @luaclass Asteroid
  *   @brief    Just like the arcade game!  Yo!
  */

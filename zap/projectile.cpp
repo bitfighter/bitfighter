@@ -1017,7 +1017,20 @@ SpyBug::SpyBug(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter
 // Combined Lua / C++ default constructor -- used in Lua and editor
 SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
 {
-   initialize(Point(0,0), NULL);
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "SpyBug", "constructor");
+      
+      if(profile == 0)
+         initialize(Point(0,0), NULL);
+      else if(profile == 1)
+      {
+         initialize(Point(0,0), NULL);
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+      }
+   }
 }
 
 
@@ -1240,6 +1253,14 @@ bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 
 /////
 // Lua interface
+/**
+  *  @luaconst SpyBug::SpyBug()
+  *  @luaconst SpyBug::SpyBug(geom, team)
+  *  @luaclass SpyBug
+  *  @brief Monitors a section of the map and will show enemy ships there.
+  *  @descr Can only be used/created if the Sensor module is selected. 
+  *         Makes surrounding areas of the commander's map visible to player and teammates.
+  */
 //                Fn name                  Param profiles            Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
 

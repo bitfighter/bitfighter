@@ -86,13 +86,11 @@ void DestManager::addDest(const Point &dest)
 {
    TNLAssert(mOwner, "We need an owner here!");
    mDests.push_back(dest);
-
    if(mDests.size() == 1)      // Just added the first dest
    {
       mOwner->setVert(dest, 1);
       mOwner->updateExtentInDatabase();
    }
-   
    // If we're the server, update the clients 
    if(mOwner->getGame() && mOwner->getGame()->isServer())
       mOwner->s2cAddDestination(dest);
@@ -177,7 +175,16 @@ static Vector<DatabaseObject *> foundObjects;      // Reusable container
 // Combined default C++/Lua constructor
 Teleporter::Teleporter(lua_State *L)
 {
-   initialize(Point(0,0), Point(0,0), NULL);
+   initialize(Point(0,0),Point(0,0),NULL);
+   // TODO: XXXXX Fix this one too -- intiailze needs to be refactored because who knows
+   // how many points the teleporter is getting?  could be 1, could be 2, could be many
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "Teleporter", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+   }
 }
 
 
@@ -858,6 +865,8 @@ bool Teleporter::canBeNeutral() { return false; }
 //// Lua methods
 
 /**
+  *  @luaconst Teleporter::Teleporter()
+  *  @luaconst Teleporter::Teleporter(geom)
   *  @luaclass Teleporter
   *  @brief Instantly transports ships from here to there.
   *  @descr A %Teleporter represents the basic teleporter object.  Every teleporter has an intake location

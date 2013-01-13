@@ -31,6 +31,7 @@
 #include "game.h"
 #include "config.h"
 #include "stringUtils.h"
+#include "LuaWrapper.h"
 
 #ifndef ZAP_DEDICATED 
 #  include "OpenglUtils.h"
@@ -349,6 +350,18 @@ WallItem::WallItem(lua_State *L)
    mAlreadyAdded = false;
 
    setNewGeometry(geomPolyLine);
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, INT, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "WallItem", "constructor");
+      if(profile == 1)
+      {
+         setWidth(lua_tointeger(L, -1));
+         lua_pop(L, 1);
+         setGeom(L);
+      }
+   }
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -571,6 +584,8 @@ void WallItem::addToGame(Game *game, GridDatabase *database)
 /////
 // Lua interface
 /**
+  *  @luaconst WallItem::WallItem()
+  *  @luaconst WallItem::WallItem(geom, thickness)
   *  @luaclass WallItem
   *  @brief Traditional wall item.
   *  @descr A %WallItem is a traditional wall consisting of a series of straight-line segments.  WallItems have a width setting that 

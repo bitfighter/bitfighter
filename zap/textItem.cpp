@@ -53,6 +53,9 @@ EditorAttributeMenuUI *TextItem::mAttributeMenuUI = NULL;
 // Combined Lua / C++ constructor
 TextItem::TextItem(lua_State *L)
 {
+   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, STR, END }}, 2 };
+   S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
+   
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TextItemTypeNumber;
 
@@ -60,6 +63,12 @@ TextItem::TextItem(lua_State *L)
    mSize = 20;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   
+   if(L && profile == 1)
+   {
+      setPos(getPointOrXY(L, 1));
+      setText(getString(L, 2));
+   }
 }
 
 
@@ -426,6 +435,8 @@ void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 //// Lua methods
 
 /**
+  *  @luaconst TextItem::TextItem()
+  *  @luaconst TextItem::TextItem(geom, text)
   *  @luaclass TextItem
   *  @brief Display text message in level.
   *  @descr A %TextItem displays text in a level.  If the %TextItem belongs to a team, it is only visible to players on that team.

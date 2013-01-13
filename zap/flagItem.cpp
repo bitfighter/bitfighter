@@ -45,6 +45,21 @@ TNL_IMPLEMENT_NETOBJECT(FlagItem);
 FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20
 {
    initialize();
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, TEAM_INDX, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "FlagItem", "constructor");
+      if(profile == 1)
+      {
+         setPos(getPointOrXY(L, 1));
+      }
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+      }
+   }
 }
 
 
@@ -396,6 +411,9 @@ bool FlagItem::isAtHome()
 // Lua interface
 
 /**
+  *  @luaconst  FlagItem::FlagItem()
+  *  @luaconst  FlagItem::FlagItem(geom)
+  *  @luaconst  FlagItem::FlagItem(geom, team)
   *  @luaclass FlagItem
   *  @brief    Flags are used in many games, such as Nexus and Capture The Flag (CTF).
   *  @geom     The geometry of a %FlagItem is a point.
