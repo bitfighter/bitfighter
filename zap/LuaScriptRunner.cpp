@@ -200,62 +200,71 @@ bool LuaScriptRunner::loadScript()
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack dirty!");
 
-   if(!cacheScripts)
-      loadCompileScript(mScriptName.c_str());
-   else  
+   try
    {
-      bool found = false;
-
-      // Check if script is in our cache
-      S32 cacheSize = (S32)mCachedScripts.size();
-
-      for(S32 i = 0; i < cacheSize; i++)
-         if(mCachedScripts[i] == mScriptName)
-         {
-            found = true;
-            break;
-         }
-
-      if(!found)     // Script is not (yet) cached
+      if(!cacheScripts)
+         loadCompileScript(mScriptName.c_str());
+      else  
       {
-         if(cacheSize > MAX_CACHE_SIZE)
+         bool found = false;
+
+         // Check if script is in our cache
+         S32 cacheSize = (S32)mCachedScripts.size();
+
+         for(S32 i = 0; i < cacheSize; i++)
+            if(mCachedScripts[i] == mScriptName)
+            {
+               found = true;
+               break;
+            }
+
+         if(!found)     // Script is not (yet) cached
          {
-            // Remove oldest script from the cache
-            deleteScript(mCachedScripts.front().c_str());
-            mCachedScripts.pop_front();
+            if(cacheSize > MAX_CACHE_SIZE)
+            {
+               // Remove oldest script from the cache
+               deleteScript(mCachedScripts.front().c_str());
+               mCachedScripts.pop_front();
+            }
+
+            // Load new script into cache using full name as registry key
+            loadCompileSaveScript(mScriptName.c_str(), mScriptName.c_str());
+            mCachedScripts.push_back(mScriptName);
          }
 
-         // Load new script into cache using full name as registry key
-         loadCompileSaveScript(mScriptName.c_str(), mScriptName.c_str());
-         mCachedScripts.push_back(mScriptName);
+         lua_getfield(L, LUA_REGISTRYINDEX, mScriptName.c_str());    // Load script from cache
       }
 
-      lua_getfield(L, LUA_REGISTRYINDEX, mScriptName.c_str());    // Load script from cache
-   }
 
-   if(lua_gettop(L) == 0)     // Script compile error?
+      if(lua_gettop(L) == 0)     // Script compile error?
+      {
+         logError("Error compiling script -- aborting.");
+         return false;
+      }
+
+      // So, however we got here, the script we want to run is now sitting on top of the stack
+      TNLAssert((lua_gettop(L) == 1 && lua_isfunction(L, 1)) || LuaObject::dumpStack(L), "Expected a single function on the stack!");
+
+      setEnvironment();
+
+      // We won't use our stack trace util here because compile errors don't produce interesting traces.
+      S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
+
+      if(error)
+      {
+         logError("%s -- Aborting.", lua_tostring(L, -1));     // Also clears the stack
+         return false;
+      }
+
+      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
+
+      return true;
+   }
+   catch(const LuaException &e)
    {
-      logError("Error compiling script -- aborting.");
+
       return false;
    }
-
-   // So, however we got here, the script we want to run is now sitting on top of the stack
-   TNLAssert((lua_gettop(L) == 1 && lua_isfunction(L, 1)) || LuaObject::dumpStack(L), "Expected a single function on the stack!");
-
-   setEnvironment();
-
-   // We won't use our stack trace util here because compile errors don't produce interesting traces.
-   S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
-
-   if(error)
-   {
-      logError("%s -- Aborting.", lua_tostring(L, -1));     // Also clears the stack
-      return false;
-   }
-
-   TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
-   return true;
 }
 
 
