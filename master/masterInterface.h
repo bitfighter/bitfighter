@@ -132,9 +132,11 @@ public:
       StringTableEntry levelName, StringTableEntry levelType,
       U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
 
+   /// Request the Message-of-the-Day
+   TNL_DECLARE_RPC(c2mRequestMOTD, ());
 
    /// m2cSetMOTD is sent to a client when the connection is established.  The
-   /// client's game string is used to pick which MOTD will be sent.
+   /// client's BUILD_VERSION is used to pick which MOTD will be sent.
    TNL_DECLARE_RPC(m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString));
 
    // If the user has a verified name, send this message back so they know the "correct spelling" of the name

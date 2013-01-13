@@ -1116,6 +1116,12 @@ public:
    }
 
 
+   TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, c2mRequestMOTD, ())
+   {
+      sendMotd();
+   }
+
+
    // Game server wants to know if user name has been verified
    TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
    {

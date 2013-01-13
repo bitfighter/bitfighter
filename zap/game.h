@@ -110,6 +110,7 @@ const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen;
 ////////////////////////////////////////
 
 // Some forward declarations
+class AnonymousMasterServerConnection;
 class MasterServerConnection;
 class GameNetInterface;
 class GameType;
@@ -127,6 +128,8 @@ class EditorTeam;
 class UIManager;
 
 struct IniSettings;
+
+typedef void (MasterServerConnection::*MasterConnectionCallback)();
 
 // Modes the player could be in during the game
 enum UIMode {
@@ -200,7 +203,6 @@ protected:
    U32 mNextMasterTryTime;
 
    bool mReadyToConnectToMaster;
-   bool mDoAnonymousMasterConnection;
 
    Vector<Robot *> mRobots;               // Grand master list of all robots in the current game
    Rect mWorldExtents;                    // Extents of everything
@@ -229,6 +231,10 @@ protected:
    RefPtr<GameNetInterface> mNetInterface;
 
    SafePtr<MasterServerConnection> mConnectionToMaster;
+
+   // Not really a queue, but good enough for now!
+   SafePtr<AnonymousMasterServerConnection> mAnonymousMasterServerConnection;
+
    SafePtr<GameType> mGameType;
 
    bool mGameSuspended;       // True if we're in "suspended animation" mode
@@ -339,6 +345,9 @@ public:
    void checkConnectionToMaster(U32 timeDelta);
    MasterServerConnection *getConnectionToMaster();
 
+   void runAnonymousMasterRequest(MasterConnectionCallback callback);
+   void processAnonymousMasterConnection();
+
    GameNetInterface *getNetInterface();
    virtual GridDatabase *getGameObjDatabase();
 
@@ -382,7 +391,7 @@ public:
 
    void resetMasterConnectTimer();
 
-   void setReadyToConnectToMaster(bool ready, bool doAnonymous = false);
+   void setReadyToConnectToMaster(bool ready);
 
    // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
    S32 mObjectsLoaded;  

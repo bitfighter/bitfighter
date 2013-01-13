@@ -251,6 +251,9 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mSendLevelInfo, (string hash, string levelName, string creator, 
                                                StringTableEntry gametype, bool hasLevelGen, U8 teamCount, S32 winningScore, S32 gameDurationInSeconds));
 
+   // Send message-of-the-day
+   TNL_DECLARE_RPC_OVERRIDE(c2mRequestMOTD, ());
+
    // Send high scores stats to client
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestHighScores, ());
 

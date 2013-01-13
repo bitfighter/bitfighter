@@ -74,7 +74,13 @@ MasterServerConnection::MasterServerConnection(Game *game)
 
 MasterServerConnection::MasterServerConnection()
 {
-   TNLAssert(false, "We need a default constructor, but we never actually use it!"); 
+   TNLAssert(false, "We need a default constructor, but we never actually use it!");
+}
+
+
+MasterServerConnection::~MasterServerConnection()
+{
+   // Do nothing
 }
 
 
@@ -245,6 +251,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 
    setMasterName(masterName.getString());
    static_cast<ClientGame *>(mGame)->setMOTD(motdString.getString());
+
+   terminateIfAnonymous();
 }
 
 
@@ -509,6 +517,57 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
 void MasterServerConnection::requestAuthentication(StringTableEntry clientName, Nonce clientId)
 {
    s2mRequestAuthentication(clientId.toVector(), clientName);
+}
+
+
+void MasterServerConnection::terminateIfAnonymous()
+{
+   if(mConnectionType != MasterConnectionTypeAnonymous)
+      return;
+
+   // Actions performed on an anonymous connection should terminate the connection
+   disconnect(ReasonAnonymous, "");
+}
+
+
+AnonymousMasterServerConnection::AnonymousMasterServerConnection(Game *game) : Parent(game)
+{
+   mConnectionType = MasterConnectionTypeAnonymous;
+   mConnectionCallback = NULL;
+}
+
+
+AnonymousMasterServerConnection::~AnonymousMasterServerConnection()
+{
+   // Do nothing
+}
+
+
+// Set a function to call upon establishing a connection
+void AnonymousMasterServerConnection::setConnectionCallback(MasterConnectionCallback callback)
+{
+   mConnectionCallback = callback;
+}
+
+
+MasterConnectionCallback AnonymousMasterServerConnection::getConnectionCallback()
+{
+   return mConnectionCallback;
+}
+
+
+void AnonymousMasterServerConnection::onConnectionEstablished()
+{
+   Parent::onConnectionEstablished();
+
+   // Run the callback
+   // This uses some funky syntax.  See sections 2.1 and 2.5 of:
+   //   http://www.newty.de/fpt/fpt.html#chapter2
+   if(mConnectionCallback)
+   {
+      (*this.*mConnectionCallback)();
+      mConnectionCallback = NULL;
+   }
 }
 
 

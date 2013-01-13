@@ -50,11 +50,15 @@ private:
    Game *mGame;
    string mMasterName;
 
+   void terminateIfAnonymous();
+
+protected:
    MasterConnectionType mConnectionType;
 
 public:
    MasterServerConnection(Game *game);    // Constructor
-   MasterServerConnection();
+   MasterServerConnection();              // Default Constructor required by TNL for some reason..
+   virtual ~MasterServerConnection();     // Destructor
 
    void setConnectionType(MasterConnectionType type);
    MasterConnectionType getConnectionType();
@@ -104,11 +108,31 @@ public:
                                                   RangedU32<0,AuthenticationStatusCount> status, Int<BADGE_COUNT> badges));
 
    void writeConnectRequest(BitStream *bstream);
-   void onConnectionEstablished();
+   virtual void onConnectionEstablished();
    void onConnectionTerminated(TerminationReason r, const char *string); // An existing connection has been terminated
    void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
+};
+
+
+typedef void (MasterServerConnection::*MasterConnectionCallback)();
+
+class AnonymousMasterServerConnection : public MasterServerConnection
+{
+   typedef MasterServerConnection Parent;
+
+private:
+   MasterConnectionCallback mConnectionCallback;
+
+public:
+   AnonymousMasterServerConnection(Game *game);    // Constructor
+   virtual ~AnonymousMasterServerConnection();
+
+   void setConnectionCallback(MasterConnectionCallback callback);
+   MasterConnectionCallback getConnectionCallback();
+
+   void onConnectionEstablished();
 };
 
 };

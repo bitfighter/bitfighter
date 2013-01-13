@@ -1259,8 +1259,12 @@ void ClientGame::onConnectionToMasterTerminated(NetConnection::TerminationReason
 
          mSeenTimeOutMessage = true;
          break;
+
       case NetConnection::ReasonSelfDisconnect:
-         break;  // no errors when client disconnect (when quitting bitfighter)
+         // no errors when client disconnect (when quitting bitfighter)
+      case NetConnection::ReasonAnonymous:
+         // Anonymous connections are disconnected quickly, usually after retrieving some data
+         break;
 
       default:  // Not handled
          ui->setMessage(2, "Unable to connect to the master server, with error code:");

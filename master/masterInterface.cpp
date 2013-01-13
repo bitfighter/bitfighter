@@ -84,6 +84,11 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mUpdateServerStatus,
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
 
 
+TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestMOTD,
+      (),
+      (),
+      NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2) {}
+
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetMOTD, 
    (TNL::StringPtr masterName, TNL::StringPtr motdString), 
    (masterName, motdString),

@@ -141,7 +141,6 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
    mHaveTriedToConnectToMaster = false;
-   mDoAnonymousMasterConnection = false;
 
    mNameToAddressThread = NULL;
 
@@ -302,10 +301,9 @@ void Game::resetMasterConnectTimer()
 }
 
 
-void Game::setReadyToConnectToMaster(bool ready, bool doAnonymous)
+void Game::setReadyToConnectToMaster(bool ready)
 {
    mReadyToConnectToMaster = ready;
-   mDoAnonymousMasterConnection = doAnonymous;
 }
 
 
@@ -449,6 +447,18 @@ GridDatabase *Game::getGameObjDatabase()
 MasterServerConnection *Game::getConnectionToMaster()
 {
    return mConnectionToMaster;
+}
+
+
+void Game::runAnonymousMasterRequest(MasterConnectionCallback callback)
+{
+   TNLAssert(mAnonymousMasterServerConnection.isNull(), "An anonymous master connection is still open!");
+
+   // Create a new anonymous connection and set a callback method
+   // You need to make sure to remember to put terminateIfAnonymous() into the master
+   // response RPC that this callback calls
+   mAnonymousMasterServerConnection = new AnonymousMasterServerConnection(this);
+   mAnonymousMasterServerConnection->setConnectionCallback(callback);
 }
 
 
@@ -935,10 +945,6 @@ void Game::checkConnectionToMaster(U32 timeDelta)
                   TNLAssert(!mConnectionToMaster.isValid(), "Already have connection to master!");
                   mConnectionToMaster = new MasterServerConnection(this);
 
-                  // Are we doing an anonymous connection?
-                  if(mDoAnonymousMasterConnection)
-                     mConnectionToMaster->setConnectionType(MasterConnectionTypeAnonymous);
-
                   mConnectionToMaster->connect(mNetInterface, mNameToAddressThread->mAddress);
                }
    
@@ -952,6 +958,46 @@ void Game::checkConnectionToMaster(U32 timeDelta)
          mNextMasterTryTime = 0;
       else
          mNextMasterTryTime -= timeDelta;
+   }
+
+   processAnonymousMasterConnection();
+}
+
+
+void Game::processAnonymousMasterConnection()
+{
+   // Connection doesn't exist yet
+   if(!mAnonymousMasterServerConnection.isValid())
+      return;
+
+   // Connection has already been initiated
+   if(mAnonymousMasterServerConnection->isInitiator())
+      return;
+
+   // Try to open a socket to master server
+   if(!mNameToAddressThread)
+   {
+      Vector<string> *masterServerList = mSettings->getMasterServerList();
+
+      // No master server addresses?
+      if(masterServerList->size() == 0)
+         return;
+
+      const char *addr = masterServerList->get(0).c_str();
+
+      mNameToAddressThread = new NameToAddressThread(addr);
+      mNameToAddressThread->start();
+   }
+   else
+   {
+      if(mNameToAddressThread->mDone)
+      {
+         if(mNameToAddressThread->mAddress.isValid())
+            mAnonymousMasterServerConnection->connect(mNetInterface, mNameToAddressThread->mAddress);
+
+         delete mNameToAddressThread;
+         mNameToAddressThread = NULL;
+      }
    }
 }
 

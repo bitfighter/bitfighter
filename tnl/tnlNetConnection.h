@@ -244,6 +244,7 @@ public:
 
       ReasonConnectionsForbidden,   // Used when rejecting data connections when data connection capability is disabled
       ReasonBanned,                 // You made the admin mad...
+      ReasonAnonymous,              // Anonymous connections are terminated quickly, only for simple data retrieval
       TerminationReasons,           // Must be last of enumerated reasons!
       ReasonNone
    };
