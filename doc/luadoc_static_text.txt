@@ -43,7 +43,8 @@ For more complex objects (such as a WallItem or a Zone), geometry refers to a Lu
 Some objects have a specific number of points.  A TextItem, for example, consists of exactly two points, defining its
 start and endpoints.  Some items (like Zones and \link PolyWall PolyWalls \endlink) must have a minimum of three points.  See the documentation for individual items for details.
 
-The Geom class provides a collection of tools to make common transormations to a point or a table of points. 
+The Geom class provides a collection of tools to make common transformations to a point or a table of points.
+
 
 * Other datatypes
 
