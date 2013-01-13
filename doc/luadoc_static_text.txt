@@ -117,17 +117,20 @@ See the Timer class for more details.
 
 @section debugging Debugging Tips
 
-Any of your scripts can print a stack trace to see how you got to a particular execution point.  This can be very helpful if there are several conditions under which a function can be called.  
+Any of your scripts can print a stack trace with the \e _stackTracer() command (see sample usage below).  This will show how you got to a particular execution point, and will print the values of various variables and other potentially useful information.  This can be very helpful if there are several conditions under which a function can be called, or why something went wrong.  
 
-The logprint command will print messages both to the Bitfighter logfile, as well as to the in-game console (which you can turn on with ctrl+/).
+The \e print(msg) command will print a message the in-game console (which you can turn on with ctrl+/), and \e logprint(msg) will print a message to the console, the terminal, and the Bitfighter logfile.
+
+Lua's \e [error](http://www.lua.org/manual/5.1/manual.html#pdf-error) command will stop the script, print a message, and cause a stack trace to be printed.  Use \e [assert](http://luatut.com/assert.html) to confirm that a condition is true.
 
 Finally, if you detect an unexpected error condition, you can log a message, trigger a stack trace, and terminate the script with Lua's error function.
 
 \code
-logprint("Here's a log message:")
-logprint(debug.traceback())
+logprint("Here's a stack trace:")
+logprint(_stackTracer())
 
 if target == nil then error("Have a nil target!") end
+assert(target, "Target should never be nil here!")
 \endcode
 
 
