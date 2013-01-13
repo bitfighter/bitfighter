@@ -262,7 +262,7 @@ bool LuaScriptRunner::loadScript()
    }
    catch(const LuaException &e)
    {
-
+      // YYYYY
       return false;
    }
 }
@@ -331,13 +331,14 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 }
 
 
+// Start Lua and get everything configured
 bool LuaScriptRunner::startLua()
 {
-   // Start Lua and get everything configured if we haven't already done so
-   if(!L)
-   {
-      TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
+   TNLAssert(!L,               "L should not have been created yet!");
+   TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
 
+   try 
+   {
       // Prepare the Lua global environment
       L = lua_open();     // Create a new Lua interpreter; will be shutdown in the destructor
 
@@ -355,9 +356,14 @@ bool LuaScriptRunner::startLua()
          L = NULL;
          return false;
       }
-   }
 
-   return true;
+      return true;
+   }
+   catch(const LuaException &e)
+   {
+      // YYYYY
+      return false;
+   }
 }
 
 
