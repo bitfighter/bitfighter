@@ -357,8 +357,8 @@ WallItem::WallItem(lua_State *L)
       S32 profile = checkArgList(L, constructorArgList, "WallItem", "constructor");
       if(profile == 1)
       {
-         setWidth(lua_tointeger(L, -1));
-         lua_pop(L, 1);
+         setWidth(lua_tointeger(L, -1));     // Grab this before it gets popped
+         lua_pop(L, 1);                      // Clean up stack for setGeom, which only expects points
          setGeom(L);
       }
    }
@@ -482,7 +482,6 @@ void WallItem::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
    renderPolyLineVertices(this, snappingToWallCornersEnabled, currentScale);
 #endif
 }
-
 
 
 void WallItem::processEndPoints()

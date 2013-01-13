@@ -182,6 +182,17 @@ bool LuaScriptRunner::loadAndRunGlobalFunction(lua_State *L, const char *key, Sc
 }
 
 
+// Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
+// This function can safely throw errors.
+void LuaScriptRunner::pushStackTracer()
+{
+   // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
+   if(!loadFunction(L, getScriptId(), "_stackTracer"))       
+      throw LuaException("Method _stackTracer() could not be found!\n"
+                           "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+}
+
+
 // Loads script from file into a Lua chunk, then runs it.  This has the effect of loading all our functions into the local environment,
 // defining any globals, and executing any "loose" code not defined in a function.  If we're going to get any compile errors, they'll
 // show up here.
@@ -202,6 +213,8 @@ bool LuaScriptRunner::loadScript()
 
    try
    {
+      pushStackTracer();
+
       if(!cacheScripts)
          loadCompileScript(mScriptName.c_str());
       else  
@@ -236,33 +249,25 @@ bool LuaScriptRunner::loadScript()
       }
 
 
-      if(lua_gettop(L) == 0)     // Script compile error?
-      {
-         logError("Error compiling script -- aborting.");
-         return false;
-      }
-
-      // So, however we got here, the script we want to run is now sitting on top of the stack
-      TNLAssert((lua_gettop(L) == 1 && lua_isfunction(L, 1)) || LuaObject::dumpStack(L), "Expected a single function on the stack!");
+      // If we are here, script loaded and compiled; everything should be dandy.
+      TNLAssert((lua_gettop(L) == 2 && lua_isfunction(L, 1) && lua_isfunction(L, 2)) 
+                        || LuaObject::dumpStack(L), "Expected a single function on the stack!");
 
       setEnvironment();
 
-      // We won't use our stack trace util here because compile errors don't produce interesting traces.
-      S32 error = lua_pcall(L, 0, 0, 0);     // Passing 0 args, expecting none back
+      // The script has been compiled, and the result is sitting on the stack.  The next step is to run it; this executes all the 
+      // "loose" code and loads the functions into the current environment.  It does not directly execute any of the functions.
+      // Any errors are handed off to the stack tracer we pushed onto the stack earlier.
+      if(lua_pcall(L, 0, 0, -2))      // Passing 0 args, expecting none back
+         throw LuaException("Error starting script:\n" + string(lua_tostring(L, -1)));
 
-      if(error)
-      {
-         logError("%s -- Aborting.", lua_tostring(L, -1));     // Also clears the stack
-         return false;
-      }
-
-      TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
-
+      clearStack(L);
       return true;
    }
-   catch(const LuaException &e)
+   catch(LuaException &e)
    {
-      // YYYYY
+      // We can't load the script as requested.  Sorry!
+      logError("%s", e.msg);                                // Also clears the stack
       return false;
    }
 }
@@ -294,11 +299,7 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
    {
       S32 args = lua_gettop(L);  // Number of args on stack    -- <<args>>
 
-      // Load our error handling function -- this will print a pretty stacktrace in the event things go wrong calling function.
-      // _stackTracer is a function included in lua_helper_functions that manages the stack trace; it should ALWAYS be present.
-      if(!loadFunction(L, getScriptId(), "_stackTracer"))       // -- <<args>>, _stackTracer
-         throw LuaException("Method _stackTracer() could not be found!\n"
-                            "Your scripting environment appears corrupted.  Consider reinstalling Bitfighter.");
+      pushStackTracer();
 
       if(!loadFunction(L, getScriptId(), function))             // -- <<args>>, _stackTracer, function
          throw LuaException("Cannot load method" + string(function) +"()!\n");
@@ -337,45 +338,38 @@ bool LuaScriptRunner::startLua()
    TNLAssert(!L,               "L should not have been created yet!");
    TNLAssert(mScriptingDirSet, "Must set scripting folder before starting Lua interpreter!");
 
+   // Prepare the Lua global environment
    try 
    {
-      // Prepare the Lua global environment
-      L = lua_open();     // Create a new Lua interpreter; will be shutdown in the destructor
+      L = lua_open();               // Create a new Lua interpreter; will be shutdown in the destructor
 
+      // Failure here is likely to be something systemic, something bad.  Like smallpox.
       if(!L)
-      {  
-         // Failure here is likely to be something systemic, something bad.  Like smallpox.
-         logprintf(LogConsumer::LogError, "%s %s", "STARTUP", "Could not create Lua interpreter.  Aborting script.");
-         return false;
-      }
+         throw LuaException("Could not instantiate the Lua interpreter.");
 
-      if(!configureNewLuaInstance())
-      {
-         logErrorHandler("Could not configure Lua interpreter.  I cannot run any scripts until the problem is resolved.", "STARTUP");
-         lua_close(L);
-         L = NULL;
-         return false;
-      }
+      configureNewLuaInstance();    // Throws any errors it encounters
 
       return true;
    }
+
    catch(const LuaException &e)
    {
-      // YYYYY
+      // Lua just isn't going to work out for this session.
+      logprintf(LogConsumer::LogError, "=====FATAL LUA ERROR=====\n%s\n=========================", e.msg);
+      lua_close(L);
+      L = NULL;
       return false;
    }
 }
 
 
-// Prepare a new Lua environment ("L") for use -- now only run once since we only
-// have one L which all scripts share
-bool LuaScriptRunner::configureNewLuaInstance()
+// Prepare a new Lua environment ("L") for use -- only called from startLua() above, which has catch block, so we can throw errors
+void LuaScriptRunner::configureNewLuaInstance()
 {
    lua_atpanic(L, luaPanicked);  // Register our panic function 
 
 #ifdef USE_PROFILER
    init_profiler(L);
-   `
 #endif
 
    luaL_openlibs(L);    // Load the standard libraries
@@ -394,32 +388,30 @@ bool LuaScriptRunner::configureNewLuaInstance()
                     " end");
 
    // Load our helper functions and store copies of the compiled code in the registry where we can use them for starting new scripts
-   return(loadCompileSaveHelper("lua_helper_functions.lua",      LUA_HELPER_FUNCTIONS_KEY)   &&
-          loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY) &&
-          loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY));
+   loadCompileSaveHelper("lua_helper_functions.lua",      LUA_HELPER_FUNCTIONS_KEY);
+   loadCompileSaveHelper("robot_helper_functions.lua",    ROBOT_HELPER_FUNCTIONS_KEY);
+   loadCompileSaveHelper("levelgen_helper_functions.lua", LEVELGEN_HELPER_FUNCTIONS_KEY);
 }
 
 
-bool LuaScriptRunner::loadCompileSaveHelper(const string &scriptName, const char *registryKey)
+void LuaScriptRunner::loadCompileSaveHelper(const string &scriptName, const char *registryKey)
 {
-   return loadCompileSaveScript(joindir(mScriptingDir, scriptName).c_str(), registryKey);
+   loadCompileSaveScript(joindir(mScriptingDir, scriptName).c_str(), registryKey);
 }
 
 
-// Load script from specified file, compile it, and store it in the registry
-bool LuaScriptRunner::loadCompileSaveScript(const char *filename, const char *registryKey)
+// Load script from specified file, compile it, and store it in the registry.
+// All callers of this script have catch blocks, so we can throw errors if something goes wrong.
+void LuaScriptRunner::loadCompileSaveScript(const char *filename, const char *registryKey)
 {
-   if(!loadCompileScript(filename))
-      return false;
-
-   lua_setfield(L, LUA_REGISTRYINDEX, registryKey);      // Save compiled code in registry
-
-   return true;
+   loadCompileScript(filename);                       // Throws if there is an error
+   lua_setfield(L, LUA_REGISTRYINDEX, registryKey);   // Save compiled code in registry
 }
 
 
-// Load script and place on top of the stack
-bool LuaScriptRunner::loadCompileScript(const char *filename)
+// Load script and place on top of the stack.
+// All callers of this script have catch blocks, so we can throw errors if something goes wrong.
+void LuaScriptRunner::loadCompileScript(const char *filename)
 {
    // luaL_loadfile: Loads a file as a Lua chunk. This function uses lua_load to load the chunk in the file named filename. 
    // If filename is NULL, then it loads from the standard input. The first line in the file is ignored if it starts with a #.
@@ -428,14 +420,8 @@ bool LuaScriptRunner::loadCompileScript(const char *filename)
    // LUA_ERRSYNTAX: syntax error during pre-compilation;  [[ err == 3 ]]
    // LUA_ERRMEM: memory allocation error.  [[ err == 4 ]]
 
-   S32 err = luaL_loadfile(L, filename);     
-
-   if(err == 0)
-      return true;
-
-   logprintf(LogConsumer::LogError, "Error loading script %s: %s.", filename, lua_tostring(L, -1));
-   lua_pop(L, 1);    // Remove error message from stack
-   return false;
+   if(luaL_loadfile(L, filename) != 0)
+      throw LuaException("Error compiling script " + string(filename) + "\n" + string(lua_tostring(L, -1)));
 }
 
 

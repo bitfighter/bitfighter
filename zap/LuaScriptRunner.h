@@ -93,11 +93,14 @@ private:
    void setLuaArgs(const Vector<string> &args);
    static void setModulePath();
 
-   static bool configureNewLuaInstance();              // Prepare a new Lua environment for use
+   static void configureNewLuaInstance();              // Prepare a new Lua environment for use
 
-   static bool loadCompileSaveHelper(const string &scriptName, const char *registryKey);
-   static bool loadCompileSaveScript(const char *filename, const char *registryKey);
-   static bool loadCompileScript(const char *filename);
+   static void loadCompileSaveHelper(const string &scriptName, const char *registryKey);
+   static void loadCompileSaveScript(const char *filename, const char *registryKey);
+   static void loadCompileScript(const char *filename);
+
+   void pushStackTracer();      // Put error handler function onto the stack
+
 
    void setEnums(lua_State *L);                       // Set a whole slew of enum values that we want the scripts to have access to
    static void logErrorHandler(const char *msg, const char *prefix);
