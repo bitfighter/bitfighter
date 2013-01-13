@@ -1406,6 +1406,7 @@ int main(int argc, char **argv)
    // Load Lua stuff
    LuaScriptRunner::setScriptingDir(folderManager->luaDir);    // Get this out of the way, shall we?
    LuaScriptRunner::startLua();                                // Create single "L" instance which all scripts will use
+   // TODO: What should we do if this fails?  Quit the game?
 
 
    setupLogging(settings->getIniSettings());    // Turns various logging options on and off
