@@ -68,7 +68,6 @@ public:
    
    virtual void registerClasses();
    void onScriptInitialized();
-   bool runScript();      
    string getScriptName();
 
    virtual const char *getErrorMessagePrefix();

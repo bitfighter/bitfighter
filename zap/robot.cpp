@@ -168,7 +168,7 @@ const char *Robot::getErrorMessagePrefix() { return "***ROBOT ERROR***"; }
 // Server only
 bool Robot::start()
 {
-   if(!prepareEnvironment() || !loadScript() || !runMain())
+   if(!runScript())     // Load the script, execute the chunk to get it in memory, then run its main() function
       return false;
 
    // Pass true so that if this bot doesn't have a TickEvent handler, we don't print a message

@@ -118,9 +118,10 @@ protected:
    virtual bool prepareEnvironment();
    void setSelf(lua_State *L, LuaScriptRunner *self, const char *name);
 
-   static int luaPanicked(lua_State *L);
+   static int luaPanicked(lua_State *L);  // Handle a total freakout by Lua
    virtual void registerClasses();
-   void setEnvironment();
+   void setEnvironment();                 // Sets the environment for the function on the top of the stack to that associated with name
+
    static void deleteScript(const char *name);  // Remove saved script from the Lua registry
 
    void registerLooseFunctions(lua_State *L);   // Register some functions not associated with a particular class
@@ -133,13 +134,13 @@ protected:
 template <class T>
 void setSelf(lua_State *L, T *self, const char *name)
 {
-   lua_getfield(L, LUA_REGISTRYINDEX, self->getScriptId());  // Put script's env table onto the stack  -- env_table
+   lua_getfield(L, LUA_REGISTRYINDEX, self->getScriptId()); // Put script's env table onto the stack  -- env_table
                                                          
-   lua_pushstring(L, name);                              //                                            -- env_table, "plugin"
-   luaW_push(L, self);                                   //                                            -- env_table, "plugin", *this
-   lua_rawset(L, -3);                                    // env_table["plugin"] = *this                -- env_table
+   lua_pushstring(L, name);                                 //                                        -- env_table, "plugin"
+   luaW_push(L, self);                                      //                                        -- env_table, "plugin", *this
+   lua_rawset(L, -3);                                       // env_table["plugin"] = *this            -- env_table
                                                                                                     
-   lua_pop(L, -1);                                       // Cleanup                                    -- <<empty stack>>
+   lua_pop(L, -1);                                          // Cleanup                                -- <<empty stack>>
 
    TNLAssert(lua_gettop(L) == 0 || LuaObject::dumpStack(L), "Stack not cleared!");
 }
@@ -166,7 +167,8 @@ public:
    bool runMain();                                    // Run a script's main() function
    bool runMain(const Vector<string> &args);          // Run a script's main() function, putting args into Lua's arg table
 
-   bool loadScript();
+   bool loadScript();   // Loads script from file into a Lua chunk, then runs it
+   bool runScript();    // Load the script, execute the chunk to get it in memory, then run its main() function
 
    bool runCmd(const char *function, S32 returnValues);
 
@@ -198,7 +200,7 @@ public:
       clearStack(L);
 
       luaW_push<T>(L, static_cast<T *>(this));           // -- this
-      lua_pushnumber(L, deltaT);       // -- this, deltaT
+      lua_pushnumber(L, deltaT);                         // -- this, deltaT
 
       // Note that we don't care if this generates an error... if it does the error handler will
       // print a nice message, then call killScript().
