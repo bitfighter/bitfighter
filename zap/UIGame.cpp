@@ -154,6 +154,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
       mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
    
+   mAnnouncementTimer.setPeriod(10000);
    mAnnouncement = "";
    makeCommandCandidateList();
 }
@@ -205,6 +206,7 @@ TeamShuffleHelper *GameUserInterface::getTeamShuffleHelper(ClientGame *game)
    return mTeamShuffleHelper;
 }
 
+
 // Used when ship dies while engineering
 void GameUserInterface::quitEngineerHelper()
 {
@@ -212,10 +214,13 @@ void GameUserInterface::quitEngineerHelper()
       mHelper = NULL;
 }
 
-void GameUserInterface::setAnnouncement(string message){
+
+void GameUserInterface::setAnnouncement(string message)
+{
 	mAnnouncement = message;
 	mIsAnnouncementNew = true;
 }
+
 
 void GameUserInterface::onActivate()
 {
@@ -335,7 +340,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mLevelInfoDisplayTimer.update(timeDelta);
 
    if(mAnnouncementTimer.getCurrent() > 0)
-	mAnnouncementTimer.update(timeDelta);
+	   mAnnouncementTimer.update(timeDelta);
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       mModuleDoubleTapTimer[i].update(timeDelta);
@@ -480,32 +485,6 @@ if(con)
 if(mGotControlUpdate)
    drawString(710, 10, 30, "CU");
 #endif
-}
-
-
-void GameUserInterface::renderAnnouncement(const string &message)
-{
-   Vector<string> lines = wrapString(message, SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, " ");
-   U32 lineHeight = SRV_MSG_FONT_SIZE + SRV_MSG_FONT_GAP;
-	
-   bool helperActive = (mHelper != NULL);
-		
-   if(mMessageDisplayMode == ShortTimeout)
- 	   mChatMessageDisplayer1.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
-   else if(mMessageDisplayMode == ShortFixed)
-	   mChatMessageDisplayer2.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
-   else
-	   mChatMessageDisplayer3.render(CHAT_Y_POS + lines.size() * lineHeight, helperActive);
-
-   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, 			   		helperActive);
-	
-   U32 y = CHAT_Y_POS;
-   for(S32 i = 0; i < lines.size(); i++)
-   {
-       glColor(Colors::red);       
-       drawString(UserInterface::horizMargin, y, SRV_MSG_FONT_SIZE,lines[lines.size() - 1 - i].c_str());
-       y += lineHeight;
-   }
 }
 
 
@@ -2009,6 +1988,7 @@ void GameUserInterface::announceHandler(const Vector<string> &words)
 	}
 }
 
+
 void GameUserInterface::addBotHandler(const Vector<string> &words)
 {
    ClientGame *game = getGame();
@@ -2345,31 +2325,24 @@ CommandInfo chatCmds[] = {
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs()
 {
-   bool helperActive = (mHelper != NULL);
-   if(mAnnouncement == "")
+   if(mIsAnnouncementNew)
    {
-     if(mMessageDisplayMode == ShortTimeout)
-        mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive);
-
-     else if(mMessageDisplayMode == ShortFixed)
-        mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive);
-
-     else
-        mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive);
-
-
-     mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive);
+	   mIsAnnouncementNew = false;
+	   mAnnouncementTimer.reset();
    }
-    else{
-      renderAnnouncement(mAnnouncement);
-      if(mIsAnnouncementNew){
-        mAnnouncementTimer.setPeriod(10000);
-	mIsAnnouncementNew = false;
-	mAnnouncementTimer.reset();
-      }
-      if(mAnnouncementTimer.getCurrent() == 0)
-	mAnnouncement = "";
-    }
+   if(mAnnouncementTimer.getCurrent() == 0)
+      mAnnouncement = "";
+
+   bool helperActive = (mHelper != NULL);
+  
+     if(mMessageDisplayMode == ShortTimeout)
+        mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive, mAnnouncement);
+     else if(mMessageDisplayMode == ShortFixed)
+        mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive, mAnnouncement);
+     else
+        mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive, mAnnouncement);
+      mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive, "");
+   
 }
 
 
@@ -3892,7 +3865,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible)
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, string announcement)
 {
    // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
@@ -3957,19 +3930,49 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible)
          renderExtra = 1;
    }
                                   
-   for(U32 i = mFirst; i != mLast - renderExtra; i--)
-   {
-      U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
-
-      if(helperVisible)   
-         glColor(mMessages[index].color, 0.2f); // Dim
-      else
-         glColor(mMessages[index].color);       // Bright
-
-      drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
-
-      y -= lineHeight;
-   }
+       if(announcement == "")
+    {                               
+       for(U32 i = mFirst; i != mLast - renderExtra; i--)
+       {
+           U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
+ 
+           if(helperVisible)   
+             glColor(mMessages[index].color, 0.2f); // Dim
+           else
+             glColor(mMessages[index].color);       // Bright
+ 
+           drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+ 
+           y -= lineHeight;
+       }
+    } 
+    else 
+    {
+      Vector<string> announcementLines = wrapString(announcement, CHAT_WRAP_WIDTH, CHAT_FONT_SIZE, " "); 
+      S32 yAnnouncement = CHAT_Y_POS + lineHeight*announcementLines.size();
+       
+      for(S32 i = 0; i < announcementLines.size(); i++)
+      {
+         glColor(Colors::red);
+         drawString(UserInterface::horizMargin, yAnnouncement, mFontSize, announcementLines[i].c_str());
+ 	
+ 	      yAnnouncement -= lineHeight;
+       } 	  
+ 	
+      for(U32 i = mFirst + (U32)announcementLines.size(); i != mLast - renderExtra; i--)
+       {
+           U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
+ 
+           if(helperVisible)   
+             glColor(mMessages[index].color, 0.2f); // Dim
+           else
+             glColor(mMessages[index].color);       // Bright
+ 
+           drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+ 
+           y -= lineHeight;
+       }
+    } 
 
 
    // Restore scissors settings -- only used during scrolling

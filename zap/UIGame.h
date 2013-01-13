@@ -120,7 +120,7 @@ struct ColorString
       void reset();
 
       void idle(U32 timeDelta);
-      void render(S32 ypos, bool helperVisible);   // Render incoming chat msgs
+      void render(S32 ypos, bool helperVisible, string announcement);   // Render incoming chat msgs
 
       void onChatMessageRecieved(const Color &msgColor, const string &msg);
       string substitueVars(const string &str);
@@ -150,9 +150,6 @@ private:
       MessageDisplayModes
    };
 	
-   string mAnnouncement;
-   bool mIsAnnouncementNew;
-
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
    void renderChatMsgs();
 
@@ -274,6 +271,8 @@ private:
    ChatMessageDisplayer mChatMessageDisplayer3;    // Long form, messages do not expire
 
    Timer mAnnouncementTimer;
+   string mAnnouncement;
+   bool mIsAnnouncementNew;
 
    void dropItem();                       // User presses drop item key
 
@@ -317,7 +316,6 @@ public:
    void renderLostConnectionMessage(); 
    void renderSuspendedMessage();
    
-   void renderAnnouncement(const string &message);	// Render the announcement
    void renderBasicInterfaceOverlay(const GameType *gameType, bool scoreboardVisible);
    void renderBadges(ClientInfo *clientInfo, S32 x, S32 y, F32 scaleRatio);
 
