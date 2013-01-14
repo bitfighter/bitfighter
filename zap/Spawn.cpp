@@ -215,8 +215,10 @@ Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
+
       if(profile == 1)
          setPos(getPointOrXY(L, 1));
+
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
