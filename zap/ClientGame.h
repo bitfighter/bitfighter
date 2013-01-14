@@ -27,7 +27,7 @@
 #define _CLIENTGAME_H_
 
 #ifdef ZAP_DEDICATED
-#error "ClientGame.h shouldn't be included in dedicated build"
+#  error "ClientGame.h shouldn't be included in dedicated build"
 #endif
 
 #include "game.h"
@@ -36,7 +36,7 @@
 #include "dataConnection.h"      // For DataSender
 
 #ifdef TNL_OS_WIN32
-#include <windows.h>             // For screensaver... windows only feature, I'm afraid!
+#  include <windows.h>             // For screensaver... windows only feature, I'm afraid!
 #endif
 
 #include "sparkManager.h"
@@ -182,6 +182,8 @@ public:
 
    void requestSpawnDelayed();
    U32 getReturnToGameDelay();
+
+   void deleteLevelGen(LuaLevelGenerator *levelgen); 
 
    // Check for permissions
    bool hasAdmin(const char *failureMessage);

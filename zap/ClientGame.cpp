@@ -459,6 +459,13 @@ void ClientGame::displayShipDesignChangedMessage(const Vector<U8> &loadout, cons
 }
 
 
+// We might get here if a script ran amok in the editor...  nothing to do, really
+void ClientGame::deleteLevelGen(LuaLevelGenerator *levelgen)
+{
+   // Do nothing
+}
+
+
 extern bool gShowAimVector;
 
 static void joystickUpdateMove(GameSettings *settings, Move *theMove)

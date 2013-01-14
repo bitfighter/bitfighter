@@ -170,10 +170,12 @@ public:
 /// either the server or the client, and is responsible for
 /// managing the passage of time as well as rendering.
 
+// Some forward declarations
 class ClientRef;
 class ClientInfo;
 class PolyWall;
 class WallItem;
+class LuaLevelGenerator;
 
 class Game : public LevelLoader
 {
@@ -327,6 +329,8 @@ public:
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     
    virtual void addWallItem(WallItem *wallItem, GridDatabase *database) = 0;     
+
+   virtual void deleteLevelGen(LuaLevelGenerator *levelgen) = 0; 
 
 
    void setGameTime(F32 time);                                          // Only used during level load process

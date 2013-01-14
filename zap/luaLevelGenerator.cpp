@@ -154,10 +154,10 @@ bool LuaLevelGenerator::prepareEnvironment()
 }
 
 
+// This will need to run on both client (from editor) and server (in game)
 void LuaLevelGenerator::killScript()
 {
-   TNLAssert(mGame->isServer(), "Expected this only to run on server!");      // unless it's in editor...
-   static_cast<ServerGame *>(mGame)->deleteLevelGen(this);
+   mGame->deleteLevelGen(this);
 }
 
 
