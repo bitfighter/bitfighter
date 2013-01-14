@@ -1401,11 +1401,11 @@ bool GameType::spawnShip(ClientInfo *clientInfo)
          Vector<DatabaseObject *> loadoutZones;
          getGame()->getGameObjDatabase()->findObjects(LoadoutZoneTypeNumber, loadoutZones);
          LoadoutZone *zone;
-         for(S32 i = 0; i < loadoutZones.size(); i++) {
+         for(S32 i = 0; i < loadoutZones.size(); i++) 
+         {
             zone = static_cast<LoadoutZone*>(loadoutZones.get(i));
-            if (newShip->isOnObject(zone)) {
+            if(newShip->isOnObject(zone))
                zone->collide(newShip);
-            }
          } 
       }
 
