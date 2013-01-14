@@ -258,6 +258,10 @@ TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 static const F32 SOCCER_BALL_ITEM_MASS = 4;
 
+/**
+  *  @luaconst SoccerBallItem::SoccerBallItem()
+  *  @luaconst SoccerBallItem::SoccerBallItem(point)
+  */
 // Combined Lua / C++ default constructor
 SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)SoccerBallItem::SOCCER_BALL_RADIUS, SOCCER_BALL_ITEM_MASS)
 {
@@ -274,6 +278,14 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
    mDragFactor = NO_DRAG;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "SoccerBallItem", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+   }
 }
 
 

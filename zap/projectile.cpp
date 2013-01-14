@@ -753,11 +753,22 @@ Mine::Mine(const Point &pos, Ship *planter) : Burst(pos, Point(0,0), planter, Bu
    initialize(pos, planter);
 }
 
-
+/**
+ *   @luaconst Mine::Mine()
+ *   @luaconst Mine::Mine(point)
+ */
 // Combined Lua / C++ default constructor -- used in Lua and editor
 Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
 {
    initialize(Point(0,0), NULL);
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "Mine", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+   }
 }
 
 

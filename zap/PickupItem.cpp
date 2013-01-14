@@ -343,11 +343,30 @@ S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
 
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
+/**
+ *   @luaconst RepairItem::RepairItem()
+ *   @luaconst RepairItem::RepairItem(point)
+ *   @luaconst RepairItem::RepairItem(point, time)
+ */
 RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_RESPAWN_TIME)   // Combined Lua / C++ default constructor
 { 
    mObjectTypeNumber = RepairItemTypeNumber;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "RepairItem", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         lua_remove(L, 1);
+         setRegenTime(L);
+      }
+   }
 }
 
 
@@ -450,8 +469,8 @@ REGISTER_LUA_SUBCLASS(RepairItem, PickupItem);
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 /**
  *   @luaconst EnergyItem::EnergyItem()
- *   @luaconst EnergyItem::EnergyItem(geom)
- *   @luaconst EnergyItem::EnergyItem(geom, time)
+ *   @luaconst EnergyItem::EnergyItem(point)
+ *   @luaconst EnergyItem::EnergyItem(point, time)
  */
 EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Combined Lua / C++ default constructor
 {

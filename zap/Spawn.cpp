@@ -202,19 +202,26 @@ Spawn::Spawn(const Point &pos) : AbstractSpawn(pos)
    initialize();
 }
 
-
+/**
+  *  @luaconst Spawn::Spawn()
+  *  @luaconst Spawn::Spawn(geom)
+  *  @luaconst Spawn::Spawn(geom, team)
+  */
 // Lua constructor
 Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
 {
-   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, TEAM_INDX, END }}, 3 };
-   S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
    initialize();
-   if(L && profile == 1)
-      setPos(getPointOrXY(L, 1));
-   else if(L && profile == 2)
+   if(L)
    {
-      setPos(getPointOrXY(L, 1));
-      setTeam(getInt(L, 2));
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 3 };
+      S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
+      if(profile == 1)
+         setPos(getPointOrXY(L, 1));
+      else if(profile == 2)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+      }
    }
 }
 
@@ -298,9 +305,6 @@ void Spawn::renderDock()
 /////
 // Lua interface
 /**
-  *  @luaconst Spawn::Spawn()
-  *  @luaconst Spawn::Spawn(geom)
-  *  @luaconst Spawn::Spawn(geom, team)
   *  @luaclass Spawn
   *  @brief Marks locations where ships and robots should spawn.
   *  @geom  The geometry of Spawns is a single point.

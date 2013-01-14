@@ -1225,13 +1225,29 @@ S32 EngineeredItem::setGeom(lua_State *L)
 
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
+/**
+ *  @luaconst ForceFieldProjector::ForceFieldProjector()
+ *  @luaconst ForceFieldProjector::ForceFieldProjector(point)
+ */
 // Combined Lua / C++ default constructor
 ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
+   // TODO: This does not work; we need to snap the projector to a nearby wall and compute the normal angle.
+   // It is likely that setPos is similarly broken.  And maybe more. (Maybe less as I just pasted this comment here.)
    initialize();
 
    if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "ForceFieldProjector", "constructor");
+      if(profile == 1)
+      {
+         setPos(getPointOrXY(L, 1));
+         setTeam(getInt(L, 2));
+      }
+      
       findMountPoint(Game::getAddTarget(), getPos());
+   }
 }
 
 
@@ -1689,7 +1705,7 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 // Combined Lua / C++ default constructor
 Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
-   // TODO: XXXXX This does not work; we need to snap the turret to a nearby wall and compute the normal angle.
+   // TODO: This does not work; we need to snap the turret to a nearby wall and compute the normal angle.
    // It is likely that setPos is similarly broken.  And maybe more.
    if(L)
    {

@@ -37,11 +37,10 @@ TNL_IMPLEMENT_NETOBJECT(GoalZone);
 
 /**
 *  @luafunc GoalZone::GoalZone()
-*  @luafunc GoalZone::GoalZone(team, geom)
+*  @luafunc GoalZone::GoalZone(geom, team)
 *  @brief %GoalZone constructor.
 *  @descr Default team is Neutral.
 */
-
 // Combined Lua / C++ constructor
 GoalZone::GoalZone(lua_State *L)
 {
@@ -56,7 +55,8 @@ GoalZone::GoalZone(lua_State *L)
 
    if(L)    // Coming from Lua -- grab params from L
    {
-      S32 profile = checkArgList(L, functionArgs, "GoalZone", "constructor");
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "GoalZone", "constructor");
 
       if(profile == 0)           // No args constructor
       {
@@ -64,10 +64,10 @@ GoalZone::GoalZone(lua_State *L)
          return;
       }
 
-      if(profile == 1)           // Team, Geom
+      if(profile == 1)           // Geom, Team
       {
-         BfObject::setTeam(L, 1);
-         setGeom(L, 2);
+         BfObject::setTeam(L, 2);
+         setGeom(L, 1);
       }
    }
 

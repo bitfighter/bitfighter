@@ -677,7 +677,10 @@ extern Color EDITOR_WALL_FILL_COLOR;
 
 TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
-
+/**
+ *  @luaconst PolyWall::PolyWall()
+ *  @luaconst PolyWall::PolyWall(geom)
+ */
 // Combined Lua/C++ constructor
 PolyWall::PolyWall(lua_State *L)
 {
@@ -685,6 +688,14 @@ PolyWall::PolyWall(lua_State *L)
    mAlreadyAdded = false;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "PolyWall", "constructor");
+      if(profile == 1)
+         setGeom(L);
+   }
 }
 
 

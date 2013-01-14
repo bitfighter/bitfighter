@@ -967,6 +967,10 @@ void NexusFlagItem::sendHome()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+/**
+ *  @luaconst NexusZone::NexusZone()
+ *  @luaconst NexusZone::NexusZone(geom)
+ */
 // Combined Lua / C++ constructor)
 NexusZone::NexusZone(lua_State *L)
 {
@@ -974,6 +978,15 @@ NexusZone::NexusZone(lua_State *L)
    mNetFlags.set(Ghostable);
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
+   
+   if(L)
+   {
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "NexusZone", "constructor");
+         
+      if(profile == 1)
+         setGeom(L, 1);
+   }
 }
 
 
