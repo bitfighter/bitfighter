@@ -482,6 +482,9 @@ void BfObject::setGeom(lua_State *L, S32 stackIndex)
 {
    Vector<Point> points = getPointsOrXYs(L, stackIndex);
 
+   // TODO: Q. Shouldn't we verify that the number of points here is appropriate for this object?   
+   //       A. Yes!!
+
    GeomObject::setGeom(points);
    onPointsChanged();
 
