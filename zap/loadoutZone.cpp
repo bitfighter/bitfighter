@@ -50,7 +50,8 @@ LoadoutZone::LoadoutZone(lua_State *L)
 
    else     // Coming from Lua -- grab params from L
    {
-      S32 profile = checkArgList(L, functionArgs, "LoadoutZone", "constructor");
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+      S32 profile = checkArgList(L, constructorArgList, "LoadoutZone", "constructor");
 
       if(profile == 0)              // No args constructor
          setTeam(TEAM_NEUTRAL);     
