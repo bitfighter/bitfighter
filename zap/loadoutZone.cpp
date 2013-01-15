@@ -56,10 +56,10 @@ LoadoutZone::LoadoutZone(lua_State *L)
       if(profile == 0)              // No args constructor
          setTeam(TEAM_NEUTRAL);     
 
-      else if(profile == 1)         // Team, Geom
+      else if(profile == 1)         // Geom, team
       {
-         setTeam(L, 1);
          setGeom(L, 2);
+         setTeam(L, -1);
       }
    }
 
