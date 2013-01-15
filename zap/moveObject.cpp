@@ -200,6 +200,13 @@ void MoveObject::setPos(S32 stateIndex, const Point &pos)
 }
 
 
+// Function needed to provide this signature at this level
+void MoveObject::setPos(lua_State *L, S32 stackPos)
+{
+   Parent::setPos(L, stackPos);
+}
+
+
 // mMoveStates access ok here...
 Point MoveObject::getVel  (S32 stateIndex) const { return mMoveStates.getVel  (stateIndex); }
 F32   MoveObject::getAngle(S32 stateIndex) const { return mMoveStates.getAngle(stateIndex); }

@@ -98,7 +98,8 @@ public:
 
    virtual Vector<Point> getObjectGeometry(const Point &anchor, const Point &normal) const;
 
-   void setPos(Point p);
+   virtual void setPos(lua_State *L, S32 stackIndex);
+   virtual void setPos(const Point &p);
 
 
 #ifndef ZAP_DEDICATED

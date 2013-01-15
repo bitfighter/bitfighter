@@ -358,10 +358,11 @@ public:
    void setTeam(S32 team);
 
    // Lua-based attribute setters
-   void setTeam(lua_State *L, S32 stackIndex);
-   void setPos(lua_State *L, S32 stackIndex);
-   void setGeom(lua_State *L, S32 stackIndex);
+   virtual void setTeam(lua_State *L, S32 stackIndex);
+   virtual void setPos(lua_State *L, S32 stackIndex);
+   virtual void setGeom(lua_State *L, S32 stackIndex);
 
+   virtual void setPos(const Point &point);
 
    const Color *getColor() const;      // Get object's team's color
 

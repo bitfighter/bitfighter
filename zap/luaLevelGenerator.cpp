@@ -111,6 +111,22 @@ void LuaLevelGenerator::killScript()
 }
 
 
+static Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
+{
+   lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
+   if(lua_isnil(L, -1))
+   {
+      lua_pop(L, 1);
+      return Point(0,0);
+   }
+
+   Point point = LuaBase::getCheckedVec(L, -1, methodName);
+   lua_pop(L, 1);    // Clear value from stack
+
+   return point;
+}
+
+
 // Deprecated 
 // TODO: Needs documentation
 S32 LuaLevelGenerator::addWall(lua_State *L)
@@ -251,8 +267,8 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
 
    // Still need mGridSize because we deal with the coordinates used in the level file, which have to be multiplied by
    // GridSize to get in-game coordinates
-   Point p1 = getCheckedVec(L, 1, methodName) *= mGridSize;    
-   Point p2 = getCheckedVec(L, 2, methodName) *= mGridSize;
+   Point p1 = LuaBase::getCheckedVec(L, 1, methodName) *= mGridSize;   // Only use of getCheckedVec is here -- if remove here, can delete function 
+   Point p2 = LuaBase::getCheckedVec(L, 2, methodName) *= mGridSize;
 
    return returnBool(L, mGridDatabase->pointCanSeePoint(p1, p2));
 }

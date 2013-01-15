@@ -115,7 +115,7 @@ public:
    static void setfield (lua_State *L, const char *key, F32 value);
 
    static bool isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable);
-   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
+   static Point getCheckedVec(lua_State *L, S32 index, const char *methodName);      // TODO: Delete me
 
 
 

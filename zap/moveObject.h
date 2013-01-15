@@ -53,11 +53,11 @@ private:
    MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
 
 public:
-   Point getPos(S32 state) const;
-   void setPos(S32 state, const Point &pos);
+   virtual Point getPos(S32 state) const;
+   virtual void setPos(S32 state, const Point &pos);
 
-   Point getVel(S32 state) const;
-   void setVel(S32 state, const Point &vel);
+   virtual Point getVel(S32 state) const;
+   virtual void setVel(S32 state, const Point &vel);
 
    F32 getAngle(S32 state) const;
    void setAngle(S32 state, F32 angle);
@@ -124,6 +124,8 @@ public:
    Point getPos(S32 stateIndex) const;
    Point getVel(S32 stateIndex) const;
    F32 getAngle(S32 stateIndex) const;
+
+   void setPos(lua_State *L, S32 stackIndex);
 
    void setPos(S32 stateIndex, const Point &pos);
    void setVel(S32 stateIndex, const Point &vel);     // Distance/sec

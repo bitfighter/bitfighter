@@ -485,6 +485,13 @@ void BfObject::setPos(lua_State *L, S32 stackPos)
 }
 
 
+// Function needed to provide this signature at this level
+void BfObject::setPos(const Point &point)
+{
+   GeomObject::setPos(point);
+}
+
+
 void BfObject::setGeom(lua_State *L, S32 stackIndex)
 {
    Vector<Point> points = getPointsOrXYs(L, stackIndex);

@@ -839,7 +839,14 @@ Vector<Point> EngineeredItem::getObjectGeometry(const Point &anchor, const Point
 }
 
 
-void EngineeredItem::setPos(Point p)
+// Function needed to provide this signature at this level
+void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
+{
+   Parent::setPos(L, stackIndex);
+}
+
+
+void EngineeredItem::setPos(const Point &p)
 {
    Parent::setPos(p);
    computeObjectGeometry();

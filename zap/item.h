@@ -71,6 +71,8 @@ public:
    F32 getRadius();
    virtual void setRadius(F32 radius);
 
+   //virtual void setPos(const Point &pos);
+
    virtual void renderItem(const Point &pos);      // Generic renderer -- will be overridden
    virtual void render();
 

@@ -152,6 +152,13 @@ void Item::setRadius(F32 radius)
 }
 
 
+// We need this function here to create a valid signature at the item level for compilation purposes; it does nothing
+//void Item::setPos(const Point &pos)
+//{
+//   Parent::setPos(pos);
+//}
+
+
 // Provide generic item rendering; will be overridden
 void Item::renderItem(const Point &pos)
 {

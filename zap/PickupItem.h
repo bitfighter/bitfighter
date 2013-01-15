@@ -40,12 +40,10 @@ class PickupItem : public Item
 private:
    bool mIsVisible;
    Timer mRepopTimer;
-   S32 mRepopDelay;            // Period of mRepopTimer, in seconds
 
 #ifndef ZAP_DEDICATED
    static EditorAttributeMenuUI *mAttributeMenuUI;      // Menu for text editing; since it's static, don't bother with smart pointer
 #endif
-
 
 protected:
    enum MaskBits {
@@ -53,6 +51,9 @@ protected:
       SoundMask     = Parent::FirstFreeMask << 1,
       FirstFreeMask = Parent::FirstFreeMask << 2
    };
+
+   S32 mRepopDelay;            // Period of mRepopTimer, in seconds
+
 
 public:
    PickupItem(float radius = 1, S32 repopDelay = 20);   // Constructor
