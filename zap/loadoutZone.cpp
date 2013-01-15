@@ -44,23 +44,19 @@ LoadoutZone::LoadoutZone(lua_State *L)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = LoadoutZoneTypeNumber;
+   setTeam(TEAM_NEUTRAL); 
 
    if(L)   // Coming from Lua -- grab params from L
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "LoadoutZone", "constructor");
 
-      if(profile == 0)              // No args constructor
-         setTeam(TEAM_NEUTRAL);     
-
-      else if(profile == 1)         // Geom, team
+      if(profile == 1)         // Geom, team
       {
-         setGeom(L, 1);
+         setGeom(L,  1);
          setTeam(L, -1);
       }
    }
-   else
-      setTeam(TEAM_NEUTRAL);        // C+ constructor, use default params
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
