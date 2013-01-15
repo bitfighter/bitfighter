@@ -332,6 +332,7 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
    catch(const LuaException &e)
    {
       logprintf(LogConsumer::LogError, "%s\n%s\nTerminating script", getErrorMessagePrefix(), e.msg.c_str());
+      dumpStack(L, "Current stack state");
 
       killScript();
       clearStack(L);

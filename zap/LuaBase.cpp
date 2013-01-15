@@ -126,15 +126,8 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionArgList &functionArgLis
    }
    
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
-   char msg[2048];
-   string params = prettyPrintParamList(functionArgList);
-   dSprintf(msg, sizeof(msg), "Could not validate params for function %s::%s(). Expected%s: %s", 
-                              className, functionName, functionArgList.profileCount > 1 ? " one of the following" : "", params.c_str());
-   logprintf(LogConsumer::LogError, msg);
-
-   dumpStack(L, "Current stack state");
-
-   throw LuaException(msg);
+   throw LuaException("Could not validate params for function " + string(className) + "::" + string(functionName) + "()\n" +
+                      "Expected" + (functionArgList.profileCount > 1 ? " one of the following" : "") + prettyPrintParamList(functionArgList));
 
    return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
 }
