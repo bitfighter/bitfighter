@@ -195,8 +195,37 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
 
             return true;
          }
-         else if lua_istable(L, stackPos)       // We have a table: first two items should be points
+         else if lua_istable(L, stackPos)       // Table: first two items should be points
             return isPointAtTableIndex(L, stackPos, 1) && isPointAtTableIndex(L, stackPos, 2);
+
+         return false;
+
+      // POLY: Three or more points, or a table containing therein
+      case POLY:
+         if(lua_ispoint(L, stackPos))          // Series of Points
+         {
+            S32 initialPos = stackPos;
+            while(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
+               stackPos++;
+
+            return (stackPos - initialPos + 1) >= 3;
+         }
+         else if(lua_istable(L, stackPos))      // Table: should contain 3 or more points, and nothing else
+         {
+            S32 pointsFound = 0;
+            lua_pushnil(L);                     // First key
+            while(lua_next(L, stackPos) != 0)   // Traverse table
+            { 
+               if(!lua_ispoint(L, -1))          // Is it a point?  If not, cleanup and bail
+               {
+                  lua_pop(L, 2);                
+                  return false;
+               }
+               lua_pop(L, 1); 
+               pointsFound++;
+            }
+            return pointsFound >= 3;
+         }
 
          return false;
 

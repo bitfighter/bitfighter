@@ -64,30 +64,31 @@ class LuaBase
 public:
    //                 Enum       Name
 #  define LUA_ARG_TYPE_TABLE \
-   LUA_ARG_TYPE_ITEM( BOOL,        "Boolean"                                     ) \
-   LUA_ARG_TYPE_ITEM( INT,         "Integer"                                     ) \
-   LUA_ARG_TYPE_ITEM( INT_GE0,     "Integer >= 0"                                ) \
-   LUA_ARG_TYPE_ITEM( INTS,        "One or more integers"                        ) \
-   LUA_ARG_TYPE_ITEM( NUM,         "Number"                                      ) \
-   LUA_ARG_TYPE_ITEM( NUM_GE0,     "Number >= 0"                                 ) \
-   LUA_ARG_TYPE_ITEM( STR,         "String"                                      ) \
-   LUA_ARG_TYPE_ITEM( PT,          "Lua point"                                   ) \
-   LUA_ARG_TYPE_ITEM( SIMPLE_LINE, "Pair of Lua points (singly or in table)"     ) \
-   LUA_ARG_TYPE_ITEM( TABLE,       "Lua table"                                   ) \
-   LUA_ARG_TYPE_ITEM( LOADOUT,     "Loadout Object"                              ) \
-   LUA_ARG_TYPE_ITEM( ITEM,        "Item Object"                                 ) \
-   LUA_ARG_TYPE_ITEM( WEAP_ENUM,   "WeaponEnum"                                  ) \
-   LUA_ARG_TYPE_ITEM( WEAP_SLOT,   "Weapon slot #"                               ) \
-   LUA_ARG_TYPE_ITEM( MOD_ENUM,    "ModuleEnum"                                  ) \
-   LUA_ARG_TYPE_ITEM( MOD_SLOT,    "Module slot #"                               ) \
-   LUA_ARG_TYPE_ITEM( TEAM_INDX,   "Team index"                                  ) \
-   LUA_ARG_TYPE_ITEM( GEOM,        "Geometry (see documentation)"                ) \
-   LUA_ARG_TYPE_ITEM( ROBOT,       "Robot Object"                                ) \
-   LUA_ARG_TYPE_ITEM( LEVELGEN,    "Levelgen Script"                             ) \
-   LUA_ARG_TYPE_ITEM( EVENT,       "Event"                                       ) \
-   LUA_ARG_TYPE_ITEM( MOVOBJ,      "MoveObject"                                  ) \
-   LUA_ARG_TYPE_ITEM( BFOBJ,       "BfObject (or child class)"                   ) \
-   LUA_ARG_TYPE_ITEM( ANY,         "Any combination of 0 or more arguments"      ) \
+   LUA_ARG_TYPE_ITEM( BOOL,        "Boolean"                                      ) \
+   LUA_ARG_TYPE_ITEM( INT,         "Integer"                                      ) \
+   LUA_ARG_TYPE_ITEM( INT_GE0,     "Integer >= 0"                                 ) \
+   LUA_ARG_TYPE_ITEM( INTS,        "One or more integers"                         ) \
+   LUA_ARG_TYPE_ITEM( NUM,         "Number"                                       ) \
+   LUA_ARG_TYPE_ITEM( NUM_GE0,     "Number >= 0"                                  ) \
+   LUA_ARG_TYPE_ITEM( STR,         "String"                                       ) \
+   LUA_ARG_TYPE_ITEM( PT,          "Lua point"                                    ) \
+   LUA_ARG_TYPE_ITEM( SIMPLE_LINE, "Pair of Lua points (singly or in table)"      ) \
+   LUA_ARG_TYPE_ITEM( POLY,        "Three or more Lua points (singly or in table)") \
+   LUA_ARG_TYPE_ITEM( TABLE,       "Lua table"                                    ) \
+   LUA_ARG_TYPE_ITEM( LOADOUT,     "Loadout Object"                               ) \
+   LUA_ARG_TYPE_ITEM( ITEM,        "Item Object"                                  ) \
+   LUA_ARG_TYPE_ITEM( WEAP_ENUM,   "WeaponEnum"                                   ) \
+   LUA_ARG_TYPE_ITEM( WEAP_SLOT,   "Weapon slot #"                                ) \
+   LUA_ARG_TYPE_ITEM( MOD_ENUM,    "ModuleEnum"                                   ) \
+   LUA_ARG_TYPE_ITEM( MOD_SLOT,    "Module slot #"                                ) \
+   LUA_ARG_TYPE_ITEM( TEAM_INDX,   "Team index"                                   ) \
+   LUA_ARG_TYPE_ITEM( GEOM,        "Geometry (see documentation)"                 ) \
+   LUA_ARG_TYPE_ITEM( ROBOT,       "Robot Object"                                 ) \
+   LUA_ARG_TYPE_ITEM( LEVELGEN,    "Levelgen Script"                              ) \
+   LUA_ARG_TYPE_ITEM( EVENT,       "Event"                                        ) \
+   LUA_ARG_TYPE_ITEM( MOVOBJ,      "MoveObject"                                   ) \
+   LUA_ARG_TYPE_ITEM( BFOBJ,       "BfObject (or child class)"                    ) \
+   LUA_ARG_TYPE_ITEM( ANY,         "Any combination of 0 or more arguments"       ) \
       
 
    // Create the enum declaration

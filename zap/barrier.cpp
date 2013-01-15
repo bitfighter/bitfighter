@@ -679,7 +679,7 @@ TNL_IMPLEMENT_NETOBJECT(PolyWall);
 
 /**
  *  @luaconst PolyWall::PolyWall()
- *  @luaconst PolyWall::PolyWall(geom)
+ *  @luaconst PolyWall::PolyWall(polyGeom)
  */
 // Combined Lua/C++ constructor
 PolyWall::PolyWall(lua_State *L)
@@ -691,8 +691,10 @@ PolyWall::PolyWall(lua_State *L)
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, END }}, 2 };
+
       S32 profile = checkArgList(L, constructorArgList, "PolyWall", "constructor");
+
       if(profile == 1)
          setGeom(L);
    }
