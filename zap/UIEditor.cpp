@@ -4433,7 +4433,7 @@ void EditorUserInterface::idle(U32 timeDelta)
 void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
    mSaveMsg = msg;
-   mSaveMsgTimer = saveMsgDisplayTime;
+   mSaveMsgTimer = 4 * 1000;    // Display for 4 seconds
    mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
 
@@ -4442,7 +4442,7 @@ void EditorUserInterface::setWarnMessage(string msg1, string msg2)
 {
    mWarnMsg1 = msg1;
    mWarnMsg2 = msg2;
-   mWarnMsgTimer = warnMsgDisplayTime;
+   mWarnMsgTimer = 4 * 1000;    // Display for 4 seconds
    mWarnMsgColor = gErrorMessageTextColor;
 }
 

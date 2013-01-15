@@ -106,11 +106,6 @@ private:
 
    SnapContext mSnapContext;
 
-   enum {
-      saveMsgDisplayTime = 4000,
-      warnMsgDisplayTime = 4000,
-   };
-
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
