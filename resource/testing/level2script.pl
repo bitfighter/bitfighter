@@ -70,14 +70,30 @@ foreach my $line (<$IN>) {
    }
 
 
-   if($line =~ m/(FlagItem|Spawn|Turret|Core)/) {
+   if($line =~ m/(FlagItem|Spawn|Turret)/) {
       my $team = (shift @words);
       $team >= 0 && $team++;   # Stupid lua arrays
       my $x = (shift @words) * $gridsize;
       my $y = (shift @words) * $gridsize;
+
       print "levelgen:addItem($1.new(point.new($x,$y), $team))\n";
       next;
    }
+
+
+
+   if($line =~ m/(Core)/) {
+      my $team = (shift @words);
+      $team >= 0 && $team++;   # Stupid lua arrays
+
+      my $health = (shift @words);
+      my $x = (shift @words) * $gridsize;
+      my $y = (shift @words) * $gridsize;
+      
+      print "levelgen:addItem(CoreItem.new(point.new($x,$y), $team, $health))\n";
+      next;
+   }
+
 
 
    if($line =~ m/(RepairItem|EnergyItem)/) {

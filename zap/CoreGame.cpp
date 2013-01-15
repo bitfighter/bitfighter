@@ -281,7 +281,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
+   setStartingHealth(F32(CoreDefaultStartingHealth));      // Hits to kill
 
    mHasExploded = false;
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
@@ -305,7 +305,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       {
          setPos(L, 1);
          setTeam(L, 2);
-         setStartingHealth(getInt(L, 3));
+         setStartingHealth(getFloat(L, 3));
       }
    }
 
@@ -397,7 +397,7 @@ void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Retrieve the values we need from the menu
 void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()) / DamageReductionRatio);
+   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
 }
 
 
@@ -790,7 +790,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
 void CoreItem::setStartingHealth(F32 health)
 {
-   mStartingHealth = health;
+   mStartingHealth = health / DamageReductionRatio;
 
    // Now that starting health has been set, divide it amongst the panels
    mStartingPanelHealth = mStartingHealth / CORE_PANELS;
