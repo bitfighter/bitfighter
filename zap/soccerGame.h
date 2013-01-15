@@ -103,7 +103,7 @@ public:
    void damageObject(DamageInfo *theInfo);
    void idle(BfObject::IdleCallPath path);
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
 
    void onAddedToGame(Game *theGame);
 

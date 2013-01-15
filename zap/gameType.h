@@ -362,7 +362,7 @@ public:
    virtual void addToGame(Game *game, GridDatabase *database);
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
-   virtual string toString() const;
+   virtual string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
    virtual Vector<string> getGameParameterMenuKeys();

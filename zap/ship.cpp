@@ -223,9 +223,9 @@ bool Ship::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Ship::toString(F32 gridSize) const
+string Ship::toLevelCode(F32 gridSize) const
 {
-   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(getClassName()) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
 }
 
 

@@ -244,7 +244,7 @@ bool GameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string GameType::toString() const
+string GameType::toLevelCode() const
 {
    return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + itos(mWinningScore);
 }

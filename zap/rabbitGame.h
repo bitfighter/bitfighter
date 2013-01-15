@@ -57,7 +57,7 @@ public:
    RabbitGameType();  // Constructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString() const;
+   string toLevelCode() const;
 
 #ifndef ZAP_DEDICATED
    Vector<string> getGameParameterMenuKeys();

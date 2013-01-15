@@ -125,9 +125,9 @@ bool Zone::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string Zone::toString(F32 gridSize) const
+string Zone::toLevelCode(F32 gridSize) const
 {
-   return appendId("Zone") + " " + geomToString(gridSize);
+   return appendId("Zone") + " " + geomToLevelCode(gridSize);
 }
 
 

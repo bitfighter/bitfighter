@@ -386,7 +386,7 @@ public:
    virtual void removeFromGame(bool deleteObject);
 
    virtual bool processArguments(S32 argc, const char**argv, Game *game);
-   virtual string toString(F32 gridSize) const;    // Generates levelcode line for object      --> TODO: Rename to toLevelCode()?
+   virtual string toLevelCode(F32 gridSize) const;    // Generates levelcode line for object 
    string appendId(const string &objName) const;
 
    void onPointsChanged();

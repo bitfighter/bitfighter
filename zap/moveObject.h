@@ -96,7 +96,7 @@ public:
    ~MoveObject();                                                                 // Destructor
       
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
-   virtual string toString(F32 gridSize) const;
+   virtual string toLevelCode(F32 gridSize) const;
 
 
    void onAddedToGame(Game *game);
@@ -353,7 +353,7 @@ public:
    void onItemExploded(Point pos);
 
    bool processArguments(S32 argc2, const char **argv2, Game *game);
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
 
 #ifndef ZAP_DEDICATED
 private:
@@ -478,7 +478,7 @@ protected:
 public:
    Worm();     // Constructor  
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
    const char *getOnScreenName();
    Worm *clone() const;
 

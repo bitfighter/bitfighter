@@ -250,9 +250,9 @@ void TextItem::setGeom(lua_State *L, S32 index)
 }
 
 
-string TextItem::toString(F32 gridSize) const
+string TextItem::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize) + " " + ftos(mSize, 3) + " " + writeLevelString(mText.c_str());
 }
 
 

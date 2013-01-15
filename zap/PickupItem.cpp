@@ -135,9 +135,9 @@ bool PickupItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string PickupItem::toString(F32 gridSize) const
+string PickupItem::toLevelCode(F32 gridSize) const
 {
-   return Parent::toString(gridSize) + " " + (mRepopDelay > 0 ? itos(mRepopDelay) : "");
+   return Parent::toLevelCode(gridSize) + " " + (mRepopDelay > 0 ? itos(mRepopDelay) : "");
 }
 
 

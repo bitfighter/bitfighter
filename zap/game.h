@@ -324,7 +324,7 @@ public:
 
    virtual void processLevelLoadLine(U32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName);  
    bool processLevelParam(S32 argc, const char **argv);
-   string toString();
+   string toLevelCode();
 
    virtual bool processPseudoItem(S32 argc, const char **argv, const string &levelFileName, GridDatabase *database, S32 id) = 0;
    virtual void addPolyWall(PolyWall *polyWall, GridDatabase *database) = 0;     

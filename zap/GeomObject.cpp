@@ -184,7 +184,7 @@ void GeomObject::readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridS
    onPointsChanged();
 } 
 
-string GeomObject::geomToString(F32 gridSize) const {  return mGeometry.geomToString(gridSize);  }
+string GeomObject::geomToLevelCode(F32 gridSize) const {  return mGeometry.geomToLevelCode(gridSize);  }
 
 
 Rect GeomObject::calcExtents() {  return mGeometry.getGeometry()->calcExtents();  }
@@ -307,9 +307,9 @@ Point GeometryContainer::getVert(S32 index) const
 }
 
 
-string GeometryContainer::geomToString(F32 gridSize) const 
+string GeometryContainer::geomToLevelCode(F32 gridSize) const 
 {  
-   return mGeometry->geomToString(gridSize);  
+   return mGeometry->geomToLevelCode(gridSize);  
 }
 
 

@@ -61,7 +61,7 @@ bool CoreGameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string CoreGameType::toString() const
+string CoreGameType::toLevelCode() const
 {
    return string(getClassName()) + " " + mGameTimer.toString_minutes();
 }
@@ -969,9 +969,9 @@ bool CoreItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string CoreItem::toString(F32 gridSize) const
+string CoreItem::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + ftos(mStartingHealth * DamageReductionRatio) + " " + geomToLevelCode(gridSize);
 }
 
 

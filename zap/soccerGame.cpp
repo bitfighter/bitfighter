@@ -335,10 +335,10 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-// Yes, this method is superfluous, but makes it clear that it wasn't forgotten... always include toString() alongside processArguments()!
-string SoccerBallItem::toString(F32 gridSize) const
+// Yes, this method is superfluous, but makes it clear that it wasn't forgotten... always include toLevelCode() alongside processArguments()!
+string SoccerBallItem::toLevelCode(F32 gridSize) const
 {
-   return Parent::toString(gridSize);
+   return Parent::toLevelCode(gridSize);
 }
 
 

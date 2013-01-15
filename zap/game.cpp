@@ -785,13 +785,13 @@ bool Game::processLevelParam(S32 argc, const char **argv)
 
 
 // Write out the game processed above; returns multiline string
-string Game::toString()
+string Game::toLevelCode()
 {
    string str;
 
    GameType *gameType = getGameType();
 
-   str = gameType->toString() + "\n";
+   str = gameType->toLevelCode() + "\n";
 
    str += string("LevelName ") + writeLevelString(gameType->getLevelName()->getString()) + "\n";
    str += string("LevelDescription ") + writeLevelString(gameType->getLevelDescription()->getString()) + "\n";
@@ -800,7 +800,7 @@ string Game::toString()
    str += string("GridSize ") + ftos(mGridSize) + "\n";
 
    for(S32 i = 0; i < mActiveTeamManager->getTeamCount(); i++)
-      str += mActiveTeamManager->getTeam(i)->toString() + "\n";
+      str += mActiveTeamManager->getTeam(i)->toLevelCode() + "\n";
 
    str += gameType->getSpecialsLine() + "\n";
 

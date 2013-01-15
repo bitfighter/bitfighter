@@ -147,7 +147,7 @@ public:
 
    /////
    // Editor stuff
-   virtual string toString(F32 gridSize) const;
+   virtual string toLevelCode(F32 gridSize) const;
 
 #ifndef ZAP_DEDICATED
    // These four methods are all that's needed to add an editable attribute to a class...
@@ -330,7 +330,7 @@ public:
 
    S32 mWeaponFireType;
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
 
    static const S32 defaultRespawnTime = 0;
 

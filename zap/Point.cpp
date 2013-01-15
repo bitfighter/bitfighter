@@ -194,8 +194,15 @@ void Point::write(BitStream *stream) const
 
 string Point::toString() const
 {
+   return ftos(x) + ", " + ftos(y);
+}
+
+
+string Point::toLevelCode() const
+{
    return ftos(x) + " " + ftos(y);
 }
+
 
 };	// namespace
 

@@ -333,9 +333,10 @@ TNL_IMPLEMENT_NETOBJECT_RPC(Teleporter, s2cClearDestinations, (), (),
 }
 
 
-string Teleporter::toString(F32 gridSize) const
+string Teleporter::toLevelCode(F32 gridSize) const
 {
-   string out = string(appendId(getClassName())) + " " + geomToString(gridSize);
+   string out = string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
+
    if(mTeleporterCooldown != TeleporterCooldown)
       out += " Delay=" + ftos(mTeleporterCooldown / 1000.f, 3);
    return out;

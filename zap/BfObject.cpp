@@ -647,7 +647,7 @@ void BfObject::initializeEditor()
 }
 
 
-string BfObject::toString(F32) const
+string BfObject::toLevelCode(F32) const
 {
    TNLAssert(false, "This object cannot be serialized");
    return "";

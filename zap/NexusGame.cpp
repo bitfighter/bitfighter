@@ -152,7 +152,7 @@ bool NexusGameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string NexusGameType::toString() const
+string NexusGameType::toLevelCode() const
 {
    return string(getClassName()) + " " + mGameTimer.toString_minutes() + " " + ftos(F32(mNexusClosedTime) / 60, 3) + " " + 
                                          ftos(F32(mNexusOpenTime), 3)  + " " + itos(getWinningScore());
@@ -1073,9 +1073,9 @@ bool NexusZone::canBeHostile() { return false; }
 bool NexusZone::canBeNeutral() { return false; }
 
 
-string NexusZone::toString(F32 gridSize) const
+string NexusZone::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
 }
 
 

@@ -4498,7 +4498,7 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
          throw(SaveException("Could not open file for writing"));
 
       // Write out basic game parameters, including gameType info
-      s_fprintf(f, "%s", getGame()->toString().c_str());    // Note that this toString appends a newline char; most don't
+      s_fprintf(f, "%s", getGame()->toLevelCode().c_str());    // Note that this toLevelCode appends a newline char; most don't
 
       // Next come the robots
       for(S32 i = 0; i < robots.size(); i++)
@@ -4516,7 +4516,7 @@ bool EditorUserInterface::doSaveLevel(const string &saveName, bool showFailMessa
 
             // Writing wall items on first pass, non-wall items next -- that will make sure mountable items have something to grab onto
             if((j == 0 && isWallType(obj->getObjectTypeNumber())) || (j == 1 && ! isWallType(obj->getObjectTypeNumber())) )
-               s_fprintf(f, "%s\n", obj->toString(gridSize).c_str());
+               s_fprintf(f, "%s\n", obj->toLevelCode(gridSize).c_str());
          }
       fclose(f);
    }

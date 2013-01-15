@@ -155,9 +155,9 @@ bool GoalZone::canBeHostile() { return true; }
 bool GoalZone::canBeNeutral() { return true; }
 
 
-string GoalZone::toString(F32 gridSize) const
+string GoalZone::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
 }
 
 

@@ -89,9 +89,9 @@ bool Item::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Item::toString(F32 gridSize) const
+string Item::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
 }
 
 

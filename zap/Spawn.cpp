@@ -112,10 +112,10 @@ bool AbstractSpawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string AbstractSpawn::toString(F32 gridSize) const
+string AbstractSpawn::toLevelCode(F32 gridSize) const
 {
    // <<spawn class name>> <x> <y> <spawn timer>
-   return string(appendId(getClassName())) + " " + geomToString(gridSize) + " " + itos(mSpawnTime);
+   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize) + " " + itos(mSpawnTime);
 }
 
 
@@ -263,10 +263,10 @@ bool Spawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string Spawn::toString(F32 gridSize) const
+string Spawn::toLevelCode(F32 gridSize) const
 {
    // Spawn <team> <x> <y> 
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + geomToLevelCode(gridSize);
 }
 
 
@@ -786,10 +786,10 @@ bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string FlagSpawn::toString(F32 gridSize) const
+string FlagSpawn::toLevelCode(F32 gridSize) const
 {
    // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- Need to insert the team into the string we get from AbstractSpawn()
-   string str1 = Parent::toString(gridSize);
+   string str1 = Parent::toLevelCode(gridSize);
    size_t firstarg = str1.find(' ');
    return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
 }

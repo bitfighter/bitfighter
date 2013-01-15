@@ -90,7 +90,7 @@ public:
    virtual void unpackGeom(GhostConnection *connection, BitStream *stream);
    virtual void setGeom(const Vector<Point> &points);
 
-   virtual string geomToString(F32 gridSize) const;
+   virtual string geomToLevelCode(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual void disableTriangulation();

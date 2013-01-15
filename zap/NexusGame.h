@@ -69,7 +69,7 @@ protected:
 public:
    NexusGameType();           // Constructor
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString() const;
+   string toLevelCode() const;
 
    bool mNexusIsOpen;         // Is the nexus open?
    S32 getNexusTimeLeft();    // Get time until the nexus changes state
@@ -231,7 +231,7 @@ public:
    const char *getOnDockName();
    const char *getOnScreenName();
 
-   string toString(F32 gridSiz) const;
+   string toLevelCode(F32 gridSiz) const;
 
    bool hasTeam();     
    bool canBeHostile();

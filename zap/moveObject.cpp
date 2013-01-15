@@ -109,9 +109,9 @@ bool MoveObject::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string MoveObject::toString(F32 gridSize) const
+string MoveObject::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
 }
 
 
@@ -1561,12 +1561,12 @@ bool Asteroid::processArguments(S32 argc2, const char **argv2, Game *game)
 }
 
 
-string Asteroid::toString(F32 gridSize) const
+string Asteroid::toLevelCode(F32 gridSize) const
 {
    if(mSizeLeft != ASTEROID_INITIAL_SIZELEFT)
-      return Parent::toString(gridSize) + " Size=" + itos(mSizeLeft);
+      return Parent::toLevelCode(gridSize) + " Size=" + itos(mSizeLeft);
    else
-      return Parent::toString(gridSize);
+      return Parent::toLevelCode(gridSize);
 }
 
 
@@ -1886,9 +1886,9 @@ const char *Worm::getOnScreenName()
    return "Worm";
 }
 
-string Worm::toString(F32 gridSize) const
+string Worm::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + geomToLevelCode(gridSize);
 }
 
 void Worm::render()

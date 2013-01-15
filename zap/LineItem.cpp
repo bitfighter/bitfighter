@@ -157,9 +157,9 @@ bool LineItem::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string LineItem::toString(F32 gridSize) const
+string LineItem::toLevelCode(F32 gridSize) const
 {
-   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + itos(getWidth()) + " " + geomToString(gridSize);
+   return string(appendId(getClassName())) + " " + itos(getTeam()) + " " + itos(getWidth()) + " " + geomToLevelCode(gridSize);
 }
 
 

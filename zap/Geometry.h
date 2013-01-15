@@ -94,7 +94,7 @@ public:
    void unpackGeom(GhostConnection *connection, BitStream *stream);
    void setGeom(const Vector<Point> &points);
 
-   string geomToString(F32 gridSize) const;
+   string geomToLevelCode(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual Rect calcExtents();
@@ -144,7 +144,7 @@ public:
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
    void setGeom(const Vector<Point> &points);
 
-   string geomToString(F32 gridSize) const;
+   string geomToLevelCode(F32 gridSize) const;
    void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
 
    virtual Rect calcExtents();
@@ -204,7 +204,7 @@ public:
    void unpackGeom(GhostConnection *connection, BitStream *stream); 
    void setGeom(const Vector<Point> &points);
 
-   string geomToString(F32 gridSize) const;
+   string geomToLevelCode(F32 gridSize) const;
    virtual void readGeom(S32 argc, const char **argv, S32 firstCoord, F32 gridSize);
    virtual void onPointsChanged();
 

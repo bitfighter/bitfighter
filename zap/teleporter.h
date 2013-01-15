@@ -134,7 +134,7 @@ public:
    static bool checkDeploymentPosition(const Point &position, GridDatabase *gb, Ship *ship);
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
    Rect calcExtents();
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

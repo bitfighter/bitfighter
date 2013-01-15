@@ -65,7 +65,7 @@ public:
    bool canBeHostile(); 
    bool canBeNeutral(); 
 
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
 
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();

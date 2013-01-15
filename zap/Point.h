@@ -89,6 +89,7 @@ public:
    void write(BitStream *stream) const;
 
    string toString() const;
+   string toLevelCode() const;
    
    // inlines  need to be in header, too
    inline Point operator+(const Point &pt) const

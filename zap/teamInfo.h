@@ -58,7 +58,7 @@ public:
    virtual StringTableEntry getName() = 0;
 
    bool processArguments(S32 argc, const char **argv);          // Read team info from level line
-   string toString();
+   string toLevelCode();
 
    void alterRed(F32 amt);
    void alterGreen(F32 amt);

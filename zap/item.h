@@ -82,7 +82,7 @@ public:
    // Editor interface
    virtual void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    virtual F32 getEditorRadius(F32 currentScale);
-   virtual string toString(F32 gridSize) const;
+   virtual string toLevelCode(F32 gridSize) const;
 
    virtual Rect calcExtents(); 
 

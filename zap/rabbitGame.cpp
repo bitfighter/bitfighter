@@ -119,9 +119,9 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv, Game *game)
 }
 
 
-string RabbitGameType::toString() const
+string RabbitGameType::toLevelCode() const
 {
-   return Parent::toString() + " " + itos(U32(mFlagReturnTimer / 1000)) + " " + itos(getFlagScore());
+   return Parent::toLevelCode() + " " + itos(U32(mFlagReturnTimer / 1000)) + " " + itos(getFlagScore());
 }
 
 

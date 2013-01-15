@@ -50,7 +50,7 @@ public:
    virtual ~CoreGameType();   // Destructor
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString() const;
+   string toLevelCode() const;
 
    bool isTeamCoreBeingAttacked(S32 teamIndex);
 
@@ -190,7 +190,7 @@ public:
    void idle(BfObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv, Game *game);
-   string toString(F32 gridSize) const;
+   string toLevelCode(F32 gridSize) const;
 
    TNL_DECLARE_CLASS(CoreItem);
 
