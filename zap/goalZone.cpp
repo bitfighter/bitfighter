@@ -52,22 +52,17 @@ GoalZone::GoalZone(lua_State *L)
    mHasFlag = false;
    mScore = 1;             // For now...  may someday let GoalZones have different scoring values
    mCapturer = NULL;
+   setTeam(TEAM_NEUTRAL); 
 
    if(L)    // Coming from Lua -- grab params from L
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "GoalZone", "constructor");
 
-      if(profile == 0)           // No args constructor
+      if(profile == 1)        // Geom, Team
       {
-         setTeam(TEAM_NEUTRAL);  
-         return;
-      }
-
-      if(profile == 1)           // Geom, Team
-      {
-         BfObject::setTeam(L, 2);
-         setGeom(L, 1);
+         setGeom(L,  1);
+         setTeam(L, -1);
       }
    }
 
