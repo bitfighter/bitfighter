@@ -61,8 +61,6 @@ public:
    Item(F32 radius = 1);     // Constructor
    virtual ~Item();          // Destructor
 
-   virtual void setPos(const Point &p);
-
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const;
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);

@@ -65,13 +65,6 @@ Item::~Item()
 }
 
 
-void Item::setPos(const Point &p)
-{
-   Parent::setPos(p);
-   //setExtent(Rect(p, mRadius));
-}
-
-
 bool Item::getCollisionCircle(U32 stateIndex, Point &point, F32 &radius) const
 {
    point = getPos();
