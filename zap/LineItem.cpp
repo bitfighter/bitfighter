@@ -60,15 +60,17 @@ LineItem::LineItem(lua_State *L)
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, TEAM_INDX, END }}, 3 };
-      S32 profile = checkArgList(L, constructorArgList, "PolyWall", "constructor");
+      static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, END }, { SIMPLE_LINE, TEAM_INDX, END }}, 3 };
+
+      S32 profile = checkArgList(L, constructorArgList, "LineItem", "constructor");
+
       if(profile == 1)
-         setGeom(L);
+         setGeom(L, 1);
+
       else if(profile == 2)
       {
-         setTeam(lua_tointeger(L, -1)); // Grab this before it gets popped
-         lua_pop(L, 1); // Clean up stack for setGeom, which only expects points
-         setGeom(L);
+         setGeom(L, 1);
+         setTeam(lua_tointeger(L, -1)); 
       }
    }
 }

@@ -42,8 +42,8 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 /**
   *  @luaconst  FlagItem::FlagItem()
-  *  @luaconst  FlagItem::FlagItem(geom)
-  *  @luaconst  FlagItem::FlagItem(geom, team)
+  *  @luaconst  FlagItem::FlagItem(point)
+  *  @luaconst  FlagItem::FlagItem(point, team)
   */
 // Combined Lua / C++ default constructor
 FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::CollisionRadius) // radius was 20

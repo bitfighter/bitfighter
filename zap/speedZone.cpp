@@ -75,7 +75,7 @@ SpeedZone::SpeedZone(lua_State *L)
 
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }, { GEOM, NUM, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, END }, { SIMPLE_LINE, NUM, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "SpeedZone", "constructor");
 
       if(profile == 1)
@@ -546,8 +546,8 @@ bool SpeedZone::canBeNeutral() { return false; }
 
 /**
   *  @luaconst SpeedZone::SpeedZone()
-  *  @luaconst SpeedZone::SpeedZone(geom)
-  *  @luaconst SpeedZone::SpeedZone(geom, speed)
+  *  @luaconst SpeedZone::SpeedZone(lineGeom)
+  *  @luaconst SpeedZone::SpeedZone(lineGeom, speed)
   *  @luaclass SpeedZone
   *  @brief Propels ships at high speed.
   *  @descr SpeedZones are game objects that propel ships around a level.  Each %SpeedZone has a direction point

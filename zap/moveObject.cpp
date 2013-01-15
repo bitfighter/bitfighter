@@ -2225,7 +2225,7 @@ TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADI
    if(L)
    {
       // These are the signatures we'll accept for Lua to construct this object
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
 
       if(checkArgList(L, constructorArgList, "TestItem", "constructor") == 1)
          setPos(L, 1);

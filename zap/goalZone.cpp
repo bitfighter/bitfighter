@@ -37,7 +37,7 @@ TNL_IMPLEMENT_NETOBJECT(GoalZone);
 
 /**
 *  @luafunc GoalZone::GoalZone()
-*  @luafunc GoalZone::GoalZone(geom, team)
+*  @luafunc GoalZone::GoalZone(polyGeom team)
 *  @brief %GoalZone constructor.
 *  @descr Default team is Neutral.
 */

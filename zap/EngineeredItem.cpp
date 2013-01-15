@@ -1712,13 +1712,17 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
 
 
 // Combined Lua / C++ default constructor
+/**
+  *  @luaconst Turret::Turret()
+  *  @luaconst Turret::Turret(point, team)
+  */
 Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
    // TODO: This does not work; we need to snap the turret to a nearby wall and compute the normal angle.
    // It is likely that setPos is similarly broken.  And maybe more.
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Turret", "constructor");
       
       findMountPoint(Game::getAddTarget(), getPos());
@@ -2076,8 +2080,6 @@ void Turret::onGeomChanged()
 /////
 // Lua interface
 /**
-  *  @luaconst Turret::Turret()
-  *  @luaconst Turret::Turret(geom, team)
   *  @luaclass Turret
   *  @brief Mounted gun that shoots at enemy ships and other objects.
   */

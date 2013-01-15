@@ -61,13 +61,13 @@ TextItem::TextItem(lua_State *L)
 
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, STR, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, STR, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
    
       if(profile == 1)
       {
-         setPos(L, 1);
-         setText(L, 2);
+         setGeom(L, 1);
+         setText(L, -1);
       }
    }
 
@@ -242,6 +242,12 @@ void TextItem::setGeom(const Point &pos, const Point &dest)
    updateExtentInDatabase();
 }
 
+
+// Need this signature at this level
+void TextItem::setGeom(lua_State *L, S32 index)
+{
+   Parent::setGeom(L, index);
+}
 
 string TextItem::toString(F32 gridSize) const
 {
@@ -445,7 +451,7 @@ void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 
 /**
   *  @luaconst TextItem::TextItem()
-  *  @luaconst TextItem::TextItem(geom, text)
+  *  @luaconst TextItem::TextItem(lineGeom, text)
   *  @luaclass TextItem
   *  @brief Display text message in level.
   *  @descr A %TextItem displays text in a level.  If the %TextItem belongs to a team, it is only visible to players on that team.

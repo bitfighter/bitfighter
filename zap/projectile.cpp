@@ -1034,7 +1034,7 @@ SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
 
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
 
       S32 profile = checkArgList(L, constructorArgList, "SpyBug", "constructor");
       
