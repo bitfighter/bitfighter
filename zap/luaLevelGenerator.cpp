@@ -81,56 +81,6 @@ static const char *argv[LevelLoader::MAX_LEVEL_LINE_ARGS];
 // TODO: Provide mechanism to modify basic level parameters like game length and teams.
 
 
-// Note that this uses rawgeti and therefore bypasses any metamethods set on the table
-S32 getIntegerFromTable(lua_State *L, int tableIndex, int key)
-{
-   lua_rawgeti(L, tableIndex, key);    // Push value onto stack
-   if(lua_isnil(L, -1))
-   {
-      lua_pop(L, 1);
-      return 0;
-   }
-
-   S32 rtn = (S32)lua_tointeger(L, -1);
-   lua_pop(L, 1);    // Clear value from stack
-   return rtn;
-}
-
-
-// TODO: get rid of this function!!!!
-// Pop a vec object off stack, check its type, and return it
-static Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
-{
-   if(!lua_ispoint(L, index))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
-      logprintf(LogConsumer::LogError, msg);
-
-      throw LuaException(msg);
-   }
-
-   const F32 *vec = lua_tovec(L, index);
-   return Point(vec[0], vec[1]);
-}
-
-
-// TODO: Move this up to one of the higher level lua support classes
-Point LuaLevelGenerator::getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
-{
-   lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
-   if(lua_isnil(L, -1))
-   {
-      lua_pop(L, 1);
-      return Point(0,0);
-   }
-
-   Point point = getCheckedVec(L, -1, methodName);
-   lua_pop(L, 1);    // Clear value from stack
-
-   return point;
-}
-
 
 // Let someone else do the work!
 void LuaLevelGenerator::processLevelLoadLine(S32 argc, S32 id, const char **argv, GridDatabase *database, const string &levelFileName)

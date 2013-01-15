@@ -50,9 +50,6 @@ private:
 
    Vector<BfObject *> mAddedObjects;   // List of objects added by the levelgen
 
-   Point getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName);      // Helper fn
-
-
 protected:
    void killScript();
 

@@ -186,6 +186,20 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
          
          return false;
 
+      // SIMPLE_LINE: A pair of points, or a table containing two points
+      case SIMPLE_LINE:
+         if(lua_ispoint(L, stackPos))           // Pair of Points
+         {
+            if(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
+               stackPos++;
+
+            return true;
+         }
+         else if lua_istable(L, stackPos)       // We have a table: first two items should be points
+            return isPointAtTableIndex(L, stackPos, 1) && isPointAtTableIndex(L, stackPos, 2);
+
+         return false;
+
       // GEOM: A series of points, numbers, or a table containing a series of points or numbers
       case GEOM:
          if(lua_ispoint(L, stackPos))             // Series of Points
@@ -284,6 +298,66 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
          TNLAssert(false, "Unknown arg type!");
          return false;
    }
+}
+
+
+// Assumes we have already checked that there is in fact table on the stack at position tableIndex
+bool LuaBase::isPointAtTableIndex(lua_State *L, S32 tableIndex, S32 indexWithinTable)
+{
+   lua_rawgeti(L, tableIndex, indexWithinTable);   // Push point onto stack
+   bool isPoint = lua_ispoint(L, -1);              // Check its type
+   lua_pop(L, 1);                                  // Remove item from stack
+
+   return isPoint;
+}
+
+
+//// Note that this uses rawgeti and therefore bypasses any metamethods set on the table
+//S32 getIntegerFromTable(lua_State *L, int tableIndex, int key)
+//{
+//   lua_rawgeti(L, tableIndex, key);    // Push value onto stack
+//   if(lua_isnil(L, -1))
+//   {
+//      lua_pop(L, 1);
+//      return 0;
+//   }
+//
+//   S32 rtn = (S32)lua_tointeger(L, -1);
+//   lua_pop(L, 1);    // Clear value from stack
+//   return rtn;
+//}
+
+
+// Pop a vec object off stack, check its type, and return it
+static Point getCheckedVec(lua_State *L, S32 index, const char *methodName)
+{
+   if(!lua_ispoint(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
+      logprintf(LogConsumer::LogError, msg);
+
+      throw LuaException(msg);
+   }
+
+   const F32 *vec = lua_tovec(L, index);
+   return Point(vec[0], vec[1]);
+}
+
+
+Point LuaBase::getPointFromTable(lua_State *L, int tableIndex, int key, const char *methodName)
+{
+   lua_rawgeti(L, tableIndex, key);    // Push Point onto stack
+   if(lua_isnil(L, -1))
+   {
+      lua_pop(L, 1);
+      return Point(0,0);
+   }
+
+   Point point = getCheckedVec(L, -1, methodName);
+   lua_pop(L, 1);    // Clear value from stack
+
+   return point;
 }
 
 
