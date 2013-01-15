@@ -126,8 +126,9 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionArgList &functionArgLis
    }
    
    // Uh oh... items on stack did not match any known parameter profile.  Try to construct a useful error message.
+   // If we want a stack trace for parameter errors, we need to force it here... not sure how, exactly
    throw LuaException("Could not validate params for function " + string(className) + "::" + string(functionName) + "()\n" +
-                      "Expected" + (functionArgList.profileCount > 1 ? " one of the following" : "") + prettyPrintParamList(functionArgList));
+                      "Expected" + (functionArgList.profileCount > 1 ? " one of the following:" : ":") + prettyPrintParamList(functionArgList));
 
    return -1;     // No valid profile found, but we never get here, so it doesn't really matter what we return, does it?
 }
@@ -458,12 +459,12 @@ bool LuaBase::dumpStack(lua_State* L, const char *msg)
     int top = lua_gettop(L);
 
     bool hasMsg = (strcmp(msg, "") != 0);
-    logprintf("\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
+    logprintf(LogConsumer::LogError, "\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
 
     for(S32 i = 1; i <= top; i++)
     {
       string val = stringify(L, i);
-      logprintf("%d : %s", i, val.c_str());
+      logprintf(LogConsumer::LogError, "%d : %s", i, val.c_str());
     }
 
     return false;
@@ -764,13 +765,19 @@ string LuaBase::prettyPrintParamList(const Zap::LuaFunctionArgList &functionArgL
       //if(i > 0)
       msg += "\n\t";
 
+      bool none = true;
+
       for(S32 j = 0; functionArgList.argList[i][j] != Zap::LuaBase::END; j++)
       {
          if(j > 0)
             msg += ", ";
 
          msg += argTypeNames[functionArgList.argList[i][j]];
+         none = false;
       }
+
+      if(none)
+         msg += "Empty parameter list";
    }
 
    msg += "\n";
