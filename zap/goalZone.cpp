@@ -56,7 +56,7 @@ GoalZone::GoalZone(lua_State *L)
 
    if(L)    // Coming from Lua -- grab params from L
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "GoalZone", "constructor");
 
       if(profile == 1)        // Geom, Team

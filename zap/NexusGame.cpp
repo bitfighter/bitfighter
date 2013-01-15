@@ -980,7 +980,7 @@ NexusZone::NexusZone(lua_State *L)
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { POLY, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "NexusZone", "constructor");
          
       if(profile == 1)

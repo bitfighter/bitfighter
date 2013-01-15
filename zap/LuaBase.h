@@ -73,6 +73,7 @@ public:
    LUA_ARG_TYPE_ITEM( STR,         "String"                                       ) \
    LUA_ARG_TYPE_ITEM( PT,          "Lua point"                                    ) \
    LUA_ARG_TYPE_ITEM( SIMPLE_LINE, "Pair of Lua points (singly or in table)"      ) \
+   LUA_ARG_TYPE_ITEM( LINE,        "Two or more Lua points (singly or in table)"  ) \
    LUA_ARG_TYPE_ITEM( POLY,        "Three or more Lua points (singly or in table)") \
    LUA_ARG_TYPE_ITEM( TABLE,       "Lua table"                                    ) \
    LUA_ARG_TYPE_ITEM( LOADOUT,     "Loadout Object"                               ) \

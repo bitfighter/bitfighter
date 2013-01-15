@@ -353,7 +353,7 @@ WallItem::WallItem(lua_State *L)
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, INT, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { LINE, INT, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "WallItem", "constructor");
       if(profile == 1)
       {

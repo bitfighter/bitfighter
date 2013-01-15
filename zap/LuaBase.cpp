@@ -134,6 +134,40 @@ S32 LuaBase::checkArgList(lua_State *L, const LuaFunctionArgList &functionArgLis
 }
 
 
+// This function might modify stackPos
+static bool checkPoints(lua_State *L, S32 minNumberOfPoints, S32 &stackPos)
+{
+   S32 stackDepth = lua_gettop(L);
+
+   if(lua_ispoint(L, stackPos))          // Series of points
+   {
+      S32 initialPos = stackPos;
+      while(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
+         stackPos++;
+
+      return (stackPos - initialPos + 1) >= minNumberOfPoints;
+   }
+   else if(lua_istable(L, stackPos))      // Table: should contain <minNumberOfPoints> or more points, and nothing else
+   {
+      S32 pointsFound = 0;
+      lua_pushnil(L);                     // First key
+      while(lua_next(L, stackPos) != 0)   // Traverse table
+      { 
+         if(!lua_ispoint(L, -1))          // Is it a point?  If not, cleanup and bail
+         {
+            lua_pop(L, 2);                
+            return false;
+         }
+         lua_pop(L, 1); 
+         pointsFound++;
+      }
+      return pointsFound >= minNumberOfPoints;
+   }
+
+   return false;
+}
+
+
 // Warning... may alter stackPos!
 bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos)
 {
@@ -194,34 +228,12 @@ bool LuaBase::checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stack
 
          return false;
 
+      case LINE:
+         return checkPoints(L, 2, stackPos);
+
       // POLY: Three or more points, or a table containing therein
       case POLY:
-         if(lua_ispoint(L, stackPos))          // Series of Points
-         {
-            S32 initialPos = stackPos;
-            while(stackPos + 1 <= stackDepth && lua_ispoint(L, stackPos + 1))
-               stackPos++;
-
-            return (stackPos - initialPos + 1) >= 3;
-         }
-         else if(lua_istable(L, stackPos))      // Table: should contain 3 or more points, and nothing else
-         {
-            S32 pointsFound = 0;
-            lua_pushnil(L);                     // First key
-            while(lua_next(L, stackPos) != 0)   // Traverse table
-            { 
-               if(!lua_ispoint(L, -1))          // Is it a point?  If not, cleanup and bail
-               {
-                  lua_pop(L, 2);                
-                  return false;
-               }
-               lua_pop(L, 1); 
-               pointsFound++;
-            }
-            return pointsFound >= 3;
-         }
-
-         return false;
+         return checkPoints(L, 3, stackPos);
 
       // GEOM: A series of points, numbers, or a table containing a series of points or numbers
       case GEOM:
