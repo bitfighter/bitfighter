@@ -72,6 +72,8 @@ public:
    bool didRecentlyChangeTeam();
 
    void setTeam(S32 team);
+   void setTeam(lua_State *L, S32 index);
+
    void onAddedToGame(Game *theGame);
    const Vector<Point> *getCollisionPoly() const;
    bool collide(BfObject *hitObject);

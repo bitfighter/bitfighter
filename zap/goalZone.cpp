@@ -169,6 +169,13 @@ void GoalZone::setTeam(S32 team)
 }
 
 
+// This just here to provide a signature at this level
+void GoalZone::setTeam(lua_State *L, S32 index)
+{
+   Parent::setTeam(L, index);
+}
+
+
 ClientInfo *GoalZone::getCapturer()
 {
    return mCapturer;
