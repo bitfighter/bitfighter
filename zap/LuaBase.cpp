@@ -396,8 +396,8 @@ Vector<Point> LuaBase::getPointsOrXYs(lua_State *L, S32 index)
       S32 offset = 0;
       while(index + offset <= stackDepth && lua_ispoint(L, index + offset))
       {
-         const F32 *vec = lua_tovec(L, index + offset);
-         points.push_back(Point(vec[0], vec[1]));
+         const F32 *coords = lua_tovec(L, index + offset);
+         points.push_back(Point(coords[0], coords[1]));
          offset++;
       }
    }
