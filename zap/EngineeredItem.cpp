@@ -1239,11 +1239,13 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
+
       S32 profile = checkArgList(L, constructorArgList, "ForceFieldProjector", "constructor");
+
       if(profile == 1)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
       
       findMountPoint(Game::getAddTarget(), getPos());
@@ -1711,11 +1713,13 @@ Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Turret", "constructor");
+      
       findMountPoint(Game::getAddTarget(), getPos());
+
       if(profile == 1)
       {
          findMountPoint(gServerGame, getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
    }
    initialize();

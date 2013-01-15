@@ -424,6 +424,18 @@ lua_Integer LuaBase::getInt(lua_State *L, S32 index)
 }
 
 
+// Selectively adjust a value from Lua to account for it's stupid 1-index arrays.
+// Assumes that the value has already been checked, so this does no sanity checks whatsoever.
+S32 LuaBase::getTeamIndex(lua_State *L, S32 index)
+{
+   S32 teamIndex = getInt(L, index);
+   if(teamIndex <= TEAM_NEUTRAL)
+      return teamIndex;
+   else
+      return teamIndex - 1;
+}
+
+
 // Pop integer off stack, check its type, and return it (no bounds check)
 lua_Integer LuaBase::getCheckedInt(lua_State *L, S32 index, const char *methodName)
 {

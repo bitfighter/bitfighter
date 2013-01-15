@@ -474,7 +474,7 @@ void BfObject::setTeam(S32 team)
 // Lua helper methods -- these assume that the params have already been checked and are valid
 void BfObject::setTeam(lua_State *L, S32 stackPos)
 {
-   setTeam(getInt(L, stackPos) - 1);    // - 1 because Lua indices start at 1  
+   setTeam(getTeamIndex(L, stackPos));
 }
 
 

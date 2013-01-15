@@ -153,6 +153,8 @@ public:
    static lua_Integer getInt(lua_State *L, S32 index, S32 defaultVal);
    static lua_Integer getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal);
 
+   static S32 getTeamIndex(lua_State *L, S32 index);
+
    static lua_Integer getCheckedInt(lua_State *L, S32 index, const char *methodName);
 
    static const char *getString(lua_State *L, S32 index);

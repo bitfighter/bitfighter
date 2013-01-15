@@ -61,7 +61,7 @@ FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::Collision
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
    }
 }

@@ -222,7 +222,7 @@ Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
    }
 }

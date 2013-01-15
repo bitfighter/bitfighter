@@ -1038,7 +1038,7 @@ SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
       if(profile == 1)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
    }
 }

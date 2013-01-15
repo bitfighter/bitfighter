@@ -299,12 +299,12 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       if(profile == 1)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
          setStartingHealth(getInt(L, 3));
       }
    }
@@ -318,12 +318,12 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       if(profile == 1)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
       }
       else if(profile == 2)
       {
          setPos(getPointOrXY(L, 1));
-         setTeam(getInt(L, 2));
+         setTeam(L, 2);
          setStartingHealth(getInt(L, 3));
       }
    }
