@@ -502,7 +502,6 @@ void NexusGameType::idle_client(U32 deltaT)
       mNexusChangeAtTime = getNextChangeTime(mNexusChangeAtTime, mNexusClosedTime);
    }
 
-
    for(S32 i = 0; i < mYardSaleWaypoints.size();)
    {
       if(mYardSaleWaypoints[i].timeLeft.update(deltaT))
