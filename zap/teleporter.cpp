@@ -181,9 +181,11 @@ Teleporter::Teleporter(lua_State *L)
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      
       S32 profile = checkArgList(L, constructorArgList, "Teleporter", "constructor");
+
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
    }
 }
 

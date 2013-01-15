@@ -95,7 +95,8 @@ public:
    F32 getSize();
 
    string getText();
-   void setText(string text);
+   void setText(const string &text);
+   void setText(lua_State *L, S32 index);
 
    void onAttrsChanging();
    void onAttrsChanged();

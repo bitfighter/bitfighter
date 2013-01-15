@@ -1321,7 +1321,7 @@ Asteroid::Asteroid(lua_State *L) : Parent(Point(0,0), ASTEROID_SPEED, getAsteroi
       S32 profile = checkArgList(L, constructorArgList, "Asteroid", "constructor");
       if(profile == 1)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
       }
    }
 
@@ -2215,11 +2215,14 @@ static const F32 TEST_ITEM_MASS = 4;
 // Combined Lua / C++ default constructor
 TestItem::TestItem(lua_State *L) : Parent(Point(0, 0), true, (F32)TEST_ITEM_RADIUS, TEST_ITEM_MASS)
 {
-   // These are the signatures we'll accept for Lua to construct this object
-   static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+   if(L)
+   {
+      // These are the signatures we'll accept for Lua to construct this object
+      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
 
-   if(L && checkArgList(L, constructorArgList, "TestItem", "constructor") == 1)
-      setPos(getPointOrXY(L, 1));
+      if(checkArgList(L, constructorArgList, "TestItem", "constructor") == 1)
+         setPos(L, 1);
+   }
    
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = TestItemTypeNumber;
@@ -2321,11 +2324,14 @@ static const F32 RESOURCE_ITEM_MASS = 1;
 // Combined Lua / C++ default constructor
 ResourceItem::ResourceItem(lua_State *L) : Parent(Point(0,0), true, (F32)RESOURCE_ITEM_RADIUS, RESOURCE_ITEM_MASS)
 {
-   // These are the signatures we'll accept for Lua to construct this object
-   static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
+   if(L)
+   {
+      // These are the signatures we'll accept for Lua to construct this object
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
 
-   if(L && checkArgList(L, constructorArgList, "ResourceItem", "constructor") == 1)
-      setPos(getPointOrXY(L, 1));
+      if(checkArgList(L, constructorArgList, "ResourceItem", "constructor") == 1)
+         setPos(L, 1);
+   }
    
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ResourceItemTypeNumber;

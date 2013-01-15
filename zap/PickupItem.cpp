@@ -357,12 +357,15 @@ RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_R
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
+
       S32 profile = checkArgList(L, constructorArgList, "RepairItem", "constructor");
+
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
+
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          lua_remove(L, 1);
          setRegenTime(L);
       }
@@ -477,14 +480,16 @@ EnergyItem::EnergyItem(lua_State *L) : Parent(20, DEFAULT_RESPAWN_TIME)    // Co
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
+
       S32 profile = checkArgList(L, constructorArgList, "EnergyItem", "constructor");
+
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
+
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
-         lua_remove(L, 1);
-         setRegenTime(L);
+         setPos(L, 1);
+         mRepopDelay = getInt(L, 2);
       }
    }
    

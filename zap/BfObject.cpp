@@ -478,6 +478,13 @@ void BfObject::setTeam(lua_State *L, S32 stackPos)
 }
 
 
+// Assumes that the params have already been checked and are valid
+void BfObject::setPos(lua_State *L, S32 stackPos)
+{
+   setPos(getPointOrXY(L, stackPos));
+}
+
+
 void BfObject::setGeom(lua_State *L, S32 stackIndex)
 {
    Vector<Point> points = getPointsOrXYs(L, stackIndex);
@@ -1366,7 +1373,7 @@ S32 BfObject::setTeam(lua_State *L)
 S32 BfObject::setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
-   setPos(getPointOrXY(L, 1));
+   setPos(L, 1);
    return 0;
 }
 

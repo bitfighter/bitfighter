@@ -217,11 +217,11 @@ Spawn::Spawn(lua_State *L) : AbstractSpawn(Point(0,0))
       S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
 
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
 
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
       }
    }
@@ -463,11 +463,12 @@ AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "AsteroidSpawn", "constructor");
       initialize();
+
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          mSpawnTime = S32(getInt(L, 2) * 1000);
          mTimer.reset(mSpawnTime);
       }
@@ -611,11 +612,11 @@ CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME
       S32 profile = checkArgList(L, constructorArgList, "CircleSpawn", "constructor");
 
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
 
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          mSpawnTime = S32(getInt(L, 2) * 1000);
          mTimer.reset(mSpawnTime);
       }

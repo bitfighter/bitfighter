@@ -66,8 +66,8 @@ TextItem::TextItem(lua_State *L)
    
       if(profile == 1)
       {
-         setPos(getPointOrXY(L, 1));
-         setText(getString(L, 2));
+         setPos(L, 1);
+         setText(L, 2);
       }
    }
 
@@ -173,7 +173,13 @@ string TextItem::getText()
 }
 
 
-void TextItem::setText(string text)
+void TextItem::setText(lua_State *L, S32 index)
+{
+   setText(getString(L, index));
+}
+
+
+void TextItem::setText(const string &text)
 {
    mText = text;
    onGeomChanged();
@@ -475,7 +481,7 @@ S32 TextItem::lua_setText(lua_State *L)
 {
    checkArgList(L, functionArgs, "TextItem", "setText");
 
-   setText(getString(L, 1));
+   setText(L, 1);
 
    return 0;
 }

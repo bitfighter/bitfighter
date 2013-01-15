@@ -356,7 +356,10 @@ public:
    // Team related
    S32 getTeam() const;
    void setTeam(S32 team);
+
+   // Lua-based attribute setters
    void setTeam(lua_State *L, S32 stackIndex);
+   void setPos(lua_State *L, S32 stackIndex);
    void setGeom(lua_State *L, S32 stackIndex);
 
 

@@ -79,10 +79,11 @@ SpeedZone::SpeedZone(lua_State *L)
       S32 profile = checkArgList(L, constructorArgList, "SpeedZone", "constructor");
 
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
+
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setSpeed(getInt(L, 2));
       }
    }

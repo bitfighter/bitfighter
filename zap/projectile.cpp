@@ -765,9 +765,11 @@ Mine::Mine(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL, BurstRadius)
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
+      
       S32 profile = checkArgList(L, constructorArgList, "Mine", "constructor");
+
       if(profile == 1)
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
    }
 }
 
@@ -1033,11 +1035,12 @@ SpyBug::SpyBug(lua_State *L) : Burst(Point(0,0), Point(0,0), NULL)
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, TEAM_INDX, END }}, 2 };
+
       S32 profile = checkArgList(L, constructorArgList, "SpyBug", "constructor");
       
       if(profile == 1)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
       }
    }

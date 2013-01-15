@@ -53,14 +53,15 @@ FlagItem::FlagItem(lua_State *L) : Parent(Point(0,0), true, (F32)Ship::Collision
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 3 };
+      
       S32 profile = checkArgList(L, constructorArgList, "FlagItem", "constructor");
+
       if(profile == 1)
-      {
-         setPos(getPointOrXY(L, 1));
-      }
+         setPos(L, 1);
+
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
       }
    }

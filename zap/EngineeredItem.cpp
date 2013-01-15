@@ -1244,7 +1244,7 @@ ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Po
 
       if(profile == 1)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
       }
       

@@ -298,12 +298,12 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       S32 profile = checkArgList(L, constructorArgList, "CoreItem", "constructor");
       if(profile == 1)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
       }
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
          setStartingHealth(getInt(L, 3));
       }
@@ -317,12 +317,12 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       S32 profile = checkArgList(L, constructorArgList, "CoreItem", "constructor");
       if(profile == 1)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
       }
       else if(profile == 2)
       {
-         setPos(getPointOrXY(L, 1));
+         setPos(L, 1);
          setTeam(L, 2);
          setStartingHealth(getInt(L, 3));
       }
