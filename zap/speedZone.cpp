@@ -71,22 +71,22 @@ SpeedZone::SpeedZone(lua_State *L)
    mRotateSpeed = 0;
    mUnpackInit = 0;           // Some form of counter, to know that it is a rotating speed zone
 
-   preparePoints();           // If this is constructed by Lua, we need to have some default geometry in place
-
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, END }, { SIMPLE_LINE, NUM, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "SpeedZone", "constructor");
 
       if(profile == 1)
-         setPos(L, 1);
+         setGeom(L, 1);
 
       else if(profile == 2)
       {
-         setPos(L, 1);
-         setSpeed(getInt(L, 2));
+         setGeom(L, 1);
+         setSpeed(getInt(L, -1));
       }
    }
+
+   preparePoints();           // If this is constructed by Lua, we need to have some default geometry in place
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
@@ -107,7 +107,7 @@ U16 SpeedZone::getSpeed()
 
 void SpeedZone::setSpeed(U16 speed)
 {
-   mSpeed = speed;
+   mSpeed = max(minSpeed, min(maxSpeed, speed));
 }
 
 
@@ -293,7 +293,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2, Game *game)
    setVert(end, 1);
 
    if(argc >= 5)
-      mSpeed = max((U16)minSpeed, min((U16)maxSpeed, (U16)(atoi(argv[4]))));
+      setSpeed((U16)(atoi(argv[4])));
 
    preparePoints();
 

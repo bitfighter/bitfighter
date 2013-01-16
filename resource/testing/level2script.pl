@@ -3,9 +3,11 @@ use strict;            # Require vars to be declared!
 $SIG{__WARN__} = sub { die "Undef value: @_" if $_[0] =~ /undefined/ };
 
 
-my $infile = 'C:\Users\Chris\AppData\Roaming\Bitfighter\levels/core.level';
+my $infile = 'C:\Users\Chris\AppData\Roaming\Bitfighter\levels/ctf.level';
 
 open my $IN, "<", $infile || die "Could not open $infile for reading: $!";
+
+print "local g = nil\n";
 
 foreach my $line (<$IN>) {
    $line =~ m/^\w*GameType /     && next;
@@ -101,6 +103,21 @@ foreach my $line (<$IN>) {
       my $y = (shift @words) * $gridsize;
       my $time = shift @words;
       print "levelgen:addItem($1.new(point.new($x,$y), $time))\n";
+      next;
+   }
+
+
+   if($line =~ m/(SpeedZone)/) {
+      my $x1 = (shift @words) * $gridsize;
+      my $y1 = (shift @words) * $gridsize;
+      my $x2 = (shift @words) * $gridsize;
+      my $y2 = (shift @words) * $gridsize;
+      my $spd = shift @words;
+      my $snap = (shift @words) eq "SnapEnabled";    
+
+      print "g = $1.new(point.new($x1,$y1), point.new($x2,$y2), $spd)\n";
+      if($snap) { print "   g:setSnapping(true)\n"; }
+      print "   levelgen:addItem(g)\n";
       next;
    }
 
