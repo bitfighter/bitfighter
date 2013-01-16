@@ -1239,24 +1239,27 @@ TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 // Combined Lua / C++ default constructor
 ForceFieldProjector::ForceFieldProjector(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
-   // TODO: This does not work; we need to snap the projector to a nearby wall and compute the normal angle.
-   // It is likely that setPos is similarly broken.  And maybe more. (Maybe less as I just pasted this comment here.)
-   initialize();
-
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 3 };
 
       S32 profile = checkArgList(L, constructorArgList, "ForceFieldProjector", "constructor");
 
-      if(profile == 1)
+      if(profile == 1 )
+      {
+         setPos(L, 1);
+         setTeam(TEAM_NEUTRAL);
+      }
+      if(profile == 2)
       {
          setPos(L, 1);
          setTeam(L, 2);
       }
-      
+
       findMountPoint(Game::getAddTarget(), getPos());
    }
+
+   initialize();
 }
 
 
@@ -1278,7 +1281,7 @@ void ForceFieldProjector::initialize()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = ForceFieldProjectorTypeNumber;
-   onGeomChanged();     // Can't be placed on parent, as parent construtor must initalized first
+   onGeomChanged();     // Can't be placed on parent, as parent constructor must initalized first
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }

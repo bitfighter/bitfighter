@@ -3,7 +3,7 @@ use strict;            # Require vars to be declared!
 $SIG{__WARN__} = sub { die "Undef value: @_" if $_[0] =~ /undefined/ };
 
 
-my $infile = 'C:\Users\Eykamp.TUDOR\Documents\bitfighter\exe\levels\ctf.level';
+my $infile = 'C:\Users\Chris\Documents\bf-trunk\exe\levels\ctf.level';
 
 open my $IN, "<", $infile || die "Could not open $infile for reading: $!";
 
@@ -73,7 +73,7 @@ foreach my $line (<$IN>) {
 
 
 
-   if($line =~ m/(FlagItem|Spawn|Turret)/) {
+   if($line =~ m/(FlagItem|Spawn|Turret|ForceFieldProjector)/) {
       my $team = (shift @words);
       $team >= 0 && $team++;   # Stupid lua arrays
       my $x = (shift @words) * $gridsize;
