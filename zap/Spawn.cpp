@@ -69,11 +69,10 @@ AbstractSpawn::~AbstractSpawn()
 }
 
 
-void AbstractSpawn::setRespawnTime(S32 time)       // in seconds
+void AbstractSpawn::setRespawnTime(F32 time)       // in seconds
 {
    mSpawnTime = time;
-   mTimer.setPeriod(time * 1000);
-   mTimer.reset();
+   mTimer.reset(time * 1000);
 }
 
 
@@ -412,8 +411,7 @@ S32 ItemSpawn::lua_setSpawnTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "ItemSpawn", "setSpawnTime");
 
-   mSpawnTime = S32(getFloat(L, 1) * 1000);
-   mTimer.reset(mSpawnTime);
+   setRespawnTime(getFloat(L, 1));
 
    return 0;
 }
@@ -460,18 +458,14 @@ AsteroidSpawn::AsteroidSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, NUM, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "AsteroidSpawn", "constructor");
-      initialize();
 
-      if(profile == 1)
+      if(profile >= 1)
          setPos(L, 1);
-      else if(profile == 2)
-      {
-         setPos(L, 1);
-         mSpawnTime = S32(getInt(L, 2) * 1000);
-         mTimer.reset(mSpawnTime);
-      }
+
+      if(profile == 2)
+         setRespawnTime(getFloat(L, 2));
    }
 }
 
@@ -608,18 +602,14 @@ CircleSpawn::CircleSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME
    
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, INT, END }}, 3 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, NUM, END }}, 3 };
       S32 profile = checkArgList(L, constructorArgList, "CircleSpawn", "constructor");
 
-      if(profile == 1)
+      if(profile >= 1)
          setPos(L, 1);
 
-      else if(profile == 2)
-      {
-         setPos(L, 1);
-         mSpawnTime = S32(getInt(L, 2) * 1000);
-         mTimer.reset(mSpawnTime);
-      }
+      if(profile == 2)
+         setRespawnTime(getFloat(L, 2));
    }
 }
 
@@ -739,10 +729,7 @@ REGISTER_LUA_SUBCLASS(CircleSpawn, ItemSpawn);
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-//TNL_IMPLEMENT_CLASS(FlagSpawn);
-TNL::NetClassRep* FlagSpawn::getClassRep() const { TNL_DEBUGBREAK(); return &FlagSpawn::dynClassRep; }
-TNL::NetClassRepInstance<FlagSpawn> FlagSpawn::dynClassRep("FlagSpawn", 0, TNL::NetClassTypeNone, 0);  //static
-
+TNL_IMPLEMENT_CLASS(FlagSpawn);
 
 // C++ constructor
 FlagSpawn::FlagSpawn(const Point &pos, S32 time, S32 teamIndex) : Parent(pos, time)
@@ -758,6 +745,23 @@ FlagSpawn::FlagSpawn(const Point &pos, S32 time, S32 teamIndex) : Parent(pos, ti
 FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
 {
    initialize();
+
+   if(L)
+   {
+      //                                  Profile:         0          1                 2                          3
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }, { PT, TEAM_INDX, NUM, END }}, 4 };
+      
+      S32 profile = checkArgList(L, constructorArgList, "CoreItem", "constructor");
+
+      if(profile >= 1)
+         setPos(L, 1);
+
+      if(profile >= 2)
+         setTeam(L, 2);
+
+      if(profile == 3)      
+         setRespawnTime(getFloat(L, 3));
+   }
 }
 
 
@@ -773,6 +777,7 @@ void FlagSpawn::initialize()
    mObjectTypeNumber = FlagSpawnTypeNumber;
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
+
 
 // FlagSpawn <team> <x> <y> {spawn time}
 bool FlagSpawn::processArguments(S32 argc, const char **argv, Game *game)

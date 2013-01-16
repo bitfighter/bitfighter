@@ -49,7 +49,7 @@ protected:
    S32 mSpawnTime;
    Timer mTimer;
 
-   void setRespawnTime(S32 time);
+   void setRespawnTime(F32 time);
 
 public:
    AbstractSpawn(const Point &pos = Point(), S32 time = 0); // Constructor

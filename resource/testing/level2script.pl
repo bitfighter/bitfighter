@@ -11,12 +11,10 @@ print "local g = nil\n";
 
 foreach my $line (<$IN>) {
    $line =~ m/^\w*GameType /     && next;
-   $line =~ m/^LevelName /       && next;
-   $line =~ m/LevelDescription / && next;
+   $line =~ m/^LevelName|Specials|LevelCredits|Script|LevelDescription/ && next;
    $line =~ m/LevelCredits /     && next;
    $line =~ m/GridSize /         && next;
    $line =~ m/Team /             && next;
-   $line =~ m/Specials /         && next;
    $line =~ m/MinPlayers/        && next;
    $line =~ m/MaxPlayers/        && next;
    $line =~ m/^\s*$/             && next;
@@ -89,7 +87,7 @@ foreach my $line (<$IN>) {
 
 
 
-   if($line =~ m/(FlagItem|Spawn|Turret|ForceFieldProjector)/) {
+   if($line =~ m/(FlagItem|^Spawn|Turret|ForceFieldProjector)/) {
       my $team = (shift @words);
       $team >= 0 && $team++;   # Stupid lua arrays
       my $x = (shift @words) * $gridsize;
@@ -99,6 +97,27 @@ foreach my $line (<$IN>) {
       next;
    }
 
+
+   if($line =~ m/(FlagSpawn)/) {
+      my $team = (shift @words);
+      $team >= 0 && $team++;   # Stupid lua arrays
+      my $x = (shift @words) * $gridsize;
+      my $y = (shift @words) * $gridsize;
+      my $time = shift @words;
+
+      print "levelgen:addItem($1.new(point.new($x,$y), $team, $time))\n";
+      next;
+   }
+
+
+   if($line =~ m/(AsteroidSpawn|CircleSpawn)/) {
+      my $x = (shift @words) * $gridsize;
+      my $y = (shift @words) * $gridsize;
+      my $time = shift @words;
+
+      print "levelgen:addItem($1.new(point.new($x,$y), $time))\n";
+      next;
+   }
 
 
    if($line =~ m/(Core)/) {
@@ -156,6 +175,9 @@ foreach my $line (<$IN>) {
       print "levelgen:addItem($1.new(point.new($x,$y)))\n";
       next;
    }
+
+
+   print "XXXXXXXXXXXXXXXXXXXXXXXX\n$line\n";
 }
 
 =pod
