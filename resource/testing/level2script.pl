@@ -3,7 +3,7 @@ use strict;            # Require vars to be declared!
 $SIG{__WARN__} = sub { die "Undef value: @_" if $_[0] =~ /undefined/ };
 
 
-my $infile = 'C:\Users\Chris\Documents\bf-trunk\exe\levels\nexus.level';
+my $infile = 'C:\Users\Chris\Documents\bf-trunk\exe\levels\soccer.level';
 
 open my $IN, "<", $infile || die "Could not open $infile for reading: $!";
 
@@ -169,7 +169,7 @@ foreach my $line (<$IN>) {
    }
 
 
-   if($line =~ m/(ResourceItem|TestItem)/) {
+   if($line =~ m/(ResourceItem|TestItem|SoccerBallItem)/) {
       my $x = (shift @words) * $gridsize;
       my $y = (shift @words) * $gridsize;
       print "levelgen:addItem($1.new(point.new($x,$y)))\n";

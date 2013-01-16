@@ -267,18 +267,14 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
 {
    mObjectTypeNumber = SoccerBallItemTypeNumber;
    mNetFlags.set(Ghostable);
-   initialPos = Point(0,0);
    mLastPlayerTouch = NULL;
    mLastPlayerTouchTeam = NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
 
    mSendHomeTimer.setPeriod(1500);     // Ball will linger in goal for 1500 ms before being sent home
 
-   const F32 NO_DRAG = 0.0;
-   mDragFactor = NO_DRAG;
+   mDragFactor = 0.0;      // No drag
 
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
-   
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }}, 2 };
@@ -288,6 +284,10 @@ SoccerBallItem::SoccerBallItem(lua_State *L) : Parent(Point(0,0), true, (F32)Soc
       if(profile == 1)
          setPos(L, 1);
    }
+
+   mInitialPos = getPos();
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 
@@ -325,10 +325,10 @@ bool SoccerBallItem::processArguments(S32 argc2, const char **argv2, Game *game)
    if(!Parent::processArguments(argc, argv, game))
       return false;
 
-   initialPos = getActualPos();
+   mInitialPos = getActualPos();
 
    // Add a spawn point at the ball's starting location
-   FlagSpawn *spawn = new FlagSpawn(initialPos, 0);
+   FlagSpawn *spawn = new FlagSpawn(mInitialPos, 0);
    spawn->addToGame(game, game->getGameObjDatabase());
 
    return true;
@@ -495,9 +495,9 @@ void SoccerBallItem::sendHome()
    Vector<AbstractSpawn *> spawnPoints = getGame()->getGameType()->getSpawnPoints(FlagSpawnTypeNumber);
 
    S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-   initialPos = spawnPoints[spawnIndex]->getPos();
+   mInitialPos = spawnPoints[spawnIndex]->getPos();
 
-   setPosVelAng(initialPos, Point(0,0), 0);
+   setPosVelAng(mInitialPos, Point(0,0), 0);
 
    setMaskBits(WarpPositionMask | PositionMask);      // By warping, we eliminate the "drifting" effect we got when we used PositionMask
 

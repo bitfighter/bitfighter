@@ -82,12 +82,12 @@ class SoccerBallItem : public MoveItem
    typedef MoveItem Parent;      // TODO: Should be PointObject???
 
 private:
-   Point initialPos;
+   Point mInitialPos;
    Timer mSendHomeTimer;
-   SafePtr<Ship> mLastPlayerTouch;
    S32 mLastPlayerTouchTeam;
-   StringTableEntry mLastPlayerTouchName;
    F32 mDragFactor;
+   StringTableEntry mLastPlayerTouchName;
+   SafePtr<Ship> mLastPlayerTouch;
 
 public:
    SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
