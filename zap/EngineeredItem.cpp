@@ -583,6 +583,7 @@ void EngineeredItem::onGeomChanged()
    Parent::onGeomChanged();
 }
 
+
 #ifndef ZAP_DEDICATED
 Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
 {
@@ -595,7 +596,7 @@ Point EngineeredItem::getEditorSelectionOffset(F32 currentScale)
    F32 ang = cross.ATAN2();
 
    F32 x = -m * sin(ang);
-   F32 y = m * cos(ang);
+   F32 y =  m * cos(ang);
 
    return Point(x,y);
 }
@@ -843,12 +844,14 @@ Vector<Point> EngineeredItem::getObjectGeometry(const Point &anchor, const Point
 void EngineeredItem::setPos(lua_State *L, S32 stackIndex)
 {
    Parent::setPos(L, stackIndex);
+   findMountPoint(Game::getAddTarget(), getPos());
 }
 
 
 void EngineeredItem::setPos(const Point &p)
 {
    Parent::setPos(p);
+
    computeObjectGeometry();
    computeExtent();           // Sets extent based on actual geometry of object
 }
@@ -1721,21 +1724,23 @@ TNL_IMPLEMENT_NETOBJECT(Turret);
   */
 Turret::Turret(lua_State *L) : Parent(TEAM_NEUTRAL, Point(0,0), Point(1,0))
 {
-   // TODO: This does not work; we need to snap the turret to a nearby wall and compute the normal angle.
-   // It is likely that setPos is similarly broken.  And maybe more.
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, TEAM_INDX, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }}, 2 };
       S32 profile = checkArgList(L, constructorArgList, "Turret", "constructor");
       
-      findMountPoint(Game::getAddTarget(), getPos());
-
-      if(profile == 1)
+      if(profile == 1 )
       {
-         findMountPoint(gServerGame, getPointOrXY(L, 1));
+         setPos(L, 1);
+         setTeam(TEAM_NEUTRAL);
+      }
+      if(profile == 2)
+      {
+         setPos(L, 1);
          setTeam(L, 2);
       }
    }
+
    initialize();
 }
 
