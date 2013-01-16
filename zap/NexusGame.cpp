@@ -975,8 +975,6 @@ NexusZone::NexusZone(lua_State *L)
 {
    mObjectTypeNumber = NexusTypeNumber;
    mNetFlags.set(Ghostable);
-
-   LUAW_CONSTRUCTOR_INITIALIZATIONS;
    
    if(L)
    {
@@ -986,6 +984,8 @@ NexusZone::NexusZone(lua_State *L)
       if(profile == 1)
          setGeom(L, 1);
    }
+
+   LUAW_CONSTRUCTOR_INITIALIZATIONS;
 }
 
 

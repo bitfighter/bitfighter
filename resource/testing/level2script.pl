@@ -3,7 +3,7 @@ use strict;            # Require vars to be declared!
 $SIG{__WARN__} = sub { die "Undef value: @_" if $_[0] =~ /undefined/ };
 
 
-my $infile = 'C:\Users\Chris\Documents\bf-trunk\exe\levels\ctf.level';
+my $infile = 'C:\Users\Chris\Documents\bf-trunk\exe\levels\nexus.level';
 
 open my $IN, "<", $infile || die "Could not open $infile for reading: $!";
 
@@ -56,6 +56,22 @@ foreach my $line (<$IN>) {
       print "levelgen:addItem($1.new(". join(', ', @points), ", $team))\n";
       next;
    }
+
+
+
+   if($line =~ m/(HuntersNexusObject|NexusObject)/) {
+      my @points;
+
+      while(@words) {
+         my $x = (shift @words) * $gridsize;
+         my $y = (shift @words) * $gridsize;
+         push(@points, "point.new($x,$y)");
+      }
+
+      print "levelgen:addItem(NexusZone.new(". join(', ', @points), "))\n";
+      next;
+   }
+
 
 
    if($line =~ m/(PolyWall)/) {
