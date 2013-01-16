@@ -172,20 +172,20 @@ TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
 static Vector<DatabaseObject *> foundObjects;      // Reusable container
 
+
 // Combined default C++/Lua constructor
 Teleporter::Teleporter(lua_State *L)
 {
-   initialize(Point(0,0),Point(0,0),NULL);
-   // TODO: XXXXX Fix this one too -- intiailze needs to be refactored because who knows
-   // how many points the teleporter is getting?  could be 1, could be 2, could be many
+   initialize(Point(0,0), Point(0,0), NULL);
+   
    if(L)
    {
-      static LuaFunctionArgList constructorArgList = { {{ END }, { GEOM, END }}, 2 };
+      static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { LINE, END } }, 3 };
       
       S32 profile = checkArgList(L, constructorArgList, "Teleporter", "constructor");
 
-      if(profile == 1)
-         setPos(L, 1);
+      if(profile > 0)
+         doSetGeom(L);
    }
 }
 
@@ -204,13 +204,14 @@ Teleporter::~Teleporter()
 }
 
 
+// Note that the teleporter may already have destinations when we get here... just something to keep in mind
 void Teleporter::initialize(const Point &pos, const Point &dest, Ship *engineeringShip)
 {
    mObjectTypeNumber = TeleporterTypeNumber;
    mNetFlags.set(Ghostable);
 
    mTime = 0;
-   mTeleporterCooldown = TeleporterCooldown;    // Teleporters can have non-standard cooldown periods
+   mTeleporterCooldown = TeleporterCooldown;    // Teleporters can have non-standard cooldown periods, but start with default
    setTeam(TEAM_NEUTRAL);
 
    setVert(pos, 0);
@@ -308,7 +309,7 @@ bool Teleporter::processArguments(S32 argc2, const char **argv2, Game *game)
       computeExtent(); // for ServerGame extent
    }
 #ifndef ZAP_DEDICATED
-   else
+   else     // Is client
    {
       addDest(dest);
       setExtent(calcExtents()); // for editor
@@ -668,7 +669,7 @@ bool Teleporter::hasAnyDests()
 }
 
 
-// Server only
+// Server only, also called from editor
 void Teleporter::setEndpoint(const Point &point)
 {
    mDestManager.addDest(point);
@@ -876,13 +877,14 @@ bool Teleporter::canBeNeutral() { return false; }
   *         and one or more destinations.  When a ship enters the teleporter, a destination will be chosen 
   *         randomly if there is more than one.   
   */
-//               Fn name     Param profiles       Profile count                           
+//               Fn name                       Param profiles         Profile count                           
 #define LUA_METHODS(CLASS, METHOD) \
-   METHOD(CLASS, addDest,      ARRAYDEF({{ PT,  END }}), 1 ) \
-   METHOD(CLASS, delDest,      ARRAYDEF({{ INT, END }}), 1 ) \
-   METHOD(CLASS, clearDests,   ARRAYDEF({{      END }}), 1 ) \
-   METHOD(CLASS, getDest,      ARRAYDEF({{ INT, END }}), 1 ) \
-   METHOD(CLASS, getDestCount, ARRAYDEF({{      END }}), 1 ) \
+   METHOD(CLASS, addDest,      ARRAYDEF({ { PT,  END }                }), 1 ) \
+   METHOD(CLASS, delDest,      ARRAYDEF({ { INT, END }                }), 1 ) \
+   METHOD(CLASS, clearDests,   ARRAYDEF({ {      END }                }), 1 ) \
+   METHOD(CLASS, getDest,      ARRAYDEF({ { INT, END }                }), 1 ) \
+   METHOD(CLASS, getDestCount, ARRAYDEF({ {      END }                }), 1 ) \
+   METHOD(CLASS, setGeom,      ARRAYDEF({ { PT,  END }, { LINE, END } }), 2 ) \
 
 GENERATE_LUA_METHODS_TABLE(Teleporter, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Teleporter, LUA_METHODS);
@@ -997,34 +999,36 @@ S32 Teleporter::getDestCount(lua_State *L)
   */
 S32 Teleporter::setGeom(lua_State *L)
 {
-   S32 stackPos = 1;
+   checkArgList(L, functionArgs, "Teleporter", "setGeom");
 
-   if(!checkLuaArgs(L, LuaBase::GEOM, stackPos))      // Warning: stackPos will likely be altered!!
-   {
-      const char *msg = "Could not validate params for function Teleporter::setGeom().  Expected Geometry.";
-      logprintf(LogConsumer::LogError, msg);
+   doSetGeom(L);
 
-      dumpStack(L, "Current stack state");
+   //clearStack(L);    // Why do we need this?
+   return 0;
+}
 
-      throw LuaException(msg);
-   }
 
-   Vector<Point> points = getPointsOrXYs(L, 1);    
-
+// Helper for Lua constructor and setGeom(L) methods
+void Teleporter::doSetGeom(lua_State *L)
+{
    mDestManager.clear();      // Any existing destinations are toast
 
-   if(points.size() > 0)
+   Vector<Point> points = getPointsOrXYs(L, 1);
+
+   setVert(points[0], 0);     // Origin
+
+   if(points.size() >= 2)     
    {
-      // We'll use the first point to set the object's origin
-      setPos(points[0]);
+      setVert(points[1], 1);  // Dest
 
-      // Subsequent points will be used as destinations for the teleporter
+      // Notify destination manager about the new destinations
       for(S32 i = 1; i < points.size(); i++)
-         mDestManager.addDest(points[i]);
+         addDest(points[i]);
    }
+   else
+      setVert(Point(0,0), 1);  // Set default dest -- maybe not important to set this
 
-   clearStack(L);    // Why do we need this?
-   return 0;
+   computeExtent();
 }
 
 

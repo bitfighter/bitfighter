@@ -3,7 +3,7 @@ use strict;            # Require vars to be declared!
 $SIG{__WARN__} = sub { die "Undef value: @_" if $_[0] =~ /undefined/ };
 
 
-my $infile = 'C:\Users\Chris\AppData\Roaming\Bitfighter\levels/ctf.level';
+my $infile = 'C:\Users\Eykamp.TUDOR\Documents\bitfighter\exe\levels\ctf.level';
 
 open my $IN, "<", $infile || die "Could not open $infile for reading: $!";
 
@@ -72,6 +72,7 @@ foreach my $line (<$IN>) {
    }
 
 
+
    if($line =~ m/(FlagItem|Spawn|Turret)/) {
       my $team = (shift @words);
       $team >= 0 && $team++;   # Stupid lua arrays
@@ -118,6 +119,17 @@ foreach my $line (<$IN>) {
       print "g = $1.new(point.new($x1,$y1), point.new($x2,$y2), $spd)\n";
       if($snap) { print "   g:setSnapping(true)\n"; }
       print "   levelgen:addItem(g)\n";
+      next;
+   }
+
+
+   if($line =~ m/(Teleporter)/) {
+      my $x1 = (shift @words) * $gridsize;
+      my $y1 = (shift @words) * $gridsize;
+      my $x2 = (shift @words) * $gridsize;
+      my $y2 = (shift @words) * $gridsize;
+
+      print "levelgen:addItem($1.new(point.new($x1,$y1), point.new($x2,$y2)))\n";
       next;
    }
 

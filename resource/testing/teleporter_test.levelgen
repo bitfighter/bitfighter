@@ -1,0 +1,54 @@
+
+
+
+function main()
+
+  -- Test some teleporter functionality
+  p11 = point.new(100,0)
+  p21 = point.new(200,0)
+  p31 = point.new(300,0)
+  p41 = point.new(400,0)
+  p51 = point.new(500,0)
+  p61 = point.new(600,0)
+  p71 = point.new(700,0)
+  p81 = point.new(800,0)
+
+  p12 = point.new(100,-500)
+  p22 = point.new(200,-500)
+  p32 = point.new(300,-500)
+  p42 = point.new(400,-500)
+  p52 = point.new(500,-500)
+  p62 = point.new(600,-500)
+  p72 = point.new(700,-500)
+  p82 = point.new(800,-500)
+
+
+  -- Add empty teleporter, set geom
+  g = Teleporter.new()
+  g:setGeom(p11, p12)
+  levelgen:addItem(g)
+  assert(g:getDestCount() == 1)
+
+  -- Add teleporter with origin and dest
+  levelgen:addItem(Teleporter.new(p21,p22))
+
+  -- Add teleporter with mulitple dests
+  levelgen:addItem(Teleporter.new(p31,p32,p42,p52))
+
+  -- Add empty teleporter, add two dests with addDest
+  g = Teleporter.new(p61)
+  g:addDest(p62)
+  g:addDest(p72)
+  levelgen:addItem(g)
+  assert(g:getDestCount() == 2)
+
+  -- As above, but clear dests and add a new one
+  g = Teleporter.new(p81)
+  g:addDest(p62)
+  g:addDest(p72)
+  levelgen:addItem(g)
+  g:clearDests()
+  g:addDest(p82)
+  assert(g:getDestCount() == 1)
+
+end 
