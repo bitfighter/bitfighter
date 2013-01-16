@@ -321,7 +321,12 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
 
       S32 error = lua_pcall(L, args, returnValues, -2 - args);  // -- _stackTracer, <<return values>>
       if(error)
-         throw LuaException("In method " + string(function) +"():\n" + string(lua_tostring(L, -1)));
+      {
+         string msg = lua_tostring(L, -1);
+         lua_pop(L, 1);    // Remove the message from the stack, so it won't appear in our stack dump
+
+         throw LuaException("In method " + string(function) +"():\n" + msg);
+      }
 
       lua_remove(L, 1);    // Remove _stackTracer               // -- <<return values>>
 
