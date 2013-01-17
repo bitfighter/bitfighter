@@ -608,17 +608,13 @@ S32 NexusGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEven
    {
       switch(scoreEvent)
       {
-         case KillEnemy:
-            return 0;
-         case KilledByAsteroid:  // Fall through OK
-         case KilledByTurret:    // Fall through OK
-         case KillSelf:
-            return 0;
-         case KillTeammate:
-            return 0;
-         case KillEnemyTurret:
-            return 0;
-         case KillOwnTurret:
+         case KillEnemy:         // Fall through OK
+         case KilledByAsteroid:  //       .
+         case KilledByTurret:    //       .
+         case KillSelf:          //       .
+         case KillTeammate:      //       .
+         case KillEnemyTurret:   //       .
+         case KillOwnTurret:     //       .
             return 0;
          case ReturnFlagsToNexus:
             return score;
