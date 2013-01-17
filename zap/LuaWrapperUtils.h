@@ -39,6 +39,12 @@ T luaU_toenum(lua_State* L, int index)
 }
 
 template <typename T>
+void luaU_setenum(lua_State* L, int index, const char* key, T value)
+{
+    lua_pushnumber(L, static_cast<int>(value));
+}
+
+template <typename T>
 void luaU_pushenum(lua_State* L, T value)
 {
     lua_pushnumber(L, static_cast<int>(value));

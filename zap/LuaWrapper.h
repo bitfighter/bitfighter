@@ -52,15 +52,10 @@ using namespace Zap;
 
 #define LUAW_BUILDER
 
-#define luaW_getregistry(L, s) \
-     lua_getfield(L, LUA_REGISTRYINDEX, s)
-
-#define luaW_setregistry(L, s) \
-     lua_setfield(L, LUA_REGISTRYINDEX, s)
-
-
 #if LUA_VERSION_NUM == 502
+
 #define luaL_reg luaL_Reg
+
 inline int luaL_register(lua_State* L, const char* name, const luaL_Reg table[])
 {
     if (name)
@@ -78,6 +73,7 @@ inline int luaL_typerror(lua_State* L, int narg, const char* tname)
     const char *msg = lua_pushfstring((L), "%s expected, got %s", (tname), luaL_typename((L), (narg)));
     return luaL_argerror((L), (narg), msg);
 }
+
 #endif
 
 #define LUAW_POSTCTOR_KEY "__postctor"
@@ -186,9 +182,9 @@ luaW_Userdata luaW_cast(const luaW_Userdata& obj)
 template <typename T>
 inline void luaW_wrapperfield(lua_State* L, const char* field)
 {
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... LuaWrapper
-    lua_getfield(L, -1, field); // ... LuaWrapper LuaWrapper.field
-    lua_remove(L, -2); // ... LuaWrapper LuaWrapper.field
+    lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // ... LuaWrapper
+    lua_getfield(L, -1, field);                           // ... LuaWrapper LuaWrapper.field
+    lua_remove(L, -2);                                    // ... LuaWrapper LuaWrapper.field
 }
 
 // Analogous to lua_is(boolean|string|*)
@@ -338,32 +334,32 @@ void luaW_push(lua_State* L, T* obj)
 
         ////////// This bit here we assign a class-specific metatable to our new userdata object
         // Get the metatable for this class out of the registry
-        luaL_getmetatable(L, LuaWrapper<T>::classname);     // -- userdata class_metatable
+        luaL_getmetatable(L, LuaWrapper<T>::classname);        // -- userdata class_metatable
 
         // Set the metatable of our userdata to be the class metatable
-        lua_setmetatable(L, -2);                            // -- userdata
+        lua_setmetatable(L, -2);                               // -- userdata
 
         ////////// This bit here increments an instance count for our specific object, which is stored
         //         in the LuaWrapper table in the registry
                
         // Retrieve luaW from the registry
-        luaW_getregistry(L, LUAW_WRAPPER_KEY);              // -- userdata LuaWrapper
-        lua_getfield(L, -1, LUAW_COUNT_KEY);                // -- userdata LuaWrapper LuaWrapper.counts
+        lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY);  // -- userdata LuaWrapper
+        lua_getfield(L, -1, LUAW_COUNT_KEY);                   // -- userdata LuaWrapper LuaWrapper.counts
 
         // Push object's unique_id onto the stack (usally the object's memory location)
-        LuaWrapper<T>::identifier(L, obj);                  // -- userdata LuaWrapper LuaWrapper.counts unique_id
+        LuaWrapper<T>::identifier(L, obj);                     // -- userdata LuaWrapper LuaWrapper.counts unique_id
 
         // Get the instance count for our object from the LuaWrapper table
-        lua_gettable(L, -2);                                // -- userdata LuaWrapper LuaWrapper.counts count
+        lua_gettable(L, -2);                                   // -- userdata LuaWrapper LuaWrapper.counts count
         int count = (int) lua_tointeger(L, -1);             
 
         // This chunk increments the instance count, and stores it back in the LuaWrapper table
-        LuaWrapper<T>::identifier(L, obj);                  // -- userdata LuaWrapper LuaWrapper.counts count unique_id
-        lua_pushinteger(L, count+1);                        // -- userdata LuaWrapper LuaWrapper.counts count unique_id count+1
-        lua_settable(L, -4);                                // -- userdata LuaWrapper LuaWrapper.counts count
+        LuaWrapper<T>::identifier(L, obj);                     // -- userdata LuaWrapper LuaWrapper.counts count unique_id
+        lua_pushinteger(L, count+1);                           // -- userdata LuaWrapper LuaWrapper.counts count unique_id count+1
+        lua_settable(L, -4);                                   // -- userdata LuaWrapper LuaWrapper.counts count
 
         ////////// Clean house
-        lua_pop(L, 3);                                      // -- userdata
+        lua_pop(L, 3);                                         // -- userdata
 
         //luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
     }
@@ -383,7 +379,7 @@ void luaW_push(lua_State* L, T* obj)
 template <typename T>
 bool luaW_hold(lua_State* L, T* obj)
 {
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... LuaWrapper
+    lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // ... LuaWrapper
 
     lua_getfield(L, -1, LUAW_HOLDS_KEY); // ... LuaWrapper LuaWrapper.holds
     LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.holds id
@@ -501,20 +497,20 @@ void luaW_clean(lua_State* L, T* obj)
 template <typename T>
 void luaW_postconstructor(lua_State* L, int numargs)
 {
-    // ... args ud
-    lua_getfield(L, -1, LUAW_POSTCTOR_KEY); // ... args ud ud.__postctor
-    if (lua_type(L, -1) == LUA_TFUNCTION)
-    {
-        lua_pushvalue(L, -2); // ... args ud ud.__postctor ud
-        lua_insert(L, -3); // ... ud args ud ud.__postctor
-        lua_insert(L, -3); // ... ud.__postctor ud args ud
-        lua_insert(L, -3); // ... ud ud.__postctor ud args
-        lua_call(L, numargs+1, 0); // ... ud
-    }
-    else
-    {
-        lua_pop(L, 1); // ... ud
-    }
+   // ... args... ud
+   lua_getfield(L, -1, LUAW_POSTCTOR_KEY); // ... args... ud ud.__postctor
+   if (lua_type(L, -1) == LUA_TFUNCTION)
+   {
+      lua_pushvalue(L, -2);        // ... args... ud ud.__postctor ud
+      lua_insert(L, -3 - numargs); // ... ud args... ud ud.__postctor
+      lua_insert(L, -3 - numargs); // ... ud.__postctor ud args... ud
+      lua_insert(L, -3 - numargs); // ... ud ud.__postctor ud args...
+      lua_call(L, numargs + 1, 0); // ... ud
+   }
+   else
+   {
+      lua_pop(L, 1); // ... ud
+   }
 }
 
 // This function is generally called from Lua, not C++
@@ -716,6 +712,8 @@ int luaW_gc(lua_State* L)
 // but still represent the same object. For cases like that, you may specify an
 // identifier function which is responsible for pushing a key representing your
 // object on to the stack.
+// 
+// As with luaL_register, this leaves the new table on the top of the stack.
 //
 // Allocator -> constructor, Deallocator => destructor
 template <typename T>
@@ -743,12 +741,12 @@ void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, c
     metatable = metatable ? metatable : emptytable;
 
     // Ensure that the LuaWrapper table is set up
-    luaW_getregistry(L, LUAW_WRAPPER_KEY); // LuaWrapper
+    lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // LuaWrapper
     if (lua_isnil(L, -1))
     {
         lua_newtable(L); // nil {}
         lua_pushvalue(L, -1); // nil {} {}
-        luaW_setregistry(L, LUAW_WRAPPER_KEY); // nil LuaWrapper
+        lua_setfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // nil LuaWrapper
         lua_newtable(L); // nil LuaWrapper {}
         lua_setfield(L, -2, LUAW_COUNT_KEY); // nil LuaWrapper
         lua_newtable(L); // LuaWrapper nil {}
@@ -820,12 +818,9 @@ void luaW_extend(lua_State* L)
     lua_pop(L, 4); // mt emt
 }
 
-#undef luaW_getregistry
-#undef luaW_setregistry
-
 
 #if LUA_VERSION_NUM == 502
-#undef luaL_reg
+#  undef luaL_reg
 #endif
 
 extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
