@@ -1,3 +1,6 @@
+// NOTE: This file includes edits from https://bitbucket.org/alexames/luawrapper/commits
+//       through d21a7ff
+
 /*
  * Copyright (c) 2010-2011 Alexander Ames
  * Alexander.Ames@gmail.com
@@ -19,6 +22,7 @@
 //  luaW_check<T>
 //  luaW_push<T>
 //  luaW_register<T>
+//  luaW_setfuncs<T>
 //  luaW_extend<T, U>
 //  luaW_hold<T>
 //  luaW_release<T>
@@ -51,30 +55,6 @@ extern "C"
 using namespace Zap;
 
 #define LUAW_BUILDER
-
-#if LUA_VERSION_NUM == 502
-
-#define luaL_reg luaL_Reg
-
-inline int luaL_register(lua_State* L, const char* name, const luaL_Reg table[])
-{
-    if (name)
-    {
-        luaL_newlibtable(L, table);
-        lua_pushvalue(L, -1);
-        lua_setglobal(L, name);
-    }
-    luaL_setfuncs(L, table, 0);
-    return 1;
-}
-
-inline int luaL_typerror(lua_State* L, int narg, const char* tname)
-{
-    const char *msg = lua_pushfstring((L), "%s expected, got %s", (tname), luaL_typename((L), (narg)));
-    return luaL_argerror((L), (narg), msg);
-}
-
-#endif
 
 #define LUAW_POSTCTOR_KEY "__postctor"
 #define LUAW_EXTENDS_KEY  "__extends"
@@ -292,11 +272,12 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
         LuaProxy<T> *proxy = (LuaProxy<T>*)pud->data;
 
         if(!proxy->isDefunct())
-         obj = proxy->getProxiedObject();
+           obj = proxy->getProxiedObject();
     }
     else
     {
-        luaL_typerror(L, index, LuaWrapper<T>::classname);
+       const char *msg = lua_pushfstring(L, "%s expected, got %s", LuaWrapper<T>::classname, luaL_typename(L, index));
+       luaL_argerror(L, index, msg);
     }
 
     return obj;
@@ -692,13 +673,55 @@ int luaW_gc(lua_State* L)
     return 0;
 }
 
-// Run luaW_register to create a table and metatable for your class. This
-// creates a table with the name you specify filled with the function from the
-// table argument in addition to the functions new and build. This is generally
-// for things you think of as static methods in C++. The metatable becomes a
-// metatable for each object if your class. These can be thought of as member
-// functions or methods.
+// Takes two tables and registers them with Lua to the table on the top of the
+// stack. 
 //
+// This function is only called from LuaWrapper internally. 
+inline void luaW_registerfuncs(lua_State* L, const luaL_Reg defaulttable[], const luaL_Reg table[])
+{
+    // ... T
+#if LUA_VERSION_NUM == 502
+    if (defaulttable)
+        luaL_setfuncs(L, defaulttable, 0); // ... T
+    if (table)
+        luaL_setfuncs(L, table, 0); // ... T
+#else
+    if (defaulttable)
+        luaL_register(L, NULL, defaulttable); // ... T
+    if (table)
+        luaL_register(L, NULL, table); // ... T
+#endif
+}
+
+// Initializes the LuaWrapper tables used to track internal state. 
+//
+// This function is only called from LuaWrapper internally. 
+inline void luaW_initialize(lua_State* L)
+{
+    // Ensure that the LuaWrapper table is set up
+    lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // ... LuaWrapper
+    if (lua_isnil(L, -1))
+    {
+        lua_newtable(L); // ... nil {}
+        lua_pushvalue(L, -1); // ... nil {} {}
+        lua_setfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // ... nil LuaWrapper
+        lua_newtable(L); // ... nil LuaWrapper {}
+        lua_setfield(L, -2, LUAW_COUNT_KEY); // ... nil LuaWrapper
+        lua_newtable(L); // ... LuaWrapper nil {}
+        lua_setfield(L, -2, LUAW_STORAGE_KEY); // ... nil LuaWrapper
+        lua_newtable(L); // ... LuaWrapper {}
+        lua_setfield(L, -2, LUAW_HOLDS_KEY); // ... nil LuaWrapper
+        lua_pop(L, 1); // ... nil
+    }
+    lua_pop(L, 1); // ...
+}
+
+// Run luaW_register or luaW_setfuncs to create a table and metatable for your
+// class.  These functions create a table with filled with the function from
+// the table argument in addition to the functions new and build (This is
+// generally for things you think of as static methods in C++). The given
+// metatable argument becomes a metatable for each object of your class. These
+// can be thought of as member functions or methods.//
 // You may also supply constructors and destructors for classes that do not
 // have a default constructor or that require special set up or tear down. You
 // may specify NULL as the constructor, which means that you will not be able
@@ -713,17 +736,23 @@ int luaW_gc(lua_State* L)
 // identifier function which is responsible for pushing a key representing your
 // object on to the stack.
 // 
-// As with luaL_register, this leaves the new table on the top of the stack.
-//
+// luaW_register will set table as the new value of the global of the given
+// name. luaW_setfuncs is identical to luaW_register, but it does not set the
+// table globally.  As with luaL_register and luaL_setfuncs, both funcstions
+// leave the new table on the top of the stack.
 // Allocator -> constructor, Deallocator => destructor
 template <typename T>
-void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, const luaL_reg* metatable, 
-                   T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, 
-                   void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>)
+void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table, 
+                   const luaL_Reg* metatable, 
+                   T* (*allocator)(lua_State*)         = luaW_defaultallocator<T>, 
+                   void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, 
+                   void (*identifier)(lua_State*, T*)  = luaW_defaultidentifier<T>)
 {
-    LuaWrapper<T>::classname = classname;
-    LuaWrapper<T>::identifier = identifier;
-    LuaWrapper<T>::allocator = allocator;
+    luaW_initialize(L);
+
+    LuaWrapper<T>::classname   = classname;
+    LuaWrapper<T>::identifier  = identifier;
+    LuaWrapper<T>::allocator   = allocator;
     LuaWrapper<T>::deallocator = deallocator;
 
     const luaL_reg defaulttable[] =
@@ -734,47 +763,33 @@ void luaW_register(lua_State* L, const char* classname, const luaL_reg* table, c
 #endif
         { NULL, NULL }
     };
-    const luaL_reg defaultmetatable[] = { { "__index", luaW_index<T> }, { "__newindex", luaW_newindex<T> }, { "__gc", luaW_gc<T> }, { NULL, NULL } };
-    const luaL_reg emptytable[] = { { NULL, NULL } };
 
-    table = table ? table : emptytable;
-    metatable = metatable ? metatable : emptytable;
-
-    // Ensure that the LuaWrapper table is set up
-    lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // LuaWrapper
-    if (lua_isnil(L, -1))
-    {
-        lua_newtable(L); // nil {}
-        lua_pushvalue(L, -1); // nil {} {}
-        lua_setfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY); // nil LuaWrapper
-        lua_newtable(L); // nil LuaWrapper {}
-        lua_setfield(L, -2, LUAW_COUNT_KEY); // nil LuaWrapper
-        lua_newtable(L); // LuaWrapper nil {}
-        lua_setfield(L, -2, LUAW_STORAGE_KEY); // nil LuaWrapper
-        lua_newtable(L); // LuaWrapper {}
-        lua_setfield(L, -2, LUAW_HOLDS_KEY); // nil LuaWrapper
-        lua_pop(L, 1); // nil
-    }
-    lua_pop(L, 1); //
+    const luaL_Reg defaultmetatable[] = 
+    { 
+        { "__index",    luaW_index<T> }, 
+        { "__newindex", luaW_newindex<T> }, 
+        { "__gc",       luaW_gc<T> }, 
+        { NULL,         NULL } 
+    };
 
     // Open table
-    if (allocator)
-    {
-        luaL_register(L, LuaWrapper<T>::classname, defaulttable); // T
-        luaL_register(L, NULL, table); // T
-    }
-    else
-    {
-        luaL_register(L, LuaWrapper<T>::classname, table); // T
-    }
+    lua_newtable(L); // ... T
+    luaW_registerfuncs(L, allocator ? defaulttable : NULL, table); // ... T
 
     // Open metatable, set up extends table
-    luaL_newmetatable(L, LuaWrapper<T>::classname); // T mt
-    lua_newtable(L); // T mt {}
-    lua_setfield(L, -2, LUAW_EXTENDS_KEY); // T mt
-    luaL_register(L, NULL, defaultmetatable); // T mt
-    luaL_register(L, NULL, metatable); // T mt
-    lua_setfield(L, -2, "metatable"); // T
+    luaL_newmetatable(L, classname); // ... T mt
+    lua_newtable(L); // ... T mt {}
+    lua_setfield(L, -2, LUAW_EXTENDS_KEY); // ... T mt
+    luaW_registerfuncs(L, defaultmetatable, metatable); // ... T mt
+    lua_setfield(L, -2, "metatable"); // ... T
+}
+
+template <typename T>
+void luaW_register(lua_State* L, const char* classname, const luaL_Reg* table, const luaL_Reg* metatable, T* (*allocator)(lua_State*) = luaW_defaultallocator<T>, void (*deallocator)(lua_State*, T*) = luaW_defaultdeallocator<T>, void (*identifier)(lua_State*, T*) = luaW_defaultidentifier<T>)
+{
+    luaW_setfuncs(L, classname, table, metatable, allocator, deallocator, identifier); // ... T
+    lua_pushvalue(L, -1); // ... T T
+    lua_setglobal(L, classname); // ... T
 }
 
 // luaW_extend is used to declare that class T inherits from class U. All
@@ -818,10 +833,6 @@ void luaW_extend(lua_State* L)
     lua_pop(L, 4); // mt emt
 }
 
-
-#if LUA_VERSION_NUM == 502
-#  undef luaL_reg
-#endif
 
 extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
                            const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
