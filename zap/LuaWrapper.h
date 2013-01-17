@@ -326,25 +326,44 @@ void luaW_push(lua_State* L, T* obj)
         if(!proxy)
            proxy = new LuaProxy<T>(obj);
 
+        logprintf("proxy: %p (%p)", proxy, obj);
+
         proxy->incUseCount();
 
-        luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // ... obj
+                // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
+        luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // -- new userdata
         ud->data = proxy;
 
         ud->cast = LuaWrapper<T>::cast;
 
-        luaL_getmetatable(L, LuaWrapper<T>::classname); // ... obj mt
-        lua_setmetatable(L, -2); // ... obj
-        luaW_getregistry(L, LUAW_WRAPPER_KEY); // ... obj LuaWrapper
-        lua_getfield(L, -1, LUAW_COUNT_KEY); // ... obj LuaWrapper LuaWrapper.counts
-        LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts id
-        lua_gettable(L, -2); // ... obj LuaWrapper LuaWrapper.counts count
-        int count = (int) lua_tointeger(L, -1);
+        ////////// This bit here we assign a class-specific metatable to our new userdata object
+        // Get the metatable for this class out of the registry
+        luaL_getmetatable(L, LuaWrapper<T>::classname);     // -- userdata class_metatable
 
-        LuaWrapper<T>::identifier(L, obj); // ... obj LuaWrapper LuaWrapper.counts count id
-        lua_pushinteger(L, count+1); // ... obj LuaWrapper LuaWrapper.counts count id count+1
-        lua_settable(L, -4); // ... obj LuaWrapper LuaWrapper.counts count
-        lua_pop(L, 3); // ... obj
+        // Set the metatable of our userdata to be the class metatable
+        lua_setmetatable(L, -2);                            // -- userdata
+
+        ////////// This bit here increments an instance count for our specific object, which is stored
+        //         in the LuaWrapper table in the registry
+               
+        // Retrieve luaW from the registry
+        luaW_getregistry(L, LUAW_WRAPPER_KEY);              // -- userdata LuaWrapper
+        lua_getfield(L, -1, LUAW_COUNT_KEY);                // -- userdata LuaWrapper LuaWrapper.counts
+
+        // Push object's unique_id onto the stack (usally the object's memory location)
+        LuaWrapper<T>::identifier(L, obj);                  // -- userdata LuaWrapper LuaWrapper.counts unique_id
+
+        // Get the instance count for our object from the LuaWrapper table
+        lua_gettable(L, -2);                                // -- userdata LuaWrapper LuaWrapper.counts count
+        int count = (int) lua_tointeger(L, -1);             
+
+        // This chunk increments the instance count, and stores it back in the LuaWrapper table
+        LuaWrapper<T>::identifier(L, obj);                  // -- userdata LuaWrapper LuaWrapper.counts count unique_id
+        lua_pushinteger(L, count+1);                        // -- userdata LuaWrapper LuaWrapper.counts count unique_id count+1
+        lua_settable(L, -4);                                // -- userdata LuaWrapper LuaWrapper.counts count
+
+        ////////// Clean house
+        lua_pop(L, 3);                                      // -- userdata
 
         //luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
     }
