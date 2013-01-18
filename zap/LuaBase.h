@@ -183,10 +183,6 @@ public:
    static bool checkLuaArgs(lua_State *L, LuaBase::LuaArgType argType, S32 &stackPos);
 
    static string prettyPrintParamList(const LuaFunctionArgList &functionInfo);
-   static void printFunctions(const ArgMap &argMap, const map<ClassName, unsigned int> &nodeMap, 
-                              const vector<Node> &nodeList, const string &prefix, unsigned int nodeIndex);
-   static void printLooseFunctions();
-
 
    /////
    // Debugging helpers

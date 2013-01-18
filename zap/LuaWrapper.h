@@ -834,11 +834,6 @@ void luaW_extend(lua_State* L)
 }
 
 
-extern void printFunctions(const ArgMap &argMap, const std::map<ClassName, unsigned int> &nodeMap, 
-                           const std::vector<Node> &nodeList, const std::string &prefix, unsigned int nodeIndex);
-extern void printLooseFunctions();
-
-
 // Class to facilitate the semi-autonomous self-registration of LuaW classes.
 // To use this system, classes must implement the following:
 //    class name:  const char *luaClassName
@@ -1023,78 +1018,6 @@ public:
 
          getExtensionFunctions()[orderedClassList[i]](L);
       }
-   }
-
-
-   //template<class T>
-   //static std::string getArgList(const char *functionName)
-   //{
-   //   for(S32 i = 0; T::functionArgs[i].name != NULL; i++)
-   //      if(strcmp(functionName, T::functionArgs[i].name) == 0)
-   //         return prettyPrintParamList(T::functionArgs[i]);
-
-   //   return "Arguments unknown";
-   //}
-
-
-   // Has to be run BEFORE sortClassList()!
-   static void printDocs()
-   {
-      std::vector<ClassName> &orderedClassList = getOrderedClassList();
-      std::map<ClassName, unsigned int> nodeMap;    // For access to the nodes
-      std::map<ClassName, ClassParent> classParentMap;
-
-      std::vector<Node> nodeList;
-
-      // Put our unordered class list into a more accessible form
-      for(unsigned int i = 0; i < getUnorderedClassList().size(); i++)
-      {
-         std::pair<ClassName, ClassParent> p;
-         p.first = getUnorderedClassList()[i].name;
-         p.second = getUnorderedClassList()[i];
-
-         classParentMap.insert(p);
-      }
-
-      // Until sortClassList is run, orderedClassList containes all our root nodes, and nothing else
-      // Here we create our list of root nodes, under which other nodes will be added
-      unsigned int rootClassCount = orderedClassList.size();
-      for(unsigned int i = 0; i < rootClassCount; i++)
-      {
-         Node node;
-         node.first = orderedClassList[i];
-
-         nodeList.push_back(node);
-         nodeMap.insert(std::pair<ClassName, unsigned int>(orderedClassList[i], i));
-      }
-
-      sortClassList();
-
-      // Now orderedClassList contains all our classes; skip over initial group by starting at rootClassCount
-      for(unsigned int i = rootClassCount; i < orderedClassList.size(); i++)
-      {
-         // Find the parent node
-         ClassParent parent = classParentMap.find(orderedClassList[i])->second;
-         nodeList[nodeMap.find(parent.parent)->second].second.push_back(orderedClassList[i]);
-
-         Node node;
-         node.first = orderedClassList[i];
-
-         nodeList.push_back(node);
-         nodeMap.insert(std::pair<ClassName, unsigned int>(orderedClassList[i], nodeList.size() - 1));
-      }
-
-      // Output the map; only call on root nodes
-      for(unsigned int i = 0; i < rootClassCount; i++)
-      {
-         printf("=====================\n");
-         printFunctions(getArgMap(), nodeMap, nodeList, "", i);
-      }
-
-      // Finally, our "loose" functions...
-      printf("=====================\n");
-      printLooseFunctions();
-      printf("=====================\n");
    }
 };
 

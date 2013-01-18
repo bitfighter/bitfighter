@@ -148,7 +148,6 @@ DirectiveInfo directiveDefs[] = {
 
 // Other commands
 { "rules",   NO_PARAMETERS,  SHOW_RULES,        6, GameSettings::showRules,      "",  "Print a list of \"rules of the game\" and other possibly useful data", "" },
-{ "luadocs", NO_PARAMETERS,  SHOW_LUA_CLASSES,  6, GameSettings::showLuaClasses, "",  "Print a list of classes and methods available to Lua scripts", "" },
 { "help",    NO_PARAMETERS,  HELP,              6, GameSettings::showHelp,       "",  "Display this message", "" },
 
 };
@@ -913,13 +912,6 @@ void GameSettings::showRules(GameSettings *settings, const Vector<string> &words
    exitToOs(0);
 }
 
-
-void GameSettings::showLuaClasses(GameSettings *settings, const Vector<string> &words)
-{
-   writeToConsole();
-   LuaW_Registrar::printDocs();
-   exitToOs(0);
-}
 
 ////////////////////////////////////////
 ////////////////////////////////////////
