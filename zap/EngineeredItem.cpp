@@ -630,7 +630,8 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    F32 t;
 
    // Start with a sweep of the area
-   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125f)   // Reducing to 0.0125 seems to have no effect
+   // Start at any angle other than 0.  Search at angle 0 seems to return the wrong wall sometimes
+   for(F32 theta = 1.0f; theta < Float2Pi + 1.0f; theta += FloatPi * 0.125f)   // Reducing to 0.0125 seems to have no effect
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
