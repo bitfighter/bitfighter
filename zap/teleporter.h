@@ -143,6 +143,7 @@ public:
 
    void damageObject(DamageInfo *theInfo);
    void onDestroyed();
+   void doTeleport();
    bool collide(BfObject *otherObject);
 
    const Vector<Point> *getCollisionPoly() const;
