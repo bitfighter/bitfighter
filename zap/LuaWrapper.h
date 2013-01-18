@@ -719,7 +719,8 @@ inline void luaW_initialize(lua_State* L)
 // the table argument in addition to the functions new and build (This is
 // generally for things you think of as static methods in C++). The given
 // metatable argument becomes a metatable for each object of your class. These
-// can be thought of as member functions or methods.//
+// can be thought of as member functions or methods.
+//
 // You may also supply constructors and destructors for classes that do not
 // have a default constructor or that require special set up or tear down. You
 // may specify NULL as the constructor, which means that you will not be able
