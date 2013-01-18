@@ -634,7 +634,7 @@ DatabaseObject *EngineeredItem::findAnchorPointAndNormal(GridDatabase *wallEdgeD
    {
       Point dir(cos(theta), sin(theta));
       dir *= snapDist;
-      Point mountPos = pos;
+      Point mountPos = pos - dir * 0.001f;  // Offsetting slightly prevents spazzy behavior in editor
       
       // Look for walls
       DatabaseObject *wall = wallEdgeDatabase->findObjectLOS(testFunc, ActualState, format, mountPos, mountPos + dir, t, n);
