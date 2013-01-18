@@ -539,6 +539,68 @@ void Teleporter::onDestroyed()
    }
 }
 
+void Teleporter::doTeleport()
+{
+   static const F32 TRIGGER_RADIUS  = F32(TELEPORTER_RADIUS - Ship::CollisionRadius);
+   static const F32 TELEPORT_RADIUS = F32(TELEPORTER_RADIUS + Ship::CollisionRadius);
+
+   if(mDestManager.getDestCount() == 0)      // Ignore 0-dest teleporters -- where would you go??
+      return;
+
+   Rect queryRect(getVert(0), TRIGGER_RADIUS * 2);     
+
+   foundObjects.clear();
+   findObjects((TestFunc)isShipType, foundObjects, queryRect);
+
+   S32 dest = mDestManager.getRandomDest();
+
+   Point teleportCenter = getVert(0);
+
+   bool isTriggered = false; // First, check if triggered, can come from idle timer.
+   for(S32 i = 0; i < foundObjects.size(); i++)
+   {
+      if((teleportCenter - static_cast<Ship *>(foundObjects[i])->getRenderPos()).lenSquared() < sq(TRIGGER_RADIUS))
+      {
+         isTriggered = true;
+         break;
+      }
+   }
+
+   if(!isTriggered)
+      return;
+
+   setMaskBits(TeleportMask);
+   mTeleportCooldown.reset(mTeleporterCooldown);      // Teleport needs to wait a bit before being usable again
+
+   // We've triggered the teleporter.  Relocate any ships within range.  Any ship touching the teleport will be warped.
+   for(S32 i = 0; i < foundObjects.size(); i++)
+   {
+      Ship *ship = static_cast<Ship *>(foundObjects[i]);
+      if((teleportCenter - ship->getRenderPos()).lenSquared() < sq(TELEPORT_RADIUS))
+      {
+         mLastDest = dest;    // Save the destination
+
+         Point newPos = ship->getActualPos() - teleportCenter + mDestManager.getDest(dest);
+         ship->setActualPos(newPos, true);
+
+         if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
+            ship->getClientInfo()->getStatistics()->mTeleport++;
+
+         // See if we've teleported onto a zone of some sort
+         BfObject *zone = ship->isInAnyZone();
+         if(zone)
+            zone->collide(ship);
+      }
+   }
+
+   Vector<DatabaseObject *> foundTeleporters; // Must be kept local, non static, because of possible recursive.
+   queryRect.set(getVert(0), TRIGGER_RADIUS * 2);
+   findObjects(TeleporterTypeNumber, foundTeleporters, queryRect);
+   for(S32 i = 0; i < foundTeleporters.size(); i++)
+      if(static_cast<Teleporter *>(foundTeleporters[i])->mTeleportCooldown.getCurrent() == 0)
+         static_cast<Teleporter *>(foundTeleporters[i])->doTeleport();
+}
+
 
 bool Teleporter::collide(BfObject *otherObject)
 {
@@ -548,6 +610,9 @@ bool Teleporter::collide(BfObject *otherObject)
    {
       static const F32 TRIGGER_RADIUS  = F32(TELEPORTER_RADIUS - Ship::CollisionRadius);
       static const F32 TELEPORT_RADIUS = F32(TELEPORTER_RADIUS + Ship::CollisionRadius);
+
+      if(isGhost())
+         return false; // Server only
 
       if(mTeleportCooldown.getCurrent() > 0)    // Ignore teleports in cooldown mode
          return false;
@@ -559,48 +624,18 @@ bool Teleporter::collide(BfObject *otherObject)
          return false;
 
       // First see if we've triggered the teleport...
-      Point teleportCenter = getVert(0);
-
       Ship *ship = static_cast<Ship *>(otherObject);
 
       // Check if the center of the ship is closer than TRIGGER_RADIUS -- this is equivalent to testing if
       // the ship is entirely within the outer radius of the teleporter.  Therefore, ships can almost entirely 
       // overlap the teleporter before triggering the teleport.
-      if((teleportCenter - ship->getActualPos()).lenSquared() > sq(TRIGGER_RADIUS))  
+      if((getVert(0) - ship->getActualPos()).lenSquared() > sq(TRIGGER_RADIUS))  
          return false;     // Too far -- teleport not activated!
 
       // Check for players within a square box around the teleporter.  Not all these ships will teleport; the actual determination is made
       // via a circle, and will be checked below.
-      Rect queryRect(getVert(0), TRIGGER_RADIUS * 2);     
 
-      foundObjects.clear();
-      findObjects((TestFunc)isShipType, foundObjects, queryRect);
-
-      S32 dest = mDestManager.getRandomDest();
-
-      // We've triggered the teleporter.  Relocate any ships within range.  Any ship touching the teleport will be warped.
-      for(S32 i = 0; i < foundObjects.size(); i++)
-      {
-         Ship *ship = static_cast<Ship *>(foundObjects[i]);
-         if((teleportCenter - ship->getRenderPos()).lenSquared() < sq(TELEPORT_RADIUS))
-         {
-            mLastDest = dest;    // Save the destination
-
-            Point newPos = ship->getActualPos() - teleportCenter + mDestManager.getDest(dest);
-            ship->setActualPos(newPos, true);
-            setMaskBits(TeleportMask);
-
-            if(ship->getClientInfo() && ship->getClientInfo()->getStatistics())
-               ship->getClientInfo()->getStatistics()->mTeleport++;
-
-            // See if we've teleported onto a zone of some sort
-            BfObject *zone = ship->isInAnyZone();
-            if(zone)
-               zone->collide(ship);
-         }
-      }
-
-      mTeleportCooldown.reset(mTeleporterCooldown);      // Teleport needs to wait a bit before being usable again
+      doTeleport();
 
       return true;
    }
@@ -690,7 +725,8 @@ void Teleporter::idle(BfObject::IdleCallPath path)
          mExplosionTimer.update(deltaT);
    }
 
-   mTeleportCooldown.update(deltaT);
+   if(mTeleportCooldown.update(deltaT) && path == BfObject::ServerIdleMainLoop)
+      doTeleport();
 }
 
 
