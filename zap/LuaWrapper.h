@@ -303,11 +303,9 @@ void luaW_push(lua_State* L, T* obj)
         if(!proxy)
            proxy = new LuaProxy<T>(obj);
 
-        logprintf("proxy: %p (%p)", proxy, obj);
-
         proxy->incUseCount();
 
-                // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
+        // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
         luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // -- new userdata
         ud->data = proxy;
 
