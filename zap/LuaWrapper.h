@@ -54,7 +54,7 @@ extern "C"
 
 using namespace Zap;
 
-#define LUAW_BUILDER
+// #define LUAW_BUILDER
 
 #define LUAW_POSTCTOR_KEY "__postctor"
 #define LUAW_EXTENDS_KEY  "__extends"
@@ -299,6 +299,7 @@ void luaW_push(lua_State* L, T* obj)
 {
     if (obj)
     {
+        // Get the object's proxy, or create one if it doesn't yet exist
         LuaProxy<T> *proxy = obj->getLuaProxy();
         if(!proxy)
            proxy = new LuaProxy<T>(obj);
@@ -332,7 +333,7 @@ void luaW_push(lua_State* L, T* obj)
         lua_gettable(L, -2);                                   // -- userdata LuaWrapper LuaWrapper.counts count
         int count = (int) lua_tointeger(L, -1);             
 
-        // This chunk increments the instance count, and stores it back in the LuaWrapper table
+        // Increments the instance count, and store it back in the LuaWrapper table
         LuaWrapper<T>::identifier(L, obj);                     // -- userdata LuaWrapper LuaWrapper.counts count unique_id
         lua_pushinteger(L, count+1);                           // -- userdata LuaWrapper LuaWrapper.counts count unique_id count+1
         lua_settable(L, -4);                                   // -- userdata LuaWrapper LuaWrapper.counts count
@@ -340,7 +341,7 @@ void luaW_push(lua_State* L, T* obj)
         ////////// Clean house
         lua_pop(L, 3);                                         // -- userdata
 
-        //luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
+        luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
     }
     else
     {
@@ -407,10 +408,6 @@ bool luaW_hold(lua_State* L, T* obj)
     lua_pop(L, 3); // ...
     return false;
 }
-
-
-
-
 
 
 // Releases LuaWrapper's hold on an object. This allows the user to remove
