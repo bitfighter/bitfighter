@@ -70,6 +70,7 @@ VideoSystem::~VideoSystem()
 
 
 extern void shutdownBitfighter();
+extern string getInstalledDataDir();
 
 static string WINDOW_TITLE = "Bitfighter " + string(ZAP_GAME_RELEASE);
 
@@ -155,7 +156,8 @@ void VideoSystem::init()
    // It will look crappy at 32x32, but good at 16x16, and that's all that really matters.
 
    // Save bmp as a 32 bit XRGB bmp file (Gimp can do it!)
-   SDL_Surface *icon = SDL_LoadBMP("bficon.bmp");
+   string iconPath = getInstalledDataDir() + getFileSeparator() + "bficon.bmp";
+   SDL_Surface *icon = SDL_LoadBMP(iconPath.c_str());
 #if SDL_VERSION_ATLEAST(2,0,0)
    if(icon != NULL)
    {
