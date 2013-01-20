@@ -1152,6 +1152,14 @@ void copyResourcesToUserData()
          }
       }
    }
+
+   // Copy the joystick_presets.ini, too
+   string joystickPresetsFile = installDataDir + fileSeparator + "joystick_presets.ini";
+   if(!copyFileToDir(joystickPresetsFile, userDataDir))
+   {
+      printf("File copy failed.  File: %s to directory: %s\n", joystickPresetsFile.c_str(), userDataDir.c_str());
+      return;
+   }
 }
 
 
