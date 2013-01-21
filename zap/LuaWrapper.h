@@ -62,6 +62,7 @@ using namespace Zap;
 #define LUAW_COUNT_KEY    "__counts"
 #define LUAW_HOLDS_KEY    "__holds"
 #define LUAW_WRAPPER_KEY  "LuaWrapper"
+#define LUAW_OBJ_CACHE_KEY "LuaWrapperObjectCacheKey"
 
 
 // A simple utility function to adjust a given index
@@ -71,6 +72,54 @@ inline int luaW_correctindex(lua_State* L, int index, int correction)
 {
     return index < 0 ? index - correction : index;
 }
+
+
+static string luaW_itos(S32 i)
+{
+   char outString[12];  // 11 chars plus a null char, -2147483648
+   dSprintf(outString, sizeof(outString), "%d", i);
+   return outString;
+}
+
+
+// Make a nice looking string representation of the object at the specified index
+static string luaW_stringify(lua_State *L, S32 index)
+{
+   int t = lua_type(L, index);
+   //TNLAssert(t >= -1 && t <= LUA_TTHREAD, "Invalid type number!");
+   if(t > LUA_TTHREAD || t < -1)
+      return "Invalid object type id " + luaW_itos(t);
+
+   switch (t) 
+   {
+      case LUA_TSTRING:   
+         return "string: " + string(lua_tostring(L, index));
+      case LUA_TBOOLEAN:  
+         return "boolean: " + lua_toboolean(L, index) ? "true" : "false";
+      case LUA_TNUMBER:    
+         return "number: " + luaW_itos(S32(lua_tonumber(L, index)));
+      default:             
+         return lua_typename(L, t);
+   }
+}
+
+
+static bool dumpStack(lua_State* L, const char *msg)
+{
+    int top = lua_gettop(L);
+
+    bool hasMsg = (strcmp(msg, "") != 0);
+    logprintf(LogConsumer::LogError, "\nTotal in stack: %d %s%s%s", top, hasMsg ? "[" : "", msg, hasMsg ? "]" : "");
+
+    for(int i = 1; i <= top; i++)
+    {
+      string val = luaW_stringify(L, i);
+      logprintf(LogConsumer::LogError, "%d : %s", i, val.c_str());
+    }
+
+    return false;
+ }
+
 
 
 // Forward declaration
@@ -297,56 +346,111 @@ bool luaW_hold(lua_State* L, T* obj);
 template <typename T>
 void luaW_push(lua_State* L, T* obj)
 {
-    if (obj)
-    {
-        // Get the object's proxy, or create one if it doesn't yet exist
-        LuaProxy<T> *proxy = obj->getLuaProxy();
-        if(!proxy)
-           proxy = new LuaProxy<T>(obj);
+   if(!obj)
+   {
+      lua_pushnil(L);
+      return;
+   }
 
-        proxy->incUseCount();
+   // Get the object's proxy, or create one if it doesn't yet exist
+   LuaProxy<T> *proxy = obj->getLuaProxy();
+   if(!proxy)
+      proxy = new LuaProxy<T>(obj);
 
-        // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
-        luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // -- new userdata
-        ud->data = proxy;
+   // Check the objectCache table to see if we already have a userdata for this object
+   // (Or cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
+   luaL_getmetatable(L, LUAW_OBJ_CACHE_KEY);              // -- cache_table
+   if(!lua_istable(L, -1))
+   {
+      // No table?  Better create one!
+      // But first, clear off whatever luaL_getmetatable put on the stack
+      lua_pop(L, 1);                                      // -- 
 
-        ud->cast = LuaWrapper<T>::cast;
+      // luaL_newmetatable: If the registry already has the key tname, returns 0. Otherwise, creates a new table to 
+      //                    be used as a metatable for userdata, adds it to the registry with key tname, and returns 1.
+      luaL_newmetatable(L, LUAW_OBJ_CACHE_KEY);
+      lua_pushstring( L, "v" );                 // Make it weak!
+      lua_setfield( L, -2, "__mode" );
+   }
 
-        ////////// This bit here we assign a class-specific metatable to our new userdata object
-        // Get the metatable for this class out of the registry
-        luaL_getmetatable(L, LuaWrapper<T>::classname);        // -- userdata class_metatable
+   // Check the table, see if we already have a userdata for this object
+   LuaWrapper<T>::identifier(L, obj);                    // -- cache_table, id
 
-        // Set the metatable of our userdata to be the class metatable
-        lua_setmetatable(L, -2);                               // -- userdata
+   // lua_rawget: Pushes onto the stack the value t[k], where t is the value at the given valid index 
+   //             and k is the value at the top of the stack; triggers no metamethods
+   lua_rawget(L, -2);                                    // -- cache_table, userdata
 
-        ////////// This bit here increments an instance count for our specific object, which is stored
-        //         in the LuaWrapper table in the registry
+   if(lua_isuserdata( L, -1 ))      // It's cached!!!
+      lua_remove( L, -2 );                               // -- userdata
+
+   // If the above did not leave a userdata on the stack, we need to create a new one, and add it to our cache table.
+   // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
+   // we add it to the table.
+   else
+   {
+      // First, clear off whatever luaL_getmetatable put on the stack
+      lua_pop(L, 1);                                      // -- cache_table
+
+      proxy->incUseCount();
+
+      // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
+      luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // -- cache_table, new userdata
+      ud->data = proxy;
+
+      ud->cast = LuaWrapper<T>::cast;
+
+      ////////// This bit here we assign a class-specific metatable to our new userdata object
+      // Get the metatable for this class out of the registry
+      luaL_getmetatable(L, LuaWrapper<T>::classname);        // -- cache_table, userdata, class_metatable
+
+      // Set the metatable of our userdata to be the class metatable
+      lua_setmetatable(L, -2);                               // -- userdata
+
+      ////////// This bit here increments an instance count for our specific object, which is stored
+      //         in the LuaWrapper table in the registry
                
-        // Retrieve luaW from the registry
-        lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY);  // -- userdata LuaWrapper
-        lua_getfield(L, -1, LUAW_COUNT_KEY);                   // -- userdata LuaWrapper LuaWrapper.counts
+      // Retrieve luaW from the registry
+      lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY);  // -- cache_table, userdata, LuaWrapper
+      lua_getfield(L, -1, LUAW_COUNT_KEY);                   // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts
 
-        // Push object's unique_id onto the stack (usally the object's memory location)
-        LuaWrapper<T>::identifier(L, obj);                     // -- userdata LuaWrapper LuaWrapper.counts unique_id
+      // Push object's unique_id onto the stack (usally the object's memory location)
+      LuaWrapper<T>::identifier(L, obj);                     // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, unique_id
 
-        // Get the instance count for our object from the LuaWrapper table
-        lua_gettable(L, -2);                                   // -- userdata LuaWrapper LuaWrapper.counts count
-        int count = (int) lua_tointeger(L, -1);             
+      // Get the instance count for our object from the LuaWrapper table
+      lua_gettable(L, -2);                                   // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, count
+      int count = (int) lua_tointeger(L, -1);             
 
-        // Increments the instance count, and store it back in the LuaWrapper table
-        LuaWrapper<T>::identifier(L, obj);                     // -- userdata LuaWrapper LuaWrapper.counts count unique_id
-        lua_pushinteger(L, count+1);                           // -- userdata LuaWrapper LuaWrapper.counts count unique_id count+1
-        lua_settable(L, -4);                                   // -- userdata LuaWrapper LuaWrapper.counts count
+      // Increments the instance count, and store it back in the LuaWrapper table
+      LuaWrapper<T>::identifier(L, obj);                     // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, count, unique_id
+      lua_pushinteger(L, count + 1);                         // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, count, unique_id, count+1
+      lua_settable(L, -4);                                   // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, count,
 
-        ////////// Clean house
-        lua_pop(L, 3);                                         // -- userdata
+      ////////// Clean house
+      lua_pop(L, 3);                                         // -- cache_table, userdata
 
-        luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
-    }
-    else
-    {
-        lua_pushnil(L);
-    }
+
+      // Add the userdata to our cache
+      // lua_rawset: Does the equivalent to t[k] = v, where t is the value at the given valid index, 
+      //             v is the value at the top of the stack, and k is the value just below the top.
+      //             Pops both the key and the value from the stack; does not trigger metamethods.
+      // lua_insert: Moves the top element into the given valid index, shifting up the elements above 
+      //             this index to open space.
+
+      LuaWrapper<T>::identifier(L, obj);                     // -- cache_table, userdata, unique_id
+
+      lua_insert(L, -2);                                     // -- cache_table, unique_id, userdata
+      lua_rawset(L, -3);                                     // -- cache_table
+      
+      LuaWrapper<T>::identifier(L, obj);                     // -- cache_table, id
+      lua_rawget(L, -2);                                     // -- cache_table, userdata
+      lua_remove( L, -2 );                                   // -- userdata
+
+       dumpStack(L, "expect ud");
+
+      TNLAssert(lua_isuserdata(L, -1), "Expected metadata!");
+
+      luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
+   }
 }
 
 
