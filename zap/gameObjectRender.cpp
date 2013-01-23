@@ -55,6 +55,10 @@ const Color *PLAIN_COLOR = &Colors::gray75;
 
 const float gShapeLineWidth = 2.0f;
 
+static const S32 NUM_CIRCLE_SIDES = 32;
+static const F32 INV_NUM_CIRCLE_SIDES = 1 / F32(NUM_CIRCLE_SIDES);
+static const F32 CIRCLE_SIDE_THETA = Float2Pi * INV_NUM_CIRCLE_SIDES;
+
 
 void drawHorizLine(S32 x1, S32 x2, S32 y)
 {
@@ -86,7 +90,7 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    // With theta delta of 0.2, that means maximum 32 points + 1 at the end
-   static const S32 MAX_POINTS = 32 + 1;
+   static const S32 MAX_POINTS = NUM_CIRCLE_SIDES + 1;
    static F32 arcVertexArray[MAX_POINTS * 2];      // 2 components per point
 
    U32 count = 0;
@@ -2378,7 +2382,6 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
 }
 
 
-
 static void drawLetter(char letter, const Point &pos, const Color *color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
@@ -2401,17 +2404,34 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 }
 
 
+// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
 void drawCircle(F32 x, F32 y, F32 radius)
 {
+   F32 theta = Float2Pi * INV_NUM_CIRCLE_SIDES; // 1/32
+
+   // Precalculate the sine and cosine
+   F32 cosTheta = cosf(theta);
+   F32 sinTheta = sinf(theta);
+
+   F32 curX = radius;  // We start at angle = 0
+   F32 curY = 0;
+   F32 prevX;
+
    // 32 vertices is almost a circle..  right?
-   F32 vertexArray[64];
-   U32 count = 0;
-   for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+   F32 vertexArray[2 * NUM_CIRCLE_SIDES];
+
+   // This is a repeated rotation
+   for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
    {
-      vertexArray[2*count] = x + cos(theta) * radius;
-      vertexArray[(2*count)+1] = y + sin(theta) * radius;
-      count++;
+      vertexArray[2*i] = curX + x;
+      vertexArray[(2*i)+1] = curY + y;
+
+      // Apply the rotation matrix
+      prevX = curX;
+      curX = (cosTheta * curX) - (sinTheta * curY);
+      curY = (sinTheta * prevX) + (cosTheta * curY);
    }
+
    renderVertexArray(vertexArray, 32, GL_LINE_LOOP);
 }
 
