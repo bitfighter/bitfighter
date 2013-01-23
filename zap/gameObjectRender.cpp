@@ -596,10 +596,6 @@ void renderAimVector()
 }
 
 
-#ifndef ABS
-#  define ABS(x) (((x) > 0) ? (x) : -(x))
-#endif
-
 // TODO: Document me better!  Especially the nerdy math stuff
 void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
                       const Vector<Point> *dests, U32 trackerCount)

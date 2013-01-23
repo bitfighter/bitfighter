@@ -1406,9 +1406,6 @@ const Vector<Point> *Asteroid::getCollisionPoly() const
 }
 
 
-#define ABS(x) (((x) > 0) ? (x) : -(x))
-
-
 void Asteroid::damageObject(DamageInfo *theInfo)
 {
    if(hasExploded)   // Avoid index out of range error
