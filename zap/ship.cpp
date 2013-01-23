@@ -2448,7 +2448,7 @@ void Ship::render(S32 layerIndex)
       // This rather gross looking variable helps manage problems with the resolution of F32s when getRealMilliseconds() returns a large value
       const S32 biggishNumber = 21988;
       F32 offset = F32(Platform::getRealMilliseconds() % biggishNumber) * FloatTau / biggishNumber;
-      drawDashedHollowArc(getRenderPos(), CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
+      drawDashedHollowCircle(getRenderPos(), CollisionRadius + 5, CollisionRadius + 10, 8, FloatTau / 24.0f, offset);
    }
 
    if(isModulePrimaryActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent

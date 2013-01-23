@@ -110,12 +110,18 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 }
 
 
-void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle, F32 offset)
+void drawDashedArc(const Point &center, F32 radius, F32 arcTheta, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
 {
-   F32 interimAngle = FloatTau / dashCount;  
+   F32 interimAngle = arcTheta / dashCount;
 
    for(S32 i = 0; i < dashCount; i++)
-      drawArc(center, radius, interimAngle * i + offset, (interimAngle * (i + 1)) - spaceAngle + offset);
+      drawArc(center, radius, interimAngle * i + offsetAngle, (interimAngle * (i + 1)) - dashSpaceCentralAngle + offsetAngle);
+}
+
+
+void drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+{
+   drawDashedArc(center, radius, FloatTau, dashCount, dashSpaceCentralAngle, offsetAngle);
 }
 
 
@@ -130,24 +136,40 @@ void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 an
 }
 
 
-void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 startAngle, F32 offset)
+void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle)
 {
-   F32 interimAngle = FloatTau / rayCount;
-
-   for(S32 i = 0; i < rayCount; i++)
-      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + startAngle + offset);
+   drawAngledRayArc(center, innerRadius, outerRadius, FloatTau, rayCount, offsetAngle);
 }
 
 
-void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 spaceAngle, F32 offset)
+void drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, S32 rayCount, F32 offsetAngle)
 {
-   // Draw the dashed arcs
-   drawDashedArc(center, innerRadius, dashCount, spaceAngle, offset);
-   drawDashedArc(center, outerRadius, dashCount, spaceAngle, offset);
+   F32 interimAngle = centralAngle / rayCount;
+
+   for(S32 i = 0; i < rayCount; i++)
+      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + offsetAngle);
+}
+
+
+void drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+{
+   // Draw the dashed circles
+   drawDashedCircle(center, innerRadius, dashCount, dashSpaceCentralAngle, offsetAngle);
+   drawDashedCircle(center, outerRadius, dashCount, dashSpaceCentralAngle, offsetAngle);
 
    // Now connect them
-   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0, offset);
-   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0 - spaceAngle, offset);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle - dashSpaceCentralAngle);
+}
+
+
+void drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle)
+{
+   drawAngledRay(center, innerRadius, outerRadius, offsetAngle);
+   drawAngledRay(center, innerRadius, outerRadius, offsetAngle + centralAngle);
+
+   drawArc(center, innerRadius, offsetAngle, offsetAngle + centralAngle);
+   drawArc(center, outerRadius, offsetAngle, offsetAngle + centralAngle);
 }
 
 
