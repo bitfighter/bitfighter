@@ -94,7 +94,7 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
    static F32 arcVertexArray[MAX_POINTS * 2];      // 2 components per point
 
    U32 count = 0;
-   for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
+   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
    {
       arcVertexArray[2*count]       = pos.x + cos(theta) * radius;
       arcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
@@ -205,7 +205,7 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 
    U32 count = 0;
 
-   for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
+   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
    {
       filledArcVertexArray[2*count]       = pos.x + cos(theta) * radius;
       filledArcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
@@ -260,7 +260,7 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
    // 32 vertices to fake our ellipse
    F32 vertexArray[64];
    U32 count = 0;
-   for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+   for(F32 theta = 0; theta < FloatTau; theta += CIRCLE_SIDE_THETA)
    {
       F32 sinalpha = sin(theta);
       F32 cosalpha = cos(theta);
@@ -338,7 +338,7 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 
    U32 count = 0;
 
-   for(F32 theta = start; theta < end; theta += 0.2f)
+   for(F32 theta = start; theta < end; theta += CIRCLE_SIDE_THETA)
    {
       filledSectorVertexArray[2*count]       = pos.x + cos(theta) * radius;
       filledSectorVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
@@ -1995,7 +1995,7 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
       F32 vertexArray[64];
       F32 colorArray[128];
       U32 count = 0;
-      for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+      for(F32 theta = 0; theta < FloatTau; theta += CIRCLE_SIDE_THETA)
       {
          F32 x = cos(theta + rotate * 2 + t) * atomSize * 0.5f;
          F32 y = sin(theta + rotate * 2 + t) * atomSize;
