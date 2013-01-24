@@ -505,7 +505,9 @@ void GameUserInterface::renderSuspendedMessage()
    static const S32 DisplayStyle = 2;
    static const S32 VertOffset = -30;
 
-   dimUnderlyingUI(getGame()->getUIFadeFactor());        // Fade what's below
+   // Fade what's below unless we're chatting
+   if(mCurrentChatType == NoChat)
+      dimUnderlyingUI(getGame()->getUIFadeFactor());
 
    if(getGame()->requestedSpawnDelayed() && getGame()->isWaitingForSpawn())
    {
