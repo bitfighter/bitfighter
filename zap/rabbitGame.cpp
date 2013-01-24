@@ -288,6 +288,10 @@ void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObjec
 
    Parent::controlObjectForClientKilled(theClient, clientObject, killerObject);
 
+   // Do nothing; it's probably a "Ship 0 0 0" in a level, where there is no ClientInfo
+   if(!theClient)
+      return;
+
    Ship *killerShip = NULL;
    ClientInfo *ko = killerObject->getOwner();
 
