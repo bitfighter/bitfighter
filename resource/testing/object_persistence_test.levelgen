@@ -1,0 +1,33 @@
+     -- Every 2 seconds, find two objects with ids 100 and 200, and print their userdatas
+     -- No reference is kept for object 100, so its userdata might change over time
+     -- Object 200 is held by objHolder, so its userdata should remain constant
+     
+     -- Obj200 should remain constant over time; obj100 can vary.  objHolder should be constant, obviously
+     
+     function printIds()
+         local obj100 = levelgen:findObjectById(100)  
+         local obj200 = levelgen:findObjectById(200)
+
+         logprint("Obj 100:" .. tostring(obj100) .. " Obj 200:" .. tostring(obj200) .. " Held:" .. tostring(objHolder))
+
+         obj100 = nil     
+         obj200 = nil
+         collectgarbage()
+     end
+     
+     function main()
+        local obj100 = levelgen:findObjectById(100)
+        objHolder    = levelgen:findObjectById(200)     -- not local, global
+     
+        assert(obj100)
+        assert(objHolder)
+     
+        logprint("Column 1 can vary; 2 and 3 should be constant")
+        logprint("=============================================")
+     
+        logprint("Obj 100:" .. tostring(obj100) .. " Obj 200:" .. tostring(objHolder) .. " Held:" .. tostring(objHolder))
+     
+        obj100 = nil
+     
+        Timer:scheduleRepeating(printIds, 2000)
+     end 

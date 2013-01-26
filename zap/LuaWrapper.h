@@ -337,6 +337,12 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
 template <typename T>
 bool luaW_hold(lua_State* L, T* obj);
 
+// Retrieve the object_cache table and put it onto the stack
+#define getCacheTable(L)                     \
+   lua_pushstring(L, LUAW_OBJ_CACHE_KEY);    \
+   lua_gettable(L, LUA_REGISTRYINDEX)        \
+
+
 
 // Analogous to lua_push(boolean|string|*)
 //
@@ -359,29 +365,48 @@ void luaW_push(lua_State* L, T* obj)
 
    // Check the objectCache table to see if we already have a userdata for this object
    // (Or cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
-   luaL_getmetatable(L, LUAW_OBJ_CACHE_KEY);              // -- cache_table
-   if(!lua_istable(L, -1))
+
+   // This will either put the cache_table onto the stack, or, if it does not exist, will put a nil there
+   getCacheTable(L);                            // -- cache_table OR nil
+
+   if(!lua_istable(L, -1))    
    {
       // No table?  Better create one!
       // But first, clear off whatever luaL_getmetatable put on the stack
-      lua_pop(L, 1);                                      // -- 
+      lua_pop(L, 1);                            // --
 
-      // luaL_newmetatable: If the registry already has the key tname, returns 0. Otherwise, creates a new table to 
-      //                    be used as a metatable for userdata, adds it to the registry with key tname, and returns 1.
-      luaL_newmetatable(L, LUAW_OBJ_CACHE_KEY);
-      lua_pushstring( L, "v" );                 // Make it weak!
-      lua_setfield( L, -2, "__mode" );
+      lua_pushstring(L, LUAW_OBJ_CACHE_KEY);    // -- LUAW_OBJ_CACHE_KEY
+      lua_newtable(L);                          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable
+
+      // Create a weak table to hold our cached objects ("v" in __mode denotes that values will be weak)
+      // lua_setfield: Does t[k] = v, where t is the value at the given valid index and v is the value at the top of the stack
+      lua_newtable(L);                          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable, soon-to-be metatable
+      lua_pushstring( L, "v" );                 // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable, soon-to-be metatable, "v"
+      lua_setfield( L, -2, "__mode" );          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable, soon-to-be metatable
+
+      // lua_setmetatable: Pops a table from the stack and sets it as the new metatable for the value at the given acceptable index
+      lua_setmetatable(L, -2);                  // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table
+
+      // lua_settable: t[k] = v, where t is the value at the given valid index, v is the value 
+      // at the top of the stack, and k is the value just below the top.
+      // Here: registry[LUAW_OBJ_CACHE_KEY] = cache_table
+      lua_settable(L, LUA_REGISTRYINDEX);       // -- 
+
+      // Retrieve the table again, so we can work with it
+      getCacheTable(L);                         // -- cache_table
+
+      TNLAssert(lua_istable(L, -1), "Expected table!");
    }
 
    // Check the table, see if we already have a userdata for this object
-   LuaWrapper<T>::identifier(L, obj);                    // -- cache_table, id
+   LuaWrapper<T>::identifier(L, obj);           // -- cache_table, id
 
    // lua_rawget: Pushes onto the stack the value t[k], where t is the value at the given valid index 
    //             and k is the value at the top of the stack; triggers no metamethods
-   lua_rawget(L, -2);                                    // -- cache_table, userdata
+   lua_rawget(L, -2);                           // -- cache_table, userdata
 
-   if(lua_isuserdata( L, -1 ))      // It's cached!!!
-      lua_remove( L, -2 );                               // -- userdata
+   if(lua_isuserdata( L, -1 ))                  // It's cached!!!
+      lua_remove( L, -2 );                      // -- userdata
 
    // If the above did not leave a userdata on the stack, we need to create a new one, and add it to our cache table.
    // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
@@ -389,12 +414,12 @@ void luaW_push(lua_State* L, T* obj)
    else
    {
       // First, clear off whatever luaL_getmetatable put on the stack
-      lua_pop(L, 1);                                      // -- cache_table
+      lua_pop(L, 1);                            // -- cache_table
 
       proxy->incUseCount();
 
       // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
-      luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata)); // -- cache_table, new userdata
+      luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata));   // -- cache_table, new userdata
       ud->data = proxy;
 
       ud->cast = LuaWrapper<T>::cast;
@@ -428,7 +453,6 @@ void luaW_push(lua_State* L, T* obj)
       ////////// Clean house
       lua_pop(L, 3);                                         // -- cache_table, userdata
 
-
       // Add the userdata to our cache
       // lua_rawset: Does the equivalent to t[k] = v, where t is the value at the given valid index, 
       //             v is the value at the top of the stack, and k is the value just below the top.
@@ -440,12 +464,10 @@ void luaW_push(lua_State* L, T* obj)
 
       lua_insert(L, -2);                                     // -- cache_table, unique_id, userdata
       lua_rawset(L, -3);                                     // -- cache_table
-      
+
       LuaWrapper<T>::identifier(L, obj);                     // -- cache_table, id
       lua_rawget(L, -2);                                     // -- cache_table, userdata
       lua_remove( L, -2 );                                   // -- userdata
-
-       dumpStack(L, "expect ud");
 
       TNLAssert(lua_isuserdata(L, -1), "Expected metadata!");
 
@@ -453,6 +475,8 @@ void luaW_push(lua_State* L, T* obj)
    }
 }
 
+
+#undef getCacheTable
 
 // Instructs LuaWrapper that it owns the userdata, and can manage its memory.
 // When all references to the object are removed, Lua is free to garbage
