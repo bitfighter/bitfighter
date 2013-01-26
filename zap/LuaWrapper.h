@@ -420,8 +420,8 @@ void luaW_push(lua_State* L, T* obj)
 
       // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
       luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata));   // -- cache_table, new userdata
-      ud->data = proxy;
 
+      ud->data = proxy;
       ud->cast = LuaWrapper<T>::cast;
 
       ////////// This bit here we assign a class-specific metatable to our new userdata object
