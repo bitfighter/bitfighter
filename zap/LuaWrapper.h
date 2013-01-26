@@ -153,18 +153,6 @@ void luaW_defaultidentifier(lua_State* L, T* obj)
 }
 
 
-// As above, but only to be called with proxied objects
-template <typename T>
-void luaW_proxiedidentifier(lua_State* L, T* obj)
-{
-    LuaProxy<T> *proxy = obj->getLuaProxy();
-    if(!proxy)
-       proxy = new LuaProxy<T>(obj);
-
-    lua_pushlightuserdata(L, obj->getLuaProxy());
-}
-
-
 // This class is what is used by LuaWrapper to contain the userdata. data
 // stores a pointer to the object itself, and cast is used to cast toward the
 // base class if there is one and it is necessary. Rather than use RTTI and
