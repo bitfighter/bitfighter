@@ -343,7 +343,6 @@ bool luaW_hold(lua_State* L, T* obj);
    lua_gettable(L, LUA_REGISTRYINDEX)        \
 
 
-
 // Analogous to lua_push(boolean|string|*)
 //
 // Pushes a userdata of type T onto the stack. If this object already exists in
