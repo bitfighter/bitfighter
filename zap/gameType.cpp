@@ -1910,6 +1910,8 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(!damager)            // Anonomyous projectiles are deadly to all!
       return true;
 
+   if(!victim->getOwner()) // Perhaps the victim is dead?!?  Turrets loaded with levels?
+      return true;
 
    U8 typeNumber = damager->getObjectTypeNumber();
 
