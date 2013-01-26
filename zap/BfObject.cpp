@@ -1325,7 +1325,7 @@ S32 BfObject::getClassId(lua_State *L)
 */
 S32 BfObject::getId(lua_State *L)  
 { 
-   return returnInt  (L, mUserAssignedId); 
+   return returnInt(L, mUserAssignedId); 
 }
 
 
