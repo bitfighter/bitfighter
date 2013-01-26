@@ -327,7 +327,7 @@ template <typename T>
 bool luaW_hold(lua_State* L, T* obj);
 
 // Retrieve the object_cache table and put it onto the stack
-#define getCacheTable(L)                     \
+#define pushCacheTable(L)                    \
    lua_pushstring(L, LUAW_OBJ_CACHE_KEY);    \
    lua_gettable(L, LUA_REGISTRYINDEX)        \
 
@@ -354,7 +354,7 @@ static void createCacheTable(lua_State *L)
    lua_settable(L, LUA_REGISTRYINDEX);       // -- 
 
    // Retrieve the table again, so we can work with it
-   getCacheTable(L);                         // -- cache_table
+   pushCacheTable(L);                        // -- cache_table
 }
 
 
@@ -381,7 +381,7 @@ void luaW_push(lua_State* L, T* obj)
    // (Or cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
 
    // This will either put the cache_table onto the stack, or, if it does not exist, will put a nil there
-   getCacheTable(L);                            // -- cache_table OR nil
+   pushCacheTable(L);                           // -- cache_table OR nil
 
    if(!lua_istable(L, -1))    
    {
@@ -472,7 +472,7 @@ void luaW_push(lua_State* L, T* obj)
 }
 
 
-#undef getCacheTable
+#undef pushCacheTable
 
 // Instructs LuaWrapper that it owns the userdata, and can manage its memory.
 // When all references to the object are removed, Lua is free to garbage
