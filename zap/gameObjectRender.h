@@ -81,9 +81,12 @@ extern void drawStar(const Point &pos, S32 points, F32 radius, F32 innerRadius);
 
 
 extern void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 angle);
-extern void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 startAngle, F32 offset);
-extern void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle, F32 offset);
-extern void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 spaceAngle, F32 offset);
+extern void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle);
+extern void drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, S32 rayCount, F32 offsetAngle);
+extern void drawDashedArc(const Point &center, F32 radius, F32 centralAngle, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle);
+extern void drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle);
+extern void drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle);
+extern void drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle);
 
 extern void drawSquare(const Point &pos, F32 size, bool filled = false);
 extern void drawSquare(const Point &pos, S32 size, bool filled = false);

@@ -173,6 +173,8 @@
 		73974A5614B4EE0B0053CCF4 /* Speex.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397499D14B4EDC60053CCF4 /* Speex.framework */; };
 		73974A5714B4EE0B0053CCF4 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7397499F14B4EDC60053CCF4 /* Vorbis.framework */; };
 		73974A6414B4EE780053CCF4 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7397499B14B4EDC60053CCF4 /* Ogg.framework */; };
+		739D0BB016B21B9F00F5B979 /* MathUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739D0BAA16B21B9F00F5B979 /* MathUtils.cpp */; };
+		739D0BB116B21B9F00F5B979 /* RenderUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 739D0BAC16B21B9F00F5B979 /* RenderUtils.cpp */; };
 		73A2B27113DE59030002EF92 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A2B1FF13DE57C40002EF92 /* libz.dylib */; };
 		73A2B2A713DE59740002EF92 /* ScreenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A313DE59740002EF92 /* ScreenShooter.cpp */; };
 		73A2B2A813DE59740002EF92 /* UIManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A2B2A513DE59740002EF92 /* UIManager.cpp */; };
@@ -768,6 +770,12 @@
 		7397499B14B4EDC60053CCF4 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = ../../../lib/Ogg.framework; sourceTree = SOURCE_ROOT; };
 		7397499D14B4EDC60053CCF4 /* Speex.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speex.framework; path = ../../../lib/Speex.framework; sourceTree = SOURCE_ROOT; };
 		7397499F14B4EDC60053CCF4 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = ../../../lib/Vorbis.framework; sourceTree = SOURCE_ROOT; };
+		739D0BAA16B21B9F00F5B979 /* MathUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MathUtils.cpp; path = ../../../zap/MathUtils.cpp; sourceTree = SOURCE_ROOT; };
+		739D0BAB16B21B9F00F5B979 /* MathUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MathUtils.h; path = ../../../zap/MathUtils.h; sourceTree = SOURCE_ROOT; };
+		739D0BAC16B21B9F00F5B979 /* RenderUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderUtils.cpp; path = ../../../zap/RenderUtils.cpp; sourceTree = SOURCE_ROOT; };
+		739D0BAD16B21B9F00F5B979 /* RenderUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RenderUtils.h; path = ../../../zap/RenderUtils.h; sourceTree = SOURCE_ROOT; };
+		739D0BAE16B21B9F00F5B979 /* TeamConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TeamConstants.h; path = ../../../zap/TeamConstants.h; sourceTree = SOURCE_ROOT; };
+		739D0BAF16B21B9F00F5B979 /* TeamPreset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TeamPreset.h; path = ../../../zap/TeamPreset.h; sourceTree = SOURCE_ROOT; };
 		73A2B1F913DE57BD0002EF92 /* libpng-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libpng-Info.plist"; sourceTree = "<group>"; };
 		73A2B1FF13DE57C40002EF92 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		73A2B22413DE58630002EF92 /* png.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = png.h; sourceTree = "<group>"; };
@@ -1840,6 +1848,12 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				739D0BAA16B21B9F00F5B979 /* MathUtils.cpp */,
+				739D0BAB16B21B9F00F5B979 /* MathUtils.h */,
+				739D0BAC16B21B9F00F5B979 /* RenderUtils.cpp */,
+				739D0BAD16B21B9F00F5B979 /* RenderUtils.h */,
+				739D0BAE16B21B9F00F5B979 /* TeamConstants.h */,
+				739D0BAF16B21B9F00F5B979 /* TeamPreset.h */,
 				7388B3C71601A71000C16E45 /* Console.cpp */,
 				7388B3C81601A71000C16E45 /* Console.h */,
 				7388B3C91601A71000C16E45 /* EditorPlugin.cpp */,
@@ -3001,6 +3015,8 @@
 				7388B3D11601A71000C16E45 /* EditorPlugin.cpp in Sources */,
 				7388B3D21601A71000C16E45 /* LuaBase.cpp in Sources */,
 				7388B3D31601A71000C16E45 /* LuaScriptRunner.cpp in Sources */,
+				739D0BB016B21B9F00F5B979 /* MathUtils.cpp in Sources */,
+				739D0BB116B21B9F00F5B979 /* RenderUtils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

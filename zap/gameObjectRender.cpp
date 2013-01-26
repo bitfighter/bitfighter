@@ -55,6 +55,10 @@ const Color *PLAIN_COLOR = &Colors::gray75;
 
 const float gShapeLineWidth = 2.0f;
 
+static const S32 NUM_CIRCLE_SIDES = 32;
+static const F32 INV_NUM_CIRCLE_SIDES = 1 / F32(NUM_CIRCLE_SIDES);
+static const F32 CIRCLE_SIDE_THETA = Float2Pi * INV_NUM_CIRCLE_SIDES;
+
 
 void drawHorizLine(S32 x1, S32 x2, S32 y)
 {
@@ -86,11 +90,11 @@ void drawVertLine(F32 x, F32 y1, F32 y2)
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    // With theta delta of 0.2, that means maximum 32 points + 1 at the end
-   static const S32 MAX_POINTS = 32 + 1;
+   static const S32 MAX_POINTS = NUM_CIRCLE_SIDES + 1;
    static F32 arcVertexArray[MAX_POINTS * 2];      // 2 components per point
 
    U32 count = 0;
-   for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
+   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
    {
       arcVertexArray[2*count]       = pos.x + cos(theta) * radius;
       arcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
@@ -106,12 +110,18 @@ void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 }
 
 
-void drawDashedArc(const Point &center, F32 radius, S32 dashCount, F32 spaceAngle, F32 offset)
+void drawDashedArc(const Point &center, F32 radius, F32 arcTheta, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
 {
-   F32 interimAngle = FloatTau / dashCount;  
+   F32 interimAngle = arcTheta / dashCount;
 
    for(S32 i = 0; i < dashCount; i++)
-      drawArc(center, radius, interimAngle * i + offset, (interimAngle * (i + 1)) - spaceAngle + offset);
+      drawArc(center, radius, interimAngle * i + offsetAngle, (interimAngle * (i + 1)) - dashSpaceCentralAngle + offsetAngle);
+}
+
+
+void drawDashedCircle(const Point &center, F32 radius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+{
+   drawDashedArc(center, radius, FloatTau, dashCount, dashSpaceCentralAngle, offsetAngle);
 }
 
 
@@ -126,24 +136,40 @@ void drawAngledRay(const Point &center, F32 innerRadius, F32 outerRadius, F32 an
 }
 
 
-void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 startAngle, F32 offset)
+void drawAngledRayCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 rayCount, F32 offsetAngle)
 {
-   F32 interimAngle = FloatTau / rayCount;
-
-   for(S32 i = 0; i < rayCount; i++)
-      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + startAngle + offset);
+   drawAngledRayArc(center, innerRadius, outerRadius, FloatTau, rayCount, offsetAngle);
 }
 
 
-void drawDashedHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 spaceAngle, F32 offset)
+void drawAngledRayArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, S32 rayCount, F32 offsetAngle)
 {
-   // Draw the dashed arcs
-   drawDashedArc(center, innerRadius, dashCount, spaceAngle, offset);
-   drawDashedArc(center, outerRadius, dashCount, spaceAngle, offset);
+   F32 interimAngle = centralAngle / rayCount;
+
+   for(S32 i = 0; i < rayCount; i++)
+      drawAngledRay(center, innerRadius, outerRadius, interimAngle * i + offsetAngle);
+}
+
+
+void drawDashedHollowCircle(const Point &center, F32 innerRadius, F32 outerRadius, S32 dashCount, F32 dashSpaceCentralAngle, F32 offsetAngle)
+{
+   // Draw the dashed circles
+   drawDashedCircle(center, innerRadius, dashCount, dashSpaceCentralAngle, offsetAngle);
+   drawDashedCircle(center, outerRadius, dashCount, dashSpaceCentralAngle, offsetAngle);
 
    // Now connect them
-   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0, offset);
-   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, 0 - spaceAngle, offset);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle);
+   drawAngledRayCircle(center, innerRadius,  outerRadius, dashCount, offsetAngle - dashSpaceCentralAngle);
+}
+
+
+void drawHollowArc(const Point &center, F32 innerRadius, F32 outerRadius, F32 centralAngle, F32 offsetAngle)
+{
+   drawAngledRay(center, innerRadius, outerRadius, offsetAngle);
+   drawAngledRay(center, innerRadius, outerRadius, offsetAngle + centralAngle);
+
+   drawArc(center, innerRadius, offsetAngle, offsetAngle + centralAngle);
+   drawArc(center, outerRadius, offsetAngle, offsetAngle + centralAngle);
 }
 
 
@@ -201,7 +227,7 @@ void drawFilledArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 
    U32 count = 0;
 
-   for(F32 theta = startAngle; theta < endAngle; theta += 0.2f)
+   for(F32 theta = startAngle; theta < endAngle; theta += CIRCLE_SIDE_THETA)
    {
       filledArcVertexArray[2*count]       = pos.x + cos(theta) * radius;
       filledArcVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
@@ -256,7 +282,7 @@ void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U
    // 32 vertices to fake our ellipse
    F32 vertexArray[64];
    U32 count = 0;
-   for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+   for(F32 theta = 0; theta < FloatTau; theta += CIRCLE_SIDE_THETA)
    {
       F32 sinalpha = sin(theta);
       F32 cosalpha = cos(theta);
@@ -334,7 +360,7 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 
    U32 count = 0;
 
-   for(F32 theta = start; theta < end; theta += 0.2f)
+   for(F32 theta = start; theta < end; theta += CIRCLE_SIDE_THETA)
    {
       filledSectorVertexArray[2*count]       = pos.x + cos(theta) * radius;
       filledSectorVertexArray[(2*count) + 1] = pos.y + sin(theta) * radius;
@@ -591,10 +617,6 @@ void renderAimVector()
    renderColorVertexArray(vertices, colors, 4, GL_LINES);
 }
 
-
-#ifndef ABS
-#  define ABS(x) (((x) > 0) ? (x) : -(x))
-#endif
 
 // TODO: Document me better!  Especially the nerdy math stuff
 void renderTeleporter(const Point &pos, U32 type, bool spiralInwards, S32 time, F32 zoomFraction, F32 radiusFraction, F32 radius, F32 alpha,
@@ -1991,7 +2013,7 @@ void renderCore(const Point &pos, const Color *coreColor, U32 time,
       F32 vertexArray[64];
       F32 colorArray[128];
       U32 count = 0;
-      for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+      for(F32 theta = 0; theta < FloatTau; theta += CIRCLE_SIDE_THETA)
       {
          F32 x = cos(theta + rotate * 2 + t) * atomSize * 0.5f;
          F32 y = sin(theta + rotate * 2 + t) * atomSize;
@@ -2378,7 +2400,6 @@ void renderVertex(char style, const Point &v, S32 number, S32 size, F32 scale, F
 }
 
 
-
 static void drawLetter(char letter, const Point &pos, const Color *color, F32 alpha)
 {
    // Mark the item with a letter, unless we're showing the reference ship
@@ -2401,17 +2422,34 @@ void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const Color *
 }
 
 
+// Faster circle algorithm adapted from:  http://slabode.exofire.net/circle_draw.shtml
 void drawCircle(F32 x, F32 y, F32 radius)
 {
+   F32 theta = Float2Pi * INV_NUM_CIRCLE_SIDES; // 1/32
+
+   // Precalculate the sine and cosine
+   F32 cosTheta = cosf(theta);
+   F32 sinTheta = sinf(theta);
+
+   F32 curX = radius;  // We start at angle = 0
+   F32 curY = 0;
+   F32 prevX;
+
    // 32 vertices is almost a circle..  right?
-   F32 vertexArray[64];
-   U32 count = 0;
-   for(F32 theta = 0; theta < FloatTau; theta += 0.2f)
+   F32 vertexArray[2 * NUM_CIRCLE_SIDES];
+
+   // This is a repeated rotation
+   for(S32 i = 0; i < NUM_CIRCLE_SIDES; i++)
    {
-      vertexArray[2*count] = x + cos(theta) * radius;
-      vertexArray[(2*count)+1] = y + sin(theta) * radius;
-      count++;
+      vertexArray[2*i] = curX + x;
+      vertexArray[(2*i)+1] = curY + y;
+
+      // Apply the rotation matrix
+      prevX = curX;
+      curX = (cosTheta * curX) - (sinTheta * curY);
+      curY = (sinTheta * prevX) + (cosTheta * curY);
    }
+
    renderVertexArray(vertexArray, 32, GL_LINE_LOOP);
 }
 
