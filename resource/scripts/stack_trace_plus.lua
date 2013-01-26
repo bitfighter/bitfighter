@@ -171,7 +171,7 @@ local function DumpLocals(level, message)
          else
             local txt = "{"
             for k,v in pairs(value) do
-               txt = txt..k..":"..tostring(v)
+               txt = txt..tostring(k)..":"..tostring(v)
                if #txt > 70 then
                   txt = txt.." (more...)"
                   break
@@ -208,7 +208,6 @@ end
 -- @param err An optional error string or object.
 -- Returns a string with the stack trace and a string with the original error.
 function _M.stacktrace(err)
-   --print(err)
    local original_error
    -- a helper for collecting strings to be used when assembling the final message
    local message = {}
