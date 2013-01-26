@@ -372,10 +372,21 @@ void luaW_push(lua_State* L, T* obj)
       return;
    }
 
+
+   bool useCache = true;
+
    // Get the object's proxy, or create one if it doesn't yet exist
    LuaProxy<T> *proxy = obj->getLuaProxy();
    if(!proxy)
+   {
       proxy = new LuaProxy<T>(obj);
+
+      // If we need a new proxy, then whatever is in the cache is bogus.  The useCache setting fixes a problem with high
+      // frequency, short lifespan objects, such as bullets, wherein a memory address might be reused before Lua has
+      // a chance to do its garbage collection.  Since memory addresses are used as the cache key, this could cause a 
+      // stale cache entry to be used, leading to problems.
+      useCache = false;       
+   }
 
    // Check the objectCache table to see if we already have a userdata for this object
    // (Or cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
@@ -401,7 +412,7 @@ void luaW_push(lua_State* L, T* obj)
    // Here we push cache_table[userdata]
    lua_rawget(L, -2);                           // -- cache_table, userdata
 
-   if(lua_isuserdata(L, -1))                    // It's cached!!!
+   if(useCache && lua_isuserdata(L, -1))        // It's cached!!!
       lua_remove(L, -2);                        // -- userdata
 
    // If the above did not leave a userdata on the stack, we need to create a new one, and add it to our cache table.
