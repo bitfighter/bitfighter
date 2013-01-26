@@ -405,8 +405,8 @@ void luaW_push(lua_State* L, T* obj)
    // Here we push cache_table[userdata]
    lua_rawget(L, -2);                           // -- cache_table, userdata
 
-   if(lua_isuserdata( L, -1 ))                  // It's cached!!!
-      lua_remove( L, -2 );                      // -- userdata
+   if(lua_isuserdata(L, -1))                    // It's cached!!!
+      lua_remove(L, -2);                        // -- userdata
 
    // If the above did not leave a userdata on the stack, we need to create a new one, and add it to our cache table.
    // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
