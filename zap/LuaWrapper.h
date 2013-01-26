@@ -321,6 +321,7 @@ T* luaW_check(lua_State* L, int index, bool strict = false)
 }
 
 
+
 // Forward declaration
 template <typename T>
 bool luaW_hold(lua_State* L, T* obj);
@@ -329,6 +330,32 @@ bool luaW_hold(lua_State* L, T* obj);
 #define getCacheTable(L)                     \
    lua_pushstring(L, LUAW_OBJ_CACHE_KEY);    \
    lua_gettable(L, LUA_REGISTRYINDEX)        \
+
+
+// Create a table to cache our userdatas, and place it in the registry with key LUAW_OBJ_CACHE_KEY.
+// Push the table onto the stack.
+static void createCacheTable(lua_State *L)
+{
+   lua_pushstring(L, LUAW_OBJ_CACHE_KEY);    // -- LUAW_OBJ_CACHE_KEY
+   lua_newtable(L);                          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table
+
+   // Create a weak table to hold our cached objects ("v" in __mode denotes that values will be weak)
+   // lua_setfield: Does t[k] = v, where t is the value at the given valid index and v is the value at the top of the stack
+   lua_newtable(L);                          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table, soon-to-be metatable
+   lua_pushstring( L, "v" );                 // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table, soon-to-be metatable, "v"
+   lua_setfield( L, -2, "__mode" );          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table, soon-to-be metatable
+
+   // lua_setmetatable: Pops a table from the stack and sets it as the new metatable for the value at the given acceptable index
+   lua_setmetatable(L, -2);                  // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table
+
+   // lua_settable: t[k] = v, where t is the value at the given valid index, v is the value 
+   // at the top of the stack, and k is the value just below the top.
+   // Here: registry[LUAW_OBJ_CACHE_KEY] = cache_table
+   lua_settable(L, LUA_REGISTRYINDEX);       // -- 
+
+   // Retrieve the table again, so we can work with it
+   getCacheTable(L);                         // -- cache_table
+}
 
 
 // Analogous to lua_push(boolean|string|*)
@@ -362,26 +389,7 @@ void luaW_push(lua_State* L, T* obj)
       // But first, clear off whatever luaL_getmetatable put on the stack
       lua_pop(L, 1);                            // --
 
-      lua_pushstring(L, LUAW_OBJ_CACHE_KEY);    // -- LUAW_OBJ_CACHE_KEY
-      lua_newtable(L);                          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable
-
-      // Create a weak table to hold our cached objects ("v" in __mode denotes that values will be weak)
-      // lua_setfield: Does t[k] = v, where t is the value at the given valid index and v is the value at the top of the stack
-      lua_newtable(L);                          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable, soon-to-be metatable
-      lua_pushstring( L, "v" );                 // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable, soon-to-be metatable, "v"
-      lua_setfield( L, -2, "__mode" );          // -- LUAW_OBJ_CACHE_KEY, soon-to-be cachetable, soon-to-be metatable
-
-      // lua_setmetatable: Pops a table from the stack and sets it as the new metatable for the value at the given acceptable index
-      lua_setmetatable(L, -2);                  // -- LUAW_OBJ_CACHE_KEY, soon-to-be cache_table
-
-      // lua_settable: t[k] = v, where t is the value at the given valid index, v is the value 
-      // at the top of the stack, and k is the value just below the top.
-      // Here: registry[LUAW_OBJ_CACHE_KEY] = cache_table
-      lua_settable(L, LUA_REGISTRYINDEX);       // -- 
-
-      // Retrieve the table again, so we can work with it
-      getCacheTable(L);                         // -- cache_table
-
+      createCacheTable(L);       // Creates table, stores it in the registry, and pushes it onto the stack
       TNLAssert(lua_istable(L, -1), "Expected table!");
    }
 
