@@ -385,11 +385,11 @@ void luaW_push(lua_State* L, T* obj)
 
    if(!lua_istable(L, -1))    
    {
-      // No table?  Better create one!
-      // But first, clear off whatever luaL_getmetatable put on the stack
+      // No table?  Better create one...  but first, clear off whatever luaL_getmetatable put on the stack
       lua_pop(L, 1);                            // --
 
-      createCacheTable(L);       // Creates table, stores it in the registry, and pushes it onto the stack
+      // Create table, store it in the registry, and push it onto the stack:
+      createCacheTable(L);       
       TNLAssert(lua_istable(L, -1), "Expected table!");
    }
 
