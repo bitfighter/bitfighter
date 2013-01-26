@@ -1265,7 +1265,7 @@ S32 Robot::doFindObjects(lua_State *L, const char *methodName, Rect *scope)
    {
       if(isShipType(fillVector[i]->getObjectTypeNumber()))
       {
-         if(fillVector[i] == this) 
+         if(fillVector[i] == this)  // Don't add calling ship to the list of found objects!
             continue;
 
          // Ignore ship/robot if it's dead or cloaked (unless bot has sensor)
