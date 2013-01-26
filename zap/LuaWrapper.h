@@ -402,6 +402,7 @@ void luaW_push(lua_State* L, T* obj)
 
    // lua_rawget: Pushes onto the stack the value t[k], where t is the value at the given valid index 
    //             and k is the value at the top of the stack; triggers no metamethods
+   // Here we push cache_table[userdata]
    lua_rawget(L, -2);                           // -- cache_table, userdata
 
    if(lua_isuserdata( L, -1 ))                  // It's cached!!!
@@ -427,11 +428,11 @@ void luaW_push(lua_State* L, T* obj)
       // Get the metatable for this class out of the registry
       luaL_getmetatable(L, LuaWrapper<T>::classname);        // -- cache_table, userdata, class_metatable
 
-      // Set the metatable of our userdata to be the class metatable
-      lua_setmetatable(L, -2);                               // -- userdata
+      // Set the userdata's metatable to be class_metatable
+      lua_setmetatable(L, -2);                               // -- cache_table, userdata
 
-      ////////// This bit here increments an instance count for our specific object, which is stored
-      //         in the LuaWrapper table in the registry
+      ////////// This bit here increments an instance count for our specific object, which is stored in the
+      //         LuaWrapper table in the registry.  This count will be decremented when the object is collected.
                
       // Retrieve luaW from the registry
       lua_getfield(L, LUA_REGISTRYINDEX, LUAW_WRAPPER_KEY);  // -- cache_table, userdata, LuaWrapper
