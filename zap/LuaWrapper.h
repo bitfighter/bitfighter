@@ -521,44 +521,56 @@ bool luaW_hold(lua_State* L, T* obj)
       return false;     // return false if already held
     }
 
-   // It's not held, hold it
-
-   // Apply hold boolean
+   // It's not held, hold it.  Start by marking the item as held in the LuaWrapper.holds table
    lua_pop(L, 1); // ... LuaWrapper LuaWrapper.holds
    LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.holds id
    lua_pushboolean(L, true); // ... LuaWrapper LuaWrapper.holds id true
+
+   // lua_rawset: Does the equivalent to t[k] = v, where t is the value at the given valid index, 
+   //             v is the value at the top of the stack, and k is the value just below the top.
+   //             Pops both the key and the value from the stack; does not trigger metamethods.
+   // Here: LuaWrapper.holds[id] = true
    lua_rawset(L, -3); // ... LuaWrapper LuaWrapper.holds
 
    // Check count, if there's at least one, add a storage table
-   lua_pop(L, 1); // ... LuaWrapper
+   lua_pop(L, 1);                       // ... LuaWrapper
    lua_getfield(L, -1, LUAW_COUNT_KEY); // ... LuaWrapper LuaWrapper.counts
-   LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.counts id
-   lua_rawget(L, -2); // ... LuaWrapper LuaWrapper.counts count
+   LuaWrapper<T>::identifier(L, obj);   // ... LuaWrapper LuaWrapper.counts id
+   // push LuaWrapper.counts[id] (we'll call it "count")
+   lua_rawget(L, -2);                   // ... LuaWrapper LuaWrapper.counts count
 
-   if (lua_tointeger(L, -1) > 0)     // if(count > 0)...
+   int count = lua_tointeger(L, -1);
+   TNLAssert(count > 0, "Not a bug really, just interesting...");
+
+   if(count > 0)     // if(count > 0)...
    {
       // Find and attach the storage table
-      lua_pop(L, 2); // ... LuaWrapper
+      lua_pop(L, 2);                         // ... LuaWrapper
       lua_getfield(L, -1, LUAW_STORAGE_KEY); // ... LuaWrapper LuaWrapper.storage
-      LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.storage id
-      lua_rawget(L, -2); // ... LuaWrapper LuaWrapper.storage store
+      LuaWrapper<T>::identifier(L, obj);     // ... LuaWrapper LuaWrapper.storage id
+      // push LuaWrapper.storage[id] (we'll call it "store")
+      lua_rawget(L, -2);                     // ... LuaWrapper LuaWrapper.storage store
 
       // Add the storage table if there isn't one already
-      if (lua_isnoneornil(L, -1))
+      if(lua_isnoneornil(L, -1))
       {
-         lua_pop(L, 1); // ... LuaWrapper LuaWrapper.storage
-         LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.storage id
-         lua_newtable(L); // ... LuaWrapper LuaWrapper.storage id store
+         lua_pop(L, 1);                      // ... LuaWrapper LuaWrapper.storage
+         LuaWrapper<T>::identifier(L, obj);  // ... LuaWrapper LuaWrapper.storage id
+         lua_newtable(L);                    // ... LuaWrapper LuaWrapper.storage id store
 
-         lua_newtable(L); // ... LuaWrapper LuaWrapper.storage id store mt storemt
-         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... LuaWrapper LuaWrapper.storage id store storemt mt
-         lua_setfield(L, -2, "__index"); // ... LuaWrapper LuaWrapper.storage id store storemt
-         lua_setmetatable(L, -2); // ... LuaWrapper LuaWrapper.storage id store
+         lua_newtable(L);                    // ... LuaWrapper LuaWrapper.storage id store mt store_mt
+         luaL_getmetatable(L, LuaWrapper<T>::classname); // ... LuaWrapper LuaWrapper.storage id store store_mt class_mt
 
-         lua_rawset(L, -3); // ... LuaWrapper LuaWrapper.storage
-         lua_pop(L, 2); // ...
+         // lua_setfield: Does t[k] = v, where t is the value at the given valid index and v is the value at the top of the stack
+         // Here: store_mt[__index] = class_mt
+         lua_setfield(L, -2, "__index");     // ... LuaWrapper LuaWrapper.storage id store store_mt
+         lua_setmetatable(L, -2);            // ... LuaWrapper LuaWrapper.storage id store
+
+         lua_rawset(L, -3);                  // ... LuaWrapper LuaWrapper.storage
+         lua_pop(L, 2);                      // ...
       }
    }
+
    return true;      // return true because we started holding
 }
 
