@@ -789,6 +789,8 @@ int luaW_gc(lua_State* L)
       return 0;
    }
     
+   TNLAssert(false, "Better uncomment this code below!");
+   /*
     // Otherwise object is not a proxy -- try popping again
 
     T* obj = luaW_to<T>(L, 1);
@@ -796,19 +798,19 @@ int luaW_gc(lua_State* L)
     TNLAssert(obj, "Obj is NULL!");
     // If obj is NULL here, it may have been deleted from the C++ side already
     LuaWrapper<T>::identifier(L, obj); // obj id
-    luaW_wrapperfield<T>(L, LUAW_COUNT_KEY); // obj id counts
-    lua_pushvalue(L, 2); // obj id counts id
-    lua_gettable(L, -2); // obj id counts count
+    luaW_wrapperfield<T>(L, LUAW_COUNT_KEY); // obj id LUAW_COUNT_KEY
+    lua_pushvalue(L, 2); // obj id LUAW_COUNT_KEY id
+    lua_gettable(L, -2); // obj id LUAW_COUNT_KEY count
     int count = lua_tointeger(L, -1) - 1;
-    lua_pushvalue(L, 2); // obj id counts count id
-    lua_pushinteger(L, count); // obj id counts count id count-1
-    lua_settable(L, -4); // obj id counts count
+    lua_pushvalue(L, 2); // obj id LUAW_COUNT_KEY count id
+    lua_pushinteger(L, count); // obj id LUAW_COUNT_KEY count id count-1
+    lua_settable(L, -4); // obj id LUAW_COUNT_KEY count
 
     if (obj && 0 == count)
     {
-        luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // obj id counts count holds
-        lua_pushvalue(L, 2); // obj id counts count holds id
-        lua_gettable(L, -2); // obj id counts count holds hold
+        luaW_wrapperfield<T>(L, LUAW_HOLDS_KEY); // obj id LUAW_COUNT_KEY count LUAW_HOLDS_KEY
+        lua_pushvalue(L, 2); // obj id LUAW_COUNT_KEY count LUAW_HOLDS_KEY id
+        lua_gettable(L, -2); // obj id LUAW_COUNT_KEY count LUAW_HOLDS_KEY hold
         if (lua_toboolean(L, -1) && LuaWrapper<T>::deallocator)
         {
             LuaWrapper<T>::deallocator(L, obj);
@@ -817,6 +819,7 @@ int luaW_gc(lua_State* L)
         luaW_clean<T>(L, 2);
     }
     return 0;
+    */
 }
 
 // Takes two tables and registers them with Lua to the table on the top of the
