@@ -261,7 +261,9 @@ T* luaW_to(lua_State* L, int index, bool strict = false)
             ud = pud->cast(*pud);
             pud = &ud;
         }
-          LuaProxy<T> *proxy = (LuaProxy<T> *)pud->data;
+
+        LuaProxy<T> *proxy = (LuaProxy<T> *)pud->data;
+
         if(!proxy->isDefunct())
            return proxy->getProxiedObject();
     }
@@ -400,9 +402,10 @@ void luaW_push(lua_State* L, T* obj)
       lua_pop(L, 1);                            // --
 
       // Create table, store it in the registry, and push it onto the stack:
-      createCacheTable(L);       
+      createCacheTable(L);                      // -- cache_table
       TNLAssert(lua_istable(L, -1), "Expected table!");
    }
+
 
    // Check the table, see if we already have a userdata for this object
    LuaWrapper<T>::identifier(L, obj);           // -- cache_table, id
@@ -413,7 +416,12 @@ void luaW_push(lua_State* L, T* obj)
    lua_rawget(L, -2);                           // -- cache_table, userdata
 
    if(useCache && lua_isuserdata(L, -1))        // It's cached!!!
+   {
+      TNLAssert(proxy == luaW_toProxy<T>(L, -1), "Cached object is not the one we expect!");
+
+      // Remove the cahce_table from the stack
       lua_remove(L, -2);                        // -- userdata
+   }
 
    // If the above did not leave a userdata on the stack, we need to create a new one, and add it to our cache table.
    // Note that from here on down, we'll fall back on the normal LuaW push code, except for the bit at the end where
@@ -422,8 +430,6 @@ void luaW_push(lua_State* L, T* obj)
    {
       // First, clear off whatever luaL_getmetatable put on the stack
       lua_pop(L, 1);                            // -- cache_table
-
-      proxy->incUseCount();
 
       // Here we create a new userdata, push it on the stack, and store a pointer to it in ud
       luaW_Userdata* ud = (luaW_Userdata*)lua_newuserdata(L, sizeof(luaW_Userdata));   // -- cache_table, new userdata
@@ -762,16 +768,14 @@ int luaW_newindex(lua_State* L)
 template <typename T>
 int luaW_gc(lua_State* L)
 {
-    // See if object is a proxy, which it most likely will be
-    LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
+   // See if object is a proxy, which it most likely will be
+   LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
 
-    if(proxy)     // If the object is a proxy, which if always will be at the moment...
-    {
-       if(proxy->decUseCount())
-          delete proxy;
-
-       return 0;
-    }
+   if(proxy)     // If the object is a proxy, which if always will be at the moment...
+   {
+      delete proxy;
+      return 0;
+   }
     
     // Otherwise object is not a proxy -- try popping again
 
@@ -1185,7 +1189,6 @@ template <class T>
 class LuaProxy
 {
 private:
-    int mUseCount;
     bool mDefunct;
     T *mProxiedObject;
 
@@ -1199,7 +1202,6 @@ public:
       mProxiedObject = obj;
       obj->setLuaProxy(this);
       mDefunct = false;
-      mUseCount = 0;
     }
 
    // Destructor
@@ -1215,30 +1217,9 @@ public:
       return mProxiedObject;
    }
 
+   void setDefunct(bool isDefunct) { mDefunct = isDefunct; }
 
-   void setDefunct(bool isDefunct)
-   {
-      mDefunct = isDefunct;
-   }
-
-
-   bool isDefunct()
-   {
-      return mDefunct;
-   }
-
-
-   void incUseCount()
-   {
-      mUseCount++;
-   }
-
-
-   bool decUseCount()
-   {
-      mUseCount--;
-      return mUseCount == 0;
-   }
+   bool isDefunct()    { return mDefunct;  }
 };
 
 
