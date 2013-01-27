@@ -1978,14 +1978,15 @@ void GameUserInterface::announceHandler(const Vector<string> &words)
 	ClientGame *game = getGame();
 	if(game->hasAdmin("!!! You need to be an admin to use /announce"))
    {
-		string s = "";		
+	   // Rebuild our announcement from the split up vector
+		string message = "";
 		for(S32 i = 1; i < words.size(); i++)
-			s = s + words[i];
+			message = message + " " + words[i];
 	
 		GameType* gt = game->getGameType();
 					
 		if(gt)
-			gt->c2sSendAnnouncement(s);
+			gt->c2sSendAnnouncement(message);
 	}
 }
 
@@ -2291,8 +2292,8 @@ CommandInfo chatCmds[] = {
    { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
    { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
-   { "announce",    &GameUserInterface::announceHandler,        { STR },                  1, ADMIN_COMMANDS,  0,  1,  {"<ANNOUNCEMENT>"},                         "Announce an important message"   },
 
+   { "announce",           &GameUserInterface::announceHandler,           { STR },        1, ADMIN_COMMANDS,  0,  1,  {"<announcement>"},      "Announce an important message" },
    { "kick",               &GameUserInterface::kickPlayerHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
    { "ban",                &GameUserInterface::banPlayerHandler,          { NAME, xINT }, 2, ADMIN_COMMANDS,  0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
    { "banip",              &GameUserInterface::banIpHandler,              { STR, xINT },  2, ADMIN_COMMANDS,  0,  1,  {"<ip>","[duration]"},   "Ban an IP address from the server (def. = 60 mins)" },
