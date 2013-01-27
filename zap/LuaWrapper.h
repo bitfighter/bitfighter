@@ -792,9 +792,23 @@ int luaW_newindex(lua_State* L)
 template <typename T>
 int luaW_gc(lua_State* L)
 {
-   // See if object is a proxy, which it most likely will be
    LuaProxy<T>* proxy = luaW_toProxy<T>(L, 1);
+   TNLAssert(proxy, "Expected a proxy!");
 
+   // Had no effect on the problem at hand
+   //// Remove from the object cache... probably not necessary, but let's try it anyhow
+   //pushOrCreateCacheTable(L);                // -- userdata, cache_table
+   //dumpStack(L, "expect userdata, cache_table");
+
+   //LuaWrapper<T>::identifier(L, proxy->getProxiedObject());      // -- userdata, cache_table, unique_id
+
+   //lua_pushnil(L);                           // -- userdata, cache_table, unique_id, userdata, nil
+   //lua_rawset(L, -3);                        // -- userdata, cache_table
+   //lua_pop(L, 1);                            // -- userdata
+
+   //dumpStack(L, "expect ud only");
+
+   // See if object is a proxy, which it most likely will be
    if(proxy)     // If the object is a proxy, which if always will be at the moment...
    {
       delete proxy;
