@@ -302,7 +302,7 @@ void RabbitGameType::controlObjectForClientKilled(ClientInfo *theClient, BfObjec
    if(isShipType(clientObject->getObjectTypeNumber()))
       victimShip = static_cast<Ship *>(clientObject);
 
-   if(killerShip)
+   if(killerShip && killerShip != victimShip)  // Suicide already handled in Parent
    {
       if(shipHasFlag(killerShip))
       {
