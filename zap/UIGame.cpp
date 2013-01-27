@@ -105,15 +105,13 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
                   mServerMessageDisplayer(game, 6, true,  true,  SRV_MSG_WRAP_WIDTH, SRV_MSG_FONT_SIZE, SRV_MSG_FONT_GAP),
                   mChatMessageDisplayer1(game,  5, true,  false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
                   mChatMessageDisplayer2(game,  5, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP),
-                  mAnnouncementTimer(0)
+                  mChatMessageDisplayer3(game, 24, false, false, CHAT_WRAP_WIDTH,    CHAT_FONT_SIZE,    CHAT_FONT_GAP)
 {
    mInScoreboardMode = false;
    mFPSVisible = false;
    mHelper = NULL;
    displayInputModeChangeAlert = false;
    mMissionOverlayActive = false;
-   mIsAnnouncementNew = false;
 
    mMessageDisplayMode = ShortTimeout;
 
@@ -218,7 +216,8 @@ void GameUserInterface::quitEngineerHelper()
 void GameUserInterface::setAnnouncement(string message)
 {
 	mAnnouncement = message;
-	mIsAnnouncementNew = true;
+
+	mAnnouncementTimer.reset();
 }
 
 
@@ -339,8 +338,8 @@ void GameUserInterface::idle(U32 timeDelta)
    mProgressBarFadeTimer.update(timeDelta);
    mLevelInfoDisplayTimer.update(timeDelta);
 
-   if(mAnnouncementTimer.getCurrent() > 0)
-	   mAnnouncementTimer.update(timeDelta);
+   if(mAnnouncementTimer.update(timeDelta))
+      mAnnouncement = "";
 
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
       mModuleDoubleTapTimer[i].update(timeDelta);
@@ -2292,7 +2291,7 @@ CommandInfo chatCmds[] = {
    { "addbots",     &GameUserInterface::addBotsHandler,         { xINT, STR, TEAM, STR }, 4, LEVEL_COMMANDS,  1,  2,  {"[count]","[file]","[team name or num]","[args]"}, "Add [count] bots from [file] to [team num], pass [args] to bot" },
    { "kickbot",     &GameUserInterface::kickBotHandler,         {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick most recently added bot" },
    { "kickbots",    &GameUserInterface::kickBotsHandler,        {  },                     0, LEVEL_COMMANDS,  1,  1,  {  },                                       "Kick all bots" },
-   {"announce",	    &GameUserInterface::announceHandler,	    { STR },                  1, ADMIN_COMMANDS,  0,  1,  {"<ANNOUNCEMENT>"},      "The admin announces an important message"   }, 
+   { "announce",    &GameUserInterface::announceHandler,        { STR },                  1, ADMIN_COMMANDS,  0,  1,  {"<ANNOUNCEMENT>"},                         "Announce an important message"   },
 
    { "kick",               &GameUserInterface::kickPlayerHandler,         { NAME },       1, ADMIN_COMMANDS,  0,  1,  {"<name>"},              "Kick a player from the game" },
    { "ban",                &GameUserInterface::banPlayerHandler,          { NAME, xINT }, 2, ADMIN_COMMANDS,  0,  1,  {"<name>","[duration]"}, "Ban a player from the server (IP-based, def. = 60 mins)" },
@@ -2327,24 +2326,27 @@ CommandInfo chatCmds[] = {
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs()
 {
-   if(mIsAnnouncementNew)
-   {
-	   mIsAnnouncementNew = false;
-	   mAnnouncementTimer.reset();
-   }
-   if(mAnnouncementTimer.getCurrent() == 0)
-      mAnnouncement = "";
-
    bool helperActive = (mHelper != NULL);
-  
-     if(mMessageDisplayMode == ShortTimeout)
-        mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive, mAnnouncement);
-     else if(mMessageDisplayMode == ShortFixed)
-        mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive, mAnnouncement);
-     else
-        mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive, mAnnouncement);
-      mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive, "");
-   
+   bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
+
+   if(mMessageDisplayMode == ShortTimeout)
+      mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive, announcementActive);
+   else if(mMessageDisplayMode == ShortFixed)
+      mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive, announcementActive);
+   else
+      mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive, announcementActive);
+
+   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive, false);
+
+   if(announcementActive)
+      renderAnnouncement(CHAT_Y_POS);
+}
+
+
+void GameUserInterface::renderAnnouncement(S32 pos)
+{
+   glColor(1.0f, 0, 0.4f);
+   drawString(UserInterface::horizMargin, pos, CHAT_FONT_SIZE, mAnnouncement.c_str());
 }
 
 
@@ -3867,7 +3869,7 @@ string ChatMessageDisplayer::substitueVars(const string &str)
 
 
 // Render any incoming player chat msgs
-void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, string announcement)
+void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anouncementActive)
 {
    // Are we in the act of transitioning between one message and another?
    bool isScrolling = (mChatScrollTimer.getCurrent() > 0);  
@@ -3920,7 +3922,7 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, string anno
    // Advance anchor from top to the bottom of the render area.  When we are rendering at the bottom, anchorPos
    // already represents the bottom, so no additional adjustment is necessary.
    if(mTopDown)
-      y += (mFirst - mLast - 1) * lineHeight; 
+      y += (mFirst - mLast - 1) * lineHeight;
 
    // Render an extra message while we're scrolling (in some cases).  Scissors will control the total vertical height.
    S32 renderExtra = 0;
@@ -3931,50 +3933,29 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, string anno
       else if(mFull)    // Only render extra item on bottom-up if list is fully occupied
          renderExtra = 1;
    }
-                                  
-       if(announcement == "")
-    {                               
-       for(U32 i = mFirst; i != mLast - renderExtra; i--)
-       {
-           U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
- 
-           if(helperVisible)   
-             glColor(mMessages[index].color, 0.2f); // Dim
-           else
-             glColor(mMessages[index].color);       // Bright
- 
-           drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
- 
-           y -= lineHeight;
-       }
-    } 
-    else 
-    {
-      Vector<string> announcementLines = wrapString(announcement, CHAT_WRAP_WIDTH, CHAT_FONT_SIZE, " "); 
-      S32 yAnnouncement = CHAT_Y_POS + lineHeight*announcementLines.size();
-       
-      for(S32 i = 0; i < announcementLines.size(); i++)
-      {
-         glColor(Colors::red);
-         drawString(UserInterface::horizMargin, yAnnouncement, mFontSize, announcementLines[i].c_str());
- 	
- 	      yAnnouncement -= lineHeight;
-       } 	  
- 	
-      for(U32 i = mFirst + (U32)announcementLines.size(); i != mLast - renderExtra; i--)
-       {
-           U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
- 
-           if(helperVisible)   
-             glColor(mMessages[index].color, 0.2f); // Dim
-           else
-             glColor(mMessages[index].color);       // Bright
- 
-           drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
- 
-           y -= lineHeight;
-       }
-    } 
+
+   // Adjust our last line if we have an announcement
+   U32 last = mLast;
+   if(anouncementActive)
+   {
+      last++;
+      y -= lineHeight;
+   }
+
+   // Draw message lines
+   for(U32 i = mFirst; i != last - renderExtra; i--)
+   {
+      U32 index = i % (U32)mMessages.size();    // Handle wrapping in our message list
+
+      if(helperVisible)
+         glColor(mMessages[index].color, 0.2f); // Dim
+      else
+         glColor(mMessages[index].color);       // Bright
+
+      drawString(UserInterface::horizMargin, y, mFontSize, mMessages[index].str.c_str());
+
+      y -= lineHeight;
+   }
 
 
    // Restore scissors settings -- only used during scrolling

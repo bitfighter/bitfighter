@@ -90,40 +90,40 @@ struct ColorString
 ////////////////////////////////////////
 ////////////////////////////////////////
 
- class ChatMessageDisplayer
+class ChatMessageDisplayer
 {
-   private:
-      U32 mFirst, mLast;
-      bool mExpire;
-      bool mTopDown;    // Render from top down or bottom up?
-      S32 mWrapWidth;
-      S32 mFontSize, mFontGap;
-      bool mFull;       // Our message displayer is full up
+private:
+   U32 mFirst, mLast;
+   bool mExpire;
+   bool mTopDown;    // Render from top down or bottom up?
+   S32 mWrapWidth;
+   S32 mFontSize, mFontGap;
+   bool mFull;       // Our message displayer is full up
 
-      U32 mNextGroupId;
+   U32 mNextGroupId;
 
 
-      void advanceFirst();
-      void advanceLast();
+   void advanceFirst();
+   void advanceLast();
 
-      Timer mChatScrollTimer;
-      Timer mDisplayChatMessageTimer;
+   Timer mChatScrollTimer;
+   Timer mDisplayChatMessageTimer;
 
-      ClientGame *mGame;
+   ClientGame *mGame;
 
-      // These are the messages and their colors
-      Vector<ColorString> mMessages;
+   // These are the messages and their colors
+   Vector<ColorString> mMessages;
 
-   public:
-      // Constructor
-      ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);  
-      void reset();
+public:
+   // Constructor
+   ChatMessageDisplayer(ClientGame *game, S32 msgCount, bool msgsExpire, bool topDown, S32 wrapWidth, S32 fontSize, S32 fontGap);
+   void reset();
 
-      void idle(U32 timeDelta);
-      void render(S32 ypos, bool helperVisible, string announcement);   // Render incoming chat msgs
+   void idle(U32 timeDelta);
+   void render(S32 ypos, bool helperVisible, bool anouncementActive);   // Render incoming chat msgs
 
-      void onChatMessageRecieved(const Color &msgColor, const string &msg);
-      string substitueVars(const string &str);
+   void onChatMessageRecieved(const Color &msgColor, const string &msg);
+   string substitueVars(const string &str);
 };
 
 ////////////////////////////////////////
@@ -152,6 +152,7 @@ private:
 	
    MessageDisplayMode mMessageDisplayMode;    // Our current message display mode
    void renderChatMsgs();
+   void renderAnnouncement(S32 pos);
 
    Move mCurrentMove;
    Move mTransformedMove;
@@ -272,7 +273,6 @@ private:
 
    Timer mAnnouncementTimer;
    string mAnnouncement;
-   bool mIsAnnouncementNew;
 
    void dropItem();                       // User presses drop item key
 

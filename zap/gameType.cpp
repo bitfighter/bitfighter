@@ -3543,7 +3543,11 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhostParent, 1)
 {
 	GameConnection *source = (GameConnection *)getRPCSourceConnection();
+	ClientInfo *sourceClientInfo = source->getClientInfo();
 	
+	if(!sourceClientInfo->isAdmin())
+	      return;
+
 	for(S32 i = 0; i < mGame->getClientCount(); i++)
    {
 		ClientInfo *clientInfo = mGame->getClientInfo(i);
@@ -3553,7 +3557,6 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sSendAnnouncement, (string message), (me
 
 		RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayAnnouncement, (message));
 			
-		source->postNetEvent(theEvent);
 		clientInfo->getConnection()->postNetEvent(theEvent);
 	}
 }
@@ -3670,6 +3673,8 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cDisplayAnnouncement, (string message), 
 #ifndef ZAP_DEDICATED
 	ClientGame* clientGame = static_cast<ClientGame *>(mGame);
 	GameUserInterface* gameUI = clientGame->getUIManager()->getGameUserInterface();
+
+	gameUI->setAnnouncement(message);
 #endif
 }
 
