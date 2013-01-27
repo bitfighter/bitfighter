@@ -528,7 +528,7 @@ bool luaW_hold(lua_State* L, T* obj)
         lua_getfield(L, -1, LUAW_COUNT_KEY); // ... LuaWrapper LuaWrapper.counts
         LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.counts id
         lua_rawget(L, -2); // ... LuaWrapper LuaWrapper.counts count
-        if (lua_tointeger(L, -1) > 0)
+        if (lua_tointeger(L, -1) > 0)     // if(count > 0)...
         {
             // Find and attach the storage table
             lua_pop(L, 2); // ... LuaWrapper
