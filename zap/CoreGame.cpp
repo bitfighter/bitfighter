@@ -281,7 +281,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
 {
    mNetFlags.set(Ghostable);
    mObjectTypeNumber = CoreTypeNumber;
-   setStartingHealth(F32(CoreDefaultStartingHealth));      // Hits to kill
+   setStartingHealth(F32(CoreDefaultStartingHealth) / DamageReductionRatio);      // Hits to kill
 
    mHasExploded = false;
    mHeartbeatTimer.reset(CoreHeartbeatStartInterval);
@@ -305,7 +305,7 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
       {
          setPos(L, 1);
          setTeam(L, 2);
-         setStartingHealth(getFloat(L, 3));
+         setStartingHealth(getFloat(L, 3) / DamageReductionRatio);
       }
    }
 
@@ -397,7 +397,7 @@ void CoreItem::startEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 // Retrieve the values we need from the menu
 void CoreItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
 {
-   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()));
+   setStartingHealth(F32(attributeMenu->getMenuItem(0)->getIntValue()) / DamageReductionRatio);
 }
 
 
@@ -790,7 +790,7 @@ void CoreItem::idle(BfObject::IdleCallPath path)
 
 void CoreItem::setStartingHealth(F32 health)
 {
-   mStartingHealth = health / DamageReductionRatio;
+   mStartingHealth = health;
 
    // Now that starting health has been set, divide it amongst the panels
    mStartingPanelHealth = mStartingHealth / CORE_PANELS;
@@ -1039,7 +1039,7 @@ REGISTER_LUA_SUBCLASS(CoreItem, Item);
   */
 S32 CoreItem::getCurrentHealth(lua_State *L) 
 { 
-   return returnFloat(L, getTotalCurrentHealth()); 
+   return returnFloat(L, getTotalCurrentHealth() * DamageReductionRatio);
 }
 
 
@@ -1051,7 +1051,7 @@ S32 CoreItem::getCurrentHealth(lua_State *L)
   */
 S32 CoreItem::getFullHealth(lua_State *L) 
 { 
-   return returnFloat(L, mStartingHealth); 
+   return returnFloat(L, mStartingHealth * DamageReductionRatio);
 }
 
 
@@ -1065,7 +1065,7 @@ S32 CoreItem::getFullHealth(lua_State *L)
 S32 CoreItem::setFullHealth(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "CoreItem", "setFullHealth");
-   setStartingHealth(getFloat(L, 1));
+   setStartingHealth(getFloat(L, 1) / DamageReductionRatio);
 
    return 0;     
 }
