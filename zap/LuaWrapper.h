@@ -360,6 +360,23 @@ static void createCacheTable(lua_State *L)
 }
 
 
+// Pushes the cache_table onto the stack, and creates it if it does not exist
+static void pushOrCreateCacheTable(lua_State *L)
+{
+   // This will either put the cache_table onto the stack, or, if it does not exist, will put a nil there
+   pushCacheTable(L);                           // -- cache_table OR nil
+
+   if(!lua_istable(L, -1))    
+   {
+      // No table?  Better create one...  but first, clear off whatever luaL_getmetatable put on the stack
+      lua_pop(L, 1);                            // --
+
+      // Create table, store it in the registry, and push it onto the stack:
+      createCacheTable(L);                      // -- cache_table
+   }
+}
+
+
 // Analogous to lua_push(boolean|string|*)
 //
 // Pushes a userdata of type T onto the stack. If this object already exists in
@@ -390,22 +407,13 @@ void luaW_push(lua_State* L, T* obj)
       useCache = false;       
    }
 
+   /////
    // Check the objectCache table to see if we already have a userdata for this object
    // (Or cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
 
-   // This will either put the cache_table onto the stack, or, if it does not exist, will put a nil there
-   pushCacheTable(L);                           // -- cache_table OR nil
-
-   if(!lua_istable(L, -1))    
-   {
-      // No table?  Better create one...  but first, clear off whatever luaL_getmetatable put on the stack
-      lua_pop(L, 1);                            // --
-
-      // Create table, store it in the registry, and push it onto the stack:
-      createCacheTable(L);                      // -- cache_table
-      TNLAssert(lua_istable(L, -1), "Expected table!");
-   }
-
+   // First get the cache_table onto the stack, by hook or by crook
+   pushOrCreateCacheTable(L);
+   TNLAssert(lua_istable(L, -1), "Expected table!");
 
    // Check the table, see if we already have a userdata for this object
    LuaWrapper<T>::identifier(L, obj);           // -- cache_table, id
