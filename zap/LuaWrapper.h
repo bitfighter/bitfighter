@@ -409,7 +409,7 @@ void luaW_push(lua_State* L, T* obj)
 
    /////
    // Check the objectCache table to see if we already have a userdata for this object
-   // (Or cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
+   // (Our cache will be a weak table; more about those here: http://lua-users.org/wiki/WeakTablesTutorial)
 
    // First get the cache_table onto the stack, by hook or by crook
    pushOrCreateCacheTable(L);
@@ -464,7 +464,7 @@ void luaW_push(lua_State* L, T* obj)
 
       // Get the instance count for our object from the LuaWrapper table
       lua_gettable(L, -2);                                   // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, count
-      int count = (int) lua_tointeger(L, -1);             
+      int count = (int) lua_tointeger(L, -1);   
 
       // Increments the instance count, and store it back in the LuaWrapper table
       LuaWrapper<T>::identifier(L, obj);                     // -- cache_table, userdata, LuaWrapper, LuaWrapper.counts, count, unique_id
@@ -531,7 +531,7 @@ bool luaW_hold(lua_State* L, T* obj)
         if (lua_tointeger(L, -1) > 0)
         {
             // Find and attach the storage table
-            lua_pop(L, 2);
+            lua_pop(L, 2); // ... LuaWrapper
             lua_getfield(L, -1, LUAW_STORAGE_KEY); // ... LuaWrapper LuaWrapper.storage
             LuaWrapper<T>::identifier(L, obj); // ... LuaWrapper LuaWrapper.storage id
             lua_rawget(L, -2); // ... LuaWrapper LuaWrapper.storage store
