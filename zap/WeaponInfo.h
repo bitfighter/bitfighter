@@ -48,7 +48,7 @@ namespace Zap
    WEAPON_ITEM(WeaponSeeker,  "Seeker",      "Seeker",     700, 20000, 20000,  600, 8000, 0.26f,  1.0f,    false, NotAProjectile   ) \
    WEAPON_ITEM(WeaponMine,    "Mine",        "Mine",       900, 55000, 55000,  500,   -1, 0.50f,  1.0f,    true,  NotAProjectile   ) \
    WEAPON_ITEM(WeaponTurret,  "Turret",      "Turret",     150,     0,     0,  800,  800, 0.11f,  1.0f,    true,  ProjectileTurret ) \
-   WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      0,       true,  NotAProjectile   ) \
+   WEAPON_ITEM(WeaponSpyBug,  "Spy Bug",     "SpyBug",     800, 50000, 50000,  800,   -1, 0,      1.0f,    true,  NotAProjectile   ) \
 
 
 // Define an enum from the first values in WEAPON_ITEM_TABLE
