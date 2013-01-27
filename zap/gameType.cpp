@@ -1939,8 +1939,8 @@ bool GameType::objectCanDamageObject(BfObject *damager, BfObject *victim)
    if(damagerOwner && damagerOwner == victim->getOwner())
       return GameWeapon::weaponInfo[weaponType].damageSelfMultiplier != 0;
 
-   // Check for friendly fire
-   else if(damager->getTeam() == victim->getTeam())
+   // Check for friendly fire, unless Spybug - they always get blowed up
+   else if(damager->getTeam() == victim->getTeam() && victim->getObjectTypeNumber() != SpyBugTypeNumber)
       return !isTeamGame() || GameWeapon::weaponInfo[weaponType].canDamageTeammate;
 
    return true;
