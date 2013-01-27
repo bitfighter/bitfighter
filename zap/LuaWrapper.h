@@ -1183,8 +1183,6 @@ public:
 
 
 
-
-
 template <class T>
 class LuaProxy
 {
