@@ -1212,14 +1212,10 @@ public:
    }
 
 
-   T *getProxiedObject()
-   {
-      return mProxiedObject;
-   }
+   T   *getProxiedObject() { return mProxiedObject; }
+   bool isDefunct()        { return mDefunct;       }
 
    void setDefunct(bool isDefunct) { mDefunct = isDefunct; }
-
-   bool isDefunct()    { return mDefunct;  }
 };
 
 
