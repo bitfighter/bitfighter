@@ -152,7 +152,7 @@ GameUserInterface::GameUserInterface(ClientGame *game) :
       mModuleDoubleTapTimer[i].setPeriod(DoubleClickTimeout);
    }
    
-   mAnnouncementTimer.setPeriod(10000);
+   mAnnouncementTimer.setPeriod(15000);  // 15 seconds
    mAnnouncement = "";
    makeCommandCandidateList();
 }
