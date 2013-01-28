@@ -3950,7 +3950,10 @@ void ChatMessageDisplayer::render(S32 anchorPos, bool helperVisible, bool anounc
    U32 last = mLast;
    if(anouncementActive)
    {
-      last++;
+      // Render one less line if we're past the size threshold for this displayer
+      if(mFirst >= mMessages.size() - 1)
+         last++;
+
       y -= lineHeight;
    }
 
