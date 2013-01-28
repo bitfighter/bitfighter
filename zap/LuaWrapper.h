@@ -56,12 +56,12 @@ using namespace Zap;
 
 // #define LUAW_BUILDER
 
-#define LUAW_POSTCTOR_KEY "__postctor"
-#define LUAW_EXTENDS_KEY  "__extends"
-#define LUAW_STORAGE_KEY  "__storage"
-#define LUAW_COUNT_KEY    "__counts"
-#define LUAW_HOLDS_KEY    "__holds"
-#define LUAW_WRAPPER_KEY  "LuaWrapper"
+#define LUAW_POSTCTOR_KEY  "__postctor"
+#define LUAW_EXTENDS_KEY   "__extends"
+#define LUAW_STORAGE_KEY   "__storage"
+#define LUAW_COUNT_KEY     "__counts"
+#define LUAW_HOLDS_KEY     "__holds"
+#define LUAW_WRAPPER_KEY   "LuaWrapper"
 #define LUAW_OBJ_CACHE_KEY "LuaWrapperObjectCacheKey"
 
 
