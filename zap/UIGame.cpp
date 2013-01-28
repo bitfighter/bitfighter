@@ -1981,7 +1981,12 @@ void GameUserInterface::announceHandler(const Vector<string> &words)
 	   // Rebuild our announcement from the split up vector
 		string message = "";
 		for(S32 i = 1; i < words.size(); i++)
-			message = message + " " + words[i];
+		{
+		   if(i != 1)
+		      message = message + " ";
+
+		   message = message + words[i];
+		}
 	
 		GameType* gt = game->getGameType();
 					
@@ -2346,8 +2351,14 @@ void GameUserInterface::renderChatMsgs()
 
 void GameUserInterface::renderAnnouncement(S32 pos)
 {
-   glColor(1.0f, 0, 0.4f);
-   drawString(UserInterface::horizMargin, pos, CHAT_FONT_SIZE, mAnnouncement.c_str());
+   glColor(Colors::red);
+   glLineWidth(gLineWidth4);
+
+   S32 x = drawStringAndGetWidth(UserInterface::horizMargin, pos, 16, "*** ");
+   x += drawStringAndGetWidth(UserInterface::horizMargin + x, pos, 16, mAnnouncement.c_str());
+   drawString(UserInterface::horizMargin + x, pos, 16, " ***");
+
+   glLineWidth(gDefaultLineWidth);
 }
 
 
