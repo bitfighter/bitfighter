@@ -1312,7 +1312,7 @@ REGISTER_LUA_CLASS(BfObject);
 */
 S32 BfObject::getClassId(lua_State *L)  
 { 
-   return returnInt  (L, mObjectTypeNumber); 
+   return returnInt(L, mObjectTypeNumber); 
 }
 
 
