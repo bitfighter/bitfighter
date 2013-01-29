@@ -336,13 +336,17 @@ void Ship::setActualPos(Point p, bool warp)
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
+   static const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35f;
+   static const F32 ARMOR_SPEED_PENALTY_FACT = 1;
+
    copyMoveState(stateIndex, LastProcessState);
    setAngle(stateIndex, mCurrentMove.angle);
 
    if(mCurrentMove.x == 0 && mCurrentMove.y == 0 && getVel(stateIndex) == Point(0,0))
       return;  // saves small amount of CPU processing to not processing any of below when ship is not moving.
 
-   F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity);
+   F32 maxVel = (isModulePrimaryActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) *
+                (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001f;
    Point requestVel(mCurrentMove.x, mCurrentMove.y);
@@ -363,7 +367,8 @@ void Ship::processMove(U32 stateIndex)
 
 
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
-   F32 maxAccel = (isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time;
+   F32 maxAccel = (isModulePrimaryActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time *
+                  (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
    maxAccel *= getSlipzoneSpeedMoficationFactor();
 
    if(accRequested > maxAccel)
