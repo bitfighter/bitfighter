@@ -105,6 +105,8 @@ Robot::~Robot()
       return;
    }
 
+   dismountAll();  // fixes dropping CTF flag without ClientInfo...
+
    // Server only from here on down
    if(getGame())  // can be NULL if this robot was never added to game (bad / missing robot file)
    {
