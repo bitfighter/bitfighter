@@ -2338,17 +2338,17 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 
 GAMETYPE_RPC_C2S(GameType, c2sSetTime, (U32 time), (time))
 {
-   processClientRequestForChangingGameTime(time, time == 0, true, 2);
+   processClientRequestForChangingGameTime(time, time == 0, true, false);
 }
 
 
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
 {
-   processClientRequestForChangingGameTime(time += mGameTimer.getCurrent(), false, false, 1);
+   processClientRequestForChangingGameTime(time, false, false, true);
 }
 
 
-void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, S32 voteType)
+void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, bool addTime)
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientInfo *clientInfo = source->getClientInfo();
@@ -2365,10 +2365,12 @@ void GameType::processClientRequestForChangingGameTime(S32 time, bool isUnlimite
          getGame()->getSettings()->getLevelChangePassword() == "" && 
          getGame()->getPlayerCount() > 1)
    {
-      if(static_cast<ServerGame *>(getGame())->voteStart(clientInfo, voteType, time))     // Returns true if handled
+      if(static_cast<ServerGame *>(getGame())->voteStart(clientInfo, addTime ? ServerGame::VoteAddTime : ServerGame::VoteSetTime, time))     // Returns true if handled
          return;
    }
 
+   if(addTime)
+      time += mGameTimer.getCurrent();
 
    if(isUnlimited)
       setTimeRemaining(MAX_GAME_TIME, true);
@@ -2402,7 +2404,7 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") && 
         getGame()->getPlayerCount() > 1 )
    {
-      if(((ServerGame *)getGame())->voteStart(clientInfo, 4, team))
+      if(((ServerGame *)getGame())->voteStart(clientInfo, ServerGame::VoteChangeTeam, team))
          return;
    }
 
@@ -3125,7 +3127,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
 
    // Use voting when there is no level change password, and there is more then 1 player
    if(!clientInfo->isAdmin() && settings->getLevelChangePassword() == "" && serverGame->getPlayerCount() > 1)
-      if(serverGame->voteStart(clientInfo, 3, score))
+      if(serverGame->voteStart(clientInfo, ServerGame::VoteSetScore, score))
          return;
 
    mWinningScore = score;
@@ -3148,18 +3150,26 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    if(getGameTypeId() == CoreGame)
       return;
 
+   if(serverGame->voteStart(clientInfo, ServerGame::VoteResetScore, 0))
+      return;
+
    // Reset player scores
    for(S32 i = 0; i < serverGame->getClientCount(); i++)
+   {
+      if(mGame->getClientInfo(i)->getScore() != 0)
+         s2cSetPlayerScore(i, 0);
       mGame->getClientInfo(i)->setScore(0);
+   }
 
    // Reset team scores
    for(S32 i = 0; i < mGame->getTeamCount(); i++)
    {
+      // broadcast it to the clients
+      if(((Team*)mGame->getTeam(i))->getScore() != 0)
+         s2cSetTeamScore(i, 0);
+
       // Set the score internally...
       ((Team*)mGame->getTeam(i))->setScore(0);
-
-      // ...and broadcast it to the clients
-      s2cSetTeamScore(i, 0);
    }
 
    StringTableEntry msg("%e0 has reset the score of the game");
