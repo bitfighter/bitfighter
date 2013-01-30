@@ -3120,7 +3120,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSetWinningScore, (U32 score), (score))
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    // No changing score in Core
-   if(serverGame->getGameType()->getGameTypeId() == CoreGame)
+   if(getGameTypeId() == CoreGame)
       return;
 
    // Use voting when there is no level change password, and there is more then 1 player
@@ -3145,7 +3145,7 @@ GAMETYPE_RPC_C2S(GameType, c2sResetScore, (), ())
    ServerGame *serverGame = static_cast<ServerGame *>(mGame);
 
    // No changing score in Core
-   if(serverGame->getGameType()->getGameTypeId() == CoreGame)
+   if(getGameTypeId() == CoreGame)
       return;
 
    // Reset player scores
