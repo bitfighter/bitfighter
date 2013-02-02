@@ -296,7 +296,7 @@ SplashUserInterface::SplashUserInterface(ClientGame *game) : Parent(game)
 void SplashUserInterface::onActivate()
 {
    mSplashTimer.reset(spinTime);
-   glLineWidth(gDefaultLineWidth);
+//   glLineWidth(gDefaultLineWidth);
 
    mPhase = SplashPhaseAnimation;
 }
