@@ -108,7 +108,6 @@ OBJECTS_SHARED=\
    projectile.o\
    rabbitGame.o\
    Rect.o\
-   RenderUtils.o\
    retrieveGame.o\
    robot.o\
    ScreenInfo.o\
@@ -155,6 +154,7 @@ OBJECTS_CLIENT=\
    oglconsole.o\
    OpenglUtils.o\
    quickChatHelper.o\
+   RenderUtils.o\
    ScreenShooter.o\
    ShipShape.o\
    sparkManager.o\
