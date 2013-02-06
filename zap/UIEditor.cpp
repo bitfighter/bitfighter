@@ -3928,7 +3928,8 @@ void EditorUserInterface::onMouseClicked_left()
 
       if(InputCodeManager::checkModifier(KEY_SHIFT))  // ==> Shift key is down
       {
-         if(!mHitItem && mHitVertex != NONE)                   // If mHitItem is not NULL, we may have hit a point object
+         // Check for vertices
+         if(mHitItem && mHitVertex != NONE && mHitItem->getGeomType() != geomPoint)
          {
             if(mHitItem->vertSelected(mHitVertex))
                mHitItem->unselectVert(mHitVertex);
