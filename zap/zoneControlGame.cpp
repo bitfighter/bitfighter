@@ -376,7 +376,7 @@ void ZoneControlGameType::majorScoringEventOcurred(S32 team)
    }
 
    // ...then activate the glowing zone effect
-   getGame()->getGameType()->mZoneGlowTimer.reset();
+   mZoneGlowTimer.reset();
 }
 
 

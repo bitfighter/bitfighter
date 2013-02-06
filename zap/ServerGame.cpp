@@ -165,7 +165,7 @@ void ServerGame::cleanUp()
 
 
 // Return true when handled
-bool ServerGame::voteStart(ClientInfo *clientInfo, S32 type, S32 number)
+bool ServerGame::voteStart(ClientInfo *clientInfo, VoteType type, S32 number)
 {
    GameConnection *conn = clientInfo->getConnection();
 
@@ -173,12 +173,24 @@ bool ServerGame::voteStart(ClientInfo *clientInfo, S32 type, S32 number)
       return false;
 
    U32 VoteTimer;
-   if(type == 4) // change team
+   if(type == VoteChangeTeam)
       VoteTimer = mSettings->getIniSettings()->voteLengthToChangeTeam * 1000;
    else
       VoteTimer = mSettings->getIniSettings()->voteLength * 1000;
    if(VoteTimer == 0)
       return false;
+
+   if(type != VoteLevelChange)
+   {
+      if(getGameType()->isGameOver())
+         return true;   // Don't allow trying to start votes during game over, except level changing.
+
+      if((U32) getGameType()->getRemainingGameTimeInMs() - 1 < VoteTimer)  // handles unlimited GameType time, by forcing the U32 range.
+      {
+         conn->s2cDisplayErrorMessage("Not enough time");
+         return true;
+      }
+   }
 
    if(mVoteTimer != 0)
    {
@@ -1285,31 +1297,30 @@ void ServerGame::processVoting(U32 timeDelta)
             i.push_back(mVoteTimer / 1000);
             switch(mVoteType)
             {
-            case 0:
+            case VoteLevelChange:
                msg = "/YES or /NO : %i0 : Change Level to %e0";
                e.push_back(getLevelNameFromIndex(mVoteNumber));
                break;
-            case 1:
+            case VoteAddTime:
                msg = "/YES or /NO : %i0 : Add time %i1 minutes";
                i.push_back(mVoteNumber / 60000);
                break;
-            case 2:
+            case VoteSetTime:
                msg = "/YES or /NO : %i0 : Set time %i1 minutes %i2 seconds";
                i.push_back(mVoteNumber / 60000);
                i.push_back((mVoteNumber / 1000) % 60);
                break;
-            case 3:
+            case VoteSetScore:
                msg = "/YES or /NO : %i0 : Set score %i1";
                i.push_back(mVoteNumber);
                break;
-            case 4:
+            case VoteChangeTeam:
                msg = "/YES or /NO : %i0 : Change team %e0 to %e1";
                e.push_back(mVoteClientName);
                e.push_back(getTeamName(mVoteNumber));
                break;
-            case 5:
-               msg = "/YES or /NO : %i0 : %s0";
-               s.push_back(mVoteString);
+            case VoteResetScore:
+               msg = "/YES or /NO : %i0 : Reset All Scores";
                break;
             }
             
@@ -1360,33 +1371,33 @@ void ServerGame::processVoting(U32 timeDelta)
             mVoteTimer = 0;
             switch(mVoteType)
             {
-               case 0:
+               case VoteLevelChange:
                   mNextLevel = mVoteNumber;
                   if(mGameType)
                      mGameType->gameOverManGameOver();
                   break;
-               case 1:
+               case VoteAddTime:
                   if(mGameType)
                   {
                      mGameType->extendGameTime(mVoteNumber);                           // Increase "official time"
                      mGameType->broadcastNewRemainingTime();   
                   }
                   break;   
-               case 2:
+               case VoteSetTime:
                   if(mGameType)
                   {
                      mGameType->extendGameTime(S32(mVoteNumber - mGameType->getRemainingGameTimeInMs()));
                      mGameType->broadcastNewRemainingTime();                                   
                   }
                   break;
-               case 3:
+               case VoteSetScore:
                   if(mGameType)
                   {
                      mGameType->setWinningScore(mVoteNumber);
                      mGameType->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);     // Broadcast score to clients
                   }
                   break;
-               case 4:
+               case VoteChangeTeam:
                   if(mGameType)
                   {
                      for(S32 i = 0; i < getClientCount(); i++)
@@ -1398,15 +1409,26 @@ void ServerGame::processVoting(U32 timeDelta)
                      }
                   }
                   break;
-               case 5:
-                  if(mGameType)
+               case VoteResetScore:
+                  if(mGameType && mGameType->getGameTypeId() != CoreGame) // No changing score in Core
                   {
+                     // Reset player scores
                      for(S32 i = 0; i < getClientCount(); i++)
                      {
-                        ClientInfo *clientInfo = getClientInfo(i);
+                        if(getClientInfo(i)->getScore() != 0)
+                           mGameType->s2cSetPlayerScore(i, 0);
+                        getClientInfo(i)->setScore(0);
+                     }
 
-                        if(clientInfo->getName() == mVoteClientName)
-                           mGameType->changeClientTeam(clientInfo, mVoteNumber);
+                     // Reset team scores
+                     for(S32 i = 0; i < getTeamCount(); i++)
+                     {
+                        // broadcast it to the clients
+                        if(((Team*)getTeam(i))->getScore() != 0)
+                           mGameType->s2cSetTeamScore(i, 0);
+
+                        // Set the score internally...
+                        ((Team*)getTeam(i))->setScore(0);
                      }
                   }
                   break;

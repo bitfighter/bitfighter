@@ -536,7 +536,7 @@ public:
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
-   void processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, S32 voteType);
+   void processClientRequestForChangingGameTime(S32 time, bool isUnlimited, bool changeTimeIfAlreadyUnlimited, bool addTime);
 
    TNL_DECLARE_RPC(c2sSendAnnouncement,(string message));
    TNL_DECLARE_RPC(s2cDisplayAnnouncement,(string message));

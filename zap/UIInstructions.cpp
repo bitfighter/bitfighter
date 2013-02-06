@@ -996,7 +996,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    const S32 headerSize = 20;
    const S32 cmdSize = 16;
-   const S32 cmdGap = 10;
+   const S32 cmdGap = 8;
 
    glColor(secColor);
    drawString(cmdCol, ypos, headerSize, "Command");

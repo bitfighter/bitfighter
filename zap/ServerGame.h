@@ -108,17 +108,24 @@ public:
    virtual ~ServerGame();   // Destructor
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
+
+   enum VoteType{
+      VoteLevelChange,
+      VoteAddTime,
+      VoteSetTime,
+      VoteSetScore,
+      VoteChangeTeam,
+      VoteResetScore,
+   };
    U32 mVoteTimer;
-   S32 mVoteType;
+   VoteType mVoteType;
    S32 mVoteYes;
    S32 mVoteNo;
    S32 mVoteNumber;
-   StringPtr mVoteString;
    S32 mNextLevel;
 
-   //SafePtr<GameConnection> mVoteClientConnection;
    StringTableEntry mVoteClientName;
-   bool voteStart(ClientInfo *clientInfo, S32 type, S32 number = 0);
+   bool voteStart(ClientInfo *clientInfo, VoteType type, S32 number = 0);
    void voteClient(ClientInfo *clientInfo, bool voteYes);
 
    enum HostingModePhases {

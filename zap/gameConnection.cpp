@@ -1167,7 +1167,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 
    // Use voting when there is no level change password and there is more then 1 player (unless changer is an admin)
    if(!mClientInfo->isAdmin() && mSettings->getLevelChangePassword().length() == 0 && 
-         mServerGame->getPlayerCount() > 1 && mServerGame->voteStart(mClientInfo, 0, newLevelIndex))
+         mServerGame->getPlayerCount() > 1 && mServerGame->voteStart(mClientInfo, ServerGame::VoteLevelChange, newLevelIndex))
       return;
 
    // Don't let spawn delay kick in for caller.  This prevents a race condition with spawn undelay and becoming unbusy
@@ -1498,7 +1498,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    // Now read the player name, id, and verification status
    stream->readString(buf);
-   size_t len = strlen(buf);
+   std::size_t len = strlen(buf);
 
    if(len > MAX_PLAYER_NAME_LENGTH)      // Make sure it isn't too long
       len = MAX_PLAYER_NAME_LENGTH;
@@ -1516,7 +1516,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       len--;
 
    // Remove invisible chars and quotes
-   for(size_t i = 0; i < len; i++)
+   for(std::size_t i = 0; i < len; i++)
       if(name[i] < ' ' || name[i] > '~' || name[i] == '"')
          name[i] = 'X';
 
