@@ -557,24 +557,6 @@ void AsteroidSpawn::render()
 }
 
 
-static void renderAsteroidSpawnEditor(const Point &pos)
-{
-#ifndef ZAP_DEDICATED
-   F32 scale = 0.8f;
-   static const Point p(0,0);
-
-   glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-      glScalef(scale, scale, 1);
-      renderAsteroid(p, 2, .1f);
-
-      glColor(Colors::white);
-      drawCircle(p, 13);
-   glPopMatrix();
-#endif
-}
-
-
 void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
@@ -591,7 +573,9 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 
 void AsteroidSpawn::renderDock()
 {
+#ifndef ZAP_DEDICATED
    renderAsteroidSpawnEditor(getPos());
+#endif
 }
 
 

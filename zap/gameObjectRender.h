@@ -223,6 +223,7 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact);
 void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha = 1);
 
 void renderAsteroidSpawn(const Point &pos, S32 time);
+void renderAsteroidSpawnEditor(const Point &pos);
 
 void renderResourceItem(const Point &pos, F32 alpha = 1);
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
