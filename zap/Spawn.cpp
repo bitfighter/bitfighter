@@ -557,7 +557,7 @@ static void renderAsteroidSpawn(const Point &pos)
 
       glColor(Colors::white);
       drawCircle(p, 13);
-   glPopMatrix();  
+   glPopMatrix();
 #endif
 }
 
@@ -566,9 +566,11 @@ static void renderAsteroidSpawn(const Point &pos)
 void AsteroidSpawn::render()
 {
 #ifndef ZAP_DEDICATED
-   renderAsteroid(getPos(), 2, .1f);
+   GameType *gameType = getGame()->getGameType();
 
+   S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
 
+   renderAsteroidSpawn(getPos(), time);
 #endif
 }
 
@@ -582,7 +584,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
       glTranslate(pos);
       glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
       renderAsteroidSpawn(Point(0,0));
-   glPopMatrix();   
+   glPopMatrix();
 #endif
 }
 

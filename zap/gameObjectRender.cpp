@@ -1926,6 +1926,12 @@ void renderAsteroid(const Point &pos, S32 design, F32 scaleFact)
 }
 
 
+void renderAsteroidSpawn(const Point &pos, S32 time)
+{
+   renderAsteroid(pos, 2, .1f);
+}
+
+
 void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
 {
    glPushMatrix();
