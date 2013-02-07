@@ -1449,7 +1449,9 @@ Point EditorUserInterface::snapPoint(GridDatabase *database, Point const &p, boo
 
 bool EditorUserInterface::getSnapToWallCorners()
 {
-   return mSnapContext != NO_SNAPPING && mDraggingObjects && !(isWallType(mSnapObject->getObjectTypeNumber()));
+   // Allow snapping to wall corners when we're dragging items.  Disallow for all wall types other than PolyWall
+   return mSnapContext != NO_SNAPPING && mDraggingObjects &&
+         (!isWallType(mSnapObject->getObjectTypeNumber()) || mSnapObject->getObjectTypeNumber() == PolyWallTypeNumber);
 }
 
 
