@@ -355,6 +355,10 @@ void ItemSpawn::onAddedToGame(Game *game)
 
 void ItemSpawn::idle(IdleCallPath path)
 {
+   // Only on server
+   if(path != BfObject::ServerIdleMainLoop)
+      return;
+
    if(mTimer.update(mCurrentMove.time))
       spawn();
 }
@@ -545,6 +549,7 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 // Used for rendering in-game
+// TODO Don't render on top of ship.  Layering problem??
 void AsteroidSpawn::render()
 {
 #ifndef ZAP_DEDICATED
