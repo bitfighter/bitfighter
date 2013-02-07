@@ -544,7 +544,20 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-static void renderAsteroidSpawn(const Point &pos)
+// Used for rendering in-game
+void AsteroidSpawn::render()
+{
+#ifndef ZAP_DEDICATED
+   GameType *gameType = getGame()->getGameType();
+
+   S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
+
+   renderAsteroidSpawn(getPos(), time);
+#endif
+}
+
+
+static void renderAsteroidSpawnEditor(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
    F32 scale = 0.8f;
@@ -562,19 +575,6 @@ static void renderAsteroidSpawn(const Point &pos)
 }
 
 
-// Used for rendering in-game
-void AsteroidSpawn::render()
-{
-#ifndef ZAP_DEDICATED
-   GameType *gameType = getGame()->getGameType();
-
-   S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
-
-   renderAsteroidSpawn(getPos(), time);
-#endif
-}
-
-
 void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
 #ifndef ZAP_DEDICATED
@@ -583,7 +583,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
    glPushMatrix();
       glTranslate(pos);
       glScale(1/currentScale);    // Make item draw at constant size, regardless of zoom
-      renderAsteroidSpawn(Point(0,0));
+      renderAsteroidSpawnEditor(Point(0,0));
    glPopMatrix();
 #endif
 }
@@ -591,7 +591,7 @@ void AsteroidSpawn::renderEditor(F32 currentScale, bool snappingToWallCornersEna
 
 void AsteroidSpawn::renderDock()
 {
-   renderAsteroidSpawn(getPos());
+   renderAsteroidSpawnEditor(getPos());
 }
 
 
