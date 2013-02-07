@@ -439,7 +439,7 @@ S32 ItemSpawn::lua_spawnNow(lua_State *L)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-TNL_IMPLEMENT_CLASS(AsteroidSpawn);
+TNL_IMPLEMENT_NETOBJECT(AsteroidSpawn);
 
 // Constructor
 AsteroidSpawn::AsteroidSpawn(const Point &pos, S32 time) : Parent(pos, time)
@@ -479,6 +479,7 @@ AsteroidSpawn::~AsteroidSpawn()
 
 void AsteroidSpawn::initialize()
 {
+   mNetFlags.set(Ghostable);   // So we can render on the client
    mObjectTypeNumber = AsteroidSpawnTypeNumber;
 
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
@@ -520,6 +521,29 @@ void AsteroidSpawn::spawn()
 }
 
 
+U32 AsteroidSpawn::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   //U32 retMask = Parent::packUpdate(connection, updateMask, stream);  // Goes to empty function NetObject::packUpdate
+
+   if(stream->writeFlag(updateMask & InitialMask))
+      ((GameConnection *) connection)->writeCompressedPoint(getPos(), stream);
+
+   return 0; // retMask;
+}
+
+
+void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   if(stream->readFlag())  // InitialMask
+   {
+      Point pos;
+      ((GameConnection *) connection)->readCompressedPoint(pos, stream);
+
+      setPos(pos);      // Also sets object extent
+   }
+}
+
+
 static void renderAsteroidSpawn(const Point &pos)
 {
 #ifndef ZAP_DEDICATED
@@ -534,6 +558,17 @@ static void renderAsteroidSpawn(const Point &pos)
       glColor(Colors::white);
       drawCircle(p, 13);
    glPopMatrix();  
+#endif
+}
+
+
+// Used for rendering in-game
+void AsteroidSpawn::render()
+{
+#ifndef ZAP_DEDICATED
+   renderAsteroid(getPos(), 2, .1f);
+
+
 #endif
 }
 
@@ -795,7 +830,7 @@ string FlagSpawn::toLevelCode(F32 gridSize) const
 {
    // FlagSpawn <team> <x> <y> <spawn timer for nexus> -- Need to insert the team into the string we get from AbstractSpawn()
    string str1 = Parent::toLevelCode(gridSize);
-   size_t firstarg = str1.find(' ');
+   std::size_t firstarg = str1.find(' ');
    return str1.substr(0, firstarg) + " " + itos(getTeam()) + str1.substr(firstarg);
 }
 

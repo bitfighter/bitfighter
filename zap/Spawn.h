@@ -49,6 +49,10 @@ protected:
    S32 mSpawnTime;
    Timer mTimer;
 
+   enum MaskBits {
+      InitialMask     = Parent::FirstFreeMask << 0,
+   };
+
    void setRespawnTime(F32 time);
 
 public:
@@ -193,6 +197,11 @@ public:
    S32 getDefaultRespawnTime();
 
    void spawn();
+
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   void render();
    void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);
    void renderDock();
 
