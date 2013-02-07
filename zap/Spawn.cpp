@@ -549,10 +549,12 @@ void AsteroidSpawn::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 // Used for rendering in-game
-// TODO Don't render on top of ship.  Layering problem??
-void AsteroidSpawn::render()
+void AsteroidSpawn::render(S32 layerIndex)
 {
 #ifndef ZAP_DEDICATED
+   if(layerIndex != -1)
+      return;
+
    GameType *gameType = getGame()->getGameType();
 
    S32 time = gameType->getRemainingGameTimeInMs() + gameType->getRenderingOffset();
