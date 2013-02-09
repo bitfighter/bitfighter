@@ -1,0 +1,47 @@
+find_package(MySQL)
+if(MYSQL_FOUND)
+	set(MYSQLPP_SOURCES
+		beemutex.cpp
+		cmdline.cpp
+		connection.cpp
+		cpool.cpp
+		datetime.cpp
+		dbdriver.cpp
+		field_names.cpp
+		field_types.cpp
+		manip.cpp
+		myset.cpp
+		mysql++.cpp
+		mystring.cpp
+		null.cpp
+		options.cpp
+		qparms.cpp
+		query.cpp
+		result.cpp
+		row.cpp
+		scopedconnection.cpp
+		sql_buffer.cpp
+		sqlstream.cpp
+		ssqls2.cpp
+		stadapter.cpp
+		tcp_connection.cpp
+		transaction.cpp
+		type_info.cpp
+		uds_connection.cpp
+		utility.cpp
+		vallist.cpp
+		wnp_connection.cpp
+	)
+	add_library(mysql++
+		SHARED
+		EXCLUDE_FROM_ALL
+		${MYSQLPP_SOURCES}
+	)
+
+	include_directories(SYSTEM ${MYSQL_INCLUDE_DIR}
+	)
+
+	target_link_libraries(mysql++
+		${MYSQL_LIBRARY}
+	)
+ENDIF(MYSQL_FOUND)

@@ -1,0 +1,217 @@
+find_package(SDL)
+find_package(X11)
+find_package(OpenAL)
+find_package(OpenGL)
+find_package(PNG)
+find_package(Threads)
+
+set(CLIENT_SOURCES 
+   ClientGame.cpp
+   Console.cpp
+   Cursor.cpp
+   engineerHelper.cpp
+   Event.cpp
+   gameObjectRender.cpp
+   helperMenu.cpp
+   Joystick.cpp
+   JoystickRender.cpp
+   loadoutHelper.cpp
+   oglconsole.c
+   OpenglUtils.cpp
+   quickChatHelper.cpp
+   RenderUtils.cpp
+   ScreenShooter.cpp
+   ShipShape.cpp
+   sparkManager.cpp
+   TeamShuffleHelper.cpp
+   UI.cpp
+   UIAbstractInstructions.cpp
+   UIChat.cpp
+   UICredits.cpp
+   UIDiagnostics.cpp
+   UIEditor.cpp
+   UIEditorInstructions.cpp
+   UIEditorMenus.cpp
+   UIErrorMessage.cpp
+   UIGame.cpp
+   UIGameParameters.cpp
+   UIHighScores.cpp
+   UIInstructions.cpp
+   UIKeyDefMenu.cpp
+   UIManager.cpp
+   UIMenuItems.cpp
+   UIMenus.cpp
+   UIMessage.cpp
+   UINameEntry.cpp
+   UIQueryServers.cpp
+   UITeamDefMenu.cpp
+   UIYesNo.cpp
+   VideoSystem.cpp
+   voiceCodec.cpp
+)
+
+set(SHARED_SOURCES
+   BanList.cpp
+   barrier.cpp
+   BfObject.cpp
+   BotNavMeshZone.cpp
+   ChatCheck.cpp
+   ClientInfo.cpp
+   Color.cpp
+   config.cpp
+   controlObjectConnection.cpp
+   CoreGame.cpp
+   CTFGame.cpp
+   dataConnection.cpp
+   EditorObject.cpp
+   EditorPlugin.cpp
+   EngineeredItem.cpp
+   EventManager.cpp
+   flagItem.cpp
+   game.cpp
+   gameConnection.cpp
+   gameLoader.cpp
+   gameNetInterface.cpp
+   GameSettings.cpp
+   gameStats.cpp
+   gameType.cpp
+   gameWeapons.cpp
+   Geometry.cpp
+   GeomObject.cpp
+   GeomUtils.cpp
+   goalZone.cpp
+   gridDB.cpp
+   HTFGame.cpp
+   IniFile.cpp
+   InputCode.cpp
+   item.cpp
+   lineEditor.cpp
+   LineItem.cpp
+   loadoutZone.cpp
+   LuaBase.cpp
+   luaGameInfo.cpp
+   luaLevelGenerator.cpp
+   LuaScriptRunner.cpp
+   main.cpp
+   masterConnection.cpp
+   MathUtils.cpp
+   md5wrapper.cpp
+   move.cpp
+   moveObject.cpp
+   NexusGame.cpp
+   PickupItem.cpp
+   playerInfo.cpp
+   Point.cpp
+   polygon.cpp
+   projectile.cpp
+   rabbitGame.cpp
+   Rect.cpp
+   retrieveGame.cpp
+   robot.cpp
+   ScreenInfo.cpp
+   ServerGame.cpp
+   ship.cpp
+   shipItems.cpp
+   SimpleLine.cpp
+   SlipZone.cpp
+   soccerGame.cpp
+   SoundEffect.cpp
+   SoundSystem.cpp
+   Spawn.cpp
+   speedZone.cpp
+   statistics.cpp
+   stringUtils.cpp
+   teamInfo.cpp
+   teleporter.cpp
+   textItem.cpp
+   Timer.cpp
+   WallSegmentManager.cpp
+   WeaponInfo.cpp
+   Zone.cpp
+   zoneControlGame.cpp
+   ../clipper/clipper.cpp
+   ../master/database.cpp
+   ../master/masterInterface.cpp
+   ../recast/RecastAlloc.cpp
+   ../recast/RecastMesh.cpp
+   ../sqlite/sqlite3.c
+   ../Triangle/triangle.c
+)
+
+if(SDL_FOUND)
+	add_executable(bitfighter
+		${SHARED_SOURCES}
+		${CLIENT_SOURCES}
+	)
+
+	add_dependencies(bitfighter
+		alure
+		lua-vec
+		tnl
+		tomcrypt
+	)
+
+	target_link_libraries(bitfighter
+		SDLmain
+		${SDL_LIBRARY}
+		${PNG_LIBRARIES}
+		${X11_LIBRARIES}
+		${OPENGL_LIBRARY}
+		${OPENAL_LIBRARY}
+		${CMAKE_THREAD_LIBS_INIT}
+		alure
+		dl
+		lua-vec
+		m
+		modplug
+		speex
+		tnl
+		tomcrypt
+	)
+	include_directories(
+		${OPENAL_INCLUDE_DIR}
+		${OPENGL_INCLUDE_DIR}
+		${PNG_INCLUDE_DIR}
+		${SDL_INCLUDE_DIR}
+		${X11_INCLUDE_DIR}
+	)
+endif(SDL_FOUND)
+
+add_executable(bitfighterd
+	EXCLUDE_FROM_ALL
+	${SHARED_SOURCES}
+)
+
+add_dependencies(bitfighterd
+	tnl
+	lua-vec
+	tomcrypt
+)
+
+target_link_libraries(bitfighterd
+	${CMAKE_THREAD_LIBS_INIT}
+	dl
+	lua-vec
+	m
+	tnl
+	tomcrypt
+)
+
+set_target_properties(bitfighterd bitfighter
+	PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/exe
+)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set_target_properties(bitfighterd bitfighter
+		PROPERTIES COMPILE_DEFINITIONS TNL_DEBUG
+	)
+endif()
+
+get_property(DEDICATED_DEFS TARGET bitfighterd PROPERTY COMPILE_DEFINITIONS)
+set_target_properties(bitfighterd
+	PROPERTIES
+	COMPILE_DEFINITIONS "${DEDICATED_DEFS};ZAP_DEDICATED"
+)
+
+include_directories(../tnl ../boost)
