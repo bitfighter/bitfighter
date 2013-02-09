@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Alexander Ames
+ * Copyright (c) 2010-2011 Alexander Ames
  * Alexander.Ames@gmail.com
  * See Copyright Notice at the end of this file
  */
@@ -19,12 +19,6 @@
 
 #include "LuaWrapper.hpp"
 
-#ifdef _WIN32
-#define LUAW_BOOL_RELEASE
-#else
-#define LUAW_BOOL_RELEASE , bool release = false
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // A set if enum helper functions and macros
@@ -42,6 +36,12 @@ template <typename T>
 T luaU_toenum(lua_State* L, int index)
 {
     return static_cast<T>(lua_tointeger(L, index));
+}
+
+template <typename T>
+void luaU_setenum(lua_State* L, int index, const char* key, T value)
+{
+    lua_pushnumber(L, static_cast<int>(value));
 }
 
 template <typename T>
@@ -76,24 +76,24 @@ T* luaU_checkornil(lua_State* L, int index, bool strict = false)
 //
 
 template <typename U> U luaU_check(lua_State* L, int index);
-template <> inline bool          luaU_check<>(lua_State* L, int index) { return                           (lua_toboolean(L, index) != 0); }
-template <> inline const char*   luaU_check<>(lua_State* L, int index) { return                           (luaL_checkstring(L, index)); }
-template <> inline unsigned int  luaU_check<>(lua_State* L, int index) { return static_cast<unsigned int >(luaL_checkinteger(L, index)); }
-template <> inline int           luaU_check<>(lua_State* L, int index) { return static_cast<int          >(luaL_checkinteger(L, index)); }
-template <> inline unsigned char luaU_check<>(lua_State* L, int index) { return static_cast<unsigned char>(luaL_checkinteger(L, index)); }
-template <> inline char          luaU_check<>(lua_State* L, int index) { return static_cast<char         >(luaL_checkinteger(L, index)); }
-template <> inline float         luaU_check<>(lua_State* L, int index) { return static_cast<float        >(luaL_checknumber(L, index)); }
-template <> inline double        luaU_check<>(lua_State* L, int index) { return static_cast<double       >(luaL_checknumber(L, index)); }
+template <> inline bool          luaU_check<>(lua_State* L, int index) { return lua_toboolean(L, index); }
+template <> inline const char*   luaU_check<>(lua_State* L, int index) { return luaL_checkstring(L, index); }
+template <> inline unsigned int  luaU_check<>(lua_State* L, int index) { return luaL_checkinteger(L, index); }
+template <> inline int           luaU_check<>(lua_State* L, int index) { return luaL_checkinteger(L, index); }
+template <> inline unsigned char luaU_check<>(lua_State* L, int index) { return luaL_checkinteger(L, index); }
+template <> inline char          luaU_check<>(lua_State* L, int index) { return luaL_checkinteger(L, index); }
+template <> inline float         luaU_check<>(lua_State* L, int index) { return luaL_checknumber(L, index); }
+template <> inline double        luaU_check<>(lua_State* L, int index) { return luaL_checknumber(L, index); }
 
 template <typename U> U luaU_to(lua_State* L, int index);
-template <> inline bool          luaU_to<>(lua_State* L, int index) { return                           (lua_toboolean(L, index) != 0); }
-template <> inline const char*   luaU_to<>(lua_State* L, int index) { return                           (lua_tostring(L, index)); }
-template <> inline unsigned int  luaU_to<>(lua_State* L, int index) { return static_cast<unsigned int >(lua_tointeger(L, index)); }
-template <> inline int           luaU_to<>(lua_State* L, int index) { return static_cast<int          >(lua_tointeger(L, index)); }
-template <> inline unsigned char luaU_to<>(lua_State* L, int index) { return static_cast<unsigned char>(lua_tointeger(L, index)); }
-template <> inline char          luaU_to<>(lua_State* L, int index) { return static_cast<char         >(lua_tointeger(L, index)); }
-template <> inline float         luaU_to<>(lua_State* L, int index) { return static_cast<float        >(lua_tonumber(L, index)); }
-template <> inline double        luaU_to<>(lua_State* L, int index) { return static_cast<double       >(lua_tonumber(L, index)); }
+template <> inline bool          luaU_to<>(lua_State* L, int index) { return lua_toboolean(L, index); }
+template <> inline const char*   luaU_to<>(lua_State* L, int index) { return lua_tostring(L, index); }
+template <> inline unsigned int  luaU_to<>(lua_State* L, int index) { return lua_tointeger(L, index); }
+template <> inline int           luaU_to<>(lua_State* L, int index) { return lua_tointeger(L, index); }
+template <> inline unsigned char luaU_to<>(lua_State* L, int index) { return lua_tointeger(L, index); }
+template <> inline char          luaU_to<>(lua_State* L, int index) { return lua_tointeger(L, index); }
+template <> inline float         luaU_to<>(lua_State* L, int index) { return lua_tonumber(L, index); }
+template <> inline double        luaU_to<>(lua_State* L, int index) { return lua_tonumber(L, index); }
 
 template <typename U> void luaU_push(lua_State* L, const U& val);
 template <> inline void luaU_push<>(lua_State* L, const bool&          val) { lua_pushboolean(L, val); }
@@ -233,7 +233,7 @@ int luaU_set(lua_State* L)
     return 0;
 }
 
-template <typename T, typename U, U* T::*Member>
+template <typename T, typename U, U* T::*Member, bool release = false>
 int luaU_set(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
@@ -241,15 +241,13 @@ int luaU_set(lua_State* L)
     {
         U* member = luaU_checkornil<U>(L, 2);
         obj->*Member = member;
-#ifndef _WIN32
         if (member && release)
             luaW_release<U>(L, member);
-#endif
     }
     return 0;
 }
 
-template <typename T, typename U, const U* T::*Member LUAW_BOOL_RELEASE>
+template <typename T, typename U, const U* T::*Member, bool release = false>
 int luaU_set(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
@@ -257,10 +255,8 @@ int luaU_set(lua_State* L)
     {
         U* member = luaU_checkornil<U>(L, 2);
         obj->*Member = member;
-#ifndef _WIN32
         if (member && release)
             luaW_release<U>(L, member);
-#endif
     }
     return 0;
 }
@@ -283,7 +279,7 @@ int luaU_set(lua_State* L)
     return 0;
 }
 
-template <typename T, typename U, void (T::*Setter)(U*) LUAW_BOOL_RELEASE>
+template <typename T, typename U, void (T::*Setter)(U*), bool release = false>
 int luaU_set(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
@@ -291,10 +287,8 @@ int luaU_set(lua_State* L)
     {
         U* member = luaU_checkornil<U>(L, 2);
         (obj->*Setter)(member);
-#ifndef _WIN32
         if (member && release)
             luaW_release<U>(L, member);
-#endif
     }
     return 0;
 }
@@ -315,7 +309,7 @@ int luaU_getset(lua_State* L)
     }
 }
 
-template <typename T, typename U, U* T::*Member LUAW_BOOL_RELEASE>
+template <typename T, typename U, U* T::*Member, bool release = false>
 int luaU_getset(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
@@ -323,10 +317,8 @@ int luaU_getset(lua_State* L)
     {
         U* member = luaU_checkornil<U>(L, 2);
         obj->*Member = member;
-#ifndef _WIN32
         if (member && release)
             luaW_release<U>(L, member);
-#endif
         return 0;
     }
     else
@@ -384,7 +376,7 @@ int luaU_getset(lua_State* L)
     }
 }
 
-template <typename T, typename U, U* (T::*Getter)() const, void (T::*Setter)(U*) LUAW_BOOL_RELEASE>
+template <typename T, typename U, U* (T::*Getter)() const, void (T::*Setter)(U*), bool release = false>
 int luaU_getset(lua_State* L)
 {
     T* obj = luaW_check<T>(L, 1);
@@ -392,10 +384,8 @@ int luaU_getset(lua_State* L)
     {
         U* member = luaU_checkornil<U>(L, 2);
         (obj->*Setter)(member);
-#ifndef _WIN32
         if (member && release)
             luaW_release<U>(L, member);
-#endif
         return 0;
     }
     else
@@ -404,8 +394,6 @@ int luaU_getset(lua_State* L)
         return 1;
     }
 }
-
-#ifndef _WIN32
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -462,8 +450,6 @@ private:
         return 1;
     }
 };
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -531,7 +517,7 @@ void luaU_store(lua_State* L, int index, const char* storagetable, const char* k
 }
 
 /*
- * Copyright (c) 2010-2013 Alexander Ames
+ * Copyright (c) 2010-2011 Alexander Ames
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
