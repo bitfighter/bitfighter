@@ -366,8 +366,7 @@ RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_R
       else if(profile == 2)
       {
          setPos(L, 1);
-         lua_remove(L, 1);
-         lua_setRegenTime(L);
+         mRepopDelay = getInt(L, 2);
       }
    }
 }
