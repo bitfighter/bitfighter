@@ -75,7 +75,7 @@ public:
 
    Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  
    Projectile(lua_State *L = NULL);                                                     // Combined Lua / C++ default constructor -- only used in Lua at the moment
-   ~Projectile();                                                                       // Destructor
+   virtual ~Projectile();                                                               // Destructor
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -125,7 +125,7 @@ private:
 public:
    Burst(const Point &pos, const Point &vel, BfObject *shooter, F32 radius = BurstRadius);  // Constructor -- used when burst is fired
    Burst(lua_State *L = NULL);                                                              // Combined Lua / C++ default constructor
-   ~Burst();                                                                                // Destructor
+   virtual ~Burst();                                                                                // Destructor
 
    enum Constants
    {

@@ -142,7 +142,7 @@ private:
 
 public:
    WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
-   ~WallItem();                     // Destructor
+   virtual ~WallItem();             // Destructor
    WallItem *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -218,7 +218,7 @@ private:
 
 public:
    PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
-   ~PolyWall();                        // Destructor
+   virtual ~PolyWall();                // Destructor
 
    PolyWall *clone() const;
 

@@ -110,8 +110,8 @@ public:
       UnknownContext
    };
 
-   LuaBase();     // Constuctor
-   ~LuaBase();    // Destructor
+   LuaBase();           // Constuctor
+   virtual ~LuaBase();  // Destructor
 
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *methodName);
    static void setfield (lua_State *L, const char *key, F32 value);

@@ -62,7 +62,7 @@ public:
    FlagItem(lua_State *L = NULL);                                              // Combined Lua / C++ default constructor
    FlagItem(const Point &pos, bool collidable, float radius, float mass);      // Alternate C++ constructor
    FlagItem(const Point &pos, const Point &vel, bool useDropDelay = false);    // Alternate alternate C++ constructor
-   ~FlagItem();                                                                // Destructor
+   virtual ~FlagItem();                                                        // Destructor
 
    FlagItem *clone() const;
    void copyAttrs(FlagItem *target);

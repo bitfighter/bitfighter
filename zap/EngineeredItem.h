@@ -82,7 +82,7 @@ protected:
 
 public:
    EngineeredItem(S32 team = TEAM_NEUTRAL, const Point &anchorPoint = Point(0,0), const Point &anchorNormal = Point(1,0));  // Constructor
-   ~EngineeredItem();                                                                                                       // Destructor
+   virtual ~EngineeredItem();                                                                                               // Destructor
 
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
 

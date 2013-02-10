@@ -93,7 +93,7 @@ protected:
 
 public:
    MoveObject(const Point &p = Point(0,0), float radius = 1, float mass = 1);     // Constructor
-   ~MoveObject();                                                                 // Destructor
+   virtual ~MoveObject();                                                                // Destructor
       
    virtual bool processArguments(S32 argc, const char **argv, Game *game);
    virtual string toLevelCode(F32 gridSize) const;
@@ -237,7 +237,7 @@ protected:
 
 public:
    MountableItem(const Point &pos = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
-   ~MountableItem();                                                                                           // Destructor
+   virtual ~MountableItem();                                                                                   // Destructor
 
    // Override some parent functions
    void idle(BfObject::IdleCallPath path);

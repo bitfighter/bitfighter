@@ -150,7 +150,7 @@ public:
    GameConnection(ClientGame *game);      // Constructor for ClientGame
 #endif
    GameConnection();                      // Constructor for ServerGame
-   ~GameConnection();                     // Destructor
+   virtual ~GameConnection();             // Destructor
 
 
    // These from the DataSendable interface class

@@ -65,7 +65,7 @@ private:
 
 public:
    PointGeometry(F32 radius);                   // Constructor
-   ~PointGeometry();                            // Destructor
+   virtual ~PointGeometry();                    // Destructor
 
    GeomType getGeomType() const;
 
@@ -171,8 +171,8 @@ protected:
    void checkIfAnyVertsSelected();     
 
 public:
-   PolylineGeometry();    // Constructor
-   ~PolylineGeometry();   // Destructor
+   PolylineGeometry();           // Constructor
+   virtual ~PolylineGeometry();  // Destructor
 
    virtual GeomType getGeomType() const;
 

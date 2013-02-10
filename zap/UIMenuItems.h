@@ -219,7 +219,7 @@ public:
 
    ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, 
                   void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   ~ToggleMenuItem();      // Destructor
+   virtual ~ToggleMenuItem();  // Destructor
 
    virtual MenuItemTypes getItemType();
    virtual string getValueForDisplayingInMenu();
@@ -262,7 +262,7 @@ private:
 
 public:
    YesNoMenuItem(string title, bool currOption, const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
-   ~YesNoMenuItem();    // Destructor
+   virtual ~YesNoMenuItem();  // Destructor
 
    virtual string getValueForDisplayingInMenu();
    virtual string getValueForWritingToLevelFile();
@@ -309,7 +309,7 @@ public:
                    const string &units, const string &minMsg, 
                    const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   ~CounterMenuItem();     // Destructor
+   virtual ~CounterMenuItem();  // Destructor
 
    virtual void render(S32 xpos, S32 ypos, S32 textsize, bool isSelected);
    virtual S32 getWidth(S32 textsize);
@@ -403,7 +403,7 @@ public:
    TextEntryMenuItem(string title, string val, string emptyVal, const char *help, U32 maxLen, 
                      InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
-   ~TextEntryMenuItem();      // Destructor
+   virtual ~TextEntryMenuItem();  // Destructor
 
    virtual MenuItemTypes getItemType();
 
