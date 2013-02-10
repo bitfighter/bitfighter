@@ -162,7 +162,7 @@ public:
    LuaTeamInfo(lua_State *L);     // Lua constructor
    LuaTeamInfo(Team *team);       // C++ constructor
 
-   ~LuaTeamInfo();                // Destructor
+   virtual ~LuaTeamInfo();        // Destructor
 
    static const char className[];
 

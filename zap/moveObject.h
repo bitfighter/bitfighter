@@ -333,7 +333,7 @@ protected:
 
 public:
    Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
-   ~Asteroid();                   // Destructor
+   virtual ~Asteroid();           // Destructor
 
    Asteroid *clone() const;
 
@@ -406,7 +406,7 @@ private:
 
 public:
    Circle(lua_State *L = NULL); // Combined Lua / C++ default constructor
-   ~Circle();                   // Destructor
+   virtual ~Circle();           // Destructor
    Circle *clone() const;
 
    static const S32 CIRCLE_RADIUS = 10;
@@ -515,7 +515,7 @@ class TestItem : public MoveItem
 
 public:
    TestItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
-   ~TestItem();                   // Destructor
+   virtual ~TestItem();           // Destructor
    TestItem *clone() const;
 
    // Test methods
@@ -557,7 +557,7 @@ class ResourceItem : public MountableItem
 
 public:
    ResourceItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
-   ~ResourceItem();                   // Destructor
+   virtual ~ResourceItem();           // Destructor
    ResourceItem *clone() const;
 
    static const S32 RESOURCE_ITEM_RADIUS = 20;

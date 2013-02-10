@@ -232,7 +232,7 @@ public:
 
    CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
    CircleSpawn(lua_State *L);                                                 // Lua constructor
-   ~CircleSpawn();                                                            // Destructor
+   virtual ~CircleSpawn();                                                    // Destructor
 
    CircleSpawn *clone() const;
 

@@ -166,7 +166,7 @@ protected:
 
 public:
    NexusFlagItem(Point pos = Point(), Point vel = Point(0,0), S32 count = 0, bool useDropDelay = false);    // Constructor
-   ~NexusFlagItem();                                                                                        // Destructor
+   virtual ~NexusFlagItem();                                                                                // Destructor
 
    void renderItem(const Point &pos);
    void renderItemAlpha(const Point &pos, F32 alpha);
@@ -200,7 +200,7 @@ private:
 
 public:
    NexusZone(lua_State *L = NULL);     // Combined Lua / C++ constructor
-   ~NexusZone();                       // Destructor
+   virtual ~NexusZone();               // Destructor
 
    NexusZone *clone() const;
 

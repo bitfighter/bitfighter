@@ -51,7 +51,7 @@ public:
    EditorPlugin(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, 
                   GridDatabase *gridDatabase, LevelLoader *caller);
 
-   ~EditorPlugin();     // Destructor
+   virtual ~EditorPlugin();  // Destructor
 
    bool prepareEnvironment();
    string getScriptName();

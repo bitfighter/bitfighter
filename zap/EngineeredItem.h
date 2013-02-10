@@ -256,7 +256,7 @@ public:
 
    ForceFieldProjector(lua_State *L = NULL);                                              // Combined Lua / C++ default constructor
    ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal);    // Constructor for when ffp is built with engineer
-   ~ForceFieldProjector();                                                                // Destructor
+   virtual ~ForceFieldProjector();                                                        // Destructor
 
    ForceFieldProjector *clone() const;
    
@@ -324,7 +324,7 @@ private:
 public:
    Turret(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor
    Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal);  // Constructor for when turret is built with engineer
-   ~Turret();                                                              // Destructor
+   virtual ~Turret();                                                      // Destructor
 
    Turret *clone() const;
 

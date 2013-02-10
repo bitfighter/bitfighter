@@ -40,7 +40,7 @@ private:
 public:
    GeometryContainer();                                     // Constructor
    GeometryContainer(const GeometryContainer &container);   // Copy constructor
-   ~GeometryContainer();                                    // Destructor
+   virtual ~GeometryContainer();                            // Destructor
 
    Geometry *getGeometry() const;
    const Geometry *getConstGeometry() const;

@@ -57,7 +57,7 @@ protected:
 
 public:
    GoalZone(lua_State *L = NULL);   // Combined Lua / C++ constructor
-   ~GoalZone();                     // Destructor
+   virtual ~GoalZone();             // Destructor
 
    GoalZone *clone() const;
 

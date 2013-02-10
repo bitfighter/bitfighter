@@ -149,7 +149,7 @@ protected:
 
 public:
    CoreItem(lua_State *L = NULL);   // Combined Lua / C++ default constructor
-   ~CoreItem();                     // Destructor
+   virtual ~CoreItem();             // Destructor
    CoreItem *clone() const;
 
    static F32 getCoreAngle(U32 time);

@@ -91,7 +91,7 @@ private:
 
 public:
    SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
-   ~SoccerBallItem();                        // Destructor
+   virtual ~SoccerBallItem();                // Destructor
 
    SoccerBallItem *clone() const;
 

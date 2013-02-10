@@ -186,7 +186,7 @@ public:
 
    Mine(const Point &pos, Ship *owner);   // Constructor -- used when mine is planted
    Mine(lua_State *L = NULL);             // Combined Lua / C++ default constructor -- used in Lua and editor
-   ~Mine();                               // Destructor
+   virtual ~Mine();                       // Destructor
 
    Mine *clone() const;
 
@@ -242,7 +242,7 @@ private:
 public:
    SpyBug(const Point &pos, Ship *planter);  // Constructor -- used when SpyBug is deployed
    SpyBug(lua_State *L = NULL);              // Combined Lua / C++ default constructor -- used in Lua and editor
-   ~SpyBug();                                // Destructor
+   virtual ~SpyBug();                        // Destructor
    SpyBug *clone() const;
 
    static const S32 SPY_BUG_RANGE = 300;     // How far can a spy bug see?
@@ -325,7 +325,7 @@ private:
 public:
    Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);    // Constructor
    Seeker(lua_State *L = NULL);                                      // Combined Lua / C++ default constructor
-   ~Seeker();                                                        // Destructor
+   virtual ~Seeker();                                                // Destructor
 
    SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;

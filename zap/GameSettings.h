@@ -157,8 +157,8 @@ private:
    Vector<string> mConfigurationErrors;
 
 public:
-   GameSettings();    // Constructor
-   ~GameSettings();   // Destructor
+   GameSettings();            // Constructor
+   virtual ~GameSettings();   // Destructor
 
    void readCmdLineParams(const Vector<string> &argv);
    void resolveDirs();
