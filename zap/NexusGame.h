@@ -246,10 +246,10 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 isOpen(lua_State *L);
-   S32 setOpen(lua_State *L);
-   S32 setOpenTime(lua_State *L);
-   S32 setClosedTime(lua_State *L);
+   S32 lua_isOpen(lua_State *L);
+   S32 lua_setOpen(lua_State *L);
+   S32 lua_setOpenTime(lua_State *L);
+   S32 lua_setClosedTime(lua_State *L);
 };
 
 };

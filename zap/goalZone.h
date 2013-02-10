@@ -114,7 +114,7 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 hasFlag(lua_State *L);
+   S32 lua_hasFlag(lua_State *L);
 };
 
 

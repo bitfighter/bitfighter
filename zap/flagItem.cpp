@@ -439,7 +439,7 @@ REGISTER_LUA_SUBCLASS(FlagItem, MountableItem);
   *  @brief   Returns true if the flag is in its starting position, false if it has been moved.
   *  @return  \e bool - True if flag is in its starting position, false if it has been moved.
   */
-S32 FlagItem::isInInitLoc(lua_State *L) 
+S32 FlagItem::lua_isInInitLoc(lua_State *L)
 { 
    return returnBool(L, isAtHome()); 
 }
@@ -452,7 +452,7 @@ S32 FlagItem::isInInitLoc(lua_State *L)
  */
 
 // Override parent method
-S32 FlagItem::getCaptureZone(lua_State *L)
+S32 FlagItem::lua_getCaptureZone(lua_State *L)
 {
    if(mZone.isValid())
    {
@@ -465,6 +465,6 @@ S32 FlagItem::getCaptureZone(lua_State *L)
 
 
 // Override parent method
-S32 FlagItem::isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }
+S32 FlagItem::lua_isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }
 
 };

@@ -457,7 +457,7 @@ REGISTER_LUA_SUBCLASS(Projectile, BfObject);
   *  @brief Returns the radius of the projectile.  In the current version of Bitfighter, this may not be accurate.
   *  @return The radius of the projectile.
   */
-S32 Projectile::getRad(lua_State *L)    
+S32 Projectile::lua_getRad(lua_State *L)
 { 
    return returnFloat(L, getRadius());
 } 
@@ -468,7 +468,7 @@ S32 Projectile::getRad(lua_State *L)
   *  @brief Returns the velocity of the projectile.
   *  @return A point representing the projectile's velocity.
   */
-S32 Projectile::getVel(lua_State *L)    
+S32 Projectile::lua_getVel(lua_State *L)
 { 
    return returnPoint(L, getActualVel()); 
 }
@@ -479,7 +479,7 @@ S32 Projectile::getVel(lua_State *L)
   *  @brief Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
   *  @return The index of the weapon used to fire the projectile.
   */
-S32 Projectile::getWeapon(lua_State *L) 
+S32 Projectile::lua_getWeapon(lua_State *L)
 { 
    return returnInt(L, mWeaponType);      
 }
@@ -720,7 +720,7 @@ const char *Burst::luaClassName = "Burst";
 REGISTER_LUA_SUBCLASS(Burst, MoveObject);
 
 
-S32 Burst::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 Burst::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 
 ////////////////////////////////////////
@@ -1006,7 +1006,7 @@ bool Mine::canAddToEditor() { return true; }
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(Mine, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(Mine, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Mine, LUA_METHODS);
 
 #undef LUA_METHODS
 
@@ -1278,7 +1278,7 @@ bool SpyBug::isVisibleToPlayer(ClientInfo *clientInfo, bool isTeamGame)
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(SpyBug, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(SpyBug, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(SpyBug, LUA_METHODS);
 
 #undef LUA_METHODS
 
@@ -1775,7 +1775,7 @@ REGISTER_LUA_SUBCLASS(Seeker, MoveObject);
  *  @brief   Returns the index of the weapon used to fire the projectile.  See the \ref WeaponEnum enum for valid values.  
  *  @return  \e int - The index of the weapon used to fire the projectile.
  */
-S32 Seeker::getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
+S32 Seeker::lua_getWeapon(lua_State *L) { return returnInt(L, mWeaponType); }
 
 
 };

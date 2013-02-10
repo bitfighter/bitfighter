@@ -196,15 +196,15 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 addDest(lua_State *L);
-   S32 delDest(lua_State *L);
-   S32 clearDests(lua_State *L);
-   S32 getDest(lua_State *L);
-   S32 getDestCount(lua_State *L);
+   S32 lua_addDest(lua_State *L);
+   S32 lua_delDest(lua_State *L);
+   S32 lua_clearDests(lua_State *L);
+   S32 lua_getDest(lua_State *L);
+   S32 lua_getDestCount(lua_State *L);
 
    // Overrides
-   S32 setGeom(lua_State *L);
-   S32 getGeom(lua_State *L);
+   S32 lua_setGeom(lua_State *L);
+   S32 lua_getGeom(lua_State *L);
 };
 
 

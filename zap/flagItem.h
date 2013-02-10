@@ -127,11 +127,11 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
    
-   S32 isInInitLoc(lua_State *L);      // Is flag in it's initial location?
+   S32 lua_isInInitLoc(lua_State *L);      // Is flag in it's initial location?
 
    // Override some parent methods
-   S32 isInCaptureZone(lua_State *L);
-   S32 getCaptureZone(lua_State *L);   
+   S32 lua_isInCaptureZone(lua_State *L);
+   S32 lua_getCaptureZone(lua_State *L);   
 };
 
 

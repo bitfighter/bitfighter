@@ -177,8 +177,8 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    // Get/set object's velocity vector
-   virtual S32 getVel(lua_State *L);
-   virtual S32 setVel(lua_State *L);
+   virtual S32 lua_getVel(lua_State *L);
+   virtual S32 lua_setVel(lua_State *L);
 };
 
 
@@ -276,8 +276,8 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   virtual S32 isOnShip(lua_State *L);                 // Is flag being carried by a ship?
-   virtual S32 getShip(lua_State *L);
+   virtual S32 lua_isOnShip(lua_State *L);                 // Is flag being carried by a ship?
+   virtual S32 lua_getShip(lua_State *L);
 };
 
 
@@ -388,8 +388,8 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 getSizeIndex(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
-   S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
+   S32 lua_getSizeIndex(lua_State *L);   // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 lua_getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
 };
 
 

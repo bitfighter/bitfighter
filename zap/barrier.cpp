@@ -359,7 +359,7 @@ WallItem::WallItem(lua_State *L)
       {
          setWidth(lua_tointeger(L, -1));     // Grab this before it gets popped
          lua_pop(L, 1);                      // Clean up stack for setGeom, which only expects points
-         setGeom(L);
+         lua_setGeom(L);
       }
    }
 
@@ -614,7 +614,7 @@ REGISTER_LUA_SUBCLASS(WallItem, BfObject);
   *  @descr   Walls have a default width of 50.
   *  @return  \e width: \e Int representing %WallItem's width.
   */
-S32 WallItem::getWidth(lua_State *L)     
+S32 WallItem::lua_getWidth(lua_State *L)     
 { 
    return returnInt(L, getWidth()); 
 }
@@ -626,7 +626,7 @@ S32 WallItem::getWidth(lua_State *L)
   *  @descr   Walls have a default width of 50.
   *  @param  \e width: \e Int representing %WallItem's width.
   */
-S32 WallItem::setWidth(lua_State *L)     
+S32 WallItem::lua_setWidth(lua_State *L)     
 { 
    checkIfHasBeenAddedToTheGame(L);
 
@@ -656,17 +656,17 @@ void WallItem::checkIfHasBeenAddedToTheGame(lua_State *L)
 
 // Some Lua method overrides.  Because walls are... special.
 
-S32 WallItem::setLoc(lua_State *L)
+S32 WallItem::lua_setLoc(lua_State *L)
 {
    checkIfHasBeenAddedToTheGame(L);
-   return Parent::setLoc(L);
+   return Parent::lua_setLoc(L);
 }
 
 
-S32 WallItem::setGeom(lua_State *L)
+S32 WallItem::lua_setGeom(lua_State *L)
 {
    checkIfHasBeenAddedToTheGame(L);
-   return Parent::setGeom(L);
+   return Parent::lua_setGeom(L);
 }
 
 
@@ -696,7 +696,7 @@ PolyWall::PolyWall(lua_State *L)
       S32 profile = checkArgList(L, constructorArgList, "PolyWall", "constructor");
 
       if(profile == 1)
-         setGeom(L);
+         lua_setGeom(L);
    }
 }
 
@@ -830,7 +830,7 @@ void PolyWall::onAddedToGame(Game *game)
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(PolyWall, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(PolyWall, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(PolyWall, LUA_METHODS);
 
 #undef LUA_METHODS
 
@@ -857,17 +857,17 @@ void PolyWall::checkIfHasBeenAddedToTheGame(lua_State *L)
 
 // Lua method overrides.  Because walls are... special.
 
-S32 PolyWall::setLoc(lua_State *L)
+S32 PolyWall::lua_setLoc(lua_State *L)
 {
    checkIfHasBeenAddedToTheGame(L);
-   return Parent::setLoc(L);
+   return Parent::lua_setLoc(L);
 }
 
 
-S32 PolyWall::setGeom(lua_State *L)
+S32 PolyWall::lua_setGeom(lua_State *L)
 {
    checkIfHasBeenAddedToTheGame(L);
-   return Parent::setGeom(L);
+   return Parent::lua_setGeom(L);
 }
 
 

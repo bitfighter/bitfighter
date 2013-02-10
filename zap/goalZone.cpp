@@ -310,7 +310,7 @@ REGISTER_LUA_SUBCLASS(GoalZone, Zone);
   *         zones that hold flags (e.g. Soccer, ZoneControl), then the function will return false.
   *  @return \e bool - True if the %GoalZone is currently holding a flag, false otherwise.
   */
-S32 GoalZone::hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
+S32 GoalZone::lua_hasFlag(lua_State *L) { return returnBool(L, mHasFlag); }
 
 };
 

@@ -1196,7 +1196,7 @@ REGISTER_LUA_SUBCLASS(NexusZone, Zone);
  * @return   isOpen - Boolean specifying the current state of the Nexus -- true for open, false for closed.
  * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
 */
-S32 NexusZone::isOpen(lua_State *L) 
+S32 NexusZone::lua_isOpen(lua_State *L)
 { 
    if(!mGame)
       return returnBool(L, false);
@@ -1216,7 +1216,7 @@ S32 NexusZone::isOpen(lua_State *L)
  * @param    isOpen - Pass true to open the Nexus, false to close it.
  * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
 */
-S32 NexusZone::setOpen(lua_State *L) 
+S32 NexusZone::lua_setOpen(lua_State *L)
 { 
    checkArgList(L, functionArgs, "NexusZone", "setOpen");
 
@@ -1241,7 +1241,7 @@ S32 NexusZone::setOpen(lua_State *L)
  * @param    time - Time in seconds that the Nexus should remain open.
  * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
  */
-S32 NexusZone::setOpenTime(lua_State *L)
+S32 NexusZone::lua_setOpenTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "NexusZone", "setOpenTime");
 
@@ -1267,7 +1267,7 @@ S32 NexusZone::setOpenTime(lua_State *L)
  * @note     Since all Nexus items open and close together, this method will affect all Nexus items in a game.
  * @note     Note that in a level file, closing times are specified in fractions of minutes.  This method works with seconds.
  */
-S32 NexusZone::setClosedTime(lua_State *L)
+S32 NexusZone::lua_setClosedTime(lua_State *L)
 {
    checkArgList(L, functionArgs, "NexusZone", "setCloseTime");
 

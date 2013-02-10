@@ -438,22 +438,22 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 getClassId(lua_State *L);
-   S32 getId(lua_State *L);
+   S32 lua_getClassId(lua_State *L);
+   S32 lua_getId(lua_State *L);
 
    // Get/set object's position
-   virtual S32 getLoc(lua_State *L);
-   virtual S32 setLoc(lua_State *L);
+   virtual S32 lua_getLoc(lua_State *L);
+   virtual S32 lua_setLoc(lua_State *L);
 
-   virtual S32 getTeamIndx(lua_State *L);   
-   virtual S32 setTeam(lua_State *L);   
+   virtual S32 lua_getTeamIndx(lua_State *L);   
+   virtual S32 lua_setTeam(lua_State *L);   
 
-   virtual S32 removeFromGame(lua_State *L);
+   virtual S32 lua_removeFromGame(lua_State *L);
 
-   virtual S32 setGeom(lua_State *L);
-   virtual S32 getGeom(lua_State *L);
+   virtual S32 lua_setGeom(lua_State *L);
+   virtual S32 lua_getGeom(lua_State *L);
 
-   S32 clone(lua_State *L);
+   S32 lua_clone(lua_State *L);
 };
 
 
@@ -464,8 +464,8 @@ class CentroidObject : public BfObject
 {
 public:
    // Provide special location handlers
-   virtual S32 getLoc(lua_State *L);
-   virtual S32 setLoc(lua_State *L);
+   virtual S32 lua_getLoc(lua_State *L);
+   virtual S32 lua_setLoc(lua_State *L);
 };
 
 

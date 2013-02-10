@@ -1037,7 +1037,7 @@ REGISTER_LUA_SUBCLASS(CoreItem, Item);
   *  @brief   Returns %CoreItem's current health.
   *  @return   \e health: Number representing %CoreItem's current health 
   */
-S32 CoreItem::getCurrentHealth(lua_State *L) 
+S32 CoreItem::lua_getCurrentHealth(lua_State *L) 
 { 
    return returnFloat(L, getTotalCurrentHealth() * DamageReductionRatio);
 }
@@ -1049,7 +1049,7 @@ S32 CoreItem::getCurrentHealth(lua_State *L)
   *  @descr   %CoreItem's full health represents the total health of all panels before they have suffered any damage.
   *  @return   \e health: Number representing %CoreItem's total health 
   */
-S32 CoreItem::getFullHealth(lua_State *L) 
+S32 CoreItem::lua_getFullHealth(lua_State *L) 
 { 
    return returnFloat(L, mStartingHealth * DamageReductionRatio);
 }
@@ -1062,7 +1062,7 @@ S32 CoreItem::getFullHealth(lua_State *L)
   *           on the CoreItem's current health
   *  @param   \e health: Number representing %CoreItem's total health 
   */
-S32 CoreItem::setFullHealth(lua_State *L) 
+S32 CoreItem::lua_setFullHealth(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "CoreItem", "setFullHealth");
    setStartingHealth(getFloat(L, 1) / DamageReductionRatio);

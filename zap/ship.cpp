@@ -2564,7 +2564,7 @@ bool Ship::isRobot()
    METHOD(CLASS, getReqLoadout,   ARRAYDEF({{ END }}), 1 ) \
 
 
-GENERATE_LUA_METHODS_TABLE(Ship, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE (Ship, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(Ship, LUA_METHODS);
 
 #undef LUA_METHODS
@@ -2575,31 +2575,31 @@ REGISTER_LUA_SUBCLASS(Ship, MoveObject);
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
 
-S32 Ship::isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
-S32 Ship::hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
+S32 Ship::lua_isAlive(lua_State *L)    { return returnBool(L, !isDestroyed()); }
+S32 Ship::lua_hasFlag(lua_State *L)    { return returnBool (L, getFlagCount() > 0); }
 
 // Returns number of flags ship is carrying (most games will always be 0 or 1)
-S32 Ship::getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); }
+S32 Ship::lua_getFlagCount(lua_State *L) { return returnInt(L, getFlagCount()); }
 
 
-S32 Ship::getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
+S32 Ship::lua_getPlayerInfo(lua_State *L) { return returnPlayerInfo(L, this); }
 
 
-S32 Ship::isModActive(lua_State *L) {
+S32 Ship::lua_isModActive(lua_State *L) {
    static const char *methodName = "Ship:isModActive()";
    checkArgCount(L, 1, methodName);
    ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
    return returnBool(L, isModulePrimaryActive(module) || isModuleSecondaryActive(module));
 }
 
-S32 Ship::getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle); }  // Get angle ship is pointing at
-S32 Ship::getActiveWeapon(lua_State *L) { return returnInt  (L, getSelectedWeapon());    }  // Get WeaponIndex for current weapon
+S32 Ship::lua_getAngle(lua_State *L)        { return returnFloat(L, getCurrentMove().angle); }  // Get angle ship is pointing at
+S32 Ship::lua_getActiveWeapon(lua_State *L) { return returnInt  (L, getSelectedWeapon());    }  // Get WeaponIndex for current weapon
                                
 // Ship status
-S32 Ship::getEnergy(lua_State *L)       { return returnFloat(L, getEnergyFraction()); }     // Return ship's energy as a fraction between 0 and 1
-S32 Ship::getHealth(lua_State *L)       { return returnFloat(L, getHealth()); }             // Return ship's health as a fraction between 0 and 1
+S32 Ship::lua_getEnergy(lua_State *L)       { return returnFloat(L, getEnergyFraction()); }     // Return ship's energy as a fraction between 0 and 1
+S32 Ship::lua_getHealth(lua_State *L)       { return returnFloat(L, getHealth()); }             // Return ship's health as a fraction between 0 and 1
 
-S32 Ship::getMountedItems(lua_State *L)
+S32 Ship::lua_getMountedItems(lua_State *L)
 {
    bool hasArgs = lua_isnumber(L, 1);
    Vector<BfObject *> tempVector;
@@ -2648,7 +2648,7 @@ S32 Ship::getMountedItems(lua_State *L)
 }
 
 // Return current loadout
-S32 Ship::getCurrLoadout(lua_State *L)
+S32 Ship::lua_getCurrLoadout(lua_State *L)
 {
    U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
 
@@ -2667,7 +2667,7 @@ S32 Ship::getCurrLoadout(lua_State *L)
 
 
 // Return requested loadout
-S32 Ship::getReqLoadout(lua_State *L)
+S32 Ship::lua_getReqLoadout(lua_State *L)
 {
    U8 loadoutItems[ShipModuleCount + ShipWeaponCount];
    ClientInfo *clientInfo = getOwner();
@@ -2675,7 +2675,7 @@ S32 Ship::getReqLoadout(lua_State *L)
    const Vector<U8> requestedLoadout = clientInfo ? clientInfo->getLoadout() : Vector<U8>();
 
    if(!clientInfo || requestedLoadout.size() != ShipModuleCount + ShipWeaponCount)    // Robots and clients starts at zero size requested loadout
-      return getCurrLoadout(L);
+      return lua_getCurrLoadout(L);
 
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       loadoutItems[i] = requestedLoadout[i];

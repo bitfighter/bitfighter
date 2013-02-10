@@ -469,7 +469,7 @@ void TextItem::doneEditingAttrs(EditorAttributeMenuUI *attributeMenu)
    METHOD(CLASS, setText,      ARRAYDEF({{ STR, END }}), 1 ) \
    METHOD(CLASS, getText,      ARRAYDEF({{      END }}), 1 ) \
 
-GENERATE_LUA_METHODS_TABLE_NEW(TextItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(TextItem, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(TextItem, LUA_METHODS);
 
 #undef LUA_METHODS

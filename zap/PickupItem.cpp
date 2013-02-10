@@ -294,7 +294,7 @@ REGISTER_LUA_SUBCLASS(PickupItem, Item);
  * @brief    Returns true if item is currently visible, false if not. 
  * @return   \e bool - True if item is currently visible, false if not.
 */
-S32 PickupItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }
+S32 PickupItem::lua_isVis(lua_State *L) { return returnBool(L, isVisible()); }
 
 
 /**
@@ -302,7 +302,7 @@ S32 PickupItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }
  * @brief    Show or hide the item.  Note that hiding an item will reset the timer that makes it visible again, just as if it had been picked up by a player.
  * @param    isVisible - Pass true to make the item visible, false to hide it.
 */
-S32 PickupItem::setVis(lua_State *L) 
+S32 PickupItem::lua_setVis(lua_State *L)
 {
    checkArgList(L, functionArgs, "PickupItem", "setVis");
 
@@ -320,7 +320,7 @@ S32 PickupItem::setVis(lua_State *L)
  * @brief    Sets the time (in seconds) for the %PickupItem to regenerate itself.  Default is 20 seconds. Setting regen time to a negative value will produce an error.
  * @param    time - Time in seconds for the item to remain hidden.
 */
-S32 PickupItem::setRegenTime(lua_State *L) 
+S32 PickupItem::lua_setRegenTime(lua_State *L)
 { 
    checkArgList(L, functionArgs, "PickupItem", "setRegenTime");
 
@@ -335,7 +335,7 @@ S32 PickupItem::setRegenTime(lua_State *L)
  * @brief    Returns the time (in seconds) for the %PickupItem to regenerate itself.
  * @return   int - Time in seconds for the item will remain hidden.
 */
-S32 PickupItem::getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
+S32 PickupItem::lua_getRegenTime(lua_State *L) { return returnInt(L, mRepopDelay); }
 
 
 ////////////////////////////////////////
@@ -367,7 +367,7 @@ RepairItem::RepairItem(lua_State *L) : Parent((F32)REPAIR_ITEM_RADIUS, DEFAULT_R
       {
          setPos(L, 1);
          lua_remove(L, 1);
-         setRegenTime(L);
+         lua_setRegenTime(L);
       }
    }
 }
@@ -455,7 +455,7 @@ F32 RepairItem::getEditorRadius(F32 currentScale)
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(RepairItem, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(RepairItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(RepairItem, LUA_METHODS);
 
 #undef LUA_METHODS
 
@@ -571,7 +571,7 @@ const char *EnergyItem::getEditorHelpString() { return "Restores energy to ships
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(EnergyItem, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(EnergyItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(EnergyItem, LUA_METHODS);
 
 #undef LUA_METHODS
 

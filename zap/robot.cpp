@@ -640,25 +640,25 @@ const char *Robot::luaClassName = "Robot";
 REGISTER_LUA_SUBCLASS(Robot, Ship);
 
 
-S32 Robot::subscribe(lua_State *L)   { return doSubscribe(L, RobotContext);   }
-S32 Robot::unsubscribe(lua_State *L) { return doUnsubscribe(L); }
+S32 Robot::lua_subscribe(lua_State *L)   { return doSubscribe(L, RobotContext);   }
+S32 Robot::lua_unsubscribe(lua_State *L) { return doUnsubscribe(L); }
 
 
 // Return CPU time... use for timing things
-S32 Robot::getCPUTime(lua_State *L)
+S32 Robot::lua_getCPUTime(lua_State *L)
 {
    return returnInt(L, getGame()->getCurrentTime());
 }
 
 
-S32 Robot::getTime(lua_State *L)
+S32 Robot::lua_getTime(lua_State *L)
 {
    return returnInt(L, getCurrentMove().time);
 }
 
 
 // Turn to angle a (in radians, or toward a point)
-S32 Robot::setAngle(lua_State *L)
+S32 Robot::lua_setAngle(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "setAngle");
 
@@ -679,7 +679,7 @@ S32 Robot::setAngle(lua_State *L)
 
 
 // Get angle toward point
-S32 Robot::getAnglePt(lua_State *L)
+S32 Robot::lua_getAnglePt(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getAnglePt");
 
@@ -690,7 +690,7 @@ S32 Robot::getAnglePt(lua_State *L)
 
 
 // Can robot see point P?
-S32 Robot::hasLosPt(lua_State *L)
+S32 Robot::lua_hasLosPt(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "hasLosPt");
 
@@ -703,7 +703,7 @@ S32 Robot::hasLosPt(lua_State *L)
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
-S32 Robot::getWaypoint(lua_State *L)  
+S32 Robot::lua_getWaypoint(lua_State *L)
 {
    TNLAssert(dynamic_cast<ServerGame *>(getGame()), "Not a ServerGame");
 
@@ -842,7 +842,7 @@ S32 Robot::getWaypoint(lua_State *L)
   * @param   range - (Optional) Radius in which to search.  Use -1 to search entire map.  If omitted, will use normal scanner range.
   * @return  Ship object representing closest enemy, or nil if none were found.
   */
-S32 Robot::findClosestEnemy(lua_State *L)
+S32 Robot::lua_findClosestEnemy(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "findClosestEnemy");
 
@@ -900,7 +900,7 @@ S32 Robot::findClosestEnemy(lua_State *L)
 
 
 // Thrust at velocity v toward angle a
-S32 Robot::setThrust(lua_State *L)
+S32 Robot::lua_setThrust(lua_State *L)
 {
    S32 profile = checkArgList(L, functionArgs, "Robot", "setThrust");
 
@@ -929,7 +929,7 @@ S32 Robot::setThrust(lua_State *L)
 
 
 // Thrust toward specified point, but slow speed so that we land directly on that point if it is within range
-S32 Robot::setThrustToPt(lua_State *L)
+S32 Robot::lua_setThrustToPt(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setThrustToPt");
 
@@ -956,7 +956,7 @@ S32 Robot::setThrustToPt(lua_State *L)
 
 
 // Fire current weapon if possible
-S32 Robot::fire(lua_State *L)
+S32 Robot::lua_fire(lua_State *L)
 {
    Move move = getCurrentMove();
    move.fire = true;
@@ -967,7 +967,7 @@ S32 Robot::fire(lua_State *L)
 
 
 // Set weapon to specified weapon, if we have it
-S32 Robot::setWeapon(lua_State *L)
+S32 Robot::lua_setWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setWeapon");
 
@@ -987,7 +987,7 @@ S32 Robot::setWeapon(lua_State *L)
 
 
 // Set weapon to index of slot (i.e. 1, 2, or 3)
-S32 Robot::setWeaponIndex(lua_State *L)
+S32 Robot::lua_setWeaponIndex(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setWeaponIndex");
 
@@ -999,7 +999,7 @@ S32 Robot::setWeaponIndex(lua_State *L)
 
 
 // Do we have a given weapon in our current loadout?
-S32 Robot::hasWeapon(lua_State *L)
+S32 Robot::lua_hasWeapon(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "hasWeapon");
    U32 weap = (U32)getInt(L, 1);
@@ -1014,7 +1014,7 @@ S32 Robot::hasWeapon(lua_State *L)
 
 // Activate module this cycle --> takes module enum.
 // If specified module is not part of the loadout, does nothing.
-S32 Robot::activateModule(lua_State *L)
+S32 Robot::lua_activateModule(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "activateModule");
 
@@ -1032,7 +1032,7 @@ S32 Robot::activateModule(lua_State *L)
 
 
 // Activate module this cycle --> takes module index
-S32 Robot::activateModuleIndex(lua_State *L)
+S32 Robot::lua_activateModuleIndex(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "activateModuleIndex");
 
@@ -1045,7 +1045,7 @@ S32 Robot::activateModuleIndex(lua_State *L)
 
 
 // Sets requested loadout to specified
-S32 Robot::setReqLoadout(lua_State *L)
+S32 Robot::lua_setReqLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setReqLoadout");
 
@@ -1063,7 +1063,7 @@ S32 Robot::setReqLoadout(lua_State *L)
 
 
 // Sets loadout to specified 
-S32 Robot::setCurrLoadout(lua_State *L)
+S32 Robot::lua_setCurrLoadout(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "setCurrLoadout");
 
@@ -1082,7 +1082,7 @@ S32 Robot::setCurrLoadout(lua_State *L)
 
 
 // Send message to all players
-S32 Robot::globalMsg(lua_State *L)
+S32 Robot::lua_globalMsg(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "globalMsg");
 
@@ -1102,7 +1102,7 @@ S32 Robot::globalMsg(lua_State *L)
 
 
 // Send message to team (what happens when neutral/hostile robot does this???)
-S32 Robot::teamMsg(lua_State *L)
+S32 Robot::lua_teamMsg(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "teamMsg");
 
@@ -1146,7 +1146,7 @@ S32 Robot::teamMsg(lua_State *L)
   *           print(#items)                       -- Print the number of items found to the console
   *         end
   */
-S32 Robot::findObjects(lua_State *L)
+S32 Robot::lua_findObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "findObjects");
 
@@ -1183,7 +1183,7 @@ S32 Robot::findObjects(lua_State *L)
   *           print(#items)                           -- Print the number of items found to the console
   *         end
   */
-S32 Robot::findGlobalObjects(lua_State *L)
+S32 Robot::lua_findGlobalObjects(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "findGlobalObjects");
 
@@ -1203,7 +1203,7 @@ S32 Robot::findGlobalObjects(lua_State *L)
  * @param      id - int id to search for.
  * @return     \e BfObject - Found object, or nil if no objects with the specified id could be found.
 */
-S32 Robot::findObjectById(lua_State *L)
+S32 Robot::lua_findObjectById(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "findObjectById");
 
@@ -1354,7 +1354,7 @@ static bool calcInterceptCourse(BfObject *target, Point aimPos, F32 aimRadius, S
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
 // Note that bot WILL fire at teammates if you ask it to!
-S32 Robot::getFiringSolution(lua_State *L)
+S32 Robot::lua_getFiringSolution(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getFiringSolution");
 
@@ -1374,7 +1374,7 @@ S32 Robot::getFiringSolution(lua_State *L)
 
 // Given an object, what angle do we need to fly toward in order to collide with an object?  This
 // works a lot like getFiringSolution().
-S32 Robot::getInterceptCourse(lua_State *L)
+S32 Robot::lua_getInterceptCourse(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "getInterceptCourse");
 
@@ -1389,7 +1389,7 @@ S32 Robot::getInterceptCourse(lua_State *L)
 }
 
 
-S32 Robot::engineerDeployObject(lua_State *L)
+S32 Robot::lua_engineerDeployObject(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "engineerDeployObject");
 
@@ -1399,7 +1399,7 @@ S32 Robot::engineerDeployObject(lua_State *L)
 }
 
 
-S32 Robot::dropItem(lua_State *L)
+S32 Robot::lua_dropItem(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "dropItem");
 
@@ -1411,7 +1411,7 @@ S32 Robot::dropItem(lua_State *L)
 }
 
 
-S32 Robot::copyMoveFromObject(lua_State *L)
+S32 Robot::lua_copyMoveFromObject(lua_State *L)
 {
    checkArgList(L, functionArgs, "Robot", "copyMoveFromObject");
 

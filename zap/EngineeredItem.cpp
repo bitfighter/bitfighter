@@ -1129,7 +1129,7 @@ REGISTER_LUA_SUBCLASS(EngineeredItem, Item);
  * @descr    A player can activate an inactive item by repairing it.
  * @return   Returns true if the item is "alive" and active, or false if it is dead.
 */
-S32 EngineeredItem::isActive(lua_State *L)       
+S32 EngineeredItem::lua_isActive(lua_State *L)
 { 
    return returnBool(L, isEnabled()); 
 }
@@ -1140,7 +1140,7 @@ S32 EngineeredItem::isActive(lua_State *L)
  * @brief    Gets the angle (in radians) at which the item is mounted.
  * @return   Returns the mount angle, in radians.
 */
-S32 EngineeredItem::getMountAngle(lua_State *L)  
+S32 EngineeredItem::lua_getMountAngle(lua_State *L)
 { 
    return returnFloat(L, mAnchorNormal.ATAN2()); 
 }
@@ -1152,7 +1152,7 @@ S32 EngineeredItem::getMountAngle(lua_State *L)
  * @descr    Health is specified as a number between 0 and 1 where 0 is completely dead and 1 is totally healthy.
  * @return   Returns a value between 0 and 1 indicating the health of the item.
 */
-S32 EngineeredItem::getHealth(lua_State *L)      
+S32 EngineeredItem::lua_getHealth(lua_State *L)
 { 
    return returnFloat(L, mHealth);     
 }
@@ -1165,7 +1165,7 @@ S32 EngineeredItem::getHealth(lua_State *L)
  *           Values outside this range will be clamped to the valid range.
  * @param    health - A value between 0 and 1.
 */
-S32 EngineeredItem::setHealth(lua_State *L) 
+S32 EngineeredItem::lua_setHealth(lua_State *L)
 { 
    checkArgList(L, functionArgs, "EngineeredItem", "setHealth");
    mHealth = getFloat(L, 1);
@@ -1180,7 +1180,7 @@ S32 EngineeredItem::setHealth(lua_State *L)
  * @descr    The value will always be between 0 and 1.  This value is constant and will be the same for all %EngineeredItems.
  * @return   Health threshold below which the item will be disabled.
 */
-S32 EngineeredItem::getDisabledThreshold(lua_State *L)
+S32 EngineeredItem::lua_getDisabledThreshold(lua_State *L)
 {
    return returnFloat(L, disabledLevel);
 }
@@ -1193,7 +1193,7 @@ S32 EngineeredItem::getDisabledThreshold(lua_State *L)
  *           If an %EngineeredItem is assigned to the neutral team, it will not heal itself.
  * @return   healRate
 */
-S32 EngineeredItem::getHealRate(lua_State *L)
+S32 EngineeredItem::lua_getHealRate(lua_State *L)
 {
    return returnInt(L, mHealRate);
 }
@@ -1207,7 +1207,7 @@ S32 EngineeredItem::getHealRate(lua_State *L)
  *           Passing a negative value will generate an error.
  * @param    healRate - Time, in seconds, it takes an %EngineeredItem to heal itself by 10%.  Specify 0 to disable healing.
 */
-S32 EngineeredItem::setHealRate(lua_State *L)
+S32 EngineeredItem::lua_setHealRate(lua_State *L)
 {
    checkArgList(L, functionArgs, "EngineeredItem", "setHealRate");
 
@@ -1221,9 +1221,9 @@ S32 EngineeredItem::setHealRate(lua_State *L)
 
 
 // Override some methods
-S32 EngineeredItem::setGeom(lua_State *L)
+S32 EngineeredItem::lua_setGeom(lua_State *L)
 {
-   S32 retVal = Parent::setGeom(L);
+   S32 retVal = Parent::lua_setGeom(L);
 
    findMountPoint(Game::getAddTarget(), getPos());
 
@@ -1498,7 +1498,7 @@ void ForceFieldProjector::onGeomChanged()
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(ForceFieldProjector, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(ForceFieldProjector, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(ForceFieldProjector, LUA_METHODS);
 
 #undef LUA_METHODS
 
@@ -1506,7 +1506,7 @@ const char *ForceFieldProjector::luaClassName = "ForceFieldProjector";
 REGISTER_LUA_SUBCLASS(ForceFieldProjector, EngineeredItem);
 
 // LuaItem methods -- override method in parent class
-S32 ForceFieldProjector::getLoc(lua_State *L)
+S32 ForceFieldProjector::lua_getLoc(lua_State *L)
 {
    return LuaObject::returnPoint(L, getPos() + mAnchorNormal * getRadius() );
 }
@@ -2115,7 +2115,7 @@ REGISTER_LUA_SUBCLASS(Turret, EngineeredItem);
  * @brief    Returns the angle (in radians) at which the Turret is aiming.
  * @return   The angle (in radians) at which the Turret is aiming.
 */
-S32 Turret::getAimAngle(lua_State *L)
+S32 Turret::lua_getAimAngle(lua_State *L)
 {
    return returnFloat(L, mCurrentAngle);
 }
@@ -2126,7 +2126,7 @@ S32 Turret::getAimAngle(lua_State *L)
  * @brief    Sets the angle (in radians) where the Turret should aim.
  * @param    angle - Angle (in radians) where the turret should aim.
 */
-S32 Turret::setAimAngle(lua_State *L)
+S32 Turret::lua_setAimAngle(lua_State *L)
 {
    checkArgList(L, functionArgs, "Turret", "setAimAngle");
    mCurrentAngle = getFloat(L, 1);
@@ -2136,13 +2136,13 @@ S32 Turret::setAimAngle(lua_State *L)
 
 
 // Override some methods
-S32 Turret::getRad(lua_State *L)
+S32 Turret::lua_getRad(lua_State *L)
 {
    return returnInt(L, TURRET_OFFSET);
 }
 
 
-S32 Turret::getLoc(lua_State *L)
+S32 Turret::lua_getLoc(lua_State *L)
 {
    return LuaObject::returnPoint(L, getPos() + mAnchorNormal * TURRET_OFFSET);
 }

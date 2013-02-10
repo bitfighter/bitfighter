@@ -1313,7 +1313,7 @@ REGISTER_LUA_CLASS(BfObject);
  * See \ref ObjTypeEnum for a list of possible return values.
  * @return The object's ClassId
 */
-S32 BfObject::getClassId(lua_State *L)  
+S32 BfObject::lua_getClassId(lua_State *L)  
 { 
    return returnInt(L, mObjectTypeNumber); 
 }
@@ -1326,7 +1326,7 @@ S32 BfObject::getClassId(lua_State *L)
  *           not assigned an object an id, %getId() will return a negative id that will remain consistent throught the game.
  * @return \e int - The object's id.
 */
-S32 BfObject::getId(lua_State *L)  
+S32 BfObject::lua_getId(lua_State *L)  
 { 
    return returnInt(L, mUserAssignedId); 
 }
@@ -1338,7 +1338,7 @@ S32 BfObject::getId(lua_State *L)
  * @descr    For objects that are not points (such as a LoadoutZone), will return the object's centroid.
  * @return   A \e point representing the object's location.
 */
-S32 BfObject::getLoc(lua_State *L)      
+S32 BfObject::lua_getLoc(lua_State *L)      
 { 
    return returnPoint(L, getPos()); 
 }
@@ -1352,7 +1352,7 @@ S32 BfObject::getLoc(lua_State *L)
  * @note     Remember that in Lua, indices start with 1!
  * @return   \e int - Team index of the object.
 */
-S32 BfObject::getTeamIndx(lua_State *L)
+S32 BfObject::lua_getTeamIndx(lua_State *L)
 { 
    return returnInt  (L, mTeam + 1); // + 1 because Lua indices start at 1
 }  
@@ -1366,7 +1366,7 @@ S32 BfObject::getTeamIndx(lua_State *L)
  *           that are inherently teamless (such as a NexusZone).
  * @note     Remember that in Lua, indices start with 1!
 */
-S32 BfObject::setTeam(lua_State *L) 
+S32 BfObject::lua_setTeam(lua_State *L) 
 { 
    checkArgList(L, functionArgs, "BfObject", "setTeam");
    setTeam(L, 1);
@@ -1380,7 +1380,7 @@ S32 BfObject::setTeam(lua_State *L)
  * @descr    To set the full geometry of a more complex object, see the setGeom() method.
  * @param    \e point pos - Point (or coordinate pair) representing the location of the object. 
  */
-S32 BfObject::setLoc(lua_State *L)
+S32 BfObject::lua_setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
    setPos(L, 1);
@@ -1393,7 +1393,7 @@ S32 BfObject::setLoc(lua_State *L)
  * @brief    Removes the object from the current game or editor session.
  * @descr    May not be implemented for all objects.
  */
-S32 BfObject::removeFromGame(lua_State *L)
+S32 BfObject::lua_removeFromGame(lua_State *L)
 {
    deleteObject();
    return 0;
@@ -1406,7 +1406,7 @@ S32 BfObject::removeFromGame(lua_State *L)
  * @param    \e geometry - The object's geometry.  (See \ref datatypes for an explanation of geometry.) 
  * @descr    Note that not all objects support changing geometry if the object has already been added to a game.
  */
-S32 BfObject::setGeom(lua_State *L)
+S32 BfObject::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setGeom");
    setGeom(L, 1);
@@ -1422,7 +1422,7 @@ S32 BfObject::setGeom(lua_State *L)
  * @return   ObjectGeometry - For %point objects (such as a RepairItem or TestItem), this will be a single point. For more complex objects 
  *           (such as a WallItem or a Zone), this will be a Lua table containing a list of points.
  */
-S32 BfObject::getGeom(lua_State *L)
+S32 BfObject::lua_getGeom(lua_State *L)
 {
    // Simple geometry
    if(getGeomType() == geomPoint)
@@ -1439,7 +1439,7 @@ S32 BfObject::getGeom(lua_State *L)
  * @descr    Returned object will not be added to the current game, and will have a different id than the source object.
  * @return   Returns the clone.
  */
-S32 BfObject::clone(lua_State *L)
+S32 BfObject::lua_clone(lua_State *L)
 {
    TNLAssert(false, "Not yet implemented!!!");
    return 0;      // TODO: return clone -- how do we prevent leaks here?
@@ -1450,13 +1450,13 @@ S32 BfObject::clone(lua_State *L)
 ////////////////////////////////////////
 
 // 2D objects need special handling when getting/setting location
-S32 CentroidObject::getLoc(lua_State *L)
+S32 CentroidObject::lua_getLoc(lua_State *L)
 {
    return LuaObject::returnPoint(L, getCentroid());      // Do we want this to return a series of points?
 }
 
 
-S32 CentroidObject::setLoc(lua_State *L)
+S32 CentroidObject::lua_setLoc(lua_State *L)
 {
    checkArgList(L, functionArgs, "BfObject", "setLoc");
 

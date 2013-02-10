@@ -136,12 +136,12 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 setDir(lua_State *L);
-   S32 getDir(lua_State *L);
-   S32 setSpeed(lua_State *L);
-   S32 getSpeed(lua_State *L);
-   S32 setSnapping(lua_State *L);
-   S32 getSnapping(lua_State *L);
+   S32 lua_setDir(lua_State *L);
+   S32 lua_getDir(lua_State *L);
+   S32 lua_setSpeed(lua_State *L);
+   S32 lua_getSpeed(lua_State *L);
+   S32 lua_setSnapping(lua_State *L);
+   S32 lua_getSnapping(lua_State *L);
 };
 
 

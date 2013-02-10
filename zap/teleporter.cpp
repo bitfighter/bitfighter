@@ -943,7 +943,7 @@ REGISTER_LUA_SUBCLASS(Teleporter, BfObject);
  *    levelgen:addItem(t)  -- or plugin:addItem(t) in a plugin
  *  @endcode
  */
-S32 Teleporter::addDest(lua_State *L)
+S32 Teleporter::lua_addDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "addDest");
 
@@ -961,7 +961,7 @@ S32 Teleporter::addDest(lua_State *L)
   *         an invalid index, will generate an error.
   *  @note  Remember that in Lua, indices start with 1!
   */
-S32 Teleporter::delDest(lua_State *L)
+S32 Teleporter::lua_delDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "delDest");
 
@@ -979,7 +979,7 @@ S32 Teleporter::delDest(lua_State *L)
   *  @luafunc Teleporter::clearDests()
   *  @brief Removes all destinations from the teleporter.
   */
-S32 Teleporter::clearDests(lua_State *L)
+S32 Teleporter::lua_clearDests(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "clearDests");
 
@@ -994,7 +994,7 @@ S32 Teleporter::clearDests(lua_State *L)
   *  @param   index - Index of the dest to return.  Will generate an error if index is invalid.
   *  @return  A point object representing the requested destination.
   */
-S32 Teleporter::getDest(lua_State *L)
+S32 Teleporter::lua_getDest(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "getDest");
    S32 index = getInt(L, 1) - 1;    // - 1 corrects for Lua indices starting at 1
@@ -1011,7 +1011,7 @@ S32 Teleporter::getDest(lua_State *L)
   *  @brief   Returns the number of destinations this teleporter has.
   *  @return  The number of destinations this teleporter has.
   */
-S32 Teleporter::getDestCount(lua_State *L)
+S32 Teleporter::lua_getDestCount(lua_State *L)
 {
    return returnInt(L, mDestManager.getDestCount());
 }
@@ -1033,7 +1033,7 @@ S32 Teleporter::getDestCount(lua_State *L)
   *  If the teleporter has no destinations, it will not be added to the editor.
   *  @param   \e Geom geometry: New geometry for %Teleporter.
   */
-S32 Teleporter::setGeom(lua_State *L)
+S32 Teleporter::lua_setGeom(lua_State *L)
 {
    checkArgList(L, functionArgs, "Teleporter", "setGeom");
 
@@ -1078,7 +1078,7 @@ void Teleporter::doSetGeom(lua_State *L)
   *  In the editor, all teleporters are simple lines, and will return geometries with two points -- an origin and a destination.
   *  @param   \e Geom geometry: New geometry for %Teleporter.
   */
-S32 Teleporter::getGeom(lua_State *L)
+S32 Teleporter::lua_getGeom(lua_State *L)
 {
    Vector<Point> points;
 

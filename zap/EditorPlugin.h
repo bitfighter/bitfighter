@@ -61,10 +61,10 @@ public:
    bool runGetArgsMenu(string &menuTitle, Vector<MenuItem *> &menuItems);    // Get menu def from the plugin
 
    // Lua methods
-   S32 getGridSize(lua_State *L);
-   S32 addLevelLine(lua_State *L);
-   S32 getSelectedObjects(lua_State *L);        // Return all selected objects in the editor
-   S32 getAllObjects(lua_State *L);             // Return all objects in the editor
+   S32 lua_getGridSize(lua_State *L);
+   S32 lua_addLevelLine(lua_State *L);
+   S32 lua_getSelectedObjects(lua_State *L);        // Return all selected objects in the editor
+   S32 lua_getAllObjects(lua_State *L);             // Return all objects in the editor
 
 
    //// Lua interface

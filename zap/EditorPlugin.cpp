@@ -236,7 +236,7 @@ GENERATE_LUA_FUNARGS_TABLE(EditorPlugin, LUA_METHODS);
  * @brief    Returns the current Grid Size setting.
  * @return   \e num - Current GridSize setting in the editor.
 */
-S32 EditorPlugin::getGridSize(lua_State *L)
+S32 EditorPlugin::lua_getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);    
 }
@@ -249,7 +249,7 @@ S32 EditorPlugin::getGridSize(lua_State *L)
  *             add it to the game using the editorPlugin:addItem() method.
  * @param      levelLine - string containing the line of levelcode.
 */
-S32 EditorPlugin::addLevelLine(lua_State *L)
+S32 EditorPlugin::lua_addLevelLine(lua_State *L)
 {
    static const char *methodName = "EditorPlugin:addLevelLine()";
 
@@ -279,7 +279,7 @@ S32 EditorPlugin::addLevelLine(lua_State *L)
  * @endcode
  * @return   \e table - Lua table containing all the objects in the editor that are currently selected.
 */
-S32 EditorPlugin::getSelectedObjects(lua_State *L)
+S32 EditorPlugin::lua_getSelectedObjects(lua_State *L)
 {
    S32 count = mGridDatabase->getObjectCount();
 
@@ -310,7 +310,7 @@ S32 EditorPlugin::getSelectedObjects(lua_State *L)
  * @brief    Returns a list of all objects in the editor.
  * @return   \e table - Lua table containing all the objects in the editor.
 */
-S32 EditorPlugin::getAllObjects(lua_State *L)
+S32 EditorPlugin::lua_getAllObjects(lua_State *L)
 {
    S32 count = mGridDatabase->getObjectCount();
 

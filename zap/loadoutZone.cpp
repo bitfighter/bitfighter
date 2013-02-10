@@ -193,7 +193,7 @@ void LoadoutZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(LoadoutZone, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(LoadoutZone, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(LoadoutZone, LUA_METHODS);
 
 #undef LUA_METHODS
 

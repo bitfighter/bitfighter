@@ -384,7 +384,7 @@ void ItemSpawn::renderDock()                                                    
    METHOD(CLASS, setSpawnTime, ARRAYDEF({{ NUM_GE0, END }}), 1 ) \
    METHOD(CLASS, spawnNow,     ARRAYDEF({{          END }}), 1 ) \
 
-GENERATE_LUA_METHODS_TABLE_NEW(ItemSpawn, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(ItemSpawn, LUA_METHODS);
 GENERATE_LUA_FUNARGS_TABLE(ItemSpawn, LUA_METHODS);
 
 #undef LUA_METHODS

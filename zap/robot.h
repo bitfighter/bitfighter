@@ -127,51 +127,51 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 subscribe(lua_State *L);
-   S32 unsubscribe(lua_State *L);
+   S32 lua_subscribe(lua_State *L);
+   S32 lua_unsubscribe(lua_State *L);
 
-   S32 getCPUTime(lua_State *L);
-   S32 getTime(lua_State *L);
+   S32 lua_getCPUTime(lua_State *L);
+   S32 lua_getTime(lua_State *L);
 
-   S32 setAngle(lua_State *L);
-   S32 getAnglePt(lua_State *L);
-   S32 hasLosPt(lua_State *L);
+   S32 lua_setAngle(lua_State *L);
+   S32 lua_getAnglePt(lua_State *L);
+   S32 lua_hasLosPt(lua_State *L);
 
    // Navigation
-   S32 getWaypoint(lua_State *L);
+   S32 lua_getWaypoint(lua_State *L);
 
    // Finding stuff
-   S32 findObjects(lua_State *L);
-   S32 findGlobalObjects(lua_State *L);
-   S32 findObjectById(lua_State *L);
+   S32 lua_findObjects(lua_State *L);
+   S32 lua_findGlobalObjects(lua_State *L);
+   S32 lua_findObjectById(lua_State *L);
 
    // Bad dudes
-   S32 findClosestEnemy(lua_State *L);
+   S32 lua_findClosestEnemy(lua_State *L);
 
    // Ship control
-   S32 setThrust(lua_State *L);
-   S32 setThrustToPt(lua_State *L);
+   S32 lua_setThrust(lua_State *L);
+   S32 lua_setThrustToPt(lua_State *L);
 
-   S32 getFiringSolution(lua_State *L);
-   S32 getInterceptCourse(lua_State *L);
+   S32 lua_getFiringSolution(lua_State *L);
+   S32 lua_getInterceptCourse(lua_State *L);
 
-   S32 fire(lua_State *L);
-   S32 setWeapon(lua_State *L);
-   S32 setWeaponIndex(lua_State *L);
-   S32 hasWeapon(lua_State *L);  
+   S32 lua_fire(lua_State *L);
+   S32 lua_setWeapon(lua_State *L);
+   S32 lua_setWeaponIndex(lua_State *L);
+   S32 lua_hasWeapon(lua_State *L);  
 
-   S32 globalMsg(lua_State *L);
-   S32 teamMsg(lua_State *L);
+   S32 lua_globalMsg(lua_State *L);
+   S32 lua_teamMsg(lua_State *L);
 
-   S32 activateModule(lua_State *L);       // Activate module this cycle --> takes module index
-   S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
+   S32 lua_activateModule(lua_State *L);       // Activate module this cycle --> takes module index
+   S32 lua_activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
-   S32 setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
-   S32 setCurrLoadout(lua_State *L);       // Sets requested loadout to specified --> takes Loadout object
+   S32 lua_setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
+   S32 lua_setCurrLoadout(lua_State *L);       // Sets requested loadout to specified --> takes Loadout object
 
-   S32 engineerDeployObject(lua_State *L);
-   S32 dropItem(lua_State *L);
-   S32 copyMoveFromObject(lua_State *L);
+   S32 lua_engineerDeployObject(lua_State *L);
+   S32 lua_dropItem(lua_State *L);
+   S32 lua_copyMoveFromObject(lua_State *L);
 };
 
 

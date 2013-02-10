@@ -94,10 +94,10 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 isVis(lua_State *L);
-   S32 setVis(lua_State *L);
-   S32 setRegenTime(lua_State *L);
-   S32 getRegenTime(lua_State *L);
+   S32 lua_isVis(lua_State *L);
+   S32 lua_setVis(lua_State *L);
+   S32 lua_setRegenTime(lua_State *L);
+   S32 lua_getRegenTime(lua_State *L);
 };
 
 

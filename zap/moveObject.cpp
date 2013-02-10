@@ -819,7 +819,7 @@ REGISTER_LUA_SUBCLASS(MoveObject, Item);
  *   @descr   Points are used to represent velocity; the x and y components represent the speed in the x and y directions respectively.
  *   @return  \e point representing the item's velocity.
  */
-S32 MoveObject::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
+S32 MoveObject::lua_getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
 
 
 /**
@@ -828,7 +828,7 @@ S32 MoveObject::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }
  * @descr   As with other functions that take a point as an input, you can also specify the x and y components as numeric arguments.
  * @param   vel - A point representing item's velocity.
  */
-S32 MoveObject::setVel(lua_State *L)
+S32 MoveObject::lua_setVel(lua_State *L)
 {
    checkArgList(L, functionArgs, "MoveObject", "setVel");
    setActualVel(getPointOrXY(L, 1));
@@ -1249,7 +1249,7 @@ REGISTER_LUA_SUBCLASS(MountableItem, MoveObject);
  *  @brief   Gets ship that item is mounted to.  If item is not mounted, returns nil.
  *  @return  \e ship - Ship item is mounted to, or nil if item is unmounted
  */
-S32 MountableItem::getShip(lua_State *L) 
+S32 MountableItem::lua_getShip(lua_State *L) 
 { 
    if(mMount.isValid())
       return returnShip(L, mMount);
@@ -1263,7 +1263,7 @@ S32 MountableItem::getShip(lua_State *L)
  *  @brief   Returns true if the item is mounted on a %ship, false otherwise.
  *  @return  \e bool - True if item is mounted on a %ship, false otherwise.
  */
-S32 MountableItem::isOnShip(lua_State *L)
+S32 MountableItem::lua_isOnShip(lua_State *L)
 {
    return returnBool(L, mIsMounted);
 }
@@ -1645,7 +1645,7 @@ REGISTER_LUA_SUBCLASS(Asteroid, MoveObject);
  *           This method will always return an integer between 1 and the value returned by the %getSizeCount() method (inclusive).
  *  @return  \e int - Index corresponding to the %asteroid's current size.
  */
-S32 Asteroid::getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft + 1); }
+S32 Asteroid::lua_getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT - mSizeLeft + 1); }
 
 /**
  *  @luafunc Asteroid::getSizeCount()
@@ -1653,7 +1653,7 @@ S32 Asteroid::getSizeIndex(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_
  *  @descr   Remember, bigger indices mean smaller asteroids.
  *  @return  \e int - Index of the %asteroid's smallest size.
  */
-S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
+S32 Asteroid::lua_getSizeCount(lua_State *L) { return returnInt(L, ASTEROID_INITIAL_SIZELEFT + 1); }
 
 
 ////////////////////////////////////////
@@ -1828,7 +1828,7 @@ void Circle::playCollisionSound(U32 stateIndex, MoveObject *moveObjectThatWasHit
 #define LUA_METHODS(CLASS, METHOD) \
 
 GENERATE_LUA_FUNARGS_TABLE(Circle, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(Circle, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(Circle, LUA_METHODS);
 
 #undef LUA_METHODS
 
@@ -2314,7 +2314,7 @@ const Vector<Point> *TestItem::getCollisionPoly() const
 #define LUA_METHODS(CLASS, METHOD) \
    
 GENERATE_LUA_FUNARGS_TABLE(TestItem, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(TestItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(TestItem, LUA_METHODS);
 
 const char *TestItem::luaClassName = "TestItem";
 REGISTER_LUA_SUBCLASS(TestItem, MoveObject);
@@ -2442,7 +2442,7 @@ void ResourceItem::dismount(DismountMode dismountMode)
 #define LUA_METHODS(CLASS, METHOD) \
    
 GENERATE_LUA_FUNARGS_TABLE(ResourceItem, LUA_METHODS);
-GENERATE_LUA_METHODS_TABLE_NEW(ResourceItem, LUA_METHODS);
+GENERATE_LUA_METHODS_TABLE(ResourceItem, LUA_METHODS);
 
 const char *ResourceItem::luaClassName = "ResourceItem";
 REGISTER_LUA_SUBCLASS(ResourceItem, MountableItem);

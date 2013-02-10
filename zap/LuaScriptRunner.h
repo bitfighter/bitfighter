@@ -230,7 +230,8 @@ public:
 */
 
 #define LUA_METHOD_ITEM(class_, name, b, c) \
-{ #name, luaW_doMethod<class_, &class_::name > },
+{ #name, luaW_doMethod<class_, &class_::lua_## name > },
+
 
 #define GENERATE_LUA_METHODS_TABLE(class_, table_) \
 const luaL_reg class_::luaMethods[] =              \
@@ -242,31 +243,9 @@ const luaL_reg class_::luaMethods[] =              \
 // Generates something like the following:
 // const luaL_reg Teleporter::luaMethods[] =
 // {
-//       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest >    },
-//       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest >    },
-//       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests > },
-//       { NULL, NULL }
-// };
-
-
-// TODO: Migrate all uses of above to the below, delete the above, and rename the below to the above.
-#define LUA_METHOD_ITEM_NEW(class_, name, b, c) \
-{ #name, luaW_doMethod<class_, &class_::lua_## name > },
-
-
-#define GENERATE_LUA_METHODS_TABLE_NEW(class_, table_) \
-const luaL_reg class_::luaMethods[] =                  \
-{                                                      \
-   table_(class_, LUA_METHOD_ITEM_NEW)                 \
-   { NULL, NULL }                                      \
-}
-
-// Generates something like the following:
-// const luaL_reg Teleporter::luaMethods[] =
-// {
-//       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::addDest_lua >    }
-//       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::delDest_lua >    }
-//       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::clearDests_lua > }
+//       { "addDest",    luaW_doMethod<Teleporter, &Teleporter::lua_addDest >    }
+//       { "delDest",    luaW_doMethod<Teleporter, &Teleporter::lua_delDest >    }
+//       { "clearDests", luaW_doMethod<Teleporter, &Teleporter::lua_clearDests > }
 //       { NULL, NULL }
 // };
 

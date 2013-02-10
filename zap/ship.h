@@ -332,22 +332,22 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 isAlive(lua_State *L);
-   S32 getAngle(lua_State *L);
-   S32 hasFlag(lua_State *L);
+   S32 lua_isAlive(lua_State *L);
+   S32 lua_getAngle(lua_State *L);
+   S32 lua_hasFlag(lua_State *L);
 
-   S32 getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
-   S32 getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
+   S32 lua_getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
+   S32 lua_getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
 
-   S32 getFlagCount(lua_State *L);
+   S32 lua_getFlagCount(lua_State *L);
 
-   S32 getPlayerInfo(lua_State *L);
-   S32 isModActive(lua_State *L);
-   S32 getMountedItems(lua_State *L);
-   S32 getCurrLoadout(lua_State *L);
-   S32 getReqLoadout(lua_State *L);
+   S32 lua_getPlayerInfo(lua_State *L);
+   S32 lua_isModActive(lua_State *L);
+   S32 lua_getMountedItems(lua_State *L);
+   S32 lua_getCurrLoadout(lua_State *L);
+   S32 lua_getReqLoadout(lua_State *L);
 
-   S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
+   S32 lua_getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 };
 
 

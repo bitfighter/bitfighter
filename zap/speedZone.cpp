@@ -592,7 +592,7 @@ REGISTER_LUA_SUBCLASS(SpeedZone, BfObject);
  *    levelgen:addItem(s)  -- or plugin:addItem(s) in a plugin
  *  @endcode
  */
-S32 SpeedZone::setDir(lua_State *L)
+S32 SpeedZone::lua_setDir(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setDir");
 
@@ -611,7 +611,7 @@ S32 SpeedZone::setDir(lua_State *L)
   *           only the angle between them matters.
   *  @return  A point object representing the %SpeedZone's direction.  
   */
-S32 SpeedZone::getDir(lua_State *L)
+S32 SpeedZone::lua_getDir(lua_State *L)
 {
    // Calculate the direction point
    Point offset(getVert(1) - getVert(0));
@@ -627,7 +627,7 @@ S32 SpeedZone::getDir(lua_State *L)
   *  @descr   Speed must be a positive number, and will be limited to a maximum of 65536.  Default speed is 2000.
   *  @param   speed - The speed that the %SpeedZone should propel ships.
   */
-S32 SpeedZone::setSpeed(lua_State *L)
+S32 SpeedZone::lua_setSpeed(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setSpeed");
    U32 speed = getInt(L, 1);
@@ -642,7 +642,7 @@ S32 SpeedZone::setSpeed(lua_State *L)
   *  @brief   Returns the %SpeedZone's speed.
   *  @return  A number representing the %SpeedZone's speed.  Bigger is faster, obviously.
   */
-S32 SpeedZone::getSpeed(lua_State *L)
+S32 SpeedZone::lua_getSpeed(lua_State *L)
 {
    return returnInt(L, mSpeed);
 }
@@ -660,7 +660,7 @@ S32 SpeedZone::getSpeed(lua_State *L)
   *  Snapping is off by default.
   *  @param   snapping - True if snapping should be enabled, false otherwise.
   */
-S32 SpeedZone::setSnapping(lua_State *L)
+S32 SpeedZone::lua_setSnapping(lua_State *L)
 {
    checkArgList(L, functionArgs, "SpeedZone", "setSnapping");
    mSnapLocation = getBool(L, 1);
@@ -674,7 +674,7 @@ S32 SpeedZone::setSnapping(lua_State *L)
   *  @brief   Returns the %SpeedZone's snapping parameter.
   *  @return  A boolean; true if snapping is enabled, false if not.
   */
-S32 SpeedZone::getSnapping(lua_State *L)
+S32 SpeedZone::lua_getSnapping(lua_State *L)
 {
    return returnBool(L, mSnapLocation);
 }

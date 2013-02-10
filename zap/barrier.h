@@ -196,12 +196,12 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    // Get/set wall's thickness
-   S32 getWidth(lua_State *L);
-   S32 setWidth(lua_State *L);
+   S32 lua_getWidth(lua_State *L);
+   S32 lua_setWidth(lua_State *L);
 
    // Override standard methods basically to add checks to keep us from modifying a wall already in the game
-   S32 setLoc(lua_State *L);
-   S32 setGeom(lua_State *L);
+   S32 lua_setLoc(lua_State *L);
+   S32 lua_setGeom(lua_State *L);
 };
 
 
@@ -259,8 +259,8 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    // Override standard methods basically to add checks to keep us from modifying a wall already in the game
-   S32 setLoc(lua_State *L);
-   S32 setGeom(lua_State *L);
+   S32 lua_setLoc(lua_State *L);
+   S32 lua_setGeom(lua_State *L);
 };
 
 

@@ -224,7 +224,7 @@ REGISTER_LUA_SUBCLASS(Item, BfObject);
  * @brief   Returns radius of the %item.
  * @return  \e num representing the radius of the %item.
  */
-S32 Item::getRad(lua_State *L) { return returnFloat(L, getRadius()); }
+S32 Item::lua_getRad(lua_State *L) { return returnFloat(L, getRadius()); }
 
 /**
  * @luafunc Item::isOnShip()
@@ -232,7 +232,7 @@ S32 Item::getRad(lua_State *L) { return returnFloat(L, getRadius()); }
  * @descr   Currently, only \link FlagItem FlagItems\endlink and \link ResourceItem ResourceItems\endlink can be mounted on ships.
  * @return  \e bool True if the item is mounted on a ship, false otherwise.
  */
-S32 Item::isOnShip (lua_State *L) { return returnBool(L, false); }
+S32 Item::lua_isOnShip (lua_State *L) { return returnBool(L, false); }
 
 /**
  * @luafunc Item::getCaptureZone()
@@ -241,7 +241,7 @@ S32 Item::isOnShip (lua_State *L) { return returnBool(L, false); }
  *          Currently only \link FlagItem FlagItems\endlink can be captured.
  * @return  \e Zone where the item has been captured.  Returns nil if the item is not in a capture zone.
  */
-S32 Item::getCaptureZone (lua_State *L) { return returnNil(L); }
+S32 Item::lua_getCaptureZone (lua_State *L) { return returnNil(L); }
 
 /**
  * @luafunc Item::getShip()
@@ -249,14 +249,14 @@ S32 Item::getCaptureZone (lua_State *L) { return returnNil(L); }
  * @descr   Most objects cannot be mounted.  For those, this function will always return nil.
  * @return  \e Ship where the item is mounted.  Returns nil if the item is not mounted.
  */
-S32 Item::getShip (lua_State *L) { return returnNil(L); }
+S32 Item::lua_getShip (lua_State *L) { return returnNil(L); }
 
 /**
  * @luafunc Item::isInCaptureZone()
  * @brief  Returns whether or not the item is in a capture zone.
  * @return \e bool True if item is in a capture zone, false otherwise.
  */
-S32 Item::isInCaptureZone(lua_State *L) { return returnBool(L, false); }
+S32 Item::lua_isInCaptureZone(lua_State *L) { return returnBool(L, false); }
 
 
 };

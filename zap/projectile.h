@@ -105,9 +105,9 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 getRad(lua_State *L);      // Radius of item (returns number)
-   S32 getVel(lua_State *L);
-   S32 getWeapon(lua_State *L);   // Return which type of weapon this is
+   S32 lua_getRad(lua_State *L);      // Radius of item (returns number)
+   S32 lua_getVel(lua_State *L);
+   S32 lua_getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 
 
@@ -163,7 +163,7 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
+   virtual S32 lua_getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 
 
@@ -353,7 +353,7 @@ public:
    static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   virtual S32 getWeapon(lua_State *L);   // Return which type of weapon this is
+   virtual S32 lua_getWeapon(lua_State *L);   // Return which type of weapon this is
 };
 
 

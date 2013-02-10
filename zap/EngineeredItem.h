@@ -166,16 +166,16 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    // More Lua methods that are inherited by turrets and forcefield projectors
-   S32 getHealth(lua_State *L);
-   S32 setHealth(lua_State *L);
-   S32 isActive(lua_State *L);
-   S32 getMountAngle(lua_State *L);
-   S32 getDisabledThreshold(lua_State *L);
-   S32 getHealRate(lua_State *L);
-   S32 setHealRate(lua_State *L);
+   S32 lua_getHealth(lua_State *L);
+   S32 lua_setHealth(lua_State *L);
+   S32 lua_isActive(lua_State *L);
+   S32 lua_getMountAngle(lua_State *L);
+   S32 lua_getDisabledThreshold(lua_State *L);
+   S32 lua_getHealRate(lua_State *L);
+   S32 lua_setHealRate(lua_State *L);
 
    // Some overrides
-   S32 setGeom(lua_State *L);
+   S32 lua_setGeom(lua_State *L);
 };
 
 
@@ -302,7 +302,7 @@ public:
 	static const luaL_reg luaMethods[];
    static const LuaFunctionProfile functionArgs[];
 
-   S32 getLoc(lua_State *L);
+   S32 lua_getLoc(lua_State *L);
 };
 
 
@@ -382,10 +382,10 @@ public:
    static const LuaFunctionProfile functionArgs[];
 
    // LuaItem methods
-   S32 getRad(lua_State *L);
-   S32 getLoc(lua_State *L);
-   S32 getAimAngle(lua_State *L);
-   S32 setAimAngle(lua_State *L);
+   S32 lua_getRad(lua_State *L);
+   S32 lua_getLoc(lua_State *L);
+   S32 lua_getAimAngle(lua_State *L);
+   S32 lua_setAimAngle(lua_State *L);
 };
 
 
