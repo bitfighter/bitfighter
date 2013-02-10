@@ -40,6 +40,7 @@ Move::Move()
    time = 32; 
    x = 0;
    y = 0;
+   angle = 0;
 
    for(U32 i = 0; i < ARRAYSIZE(modulePrimary); i++)
    {
