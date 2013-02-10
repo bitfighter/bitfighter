@@ -341,7 +341,7 @@ void luaW_push(lua_State* L, T* obj)
         ////////// Clean house
         lua_pop(L, 3);                                         // -- userdata
 
-        luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
+//        luaW_hold<T>(L, obj);     // Tell luaW to collect the proxy when it's done with it
     }
     else
     {
