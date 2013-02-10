@@ -56,6 +56,8 @@ LineItem::LineItem(lua_State *L)
    setNewGeometry(geomPolyLine);
    mObjectTypeNumber = LineTypeNumber;
 
+   mWidth = 2;
+
    LUAW_CONSTRUCTOR_INITIALIZATIONS;
    
    if(L)

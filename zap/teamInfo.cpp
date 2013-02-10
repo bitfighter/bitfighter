@@ -137,6 +137,8 @@ Team::Team()
    mBotCount = 0;
    mScore = 0;
    mRating = 0;
+
+   mId = 0;
 }
 
 

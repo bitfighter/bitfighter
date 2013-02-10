@@ -145,7 +145,7 @@ void Console::processCommand(const char *cmdline)
       
    if(status == LUA_ERRSYNTAX)      // cmd is not a complete Lua statement yet -- need to add more input
    {
-      size_t lmsg;
+      std::size_t lmsg;
       const char *msg = lua_tolstring(L, -1, &lmsg);
       const char *tp = msg + lmsg - (sizeof(LUA_QL("<eof>")) - 1);
 

@@ -94,11 +94,17 @@ QueryServersUserInterface::ServerRef::ServerRef()
    passwordRequired = false;
    test = false;
    dedicated = false;
+   isFromMaster = false;
    sendCount = 0;
    pingTime = 9999;
    playerCount = -1;
    maxPlayers = -1;
    botCount = -1;
+
+   id = 0;
+   identityToken = 0;
+   lastSendTime = 0;
+   state = Start;
 }
 
 
@@ -747,7 +753,7 @@ void QueryServersUserInterface::render()
          if(getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName.c_str()) < colwidth)
             sname = s.serverName;
          else
-            for(size_t j = 0; j < s.serverName.length(); j++)
+            for(std::size_t j = 0; j < s.serverName.length(); j++)
                if(getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName.substr(j, 1)).c_str() ) < colwidth)
                   sname += s.serverName[j];
                else
@@ -1364,7 +1370,9 @@ void QueryServersUserInterface::issueChat()
    parseString(mLineEditor.getString(), words, ' ');
 
    if(words.size() == 0)  // might be caused by mLineEditor == " "
+   {
       ;
+   }
    else if(words[0] == "/connect")
    {
       Address address(&mLineEditor.c_str()[9]);

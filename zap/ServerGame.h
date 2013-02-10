@@ -109,7 +109,7 @@ public:
 
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
 
-   enum VoteType{
+   enum VoteType {
       VoteLevelChange,
       VoteAddTime,
       VoteSetTime,

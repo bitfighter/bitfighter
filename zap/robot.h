@@ -54,7 +54,6 @@ class Robot : public Ship, public LuaScriptRunner
 private:
    static const S32 RobotRespawnDelay = 1500;
 
-   int attribute;
    string message;
 
    U16 mCurrentZone;                // Zone robot is currently in

@@ -1854,6 +1854,8 @@ Worm::Worm()
 
    mHeadIndex = 0;
    mTailLength = 0;
+
+   mAngle = 0;
 }
 
 

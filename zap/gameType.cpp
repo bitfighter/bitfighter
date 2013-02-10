@@ -207,8 +207,11 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;        // By default, all zones glow
    mLevelHasLoadoutZone = false;
+   mLevelHasPredeployedFlags = false;
+   mLevelHasFlagSpawns = false;
    mShowAllBots = false;
    mTotalGamePlay = 0;
+   mHaveSoccer = false;
    mBotZoneCreationFailed = false;
 
    mMinRecPlayers = 0;
@@ -221,6 +224,7 @@ GameType::GameType(S32 winningScore) : mScoreboardUpdateTimer(1000), mGameTimeUp
 
    mGameTimer.reset(DefaultGameTime);
 
+   mObjectsExpected = 0;
    mGame = NULL;
 }
 

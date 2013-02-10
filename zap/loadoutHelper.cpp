@@ -80,7 +80,7 @@ LoadoutItem::LoadoutItem(ClientGame *game, InputCode key, InputCode button, U32 
 // Constructor
 LoadoutHelper::LoadoutHelper(ClientGame *clientGame) : Parent(clientGame)
 {
-   // Do nothing
+   mCurrentIndex = 0;
 }
 
 

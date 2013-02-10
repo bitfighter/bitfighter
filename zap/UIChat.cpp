@@ -81,6 +81,7 @@ AbstractChat::AbstractChat(ClientGame *game)
 {
    mGame = game;
    mLineEditor = LineEditor(200);
+   mChatCursorPos = 0;
 }
 
 AbstractChat::~AbstractChat()
@@ -400,6 +401,8 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 ChatUserInterface::ChatUserInterface(ClientGame *game) : Parent(game), ChatParent(game)
 {
    setMenuID(GlobalChatUI);
+
+   mRenderUnderlyingUI = false;
 }
 
 

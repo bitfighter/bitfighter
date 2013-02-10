@@ -44,6 +44,8 @@ ControlObjectConnection::ControlObjectConnection()
    mTimeSinceLastMove = 0;
    mPrevAngle = 0;
 
+   mCompressPointsRelative = false;
+
    mObjectMovedThisGame = false;
    mIsBusy = false;
 }

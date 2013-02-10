@@ -81,6 +81,8 @@ UserInterface::UserInterface(ClientGame *clientGame)
 {
    mClientGame = clientGame;
    mTimeSinceLastInput = 0;
+
+   mInternalMenuID = InvalidUI;
 }
 
 

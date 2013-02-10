@@ -43,6 +43,7 @@ namespace Zap
 ClientInfo::ClientInfo()
 {
    mPlayerInfo = NULL;
+   mGame = NULL;
 
    mScore = 0;
    mTotalScore = 0;

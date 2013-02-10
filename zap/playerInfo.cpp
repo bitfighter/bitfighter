@@ -58,7 +58,7 @@ LuaPlayerInfo::LuaPlayerInfo()
 // Lua constructor
 LuaPlayerInfo::LuaPlayerInfo(lua_State *L)
 {
-   // Do nothing
+   defunct = false;
 }
 
 

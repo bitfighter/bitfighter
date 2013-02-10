@@ -89,6 +89,12 @@ ServerGame::ServerGame(const Address &address, GameSettings *settings, bool test
       Game(address, settings)
 {
    mVoteTimer = 0;
+   mVoteYes = 0;
+   mVoteNo = 0;
+   mVoteNumber = 0;
+   mVoteType = VoteLevelChange;  // Arbitrary
+   mLevelLoadIndex = 0;
+   mShutdownOriginator = NULL;
 
    setAddTarget();         // When we do an addToGame, objects should be added to ServerGame
 

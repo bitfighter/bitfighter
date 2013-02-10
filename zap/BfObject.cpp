@@ -268,6 +268,9 @@ bool isAnyObjectType(U8 x)
 DamageInfo::DamageInfo()
 {
    damageSelfMultiplier = 1;
+   damageAmount = 0;
+   damagingObject = NULL;
+   damageType = DamageTypePoint;
 }
 
 

@@ -55,11 +55,6 @@ using namespace boost;
 
 namespace Zap
 {
- 
-// TODO: merge with simpleLine values, put in editor
-static const S32 INSTRUCTION_TEXTSIZE = 12;      
-static const S32 INSTRUCTION_TEXTGAP = 4;
-static const Color INSTRUCTION_TEXTCOLOR = Colors::white;      // TODO: Put in editor
 
 
 // Constructor

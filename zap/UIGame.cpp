@@ -2916,6 +2916,8 @@ GameUserInterface::VoiceRecorder::VoiceRecorder(ClientGame *game)
    mVoiceEncoder = new SpeexVoiceEncoder;
 
    mGame = game;
+
+   mWantToStopRecordingAudio = false;
 }
 
 

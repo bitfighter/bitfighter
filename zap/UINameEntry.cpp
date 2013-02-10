@@ -168,6 +168,9 @@ LevelNameEntryUserInterface::LevelNameEntryUserInterface(ClientGame *game) : Par
    resetOnActivate = false;
    lineEditor.setFilter(LineEditor::fileNameFilter);
    lineEditor.mMaxLen = MAX_FILE_NAME_LEN;
+
+   mLevelIndex = 0;
+   mFoundLevel = false;
 }
 
 

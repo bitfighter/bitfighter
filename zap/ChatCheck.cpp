@@ -4,12 +4,17 @@
 using namespace TNL;
 namespace Zap{
 
+
 ChatCheck::ChatCheck()
 {
    mChatMute = false;
    mChatTimer = 0;
    mChatTimerBlocked = false;
+   mMillisecondsClock = 0;
+   mChatPrevMessageSum = 0;
+   mChatPrevMessageMode = 0;
 }
+
 
 bool ChatCheck::checkMessage(const char *message, U32 mode)
 {

@@ -304,7 +304,7 @@ void QuickMenuUI::addSaveAndQuitMenuItem(const char *menuText, const char *helpT
 EditorAttributeMenuUI::EditorAttributeMenuUI(ClientGame *game) :
       Parent(game)
 {
-   /* Do nothing */
+   mObject = NULL;
 }
 
 

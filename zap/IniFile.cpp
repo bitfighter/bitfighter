@@ -409,10 +409,10 @@ int CIniFile::GetValueI(const string &section, const string &key, S32 const defV
 
    string val = GetValue(section, key, string(svalue));
 
-   size_t len = val.size();
+   std::size_t len = val.size();
    string s;
    s.resize(len);
-   for(size_t i = 0; i < len; i++)
+   for(std::size_t i = 0; i < len; i++)
       s[i] = static_cast<char>(val[i]);
    S32 i = atoi(s.c_str());
 
@@ -434,10 +434,10 @@ F64 CIniFile::GetValueF(const string &section, const string &key, F64 const defV
    dSprintf(svalue, sizeof(svalue), "%f", defValue);
 
    string val = GetValue(section, key, string(svalue));
-   size_t len = val.size();
+   std::size_t len = val.size();
    string s;
    s.resize(len);
-   for(size_t i = 0; i < len; i++)
+   for(std::size_t i = 0; i < len; i++)
       s[i] = static_cast<char>(val[i]);
 
    return atof(s.c_str());
@@ -777,7 +777,7 @@ bool CIniFile::setValueYN(const string section, const string key, bool const val
 }
 
 
-size_t CIniFile::NumHeaderComments()
+std::size_t CIniFile::NumHeaderComments()
 {
    return headerComments.size();
 }

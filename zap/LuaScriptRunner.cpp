@@ -278,6 +278,8 @@ bool LuaScriptRunner::loadScript()
       logError("%s", e.msg.c_str());                                // Also clears the stack
       return false;
    }
+
+   return false;
 }
 
 
@@ -345,6 +347,8 @@ bool LuaScriptRunner::runCmd(const char *function, S32 returnValues)
       clearStack(L);
       return true;
    }
+
+   return true;
 }
 
 
@@ -376,6 +380,8 @@ bool LuaScriptRunner::startLua()
       L = NULL;
       return false;
    }
+
+   return false;
 }
 
 

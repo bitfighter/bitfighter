@@ -55,6 +55,9 @@ static Border border34;
 EditorInstructionsUserInterface::EditorInstructionsUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(EditorInstructionsUI);
+
+   mCurPage = 1;
+   mAnimStage = 0;
 }
 
 

@@ -37,6 +37,9 @@ namespace Zap
 YesNoUserInterface::YesNoUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(YesOrNoUI);
+
+   mYesFunction = NULL;
+   mNoFunction = NULL;
 }
 
 

@@ -65,6 +65,9 @@ static const S32 NUM_PAGES = 3;
 DiagnosticUserInterface::DiagnosticUserInterface(ClientGame *game) : Parent(game)
 {
    setMenuID(DiagnosticsScreenUI);
+
+   mActive = false;
+   mCurPage = 0;
 }
 
 

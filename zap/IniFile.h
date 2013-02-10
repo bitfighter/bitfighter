@@ -171,7 +171,7 @@ public:
    // Header comments are those comments before the first key.
    //
    // Get number of header comments.
-   size_t NumHeaderComments();
+   std::size_t NumHeaderComments();
    // Add a header comment.
    void     headerComment( const string comment);
    // Return a header comment.

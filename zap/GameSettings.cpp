@@ -937,7 +937,7 @@ static string makePad(U32 len)
 }
 
 
-static size_t chunkStart;  // string::length returns size_t type which might be U64 for 64 bit systems.
+static std::size_t chunkStart;  // string::length returns size_t type which might be U64 for 64 bit systems.
 static string chunkText;
 
 // Return a chunk of text starting at start, with a max of len chars

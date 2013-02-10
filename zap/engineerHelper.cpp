@@ -55,6 +55,7 @@ EngineerConstructionItemInfo engineerItemInfo[] = {
 // Constructor
 EngineerHelper::EngineerHelper(ClientGame *clientGame) : Parent(clientGame)
 {
+   mSelectedItem = -1;
    mEngineerCostructionItemInfos = Vector<EngineerConstructionItemInfo>(engineerItemInfo, ARRAYSIZE(engineerItemInfo));
 }
 

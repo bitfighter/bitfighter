@@ -875,7 +875,7 @@ const Vector<Point> *PolylineGeometry::getFill() const
 
 Point PolylineGeometry::getCentroid() const
 {
-   return mCentroid;;
+   return mCentroid;
 }
 
 

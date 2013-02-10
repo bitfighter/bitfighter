@@ -126,6 +126,7 @@ static Game *mObjectAddTarget = NULL;
 // Constructor
 Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjDatabase(new GridDatabase())  // New database will be deleted by boost
 {
+   mGridSize = 255;
    mSettings = settings;
 
    mNextMasterTryTime = 0;
@@ -148,6 +149,7 @@ Game::Game(const Address &theBindAddress, GameSettings *settings) : mGameObjData
 
    mTimeToSuspend.setPeriod(2000);           // Time for screen to fade when going /idle on client, time for things to settle down on server
 
+   mObjectsLoaded = 0;
 }
 
 

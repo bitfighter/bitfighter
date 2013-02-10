@@ -148,6 +148,7 @@ IniSettings::IniSettings()
    winSizeFact = 1.0;
 
    useFakeFullscreen = true;
+   musicMutedOnCmdLine = false;
 
    neverConnectDirect = false;
 
