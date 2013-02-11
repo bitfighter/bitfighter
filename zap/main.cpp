@@ -1242,6 +1242,12 @@ void checkIfThisIsAnUpdate(GameSettings *settings, bool isStandalone)
             logprintf(LogConsumer::LogWarning, "Could not remove game.ogg from music folder during upgrade process." );
    }
 
+   if(previousVersion < VERSION_018a)
+   {
+      // Fix a previous evil bug that hurt connection speed.  Reset it to 0 here
+      settings->getIniSettings()->connectionSpeed = 0;
+   }
+
    // Now copy over resources to user's preference directory.  This will overwrite the previous
    // resources with same names.  Dont do this if it is a standalone bundle
    if(!isStandalone)

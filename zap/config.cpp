@@ -423,7 +423,7 @@ static void loadGeneralSettings(CIniFile *ini, IniSettings *iniSettings)
 
    iniSettings->version = ini->GetValueI(section, "Version", iniSettings->version);
 
-   iniSettings->connectionSpeed = ini->GetValueI(section, "Version", iniSettings->connectionSpeed);
+   iniSettings->connectionSpeed = ini->GetValueI(section, "ConnectionSpeed", iniSettings->connectionSpeed);
 
    iniSettings->enableExperimentalAimMode = ini->GetValueYN(section, "EnableExperimentalAimMode", iniSettings->enableExperimentalAimMode);
    S32 fps = ini->GetValueI(section, "MaxFPS", iniSettings->maxFPS);
