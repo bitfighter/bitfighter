@@ -112,6 +112,7 @@ IniSettings::IniSettings()
    botsBalanceTeams = false;
    minBalancedPlayers = 6;
    enableServerVoiceChat = true;
+   allowTeamChanging = true;
    serverPassword = "";               // Passwords empty by default
    adminPassword = "";
    levelChangePassword = "";
@@ -611,6 +612,7 @@ static void loadHostConfiguration(CIniFile *ini, IniSettings *iniSettings)
    iniSettings->voteYesStrength        = ini->GetValueI(section, "VoteYesStrength", iniSettings->voteYesStrength );
    iniSettings->voteNoStrength         = ini->GetValueI(section, "VoteNoStrength", iniSettings->voteNoStrength );
    iniSettings->voteNothingStrength    = ini->GetValueI(section, "VoteNothingStrength", iniSettings->voteNothingStrength );
+   iniSettings->allowTeamChanging      = ini->GetValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
 
 #ifdef BF_WRITE_TO_MYSQL
    Vector<string> args;
@@ -1662,6 +1664,7 @@ static void writeHost(CIniFile *ini, IniSettings *iniSettings)
    ini->setValueYN(section, "BotsBalanceTeams", iniSettings->botsBalanceTeams);
    ini->SetValueI (section, "MinBalancedPlayers", iniSettings->minBalancedPlayers);
    ini->setValueYN(section, "EnableServerVoiceChat", iniSettings->enableServerVoiceChat);
+   ini->setValueYN(section, "AllowTeamChanging", iniSettings->allowTeamChanging);
    ini->SetValueI (section, "AlertsVolume", (S32) (iniSettings->alertsVolLevel * 10));
    ini->setValueYN(section, "AllowGetMap", iniSettings->allowGetMap);
    ini->setValueYN(section, "AllowDataConnections", iniSettings->allowDataConnections);

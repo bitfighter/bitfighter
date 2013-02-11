@@ -692,13 +692,16 @@ void GameType::idle_server(U32 deltaT)
                updateClientScoreboard(clientInfo);
          }
 
-         if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
-            if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
-            {                                            
-               NetObject::setRPCDestConnection(conn);    // Limit who gets this message
-               s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
-               NetObject::setRPCDestConnection(NULL);
-            }
+         if(getGame()->getSettings()->getIniSettings()->allowTeamChanging)
+         {
+            if(conn->mSwitchTimer.getCurrent())             // Are we still counting down until the player can switch?
+               if(conn->mSwitchTimer.update(deltaT))        // Has the time run out?
+               {
+                  NetObject::setRPCDestConnection(conn);    // Limit who gets this message
+                  s2cCanSwitchTeams(true);                  // If so, let the client know they can switch again
+                  NetObject::setRPCDestConnection(NULL);
+               }
+         }
 
          conn->addTimeSinceLastMove(deltaT);             // Increment timer       
       }
@@ -2402,7 +2405,14 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       return;
 
    if(!clientInfo->isAdmin() && source->mSwitchTimer.getCurrent())    // If we're not admin and we're waiting for our switch-expiration to reset,
-      return;                                                     // return without processing the change team request
+   {
+      // Alert them again
+      NetObject::setRPCDestConnection(source);
+      s2cCanSwitchTeams(false);
+      NetObject::setRPCDestConnection(NULL);
+
+      return;                                                         // return without processing the change team request
+   }
 
    // Vote to change team might have different problems than the old way...
    if( (!clientInfo->isLevelChanger() || getGame()->getSettings()->getLevelChangePassword() == "") && 

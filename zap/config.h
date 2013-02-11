@@ -218,6 +218,7 @@ public:
    bool botsBalanceTeams;           // Should the server auto-balance teams
    S32 minBalancedPlayers;          // If bot auto-balance, make sure there are at least this many players
    bool enableServerVoiceChat;     // No voice chat allowed in server if disabled
+   bool allowTeamChanging;
 
    S32 connectionSpeed;
 

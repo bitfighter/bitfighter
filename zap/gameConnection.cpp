@@ -1804,6 +1804,13 @@ void GameConnection::onConnectionEstablished_server()
 
    if(mServerGame->getSettings()->getIniSettings()->allowMapUpload)
       s2rSendableFlags(ServerFlagAllowUpload);
+
+   // No team changing allowed
+   if(!mServerGame->getSettings()->getIniSettings()->allowTeamChanging)
+   {
+      // Forever!
+      mSwitchTimer.reset(U32_MAX, U32_MAX);
+   }
 }
 
 
