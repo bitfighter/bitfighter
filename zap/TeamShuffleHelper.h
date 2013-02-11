@@ -61,7 +61,7 @@ private:
    void calculateRenderSizes();
 
 public:
-   TeamShuffleHelper(ClientGame *clientGame);   // Constructor
+   explicit TeamShuffleHelper(ClientGame *clientGame);   // Constructor
 
    void render();                
    void onMenuShow();  

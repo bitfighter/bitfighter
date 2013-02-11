@@ -356,7 +356,7 @@ public:
    static Vector<SignedInt<24> > mScores;
    static Vector<SignedFloat<8> > mRatings;
 
-   GameType(S32 winningScore = DefaultWinningScore);    // Constructor
+   explicit GameType(S32 winningScore = DefaultWinningScore);    // Constructor
    virtual ~GameType();                                 // Destructor
 
    virtual void addToGame(Game *game, GridDatabase *database);

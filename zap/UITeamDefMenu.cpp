@@ -110,7 +110,7 @@ void TeamDefUserInterface::onActivate()
    {
       EditorTeam *team = ui->getTeam(i);
 
-      ui->mOldTeams[i].color = team->getColor();
+      ui->mOldTeams[i].color = *team->getColor();
       ui->mOldTeams[i].name = team->getName().getString();
    }
 

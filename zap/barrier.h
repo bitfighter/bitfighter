@@ -121,8 +121,8 @@ struct WallRec
 
 public:
    WallRec(F32 width, bool solid, const Vector<F32> &verts);   // Constructor
-   WallRec(const WallItem *wallItem);                          // Constructor
-   WallRec(const PolyWall *polyWall);                          // Constructor
+   explicit WallRec(const WallItem *wallItem);                          // Constructor
+   explicit WallRec(const PolyWall *polyWall);                          // Constructor
 
    void constructWalls(Game *theGame) const;
 };
@@ -141,8 +141,8 @@ private:
    void checkIfHasBeenAddedToTheGame(lua_State *L);
 
 public:
-   WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
-   virtual ~WallItem();             // Destructor
+   explicit WallItem(lua_State *L = NULL);   // Combined Lua/C++ constructor
+   virtual ~WallItem();                      // Destructor
    WallItem *clone() const;
 
    bool processArguments(S32 argc, const char **argv, Game *game);
@@ -217,8 +217,8 @@ private:
    void checkIfHasBeenAddedToTheGame(lua_State *L);
 
 public:
-   PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
-   virtual ~PolyWall();                // Destructor
+   explicit PolyWall(lua_State *L = NULL);      // Combined Lua/C++ constructor
+   virtual ~PolyWall();                         // Destructor
 
    PolyWall *clone() const;
 

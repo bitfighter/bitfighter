@@ -36,6 +36,7 @@ class Color;
 class Point;
 extern void glColor(const Color &c, float alpha = 1.0);
 extern void glColor(const Color *c, float alpha = 1.0);
+extern void glColor(F32 c, float alpha = 1.0);
 
 extern void renderPointVector(const Vector<Point> *points, U32 geomType);
 extern void renderPointVector(const Vector<Point> *points, const Point &offset, U32 geomType);  // Same, but with points offset some distance

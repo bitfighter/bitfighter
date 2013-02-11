@@ -388,7 +388,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
 {
 #ifndef ZAP_DEDICATED
    // We'll use the editor color most of the time; only in preview mode do we use the game color
-   Color fillColor = previewMode ? settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
+   Color fillColor = previewMode ? *settings->getWallFillColor() : EDITOR_WALL_FILL_COLOR;
 
    bool moved = (selectedItemOffset.x != 0 || selectedItemOffset.y != 0);
    S32 count = mWallSegmentDatabase->getObjectCount();
@@ -396,7 +396,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
    if(!drawSelected)    // Essentially pass 1, drawn earlier in the process
    {
       // Render walls that have been moved first (i.e. render their shadows)
-      glColor(.1);
+      glColor(.1, .1, .1);
       if(moved)
       {
          for(S32 i = 0; i < count; i++)
@@ -420,7 +420,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
             wallSegment->renderFill(selectedItemOffset);                   // RenderFill ignores offset for unselected walls
       }
 
-      renderWallEdges(&mWallEdgePoints, settings->getWallOutlineColor());  // Render wall outlines with unselected walls
+      renderWallEdges(&mWallEdgePoints, *settings->getWallOutlineColor());  // Render wall outlines with unselected walls
    }
    else  // Render selected/moving walls last so they appear on top; this is pass 2, 
    {
@@ -433,7 +433,7 @@ void WallSegmentManager::renderWalls(GameSettings *settings, F32 currentScale, b
       }
 
       // Render wall outlines for selected walls only
-      renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, settings->getWallOutlineColor());      
+      renderWallEdges(&mSelectedWallEdgePoints, selectedItemOffset, *settings->getWallOutlineColor());
    }
 
    if(showSnapVertices)

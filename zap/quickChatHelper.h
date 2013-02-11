@@ -66,7 +66,7 @@ private:
    //virtual InputCode getActivationKey() { return keyQUICKCHAT[getGame()->getSettings()->getIniSettings()->inputMode]; } <=== don't supply a keycode to avoid canceling when pressed
 
 public:
-   QuickChatHelper(ClientGame *clientGame);      // Constructor
+   explicit QuickChatHelper(ClientGame *clientGame);      // Constructor
 
    void render();                
    void onMenuShow();  

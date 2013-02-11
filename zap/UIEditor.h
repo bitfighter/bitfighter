@@ -269,7 +269,7 @@ protected:
    bool usesEditorScreenMode();
 
 public:
-   EditorUserInterface(ClientGame *game);    // Constructor
+   explicit EditorUserInterface(ClientGame *game);    // Constructor
    virtual ~EditorUserInterface();           // Destructor
 
    GridDatabase *getDatabase();      // Need external access to this in one static function
@@ -419,7 +419,7 @@ protected:
    void onActivate();
 
 public:
-   EditorMenuUserInterface(ClientGame *game);    // Constructor
+   explicit EditorMenuUserInterface(ClientGame *game);    // Constructor
 };
 
 

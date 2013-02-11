@@ -335,7 +335,7 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
             else if(zone->didRecentlyChangeTeam() && zone->getTeam() != TEAM_NEUTRAL && zone->getTeam() != ship->getTeam())
             {
                // Render a blinky arrow for a recently captured zone
-               Color c = zone->getColor();
+               Color c = *zone->getColor();
 
                if(zone->isFlashing())
                   c *= 0.7f;

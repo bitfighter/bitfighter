@@ -113,7 +113,7 @@ private:
    bool mouseInHeaderRow(const Point *pos);
 
 public:
-   QueryServersUserInterface(ClientGame *game);      // Constructor
+   explicit QueryServersUserInterface(ClientGame *game);      // Constructor
    bool mRecievedListOfServersFromMaster;
    Nonce mNonce;
    U32 pendingPings;

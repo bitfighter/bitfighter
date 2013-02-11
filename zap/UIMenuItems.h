@@ -89,8 +89,8 @@ protected:
 
 public:
    // Constructors
-   MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
-   MenuItem(const string &displayVal);
+   explicit MenuItem(lua_State *L = NULL);         // Combined default C++ / Lua constructor  ==> used at all?
+   explicit MenuItem(const string &displayVal);
    MenuItem(const string &displayVal, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
    MenuItem(S32 index, const string &prompt, void (*callback)(ClientGame *, U32), const char *help, InputCode k1 = KEY_UNKNOWN, InputCode k2 = KEY_UNKNOWN);
 
@@ -241,7 +241,7 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(ToggleMenuItem);
-   ToggleMenuItem(lua_State *L);      // Constructor called from Lua
+   explicit ToggleMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -272,7 +272,7 @@ public:
 
    /////// Lua Interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(YesNoMenuItem);
-   YesNoMenuItem(lua_State *L);      // Constructor called from Lua
+   explicit YesNoMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -332,7 +332,7 @@ public:
 
    ///// Lua interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(CounterMenuItem);
-   CounterMenuItem(lua_State *L);      // Constructor called from Lua
+   explicit CounterMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];
@@ -434,7 +434,7 @@ public:
 
    /////// Lua Interface
    LUAW_DECLARE_CLASS_CUSTOM_CONSTRUCTOR(TextEntryMenuItem);
-   TextEntryMenuItem(lua_State *L);      // Constructor called from Lua
+   explicit TextEntryMenuItem(lua_State *L);      // Constructor called from Lua
 
 	static const char *luaClassName;
 	static const luaL_reg luaMethods[];

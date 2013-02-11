@@ -69,7 +69,7 @@ private:
    bool isDuplicate(S32 key, const Vector<KeyDefMenuItem> &menuItems);
 
 public:
-   KeyDefMenuUserInterface(ClientGame *game);   // Constructor
+   explicit KeyDefMenuUserInterface(ClientGame *game);   // Constructor
    Vector<KeyDefMenuItem> menuItems;      // Array of menu items
    const char *mMenuTitle;
    const char *mMenuSubTitle;

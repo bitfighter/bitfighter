@@ -978,7 +978,7 @@ void Mine::renderDock()
 #ifndef ZAP_DEDICATED
    Point pos = getActualPos();
 
-   glColor(.7);
+   glColor(.7, .7, .7);
    drawCircle(pos, 9);
    drawLetter('M', pos, Color(.7), 1);
 #endif
@@ -1198,14 +1198,14 @@ void SpyBug::renderItem(const Point &pos)
    else    
       visible = true;      // We get here in editor when in preview mode
 
-   renderSpyBug(pos, getColor(), visible, true);
+   renderSpyBug(pos, *getColor(), visible, true);
 #endif
 }
 
 
 void SpyBug::renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)
 {
-   renderSpyBug(getPos(), getColor(), true, true);
+   renderSpyBug(getPos(), *getColor(), true, true);
 }
 
 

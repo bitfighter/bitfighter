@@ -139,7 +139,7 @@ private:
 
 public:
    EditorTeam();                          // Constructor
-   EditorTeam(const TeamPreset &preset);  // Constructor II
+   explicit EditorTeam(const TeamPreset &preset);  // Constructor II
    virtual ~EditorTeam();                 // Destructor
 
    LineEditor *getLineEditor();
@@ -159,8 +159,8 @@ private:
    Team *mTeam;
 
 public:
-   LuaTeamInfo(lua_State *L);     // Lua constructor
-   LuaTeamInfo(Team *team);       // C++ constructor
+   explicit LuaTeamInfo(lua_State *L);     // Lua constructor
+   explicit LuaTeamInfo(Team *team);       // C++ constructor
 
    virtual ~LuaTeamInfo();        // Destructor
 

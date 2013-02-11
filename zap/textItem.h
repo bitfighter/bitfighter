@@ -53,7 +53,7 @@ public:
    static const S32 MAX_TEXT_SIZE = 255;
    static const S32 MIN_TEXT_SIZE = 10;
 
-   TextItem(lua_State *L = NULL);   // Combined Lua / C++ constructor
+   explicit TextItem(lua_State *L = NULL);   // Combined Lua / C++ constructor
    virtual ~TextItem();             // Destructor
 
    TextItem *clone() const;

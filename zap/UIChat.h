@@ -86,7 +86,7 @@ protected:
    bool composingMessage();
 
 public:
-   AbstractChat(ClientGame *game);        // Constructor
+   explicit AbstractChat(ClientGame *game);        // Constructor
    virtual ~AbstractChat();               // Destructor
    void newMessage(const string &from, const string &message, bool isPrivate, bool isSystem, bool fromSelf);   // Handle incoming msg
 
@@ -136,7 +136,7 @@ private:
    bool mRenderUnderlyingUI;
 
 public:
-   ChatUserInterface(ClientGame *game);      // Constructor
+   explicit ChatUserInterface(ClientGame *game);      // Constructor
 
    // UI related
    void render();
@@ -166,7 +166,7 @@ private:
    void onOutGameChat();                  // What to do if user presses [F5]
 
 public:
-   SuspendedUserInterface(ClientGame *game);    // Constructor
+   explicit SuspendedUserInterface(ClientGame *game);    // Constructor
 };
 
 

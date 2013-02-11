@@ -113,7 +113,7 @@ private:
    void computeExtent();
 
 public:
-   Teleporter(lua_State *L = NULL);                                           // Combined default C++/Lua constructor
+   explicit Teleporter(lua_State *L = NULL);                                  // Combined default C++/Lua constructor
    Teleporter(const Point &pos, const Point &dest, Ship *engineeringShip);    // Constructor used by engineer
    virtual ~Teleporter();                                                     // Destructor
 

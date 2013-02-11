@@ -199,7 +199,7 @@ private:
    void processArguments_ArchaicZapFormat(S32 argc, const char **argv, F32 gridSize);    // Helper for processArguments
 
 public:
-   NexusZone(lua_State *L = NULL);     // Combined Lua / C++ constructor
+   explicit NexusZone(lua_State *L = NULL);     // Combined Lua / C++ constructor
    virtual ~NexusZone();               // Destructor
 
    NexusZone *clone() const;

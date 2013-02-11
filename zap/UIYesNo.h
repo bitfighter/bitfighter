@@ -42,7 +42,7 @@ private:
    void (*mNoFunction)(ClientGame *game);
 
 public:
-   YesNoUserInterface(ClientGame *game);      // Constructor
+   explicit YesNoUserInterface(ClientGame *game);      // Constructor
    void reset();
    bool onKeyDown(InputCode inputCode);
    void registerYesFunction(void(*ptr)(ClientGame *));

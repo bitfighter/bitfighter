@@ -53,7 +53,7 @@ private:
 public:
    SavedMenuItem();    // Default constructor
 
-   SavedMenuItem(MenuItem *menuItem);
+   explicit SavedMenuItem(MenuItem *menuItem);
 
    void setValues(MenuItem *menuItem);
 
@@ -87,7 +87,7 @@ private:
 
 
 public:
-   GameParamUserInterface(ClientGame *game);   // Constructor
+   explicit GameParamUserInterface(ClientGame *game);   // Constructor
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise

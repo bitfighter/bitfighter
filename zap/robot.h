@@ -73,7 +73,7 @@ protected:
    void killScript();
 
 public:
-   Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
+   explicit Robot(lua_State *L = NULL);      // Combined Lua / C++ default constructor
    virtual ~Robot();                // Destructor
 
    bool initialize(Point &pos);

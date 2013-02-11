@@ -92,7 +92,7 @@ protected:
    void setMenuID(UIID menuID);              // Set interface's name
 
 public:
-   UserInterface(ClientGame *game);                // Constructor
+   explicit UserInterface(ClientGame *game);       // Constructor
    virtual ~UserInterface();                       // Destructor
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 

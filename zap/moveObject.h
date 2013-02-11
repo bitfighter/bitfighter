@@ -332,7 +332,7 @@ protected:
    };
 
 public:
-   Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   explicit Asteroid(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~Asteroid();           // Destructor
 
    Asteroid *clone() const;
@@ -405,7 +405,7 @@ private:
    bool hasExploded;
 
 public:
-   Circle(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   explicit Circle(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~Circle();           // Destructor
    Circle *clone() const;
 
@@ -514,7 +514,7 @@ class TestItem : public MoveItem
    typedef MoveItem Parent;
 
 public:
-   TestItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   explicit TestItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~TestItem();           // Destructor
    TestItem *clone() const;
 
@@ -556,7 +556,7 @@ class ResourceItem : public MountableItem
    typedef MountableItem Parent; 
 
 public:
-   ResourceItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
+   explicit ResourceItem(lua_State *L = NULL); // Combined Lua / C++ default constructor
    virtual ~ResourceItem();           // Destructor
    ResourceItem *clone() const;
 

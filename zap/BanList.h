@@ -66,7 +66,7 @@ private:
    string banItemToString(BanItem *banItem);
 
 public:
-   BanList(const string &iniDir);
+   explicit BanList(const string &iniDir);
    virtual ~BanList();
 
    void addToBanList(const Address &address, S32 durationMinutes, bool nonAuthenticatedOnly = false);

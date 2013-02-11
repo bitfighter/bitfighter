@@ -147,7 +147,7 @@ public:
 
 
 #ifndef ZAP_DEDICATED
-   GameConnection(ClientGame *game);      // Constructor for ClientGame
+   explicit GameConnection(ClientGame *game);      // Constructor for ClientGame
 #endif
    GameConnection();                      // Constructor for ServerGame
    virtual ~GameConnection();             // Destructor

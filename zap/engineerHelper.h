@@ -64,7 +64,7 @@ private:
    void exitHelper();
 
 public:
-   EngineerHelper(ClientGame *clientGame);          // Constructor
+   explicit EngineerHelper(ClientGame *clientGame);          // Constructor
    virtual ~EngineerHelper();
 
    void setSelectedEngineeredObject(U32 objectType);

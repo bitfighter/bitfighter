@@ -1077,7 +1077,7 @@ void EditorUserInterface::teamsHaveChanged()
       {
          EditorTeam *team = getTeam(i);
 
-         if(mOldTeams[i].color != team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
+         if(mOldTeams[i].color != *team->getColor() || mOldTeams[i].name != team->getName().getString()) // Color(s) or names(s) have changed
          {
             teamsChanged = true;
             break;
@@ -1227,7 +1227,7 @@ void EditorUserInterface::onActivate()
 
    Cursor::enableCursor();
 
-   mSaveMsgTimer = 0;
+   mSaveMsgTimer.clear();
 
    getGame()->setAddTarget();    // When a Lua script does an addToGame(), objects should be added to this game
 
@@ -1535,7 +1535,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          Point pos = sb->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderSpyBugVisibleRange(pos, sb->getColor(), mCurrentScale);
+         renderSpyBugVisibleRange(pos, *sb->getColor(), mCurrentScale);
 
          glTranslatef(0, 0, -translation);         // Reset translation back to where it was
       }
@@ -1559,7 +1559,7 @@ void EditorUserInterface::renderTurretAndSpyBugRanges(GridDatabase *editorDb)
          Point pos = editorObj->getPos();
          pos *= mCurrentScale;
          pos += mCurrentOffset;
-         renderTurretFiringRange(pos, editorObj->getColor(), mCurrentScale);
+         renderTurretFiringRange(pos, *editorObj->getColor(), mCurrentScale);
       }
    }
 }
@@ -4436,7 +4436,7 @@ void EditorUserInterface::idle(U32 timeDelta)
 void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
    mSaveMsg = msg;
-   mSaveMsgTimer = 4 * 1000;    // Display for 4 seconds
+   mSaveMsgTimer.reset(4000, 4000);    // Display for 4 seconds
    mSaveMsgColor = (savedOK ? Colors::green : Colors::red);
 }
 
@@ -4445,7 +4445,7 @@ void EditorUserInterface::setWarnMessage(string msg1, string msg2)
 {
    mWarnMsg1 = msg1;
    mWarnMsg2 = msg2;
-   mWarnMsgTimer = 4 * 1000;    // Display for 4 seconds
+   mWarnMsgTimer.reset(4000, 4000);    // Display for 4 seconds
    mWarnMsgColor = gErrorMessageTextColor;
 }
 

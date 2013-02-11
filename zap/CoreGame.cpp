@@ -568,7 +568,7 @@ void CoreItem::doExplosion(const Point &pos)
 {
    ClientGame *game = static_cast<ClientGame *>(getGame());
 
-   Color teamColor = getColor();
+   Color teamColor = *(getColor());
    Color CoreExplosionColors[12] = {
       Colors::red,
       teamColor,

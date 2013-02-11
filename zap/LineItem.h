@@ -44,8 +44,8 @@ private:
    S32 mWidth;    
 
 public:
-   LineItem(lua_State *L = NULL);   // Combined C++ / Lua constructor
-   virtual ~LineItem();             // Destructor
+   explicit LineItem(lua_State *L = NULL);   // Combined C++ / Lua constructor
+   virtual ~LineItem();                      // Destructor
    LineItem *clone() const;
 
    virtual void render();

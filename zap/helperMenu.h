@@ -59,8 +59,8 @@ protected:
    ClientGame *getGame();
 
 public:
-   HelperMenu(ClientGame *clientGame);    // Constructor
-   virtual ~HelperMenu();                 // Destructor
+   explicit HelperMenu(ClientGame *clientGame);    // Constructor
+   virtual ~HelperMenu();                          // Destructor
 
    virtual void render() = 0;
    virtual void idle(U32 delta);

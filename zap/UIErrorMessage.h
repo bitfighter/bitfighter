@@ -40,8 +40,8 @@ private:
    S32 mPresentationId;
 
 public:
-   AbstractMessageUserInterface(ClientGame *game);      // Constructor
-   const static S32 MAX_LINES = 9;
+   explicit AbstractMessageUserInterface(ClientGame *game);      // Constructor
+   static const S32 MAX_LINES = 9;
    const char *mTitle;
    const char *mInstr;
    string mMessage[MAX_LINES];
@@ -65,7 +65,7 @@ class ErrorMessageUserInterface : public AbstractMessageUserInterface
    typedef AbstractMessageUserInterface Parent;
 
 public:
-   ErrorMessageUserInterface(ClientGame *game);      // Constructor
+   explicit ErrorMessageUserInterface(ClientGame *game);      // Constructor
    void reset();
 
    bool onKeyDown(InputCode inputCode);

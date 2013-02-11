@@ -101,7 +101,7 @@ private:
 
 public:
    Spawn(const Point &pos = Point(0,0));  // C++ constructor
-   Spawn(lua_State *L);                   // Lua constructor
+   explicit Spawn(lua_State *L);          // Lua constructor
    virtual ~Spawn();                      // Destructor
 
    Spawn *clone() const;
@@ -182,7 +182,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    AsteroidSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
-   AsteroidSpawn(lua_State *L);                                                 // Lua constructor
+   explicit AsteroidSpawn(lua_State *L);                                        // Lua constructor
    virtual ~AsteroidSpawn();
 
    AsteroidSpawn *clone() const;
@@ -231,7 +231,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 20;    // in seconds
 
    CircleSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME);  // C++ constructor
-   CircleSpawn(lua_State *L);                                                 // Lua constructor
+   explicit CircleSpawn(lua_State *L);                                        // Lua constructor
    virtual ~CircleSpawn();                                                    // Destructor
 
    CircleSpawn *clone() const;
@@ -279,7 +279,7 @@ public:
    static const S32 DEFAULT_RESPAWN_TIME = 30;    // in seconds
 
    FlagSpawn(const Point &pos = Point(), S32 time = DEFAULT_RESPAWN_TIME, S32 team = TeamNotSpecified);  // C++ constructor
-   FlagSpawn(lua_State *L);                                                                              // Lua constructor
+   explicit FlagSpawn(lua_State *L);                                                                     // Lua constructor
    virtual ~FlagSpawn();                                                                                 // Destructor
 
    FlagSpawn *clone() const;

@@ -62,8 +62,8 @@ public:
 
    S32 lineCount;
 
-   CIniFile( const string iniPath = "");     // Constructor
-   ~CIniFile();                              // Destructor
+   explicit CIniFile( const string iniPath = "");    // Constructor
+   virtual ~CIniFile();                              // Destructor
 
    void processLine(string line);     // Process a line of an input file (CE)
 

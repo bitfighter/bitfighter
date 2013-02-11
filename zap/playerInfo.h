@@ -42,7 +42,7 @@ public:
    static Lunar<LuaPlayerInfo>::RegType methods[];
 
    LuaPlayerInfo();                 // Constructor
-   LuaPlayerInfo(lua_State *L);     // Lua constructor
+   explicit LuaPlayerInfo(lua_State *L);     // Lua constructor
    virtual ~LuaPlayerInfo();
 
    // These would be declared asbstract, except that Lunar strenusously objects...
@@ -71,7 +71,7 @@ private:
   ClientInfo *mClientInfo;
 
 public:
-   PlayerInfo(ClientInfo *clientInfo);   // C++ Constructor
+   explicit PlayerInfo(ClientInfo *clientInfo);   // C++ Constructor
    virtual ~PlayerInfo();                // Destructor
 
    S32 getName(lua_State *L);
@@ -96,7 +96,7 @@ private:
    Robot *mRobot;
 
 public:
-   RobotPlayerInfo(Robot *robot = NULL);     // C++ Constructor
+   explicit RobotPlayerInfo(Robot *robot = NULL);     // C++ Constructor
    virtual ~RobotPlayerInfo();               // Destructor
 
    S32 getName(lua_State *L);

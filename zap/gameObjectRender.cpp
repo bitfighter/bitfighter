@@ -1304,7 +1304,7 @@ void renderGoalZone(const Color &c, const Vector<Point> *outline, const Vector<P
    {
       F32 glowRate = 0.5f - fabs(flashCounter - 0.5f);  // will need flashCounter for this.
 
-      Color newColor = c;
+      Color newColor(c);
       if(isFlashing)
          newColor = newColor + glowRate * (1 - glowRate);
       else

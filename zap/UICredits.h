@@ -79,7 +79,7 @@ private:
    CreditsScroller *mScroller;
 
 public:
-   CreditsUserInterface(ClientGame *game);   // Constructor
+   explicit CreditsUserInterface(ClientGame *game);   // Constructor
    virtual ~CreditsUserInterface();          // Destructor
 
    void onActivate();
@@ -117,7 +117,7 @@ private:
    SplashPhase mPhase;            // Phase of the animation
 
 public:
-   SplashUserInterface(ClientGame *game);      // Constructor
+   explicit SplashUserInterface(ClientGame *game);      // Constructor
 
    void onActivate();
    void idle(U32 timeDelta);

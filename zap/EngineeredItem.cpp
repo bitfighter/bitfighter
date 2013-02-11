@@ -1887,7 +1887,7 @@ bool Turret::isTurret()
 
 void Turret::render()
 {
-   renderTurret(getColor(), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
+   renderTurret(*(getColor()), getPos(), mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
 }
 
 

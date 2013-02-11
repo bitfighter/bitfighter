@@ -85,7 +85,7 @@ protected:
 
 public:
    // Constructor
-   MenuUserInterface(ClientGame *game);      
+   explicit MenuUserInterface(ClientGame *game);
    MenuUserInterface(ClientGame *game, const string &title);
 
    bool isScrollingMenu();
@@ -153,7 +153,7 @@ private:
    void renderExtras();
 
 public:
-   MainMenuUserInterface(ClientGame *game);           // Constructor
+   explicit MainMenuUserInterface(ClientGame *game);           // Constructor
    void processSelection(U32 index);
    void onEscape();
    void render();
@@ -177,7 +177,7 @@ class OptionsMenuUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 public:
-   OptionsMenuUserInterface(ClientGame *game);        // Constructor
+   explicit OptionsMenuUserInterface(ClientGame *game);        // Constructor
    void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
    void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
@@ -215,7 +215,7 @@ private:
    S32 mEditingIndex;                        // Index of item we're editing, -1 if none
 
 public:
-   HostMenuUserInterface(ClientGame *game);        // Constructor
+   explicit HostMenuUserInterface(ClientGame *game);        // Constructor
    void onEscape();
    void setupMenus();
    void onActivate();
@@ -241,7 +241,7 @@ private:
    NetConnection::TerminationReason mReason;
 
 public:
-   NameEntryUserInterface(ClientGame *game);    // Constructor
+   explicit NameEntryUserInterface(ClientGame *game);    // Constructor
    void processSelection(U32 index);            // Process selected menu item when right arrow is pressed
    void processShiftSelection(U32 index);       // And when the left arrow is pressed
    void onEscape();
@@ -277,7 +277,7 @@ private:
    void buildMenu();
 
 public:
-   GameMenuUserInterface(ClientGame *game);            // Constructor
+   explicit GameMenuUserInterface(ClientGame *game);            // Constructor
 
    void idle(U32 timeDelta);
    void onActivate();
@@ -295,7 +295,7 @@ private:
    typedef MenuUserInterface Parent;
 
 public:
-   LevelMenuUserInterface(ClientGame *game);        // Constructor
+   explicit LevelMenuUserInterface(ClientGame *game);        // Constructor
    void onActivate();
    void onEscape();
 };
@@ -312,7 +312,7 @@ private:
    Vector<string> mLevels;
 
 public:
-   LevelMenuSelectUserInterface(ClientGame *game);        // Constructor
+   explicit LevelMenuSelectUserInterface(ClientGame *game);        // Constructor
    string category;
    void onActivate();
    bool processMenuSpecificKeys(InputCode inputCode);  // Custom key handling for level selection menus
@@ -349,7 +349,7 @@ class PlayerMenuUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 public:
-   PlayerMenuUserInterface(ClientGame *game);        // Constructor
+   explicit PlayerMenuUserInterface(ClientGame *game);        // Constructor
 
    void render();
    void playerSelected(U32 index);
@@ -370,7 +370,7 @@ class TeamMenuUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 public:
-   TeamMenuUserInterface(ClientGame *game);        // Constructor
+   explicit TeamMenuUserInterface(ClientGame *game);        // Constructor
    void render();
    void onEscape();
    string nameToChange;

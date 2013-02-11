@@ -1131,8 +1131,8 @@ TeamMenuItem::TeamMenuItem(S32 index, AbstractTeam *team, void (*callback)(Clien
 {
    mTeam = team;
    mIsCurrent = isCurrent;
-   mUnselectedColor = team->getColor();
-   mSelectedColor = team->getColor();
+   mUnselectedColor = *team->getColor();
+   mSelectedColor = *team->getColor();
 }
 
 
@@ -1212,7 +1212,7 @@ void TextEntryMenuItem::render(S32 xpos, S32 ypos, S32 textsize, bool isSelected
 {
    Color textColor;     
    if(mLineEditor.getString() == "" && mEmptyVal != "")
-      textColor.set(.4);
+      textColor.set(.4, .4, .4);
    else if(isSelected)
       textColor.set(Colors::red);
    else

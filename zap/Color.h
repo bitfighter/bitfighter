@@ -47,15 +47,15 @@ public:
    float r, g, b;
 
    Color(const Color &c);
-   Color(const Color *c);
+   explicit Color(const Color *c);
 
    template<class T, class U, class V>
       Color(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b);}
 
-   Color(float grayScale = 1);
-   Color(double grayScale);
+   explicit Color(float grayScale = 1);
+   explicit Color(double grayScale);
 
-   Color(U32 rgbInt);
+   explicit Color(U32 rgbInt);
 
    void read(const char **argv);
 
@@ -80,8 +80,9 @@ public:
    inline Color& operator+=(const Color &c) { r += c.r; g += c.g; b += c.b; return *this; }
    inline Color& operator-=(const Color &c) { r -= c.r; g -= c.g; b -= c.b; return *this; }
 
-   inline Color operator*(const float f) { return Color (r * f, g * f, b * f); }
-   inline Color& operator*=(const float f) { r *= f; g *= f; b *= f; return *this; }
+   inline Color operator+(const F32 f) const { return Color (r + f, g + f, b + f); }
+   inline Color operator*(const F32 f) { return Color (r * f, g * f, b * f); }
+   inline Color& operator*=(const F32 f) { r *= f; g *= f; b *= f; return *this; }
 
    inline bool operator==(const Color &col) const { return r == col.r && g == col.g && b == col.b; }
    inline bool operator!=(const Color &col) const { return r != col.r || g != col.g || b != col.b; }

@@ -93,8 +93,8 @@ private:
    static bool mConstructed;
 
 public:
-   EventManager();                     // C++ constructor
-   EventManager(lua_State *L);         // Lua Constructor
+   EventManager();                       // C++ constructor
+   explicit EventManager(lua_State *L);  // Lua Constructor
 
    static void shutdown();
 

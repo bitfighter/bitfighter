@@ -80,7 +80,7 @@ public:
       InstructionMaxPages
    };
 
-   InstructionsUserInterface(ClientGame *game);      // Constructor
+   explicit InstructionsUserInterface(ClientGame *game);      // Constructor
    void render();
 
    bool onKeyDown(InputCode inputCode);

@@ -164,10 +164,10 @@ void TeamShuffleHelper::render()
 
          S32 teamIndex = i * cols + j;
 
-         Color c = getGame()->getTeamColor(teamIndex);
+         Color c = *getGame()->getTeamColor(teamIndex);
          c *= .2f;
 
-         drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, getGame()->getTeamColor(teamIndex), 8);
+         drawFilledRoundedRect(Point(x + columnWidth/2, y + rowHeight/2), columnWidth, rowHeight, c, *getGame()->getTeamColor(teamIndex), 8);
 
          glColor(getGame()->getTeamColor(teamIndex));
          drawString(x + hpad, y + vpad, TEXT_SIZE, getGame()->getTeamName(teamIndex).getString());

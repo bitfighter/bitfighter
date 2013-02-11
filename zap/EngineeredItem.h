@@ -254,7 +254,7 @@ private:
 public:
    static const S32 defaultRespawnTime = 0;
 
-   ForceFieldProjector(lua_State *L = NULL);                                              // Combined Lua / C++ default constructor
+   explicit ForceFieldProjector(lua_State *L = NULL);                                     // Combined Lua / C++ default constructor
    ForceFieldProjector(S32 team, const Point &anchorPoint, const Point &anchorNormal);    // Constructor for when ffp is built with engineer
    virtual ~ForceFieldProjector();                                                        // Destructor
 
@@ -322,7 +322,7 @@ private:
    F32 getSelectionOffsetMagnitude();
 
 public:
-   Turret(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor
+   explicit Turret(lua_State *L = NULL);                                   // Combined Lua / C++ default constructor
    Turret(S32 team, const Point &anchorPoint, const Point &anchorNormal);  // Constructor for when turret is built with engineer
    virtual ~Turret();                                                      // Destructor
 

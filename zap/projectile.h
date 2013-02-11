@@ -74,7 +74,7 @@ public:
    SafePtr<BfObject> mShooter;
 
    Projectile(WeaponType type, const Point &pos, const Point &vel, BfObject *shooter);  // Constructor -- used when weapon is fired  
-   Projectile(lua_State *L = NULL);                                                     // Combined Lua / C++ default constructor -- only used in Lua at the moment
+   explicit Projectile(lua_State *L = NULL);                                            // Combined Lua / C++ default constructor -- only used in Lua at the moment
    virtual ~Projectile();                                                               // Destructor
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -124,8 +124,8 @@ private:
 
 public:
    Burst(const Point &pos, const Point &vel, BfObject *shooter, F32 radius = BurstRadius);  // Constructor -- used when burst is fired
-   Burst(lua_State *L = NULL);                                                              // Combined Lua / C++ default constructor
-   virtual ~Burst();                                                                                // Destructor
+   explicit Burst(lua_State *L = NULL);                                                     // Combined Lua / C++ default constructor
+   virtual ~Burst();                                                                        // Destructor
 
    enum Constants
    {
@@ -185,7 +185,7 @@ public:
    static const S32 OuterBlastRadius = 250;
 
    Mine(const Point &pos, Ship *owner);   // Constructor -- used when mine is planted
-   Mine(lua_State *L = NULL);             // Combined Lua / C++ default constructor -- used in Lua and editor
+   explicit Mine(lua_State *L = NULL);    // Combined Lua / C++ default constructor -- used in Lua and editor
    virtual ~Mine();                       // Destructor
 
    Mine *clone() const;
@@ -241,7 +241,7 @@ private:
 
 public:
    SpyBug(const Point &pos, Ship *planter);  // Constructor -- used when SpyBug is deployed
-   SpyBug(lua_State *L = NULL);              // Combined Lua / C++ default constructor -- used in Lua and editor
+   explicit SpyBug(lua_State *L = NULL);     // Combined Lua / C++ default constructor -- used in Lua and editor
    virtual ~SpyBug();                        // Destructor
    SpyBug *clone() const;
 
@@ -324,8 +324,8 @@ private:
 
 public:
    Seeker(const Point &pos, const Point &vel, F32 angle, BfObject *shooter);    // Constructor
-   Seeker(lua_State *L = NULL);                                      // Combined Lua / C++ default constructor
-   virtual ~Seeker();                                                // Destructor
+   explicit Seeker(lua_State *L = NULL);                                        // Combined Lua / C++ default constructor
+   virtual ~Seeker();                                                           // Destructor
 
    SafePtr<BfObject> mShooter;
    WeaponType mWeaponType;

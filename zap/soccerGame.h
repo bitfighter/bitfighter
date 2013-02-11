@@ -90,7 +90,7 @@ private:
    SafePtr<Ship> mLastPlayerTouch;
 
 public:
-   SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
+   explicit SoccerBallItem(lua_State *L = NULL);      // Combined Lua / C++ default constructor
    virtual ~SoccerBallItem();                // Destructor
 
    SoccerBallItem *clone() const;

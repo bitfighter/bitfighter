@@ -56,7 +56,7 @@ protected:
    MasterConnectionType mConnectionType;
 
 public:
-   MasterServerConnection(Game *game);    // Constructor
+   explicit MasterServerConnection(Game *game);    // Constructor
    MasterServerConnection();              // Default Constructor required by TNL for some reason..
    virtual ~MasterServerConnection();     // Destructor
 
@@ -126,7 +126,7 @@ private:
    MasterConnectionCallback mConnectionCallback;
 
 public:
-   AnonymousMasterServerConnection(Game *game);    // Constructor
+   explicit AnonymousMasterServerConnection(Game *game);    // Constructor
    virtual ~AnonymousMasterServerConnection();
 
    void setConnectionCallback(MasterConnectionCallback callback);

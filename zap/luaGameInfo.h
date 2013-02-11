@@ -38,7 +38,7 @@ namespace Zap
 class LuaGameInfo : public LuaObject
 {
 public:
-   LuaGameInfo(lua_State *L);      // Constructor
+   explicit LuaGameInfo(lua_State *L);     // Constructor
    virtual ~LuaGameInfo();                 // Destructor
 
    static const char className[];
@@ -78,8 +78,8 @@ private:
 
 public:
    // Initialize the pointer
-   LuaWeaponInfo(lua_State *L);            // Lua constructor
-   LuaWeaponInfo(WeaponType weapon);       // C++ constructor
+   explicit LuaWeaponInfo(lua_State *L);           // Lua constructor
+   explicit LuaWeaponInfo(WeaponType weapon);      // C++ constructor
 
    virtual ~LuaWeaponInfo();                       // Destructor
 
@@ -111,7 +111,7 @@ private:
    U32 mModuleIndex;
 
 public:
-   LuaModuleInfo(lua_State *L);      // Constructor
+   explicit LuaModuleInfo(lua_State *L);     // Constructor
    virtual ~LuaModuleInfo();                 // Destructor
 
    static const char className[];
@@ -134,8 +134,7 @@ private:
 
 public:
    //LuaLoadout(lua_State *L);                              // Lua constructor
-   LuaLoadout(const U8 loadoutItems[] = DefaultLoadout);    // C++ constructor
-
+   explicit LuaLoadout(const U8 loadoutItems[] = DefaultLoadout);    // C++ constructor
    virtual ~LuaLoadout();                                   // Destructor
 
    LUAW_DECLARE_CLASS(LuaLoadout);

@@ -40,7 +40,7 @@ private:
    bool mActive;
    S32 mCurPage;
 public:
-   DiagnosticUserInterface(ClientGame *game);     // Constructor
+   explicit DiagnosticUserInterface(ClientGame *game);     // Constructor
    void onActivate();
    void idle(U32 t);
    void render();

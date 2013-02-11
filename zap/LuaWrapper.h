@@ -956,7 +956,7 @@ private:
 
    // registerClass() helper
    template<class T>
-   void static saveRegistration()
+   static void saveRegistration()
    {
       NameFunctionPair regPair(T::luaClassName, &registerClass<T>);
       getRegistrationFunctions().insert(regPair);
@@ -976,7 +976,7 @@ protected:
 
 
    template<class T>
-   void static registerClass()
+   static void registerClass()
    {
       getOrderedClassList().push_back(T::luaClassName);        // No parent, so add it to front of ordered list (no sorting needed)
       saveRegistration<T>();
@@ -1059,7 +1059,7 @@ public:
     LuaProxy() { TNLAssert(false, "Not used"); }
 
     // Typical constructor
-    LuaProxy(T *obj)
+    explicit LuaProxy(T *obj)
     {
       mProxiedObject = obj;
       obj->setLuaProxy(this);

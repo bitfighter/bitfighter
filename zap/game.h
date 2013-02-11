@@ -158,8 +158,8 @@ public:
    Address mAddress;
    bool mDone;
 
-   NameToAddressThread(const char *address_string);  // Constructor
-   virtual ~NameToAddressThread();                   // Destructor
+   explicit NameToAddressThread(const char *address_string);  // Constructor
+   virtual ~NameToAddressThread();                            // Destructor
 
    U32 run();
 };
@@ -428,7 +428,7 @@ public:
    LevelInfo(const StringTableEntry &name, GameTypeId type);
 
    // Constructor, used on server side, augmented with setInfo method below
-   LevelInfo(const string &levelFile);
+   explicit LevelInfo(const string &levelFile);
 
    const char *getLevelTypeName();
 };

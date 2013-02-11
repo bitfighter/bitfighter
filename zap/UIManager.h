@@ -154,8 +154,8 @@ private:
    Timer mMenuTransitionTimer;
 
 public:
-   UIManager(ClientGame *clientGame);  // Constructor
-   ~UIManager();                       // Destructor
+   explicit UIManager(ClientGame *clientGame);  // Constructor
+   virtual ~UIManager();                        // Destructor
 
    bool isCurrentUI(UIID uiid);
    UserInterface *getUI(UIID menuId);

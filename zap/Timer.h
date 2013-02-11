@@ -40,7 +40,7 @@ private:
    U32 mCurrentCounter;
 
 public:
-   Timer(U32 period = 0);  // Constructor
+   explicit Timer(U32 period = 0);  // Constructor
    virtual ~Timer();       // Destructor
 
    // Update timer in idle loop -- returns true if timer has just expired, false if there's still time left

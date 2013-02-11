@@ -148,8 +148,8 @@ protected:
    };
 
 public:
-   CoreItem(lua_State *L = NULL);   // Combined Lua / C++ default constructor
-   virtual ~CoreItem();             // Destructor
+   explicit CoreItem(lua_State *L = NULL);   // Combined Lua / C++ default constructor
+   virtual ~CoreItem();                      // Destructor
    CoreItem *clone() const;
 
    static F32 getCoreAngle(U32 time);

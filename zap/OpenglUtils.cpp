@@ -127,6 +127,11 @@ void glColor(const Color *c, float alpha)
     glColor4f(c->r, c->g, c->b, alpha);
 }
 
+void glColor(F32 c, float alpha)
+{
+   glColor4f(c, c, c, alpha);
+}
+
 void glScale(F32 scaleFactor)
 {
     glScalef(scaleFactor, scaleFactor, 1);

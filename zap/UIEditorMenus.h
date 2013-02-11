@@ -62,7 +62,7 @@ protected:
 
 public:
    // Constructors
-   QuickMenuUI(ClientGame *game);
+   explicit QuickMenuUI(ClientGame *game);
    QuickMenuUI(ClientGame *game, const string &title);
 
    void render();
@@ -92,7 +92,7 @@ protected:
    BfObject *mObject;         // Object whose attributes are being edited
 
 public:
-   EditorAttributeMenuUI(ClientGame *game);    // Constructor
+   explicit EditorAttributeMenuUI(ClientGame *game);    // Constructor
    BfObject *getObject();
 
    virtual void startEditingAttrs(BfObject *object);

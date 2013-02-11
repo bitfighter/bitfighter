@@ -64,7 +64,7 @@ private:
    virtual void setVert(const Point &pos, S32 index);
 
 public:
-   PointGeometry(F32 radius);                   // Constructor
+   explicit PointGeometry(F32 radius);          // Constructor
    virtual ~PointGeometry();                    // Destructor
 
    GeomType getGeomType() const;

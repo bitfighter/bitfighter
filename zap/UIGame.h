@@ -253,8 +253,8 @@ private:
       S32 mMaxForGain;
       ByteBufferPtr mUnusedAudio;
 
-      VoiceRecorder(ClientGame *game);
-      ~VoiceRecorder();
+      explicit VoiceRecorder(ClientGame *game);
+      virtual ~VoiceRecorder();
 
       void idle(U32 timeDelta);
       void process();
@@ -286,7 +286,7 @@ private:
    static const S32 DoubleClickTimeout = 200;          // Timeout in milliseconds
 
 public:
-   GameUserInterface(ClientGame *game);           // Constructor
+   explicit GameUserInterface(ClientGame *game);  // Constructor
    virtual ~GameUserInterface();                  // Destructor
 
    bool displayInputModeChangeAlert;

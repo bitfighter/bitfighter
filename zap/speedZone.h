@@ -65,7 +65,7 @@ public:
       HitMask      = BIT(1),
    };
 
-   SpeedZone(lua_State *L = NULL);     // Combined C++/Lua constructor
+   explicit SpeedZone(lua_State *L = NULL);     // Combined C++/Lua constructor
    virtual ~SpeedZone();               // Destructor
       
    SpeedZone *clone() const;
