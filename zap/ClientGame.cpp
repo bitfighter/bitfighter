@@ -93,16 +93,10 @@ bool showDebugBots = false;
 
 
 // Global Game objects
-// TODO: Replace this rigamarole with something like: Vector<ClientGame *> gClientGames;
-//ClientGame *gClientGame = NULL;
-//ClientGame *gClientGame1 = NULL;
-//ClientGame *gClientGame2 = NULL;
-
 Vector<ClientGame *> gClientGames;
 
-
-
 extern ScreenInfo gScreenInfo;
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
