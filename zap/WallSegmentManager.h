@@ -27,8 +27,6 @@
 #define _WALL_SEGMENT_MANAGER_H_
 
 #include "BfObject.h"
-//#include "LineItem.h"      // for LineItem def  TODO: get rid of this
-
 #include "Point.h"
 #include "tnlVector.h"
 #include "tnlNetObject.h"

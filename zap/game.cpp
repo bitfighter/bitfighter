@@ -596,9 +596,8 @@ void Game::countTeamPlayers()
 }
 
 
-void Game::setGameType(GameType *theGameType)      // TODO==> Need to store gameType as a shared_ptr or auto_ptr   Why?
+void Game::setGameType(GameType *theGameType)
 {
-   //delete mGameType;          // Cleanup, if need be
    mGameType = theGameType;
 }
 
