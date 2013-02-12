@@ -255,6 +255,13 @@ bool isSeekerTarget(U8 x)
 }
 
 
+bool isMountableItemType(U8 x)
+{
+   return
+         x == ResourceItemTypeNumber || x == FlagTypeNumber;
+}
+
+
 bool isAnyObjectType(U8 x)
 {
    return true;

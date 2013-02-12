@@ -133,6 +133,7 @@ bool isVisibleOnCmdrsMapType(U8 x);
 bool isVisibleOnCmdrsMapWithSensorType(U8 x);
 bool isZoneType(U8 x);
 bool isSeekerTarget(U8 x);
+bool isMountableItemType(U8 x);
 
 bool isAnyObjectType(U8 x);
 // END GAME OBJECT TYPES

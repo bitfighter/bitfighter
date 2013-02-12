@@ -1969,9 +1969,9 @@ void Turret::idle(IdleCallPath path)
       }
 
       // Don't target mounted items (like resourceItems and flagItems)
-      MountableItem *item = dynamic_cast<MountableItem *>(fillVector[i]);  // TODO get rid of dynamic_cast with a type check
-      if(item && item->isMounted())
-         continue;
+      if(isMountableItemType(fillVector[i]->getObjectTypeNumber()))
+         if(static_cast<MountableItem *>(fillVector[i])->isMounted())
+            continue;
 
       BfObject *potential = static_cast<BfObject *>(fillVector[i]);
       if(potential->getTeam() == getTeam())     // Is target on our team?
