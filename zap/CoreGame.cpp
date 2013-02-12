@@ -288,8 +288,6 @@ CoreItem::CoreItem(lua_State *L) : Parent(F32(CoreRadius * 2))
    mCurrentExplosionNumber = 0;
    mPanelGeom.isValid = false;
 
-   mKillString = "crashed into a core";    // TODO: Really needed?
-
 
    // Read some params from our L, if we have it
    if(L)
@@ -764,7 +762,6 @@ void CoreItem::idle(BfObject::IdleCallPath path)
    if(Platform::getRealMilliseconds() % 100 < 20)  // 20% of the time...
    {
       Point cross, dir;
-
 
       for(S32 i = 0; i < CORE_PANELS; i++)
       {
