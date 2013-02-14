@@ -781,7 +781,7 @@ FlagSpawn::FlagSpawn(lua_State *L) : Parent(Point(0,0), DEFAULT_RESPAWN_TIME)
       //                                  Profile:         0          1                 2                          3
       static LuaFunctionArgList constructorArgList = { {{ END }, { PT, END }, { PT, TEAM_INDX, END }, { PT, TEAM_INDX, NUM, END }}, 4 };
       
-      S32 profile = checkArgList(L, constructorArgList, "CoreItem", "constructor");
+      S32 profile = checkArgList(L, constructorArgList, "FlagSpawn", "constructor");
 
       if(profile >= 1)
          setPos(L, 1);

@@ -62,7 +62,7 @@ TextItem::TextItem(lua_State *L)
    if(L)
    {
       static LuaFunctionArgList constructorArgList = { {{ END }, { SIMPLE_LINE, STR, END }}, 2 };
-      S32 profile = checkArgList(L, constructorArgList, "Spawn", "constructor");
+      S32 profile = checkArgList(L, constructorArgList, "TextItem", "constructor");
    
       if(profile == 1)
       {
