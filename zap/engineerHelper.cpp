@@ -95,7 +95,7 @@ void EngineerHelper::render()
    const S32 fontSize = 15;
    const Color engineerMenuHeaderColor (Colors::red);
 
-   if(mSelectedItem == -1)    // Haven't selected an item yet
+   if(isMenuBeingDisplayed())    // Haven't selected an item yet, so show the menu
    {
       const S32 xPos = UserInterface::horizMargin + 50;
 
@@ -157,6 +157,12 @@ void EngineerHelper::render()
 }
 
 
+bool EngineerHelper::isMenuBeingDisplayed()
+{
+   return mSelectedItem == -1;
+}
+
+
 // Return true if key did something, false if key had no effect
 // Runs on client
 bool EngineerHelper::processInputCode(InputCode inputCode)
@@ -164,10 +170,10 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
    if(Parent::processInputCode(inputCode))    // Check for cancel keys
       return true;
 
-   GameConnection *gc = getGame()->getConnectionToServer();
    InputCodeManager *inputCodeManager = getGame()->getSettings()->getInputCodeManager();
+   GameConnection *gc = getGame()->getConnectionToServer();
 
-   if(mSelectedItem == -1)    // Haven't selected an item yet
+   if(isMenuBeingDisplayed())    // Menu is being displayed, so interpret keystrokes as menu items
    {
       for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
@@ -183,6 +189,9 @@ bool EngineerHelper::processInputCode(InputCode inputCode)
       }
 
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
+      TNLAssert(ship, "Will this ever be true?  If not, we can replace with static cast/assert. If this does assert, "
+                      "please document and remove this assert.");
+
       if(!ship || (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD1) && ship->getModule(0) == ModuleEngineer) ||
                   (inputCode == inputCodeManager->getBinding(InputCodeManager::BINDING_MOD2) && ship->getModule(1) == ModuleEngineer))
       {
@@ -281,6 +290,12 @@ const char *EngineerHelper::getCancelMessage()
    return "Engineered item not deployed";
 }
 
+
+// When a menu is not active, we'll allow players to enter chat
+bool EngineerHelper::isChatDisabled()
+{
+   return isMenuBeingDisplayed();
+}
 
 };
 

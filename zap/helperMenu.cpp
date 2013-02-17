@@ -144,20 +144,12 @@ void HelperMenu::activateHelp(UIManager *uiManager)
 }
 
 
-bool HelperMenu::isEngineerHelper()
-{
-   return false;
-}
-
-
-bool HelperMenu::isMovementDisabled()
-{
-   return false;
-}
+bool HelperMenu::isEngineerHelper()   { return false; }
+bool HelperMenu::isMovementDisabled() { return false; }
+bool HelperMenu::isChatDisabled()     { return true;  }
 
 
 void HelperMenu::idle(U32 delta) { /* Do nothing */ }
-void HelperMenu::onMenuShow() { /* Do nothing */  }
-
+void HelperMenu::onMenuShow()    { /* Do nothing */ }
 
 };

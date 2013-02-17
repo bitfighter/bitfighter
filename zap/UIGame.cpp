@@ -1253,7 +1253,9 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
       if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
          mVoiceRecorder.start();
    }
-   else if(!mHelper)    // The following keys are only allowed in PlayMode
+
+   // The following keys are only allowed in PlayMode or when helper permits
+   else if(!mHelper || !mHelper->isChatDisabled())    
    {
       if(checkInputCode(settings, InputCodeManager::BINDING_TEAMCHAT, inputCode))          // Start entering a team chat msg
       {
@@ -1270,19 +1272,23 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          mCurrentChatType = CmdChat;
          setBusyChatting(true);
       }
-      else if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
-         enterMode(QuickChatMode);
-      else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
-         enterMode(LoadoutMode);
-      else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
-         dropItem();
-      // Check if the user is trying to use keyboard to move when in joystick mode
-      else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
-         if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
-            checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
-            checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
-            checkInputCode(settings, InputCodeManager::BINDING_RIGHT, inputCode))
-               mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
+      // These keys are only available when there is no helper active
+      else if(!mHelper)
+      {
+         if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
+            enterMode(QuickChatMode);
+         else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
+            enterMode(LoadoutMode);
+         else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
+            dropItem();
+         // Check if the user is trying to use keyboard to move when in joystick mode
+         else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
+            if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
+               checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
+               checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
+               checkInputCode(settings, InputCodeManager::BINDING_RIGHT, inputCode))
+                  mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
+      }
    }
    else
       return false;

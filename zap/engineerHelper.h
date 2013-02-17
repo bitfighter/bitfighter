@@ -57,10 +57,10 @@ class EngineerHelper : public HelperMenu
 
 private:
    const char *getCancelMessage();
+   S32 mSelectedItem;
    Vector<EngineerConstructionItemInfo> mEngineerCostructionItemInfos;
 
-   S32 mSelectedItem;
-
+   bool isMenuBeingDisplayed();
    void exitHelper();
 
 public:
@@ -75,6 +75,7 @@ public:
    void renderDeploymentMarker(Ship *ship);
 
    bool isEngineerHelper();      // returns true
+   bool isChatDisabled();
 };
 
 };
