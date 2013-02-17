@@ -440,9 +440,6 @@ public:
    void renamePlayerHandler(const Vector<string> &words);
    void globalMuteHandler(const Vector<string> &words);
    void shuffleTeams(const Vector<string> &words);
-
-   bool isHelperActive();
-   bool isChatting();
 };
 
 

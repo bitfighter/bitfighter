@@ -860,18 +860,6 @@ void GameUserInterface::enterMode(UIMode mode)
 }
 
 
-bool GameUserInterface::isHelperActive()
-{
-   return mHelper != NULL;
-}
-
-
-bool GameUserInterface::isChatting()
-{
-   return mCurrentChatType != NoChat;
-}
-
-
 // Render potential location to deploy engineered item -- does nothing if we're not engineering
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
