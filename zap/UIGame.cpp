@@ -872,6 +872,7 @@ bool GameUserInterface::isChatting()
 }
 
 
+// Render potential location to deploy engineered item -- does nothing if we're not engineering
 void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
 {
    if(mHelper && mHelper->isEngineerHelper())
