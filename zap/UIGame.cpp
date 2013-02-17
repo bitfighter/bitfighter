@@ -2339,17 +2339,17 @@ CommandInfo chatCmds[] = {
 // Display proper chat queue based on mMessageDisplayMode.  These displayers are configured in the constructor. 
 void GameUserInterface::renderChatMsgs()
 {
-   bool helperActive = (mHelper != NULL);
+   bool chatDisabled = (mHelper && mHelper->isChatDisabled());
    bool announcementActive = (mAnnouncementTimer.getCurrent() != 0);
 
    if(mMessageDisplayMode == ShortTimeout)
-      mChatMessageDisplayer1.render(CHAT_Y_POS, helperActive, announcementActive);
+      mChatMessageDisplayer1.render(CHAT_Y_POS, chatDisabled, announcementActive);
    else if(mMessageDisplayMode == ShortFixed)
-      mChatMessageDisplayer2.render(CHAT_Y_POS, helperActive, announcementActive);
+      mChatMessageDisplayer2.render(CHAT_Y_POS, chatDisabled, announcementActive);
    else
-      mChatMessageDisplayer3.render(CHAT_Y_POS, helperActive, announcementActive);
+      mChatMessageDisplayer3.render(CHAT_Y_POS, chatDisabled, announcementActive);
 
-   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, helperActive, false);
+   mServerMessageDisplayer.render(getGame()->getSettings()->getIniSettings()->showWeaponIndicators ? messageMargin : vertMargin, chatDisabled, false);
 
    if(announcementActive)
       renderAnnouncement(CHAT_Y_POS);
