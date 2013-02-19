@@ -112,6 +112,8 @@ extern void renderSquareItem(const Point &pos, const Color *c, F32 alpha, const 
 extern void drawCircle(const Point &pos, F32 radius);
 extern void drawCircle(F32 x, F32 y, F32 radius);
 
+extern void drawDivetedTriangle(F32 height, F32 len);
+
 
 //////////
 // Some things for rendering on screen display

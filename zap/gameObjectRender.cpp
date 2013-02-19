@@ -2489,6 +2489,44 @@ void drawCircle(const Point &pos, F32 radius)
 }
 
 
+void drawDivetedTriangle(F32 height, F32 len) 
+{
+   static const F32 t30 = tan(degreesToRadians(30.0f));
+   static const F32 t60 = tan(degreesToRadians(60.0f));
+   static const F32 c30 = cos(degreesToRadians(30.0f));
+   static const F32 c60 = cos(degreesToRadians(60.0f));
+   static const F32 s60 = sin(degreesToRadians(60.0f));
+
+   const F32 h3 = height / 3;
+   const F32 ht30 = height * t30;
+   const F32 lc30 = len * c30;
+
+   Vector<Point> pts;
+   pts.push_back(Point(0, 2 * h3));   // A
+   pts.push_back(Point(-.5 * len, 2 * h3 - lc30));   // B
+   pts.push_back(Point(-.5 * len + 2 * (ht30 - len) * c60, 2 * h3 - lc30 - 2 * (ht30 - len) * s60));   // C
+   pts.push_back(Point(-ht30 + .5 * len, -h3 + lc30));   // D
+   pts.push_back(Point(-ht30, -h3));   // E
+   pts.push_back(Point(-ht30 + len, -h3));   // F
+   pts.push_back(Point(0, -h3 + (ht30 - len) * t60));   // G
+   pts.push_back(Point(ht30 - len, -h3));   // H
+   pts.push_back(Point(ht30, -h3));   // I
+   pts.push_back(Point(ht30 - .5 * len, -h3 + lc30));   // J
+   pts.push_back(Point(.5 * len - 2 * (ht30 - len) * c60, 2 * h3 - lc30 - 2 * (ht30 - len) * s60));   // K
+   pts.push_back(Point(.5 * len, 2 * h3 - lc30));   // L
+
+   
+   glPushMatrix();
+      glTranslate(200, 200, 0);
+      glRotatef(Platform::getRealMilliseconds() / 10 % 360,0,0,1);
+      glScale(6);
+   renderPolygonOutline(&pts, &Colors::red);
+
+   glPopMatrix();
+
+}
+
+
 void render25FlagsBadge(F32 x, F32 y, F32 rad)
 {
    glPushMatrix();

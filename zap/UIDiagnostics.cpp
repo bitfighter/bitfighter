@@ -636,6 +636,9 @@ void DiagnosticUserInterface::render()
 
       // Temporary placeholder for badge testing -- centered at xpos, ypos, with radius of rad (i.e. 2 x rad across)
 #ifdef TNL_DEBUG
+
+      //drawDivetedTriangle(20,9);
+
       for(S32 i = 0; i < 2; i++)
       {
          F32 x;
