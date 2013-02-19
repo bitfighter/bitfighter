@@ -170,7 +170,7 @@ public:
    void addPolyWall(PolyWall *polyWall, GridDatabase *database);
    void addWallItem(WallItem *wallItem, GridDatabase *database);
 
-   S32 cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
+   void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    void sendLevelStatsToMaster();
 
    void onConnectedToMaster();

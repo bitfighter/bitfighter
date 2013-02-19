@@ -614,10 +614,9 @@ static S32 QSORT_CALLBACK AddOrderSort(RefPtr<ClientInfo> *a, RefPtr<ClientInfo>
 
 /**
  * Clear, prepare, and load the level given by the index \nextLevel. This
- * function respects meta-indexes, and otherwise expects an absolute index
- * @return the index of the level which is ultimately loaded
+ * function respects meta-indices, and otherwise expects an absolute index
  */
-S32 ServerGame::cycleLevel(S32 nextLevel)
+void ServerGame::cycleLevel(S32 nextLevel)
 {
    cleanUp();
    mLevelSwitchTimer.clear();
@@ -698,7 +697,6 @@ S32 ServerGame::cycleLevel(S32 nextLevel)
    sendLevelStatsToMaster();     // Give the master some information about this level for its database
 
    suspendIfNoActivePlayers();   // Does nothing if we're already suspended
-   return mCurrentLevelIndex;
 }
 
 

@@ -1184,9 +1184,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    Vector<StringTableEntry> e;
    e.push_back(mClientInfo->getName()); 
 
-   S32 newAbsoluteIndex = mServerGame->cycleLevel(newLevelIndex);
+   // resolve the index (which could be a meta-index) to an absolute index
+   newLevelIndex = mServerGame->getAbsoluteLevelIndex(newLevelIndex);
+
+   mServerGame->cycleLevel(newLevelIndex);
    if(!restart)
-      e.push_back(mServerGame->getLevelNameFromIndex(newAbsoluteIndex));
+      e.push_back(mServerGame->getLevelNameFromIndex(newLevelIndex));
 
    mServerGame->getGameType()->broadcastMessage(ColorYellow, SFXNone, msg, e);
 }
