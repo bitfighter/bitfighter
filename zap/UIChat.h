@@ -65,7 +65,7 @@ private:
    Color getNextColor();                             // Get next available color for a new nick
    static const S32 MESSAGES_TO_RETAIN = 80;         // Plenty for now... far too many, really
    static const S32 MESSAGE_OVERFLOW_SHIFT = 25;     // Number of characters to shift when typing a long message
-                                                      // and you over flow the box
+                                                     // and you over flow the box
 
    static U32 mMessageCount;
 
