@@ -937,10 +937,8 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
 {
    GameSettings *settings = getGame()->getSettings();
 
-   bool startedInHelper = mHelperStack.size() > 0;
-
    // Kind of hacky, but this will unsuspend and swallow the keystroke, which is what we want
-   if(!startedInHelper && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
+   if(mHelperStack.size() == 0 && (getGame()->isSuspended() || getGame()->isSpawnDelayed()))
    {
       getGame()->undelaySpawn();
       if(inputCode != KEY_ESCAPE)  // Lagged out and can't un-idle to bring up the menu?
