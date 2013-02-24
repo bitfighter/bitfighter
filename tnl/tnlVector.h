@@ -67,7 +67,7 @@ protected:
 template<> class VectorBase<bool>
 {
 protected:
-   std::vector<char> innerVector;  // sizeof(char) must equal sizeof(bool)
+   std::vector<S32> innerVector;  // Use 'int' instead of 'char' to prevent endian-issues
 };
 
 
