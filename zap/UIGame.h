@@ -241,6 +241,10 @@ private:
    Timer mModuleDoubleTapTimer[ShipModuleCount];  // Timer for detecting if a module key is double-tapped
    static const S32 DoubleClickTimeout = 200;          // Timeout in milliseconds
 
+   // Some key event handlers
+   bool processPlayModeKey(InputCode inputCode);
+   void checkForKeyboardMovementKeysInJoystickMode(InputCode inputCode);
+
 public:
    explicit GameUserInterface(ClientGame *game);  // Constructor
    virtual ~GameUserInterface();                  // Destructor
@@ -309,8 +313,6 @@ public:
    void onKeyUp(InputCode inputCode);
 
    void onTextInput(char ascii);
-
-   bool processPlayModeKey(InputCode inputCode);
 
    void chooseNextWeapon();           
    void choosePrevWeapon();   

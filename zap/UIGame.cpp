@@ -948,10 +948,10 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    if(checkInputCode(settings, InputCodeManager::BINDING_OUTGAMECHAT, inputCode))
       getGame()->setBusyChatting(true);
 
-   if(mHelperStack.size() == 0)
+   if(mHelperStack.size() == 0)        // No helper active
       getGame()->undelaySpawn();
 
-   if(Parent::onKeyDown(inputCode))
+   if(Parent::onKeyDown(inputCode))    // Let parent try handling the key
       return true;
 
    if(gConsole.onKeyDown(inputCode))   // Pass the key on to the console for processing
@@ -972,25 +972,24 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    }
 
    // Ctrl-/ toggles console window for the moment
-   // Only open when not in any special mode.
+   // Only open when there are no active helpers
    if(mHelperStack.size() == 0 && inputCode == KEY_SLASH && InputCodeManager::checkModifier(KEY_CTRL))
    {
-      if(gConsole.isOk())
+      if(gConsole.isOk())                 // Console is only not Ok if something bad has happened somewhere
          gConsole.toggleVisibility();
-      // else... what?
 
       return true;
    }
 
-   if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode))
+   if(checkInputCode(settings, InputCodeManager::BINDING_MISSION, inputCode)) // F2
    {
       mMissionOverlayActive = true;
-      getUIManager()->getGameUserInterface()->clearLevelInfoDisplayTimer();    // Clear level-start display if user hits F2
+      getUIManager()->getGameUserInterface()->clearLevelInfoDisplayTimer();   // Clear level-start display timer so releasing F2 always hides display
 
       return true;
    }
 
-   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
+   if(inputCode == KEY_M && InputCodeManager::checkModifier(KEY_CTRL))        // Ctrl-M, for now, to cycle through message dispaly modes
    {
       toggleChatDisplayMode();
       return true;
@@ -1031,8 +1030,6 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
    {
       if(!isChatting())
          return processPlayModeKey(inputCode);
-      //else
-      //   return processChatModeKey(inputCode);
    }
 
    return false;
@@ -1139,28 +1136,28 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
 
    // The following keys are allowed in both play mode and in loadout or
    // engineering menu modes if not used in the loadout menu above
-   if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_ALT))          // Alt-] advances bots by one step if frozen
+   if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_ALT))          // Alt+] advances bots by one step if frozen
       EventManager::get()->addSteps(1);
-   else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl-] advances bots by 10 steps if frozen
+   else if(inputCode == KEY_CLOSEBRACKET && InputCodeManager::checkModifier(KEY_CTRL))    // Ctrl+] advances bots by 10 steps if frozen
       EventManager::get()->addSteps(10);
-   else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl-1 saves loadout preset in first slot
+   else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+1 saves loadout preset in first slot
       saveLoadoutPreset(getGame(), 0);
-   else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_ALT))                // Alt-1 loads preset from first slot
+   else if(inputCode == KEY_1 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+1 loads preset from first slot
       loadLoadoutPreset(getGame(), 0);
-   else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_CTRL))              
+   else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+2
       saveLoadoutPreset(getGame(), 1);
-   else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_ALT))             
+   else if(inputCode == KEY_2 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+2
       loadLoadoutPreset(getGame(), 1);
-   else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_CTRL))              
+   else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_CTRL))               // Ctrl+3
       saveLoadoutPreset(getGame(), 2);
-   else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_ALT))             
+   else if(inputCode == KEY_3 && InputCodeManager::checkModifier(KEY_ALT))                // Alt+3
       loadLoadoutPreset(getGame(), 2);
 
-   else if(checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode))
+   else if(checkInputCode(settings, InputCodeManager::BINDING_MOD1, inputCode))       
       activateModule(0);
-   else if(checkInputCode(settings, InputCodeManager::BINDING_MOD2, inputCode))
+   else if(checkInputCode(settings, InputCodeManager::BINDING_MOD2, inputCode))       
       activateModule(1);
-   else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))
+   else if(checkInputCode(settings, InputCodeManager::BINDING_FIRE, inputCode))       
       mFiring = true;
    else if(checkInputCode(settings, InputCodeManager::BINDING_SELWEAP1, inputCode))
       selectWeapon(0);
@@ -1231,34 +1228,43 @@ bool GameUserInterface::processPlayModeKey(InputCode inputCode)
          mVoiceRecorder.start();
    }
 
-   // The following keys are only allowed when there are no helpers or when top helper permits
+   // The following keys are only allowed when there are no helpers or when the top helper permits
    else if(mHelperStack.size() == 0 || !mHelperStack.last()->isChatDisabled())    
    {
       if(checkEnterChatInputCode(inputCode))
          return true;
-   }
 
-   // These keys are only available when there is no helper active
-   else if(mHelperStack.size() == 0)
-   {
-      if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
-         enterMode(HelperMenu::QuickChatHelperType);
-      else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
-         enterMode(HelperMenu::LoadoutHelperType);
-      else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
-         dropItem();
-      // Check if the user is trying to use keyboard to move when in joystick mode
-      else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
-         if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
-            checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
-            checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
-            checkInputCode(settings, InputCodeManager::BINDING_RIGHT, inputCode))
-               mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
+      // These keys are only available when there is no helper active
+      if(mHelperStack.size() == 0)
+      {
+         if(checkInputCode(settings, InputCodeManager::BINDING_QUICKCHAT, inputCode))
+            enterMode(HelperMenu::QuickChatHelperType);
+         else if(checkInputCode(settings, InputCodeManager::BINDING_LOADOUT, inputCode))
+            enterMode(HelperMenu::LoadoutHelperType);
+         else if(checkInputCode(settings, InputCodeManager::BINDING_DROPITEM, inputCode))
+            dropItem();
+         // Check if the user is trying to use keyboard to move when in joystick mode
+         else if(settings->getInputCodeManager()->getInputMode() == InputModeJoystick)      
+            checkForKeyboardMovementKeysInJoystickMode(inputCode);
+      }
    }
    else
       return false;
 
    return true;
+}
+
+
+// Show a message if the user starts trying to play with keyboard in joystick mode
+void GameUserInterface::checkForKeyboardMovementKeysInJoystickMode(InputCode inputCode)
+{
+   GameSettings *settings = getGame()->getSettings();
+
+   if(checkInputCode(settings, InputCodeManager::BINDING_UP,    inputCode) ||
+      checkInputCode(settings, InputCodeManager::BINDING_DOWN,  inputCode) ||
+      checkInputCode(settings, InputCodeManager::BINDING_LEFT,  inputCode) ||
+      checkInputCode(settings, InputCodeManager::BINDING_RIGHT, inputCode))
+         mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
 }
 
 
