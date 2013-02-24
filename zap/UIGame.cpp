@@ -1003,7 +1003,7 @@ bool GameUserInterface::onKeyDown(InputCode inputCode)
       return true;
    }
 
-   // If we're not in a helper, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
+   // If we're not in a helper, and we apply the engineer module, then we can handle that locally by displaying a menu or message
    if(mHelperStack.size() == 0)
    {
       Ship *ship = NULL;
